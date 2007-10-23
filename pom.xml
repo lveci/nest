@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
+
+    <scm>
+	<connection>scm:cvs:pserver:lveci@fileserver:/big/cvsroot:nest</connection>
+        <!-- <connection>scm:svn:https://www.brockmann-consult.de/svn/os/beam-4.x/trunk</connection> -->
+        <url>https://www.brockmann-consult.de/svn/os/beam-4.x/trunk</url>
+    </scm>
 
     <name>NEST Project</name>
     <url>http://www.brockmann-consult.de/beam-wiki</url>
@@ -13,7 +18,7 @@
     <packaging>pom</packaging>
 
     <organization>
-        <name>Brockmann Consult GmbH</name>
+        <name>Array Systems Computing Inc.</name>
         <url>http://envisat.esa.int/beam/</url>
     </organization>
 
@@ -32,17 +37,10 @@
         </license>
     </licenses>
 
-    <scm>
-        <connection>scm:svn:https://www.brockmann-consult.de/svn/os/beam-4.x/trunc</connection>
-        <url>https://www.brockmann-consult.de/svn/os/beam-4.x/trunc</url>
-    </scm>
-
     <modules>
-
-	  <module>beam</module>
-        <module>nest-test-reader</module>      
-
-    </modules>
+	<module>beam</module>
+	<module>nest-test-reader</module>        
+  </modules>
 
     <dependencyManagement>
         <dependencies>
@@ -266,7 +264,120 @@
                     <encoding>ISO-8859-1</encoding>
                 </configuration>
             </plugin>
-	  </plugins>
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.1</version>
+                <configuration>
+                    <descriptors>
+                        <!--<descriptor>src/main/assembly/src.xml</descriptor>-->
+                        <descriptor>src/main/assembly/bin.xml</descriptor>
+                        <descriptor>src/main/assembly/installer-files.xml</descriptor>
+                    </descriptors>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                    <printSummary>true</printSummary>
+                    <excludes>
+                        <exclude>**/TestRaster.java</exclude>
+                        <exclude>**/TestHelper$1.java</exclude>
+                    </excludes>
+                    <systemProperties>
+                        <!--<property>
+                            <name>beam.home</name>
+                            <value>.</value>
+                        </property>-->
+                        <property>
+                            <name>org.esa.beam.testdata.out</name>
+                            <value>target/test-data</value>
+                        </property>
+                    </systemProperties>
+                    <argLine>-Xmx512M -enableassertions</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-idea-plugin</artifactId>
+                <configuration>
+                    <downloadSources>true</downloadSources>
+                    <downloadJavadocs>true</downloadJavadocs>
+                    <jdkName>1.6</jdkName>
+                    <jdkLevel>1.5</jdkLevel>
+                    <exclude>target</exclude>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.bc.maven.plugins</groupId>
+                <artifactId>maven-template-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>template</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <templates>
+                        <template>
+                            <source>src/main/bin/win/beam-cli-template.bat</source>
+                            <lineEnding>dos</lineEnding>
+                            <outputDirectory>target/${artifactId}-${version}-bin.dir/bin</outputDirectory>
+                            <outputFileNamePattern>@{filterBaseName}.@{sourceExtension}</outputFileNamePattern>
+                            <filterSet>
+                                <directory>src/main/filters</directory>
+                                <includes>
+                                    <include>*.properties</include>
+                                </includes>
+                            </filterSet>
+                        </template>
+                        <template>
+                            <source>src/main/bin/linux/beam-cli-template.sh</source>
+                            <lineEnding>unix</lineEnding>
+                            <outputDirectory>target/${artifactId}-${version}-bin.dir/bin</outputDirectory>
+                            <outputFileNamePattern>@{filterBaseName}.@{sourceExtension}</outputFileNamePattern>
+                            <filterSet>
+                                <directory>src/main/filters</directory>
+                                <includes>
+                                    <include>*.properties</include>
+                                </includes>
+                            </filterSet>
+                        </template>
+                        <template>
+                            <source>src/main/bin/macosx/beam-cli-template.command</source>
+                            <lineEnding>unix</lineEnding>
+                            <outputDirectory>target/${artifactId}-${version}-bin.dir/bin</outputDirectory>
+                            <outputFileNamePattern>@{filterBaseName}.@{sourceExtension}</outputFileNamePattern>
+                            <filterSet>
+                                <directory>src/main/filters</directory>
+                                <includes>
+                                    <include>*.properties</include>
+                                </includes>
+                            </filterSet>
+                        </template>
+                    </templates>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
     <reporting>
