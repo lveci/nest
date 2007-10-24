@@ -250,7 +250,7 @@
     </dependencies>
 
     <build>
-        <outputDirectory>../modules/${artifactId}-${version}</outputDirectory>
+        <outputDirectory>../beam/modules/${artifactId}-${version}</outputDirectory>
 
         <plugins>
             <plugin>
@@ -416,12 +416,12 @@
 
     <developers>
         <developer>
-            <id>marcop</id>
-            <name>Marco Peters</name>
-            <email>marco.peters@brockmann-consult.de</email>
-            <organization>Brockmann Consult</organization>
+            <id>lveci</id>
+            <name>Luis Veci</name>
+            <email>lveci@array.ca</email>
+            <organization>Array Systems Computing Inc</organization>
             <roles>
-                <role>Java Developer</role>
+                <role>Software Engineering Lead</role>
             </roles>
         </developer>
     </developers>
