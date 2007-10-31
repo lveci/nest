@@ -1,28 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
-    <scm>
-	<connection>scm:cvs:pserver:lveci@fileserver:/big/cvsroot:nest</connection>
-        <!-- <connection>scm:svn:https://www.brockmann-consult.de/svn/os/beam-4.x/trunk</connection> -->
-        <url>https://www.brockmann-consult.de/svn/os/beam-4.x/trunk</url>
-    </scm>
-
-    <name>NEST Project</name>
+    <name>BEAM Project</name>
     <url>http://www.brockmann-consult.de/beam-wiki</url>
-    <groupId>org.esa.nest</groupId>
-    <artifactId>nest</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <groupId>org.esa.beam</groupId>
+    <artifactId>beam</artifactId>
+    <version>4.1</version>
 
     <packaging>pom</packaging>
 
     <organization>
-        <name>Array Systems Computing Inc.</name>
+        <name>Brockmann Consult GmbH</name>
         <url>http://envisat.esa.int/beam/</url>
     </organization>
 
-    <inceptionYear>2007</inceptionYear>
+    <inceptionYear>2003</inceptionYear>
 
     <issueManagement>
         <system>JIRA</system>
@@ -37,15 +32,49 @@
         </license>
     </licenses>
 
-    <modules>
-	<module>beam</module>
-	<module>nest-test-reader</module> 
-	<module>nest-alos-reader</module>
-	<module>nest-oil-spill-detector</module> 
-      <module>nest-speckle-filter</module> 
-  </modules>
+    <scm>
+        <connection>scm:svn:https://www.brockmann-consult.de/svn/os/beam-4.x/trunc</connection>
+        <url>https://www.brockmann-consult.de/svn/os/beam-4.x/trunc</url>
+    </scm>
 
-     <dependencyManagement>
+    <modules>
+        <!-- the bootstrap module has no sources,
+             its only purpose is to construct a class path for VISAT
+        -->
+        <module>beam-bootstrap</module>
+        <module>beam-installer</module>
+
+        <module>beam-core</module>
+        <module>beam-ui</module>
+        <module>beam-pconvert</module>
+        <module>beam-visat</module>
+        <module>beam-gpf</module>
+        <module>beam-gpf-docgen</module>
+        <module>beam-processing</module>
+        <module>beam-help</module>
+
+        <module>beam-aatsr-sst</module>
+        <module>beam-flhmci</module>
+        <module>beam-mosaic</module>
+        <module>beam-binning</module>
+        <module>beam-unmix</module>
+        <module>beam-cluster</module>
+        <module>beam-collocation</module>
+
+        <module>beam-atsr-reader</module>
+        <module>beam-alos-reader</module>
+        <module>beam-netcdf-reader</module>
+        <module>beam-getasse30-reader</module>
+        <module>beam-envisat-reader</module>
+        <module>beam-geotiff-writer</module>
+        <module>beam-hdf5-writer</module>
+
+        <module>lib-hdf</module>
+        <module>lib-netcdf</module>
+
+    </modules>
+
+    <dependencyManagement>
         <dependencies>
 
             <!-- Ceres System Level Module ############################################# -->
@@ -253,7 +282,7 @@
     </dependencies>
 
     <build>
-        <outputDirectory>../beam/modules/${artifactId}-${version}</outputDirectory>
+        <outputDirectory>../modules/${artifactId}-${version}</outputDirectory>
 
         <plugins>
             <plugin>
@@ -271,7 +300,7 @@
                 <version>2.2-beta-1</version>
                 <configuration>
                     <descriptors>
-                        <descriptor>src/main/assembly/src.xml</descriptor>
+                        <!--<descriptor>src/main/assembly/src.xml</descriptor>-->
                         <descriptor>src/main/assembly/bin.xml</descriptor>
                         <descriptor>src/main/assembly/installer-files.xml</descriptor>
                     </descriptors>
@@ -414,14 +443,52 @@
         </pluginRepository>
     </pluginRepositories>
 
+
     <developers>
         <developer>
-            <id>lveci</id>
-            <name>Luis Veci</name>
-            <email>lveci@array.ca</email>
-            <organization>Array Systems Computing Inc</organization>
+            <id>marcop</id>
+            <name>Marco Peters</name>
+            <email>marco.peters@brockmann-consult.de</email>
+            <organization>Brockmann Consult</organization>
             <roles>
-                <role>Software Engineering Lead</role>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>marcoz</id>
+            <name>Marco Zuehlke</name>
+            <email>marco.zuehlke@brockmann-consult.de</email>
+            <organization>Brockmann Consult</organization>
+            <roles>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>norman</id>
+            <name>Norman Fomferra</name>
+            <email>norman.fomferra@brockmann-consult.de</email>
+            <organization>Brockmann Consult</organization>
+            <roles>
+                <role>Project Manager</role>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>ralf</id>
+            <name>Ralf Quast</name>
+            <email>ralf.quast@brockmann-consult.de</email>
+            <organization>Brockmann Consult</organization>
+            <roles>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>tom</id>
+            <name>Thomas Block</name>
+            <email>thomas.block@brockmann-consult.de</email>
+            <organization>Brockmann Consult</organization>
+            <roles>
+                <role>Java Developer</role>
             </roles>
         </developer>
     </developers>
