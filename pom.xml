@@ -40,6 +40,7 @@
     <modules>
 	<module>beam</module>
 	<module>nest-test-reader</module> 
+	<module>nest-alos-reader</module>
 	<module>nest-oil-spill-detector</module> 
       <module>nest-speckle-filter</module> 
   </modules>
