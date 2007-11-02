@@ -8,7 +8,7 @@
     <url>http://www.brockmann-consult.de/beam-wiki</url>
     <groupId>org.esa.beam</groupId>
     <artifactId>beam</artifactId>
-    <version>4.1</version>
+    <version>4.2-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -82,25 +82,25 @@
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-launcher</artifactId>
-                <version>0.6</version>
+                <version>0.7-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-core</artifactId>
-                <version>0.6</version>
+                <version>0.7-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-binding</artifactId>
-                <version>0.6</version>
+                <version>0.7-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-ui</artifactId>
-                <version>0.6</version>
+                <version>0.7-SNAPSHOT</version>
             </dependency>
 
             <!-- BEAM System Level Modules ############################################# -->
@@ -108,32 +108,32 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-core</artifactId>
-                <version>4.1</version>
+                <version>4.2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-gpf</artifactId>
-                <version>4.1</version>
+                <version>4.2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-ui</artifactId>
-                <version>4.1</version>
+                <version>4.2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-processing</artifactId>
-                <version>4.1</version>
+                <version>4.2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-processing-chain</artifactId>
-                <version>4.1</version>
+                <version>4.2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-visat</artifactId>
-                <version>4.1</version>
+                <version>4.2-SNAPSHOT</version>
             </dependency>
 
             <!-- BEAM Modules ############################################# -->
@@ -345,7 +345,7 @@
             <plugin>
                 <groupId>com.bc.maven.plugins</groupId>
                 <artifactId>maven-template-plugin</artifactId>
-                <version>1.0</version>
+                <version>1.1</version>
                 <executions>
                     <execution>
                         <phase>process-sources</phase>
