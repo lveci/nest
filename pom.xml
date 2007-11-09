@@ -39,6 +39,7 @@
 
     <modules>
 	<module>beam</module>
+	<module>nest-3d-view</module>
 	<module>nest-test-reader</module> 
 	<module>nest-alos-reader</module>
 	<module>nest-oil-spill-detector</module> 
