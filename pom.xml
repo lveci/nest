@@ -3,12 +3,6 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <scm>
-	<connection>scm:cvs:pserver:lveci@fileserver:/big/cvsroot:nest</connection>
-        <!-- <connection>scm:svn:https://www.brockmann-consult.de/svn/os/beam-4.x/trunk</connection> -->
-        <url>https://www.brockmann-consult.de/svn/os/beam-4.x/trunk</url>
-    </scm>
-
     <name>NEST Project</name>
     <url>http://www.brockmann-consult.de/beam-wiki</url>
     <groupId>org.esa.nest</groupId>
@@ -37,13 +31,21 @@
         </license>
     </licenses>
 
+    <scm>
+	 <connection>scm:cvs:pserver:lveci@fileserver:/big/cvsroot:nest</connection>
+       <developerConnection>scm:cvs:pserver:lveci@fileserver:/big/cvsroot:nest</developerConnection>
+       <tag>HEAD</tag>
+       <url>www.array.ca</url>
+    </scm>
+
     <modules>
 	<module>beam</module>
 	<module>nest-3d-view</module>
 	<module>nest-test-reader</module> 
 	<module>nest-alos-reader</module>
 	<module>nest-oil-spill-detector</module> 
-      <module>nest-speckle-filter</module> 
+      <module>nest-op-filter</module>
+    <module>radarsat-reader</module>
   </modules>
 
     <dependencyManagement>
@@ -282,7 +284,8 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <skip>true</skip>
+                    <skip>false</skip>
+			  <format>xml</format>
                     <printSummary>true</printSummary>
                     <excludes>
                         <exclude>**/TestRaster.java</exclude>
