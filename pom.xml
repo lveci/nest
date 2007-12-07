@@ -40,12 +40,8 @@
 
     <modules>
 	<module>beam</module>
-	<module>nest-3d-view</module>
-	<module>nest-test-reader</module> 
-	<module>nest-alos-reader</module>
-	<module>nest-oil-spill-detector</module> 
-      <module>nest-op-filter</module>
-    <module>radarsat-reader</module>
+	<module>nest-3d-view</module> 
+    <module>nest-op-filter</module>
   </modules>
 
     <dependencyManagement>
@@ -274,17 +270,18 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.2-beta-1</version>
                 <configuration>
+					<appendAssemblyId>false</appendAssemblyId>
                     <descriptors>
-                        <descriptor>src/main/assembly/src.xml</descriptor>
+                        <!--<descriptor>src/main/assembly/src.xml</descriptor>-->
                         <descriptor>src/main/assembly/bin.xml</descriptor>
-                        <descriptor>src/main/assembly/installer-files.xml</descriptor>
+                        <!--<descriptor>src/main/assembly/installer-files.xml</descriptor>-->
                     </descriptors>
                 </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <skip>false</skip>
+                    <skip>true</skip>
 			  <format>xml</format>
                     <printSummary>true</printSummary>
                     <excludes>

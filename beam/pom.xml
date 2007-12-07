@@ -46,18 +46,19 @@
 
         <module>beam-core</module>
         <module>beam-ui</module>
-        <module>beam-pconvert</module>
+        <!--<module>beam-pconvert</module>-->
         <module>beam-visat</module>
         <module>beam-gpf</module>
         <module>beam-gpf-docgen</module>
         <module>beam-processing</module>
+        <module>beam-scripting</module>
         <module>beam-help</module>
 
         <module>beam-mosaic</module>
-        <module>beam-binning</module>
-        <module>beam-unmix</module>
-        <module>beam-cluster</module>
-        <module>beam-collocation</module>
+       <!-- <module>beam-binning</module> 
+			<module>beam-unmix</module>
+			<module>beam-cluster</module>
+			<module>beam-collocation</module> -->
 
         <module>beam-alos-reader</module>
         <module>beam-netcdf-reader</module>
