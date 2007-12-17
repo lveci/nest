@@ -40,8 +40,9 @@
 
     <modules>
 	<module>beam</module>
+	<module>nest-dat</module>
 	<module>nest-3d-view</module> 
-    <module>nest-op-filter</module>
+      <module>nest-op-filter</module>
   </modules>
 
     <dependencyManagement>
