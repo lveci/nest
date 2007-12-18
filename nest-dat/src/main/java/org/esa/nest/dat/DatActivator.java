@@ -6,7 +6,6 @@ import com.bc.ceres.core.ServiceRegistryFactory;
 import com.bc.ceres.core.runtime.ModuleContext;
 import org.esa.beam.BeamCoreActivator;
 import org.esa.beam.framework.ui.application.ToolViewDescriptor;
-import org.esa.beam.framework.ui.application.ToolViewDescriptorRegistry;
 import org.esa.beam.framework.ui.command.Command;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.SystemUtils;

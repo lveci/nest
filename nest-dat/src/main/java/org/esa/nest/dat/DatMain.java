@@ -25,7 +25,7 @@ import java.util.Locale;
  * <i>file</i></code> sets the logfile for DAT to <i>file</i> </ld>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2007-12-17 21:22:54 $
+ * @version $Revision: 1.2 $ $Date: 2007-12-18 14:43:13 $
  */
 public class DatMain implements RuntimeRunnable {
     /**
@@ -45,6 +45,7 @@ public class DatMain implements RuntimeRunnable {
         Locale.setDefault(Locale.ENGLISH); // Force usage of english locale
 
         Lm.verifyLicense("Brockmann Consult", "BEAM", "lCzfhklpZ9ryjomwWxfdupxIcuIoCxg2");
+        
         // set special properties for Mac OS X
         if (SystemInfo.isMacOSX()) {
             if (System.getProperty("apple.laf.useScreenMenuBar") == null) {
