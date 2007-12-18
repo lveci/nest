@@ -69,7 +69,7 @@ import java.util.concurrent.Executors;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.3 $ $Date: 2007-12-18 14:43:13 $
+ * @version $Revision: 1.4 $ $Date: 2007-12-18 17:53:53 $
  */
 public final class DatApp extends VisatApp {
 
@@ -612,22 +612,6 @@ public final class DatApp extends VisatApp {
     }
 
     /**
-     * Returns the product node cuurrently displayed in the given internal frame.
-     *
-     * @return the displayed product nod or <code>null</code> if the product node cannot be identified.
-     */
-    public static ProductNode getProductNode(final JInternalFrame frame) {
-        if (frame == null) {
-            return null;
-        }
-        final Container contentPane = frame.getContentPane();
-        if (contentPane instanceof ProductNodeView) {
-            return ((ProductNodeView) contentPane).getVisibleProductNode();
-        }
-        return null;
-    }
-
-    /**
      * Returns the currently selected node within a product.
      *
      * @return the selected node, which can be <code>null</code>
@@ -905,13 +889,6 @@ public final class DatApp extends VisatApp {
     }
 
     /**
-     * Unloads all bands of the given product.
-     */
-    public synchronized void unloadAllAssociatedBands(final Product product) {
-        product.acceptVisitor(new BandUnloader());
-    }
-
-    /**
      * Returns true if the given raster data node is used in any product scene view.
      *
      * @param raster
@@ -1016,7 +993,7 @@ public final class DatApp extends VisatApp {
         swingWorker.execute();
     }
 
-    @Override
+ /*   @Override
     public synchronized void shutDown() {
         final ArrayList<Product> modifiedOrNew = new ArrayList<Product>(5);
         final Product[] products = getProductManager().getProducts();
@@ -1039,15 +1016,15 @@ public final class DatApp extends VisatApp {
             final Product[] modifiedProducts = modifiedOrNew.toArray(new Product[modifiedOrNew.size()]);
             final StringBuilder message = new StringBuilder();
             if (modifiedProducts.length == 1) {
-                message.append("The following product has been modified:"); /*I18N*/
+                message.append("The following product has been modified:");
                 message.append("\n    ").append(modifiedProducts[0].getDisplayName());
-                message.append("\n\nDo you want to save this product before exiting DAT?"); /*I18N*/
+                message.append("\n\nDo you want to save this product before exiting DAT?");
             } else {
-                message.append("The following products have been modified:"); /*I18N*/
+                message.append("The following products have been modified:"); 
                 for (Product modifiedProduct : modifiedProducts) {
                     message.append("\n    ").append(modifiedProduct.getDisplayName());
                 }
-                message.append("\n\nDo you want to save these products before exiting DAT?"); /*I18N*/
+                message.append("\n\nDo you want to save these products before exiting DAT?");
             }
             final int result = showQuestionDialog("Products Modified", message.toString(), true, null);
             if (result == JOptionPane.YES_OPTION) {
@@ -1063,7 +1040,7 @@ public final class DatApp extends VisatApp {
             }
         }
     }
-
+      */
 
     public synchronized Product newProduct() {
         return newProductImpl();
@@ -2423,316 +2400,12 @@ public final class DatApp extends VisatApp {
         void updateView(ProductSceneView view);
     }
 
-
-    /**
-     * This is VISAT's internal frame listener.
-     */
-    private class VisatIFL implements InternalFrameListener {
-
-        /**
-         * Invoked when an internal frame is activated.
-         *
-         * @see javax.swing.JInternalFrame#setSelected
-         */
-        public void internalFrameActivated(final InternalFrameEvent e) {
-            Debug.trace("VisatApp: internal frame activated: " + e);
-            setSelectedProductNode(e.getInternalFrame());
-            final Component contentPane = e.getInternalFrame().getContentPane();
-            if (contentPane instanceof DrawingEditor) {
-                final DrawingEditor drawingEditor = (DrawingEditor) contentPane;
-                drawingEditor.setTool(ToolAction.getActiveTool());
-            }
-            updateCurrentDocTitle();
-            updateState();
-        }
-
-        /**
-         * Invoked when an internal frame is de-activated.
-         *
-         * @see javax.swing.JInternalFrame#setSelected
-         */
-        public void internalFrameDeactivated(final InternalFrameEvent e) {
-            Debug.trace("VisatApp: internal frame deactivated: " + e);
-            final Component contentPane = e.getInternalFrame().getContentPane();
-            if (contentPane instanceof DrawingEditor) {
-                final DrawingEditor drawingEditor = (DrawingEditor) contentPane;
-                drawingEditor.setTool(null);
-            }
-            updateState();
-        }
-
-        /**
-         * Invoked when a internal frame has been opened.
-         *
-         * @see javax.swing.JInternalFrame#show
-         */
-        public void internalFrameOpened(final InternalFrameEvent e) {
-            Debug.trace("VisatApp: internal frame opened: " + e);
-            setSelectedProductNode(e.getInternalFrame());
-            final Container contentPane = e.getInternalFrame().getContentPane();
-            if (contentPane instanceof DrawingEditor) {
-                final DrawingEditor drawingEditor = (DrawingEditor) contentPane;
-                drawingEditor.setTool(ToolAction.getActiveTool());
-            }
-        }
-
-        /**
-         * Invoked when an internal frame is in the process of being closed. The close operation can be overridden at
-         * this point.
-         *
-         * @see javax.swing.JInternalFrame#setDefaultCloseOperation
-         */
-        public void internalFrameClosing(final InternalFrameEvent e) {
-            Debug.trace("VisatApp: internal frame closing: " + e);
-            updateState();
-        }
-
-        /**
-         * Invoked when an internal frame has been closed.
-         *
-         * @see javax.swing.JInternalFrame#setClosed
-         */
-        public void internalFrameClosed(final InternalFrameEvent e) {
-            Debug.trace("VisatApp: internal frame closed: " + e);
-            final String title = e.getInternalFrame().getTitle();
-            final Container contentPane = e.getInternalFrame().getContentPane();
-            if (contentPane instanceof DrawingEditor) {
-                final DrawingEditor drawingEditor = (DrawingEditor) contentPane;
-                drawingEditor.setTool(null);
-            }
-            if (contentPane instanceof ProductSceneView) {
-                final ProductSceneView productSceneView = (ProductSceneView) contentPane;
-                removePropertyMapChangeListener(productSceneView);
-
-                final int numRasters = productSceneView.getNumRasters();
-
-                JInternalFrame otherFrame = null;
-                for (int i = 0; i < numRasters; i++) {
-                    final RasterDataNode raster = productSceneView.getRasterAt(i);
-                    otherFrame = findInternalFrame(raster);
-                    // If this band is not referenced by other frames anymore:
-                    if (otherFrame == null) {
-                        final boolean autoUnload = getPreferences().getPropertyBool(PROPERTY_KEY_AUTO_UNLOAD_DATA,
-                                                                                    true);
-                        // If auto-unload is on, unload data
-                        if (autoUnload && !raster.isSynthetic()) {
-                            Debug.trace("Unloading raster data of '" + raster.getName() + "'...");
-                            raster.unloadRasterData();
-                            Debug.trace("Raster data unloaded.");
-                        }
-                    }
-                }
-
-                // Save view-associtated objects before we dispose the view
-                final LayerModel layerModel = productSceneView.getImageDisplay().getLayerModel();
-                final JInternalFrame[] otherFrames = findInternalFrames(productSceneView.getRaster(), 1);
-
-                Debug.trace("Disposing view '" + title + "'...");
-                productSceneView.dispose();
-                Debug.trace("View disposed.");
-
-                if (otherFrames.length == 0) {
-                    Debug.trace("Disposing layer model of view '" + title + "'...");
-                    layerModel.dispose();
-                    Debug.trace("Layer model disposed.");
-                }
-
-                if (otherFrame != null) {
-                    try {
-                        otherFrame.setSelected(true);
-                    } catch (PropertyVetoException ignored) {
-                        // ok
-                    }
-                }
-            }
-
-            updateState();
-        }
-
-        /**
-         * Invoked when an internal frame is iconified.
-         *
-         * @see javax.swing.JInternalFrame#setIcon
-         */
-        public void internalFrameIconified(final InternalFrameEvent e) {
-            updateState();
-        }
-
-        /**
-         * Invoked when an internal frame is de-iconified.
-         *
-         * @see javax.swing.JInternalFrame#setIcon
-         */
-        public void internalFrameDeiconified(final InternalFrameEvent e) {
-            updateState();
-        }
-    }
-
-    /**
-     * This band unloader is used to unload all bands of a product.
-     */
-    private class BandUnloader extends ProductVisitorAdapter {
-
-        @Override
-        public void visit(final Band band) {
-            if (band.getRasterData() != null) {
-                getLogger().info("Unloading raster data of '" + band.getName() + "'...");
-                band.unloadRasterData();
-                getLogger().info("Raster data unloaded.");
-            }
-        }
-    }
-
-    /**
-     * This listener is used to identify whether or not a property map has changed.
-     */
-    private static class PreferencesChangeChecker implements PropertyChangeListener {
-
-        private boolean propertiesChanged;
-
-        PreferencesChangeChecker() {
-        }
-
-        public boolean arePropertiesChanged() {
-            return propertiesChanged;
-        }
-
-        public void propertyChange(final PropertyChangeEvent evt) {
-            propertiesChanged = true;
-        }
-    }
-
     private boolean isVisatExitConfirmed() {
         return visatExitConfirmed;
     }
 
     public void setVisatExitConfirmed(final boolean visatExitConfirmed) {
         this.visatExitConfirmed = visatExitConfirmed;
-    }
-
-    private class OpenProductRunnable implements Runnable {
-
-        private final File file;
-
-        public OpenProductRunnable(File file) {
-            this.file = file;
-        }
-
-        public void run() {
-            File[] selectedFiles;
-            FileFilter selectedFileFilter = null;
-
-            if (file == null || !file.exists()) {
-                JFileChooser fileChooser = showOpenFileDialog();
-                if (fileChooser == null) {
-                    return;
-                }
-                selectedFiles = fileChooser.getSelectedFiles();
-                selectedFileFilter = fileChooser.getFileFilter();
-            } else {
-                selectedFiles = new File[]{file};
-            }
-
-            Cursor oldCursor = getMainFrame().getCursor();
-            UIUtils.setRootFrameWaitCursor(getMainFrame());
-
-            StringBuffer msgBuffer = new StringBuffer();
-            for (File selectedFile : selectedFiles) {
-                if (getOpenProduct(selectedFile) != null) {
-                    msgBuffer.append(String.format("Product is already open: %s\n", selectedFile));
-                    continue;
-                }
-
-                ProductReader reader = getReader(selectedFile, selectedFileFilter);
-                if (reader == null) {
-                    msgBuffer.append(String.format("No appropriate reader found: %s\n", selectedFile));  /*I18N*/
-                    continue;
-                }
-
-                setStatusBarMessage(String.format("Opening product %s...", selectedFile)); /*I18N*/
-                Product product = loadProduct(reader, selectedFile);
-                if (product == null) {
-                    msgBuffer.append(String.format("Not able to read file: %s\n", selectedFile));  /*I18N*/
-                    continue;
-                }
-                addProduct(product);
-                historyPush(selectedFile);
-            }
-
-            if (msgBuffer.length() > 0) {
-                showWarningDialog(msgBuffer.toString());
-            }
-            updateState();
-            UIUtils.setRootFrameCursor(getMainFrame(), oldCursor);
-        }
-
-        private JFileChooser showOpenFileDialog() {
-            String lastDir = getPreferences().getPropertyString(PROPERTY_KEY_APP_LAST_OPEN_DIR,
-                                                                SystemUtils.getUserHomeDir().getPath());
-            String lastFormat = getPreferences().getPropertyString(PROPERTY_KEY_APP_LAST_OPEN_FORMAT,
-                                                                   ALL_FILES_IDENTIFIER);
-            BeamFileChooser fileChooser = new BeamFileChooser();
-            fileChooser.setCurrentDirectory(new File(lastDir));
-            fileChooser.setAcceptAllFileFilterUsed(true);
-            fileChooser.setDialogTitle(getAppName() + " - " + "Open Data Product(s)"); /*I18N*/
-            fileChooser.setMultiSelectionEnabled(true);
-
-            FileFilter actualFileFilter = fileChooser.getAcceptAllFileFilter();
-            Iterator allReaderPlugIns = ProductIOPlugInManager.getInstance().getAllReaderPlugIns();
-            while (allReaderPlugIns.hasNext()) {
-                final ProductIOPlugIn plugIn = (ProductIOPlugIn) allReaderPlugIns.next();
-                BeamFileFilter productFileFilter = plugIn.getProductFileFilter();
-                fileChooser.addChoosableFileFilter(productFileFilter);
-                if (!ALL_FILES_IDENTIFIER.equals(lastFormat) &&
-                    productFileFilter.getFormatName().equals(lastFormat)) {
-                    actualFileFilter = productFileFilter;
-                }
-            }
-            fileChooser.setFileFilter(actualFileFilter);
-
-            int result = fileChooser.showDialog(getMainFrame(), "Open Product");    /*I18N*/
-            if (result != JFileChooser.APPROVE_OPTION) {
-                return null;
-            }
-
-            String currentDir = fileChooser.getCurrentDirectory().getAbsolutePath();
-            if (currentDir != null) {
-                getPreferences().setPropertyString(PROPERTY_KEY_APP_LAST_OPEN_DIR, currentDir);
-            }
-
-            if (fileChooser.getFileFilter() instanceof BeamFileFilter) {
-                String currentFormat = ((BeamFileFilter) fileChooser.getFileFilter()).getFormatName();
-                if (currentFormat != null) {
-                    getPreferences().setPropertyString(PROPERTY_KEY_APP_LAST_OPEN_FORMAT, currentFormat);
-                }
-            } else {
-                getPreferences().setPropertyString(PROPERTY_KEY_APP_LAST_OPEN_FORMAT, ALL_FILES_IDENTIFIER);
-            }
-            return fileChooser;
-
-        }
-
-        private Product loadProduct(ProductReader reader, File selectedFile) {
-            Product product = null;
-            try {
-                product = reader.readProductNodes(selectedFile, null);
-            } catch (Exception e) {
-                handleUnknownException(e);
-            } finally {
-                clearStatusBarMessage();
-            }
-            return product;
-        }
-
-
-        private ProductReader getReader(File selectedFile, FileFilter selectedFileFilter) {
-            if (selectedFileFilter instanceof BeamFileFilter) {
-                return ProductIO.getProductReader(((BeamFileFilter) selectedFileFilter).getFormatName());
-            } else {
-                return ProductIO.getProductReaderForFile(selectedFile);
-            }
-        }
-
     }
 
     private class ToolBarListener extends DockableBarAdapter {

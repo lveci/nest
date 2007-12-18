@@ -8,10 +8,10 @@
         NEST Display and Analysis Tool
     </description>
 
-    <vendor>Brockmann Consult GmbH</vendor>
-    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
-    <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
-    <url>http://envisat.esa.int/beam</url>
+    <vendor>Array Systems Computing Inc</vendor>
+    <contactAddress>1120 Finch Ave W. Toronto (Canada)</contactAddress>
+    <copyright>(C) 2007 by Array Systems Computing Inc</copyright>
+    <url>http://www.array.ca/nest</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
 
     <activator>org.esa.nest.dat.DatActivator</activator>
@@ -287,8 +287,8 @@
             <mnemonic>P</mnemonic>
             <placeAfter>properties</placeAfter>
             <accelerator>alt P</accelerator>
-            <shortDescr>Edit VISAT preferences.</shortDescr>
-            <description>Edit VISAT preferences.</description>
+            <shortDescr>Edit DAT preferences.</shortDescr>
+            <description>Edit DAT preferences.</description>
             <smallIcon>icons/Preferences16.gif</smallIcon>
             <largeIcon>icons/Preferences24.gif</largeIcon>
             <helpId>preferences</helpId>
@@ -302,8 +302,8 @@
             <mnemonic>x</mnemonic>
             <placeAfter>export</placeAfter>
             <separatorBefore>true</separatorBefore>
-            <shortDescr>Exit the VISAT application.</shortDescr>
-            <description>Exit the VISAT application.</description>
+            <shortDescr>Exit the DAT application.</shortDescr>
+            <description>Exit the DAT application.</description>
             <accelerator>alt F4</accelerator>
             <smallIcon></smallIcon>
             <largeIcon></largeIcon>
@@ -957,8 +957,8 @@
             <mnemonic>T</mnemonic>
             <accelerator>F1</accelerator>
             <separatorBefore>false</separatorBefore>
-            <shortDescr>VISAT help</shortDescr>
-            <description>Opens the VISAT help browser.</description>
+            <shortDescr>DAT help</shortDescr>
+            <description>Opens the DAT help browser.</description>
             <smallIcon>icons/Help16.gif</smallIcon>
             <largeIcon>icons/Help24.gif</largeIcon>
             <helpId>visat</helpId>
