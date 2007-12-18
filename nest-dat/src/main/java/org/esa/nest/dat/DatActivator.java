@@ -3,7 +3,6 @@ package org.esa.nest.dat;
 import com.bc.ceres.core.CoreException;
 import com.bc.ceres.core.ServiceRegistry;
 import com.bc.ceres.core.ServiceRegistryFactory;
-import com.bc.ceres.core.runtime.Activator;
 import com.bc.ceres.core.runtime.ModuleContext;
 import org.esa.beam.BeamCoreActivator;
 import org.esa.beam.framework.ui.application.ToolViewDescriptor;
@@ -11,6 +10,7 @@ import org.esa.beam.framework.ui.application.ToolViewDescriptorRegistry;
 import org.esa.beam.framework.ui.command.Command;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.SystemUtils;
+import org.esa.beam.visat.VisatActivator;
 import org.esa.beam.visat.VisatPlugIn;
 
 import java.util.*;
@@ -18,7 +18,7 @@ import java.util.*;
 /**
  * The activator for DAT. This activator processes the extension point <code>plugins</code>.
  */
-public class DatActivator implements Activator, ToolViewDescriptorRegistry {
+public class DatActivator extends VisatActivator {
 
     private static DatActivator instance;
     private ModuleContext moduleContext;

@@ -69,7 +69,7 @@ import java.util.concurrent.Executors;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.1 $ $Date: 2007-12-17 21:22:54 $
+ * @version $Revision: 1.2 $ $Date: 2007-12-17 22:29:49 $
  */
 public final class DatApp extends VisatApp {
 
@@ -384,7 +384,7 @@ public final class DatApp extends VisatApp {
         }
     }
 
-    private static void addCommand(Command command, CommandManager commandManager) {
+ /*   private static void addCommand(Command command, CommandManager commandManager) {
         String parentId = command.getParent();
         if (parentId != null && commandManager.getCommandGroup(parentId) == null) {
             Command com = getCommand(DatActivator.getInstance().getCommands(), parentId);
@@ -397,17 +397,20 @@ public final class DatApp extends VisatApp {
         if (commandManager.getCommand(command.getCommandID()) == null) { // my be already added in the recursion
             commandManager.addCommand(command);
         }
-    }
+    } */
 
-    private static Command getCommand(Command[] commands, String commandId) {
+   /* private static Command getCommand(Command[] commands, String commandId) {
         for (Command command : commands) {
             if (command.getCommandID().equals(commandId)) {
                 return command;
             }
         }
         return null;
-    }
+    } */
 
+    public VisatActivator getActivator() {
+        return DatActivator.getInstance();
+    }
 
     public final ApplicationWindow getWindow() {
         return window;

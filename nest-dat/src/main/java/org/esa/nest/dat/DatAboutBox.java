@@ -56,7 +56,7 @@ public class DatAboutBox extends ModalDialog {
             }
         });
 
-        URL resource = getClass().getResource("/about.jpg");
+        URL resource = getClass().getResource("/about_nest.jpg");
         Assert.notNull(resource);
         Icon icon = new ImageIcon(resource);
 
