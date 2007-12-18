@@ -102,7 +102,159 @@
             <initSide>WEST</initSide>
             <initIndex>0</initIndex>
         </toolView>
+        <toolView>
+            <id>org.esa.beam.visat.toolviews.pixelinfo.PixelInfoToolView</id>
+            <class>org.esa.beam.visat.toolviews.pixelinfo.PixelInfoToolView</class>
+            <title>Pixel Info View</title>
+            <tabTitle>Pixel Info</tabTitle>
+            <mnemonic>i</mnemonic>
+            <accelerator>ctrl alt I</accelerator>
+            <description>Display detailed pixel information in a table view.</description>
+            <smallIcon>/org/esa/beam/resources/images/icons/PixelInfo16.gif</smallIcon>
+            <largeIcon>/org/esa/beam/resources/images/icons/PixelInfo24.gif</largeIcon>
+            <!--<helpId>TODO</helpId>-->
+            <initState>DOCKED</initState>
+            <initSide>WEST</initSide>
+            <initIndex>0</initIndex>
+        </toolView>
 
+        <toolView>
+            <id>org.esa.beam.visat.toolviews.bitmask.BitmaskOverlayToolView</id>
+            <class>org.esa.beam.visat.toolviews.bitmask.BitmaskOverlayToolView</class>
+            <title>Bitmask Overlay</title>
+            <mnemonic>B</mnemonic>
+            <accelerator>ctrl alt B</accelerator>
+            <description>Overlay bitmasks on top of an image view.</description>
+            <smallIcon>/org/esa/beam/resources/images/icons/BitmaskOverlay16.gif</smallIcon>
+            <largeIcon>/org/esa/beam/resources/images/icons/BitmaskOverlay24.gif</largeIcon>
+            <!--<helpId>TODO</helpId>-->
+            <initState>HIDDEN</initState>
+            <initSide>SOUTH</initSide>
+            <initIndex>0</initIndex>
+        </toolView>
+
+        <toolView>
+            <id>org.esa.beam.visat.toolviews.cspal.ContrastStretchToolView</id>
+            <class>org.esa.beam.visat.toolviews.cspal.ContrastStretchToolView</class>
+            <title>Contrast Stretch</title>
+            <mnemonic>C</mnemonic>
+            <accelerator>ctrl alt C</accelerator>
+            <description>Contrast stretch and colorize a selected image view.</description>
+            <smallIcon>/org/esa/beam/resources/images/icons/ContrastStretch16.gif</smallIcon>
+            <largeIcon>/org/esa/beam/resources/images/icons/ContrastStretch24.gif</largeIcon>
+            <!--<helpId>TODO</helpId>-->
+            <initState>HIDDEN</initState>
+            <initSide>SOUTH</initSide>
+            <initIndex>0</initIndex>
+        </toolView>
+
+        <toolView>
+            <id>org.esa.beam.visat.toolviews.nav.NavigationToolView</id>
+            <class>org.esa.beam.visat.toolviews.nav.NavigationToolView</class>
+            <title>Navigation</title>
+            <mnemonic>N</mnemonic>
+            <accelerator>ctrl alt N</accelerator>
+            <description>Zoom and pan a selected image view.</description>
+            <smallIcon>/org/esa/beam/resources/images/icons/Navigation16.gif</smallIcon>
+            <largeIcon>/org/esa/beam/resources/images/icons/Navigation24.gif</largeIcon>
+            <helpId>showNavigationWnd</helpId>
+            <initState>HIDDEN</initState>
+            <initSide>SOUTH</initSide>
+            <initIndex>0</initIndex>
+        </toolView>
+
+        <toolView>
+            <id>org.esa.beam.visat.toolviews.pin.PinManagerToolView</id>
+            <class>org.esa.beam.visat.toolviews.pin.PinManagerToolView</class>
+            <title>Pin Manager</title>
+            <mnemonic>a</mnemonic>
+            <accelerator>ctrl alt A</accelerator>
+            <description>Manage pins of a data product.</description>
+            <smallIcon>/org/esa/beam/resources/images/icons/PinManager16.gif</smallIcon>
+            <largeIcon>/org/esa/beam/resources/images/icons/PinManager24.gif</largeIcon>
+            <helpId>showPinManagerWnd</helpId>
+            <initState>HIDDEN</initState>
+            <initSide>SOUTH</initSide>
+            <initIndex>0</initIndex>
+        </toolView>
+
+        <toolView>
+            <id>org.esa.beam.visat.toolviews.pin.GcpManagerToolView</id>
+            <class>org.esa.beam.visat.toolviews.pin.GcpManagerToolView</class>
+            <title>GCP Manager</title>
+            <mnemonic>c</mnemonic>
+            <accelerator>ctrl alt G</accelerator>
+            <description>Manage ground control points of a data product.</description>
+            <smallIcon>/org/esa/beam/resources/images/icons/GcpManager16.gif</smallIcon>
+            <largeIcon>/org/esa/beam/resources/images/icons/GcpManager24.gif</largeIcon>
+            <helpId>showGcpManagerWnd</helpId>/
+            <initState>HIDDEN</initState>
+            <initSide>SOUTH</initSide>
+            <initIndex>0</initIndex>
+        </toolView>
+
+        <toolView>
+            <id>org.esa.beam.visat.toolviews.roi.RoiManagerToolView</id>
+            <class>org.esa.beam.visat.toolviews.roi.RoiManagerToolView</class>
+            <title>ROI Manager</title>
+            <mnemonic>r</mnemonic>
+            <accelerator>ctrl alt R</accelerator>
+            <description>Manage ROI of a selected image view.</description>
+            <smallIcon>/org/esa/beam/resources/images/icons/ROIDefinition16.gif</smallIcon>
+            <largeIcon>/org/esa/beam/resources/images/icons/ROIDefinition24.gif</largeIcon>
+            <helpId>showROIDefWnd</helpId>
+            <initState>HIDDEN</initState>
+            <initSide>SOUTH</initSide>
+            <initIndex>0</initIndex>
+        </toolView>
+
+        <toolView>
+            <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
+            <class>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</class>
+            <title>Spectrum View</title>
+            <tabTitle>Spectrum</tabTitle>
+            <mnemonic>S</mnemonic>
+            <accelerator>ctrl alt S</accelerator>
+            <description>Display spectrum at the current pixel position.</description>
+            <smallIcon>/org/esa/beam/resources/images/icons/Spectrum16.gif</smallIcon>
+            <largeIcon>/org/esa/beam/resources/images/icons/Spectrum24.gif</largeIcon>
+            <helpId>showSpectrumWnd</helpId>
+            <initState>HIDDEN</initState>
+            <initSide>SOUTH</initSide>
+            <initIndex>0</initIndex>
+        </toolView>
+
+        <toolView>
+            <id>org.esa.beam.visat.toolviews.stat.StatisticsToolView</id>
+            <class>org.esa.beam.visat.toolviews.stat.StatisticsToolView</class>
+            <title>Statistics View</title>
+            <tabTitle>Statistics</tabTitle>
+            <mnemonic>t</mnemonic>
+            <accelerator>ctrl alt T</accelerator>
+            <description>Display statistics for a selected band.</description>
+            <smallIcon>/org/esa/beam/resources/images/icons/Statistics16.gif</smallIcon>
+            <largeIcon>/org/esa/beam/resources/images/icons/Statistics24.gif</largeIcon>
+            <helpId>statisticsToolView</helpId>
+            <initState>HIDDEN</initState>
+            <initSide>SOUTH</initSide>
+            <initIndex>0</initIndex>
+        </toolView>
+
+        <toolView>
+            <id>org.esa.beam.visat.toolviews.worldmap.WorldMapToolView</id>
+            <class>org.esa.beam.visat.toolviews.worldmap.WorldMapToolView</class>
+            <title>World Map</title>
+            <tabTitle>World Map</tabTitle>
+            <mnemonic>W</mnemonic>
+            <accelerator>ctrl alt W</accelerator>
+            <description>Display product boundaries in a world map.</description>
+            <smallIcon>/org/esa/beam/resources/images/icons/WorldMap16.gif</smallIcon>
+            <largeIcon>/org/esa/beam/resources/images/icons/WorldMap24.gif</largeIcon>
+            <helpId>showWorldMapWnd</helpId>
+            <initState>HIDDEN</initState>
+            <initSide>SOUTH</initSide>
+            <initIndex>0</initIndex>
+        </toolView>
  </extension>
 
     <extension point="nest-dat:actions">

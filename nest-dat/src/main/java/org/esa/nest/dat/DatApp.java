@@ -63,13 +63,14 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.net.URL;
 
 /**
  * The <code>DatApp</code> class represents the DAT application.
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.4 $ $Date: 2007-12-18 17:53:53 $
+ * @version $Revision: 1.5 $ $Date: 2007-12-18 20:15:39 $
  */
 public final class DatApp extends VisatApp {
 
@@ -394,6 +395,20 @@ public final class DatApp extends VisatApp {
 
     public final ApplicationPage getPage() {
         return window.getPage();
+    }
+
+    /**
+     * Creates a default frame icon for this application.
+     * <p/> Override this method if you want another behaviour.
+     *
+     * @return the frame icon, or <code>null</code> if no icon is used
+     */
+    protected ImageIcon createFrameIcon() {
+        URL iconURL = getClass().getResource("/icons/WorldMap24.gif");
+        if (iconURL == null) {
+            return null;
+        }
+        return new ImageIcon(iconURL);
     }
 
     private void loadToolViews() {
