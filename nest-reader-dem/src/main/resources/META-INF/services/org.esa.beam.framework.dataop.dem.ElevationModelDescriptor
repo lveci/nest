@@ -1,0 +1,2 @@
+org.esa.nest.dataio.dem.srtm.SRTMElevationModelDescriptor
+org.esa.nest.dataio.dem.ace.ACEElevationModelDescriptor

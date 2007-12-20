@@ -1,0 +1,2 @@
+org.esa.nest.dataio.dem.srtm.SRTMReaderPlugIn
+org.esa.nest.dataio.dem.ace.ACEReaderPlugIn

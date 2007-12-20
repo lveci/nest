@@ -42,6 +42,7 @@
 	<module>beam</module>
 	<module>nest-dat</module>
 	<module>nest-3d-view</module> 
+	<module>nest-reader-dem</module>
       <module>nest-op-filter</module>
   </modules>
 

@@ -1,0 +1,39 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>nest-reader-dem</symbolicName>
+    <version>0.1</version>
+    <name>SRTM DEM Reader</name>
+
+    <description>Enables NEST to read the SRTM digital elevation model.</description>
+
+    <vendor>Array Systems Computing Inc</vendor>
+    <contactAddress>1120 Finch Ave W. Toronto (Canada)</contactAddress>
+    <copyright>(C) 2007 by Array Systems Computing Inc</copyright>
+    <url>http://www.array.ca/nest</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat</module>
+        <optional>true</optional>
+    </dependency>
+    
+
+    <categories>Reader,DEM</categories>
+
+    <extension point="nest-dat:actions">
+        <action>
+            <id>importSRTMDEMProduct</id>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <formatName>DEM</formatName>
+            <text>Import SRTM DEM Tile (or Subset)...</text>
+            <mnemonic>D</mnemonic>
+            <shortDescr>Import a SRTM DEM tile or tile subset.</shortDescr>
+            <description>Import a SRTM DEM tile or tile subset.</description>
+            <helpId>importSRTMProduct</helpId>
+        </action>
+    </extension>
+
+</module>
