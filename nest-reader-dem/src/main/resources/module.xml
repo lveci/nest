@@ -23,17 +23,5 @@
 
     <categories>Reader,DEM</categories>
 
-    <extension point="nest-dat:actions">
-        <action>
-            <id>importSRTMDEMProduct</id>
-            <class>org.esa.beam.visat.actions.ProductImportAction</class>
-            <formatName>DEM</formatName>
-            <text>Import SRTM DEM Tile (or Subset)...</text>
-            <mnemonic>D</mnemonic>
-            <shortDescr>Import a SRTM DEM tile or tile subset.</shortDescr>
-            <description>Import a SRTM DEM tile or tile subset.</description>
-            <helpId>importSRTMProduct</helpId>
-        </action>
-    </extension>
-
+   
 </module>

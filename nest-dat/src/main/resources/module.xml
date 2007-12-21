@@ -19,6 +19,9 @@
     <dependency>
         <module>beam-visat</module>
     </dependency>
+	<dependency>
+        <module>beam-gpf</module>
+    </dependency>
     <dependency>
         <module>beam-core</module>
     </dependency>

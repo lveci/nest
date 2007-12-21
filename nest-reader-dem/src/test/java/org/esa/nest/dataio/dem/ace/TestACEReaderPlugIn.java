@@ -1,4 +1,4 @@
-package org.esa.nest.dataio.dem.srtm;
+package org.esa.nest.dataio.dem.ace;
 
 import junit.framework.TestCase;
 import org.esa.beam.framework.dataio.ProductReader;
@@ -9,13 +9,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 
-public class SRTMReaderPlugInTest extends TestCase {
+public class TestACEReaderPlugIn extends TestCase {
 
-    private SRTMReaderPlugIn _plugIn;
+    private ACEReaderPlugIn _plugIn;
 
     @Override
     protected void setUp() throws Exception {
-        _plugIn = new SRTMReaderPlugIn();
+        _plugIn = new ACEReaderPlugIn();
     }
 
     @Override
@@ -24,9 +24,9 @@ public class SRTMReaderPlugInTest extends TestCase {
     }
 
     public void testValidInputs() {
-       /* testValidInput("./SRTM/00N015W.SRTM");
-        testValidInput("./SRTM/00N015W.SRTM");
-        testValidInput("./SRTM/00N015W.SRTM");  */
+        testValidInput("./ACE/00N015W.ACE");
+        testValidInput("./ACE/00N015W.ACE");
+        testValidInput("./ACE/00N015W.ACE");
     }
 
     private void testValidInput(final String s) {
@@ -35,20 +35,20 @@ public class SRTMReaderPlugInTest extends TestCase {
     }
 
     public void testInvalidInputs() {
-        testInvalidInput("10n143w.SRTM.zip");
-        testInvalidInput("./SRTM/00N015W.SRTM.zip");
-        testInvalidInput("./SRTM/00N015W.SRTM.zip");
-        testInvalidInput("./SRTM/readme.txt");
-        testInvalidInput("./SRTM/readme.txt.zip");
-        testInvalidInput("./SRTM/readme");
-        testInvalidInput("./SRTM/");
+        testInvalidInput("10n143w.ACE.zip");
+        testInvalidInput("./ACE/00N015W.ACE.zip");
+        testInvalidInput("./ACE/00N015W.ACE.zip");
+        testInvalidInput("./ACE/readme.txt");
+        testInvalidInput("./ACE/readme.txt.zip");
+        testInvalidInput("./ACE/readme");
+        testInvalidInput("./ACE/");
         testInvalidInput("./");
         testInvalidInput(".");
         testInvalidInput("");
-        testInvalidInput("./SRTM/.hgt");
-        testInvalidInput("./SRTM/.hgt.zip");
-        testInvalidInput("./SRTM/.hgt");
-        testInvalidInput("./SRTM/.hgt.zip");
+        testInvalidInput("./ACE/.hgt");
+        testInvalidInput("./ACE/.hgt.zip");
+        testInvalidInput("./ACE/.hgt");
+        testInvalidInput("./ACE/.hgt.zip");
     }
 
     private void testInvalidInput(final String s) {
@@ -58,7 +58,7 @@ public class SRTMReaderPlugInTest extends TestCase {
 
     public void testThatOtherTypesCannotBeDecoded() throws MalformedURLException {
         assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(null));
-        final URL url = new File("./SRTM/readme.txt").toURL();
+        final URL url = new File("./ACE/readme.txt").toURI().toURL();
         assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(url));
         final Object object = new Object();
         assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(object));
@@ -66,7 +66,7 @@ public class SRTMReaderPlugInTest extends TestCase {
 
     public void testCreateReaderInstance() {
         final ProductReader reader = _plugIn.createReaderInstance();
-        assertTrue(reader instanceof SRTMReader);
+        assertTrue(reader instanceof ACEReader);
     }
 
     public void testGetInputTypes() {
@@ -81,14 +81,14 @@ public class SRTMReaderPlugInTest extends TestCase {
         final String[] formatNames = _plugIn.getFormatNames();
         assertNotNull(formatNames);
         assertTrue(formatNames.length == 1);
-        assertEquals("SRTM", formatNames[0]);
+        assertEquals("ACE", formatNames[0]);
     }
 
     public void testGetDefaultFileExtensions() {
         final String[] defaultFileExtensions = _plugIn.getDefaultFileExtensions();
         assertNotNull(defaultFileExtensions);
         assertTrue(defaultFileExtensions.length == 1);
-        assertEquals(".SRTM", defaultFileExtensions[0]);
+        assertEquals(".ACE", defaultFileExtensions[0]);
     }
 
 }

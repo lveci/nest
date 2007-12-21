@@ -39,7 +39,7 @@ public class ACEReaderPlugIn implements ProductReaderPlugIn {
             final String fileName = file.getName().toLowerCase();
             final String[] extensions = getDefaultFileExtensions();
             for (final String extension : extensions) {
-                if (fileName.endsWith(extension) && !fileName.equals(extension)) {
+                if (fileName.endsWith(extension.toLowerCase()) && !fileName.equals(extension.toLowerCase())) {
                     return DecodeQualification.INTENDED;
                 }
             }
