@@ -20,21 +20,12 @@ public class GraphProcessorVPITest extends TestCase {
 
     public void setUp() throws Exception {
         _gp = new GraphProcessorVPI();
-        _gp.initialize();
+
     }
 
     public void tearDown() throws Exception {
         _gp = null;
     }
 
-    public void testGetOperatorList() {
 
-        Set aliasSet = _gp.GetOperatorList();
-        assertFalse(aliasSet.isEmpty());
-
-        for (Object anAliasSet : aliasSet) {
-            String alias = (String) anAliasSet;
-            System.out.println(alias);
-        }
-    }
 }
