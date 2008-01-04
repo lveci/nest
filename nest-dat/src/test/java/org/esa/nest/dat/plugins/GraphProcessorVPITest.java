@@ -27,5 +27,8 @@ public class GraphProcessorVPITest extends TestCase {
         _gp = null;
     }
 
+    public void testSomething() {
 
+        assertTrue(true);
+    }
 }
