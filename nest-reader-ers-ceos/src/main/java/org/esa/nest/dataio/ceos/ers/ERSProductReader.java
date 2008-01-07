@@ -45,10 +45,10 @@ public class ERSProductReader extends AbstractProductReader {
      */
     @Override
     public void close() throws IOException {
-       // if (_dataDir != null) {
-      //      _dataDir.close();
-     //       _dataDir = null;
-     //   }
+        if (_dataDir != null) {
+            _dataDir.close();
+            _dataDir = null;
+        }
         super.close();
     }
 
@@ -109,8 +109,8 @@ public class ERSProductReader extends AbstractProductReader {
                                           int sourceStepX, int sourceStepY, Band destBand, int destOffsetX,
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
-       /* try {
-            final PalsarImageFile imageFile = _PalsarDir.getImageFile(destBand);
+        try {
+            final ERSImageFile imageFile = _dataDir.getImageFile(destBand);
             imageFile.readBandRasterData(sourceOffsetX, sourceOffsetY,
                                          sourceWidth, sourceHeight,
                                          sourceStepX, sourceStepY,
@@ -121,7 +121,7 @@ public class ERSProductReader extends AbstractProductReader {
             final IOException ioException = new IOException(e.getMessage());
             ioException.initCause(e);
             throw ioException;
-        }       */
+        }
 
     }
 }

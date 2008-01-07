@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.Calendar;
 
 /*
- * $Id: ERSLeaderFile.java,v 1.1 2008-01-04 16:23:10 lveci Exp $
+ * $Id: ERSLeaderFile.java,v 1.2 2008-01-07 15:04:28 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -37,7 +37,7 @@ import java.util.Calendar;
  * This class represents a leader file of an Avnir-2 product.
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2008-01-04 16:23:10 $
+ * @version $Revision: 1.2 $ $Date: 2008-01-07 15:04:28 $
  */
 class ERSLeaderFile {
 
@@ -70,7 +70,6 @@ class ERSLeaderFile {
         _ancillary3Record = new Ancillary3Record(_reader);
 
     }
-
 
     public String getProductLevel() throws IOException,
                                            IllegalCeosFormatException {

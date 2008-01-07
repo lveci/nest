@@ -1,5 +1,5 @@
 /*
- * $Id: BaseSceneHeaderRecord.java,v 1.1 2008-01-04 16:23:10 lveci Exp $
+ * $Id: BaseSceneHeaderRecord.java,v 1.2 2008-01-07 15:04:28 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -112,8 +112,20 @@ public abstract class BaseSceneHeaderRecord extends BaseRecord {
 
     private void readGeneralFields(final CeosFileReader reader) throws IOException,
                                                                        IllegalCeosFormatException {
+        reader.skipBytes(4);  //  dss_rec_seq_num 
         _headerRecordNumber = reader.readI4();
-        reader.skipBytes(4);    // blank
+        reader.skipBytes(16);    // blank
+        _productId = reader.readAn(32);
+        _sceneCenterTime = reader.readAn(32);
+        reader.skipBytes(16); // spare
+        _sceneCenterLat_L1A_L1B1 = reader.readFn(16);
+        _sceneCenterLon_L1A_L1B1 = reader.readFn(16);
+        
+
+
+
+
+        /*reader.skipBytes(4);    // blank
         _productId = reader.readAn(16);
         _uncorrectedSceneId = reader.readAn(16);
         _sceneCenterLat_L1A_L1B1 = reader.readFn(16);
@@ -183,7 +195,7 @@ public abstract class BaseSceneHeaderRecord extends BaseRecord {
 
 //        readField73ToEnd(reader);
 
-        readSpecificFields(reader);
+        readSpecificFields(reader);              */
     }
 
     protected void readSpecificFields(final CeosFileReader reader) throws IOException,

@@ -1,5 +1,5 @@
 /*
- * $Id: BaseImageFileDescriptorRecord.java,v 1.1 2008-01-04 16:23:10 lveci Exp $
+ * $Id: BaseImageFileDescriptorRecord.java,v 1.2 2008-01-07 15:04:28 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -85,26 +85,37 @@ public abstract class BaseImageFileDescriptorRecord extends CommonFileDescriptor
         _numTopBorderLines = reader.readI4();
         _numBottomBorderLines = reader.readI4();
         _imageFormatID = reader.readAn(4);
-        _numRecordsPerLineSingleUnit = reader.readI4();
-        _numRecordsPerLine = reader.readI4();
+        _numRecordsPerLineSingleUnit = (int)reader.readIn(2);
+        _numRecordsPerLine = (int)reader.readIn(2);
         _numBytesCoverIdentifierAndHeader = reader.readI4();
         _numImgDataBytesPerRecAndDummyPix = (int) reader.readIn(8);
         _numBytesOfSuffixDataPerRecord = reader.readI4();
-        _flagPrefixDataRepeat = reader.readAn(4);
 
-        _locatorLineNumber = reader.readAn(8);
-        _locatorBandNumber = reader.readAn(8);
-        _locatorScanStartTime = reader.readAn(8);
-        _locatorLeftDummyPixel = reader.readAn(8);
-        _locatorRightDummyPixel = reader.readAn(8);
+        reader.skipBytes(48);
+        reader.skipBytes(28);
+        reader.skipBytes(32);
 
-        reader.skipBytes(52);   // depends on specific product
-
-        _dataFormatTypeId = reader.readAn(36);
+        _dataFormatTypeId = reader.readAn(28);
         _dataFormatTypeIdCode = reader.readAn(4);
         _numLeftUnusedBitsInPixelData = reader.readI4();
         _numRightUnusedBitsInPixelData = reader.readI4();
-        _maxPixelDataValue = reader.readI4();
+        _maxPixelDataValue = (int)reader.readIn(8);
+
+        //_flagPrefixDataRepeat = reader.readAn(4);
+
+        //_locatorLineNumber = reader.readAn(8);
+        //_locatorBandNumber = reader.readAn(8);
+        //_locatorScanStartTime = reader.readAn(8);
+        //_locatorLeftDummyPixel = reader.readAn(8);
+        //_locatorRightDummyPixel = reader.readAn(8);
+
+        //reader.skipBytes(52);   // depends on specific product
+
+        //_dataFormatTypeId = reader.readAn(36);
+        //_dataFormatTypeIdCode = reader.readAn(4);
+        //_numLeftUnusedBitsInPixelData = reader.readI4();
+        //_numRightUnusedBitsInPixelData = reader.readI4();
+        //_maxPixelDataValue = reader.readI4();
 
         readSpecificFields(reader);
     }

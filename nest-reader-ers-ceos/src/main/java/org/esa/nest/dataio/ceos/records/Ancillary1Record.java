@@ -1,5 +1,5 @@
 /*
- * $Id: Ancillary1Record.java,v 1.1 2008-01-04 16:23:10 lveci Exp $
+ * $Id: Ancillary1Record.java,v 1.2 2008-01-07 15:04:28 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -40,7 +40,7 @@ public abstract class Ancillary1Record extends BaseRecord {
                                                                               IllegalCeosFormatException {
         super(reader, startPos);
 
-        readGeneralFields(reader);
+        //readGeneralFields(reader);
 
         reader.seek(getAbsolutPosition(getRecordLength())); // seek to end of record
     }

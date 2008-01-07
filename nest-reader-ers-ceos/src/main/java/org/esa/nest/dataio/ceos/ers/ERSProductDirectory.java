@@ -66,7 +66,7 @@ class ERSProductDirectory {
         _baseDir = dir;
         _volumeDirectoryFile = new ERSVolumeDirectoryFile(_baseDir);
         _leaderFile = new ERSLeaderFile(createInputStream(_volumeDirectoryFile.getLeaderFileName()));
-        _trailerFile = new ERSTrailerFile(createInputStream(_volumeDirectoryFile.getTrailerFileName()));
+        //_trailerFile = new ERSTrailerFile(createInputStream(_volumeDirectoryFile.getTrailerFileName()));
 
         final String[] imageFileNames = _volumeDirectoryFile.getImageFileNames();
         _imageFiles = new ERSImageFile[imageFileNames.length];
@@ -87,16 +87,16 @@ class ERSProductDirectory {
         product.setFileLocation(_baseDir);
 
         for (int i = 0; i < _imageFiles.length; i++) {
-            final ERSImageFile PalsarImageFile = _imageFiles[i];
-            product.addBand(createBand(PalsarImageFile));
+            final ERSImageFile ImageFile = _imageFiles[i];
+            product.addBand(createBand(ImageFile));
         }
-        product.setStartTime(getUTCScanStartTime());
+        /*product.setStartTime(getUTCScanStartTime());
         product.setEndTime(getUTCScanStopTime());
         product.setDescription(getProductDescription());
 
 
         addGeoCoding(product);
-
+                                */
         addMetaData(product);
 
         return product;
@@ -230,16 +230,16 @@ class ERSProductDirectory {
         _trailerFile = null;
     }
 
-    private Band createBand(final ERSImageFile PalsarImageFile) throws IOException,
+    private Band createBand(final ERSImageFile ImageFile) throws IOException,
                                                                           IllegalCeosFormatException {
-        final Band band = new Band(PalsarImageFile.getBandName(), ProductData.TYPE_UINT8,
+        final Band band = new Band(ImageFile.getBandName(), ProductData.TYPE_UINT8,
                                    _sceneWidth, _sceneHeight);
-        final int bandIndex = PalsarImageFile.getBandIndex();
+        final int bandIndex = ImageFile.getBandIndex();
         band.setSpectralBandIndex(bandIndex - 1);
-        band.setSpectralWavelength(PalsarImageFile.getSpectralWavelength());
-        band.setSpectralBandwidth(PalsarImageFile.getSpectralBandwidth());
-        band.setUnit(PalsarImageFile.getGeophysicalUnit());
-        final double scalingFactor = _leaderFile.getAbsoluteCalibrationGain(bandIndex);
+        band.setSpectralWavelength(ImageFile.getSpectralWavelength());
+        band.setSpectralBandwidth(ImageFile.getSpectralBandwidth());
+        band.setUnit(ImageFile.getGeophysicalUnit());
+      /*  final double scalingFactor = _leaderFile.getAbsoluteCalibrationGain(bandIndex);
         final double scalingOffset = _leaderFile.getAbsoluteCalibrationOffset(bandIndex);
         band.setScalingFactor(scalingFactor);
         band.setScalingOffset(scalingOffset);
@@ -249,17 +249,17 @@ class ERSProductDirectory {
         final float scaledMaxSample = (float) (getMaxSampleValue(histogramBins) * scalingFactor + scalingOffset);
         final ImageInfo imageInfo = new ImageInfo(scaledMinSample, scaledMaxSample, histogramBins);
         band.setImageInfo(imageInfo);
-        band.setDescription("Radiance band " + PalsarImageFile.getBandIndex());
-
+        band.setDescription("Radiance band " + ImageFile.getBandIndex());
+        */
         return band;
     }
 
     private void addMetaData(final Product product) throws IOException,
                                                            IllegalCeosFormatException {
         final MetadataElement metadata = new MetadataElement("SPH");
-        metadata.addElement(_leaderFile.getMapProjectionMetadata());
-        metadata.addElement(_leaderFile.getRadiometricMetadata());
-        metadata.addElement(_leaderFile.getPlatformMetadata());
+        //metadata.addElement(_leaderFile.getMapProjectionMetadata());
+        //metadata.addElement(_leaderFile.getRadiometricMetadata());
+        //metadata.addElement(_leaderFile.getPlatformMetadata());
         addSummaryMetadata(metadata);
 
         product.getMetadataRoot().addElement(metadata);

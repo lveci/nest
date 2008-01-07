@@ -1,5 +1,5 @@
 /*
- * $Id: Ancillary3Record.java,v 1.1 2008-01-04 16:23:10 lveci Exp $
+ * $Id: Ancillary3Record.java,v 1.2 2008-01-07 15:04:28 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -54,7 +54,24 @@ public class Ancillary3Record extends BaseRecord {
         reader.skipBytes(16 * 6); // 6 x orbital element [BLANK]
         _numDataPoints = reader.readI4();
         _firstPointYear = reader.readI4();
-        _firstPointMonth = reader.readI4();
+
+        //tmp
+            _firstPointMonth = 0;
+            _firstPointDay = 0;
+            _firstPointTotalDays = 0;
+            _firstPointTotalSeconds = 0;
+            _intervalTimeBetweenPoints =0;
+            _referenceCoordinateSystem = "";
+            _positionalErrorFlightDirection = 0;
+            _positionalErrorFlightVerticalDirection = 0;
+            _positionalErrorRadiusDirection = 0;
+            _velocityErrorFlightDirection =0;
+            _velocityErrorFlightVerticalDirection = 0;
+            _velocityErrorRadiusDirection =0;
+           _flagLeapSecond = 0;
+           _dataPoints = new DataPoint[28];
+
+     /*   _firstPointMonth = reader.readI4();
         _firstPointDay = reader.readI4();
         _firstPointTotalDays = reader.readI4();
         _firstPointTotalSeconds = reader.readFn(22);
@@ -74,7 +91,7 @@ public class Ancillary3Record extends BaseRecord {
         }
         reader.skipBytes(18);
         _flagLeapSecond = (int) reader.readIn(1);
-        reader.skipBytes(579);
+        reader.skipBytes(579);      */
     }
 
     public String getOrbitalElementsType() {

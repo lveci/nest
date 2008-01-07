@@ -1,5 +1,5 @@
 /*
- * $Id: BaseLeaderFileDescriptorRecord.java,v 1.1 2008-01-04 16:23:10 lveci Exp $
+ * $Id: BaseLeaderFileDescriptorRecord.java,v 1.2 2008-01-07 15:04:28 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -23,10 +23,10 @@ import java.io.IOException;
 
 public class BaseLeaderFileDescriptorRecord extends CommonFileDescriptorRecord {
 
-    private int _numSceneHeaderRecords;
-    private int _sceneHeaderRecordLength;
-    private int _numAncillaryRecords;
-    private int _ancillaryRecordLength;
+    protected int _numSceneHeaderRecords;
+    protected int _sceneHeaderRecordLength;
+    protected int _numAncillaryRecords;
+    protected int _ancillaryRecordLength;
 
     private int _sceneIdFieldLocator;
     private int _sceneIdFieldDataStart;
@@ -86,7 +86,7 @@ public class BaseLeaderFileDescriptorRecord extends CommonFileDescriptorRecord {
         reader.seek(getAbsolutPosition(getRecordLength()));
     }
 
-    private void readGeneralFields(final CeosFileReader reader) throws IOException,
+    protected void readGeneralFields(final CeosFileReader reader) throws IOException,
                                                                        IllegalCeosFormatException {
         _numSceneHeaderRecords = (int) reader.readIn(6);
         _sceneHeaderRecordLength = (int) reader.readIn(6);

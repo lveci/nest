@@ -70,7 +70,7 @@ import java.net.URL;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.5 $ $Date: 2007-12-18 20:15:39 $
+ * @version $Revision: 1.6 $ $Date: 2008-01-07 15:04:28 $
  */
 public final class DatApp extends VisatApp {
 
@@ -251,11 +251,6 @@ public final class DatApp extends VisatApp {
      * VISAT's product manager
      */
     private ProductManager productManager;
-
-    /**
-     * VISAT's scrollable desktop pane
-     */
-    private TabbedDesktopPane desktopPane;
 
     /**
      * The currently selected node within a data product. Can be <code>null</code>
@@ -1943,20 +1938,6 @@ public final class DatApp extends VisatApp {
         } else {
             return null;
         }
-    }
-
-    private JInternalFrame getSelectedInternalFrame() {
-        JInternalFrame selectedFrame = null;
-        if (desktopPane != null) {
-            selectedFrame = desktopPane.getSelectedFrame();
-            if (selectedFrame == null) {
-                final JInternalFrame[] internalFrames = desktopPane.getAllFrames();
-                if (internalFrames.length > 0) {
-                    selectedFrame = internalFrames[internalFrames.length - 1];
-                }
-            }
-        }
-        return selectedFrame;
     }
 
     public void showPreferencesDialog(final String helpId) {
