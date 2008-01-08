@@ -5,58 +5,31 @@ import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.core.runtime.Module;
-import com.bc.ceres.swing.progress.DialogProgressMonitor;
 import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
 import com.bc.layer.LayerModel;
 import com.bc.swing.desktop.TabbedDesktopPane;
 import com.jidesoft.action.CommandBar;
 import com.jidesoft.action.CommandMenuBar;
 import com.jidesoft.action.DockableBarContext;
-import com.jidesoft.action.event.DockableBarAdapter;
-import com.jidesoft.action.event.DockableBarEvent;
 import com.jidesoft.status.*;
 import com.jidesoft.swing.JideBoxLayout;
-import org.esa.beam.dataio.dimap.DimapProductConstants;
-import org.esa.beam.dataio.dimap.DimapProductHelpers;
-import org.esa.beam.dataio.dimap.DimapProductReader;
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.dataio.ProductIOPlugIn;
-import org.esa.beam.framework.dataio.ProductIOPlugInManager;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.help.HelpSys;
-import org.esa.beam.framework.param.ParamException;
-import org.esa.beam.framework.param.ParamExceptionHandler;
-import org.esa.beam.framework.param.Parameter;
 import org.esa.beam.framework.ui.*;
 import org.esa.beam.framework.ui.application.ApplicationPage;
 import org.esa.beam.framework.ui.application.ApplicationWindow;
 import org.esa.beam.framework.ui.application.ToolViewDescriptor;
 import org.esa.beam.framework.ui.command.Command;
-import org.esa.beam.framework.ui.command.CommandManager;
 import org.esa.beam.framework.ui.product.*;
-import org.esa.beam.framework.ui.tool.DrawingEditor;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.util.*;
-import org.esa.beam.util.io.BeamFileChooser;
-import org.esa.beam.util.io.BeamFileFilter;
-import org.esa.beam.util.io.FileUtils;
-import org.esa.beam.util.jai.JAIUtils;
 import org.esa.beam.visat.*;
-import org.esa.beam.visat.actions.ToolAction;
 
 import javax.media.jai.JAI;
 import javax.swing.*;
-import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
-import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyVetoException;
-import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.*;
@@ -70,7 +43,7 @@ import java.net.URL;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.6 $ $Date: 2008-01-07 15:04:28 $
+ * @version $Revision: 1.7 $ $Date: 2008-01-08 17:10:02 $
  */
 public final class DatApp extends VisatApp {
 
@@ -114,50 +87,7 @@ public final class DatApp extends VisatApp {
      * VISAT's plug-in directory
      */
     public static final String APP_DEFAULT_PLUGIN_DIR = SystemUtils.EXTENSION_DIR_NAME;
-    /**
-     * Preferences key for big-product size
-     */
-    public static final String PROPERTY_KEY_BIG_PRODUCT_SIZE = "big.product.size";
-    /**
-     * Preferences key for save product headers (MPH, SPH) or not
-     */
-    public static final String PROPERTY_KEY_SAVE_PRODUCT_HEADERS = "save.product.headers";
-    /**
-     * Preferences key for save product annotations (ADS) or not
-     */
-    public static final String PROPERTY_KEY_SAVE_PRODUCT_HISTORY = "save.product.history";
-    /**
-     * Preferences key for save product annotations (ADS) or not
-     */
-    public static final String PROPERTY_KEY_SAVE_PRODUCT_ANNOTATIONS = "save.product.annotations";
-    /**
-     * Preferences key for geo-location epsilon
-     */
-    public static final String PROPERTY_KEY_GEOLOCATION_EPS = "geolocation.eps";
-    /**
-     * Preferences key for geo-location epsilon
-     */
-    public static final double PROPERTY_DEFAULT_GEOLOCATION_EPS = 1.0e-4;
-    /**
-     * Preferences key for incremental mode at save
-     */
-    public static final String PROPERTY_KEY_SAVE_INCREMENTAL = "save.incremental";
-    /**
-     * Preferences key for low memory size
-     */
-    public static final String PROPERTY_KEY_LOW_MEMORY_LIMIT = "low.memory.limit";
-    /**
-     * Preferences key for the memory capacity of the JAI tile cache in megabytes
-     */
-    public static final String PROPERTY_KEY_JAI_TILE_CACHE_CAPACITY = "jai.tileCache.memoryCapacity";
-    /**
-     * Preferences key for limit for automatic data load
-     */
-    public static final String PROPERTY_KEY_AUTO_LOAD_DATA_LIMIT = "visat.autoload.limit";
-    /**
-     * Default value for limit for automatic data load
-     */
-    public static final int PROPERTY_DEFAULT_AUTO_LOAD_DATA_LIMIT = 512;
+
     /**
      * Preferences key for automatic data unload
      */
@@ -182,91 +112,11 @@ public final class DatApp extends VisatApp {
      * Preferences key for on-line version question
      */
     public static final String PROPERTY_KEY_VERSION_CHECK_DONT_ASK = "visat.versionCheck" + SuppressibleOptionPane.KEY_PREFIX_DONT_SHOW;
-    /**
-     * Preferences key for pixel offset-X for display pixel positions
-     */
-    public static final String PROPERTY_KEY_PIXEL_OFFSET_FOR_DISPLAY_X = "pixel.offset.display.x";
-    /**
-     * Preferences key for pixel offset-Y for display pixel positions
-     */
-    public static final String PROPERTY_KEY_PIXEL_OFFSET_FOR_DISPLAY_Y = "pixel.offset.display.y";
-    /**
-     * Default value for pixel offset's for display pixel positions
-     */
-    public static final float PROPERTY_DEFAULT_PIXEL_OFFSET_FOR_DISPLAY = 0.5f;
-    /**
-     * Preferences key for pixel offset-Y for display pixel positions
-     */
-    public static final String PROPERTY_KEY_PIXEL_OFFSET_FOR_DISPLAY_SHOW_DECIMALS = "pixel.offset.display.show.decimals";
-    /**
-     * Default value for pixel offset's for display pixel positions
-     */
-    public static final boolean PROPERTY_DEFAULT_PIXEL_OFFSET_FOR_DISPLAY_SHOW_DECIMALS = false;
-
-    /**
-     * Location key "browserPane" for plugin comonents
-     */
-    public static final String LOCATION_BROWSERPANE = "browserPane";
-
-    /**
-     * default value for preference save product annotations (ADS) or not
-     */
-    public static final boolean DEFAULT_VALUE_SAVE_PRODUCT_ANNOTATIONS = false;
-    /**
-     * default value for preference incremental mode at save
-     */
-    public static final boolean DEFAULT_VALUE_SAVE_INCREMENTAL = true;
-    /**
-     * default value for preference save product headers (MPH, SPH) or not
-     */
-    public static final boolean DEFAULT_VALUE_SAVE_PRODUCT_HEADERS = true;
-    /**
-     * default value for preference save product history (History) or not
-     */
-    public static final boolean DEFAULT_VALUE_SAVE_PRODUCT_HISTORY = true;
-
-    public static final String ERROR_MESSAGE_PRODUCT_IS_ALREADY_OPENED = "The product is already open.\n"
-                                                                         + "A product can only be opened once."; /*I18N*/
-
-    public static final String ALL_FILES_IDENTIFIER = "ALL_FILES";
 
     /**
      * The one and only visat instance
      */
     private static DatApp instance;
-
-    /**
-     * VISAT's plug-in manager
-     */
-    private VisatPlugInManager plugInManager;
-    /**
-     * All internal frame listeners.
-     */
-    private List<InternalFrameListener> internalFrameListeners;
-    /**
-     * All registered property map listeners.
-     */
-    private List<PropertyMapChangeListener> propertyMapChangeListeners;
-    /**
-     * VISAT's product manager
-     */
-    private ProductManager productManager;
-
-    /**
-     * The currently selected node within a data product. Can be <code>null</code>
-     */
-    private ProductNode selectedNode;
-    /**
-     * VISAT's preferences dialog
-     */
-    private VisatPreferencesDialog preferencesDialog;
-    /**
-     * VISAT's product node listener
-     */
-    private ProductNodeListener productNodeListener;
-    private ParamExceptionHandler preferencesErrorHandler;
-
-    private boolean visatExitConfirmed = false;
 
     // todo use instead
     private VisatApplicationPage applicationPage;
@@ -336,7 +186,7 @@ public final class DatApp extends VisatApp {
             pm.worked(1);
 
             pm.setTaskName("Starting plugins");
-            loadPlugins();
+            plugInManager = new VisatPlugInManager(DatActivator.getInstance().getPlugins());
             plugInManager.startPlugins();
             registerShowToolViewCommands();
             pm.worked(1);
@@ -436,10 +286,6 @@ public final class DatApp extends VisatApp {
         }
     }
 
-    private void loadPlugins() {
-        plugInManager = new VisatPlugInManager(DatActivator.getInstance().getPlugins());
-    }
-
     /**
      * Returns the one and only VISAT application instance (singleton).
      *
@@ -447,49 +293,6 @@ public final class DatApp extends VisatApp {
      */
     public static DatApp getApp() {
         return instance;
-    }
-
-    /**
-     * @return VISAT's preferences dialog
-     */
-    public VisatPreferencesDialog getPreferencesDialog() {
-        return preferencesDialog;
-    }
-
-    /**
-     * @return the scrollable desktop pane used by VISAT
-     */
-    public TabbedDesktopPane getDesktopPane() {
-        return desktopPane;
-    }
-
-
-    /**
-     * Adds an internal frame listener to VISAT. Internal frame listeners are notified each time an internal frame
-     * within VISAT's desktop pane is activated, deactivated,opened or closed.
-     *
-     * @param listener the listener to be added
-     */
-    public void addInternalFrameListener(final InternalFrameListener listener) {
-        internalFrameListeners.add(listener);
-        JInternalFrame[] internalFrames = getAllInternalFrames();
-        for (JInternalFrame internalFrame : internalFrames) {
-            internalFrame.addInternalFrameListener(listener);
-        }
-    }
-
-    /**
-     * Removes an internal frame listener from VISAT. Internal frame listeners are notified each time an internal frame
-     * within VISAT's desktop pane is activated, deactivated,opened or closed.
-     *
-     * @param listener the listener to be removed
-     */
-    public void removeInternalFrameListener(final InternalFrameListener listener) {
-        internalFrameListeners.remove(listener);
-        JInternalFrame[] internalFrames = getAllInternalFrames();
-        for (JInternalFrame internalFrame : internalFrames) {
-            internalFrame.removeInternalFrameListener(listener);
-        }
     }
 
     /**
@@ -520,70 +323,6 @@ public final class DatApp extends VisatApp {
         productsToolView.getProductTree().removeProductTreeListener(listener);
     }
 
-    // todo - use getPreferences().addPropertyChangeListener()
-
-    /**
-     * Adds a property map change listener to VISAT. Property map change listeners are notified each time the VISAT
-     * prferences have been loaded or modified.
-     *
-     * @param listener the listener to be added
-     */
-    public void addPropertyMapChangeListener(final PropertyMapChangeListener listener) {
-        propertyMapChangeListeners.add(listener);
-    }
-
-    // todo - use getPreferences().removePropertyChangeListener()
-
-    /**
-     * Removes a property map change listener from VISAT. Property map change listeners are notified each time the VISAT
-     * prferences have been loaded or modified.
-     *
-     * @param listener the listener to be removed
-     */
-    public void removePropertyMapChangeListener(final PropertyMapChangeListener listener) {
-        propertyMapChangeListeners.remove(listener);
-    }
-
-    /**
-     * Adds the given product to VISAT's internal open product list.
-     *
-     * @param product the product to be added
-     */
-    public void addProduct(final Product product) {
-        getProductManager().addProduct(product);
-        product.addProductNodeListener(productNodeListener);
-    }
-
-    /**
-     * Removes the given product from VISAT's internal open product list.
-     *
-     * @param product the product to be removed
-     */
-    public void removeProduct(final Product product) {
-        getProductManager().removeProduct(product);
-        product.removeProductNodeListener(productNodeListener);
-    }
-
-    /**
-     * Removes and disposes the given product and performs a garbage collection. After calling this method, the product
-     * object cannot be used anymore.
-     *
-     * @param product the product to be disposed
-     *
-     * @see org.esa.beam.framework.datamodel.Product#dispose
-     */
-    public void disposeProduct(final Product product) {
-        removeProduct(product);
-        product.dispose();
-    }
-
-    /**
-     * Returns the product manager which holds the list of currently open products.
-     */
-    public ProductManager getProductManager() {
-        return productManager;
-    }
-
     /**
      * Returns VISAT's product tree browser.
      */
@@ -591,594 +330,8 @@ public final class DatApp extends VisatApp {
         return productsToolView.getProductTree();
     }
 
-    /**
-     * Returns the currently selected product.
-     *
-     * @return the selected product, which can be <code>null</code>
-     */
-    public Product getSelectedProduct() {
-        if (selectedNode instanceof Product) {
-            return (Product) selectedNode;
-        } else if (selectedNode != null) {
-            return selectedNode.getProduct();
-        } else if (getSelectedProductSceneView() != null) {
-            return getSelectedProductSceneView().getProduct();
-        } else if (getSelectedProductMetadataView() != null) {
-            return getSelectedProductMetadataView().getProduct();
-        } else if (getProductManager().getNumProducts() == 1) {
-            return getProductManager().getProductAt(0);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Sets the selected product node to the node displyed in the given internal frame.
-     *
-     * @param frame the internal frame which assigns a product node
-     */
-    public void setSelectedProductNode(final JInternalFrame frame) {
-        setSelectedProductNode(getProductNode(frame));
-    }
-
-    /**
-     * Returns the currently selected node within a product.
-     *
-     * @return the selected node, which can be <code>null</code>
-     */
-    public ProductNode getSelectedProductNode() {
-        return selectedNode;
-    }
-
-    /**
-     * Sets the currently selected node.
-     * <p/>
-     * <p>The method does nothing if the given selected node is already the selected one The method calls
-     * <code>updateState()</code> if the selected node changes.
-     *
-     * @param selectedNode the product node, can be <code>null</code>
-     */
-    public void setSelectedProductNode(final ProductNode selectedNode) {
-        if (this.selectedNode == selectedNode) {
-            return;
-        }
-        // @todo 2 nf/nf - make sure, node CAN be selected
-        this.selectedNode = selectedNode;
-
-        Debug.trace("VisatApp: selected node changed: " + this.selectedNode);
-        updateCurrentDocTitle();
-        getProductTree().select(selectedNode);
-        updateState();
-    }
-
-    /**
-     * Returns the selected drawing editor.
-     *
-     * @return the selected drawing editor, or <code>null</code> if no drawing editor is selected
-     */
-    public DrawingEditor getSelectedDrawingEditor() {
-        final Component contentPane = getContentPaneOfSelectedInternalFrame();
-        if (contentPane instanceof DrawingEditor) {
-            return (DrawingEditor) contentPane;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Returns the selected product node view.
-     *
-     * @return the selected product node view, or <code>null</code> if no product scene view is selected
-     */
-    public ProductNodeView getSelectedProductNodeView() {
-        final Component contentPane = getContentPaneOfSelectedInternalFrame();
-        if (contentPane instanceof ProductNodeView) {
-            return (ProductNodeView) contentPane;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Returns the selected product scene view.
-     *
-     * @return the selected product scene view, or <code>null</code> if no product scene view is selected
-     */
-    public ProductSceneView getSelectedProductSceneView() {
-        final Component contentPane = getContentPaneOfSelectedInternalFrame();
-        if (contentPane instanceof ProductSceneView) {
-            return (ProductSceneView) contentPane;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Returns the selected product metadata view.
-     *
-     * @return the selected product metadata view, or <code>null</code> if no product metadata view is selected
-     */
-    public ProductMetadataView getSelectedProductMetadataView() {
-        final Component contentPane = getContentPaneOfSelectedInternalFrame();
-        if (contentPane instanceof ProductMetadataView) {
-            return (ProductMetadataView) contentPane;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Returns all open (internal) frames VISAT currently has.
-     *
-     * @return the internal frames, never <code>null</code>.
-     */
-    public synchronized JInternalFrame[] getAllInternalFrames() {
-        return desktopPane != null ? desktopPane.getAllFrames() : new JInternalFrame[0];
-    }
-
-    /**
-     * Finds the (internal) frames for the given raster data node.
-     * <p/>
-     * <p>The content panes of the returned frames are always  instances of <code>ProductSceneView</code>.
-     *
-     * @param raster   the raster for which to perform the lookup
-     * @param numBands the number of bands in the view, pass -1 for all view types, 1 for single band type and 3 for RGB
-     *                 views
-     *
-     * @return the internal frames, never <code>null</code>.
-     */
-    public JInternalFrame[] findInternalFrames(final RasterDataNode raster, final int numBands) {
-        final JInternalFrame[] frames = getAllInternalFrames();
-        final ArrayList<JInternalFrame> frameList = new ArrayList<JInternalFrame>(10);
-        for (final JInternalFrame frame : frames) {
-            final Container contentPane = frame.getContentPane();
-            if (contentPane instanceof ProductSceneView) {
-                final ProductSceneView view = (ProductSceneView) contentPane;
-                if ((numBands == -1 || view.getNumRasters() == numBands) &&
-                    view.getRaster() == raster) {
-                    frameList.add(frame);
-                }
-            }
-        }
-        return frameList.toArray(new JInternalFrame[frameList.size()]);
-    }
-
-    /**
-     * Finds the any internal frame for the given raster data node.
-     * <p/>
-     * <p>The content pane of the returned frame is always an instance of <code>ProductSceneView</code>.
-     *
-     * @param raster the raster for which to perform the lookup
-     *
-     * @return the internal frame or <code>null</code> if no frame was found
-     */
-    public JInternalFrame findInternalFrame(final RasterDataNode raster) {
-        final JInternalFrame[] frames = getAllInternalFrames();
-        for (final JInternalFrame frame : frames) {
-            final Container contentPane = frame.getContentPane();
-            if (contentPane instanceof ProductSceneView) {
-                final ProductSceneView view = (ProductSceneView) contentPane;
-                final int numRasters = view.getNumRasters();
-                for (int j = 0; j < numRasters; j++) {
-                    if (view.getRasterAt(j) == raster) {
-                        return frame;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Finds the (internal) frames for the given raster data node.
-     * <p/>
-     * <p>The content pane of the returned frame is always an instance of <code>ProductSceneView</code>.
-     *
-     * @param raster the raster for which to perform the lookup
-     *
-     * @return the internal frames, never <code>null</code>.
-     */
-    public JInternalFrame[] findInternalFrames(final RasterDataNode raster) {
-        final JInternalFrame[] frames = getAllInternalFrames();
-        final ArrayList<JInternalFrame> frameList = new ArrayList<JInternalFrame>(10);
-        for (final JInternalFrame frame : frames) {
-            final Container contentPane = frame.getContentPane();
-            if (contentPane instanceof ProductSceneView) {
-                final ProductSceneView view = (ProductSceneView) contentPane;
-                final int numRasters = view.getNumRasters();
-                for (int j = 0; j < numRasters; j++) {
-                    if (view.getRasterAt(j) == raster) {
-                        frameList.add(frame);
-                    }
-                }
-            }
-        }
-        return frameList.toArray(new JInternalFrame[frameList.size()]);
-    }
-
-    /**
-     * Finds the (internal) frame for the given meta data element.
-     * <p/>
-     * <p>The content pane of the returned frame is always an instance of <code>ProductMetadataView</code>.
-     *
-     * @param metadataElement the metadata element for which to perform the lookup
-     *
-     * @return the internal frame or <code>null</code> if no frame was found
-     */
-    public JInternalFrame findInternalFrame(final MetadataElement metadataElement) {
-        final JInternalFrame[] frames = getAllInternalFrames();
-        if (frames == null) {
-            return null;
-        }
-        for (final JInternalFrame frame : frames) {
-            final Container contentPane = frame.getContentPane();
-            if (contentPane instanceof ProductMetadataView) {
-                final ProductMetadataView view = (ProductMetadataView) contentPane;
-                if (view.getMetadataElement() == metadataElement) {
-                    return frame;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Finds the (internal) frame for the given product node.
-     * <p/>
-     * <p>The content pane of the returned frame is always an instance of <code>ProductMetadataView</code>.
-     *
-     * @param productNode the product node for which to perform the lookup
-     *
-     * @return the internal frame or <code>null</code> if no frame was found
-     */
-    public JInternalFrame findInternalFrame(final ProductNode productNode) {
-        final JInternalFrame[] frames = getAllInternalFrames();
-        if (frames == null) {
-            return null;
-        }
-        for (final JInternalFrame frame : frames) {
-            final Container contentPane = frame.getContentPane();
-            if (contentPane instanceof ProductNodeView) {
-                final ProductNodeView view = (ProductNodeView) contentPane;
-                if (view.getVisibleProductNode() == productNode) {
-                    return frame;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Finds the product associated with the given file.
-     *
-     * @param file the file
-     *
-     * @return the product associated with the given file. or <code>null</code> if no such exists.
-     */
-    public Product getOpenProduct(final File file) {
-        final ProductManager productManager = getProductManager();
-        for (int i = 0; i < productManager.getNumProducts(); i++) {
-            final Product product = productManager.getProductAt(i);
-            final File productFile = product.getFileLocation();
-            if (file.equals(productFile)) {
-                return product;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Closes all (internal) frames associated with the given product.
-     */
-    public synchronized void closeAllAssociatedFrames(final Product product) {
-
-        boolean frameFound;
-        do {
-            frameFound = false;
-            final JInternalFrame[] frames = desktopPane.getAllFrames();
-            if (frames == null) {
-                break;
-            }
-            for (final JInternalFrame frame : frames) {
-                final Container cont = frame.getContentPane();
-                Product frameProduct = null;
-                if (cont instanceof ProductSceneView) {
-                    final ProductSceneView imageView = (ProductSceneView) cont;
-                    frameProduct = imageView.getProduct();
-                } else if (cont instanceof ProductMetadataView) {
-                    final ProductMetadataView metadataView = (ProductMetadataView) cont;
-                    frameProduct = metadataView.getMetadataElement().getProduct();
-                }
-                if (frameProduct != null && frameProduct == product) {
-                    desktopPane.closeFrame(frame);
-                    frameFound = true;
-                    break;
-                }
-            }
-        } while (frameFound);
-    }
-
-    /**
-     * Returns true if the given raster data node is used in any product scene view.
-     *
-     * @param raster
-     *
-     * @return true if raster is used
-     */
-    public boolean hasRasterProductSceneView(final RasterDataNode raster) {
-        final JInternalFrame[] internalFrames = getAllInternalFrames();
-        if (internalFrames != null) {
-            for (final JInternalFrame frame : internalFrames) {
-                final Container contentPane = frame.getContentPane();
-                if (contentPane instanceof ProductSceneView) {
-                    final ProductSceneView productSceneView = (ProductSceneView) contentPane;
-                    final int numRasters = productSceneView.getNumRasters();
-                    for (int j = 0; j < numRasters; j++) {
-                        final RasterDataNode rasterAt = productSceneView.getRasterAt(j);
-                        if (rasterAt == raster) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-
-    public void updateAssociatedViews(final RasterDataNode[] rasters, final ViewUpdateMethod updateMethod) {
-        final JInternalFrame[] internalFrames = getAllInternalFrames();
-        for (final JInternalFrame internalFrame : internalFrames) {
-            final Container contentPane = internalFrame.getContentPane();
-            if (contentPane instanceof ProductSceneView) {
-                final ProductSceneView view = (ProductSceneView) contentPane;
-                boolean updateView = false;
-                for (int j = 0; j < rasters.length && !updateView; j++) {
-                    final RasterDataNode raster = rasters[j];
-                    for (int k = 0; k < view.getNumRasters() && !updateView; k++) {
-                        if (view.getRasterAt(k) == raster) {
-                            updateView = true;
-                        }
-                    }
-                }
-                if (updateView) {
-                    final Runnable doRun = new Runnable() {
-                        public void run() {
-                            updateMethod.updateView(view);
-                        }
-                    };
-                    SwingUtilities.invokeLater(doRun);
-                }
-            }
-        }
-    }
-
-    public void updateImages(final RasterDataNode[] rasters) {
-        updateAssociatedViews(rasters, new ViewUpdateMethod() {
-            public void updateView(final ProductSceneView view) {
-                updateImage(view);
-            }
-        });
-    }
-
-    public void updateImage(final ProductSceneView view) {
-        try {
-            view.updateImage(ProgressMonitor.NULL);
-        } catch (IOException e) {
-            showErrorDialog("An I/O error occured during image update:\n" + e.getMessage()); /*I18N*/
-            Debug.trace(e);
-        }
-    }
-
-    public void updateROIImages(final RasterDataNode[] rasters, final boolean recreateROIImage) {
-        updateAssociatedViews(rasters, new ViewUpdateMethod() {
-            public void updateView(final ProductSceneView view) {
-                updateROIImage(view, recreateROIImage);
-            }
-        });
-    }
-
-    public void updateROIImage(final ProductSceneView view, final boolean recreateROIImage) {
-        final SwingWorker swingWorker = new SwingWorker() {
-            ProgressMonitor pm = new DialogProgressMonitor(getMainFrame(), "Computing ROI Image",
-                                                           Dialog.ModalityType.APPLICATION_MODAL);
-
-            @Override
-            protected Object doInBackground() throws Exception {
-                try {
-                    view.updateROIImage(recreateROIImage, pm);
-                } catch (IOException e) {
-                    Debug.trace(e);
-                    showErrorDialog("Failed to create ROI image.\nAn I/O error occured:\n" + e.getMessage());
-                }
-                return null;  //To change body of implemented methods use File | Settings | File Templates.
-            }
-
-            @Override
-            protected void done() {
-                updateState();
-            }
-
-        };
-        swingWorker.execute();
-    }
-
- /*   @Override
-    public synchronized void shutDown() {
-        final ArrayList<Product> modifiedOrNew = new ArrayList<Product>(5);
-        final Product[] products = getProductManager().getProducts();
-        for (final Product product : products) {
-            final ProductReader reader = product.getProductReader();
-            if (reader != null) {
-                final Object input = reader.getInput();
-                if (input instanceof Product) {
-                    modifiedOrNew.add(product);
-                }
-            }
-            if (!modifiedOrNew.contains(product)
-                && product.isModified()) {
-                modifiedOrNew.add(product);
-            }
-        }
-        if (modifiedOrNew.size() == 0) {
-            super.shutDown();
-        } else {
-            final Product[] modifiedProducts = modifiedOrNew.toArray(new Product[modifiedOrNew.size()]);
-            final StringBuilder message = new StringBuilder();
-            if (modifiedProducts.length == 1) {
-                message.append("The following product has been modified:");
-                message.append("\n    ").append(modifiedProducts[0].getDisplayName());
-                message.append("\n\nDo you want to save this product before exiting DAT?");
-            } else {
-                message.append("The following products have been modified:"); 
-                for (Product modifiedProduct : modifiedProducts) {
-                    message.append("\n    ").append(modifiedProduct.getDisplayName());
-                }
-                message.append("\n\nDo you want to save these products before exiting DAT?");
-            }
-            final int result = showQuestionDialog("Products Modified", message.toString(), true, null);
-            if (result == JOptionPane.YES_OPTION) {
-                setVisatExitConfirmed(true);
-                //Save Products in reverse order is neccessary because derived products must be saved first
-                for (int i = modifiedProducts.length - 1; i >= 0; i--) {
-                    final Product modifiedProduct = modifiedProducts[i];
-                    saveProduct(modifiedProduct);
-                }
-                super.shutDown();
-            } else if (result == JOptionPane.NO_OPTION) {
-                super.shutDown();
-            }
-        }
-    }
-      */
-
     public synchronized Product newProduct() {
         return newProductImpl();
-    }
-
-
-    private void openProductImpl(final File file) {
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        executorService.submit(new OpenProductRunnable(file));
-    }
-
-
-    public synchronized void openProduct(final File file) {
-        openProductImpl(file);
-    }
-
-    /**
-     * Closes the currently selected product.
-     */
-    public synchronized void closeSelectedProduct() {
-        final Product product = getSelectedProductChecked();
-        if (product == null) {
-            return;
-        }
-        closeProduct(product);
-    }
-
-    /**
-     * Closes the given product.
-     *
-     * @param product the product to be closed
-     */
-    public synchronized void closeProduct(final Product product) {
-        closeProductImpl(product, true);
-    }
-
-    /**
-     * Closes the all open products.
-     */
-    public synchronized void closeAllProducts() {
-        final Product[] products = getProductManager().getProducts();
-        for (int i = products.length - 1; i >= 0; i--) {
-            final Product product = products[i];
-            closeProduct(product);
-        }
-    }
-
-    /**
-     * Prompts the user to enter a new file name and saves the currently selected product under this new file name.
-     */
-    public synchronized void saveSelectedProductAs() {
-        final Product product = getSelectedProductChecked();
-        if (product != null) {
-            saveProductAs(product);
-        }
-    }
-
-    /**
-     * Prompts the user to enter a new file name and saves the given product under this new file name.
-     *
-     * @param product the product to be saved
-     */
-    public synchronized void saveProductAs(final Product product) {
-        saveProductAsImpl(product);
-    }
-
-    /**
-     * Saves the currently selected product using its current file path. If it does not have a file name the method call
-     * is equivalent to a call to the <code>{@link #saveSelectedProductAs}</code> method.
-     */
-    public synchronized void saveSelectedProduct() {
-        final Product product = getSelectedProductChecked();
-        if (product != null) {
-            saveProduct(product);
-        }
-    }
-
-    /**
-     * Saves the given product using its current file path. If it does not have a file name the method call is
-     * equivalent to a call to the <code>{@link #saveSelectedProductAs}</code> method.
-     *
-     * @param product the product to be saved
-     */
-    public synchronized void saveProduct(final Product product) {
-        if (!(product.getProductReader() instanceof DimapProductReader) || product.getFileLocation() == null) {
-            saveProductAs(product);
-            return;
-        }
-        final SwingWorker worker = new SwingWorker() {
-
-            @Override
-            protected Object doInBackground() throws Exception {
-                boolean success = false;
-                try {
-                    boolean incremental = DEFAULT_VALUE_SAVE_INCREMENTAL;
-                    final PropertyMap preferences = getPreferences();
-                    if (preferences != null) {
-                        incremental = preferences.getPropertyBool(PROPERTY_KEY_SAVE_INCREMENTAL, incremental);
-                    }
-                    success = saveProductImpl(product, incremental);
-                } finally {
-                    unregisterJob(this);
-                    if (success) {
-                        product.setModified(false);
-                    }
-                }
-                return null;
-            }
-        };
-        registerJob(worker);
-        worker.execute();
-    }
-
-    public synchronized boolean writeProduct(final Product product, final File file, final String formatName) {
-        final SwingWorker worker = new SwingWorker() {
-
-            @Override
-            protected Object doInBackground() throws Exception {
-                if (!writeProductImpl(product, file, formatName, false)) {
-                    // @todo 1 nf/nf - end thread and return false
-                }
-                return null;
-            }
-        };
-        worker.execute();
-        // CAUTION: Here, worker is possibly still working in construct()!!!
-        // @todo 1 nf/nf - check this is NOT always true!
-        return true;
     }
 
     /**
@@ -1297,42 +450,6 @@ public final class DatApp extends VisatApp {
         box.show();
     }
 
-
-    /**
-     * Updates the main frame's document title.
-     */
-    public void updateCurrentDocTitle() {
-
-        final ProductNode productNode = getSelectedProductNode();
-        final JInternalFrame selectedInternalFrame = getSelectedInternalFrame();
-
-        final StringBuffer docTitle = new StringBuffer();
-        if (selectedInternalFrame != null) {
-            docTitle.append(selectedInternalFrame.getTitle());
-        } else if (productNode != null) {
-            docTitle.append(productNode.getName());
-        }
-
-        if (productNode != null) {
-            final Product product = productNode.getProduct();
-            if (product != null) {
-                if (docTitle.length() > 0) {
-                    docTitle.append(" - ");
-                }
-                docTitle.append("[");
-                final File fileLocation = product.getFileLocation();
-                if (fileLocation != null) {
-                    docTitle.append(fileLocation.getPath());
-                } else {
-                    docTitle.append("Not yet saved");
-                }
-                docTitle.append("]");
-            }
-        }
-
-        setCurrentDocTitle(docTitle.toString());
-    }
-
     private Product newProductImpl() {
         if (getProductManager().getNumProducts() == 0) {
             return null;
@@ -1356,190 +473,6 @@ public final class DatApp extends VisatApp {
         return product;
     }
 
-    private boolean closeProductImpl(final Product product, final boolean modificationLostWarning) {
-        final List<String> derivedProductNameList = new LinkedList<String>();
-
-        for (final Product p : getProductManager().getProducts()) {
-            final Set<Product> sourceProductSet = new HashSet<Product>(2);
-            collectSourceProducts(p, sourceProductSet);
-
-            if (sourceProductSet.contains(product)) {
-                derivedProductNameList.add(p.getDisplayName());
-            }
-        }
-
-        if (derivedProductNameList.size() > 0) {
-            final StringBuilder message = new StringBuilder();
-            message.append("Some (new) products are derived from the product you want to close now.\n");
-            message.append(
-                    "You cannot close this product until you have closed (or saved) the following product(s):\n");
-            for (String name : derivedProductNameList) {
-                message.append("  ").append(name).append("\n");
-            }
-            showInfoDialog("Cannot close", message.toString(), null);
-            return false;
-        }
-
-        if (modificationLostWarning) {
-            StringBuilder message = null;
-            if (product.getFileLocation() == null) {
-                message = new StringBuilder("The product\n" +
-                                            "  " + product.getDisplayName() + "\n" +
-                                            "you want to close has not been saved yet.\n");
-            } else if (product.isModified()) {
-                message = new StringBuilder("The product\n" +
-                                            "  " + product.getDisplayName() + "\n" +
-                                            "has been modified.\n");
-            }
-            if (message != null) {
-                message.append("After closing this product all modifications will be lost.\n" +
-                               "\n" +
-                               "Do you really want to close this product now?");
-                final int pressedButton = showQuestionDialog("Product Modified", message.toString(), null);
-                if (pressedButton != JOptionPane.YES_OPTION) {
-                    return false;
-                }
-            }
-        }
-
-        try {
-            UIUtils.setRootFrameWaitCursor(getMainFrame());
-            setStatusBarMessage("Closing product '" + product.getDisplayName() + "'...");
-            closeAllAssociatedFrames(product);
-            unloadAllAssociatedBands(product);
-        } finally {
-            removeProduct(product);
-            updateState();
-            disposeProduct(product);
-            clearStatusBarMessage();
-            UIUtils.setRootFrameDefaultCursor(getMainFrame());
-        }
-        return true;
-    }
-
-    private static void collectSourceProducts(Product product, Set<Product> sourceProductSet) {
-        final ProductReader reader = product.getProductReader();
-        if (reader != null) {
-            final Object input = reader.getInput();
-            if (input instanceof Product) {
-                sourceProductSet.add((Product) input);
-                collectSourceProducts((Product) input, sourceProductSet);
-            } else {
-                if (input instanceof Product[]) {
-                    for (final Product sourceProduct : (Product[]) input) {
-                        sourceProductSet.add(sourceProduct);
-                        collectSourceProducts(sourceProduct, sourceProductSet);
-                    }
-                }
-            }
-        }
-    }
-
-    private synchronized boolean saveProductImpl(final Product product, final boolean incremental) {
-        final File file = product.getFileLocation();
-        if (file.isFile() && !file.canWrite()) {
-            showWarningDialog("The product\n" +
-                              "'" + file.getPath() + "'\n" +
-                              "exists and cannot be overwritten, because it is read only.\n" +
-                              "Please choose another file or remove the write protection."); /*I18N*/
-            return false;
-        }
-
-        boolean saveProductHeaders = DEFAULT_VALUE_SAVE_PRODUCT_HEADERS;
-        boolean saveProductHistory = DEFAULT_VALUE_SAVE_PRODUCT_HISTORY;
-        boolean saveADS = DEFAULT_VALUE_SAVE_PRODUCT_ANNOTATIONS;
-        final PropertyMap preferences = getPreferences();
-        if (preferences != null) {
-            saveProductHeaders = preferences.getPropertyBool(PROPERTY_KEY_SAVE_PRODUCT_HEADERS, saveProductHeaders);
-            saveProductHistory = preferences.getPropertyBool(PROPERTY_KEY_SAVE_PRODUCT_HISTORY, saveProductHistory);
-            saveADS = getPreferences().getPropertyBool(PROPERTY_KEY_SAVE_PRODUCT_ANNOTATIONS, saveADS);
-        }
-        final MetadataElement metadataRoot = product.getMetadataRoot();
-        final ProductNodeList<MetadataElement> metadataElements = new ProductNodeList<MetadataElement>();
-        if (metadataRoot != null) {
-            if (!saveProductHeaders) {
-                MetadataElement element = metadataRoot.getElement("MPH");
-                metadataElements.add(element);
-                metadataRoot.removeElement(element);
-                element = metadataRoot.getElement("SPH");
-                metadataElements.add(element);
-                metadataRoot.removeElement(element);
-            }
-            if (!saveProductHistory) {
-                final MetadataElement element = metadataRoot.getElement("History");
-                metadataElements.add(element);
-                metadataRoot.removeElement(element);
-            }
-            if (!saveADS) {
-                final String[] names = metadataRoot.getElementNames();
-                for (final String name : names) {
-                    //     'processing_request' must not be removed. It would stop mosaic from functioning.
-                    if (!"MPH".equals(name) && !"SPH".equals(name) && !"History".equals(
-                            name) && !"processing_request".equals(name)) {
-                        final MetadataElement element = metadataRoot.getElement(name);
-                        metadataElements.add(element);
-                        metadataRoot.removeElement(element);
-                    }
-                }
-            }
-        }
-
-        final boolean saveOk = writeProductImpl(product, product.getFileLocation(),
-                                                DimapProductConstants.DIMAP_FORMAT_NAME,
-                                                incremental);
-        if (saveOk) {
-            product.setModified(false);
-        } else {
-            if (metadataRoot != null) {
-                final MetadataElement[] elementsArray = new MetadataElement[metadataElements.size()];
-                metadataElements.toArray(elementsArray);
-                for (final MetadataElement metadataElement : elementsArray) {
-                    metadataRoot.addElement(metadataElement);
-                }
-            }
-        }
-        return saveOk;
-    }
-
-    private boolean writeProductImpl(final Product product, final File file, final String formatName,
-                                     final boolean incremental) {
-        Debug.assertNotNull(product);
-
-        boolean status = false;
-        setStatusBarMessage("Writing product '" + product.getDisplayName() + "' to " + file + "...");
-        ProgressMonitor pm = new DialogProgressMonitor(getMainFrame(), "Writing " + formatName + " format",
-                                                       Dialog.ModalityType.APPLICATION_MODAL) {
-            @Override
-            public void setCanceled(boolean canceled) {
-                if (canceled) {
-                    int result = JOptionPane.showConfirmDialog(getMainFrame(),
-                                                               "Cancel saving may lead to an unreadable product.\n\n"
-                                                               + "Do you really want to cancel the save process?",
-                                                               "Cancel Process", JOptionPane.YES_NO_OPTION);
-                    if (result != JOptionPane.YES_OPTION) {
-                        super.setCanceled(false);
-                    }
-                }
-                super.setCanceled(canceled);
-            }
-        };
-        try {
-            ProductIO.writeProduct(product,
-                                   file,
-                                   formatName,
-                                   incremental,
-                                   pm);
-            updateState();
-            status = !pm.isCanceled();
-        } catch (Exception e) {
-            handleUnknownException(e);
-        }
-
-        UIUtils.setRootFrameDefaultCursor(getMainFrame());
-        clearStatusBarMessage();
-        return status;
-    }
-
     private ProductSceneImage createProductSceneImage(final RasterDataNode raster, final String helpId,
                                                       ProgressMonitor pm) {
         Debug.assertNotNull(raster);
@@ -1549,7 +482,7 @@ public final class DatApp extends VisatApp {
 
         final boolean mustLoadData;
         // JAIJAIJAI
-        if (Boolean.getBoolean("beam.imageTiling.enabled")) {
+        if (Boolean.getBoolean("nest.imageTiling.enabled")) {
             mustLoadData = false;
         } else {
             final long dataAutoLoadMemLimit = getDataAutoLoadLimit();
@@ -1669,7 +602,7 @@ public final class DatApp extends VisatApp {
             storageMem += rgbBand.band.getRawStorageSize();
         }
         // JAIJAIJAI
-        if (Boolean.getBoolean("beam.imageTiling.enabled")) {
+        if (Boolean.getBoolean("nest.imageTiling.enabled")) {
             // don't need to load any data!
         } else {
             if (storageMem < dataAutoLoadMemLimit) {
@@ -1749,129 +682,13 @@ public final class DatApp extends VisatApp {
         return metadataView;
     }
 
-    /**
-     * Notify all listeners that have registered interest for notification on VISAT's preferences changes..
-     */
-    private void firePreferencesChanged() {
-        firePropertyMapChanged(getPreferences());
-    }
-
-    /**
-     * Notify all listeners that have registered interest for notification on property map changes.
-     */
-    private void firePropertyMapChanged(final PropertyMap propertyMap) {
-        for (PropertyMapChangeListener l : propertyMapChangeListeners) {
-            l.propertyMapChanged(propertyMap);
-        }
-    }
-
-    private void saveProductAsImpl(final Product product) {
-        final ProductReader reader = product.getProductReader();
-        if (reader != null && !(reader instanceof DimapProductReader)) {
-            final int answer = showQuestionDialog("Save Product As",
-                                                  "In order to save the product\n" +
-                                                  "   " + product.getDisplayName() + "\n" +
-                                                  "it has to be converted to the BEAM-DIMAP format.\n" +
-                                                  "The current product and all of its views will be closed.\n" +
-                                                  "Depending on the product size the conversion also may take a while.\n\n" +
-                                                  "Do you really want to convert the product now?\n",
-                                                  "productConversionRequired"); /*I18N*/
-            if (answer != 0) { // Zero means YES
-                return;
-            }
-        }
-        final FileFilter dimapFileFilter = DimapProductHelpers.createDimapFileFilter();
-        File file;
-        while (true) {
-            final String title = "Save Product As"; /*I18N*/
-            final String extension = DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION;
-            String fileName;
-            if (product.getFileLocation() != null) {
-                fileName = product.getFileLocation().getName();
-            } else {
-                fileName = product.getName();
-                if (!fileName.endsWith(extension)) {
-                    fileName += extension;
-                }
-            }
-            file = showFileSaveDialog(title, false, dimapFileFilter, extension, fileName); /*I18N*/
-            if (file == null) {
-                break;
-            }
-
-            file = FileUtils.ensureExtension(file, extension);
-            file = file.getAbsoluteFile();
-
-            if (file.exists()) {
-                final int answer = showQuestionDialog("Product Exists",
-                                                      "The selected directory already contains a data product with the name\n" +
-                                                      "'" + file.getName() + "'.\n\n" +
-                                                      "Do you really want to overwrite this product?\n", null); /*I18N*/
-                if (answer == 0) { // Zero means YES
-                    break;
-                } else {
-                    continue;
-                }
-            }
-
-            break;
-        }
-
-        if (file == null) {
-            return;
-        }
-
-        final String oldProductName = product.getName();
-        final File oldFile = product.getFileLocation();
-        final File newFile = FileUtils.ensureExtension(file, DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION);
-
-// For DIMAP products, check if file path has really changed
-// if not, just save product
-        if (reader instanceof DimapProductReader && newFile.equals(oldFile)) {
-            saveProduct(product);
-            return;
-        }
-
-        product.setFileLocation(newFile);
-
-        final SwingWorker worker = new SwingWorker() {
-
-            @Override
-            protected Object doInBackground() throws Exception {
-                final boolean incremental = false;
-                final boolean successfullySaved = saveProductImpl(product, incremental);
-                final boolean successfullyClosed;
-                if (successfullySaved) {
-                    successfullyClosed = closeProductImpl(product, false);
-                    if (!isVisatExitConfirmed()) {
-                        openProduct(newFile);
-                    }
-                } else {
-                    successfullyClosed = false;
-                }
-                if (!successfullySaved || !successfullyClosed) {
-                    product.setFileLocation(oldFile);
-                    product.setName(oldProductName);
-                }
-                return null;
-            }
-
-            @Override
-            public void done() {
-                unregisterJob(this);
-            }
-        };
-        registerJob(worker);
-        worker.execute();
-    }
-
     private boolean loadProductRasterDataImpl(final RasterDataNode raster, ProgressMonitor pm) {
         if (raster.hasRasterData()) {
             return true;
         }
 
         setStatusBarMessage("Loading raster data...");
-// Don't show wait cursor here - progress bar should pop-up soon...
+        // Don't show wait cursor here - progress bar should pop-up soon...
 
         boolean state = false;
         try {
@@ -1886,162 +703,8 @@ public final class DatApp extends VisatApp {
         return state;
     }
 
-    @Override
-    protected void applyPreferences() {
-        super.applyPreferences();
-        updateReopenMenu();
-        configureJaiTileCache();
-    }
-
-    private void updateReopenMenu() {
-        final JMenu menu = findMenu("reopen");
-        if (menu == null) {
-            return;
-        }
-        menu.removeAll();
-//        final FileHistory history = new FormatedFileHistory(getFileHistory(), new DimapProductReaderPlugIn());
-        final FileHistory history = getFileHistory();
-        history.initBy(getPreferences());
-        final String[] entries = history.getEntries();
-        if (entries != null) {
-            for (int i = 0; i < entries.length; i++) {
-                final String filePath = entries[i];
-                final JMenuItem item = new JMenuItem((i + 1) + ": " + filePath);
-                item.setMnemonic('1' + i);
-                item.addActionListener(new ActionListener() {
-
-                    public void actionPerformed(final ActionEvent e) {
-                        openProduct(new File(filePath));
-                    }
-                });
-                menu.add(item);
-            }
-        }
-    }
-
-    private void configureJaiTileCache() {
-        final int tileCacheCapacity = getPreferences().getPropertyInt(PROPERTY_KEY_JAI_TILE_CACHE_CAPACITY, 512);
-        JAIUtils.setDefaultTileCacheCapacity(tileCacheCapacity);
-    }
-
-    @Override
-    protected void historyPush(final File file) {
-        super.historyPush(file);
-        updateReopenMenu();
-    }
-
-
-    private Component getContentPaneOfSelectedInternalFrame() {
-        final JInternalFrame selectedFrame = getSelectedInternalFrame();
-        if (selectedFrame != null) {
-            return selectedFrame.getContentPane();
-        } else {
-            return null;
-        }
-    }
-
-    public void showPreferencesDialog(final String helpId) {
-        if (preferencesDialog == null) {
-            getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            preferencesDialog = new VisatPreferencesDialog(this, helpId);
-            getMainFrame().setCursor(Cursor.getDefaultCursor());
-        }
-        if (preferencesErrorHandler == null) {
-            preferencesErrorHandler = new ParamExceptionHandler() {
-                public boolean handleParamException(final ParamException e) {
-                    final Parameter parameter = e.getParameter();
-                    final Object defaultValue = parameter.getProperties().getDefaultValue();
-                    showErrorDialog("Error in Preferences",
-                                    "A problem has been detected in VISAT's preference settings:\n\n"
-                                    + "Value for parameter '" + parameter.getName() + "' is invalid.\n"
-                                    + "Its default value '" + defaultValue + "' will be used instead.");
-                    try {
-                        parameter.setDefaultValue();
-                    } catch (IllegalArgumentException e1) {
-                        Debug.trace(e1);
-                    }
-                    return true;
-                }
-            };
-        }
-        preferencesDialog.setConfigParamValues(getPreferences(), preferencesErrorHandler);
-        if (preferencesDialog.show() == ModalDialog.ID_OK) {
-            final PreferencesChangeChecker checker = new PreferencesChangeChecker();
-            getPreferences().addPropertyChangeListener(checker);
-            preferencesDialog.getConfigParamValues(getPreferences());
-            getPreferences().removePropertyChangeListener(checker);
-            if (checker.arePropertiesChanged()) {
-                configureJaiTileCache();
-                applyLookAndFeelPreferences();
-// @todo 1 nf/nf - extract layer properties dialog from VISAT preferences
-// note: the following line is necessary in order to transfer layer proerties from
-// preferences to current product scene view. Only the current view is affected by
-// the preferences change.
-                applyProductSceneViewlPreferences();
-                firePreferencesChanged();
-            }
-        }
-    }
-
-    private void applyProductSceneViewlPreferences() {
-        final ProductSceneView selectedProductSceneView = getSelectedProductSceneView();
-        if (selectedProductSceneView != null) {
-            selectedProductSceneView.setLayerProperties(getPreferences());
-        }
-    }
-
-    /**
-     * Called after the look & feel has changed. The method simply calls <code>SwingUtilities.updateComponentTreeUI(getMainFrame())</code>
-     * in order to reflect changes of the look-and-feel.
-     * <p/>
-     * <p>You might want to override this method in order to call <code>SwingUtilities.updateComponentTreeUI()</code> on
-     * other top-level containers beside the main frame.
-     */
-    @Override
-    protected void updateComponentTreeUI() {
-        super.updateComponentTreeUI();
-        if (preferencesDialog != null) {
-            SwingUtilities.updateComponentTreeUI(preferencesDialog.getJDialog());
-        }
-        plugInManager.updatePluginsComponentTreeUI();
-        getCommandManager().updateComponentTreeUI();
-    }
-
-    private Product getSelectedProductChecked() {
-        final Product product = getSelectedProduct();
-        if (product == null) {
-            showInfoDialog("No data product selected.", null); /*I18N*/
-        }
-        return product;
-    }
-
-    private void addRegisteredInternalFrameListeners(final JInternalFrame frame) {
-        for (InternalFrameListener l : internalFrameListeners) {
-            frame.addInternalFrameListener(l);
-        }
-    }
-
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // UI Creation
-
-    /**
-     * Overrides the base class version in order to create and configure the VISAT's main pane.
-     */
-    @Override
-    protected JComponent createMainPane() {
-
-        final JMenuBar menuBar = getMainFrame().getJMenuBar();
-        JMenu windowMenu = null;
-        for (int i = 0; i < menuBar.getComponentCount(); i++) {
-            final Component component = menuBar.getComponent(i);
-            if (component instanceof JMenu && "window".equals(component.getName())) {
-                windowMenu = (JMenu) menuBar.getComponent(i);
-            }
-        }
-        desktopPane.setWindowMenu(windowMenu);
-
-        return desktopPane;
-    }
 
     /**
      * Overrides the base class version in order to create a tool bar for VISAT.
@@ -2107,7 +770,7 @@ public final class DatApp extends VisatApp {
         // context of action in module.xml used as key
         final CommandBar toolBar = new CommandBar("toolsToolBar");
         toolBar.setTitle("Tools");
-        toolBar.addDockableBarListener(new ToolBarListener());
+        toolBar.addDockableBarListener(new VisatApp.ToolBarListener());
 
         addCommandsToToolBar(toolBar, new String[]{
                 // These IDs are defined in the module.xml
@@ -2132,12 +795,11 @@ public final class DatApp extends VisatApp {
         return toolBar;
     }
 
-
     private CommandBar createViewsToolBar() {
         // context of action in module.xml used as key
         final CommandBar toolBar = new CommandBar("viewsToolBar");
         toolBar.setTitle("Views");
-        toolBar.addDockableBarListener(new ToolBarListener());
+        toolBar.addDockableBarListener(new VisatApp.ToolBarListener());
 
         ToolViewDescriptor[] toolViewDescriptors = DatActivator.getInstance().getToolViewDescriptors();
         List<String> viewCommandIdList = new ArrayList<String>(5);
@@ -2170,116 +832,6 @@ public final class DatApp extends VisatApp {
     }
 
     /**
-     * Creates a standard status bar for this application.
-     */
-    @Override
-    protected com.jidesoft.status.StatusBar createStatusBar() {
-        final com.jidesoft.status.StatusBar statusBar = new com.jidesoft.status.StatusBar();
-
-        final LabelStatusBarItem message = new LabelStatusBarItem(MESSAGE_STATUS_BAR_ITEM_KEY);
-        Debug.trace(message.getItemName());
-        message.setText("Ready.");
-        message.setPreferredWidth(600);
-        message.setAlignment(JLabel.LEFT);
-        message.setToolTip("Displays status messages.");
-        statusBar.add(message, JideBoxLayout.FLEXIBLE);
-
-        final LabelStatusBarItem position = new LabelStatusBarItem("Position");
-        Debug.trace(position.getItemName());
-        position.setName("Position");
-        position.setText("");
-        position.setPreferredWidth(80);
-        position.setAlignment(JLabel.CENTER);
-        position.setToolTip("Displays pixel position");
-        statusBar.add(position, JideBoxLayout.FLEXIBLE);
-
-        final OvrInsStatusBarItem ovr = new OvrInsStatusBarItem();
-        Debug.trace(ovr.getItemName());
-        ovr.setPreferredWidth(50);
-        ovr.setAlignment(JLabel.CENTER);
-        statusBar.add(ovr, JideBoxLayout.FLEXIBLE);
-
-        final TimeStatusBarItem time = new TimeStatusBarItem();
-        Debug.trace(time.getItemName());
-        time.setPreferredWidth(80);
-        time.setUpdateInterval(1000);
-        time.setAlignment(JLabel.CENTER);
-        statusBar.add(time, JideBoxLayout.FLEXIBLE);
-
-        final MemoryStatusBarItem gc = new MemoryStatusBarItem();
-        Debug.trace(gc.getItemName());
-        gc.setPreferredWidth(100);
-        gc.setUpdateInterval(1000);
-        gc.setGcIcon(UIUtils.loadImageIcon("icons/GC18.gif"));
-        statusBar.add(gc, JideBoxLayout.FLEXIBLE);
-
-        final ResizeStatusBarItem resize = new ResizeStatusBarItem();
-        statusBar.add(resize, JideBoxLayout.FIX);
-
-        // JAIJAIJAI
-        if (Boolean.getBoolean("beam.imageTiling.enabled")) {
-            hookJaiTileCacheFlush(gc);
-        }
-
-        return statusBar;
-    }
-
-    private static void hookJaiTileCacheFlush(MemoryStatusBarItem gc) {
-        AbstractButton button = findButtonForIcon(gc, gc.getGcIcon());
-        if (button != null) {
-            button.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    JAI.getDefaultInstance().getTileCache().flush();
-                    Debug.trace("JAI tile cache flushed!");
-                }
-            });
-        }
-    }
-
-    private static AbstractButton findButtonForIcon(Container container, Icon icon) {
-        Component[] components = container.getComponents();
-        for (Component component : components) {
-            if (component instanceof AbstractButton) {
-                AbstractButton button = (AbstractButton) component;
-                if (button.getIcon() == icon) {
-                    return button;
-                }
-            }
-        }
-        for (Component component : components) {
-            if (component instanceof Container) {
-                AbstractButton button = findButtonForIcon((Container) component, icon);
-                if (button != null) {
-                    return button;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Creates a tool button for the tool-command with the given command ID.
-     * <p/>
-     * <p>A command with the given ID must already been registered using any of the <code>createToolCommand</code>
-     * methods of VisatApp, or directly using the <code>createToolCommand</code> method of VISAT's {@link
-     * CommandManager}. Otherwise an {@link IllegalArgumentException} will be thrown.
-     * <p/>
-     * <p>The new button is which is automatically added to VISAT's tool button group to ensure that a only single tool
-     * is selected.
-     *
-     * @param commandID the command ID
-     *
-     * @return a tool button which is automatically added to VISAT's tool button group.
-     *
-     * @see #getCommandManager
-     */
-    public AbstractButton createToolButton(final String commandID) {
-        final Command command = getCommandManager().getCommand(commandID);
-        Guardian.assertNotNull("command", command);
-        return command.createToolBarButton();
-    }
-
-    /**
      * Overrides the base class version in order to creates the menu bar for VISAT.
      */
     @Override
@@ -2306,109 +858,4 @@ public final class DatApp extends VisatApp {
         return createProductMetadataViewImpl(element);
     }
 
-    /**
-     * Creates an internal frame and adds it to VISAT's desktop.
-     *
-     * @param title   a frame title
-     * @param icon    a frame icon, can be null
-     * @param content the frame's content pane
-     *
-     * @return the newly created frame
-     */
-    public synchronized JInternalFrame createInternalFrame(final String title, final Icon icon,
-                                                           final JComponent content, final String helpId) {
-        Debug.assertNotNull(desktopPane);
-
-        final JInternalFrame frame = new JInternalFrame(title, true, true, true, true) {
-            @Override
-            public void dispose() {
-                super.dispose();
-                // Note that super.dispose() does not remove registered InternalFrameListener! Why?
-                InternalFrameListener[] listeners = getListeners(InternalFrameListener.class);
-                for (InternalFrameListener l : listeners) {
-                    removeInternalFrameListener(l);
-                }
-            }
-        };
-
-        if (helpId != null) {
-            HelpSys.enableHelpKey(frame, helpId);
-        }
-
-        frame.addInternalFrameListener(new VisatIFL());
-        addRegisteredInternalFrameListeners(frame);
-
-        if (icon != null) {
-            frame.setFrameIcon(icon);
-        }
-        if (content != null) {
-            frame.setContentPane(content);
-        }
-        frame.setVisible(true);
-        frame.setLocation(0, 0);
-        if (content != null && content.getPreferredSize() != null) {
-            frame.pack();
-        } else {
-            frame.setSize(640, 480);
-        }
-
-// Resize frame so that it completely fits into desktopPane
-        final Rectangle desktopBounds = new Rectangle(desktopPane.getDesktopPane().getSize());
-        if (!desktopBounds.isEmpty()) {
-            frame.setBounds(frame.getBounds().intersection(desktopBounds));
-        }
-
-        desktopPane.addFrame(frame);
-
-// force frame to be activated so that the frame listeners are informed
-        try {
-            frame.setSelected(true);
-        } catch (PropertyVetoException ignored) {
-            // ok
-        }
-        updateState();
-        return frame;
-    }
-
-    private ProductNodeListener createProductNodeListener() {
-        return new ProductNodeListenerAdapter() {
-            @Override
-            public void nodeChanged(final ProductNodeEvent event) {
-                if (event.getPropertyName().equalsIgnoreCase(Product.PROPERTY_NAME_NAME)) {
-                    final ProductNode sourceNode = event.getSourceNode();
-                    if (getSelectedProductNode() == sourceNode) {
-                        updateCurrentDocTitle();
-                    }
-                }
-
-            }
-        };
-    }
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Nested classes & Interfaces
-
-    /**
-     * A method used to update a <code>ProductSceneView</code>.
-     */
-    public static interface ViewUpdateMethod {
-
-        void updateView(ProductSceneView view);
-    }
-
-    private boolean isVisatExitConfirmed() {
-        return visatExitConfirmed;
-    }
-
-    public void setVisatExitConfirmed(final boolean visatExitConfirmed) {
-        this.visatExitConfirmed = visatExitConfirmed;
-    }
-
-    private class ToolBarListener extends DockableBarAdapter {
-
-        @Override
-        public void dockableBarHidden(DockableBarEvent dockableBarEvent) {
-            updateState();
-        }
-    }
 }
