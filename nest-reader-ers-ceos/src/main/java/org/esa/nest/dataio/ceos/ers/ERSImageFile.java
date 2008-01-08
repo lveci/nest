@@ -11,7 +11,7 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
 /*
- * $Id: ERSImageFile.java,v 1.1 2008-01-04 16:23:10 lveci Exp $
+ * $Id: ERSImageFile.java,v 1.2 2008-01-08 15:12:54 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,7 +32,7 @@ import java.io.IOException;
  * This class represents an image file of an Avnir-2 product.
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2008-01-04 16:23:10 $
+ * @version $Revision: 1.2 $ $Date: 2008-01-08 15:12:54 $
  */
 class ERSImageFile {
 
@@ -138,25 +138,33 @@ class ERSImageFile {
                                    final ProductData destBuffer, ProgressMonitor pm) throws IOException,
                                                                                             IllegalCeosFormatException {
 
-        final int sourceMinY = sourceOffsetY;
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
+        ImageRecord imageRecord;
 
-
-        pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceMinY);
+        pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceOffsetY);
         try {
-            final byte[] srcLine = new byte[sourceWidth];
-            final byte[] destLine = new byte[destWidth];
-            for (int y = sourceMinY; y <= sourceMaxY; y += sourceStepY) {
+            final int[] srcLine = new int[sourceWidth];
+            final int[] destLine = new int[destWidth];
+            for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
                 }
+
                 // Read source line
-                readSourceLine(y, sourceOffsetX, srcLine);
-                copyLine(srcLine, destLine, sourceStepX);
+                imageRecord = getImageRecord(y);
+                _ceosReader.seek(imageRecord.getImageDataStart() + sourceOffsetX);
+                _ceosReader.readB2(srcLine);
 
                 // Copy source line into destination buffer
-                final int currentLineIndex = (y - sourceMinY) * destWidth;
-                System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+                final int currentLineIndex = (y - sourceOffsetY) * destWidth;
+                if (sourceStepX == 1) {
+
+                    System.arraycopy(srcLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+                } else {
+                    copyLine(srcLine, destLine, sourceStepX);
+
+                    System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+                }
 
                 pm.worked(1);
             }
@@ -164,13 +172,6 @@ class ERSImageFile {
             pm.done();
         }
 
-    }
-
-    private void readSourceLine(final int y, final int sourceOffsetX, final byte[] srcLine) throws IOException,
-                                                                                                   IllegalCeosFormatException {
-        final ImageRecord imageRecord = getImageRecord(y);
-        _ceosReader.seek(imageRecord.getImageDataStart() + sourceOffsetX);
-        _ceosReader.readB1(srcLine);
     }
 
     private ImageRecord getImageRecord(final int line) throws IOException,
@@ -182,14 +183,10 @@ class ERSImageFile {
         return _imageRecords[line];
     }
 
-    private void copyLine(final byte[] srcLine, final byte[] destLine,
+    private void copyLine(final int[] srcLine, final int[] destLine,
                           final int sourceStepX) {
-        if (sourceStepX == 1) {
-            System.arraycopy(srcLine, 0, destLine, 0, destLine.length);
-        } else {
-            for (int x = 0, i = 0; x < destLine.length; x++, i += sourceStepX) {
-                destLine[x] = srcLine[i];
-            }
+        for (int x = 0, i = 0; x < destLine.length; x++, i += sourceStepX) {
+            destLine[x] = srcLine[i];
         }
     }
 
