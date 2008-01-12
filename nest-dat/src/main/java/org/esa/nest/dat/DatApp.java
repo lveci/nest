@@ -11,8 +11,6 @@ import com.bc.swing.desktop.TabbedDesktopPane;
 import com.jidesoft.action.CommandBar;
 import com.jidesoft.action.CommandMenuBar;
 import com.jidesoft.action.DockableBarContext;
-import com.jidesoft.status.*;
-import com.jidesoft.swing.JideBoxLayout;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.ui.*;
 import org.esa.beam.framework.ui.application.ApplicationPage;
@@ -24,12 +22,9 @@ import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.util.*;
 import org.esa.beam.visat.*;
 
-import javax.media.jai.JAI;
 import javax.swing.*;
 import javax.swing.event.InternalFrameListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.*;
@@ -43,7 +38,7 @@ import java.net.URL;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.7 $ $Date: 2008-01-08 17:10:02 $
+ * @version $Revision: 1.8 $ $Date: 2008-01-11 22:19:29 $
  */
 public final class DatApp extends VisatApp {
 

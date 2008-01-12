@@ -33,6 +33,9 @@ public class GraphProcessorDialog {
     String sourcePath = "\\\\fileserver\\projects\\nest\\nest\\ESA Data\\RADAR\\DIMAP\\small_data.dim";
     String destPath = "c:\\small_data.dim";
 
+    //TabbedPanel
+    private static final ImageIcon OpIcon = UIUtils.loadImageIcon("icons/Gears20.gif");
+
     public GraphProcessorDialog() {
 
          graphEx = new GraphExecuter();
@@ -41,7 +44,7 @@ public class GraphProcessorDialog {
 
     public JFrame getFrame() {
         if (mainFrame == null) {
-            mainFrame = new JFrame("Graph Processor");
+            mainFrame = new JFrame("Graph Builder");
             mainFrame.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
             initUI();
 
@@ -56,6 +59,31 @@ public class GraphProcessorDialog {
 
         operatorList.setEnabled(enable);
     }
+
+    private JTabbedPane CreateJTabbedPane() {
+
+		JTabbedPane tabbedPane = new JTabbedPane();
+		JPanel jplInnerPanel1 = createInnerPanel("Tab 1 Contains Tooltip and Icon");
+        tabbedPane.addTab("One", OpIcon, jplInnerPanel1, "Tab 1");
+		tabbedPane.setSelectedIndex(0);
+		JPanel jplInnerPanel2 = createInnerPanel("Tab 2 Contains Icon only");
+		tabbedPane.addTab("Two", OpIcon, jplInnerPanel2);
+		JPanel jplInnerPanel3 = createInnerPanel("Tab 3 Contains Tooltip and Icon");
+		tabbedPane.addTab("Three", OpIcon, jplInnerPanel3, "Tab 3");
+		JPanel jplInnerPanel4 = createInnerPanel("Tab 4 Contains Text only");
+		tabbedPane.addTab("Four", jplInnerPanel4);
+
+        return tabbedPane;
+	}
+
+    private JPanel createInnerPanel(String text) {
+		JPanel jplPanel = new JPanel();
+		JLabel jlbDisplay = new JLabel(text);
+		jlbDisplay.setHorizontalAlignment(JLabel.CENTER);
+		jplPanel.setLayout(new GridLayout(1, 1));
+		jplPanel.add(jlbDisplay);
+		return jplPanel;
+	}
 
     private void initUI() {
         mainPanel = new JPanel(new BorderLayout(4, 4));
@@ -72,7 +100,10 @@ public class GraphProcessorDialog {
         headerPanel = new JPanel();
 
         northPanel.add(headerPanel, BorderLayout.CENTER);
-        southPanel.add(statusLabel, BorderLayout.CENTER);
+
+        JTabbedPane tabbedPanel = CreateJTabbedPane();
+        southPanel.add(tabbedPanel, BorderLayout.CENTER);
+        southPanel.add(statusLabel, BorderLayout.WEST);
         southPanel.add(progressPanel, BorderLayout.EAST);
 
         mainPanel.add(northPanel, BorderLayout.NORTH);
