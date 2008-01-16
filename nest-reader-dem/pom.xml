@@ -11,8 +11,8 @@
 
     <groupId>org.esa.nest</groupId>
     <artifactId>nest-reader-dem</artifactId>
-    <name>SRTM DEM Reader</name>
-    <version>0.1</version>
+    <name>NEST DEM Reader</name>
+    <version>1.0-SNAPSHOT</version>
 	
     <packaging>jar</packaging>
 

@@ -9,9 +9,9 @@ import org.esa.beam.visat.VisatApp;
 
 import javax.swing.*;
 
-public class GraphProcessorVPI extends AbstractVisatPlugIn {
+public class GraphBuilderVPI extends AbstractVisatPlugIn {
 
-    private GraphProcessorDialog _gpDialog;
+    private GraphBuilderDialog _gpDialog;
     private JFrame _pgFrame;
 
     /**
@@ -27,7 +27,7 @@ public class GraphProcessorVPI extends AbstractVisatPlugIn {
 
                 if (_pgFrame == null) {
                     if(_gpDialog == null) {
-                        _gpDialog = new GraphProcessorDialog();
+                        _gpDialog = new GraphBuilderDialog();
                     }
                     _pgFrame = _gpDialog.getFrame();
                     _pgFrame.setIconImage(visatApp.getMainFrame().getIconImage());
@@ -37,7 +37,7 @@ public class GraphProcessorVPI extends AbstractVisatPlugIn {
         };
         CommandManager commandManager = visatApp.getCommandManager();
         ExecCommand runGraphCommand = commandManager.createExecCommand("runGraphProcessing", runGraphAction);
-        runGraphCommand.setText("Graph Processing");
+        runGraphCommand.setText("Graph Builder");
         runGraphCommand.setShortDescription("Starts Graph Processing");
         runGraphCommand.setParent("tools");
 

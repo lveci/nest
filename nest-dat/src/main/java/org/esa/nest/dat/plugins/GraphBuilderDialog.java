@@ -13,7 +13,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.Set;
 
-public class GraphProcessorDialog {
+public class GraphBuilderDialog {
 
     private static final String processCommand = "process";
     private static final ImageIcon processIcon = UIUtils.loadImageIcon("icons/Gears20.gif");
@@ -36,7 +36,7 @@ public class GraphProcessorDialog {
     //TabbedPanel
     private static final ImageIcon OpIcon = UIUtils.loadImageIcon("icons/Gears20.gif");
 
-    public GraphProcessorDialog() {
+    public GraphBuilderDialog() {
 
          graphEx = new GraphExecuter();
          gpfOperatorSet = graphEx.GetOperatorList();
@@ -87,7 +87,8 @@ public class GraphProcessorDialog {
 
     private void initUI() {
         mainPanel = new JPanel(new BorderLayout(4, 4));
-        final JPanel southPanel = new JPanel(new BorderLayout(4, 4));
+
+        // north panel
         final JPanel northPanel = new JPanel(new BorderLayout(4, 4));
         operatorList = new JComboBox();
         setComponentName(operatorList, "operatorList");
@@ -95,26 +96,38 @@ public class GraphProcessorDialog {
         progressPanel = new JPanel();
         processButton = new JButton();
         setComponentName(processButton, "processButton");
-        progressBar = new JProgressBar();
-        setComponentName(progressBar, "progressBar");
         headerPanel = new JPanel();
 
-        northPanel.add(headerPanel, BorderLayout.CENTER);
+        northPanel.add(headerPanel, BorderLayout.NORTH);
 
+        GraphPanel graphPanel = new GraphPanel(graphEx);
+        graphPanel.setBackground(Color.WHITE);
+        graphPanel.setPreferredSize(new Dimension(500,500));
+        JScrollPane scrollPane = new JScrollPane(graphPanel);
+        scrollPane.setPreferredSize(new Dimension(300,300));
+        northPanel.add(scrollPane, BorderLayout.CENTER);
+
+        mainPanel.add(northPanel, BorderLayout.NORTH);
+
+        // south panel
+        final JPanel southPanel = new JPanel(new BorderLayout(4, 4));
         JTabbedPane tabbedPanel = CreateJTabbedPane();
         southPanel.add(tabbedPanel, BorderLayout.CENTER);
         southPanel.add(statusLabel, BorderLayout.WEST);
         southPanel.add(progressPanel, BorderLayout.EAST);
 
-        mainPanel.add(northPanel, BorderLayout.NORTH);
         mainPanel.add(southPanel, BorderLayout.SOUTH);
         mainPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
+        // progress Bar
+        progressBar = new JProgressBar();
+        setComponentName(progressBar, "progressBar");
         progressBar = new JProgressBar();
         progressBar.setStringPainted(true);
         progressPanel.setLayout(new BorderLayout());
         progressPanel.add(progressBar);
         progressPanel.setVisible(false);
+        // todo progressPanel
 
         operatorList.addItemListener(new OperatorListChangeHandler());
 

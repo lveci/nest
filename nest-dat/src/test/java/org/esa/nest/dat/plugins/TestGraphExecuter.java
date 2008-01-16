@@ -1,25 +1,24 @@
 package org.esa.nest.dat.plugins;
 
 import junit.framework.TestCase;
-import java.util.Set;
 
 /**
- * GraphProcessorVPI Tester.
+ * GraphBuilderVPI Tester.
  *
  * @author <Authors name>
  * @since <pre>12/21/2007</pre>
  * @version 1.0
  */
-public class GraphProcessorVPITest extends TestCase {
+public class TestGraphExecuter extends TestCase {
 
-    private GraphProcessorVPI _gp;
+    private GraphBuilderVPI _gp;
 
-    public GraphProcessorVPITest(String name) {
+    public TestGraphExecuter(String name) {
         super(name);
     }
 
     public void setUp() throws Exception {
-        _gp = new GraphProcessorVPI();
+        _gp = new GraphBuilderVPI();
 
     }
 

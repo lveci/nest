@@ -38,7 +38,7 @@ import java.net.URL;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.8 $ $Date: 2008-01-11 22:19:29 $
+ * @version $Revision: 1.9 $ $Date: 2008-01-16 16:48:44 $
  */
 public final class DatApp extends VisatApp {
 
@@ -477,7 +477,7 @@ public final class DatApp extends VisatApp {
 
         final boolean mustLoadData;
         // JAIJAIJAI
-        if (Boolean.getBoolean("nest.imageTiling.enabled")) {
+        if (Boolean.getBoolean("beam.imageTiling.enabled")) {
             mustLoadData = false;
         } else {
             final long dataAutoLoadMemLimit = getDataAutoLoadLimit();
@@ -597,7 +597,7 @@ public final class DatApp extends VisatApp {
             storageMem += rgbBand.band.getRawStorageSize();
         }
         // JAIJAIJAI
-        if (Boolean.getBoolean("nest.imageTiling.enabled")) {
+        if (Boolean.getBoolean("beam.imageTiling.enabled")) {
             // don't need to load any data!
         } else {
             if (storageMem < dataAutoLoadMemLimit) {
