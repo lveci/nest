@@ -2,18 +2,38 @@ package org.esa.nest.dat.plugins;
 
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.binding.ValueContainerFactory;
+import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.swing.SwingBindingContext;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import org.esa.beam.framework.ui.UIUtils;
+import org.esa.beam.framework.ui.TableLayout;
+import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.framework.gpf.graph.GraphException;
+import org.esa.beam.framework.gpf.graph.Node;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.ui.ParametersPane;
+import org.esa.beam.framework.gpf.ui.SourceProductSelector;
+import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
+import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
+import org.esa.nest.dat.DatContext;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Set;
+import java.util.Observer;
+import java.util.HashMap;
+import java.util.Map;
 
-public class GraphBuilderDialog {
+/**
+ *  Provides the User Interface for creating, loading and saving Graphs
+ */
+public class GraphBuilderDialog implements Observer {
 
     private static final String processCommand = "process";
     private static final ImageIcon processIcon = UIUtils.loadImageIcon("icons/Gears20.gif");
@@ -29,16 +49,20 @@ public class GraphBuilderDialog {
 
     private GraphExecuter graphEx;
     private Set gpfOperatorSet;
+    private Map<String, Object> parameterMap;
 
+    // tmp
     String sourcePath = "\\\\fileserver\\projects\\nest\\nest\\ESA Data\\RADAR\\DIMAP\\small_data.dim";
     String destPath = "c:\\small_data.dim";
 
     //TabbedPanel
+    JTabbedPane tabbedPanel;
     private static final ImageIcon OpIcon = UIUtils.loadImageIcon("icons/Gears20.gif");
 
     public GraphBuilderDialog() {
 
          graphEx = new GraphExecuter();
+         graphEx.addObserver(this);
          gpfOperatorSet = graphEx.GetOperatorList();
     }
 
@@ -48,7 +72,7 @@ public class GraphBuilderDialog {
             mainFrame.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
             initUI();
 
-            mainFrame.setBounds(new Rectangle(200, 100, 500, 800));
+            mainFrame.setBounds(new Rectangle(200, 100, 500, 600));
 
             setUIComponentsEnabled(operatorList.getItemCount() > 0);
         }
@@ -60,30 +84,21 @@ public class GraphBuilderDialog {
         operatorList.setEnabled(enable);
     }
 
-    private JTabbedPane CreateJTabbedPane() {
+    private JComponent CreateOpTab(String operatorName) {
 
-		JTabbedPane tabbedPane = new JTabbedPane();
-		JPanel jplInnerPanel1 = createInnerPanel("Tab 1 Contains Tooltip and Icon");
-        tabbedPane.addTab("One", OpIcon, jplInnerPanel1, "Tab 1");
-		tabbedPane.setSelectedIndex(0);
-		JPanel jplInnerPanel2 = createInnerPanel("Tab 2 Contains Icon only");
-		tabbedPane.addTab("Two", OpIcon, jplInnerPanel2);
-		JPanel jplInnerPanel3 = createInnerPanel("Tab 3 Contains Tooltip and Icon");
-		tabbedPane.addTab("Three", OpIcon, jplInnerPanel3, "Tab 3");
-		JPanel jplInnerPanel4 = createInnerPanel("Tab 4 Contains Text only");
-		tabbedPane.addTab("Four", jplInnerPanel4);
+        final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
+        if (operatorSpi == null) {
+            throw new IllegalArgumentException("operatorName");
+        }
 
-        return tabbedPane;
-	}
+        ValueContainerFactory factory = new ValueContainerFactory(new ParameterDescriptorFactory());
+        parameterMap = new HashMap<String, Object>();
+        ValueContainer valueContainer = factory.createMapBackedValueContainer(operatorSpi.getOperatorClass(), parameterMap);
+        SwingBindingContext context = new SwingBindingContext(valueContainer);
 
-    private JPanel createInnerPanel(String text) {
-		JPanel jplPanel = new JPanel();
-		JLabel jlbDisplay = new JLabel(text);
-		jlbDisplay.setHorizontalAlignment(JLabel.CENTER);
-		jplPanel.setLayout(new GridLayout(1, 1));
-		jplPanel.add(jlbDisplay);
-		return jplPanel;
-	}
+        ParametersPane parametersPane = new ParametersPane(context);
+        return new JScrollPane(parametersPane.createPanel());
+    }
 
     private void initUI() {
         mainPanel = new JPanel(new BorderLayout(4, 4));
@@ -111,7 +126,7 @@ public class GraphBuilderDialog {
 
         // south panel
         final JPanel southPanel = new JPanel(new BorderLayout(4, 4));
-        JTabbedPane tabbedPanel = CreateJTabbedPane();
+        tabbedPanel = new JTabbedPane();
         southPanel.add(tabbedPanel, BorderLayout.CENTER);
         southPanel.add(statusLabel, BorderLayout.WEST);
         southPanel.add(progressPanel, BorderLayout.EAST);
@@ -184,7 +199,10 @@ public class GraphBuilderDialog {
 
         public void itemStateChanged(final ItemEvent e) {
             if (e.getStateChange() == ItemEvent.SELECTED) {
-                //graphEx.addOperator((String) e.getItem());
+
+                ModalDialog d = new DefaultSingleTargetProductDialog((String) e.getItem(), new DatContext("dat"), "", null);
+                d.show();
+
             }
         }
 
@@ -194,13 +212,13 @@ public class GraphBuilderDialog {
     private void DoProcessing() {
 
         try {
-            graphEx.addOperator("Read", "1");
+            graphEx.addOperator("Read");
             graphEx.setOperatorParam("1", "file", sourcePath);
 
-            graphEx.addOperator("MySingleOp", "2");
+            graphEx.addOperator("MySingleOp");
             graphEx.addOperatorSource("2", "sourceProduct", "1");
 
-            graphEx.addOperator("Write", "3");
+            graphEx.addOperator("Write");
             graphEx.setOperatorParam("3", "file", destPath);
             graphEx.setOperatorParam("3", "formatName", "BEAM-DIMAP");
             graphEx.addOperatorSource("3", "sourceProduct", "2");
@@ -210,6 +228,28 @@ public class GraphBuilderDialog {
             throw new OperatorException(e);
         }
     }
+
+       /**
+     Implements the functionality of Observer participant of Observer Design Pattern to define a one-to-many
+     dependency between a Subject object and any number of Observer objects so that when the
+     Subject object changes state, all its Observer objects are notified and updated automatically.
+
+     Defines an updating interface for objects that should be notified of changes in a subject.
+     * @param subject The Observerable subject
+     * @param data optional data
+     */
+    public void update(java.util.Observable subject, java.lang.Object data) {
+
+        Node node = (Node)data;
+        String opID = node.getId();
+        System.out.println("update recieved for " + opID);
+
+        tabbedPanel.addTab(opID, OpIcon, CreateOpTab(node.getOperatorName()), opID);
+    }
+
+
+
+
 
     /**
      * A {@link com.bc.ceres.core.ProgressMonitor} which uses a
@@ -399,6 +439,5 @@ public class GraphBuilderDialog {
             statusLabel.setVisible(visible);
         }
     }
-
 
 }
