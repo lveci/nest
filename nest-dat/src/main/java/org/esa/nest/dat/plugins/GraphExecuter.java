@@ -4,15 +4,17 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.graph.*;
-import java.util.Observable;
 
-import java.util.Set;
+import java.util.*;
 
 public class GraphExecuter extends Observable {
 
-    private GPF gpf;
-    private Graph graph;
+    private final GPF gpf;
+    private final Graph graph;
     private int idCount = 0;
+    private final Vector nodeList = new Vector(30);
+
+    enum events { ADD_EVENT, REMOVE_EVENT, SELECT_EVENT }
 
     public GraphExecuter() {
 
@@ -22,8 +24,23 @@ public class GraphExecuter extends Observable {
         graph = new Graph("Graph");
     }
 
-    Node[] GetNodes() {
-        return graph.getNodes();
+    Vector GetGraphNodes() {
+        return nodeList;
+    }
+
+    void setSelectedNode(GraphNode node) {
+        if(node == null) return;
+        setChanged();
+        notifyObservers(new GraphEvent(events.SELECT_EVENT, node));
+        clearChanged();
+    }
+
+    /**
+     * Gets the list of operators
+     * @return set of operator names
+     */
+    Set GetOperatorList() {
+        return gpf.getOperatorSpiRegistry().getAliases();
     }
 
     void addOperator(String opName) {
@@ -36,9 +53,22 @@ public class GraphExecuter extends Observable {
 
         graph.addNode(newNode);
 
+        GraphNode newGraphNode = new GraphNode(newNode);
+        nodeList.add(newGraphNode);
+
         setChanged();
-        notifyObservers(newNode);
+        notifyObservers(new GraphEvent(events.ADD_EVENT, newGraphNode));
         clearChanged();
+    }
+
+    void removeOperator(GraphNode node) {
+
+        setChanged();
+        notifyObservers(new GraphEvent(events.REMOVE_EVENT, node));
+        clearChanged();
+
+        graph.removeNode(node.getNode().getId());
+        nodeList.remove(node);
     }
 
     void addOperatorSource(String id, String sourceName, String sourceID) {
@@ -57,25 +87,43 @@ public class GraphExecuter extends Observable {
         node.getConfiguration().addChild(xml);
     }
 
-     /**
-     * Gets the list of operators
-     * @return set of operator names
-     */
-    Set GetOperatorList() {
+    void AssignAllParameters() {
+        for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
+        {
+            GraphNode n = (GraphNode) e.nextElement();
+            Map<String, Object> parameterMap = n.getParameterMap();
+            Set keys = parameterMap.keySet();                           // The set of keys in the map.
+            for (Object key : keys) {
+                Object value = parameterMap.get(key);                   // Get the value for that key.
 
-        return gpf.getOperatorSpiRegistry().getAliases();
+                Xpp3Dom xml = new Xpp3Dom((String)key);
+                xml.setValue(value.toString());
+
+                n.getNode().getConfiguration().addChild(xml);
+            }
+        }
     }
 
     /**
      * Begins graph processing
      *
-     * @throws org.esa.beam.framework.gpf.graph.GraphException
+     * @throws GraphException
      */
     void executeGraph() throws GraphException {
+        AssignAllParameters();
         GraphProcessor processor = new GraphProcessor();
         processor.executeGraph(graph, ProgressMonitor.NULL);
     }
 
 
-  
+    class GraphEvent {
+
+        events  eventType;
+        Object  data;
+
+        GraphEvent(events type, Object d) {
+            eventType = type;
+            data = d;
+        }
+    }
 }

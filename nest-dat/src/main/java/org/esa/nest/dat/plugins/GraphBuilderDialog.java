@@ -5,19 +5,14 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.binding.ValueContainerFactory;
 import com.bc.ceres.binding.ValueContainer;
 import com.bc.ceres.binding.swing.SwingBindingContext;
-import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import org.esa.beam.framework.ui.UIUtils;
-import org.esa.beam.framework.ui.TableLayout;
-import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.framework.gpf.graph.GraphException;
-import org.esa.beam.framework.gpf.graph.Node;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.ui.ParametersPane;
-import org.esa.beam.framework.gpf.ui.SourceProductSelector;
 import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.nest.dat.DatContext;
@@ -27,8 +22,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.Set;
 import java.util.Observer;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *  Provides the User Interface for creating, loading and saving Graphs
@@ -49,7 +42,6 @@ public class GraphBuilderDialog implements Observer {
 
     private GraphExecuter graphEx;
     private Set gpfOperatorSet;
-    private Map<String, Object> parameterMap;
 
     // tmp
     String sourcePath = "\\\\fileserver\\projects\\nest\\nest\\ESA Data\\RADAR\\DIMAP\\small_data.dim";
@@ -84,16 +76,16 @@ public class GraphBuilderDialog implements Observer {
         operatorList.setEnabled(enable);
     }
 
-    private JComponent CreateOpTab(String operatorName) {
+    private JComponent CreateOpTab(GraphNode node) {
 
+        String operatorName = node.getNode().getOperatorName();
         final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
         if (operatorSpi == null) {
             throw new IllegalArgumentException("operatorName");
         }
 
         ValueContainerFactory factory = new ValueContainerFactory(new ParameterDescriptorFactory());
-        parameterMap = new HashMap<String, Object>();
-        ValueContainer valueContainer = factory.createMapBackedValueContainer(operatorSpi.getOperatorClass(), parameterMap);
+        ValueContainer valueContainer = factory.createMapBackedValueContainer(operatorSpi.getOperatorClass(), node.getParameterMap());
         SwingBindingContext context = new SwingBindingContext(valueContainer);
 
         ParametersPane parametersPane = new ParametersPane(context);
@@ -212,7 +204,7 @@ public class GraphBuilderDialog implements Observer {
     private void DoProcessing() {
 
         try {
-            graphEx.addOperator("Read");
+           /* graphEx.addOperator("Read");
             graphEx.setOperatorParam("1", "file", sourcePath);
 
             graphEx.addOperator("MySingleOp");
@@ -221,7 +213,7 @@ public class GraphBuilderDialog implements Observer {
             graphEx.addOperator("Write");
             graphEx.setOperatorParam("3", "file", destPath);
             graphEx.setOperatorParam("3", "formatName", "BEAM-DIMAP");
-            graphEx.addOperatorSource("3", "sourceProduct", "2");
+            graphEx.addOperatorSource("3", "sourceProduct", "2");   */
 
             graphEx.executeGraph();
         } catch(GraphException e) {
@@ -229,7 +221,7 @@ public class GraphBuilderDialog implements Observer {
         }
     }
 
-       /**
+     /**
      Implements the functionality of Observer participant of Observer Design Pattern to define a one-to-many
      dependency between a Subject object and any number of Observer objects so that when the
      Subject object changes state, all its Observer objects are notified and updated automatically.
@@ -240,11 +232,21 @@ public class GraphBuilderDialog implements Observer {
      */
     public void update(java.util.Observable subject, java.lang.Object data) {
 
-        Node node = (Node)data;
-        String opID = node.getId();
-        System.out.println("update recieved for " + opID);
+        GraphExecuter.GraphEvent event = (GraphExecuter.GraphEvent)data;
+        GraphNode node = (GraphNode)event.data;
+        String opID = node.getNode().getId();
+        if(event.eventType == GraphExecuter.events.ADD_EVENT) {
 
-        tabbedPanel.addTab(opID, OpIcon, CreateOpTab(node.getOperatorName()), opID);
+            tabbedPanel.addTab(opID, OpIcon, CreateOpTab(node), opID + " Operator");
+        } else if(event.eventType == GraphExecuter.events.REMOVE_EVENT) {
+
+            int index = tabbedPanel.indexOfTab(opID);
+            tabbedPanel.remove(index);
+        } else if(event.eventType == GraphExecuter.events.SELECT_EVENT) {
+
+            int index = tabbedPanel.indexOfTab(opID);
+            tabbedPanel.setSelectedIndex(index);
+        }
     }
 
 
