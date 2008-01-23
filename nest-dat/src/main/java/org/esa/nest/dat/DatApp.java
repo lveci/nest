@@ -38,7 +38,7 @@ import java.net.URL;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.9 $ $Date: 2008-01-16 16:48:44 $
+ * @version $Revision: 1.10 $ $Date: 2008-01-23 19:51:56 $
  */
 public final class DatApp extends VisatApp {
 
@@ -61,7 +61,7 @@ public final class DatApp extends VisatApp {
     /**
      * Application Name
      */
-    public static final String APP_NAME = "DAT";
+    public static final String APP_NAME = "NEST DAT";
     /**
      * Application symbolic name
      */
@@ -117,10 +117,8 @@ public final class DatApp extends VisatApp {
     private VisatApplicationPage applicationPage;
     private VisatApplicationWindow window;
 
-
     private DatProductsToolView productsToolView;
     private final ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
-
 
     /**
      * Constructs the VISAT application instance. The method does not start the application nor does it perform any GUI

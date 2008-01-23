@@ -357,6 +357,20 @@
             <helpId>open</helpId>
         </action>
 
+	  <action>
+            <id>openProject</id>
+            <class>org.esa.nest.dat.actions.OpenProjectAction</class>
+            <parent>file</parent>
+            <text>Open Project...</text>
+            <accelerator>control O</accelerator>
+            <placeAfter>open</placeAfter>
+            <shortDescr>Open a project</shortDescr>
+            <description>Open a project</description>
+            <smallIcon>icons/Open16.gif</smallIcon>
+            <largeIcon>icons/Open24.gif</largeIcon>
+            <helpId>open</helpId>
+        </action>
+
         <action>
             <id>close</id>
             <class>org.esa.beam.visat.actions.CloseAction</class>
@@ -398,6 +412,20 @@
             <shortDescr>Save a BEAM-DIMAP data product.</shortDescr>
             <description>Save a BEAM-DIMAP data product.</description>
             <accelerator>control S</accelerator>
+            <smallIcon>icons/Save16.gif</smallIcon>
+            <largeIcon>icons/Save24.gif</largeIcon>
+            <helpId>save</helpId>
+        </action>
+
+	  <action>
+            <id>saveProject</id>
+            <class>org.esa.nest.dat.actions.SaveProjectAction</class>
+            <parent>file</parent>
+            <text>Save Project</text>
+            <placeAfter>save</placeAfter>
+            <separatorBefore>false</separatorBefore>
+            <shortDescr>Save a NEST project.</shortDescr>
+            <description>Save a NEST project.</description>
             <smallIcon>icons/Save16.gif</smallIcon>
             <largeIcon>icons/Save24.gif</largeIcon>
             <helpId>save</helpId>

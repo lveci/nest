@@ -4,13 +4,20 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.graph.*;
+import org.esa.beam.util.io.FileUtils;
+import org.esa.beam.util.io.BeamFileFilter;
+import org.esa.beam.visat.SharedApp;
 
 import java.util.*;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.File;
 
 public class GraphExecuter extends Observable {
 
     private final GPF gpf;
-    private final Graph graph;
+    private Graph graph;
     private int idCount = 0;
     private final Vector nodeList = new Vector(30);
 
@@ -26,6 +33,17 @@ public class GraphExecuter extends Observable {
 
     Vector GetGraphNodes() {
         return nodeList;
+    }
+
+    GraphNode findGraphNode(String id) {    
+        for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
+        {
+            GraphNode n = (GraphNode) e.nextElement();
+            if(n.getNode().getId().equals(id)) {
+                return n;
+            }
+        }
+        return null;
     }
 
     void setSelectedNode(GraphNode node) {
@@ -71,11 +89,11 @@ public class GraphExecuter extends Observable {
         nodeList.remove(node);
     }
 
-    void addOperatorSource(String id, String sourceName, String sourceID) {
-        Node node = graph.getNode(id);
-        NodeSource ns = new NodeSource(sourceName, sourceID);
-       
-        node.addSource(ns);
+    void addOperatorSource(GraphNode source, GraphNode target) {
+        Node srcNode = source.getNode();
+        NodeSource ns = new NodeSource("sourceProduct", srcNode.getId());
+
+        target.getNode().addSource(ns);
     }
 
     void setOperatorParam(String id, String paramName, String value) {
@@ -115,11 +133,72 @@ public class GraphExecuter extends Observable {
         processor.executeGraph(graph, ProgressMonitor.NULL);
     }
 
+    void saveGraph() {
+        try {
+            String filePath = GetFilePath("Save Graph", true);
+            if(filePath == null) return;
+            FileWriter fileWriter = new FileWriter(filePath);
+            try {
+                GraphIO.write(graph, fileWriter);
+            } finally {
+                fileWriter.close();
+            }
+        } catch(IOException e) {
+
+        }
+    }
+
+    void loadGraph() {
+        try {
+            String filePath = GetFilePath("Load Graph", false);
+            if(filePath == null) return;
+            FileReader fileReader = new FileReader(filePath);
+            Graph graphFromFile;
+            try {
+                graphFromFile = GraphIO.read(fileReader, null);
+            } finally {
+                fileReader.close();
+            }
+
+            if(graphFromFile != null) {
+                graph = graphFromFile;
+                nodeList.clear();
+
+                Node[] nodes = graph.getNodes();
+                for (Node n : nodes) {
+                    GraphNode newGraphNode = new GraphNode(n);
+                    nodeList.add(newGraphNode);
+                    
+                    setChanged();
+                    notifyObservers(new GraphEvent(events.ADD_EVENT, newGraphNode));
+                    clearChanged();
+                }
+            }
+        } catch(IOException e) {
+
+        }
+    }
+
+    String GetFilePath(String title, boolean isSave) {
+        BeamFileFilter xmlFilter = new BeamFileFilter("XML", "xml", "Graph File");
+        String extension = "xml";
+        File file;
+        if(isSave)
+            file = SharedApp.instance().getApp().showFileSaveDialog(title, false, xmlFilter, extension, "Graph");
+        else
+            file = SharedApp.instance().getApp().showFileOpenDialog(title, false, xmlFilter, extension);
+        if (file == null) {
+             return null;
+        }
+
+        file = FileUtils.ensureExtension(file, extension);
+        return file.getAbsolutePath();
+    }
 
     class GraphEvent {
 
-        events  eventType;
-        Object  data;
+        final events  eventType;
+        final Object  data;
 
         GraphEvent(events type, Object d) {
             eventType = type;

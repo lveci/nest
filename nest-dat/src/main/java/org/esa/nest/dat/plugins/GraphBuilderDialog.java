@@ -28,34 +28,23 @@ import java.util.Observer;
  */
 public class GraphBuilderDialog implements Observer {
 
-    private static final String processCommand = "process";
     private static final ImageIcon processIcon = UIUtils.loadImageIcon("icons/Gears20.gif");
     private JPanel mainPanel;
-    private JComboBox operatorList;
 
-    private JLabel statusLabel;
     private JPanel progressPanel;
-    private JButton processButton;
     private JProgressBar progressBar;
-    private JPanel headerPanel;
     private JFrame mainFrame;
 
-    private GraphExecuter graphEx;
-    private Set gpfOperatorSet;
-
-    // tmp
-    String sourcePath = "\\\\fileserver\\projects\\nest\\nest\\ESA Data\\RADAR\\DIMAP\\small_data.dim";
-    String destPath = "c:\\small_data.dim";
+    private final GraphExecuter graphEx;
 
     //TabbedPanel
-    JTabbedPane tabbedPanel;
+    private JTabbedPane tabbedPanel;
     private static final ImageIcon OpIcon = UIUtils.loadImageIcon("icons/Gears20.gif");
 
     public GraphBuilderDialog() {
 
          graphEx = new GraphExecuter();
          graphEx.addObserver(this);
-         gpfOperatorSet = graphEx.GetOperatorList();
     }
 
     public JFrame getFrame() {
@@ -65,15 +54,8 @@ public class GraphBuilderDialog implements Observer {
             initUI();
 
             mainFrame.setBounds(new Rectangle(200, 100, 500, 600));
-
-            setUIComponentsEnabled(operatorList.getItemCount() > 0);
         }
         return mainFrame;
-    }
-
-    private void setUIComponentsEnabled(final boolean enable) {
-
-        operatorList.setEnabled(enable);
     }
 
     private JComponent CreateOpTab(GraphNode node) {
@@ -97,15 +79,6 @@ public class GraphBuilderDialog implements Observer {
 
         // north panel
         final JPanel northPanel = new JPanel(new BorderLayout(4, 4));
-        operatorList = new JComboBox();
-        setComponentName(operatorList, "operatorList");
-        statusLabel = new JLabel("");
-        progressPanel = new JPanel();
-        processButton = new JButton();
-        setComponentName(processButton, "processButton");
-        headerPanel = new JPanel();
-
-        northPanel.add(headerPanel, BorderLayout.NORTH);
 
         GraphPanel graphPanel = new GraphPanel(graphEx);
         graphPanel.setBackground(Color.WHITE);
@@ -116,48 +89,44 @@ public class GraphBuilderDialog implements Observer {
 
         mainPanel.add(northPanel, BorderLayout.NORTH);
 
+        // mid panel
+        final JPanel midPanel = new JPanel(new BorderLayout(4, 4));
+        tabbedPanel = new JTabbedPane();
+        midPanel.add(tabbedPanel, BorderLayout.CENTER);
+
+        mainPanel.add(midPanel, BorderLayout.CENTER);
+
         // south panel
         final JPanel southPanel = new JPanel(new BorderLayout(4, 4));
-        tabbedPanel = new JTabbedPane();
-        southPanel.add(tabbedPanel, BorderLayout.CENTER);
-        southPanel.add(statusLabel, BorderLayout.WEST);
-        southPanel.add(progressPanel, BorderLayout.EAST);
+        final JPanel buttonPanel = new JPanel();
+        initButtonPanel(buttonPanel);
+        southPanel.add(buttonPanel, BorderLayout.CENTER);
+
+        // progress Bar
+        progressBar = new JProgressBar();
+        progressBar.setName(getClass().getName() + "progressBar");
+        progressBar = new JProgressBar();
+        progressBar.setStringPainted(true);
+        progressPanel = new JPanel();
+        progressPanel.setLayout(new BorderLayout());
+        progressPanel.add(progressBar);
+        progressPanel.setVisible(false);
+        southPanel.add(progressPanel, BorderLayout.SOUTH);
+        // todo progressPanel
 
         mainPanel.add(southPanel, BorderLayout.SOUTH);
         mainPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
-        // progress Bar
-        progressBar = new JProgressBar();
-        setComponentName(progressBar, "progressBar");
-        progressBar = new JProgressBar();
-        progressBar.setStringPainted(true);
-        progressPanel.setLayout(new BorderLayout());
-        progressPanel.add(progressBar);
-        progressPanel.setVisible(false);
-        // todo progressPanel
-
-        operatorList.addItemListener(new OperatorListChangeHandler());
-
-        initHeaderPanel(headerPanel);
-
-        populateOperatorList();
-
         mainFrame.add(mainPanel);
     }
 
-    private void setComponentName(JComponent button, String name) {
-        button.setName(getClass().getName() + name);
-    }
-
-    private void initHeaderPanel(final JPanel headerBar) {
-        headerBar.setLayout(new GridBagLayout());
+    private void initButtonPanel(final JPanel panel) {
+        panel.setLayout(new GridBagLayout());
         final GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.NORTHWEST;
 
-        processButton = createToolButton(processIcon);
-        processButton.setActionCommand(processCommand);
-
+        JButton processButton = CreateButton("processButton", "Process", processIcon, panel);
         processButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
@@ -165,60 +134,64 @@ public class GraphBuilderDialog implements Observer {
             }
         });
 
-        headerBar.add(processButton, gbc);
+        JButton saveButton = CreateButton("saveButton", "Save", processIcon, panel);
+        saveButton.addActionListener(new ActionListener() {
 
-        headerBar.add(new JLabel("Operators:"));
-        gbc.weightx = 99;
-        headerBar.add(operatorList, gbc);
-        gbc.weightx = 0;
-    }
-
-    private JButton createToolButton(final ImageIcon icon) {
-        final JButton button = (JButton) ToolButtonFactory.createButton(icon, false);
-        button.setBackground(headerPanel.getBackground());
-        return button;
-    }
-
-    private void populateOperatorList() {
-
-        for (Object anAliasSet : gpfOperatorSet) {
-            String alias = (String) anAliasSet;
-            operatorList.insertItemAt(alias, operatorList.getItemCount());
-        }
-    }
-
-    private class OperatorListChangeHandler implements ItemListener {
-
-        public void itemStateChanged(final ItemEvent e) {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-
-                ModalDialog d = new DefaultSingleTargetProductDialog((String) e.getItem(), new DatContext("dat"), "", null);
-                d.show();
-
+            public void actionPerformed(final ActionEvent e) {
+                SaveGraph();
             }
-        }
+        });
 
+        JButton loadButton = CreateButton("loadButton", "Load", processIcon, panel);
+        loadButton.addActionListener(new ActionListener() {
 
+            public void actionPerformed(final ActionEvent e) {
+                LoadGraph();
+            }
+        });
+
+        gbc.weightx = 0;
+        panel.add(loadButton, gbc);
+        panel.add(saveButton, gbc);
+        panel.add(processButton, gbc);
+    }
+
+    JButton CreateButton(String name, String text, ImageIcon icon, JPanel panel) {
+        JButton button = new JButton();
+        button.setName(getClass().getName() + name);
+        button = new JButton();
+        button.setIcon(icon);
+        button.setBackground(panel.getBackground());
+        button.setText(text);
+        button.setActionCommand(name);
+        return button;
     }
 
     private void DoProcessing() {
 
         try {
-           /* graphEx.addOperator("Read");
-            graphEx.setOperatorParam("1", "file", sourcePath);
-
-            graphEx.addOperator("MySingleOp");
-            graphEx.addOperatorSource("2", "sourceProduct", "1");
-
-            graphEx.addOperator("Write");
-            graphEx.setOperatorParam("3", "file", destPath);
-            graphEx.setOperatorParam("3", "formatName", "BEAM-DIMAP");
-            graphEx.addOperatorSource("3", "sourceProduct", "2");   */
-
             graphEx.executeGraph();
         } catch(GraphException e) {
             throw new OperatorException(e);
         }
+    }
+
+     private void SaveGraph() {
+
+        //try {
+            graphEx.saveGraph();
+        //} catch(GraphException e) {
+        //    throw new OperatorException(e);
+        //}
+    }
+
+     private void LoadGraph() {
+
+        //try {
+            graphEx.loadGraph();
+        //} catch(GraphException e) {
+        //    throw new OperatorException(e);
+        //}
     }
 
      /**
@@ -259,8 +232,8 @@ public class GraphBuilderDialog implements Observer {
      */
     private class ProgressBarProgressMonitor implements ProgressMonitor {
 
-        private JProgressBar progressBar;
-        private JLabel messageLabel;
+        private final JProgressBar progressBar;
+        private final JLabel messageLabel;
 
         private double currentWork;
         private double totalWork;
@@ -433,12 +406,12 @@ public class GraphBuilderDialog implements Observer {
         }
 
         private void setDescription(final String description) {
-            statusLabel.setText(description);
+            //statusLabel.setText(description);
         }
 
         private void setVisibility(final boolean visible) {
             progressPanel.setVisible(visible);
-            statusLabel.setVisible(visible);
+           // statusLabel.setVisible(visible);
         }
     }
 

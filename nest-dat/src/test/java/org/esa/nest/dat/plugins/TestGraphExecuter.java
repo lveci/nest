@@ -2,8 +2,11 @@ package org.esa.nest.dat.plugins;
 
 import junit.framework.TestCase;
 
+import java.util.Vector;
+import java.util.Set;
+
 /**
- * GraphBuilderVPI Tester.
+ * GraphExecuter Tester.
  *
  * @author <Authors name>
  * @since <pre>12/21/2007</pre>
@@ -11,22 +14,32 @@ import junit.framework.TestCase;
  */
 public class TestGraphExecuter extends TestCase {
 
-    private GraphBuilderVPI _gp;
+    private GraphExecuter graphEx;
 
     public TestGraphExecuter(String name) {
         super(name);
     }
 
     public void setUp() throws Exception {
-        _gp = new GraphBuilderVPI();
-
+        graphEx = new GraphExecuter();
     }
 
     public void tearDown() throws Exception {
-        _gp = null;
+        graphEx = null;
     }
 
-    public void testSomething() {
+    public void testGetOperators() {
+        Set opList = graphEx.GetOperatorList();
+
+        assertTrue(!opList.isEmpty());
+    }
+
+    public void testAddOperator() {
+
+        graphEx.addOperator("testOp");
+
+        Vector nodeList = graphEx.GetGraphNodes();
+        assertEquals(1, nodeList.size());
 
         assertTrue(true);
     }

@@ -1,5 +1,7 @@
 package org.esa.nest.dat.plugins;
 
+import org.esa.beam.framework.gpf.graph.NodeSource;
+
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.PopupMenuEvent;
@@ -17,17 +19,21 @@ import java.util.Enumeration;
  */
 public class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, MouseListener, MouseMotionListener {
 
-    private GraphExecuter graphEx;
-    JMenu addMenu;
+    private final GraphExecuter graphEx;
+    final JMenu addMenu;
     private Point lastMousePos;
-    private int nodeWidth = 60;
-    private int nodeHeight = 30;
-    private int hotSpotWidth = 10;
-    private int hotSpotOffset = nodeHeight/2 - (hotSpotWidth/2);
-    private Color opColor = new Color(200, 200, 255, 128);
-    private Color selColor = new Color(200, 255, 200, 150);
+    private final int nodeWidth = 60;
+    private final int nodeHeight = 30;
+    private final int halfNodeHeight = nodeHeight/2;
+    private final int hotSpotWidth = 10;
+    private final int hotSpotOffset = halfNodeHeight - (hotSpotWidth/2);
+    private final Color opColor = new Color(200, 200, 255, 128);
+    private final Color selColor = new Color(200, 255, 200, 150);
     private GraphNode selectedNode;
     private boolean showSourceHotSpot = false;
+    private boolean connectingSource = false;
+    private Point connectingSourcePos;
+    private GraphNode connectSourceTargetNode;
 
     GraphPanel(GraphExecuter graphExec) {
 
@@ -74,17 +80,36 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
 
             g.setColor(Color.black);
             g.drawString(n.getNode().getOperatorName(), x + 10, y + 20);
+
+            g.setColor(Color.red);
+            NodeSource[] nSources = n.getNode().getSources();
+            for (NodeSource nSource : nSources) {
+                GraphNode srcNode = graphEx.findGraphNode(nSource.getSourceNodeId());
+                if(srcNode != null)
+                    g.drawLine(n.getPos().x, n.getPos().y + halfNodeHeight,
+                            srcNode.getPos().x + nodeWidth, srcNode.getPos().y + halfNodeHeight);
+            }
         }
 
         if(showSourceHotSpot && selectedNode != null) {
             Point p = selectedNode.getPos();
             g.drawOval(p.x - hotSpotWidth/2, p.y + hotSpotOffset, hotSpotWidth, hotSpotWidth);
         }
+        if(connectingSource) {
+            Point p1 = connectSourceTargetNode.getPos();
+            Point p2 = connectingSourcePos;
+            g.setColor(Color.red);
+            g.drawLine(p1.x, p1.y + halfNodeHeight, p2.x, p2.y);
+        }
     }
 
 
     public void mousePressed(MouseEvent e) {
         checkPopup(e);
+
+        if(showSourceHotSpot) {
+             connectingSource = true;
+        }
 
         lastMousePos = e.getPoint();
     }
@@ -101,21 +126,35 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
 
     public void mouseReleased(MouseEvent e) {
         checkPopup(e);
+
+        if(connectingSource) {
+            GraphNode n = findNode(e.getPoint());
+            if(n != null && selectedNode != n) {
+                graphEx.addOperatorSource(n, connectSourceTargetNode);
+            }
+        }
+        connectingSource = false;
+        connectSourceTargetNode = null;
+        repaint();
     }
 
     public void mouseDragged(java.awt.event.MouseEvent e) {
 
-        if(selectedNode != null) {
+        if(selectedNode != null && !connectingSource) {
             Point p = new Point(e.getX() - (lastMousePos.x - selectedNode.getPos().x),
                                 e.getY() - (lastMousePos.y - selectedNode.getPos().y));
             selectedNode.setPos(p);
             lastMousePos = e.getPoint();
             repaint();
         }
+        if(connectingSource) {
+            connectingSourcePos = e.getPoint();
+            repaint();
+        }
     }
 
     public void mouseMoved(java.awt.event.MouseEvent e) {
-
+  
         GraphNode n = findNode(e.getPoint());
         if(selectedNode != n) {
             showSourceHotSpot = false;
@@ -128,6 +167,10 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
             Point sourcePoint = new Point(n.getPos().x, n.getPos().y + hotSpotOffset);
             if(isWithinRect(sourcePoint, hotSpotWidth, hotSpotWidth, e.getPoint())) {
                  showSourceHotSpot = true;
+                 connectSourceTargetNode = selectedNode;
+                 repaint();
+            } else if(showSourceHotSpot) {
+                 showSourceHotSpot = false;
                  repaint();
             }
        }
