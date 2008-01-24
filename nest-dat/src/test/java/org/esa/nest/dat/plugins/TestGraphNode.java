@@ -36,19 +36,5 @@ public class TestGraphNode extends TestCase {
         assertNotNull(new GraphNode(node));
     }
 
-    public void testSetPosition() {
 
-        final int x = 20;
-        final int y = 30;
-        GraphNode gNode = new GraphNode(node);
-
-        Point p = new Point(x, y);
-        gNode.setPos(p);
-
-        Xpp3Dom xml = node.getConfiguration().getChild(gNode.DISPLAY_POSITION);
-        assertNotNull(xml);
-
-        assertEquals(x, Integer.parseInt(xml.getAttribute(gNode.X_POS)));
-        assertEquals(y, Integer.parseInt(xml.getAttribute(gNode.Y_POS)));
-    }
 }

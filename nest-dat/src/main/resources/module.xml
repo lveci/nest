@@ -212,22 +212,6 @@
         </toolView>
 
         <toolView>
-            <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
-            <class>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</class>
-            <title>Spectrum View</title>
-            <tabTitle>Spectrum</tabTitle>
-            <mnemonic>S</mnemonic>
-            <accelerator>ctrl alt S</accelerator>
-            <description>Display spectrum at the current pixel position.</description>
-            <smallIcon>/org/esa/beam/resources/images/icons/Spectrum16.gif</smallIcon>
-            <largeIcon>/org/esa/beam/resources/images/icons/Spectrum24.gif</largeIcon>
-            <helpId>showSpectrumWnd</helpId>
-            <initState>HIDDEN</initState>
-            <initSide>SOUTH</initSide>
-            <initIndex>0</initIndex>
-        </toolView>
-
-        <toolView>
             <id>org.esa.beam.visat.toolviews.stat.StatisticsToolView</id>
             <class>org.esa.beam.visat.toolviews.stat.StatisticsToolView</class>
             <title>Statistics View</title>
