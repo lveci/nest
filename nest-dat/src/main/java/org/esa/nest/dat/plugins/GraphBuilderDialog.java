@@ -16,6 +16,7 @@ import org.esa.beam.framework.gpf.ui.ParametersPane;
 import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.nest.dat.DatContext;
+import org.esa.nest.dat.util.DatUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,7 +29,9 @@ import java.util.Observer;
  */
 public class GraphBuilderDialog implements Observer {
 
-    private static final ImageIcon processIcon = UIUtils.loadImageIcon("icons/Gears20.gif");
+    private static final ImageIcon processIcon = DatUtils.LoadIcon("org/esa/nest/icons/Gears24.gif");
+    private static final ImageIcon saveIcon = DatUtils.LoadIcon("org/esa/nest/icons/Save24b.gif");
+    private static final ImageIcon loadIcon = DatUtils.LoadIcon("org/esa/nest/icons/Open24b.gif");
     private JPanel mainPanel;
 
     private JPanel progressPanel;
@@ -134,7 +137,7 @@ public class GraphBuilderDialog implements Observer {
             }
         });
 
-        JButton saveButton = CreateButton("saveButton", "Save", processIcon, panel);
+        JButton saveButton = CreateButton("saveButton", "Save", saveIcon, panel);
         saveButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
@@ -142,7 +145,7 @@ public class GraphBuilderDialog implements Observer {
             }
         });
 
-        JButton loadButton = CreateButton("loadButton", "Load", processIcon, panel);
+        JButton loadButton = CreateButton("loadButton", "Load", loadIcon, panel);
         loadButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
