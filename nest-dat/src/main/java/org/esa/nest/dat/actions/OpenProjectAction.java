@@ -3,18 +3,19 @@ package org.esa.nest.dat.actions;
 
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
-import org.esa.beam.visat.SharedApp;
+import org.esa.nest.dat.DatProject;
 
 /**
  * This action opens a project.
  *
  * @author lveci
- * @version $Revision: 1.1 $ $Date: 2008-01-23 19:51:56 $
+ * @version $Revision: 1.2 $ $Date: 2008-01-29 21:48:40 $
  */
 public class OpenProjectAction extends ExecCommand {
 
     @Override
     public void actionPerformed(final CommandEvent event) {
-        SharedApp.instance().getApp().openProduct(null);
+
+        DatProject.instance().LoadProject();
     }
 }

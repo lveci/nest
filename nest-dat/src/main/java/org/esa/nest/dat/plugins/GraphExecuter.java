@@ -7,6 +7,7 @@ import org.esa.beam.framework.gpf.graph.*;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.visat.SharedApp;
+import org.esa.nest.dat.util.DatUtils;
 
 import java.util.*;
 import java.io.FileReader;
@@ -135,7 +136,7 @@ public class GraphExecuter extends Observable {
 
     void saveGraph() {
         try {
-            String filePath = GetFilePath("Save Graph", true);
+            String filePath = DatUtils.GetFilePath("Save Graph", "XML", "xml", "Graph File", true);
             if(filePath == null) return;
             FileWriter fileWriter = new FileWriter(filePath);
             try {
@@ -150,7 +151,7 @@ public class GraphExecuter extends Observable {
 
     void loadGraph() {
         try {
-            String filePath = GetFilePath("Load Graph", false);
+            String filePath = DatUtils.GetFilePath("Load Graph", "XML", "xml", "Graph File", false);
             if(filePath == null) return;
             FileReader fileReader = new FileReader(filePath);
             Graph graphFromFile;
@@ -177,22 +178,6 @@ public class GraphExecuter extends Observable {
         } catch(IOException e) {
 
         }
-    }
-
-    String GetFilePath(String title, boolean isSave) {
-        BeamFileFilter xmlFilter = new BeamFileFilter("XML", "xml", "Graph File");
-        String extension = "xml";
-        File file;
-        if(isSave)
-            file = SharedApp.instance().getApp().showFileSaveDialog(title, false, xmlFilter, extension, "Graph");
-        else
-            file = SharedApp.instance().getApp().showFileOpenDialog(title, false, xmlFilter, extension);
-        if (file == null) {
-             return null;
-        }
-
-        file = FileUtils.ensureExtension(file, extension);
-        return file.getAbsolutePath();
     }
 
     class GraphEvent {
