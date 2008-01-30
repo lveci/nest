@@ -7,7 +7,7 @@ import org.esa.beam.framework.gpf.graph.*;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.visat.SharedApp;
-import org.esa.nest.dat.util.DatUtils;
+import org.esa.nest.util.DatUtils;
 
 import java.util.*;
 import java.io.FileReader;

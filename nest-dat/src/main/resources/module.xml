@@ -26,6 +26,9 @@
         <module>beam-core</module>
     </dependency>
     <dependency>
+        <module>nest-core</module>
+    </dependency>
+    <dependency>
         <module>beam-ui</module>
     </dependency>
     <dependency>

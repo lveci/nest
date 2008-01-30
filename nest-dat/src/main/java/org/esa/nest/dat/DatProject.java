@@ -1,7 +1,7 @@
 package org.esa.nest.dat;
 
-import org.esa.nest.dat.util.XMLSupport;
-import org.esa.nest.dat.util.DatUtils;
+import org.esa.nest.util.XMLSupport;
+import org.esa.nest.util.DatUtils;
 import org.esa.beam.visat.SharedApp;
 import org.jdom.Document;
 import org.jdom.Element;

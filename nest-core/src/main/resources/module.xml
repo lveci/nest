@@ -1,10 +1,12 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
-    <symbolicName>nest-reader-dem</symbolicName>
+    <symbolicName>nest-core</symbolicName>
     <version>0.1</version>
-    <name>NEST DEM Reader</name>
+    <name>NEST Core</name>
 
-    <description>Enables NEST to read the SRTM, ACE and D-TED digital elevation models.</description>
+    <description>
+        NEST Core
+    </description>
 
     <vendor>Array Systems Computing Inc</vendor>
     <contactAddress>1120 Finch Ave W. Toronto (Canada)</contactAddress>
@@ -15,13 +17,9 @@
     <dependency>
         <module>beam-core</module>
     </dependency>
-    <dependency>
-        <module>beam-visat</module>
-        <optional>true</optional>
-    </dependency>
     
+    
+    <categories>System</categories>
 
-    <categories>Reader,DEM</categories>
 
-   
 </module>

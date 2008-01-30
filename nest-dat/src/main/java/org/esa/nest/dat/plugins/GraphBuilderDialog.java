@@ -16,7 +16,7 @@ import org.esa.beam.framework.gpf.ui.ParametersPane;
 import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.nest.dat.DatContext;
-import org.esa.nest.dat.util.DatUtils;
+import org.esa.nest.util.DatUtils;
 
 import javax.swing.*;
 import java.awt.*;
