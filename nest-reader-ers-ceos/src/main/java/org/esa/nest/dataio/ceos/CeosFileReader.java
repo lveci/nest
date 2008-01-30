@@ -1,5 +1,5 @@
 /*
- * $Id: CeosFileReader.java,v 1.3 2008-01-08 15:12:54 lveci Exp $
+ * $Id: CeosFileReader.java,v 1.4 2008-01-30 14:47:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,7 +32,7 @@ public class CeosFileReader {
     private static final String EM_READING_X_TYPE = "Reading '%s'-Type";
     private static final String EM_NOT_PARSABLE_X_STRING = "Not able to parse %s string";
 
-    private ImageInputStream _stream;
+    private final ImageInputStream _stream;
 
     public CeosFileReader(final ImageInputStream stream) {
         _stream = stream;
@@ -98,24 +98,34 @@ public class CeosFileReader {
         }
     }
 
-    public void readB2(final int[] array) throws IOException,
+    public void readB2(final short[] array) throws IOException,
                                                  IllegalCeosFormatException {
-        final long streamPosition = _stream.getStreamPosition();
-        for (int i = 0; i < array.length; i++) {
-            try {
-                array[i] = _stream.readShort();
-            } catch (IOException e) {
-                array[i] = 0;
-                final String message = String.format(CeosFileReader.EM_READING_X_TYPE,
-                                                     new Object[]{"B2[]"});
+         try {
+            _stream.readFully(array, 0, array.length);
+         } catch (IOException e) {
+
+         }
+        //final long streamPosition = _stream.getStreamPosition();
+        //for (int i = 0; i < array.length; i++) {
+         //   try {
+        //        array[i] = _stream.readShort();
+         //   } catch (IOException e) {
+        //        array[i] = 0;
+                //final String message = String.format(CeosFileReader.EM_READING_X_TYPE,
+                //                                     new Object[]{"B2[]"});
                 //throw new IllegalCeosFormatException(message, streamPosition, e);
-            }
-        }
+        //    }
+       // }
     }
 
     public void readB4(final int[] array) throws IOException,
                                                  IllegalCeosFormatException {
-        final long streamPosition = _stream.getStreamPosition();
+        try {
+            _stream.readFully(array, 0, array.length);
+         } catch (IOException e) {
+
+         }
+        /*final long streamPosition = _stream.getStreamPosition();
         for (int i = 0; i < array.length; i++) {
             try {
                 array[i] = _stream.readInt(); //readB4();
@@ -124,7 +134,7 @@ public class CeosFileReader {
                                                      new Object[]{"B4[]"});
                 throw new IllegalCeosFormatException(message, streamPosition, e);
             }
-        }
+        }   */
     }
 
     public void readB8(final long[] array) throws IOException, IllegalCeosFormatException {
@@ -257,7 +267,6 @@ public class CeosFileReader {
                                                  new Object[]{n, bytesRead});
             throw new IllegalCeosFormatException(message, streamPosition);
         }
-        String str = new String(bytes);
         return new String(bytes);
     }
 

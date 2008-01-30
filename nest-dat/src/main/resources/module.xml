@@ -251,7 +251,7 @@
             <parent>file</parent>
             <text>Reopen</text>
             <mnemonic>R</mnemonic>
-            <placeAfter>open</placeAfter>
+            <placeAfter>openProject</placeAfter>
             <shortDescr>Re-open a BEAM-DIMAP data product.</shortDescr>
             <longDescr>Re-open a BEAM-DIMAP data product.</longDescr>
             <smallIcon>icons/History16.gif</smallIcon>

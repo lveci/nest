@@ -11,7 +11,7 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
 /*
- * $Id: ERSImageFile.java,v 1.2 2008-01-08 15:12:54 lveci Exp $
+ * $Id: ERSImageFile.java,v 1.3 2008-01-30 14:47:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,7 +32,7 @@ import java.io.IOException;
  * This class represents an image file of an Avnir-2 product.
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2008-01-08 15:12:54 $
+ * @version $Revision: 1.3 $ $Date: 2008-01-30 14:47:10 $
  */
 class ERSImageFile {
 
@@ -141,6 +141,10 @@ class ERSImageFile {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         ImageRecord imageRecord;
 
+        System.out.print("readBandRasterData x " + sourceOffsetX + " y " + sourceOffsetY +
+                " w " + sourceWidth + " h " + sourceHeight + 
+                " stepX " + sourceStepX + " stepY " + sourceStepY + "\n");
+
         pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceOffsetY);
         try {
             final int[] srcLine = new int[sourceWidth];
@@ -153,7 +157,7 @@ class ERSImageFile {
                 // Read source line
                 imageRecord = getImageRecord(y);
                 _ceosReader.seek(imageRecord.getImageDataStart() + sourceOffsetX);
-                _ceosReader.readB2(srcLine);
+                _ceosReader.readB4(srcLine);
 
                 // Copy source line into destination buffer
                 final int currentLineIndex = (y - sourceOffsetY) * destWidth;

@@ -12,12 +12,12 @@ import java.util.Iterator;
  * Created by Marco Peters.
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2008-01-28 14:40:11 $
+ * @version $Revision: 1.3 $ $Date: 2008-01-30 14:47:10 $
  */
 public class TestReaderLoadedAsService extends TestCase {
 
     public void testReaderIsLoaded() {
-        /*int readerCount = 0;
+        int readerCount = 0;
 
         ProductIOPlugInManager plugInManager = ProductIOPlugInManager.getInstance();
         Iterator readerPlugIns = plugInManager.getReaderPlugIns("ACE");
@@ -30,7 +30,7 @@ public class TestReaderLoadedAsService extends TestCase {
         }
 
         Assert.assertEquals(1, readerCount);
-         */
+         
     }
 
 }

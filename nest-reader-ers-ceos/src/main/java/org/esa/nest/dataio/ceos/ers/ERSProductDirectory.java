@@ -94,9 +94,9 @@ class ERSProductDirectory {
         product.setEndTime(getUTCScanStopTime());
         product.setDescription(getProductDescription());
 
-
-        addGeoCoding(product);
                                 */
+        //addGeoCoding(product);
+
         addMetaData(product);
 
         return product;
@@ -110,7 +110,8 @@ class ERSProductDirectory {
     private void addGeoCoding(final Product product) throws IllegalCeosFormatException,
                                                             IOException {
 
-        final String usedProjection = _leaderFile.getUsedProjection();
+        //final String usedProjection = _leaderFile.getUsedProjection();
+        final String usedProjection = "NNNNN";  // luis tmp
         if (ERSConstants.MAP_PROJECTION_RAW.equalsIgnoreCase(usedProjection)) {
             final Band[] bands = product.getBands();
             for (int i = 0; i < bands.length; i++) {
