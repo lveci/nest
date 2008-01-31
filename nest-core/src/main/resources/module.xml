@@ -17,7 +17,9 @@
     <dependency>
         <module>beam-core</module>
     </dependency>
-    
+    <dependency>
+        <module>beam-visat</module>
+    </dependency>
     
     <categories>System</categories>
 

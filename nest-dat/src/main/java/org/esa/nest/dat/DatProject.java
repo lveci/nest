@@ -76,8 +76,14 @@ public class DatProject {
                     String path = attrib.getValue();
 
                     File file = new File(path);
-                    if(file.exists())
+                    if(file.exists()) {
                         SharedApp.instance().getApp().openProduct(file);
+                        try {
+                            Thread.sleep(500);
+                        } catch(InterruptedException e) {
+
+                        }
+                    }
                 }
             }
         }
