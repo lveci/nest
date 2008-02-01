@@ -6,33 +6,31 @@ import com.bc.ceres.binding.ValueContainerFactory;
 import com.bc.ceres.binding.ValueContainer;
 import com.bc.ceres.binding.swing.SwingBindingContext;
 import org.esa.beam.framework.ui.UIUtils;
-import org.esa.beam.framework.ui.ModalDialog;
-import org.esa.beam.framework.ui.tool.ToolButtonFactory;
-import org.esa.beam.framework.gpf.graph.GraphException;
-import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.framework.ui.TableLayout;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.ui.ParametersPane;
-import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
+import org.esa.beam.framework.gpf.ui.SourceProductSelector;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
-import org.esa.nest.dat.DatContext;
 import org.esa.nest.util.DatUtils;
+import org.esa.nest.dat.DatContext;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Set;
-import java.util.Observer;
+import java.util.*;
 
 /**
  *  Provides the User Interface for creating, loading and saving Graphs
  */
 public class GraphBuilderDialog implements Observer {
 
-    private static final ImageIcon processIcon = DatUtils.LoadIcon("org/esa/nest/icons/Gears24.gif");
-    private static final ImageIcon saveIcon = DatUtils.LoadIcon("org/esa/nest/icons/Save24b.gif");
-    private static final ImageIcon loadIcon = DatUtils.LoadIcon("org/esa/nest/icons/Open24b.gif");
+    private static final ImageIcon processIcon = DatUtils.LoadIcon("org/esa/nest/icons/cog.png");
+    private static final ImageIcon saveIcon = DatUtils.LoadIcon("org/esa/nest/icons/save.png");
+    private static final ImageIcon loadIcon = DatUtils.LoadIcon("org/esa/nest/icons/open.png");
+    private static final ImageIcon clearIcon = DatUtils.LoadIcon("org/esa/nest/icons/edit-clear.png");
     private JPanel mainPanel;
+    private GraphPanel graphPanel;
 
     private JPanel progressPanel;
     private JProgressBar progressBar;
@@ -77,13 +75,57 @@ public class GraphBuilderDialog implements Observer {
         return new JScrollPane(parametersPane.createPanel());
     }
 
+    private JComponent CreateSourceTab(GraphNode node) {
+
+        String operatorName = node.getNode().getOperatorName();
+        final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
+        if (operatorSpi == null) {
+            throw new IllegalArgumentException("operatorName");
+        }
+
+        ValueContainerFactory factory = new ValueContainerFactory(new ParameterDescriptorFactory());
+        ValueContainer valueContainer = factory.createMapBackedValueContainer(operatorSpi.getOperatorClass(), node.getParameterMap());
+        SwingBindingContext binding = new SwingBindingContext(valueContainer);
+
+        java.util.List<GraphSourceProductSelector> sourceProductSelectorList;
+        sourceProductSelectorList = new ArrayList<GraphSourceProductSelector>(3);
+        GraphSourceProductSelector sourceProductSelector = new GraphSourceProductSelector(new DatContext(""), binding);
+        sourceProductSelectorList.add(sourceProductSelector);
+
+        final TableLayout tableLayout = new TableLayout(1);
+        tableLayout.setTableAnchor(TableLayout.Anchor.WEST);
+        tableLayout.setTableWeightX(1.0);
+        tableLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
+        tableLayout.setTablePadding(3, 3);
+
+        JPanel ioParametersPanel = new JPanel(tableLayout);
+        for (GraphSourceProductSelector selector : sourceProductSelectorList) {
+            ioParametersPanel.add(selector.createDefaultPanel());
+        }
+        //ioParametersPanel.add(getTargetProductSelector().createDefaultPanel());
+        ioParametersPanel.add(tableLayout.createVerticalSpacer());
+
+        initSourceProductSelectors(sourceProductSelectorList);
+
+        return ioParametersPanel;
+    }
+
+    private static void initSourceProductSelectors(java.util.List<GraphSourceProductSelector> sourceProductSelectorList) {
+        for (GraphSourceProductSelector sourceProductSelector : sourceProductSelectorList) {
+            sourceProductSelector.initProducts();
+            if (sourceProductSelector.getProductCount() > 0) {
+                sourceProductSelector.setSelectedIndex(0);
+            }
+        }
+    }
+
     private void initUI() {
         mainPanel = new JPanel(new BorderLayout(4, 4));
 
         // north panel
         final JPanel northPanel = new JPanel(new BorderLayout(4, 4));
 
-        GraphPanel graphPanel = new GraphPanel(graphEx);
+        graphPanel = new GraphPanel(graphEx);
         graphPanel.setBackground(Color.WHITE);
         graphPanel.setPreferredSize(new Dimension(500,500));
         JScrollPane scrollPane = new JScrollPane(graphPanel);
@@ -115,7 +157,6 @@ public class GraphBuilderDialog implements Observer {
         progressPanel.add(progressBar);
         progressPanel.setVisible(false);
         southPanel.add(progressPanel, BorderLayout.SOUTH);
-        // todo progressPanel
 
         mainPanel.add(southPanel, BorderLayout.SOUTH);
         mainPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
@@ -153,9 +194,18 @@ public class GraphBuilderDialog implements Observer {
             }
         });
 
+        JButton clearButton = CreateButton("clearButton", "Clear", clearIcon, panel);
+        clearButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(final ActionEvent e) {
+                ClearGraph();
+            }
+        });
+
         gbc.weightx = 0;
         panel.add(loadButton, gbc);
         panel.add(saveButton, gbc);
+        panel.add(clearButton, gbc);
         panel.add(processButton, gbc);
     }
 
@@ -172,29 +222,27 @@ public class GraphBuilderDialog implements Observer {
 
     private void DoProcessing() {
 
-        try {
-            graphEx.executeGraph();
-        } catch(GraphException e) {
-            throw new OperatorException(e);
-        }
+       final SwingWorker processThread = new ProcessThread(new ProgressBarProgressMonitor(progressBar, null));
+       processThread.execute();
     }
 
      private void SaveGraph() {
 
-        //try {
-            graphEx.saveGraph();
-        //} catch(GraphException e) {
-        //    throw new OperatorException(e);
-        //}
+        graphEx.saveGraph();
     }
 
      private void LoadGraph() {
 
-        //try {
-            graphEx.loadGraph();
-        //} catch(GraphException e) {
-        //    throw new OperatorException(e);
-        //}
+        tabbedPanel.removeAll();
+        graphEx.loadGraph();
+        graphPanel.repaint();
+    }
+
+    private void ClearGraph() {
+
+        tabbedPanel.removeAll();
+        graphEx.ClearGraph();
+        graphPanel.repaint();
     }
 
      /**
@@ -213,7 +261,10 @@ public class GraphBuilderDialog implements Observer {
         String opID = node.getNode().getId();
         if(event.eventType == GraphExecuter.events.ADD_EVENT) {
 
-            tabbedPanel.addTab(opID, OpIcon, CreateOpTab(node), opID + " Operator");
+            if(node.getOperatorName().equals("Read")) {
+                tabbedPanel.addTab(opID, OpIcon, CreateSourceTab(node), opID + " Operator");
+            } else
+                tabbedPanel.addTab(opID, OpIcon, CreateOpTab(node), opID + " Operator");
         } else if(event.eventType == GraphExecuter.events.REMOVE_EVENT) {
 
             int index = tabbedPanel.indexOfTab(opID);
@@ -226,7 +277,33 @@ public class GraphBuilderDialog implements Observer {
     }
 
 
+    private class ProcessThread extends SwingWorker<GraphExecuter, Object> {
 
+        private final ProgressMonitor pm;
+
+        public ProcessThread(final ProgressMonitor pm) {
+            this.pm = pm;
+        }
+
+        @Override
+        protected GraphExecuter doInBackground() throws Exception {
+
+            pm.beginTask("Processing Graph...", 10);
+            try {
+                graphEx.executeGraph(pm);
+
+            } finally {
+                pm.done();
+            }
+            return graphEx;
+        }
+
+        @Override
+        public void done() {
+
+        }
+
+    }
 
 
     /**

@@ -4,16 +4,12 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.graph.*;
-import org.esa.beam.util.io.FileUtils;
-import org.esa.beam.util.io.BeamFileFilter;
-import org.esa.beam.visat.SharedApp;
 import org.esa.nest.util.DatUtils;
 
 import java.util.*;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.File;
 
 public class GraphExecuter extends Observable {
 
@@ -36,11 +32,17 @@ public class GraphExecuter extends Observable {
         return nodeList;
     }
 
+    void ClearGraph() {
+        graph = null;
+        graph = new Graph("Graph");
+        nodeList.clear();
+    }
+
     GraphNode findGraphNode(String id) {    
         for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
         {
             GraphNode n = (GraphNode) e.nextElement();
-            if(n.getNode().getId().equals(id)) {
+            if(n.getID().equals(id)) {
                 return n;
             }
         }
@@ -62,9 +64,9 @@ public class GraphExecuter extends Observable {
         return gpf.getOperatorSpiRegistry().getAliases();
     }
 
-    void addOperator(String opName) {
+    GraphNode addOperator(String opName) {
 
-        String id = opName + " " + ++idCount;
+        String id = opName + ' ' + ++idCount;
         Node newNode = new Node(id, opName);
 
         Xpp3Dom parameters = new Xpp3Dom("parameters");
@@ -78,6 +80,8 @@ public class GraphExecuter extends Observable {
         setChanged();
         notifyObservers(new GraphEvent(events.ADD_EVENT, newGraphNode));
         clearChanged();
+
+        return newGraphNode;
     }
 
     void removeOperator(GraphNode node) {
@@ -86,13 +90,12 @@ public class GraphExecuter extends Observable {
         notifyObservers(new GraphEvent(events.REMOVE_EVENT, node));
         clearChanged();
 
-        graph.removeNode(node.getNode().getId());
+        graph.removeNode(node.getID());
         nodeList.remove(node);
     }
 
-    void addOperatorSource(GraphNode source, GraphNode target) {
-        Node srcNode = source.getNode();
-        NodeSource ns = new NodeSource("sourceProduct", srcNode.getId());
+    void connectOperatorSource(GraphNode source, GraphNode target) {
+        NodeSource ns = new NodeSource("sourceProduct", source.getID());
 
         target.getNode().addSource(ns);
     }
@@ -110,15 +113,18 @@ public class GraphExecuter extends Observable {
         for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
         {
             GraphNode n = (GraphNode) e.nextElement();
+            Xpp3Dom config = n.getNode().getConfiguration();
             Map<String, Object> parameterMap = n.getParameterMap();
             Set keys = parameterMap.keySet();                           // The set of keys in the map.
             for (Object key : keys) {
                 Object value = parameterMap.get(key);                   // Get the value for that key.
 
-                Xpp3Dom xml = new Xpp3Dom((String)key);
+                Xpp3Dom xml = config.getChild((String)key);
+                if(xml == null) {
+                    xml = new Xpp3Dom((String)key);
+                    config.addChild(xml);
+                }
                 xml.setValue(value.toString());
-
-                n.getNode().getConfiguration().addChild(xml);
             }
         }
     }
@@ -128,14 +134,16 @@ public class GraphExecuter extends Observable {
      *
      * @throws GraphException
      */
-    void executeGraph() throws GraphException {
+    void executeGraph(ProgressMonitor pm) throws GraphException {
         AssignAllParameters();
         GraphProcessor processor = new GraphProcessor();
-        processor.executeGraph(graph, ProgressMonitor.NULL);
+        processor.executeGraph(graph, pm);
     }
 
     void saveGraph() {
         try {
+            AssignAllParameters();
+
             String filePath = DatUtils.GetFilePath("Save Graph", "XML", "xml", "Graph File", true);
             if(filePath == null) return;
             FileWriter fileWriter = new FileWriter(filePath);
@@ -180,7 +188,7 @@ public class GraphExecuter extends Observable {
         }
     }
 
-    class GraphEvent {
+    static class GraphEvent {
 
         final events  eventType;
         final Object  data;

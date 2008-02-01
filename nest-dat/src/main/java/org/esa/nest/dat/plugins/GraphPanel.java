@@ -1,6 +1,7 @@
 package org.esa.nest.dat.plugins;
 
 import org.esa.beam.framework.gpf.graph.NodeSource;
+import org.esa.nest.util.DatUtils;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
@@ -15,20 +16,20 @@ import java.util.Enumeration;
 /**
  * User: lveci
  * Date: Jan 15, 2008
- * Edits the graph graphically
+ * Draws and Edits the graph graphically
  */
 public class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, MouseListener, MouseMotionListener {
 
     private final GraphExecuter graphEx;
-    final JMenu addMenu;
+    private JMenu addMenu;
     private Point lastMousePos;
-    private final int nodeWidth = 60;
-    private final int nodeHeight = 30;
-    private final int halfNodeHeight = nodeHeight/2;
-    private final int hotSpotWidth = 10;
-    private final int hotSpotOffset = halfNodeHeight - (hotSpotWidth/2);
-    private final Color opColor = new Color(200, 200, 255, 128);
-    private final Color selColor = new Color(200, 255, 200, 150);
+    private static final int nodeWidth = 60;
+    private static final int nodeHeight = 30;
+    private static final int halfNodeHeight = nodeHeight/2;
+    private static final int hotSpotWidth = 10;
+    private static final int hotSpotOffset = halfNodeHeight - (hotSpotWidth/2);
+    private static final Color opColor = new Color(200, 200, 255, 128);
+    private static final Color selColor = new Color(200, 255, 200, 150);
     private GraphNode selectedNode;
     private boolean showSourceHotSpot = false;
     private boolean connectingSource = false;
@@ -38,21 +39,58 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
     GraphPanel(GraphExecuter graphExec) {
 
         graphEx = graphExec;
-        Set gpfOperatorSet = graphEx.GetOperatorList();
 
-        JMenuItem item;
-        addMenu = new JMenu("Add");
-        for (Object anAliasSet : gpfOperatorSet) {
-            String alias = (String) anAliasSet;
-            addMenu.add(item = new JMenuItem(alias, new ImageIcon("icons/Gears20.gif")));
-            item.setHorizontalTextPosition(JMenuItem.RIGHT);
-            item.addActionListener(this);
-        }
+        CreateAddOpMenu();
         
         addMouseListener(this);
         addMouseMotionListener(this);
     }
 
+    /**
+     * Creates a menu containing the list of operators to the addMenu
+     */
+    private void CreateAddOpMenu() {
+        ImageIcon opIcon = DatUtils.LoadIcon("org/esa/nest/icons/cog_add.png");
+        addMenu = new JMenu("Add");
+
+        // get operator list from graph executor
+        Set gpfOperatorSet = graphEx.GetOperatorList();
+        // add operators
+        for (Object anAliasSet : gpfOperatorSet) {
+            addMenuItem(addMenu, (String)anAliasSet, opIcon);
+        }
+    }
+
+    private void addMenuItem(JMenu menu, String name, ImageIcon icon) {
+        JMenuItem item = new JMenuItem(name, icon);
+        item.setHorizontalTextPosition(JMenuItem.RIGHT);
+        item.addActionListener(this);
+        menu.add(item);
+    }
+
+    /**
+     * Handles menu item pressed events
+     * @param event the action event
+     */
+    public void actionPerformed(ActionEvent event) {
+
+        String name = event.getActionCommand();
+        if(name.equals("Remove")) {
+
+            graphEx.removeOperator(selectedNode);
+        } else {
+            GraphNode newGraphNode = graphEx.addOperator(name);
+            newGraphNode.setPos(lastMousePos);
+        }
+
+        repaint();
+    }
+    
+    /**
+     * Paints the panel component
+     * @param g The Graphics
+     */
+    @Override
     protected void paintComponent(java.awt.Graphics g) {
         super.paintComponent(g);
 
@@ -62,6 +100,11 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
         DrawGraph(g, graphEx.GetGraphNodes());
     }
 
+    /**
+     * Draw the graphical representation of the Graph
+     * @param g the Graphics
+     * @param nodes the list of graphNodes
+     */
     private void DrawGraph(Graphics g, Vector nodes) {
 
         for (Enumeration e = nodes.elements(); e.hasMoreElements();)
@@ -79,7 +122,7 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
             g.draw3DRect(x, y, nodeWidth, nodeHeight, true);
 
             g.setColor(Color.black);
-            g.drawString(n.getNode().getOperatorName(), x + 10, y + 20);
+            g.drawString(n.getOperatorName(), x + 10, y + 20);
 
             g.setColor(Color.red);
             NodeSource[] nSources = n.getNode().getSources();
@@ -103,7 +146,10 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
         }
     }
 
-
+    /**
+     * Handle mouse pressed event
+     * @param e the mouse event
+     */
     public void mousePressed(MouseEvent e) {
         checkPopup(e);
 
@@ -114,6 +160,10 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
         lastMousePos = e.getPoint();
     }
 
+    /**
+     * Handle mouse clicked event
+     * @param e the mouse event
+     */
     public void mouseClicked(MouseEvent e) {
         checkPopup(e);
     }
@@ -124,13 +174,17 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
     public void mouseExited(MouseEvent e) {
     }
 
+    /**
+     * Handle mouse released event
+     * @param e the mouse event
+     */
     public void mouseReleased(MouseEvent e) {
         checkPopup(e);
 
         if(connectingSource) {
             GraphNode n = findNode(e.getPoint());
             if(n != null && selectedNode != n) {
-                graphEx.addOperatorSource(n, connectSourceTargetNode);
+                graphEx.connectOperatorSource(n, connectSourceTargetNode);
             }
         }
         connectingSource = false;
@@ -138,7 +192,11 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
         repaint();
     }
 
-    public void mouseDragged(java.awt.event.MouseEvent e) {
+    /**
+     * Handle mouse dragged event
+     * @param e the mouse event
+     */
+    public void mouseDragged(MouseEvent e) {
 
         if(selectedNode != null && !connectingSource) {
             Point p = new Point(e.getX() - (lastMousePos.x - selectedNode.getPos().x),
@@ -153,7 +211,11 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
         }
     }
 
-    public void mouseMoved(java.awt.event.MouseEvent e) {
+    /**
+     * Handle mouse moved event
+     * @param e the mouse event
+     */
+    public void mouseMoved(MouseEvent e) {
   
         GraphNode n = findNode(e.getPoint());
         if(selectedNode != n) {
@@ -205,19 +267,6 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
     public void popupMenuCanceled(PopupMenuEvent e) {
     }
 
-    public void actionPerformed(ActionEvent event) {
-
-        String name = event.getActionCommand();
-        if(name.equals("Remove")) {
-
-            graphEx.removeOperator(selectedNode);
-        } else {
-            graphEx.addOperator(name);
-        }
-
-        repaint();
-    }
-
     private GraphNode findNode(Point p) {
 
        Vector nodes = graphEx.GetGraphNodes();
@@ -231,7 +280,7 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
         return null;
     }
 
-    private boolean isWithinRect(Point o, int width, int height, Point p) {
+    private static boolean isWithinRect(Point o, int width, int height, Point p) {
         return p.x > o.x && p.y > o.y && p.x < o.x+width && p.y < o.y+height;
     }
 

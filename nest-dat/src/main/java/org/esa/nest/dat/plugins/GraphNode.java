@@ -6,8 +6,6 @@ import java.awt.*;
 import java.util.Map;
 import java.util.HashMap;
 
-import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
-
 /**
  * Represents a node of the graph for the GraphBuilder
  * Stores, saves and loads the display position for the node
@@ -41,6 +39,22 @@ public class GraphNode {
 
     Node getNode() {
         return node;
+    }
+
+    /**
+     * Gets the uniqe node identifier.
+     * @return the identifier
+     */
+    String getID() {
+        return node.getId();
+    }
+
+     /**
+     * Gets the name of the operator. 
+     * @return the name of the operator.
+     */
+    String getOperatorName() {
+        return node.getOperatorName();
     }
 
     Map<String, Object> getParameterMap() {
