@@ -90,14 +90,15 @@ public class GraphExecuter extends Observable {
         notifyObservers(new GraphEvent(events.REMOVE_EVENT, node));
         clearChanged();
 
+        // remove as a source from all nodes
+        for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
+        {
+            GraphNode n = (GraphNode) e.nextElement();
+            n.disconnectOperatorSources(node);
+        }
+
         graph.removeNode(node.getID());
         nodeList.remove(node);
-    }
-
-    void connectOperatorSource(GraphNode source, GraphNode target) {
-        NodeSource ns = new NodeSource("sourceProduct", source.getID());
-
-        target.getNode().addSource(ns);
     }
 
     void setOperatorParam(String id, String paramName, String value) {

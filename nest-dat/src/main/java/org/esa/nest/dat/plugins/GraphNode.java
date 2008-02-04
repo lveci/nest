@@ -1,6 +1,7 @@
 package org.esa.nest.dat.plugins;
 
 import org.esa.beam.framework.gpf.graph.Node;
+import org.esa.beam.framework.gpf.graph.NodeSource;
 
 import java.awt.*;
 import java.util.Map;
@@ -16,6 +17,12 @@ public class GraphNode {
 
     private final Node node;
     private final Map<String, Object> parameterMap = new HashMap<String, Object>();
+
+    static final int nodeWidth = 60;
+    static final int nodeHeight = 30;
+    static final int halfNodeHeight = GraphNode.nodeHeight/2;
+    static final int hotSpotSize = 10;
+    static final int hotSpotOffset = halfNodeHeight - (hotSpotSize/2);
 
     GraphNode(Node n) {
         node = n;
@@ -61,4 +68,40 @@ public class GraphNode {
         return parameterMap;
     }
 
+    void connectOperatorSource(GraphNode source) {
+        // check if already a source for this node
+        disconnectOperatorSources(source);
+        
+        NodeSource ns = new NodeSource("sourceProduct", source.getID());
+        node.addSource(ns);
+    }
+
+    void disconnectOperatorSources(GraphNode source) {
+
+        NodeSource[] sources = node.getSources();
+        for (NodeSource ns : sources) {
+            if(ns.getSourceNodeId().equals(source.getID())) {
+                node.removeSource(ns);
+            }
+        }
+    }
+
+    void DrawNode(Graphics g, Color col) {
+        int x = getPos().x;
+        int y = getPos().y;
+        g.setColor(col);
+        g.fill3DRect(x, y, nodeWidth, nodeHeight, true);
+        g.setColor(Color.blue);
+        g.draw3DRect(x, y, nodeWidth, nodeHeight, true);
+
+        g.setColor(Color.black);
+        g.drawString(getOperatorName(), x + 10, y + 20);
+    }
+    
+    void DrawHotspot(Graphics g, Color col) {
+        Point p = getPos();
+        g.setColor(col);
+        g.drawOval(p.x - hotSpotSize/2, p.y + hotSpotOffset, hotSpotSize, hotSpotSize);
+    }
+      
 }

@@ -23,11 +23,9 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
     private final GraphExecuter graphEx;
     private JMenu addMenu;
     private Point lastMousePos;
-    private static final int nodeWidth = 60;
-    private static final int nodeHeight = 30;
-    private static final int halfNodeHeight = nodeHeight/2;
-    private static final int hotSpotWidth = 10;
-    private static final int hotSpotOffset = halfNodeHeight - (hotSpotWidth/2);
+    private final AddMenuListener addListener = new AddMenuListener(this);
+    private final RemoveSourceMenuListener removeSourceListener = new RemoveSourceMenuListener(this);
+
     private static final Color opColor = new Color(200, 200, 255, 128);
     private static final Color selColor = new Color(200, 255, 200, 150);
     private GraphNode selectedNode;
@@ -57,15 +55,27 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
         Set gpfOperatorSet = graphEx.GetOperatorList();
         // add operators
         for (Object anAliasSet : gpfOperatorSet) {
-            addMenuItem(addMenu, (String)anAliasSet, opIcon);
+            JMenuItem item = new JMenuItem((String)anAliasSet, opIcon);
+            item.setHorizontalTextPosition(JMenuItem.RIGHT);
+            item.addActionListener(addListener);
+            addMenu.add(item);
         }
     }
 
-    private void addMenuItem(JMenu menu, String name, ImageIcon icon) {
-        JMenuItem item = new JMenuItem(name, icon);
-        item.setHorizontalTextPosition(JMenuItem.RIGHT);
-        item.addActionListener(this);
-        menu.add(item);
+    void AddOperatorAction(String name)
+    {
+        GraphNode newGraphNode = graphEx.addOperator(name);
+        newGraphNode.setPos(lastMousePos);
+        repaint();
+    }
+
+    void RemoveSourceAction(String id)
+    {
+        if(selectedNode != null) {
+            GraphNode source = graphEx.findGraphNode(id);
+            selectedNode.disconnectOperatorSources(source);
+            repaint();
+        }
     }
 
     /**
@@ -75,17 +85,54 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
     public void actionPerformed(ActionEvent event) {
 
         String name = event.getActionCommand();
-        if(name.equals("Remove")) {
+        if(name.equals("Delete")) {
 
             graphEx.removeOperator(selectedNode);
-        } else {
-            GraphNode newGraphNode = graphEx.addOperator(name);
-            newGraphNode.setPos(lastMousePos);
+            repaint();
         }
-
-        repaint();
     }
-    
+
+    private void checkPopup(MouseEvent e) {
+        if (e.isPopupTrigger()) {
+
+            JPopupMenu popup = new JPopupMenu();
+            popup.add(addMenu);
+
+            if(selectedNode != null) {
+                JMenuItem item = new JMenuItem("Delete");
+                popup.add(item);
+                item.setHorizontalTextPosition(JMenuItem.RIGHT);
+                item.addActionListener(this);
+
+                NodeSource[] sources = selectedNode.getNode().getSources();
+                if(sources.length > 0) {
+                    JMenu removeSourcedMenu = new JMenu("Remove Source");
+                    for (NodeSource ns : sources) {
+                        JMenuItem nsItem = new JMenuItem(ns.getSourceNodeId());
+                        removeSourcedMenu.add(nsItem);
+                        nsItem.setHorizontalTextPosition(JMenuItem.RIGHT);
+                        nsItem.addActionListener(removeSourceListener);
+                    }
+                    popup.add(removeSourcedMenu);
+                }
+            }
+
+            popup.setLabel("Justification");
+            popup.setBorder(new BevelBorder(BevelBorder.RAISED));
+            popup.addPopupMenuListener(this);
+            popup.show(this, e.getX(), e.getY());
+        }
+    }
+
+    public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+    }
+
+    public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+    }
+
+    public void popupMenuCanceled(PopupMenuEvent e) {
+    }
+
     /**
      * Paints the panel component
      * @param g The Graphics
@@ -111,38 +158,29 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
         {
             GraphNode n = (GraphNode) e.nextElement();
             
-            int x = n.getPos().x;
-            int y = n.getPos().y;
             if(n == selectedNode)
-                g.setColor(selColor);
+                n.DrawNode(g, selColor);
             else
-                g.setColor(opColor);
-            g.fill3DRect(x, y, nodeWidth, nodeHeight, true);
-            g.setColor(Color.blue);
-            g.draw3DRect(x, y, nodeWidth, nodeHeight, true);
-
-            g.setColor(Color.black);
-            g.drawString(n.getOperatorName(), x + 10, y + 20);
+                n.DrawNode(g, opColor);
 
             g.setColor(Color.red);
             NodeSource[] nSources = n.getNode().getSources();
             for (NodeSource nSource : nSources) {
                 GraphNode srcNode = graphEx.findGraphNode(nSource.getSourceNodeId());
                 if(srcNode != null)
-                    g.drawLine(n.getPos().x, n.getPos().y + halfNodeHeight,
-                            srcNode.getPos().x + nodeWidth, srcNode.getPos().y + halfNodeHeight);
+                    g.drawLine(n.getPos().x, n.getPos().y + GraphNode.halfNodeHeight,
+                            srcNode.getPos().x + GraphNode.nodeWidth, srcNode.getPos().y + GraphNode.halfNodeHeight);
             }
         }
 
         if(showSourceHotSpot && selectedNode != null) {
-            Point p = selectedNode.getPos();
-            g.drawOval(p.x - hotSpotWidth/2, p.y + hotSpotOffset, hotSpotWidth, hotSpotWidth);
+            selectedNode.DrawHotspot(g, Color.red);
         }
         if(connectingSource) {
             Point p1 = connectSourceTargetNode.getPos();
             Point p2 = connectingSourcePos;
             g.setColor(Color.red);
-            g.drawLine(p1.x, p1.y + halfNodeHeight, p2.x, p2.y);
+            g.drawLine(p1.x, p1.y + GraphNode.halfNodeHeight, p2.x, p2.y);
         }
     }
 
@@ -184,7 +222,7 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
         if(connectingSource) {
             GraphNode n = findNode(e.getPoint());
             if(n != null && selectedNode != n) {
-                graphEx.connectOperatorSource(n, connectSourceTargetNode);
+                connectSourceTargetNode.connectOperatorSource(n);
             }
         }
         connectingSource = false;
@@ -226,8 +264,8 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
             repaint();
         }
         if(selectedNode != null) {
-            Point sourcePoint = new Point(n.getPos().x, n.getPos().y + hotSpotOffset);
-            if(isWithinRect(sourcePoint, hotSpotWidth, hotSpotWidth, e.getPoint())) {
+            Point sourcePoint = new Point(n.getPos().x, n.getPos().y + GraphNode.hotSpotOffset);
+            if(isWithinRect(sourcePoint, GraphNode.hotSpotSize, GraphNode.hotSpotSize, e.getPoint())) {
                  showSourceHotSpot = true;
                  connectSourceTargetNode = selectedNode;
                  repaint();
@@ -238,35 +276,6 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
        }
     }
 
-    private void checkPopup(MouseEvent e) {
-        if (e.isPopupTrigger()) {
-
-            JPopupMenu popup = new JPopupMenu();
-            popup.add(addMenu);
-
-            if(selectedNode != null) {
-                JMenuItem item = new JMenuItem("Remove");
-                popup.add(item);
-                item.setHorizontalTextPosition(JMenuItem.RIGHT);
-                item.addActionListener(this);
-            }
-
-            popup.setLabel("Justification");
-            popup.setBorder(new BevelBorder(BevelBorder.RAISED));
-            popup.addPopupMenuListener(this);
-            popup.show(this, e.getX(), e.getY());
-        }
-    }
-
-    public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-    }
-
-    public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-    }
-
-    public void popupMenuCanceled(PopupMenuEvent e) {
-    }
-
     private GraphNode findNode(Point p) {
 
        Vector nodes = graphEx.GetGraphNodes();
@@ -274,7 +283,7 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
         {
             GraphNode n = (GraphNode) e.nextElement();
 
-            if(isWithinRect(n.getPos(), nodeWidth, nodeHeight, p))
+            if(isWithinRect(n.getPos(), GraphNode.nodeWidth, GraphNode.nodeHeight, p))
                 return n;
         }
         return null;
@@ -284,4 +293,27 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
         return p.x > o.x && p.y > o.y && p.x < o.x+width && p.y < o.y+height;
     }
 
+    static class AddMenuListener implements ActionListener {
+
+        final GraphPanel graphPanel;
+        AddMenuListener(GraphPanel panel) {
+            graphPanel = panel;
+        }
+        public void actionPerformed(java.awt.event.ActionEvent event) {
+            graphPanel.AddOperatorAction(event.getActionCommand());
+        }
+
+    }
+
+    static class RemoveSourceMenuListener implements ActionListener {
+
+        final GraphPanel graphPanel;
+        RemoveSourceMenuListener(GraphPanel panel) {
+            graphPanel = panel;
+        }
+        public void actionPerformed(java.awt.event.ActionEvent event) {
+            graphPanel.RemoveSourceAction(event.getActionCommand());
+        }
+
+    }
 }
