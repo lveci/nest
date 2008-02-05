@@ -199,8 +199,7 @@ public class DatAboutBox extends ModalDialog {
                 names[i] = (String) e.nextElement();
             }
             Arrays.sort(names);
-            for (int i = 0; i < names.length; i++) {
-                String name = names[i];
+            for (String name : names) {
                 String value = sysProps.getProperty(name);
                 data.add(new Object[]{name, value});
             }

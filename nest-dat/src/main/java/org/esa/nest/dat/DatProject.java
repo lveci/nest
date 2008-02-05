@@ -66,21 +66,20 @@ public class DatProject {
         Element root = doc.getRootElement();
 
         List children = root.getContent();
-        Iterator iterator = children.iterator();
-        while (iterator.hasNext()) {
-            Object o = iterator.next();
-            if(o instanceof Element) {
-                Element child = (Element)o;
+        for (Object aChildren : children) {
+            Object o = aChildren;
+            if (o instanceof Element) {
+                Element child = (Element) o;
                 Attribute attrib = child.getAttribute("path");
-                if(attrib != null) {
+                if (attrib != null) {
                     String path = attrib.getValue();
 
                     File file = new File(path);
-                    if(file.exists()) {
+                    if (file.exists()) {
                         SharedApp.instance().getApp().openProduct(file);
                         try {
                             Thread.sleep(500);
-                        } catch(InterruptedException e) {
+                        } catch (InterruptedException e) {
 
                         }
                     }

@@ -10,7 +10,6 @@ import org.esa.beam.framework.ui.TableLayout;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.ui.ParametersPane;
-import org.esa.beam.framework.gpf.ui.SourceProductSelector;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.nest.util.DatUtils;
 import org.esa.nest.dat.DatContext;
@@ -291,7 +290,8 @@ public class GraphBuilderDialog implements Observer {
             pm.beginTask("Processing Graph...", 10);
             try {
                 graphEx.executeGraph(pm);
-
+            } catch(Exception e) {
+                System.out.print(e.getMessage());
             } finally {
                 pm.done();
             }

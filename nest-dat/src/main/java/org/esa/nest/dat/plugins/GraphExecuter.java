@@ -4,6 +4,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.graph.*;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.util.DatUtils;
 
 import java.util.*;
@@ -125,7 +126,11 @@ public class GraphExecuter extends Observable {
                     xml = new Xpp3Dom((String)key);
                     config.addChild(xml);
                 }
-                xml.setValue(value.toString());
+
+                if(value instanceof Product)
+                    xml.setValue(((Product)value).getFileLocation().getAbsolutePath());
+                else
+                    xml.setValue(value.toString());
             }
         }
     }

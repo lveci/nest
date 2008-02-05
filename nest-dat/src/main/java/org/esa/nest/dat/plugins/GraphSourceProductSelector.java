@@ -67,7 +67,6 @@ public class GraphSourceProductSelector {
         productNameComboBox = new JComboBox(productListModel);
         productNameComboBox.setPrototypeDisplayValue("[1] 123456789 123456789 12345");
         productNameComboBox.setRenderer(new ProductListCellRenderer());
-        productNameComboBox.addPopupMenuListener(new ProductPopupMenuListener());
         productNameComboBox.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 final Product product = (Product) productNameComboBox.getSelectedItem();
@@ -257,42 +256,6 @@ public class GraphSourceProductSelector {
             }
 
             return cellRendererComponent;
-        }
-    }
-
-    /**
-     * To let the popup menu be wider than the closed combobox.
-     * Adapted an idea from http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6257236
-     */
-    private static class ProductPopupMenuListener  implements PopupMenuListener {
-
-        public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-            JComboBox box = (JComboBox) e.getSource();
-            Object comp = box.getUI().getAccessibleChild(box, 0);
-            if (!(comp instanceof JPopupMenu))
-                return;
-            JComponent scrollPane = (JComponent) ((JPopupMenu) comp)
-                    .getComponent(0);
-            Dimension size = new Dimension();
-            size.width = scrollPane.getPreferredSize().width;
-            final int boxItemCount = box.getModel().getSize();
-            for (int i = 0; i < boxItemCount; i++) {
-                Product product = (Product) box.getModel().getElementAt(i);
-                final JLabel label = new JLabel();
-                label.setText(product.getDisplayName());
-                size.width = Math.max(label.getPreferredSize().width, size.width);
-            }
-            size.height = scrollPane.getPreferredSize().height;
-            scrollPane.setPreferredSize(size);
-            scrollPane.setMaximumSize(size);
-        }
-
-        @Override
-        public void popupMenuCanceled(PopupMenuEvent e) {
-        }
-
-        @Override
-        public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
         }
     }
 
