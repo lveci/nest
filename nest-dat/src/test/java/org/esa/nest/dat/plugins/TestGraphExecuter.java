@@ -4,17 +4,19 @@ import junit.framework.TestCase;
 
 import java.util.Vector;
 import java.util.Set;
+import java.util.Observer;
 
 /**
  * GraphExecuter Tester.
  *
- * @author <Authors name>
- * @since <pre>12/21/2007</pre>
+ * @author lveci
+ * @since 12/21/2007
  * @version 1.0
  */
-public class TestGraphExecuter extends TestCase {
+public class TestGraphExecuter extends TestCase implements Observer {
 
     private GraphExecuter graphEx;
+    private String updateValue = "";
 
     public TestGraphExecuter(String name) {
         super(name);
@@ -22,6 +24,7 @@ public class TestGraphExecuter extends TestCase {
 
     public void setUp() throws Exception {
         graphEx = new GraphExecuter();
+        graphEx.addObserver(this);
     }
 
     public void tearDown() throws Exception {
@@ -35,12 +38,75 @@ public class TestGraphExecuter extends TestCase {
     }
 
     public void testAddOperator() {
+        updateValue = "";
+        graphEx.addOperator("testOp");
 
+        Vector nodeList = graphEx.GetGraphNodes();
+        assertEquals(1, nodeList.size());
+        assertEquals(updateValue, "Add");
+    }
+
+    public void testClear() {
         graphEx.addOperator("testOp");
 
         Vector nodeList = graphEx.GetGraphNodes();
         assertEquals(1, nodeList.size());
 
-        assertTrue(true);
+        graphEx.ClearGraph();
+        assertEquals(0, nodeList.size());
+    }
+
+    public void testRemoveOperator() {
+        GraphNode node = graphEx.addOperator("testOp");
+
+        Vector nodeList = graphEx.GetGraphNodes();
+        assertEquals(1, nodeList.size());
+
+        updateValue = "";
+        graphEx.removeOperator(node);
+        assertEquals(0, nodeList.size());
+        assertEquals(updateValue, "Remove");
+    }
+
+    public void testFindGraphNode() {
+        GraphNode lostNode = graphEx.addOperator("lostOp");
+
+        GraphNode foundNode = graphEx.findGraphNode(lostNode.getID());
+        assertTrue(foundNode.equals(lostNode));
+
+        graphEx.ClearGraph();
+    }
+
+    public void testSetSelected() {
+        GraphNode node = graphEx.addOperator("testOp");
+
+        updateValue = "";
+        graphEx.setSelectedNode(node);
+
+        assertEquals(updateValue, "Selected");
+    }
+
+
+    /**
+     Implements the functionality of Observer participant of Observer Design Pattern to define a one-to-many
+     dependency between a Subject object and any number of Observer objects so that when the
+     Subject object changes state, all its Observer objects are notified and updated automatically.
+
+     Defines an updating interface for objects that should be notified of changes in a subject.
+     * @param subject The Observerable subject
+     * @param data optional data
+     */
+    public void update(java.util.Observable subject, java.lang.Object data) {
+
+        GraphExecuter.GraphEvent event = (GraphExecuter.GraphEvent)data;
+        GraphNode node = (GraphNode)event.data;
+        String opID = node.getNode().getId();
+        if(event.eventType == GraphExecuter.events.ADD_EVENT) {
+            updateValue = "Add";
+        } else if(event.eventType == GraphExecuter.events.REMOVE_EVENT) {
+            updateValue = "Remove";
+        } else if(event.eventType == GraphExecuter.events.SELECT_EVENT) {
+            updateValue = "Selected";
+        }
     }
 }
