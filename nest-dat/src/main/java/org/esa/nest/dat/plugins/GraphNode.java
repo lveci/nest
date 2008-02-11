@@ -4,6 +4,7 @@ import org.esa.beam.framework.gpf.graph.Node;
 import org.esa.beam.framework.gpf.graph.NodeSource;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -18,11 +19,11 @@ public class GraphNode {
     private final Node node;
     private final Map<String, Object> parameterMap = new HashMap<String, Object>();
 
-    static final int nodeWidth = 60;
-    static final int nodeHeight = 30;
-    static final int halfNodeHeight = GraphNode.nodeHeight/2;
-    static final int hotSpotSize = 10;
-    static final int hotSpotOffset = halfNodeHeight - (hotSpotSize/2);
+    private int nodeWidth = 60;
+    private int nodeHeight = 30;
+    private int halfNodeHeight;
+    private int hotSpotSize = 10;
+    private int hotSpotOffset;
 
     GraphNode(Node n) {
         node = n;
@@ -46,6 +47,33 @@ public class GraphNode {
 
     Node getNode() {
         return node;
+    }
+
+    int getWidth() {
+        return nodeWidth;
+    }
+
+    int getHeight() {
+        return nodeHeight;
+    }
+
+    int getHotSpotSize() {
+        return hotSpotSize;
+    }
+
+    int getHalfNodeHeight() {
+        return halfNodeHeight;
+    }
+
+    private void setSize(int width, int height) {
+        nodeWidth = width;
+        nodeHeight = height;
+        halfNodeHeight = nodeHeight / 2;
+        hotSpotOffset = nodeHeight/2 - (hotSpotSize/2);
+    }
+
+    int getHotSpotOffset() {
+        return hotSpotOffset;
     }
 
     /**
@@ -86,19 +114,26 @@ public class GraphNode {
         }
     }
 
-    void DrawNode(Graphics g, Color col) {
+    void drawNode(Graphics g, Color col) {
         int x = getPos().x;
         int y = getPos().y;
+
+        FontMetrics metrics = g.getFontMetrics();
+        String name = getOperatorName();
+        Rectangle2D rect = metrics.getStringBounds(name, g);
+        int stringWidth = (int)rect.getWidth();
+        setSize(Math.max(stringWidth, 50) + 10, 30);
+
         g.setColor(col);
         g.fill3DRect(x, y, nodeWidth, nodeHeight, true);
         g.setColor(Color.blue);
         g.draw3DRect(x, y, nodeWidth, nodeHeight, true);
 
         g.setColor(Color.black);
-        g.drawString(getOperatorName(), x + 10, y + 20);
+        g.drawString(name, x + (nodeWidth - stringWidth)/2, y + 20);
     }
     
-    void DrawHotspot(Graphics g, Color col) {
+    void drawHotspot(Graphics g, Color col) {
         Point p = getPos();
         g.setColor(col);
         g.drawOval(p.x - hotSpotSize/2, p.y + hotSpotOffset, hotSpotSize, hotSpotSize);

@@ -9,6 +9,7 @@ import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.TableLayout;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.ui.ParametersPane;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.nest.util.DatUtils;
@@ -101,7 +102,40 @@ public class GraphBuilderDialog implements Observer {
         for (GraphSourceProductSelector selector : sourceProductSelectorList) {
             ioParametersPanel.add(selector.createDefaultPanel());
         }
-        //ioParametersPanel.add(getTargetProductSelector().createDefaultPanel());
+        ioParametersPanel.add(tableLayout.createVerticalSpacer());
+
+        initSourceProductSelectors(sourceProductSelectorList);
+
+        return ioParametersPanel;
+    }
+
+    private JComponent CreateTargetTab(GraphNode node) {
+
+        String operatorName = node.getNode().getOperatorName();
+        final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
+        if (operatorSpi == null) {
+            throw new IllegalArgumentException("operatorName");
+        }
+
+        ValueContainerFactory factory = new ValueContainerFactory(new ParameterDescriptorFactory());
+        ValueContainer valueContainer = factory.createMapBackedValueContainer(operatorSpi.getOperatorClass(), node.getParameterMap());
+        SwingBindingContext binding = new SwingBindingContext(valueContainer);
+
+        java.util.List<GraphSourceProductSelector> sourceProductSelectorList;
+        sourceProductSelectorList = new ArrayList<GraphSourceProductSelector>(3);
+        GraphSourceProductSelector sourceProductSelector = new GraphSourceProductSelector(new DatContext(""), binding);
+        sourceProductSelectorList.add(sourceProductSelector);
+
+        final TableLayout tableLayout = new TableLayout(1);
+        tableLayout.setTableAnchor(TableLayout.Anchor.WEST);
+        tableLayout.setTableWeightX(1.0);
+        tableLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
+        tableLayout.setTablePadding(3, 3);
+
+        JPanel ioParametersPanel = new JPanel(tableLayout);
+        for (GraphSourceProductSelector selector : sourceProductSelectorList) {
+            ioParametersPanel.add(selector.createDefaultPanel());
+        }
         ioParametersPanel.add(tableLayout.createVerticalSpacer());
 
         initSourceProductSelectors(sourceProductSelectorList);
@@ -260,8 +294,22 @@ public class GraphBuilderDialog implements Observer {
         String opID = node.getNode().getId();
         if(event.eventType == GraphExecuter.events.ADD_EVENT) {
 
+           /* String operatorName = node.getOperatorName();
+            final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
+            if (operatorSpi == null) {
+                throw new IllegalArgumentException("operatorName");
+            }
+
+            Class op = operatorSpi.getOperatorClass();
+            
+            JPanel paramPanal = CreateParameterPanel();
+                 */
+
+
             if(node.getOperatorName().equals("Read")) {
                 tabbedPanel.addTab(opID, OpIcon, CreateSourceTab(node), opID + " Operator");
+            } else if(node.getOperatorName().equals("Write")) {
+                tabbedPanel.addTab(opID, OpIcon, CreateTargetTab(node), opID + " Operator");
             } else
                 tabbedPanel.addTab(opID, OpIcon, CreateOpTab(node), opID + " Operator");
         } else if(event.eventType == GraphExecuter.events.REMOVE_EVENT) {

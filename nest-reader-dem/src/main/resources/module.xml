@@ -20,8 +20,6 @@
         <optional>true</optional>
     </dependency>
     
-
     <categories>Reader,DEM</categories>
-
    
 </module>

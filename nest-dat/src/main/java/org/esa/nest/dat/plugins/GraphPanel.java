@@ -154,33 +154,35 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
      */
     private void DrawGraph(Graphics g, Vector nodes) {
 
+        Font font = new Font("Ariel", 10, 10);
+        g.setFont(font);
         for (Enumeration e = nodes.elements(); e.hasMoreElements();)
         {
             GraphNode n = (GraphNode) e.nextElement();
             
             if(n == selectedNode)
-                n.DrawNode(g, selColor);
+                n.drawNode(g, selColor);
             else
-                n.DrawNode(g, opColor);
+                n.drawNode(g, opColor);
 
             g.setColor(Color.red);
             NodeSource[] nSources = n.getNode().getSources();
             for (NodeSource nSource : nSources) {
                 GraphNode srcNode = graphEx.findGraphNode(nSource.getSourceNodeId());
                 if(srcNode != null)
-                    g.drawLine(n.getPos().x, n.getPos().y + GraphNode.halfNodeHeight,
-                            srcNode.getPos().x + GraphNode.nodeWidth, srcNode.getPos().y + GraphNode.halfNodeHeight);
+                    g.drawLine(n.getPos().x, n.getPos().y + n.getHalfNodeHeight(),
+                            srcNode.getPos().x + srcNode.getWidth(), srcNode.getPos().y + srcNode.getHalfNodeHeight());
             }
         }
 
         if(showSourceHotSpot && selectedNode != null) {
-            selectedNode.DrawHotspot(g, Color.red);
+            selectedNode.drawHotspot(g, Color.red);
         }
         if(connectingSource) {
             Point p1 = connectSourceTargetNode.getPos();
             Point p2 = connectingSourcePos;
             g.setColor(Color.red);
-            g.drawLine(p1.x, p1.y + GraphNode.halfNodeHeight, p2.x, p2.y);
+            g.drawLine(p1.x, p1.y + connectSourceTargetNode.getHalfNodeHeight(), p2.x, p2.y);
         }
     }
 
@@ -264,8 +266,8 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
             repaint();
         }
         if(selectedNode != null) {
-            Point sourcePoint = new Point(n.getPos().x, n.getPos().y + GraphNode.hotSpotOffset);
-            if(isWithinRect(sourcePoint, GraphNode.hotSpotSize, GraphNode.hotSpotSize, e.getPoint())) {
+            Point sourcePoint = new Point(n.getPos().x, n.getPos().y + selectedNode.getHotSpotOffset());
+            if(isWithinRect(sourcePoint, selectedNode.getHotSpotSize(), selectedNode.getHotSpotSize(), e.getPoint())) {
                  showSourceHotSpot = true;
                  connectSourceTargetNode = selectedNode;
                  repaint();
@@ -283,7 +285,7 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
         {
             GraphNode n = (GraphNode) e.nextElement();
 
-            if(isWithinRect(n.getPos(), GraphNode.nodeWidth, GraphNode.nodeHeight, p))
+            if(isWithinRect(n.getPos(), n.getWidth(), n.getHeight(), p))
                 return n;
         }
         return null;
