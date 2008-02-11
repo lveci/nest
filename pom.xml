@@ -47,6 +47,7 @@
 	<module>nest-reader-dem</module>
 	<module>nest-reader-ers-ceos</module>
 	<module>nest-writer-gdal</module>
+    <module>nest-op-speckle-filter</module>
   </modules>
 
     <dependencyManagement>
