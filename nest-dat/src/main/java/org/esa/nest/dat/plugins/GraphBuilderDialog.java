@@ -2,16 +2,8 @@ package org.esa.nest.dat.plugins;
 
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.binding.ValueContainerFactory;
-import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.swing.SwingBindingContext;
 import org.esa.beam.framework.ui.UIUtils;
-import org.esa.beam.framework.ui.TableLayout;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.ui.ParametersPane;
-import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
+import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.nest.util.DatUtils;
 import org.esa.nest.dat.DatContext;
 
@@ -57,99 +49,6 @@ public class GraphBuilderDialog implements Observer {
             mainFrame.setBounds(new Rectangle(200, 100, 500, 600));
         }
         return mainFrame;
-    }
-
-    private JComponent CreateOpTab(GraphNode node) {
-
-        String operatorName = node.getNode().getOperatorName();
-        final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
-        if (operatorSpi == null) {
-            throw new IllegalArgumentException("operatorName");
-        }
-
-        ValueContainerFactory factory = new ValueContainerFactory(new ParameterDescriptorFactory());
-        ValueContainer valueContainer = factory.createMapBackedValueContainer(operatorSpi.getOperatorClass(), node.getParameterMap());
-        SwingBindingContext context = new SwingBindingContext(valueContainer);
-
-        ParametersPane parametersPane = new ParametersPane(context);
-        return new JScrollPane(parametersPane.createPanel());
-    }
-
-    private JComponent CreateSourceTab(GraphNode node) {
-
-        String operatorName = node.getNode().getOperatorName();
-        final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
-        if (operatorSpi == null) {
-            throw new IllegalArgumentException("operatorName");
-        }
-
-        ValueContainerFactory factory = new ValueContainerFactory(new ParameterDescriptorFactory());
-        ValueContainer valueContainer = factory.createMapBackedValueContainer(operatorSpi.getOperatorClass(), node.getParameterMap());
-        SwingBindingContext binding = new SwingBindingContext(valueContainer);
-
-        java.util.List<GraphSourceProductSelector> sourceProductSelectorList;
-        sourceProductSelectorList = new ArrayList<GraphSourceProductSelector>(3);
-        GraphSourceProductSelector sourceProductSelector = new GraphSourceProductSelector(new DatContext(""), binding);
-        sourceProductSelectorList.add(sourceProductSelector);
-
-        final TableLayout tableLayout = new TableLayout(1);
-        tableLayout.setTableAnchor(TableLayout.Anchor.WEST);
-        tableLayout.setTableWeightX(1.0);
-        tableLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
-        tableLayout.setTablePadding(3, 3);
-
-        JPanel ioParametersPanel = new JPanel(tableLayout);
-        for (GraphSourceProductSelector selector : sourceProductSelectorList) {
-            ioParametersPanel.add(selector.createDefaultPanel());
-        }
-        ioParametersPanel.add(tableLayout.createVerticalSpacer());
-
-        initSourceProductSelectors(sourceProductSelectorList);
-
-        return ioParametersPanel;
-    }
-
-    private JComponent CreateTargetTab(GraphNode node) {
-
-        String operatorName = node.getNode().getOperatorName();
-        final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
-        if (operatorSpi == null) {
-            throw new IllegalArgumentException("operatorName");
-        }
-
-        ValueContainerFactory factory = new ValueContainerFactory(new ParameterDescriptorFactory());
-        ValueContainer valueContainer = factory.createMapBackedValueContainer(operatorSpi.getOperatorClass(), node.getParameterMap());
-        SwingBindingContext binding = new SwingBindingContext(valueContainer);
-
-        java.util.List<GraphSourceProductSelector> sourceProductSelectorList;
-        sourceProductSelectorList = new ArrayList<GraphSourceProductSelector>(3);
-        GraphSourceProductSelector sourceProductSelector = new GraphSourceProductSelector(new DatContext(""), binding);
-        sourceProductSelectorList.add(sourceProductSelector);
-
-        final TableLayout tableLayout = new TableLayout(1);
-        tableLayout.setTableAnchor(TableLayout.Anchor.WEST);
-        tableLayout.setTableWeightX(1.0);
-        tableLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
-        tableLayout.setTablePadding(3, 3);
-
-        JPanel ioParametersPanel = new JPanel(tableLayout);
-        for (GraphSourceProductSelector selector : sourceProductSelectorList) {
-            ioParametersPanel.add(selector.createDefaultPanel());
-        }
-        ioParametersPanel.add(tableLayout.createVerticalSpacer());
-
-        initSourceProductSelectors(sourceProductSelectorList);
-
-        return ioParametersPanel;
-    }
-
-    private static void initSourceProductSelectors(java.util.List<GraphSourceProductSelector> sourceProductSelectorList) {
-        for (GraphSourceProductSelector sourceProductSelector : sourceProductSelectorList) {
-            sourceProductSelector.initProducts();
-            if (sourceProductSelector.getProductCount() > 0) {
-                sourceProductSelector.setSelectedIndex(0);
-            }
-        }
     }
 
     private void initUI() {
@@ -255,13 +154,17 @@ public class GraphBuilderDialog implements Observer {
 
     private void DoProcessing() {
 
-       final SwingWorker processThread = new ProcessThread(new ProgressBarProgressMonitor(progressBar, null));
-       processThread.execute();
+        if(ValidateAllNodes()) {
+            final SwingWorker processThread = new ProcessThread(new ProgressBarProgressMonitor(progressBar, null));
+            processThread.execute();
+        }
     }
 
      private void SaveGraph() {
 
-        graphEx.saveGraph();
+        if(ValidateAllNodes()) {
+            graphEx.saveGraph();
+        }
     }
 
      private void LoadGraph() {
@@ -278,6 +181,29 @@ public class GraphBuilderDialog implements Observer {
         graphPanel.repaint();
     }
 
+    boolean ValidateAllNodes() {
+        UIValidation validation = null;
+        StringBuffer msg = new StringBuffer(100);
+        Vector nodeList = graphEx.GetGraphNodes();
+        for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
+        {
+            GraphNode n = (GraphNode) e.nextElement();
+            validation = n.validateParameterMap();
+            if(!validation.getState()) {
+                msg.append(validation.getMsg()).append('\n');
+            }
+        }
+
+        if(validation != null && !validation.getState()) {
+
+            JOptionPane.showMessageDialog(mainFrame, msg, "Graph Errors",
+                                                  JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        return true;
+    }
+
      /**
      Implements the functionality of Observer participant of Observer Design Pattern to define a one-to-many
      dependency between a Subject object and any number of Observer objects so that when the
@@ -291,27 +217,10 @@ public class GraphBuilderDialog implements Observer {
 
         GraphExecuter.GraphEvent event = (GraphExecuter.GraphEvent)data;
         GraphNode node = (GraphNode)event.data;
-        String opID = node.getNode().getId();
+        String opID = node.getID();
         if(event.eventType == GraphExecuter.events.ADD_EVENT) {
 
-           /* String operatorName = node.getOperatorName();
-            final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
-            if (operatorSpi == null) {
-                throw new IllegalArgumentException("operatorName");
-            }
-
-            Class op = operatorSpi.getOperatorClass();
-            
-            JPanel paramPanal = CreateParameterPanel();
-                 */
-
-
-            if(node.getOperatorName().equals("Read")) {
-                tabbedPanel.addTab(opID, OpIcon, CreateSourceTab(node), opID + " Operator");
-            } else if(node.getOperatorName().equals("Write")) {
-                tabbedPanel.addTab(opID, OpIcon, CreateTargetTab(node), opID + " Operator");
-            } else
-                tabbedPanel.addTab(opID, OpIcon, CreateOpTab(node), opID + " Operator");
+            tabbedPanel.addTab(opID, OpIcon, CreateOperatorTab(node), opID + " Operator");
         } else if(event.eventType == GraphExecuter.events.REMOVE_EVENT) {
 
             int index = tabbedPanel.indexOfTab(opID);
@@ -323,6 +232,10 @@ public class GraphBuilderDialog implements Observer {
         }
     }
 
+    private static JComponent CreateOperatorTab(GraphNode node) {
+
+        return node.GetOperatorUI().CreateOpTab(node.getOperatorName(), node.getParameterMap(), new DatContext(""));
+    }
 
     private class ProcessThread extends SwingWorker<GraphExecuter, Object> {
 

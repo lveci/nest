@@ -3,6 +3,7 @@ package org.esa.nest.dat.plugins;
 import com.bc.ceres.core.ProgressMonitor;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.gpf.graph.*;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.util.DatUtils;
@@ -112,29 +113,14 @@ public class GraphExecuter extends Observable {
     }
 
     void AssignAllParameters() {
+
         for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
         {
             GraphNode n = (GraphNode) e.nextElement();
-            Xpp3Dom config = n.getNode().getConfiguration();
-            Map<String, Object> parameterMap = n.getParameterMap();
-            Set keys = parameterMap.keySet();                           // The set of keys in the map.
-            for (Object key : keys) {
-                Object value = parameterMap.get(key);                   // Get the value for that key.
-
-                Xpp3Dom xml = config.getChild((String)key);
-                if(xml == null) {
-                    xml = new Xpp3Dom((String)key);
-                    config.addChild(xml);
-                }
-
-                if(value instanceof Product)
-                    xml.setValue(((Product)value).getFileLocation().getAbsolutePath());
-                else
-                    xml.setValue(value.toString());
-            }
+            n.AssignParameters();
         }
     }
-
+    
     /**
      * Begins graph processing
      *
