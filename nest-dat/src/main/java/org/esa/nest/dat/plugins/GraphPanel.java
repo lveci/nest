@@ -14,9 +14,9 @@ import java.util.Vector;
 import java.util.Enumeration;
 
 /**
+ * Draws and Edits the graph graphically
  * User: lveci
  * Date: Jan 15, 2008
- * Draws and Edits the graph graphically
  */
 public class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, MouseListener, MouseMotionListener {
 

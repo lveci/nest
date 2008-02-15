@@ -40,6 +40,10 @@ public class GraphBuilderDialog implements Observer {
          graphEx.addObserver(this);
     }
 
+    /**
+     * Creates a new JFrame on the initial call and return the existing JFrame on subsequent calls
+     * @return The JFrame for the dialog
+     */
     public JFrame getFrame() {
         if (mainFrame == null) {
             mainFrame = new JFrame("Graph Builder");
@@ -51,6 +55,9 @@ public class GraphBuilderDialog implements Observer {
         return mainFrame;
     }
 
+    /**
+     * Initializes the dialog components
+     */
     private void initUI() {
         mainPanel = new JPanel(new BorderLayout(4, 4));
 
@@ -152,6 +159,9 @@ public class GraphBuilderDialog implements Observer {
         return button;
     }
 
+    /**
+     * Validates the input and then call the GPF to execute the graph
+     */
     private void DoProcessing() {
 
         if(ValidateAllNodes()) {
@@ -160,20 +170,29 @@ public class GraphBuilderDialog implements Observer {
         }
     }
 
-     private void SaveGraph() {
+    /**
+     * Validates the input and then saves the current graph to a file
+     */
+    private void SaveGraph() {
 
         if(ValidateAllNodes()) {
             graphEx.saveGraph();
         }
     }
 
-     private void LoadGraph() {
+    /**
+     * Loads a new graph from a file
+     */
+    private void LoadGraph() {
 
         tabbedPanel.removeAll();
         graphEx.loadGraph();
         graphPanel.repaint();
     }
 
+    /**
+     * Removes all tabs and clears the graph
+     */
     private void ClearGraph() {
 
         tabbedPanel.removeAll();
@@ -181,7 +200,14 @@ public class GraphBuilderDialog implements Observer {
         graphPanel.repaint();
     }
 
+    /**
+     * lets all operatorUIs validate their parameters
+     * If parameter validation fails then a list of the failures is presented to the user
+     * @return true if validation passes
+     */
     boolean ValidateAllNodes() {
+
+        //todo check for correct number of sources and possibly source types?
         UIValidation validation = null;
         StringBuffer msg = new StringBuffer(100);
         Vector nodeList = graphEx.GetGraphNodes();
