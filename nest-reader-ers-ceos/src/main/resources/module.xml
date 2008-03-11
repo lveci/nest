@@ -28,7 +28,7 @@
         <action>
             <id>importERSCEOSProduct</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
-            <formatName>ERS</formatName>
+            <formatName>ERS CEOS</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <mnemonic>R</mnemonic>
             <shortDescr>Import an ERS CEOS data product or product subset.</shortDescr>

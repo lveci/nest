@@ -8,7 +8,7 @@ import java.io.File;
 public interface ERSConstants {
 
     Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
-    String[] FORMAT_NAMES = new String[]{"ERS"};
+    String[] FORMAT_NAMES = new String[]{"ERS CEOS"};
     String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
     String PLUGIN_DESCRIPTION = "ERS CEOS Products";      /*I18N*/
     String PRODUCT_TYPE_PREFIX = "";
@@ -41,7 +41,7 @@ public interface ERSConstants {
     float BANDWIDTH_BAND_4 = 130.0F;
 
     String GEOPHYSICAL_UNIT = "mw / (m^2*sr*nm)";
-    String BANDNAME_PREFIX = "radiance_";
+    String BANDNAME_PREFIX = "sar_band_";
     String BAND_DESCRIPTION_FORMAT_STRING = "Radiance, Band %d";    /*I18N*/
     String PRODUCT_DESCRIPTION_PREFIX = "ERS product Level ";
 
