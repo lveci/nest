@@ -4,6 +4,7 @@ import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.gpf.ui.UIValidation;
+import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.nest.util.DatUtils;
 import org.esa.nest.dat.DatContext;
 
@@ -184,10 +185,14 @@ public class GraphBuilderDialog implements Observer {
      * Loads a new graph from a file
      */
     private void LoadGraph() {
-
-        tabbedPanel.removeAll();
-        graphEx.loadGraph();
-        graphPanel.repaint();
+        try {
+            tabbedPanel.removeAll();
+            graphEx.loadGraph();
+            graphPanel.repaint();
+        } catch(GraphException e) {
+            JOptionPane.showMessageDialog(mainFrame, e.getMessage(), "Error Loading Graph",
+                                          JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**

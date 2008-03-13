@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -37,11 +36,46 @@
         <url>https://www.brockmann-consult.de/svn/os/beam-4.x/trunc</url>
     </scm>
 
+    <repositories>
+        <repository>
+            <id>bc-public</id>
+            <name>Public Maven Repository at Brockmann-Consult</name>
+            <url>http://www.brockmann-consult.de/mvn/os</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>bc-public</id>
+            <name>Public Maven Repository at Brockmann-Consult</name>
+            <url>http://www.brockmann-consult.de/mvn/os</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>apache.org</id>
+            <name>Maven Plugin Snapshots</name>
+            <url>http://people.apache.org/repo/m2-snapshot-repository</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+
     <modules>
         <!-- the bootstrap module has no sources,
-		its only purpose is to construct a class path for VISAT
-		-->
+             its only purpose is to construct a class path for VISAT
+        -->
         <module>beam-bootstrap</module>
+        <module>beam-installer</module>
 
         <module>beam-core</module>
         <module>beam-ui</module>
@@ -51,10 +85,9 @@
         <module>beam-processing</module>
         <module>beam-scripting</module>
         <module>beam-help</module>
-		
+
         <module>beam-mosaic</module>
 
-        <module>beam-alos-reader</module>
         <module>beam-netcdf-reader</module>
         <module>beam-getasse30-reader</module>
         <module>beam-envisat-reader</module>
@@ -65,8 +98,8 @@
 
         <module>lib-hdf</module>
         <module>lib-netcdf</module>
-		
-    </modules>
+        <module>beam-diagnostics</module>
+  </modules>
 
     <dependencyManagement>
         <dependencies>
@@ -271,7 +304,7 @@
             <dependency>
                 <groupId>jfree</groupId>
                 <artifactId>jfreechart</artifactId>
-                <version>1.0.7</version>
+                <version>1.0.8</version>
             </dependency>
             <dependency>
                 <groupId>jfree</groupId>
@@ -356,7 +389,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-eclipse-plugin</artifactId>
-                <version>2.4</version>
+                <version>2.3-bc</version>
             </plugin>
 
             <plugin>
@@ -446,21 +479,6 @@
         </plugins>
     </reporting>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>apache.org</id>
-            <name>Maven Plugin Snapshots</name>
-            <url>http://people.apache.org/repo/m2-snapshot-repository</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
-
-
     <developers>
         <developer>
             <id>marcop</id>
@@ -503,6 +521,15 @@
             <id>tom</id>
             <name>Thomas Block</name>
             <email>thomas.block@brockmann-consult.de</email>
+            <organization>Brockmann Consult</organization>
+            <roles>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>sabine</id>
+            <name>Sabine Embacher</name>
+            <email>sabine.embacher@brockmann-consult.de</email>
             <organization>Brockmann Consult</organization>
             <roles>
                 <role>Java Developer</role>

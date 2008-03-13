@@ -149,7 +149,7 @@ public class GraphExecuter extends Observable {
         }
     }
 
-    void loadGraph() {
+    void loadGraph() throws GraphException {
         try {
             String filePath = DatUtils.GetFilePath("Load Graph", "XML", "xml", "Graph File", false);
             if(filePath == null) return;
