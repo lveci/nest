@@ -917,7 +917,7 @@
             <largeIcon>icons/Information24.gif</largeIcon>
             <helpId>informationDialog</helpId>
         </action>
-
+<!--
         <action>
             <id>openGeoCodingInfoDialog</id>
             <class>org.esa.beam.visat.actions.OpenGeoCodingInfoDialogAction</class>
@@ -1007,6 +1007,7 @@
             <largeIcon></largeIcon>
             <helpId>coordinateListDialog</helpId>
         </action>
+-->
 
         <action>
             <id>bandArithmetic</id>
