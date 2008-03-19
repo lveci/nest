@@ -81,7 +81,7 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
     public float getSample(int pixelX, int pixelY) throws IOException {
         final int tileXIndex = pixelX / NUM_PIXELS_PER_TILE;
         final int tileYIndex = pixelY / NUM_PIXELS_PER_TILE;
-        final ACEElevationTile tile = getElevationTile(tileXIndex, tileYIndex);
+        final ACEElevationTile tile = _elevationTiles[tileXIndex][tileYIndex];
         if(tile == null) {
             return Float.NaN;
         }
@@ -98,9 +98,10 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
         final ACEElevationTile[][] elevationTiles = new ACEElevationTile[NUM_X_TILES][NUM_Y_TILES];
         final ProductReaderPlugIn ACEReaderPlugIn = getACEReaderPlugIn();
         for (int i = 0; i < elevationTiles.length; i++) {
+            final int minLon = i * DEGREE_RES - 180;
+
             for (int j = 0; j < elevationTiles[i].length; j++) {
                 final ProductReader productReader = ACEReaderPlugIn.createReaderInstance();
-                final int minLon = i * DEGREE_RES - 180;
                 final int minLat = j * DEGREE_RES - 90;
 
                 File file = _descriptor.getTileFile(minLon, minLat);
@@ -124,10 +125,6 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
             lastTile.clearCache();
             _elevationTileCache.remove(index);
         }
-    }
-
-    private ACEElevationTile getElevationTile(final int lonIndex, final int latIndex) {
-        return _elevationTiles[lonIndex][latIndex];
     }
 
     private static ACEReaderPlugIn getACEReaderPlugIn() {

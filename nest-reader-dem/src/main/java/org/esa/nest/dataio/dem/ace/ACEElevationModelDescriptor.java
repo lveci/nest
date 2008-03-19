@@ -65,14 +65,14 @@ public class ACEElevationModelDescriptor extends AbstractElevationModelDescripto
         return new File(getDemInstallDir(), createTileFilename(minLat, minLon));
     }
 
-    public String createTileFilename(int minLat, int minLon) {
+    public static String createTileFilename(int minLat, int minLon) {
         String latString = minLat < 0 ? Math.abs(minLat) + "S" : minLat + "N";
         while (latString.length() < 3) {
-            latString = "0" + latString;
+            latString = '0' + latString;
         }
         String lonString = minLon < 0 ? Math.abs(minLon) + "W" : minLon + "E";
         while (lonString.length() < 4) {
-            lonString = "0" + lonString;
+            lonString = '0' + lonString;
         }
         return latString + lonString + DB_FILE_SUFFIX;
     }

@@ -81,7 +81,7 @@ public class ACEReader extends AbstractProductReader {
             throw e;
         }
 
-        initProduct(ACEReaderPlugIn.FORMAT_NAME + "_" + fileName);
+        initProduct(ACEReaderPlugIn.FORMAT_NAME + '_' + fileName);
         _product.setFileLocation(dataFile);
         return _product;
     }
