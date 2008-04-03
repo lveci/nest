@@ -53,10 +53,7 @@ public class TextRecordTest extends TestCase {
         ios.writeBytes("PRODUCT:O1B2R_UB                        "); // A40
         // facility = "PROCESS:JAPAN-JAXA-EOC-ALOS-DPS  YYYYMMDDHHNNSS" + 13 blanks
         ios.writeBytes("PROCESS:JAPAN-JAXA-EOC-ALOS-DPS  20060410075225             "); //A60
-        // sceneID =  "ORBIT:AABBBCDDDDDEEEE" + 19 blanks
-        ios.writeBytes("ORBIT:ALPSMB003062950                   "); // A40
-        // imageFormat = "BSQ" + 1 blank
-        ios.writeBytes("BSQ "); // A4
+        
         // Blank = 200 blanks
         CeosTestHelper.writeBlanks(ios, 200);
     }
@@ -70,6 +67,6 @@ public class TextRecordTest extends TestCase {
         assertEquals("O1B2R_UB", record.getProductID());
         assertEquals("PROCESS:JAPAN-JAXA-EOC-ALOS-DPS  20060410075225             ",
                      record.getFacility());
-        assertEquals("ALPSMB003062950", record.getSceneID());
+
     }
 }
