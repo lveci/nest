@@ -1,5 +1,5 @@
 /*
- * $Id: TextRecord.java,v 1.1 2008-01-04 16:23:10 lveci Exp $
+ * $Id: TextRecord.java,v 1.2 2008-04-03 16:28:16 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -26,8 +26,9 @@ public class TextRecord extends BaseRecord {
     private final String _codeCharacter;
     private final String _productID;
     private final String _facility;
+    private final String _volumeID;
     private final String _sceneID;
-    private final String _imageFormat;
+    private final String _sceneLocation;
 
     public TextRecord(final CeosFileReader reader) throws IOException,
                                                           IllegalCeosFormatException {
@@ -40,12 +41,12 @@ public class TextRecord extends BaseRecord {
 
         _codeCharacter = reader.readAn(2);
         reader.skipBytes(2);    // blank
-        _productID = reader.readAn(40).trim().substring(8);
+        _productID = reader.readAn(40).trim().substring(8);           // productType
         _facility = reader.readAn(60);
-        _sceneID = reader.readAn(40).trim().substring(6);
-        _imageFormat = reader.readAn(4);
-        // The last 200 bytes are blanks.
-        reader.skipBytes(200);
+        _volumeID = reader.readAn(40);
+        _sceneID = reader.readAn(40).trim();
+        _sceneLocation = reader.readAn(40);
+        reader.skipBytes(124);
     }
 
     public String getCodeCharacter() {
@@ -64,7 +65,11 @@ public class TextRecord extends BaseRecord {
         return _sceneID;
     }
 
-    public String getImageFormat() {
-        return _imageFormat;
+    public String getVolumeID() {
+        return _volumeID;
+    }
+
+    public String getSceneLocation() {
+        return _sceneLocation;
     }
 }

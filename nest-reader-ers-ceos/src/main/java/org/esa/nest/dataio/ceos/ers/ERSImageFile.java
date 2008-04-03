@@ -11,7 +11,7 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
 /*
- * $Id: ERSImageFile.java,v 1.3 2008-01-30 14:47:10 lveci Exp $
+ * $Id: ERSImageFile.java,v 1.4 2008-04-03 16:28:16 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,12 +32,12 @@ import java.io.IOException;
  * This class represents an image file of an Avnir-2 product.
  *
  * @author Marco Peters
- * @version $Revision: 1.3 $ $Date: 2008-01-30 14:47:10 $
+ * @version $Revision: 1.4 $ $Date: 2008-04-03 16:28:16 $
  */
 class ERSImageFile {
 
-    public final ERSImageFDR _imageFDR;
-    public final ImageRecord[] _imageRecords;
+    private final ERSImageFDR _imageFDR;
+    private final ImageRecord[] _imageRecords;
     private CeosFileReader _ceosReader;
     private final int _imageNumber;
     private int _imageRecordLength;
@@ -54,38 +54,32 @@ class ERSImageFile {
         _imageNumber = _imageRecords[0].getImageNumber();
     }
 
-    public String getBandName() throws IOException,
-                                       IllegalCeosFormatException {
-        return ERSConstants.BANDNAME_PREFIX + getBandIndex();
+    public String getBandName() {
+        return ERSConstants.BANDNAME_PREFIX + _imageNumber;
     }
 
-    public String getBandDescription() throws IOException,
-                                              IllegalCeosFormatException {
-        return String.format(ERSConstants.BAND_DESCRIPTION_FORMAT_STRING, new Object[]{getBandIndex()});
+    public String getBandDescription() {
+        return String.format(ERSConstants.BAND_DESCRIPTION_FORMAT_STRING, new Object[]{_imageNumber});
     }
 
-    public int getBandIndex() throws IOException,
-                                     IllegalCeosFormatException {
+    public int getBandIndex() {
         return _imageNumber;
     }
 
-    public int getRasterWidth() throws IOException,
-                                       IllegalCeosFormatException {
+    public int getRasterWidth() {
         return _imageFDR.getNumImagePixelsPerLine();
     }
 
-    public int getRasterHeight() throws IOException,
-                                        IllegalCeosFormatException {
+    public int getRasterHeight() {
         return _imageFDR.getNumLinesPerBand();
     }
 
-    public String getGeophysicalUnit() {
+    public static String getGeophysicalUnit() {
         return ERSConstants.GEOPHYSICAL_UNIT;
     }
 
-    public float getSpectralWavelength() throws IOException,
-                                                IllegalCeosFormatException {
-        final int bandIndex = getBandIndex();
+    public float getSpectralWavelength() {
+        final int bandIndex = _imageNumber;
 
         switch (bandIndex) {
         case 1:
@@ -101,9 +95,8 @@ class ERSImageFile {
         }
     }
 
-    public float getSpectralBandwidth() throws IOException,
-                                               IllegalCeosFormatException {
-        final int bandIndex = getBandIndex();
+    public float getSpectralBandwidth() {
+        final int bandIndex = _imageNumber;
 
         switch (bandIndex) {
         case 1:
@@ -129,7 +122,6 @@ class ERSImageFile {
         return getImageRecord(y).getScanStartTimeMicros();
     }
 
-
     public void readBandRasterData(final int sourceOffsetX, final int sourceOffsetY,
                                    final int sourceWidth, final int sourceHeight,
                                    final int sourceStepX, final int sourceStepY,
@@ -141,14 +133,15 @@ class ERSImageFile {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         ImageRecord imageRecord;
 
-        System.out.print("readBandRasterData x " + sourceOffsetX + " y " + sourceOffsetY +
+        /*System.out.print("readBandRasterData x " + sourceOffsetX + " y " + sourceOffsetY +
                 " w " + sourceWidth + " h " + sourceHeight + 
-                " stepX " + sourceStepX + " stepY " + sourceStepY + "\n");
+                " stepX " + sourceStepX + " stepY " + sourceStepY +
+                " dstW " + destWidth + '\n');   */
 
         pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceOffsetY);
         try {
-            final int[] srcLine = new int[sourceWidth];
-            final int[] destLine = new int[destWidth];
+            final short[] srcLine = new short[sourceWidth];
+            final short[] destLine = new short[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
@@ -157,7 +150,7 @@ class ERSImageFile {
                 // Read source line
                 imageRecord = getImageRecord(y);
                 _ceosReader.seek(imageRecord.getImageDataStart() + sourceOffsetX);
-                _ceosReader.readB4(srcLine);
+                _ceosReader.readB2(srcLine);
 
                 // Copy source line into destination buffer
                 final int currentLineIndex = (y - sourceOffsetY) * destWidth;
@@ -175,7 +168,6 @@ class ERSImageFile {
         } finally {
             pm.done();
         }
-
     }
 
     private ImageRecord getImageRecord(final int line) throws IOException,
@@ -186,8 +178,8 @@ class ERSImageFile {
         }
         return _imageRecords[line];
     }
-
-    private void copyLine(final int[] srcLine, final int[] destLine,
+    
+    private static void copyLine(final short[] srcLine, final short[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; x++, i += sourceStepX) {
             destLine[x] = srcLine[i];

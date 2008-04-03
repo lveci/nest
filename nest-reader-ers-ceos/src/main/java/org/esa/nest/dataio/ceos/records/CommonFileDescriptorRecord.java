@@ -1,5 +1,5 @@
 /*
- * $Id: CommonFileDescriptorRecord.java,v 1.1 2008-01-04 16:23:10 lveci Exp $
+ * $Id: CommonFileDescriptorRecord.java,v 1.2 2008-04-03 16:28:16 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -39,10 +39,6 @@ public class CommonFileDescriptorRecord extends BaseRecord {
     private String _flagRecordLength;
     private int _bytePosOfRecLength;
     private int _numOfBytesOfRecLength;
-    private String _flagDataConvInfFileDescRec;
-    private String _flagDataConvInOtherRecords;
-    private String _flagDataDispFileDescRecord;
-    private String _flagDataDispInOtherRecords;
 
     public CommonFileDescriptorRecord(final CeosFileReader reader, final long startPos) throws
                                                                                         IOException,
@@ -65,10 +61,7 @@ public class CommonFileDescriptorRecord extends BaseRecord {
         _flagRecordLength = reader.readAn(4);
         _bytePosOfRecLength = (int) reader.readIn(8);
         _numOfBytesOfRecLength = reader.readI4();
-        _flagDataConvInfFileDescRec = reader.readAn(1);
-        _flagDataConvInOtherRecords = reader.readAn(1);
-        _flagDataDispFileDescRecord = reader.readAn(1);
-        _flagDataDispInOtherRecords = reader.readAn(1);
+        reader.skipBytes(4);
         reader.skipBytes(64);   // blank
     }
 
@@ -134,21 +127,5 @@ public class CommonFileDescriptorRecord extends BaseRecord {
 
     public int getNumOfBytesOfRecLength() {
         return _numOfBytesOfRecLength;
-    }
-
-    public String getFlagDataConvInfFileDescRec() {
-        return _flagDataConvInfFileDescRec;
-    }
-
-    public String getFlagDataConvInOtherRecords() {
-        return _flagDataConvInOtherRecords;
-    }
-
-    public String getFlagDataDispFileDescRecord() {
-        return _flagDataDispFileDescRecord;
-    }
-
-    public String getFlagDataDispInOtherRecords() {
-        return _flagDataDispInOtherRecords;
     }
 }

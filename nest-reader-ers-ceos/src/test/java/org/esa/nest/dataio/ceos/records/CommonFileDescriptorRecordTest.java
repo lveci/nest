@@ -49,10 +49,6 @@ public class CommonFileDescriptorRecordTest extends TestCase {
         assertEquals("FLGT", record.getFlagRecordLength()); // flagRecordLength // A4
         assertEquals(9, record.getBytePosOfRecLength()); // bytePosOfRecLenth // I8
         assertEquals(4, record.getNumOfBytesOfRecLength()); // numOfBytesOfRecLength // I4
-        assertEquals("N", record.getFlagDataConvInfFileDescRec()); // flagDataConvInfFileDescRec // A1
-        assertEquals("O", record.getFlagDataConvInOtherRecords()); // flagDataConvInOtherRecords // A1
-        assertEquals("P", record.getFlagDataDispFileDescRecord()); // flagDataDispFileDescRecord // A1
-        assertEquals("Q", record.getFlagDataDispInOtherRecords()); // flagDataDispInOtherRecords // A1
     }
 
     public static void writeRecordData(ImageOutputStream ios) throws IOException {

@@ -71,6 +71,5 @@ public class TextRecordTest extends TestCase {
         assertEquals("PROCESS:JAPAN-JAXA-EOC-ALOS-DPS  20060410075225             ",
                      record.getFacility());
         assertEquals("ALPSMB003062950", record.getSceneID());
-        assertEquals("BSQ ", record.getImageFormat());
     }
 }

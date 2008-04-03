@@ -1,5 +1,5 @@
 /*
- * $Id: BaseSceneHeaderRecord.java,v 1.2 2008-01-07 15:04:28 lveci Exp $
+ * $Id: BaseSceneHeaderRecord.java,v 1.3 2008-04-03 16:28:16 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -430,12 +430,6 @@ public abstract class BaseSceneHeaderRecord extends BaseRecord {
     public String getAccuracyUsedAttitudeData() {
         return _accuracyUsedAttitudeData;
     }
-
-//    protected abstract void readFields30To31(final CeosFileReader reader) throws IOException,
-//                                                                                 IllegalCeosFormatException;
-//
-//    protected abstract void readField73ToEnd(final CeosFileReader reader) throws IOException,
-//                                                                                 IllegalCeosFormatException;
 
     public abstract String getYawSteeringFlag();
 }
