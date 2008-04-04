@@ -6,10 +6,9 @@
 .settings
 .svn*
 beam*
+lib-*
 target
-lib*
 log
-config
 modules
 repository
 testdata
