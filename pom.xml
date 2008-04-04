@@ -40,6 +40,7 @@
 
     <modules>
 	<module>beam</module>
+	<module>nest-bootstrap</module>
 	<module>nest-core</module>
 	<module>nest-dat</module>
 	<module>nest-3d-view</module> 
@@ -307,10 +308,11 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.2-beta-1</version>
                 <configuration>
-			  <appendAssemblyId>false</appendAssemblyId>
+			    <appendAssemblyId>true</appendAssemblyId>
                     <descriptors>
                         <descriptor>src/main/assembly/src.xml</descriptor>
                         <descriptor>src/main/assembly/bin.xml</descriptor>
+						<!--descriptor>src/main/assembly/repository.xml</descriptor-->
                     </descriptors>
                 </configuration>
             </plugin>
@@ -325,10 +327,6 @@
                         <exclude>**/TestHelper$1.java</exclude>
                     </excludes>
                     <systemProperties>
-                        <!--<property>
-                            <name>beam.home</name>
-                            <value>.</value>
-                        </property>-->
                         <property>
                             <name>org.esa.beam.testdata.out</name>
                             <value>target/test-data</value>
