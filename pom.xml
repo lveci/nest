@@ -350,7 +350,7 @@
             </plugin>
 			<plugin>
                 <artifactId>maven-eclipse-plugin</artifactId>
-                <version>2.3-bc</version>
+                <version>2.4</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
