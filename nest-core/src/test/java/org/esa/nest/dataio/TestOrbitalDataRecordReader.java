@@ -13,7 +13,9 @@ import junit.framework.TestCase;
  */
 public class TestOrbitalDataRecordReader extends TestCase {
 
-    String orbitFilePath = "P:\\nest\\nest\\ESA Data\\Orbits\\ODR.ENVISAT1\\eigen-cg03c\\ODR.051";
+    String envisatOrbitFilePath = "org/esa/nest/data/envisat_ODR.051";
+    String ers1OrbitFilePath = "org/esa/nest/data/ers1_ODR.051";
+    String ers2OrbitFilePath = "org/esa/nest/data/ers2_ODR.051";
 
     public TestOrbitalDataRecordReader(String name) {
         super(name);
@@ -31,14 +33,14 @@ public class TestOrbitalDataRecordReader extends TestCase {
 
         OrbitalDataRecordReader reader = new OrbitalDataRecordReader();
 
-        assertTrue(reader.OpenOrbitFile(orbitFilePath));
+        assertTrue(reader.OpenOrbitFile(envisatOrbitFilePath));
     }
 
     public void testReadHeader() {
 
         OrbitalDataRecordReader reader = new OrbitalDataRecordReader();
 
-        if(reader.OpenOrbitFile(orbitFilePath)) {
+        if(reader.OpenOrbitFile(envisatOrbitFilePath)) {
 
             reader.parseHeader1();
             reader.parseHeader2();
@@ -47,6 +49,16 @@ public class TestOrbitalDataRecordReader extends TestCase {
 
     public void testReadOrbitFile() {
         OrbitalDataRecordReader reader = new OrbitalDataRecordReader();
-        reader.readOrbitFile(orbitFilePath);
+        reader.readOrbitFile(envisatOrbitFilePath);
+    }
+
+    public void testReadERS1OrbitFile() {
+        OrbitalDataRecordReader reader = new OrbitalDataRecordReader();
+        reader.readOrbitFile(ers1OrbitFilePath);
+    }
+    
+    public void testReadERS2OrbitFile() {
+        OrbitalDataRecordReader reader = new OrbitalDataRecordReader();
+        reader.readOrbitFile(ers2OrbitFilePath);
     }
 }

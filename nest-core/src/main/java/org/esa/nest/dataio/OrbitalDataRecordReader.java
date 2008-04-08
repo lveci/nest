@@ -1,5 +1,7 @@
 package org.esa.nest.dataio;
 
+import org.esa.nest.util.DatUtils;
+
 import java.io.*;
 
 /**
@@ -42,8 +44,11 @@ public class OrbitalDataRecordReader {
     boolean OpenOrbitFile(String path) {
 
         try {
-        in = new DataInputStream(new BufferedInputStream(new FileInputStream(path)));
+            in = new DataInputStream(new BufferedInputStream(DatUtils.getResourceAsStream(path)));
         } catch(FileNotFoundException e) {
+            in = null;
+            return false;
+        } catch(IOException e) {
             in = null;
             return false;
         }
