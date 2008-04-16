@@ -90,7 +90,6 @@ public class GraphBuilderDialog implements Observer {
         // progress Bar
         progressBar = new JProgressBar();
         progressBar.setName(getClass().getName() + "progressBar");
-        progressBar = new JProgressBar();
         progressBar.setStringPainted(true);
         progressPanel = new JPanel();
         progressPanel.setLayout(new BorderLayout());
