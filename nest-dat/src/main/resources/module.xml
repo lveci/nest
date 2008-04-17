@@ -230,8 +230,8 @@
         </toolView>
 
         <toolView>
-            <id>org.esa.beam.visat.toolviews.stat.StatisticsToolView</id>
-            <class>org.esa.beam.visat.toolviews.stat.StatisticsToolView</class>
+            <id>org.esa.nest.dat.toolviews.DatStatisticsToolView</id>
+            <class>org.esa.nest.dat.toolviews.DatStatisticsToolView</class>
             <title>Statistics View</title>
             <tabTitle>Statistics</tabTitle>
             <mnemonic>t</mnemonic>
@@ -904,7 +904,7 @@
 
         <action>
             <id>openInformationDialog</id>
-            <class>org.esa.beam.visat.actions.OpenInformationDialogAction</class>
+            <class>org.esa.nest.dat.actions.OpenInformationDialogAction</class>
             <placeBefore>openGeoCodingInfoDialog</placeBefore>
             <parent>data</parent>
             <text>Information...</text>

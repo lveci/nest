@@ -11,7 +11,7 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
 /*
- * $Id: ERSImageFile.java,v 1.4 2008-04-03 16:28:16 lveci Exp $
+ * $Id: ERSImageFile.java,v 1.5 2008-04-17 17:19:43 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,7 +32,7 @@ import java.io.IOException;
  * This class represents an image file of an Avnir-2 product.
  *
  * @author Marco Peters
- * @version $Revision: 1.4 $ $Date: 2008-04-03 16:28:16 $
+ * @version $Revision: 1.5 $ $Date: 2008-04-17 17:19:43 $
  */
 class ERSImageFile {
 
@@ -128,20 +128,24 @@ class ERSImageFile {
                                    final int destOffsetX, final int destOffsetY,
                                    final int destWidth, final int destHeight,
                                    final ProductData destBuffer, ProgressMonitor pm) throws IOException,
-                                                                                            IllegalCeosFormatException {
-
+                                                                                            IllegalCeosFormatException
+    {
+        int ourceWidth = 320;
+        int estWidth = 320;
+        final int sourceMaxX = sourceOffsetX + ourceWidth - 1;
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         ImageRecord imageRecord;
 
-        /*System.out.print("readBandRasterData x " + sourceOffsetX + " y " + sourceOffsetY +
-                " w " + sourceWidth + " h " + sourceHeight + 
+        System.out.print("readBandRasterData x " + sourceOffsetX + " y " + sourceOffsetY +
+                " w " + ourceWidth + " h " + sourceHeight +
                 " stepX " + sourceStepX + " stepY " + sourceStepY +
-                " dstW " + destWidth + '\n');   */
+                " dstW " + estWidth +
+                " maxX " + sourceMaxX + " maxY " + sourceMaxY + '\n');
 
         pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceOffsetY);
         try {
-            final short[] srcLine = new short[sourceWidth];
-            final short[] destLine = new short[destWidth];
+            final short[] srcLine = new short[ourceWidth];
+            final short[] destLine = new short[estWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
@@ -156,15 +160,16 @@ class ERSImageFile {
                 final int currentLineIndex = (y - sourceOffsetY) * destWidth;
                 if (sourceStepX == 1) {
 
-                    System.arraycopy(srcLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+                    System.arraycopy(srcLine, 0, destBuffer.getElems(), currentLineIndex, estWidth);
                 } else {
                     copyLine(srcLine, destLine, sourceStepX);
 
-                    System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+                    System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, estWidth);
                 }
 
                 pm.worked(1);
             }
+
         } finally {
             pm.done();
         }

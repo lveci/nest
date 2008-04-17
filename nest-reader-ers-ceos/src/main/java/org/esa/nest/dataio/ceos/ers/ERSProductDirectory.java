@@ -233,7 +233,7 @@ class ERSProductDirectory {
 
     private Band createBand(final ERSImageFile ImageFile) throws IOException,
                                                                           IllegalCeosFormatException {
-        final Band band = new Band(ImageFile.getBandName(), ProductData.TYPE_INT16, 
+        final Band band = new Band(ImageFile.getBandName(), ProductData.TYPE_UINT16, 
                                    _sceneWidth, _sceneHeight);
         final int bandIndex = ImageFile.getBandIndex();
         band.setSpectralBandIndex(bandIndex - 1);

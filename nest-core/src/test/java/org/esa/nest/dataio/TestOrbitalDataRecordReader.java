@@ -1,15 +1,11 @@
 package org.esa.nest.dataio;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import junit.framework.TestCase;
 
 /**
  * OrbitalDataRecordReader Tester.
  *
- * @author <Authors name>
- * @since <pre>02/26/2008</pre>
- * @version 1.0
+ * @author lveci
  */
 public class TestOrbitalDataRecordReader extends TestCase {
 

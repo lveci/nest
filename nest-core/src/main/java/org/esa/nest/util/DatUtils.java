@@ -56,4 +56,15 @@ public class DatUtils {
         return new FileInputStream(filename);
     }
 
+    public static File getResourceAsFile(final String filename) throws IOException {
+
+        // load from disk
+        java.net.URL resURL = DatUtils.class.getClassLoader().getResource(filename);
+        if (resURL != null) {
+            return new File(resURL.getPath());
+        }
+
+        return null;
+    }
+
 }
