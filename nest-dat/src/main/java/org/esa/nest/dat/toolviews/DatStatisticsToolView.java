@@ -3,7 +3,7 @@ package org.esa.nest.dat.toolviews;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.util.Debug;
-import org.esa.beam.visat.SharedApp;
+import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.stat.*;
 
 import javax.swing.*;
@@ -57,7 +57,7 @@ public class DatStatisticsToolView extends AbstractToolView {
     }
 
     public void show(final int tabIndex) {
-        SharedApp.instance().getApp().getPage().showToolView(DatStatisticsToolView.ID);
+        VisatApp.getApp().getPage().showToolView(DatStatisticsToolView.ID);
         if (!isValidTabIndex(tabIndex)) {
             throw new IllegalArgumentException("illegal tab-index");
         }

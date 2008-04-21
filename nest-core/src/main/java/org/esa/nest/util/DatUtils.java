@@ -2,7 +2,7 @@ package org.esa.nest.util;
 
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
-import org.esa.beam.visat.SharedApp;
+import org.esa.beam.visat.VisatApp;
 
 import javax.swing.*;
 import java.io.File;
@@ -31,9 +31,9 @@ public class DatUtils {
         BeamFileFilter xmlFilter = new BeamFileFilter(formatName, extension, description);
         File file;
         if (isSave)
-            file = SharedApp.instance().getApp().showFileSaveDialog(title, false, xmlFilter, '.' + extension, description);
+            file = VisatApp.getApp().showFileSaveDialog(title, false, xmlFilter, '.' + extension, description);
         else
-            file = SharedApp.instance().getApp().showFileOpenDialog(title, false, xmlFilter, extension);
+            file = VisatApp.getApp().showFileOpenDialog(title, false, xmlFilter, extension);
         if (file == null) {
             return null;
         }

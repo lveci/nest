@@ -112,7 +112,7 @@
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
-                <artifactId>beam-visat</artifactId>
+                <artifactId>beam-visat-rcp</artifactId>
                 <version>4.2-SNAPSHOT</version>
             </dependency>
 

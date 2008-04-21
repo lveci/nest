@@ -18,13 +18,13 @@
         <module>beam-core</module>
     </dependency>
     <dependency>
-        <module>beam-visat</module>
+        <module>beam-visat-rcp</module>
         <optional>true</optional>
     </dependency>
 
     <categories>Reader,ERS</categories>
 
-    <extension point="nest-dat:actions">
+    <extension point="beam-ui:actions">
         <action>
             <id>importERSCEOSProduct</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>

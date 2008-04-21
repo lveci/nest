@@ -2,7 +2,7 @@ package org.esa.nest.dat;
 
 import org.esa.nest.util.XMLSupport;
 import org.esa.nest.util.DatUtils;
-import org.esa.beam.visat.SharedApp;
+import org.esa.beam.visat.VisatApp;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Attribute;
@@ -45,9 +45,9 @@ public class DatProject {
         Element root = new Element("Project");
         Document doc = new Document(root);
 
-        int numProducts = SharedApp.instance().getApp().getProductManager().getNumProducts();
+        int numProducts = VisatApp.getApp().getProductManager().getNumProducts();
         for(int i=0; i < numProducts; ++i) {
-            String path = SharedApp.instance().getApp().getProductManager().getProductAt(i).getFileLocation().getAbsolutePath();
+            String path = VisatApp.getApp().getProductManager().getProductAt(i).getFileLocation().getAbsolutePath();
 
             Element projElem = new Element("product").setAttribute("path", path);
             root.addContent(projElem);
@@ -76,7 +76,7 @@ public class DatProject {
 
                     File file = new File(path);
                     if (file.exists()) {
-                        SharedApp.instance().getApp().openProduct(file);
+                        VisatApp.getApp().openProduct(file);
                         try {
                             Thread.sleep(500);
                         } catch (InterruptedException e) {

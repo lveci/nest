@@ -2,7 +2,7 @@ package org.esa.nest.dat;
 
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.visat.SharedApp;
+import org.esa.beam.visat.VisatApp;
 import org.esa.beam.util.PropertyMap;
 
 import java.awt.*;
@@ -22,30 +22,30 @@ public class DatContext implements AppContext {
         }
 
         public Product[] getProducts() {
-            return SharedApp.instance().getApp().getProductManager().getProducts();
+            return VisatApp.getApp().getProductManager().getProducts();
         }
 
         public Product getSelectedProduct() {
-            return SharedApp.instance().getApp().getSelectedProduct();
+            return VisatApp.getApp().getSelectedProduct();
         }
 
         public Window getApplicationWindow() {
-            return SharedApp.instance().getApp().getMainFrame();
+            return VisatApp.getApp().getMainFrame();
         }
 
         public String getApplicationName() {
-            return SharedApp.instance().getApp().getAppName();
+            return VisatApp.getApp().getAppName();
         }
 
         public void addProduct(Product product) {
-            SharedApp.instance().getApp().addProduct(product);
+            VisatApp.getApp().addProduct(product);
         }
 
         public void handleError(Throwable e) {
-            SharedApp.instance().getApp().showErrorDialog(toolTitle, e.getMessage());
+            VisatApp.getApp().showErrorDialog(toolTitle, e.getMessage());
         }
 
         public PropertyMap getPreferences() {
-            return SharedApp.instance().getApp().getPreferences();
+            return VisatApp.getApp().getPreferences();
         }
 }

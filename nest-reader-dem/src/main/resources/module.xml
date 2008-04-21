@@ -15,10 +15,6 @@
     <dependency>
         <module>beam-core</module>
     </dependency>
-    <dependency>
-        <module>beam-visat</module>
-        <optional>true</optional>
-    </dependency>
     
     <categories>Reader,DEM</categories>
    
