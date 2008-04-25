@@ -10,6 +10,7 @@ import org.jdom.Attribute;
 import java.util.List;
 import java.util.Iterator;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -61,15 +62,20 @@ public class DatProject {
 
         String filePath = DatUtils.GetFilePath("Load Project", "XML", "xml", "Project File", false);
 
-        org.jdom.Document doc = XMLSupport.LoadXML(filePath);
+        org.jdom.Document doc;
+        try {
+            doc = XMLSupport.LoadXML(filePath);
+        } catch(IOException e) {
+            VisatApp.getApp().showErrorDialog(e.getMessage());
+            return;
+        }
 
         Element root = doc.getRootElement();
 
         List children = root.getContent();
-        for (Object aChildren : children) {
-            Object o = aChildren;
-            if (o instanceof Element) {
-                Element child = (Element) o;
+        for (Object aChild : children) {
+            if (aChild instanceof Element) {
+                Element child = (Element) aChild;
                 Attribute attrib = child.getAttribute("path");
                 if (attrib != null) {
                     String path = attrib.getValue();

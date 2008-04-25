@@ -4,7 +4,11 @@ import org.jdom.input.DOMBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.jdom.Document;
+import org.xml.sax.SAXException;
+
 import java.io.FileWriter;
+import java.io.IOException;
+
 import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 
 /**
@@ -31,7 +35,7 @@ public class XMLSupport {
         }
     }
 
-    public static org.jdom.Document LoadXML(String filePath) {
+    public static org.jdom.Document LoadXML(String filePath) throws IOException {
 
         DOMBuilder builder = new DOMBuilder();
 
@@ -42,10 +46,13 @@ public class XMLSupport {
             parser.parse(path);
             org.w3c.dom.Document domDoc = parser.getDocument();
             return builder.build(domDoc);
-        } catch (Exception e) {
-            System.out.println(" is not valid:" + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("Path to xml is not valid: " + e.getMessage());
+            throw e;
+        } catch (SAXException e) {
+            System.out.println("cannot parse xml : " + e.getMessage());
+            throw new IOException(e.getMessage());
         }
-        return null;
     }
 
 }

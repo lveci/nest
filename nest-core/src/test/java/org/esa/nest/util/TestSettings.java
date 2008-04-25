@@ -28,6 +28,6 @@ public class TestSettings extends TestCase {
     {
         Settings settings = Settings.instance();
 
-        
+        String value = settings.get("envisatAuxDataPath");
     }
 }
