@@ -12,15 +12,15 @@ import java.util.Iterator;
  * Created by Marco Peters.
  *
  * @author Marco Peters
- * @version $Revision: 1.3 $ $Date: 2008-01-30 14:47:10 $
+ * @version $Revision: 1.1 $ $Date: 2008-04-28 13:57:34 $
  */
-public class ReaderLoadedAsServiceTest extends TestCase {
+public class TestReaderLoadedAsService extends TestCase {
 
     public void testReaderIsLoaded() {
         int readerCount = 0;
 
         ProductIOPlugInManager plugInManager = ProductIOPlugInManager.getInstance();
-        Iterator readerPlugIns = plugInManager.getReaderPlugIns("SRTM");
+        Iterator readerPlugIns = plugInManager.getReaderPlugIns("SRTM30");
 
         while (readerPlugIns.hasNext()) {
             readerCount++;

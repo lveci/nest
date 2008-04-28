@@ -2,12 +2,12 @@ package org.esa.nest.dataio.dem.srtm;
 
 import junit.framework.TestCase;
 
-public class SRTMElevationModelDescriptorTest extends TestCase {
+public class TestSRTMElevationModelDescriptor extends TestCase {
 
     final SRTMElevationModelDescriptor _descriptor = new SRTMElevationModelDescriptor();
 
     public void testConstantProperties() {
-        assertEquals("SRTM", _descriptor.getName());
+        assertEquals("SRTM30", _descriptor.getName());
     }
 
     public void testFilenameCreation() {

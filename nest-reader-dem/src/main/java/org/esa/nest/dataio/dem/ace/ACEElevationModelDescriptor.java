@@ -5,6 +5,7 @@ import org.esa.beam.framework.dataop.dem.AbstractElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.SystemUtils;
+import org.esa.nest.util.Settings;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +26,8 @@ public class ACEElevationModelDescriptor extends AbstractElevationModelDescripto
     public static final int RASTER_HEIGHT = NUM_Y_TILES * PIXEL_RES;
     public static final Datum DATUM = Datum.WGS_84;
 
+    private File aceDemInstallDir = null;
+
     public ACEElevationModelDescriptor() {
     }
 
@@ -38,6 +41,15 @@ public class ACEElevationModelDescriptor extends AbstractElevationModelDescripto
 
     public float getNoDataValue() {
         return NO_DATA_VALUE;
+    }
+
+    @Override
+    public File getDemInstallDir() {
+        if(aceDemInstallDir == null) {
+            String path = Settings.instance().get("aceDEMDataPath");
+            aceDemInstallDir = new File(path);
+        }
+        return aceDemInstallDir;
     }
 
     public boolean isDemInstalled() {

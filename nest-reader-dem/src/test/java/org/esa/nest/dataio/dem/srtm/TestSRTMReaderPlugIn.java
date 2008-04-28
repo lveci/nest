@@ -9,7 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 
-public class SRTMReaderPlugInTest extends TestCase {
+public class TestSRTMReaderPlugIn extends TestCase {
 
     private SRTMReaderPlugIn _plugIn;
 
@@ -24,9 +24,9 @@ public class SRTMReaderPlugInTest extends TestCase {
     }
 
     public void testValidInputs() {
-       /* testValidInput("./SRTM/00N015W.SRTM");
-        testValidInput("./SRTM/00N015W.SRTM");
-        testValidInput("./SRTM/00N015W.SRTM");  */
+        testValidInput("e020s10.DEM");
+        testValidInput("w100s10.DEM"); 
+        testValidInput("w100s10.DEM.zip");
     }
 
     private void testValidInput(final String s) {
@@ -35,8 +35,8 @@ public class SRTMReaderPlugInTest extends TestCase {
     }
 
     public void testInvalidInputs() {
-        testInvalidInput("10n143w.SRTM.zip");
-        testInvalidInput("./SRTM/00N015W.SRTM.zip");
+        testInvalidInput("10n143w.SRTM");
+        testInvalidInput("w100s10.jpg.zip");
         testInvalidInput("./SRTM/00N015W.SRTM.zip");
         testInvalidInput("./SRTM/readme.txt");
         testInvalidInput("./SRTM/readme.txt.zip");
@@ -45,10 +45,6 @@ public class SRTMReaderPlugInTest extends TestCase {
         testInvalidInput("./");
         testInvalidInput(".");
         testInvalidInput("");
-        testInvalidInput("./SRTM/.hgt");
-        testInvalidInput("./SRTM/.hgt.zip");
-        testInvalidInput("./SRTM/.hgt");
-        testInvalidInput("./SRTM/.hgt.zip");
     }
 
     private void testInvalidInput(final String s) {
@@ -58,7 +54,7 @@ public class SRTMReaderPlugInTest extends TestCase {
 
     public void testThatOtherTypesCannotBeDecoded() throws MalformedURLException {
         assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(null));
-        final URL url = new File("./SRTM/readme.txt").toURL();
+        final URL url = new File("./SRTM/readme.txt").toURI().toURL();
         assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(url));
         final Object object = new Object();
         assertEquals(DecodeQualification.UNABLE, _plugIn.getDecodeQualification(object));
@@ -81,14 +77,13 @@ public class SRTMReaderPlugInTest extends TestCase {
         final String[] formatNames = _plugIn.getFormatNames();
         assertNotNull(formatNames);
         assertTrue(formatNames.length == 1);
-        assertEquals("SRTM", formatNames[0]);
+        assertEquals("SRTM30", formatNames[0]);
     }
 
     public void testGetDefaultFileExtensions() {
         final String[] defaultFileExtensions = _plugIn.getDefaultFileExtensions();
         assertNotNull(defaultFileExtensions);
-        assertTrue(defaultFileExtensions.length == 1);
-        assertEquals(".SRTM", defaultFileExtensions[0]);
+        assertEquals(".dem", defaultFileExtensions[0]);
     }
 
 }

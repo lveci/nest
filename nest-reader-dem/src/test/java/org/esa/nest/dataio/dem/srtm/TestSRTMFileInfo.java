@@ -5,7 +5,7 @@ import junit.framework.TestCase;
 import java.text.ParseException;
 
 
-public class SRTMFileInfoTest extends TestCase {
+public class TestSRTMFileInfo extends TestCase {
 
     protected void setUp() throws Exception {
     }
@@ -38,13 +38,13 @@ public class SRTMFileInfoTest extends TestCase {
     }
 
     public void testExtractEastingNorthingWithValidStrings() throws ParseException {
-        int[] values = SRTMFileInfo.parseEastingNorthing("00N015W.SRTM");
+        int[] values = SRTMFileInfo.parseEastingNorthing("W15N00.DEM");
         assertNotNull(values);
         assertEquals(2, values.length);
         assertEquals(-15, values[0]);
         assertEquals(00, values[1]);
 
-        values = SRTMFileInfo.parseEastingNorthing("75S135E.SRTM");
+        values = SRTMFileInfo.parseEastingNorthing("E135S75.DEM");
         assertNotNull(values);
         assertEquals(2, values.length);
         assertEquals(135, values[0]);
@@ -53,23 +53,7 @@ public class SRTMFileInfoTest extends TestCase {
 
     public void testExtractEastingNorthingWithInvalidStrings() {
         try {
-            SRTMFileInfo.parseEastingNorthing("020n10w");  // string length  = 7
-            fail("ParseException expected because the string not ends with '\\..+' ");
-        } catch (ParseException expected) {
-            assertEquals("Illegal string format.", expected.getMessage());
-            assertEquals(7, expected.getErrorOffset());
-        }
-
-        try {
-            SRTMFileInfo.parseEastingNorthing("005n104w"); // string length  = 8
-            fail("ParseException expected because the string not ends with '\\..+' ");
-        } catch (ParseException expected) {
-            assertEquals("Illegal string format.", expected.getMessage());
-            assertEquals(8, expected.getErrorOffset());
-        }
-
-        try {
-            SRTMFileInfo.parseEastingNorthing("05S104E");
+            SRTMFileInfo.parseEastingNorthing("w020n10");  // string length  = 7
             fail("ParseException expected because the string not ends with '\\..+' ");
         } catch (ParseException expected) {
             assertEquals("Illegal string format.", expected.getMessage());
@@ -94,55 +78,39 @@ public class SRTMFileInfoTest extends TestCase {
         }
 
         try {
-            SRTMFileInfo.parseEastingNorthing("020n10aw");
+            SRTMFileInfo.parseEastingNorthing("aw010n20");
             fail("ParseException expected because illegal 'a' character");
         } catch (ParseException expected) {
             assertEquals("Illegal direction character.", expected.getMessage());
-            assertEquals(6, expected.getErrorOffset());
-        }
-
-        try {
-            SRTMFileInfo.parseEastingNorthing("w0a0n10.SRTM");
-            fail("ParseException expected because the string starts with no digit.");
-        } catch (ParseException expected) {
-            assertEquals("Digit character expected.", expected.getMessage());
             assertEquals(0, expected.getErrorOffset());
         }
 
         try {
-            SRTMFileInfo.parseEastingNorthing("100n10w.SRTM");
+            SRTMFileInfo.parseEastingNorthing("w10n100.SRTM");
             fail("ParseException expected because the value for north direction is out of bounds.");
         } catch (ParseException expected) {
             assertEquals("The value '100' for north direction is out of the range 0 ... 90.", expected.getMessage());
-            assertEquals(3, expected.getErrorOffset());
+            assertEquals(6, expected.getErrorOffset());
         }
 
         try {
-            SRTMFileInfo.parseEastingNorthing("100s10w.SRTM");
-            fail("ParseException expected because the value for south direction is out of bounds.");
-        } catch (ParseException expected) {
-            assertEquals("The value '-100' for south direction is out of the range -90 ... 0.", expected.getMessage());
-            assertEquals(3, expected.getErrorOffset());
-        }
-
-        try {
-            SRTMFileInfo.parseEastingNorthing("80n190e.SRTM");
+            SRTMFileInfo.parseEastingNorthing("e190n80.SRTM");
             fail("ParseException expected because the value for east direction is out of bounds.");
         } catch (ParseException expected) {
             assertEquals("The value '190' for east direction is out of the range 0 ... 180.", expected.getMessage());
-            assertEquals(6, expected.getErrorOffset());
+            assertEquals(3, expected.getErrorOffset());
         }
 
         try {
-            SRTMFileInfo.parseEastingNorthing("80s190w.SRTM");
+            SRTMFileInfo.parseEastingNorthing("w190s80.SRTM");
             fail("ParseException expected because the value for west direction is out of bounds.");
         } catch (ParseException expected) {
             assertEquals("The value '-190' for west direction is out of the range -180 ... 0.", expected.getMessage());
-            assertEquals(6, expected.getErrorOffset());
+            assertEquals(3, expected.getErrorOffset());
         }
 
         try {
-            SRTMFileInfo.parseEastingNorthing("80s80s.SRTM");
+            SRTMFileInfo.parseEastingNorthing("s80s80.SRTM");
             fail("ParseException expected because value for easting is not available");
         } catch (ParseException expected) {
             assertEquals("Easting value not available.", expected.getMessage());
@@ -150,7 +118,7 @@ public class SRTMFileInfoTest extends TestCase {
         }
 
         try {
-            SRTMFileInfo.parseEastingNorthing("80e80e.SRTM");
+            SRTMFileInfo.parseEastingNorthing("e80e80.SRTM");
             fail("ParseException expected because value for northing is not available");
         } catch (ParseException expected) {
             assertEquals("Northing value not available.", expected.getMessage());
@@ -158,7 +126,7 @@ public class SRTMFileInfoTest extends TestCase {
         }
 
         try {
-            SRTMFileInfo.parseEastingNorthing("80e80sSRTM");
+            SRTMFileInfo.parseEastingNorthing("e80s80SRTM");
             fail("ParseException expected because northing easting values are not followed by a dot");
         } catch (ParseException expected) {
             assertEquals("Illegal string format.", expected.getMessage());
@@ -166,7 +134,7 @@ public class SRTMFileInfoTest extends TestCase {
         }
 
         try {
-            SRTMFileInfo.parseEastingNorthing("80e80s.");
+            SRTMFileInfo.parseEastingNorthing("e80s80.");
             fail("ParseException expected because the dot is not followed by at least one character");
         } catch (ParseException expected) {
             assertEquals("Illegal string format.", expected.getMessage());
