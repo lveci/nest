@@ -84,12 +84,47 @@ public class Settings {
                 Attribute attrib = child.getAttribute("value");
                 if (attrib != null) {
 
-                    settingMap.put(child.getName(), attrib.getValue());
+                    String value = attrib.getValue();
+                    if(value.contains("$("))
+                        value = resolve(value);
+                    settingMap.put(child.getName(), value);
                 }
             }
         }
     }
 
+    private String resolve(String value)
+    {
+        String out;
+        int idx1 = value.indexOf("$(");
+        int idx2 = value.indexOf(')') + 1;
+        String keyWord = value.substring(idx1+2, idx2-1);
+        String fullKey = value.substring(idx1, idx2);
+
+        String property = System.getProperty(keyWord);
+        if (property != null && property.length() > 0) {
+            out = value.replace(fullKey, property);
+        } else {
+
+            String settingStr = get(keyWord);
+            if(settingStr != null) {
+                out = value.replace(fullKey, settingStr);
+            } else {
+                out = value.substring(0, idx1) + value.substring(idx2, value.length());
+            }
+        }
+
+        if(keyWord.equalsIgnoreCase("nest.home")) {
+            File file = DatUtils.findHomeFolder(out);
+            if(file != null)
+                return file.getAbsolutePath();
+        }
+
+        if(out.contains("$("))
+           out = resolve(out);
+
+        return out;
+    }
 
     public String get(String key)
     {

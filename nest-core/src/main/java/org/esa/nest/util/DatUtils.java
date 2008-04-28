@@ -107,10 +107,6 @@ public class DatUtils {
 
         // next check config folder
         String homeDir = System.getProperty("nest.home");
-
-        System.out.print("homeDir = " + homeDir);
-        System.out.println();
-
         if (homeDir != null && homeDir.length() > 0) {
             File homeDirFile = new File(homeDir);
 
@@ -129,30 +125,33 @@ public class DatUtils {
                 return outFile3;
         }
 
+        return findHomeFolder("\\config\\" + filename);
+    }
+
+    public static File findHomeFolder(String filename)
+    {
         File homePath = SystemUtils.getBeamHomeDir();
         String homePathStr = homePath.getAbsolutePath();
         if(homePathStr.endsWith("."))
             homePathStr = homePathStr.substring(0, homePathStr.lastIndexOf('\\'));
-        String settingsfilePath = homePathStr + "\\config\\" + filename;
-
-        System.out.print("homePath = " + settingsfilePath);
-        System.out.println();
+        String settingsfilePath = homePathStr + filename;
 
         File outFile4 = new File(settingsfilePath);
         if(outFile4.exists())
             return outFile4;
 
-        int idx = homePathStr.lastIndexOf('\\');
-            settingsfilePath = homePathStr.substring(0, idx) + "\\beam\\config\\" + filename;
-
-        System.out.print("homePathStr = " + settingsfilePath);
-        System.out.println();
+        settingsfilePath = homePathStr.substring(0, homePathStr.lastIndexOf('\\')) + filename;
 
         File outFile5 = new File(settingsfilePath);
         if(outFile5.exists())
             return outFile5;
 
+        settingsfilePath = homePathStr.substring(0, homePathStr.lastIndexOf('\\')) + "\\beam" + filename;
+
+        File outFile6 = new File(settingsfilePath);
+        if(outFile6.exists())
+            return outFile6;
+
         return null;
     }
-
 }
