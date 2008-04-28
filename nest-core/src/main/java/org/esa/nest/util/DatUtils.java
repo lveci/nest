@@ -3,12 +3,15 @@ package org.esa.nest.util;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.visat.VisatApp;
+import org.esa.beam.util.SystemUtils;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.FileInputStream;
+
+import com.bc.ceres.core.runtime.internal.RuntimeActivator;
 
 /**
  * Created by IntelliJ IDEA.
@@ -63,6 +66,91 @@ public class DatUtils {
         if (resURL != null) {
             return new File(resURL.getPath());
         }
+
+        return null;
+    }
+
+
+    /**
+     * Optionally creates and returns the current user's application data directory.
+     *
+     * @param force if true, the directory will be created if it didn't exist before
+     * @return the current user's application data directory
+     */
+    public static File getApplicationUserDir(boolean force) {
+        String contextId = null;
+        if (RuntimeActivator.getInstance() != null
+                && RuntimeActivator.getInstance().getModuleContext() != null) {
+            contextId = RuntimeActivator.getInstance().getModuleContext().getRuntimeConfig().getContextId();
+        }
+        if (contextId == null) {
+            contextId = System.getProperty("ceres.context", "nest");
+        }
+        final File dir = new File(SystemUtils.getUserHomeDir(), '.' + contextId);
+        if (force && !dir.exists()) {
+            dir.mkdirs();
+        }
+        return dir;
+    }
+
+
+    public static File findSystemFile(String filename)
+    {
+        // check userhome/.nest first
+        File appHomePath = DatUtils.getApplicationUserDir(false);
+        String filePath = appHomePath.getAbsolutePath()
+                + '\\' + filename;
+        
+        File outFile = new File(filePath);
+        if(outFile.exists())
+            return outFile;
+
+        // next check config folder
+        String homeDir = System.getProperty("nest.home");
+
+        System.out.print("homeDir = " + homeDir);
+        System.out.println();
+
+        if (homeDir != null && homeDir.length() > 0) {
+            File homeDirFile = new File(homeDir);
+
+            String homeDirStr = homeDirFile.getAbsolutePath();
+            String settingsfilePath = homeDirStr + "\\config\\" + filename;
+
+            File outFile2 = new File(settingsfilePath);
+            if(outFile2.exists())
+                return outFile2;
+
+            int idx = homeDirStr.lastIndexOf('\\');
+            settingsfilePath = homeDirStr.substring(0, idx) + "\\config\\" + filename;
+
+            File outFile3 = new File(settingsfilePath);
+            if(outFile3.exists())
+                return outFile3;
+        }
+
+        File homePath = SystemUtils.getBeamHomeDir();
+        String homePathStr = homePath.getAbsolutePath();
+        if(homePathStr.endsWith("."))
+            homePathStr = homePathStr.substring(0, homePathStr.lastIndexOf('\\'));
+        String settingsfilePath = homePathStr + "\\config\\" + filename;
+
+        System.out.print("homePath = " + settingsfilePath);
+        System.out.println();
+
+        File outFile4 = new File(settingsfilePath);
+        if(outFile4.exists())
+            return outFile4;
+
+        int idx = homePathStr.lastIndexOf('\\');
+            settingsfilePath = homePathStr.substring(0, idx) + "\\beam\\config\\" + filename;
+
+        System.out.print("homePathStr = " + settingsfilePath);
+        System.out.println();
+
+        File outFile5 = new File(settingsfilePath);
+        if(outFile5.exists())
+            return outFile5;
 
         return null;
     }

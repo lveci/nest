@@ -64,26 +64,13 @@ public class Settings {
 
     public void Load() {
 
-        File appHomePath = SystemUtils.getApplicationUserDir();
-        String filePath = appHomePath.getAbsolutePath()
-                + '\\' + settingsFile;
+        File filePath = DatUtils.findSystemFile(settingsFile);
 
         org.jdom.Document doc;
         try {
-            doc = XMLSupport.LoadXML(filePath);
+            doc = XMLSupport.LoadXML(filePath.getAbsolutePath());
         } catch(IOException e) {
-
-            File homePath = SystemUtils.getBeamHomeDir();
-            String homePathStr = homePath.getAbsolutePath();
-            if(homePathStr.endsWith("."))
-                homePathStr = homePathStr.substring(0, homePathStr.length() - 1);
-            String settingsfilePath = homePathStr + "config\\" + settingsFile;
-
-            try {
-                doc = XMLSupport.LoadXML(settingsfilePath);
-            } catch(IOException e2) {
-                return;
-            }
+            return;
         }
 
         settingMap.clear();
