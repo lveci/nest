@@ -322,6 +322,7 @@
                     <skip>false</skip>
 					<format>xml</format>
                     <printSummary>true</printSummary>
+					<workingDirectory>../beam</workingDirectory>
                     <excludes>
                         <exclude>**/TestRaster.java</exclude>
                         <exclude>**/TestHelper$1.java</exclude>

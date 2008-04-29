@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * OrbitalDataRecordReader Tester.
+ * Settings Tester.
  *
  * @author lveci
  */

@@ -132,7 +132,7 @@ public class DatUtils {
     {
         File homePath = SystemUtils.getBeamHomeDir();
         String homePathStr = homePath.getAbsolutePath();
-        if(homePathStr.endsWith("."))
+        if(homePathStr.endsWith(".") && homePathStr.length() > 1)
             homePathStr = homePathStr.substring(0, homePathStr.lastIndexOf('\\'));
         String settingsfilePath = homePathStr + filename;
 
