@@ -38,6 +38,8 @@
                 <frameIcon>/org/esa/nest/dat/images/frame-icon.png</frameIcon>
                 <image>/org/esa/nest/dat/images/about.jpg</image>
                 <excludedActions/>
+                    <id>org.esa.beam.visat.actions.OpenGeoCodingInfoDialogAction</id>
+                    <id>org.esa.beam.visat.actions.OpenStatisticsDialogAction</id>
                 <excludedToolViews>
                     <id>org.esa.beam.visat.toolviews.lm.LayersToolView</id>
                     <id>org.esa.beam.visat.toolviews.bitmask.BitmaskOverlayToolView</id>
