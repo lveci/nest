@@ -10,8 +10,8 @@ import junit.framework.TestCase;
 public class TestOrbitalDataRecordReader extends TestCase {
 
     String envisatOrbitFilePath = "org/esa/nest/data/envisat_ODR.051";
-    String ers1OrbitFilePath = "org/esa/nest/data/ers1_ODR.051";
-    String ers2OrbitFilePath = "org/esa/nest/data/ers2_ODR.051";
+    String ers1OrbitFilePath = "org/esa/nest/data/ers1_ODR.079";
+    String ers2OrbitFilePath = "org/esa/nest/data/ers2_ODR.015";
 
     public TestOrbitalDataRecordReader(String name) {
         super(name);
@@ -40,21 +40,38 @@ public class TestOrbitalDataRecordReader extends TestCase {
 
             reader.parseHeader1();
             reader.parseHeader2();
+        } else
+            assertTrue(false);
+    }
+
+    public void testReadERS1OrbitFiles() {
+        System.out.print("ERS1 ORD ");
+        readOrbitFile(ers1OrbitFilePath);
+    }
+
+    public void testReadERS2OrbitFile() {
+        System.out.print("ERS2 ORD ");
+        readOrbitFile(ers2OrbitFilePath);
+    }
+
+    public void testReadEnvisatOrbitFile() {
+        System.out.print("Envisat ORD ");
+        readOrbitFile(envisatOrbitFilePath);
+    }
+
+    public static void readOrbitFile(String path) {
+        OrbitalDataRecordReader reader = new OrbitalDataRecordReader();
+        boolean res = reader.readOrbitFile(path);
+        assertTrue(res);
+
+        OrbitalDataRecordReader.OrbitDataRecord[] orbits = reader.getDataRecords();
+        for(int i=0; i < 2; ++i) {
+            System.out.print("Orbit time " + orbits[i].time);
+            System.out.print(" lat " + orbits[i].latitude);
+            System.out.print(" lng " + orbits[i].longitude);
+            System.out.print(" hgt " + orbits[i].heightOfCenterOfMass);
+            System.out.println();
         }
     }
 
-    public void testReadOrbitFile() {
-        OrbitalDataRecordReader reader = new OrbitalDataRecordReader();
-        reader.readOrbitFile(envisatOrbitFilePath);
-    }
-
-    public void testReadERS1OrbitFile() {
-        OrbitalDataRecordReader reader = new OrbitalDataRecordReader();
-        reader.readOrbitFile(ers1OrbitFilePath);
-    }
-    
-    public void testReadERS2OrbitFile() {
-        OrbitalDataRecordReader reader = new OrbitalDataRecordReader();
-        reader.readOrbitFile(ers2OrbitFilePath);
-    }
 }
