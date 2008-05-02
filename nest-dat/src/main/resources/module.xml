@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-dat</symbolicName>
-    <version>0.1</version>
+    <version>1A</version>
     <name>NEST Display and Analysis Tool</name>
 
     <description>NEST Display and Analysis Tool</description>
