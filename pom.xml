@@ -52,6 +52,7 @@
     <module>nest-op-asar-calibration</module>
     <module>nest-op-ers-calibration</module>
     <module>nest-op-gcp-selection</module>
+    <module>nest-op-data-analysis</module>
   </modules>
 
     <dependencyManagement>
