@@ -13,7 +13,6 @@
     <artifactId>nest-reader-ers-ceos</artifactId>
     <name>NEST ERS 1 and 2 CEOS Product Reader</name>
     <version>1A</version>
-    <url>http://envisat.esa.int/beam/</url>
 
     <packaging>jar</packaging>
 
