@@ -99,7 +99,7 @@ public class DatUtils {
         // check userhome/.nest first
         File appHomePath = DatUtils.getApplicationUserDir(false);
         String filePath = appHomePath.getAbsolutePath()
-                + '/' + filename;
+                + File.separator + filename;
         
         File outFile = new File(filePath);
         if(outFile.exists())
@@ -111,21 +111,21 @@ public class DatUtils {
             File homeDirFile = new File(homeDir);
 
             String homeDirStr = homeDirFile.getAbsolutePath();
-            String settingsfilePath = homeDirStr + "/config/" + filename;
+            String settingsfilePath = homeDirStr + File.separator + "config" + File.separator + filename;
 
             File outFile2 = new File(settingsfilePath);
             if(outFile2.exists())
                 return outFile2;
 
-            int idx = homeDirStr.lastIndexOf('/');
-            settingsfilePath = homeDirStr.substring(0, idx) + "/config/" + filename;
+            int idx = homeDirStr.lastIndexOf(File.separator);
+            settingsfilePath = homeDirStr.substring(0, idx) + File.separator + "config" + File.separator + filename;
 
             File outFile3 = new File(settingsfilePath);
             if(outFile3.exists())
                 return outFile3;
         }
 
-        return findHomeFolder("/config/" + filename);
+        return findHomeFolder(File.separator + "config" + File.separator + filename);
     }
 
     public static File findHomeFolder(String filename)
@@ -133,20 +133,20 @@ public class DatUtils {
         File homePath = SystemUtils.getBeamHomeDir();
         String homePathStr = homePath.getAbsolutePath();
         if(homePathStr.endsWith(".") && homePathStr.length() > 1)
-            homePathStr = homePathStr.substring(0, homePathStr.lastIndexOf('/'));
+            homePathStr = homePathStr.substring(0, homePathStr.lastIndexOf(File.separator));
         String settingsfilePath = homePathStr + filename;
 
         File outFile4 = new File(settingsfilePath);
         if(outFile4.exists())
             return outFile4;
 
-        settingsfilePath = homePathStr.substring(0, homePathStr.lastIndexOf('/')) + filename;
+        settingsfilePath = homePathStr.substring(0, homePathStr.lastIndexOf(File.separator)) + filename;
 
         File outFile5 = new File(settingsfilePath);
         if(outFile5.exists())
             return outFile5;
 
-        settingsfilePath = homePathStr.substring(0, homePathStr.lastIndexOf('/')) + "/beam" + filename;
+        settingsfilePath = homePathStr.substring(0, homePathStr.lastIndexOf(File.separator)) + File.separator + "beam" + filename;
 
         File outFile6 = new File(settingsfilePath);
         if(outFile6.exists())

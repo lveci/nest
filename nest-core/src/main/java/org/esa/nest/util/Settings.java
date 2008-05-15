@@ -43,9 +43,9 @@ public class Settings {
     public void Save() {
 
         File userHomePath = SystemUtils.getUserHomeDir();
-        String filePath = userHomePath.getAbsolutePath() + "\\."
+        String filePath = userHomePath.getAbsolutePath() + File.separator + "."
                 + System.getProperty("ceres.context", "nest")
-                + '\\' + settingsFile;
+                + File.separator + settingsFile;
 
         Element root = new Element("DAT");
         Document doc = new Document(root);
