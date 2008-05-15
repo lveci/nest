@@ -50,4 +50,40 @@ public final class DatApp extends VisatApp {
         return new DatAboutBox();
     }
 
+    /**
+     * Overrides the base class version in order to create a tool bar for VISAT.
+     */
+    @Override
+    protected CommandBar createMainToolBar() {
+        // context of action in module.xml used as key
+        final CommandBar toolBar = new CommandBar("mainToolBar");
+        toolBar.setTitle("Standard");
+        toolBar.addDockableBarListener(new ToolBarListener());
+
+        addCommandsToToolBar(toolBar, new String[]{
+                "new",
+                "open",
+                "save",
+                null,
+                "preferences",
+                "properties",
+                null,
+                "helpTopics",
+        });
+
+        return toolBar;
+    }
+
+    protected CommandBar createAnalysisToolBar() {
+        // context of action in module.xml used as key
+        final CommandBar toolBar = new CommandBar("analysisToolBar");
+        toolBar.setTitle("Analysis");
+        toolBar.addDockableBarListener(new ToolBarListener());
+
+        addCommandsToToolBar(toolBar, new String[]{
+                "openInformationDialog",
+        });
+
+        return toolBar;
+    }
 }

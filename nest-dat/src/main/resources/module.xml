@@ -37,40 +37,24 @@
                 <displayName>DAT</displayName>
                 <frameIcon>/org/esa/nest/dat/images/frame-icon.png</frameIcon>
                 <image>/org/esa/nest/dat/images/about.jpg</image>
-                <excludedActions/>
-                    <id>org.esa.beam.visat.actions.OpenGeoCodingInfoDialogAction</id>
-                    <id>org.esa.beam.visat.actions.OpenStatisticsDialogAction</id>
+                <excludedActions>
+                    <id>openGeoCodingInfoDialog</id>
+                    <id>openStatisticsDialog</id>
+                    <id>openHistogramDialog</id>
+                    <id>openScatterPlotDialog</id>
+                    <id>openProfilePlotDialog</id>
+                    <id>openCoordListDialog</id>
+                    <id>orthorectification</id>
+                    <id>showDataSources</id>
+                </excludedActions>
                 <excludedToolViews>
-                    <id>org.esa.beam.visat.toolviews.lm.LayersToolView</id>
-                    <id>org.esa.beam.visat.toolviews.bitmask.BitmaskOverlayToolView</id>
-                    <id>org.esa.beam.visat.toolviews.pin.PinManagerToolView</id>
-                    <id>org.esa.beam.visat.toolviews.pin.GcpManagerToolView</id>
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
-                    <id>org.esa.beam.visat.toolviews.StatisticsToolView</id>
+                    <id>org.esa.beam.visat.toolviews.stat.StatisticsToolView</id>
+                    <id>org.esa.beam.scripting.visat.ScriptConsoleToolView</id>
+                    <id>org.esa.beam.visat.diag.JaiMonitorToolView</id>
                 </excludedToolViews>
             </applicationDescriptor>
     </extension>
-   
-    <extension point="nest-dat:toolViews">
-    
-        <toolView>
-            <id>org.esa.nest.dat.toolviews.DatStatisticsToolView</id>
-            <class>org.esa.nest.dat.toolviews.DatStatisticsToolView</class>
-            <title>DAT Statistics View</title>
-            <tabTitle>DAT Statistics</tabTitle>
-            <mnemonic>t</mnemonic>
-            <accelerator>ctrl alt T</accelerator>
-            <description>Display statistics for a selected band.</description>
-            <smallIcon>/org/esa/beam/resources/images/icons/Statistics16.gif</smallIcon>
-            <largeIcon>/org/esa/beam/resources/images/icons/Statistics24.gif</largeIcon>
-            <helpId>statisticsToolView</helpId>
-            <initState>HIDDEN</initState>
-            <initSide>SOUTH</initSide>
-            <initIndex>0</initIndex>
-        </toolView>
-
-    </extension>
-
 
     <extension point="beam-ui:actions">
 
