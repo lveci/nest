@@ -123,8 +123,8 @@ public class GraphExecuter extends Observable {
     
     /**
      * Begins graph processing
-     *
-     * @throws GraphException
+     * @param pm The ProgressMonitor
+     * @throws GraphException if cannot process graph
      */
     void executeGraph(ProgressMonitor pm) throws GraphException {
         AssignAllParameters();
@@ -132,26 +132,34 @@ public class GraphExecuter extends Observable {
         processor.executeGraph(graph, pm);
     }
 
-    void saveGraph() {
-        try {
-            AssignAllParameters();
+    void saveGraph() throws GraphException {
 
-            String filePath = DatUtils.GetFilePath("Save Graph", "XML", "xml", "Graph File", true);
-            if(filePath == null) return;
+        AssignAllParameters();
+
+        String filePath = DatUtils.GetFilePath("Save Graph", "XML", "xml", "Graph File", true);
+        if(filePath != null)
+            writeGraph(filePath);
+    }
+
+    void writeGraph(String filePath) throws GraphException {
+
+        try {
             FileWriter fileWriter = new FileWriter(filePath);
+
             try {
                 GraphIO.write(graph, fileWriter);
             } finally {
                 fileWriter.close();
             }
         } catch(IOException e) {
-
+            throw new GraphException("Unable to write graph to " + filePath);
         }
     }
 
     void loadGraph() throws GraphException {
+
+        String filePath = DatUtils.GetFilePath("Load Graph", "XML", "xml", "Graph File", false);
         try {
-            String filePath = DatUtils.GetFilePath("Load Graph", "XML", "xml", "Graph File", false);
             if(filePath == null) return;
             FileReader fileReader = new FileReader(filePath);
             Graph graphFromFile;
@@ -176,7 +184,7 @@ public class GraphExecuter extends Observable {
                 }
             }
         } catch(IOException e) {
-
+            throw new GraphException("Unable to load graph " + filePath);
         }
     }
 

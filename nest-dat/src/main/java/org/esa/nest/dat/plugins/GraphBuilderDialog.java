@@ -176,7 +176,12 @@ public class GraphBuilderDialog implements Observer {
     private void SaveGraph() {
 
         if(ValidateAllNodes()) {
-            graphEx.saveGraph();
+            try {
+                graphEx.saveGraph();
+            } catch(GraphException e) {
+                JOptionPane.showMessageDialog(mainFrame, e.getMessage(), "Error Saving Graph",
+                                          JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 

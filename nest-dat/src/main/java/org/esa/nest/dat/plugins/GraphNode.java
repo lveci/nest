@@ -164,7 +164,8 @@ public class GraphNode {
     }
 
     void updateParameterMap() {
-        operatorUI.updateParameters();
+        if(operatorUI != null)
+            operatorUI.updateParameters();
     }
 
     OperatorUI GetOperatorUI() {

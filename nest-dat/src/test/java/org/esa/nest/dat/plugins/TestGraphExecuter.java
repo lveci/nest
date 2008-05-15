@@ -6,6 +6,10 @@ import java.util.Vector;
 import java.util.Set;
 import java.util.Observer;
 
+import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.NullProgressMonitor;
+import org.esa.beam.framework.gpf.graph.GraphException;
+
 /**
  * GraphExecuter Tester.
  *
@@ -84,8 +88,20 @@ public class TestGraphExecuter extends TestCase implements Observer {
         graphEx.setSelectedNode(node);
 
         assertEquals(updateValue, "Selected");
+
+        graphEx.ClearGraph();
     }
 
+    public void testCreateGraph() throws GraphException {
+        GraphNode nodeA = graphEx.addOperator("testOp");
+        GraphNode nodeB = graphEx.addOperator("testOp");
+
+        nodeB.connectOperatorSource(nodeA);
+
+        //graphEx.writeGraph("D:\\data\\testGraph.xml");
+
+        //graphEx.executeGraph(new NullProgressMonitor());
+    }
 
     /**
      Implements the functionality of Observer participant of Observer Design Pattern to define a one-to-many
