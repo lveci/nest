@@ -80,9 +80,9 @@ public final class DatApp extends VisatApp {
         toolBar.setTitle("Analysis");
         toolBar.addDockableBarListener(new ToolBarListener());
 
-        addCommandsToToolBar(toolBar, new String[]{
-                "openInformationDialog",
-        });
+        //addCommandsToToolBar(toolBar, new String[]{
+        //        "openInformationDialog",
+        //});
 
         return toolBar;
     }
