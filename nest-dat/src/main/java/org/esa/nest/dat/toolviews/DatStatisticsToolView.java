@@ -111,9 +111,9 @@ public class DatStatisticsToolView extends AbstractToolView {
     }
 
     private void setCurrentHelpID(final String helpID) {
-        HelpSys.enableHelpKey(getContentPane(), helpID);
-        HelpSys.enableHelpKey(_tabbedPane, helpID);
-        HelpSys.getHelpBroker().setCurrentID(helpID);
+        //HelpSys.enableHelpKey(getContentPane(), helpID);
+        //HelpSys.enableHelpKey(_tabbedPane, helpID);
+        //HelpSys.getHelpBroker().setCurrentID(helpID);
     }
 
     private void updateUIState() {
