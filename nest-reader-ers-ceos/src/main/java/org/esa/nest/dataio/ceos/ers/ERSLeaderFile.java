@@ -2,12 +2,8 @@ package org.esa.nest.dataio.ceos.ers;
 
 import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
-import org.esa.nest.dataio.ceos.ers.records.ERSAncillary1Record;
-import org.esa.nest.dataio.ceos.ers.records.ERSAncillary2Record;
-import org.esa.nest.dataio.ceos.ers.records.ERSLeaderFDR;
-import org.esa.nest.dataio.ceos.ers.records.ERSSceneHeaderRecord;
-import org.esa.nest.dataio.ceos.records.Ancillary3Record;
-import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.nest.dataio.ceos.records.BaseRecord;
+import org.esa.nest.dataio.ceos.records.BaseSceneHeaderRecord;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
@@ -17,7 +13,7 @@ import java.io.IOException;
 import java.util.Calendar;
 
 /*
- * $Id: ERSLeaderFile.java,v 1.2 2008-01-07 15:04:28 lveci Exp $
+ * $Id: ERSLeaderFile.java,v 1.3 2008-05-26 19:32:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -37,7 +33,7 @@ import java.util.Calendar;
  * This class represents a leader file of an Avnir-2 product.
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2008-01-07 15:04:28 $
+ * @version $Revision: 1.3 $ $Date: 2008-05-26 19:32:10 $
  */
 class ERSLeaderFile {
 
@@ -52,30 +48,43 @@ class ERSLeaderFile {
     private static final String PROJECTION_KEY_UTM = "YNNNN";
     private static final String PROJECTION_KEY_PS = "NNNNY";
 
-    public final ERSLeaderFDR _leaderFDR;
-    public final ERSSceneHeaderRecord _sceneHeaderRecord;
-    public final ERSAncillary1Record _ancillary1Record;
-    public final ERSAncillary2Record _ancillary2Record;
-    public final Ancillary3Record _ancillary3Record;
+    public final BaseRecord _leaderFDR;
+    public final BaseSceneHeaderRecord _sceneHeaderRecord;
+    public final BaseRecord _mapProjRecord;
+    public final BaseRecord _platformPositionRecord;
+    public final BaseRecord _facilityRecord;
     public CeosFileReader _reader;
 
+    private static String mission = "ers";
+    private static String leader_recordDefinitionFile = "leader_file.xml";
+    private static String scene_recordDefinitionFile = "scene_record.xml";
+    private static String mapproj_recordDefinitionFile = "map_proj_record.xml";
+    private static String platform_recordDefinitionFile = "platform_position_record.xml";
+    private static String facility_recordDefinitionFile = "facility_record.xml";
 
     public ERSLeaderFile(final ImageInputStream leaderStream) throws IOException,
                                                                         IllegalCeosFormatException {
         _reader = new CeosFileReader(leaderStream);
-        _leaderFDR = new ERSLeaderFDR(_reader);
-        _sceneHeaderRecord = new ERSSceneHeaderRecord(_reader);
-        _ancillary1Record = new ERSAncillary1Record(_reader);
-        _ancillary2Record = new ERSAncillary2Record(_reader);
-        _ancillary3Record = new Ancillary3Record(_reader);
-
+        _leaderFDR = new BaseRecord(_reader, -1, mission, leader_recordDefinitionFile);
+        _reader.seek(_leaderFDR.getAbsolutPosition(_leaderFDR.getRecordLength()));
+        _sceneHeaderRecord = new BaseSceneHeaderRecord(_reader, -1, mission, scene_recordDefinitionFile);
+        _reader.seek(_sceneHeaderRecord.getAbsolutPosition(_sceneHeaderRecord.getRecordLength()));
+        _mapProjRecord = new BaseRecord(_reader, -1, mission, mapproj_recordDefinitionFile);
+        _reader.seek(_mapProjRecord.getAbsolutPosition(_mapProjRecord.getRecordLength()));
+        _platformPositionRecord = new BaseRecord(_reader, -1, mission, platform_recordDefinitionFile);
+        _reader.seek(_platformPositionRecord.getAbsolutPosition(_platformPositionRecord.getRecordLength()));
+        _facilityRecord = new BaseRecord(_reader, -1, mission, facility_recordDefinitionFile);
     }
 
-    public String getProductLevel() throws IOException,
-                                           IllegalCeosFormatException {
-        return _sceneHeaderRecord.getProductLevel();
+    public String getProductLevel() {
+        return _sceneHeaderRecord.getAttributeString("Scene reference number");
     }
 
+    public Calendar getDateImageWasTaken() {
+        return _sceneHeaderRecord.getDateImageWasTaken();
+    }
+
+     /*
     public String getProcessingCode() throws IOException,
                                              IllegalCeosFormatException {
         return _sceneHeaderRecord.getProcessingCode();
@@ -83,30 +92,30 @@ class ERSLeaderFile {
 
     public Calendar getDateImageWasTaken() {
         return _sceneHeaderRecord.getDateImageWasTaken();
-    }
+    }    */
 
     public double[] getLatCorners() throws IOException,
                                            IllegalCeosFormatException {
-        final double latUL = _sceneHeaderRecord.getSceneCornerUpperLeftLat();
-        final double latUR = _sceneHeaderRecord.getSceneCornerUpperRightLat();
-        final double latLL = _sceneHeaderRecord.getSceneCornerLowerLeftLat();
-        final double latLR = _sceneHeaderRecord.getSceneCornerLowerRightLat();
+        final double latUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic latitude");
+        final double latUR = _mapProjRecord.getAttributeDouble("1st line last valid pixel geodetic latitude");
+        final double latLL = _mapProjRecord.getAttributeDouble("Last line 1st pixel geodetic latitude");
+        final double latLR = _mapProjRecord.getAttributeDouble("Last line last valid pixel geodetic latitude");
         return new double[]{latUL, latUR, latLL, latLR};
     }
 
     public double[] getLonCorners() throws IOException,
                                            IllegalCeosFormatException {
-        final double lonUL = _sceneHeaderRecord.getSceneCornerUpperLeftLon();
-        final double lonUR = _sceneHeaderRecord.getSceneCornerUpperRightLon();
-        final double lonLL = _sceneHeaderRecord.getSceneCornerLowerLeftLon();
-        final double lonLR = _sceneHeaderRecord.getSceneCornerLowerLeftLat();
+        final double lonUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel longitude");
+        final double lonUR = _mapProjRecord.getAttributeDouble("1st line last valid pixel longitude");
+        final double lonLL = _mapProjRecord.getAttributeDouble("Last line 1st pixel longitude");
+        final double lonLR = _mapProjRecord.getAttributeDouble("Last line last valid pixel longitude");
         return new double[]{lonUL, lonUR, lonLL, lonLR};
     }
 
     public String getUsedProjection() throws IOException,
                                              IllegalCeosFormatException {
-
-        return _sceneHeaderRecord.getMapProjectionMethod().trim();
+             return "";
+       // return _sceneHeaderRecord.getMapProjectionMethod().trim();
 //        if (PROJECTION_KEY_RAW.equals(projKey)) {
 //            return PalsarConstants.MAP_PROJECTION_RAW;
 //        } else if (PROJECTION_KEY_UTM.equals(projKey)) {
@@ -117,7 +126,7 @@ class ERSLeaderFile {
 //        return PalsarConstants.MAP_PROJECTION_UNKNOWN;
     }
 
-    public long getNominalPixelsPerLine_1A_1B1() throws IOException,
+  /*  public long getNominalPixelsPerLine_1A_1B1() throws IOException,
                                                         IllegalCeosFormatException {
         return _ancillary1Record.getNumNominalPixelsPerLine_1A_1B1();
     }
@@ -150,7 +159,7 @@ class ERSLeaderFile {
     private double getNumNominalLinesPerScene() throws IOException,
                                                        IllegalCeosFormatException {
         return _ancillary1Record.getNumNominalLinesPerScene();
-    }
+    }     */
 
     /**
      * Gets the pixel size in x direction in meters.
@@ -160,10 +169,10 @@ class ERSLeaderFile {
      * @throws IOException
      * @throws IllegalCeosFormatException
      */
-    public double getNominalInterPixelDistance() throws IOException,
+  /*  public double getNominalInterPixelDistance() throws IOException,
                                                         IllegalCeosFormatException {
         return _ancillary1Record.getNominalInterPixelDistance();
-    }
+    }  */
 
     /**
      * Gets the pixel size in y direction in meters.
@@ -173,7 +182,7 @@ class ERSLeaderFile {
      * @throws IOException
      * @throws IllegalCeosFormatException
      */
-    public double getNominalInterLineDistance() throws IOException,
+  /*  public double getNominalInterLineDistance() throws IOException,
                                                        IllegalCeosFormatException {
         return _ancillary1Record.getNominalInterLineDistance();
     }
@@ -206,7 +215,7 @@ class ERSLeaderFile {
     public boolean isUTMSouthHemisphere() throws IOException,
                                                  IllegalCeosFormatException {
         return _ancillary1Record.getHemisphere() == 1;
-    }
+    }    */
 
     /**
      * Gets the easting of the scene center in kilometers.
@@ -216,10 +225,10 @@ class ERSLeaderFile {
      * @throws IOException
      * @throws IllegalCeosFormatException
      */
-    public double getUTMEasting() throws IOException,
+  /*  public double getUTMEasting() throws IOException,
                                          IllegalCeosFormatException {
         return _ancillary1Record.getSceneCenterEasting();
-    }
+    }   */
 
     /**
      * Gets the northing  of the scene center in kilometers.
@@ -229,10 +238,10 @@ class ERSLeaderFile {
      * @throws IOException
      * @throws IllegalCeosFormatException
      */
-    public double getUTMNorthing() throws IOException,
+  /*  public double getUTMNorthing() throws IOException,
                                           IllegalCeosFormatException {
         return _ancillary1Record.getSceneCenterNorthing();
-    }
+    }    */
 
 
     /**
@@ -243,7 +252,7 @@ class ERSLeaderFile {
      * @throws IOException
      * @throws IllegalCeosFormatException
      */
-    public double getUTMOrientationAngle() throws IOException,
+  /*  public double getUTMOrientationAngle() throws IOException,
                                                   IllegalCeosFormatException {
         final double radian = _ancillary1Record.getAngleBetweenMapUTMVerticalAndTrueNorth();
         return Math.toDegrees(radian);
@@ -277,7 +286,7 @@ class ERSLeaderFile {
     public double getPSOrientationAngle() throws IOException,
                                                  IllegalCeosFormatException {
         return _ancillary1Record.getAngleBetweenMapPSVerticalAndTrueNorth();
-    }
+    }      */
 
     /**
      * Gets the coefficiants for corrected L1B2 products.
@@ -293,7 +302,7 @@ class ERSLeaderFile {
      * @throws IOException
      * @throws IllegalCeosFormatException
      */
-    public double[][] getCorrectedTransformationCoeffs() throws IOException,
+  /*  public double[][] getCorrectedTransformationCoeffs() throws IOException,
                                                                 IllegalCeosFormatException {
         return _ancillary1Record.getTransformationCoeffsL1B2();
     }
@@ -470,7 +479,7 @@ class ERSLeaderFile {
     public double[] getF4Coefficients() throws IOException,
                                                IllegalCeosFormatException {
         return _ancillary1Record.getF4FunctionCoeffs_1B2();
-    }
+    }     */
 
     public MetadataElement getMapProjectionMetadata() throws IOException,
                                                              IllegalCeosFormatException {
@@ -494,7 +503,7 @@ class ERSLeaderFile {
     public MetadataElement getRadiometricMetadata() throws IOException,
                                                            IllegalCeosFormatException {
         final MetadataElement radioMetadata = new MetadataElement("Radiometric Calibration");
-        addAttribute(radioMetadata, "SENSOR_MODE", ProductData.createInstance(getSensorMode()));
+      /*  addAttribute(radioMetadata, "SENSOR_MODE", ProductData.createInstance(getSensorMode()));
         addAttribute(radioMetadata, "LOWER_LIMIT_STRENGTH",
                      ProductData.createInstance(new int[]{getLowerLimitStrength()}));
         addAttribute(radioMetadata, "UPPER_LIMIT_STRENGTH",
@@ -519,7 +528,7 @@ class ERSLeaderFile {
         final double[] absOffsets = getAbsoluteCalibrationOffsets();
         addAttribute(radioMetadata, "ABSOLUTE_GAIN_BAND", ProductData.createInstance(absGains));
         addAttribute(radioMetadata, "ABSOLUTE_OFFSET_BAND", ProductData.createInstance(absOffsets));
-
+                      */
         return radioMetadata;
     }
 
@@ -527,7 +536,7 @@ class ERSLeaderFile {
                                                         IllegalCeosFormatException {
         final MetadataElement platformMeta = new MetadataElement("Platform Position Data");
 
-        addAttribute(platformMeta, "NUMBER_EFFECTIVE_DATA_POINTS",
+     /*   addAttribute(platformMeta, "NUMBER_EFFECTIVE_DATA_POINTS",
                      ProductData.createInstance(new int[]{getNumEffectiveDataPoints()}));
         addAttribute(platformMeta, "YEAR_OF_FIRST_POINT", ProductData.createInstance(new int[]{getYearOfFirstPoint()}));
         addAttribute(platformMeta, "MONTH_OF_FIRST_POINT",
@@ -579,7 +588,7 @@ class ERSLeaderFile {
         }
 
         addAttribute(platformMeta, "LEAP_SECOND", ProductData.createInstance(String.valueOf(isLeapSecondUsed())));
-
+           */
         return platformMeta;
     }
 
@@ -591,13 +600,13 @@ class ERSLeaderFile {
     private void addGeneralProjectionMetadata(final MetadataElement projMeta) throws
                                                                               IOException,
                                                                               IllegalCeosFormatException {
-        addAttribute(projMeta, "REFERENCE_ELLIPSOID", ProductData.createInstance(getReferenceEllipsoidName()));
+     /*   addAttribute(projMeta, "REFERENCE_ELLIPSOID", ProductData.createInstance(getReferenceEllipsoidName()));
         addAttribute(projMeta, "SEMI_MAJOR_AXIS", ProductData.createInstance(new double[]{getSemiMajorAxis()}),
                      UNIT_METER);
         addAttribute(projMeta, "SEMI_MINOR_AXIS", ProductData.createInstance(new double[]{getSemiMinorAxis()}),
                      UNIT_METER);
 
-        addAttribute(projMeta, "GEODETIC_DATUM", ProductData.createInstance(getDatumName()));
+        addAttribute(projMeta, "GEODETIC_DATUM", ProductData.createInstance(getDatumName()));   */
 
         final double[] latCorners = getLatCorners();
         final double[] lonCorners = getLonCorners();
@@ -623,7 +632,7 @@ class ERSLeaderFile {
     private void addRawProjectionMetadata(final MetadataElement projMeta) throws
                                                                           IOException,
                                                                           IllegalCeosFormatException {
-        for (int i = 1; i <= 4; i++) {
+    /*    for (int i = 1; i <= 4; i++) {
             final double[][] uncorrectedTransformationCoeffs = getUncorrectedTransformationCoeffs(i);
             for (int j = 0; j < uncorrectedTransformationCoeffs[0].length; j++) {
                 final double coeffLat = uncorrectedTransformationCoeffs[0][j];
@@ -645,9 +654,9 @@ class ERSLeaderFile {
                 addAttribute(projMeta, "BAND[" + i + "]_COEFFICIENTS_Y." + j,
                              ProductData.createInstance(new double[]{coeffY}));
             }
-        }
+        }          */
 
-        addAttribute(projMeta, "PIXELS_PER_LINE",
+       /* addAttribute(projMeta, "PIXELS_PER_LINE",
                      ProductData.createInstance(new long[]{getNominalPixelsPerLine_1A_1B1()}));
         addAttribute(projMeta, "LINES_PER_SCENE",
                      ProductData.createInstance(new long[]{getNominalLinesPerScene_1A_1B1()}));
@@ -656,14 +665,14 @@ class ERSLeaderFile {
         addAttribute(projMeta, "PIXEL_SIZE_Y_CENTER",
                      ProductData.createInstance(new double[]{getNominalInterLineDistance_1A_1B1()}), UNIT_METER);
         addAttribute(projMeta, "IMAGE_SKEW_CENTER", ProductData.createInstance(new double[]{getImageSkew()}),
-                     "milliradian");
+                     "milliradian");   */
 
     }
 
     private void addUTMProjectionMetadata(final MetadataElement projMeta) throws
                                                                           IOException,
                                                                           IllegalCeosFormatException {
-        addAttribute(projMeta, "HEMISPHERE", ProductData.createInstance(isUTMSouthHemisphere() ? "South" : "North"));
+      /*  addAttribute(projMeta, "HEMISPHERE", ProductData.createInstance(isUTMSouthHemisphere() ? "South" : "North"));
         addAttribute(projMeta, "UTM_ZONE_NUMBER", ProductData.createInstance(new long[]{getUTMZoneIndex()}));
         addAttribute(projMeta, "UTM_NORTHING", ProductData.createInstance(new double[]{getUTMNorthing()}),
                      UNIT_KILOMETER);
@@ -674,14 +683,14 @@ class ERSLeaderFile {
                                                                    getUTMOrientationAngle()
                                                            }),
                                                            UNIT_DEGREE);
-        orientation.setDescription("Angle between the map projection vertical axis and the true north at scene center");
+        orientation.setDescription("Angle between the map projection vertical axis and the true north at scene center"); */
 
     }
 
     private void addPSProjectionMetadata(final MetadataElement projMeta) throws
                                                                          IOException,
                                                                          IllegalCeosFormatException {
-        final GeoPos origin = getPSProjectionOrigin();
+      /*  final GeoPos origin = getPSProjectionOrigin();
         addAttribute(projMeta, "MAP_PROJECTION_ORIGIN",
                      ProductData.createInstance(origin.getLatString() + " , " + origin.getLonString()));
 
@@ -698,32 +707,32 @@ class ERSLeaderFile {
                                                            ProductData.createInstance(
                                                                    new double[]{getPSOrientationAngle()}),
                                                            UNIT_DEGREE);
-        orientation.setDescription("Angle between the map projection vertical axis and the true north at scene center");
+        orientation.setDescription("Angle between the map projection vertical axis and the true north at scene center");  */
     }
 
     private void addGeneralCorrectedMetadata(final MetadataElement projMeta) throws
                                                                              IllegalCeosFormatException,
                                                                              IOException {
-        addAttribute(projMeta, "PIXELS_PER_LINE",
+   /*     addAttribute(projMeta, "PIXELS_PER_LINE",
                      ProductData.createInstance(new double[]{getNumNominalPixelsPerLine()}));
         addAttribute(projMeta, "LINES_PER_SCENE",
                      ProductData.createInstance(new double[]{getNumNominalLinesPerScene()}));
         addAttribute(projMeta, "PIXEL_SIZE_X_CENTER",
                      ProductData.createInstance(new double[]{getNominalInterPixelDistance()}), UNIT_METER);
         addAttribute(projMeta, "PIXEL_SIZE_Y_CENTER",
-                     ProductData.createInstance(new double[]{getNominalInterLineDistance()}), UNIT_METER);
+                     ProductData.createInstance(new double[]{getNominalInterLineDistance()}), UNIT_METER);  */
     }
 
-    private MetadataAttribute createAttribute(final String name, final ProductData data) {
+    private static MetadataAttribute createAttribute(final String name, final ProductData data) {
         return new MetadataAttribute(name.toUpperCase(), data, true);
     }
 
-    private MetadataAttribute addAttribute(final MetadataElement platformMetadata, final String name,
+    private static MetadataAttribute addAttribute(final MetadataElement platformMetadata, final String name,
                                            final ProductData data) {
         return addAttribute(platformMetadata, name, data, null);
     }
 
-    private MetadataAttribute addAttribute(final MetadataElement platformMetadata, final String name,
+    private static MetadataAttribute addAttribute(final MetadataElement platformMetadata, final String name,
                                            final ProductData data, final String unit) {
         final MetadataAttribute attribute = createAttribute(name, data);
         if (unit != null) {

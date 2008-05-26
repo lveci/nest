@@ -1,5 +1,5 @@
 /*
- * $Id: CeosFileReader.java,v 1.5 2008-04-03 16:28:16 lveci Exp $
+ * $Id: CeosFileReader.java,v 1.6 2008-05-26 19:32:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -99,32 +99,15 @@ public class CeosFileReader {
     }
 
     public void readB2(final short[] array) throws IOException {
-        try {
             _stream.readFully(array, 0, array.length);
-        } catch (IOException e) {
-
-        }
     }
 
     public void readB4(final int[] array) throws IOException {
-        try {
             _stream.readFully(array, 0, array.length);
-         } catch (IOException e) {
-
-         }
     }
 
     public void readB8(final long[] array) throws IOException, IllegalCeosFormatException {
-        final long streamPosition = _stream.getStreamPosition();
-        for (int i = 0; i < array.length; i++) {
-            try {
-                array[i] = _stream.readLong(); //readB8();
-            } catch (IOException e) {
-                final String message = String.format(CeosFileReader.EM_READING_X_TYPE,
-                                                     new Object[]{"B8[]"});
-                throw new IllegalCeosFormatException(message, streamPosition, e);
-            }
-        }
+            _stream.readFully(array, 0, array.length);
     }
 
     public int readI4() throws IOException,
@@ -137,12 +120,13 @@ public class CeosFileReader {
                                                  new Object[]{"In"});
             throw new IllegalCeosFormatException(message, streamPosition, e);
         }
-    }
+    }    
 
     public long readIn(final int n) throws IOException,
                                            IllegalCeosFormatException {
         final long streamPosition = _stream.getStreamPosition();
         final String longStr = readAn(n).trim();
+        if(longStr.isEmpty()) return 0;
         return parseLong(longStr, streamPosition);
     }
 
@@ -151,7 +135,8 @@ public class CeosFileReader {
         try {
             number = Long .parseLong(integerStr);
         } catch (NumberFormatException e) {
-            final String message = String.format(CeosFileReader.EM_NOT_PARSABLE_X_STRING, new Object[]{"integer"});
+            final String message = String.format(CeosFileReader.EM_NOT_PARSABLE_X_STRING + " \"" + integerStr + '"',
+                                                                    new Object[]{"integer"});
             throw new IllegalCeosFormatException(message, streamPosition, e);
         }
         return number;
@@ -179,6 +164,7 @@ public class CeosFileReader {
                                              IllegalCeosFormatException {
         final long streamPosition = _stream.getStreamPosition();
         final String doubleString = readAn(n).trim();
+        if(doubleString.isEmpty()) return 0;
         try {
             return Double.parseDouble(doubleString);
         } catch (NumberFormatException e) {
@@ -188,6 +174,7 @@ public class CeosFileReader {
         }
     }
 
+    //todo remove
     public double readEn(final int n) throws IOException,
                                              IllegalCeosFormatException {
         final long streamPosition = _stream.getStreamPosition();
@@ -200,6 +187,7 @@ public class CeosFileReader {
         }
     }
 
+    //todo remove
     public double readGn(final int n) throws IOException,
                                              IllegalCeosFormatException {
         final long streamPosition = _stream.getStreamPosition();

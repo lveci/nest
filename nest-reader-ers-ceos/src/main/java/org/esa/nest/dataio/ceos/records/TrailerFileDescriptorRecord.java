@@ -1,5 +1,5 @@
 /*
- * $Id: TrailerFileDescriptorRecord.java,v 1.1 2008-01-04 16:23:10 lveci Exp $
+ * $Id: TrailerFileDescriptorRecord.java,v 1.2 2008-05-26 19:32:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -35,7 +35,7 @@ public class TrailerFileDescriptorRecord extends CommonFileDescriptorRecord {
     public TrailerFileDescriptorRecord(final CeosFileReader reader, final long startPos)
             throws IOException,
                    IllegalCeosFormatException {
-        super(reader, startPos);
+        super(reader, startPos, null, null);
 
         _numTrailerRecords = reader.readIn(6);
         _trailerRecordLength = reader.readIn(6);

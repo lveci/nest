@@ -1,5 +1,5 @@
 /*
- * $Id: BaseSceneHeaderRecord.java,v 1.3 2008-04-03 16:28:16 lveci Exp $
+ * $Id: BaseSceneHeaderRecord.java,v 1.4 2008-05-26 19:32:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 
-public abstract class BaseSceneHeaderRecord extends BaseRecord {
+public class BaseSceneHeaderRecord extends BaseRecord {
 
     private static final int YEAR_OFFSET = 2000;
     private static final HashMap MONTH_TABLE = new HashMap();
@@ -43,7 +43,7 @@ public abstract class BaseSceneHeaderRecord extends BaseRecord {
         MONTH_TABLE.put("Dec", 12);
     }
 
-    private int _headerRecordNumber;
+ /*   private int _headerRecordNumber;
     private String _productId;
     private String _uncorrectedSceneId;
     private double _sceneCenterLat_L1A_L1B1;
@@ -96,23 +96,36 @@ public abstract class BaseSceneHeaderRecord extends BaseRecord {
     private String _statusAbsoluteNavigation;
     private String _flagAttitudeDetermination;
     private String _accuracyUsedOrbitData;
-    private String _accuracyUsedAttitudeData;
+    private String _accuracyUsedAttitudeData;       */
 
-    public BaseSceneHeaderRecord(final CeosFileReader reader) throws IOException,
-                                                                     IllegalCeosFormatException {
-        this(reader, -1);
+    public BaseSceneHeaderRecord(final CeosFileReader reader,
+                                 String mission, String definitionFile)
+            throws IOException, IllegalCeosFormatException {
+        this(reader, -1, mission, definitionFile);
     }
 
-    public BaseSceneHeaderRecord(final CeosFileReader reader, final long startPos) throws IOException,
-                                                                                          IllegalCeosFormatException {
-        super(reader, startPos);
-        readGeneralFields(reader);
-        reader.seek(getAbsolutPosition(getRecordLength()));
+    public BaseSceneHeaderRecord(final CeosFileReader reader, final long startPos,
+                                 String mission, String definitionFile)
+            throws IOException, IllegalCeosFormatException {
+        super(reader, startPos, mission, definitionFile);
+        //readGeneralFields(reader);
+        //reader.seek(getAbsolutPosition(getRecordLength()));
     }
 
-    private void readGeneralFields(final CeosFileReader reader) throws IOException,
+    public Calendar getDateImageWasTaken() {
+        final Calendar calendar = Calendar.getInstance();
+        String dateImageWasTaken = getAttributeString("Scene centre time");
+        final int days = Integer.parseInt(dateImageWasTaken.substring(0, 2));
+        final int month = (Integer) MONTH_TABLE.get(dateImageWasTaken.substring(2, 5));
+        final int year = Integer.parseInt(dateImageWasTaken.substring(5, 7)) + YEAR_OFFSET;
+
+        calendar.set(year, month - 1, days, 0, 0, 0);
+        return calendar;
+    }
+
+  /*  private void readGeneralFields(final CeosFileReader reader) throws IOException,
                                                                        IllegalCeosFormatException {
-        reader.skipBytes(4);  //  dss_rec_seq_num 
+        reader.skipBytes(4);  //  dss_rec_seq_num
         _headerRecordNumber = reader.readI4();
         reader.skipBytes(16);    // blank
         _productId = reader.readAn(32);
@@ -120,12 +133,9 @@ public abstract class BaseSceneHeaderRecord extends BaseRecord {
         reader.skipBytes(16); // spare
         _sceneCenterLat_L1A_L1B1 = reader.readFn(16);
         _sceneCenterLon_L1A_L1B1 = reader.readFn(16);
-        
 
 
-
-
-        /*reader.skipBytes(4);    // blank
+        reader.skipBytes(4);    // blank
         _productId = reader.readAn(16);
         _uncorrectedSceneId = reader.readAn(16);
         _sceneCenterLat_L1A_L1B1 = reader.readFn(16);
@@ -195,29 +205,29 @@ public abstract class BaseSceneHeaderRecord extends BaseRecord {
 
 //        readField73ToEnd(reader);
 
-        readSpecificFields(reader);              */
+        readSpecificFields(reader);
     }
 
     protected void readSpecificFields(final CeosFileReader reader) throws IOException,
                                                                           IllegalCeosFormatException {
 
     }
-
-    public int getHeaderRecordNumber() {
+         */
+ /*   public int getHeaderRecordNumber() {
         return _headerRecordNumber;
     }
 
     public String getProductId() {
         return _productId;
-    }
+    }   */
 
-    public String getProductLevel() {
+   /* public String getProductLevel() {
         String levelString = _productId.substring(1, 4);
         levelString = levelString.replace('_', ' ');
         return levelString.trim();
-    }
+    }  */
 
-    public String getUncorrectedSceneId() {
+ /*   public String getUncorrectedSceneId() {
         return _uncorrectedSceneId;
     }
 
@@ -295,9 +305,9 @@ public abstract class BaseSceneHeaderRecord extends BaseRecord {
 
     public String getOrbitDirection() {
         return _orbitDirection;
-    }
+    }    */
 
-    public Calendar getDateImageWasTaken() {
+   /* public Calendar getDateImageWasTaken() {
         final Calendar calendar = Calendar.getInstance();
         final int days = Integer.parseInt(_dateImageWasTaken.substring(0, 2));
         final int month = (Integer) MONTH_TABLE.get(_dateImageWasTaken.substring(2, 5));
@@ -369,17 +379,17 @@ public abstract class BaseSceneHeaderRecord extends BaseRecord {
 
     public long getNumRadiometricAncillaryRecords() {
         return _numRadiometricAncillaryRecords;
-    }
+    }   */
 
-    public int[] getEffektiveBands() {
+   /* public int[] getEffektiveBands() {
         return _effektiveBands;
     }
 
     public String getImageFormat() {
         return _imageFormat;
-    }
+    }        */
 
-    public double getSceneCornerUpperLeftLat() {
+  /*  public double getSceneCornerUpperLeftLat() {
         return _sceneCornerUpperLeftLat;
     }
 
@@ -409,9 +419,9 @@ public abstract class BaseSceneHeaderRecord extends BaseRecord {
 
     public double getSceneCornerLowerRightLon() {
         return _sceneCornerLowerRightLon;
-    }
+    }   */
 
-    public String getStatusTimeSystem() {
+ /*   public String getStatusTimeSystem() {
         return _statusTimeSystem;
     }
 
@@ -429,7 +439,7 @@ public abstract class BaseSceneHeaderRecord extends BaseRecord {
 
     public String getAccuracyUsedAttitudeData() {
         return _accuracyUsedAttitudeData;
-    }
+    }       */
 
-    public abstract String getYawSteeringFlag();
+   // public abstract String getYawSteeringFlag();
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: Ancillary3Record.java,v 1.2 2008-01-07 15:04:28 lveci Exp $
+ * $Id: Ancillary3Record.java,v 1.3 2008-05-26 19:32:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -48,7 +48,7 @@ public class Ancillary3Record extends BaseRecord {
 
     public Ancillary3Record(final CeosFileReader reader, final long startPos) throws IOException,
                                                                                      IllegalCeosFormatException {
-        super(reader, startPos);
+        super(reader, startPos, null, null);
 
         _orbitalElementsType = reader.readAn(32);
         reader.skipBytes(16 * 6); // 6 x orbital element [BLANK]

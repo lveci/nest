@@ -1,5 +1,5 @@
 /*
- * $Id: BaseImageFileDescriptorRecord.java,v 1.2 2008-01-07 15:04:28 lveci Exp $
+ * $Id: BaseImageFileDescriptorRecord.java,v 1.3 2008-05-26 19:32:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -23,7 +23,7 @@ import java.io.IOException;
 
 public abstract class BaseImageFileDescriptorRecord extends CommonFileDescriptorRecord {
 
-    private int _numImageRecords;
+  /*  private int _numImageRecords;
     private int _imageRecordLength;
     private int _numBitsPerPixel;
     private int _numPixelsPerData;
@@ -52,23 +52,24 @@ public abstract class BaseImageFileDescriptorRecord extends CommonFileDescriptor
     private String _dataFormatTypeIdCode;
     private int _numLeftUnusedBitsInPixelData;
     private int _numRightUnusedBitsInPixelData;
-    private int _maxPixelDataValue;
+    private int _maxPixelDataValue;    */
 
-    public BaseImageFileDescriptorRecord(final CeosFileReader reader) throws IOException,
-                                                                             IllegalCeosFormatException {
-        this(reader, -1);
+    public BaseImageFileDescriptorRecord(final CeosFileReader reader,
+                                         final String mission, final String definitionFile)
+            throws IOException, IllegalCeosFormatException {
+        this(reader, -1, mission, definitionFile);
     }
 
-    public BaseImageFileDescriptorRecord(final CeosFileReader reader, final long startPos) throws
-                                                                                           IOException,
-                                                                                           IllegalCeosFormatException {
-        super(reader, startPos);
+    public BaseImageFileDescriptorRecord(final CeosFileReader reader, final long startPos,
+                                         final String mission, final String definitionFile)
+            throws IOException, IllegalCeosFormatException {
+        super(reader, startPos, mission, definitionFile);
 
-        readFields(reader);
-        reader.seek(getAbsolutPosition(getRecordLength()));
+        //readFields(reader);
+        //reader.seek(getAbsolutPosition(getRecordLength()));
     }
 
-    private void readFields(final CeosFileReader reader) throws IOException,
+  /*  private void readFields(final CeosFileReader reader) throws IOException,
                                                                 IllegalCeosFormatException {
         _numImageRecords = (int) reader.readIn(6);
         _imageRecordLength = (int) reader.readIn(6);
@@ -122,9 +123,9 @@ public abstract class BaseImageFileDescriptorRecord extends CommonFileDescriptor
 
     protected void readSpecificFields(final CeosFileReader reader) throws IOException,
                                                                           IllegalCeosFormatException {
-    }
+    } */
 
-    public int getNumImageRecords() {
+ /*   public int getNumImageRecords() {
         return _numImageRecords;
     }
 
@@ -242,5 +243,5 @@ public abstract class BaseImageFileDescriptorRecord extends CommonFileDescriptor
 
     public int getMaxPixelDataValue() {
         return _maxPixelDataValue;
-    }
+    }  */
 }

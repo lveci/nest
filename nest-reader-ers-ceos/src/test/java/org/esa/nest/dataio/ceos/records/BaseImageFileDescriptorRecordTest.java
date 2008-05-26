@@ -47,8 +47,57 @@ public abstract class BaseImageFileDescriptorRecordTest extends TestCase {
         assertRecord(record);
     }
 
+    public static void assertCommonRecord(final BaseRecord record) {
+        BaseRecordTest.assertRecord(record);
+
+        assertEquals("A ", record.getAttributeString("Ascii code character"));
+        assertEquals("manno       ", record.getAttributeString("Specification number")); // fileDocumentNumber // A12
+        assertEquals("A ", record.getAttributeString("Specification revision number")); // fileDokumentRevisionNumber // A2
+        assertEquals("A ", record.getAttributeString("Record format revision number")); // fileDesignRevisionLetter // A2
+        assertEquals("prdsys      ", record.getAttributeString("Software version number")); // logicalVolPrepSysRelNum //A12
+        assertEquals(1, record.getAttributeInt("File Number")); // fileNumber // I4
+        assertEquals("AL PSMB2LEADBSQ ", record.getAttributeString("File Name")); // fileID // A16
+        assertEquals("FSEQ", record.getAttributeString("Record Sequence and Location Type Flag")); // flagRecordComposition // A4
+        assertEquals(1, record.getAttributeInt("Sequence Number Location")); // recordNumberPositionOfEachFile // I8
+        assertEquals(4, record.getAttributeInt("Sequence number field length")); // fieldLengthForRecordData // I4
+        assertEquals("FTYP", record.getAttributeString("Record code and location type flag")); // flagOfRecordTypeCode // A4
+        assertEquals(5, record.getAttributeInt("Record code location")); // recordTypeCodeBytePosition // I8
+        assertEquals(4, record.getAttributeInt("Record code field length")); // recordTypeCodeFieldLength // I4
+        assertEquals("FLGT", record.getAttributeString("Record length and location type flag")); // flagRecordLength // A4
+        assertEquals(9, record.getAttributeInt("Record length location")); // bytePosOfRecLenth // I8
+        assertEquals(4, record.getAttributeInt("Record length field length")); // numOfBytesOfRecLength // I4
+    }
+
+    public static void writeCommonRecordData(ImageOutputStream ios) throws IOException {
+        BaseRecordTest.writeRecordData(ios);
+
+        ios.writeBytes("A "); // codeCharacter = "A" + 1 blank // A2
+        ios.writeBytes("  "); // A2 // 2 blanks
+        ios.writeBytes("manno       "); // file document number // A12
+        ios.writeBytes("A "); // fileDokumentRevisionNumber // A2
+        ios.writeBytes("A "); // fileDesignRevisionLetter // A2
+        ios.writeBytes("prdsys      "); // logicalVolPrepSysRelNum //A12
+        ios.writeBytes("   1"); // fileNumber // I4
+        ios.writeBytes("AL PSMB2LEADBSQ "); // fileID // A16
+        ios.writeBytes("FSEQ");  // flagRecordComposition = "FSEQ" // A4
+        ios.writeBytes("       1"); // recordNumberPositionOfEachFile = "bbbbbbb1" // I8
+        ios.writeBytes("   4");  // fieldLengthForRecordData ="bbb4" // I4
+        ios.writeBytes("FTYP"); // flagOfRecordTypeCode = "FTYP" // A4
+        ios.writeBytes("       5"); // recordTypeCodeBytePosition ="bbbbbbb5" // I8
+        ios.writeBytes("   4"); // recordTypeCodeFieldLength = "bbb4" // I4
+        ios.writeBytes("FLGT"); // flagRecordLength = "FLGT" // A4
+        ios.writeBytes("       9"); // bytePosOfRecLenth = "bbbbbbb9" // I8
+        ios.writeBytes("   4"); // numOfBytesOfRecLength = "bbb4" // I4
+        ios.writeBytes("N"); // flagDataConvInfFileDescRec = "N" // A1
+        ios.writeBytes("O"); // flagDataConvInOtherRecords = "N" (for test "O") // A1
+        ios.writeBytes("P"); // flagDataDispFileDescRecord = "N" (for test "P") // A1
+        ios.writeBytes("Q"); // flagDataDispInOtherRecords = "N" (for test "Q") // A1
+
+        CeosTestHelper.writeBlanks(ios, 64);
+    }
+
     protected void writeRecordData(final ImageOutputStream ios) throws IOException {
-        CommonFileDescriptorRecordTest.writeRecordData(ios);
+        writeCommonRecordData(ios);
 
         ios.writeBytes(" 12546"); // numImageRecords // I6
         ios.writeBytes(" 12487"); // imageRecordLength // I6
@@ -91,41 +140,41 @@ public abstract class BaseImageFileDescriptorRecordTest extends TestCase {
     }
 
     protected void assertRecord(final BaseImageFileDescriptorRecord record) {
-        CommonFileDescriptorRecordTest.assertRecord(record);
+        assertCommonRecord(record);
 
-        assertEquals(12546, record.getNumImageRecords());
-        assertEquals(12487, record.getImageRecordLength());
-        assertEquals(123, record.getNumBitsPerPixel());
-        assertEquals(234, record.getNumPixelsPerData());
-        assertEquals(345, record.getNumBytesPerData());
-        assertEquals("abcd", record.getBitlistOfPixel());
-        assertEquals(567, record.getNumBandsPerFile());
-        assertEquals(14587962, record.getNumLinesPerBand());
-        assertEquals(1245, record.getNumLeftBorderPixelsPerLine());
-        assertEquals(24568954, record.getNumImagePixelsPerLine());
-        assertEquals(6542, record.getNumRightBorderPixelsPerLine());
-        assertEquals(5432, record.getNumTopBorderLines());
-        assertEquals(4321, record.getNumBottomBorderLines());
-        assertEquals("bcde", record.getImageFormatID());
-        assertEquals(852, record.getNumRecordsPerLineSingleUnit());
-        assertEquals(963, record.getNumRecordsPerLine());
-        assertEquals(741, record.getNumBytesCoverIdentifierAndHeader());
-        assertEquals(24562583, record.getNumImgDataBytesPerRecAndDummyPix());
-        assertEquals(987, record.getNumBytesOfSuffixDataPerRecord());
-        assertEquals("sdef", record.getFlagPrefixDataRepeat());
-        assertEquals("   1 4PB", record.getLocatorLineNumber());
-        assertEquals("   5 4PB", record.getLocatorBandNumber());
-        assertEquals("   9 6PB", record.getLocatorScanStartTime());
-        assertEquals("  15 4PB", record.getLocatorLeftDummyPixel());
-        assertEquals("  19 4PB", record.getLocatorRightDummyPixel());
+        assertEquals(12546, record.getAttributeInt("Number of SAR DATA records")); //getNumImageRecords());
+        assertEquals(12487, record.getAttributeInt("SAR DATA record length")); //getImageRecordLength());
+        assertEquals(123, record.getAttributeInt("Number of bits per sample")); //getNumBitsPerPixel());
+        assertEquals(234, record.getAttributeInt("")); //getNumPixelsPerData());
+        assertEquals(345, record.getAttributeInt("")); //getNumBytesPerData());
+        assertEquals("abcd", record.getAttributeString("")); //getBitlistOfPixel());
+        assertEquals(567, record.getAttributeInt("")); //getNumBandsPerFile());
+        assertEquals(14587962, record.getAttributeInt("")); //getNumLinesPerBand());
+        assertEquals(1245, record.getAttributeInt("")); //getNumLeftBorderPixelsPerLine());
+        assertEquals(24568954, record.getAttributeInt("")); //getNumImagePixelsPerLine());
+        assertEquals(6542, record.getAttributeInt("")); //getNumRightBorderPixelsPerLine());
+        assertEquals(5432, record.getAttributeInt("")); //getNumTopBorderLines());
+        assertEquals(4321, record.getAttributeInt("")); //getNumBottomBorderLines());
+        assertEquals("bcde", record.getAttributeString("")); //getImageFormatID());
+        assertEquals(852, record.getAttributeInt("")); //getNumRecordsPerLineSingleUnit());
+        assertEquals(963, record.getAttributeInt("")); //getNumRecordsPerLine());
+        assertEquals(741, record.getAttributeInt("")); //getNumBytesCoverIdentifierAndHeader());
+        assertEquals(24562583, record.getAttributeInt("")); //getNumImgDataBytesPerRecAndDummyPix());
+        assertEquals(987, record.getAttributeInt("")); //getNumBytesOfSuffixDataPerRecord());
+        assertEquals("sdef", record.getAttributeString("")); //getFlagPrefixDataRepeat());
+        assertEquals("   1 4PB", record.getAttributeString("")); //getLocatorLineNumber());
+        assertEquals("   5 4PB", record.getAttributeString("")); //getLocatorBandNumber());
+        assertEquals("   9 6PB", record.getAttributeString("")); //getLocatorScanStartTime());
+        assertEquals("  15 4PB", record.getAttributeString("")); //getLocatorLeftDummyPixel());
+        assertEquals("  19 4PB", record.getAttributeString("")); //getAttributeInt(""); //getLocatorRightDummyPixel());
 
         assertBytes341To392(record);
 
-        assertEquals("oiklfdöklsgjopesirmfdlknaoiawefölkdd", record.getDataFormatTypeId());
-        assertEquals("BVFR", record.getDataFormatTypeIdCode());
-        assertEquals(753, record.getNumLeftUnusedBitsInPixelData());
-        assertEquals(357, record.getNumRightUnusedBitsInPixelData());
-        assertEquals(242, record.getMaxPixelDataValue());
+        assertEquals("oiklfdöklsgjopesirmfdlknaoiawefölkdd", record.getAttributeString("")); //getDataFormatTypeId());
+        assertEquals("BVFR", record.getAttributeString("")); //getDataFormatTypeIdCode());
+        assertEquals(753, record.getAttributeInt("")); //getNumLeftUnusedBitsInPixelData());
+        assertEquals(357, record.getAttributeInt("")); //getNumRightUnusedBitsInPixelData());
+        assertEquals(242, record.getAttributeInt("")); //getMaxPixelDataValue());
     }
 
 

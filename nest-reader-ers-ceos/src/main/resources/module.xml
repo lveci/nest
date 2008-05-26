@@ -18,6 +18,9 @@
         <module>beam-core</module>
     </dependency>
     <dependency>
+        <module>nest-core</module>
+    </dependency>
+    <dependency>
         <module>beam-visat-rcp</module>
         <optional>true</optional>
     </dependency>
@@ -36,6 +39,30 @@
             <largeIcon>icons/Import24.gif</largeIcon>
             <helpId>importPalsarProduct</helpId>
             <placeAfter>importNetcdfProduct</placeAfter>
+        </action>
+        <action>
+            <id>importJERSCEOSProduct</id>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <formatName>JERS CEOS</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <mnemonic>J</mnemonic>
+            <shortDescr>Import a JERS CEOS data product or product subset.</shortDescr>
+            <description>Import a JERS CEOS data product or product subset.</description>
+            <largeIcon>icons/Import24.gif</largeIcon>
+            <helpId>importJERSProduct</helpId>
+            <placeAfter>importERSCEOSProduct</placeAfter>
+        </action>
+        <action>
+            <id>importRadarsatProduct</id>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <formatName>Radarsat 1 CEOS</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <mnemonic>D</mnemonic>
+            <shortDescr>Import a Radarsat 1 CEOS data product or product subset.</shortDescr>
+            <description>Import an Radarsat 1 CEOS data product or product subset.</description>
+            <largeIcon>icons/Import24.gif</largeIcon>
+            <helpId>importRadarsatProduct</helpId>
+            <placeAfter>importJERSProduct</placeAfter>
         </action>
     </extension>
 

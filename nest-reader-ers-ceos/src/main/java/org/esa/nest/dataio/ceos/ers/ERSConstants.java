@@ -1,51 +1,76 @@
 package org.esa.nest.dataio.ceos.ers;
 
-import java.io.File;
+import org.esa.nest.dataio.ceos.CEOSConstants;
 
 /**
  * Several constants used for reading Palsar products.
  */
-public interface ERSConstants {
+public class ERSConstants implements CEOSConstants {
 
-    Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
-    String[] FORMAT_NAMES = new String[]{"ERS CEOS"};
-    String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
-    String PLUGIN_DESCRIPTION = "ERS CEOS Products";      /*I18N*/
-    String PRODUCT_TYPE_PREFIX = "";
-    String PRODUCT_LEVEL_1B2 = "1B2";
-    String VOLUME_FILE_PREFIX = "VDF";
+    final static String[] FORMAT_NAMES = new String[]{"ERS CEOS"};
+    final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
+    final static String PLUGIN_DESCRIPTION = "ERS CEOS Products";      /*I18N*/
+    final static String PRODUCT_TYPE_PREFIX = "";
+    final static String PRODUCT_LEVEL_1B2 = "1B2";
+    final static String VOLUME_FILE_PREFIX = "VDF";
 
-    String SUMMARY_FILE_NAME = "summary.txt";
+    final static String GEOPHYSICAL_UNIT = "mw / (m^2*sr*nm)";
+    final static String BANDNAME_PREFIX = "sar_band_";
+    final static String BAND_DESCRIPTION_FORMAT_STRING = "Radiance, Band %d";    /*I18N*/
+    final static String PRODUCT_DESCRIPTION_PREFIX = "ERS product Level ";
 
+    final static String SUMMARY_FILE_NAME = "summary.txt";
 
     /**
      * Taken from <a href="http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm">http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm</a>
      */
-    float WAVELENGTH_BAND_1 = 420.0F;
+    final static float WAVELENGTH_BAND_1 = 420.0F;
     /**
      * Taken from <a href="http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm">http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm</a>
      */
-    float WAVELENGTH_BAND_2 = 520.0F;
+    final static float WAVELENGTH_BAND_2 = 520.0F;
     /**
      * Taken from <a href="http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm">http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm</a>
      */
-    float WAVELENGTH_BAND_3 = 610.0F;
+    final static float WAVELENGTH_BAND_3 = 610.0F;
     /**
      * Taken from <a href="http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm">http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm</a>
      */
-    float WAVELENGTH_BAND_4 = 760.0F;
+    final static float WAVELENGTH_BAND_4 = 760.0F;
 
-    float BANDWIDTH_BAND_1 = 80.0F;
-    float BANDWIDTH_BAND_2 = BANDWIDTH_BAND_1;
-    float BANDWIDTH_BAND_3 = BANDWIDTH_BAND_1;
-    float BANDWIDTH_BAND_4 = 130.0F;
+    final static float BANDWIDTH_BAND_1 = 80.0F;
+    final static float BANDWIDTH_BAND_2 = BANDWIDTH_BAND_1;
+    final static float BANDWIDTH_BAND_3 = BANDWIDTH_BAND_1;
+    final static float BANDWIDTH_BAND_4 = 130.0F;
 
-    String GEOPHYSICAL_UNIT = "mw / (m^2*sr*nm)";
-    String BANDNAME_PREFIX = "sar_band_";
-    String BAND_DESCRIPTION_FORMAT_STRING = "Radiance, Band %d";    /*I18N*/
-    String PRODUCT_DESCRIPTION_PREFIX = "ERS product Level ";
+    final static String MAP_PROJECTION_RAW = "NNNNN";
+    final static String MAP_PROJECTION_UTM = "YNNNN";
+    final static String MAP_PROJECTION_PS = "NNNNY";
 
-    String MAP_PROJECTION_RAW = "NNNNN";
-    String MAP_PROJECTION_UTM = "YNNNN";
-    String MAP_PROJECTION_PS = "NNNNY";
+    private final static String INDICATION_KEY = "001";
+    private final static int MINIMUM_FILES = 4;    // 4 image files + leader file + volume file + trailer file
+
+    public String getVolumeFilePrefix() {
+        return VOLUME_FILE_PREFIX;
+    }
+
+    public String getIndicationKey() {
+        return INDICATION_KEY;
+    }
+
+    public int getMinimumNumFiles() {
+        return MINIMUM_FILES;
+    }
+
+    public String getPluginDescription() {
+        return PLUGIN_DESCRIPTION;
+    }
+
+    public String[] getFormatNames() {
+        return FORMAT_NAMES;
+    }
+
+    public String[] getForamtFileExtensions() {
+        return FORMAT_FILE_EXTENSIONS;
+    }
 }

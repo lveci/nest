@@ -1,5 +1,5 @@
 /*
- * $Id: FilePointerRecord.java,v 1.1 2008-01-04 16:23:10 lveci Exp $
+ * $Id: FilePointerRecord.java,v 1.2 2008-05-26 19:32:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -28,7 +28,7 @@ public class FilePointerRecord extends BaseRecord {
 
     private static final String IMAGE_FILE_CLASS_CODE = "IMGY";
 
-    private final String _codeCharacter;
+  /*  private final String _codeCharacter;
     private final int _filePointerNumber;
     private final String _fileID;
     private final String _fileClass;
@@ -42,7 +42,10 @@ public class FilePointerRecord extends BaseRecord {
     private final String _recordLengthTypeCode;
     private final int _firstRecordVolumeNumber;
     private final int _finalRecordVolumeNumber;
-    private final int _firstRecordNumberOfReferencedFile;
+    private final int _firstRecordNumberOfReferencedFile;       */
+
+    private static String format = "ers";
+    private static String recordDefinitionFile = "file_pointer_record.xml";
 
     public FilePointerRecord(final CeosFileReader reader) throws IOException, IllegalCeosFormatException {
         this(reader, -1);
@@ -50,7 +53,8 @@ public class FilePointerRecord extends BaseRecord {
 
     public FilePointerRecord(final CeosFileReader reader, final long startPos) throws IOException,
                                                                                       IllegalCeosFormatException {
-        super(reader, startPos);
+        super(reader, startPos, format, recordDefinitionFile);
+        /*
         _codeCharacter = reader.readAn(2);
         reader.skipBytes(2);    // blank
         _filePointerNumber = reader.readI4();
@@ -68,10 +72,10 @@ public class FilePointerRecord extends BaseRecord {
         _finalRecordVolumeNumber = (int) reader.readIn(2);
         _firstRecordNumberOfReferencedFile = (int) reader.readIn(8);
         // skip the last 208 blanks
-        reader.skipBytes(208);
+        reader.skipBytes(208);  */
     }
 
-    public String getCodeCharacter() {
+  /*  public String getCodeCharacter() {
         return _codeCharacter;
     }
 
@@ -119,10 +123,6 @@ public class FilePointerRecord extends BaseRecord {
         return _recordLengthTypeCode;
     }
 
-    public boolean isImageFileRecord() {
-        return FilePointerRecord.IMAGE_FILE_CLASS_CODE.equalsIgnoreCase(_fileClassCode);
-    }
-
     public int getFirstRecordVolumeNumber() {
         return _firstRecordVolumeNumber;
     }
@@ -133,6 +133,10 @@ public class FilePointerRecord extends BaseRecord {
 
     public int getFirstRecordNumberOfReferencedFile() {
         return _firstRecordNumberOfReferencedFile;
+    }         */
+
+    public boolean isImageFileRecord() {
+        return FilePointerRecord.IMAGE_FILE_CLASS_CODE.equalsIgnoreCase(getAttributeString("File class code"));
     }
 
     public void assignMetadataTo(final MetadataElement root, final String suffix) {
@@ -141,7 +145,7 @@ public class FilePointerRecord extends BaseRecord {
 
         super.assignMetadataTo(elem, null);
 
-        elem.setAttributeString("Code character", _codeCharacter);
+    /*    elem.setAttributeString("Code character", _codeCharacter);
         elem.setAttributeInt("File pointer number", _filePointerNumber);
         elem.setAttributeString("File ID", _fileID);
         elem.setAttributeString("File class", _fileClass);
@@ -155,6 +159,6 @@ public class FilePointerRecord extends BaseRecord {
         elem.setAttributeString("Record lengthtype code", _recordLengthTypeCode);
         elem.setAttributeInt("First record volume numer", _firstRecordVolumeNumber);
         elem.setAttributeInt("Final record volume number", _finalRecordVolumeNumber);
-        elem.setAttributeInt("First record number of referenced file", _firstRecordNumberOfReferencedFile);
+        elem.setAttributeInt("First record number of referenced file", _firstRecordNumberOfReferencedFile); */
     }
 }

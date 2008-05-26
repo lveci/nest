@@ -1,5 +1,5 @@
 /*
- * $Id: CeosHelper.java,v 1.1 2008-01-04 16:23:10 lveci Exp $
+ * $Id: CeosHelper.java,v 1.2 2008-05-26 19:32:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,8 +17,7 @@
 package org.esa.nest.dataio.ceos;
 
 import org.esa.nest.dataio.ceos.records.FilePointerRecord;
-import org.esa.nest.dataio.ceos.records.TextRecord;
-import org.esa.nest.dataio.ceos.records.VolumeDescriptorRecord;
+import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.beam.framework.datamodel.ProductData;
 
 import java.io.File;
@@ -36,7 +35,7 @@ public class CeosHelper {
     public static File getVolumeFile(final File baseDir) throws IOException {
         final File[] files = baseDir.listFiles(new FilenameFilter() {
             public boolean accept(final File dir, final String name) {
-                return name.startsWith(VOLUME_FILE_PREFIX);
+                return name.toUpperCase().startsWith(VOLUME_FILE_PREFIX);
             }
         });
         if (files == null || files.length < 1) {
@@ -50,10 +49,10 @@ public class CeosHelper {
         return files[0];
     }
 
-    public static FilePointerRecord[] readFilePointers(final VolumeDescriptorRecord vdr) throws
+    public static FilePointerRecord[] readFilePointers(final BaseRecord vdr) throws
                                                                                          IllegalCeosFormatException,
                                                                                          IOException {
-        final int numFilePointers = vdr.getNumberOfFilepointerRecords();
+        final int numFilePointers = vdr.getAttributeInt("Number of filepointer records");
         final CeosFileReader reader = vdr.getReader();
         reader.seek(vdr.getRecordLength());
         final FilePointerRecord[] filePointers = new FilePointerRecord[numFilePointers];
@@ -63,24 +62,25 @@ public class CeosHelper {
         return filePointers;
     }
 
-    public static String getLeaderFileName(final TextRecord textRecord) {
+    public static String getLeaderFileName(final BaseRecord textRecord) {
         return LEADER_FILE_PREFIX + getProductName(textRecord);
     }
 
-    public static String getTrailerFileName(final TextRecord textRecord) {
+    public static String getTrailerFileName(final BaseRecord textRecord) {
         return TRAILER_FILE_PREFIX + getProductName(textRecord);
     }
 
-    public static String getImageFileName(final TextRecord textRecord, final String ccd) {
+    public static String getImageFileName(final BaseRecord textRecord, final String ccd) {
         if (ccd != null && ccd.trim().length() > 0) {
-            return IMAGE_FILE_PREFIX + "0" + ccd + "-" + getProductName(textRecord);
+            return IMAGE_FILE_PREFIX + '0' + ccd + '-' + getProductName(textRecord);
         } else {
             return IMAGE_FILE_PREFIX + getProductName(textRecord);
         }
     }
 
-    public static String getProductName(final TextRecord textRecord) {
-        return textRecord.getSceneID() + "-" + textRecord.getProductID();
+    public static String getProductName(final BaseRecord textRecord) {
+        return textRecord.getAttributeString("Scene identification") + '-' +
+                textRecord.getAttributeString("Product type specifier");
     }
 
     public static ProductData.UTC createUTCDate(final int year, final int dayOfYear, final int millisInDay) {

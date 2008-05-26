@@ -1,5 +1,5 @@
 /*
- * $Id: CommonFileDescriptorRecord.java,v 1.2 2008-04-03 16:28:16 lveci Exp $
+ * $Id: CommonFileDescriptorRecord.java,v 1.3 2008-05-26 19:32:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -23,7 +23,7 @@ import java.io.IOException;
 
 public class CommonFileDescriptorRecord extends BaseRecord {
 
-    private String _codeCharacter;
+ /*   private String _codeCharacter;
     private String _fileDocumentNumber;
     private String _fileDokumentRevisionNumber;
     private String _fileDesignRevisionLetter;
@@ -38,13 +38,15 @@ public class CommonFileDescriptorRecord extends BaseRecord {
     private int _recordTypeCodeFieldLength;
     private String _flagRecordLength;
     private int _bytePosOfRecLength;
-    private int _numOfBytesOfRecLength;
+    private int _numOfBytesOfRecLength;    */
 
-    public CommonFileDescriptorRecord(final CeosFileReader reader, final long startPos) throws
-                                                                                        IOException,
-                                                                                        IllegalCeosFormatException {
-        super(reader, startPos);
-        _codeCharacter = reader.readAn(2);
+    public CommonFileDescriptorRecord(final CeosFileReader reader, final long startPos,
+                                      final String mission, final String definitionFile)
+            throws IOException, IllegalCeosFormatException {
+
+        super(reader, startPos, mission, definitionFile);
+        
+    /*    _codeCharacter = reader.readAn(2);
         reader.skipBytes(2);    // blank
         _fileDocumentNumber = reader.readAn(12);
         _fileDokumentRevisionNumber = reader.readAn(2);
@@ -62,10 +64,10 @@ public class CommonFileDescriptorRecord extends BaseRecord {
         _bytePosOfRecLength = (int) reader.readIn(8);
         _numOfBytesOfRecLength = reader.readI4();
         reader.skipBytes(4);
-        reader.skipBytes(64);   // blank
+        reader.skipBytes(64);   // blank    */
     }
 
-    public String getCodeCharacter() {
+ /*   public String getCodeCharacter() {
         return _codeCharacter;
     }
 
@@ -127,5 +129,5 @@ public class CommonFileDescriptorRecord extends BaseRecord {
 
     public int getNumOfBytesOfRecLength() {
         return _numOfBytesOfRecLength;
-    }
+    }    */
 }

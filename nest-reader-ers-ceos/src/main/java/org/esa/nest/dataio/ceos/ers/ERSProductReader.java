@@ -14,9 +14,8 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * The product reader for Palsar products.
+ * The product reader for ERS products.
  *
- * @author Marco Peters
  */
 public class ERSProductReader extends AbstractProductReader {
 

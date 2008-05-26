@@ -20,6 +20,9 @@ public class TextRecordTest extends TestCase {
     private String _prefix;
     private CeosFileReader _reader;
 
+    private static String format = "ers";
+    private static String text_recordDefinitionFile = "text_record.xml";
+
     protected void setUp() throws Exception {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(24);
         _ios = new MemoryCacheImageOutputStream(os);
@@ -32,18 +35,18 @@ public class TextRecordTest extends TestCase {
 
     public void testInit_SimpleConstructor() throws IOException, IllegalCeosFormatException {
         _reader.seek(_prefix.length());
-        final TextRecord textRecord = new TextRecord(_reader);
+        final BaseRecord textRecord = new BaseRecord(_reader, -1, format, text_recordDefinitionFile);
 
         assertRecord(textRecord);
     }
 
     public void testInit() throws IOException, IllegalCeosFormatException {
-        final TextRecord textRecord = new TextRecord(_reader, _prefix.length());
+        final BaseRecord textRecord = new BaseRecord(_reader, _prefix.length(), format, text_recordDefinitionFile);
 
         assertRecord(textRecord);
     }
 
-    private void writeRecordData(final ImageOutputStream ios) throws IOException {
+    private static void writeRecordData(final ImageOutputStream ios) throws IOException {
         BaseRecordTest.writeRecordData(ios);
 
         // codeCharacter = "A" + 1 blank
@@ -58,15 +61,15 @@ public class TextRecordTest extends TestCase {
         CeosTestHelper.writeBlanks(ios, 200);
     }
 
-    private void assertRecord(final TextRecord record) throws IOException {
+    private void assertRecord(final BaseRecord record) throws IOException {
         BaseRecordTest.assertRecord(record);
         assertEquals(_prefix.length(), record.getStartPos());
         assertEquals(_prefix.length() + 360, _ios.getStreamPosition());
 
-        assertEquals("A ", record.getCodeCharacter());
-        assertEquals("O1B2R_UB", record.getProductID());
+        assertEquals("A ", record.getAttributeString("Ascii code character"));
+        assertEquals("PRODUCT:O1B2R_UB                        ", record.getAttributeString("Product type specifier"));
         assertEquals("PROCESS:JAPAN-JAXA-EOC-ALOS-DPS  20060410075225             ",
-                     record.getFacility());
+                     record.getAttributeString("Location and datetime of product creation"));
 
     }
 }

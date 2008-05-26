@@ -3,15 +3,15 @@ package org.esa.nest.dataio.ceos.ers;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
-import org.esa.nest.dataio.ceos.ers.records.ERSImageFDR;
 import org.esa.nest.dataio.ceos.records.ImageRecord;
+import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.beam.framework.datamodel.ProductData;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
 /*
- * $Id: ERSImageFile.java,v 1.5 2008-04-17 17:19:43 lveci Exp $
+ * $Id: ERSImageFile.java,v 1.6 2008-05-26 19:32:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -29,26 +29,31 @@ import java.io.IOException;
 
 
 /**
- * This class represents an image file of an Avnir-2 product.
+ * This class represents an image file of an ERS product.
  *
- * @author Marco Peters
- * @version $Revision: 1.5 $ $Date: 2008-04-17 17:19:43 $
+ * @version $Revision: 1.6 $ $Date: 2008-05-26 19:32:10 $
  */
 class ERSImageFile {
 
-    private final ERSImageFDR _imageFDR;
+    private final BaseRecord _imageFDR;
     private final ImageRecord[] _imageRecords;
     private CeosFileReader _ceosReader;
     private final int _imageNumber;
     private int _imageRecordLength;
     private long _startPosImageRecords;
 
+    private static String mission = "ers";
+    private static String image_DefinitionFile = "image_file.xml";
+    private static String image_recordDefinition = "image_record.xml";
+
     public ERSImageFile(final ImageInputStream imageStream) throws IOException,
                                                                       IllegalCeosFormatException {
         _ceosReader = new CeosFileReader(imageStream);
-        _imageFDR = new ERSImageFDR(_ceosReader);
-        _imageRecords = new ImageRecord[_imageFDR.getNumLinesPerBand()];
-        _imageRecords[0] = new ImageRecord(_ceosReader);
+        _imageFDR = new BaseRecord(_ceosReader, -1, mission, image_DefinitionFile);
+        _ceosReader.seek(_imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()));
+        _imageRecords = new ImageRecord[_imageFDR.getAttributeInt("Number of lines per data set")];
+        _imageRecords[0] = new ImageRecord(_ceosReader, -1, mission, image_recordDefinition);
+
         _imageRecordLength = _imageRecords[0].getRecordLength();
         _startPosImageRecords = _imageRecords[0].getStartPos();
         _imageNumber = _imageRecords[0].getImageNumber();
@@ -67,11 +72,11 @@ class ERSImageFile {
     }
 
     public int getRasterWidth() {
-        return _imageFDR.getNumImagePixelsPerLine();
+        return _imageFDR.getAttributeInt("Number of pixels per line per SAR channel");//getNumImagePixelsPerLine();
     }
 
     public int getRasterHeight() {
-        return _imageFDR.getNumLinesPerBand();
+        return _imageFDR.getAttributeInt("Number of lines per data set");
     }
 
     public static String getGeophysicalUnit() {
@@ -112,7 +117,7 @@ class ERSImageFile {
         }
     }
 
-    public int getTotalMillisInDayOfLine(final int y) throws IOException,
+   /* public int getTotalMillisInDayOfLine(final int y) throws IOException,
                                                              IllegalCeosFormatException {
         return getImageRecord(y).getScanStartTimeMillisAtDay();
     }
@@ -120,7 +125,7 @@ class ERSImageFile {
     public int getMicrosecondsOfLine(final int y) throws IOException,
                                                          IllegalCeosFormatException {
         return getImageRecord(y).getScanStartTimeMicros();
-    }
+    }         */
 
     public void readBandRasterData(final int sourceOffsetX, final int sourceOffsetY,
                                    final int sourceWidth, final int sourceHeight,
@@ -130,22 +135,15 @@ class ERSImageFile {
                                    final ProductData destBuffer, ProgressMonitor pm) throws IOException,
                                                                                             IllegalCeosFormatException
     {
-        int ourceWidth = 320;
-        int estWidth = 320;
-        final int sourceMaxX = sourceOffsetX + ourceWidth - 1;
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         ImageRecord imageRecord;
 
-        System.out.print("readBandRasterData x " + sourceOffsetX + " y " + sourceOffsetY +
-                " w " + ourceWidth + " h " + sourceHeight +
-                " stepX " + sourceStepX + " stepY " + sourceStepY +
-                " dstW " + estWidth +
-                " maxX " + sourceMaxX + " maxY " + sourceMaxY + '\n');
+        int x = sourceOffsetX * 2;
 
         pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceOffsetY);
         try {
-            final short[] srcLine = new short[ourceWidth];
-            final short[] destLine = new short[estWidth];
+            final short[] srcLine = new short[sourceWidth];
+            final short[] destLine = new short[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
@@ -153,18 +151,18 @@ class ERSImageFile {
 
                 // Read source line
                 imageRecord = getImageRecord(y);
-                _ceosReader.seek(imageRecord.getImageDataStart() + sourceOffsetX);
+                _ceosReader.seek(imageRecord.getImageDataStart() + x);
                 _ceosReader.readB2(srcLine);
 
                 // Copy source line into destination buffer
                 final int currentLineIndex = (y - sourceOffsetY) * destWidth;
                 if (sourceStepX == 1) {
 
-                    System.arraycopy(srcLine, 0, destBuffer.getElems(), currentLineIndex, estWidth);
+                    System.arraycopy(srcLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
                 } else {
                     copyLine(srcLine, destLine, sourceStepX);
 
-                    System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, estWidth);
+                    System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
                 }
 
                 pm.worked(1);
@@ -179,7 +177,7 @@ class ERSImageFile {
                                                               IllegalCeosFormatException {
         if (_imageRecords[line] == null) {
             _ceosReader.seek(_imageRecordLength * line + _startPosImageRecords);
-            _imageRecords[line] = new ImageRecord(_ceosReader);
+            _imageRecords[line] = new ImageRecord(_ceosReader, _ceosReader.getCurrentPos(), _imageRecords[0].getCeosDatabase());
         }
         return _imageRecords[line];
     }

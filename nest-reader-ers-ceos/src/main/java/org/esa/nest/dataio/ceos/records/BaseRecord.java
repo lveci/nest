@@ -1,5 +1,5 @@
 /*
- * $Id: BaseRecord.java,v 1.1 2008-01-04 16:23:10 lveci Exp $
+ * $Id: BaseRecord.java,v 1.2 2008-05-26 19:32:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -18,24 +18,28 @@ package org.esa.nest.dataio.ceos.records;
 
 import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
+import org.esa.nest.dataio.ceos.CeosDB;
+import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.XMLSupport;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
 
 import java.io.IOException;
+import java.io.File;
+import java.util.Map;
+import java.util.Set;
 
 public class BaseRecord {
 
-    private final int _recordNumber;
-    private final int _firstRecordSubtype;
-    private final int _recordTypeCode;
-    private final int _secondRecordSubtype;
-    private final int _thirdRecordSubtype;
-    private final int _recordLength;
     private final long _startPos;
     private final CeosFileReader _reader;
 
-    public BaseRecord(final CeosFileReader reader, final long startPos) throws
+    private CeosDB db;
+    private static String ceosDBPath = "org/esa/nest/ceosFormatDB";
+
+    public BaseRecord(final CeosFileReader reader, final long startPos,
+                      final String mission, final String recordDefinitionFileName) throws
                                                                         IOException,
                                                                         IllegalCeosFormatException {
         _reader = reader;
@@ -47,15 +51,55 @@ public class BaseRecord {
             _startPos = reader.getCurrentPos();
         }
 
-        _recordNumber = reader.readB4();
+        File defFile = DatUtils.getResourceAsFile(ceosDBPath + '/' +
+                                                    mission + '/' + recordDefinitionFileName, this.getClass());
+
+        db = new CeosDB(defFile);
+        db.readRecord(reader);
+
+   /*     _recordNumber = reader.readB4();
         _firstRecordSubtype = reader.readB1();
         _recordTypeCode = reader.readB1();
         _secondRecordSubtype = reader.readB1();
         _thirdRecordSubtype = reader.readB1();
-        _recordLength = reader.readB4();
+        _recordLength = reader.readB4();  */
     }
 
-    public int getRecordNumber() {
+    public BaseRecord(final CeosFileReader reader, final long startPos, CeosDB db) throws
+                                                                        IOException,
+                                                                        IllegalCeosFormatException {
+        _reader = reader;
+        // reposition start if needed
+        if (startPos != -1) {
+            _startPos = startPos;
+            reader.seek(startPos);
+        } else {
+            _startPos = reader.getCurrentPos();
+        }
+
+        db.readRecord(reader);
+
+   /*     _recordNumber = reader.readB4();
+        _firstRecordSubtype = reader.readB1();
+        _recordTypeCode = reader.readB1();
+        _secondRecordSubtype = reader.readB1();
+        _thirdRecordSubtype = reader.readB1();
+        _recordLength = reader.readB4();  */
+    }
+
+    public String getAttributeString(String name) {
+        return db.getAttributeString(name);
+    }
+
+    public int getAttributeInt(String name) {
+        return db.getAttributeInt(name);
+    }
+
+    public Double getAttributeDouble(String name) {
+        return db.getAttributeDouble(name);
+    }
+
+ /*   public int getRecordNumber() {
         return _recordNumber;
     }
 
@@ -73,10 +117,10 @@ public class BaseRecord {
 
     public int getThirdRecordSubtype() {
         return _thirdRecordSubtype;
-    }
+    }    */
 
     public int getRecordLength() {
-        return _recordLength;
+        return getAttributeInt("Record Length");
     }
 
     public long getStartPos() {
@@ -87,17 +131,33 @@ public class BaseRecord {
         return _reader;
     }
 
+    public CeosDB getCeosDatabase() {
+        return db; 
+    }
+
     public long getAbsolutPosition(final long relativePosition) {
         return getStartPos() + relativePosition;
     }
 
     public void assignMetadataTo(final MetadataElement elem, final String suffix) {
-        elem.setAttributeInt("Record number", _recordNumber);
+      /*  elem.setAttributeInt("Record number", _recordNumber);
         elem.setAttributeInt("First record subtype", _firstRecordSubtype);
         elem.setAttributeInt("Record type code", _recordTypeCode);
         elem.setAttributeInt("Second record subtype", _secondRecordSubtype);
         elem.setAttributeInt("Third record subtype", _thirdRecordSubtype);
-        elem.setAttributeInt("Record length", _recordLength);
+        elem.setAttributeInt("Record length", _recordLength); */
+
+        Map metadata = db.getMetadataElement();
+        Set keys = metadata.keySet();                           // The set of keys in the map.
+        for (Object key : keys) {
+            Object value = metadata.get(key);                   // Get the value for that key.
+            if (value == null) continue;
+
+            if(value instanceof String)
+                elem.setAttributeString((String)key, value.toString());
+            else
+                elem.setAttributeInt((String)key, (Integer)value);
+        }
     }
 
     public static void addIntAttributte(final MetadataElement elem, final String name, final int value) {
@@ -131,7 +191,7 @@ public class BaseRecord {
     protected static MetadataElement createMetadataElement(String name, String suffix) {
         final MetadataElement elem;
         if (suffix != null && suffix.trim().length() > 0) {
-            elem = new MetadataElement(name + " " + suffix.trim());
+            elem = new MetadataElement(name + ' ' + suffix.trim());
         } else {
             elem = new MetadataElement(name);
         }

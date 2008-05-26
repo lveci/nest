@@ -17,6 +17,9 @@ public class VolumeDescriptorRecordTest extends TestCase {
     private String _prefix;
     private CeosFileReader _reader;
 
+    private static String format = "ers";
+    private static String volume_desc_recordDefinitionFile = "volume_descriptor.xml";
+
     protected void setUp() throws Exception {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(24);
         _ios = new MemoryCacheImageOutputStream(os);
@@ -30,26 +33,26 @@ public class VolumeDescriptorRecordTest extends TestCase {
     public void testInit_SimpleConstructor() throws IOException,
                                                     IllegalCeosFormatException {
         _reader.seek(_prefix.length());
-        final VolumeDescriptorRecord record = new VolumeDescriptorRecord(_reader);
+        final BaseRecord record = new BaseRecord(_reader, -1, format, volume_desc_recordDefinitionFile);
 
         assertRecord(record);
     }
 
     public void testInit() throws IOException,
                                   IllegalCeosFormatException {
-        final VolumeDescriptorRecord record = new VolumeDescriptorRecord(_reader, _prefix.length());
+        final BaseRecord record = new BaseRecord(_reader, _prefix.length(), format, volume_desc_recordDefinitionFile);
 
         assertRecord(record);
     }
 
     public void testAssignMetadata() throws IOException,
                                             IllegalCeosFormatException {
-        final VolumeDescriptorRecord record = new VolumeDescriptorRecord(_reader, _prefix.length());
+        final BaseRecord record = new BaseRecord(_reader, _prefix.length(), format, volume_desc_recordDefinitionFile);
         final MetadataElement volumeMetadata = new MetadataElement("VOLUME_DESCRIPTOR");
 
         record.assignMetadataTo(volumeMetadata, "suffix");
 
-        assertEquals(23, volumeMetadata.getNumAttributes());
+        assertEquals(26, volumeMetadata.getNumAttributes());
         assertEquals(0, volumeMetadata.getNumElements());
         assertMetadata(volumeMetadata);
     }
@@ -70,7 +73,7 @@ public class VolumeDescriptorRecordTest extends TestCase {
         BaseRecordTest.assertStringAttribute(elem, "Logical volume preparation date", "efghijkl");
         BaseRecordTest.assertStringAttribute(elem, "Logical volume preparation time", "fghijklm");
         BaseRecordTest.assertStringAttribute(elem, "Logical volume preparation country", "ghijklmnopqr");
-        BaseRecordTest.assertStringAttribute(elem, "Logical volume preparing agent", "hijklmno");
+        BaseRecordTest.assertStringAttribute(elem, "Logical volume preparing agency", "hijklmno");
         BaseRecordTest.assertStringAttribute(elem, "Logical volume preparing facility", "ijklmnopqrst");
         BaseRecordTest.assertIntAttribute(elem, "Number of filepointer records", 4567);
         BaseRecordTest.assertIntAttribute(elem, "Number of records", 5678);
@@ -92,7 +95,7 @@ public class VolumeDescriptorRecordTest extends TestCase {
         ios.writeBytes("12"); // volumeNuberOfThisVolumeDescritorRecord // I2
         ios.writeBytes("2345"); // nuberOfFirstFileFollowingTheVolumeDirectoryFile // I4
         ios.writeBytes("3456"); // logicalVolumeNumberInVolumeSet // I4
-        CeosTestHelper.writeBlanks(ios, 4); // blank
+        ios.writeBytes("3457"); // physicalVolumeNumberInVolumeSet // I4
         ios.writeBytes("efghijkl"); // logicalVolumePreparationDate // A8
         ios.writeBytes("fghijklm"); // logicalVolumePreparationTime // A8
         ios.writeBytes("ghijklmnopqr"); // logicalVolumePreparationCountry // A12
@@ -100,30 +103,31 @@ public class VolumeDescriptorRecordTest extends TestCase {
         ios.writeBytes("ijklmnopqrst"); // logicalVolumePreparingFacility // A12
         ios.writeBytes("4567"); // numberOfFilepointerRecords // I4
         ios.writeBytes("5678"); // nuberOfRecords // I4
+        ios.writeBytes("5"); // Total number of logical volume set // I4
         CeosTestHelper.writeBlanks(ios, 192); // blank
     }
 
-    private void assertRecord(final VolumeDescriptorRecord record) throws IOException {
+    private void assertRecord(final BaseRecord record) throws IOException {
         BaseRecordTest.assertRecord(record);
         assertEquals(_prefix.length(), record.getStartPos());
-        assertEquals(_prefix.length() + 360, _ios.getStreamPosition());
+        assertEquals(_prefix.length() + 357, _ios.getStreamPosition());
 
-        assertEquals("AB", record.getAsciiCodeCharacter());
-        assertEquals("abcdefghijkl", record.getSpecificationNumber());
-        assertEquals("CD", record.getSpecificationRevisionNumber());
-        assertEquals("EF", record.getRecordFormatRevisionNumer());
-        assertEquals("bcdefghijklm", record.getSoftwareVersionNumber());
-        assertEquals("cdefghijklmnopqr", record.getLogicalVolumeID());
-        assertEquals("defghijklmnopqrs", record.getVolumeSetID());
-        assertEquals(12, record.getVolumeNumberOfThisVolumeDescritorRecord());
-        assertEquals(2345, record.getNumberOfFirstFileFollowingTheVolumeDirectoryFile());
-        assertEquals(3456, record.getLogicalVolumeNumberInVolumeSet());
-        assertEquals("efghijkl", record.getLogicalVolumePreparationDate());
-        assertEquals("fghijklm", record.getLogicalVolumePreparationTime());
-        assertEquals("ghijklmnopqr", record.getLogicalVolumePreparationCountry());
-        assertEquals("hijklmno", record.getLogicalVolumePreparingAgent());
-        assertEquals("ijklmnopqrst", record.getLogicalVolumePreparingFacility());
-        assertEquals(4567, record.getNumberOfFilepointerRecords());
-        assertEquals(5678, record.getNumberOfRecords());
+        assertEquals("AB", record.getAttributeString("Ascii code character"));
+        assertEquals("abcdefghijkl", record.getAttributeString("Specification number"));
+        assertEquals("CD", record.getAttributeString("Specification revision number"));
+        assertEquals("EF", record.getAttributeString("Record format revision number"));
+        assertEquals("bcdefghijklm", record.getAttributeString("Software version number"));
+        assertEquals("cdefghijklmnopqr", record.getAttributeString("Logical volume ID"));
+        assertEquals("defghijklmnopqrs", record.getAttributeString("Volume set ID"));
+        assertEquals(12, record.getAttributeInt("Volume number of this volume descriptor record"));
+        assertEquals(2345, record.getAttributeInt("Number of first file following the volume directory file"));
+        assertEquals(3456, record.getAttributeInt("Logical volume number in volume set"));
+        assertEquals("efghijkl", record.getAttributeString("Logical volume preparation date"));
+        assertEquals("fghijklm", record.getAttributeString("Logical volume preparation time"));
+        assertEquals("ghijklmnopqr", record.getAttributeString("Logical volume preparation country"));
+        assertEquals("hijklmno", record.getAttributeString("Logical volume preparing agency"));
+        assertEquals("ijklmnopqrst", record.getAttributeString("Logical volume preparing facility"));
+        assertEquals(4567, record.getAttributeInt("Number of filepointer records"));
+        assertEquals(5678, record.getAttributeInt("Number of records"));
     }
 }

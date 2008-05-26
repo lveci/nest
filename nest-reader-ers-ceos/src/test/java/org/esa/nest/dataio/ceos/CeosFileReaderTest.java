@@ -254,27 +254,6 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(9.006, ceosReader.readFn(16), 1E-6);
     }
 
-    public void testReadFnWithEmpty() throws IllegalCeosFormatException,
-                                             IOException {
-        final String prefix = "iufkdjker";
-        final String value = "                ";
-        final String suffix = "oiunkasdjnf";
-        _ios.writeBytes(prefix);
-        _ios.writeBytes(value);
-        _ios.writeBytes(suffix);
-
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
-
-        ceosReader.seek(prefix.length());
-        try {
-            ceosReader.readFn(16);
-            fail("IllegalCeosFormatException expected");
-        } catch (IllegalCeosFormatException e) {
-            assertEquals(prefix.length(), e.getStreamPos());
-        }
-
-    }
-
     public void testReadEn() throws IllegalCeosFormatException, IOException {
         _ios.writeBytes(" 1.782000000000000E+04");
         _ios.seek(0);

@@ -4,8 +4,7 @@ import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.nest.dataio.ceos.records.FilePointerRecord;
-import org.esa.nest.dataio.ceos.records.TextRecord;
-import org.esa.nest.dataio.ceos.records.VolumeDescriptorRecord;
+import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.beam.framework.datamodel.MetadataElement;
 
 import javax.imageio.stream.FileImageInputStream;
@@ -14,7 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /*
- * $Id: ERSVolumeDirectoryFile.java,v 1.1 2008-01-04 16:23:10 lveci Exp $
+ * $Id: ERSVolumeDirectoryFile.java,v 1.2 2008-05-26 19:32:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -33,43 +32,44 @@ import java.util.ArrayList;
 /**
  * This class represents a volume directory file of Palsar product.
  *
- * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2008-01-04 16:23:10 $
  */
 class ERSVolumeDirectoryFile {
 
     private CeosFileReader _ceosReader;
-    private VolumeDescriptorRecord _volumeDescriptorRecord;
+    private BaseRecord _volumeDescriptorRecord;
     private FilePointerRecord[] _filePointerRecords;
-    private TextRecord _textRecord;
+    private BaseRecord _textRecord;
+
+    private static String mission = "ers";
+    private static String volume_desc_recordDefinitionFile = "volume_descriptor.xml";
+    private static String text_recordDefinitionFile = "text_record.xml";
 
     public ERSVolumeDirectoryFile(final File baseDir) throws IOException,
                                                                 IllegalCeosFormatException {
         final File volumeFile = CeosHelper.getVolumeFile(baseDir);
         _ceosReader = new CeosFileReader(new FileImageInputStream(volumeFile));
-        _volumeDescriptorRecord = new VolumeDescriptorRecord(_ceosReader);
+        _volumeDescriptorRecord = new BaseRecord(_ceosReader, -1, mission, volume_desc_recordDefinitionFile);
         _filePointerRecords = CeosHelper.readFilePointers(_volumeDescriptorRecord);
-        _textRecord = new TextRecord(_ceosReader);
+        _textRecord = new BaseRecord(_ceosReader, -1, mission, text_recordDefinitionFile);
     }
 
-    public String getLeaderFileName() {
+    public static String getLeaderFileName() {
         return "LEA_01.001";
     }
 
-    public String getTrailerFileName() {
+    public static String getTrailerFileName() {
         return "NUL_DAT.001";
     }
 
     public String[] getImageFileNames() throws IOException,
                                                IllegalCeosFormatException {
         final ArrayList list = new ArrayList();
-        /*for (int i = 0; i < _filePointerRecords.length; i++) {
-            final FilePointerRecord filePointerRecord = _filePointerRecords[i];
+        for (final FilePointerRecord filePointerRecord : _filePointerRecords) {
             if (filePointerRecord.isImageFileRecord()) {
-                final String fileID = filePointerRecord.getFileID();
+                final String fileID = filePointerRecord.getAttributeString("File ID");
                 list.add(CeosHelper.getImageFileName(_textRecord, fileID.substring(15)));
             }
-        }                        */
+        }
         list.add("DAT_01.001");
         return (String[]) list.toArray(new String[list.size()]);
     }

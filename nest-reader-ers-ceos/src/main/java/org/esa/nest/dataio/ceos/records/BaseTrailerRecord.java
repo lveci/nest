@@ -1,5 +1,5 @@
 /*
- * $Id: BaseTrailerRecord.java,v 1.1 2008-01-04 16:23:10 lveci Exp $
+ * $Id: BaseTrailerRecord.java,v 1.2 2008-05-26 19:32:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -33,7 +33,7 @@ public abstract class BaseTrailerRecord extends BaseRecord {
 
     public BaseTrailerRecord(final CeosFileReader reader, final long startPos) throws IOException,
                                                                                       IllegalCeosFormatException {
-        super(reader, startPos);
+        super(reader, startPos, null, null);
 
         readGeneralFields(reader);
         reader.seek(getAbsolutPosition(getRecordLength()));

@@ -1,5 +1,5 @@
 /*
- * $Id: Ancillary2Record.java,v 1.2 2008-01-07 15:04:28 lveci Exp $
+ * $Id: Ancillary2Record.java,v 1.3 2008-05-26 19:32:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -34,7 +34,7 @@ public class Ancillary2Record extends BaseRecord {
 
     public Ancillary2Record(final CeosFileReader reader, final long startPos) throws IOException,
                                                                                      IllegalCeosFormatException {
-        super(reader, startPos);
+        super(reader, startPos, null, null);
 
         //readGeneralFields(reader);
 
