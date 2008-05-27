@@ -1,5 +1,5 @@
 /*
- * $Id: CeosFileReader.java,v 1.6 2008-05-26 19:32:10 lveci Exp $
+ * $Id: CeosFileReader.java,v 1.7 2008-05-26 21:10:46 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -20,11 +20,8 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
 /**
- * A reader for readinf files in the CEOS format
+ * A reader for reading files in the CEOS format
  *
- * @author Marco Peters
- * @author Norman Fomferra
- * @author Sabine Embacher
  */
 public class CeosFileReader {
 
@@ -110,18 +107,6 @@ public class CeosFileReader {
             _stream.readFully(array, 0, array.length);
     }
 
-    public int readI4() throws IOException,
-                               IllegalCeosFormatException {
-        final long streamPosition = _stream.getStreamPosition();
-        try {
-            return (int) readIn(4);
-        } catch (IllegalCeosFormatException e) {
-            final String message = String.format(CeosFileReader.EM_READING_X_TYPE,
-                                                 new Object[]{"In"});
-            throw new IllegalCeosFormatException(message, streamPosition, e);
-        }
-    }    
-
     public long readIn(final int n) throws IOException,
                                            IllegalCeosFormatException {
         final long streamPosition = _stream.getStreamPosition();
@@ -174,39 +159,12 @@ public class CeosFileReader {
         }
     }
 
-    //todo remove
-    public double readEn(final int n) throws IOException,
-                                             IllegalCeosFormatException {
-        final long streamPosition = _stream.getStreamPosition();
-        try {
-            return readFn(n);
-        } catch (IllegalCeosFormatException e) {
-            final String message = String.format(CeosFileReader.EM_READING_X_TYPE,
-                                                 new Object[]{"En"});
-            throw new IllegalCeosFormatException(message, streamPosition, e);
-        }
-    }
-
-    //todo remove
-    public double readGn(final int n) throws IOException,
-                                             IllegalCeosFormatException {
-        final long streamPosition = _stream.getStreamPosition();
-        try {
-            return readFn(n);
-        } catch (IllegalCeosFormatException e) {
-            final String message = String.format(CeosFileReader.EM_READING_X_TYPE,
-                                                 new Object[]{"Gn"});
-            throw new IllegalCeosFormatException(message, streamPosition, e);
-        }
-    }
-
-
-    public void readGn(final int n, final double[] numbers) throws IOException,
+    public void readFn(final int n, final double[] numbers) throws IOException,
                                                                    IllegalCeosFormatException {
         final long streamPosition = _stream.getStreamPosition();
         for (int i = 0; i < numbers.length; i++) {
             try {
-                numbers[i] = readGn(n);
+                numbers[i] = Double.parseDouble(readAn(n).trim());
             } catch (IllegalCeosFormatException e) {
                 final String message = String.format(CeosFileReader.EM_READING_X_TYPE,
                                                      new Object[]{"Gn[]"});

@@ -205,8 +205,8 @@ public class CeosFileReaderTest extends TestCase {
 
         final CeosFileReader ceosReader = new CeosFileReader(_ios);
 
-        assertEquals(1973, ceosReader.readI4());
-        assertEquals(60, ceosReader.readI4());
+        assertEquals(1973, ceosReader.readIn(4));
+        assertEquals(60, ceosReader.readIn(4));
     }
 
     public void testReadIn() throws IllegalCeosFormatException, IOException {
@@ -260,7 +260,7 @@ public class CeosFileReaderTest extends TestCase {
 
         final CeosFileReader ceosReader = new CeosFileReader(_ios);
 
-        assertEquals(17820, ceosReader.readEn(22), 1E-6);
+        assertEquals(17820, ceosReader.readFn(22), 1E-6);
     }
 
     public void testReadGn() throws IllegalCeosFormatException, IOException {
@@ -269,7 +269,7 @@ public class CeosFileReaderTest extends TestCase {
 
         final CeosFileReader ceosReader = new CeosFileReader(_ios);
 
-        assertEquals(-1.06962770630708111E+01, ceosReader.readGn(24), 1E-25);
+        assertEquals(-1.06962770630708111E+01, ceosReader.readFn(24), 1E-25);
     }
 
     public void testReadGnArray() throws IllegalCeosFormatException,
@@ -283,7 +283,7 @@ public class CeosFileReaderTest extends TestCase {
         final CeosFileReader ceosReader = new CeosFileReader(_ios);
 
         final double[] values = new double[4];
-        ceosReader.readGn(24, values);
+        ceosReader.readFn(24, values);
         assertEquals(-1.06962770630708111E+01, values[0], 1e-25);
         assertEquals(1.28993192035406507E-05, values[1], 1e-25);
         assertEquals(-8.94946528898421729E-05, values[2], 1e-25);

@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /*
- * $Id: JERSVolumeDirectoryFile.java,v 1.1 2008-05-26 19:32:11 lveci Exp $
+ * $Id: JERSVolumeDirectoryFile.java,v 1.2 2008-05-26 21:10:46 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -57,7 +57,7 @@ class JERSVolumeDirectoryFile {
         return "LEA_01.001";
     }
 
-    public String getTrailerFileName() {
+    public static String getTrailerFileName() {
         return "NUL_DAT.001";
     }
 
