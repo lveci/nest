@@ -11,7 +11,7 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
 /*
- * $Id: RadarsatImageFile.java,v 1.2 2008-05-27 20:45:24 lveci Exp $
+ * $Id: RadarsatImageFile.java,v 1.3 2008-05-27 21:02:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,7 +32,7 @@ import java.io.IOException;
  * This class represents an image file of an Avnir-2 product.
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2008-05-27 20:45:24 $
+ * @version $Revision: 1.3 $ $Date: 2008-05-27 21:02:12 $
  */
 class RadarsatImageFile {
 
@@ -135,17 +135,15 @@ class RadarsatImageFile {
                                    final ProductData destBuffer, ProgressMonitor pm) throws IOException,
                                                                                             IllegalCeosFormatException
     {
-        final int sourceMaxX = sourceOffsetX + sourceWidth - 1;
+        //final int sourceMaxX = sourceOffsetX + sourceWidth - 1;
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         ImageRecord imageRecord;
 
-        int x = sourceOffsetX ;
-
-        System.out.print("readBandRasterData x " + sourceOffsetX + " y " + sourceOffsetY +
-                " w " + sourceWidth + " h " + sourceHeight +
-                " stepX " + sourceStepX + " stepY " + sourceStepY +
-                " dstW " + destWidth +
-                " maxX " + sourceMaxX + " maxY " + sourceMaxY + '\n');
+        //System.out.print("readBandRasterData x " + sourceOffsetX + " y " + sourceOffsetY +
+        //        " w " + sourceWidth + " h " + sourceHeight +
+        //        " stepX " + sourceStepX + " stepY " + sourceStepY +
+        //        " dstW " + destWidth +
+        //        " maxX " + sourceMaxX + " maxY " + sourceMaxY + '\n');
 
         pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceOffsetY);
         try {
@@ -158,7 +156,7 @@ class RadarsatImageFile {
 
                 // Read source line
                 imageRecord = getImageRecord(y);
-                _ceosReader.seek(imageRecord.getImageDataStart() + x);
+                _ceosReader.seek(imageRecord.getImageDataStart() + sourceOffsetX);
                 _ceosReader.readB1(srcLine);
 
                 // Copy source line into destination buffer
