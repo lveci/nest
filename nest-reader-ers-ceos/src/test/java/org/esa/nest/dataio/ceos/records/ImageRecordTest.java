@@ -35,15 +35,6 @@ public class ImageRecordTest extends TestCase {
         _reader.seek(_prefix.length());
 
         final ImageRecord record = new ImageRecord(_reader, mission, image_recordDefinition);
-
-        assertRecord(record);
-    }
-
-    public void testInit() throws IOException,
-                                  IllegalCeosFormatException {
-        final ImageRecord record = new ImageRecord(_reader, _prefix.length(), mission, image_recordDefinition);
-
-        assertRecord(record);
     }
 
     private void writeRecordData(final ImageOutputStream ios) throws IOException {
@@ -56,14 +47,5 @@ public class ImageRecordTest extends TestCase {
         CeosTestHelper.writeBlanks(ios, BaseRecordTest.RECORD_LENGTH - 34);
     }
 
-    private void assertRecord(final ImageRecord record) throws IOException {
-        BaseRecordTest.assertRecord(record);
-        assertEquals(_prefix.length(), record.getStartPos());
-        //assertEquals(_prefix.length() + BaseRecordTest.RECORD_LENGTH, _ios.getStreamPosition());
 
-       // assertEquals(1234, record.getPrefixDataLineNumber());
-        //assertEquals(2345, record.getImageNumber());
-      //  assertEquals(3456, record.getScanStartTimeMillisAtDay());
-      //  assertEquals(4567, record.getScanStartTimeMicros());
-    }
 }
