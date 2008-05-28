@@ -228,7 +228,7 @@ class JERSProductDirectory {
 
     private Band createBand(final JERSImageFile ImageFile) throws IOException,
                                                                           IllegalCeosFormatException {
-        final Band band = new Band(ImageFile.getBandName(), ProductData.TYPE_UINT16,
+        final Band band = new Band(ImageFile.getBandName(), ProductData.TYPE_INT16,
                                    _sceneWidth, _sceneHeight);
         final int bandIndex = ImageFile.getBandIndex();
         band.setSpectralBandIndex(bandIndex - 1);

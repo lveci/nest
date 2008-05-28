@@ -300,23 +300,6 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(expected, ceosReader.readAn(expected.length()));
     }
 
-    public void testReadB1ArrayThrowsException() throws IOException {
-        final String prefix = "ddz716d51n+dn4drh1td6r4nh64n1687";
-        _ios.writeBytes(prefix);
-        _ios.write(new byte[]{0x00, (byte) 0xBC, 0x00, 0x01});
-
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
-
-        ceosReader.seek(prefix.length());
-        final byte[] bytesToRead = new byte[8]; // only for bytes written
-        try {
-            ceosReader.readB1(bytesToRead);
-            fail("IllegalCeosFormatException expected");
-        } catch (IllegalCeosFormatException e) {
-            assertEquals(prefix.length(), e.getStreamPos());
-        }
-    }
-
     public void testReadAnThrowsExceptionBecauseStreamIsToShort() throws IOException {
         final String prefix = "dflkjoieng nvivbaewr vpivbydv";
         final String charsToRead = "To lon"; // write 6 bytes to stream

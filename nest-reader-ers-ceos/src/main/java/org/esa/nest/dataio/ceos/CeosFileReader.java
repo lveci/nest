@@ -1,5 +1,5 @@
 /*
- * $Id: CeosFileReader.java,v 1.7 2008-05-26 21:10:46 lveci Exp $
+ * $Id: CeosFileReader.java,v 1.8 2008-05-27 20:45:24 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -95,6 +95,10 @@ public class CeosFileReader {
         }
     }
 
+    public void readB1(final byte[] array) throws IOException {
+            _stream.readFully(array, 0, array.length);
+    }
+
     public void readB2(final short[] array) throws IOException {
             _stream.readFully(array, 0, array.length);
     }
@@ -125,24 +129,6 @@ public class CeosFileReader {
             throw new IllegalCeosFormatException(message, streamPosition, e);
         }
         return number;
-    }
-
-    public void readB1(final byte[] array) throws IOException,
-                                                  IllegalCeosFormatException {
-        final long streamPosition = _stream.getStreamPosition();
-        final int bytesRead;
-        try {
-            bytesRead = _stream.read(array);
-        } catch (IOException e) {
-            final String message = String.format(CeosFileReader.EM_READING_X_TYPE,
-                                                 new Object[]{"B1[]"});
-            throw new IllegalCeosFormatException(message, streamPosition, e);
-        }
-        if (bytesRead != array.length) {
-            final String message = String.format(CeosFileReader.EM_EXPECTED_X_FOUND_Y_BYTES,
-                                                 new Object[]{array.length, bytesRead});
-            throw new IllegalCeosFormatException(message, streamPosition);
-        }
     }
 
     public double readFn(final int n) throws IOException,

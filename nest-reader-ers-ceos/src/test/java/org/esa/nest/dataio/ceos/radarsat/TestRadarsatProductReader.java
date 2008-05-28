@@ -44,7 +44,7 @@ public class TestRadarsatProductReader extends TestCase {
         File file = new File(filePath);
         if(!file.exists()) return;
 
-        //Product product = reader.readProductNodes(file, null);
+        Product product = reader.readProductNodes(file, null);
     }
 
 }

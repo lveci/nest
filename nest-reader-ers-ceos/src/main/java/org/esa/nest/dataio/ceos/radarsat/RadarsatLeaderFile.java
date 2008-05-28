@@ -27,12 +27,18 @@ class RadarsatLeaderFile {
     private static final String PROJECTION_KEY_PS = "NNNNY";
 
     public final BaseRecord _leaderFDR;
-    public final BaseSceneHeaderRecord _sceneHeaderRecord;
+    public final BaseRecord _mapProjRecord;
+    public final BaseRecord _radiometricRecord;
+    public final BaseRecord _radiometricCompRecord;
+    //public final BaseSceneHeaderRecord _sceneHeaderRecord;
 
     public CeosFileReader _reader;
 
     private static String mission = "radarsat";
     private static String leader_recordDefinitionFile = "leader_file.xml";
+    private static String mapproj_recordDefinitionFile = "map_proj_record.xml";
+    private static String radiometric_recordDefinitionFile = "radiometric_record.xml";
+    private static String radiometric_comp_recordDefinitionFile = "radiometric_compensation_record.xml";
     private static String scene_recordDefinitionFile = "scene_record.xml";
 
     public RadarsatLeaderFile(final ImageInputStream leaderStream) throws IOException,
@@ -40,17 +46,23 @@ class RadarsatLeaderFile {
         _reader = new CeosFileReader(leaderStream);
         _leaderFDR = new BaseRecord(_reader, -1, mission, leader_recordDefinitionFile);
         _reader.seek(_leaderFDR.getAbsolutPosition(_leaderFDR.getRecordLength()));
-        _sceneHeaderRecord = new BaseSceneHeaderRecord(_reader, -1, mission, scene_recordDefinitionFile);
+        _mapProjRecord = new BaseRecord(_reader, -1, mission, mapproj_recordDefinitionFile);
+        _reader.seek(_mapProjRecord.getAbsolutPosition(_mapProjRecord.getRecordLength()));
+        _radiometricRecord = new BaseRecord(_reader, -1, mission, radiometric_recordDefinitionFile);
+        _reader.seek(_radiometricRecord.getAbsolutPosition(_radiometricRecord.getRecordLength()));
+        _radiometricCompRecord = new BaseRecord(_reader, -1, mission, radiometric_comp_recordDefinitionFile);
+        _reader.seek(_radiometricCompRecord.getAbsolutPosition(_radiometricCompRecord.getRecordLength()));
+        //_sceneHeaderRecord = new BaseSceneHeaderRecord(_reader, -1, mission, scene_recordDefinitionFile);
 
 
     }
 
     public String getProductLevel() {
-        return _sceneHeaderRecord.getAttributeString("Scene reference number");
+        return "ref num";//_sceneHeaderRecord.getAttributeString("Scene reference number");
     }
 
     public Calendar getDateImageWasTaken() {
-        return _sceneHeaderRecord.getDateImageWasTaken();
+        return null;//_sceneHeaderRecord.getDateImageWasTaken();
     }
     
      /*

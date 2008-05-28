@@ -1,35 +1,18 @@
 package org.esa.nest.dataio.ceos.radarsat;
 
-import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
-import org.esa.nest.dataio.ceos.ers.*;
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.FXYGeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.ImageInfo;
-import org.esa.beam.framework.datamodel.MapGeoCoding;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.dataop.maptransf.Datum;
-import org.esa.beam.framework.dataop.maptransf.Ellipsoid;
-import org.esa.beam.framework.dataop.maptransf.MapInfo;
-import org.esa.beam.framework.dataop.maptransf.MapProjection;
-import org.esa.beam.framework.dataop.maptransf.MapTransform;
-import org.esa.beam.framework.dataop.maptransf.MapTransformFactory;
-import org.esa.beam.framework.dataop.maptransf.StereographicDescriptor;
-import org.esa.beam.framework.dataop.maptransf.UTM;
-import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
-import org.esa.beam.util.math.FXYSum;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
@@ -86,8 +69,7 @@ class RadarsatProductDirectory {
                                             _sceneWidth, _sceneHeight);
         product.setFileLocation(_baseDir);
 
-        for (int i = 0; i < _imageFiles.length; i++) {
-            final RadarsatImageFile ImageFile = _imageFiles[i];
+        for (final RadarsatImageFile ImageFile : _imageFiles) {
             product.addBand(createBand(ImageFile));
         }
         /*product.setStartTime(getUTCScanStartTime());
@@ -208,8 +190,7 @@ class RadarsatProductDirectory {
 
     public RadarsatImageFile getImageFile(final Band band) throws IOException,
                                                                 IllegalCeosFormatException {
-        for (int i = 0; i < _imageFiles.length; i++) {
-            final RadarsatImageFile imageFile = _imageFiles[i];
+        for (final RadarsatImageFile imageFile : _imageFiles) {
             if (band.getName().equals(imageFile.getBandName())) {
                 return imageFile;
             }
@@ -231,7 +212,7 @@ class RadarsatProductDirectory {
 
     private Band createBand(final RadarsatImageFile ImageFile) throws IOException,
                                                                           IllegalCeosFormatException {
-        final Band band = new Band(ImageFile.getBandName(), ProductData.TYPE_UINT16,
+        final Band band = new Band(ImageFile.getBandName(), ProductData.TYPE_INT8,
                                    _sceneWidth, _sceneHeight);
         final int bandIndex = ImageFile.getBandIndex();
         band.setSpectralBandIndex(bandIndex - 1);
@@ -285,14 +266,14 @@ class RadarsatProductDirectory {
             }
         });
         sortedEntries.addAll(unsortedEntries);
-        for (Iterator iterator = sortedEntries.iterator(); iterator.hasNext();) {
-            final Map.Entry entry = (Map.Entry) iterator.next();
+        for (Object sortedEntry : sortedEntries) {
+            final Map.Entry entry = (Map.Entry) sortedEntry;
             final String data = (String) entry.getValue();
             // stripp of double quotes
             final String strippedData = data.substring(1, data.length() - 1);
             final MetadataAttribute attribute = new MetadataAttribute((String) entry.getKey(),
-                                                                      new ProductData.ASCII(strippedData),
-                                                                      true);
+                    new ProductData.ASCII(strippedData),
+                    true);
             summaryMetadata.addAttribute(attribute);
         }
 

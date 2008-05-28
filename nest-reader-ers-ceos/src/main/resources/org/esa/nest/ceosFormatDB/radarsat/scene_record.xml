@@ -8,11 +8,13 @@
 	<rec name="Record Length" type="4" num="1"/>
 	<rec name="Data Set Summary Record sequence number" type="2" num="4"/>
 	
+	<rec name="debug" type="-1" num="2000"/>
+	
 	<rec name="SAR channel indicator" type="2" num="4"/>
-	<rec name="skipBytes" type="0" num="16"/>	
+	<rec name="Scene id" type="1" num="16"/>	
 	<rec name="Scene reference number" type="1" num="32"/>
     <rec name="Scene centre time" type="1" num="32"/>
-	<rec name="skipBytes" type="0" num="16"/>
+	<rec name="Ascending or Descending flag" type="1" num="16"/>
     <rec name="scene centre geodetic latitude" type="5" num="16"/>
 	<rec name="scene centre geodetic longitude" type="5" num="16"/>
     <rec name="scene centre true heading as calculated relative to North" type="5" num="16"/>

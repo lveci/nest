@@ -11,7 +11,7 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
 /*
- * $Id: RadarsatImageFile.java,v 1.1 2008-05-26 19:32:11 lveci Exp $
+ * $Id: RadarsatImageFile.java,v 1.2 2008-05-27 20:45:24 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,7 +32,7 @@ import java.io.IOException;
  * This class represents an image file of an Avnir-2 product.
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2008-05-26 19:32:11 $
+ * @version $Revision: 1.2 $ $Date: 2008-05-27 20:45:24 $
  */
 class RadarsatImageFile {
 
@@ -139,7 +139,7 @@ class RadarsatImageFile {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         ImageRecord imageRecord;
 
-        int x = sourceOffsetX * 2;
+        int x = sourceOffsetX ;
 
         System.out.print("readBandRasterData x " + sourceOffsetX + " y " + sourceOffsetY +
                 " w " + sourceWidth + " h " + sourceHeight +
@@ -149,8 +149,8 @@ class RadarsatImageFile {
 
         pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceOffsetY);
         try {
-            final short[] srcLine = new short[sourceWidth];
-            final short[] destLine = new short[destWidth];
+            final byte[] srcLine = new byte[sourceWidth];
+            final byte[] destLine = new byte[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
@@ -159,7 +159,7 @@ class RadarsatImageFile {
                 // Read source line
                 imageRecord = getImageRecord(y);
                 _ceosReader.seek(imageRecord.getImageDataStart() + x);
-                _ceosReader.readB2(srcLine);
+                _ceosReader.readB1(srcLine);
 
                 // Copy source line into destination buffer
                 final int currentLineIndex = (y - sourceOffsetY) * destWidth;
@@ -189,7 +189,7 @@ class RadarsatImageFile {
         return _imageRecords[line];
     }
 
-    private static void copyLine(final short[] srcLine, final short[] destLine,
+    private static void copyLine(final byte[] srcLine, final byte[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; x++, i += sourceStepX) {
             destLine[x] = srcLine[i];
