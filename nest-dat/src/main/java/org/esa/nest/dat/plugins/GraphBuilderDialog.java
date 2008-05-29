@@ -9,6 +9,8 @@ import org.esa.nest.util.DatUtils;
 import org.esa.nest.dat.DatContext;
 
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
@@ -77,6 +79,13 @@ public class GraphBuilderDialog implements Observer {
         // mid panel
         final JPanel midPanel = new JPanel(new BorderLayout(4, 4));
         tabbedPanel = new JTabbedPane();
+        tabbedPanel.addChangeListener(new ChangeListener() {
+
+            public void stateChanged(final ChangeEvent e) {
+                InitGraph();
+            }
+        });
+
         midPanel.add(tabbedPanel, BorderLayout.CENTER);
 
         mainPanel.add(midPanel, BorderLayout.CENTER);
@@ -164,9 +173,19 @@ public class GraphBuilderDialog implements Observer {
      */
     private void DoProcessing() {
 
+        InitGraph();
         if(ValidateAllNodes()) {
             final SwingWorker processThread = new ProcessThread(new ProgressBarProgressMonitor(progressBar, null));
             processThread.execute();
+        }
+    }
+
+    private void InitGraph() {
+        try {
+            graphEx.InitGraph();
+        } catch(GraphException e) {
+                JOptionPane.showMessageDialog(mainFrame, e.getMessage(), "Error Initializing Graph",
+                                          JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -175,6 +194,7 @@ public class GraphBuilderDialog implements Observer {
      */
     private void SaveGraph() {
 
+        InitGraph();
         if(ValidateAllNodes()) {
             try {
                 graphEx.saveGraph();

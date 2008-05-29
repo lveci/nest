@@ -1,6 +1,7 @@
 package org.esa.nest.dat.plugins;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.SubProgressMonitor;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.ui.UIValidation;
@@ -17,6 +18,9 @@ public class GraphExecuter extends Observable {
 
     private final GPF gpf;
     private Graph graph;
+    GraphContext graphContext;
+    GraphProcessor processor;
+
     private int idCount = 0;
     private final Vector nodeList = new Vector(30);
 
@@ -28,6 +32,7 @@ public class GraphExecuter extends Observable {
         gpf.getOperatorSpiRegistry().loadOperatorSpis();
 
         graph = new Graph("Graph");
+        processor = new GraphProcessor();
     }
 
     Vector GetGraphNodes() {
@@ -120,23 +125,27 @@ public class GraphExecuter extends Observable {
             n.AssignParameters();
         }
     }
-    
+
+    void InitGraph() throws GraphException {
+        AssignAllParameters();
+        if(graphContext != null)
+            GraphProcessor.disposeGraphContext(graphContext);
+
+        graphContext = processor.createGraphContext(graph, ProgressMonitor.NULL);
+    }
+
     /**
      * Begins graph processing
      * @param pm The ProgressMonitor
      * @throws GraphException if cannot process graph
      */
     void executeGraph(ProgressMonitor pm) throws GraphException {
-        AssignAllParameters();
-        GraphProcessor processor = new GraphProcessor();
-        processor.executeGraph(graph, pm);
+        processor.executeGraphContext(graphContext, pm);
     }
 
     void saveGraph() throws GraphException {
 
-        AssignAllParameters();
-
-        String filePath = DatUtils.GetFilePath("Save Graph", "XML", "xml", "Graph File", true);
+        String filePath = DatUtils.GetFilePath("Save Graph", "XML", "xml", "GraphFile", true);
         if(filePath != null)
             writeGraph(filePath);
     }
@@ -158,7 +167,7 @@ public class GraphExecuter extends Observable {
 
     void loadGraph() throws GraphException {
 
-        String filePath = DatUtils.GetFilePath("Load Graph", "XML", "xml", "Graph File", false);
+        String filePath = DatUtils.GetFilePath("Load Graph", "XML", "xml", "GraphFile", false);
         try {
             if(filePath == null) return;
             FileReader fileReader = new FileReader(filePath);
