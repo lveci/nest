@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-dat</symbolicName>
-    <version>1A</version>
+    <version>1B</version>
     <name>NEST Display and Analysis Tool</name>
 
     <description>NEST Display and Analysis Tool</description>
@@ -71,6 +71,21 @@
             <helpId>statisticsToolView</helpId>
             <initState>HIDDEN</initState>
             <initSide>SOUTH</initSide>
+            <initIndex>0</initIndex>
+        </toolView>
+        <toolView>
+            <id>org.esa.nest.dat.toolviews.ProjectsToolView</id>
+            <class>org.esa.nest.dat.toolviews.ProjectsToolView</class>
+            <title>Projects</title>
+            <tabTitle>Projects</tabTitle>
+            <mnemonic>P</mnemonic>
+            <accelerator>ctrl alt P</accelerator>
+            <smallIcon>/org/esa/beam/resources/images/icons/Open16.gif</smallIcon>
+            <largeIcon>/org/esa/beam/resources/images/icons/Open24.gif</largeIcon>
+            <!--<helpId>TODO</helpId>-->
+            <description>Project View.</description>
+            <initState>DOCKED</initState>
+            <initSide>WEST</initSide>
             <initIndex>0</initIndex>
         </toolView>
     </extension>
