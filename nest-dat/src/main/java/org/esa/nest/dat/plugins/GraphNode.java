@@ -23,7 +23,7 @@ import java.util.Set;
 public class GraphNode {
 
     private final Node node;
-    private final Map<String, Object> parameterMap = new HashMap<String, Object>();
+    private final Map<String, Object> parameterMap = new HashMap<String, Object>(10);
     private final OperatorUI operatorUI;
 
     private int nodeWidth = 60;
@@ -157,6 +157,21 @@ public class GraphNode {
                 node.removeSource(ns);
             }
         }
+    }
+
+    boolean FindSource(GraphNode source) {
+
+        NodeSource[] sources = node.getSources();
+        for (NodeSource ns : sources) {
+            if (ns.getSourceNodeId().equals(source.getID())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean HasSources() {
+        return node.getSources().length > 0;
     }
 
     UIValidation validateParameterMap() {

@@ -1,12 +1,9 @@
 package org.esa.nest.dat.plugins;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.core.SubProgressMonitor;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.gpf.graph.*;
-import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.util.DatUtils;
 
 import java.util.*;
@@ -18,8 +15,8 @@ public class GraphExecuter extends Observable {
 
     private final GPF gpf;
     private Graph graph;
-    GraphContext graphContext;
-    GraphProcessor processor;
+    private GraphContext graphContext;
+    private final GraphProcessor processor;
 
     private int idCount = 0;
     private final Vector nodeList = new Vector(30);
@@ -43,6 +40,7 @@ public class GraphExecuter extends Observable {
         graph = null;
         graph = new Graph("Graph");
         nodeList.clear();
+        idCount = 0;
     }
 
     GraphNode findGraphNode(String id) {    
@@ -126,12 +124,35 @@ public class GraphExecuter extends Observable {
         }
     }
 
-    void InitGraph() throws GraphException {
-        AssignAllParameters();
-        if(graphContext != null)
-            GraphProcessor.disposeGraphContext(graphContext);
+    boolean IsGraphComplete() {
+        for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
+        {
+            GraphNode n = (GraphNode) e.nextElement();
+            if(!n.HasSources() && !IsNodeASource(n)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-        graphContext = processor.createGraphContext(graph, ProgressMonitor.NULL);
+    boolean IsNodeASource(GraphNode node) {
+        for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
+        {
+            GraphNode n = (GraphNode) e.nextElement();
+            if(n.FindSource(node))
+                return true;
+        }
+        return false;
+    }
+
+    void InitGraph() throws GraphException {
+        if(IsGraphComplete()) {
+            AssignAllParameters();
+            if(graphContext != null)
+                GraphProcessor.disposeGraphContext(graphContext);
+
+            graphContext = processor.createGraphContext(graph, ProgressMonitor.NULL);
+        }
     }
 
     /**
@@ -191,6 +212,7 @@ public class GraphExecuter extends Observable {
                     notifyObservers(new GraphEvent(events.ADD_EVENT, newGraphNode));
                     clearChanged();
                 }
+                idCount = nodes.length;
             }
         } catch(IOException e) {
             throw new GraphException("Unable to load graph " + filePath);

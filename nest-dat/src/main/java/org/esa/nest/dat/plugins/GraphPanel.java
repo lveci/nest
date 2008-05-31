@@ -18,7 +18,7 @@ import java.util.Enumeration;
  * User: lveci
  * Date: Jan 15, 2008
  */
-public class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, MouseListener, MouseMotionListener {
+class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, MouseListener, MouseMotionListener {
 
     private final GraphExecuter graphEx;
     private JMenu addMenu;
@@ -164,7 +164,12 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
                 n.drawNode(g, selColor);
             else
                 n.drawNode(g, opColor);
+        }
 
+        // first pass sets the Size in drawNode according to string length
+        for (Enumeration e = nodes.elements(); e.hasMoreElements();)
+        {
+            GraphNode n = (GraphNode) e.nextElement();
             // connect source nodes
             g.setColor(Color.red);
             NodeSource[] nSources = n.getNode().getSources();
@@ -224,6 +229,20 @@ public class GraphPanel extends JPanel implements ActionListener, PopupMenuListe
         if(connectingSource) {
             GraphNode n = findNode(e.getPoint());
             if(n != null && selectedNode != n) {
+
+              /*  Field[] declaredFields = graphEx.graphContext.getNodeContext(n.getNode()).getOperator().getClass().getDeclaredFields();
+                for (Field declaredField : declaredFields) {
+                    SourceProduct sourceProductAnnotation = declaredField.getAnnotation(SourceProduct.class);
+                    if (sourceProductAnnotation != null) {
+                        processSourceProductField(declaredField, sourceProductAnnotation);
+                    }
+                    SourceProducts sourceProductsAnnotation = declaredField.getAnnotation(SourceProducts.class);
+                    if (sourceProductsAnnotation != null) {
+                        processSourceProductsField(declaredField, sourceProductsAnnotation);
+                    }
+                }   */
+
+
                 connectSourceTargetNode.connectOperatorSource(n);
             }
         }

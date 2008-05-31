@@ -26,10 +26,13 @@ public class GraphBuilderDialog implements Observer {
     private static final ImageIcon clearIcon = DatUtils.LoadIcon("org/esa/nest/icons/edit-clear.png");
     private JPanel mainPanel;
     private GraphPanel graphPanel;
+    private JLabel statusLabel;
 
     private JPanel progressPanel;
     private JProgressBar progressBar;
+    private ProgressBarProgressMonitor progBarMonitor = null;
     private JFrame mainFrame;
+    private boolean initGraphEnabled = true;
 
     private final GraphExecuter graphEx;
 
@@ -82,11 +85,15 @@ public class GraphBuilderDialog implements Observer {
         tabbedPanel.addChangeListener(new ChangeListener() {
 
             public void stateChanged(final ChangeEvent e) {
-                InitGraph();
+                ValidateAllNodes();
             }
         });
 
+        statusLabel = new JLabel("");
+        statusLabel.setForeground(new Color(255,0,0));
+        
         midPanel.add(tabbedPanel, BorderLayout.CENTER);
+        midPanel.add(statusLabel, BorderLayout.SOUTH);
 
         mainPanel.add(midPanel, BorderLayout.CENTER);
 
@@ -99,10 +106,19 @@ public class GraphBuilderDialog implements Observer {
         // progress Bar
         progressBar = new JProgressBar();
         progressBar.setName(getClass().getName() + "progressBar");
-        progressBar.setStringPainted(true);
+        progressBar.setStringPainted(true);       
         progressPanel = new JPanel();
-        progressPanel.setLayout(new BorderLayout());
-        progressPanel.add(progressBar);
+        progressPanel.setLayout(new BorderLayout(2,2));
+        progressPanel.add(progressBar, BorderLayout.CENTER);
+        final JButton progressCancelBtn = new JButton("Cancel");
+        progressCancelBtn.addActionListener(new ActionListener() {
+
+            public void actionPerformed(final ActionEvent e) {
+                CancelProcessing();
+            }
+        });
+        progressPanel.add(progressCancelBtn, BorderLayout.EAST);
+
         progressPanel.setVisible(false);
         southPanel.add(progressPanel, BorderLayout.SOUTH);
 
@@ -173,20 +189,33 @@ public class GraphBuilderDialog implements Observer {
      */
     private void DoProcessing() {
 
-        InitGraph();
         if(ValidateAllNodes()) {
-            final SwingWorker processThread = new ProcessThread(new ProgressBarProgressMonitor(progressBar, null));
+            progBarMonitor = new ProgressBarProgressMonitor(progressBar, null);
+            final SwingWorker processThread = new ProcessThread(progBarMonitor);
             processThread.execute();
+        } else {
+            JOptionPane.showMessageDialog(mainFrame, statusLabel.getText(), "Please Correct Error Before Processing Graph",
+                                          JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void InitGraph() {
+    private void CancelProcessing() {
+        if(progBarMonitor != null)
+            progBarMonitor.setCanceled(true);
+    }
+
+    private boolean InitGraph() {
         try {
-            graphEx.InitGraph();
+            if(initGraphEnabled)
+                graphEx.InitGraph();
+            statusLabel.setText("");
+            return true;
         } catch(GraphException e) {
-                JOptionPane.showMessageDialog(mainFrame, e.getMessage(), "Error Initializing Graph",
-                                          JOptionPane.ERROR_MESSAGE);
+            statusLabel.setText(e.getMessage());
+            //    JOptionPane.showMessageDialog(mainFrame, e.getMessage(), "Error Initializing Graph",
+            //                              JOptionPane.ERROR_MESSAGE);
         }
+        return false;
     }
 
     /**
@@ -194,7 +223,6 @@ public class GraphBuilderDialog implements Observer {
      */
     private void SaveGraph() {
 
-        InitGraph();
         if(ValidateAllNodes()) {
             try {
                 graphEx.saveGraph();
@@ -202,6 +230,9 @@ public class GraphBuilderDialog implements Observer {
                 JOptionPane.showMessageDialog(mainFrame, e.getMessage(), "Error Saving Graph",
                                           JOptionPane.ERROR_MESSAGE);
             }
+        } else {
+            JOptionPane.showMessageDialog(mainFrame, statusLabel.getText(), "Please Correct Error Before Saving Graph",
+                                          JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -210,9 +241,11 @@ public class GraphBuilderDialog implements Observer {
      */
     private void LoadGraph() {
         try {
+            initGraphEnabled = false;
             tabbedPanel.removeAll();
             graphEx.loadGraph();
             graphPanel.repaint();
+            initGraphEnabled = true;
         } catch(GraphException e) {
             JOptionPane.showMessageDialog(mainFrame, e.getMessage(), "Error Loading Graph",
                                           JOptionPane.ERROR_MESSAGE);
@@ -224,9 +257,12 @@ public class GraphBuilderDialog implements Observer {
      */
     private void ClearGraph() {
 
+        initGraphEnabled = false;
         tabbedPanel.removeAll();
         graphEx.ClearGraph();
         graphPanel.repaint();
+        initGraphEnabled = true;
+        statusLabel.setText("");
     }
 
     /**
@@ -238,7 +274,7 @@ public class GraphBuilderDialog implements Observer {
 
         //todo check for correct number of sources and possibly source types?
         UIValidation validation = null;
-        StringBuffer msg = new StringBuffer(100);
+        StringBuilder msg = new StringBuilder(100);
         Vector nodeList = graphEx.GetGraphNodes();
         for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
         {
@@ -251,12 +287,11 @@ public class GraphBuilderDialog implements Observer {
 
         if(validation != null && !validation.getState()) {
 
-            JOptionPane.showMessageDialog(mainFrame, msg, "Graph Errors",
-                                                  JOptionPane.ERROR_MESSAGE);
+            statusLabel.setText(msg.toString());
             return false;
         }
 
-        return true;
+        return InitGraph();
     }
 
      /**
