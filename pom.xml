@@ -39,21 +39,21 @@
     </scm>
 
     <modules>
-	<module>beam</module>
-	<module>nest-bootstrap</module>
-	<module>nest-core</module>
-	<module>nest-dat</module>
-	<module>nest-3d-view</module> 
-	<module>nest-reader-dem</module>
-	<module>nest-reader-ers-ceos</module>
-	<module>nest-writer-gdal</module>
-	<module>nest-op-filter</module>
-    <module>nest-op-speckle-filter</module>
-    <module>nest-op-asar-calibration</module>
-    <module>nest-op-ers-calibration</module>
-    <module>nest-op-gcp-selection</module>
-    <module>nest-op-data-analysis</module>
-  </modules>
+		<module>beam</module>
+		<module>nest-bootstrap</module>
+		<module>nest-core</module>
+		<module>nest-dat</module>
+		<module>nest-3d-view</module> 
+		<module>nest-reader-dem</module>
+		<module>nest-reader-ers-ceos</module>
+		<module>nest-writer-gdal</module>
+		<module>nest-op-filter</module>
+	    <module>nest-op-speckle-filter</module>
+	    <module>nest-op-asar-calibration</module>
+	    <module>nest-op-ers-calibration</module>
+	    <module>nest-op-gcp-selection</module>
+	    <module>nest-op-data-analysis</module>
+	</modules>
 
     <dependencyManagement>
         <dependencies>

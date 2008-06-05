@@ -29,7 +29,7 @@ public class DatUtils {
         return new ImageIcon(imageURL);
     }
 
-    public static String GetFilePath(String title, String formatName, String extension, String description,
+    public static File GetFilePath(String title, String formatName, String extension, String description,
                                      boolean isSave) {
         BeamFileFilter xmlFilter = new BeamFileFilter(formatName, extension, description);
         File file;
@@ -41,8 +41,7 @@ public class DatUtils {
             return null;
         }
 
-        file = FileUtils.ensureExtension(file, extension);
-        return file.getAbsolutePath();
+        return FileUtils.ensureExtension(file, extension);
     }
 
      public static InputStream getResourceAsStream(final String filename) throws IOException {
