@@ -10,6 +10,7 @@ import java.util.*;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.File;
 
 public class GraphExecuter extends Observable {
 
@@ -17,6 +18,7 @@ public class GraphExecuter extends Observable {
     private Graph graph;
     private GraphContext graphContext;
     private final GraphProcessor processor;
+    private Xpp3Dom presentationXML = new Xpp3Dom("Presentation");
 
     private int idCount = 0;
     private final Vector nodeList = new Vector(30);
@@ -71,7 +73,7 @@ public class GraphExecuter extends Observable {
 
     GraphNode addOperator(String opName) {
 
-        String id = opName + ' ' + ++idCount;
+        String id = opName + ++idCount;
         Node newNode = new Node(id, opName);
 
         Xpp3Dom parameters = new Xpp3Dom("parameters");
@@ -120,8 +122,11 @@ public class GraphExecuter extends Observable {
         for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
         {
             GraphNode n = (GraphNode) e.nextElement();
-            n.AssignParameters();
+            n.AssignParameters(presentationXML);
+
         }
+
+        graph.setAppData("Presentation", presentationXML);
     }
 
     boolean IsGraphComplete() {
@@ -166,9 +171,9 @@ public class GraphExecuter extends Observable {
 
     void saveGraph() throws GraphException {
 
-        String filePath = DatUtils.GetFilePath("Save Graph", "XML", "xml", "GraphFile", true);
+        File filePath = DatUtils.GetFilePath("Save Graph", "XML", "xml", "GraphFile", true);
         if(filePath != null)
-            writeGraph(filePath);
+            writeGraph(filePath.getAbsolutePath());
     }
 
     void writeGraph(String filePath) throws GraphException {
@@ -188,10 +193,10 @@ public class GraphExecuter extends Observable {
 
     void loadGraph() throws GraphException {
 
-        String filePath = DatUtils.GetFilePath("Load Graph", "XML", "xml", "GraphFile", false);
+        File filePath = DatUtils.GetFilePath("Load Graph", "XML", "xml", "GraphFile", false);
         try {
             if(filePath == null) return;
-            FileReader fileReader = new FileReader(filePath);
+            FileReader fileReader = new FileReader(filePath.getAbsolutePath());
             Graph graphFromFile;
             try {
                 graphFromFile = GraphIO.read(fileReader, null);
@@ -203,9 +208,14 @@ public class GraphExecuter extends Observable {
                 graph = graphFromFile;
                 nodeList.clear();
 
+                Xpp3Dom xml = graph.getApplicationData("Presentation");
+                if(xml != null)
+                    presentationXML = xml;
+
                 Node[] nodes = graph.getNodes();
                 for (Node n : nodes) {
                     GraphNode newGraphNode = new GraphNode(n);
+                    newGraphNode.setDisplayParameters(presentationXML.getChild(n.getId()));
                     nodeList.add(newGraphNode);
                     
                     setChanged();

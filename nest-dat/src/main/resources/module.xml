@@ -46,6 +46,10 @@
                     <id>openCoordListDialog</id>
                     <id>orthorectification</id>
                     <id>showDataSources</id>
+                    <id>showUpdateDialog</id>
+                    <id>new</id>
+                    <id>reopen</id>
+                    <id>createAsarNrcsBands</id>
                 </excludedActions>
                 <excludedToolViews>
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
@@ -74,8 +78,8 @@
             <initIndex>0</initIndex>
         </toolView>
         <toolView>
-            <id>org.esa.nest.dat.toolviews.ProjectsToolView</id>
-            <class>org.esa.nest.dat.toolviews.ProjectsToolView</class>
+            <id>org.esa.nest.dat.toolviews.Projects.ProjectsToolView</id>
+            <class>org.esa.nest.dat.toolviews.Projects.ProjectsToolView</class>
             <title>Projects</title>
             <tabTitle>Projects</tabTitle>
             <mnemonic>P</mnemonic>
@@ -92,33 +96,33 @@
 
     <extension point="beam-ui:actions">
 
-	  <action>
+      <action>
+            <id>newProject</id>
+            <class>org.esa.nest.dat.actions.NewProjectAction</class>
+            <parent>file</parent>
+            <text>New Project...</text>
+            <accelerator>control P</accelerator>
+            <placeBefore>openProject</placeBefore>
+            <shortDescr>Create a new project</shortDescr>
+            <description>Create a new project</description>
+            <smallIcon>icons/Open16.gif</smallIcon>
+            <largeIcon>icons/Open24.gif</largeIcon>
+            <helpId>newProject</helpId>
+      </action>
+
+      <action>
             <id>openProject</id>
             <class>org.esa.nest.dat.actions.OpenProjectAction</class>
             <parent>file</parent>
             <text>Open Project...</text>
             <accelerator>control O</accelerator>
-            <placeAfter>open</placeAfter>
+            <placeBefore>openProductGrabber</placeBefore>
             <shortDescr>Open a project</shortDescr>
             <description>Open a project</description>
             <smallIcon>icons/Open16.gif</smallIcon>
             <largeIcon>icons/Open24.gif</largeIcon>
-            <helpId>open</helpId>
+            <helpId>openProject</helpId>
       </action>
-
-	  <action>
-            <id>saveProject</id>
-            <class>org.esa.nest.dat.actions.SaveProjectAction</class>
-            <parent>file</parent>
-            <text>Save Project</text>
-            <placeAfter>save</placeAfter>
-            <separatorBefore>false</separatorBefore>
-            <shortDescr>Save a NEST project.</shortDescr>
-            <description>Save a NEST project.</description>
-            <smallIcon>icons/Save16.gif</smallIcon>
-            <largeIcon>icons/Save24.gif</largeIcon>
-            <helpId>save</helpId>
-        </action>
 
         <action>
             <id>openInformationDialog</id>

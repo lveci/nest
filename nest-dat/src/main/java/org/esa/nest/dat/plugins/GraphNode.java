@@ -33,9 +33,16 @@ public class GraphNode {
     static final private int hotSpotSize = 10;
     private int hotSpotOffset;
 
+    private Point displayPosition = new Point(0,0);
+
+    private Xpp3Dom displayParameters;
+
     GraphNode(Node n) {
         node = n;
         operatorUI = CreateOperatorUI();
+
+        displayParameters = new Xpp3Dom(node.getId());
+
         initParameters();
     }
 
@@ -50,7 +57,18 @@ public class GraphNode {
         }
     }
 
-    void AssignParameters() {
+    void setDisplayParameters(Xpp3Dom params) {
+        if(params != null) {
+            displayParameters = params;
+            Xpp3Dom dpElem = displayParameters.getChild("displayPosition");
+            if(dpElem != null) {
+                displayPosition.x = (int)Float.parseFloat(dpElem.getAttribute("x"));
+                displayPosition.y = (int)Float.parseFloat(dpElem.getAttribute("y"));
+            }
+        }
+    }
+
+    void AssignParameters(Xpp3Dom presentationXML) {
 
         updateParameterMap();
         Xpp3Dom config = node.getConfiguration();
@@ -67,6 +85,24 @@ public class GraphNode {
 
             xml.setValue(value.toString());
         }
+
+        AssignDisplayParameters(presentationXML);
+    }
+
+    void AssignDisplayParameters(Xpp3Dom presentationXML) {
+        Xpp3Dom nodeElem = presentationXML.getChild(node.getId());
+        if(nodeElem == null) {
+            presentationXML.addChild(displayParameters);
+        }
+
+        Xpp3Dom dpElem = displayParameters.getChild("displayPosition");
+        if(dpElem == null) {
+            dpElem = new Xpp3Dom("displayPosition");
+            displayParameters.addChild(dpElem);
+        }
+
+        dpElem.setAttribute("y", String.valueOf(displayPosition.getY()));
+        dpElem.setAttribute("x", String.valueOf(displayPosition.getX()));
     }
 
     /**
@@ -74,7 +110,7 @@ public class GraphNode {
      * @return Point The position of the node
      */
     Point getPos() {
-        return new Point(node.getDisplayPosX(), node.getDisplayPosY());
+        return displayPosition;
     }
 
     /**
@@ -82,7 +118,7 @@ public class GraphNode {
      * @param p The position of the node
      */
     void setPos(Point p) {
-        node.setDisplayPosition(p.x, p.y);
+        displayPosition = p;
     }
 
     Node getNode() {
@@ -203,8 +239,8 @@ public class GraphNode {
      * @param col The color to draw
      */
     void drawNode(Graphics g, Color col) {
-        int x = getPos().x;
-        int y = getPos().y;
+        int x = displayPosition.x;
+        int y = displayPosition.y;
 
         FontMetrics metrics = g.getFontMetrics();
         String name = getOperatorName();
@@ -227,7 +263,7 @@ public class GraphNode {
      * @param col The color to draw
      */
     void drawHotspot(Graphics g, Color col) {
-        Point p = getPos();
+        Point p = displayPosition;
         g.setColor(col);
         g.drawOval(p.x - hotSpotSize / 2, p.y + hotSpotOffset, hotSpotSize, hotSpotSize);
     }
@@ -239,8 +275,8 @@ public class GraphNode {
      */
     public void drawConnectionLine(Graphics g, GraphNode src) {
 
-        Point tail = getPos();
-        Point head = src.getPos();
+        Point tail = displayPosition;
+        Point head = src.displayPosition;
         if (tail.x + nodeWidth < head.x) {
             drawArrow(g, tail.x + nodeWidth, tail.y + halfNodeHeight,
                     head.x, head.y + src.getHalfNodeHeight());
