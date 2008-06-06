@@ -102,7 +102,8 @@
             <parent>file</parent>
             <text>New Project...</text>
             <accelerator>control P</accelerator>
-            <placeBefore>openProject</placeBefore>
+            <separatorBefore>true</separatorBefore>
+            <placeBefore>loadProject</placeBefore>
             <shortDescr>Create a new project</shortDescr>
             <description>Create a new project</description>
             <smallIcon>icons/Open16.gif</smallIcon>
@@ -111,17 +112,17 @@
       </action>
 
       <action>
-            <id>openProject</id>
-            <class>org.esa.nest.dat.actions.OpenProjectAction</class>
+            <id>loadProject</id>
+            <class>org.esa.nest.dat.actions.LoadProjectAction</class>
             <parent>file</parent>
-            <text>Open Project...</text>
+            <text>Load Project...</text>
             <accelerator>control O</accelerator>
             <placeBefore>openProductGrabber</placeBefore>
-            <shortDescr>Open a project</shortDescr>
-            <description>Open a project</description>
+            <shortDescr>Load a project</shortDescr>
+            <description>Load a project</description>
             <smallIcon>icons/Open16.gif</smallIcon>
             <largeIcon>icons/Open24.gif</largeIcon>
-            <helpId>openProject</helpId>
+            <helpId>loadProject</helpId>
       </action>
 
         <action>

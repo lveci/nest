@@ -9,9 +9,9 @@ import org.esa.nest.dat.toolviews.Projects.Project;
  * This action opens a project.
  *
  * @author lveci
- * @version $Revision: 1.3 $ $Date: 2008-06-05 19:23:59 $
+ * @version $Revision: 1.1 $ $Date: 2008-06-06 18:07:22 $
  */
-public class OpenProjectAction extends ExecCommand {
+public class LoadProjectAction extends ExecCommand {
 
     @Override
     public void actionPerformed(final CommandEvent event) {

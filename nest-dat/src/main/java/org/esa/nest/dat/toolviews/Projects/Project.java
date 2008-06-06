@@ -89,9 +89,15 @@ public class Project extends Observable {
 
         projectSubFolders = new ProjectSubFolder(projectFolder, getProjectName());
         projectSubFolders.setRemoveable(false);
-        projectSubFolders.addSubFolder("Imported Products");
-        projectSubFolders.addSubFolder("Calibrated Products");
-        projectSubFolders.addSubFolder("Coregistered Products");
+        ProjectSubFolder stacksFolder = projectSubFolders.addSubFolder("Stacks");
+        stacksFolder.setRemoveable(false);
+        ProjectSubFolder importedFolder = projectSubFolders.addSubFolder("Imported Products");
+        importedFolder.setRemoveable(false);
+        ProjectSubFolder processedFolder = projectSubFolders.addSubFolder("Processed Products");
+        processedFolder.setRemoveable(false);
+        processedFolder.addSubFolder("Calibrated Products");
+        processedFolder.addSubFolder("Coregistered Products");
+        processedFolder.addSubFolder("Orthorectified Products");
     }
 
     private void addImportedProduct(Product product) {
@@ -101,7 +107,7 @@ public class Project extends Observable {
         if(formats.length > 0)
             destFolder = importFolder.addSubFolder(formats[0]);
 
-        destFolder.addProduct(product);
+        destFolder.addFile(product.getFileLocation());
     }
 
     public void CreateNewFolder(ProjectSubFolder subFolder) {
@@ -118,8 +124,8 @@ public class Project extends Observable {
         notifyEvent();
     }
 
-    public void DeleteProduct(ProjectSubFolder parentFolder, Product product) {
-        parentFolder.removeProduct(product);
+    public void RemoveFile(ProjectSubFolder parentFolder, File file) {
+        parentFolder.removeFile(file);
         notifyEvent();
     }
 
@@ -200,8 +206,8 @@ public class Project extends Observable {
                         ProductReader reader = ProductIO.getProductReaderForFile(prodFile);
                         if (reader != null) {
                             try {
-                                Product product = reader.readProductNodes(prodFile, null);
-                                subFolder.fileList.add(product);
+                                //Product product = reader.readProductNodes(prodFile, null);
+                                subFolder.fileList.add(prodFile);
                             } catch(Exception e) {
                                 VisatApp.getApp().showErrorDialog(e.getMessage());
                             }
@@ -251,8 +257,9 @@ public class Project extends Observable {
             subFolders.clear();
         }
 
-        void addProduct(Product prod) {
-            fileList.add(prod);
+        void addFile(File file) {
+            if(!fileList.contains(file))
+                fileList.add(file);
         }
 
         ProjectSubFolder addSubFolder(String name) {
@@ -268,8 +275,8 @@ public class Project extends Observable {
             subFolders.remove(subFolder);
         }
 
-        void removeProduct(Product product) {
-            fileList.remove(product);
+        void removeFile(File file) {
+            fileList.remove(file);
         }
 
         public int findFolder(String name) {
@@ -300,9 +307,9 @@ public class Project extends Observable {
             }
 
             for(int i=0; i < fileList.size(); ++i) {
-                Product prod = (Product)fileList.elementAt(i);
+                File file = (File)fileList.elementAt(i);
                 Element fileElem = new Element("product");
-                fileElem.setAttribute("path", prod.getFileLocation().getAbsolutePath());
+                fileElem.setAttribute("path", file.getAbsolutePath());
                 elem.addContent(fileElem);
             }
 
@@ -316,16 +323,15 @@ public class Project extends Observable {
                     Element child = (Element) aChild;
                     if(child.getName().equals("subFolder")) {
                         Attribute attrib = child.getAttribute("name");
-                        ProjectSubFolder subFolder = new ProjectSubFolder(path, attrib.getValue());
+                        ProjectSubFolder subFolder = addSubFolder(attrib.getValue());
                         subFolder.fromXML(child, folderList, prodList);
-                        subFolders.add(subFolder);
                     } else if(child.getName().equals("product")) {
                         Attribute attrib = child.getAttribute("path");
 
-                        File prodFile = new File(attrib.getValue());
-                        if (prodFile.exists()) {
+                        File file = new File(attrib.getValue());
+                        if (file.exists()) {
                             folderList.add(this);
-                            prodList.add(prodFile);
+                            prodList.add(file);
                         }
                     }
                 }

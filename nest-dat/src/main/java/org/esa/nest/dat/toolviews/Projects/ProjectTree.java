@@ -17,6 +17,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Enumeration;
+import java.io.File;
 
 /**
  * A tree-view component for Projects
@@ -48,6 +49,8 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
         setRootVisible(false);
         setShowsRootHandles(true);
         setToggleClickCount(2);
+        setExpandsSelectedPaths(true);
+        setScrollsOnExpand(true);
         setAutoscrolls(true);
         putClientProperty("JTree.lineStyle", "Angled");
         ToolTipManager.sharedInstance().registerComponent(this);
@@ -88,7 +91,13 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
             Project.ProjectSubFolder folder = (Project.ProjectSubFolder)context;
             if(!folder.canBeRemoved())
                 menuItem.setEnabled(false);
-        } else if (context instanceof Product) {
+            if(selectedNode.isRoot()) {
+                addSeparator(popup);
+                createMenuItem(popup, "Save Project As...");
+                addSeparator(popup);
+                createMenuItem(popup, "Expand All");
+            }
+        } else if (context instanceof File) {
             createMenuItem(popup, "Remove Product");
         } else if (context instanceof MetadataElement) {
 
@@ -105,6 +114,12 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
         menuItem.addActionListener(this);
         popup.add(menuItem);
         return menuItem;
+    }
+
+    private static void addSeparator(JPopupMenu popup) {
+        if (popup.getComponentCount() > 1) {
+            popup.addSeparator();
+        }
     }
 
     /**
@@ -131,21 +146,50 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                 Object context = parentNode.getUserObject();
                 if (context != null) {
                     Project.ProjectSubFolder parentFolder = (Project.ProjectSubFolder)context;
-                    Product product = (Product)menuContext;
-                    Project.instance().DeleteProduct(parentFolder, product);
+                    File file = (File)menuContext;
+                    Project.instance().RemoveFile(parentFolder, file);
                 }
             }
+        } else if(e.getActionCommand().equals("Expand All")) {
+            expandAll();
         }
     }
 
-    private static void addSeparatorIfAnyComponentsAdded(JPopupMenu popup, int componentCountBevore) {
-        if (popup.getComponentCount() > componentCountBevore) {
-            popup.addSeparator();
+    public void expandAll() {
+        TreeNode root = (TreeNode)getModel().getRoot();
+        expandAll(this, new TreePath(root), true);
+    }
+
+    /**
+     * If expand is true, expands all nodes in the tree.
+     * Otherwise, collapses all nodes in the tree.
+     * @param tree
+     * @param parent
+     * @param expand
+     */
+    private static void expandAll(JTree tree, TreePath parent, boolean expand) {
+        // Traverse children
+        TreeNode node = (TreeNode)parent.getLastPathComponent();
+        if (node.getChildCount() >= 0) {
+            for (Enumeration e=node.children(); e.hasMoreElements(); ) {
+                TreeNode n = (TreeNode)e.nextElement();
+                TreePath path = parent.pathByAddingChild(n);
+                expandAll(tree, path, expand);
+            }
+        }
+
+        // Expansion or collapse must be done bottom-up
+        if (expand) {
+            tree.expandPath(parent);
+        } else {
+            tree.collapsePath(parent);
         }
     }
+
 
     public void populateTree(DefaultMutableTreeNode treeNode) {
         setModel(new DefaultTreeModel(treeNode));
+        expandAll();
     }
 
     /**
@@ -177,22 +221,6 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
         }
     }
 
-    /**
-     * Removes a  product from this product tree component. The method fires a 'productRemoved' event to all listeners.
-     * @param product the product to be removed.
-     * @see org.esa.beam.framework.ui.product.ProductTreeListener
-     */
-    public void removeProduct(Product product) {
-        DefaultMutableTreeNode root = getRootTreeNode();
-        final DefaultMutableTreeNode productTreeNode = getTreeNodeFor(product, root);
-        if (productTreeNode != null) {
-            final int index = root.getIndex(productTreeNode);
-            productTreeNode.removeFromParent();
-            getTreeModel().nodesWereRemoved(root, new int[]{index}, new Object[]{productTreeNode});
-
-        }
-    }
-
     public void setExceptionHandler(ExceptionHandler exceptionHandler) {
         this.exceptionHandler = exceptionHandler;
     }
@@ -209,9 +237,9 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                     DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
 
                     Object o = node.getUserObject();
-                    if(o instanceof Product) {
-                        Product prod = (Product)o;
-                        VisatApp.getApp().openProduct(prod.getFileLocation());
+                    if(o instanceof File) {
+                        File file = (File)o;
+                        VisatApp.getApp().openProduct(file);
                     }
                 }
             }
@@ -304,6 +332,10 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                 this.setText("Open products");
                 this.setToolTipText("Contains the list of open data products");
                 this.setIcon(null);
+            } else if (value instanceof File) {
+                File file = (File)value;
+                this.setText(file.getName());
+                this.setIcon(productIcon);
             } else if (value instanceof Project.ProjectSubFolder) {
                 Project.ProjectSubFolder subFolder = (Project.ProjectSubFolder)value;
                 this.setText(subFolder.getName());
