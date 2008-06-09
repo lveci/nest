@@ -53,7 +53,8 @@
 	    <module>nest-op-ers-calibration</module>
 	    <module>nest-op-gcp-selection</module>
 	    <module>nest-op-data-analysis</module>
-	</modules>
+    <module>nest-op-wss-mosaic</module>
+  </modules>
 
     <dependencyManagement>
         <dependencies>
