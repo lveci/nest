@@ -69,14 +69,14 @@ public class DatStatisticsToolView extends AbstractToolView {
     public JComponent createControl() {
 
         _tabbedPane = new JTabbedPane();
-        _tabbedPane.add("Information", new InformationPanel(this)); /*I18N*/
+        _tabbedPane.add("Information", new InformationPanel(this, null)); /*I18N*/
         _tabbedPane.add("Quicklook", new QuicklookPanel(this));/*I18N*/
-        _tabbedPane.add("Geo-Coding", new GeoCodingPanel(this));/*I18N*/
-        _tabbedPane.add("Statistics", new StatisticsPanel(this)); /*I18N*/
-        _tabbedPane.add("Histogram", new HistogramPanel(this));  /*I18N*/
-        _tabbedPane.add("Scatter Plot", new ScatterPlotPanel(this)); /*I18N*/
-        _tabbedPane.add("Profile Plot", new ProfilePlotPanel(this));  /*I18N*/
-        _tabbedPane.add("Co-ordinate List", new CoordListPanel(this));  /*I18N*/
+        _tabbedPane.add("Geo-Coding", new GeoCodingPanel(this, null));/*I18N*/
+        _tabbedPane.add("Statistics", new StatisticsPanel(this, null)); /*I18N*/
+        _tabbedPane.add("Histogram", new HistogramPanel(this, null));  /*I18N*/
+        _tabbedPane.add("Scatter Plot", new ScatterPlotPanel(this, null)); /*I18N*/
+        _tabbedPane.add("Profile Plot", new ProfilePlotPanel(this, null));  /*I18N*/
+        _tabbedPane.add("Co-ordinate List", new CoordListPanel(this, null));  /*I18N*/
 
         _tabbedPane.addChangeListener(new ChangeListener() {
 

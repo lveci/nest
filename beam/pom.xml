@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -113,15 +114,14 @@
         <!--module>beam-landsat-reader</module-->
         <module>beam-geotiff-writer</module>
         <module>beam-hdf5-writer</module>
-        <module>beam-diagnostics</module>
-		<module>beam-shapefile-reader</module>
+        <module>beam-shapefile-reader</module>
 
         <module>lib-hdf</module>
         <module>lib-netcdf</module>
 
         <!--<module>nest-dat</module>-->
 
-  </modules>
+    </modules>
 
     <dependencyManagement>
         <dependencies>
@@ -202,7 +202,7 @@
             <dependency>
                 <groupId>ucar.netcdf</groupId>
                 <artifactId>lib-netcdf</artifactId>
-                <version>2.2.22</version>
+                <version>2.2.16</version>
             </dependency>
 
             <!-- JAI Libraries ############################################# -->
@@ -280,27 +280,27 @@
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-dock</artifactId>
-                <version>2.2.6</version>
+                <version>2.2.7</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-action</artifactId>
-                <version>2.2.6</version>
+                <version>2.2.7</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-grids</artifactId>
-                <version>2.2.6</version>
+                <version>2.2.7</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-components</artifactId>
-                <version>2.2.6</version>
+                <version>2.2.7</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-common</artifactId>
-                <version>2.2.6</version>
+                <version>2.2.7</version>
             </dependency>
 
             <!-- XStream Libraries ############################################# -->
@@ -321,17 +321,12 @@
             <dependency>
                 <groupId>jfree</groupId>
                 <artifactId>jfreechart</artifactId>
-                <version>1.0.9</version>
+                <version>1.0.10</version>
             </dependency>
             <dependency>
                 <groupId>jfree</groupId>
                 <artifactId>jcommon</artifactId>
-                <version>1.0.12</version>
-            </dependency>
-            <dependency>
-                <groupId>com.lowagie</groupId>
-                <artifactId>itext</artifactId>
-                <version>2.1.2</version>
+                <version>1.0.13</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -362,10 +357,10 @@
                 <version>2.2-beta-1</version>
                 <configuration>
                     <descriptors>
-                        <!--<descriptor>src/main/assembly/src.xml</descriptor>-->
                         <!-- <descriptor>src/main/assembly/beam-web-help.xml</descriptor> -->
                         <descriptor>src/main/assembly/bin.xml</descriptor>
                         <descriptor>src/main/assembly/installer-files.xml</descriptor>
+                        <descriptor>src/main/assembly/src.xml</descriptor>
                     </descriptors>
                 </configuration>
             </plugin>
@@ -483,13 +478,14 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <destDir>../target/site/apidocs/${artifactId}-${version}/apidoc</destDir>
-                    <!-- Creates an HTML version of each source file and adds links documentation -->
-                    <linksource>true</linksource>
+                    <aggregate>true</aggregate>
+                    <subpackages>
+                        org.esa.beam.framework:org.esa.beam.util:org.esa.beam.visat:com.bc.jexp
+                    </subpackages>
                     <excludePackageNames>
-                        *.internal;org.esa.beam.visat.toolviews.*;org.esa.beam.visat.actions.*;org.esa.beam.visat.plugins.*;org.esa.beam.visat.dialogs.*;org.esa.beam.examples.*;org.esa.beam.dataio.*;org.esa.beam.processor.*;com.bc.beam.processor.*;org.esa.beam.pconvert
+                        *.internal:org.esa.beam.visat.toolviews:org.esa.beam.visat.actions:org.esa.beam.visat.dialogs:org.esa.beam.visat.plugins
                     </excludePackageNames>
-                    <!-- Shuts off non-error and non-warning messages-->
+					<maxmemory>256m</maxmemory>
                     <quiet>true</quiet>
                 </configuration>
             </plugin>

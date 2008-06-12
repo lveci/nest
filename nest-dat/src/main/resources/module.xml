@@ -53,7 +53,6 @@
                 </excludedActions>
                 <excludedToolViews>
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
-                    <id>org.esa.beam.visat.toolviews.stat.StatisticsToolView</id>
                     <id>org.esa.beam.scripting.visat.ScriptConsoleToolView</id>
                     <id>org.esa.beam.visat.diag.JaiMonitorToolView</id>
                 </excludedToolViews>
@@ -62,7 +61,7 @@
 
 
     <extension point="beam-ui:toolViews">
-        <toolView>
+        <!--toolView>
             <id>org.esa.nest.dat.toolviews.DatStatisticsToolView</id>
             <class>org.esa.nest.dat.toolviews.DatStatisticsToolView</class>
             <title>Statistics View</title>
@@ -76,7 +75,7 @@
             <initState>HIDDEN</initState>
             <initSide>SOUTH</initSide>
             <initIndex>0</initIndex>
-        </toolView>
+        </toolView-->
         <toolView>
             <id>org.esa.nest.dat.toolviews.Projects.ProjectsToolView</id>
             <class>org.esa.nest.dat.toolviews.Projects.ProjectsToolView</class>

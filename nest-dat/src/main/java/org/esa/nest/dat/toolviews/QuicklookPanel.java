@@ -35,7 +35,7 @@ class QuicklookPanel extends PagePanel {
     private JButton computeButton;
 
     public QuicklookPanel(final ToolView parentDialog) {
-        super(parentDialog);
+        super(parentDialog, null);
     }
 
     @Override
