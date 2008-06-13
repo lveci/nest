@@ -5,6 +5,7 @@ import org.esa.nest.util.DatUtils;
 import org.esa.nest.dat.dialogs.PromptDialog;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.framework.ui.product.ProductTreeListener;
+import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductIO;
@@ -187,6 +188,9 @@ public class Project extends Observable {
         }
 
         loadProducts(folderList, prodList);
+
+        VisatApp.getApp().getPreferences().setPropertyString(
+                BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, projectFolder.getAbsolutePath());
 
         notifyEvent();
     }
