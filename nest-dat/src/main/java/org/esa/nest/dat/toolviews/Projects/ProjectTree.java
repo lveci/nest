@@ -6,6 +6,7 @@ import org.esa.beam.framework.ui.PopupMenuFactory;
 import org.esa.beam.framework.ui.PopupMenuHandler;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.visat.VisatApp;
+import org.esa.nest.util.DatUtils;
 
 import javax.swing.*;
 import javax.swing.tree.*;
@@ -247,30 +248,13 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
 
         ImageIcon productIcon;
         ImageIcon groupOpenIcon;
-        ImageIcon groupClosedIcon;
-        ImageIcon bandAsSwathIcon;
-        ImageIcon bandAsSwathIconDisabled;
-        ImageIcon bandAsGridIcon;
-        ImageIcon bandAsGridIconDisabled;
-        ImageIcon metadataIcon;
-        ImageIcon bandFlagsIcon;
-        ImageIcon bandFlagsIconDisabled;
-        ImageIcon bandVirtualIcon;
-        ImageIcon bandVirtualIconDisabled;
+        ImageIcon projectIcon;
 
         public PTCellRenderer() {
             productIcon = UIUtils.loadImageIcon("icons/RsProduct16.gif");
             groupOpenIcon = UIUtils.loadImageIcon("icons/RsGroupOpen16.gif");
-            groupClosedIcon = UIUtils.loadImageIcon("icons/RsGroupClosed16.gif");
-            bandAsSwathIcon = UIUtils.loadImageIcon("icons/RsBandAsSwath16.gif");
-            bandAsSwathIconDisabled = UIUtils.loadImageIcon("icons/RsBandAsSwath16Disabled.gif");
-            bandAsGridIcon = UIUtils.loadImageIcon("icons/RsBandAsGrid16.gif");
-            bandAsGridIconDisabled = UIUtils.loadImageIcon("icons/RsBandAsGrid16Disabled.gif");
-            metadataIcon = UIUtils.loadImageIcon("icons/RsMetaData16.gif");
-            bandFlagsIcon = UIUtils.loadImageIcon("icons/RsBandFlags16.gif");
-            bandFlagsIconDisabled = UIUtils.loadImageIcon("icons/RsBandFlags16Disabled.gif");
-            bandVirtualIcon = UIUtils.loadImageIcon("icons/RsBandVirtual16.gif");
-            bandVirtualIconDisabled = UIUtils.loadImageIcon("icons/RsBandVirtual16Disabled.gif");
+            projectIcon = UIUtils.loadImageIcon("icons/RsGroupClosed16.gif");
+
         }
 
         @Override
@@ -300,7 +284,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
             } else if (value instanceof Project.ProjectSubFolder) {
                 Project.ProjectSubFolder subFolder = (Project.ProjectSubFolder) value;
                 this.setText(subFolder.getName());
-                this.setIcon(groupClosedIcon);
+                this.setIcon(projectIcon);
             }
 
             return this;

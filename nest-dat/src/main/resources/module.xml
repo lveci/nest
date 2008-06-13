@@ -83,8 +83,8 @@
             <tabTitle>Projects</tabTitle>
             <mnemonic>P</mnemonic>
             <accelerator>ctrl alt P</accelerator>
-            <smallIcon>/org/esa/beam/resources/images/icons/Open16.gif</smallIcon>
-            <largeIcon>/org/esa/beam/resources/images/icons/Open24.gif</largeIcon>
+            <smallIcon>/org/esa/nest/icons/project_sm.png</smallIcon>
+            <largeIcon>/org/esa/nest/icons/project.png</largeIcon>
             <!--<helpId>TODO</helpId>-->
             <description>Project View.</description>
             <initState>DOCKED</initState>
@@ -105,8 +105,8 @@
             <placeBefore>loadProject</placeBefore>
             <shortDescr>Create a new project</shortDescr>
             <description>Create a new project</description>
-            <smallIcon>icons/Open16.gif</smallIcon>
-            <largeIcon>icons/Open24.gif</largeIcon>
+            <smallIcon>/org/esa/nest/icons/project-new.png</smallIcon>
+            <largeIcon>/org/esa/nest/icons/project-new.png</largeIcon>
             <helpId>newProject</helpId>
       </action>
 
@@ -119,8 +119,8 @@
             <placeBefore>openProductGrabber</placeBefore>
             <shortDescr>Load a project</shortDescr>
             <description>Load a project</description>
-            <smallIcon>icons/Open16.gif</smallIcon>
-            <largeIcon>icons/Open24.gif</largeIcon>
+            <smallIcon>/org/esa/nest/icons/project_sm.png</smallIcon>
+            <largeIcon>/org/esa/nest/icons/project.png</largeIcon>
             <helpId>loadProject</helpId>
       </action>
 
@@ -177,8 +177,8 @@
             <separatorAfter>true</separatorAfter>
             <shortDescr>Open Graph Builder dialog.</shortDescr>
             <description>Open Graph Builder dialog.</description>
-            <smallIcon>icons/cog16.png</smallIcon>
-            <largeIcon>icons/cog.png</largeIcon>
+            <smallIcon>/org/esa/nest/icons/cog16.png</smallIcon>
+            <largeIcon>/org/esa/nest/icons/cog.png</largeIcon>
             <helpId>GraphBuilderDialog</helpId>
         </action>
 
