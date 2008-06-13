@@ -45,12 +45,12 @@ public final class DatApp extends VisatApp {
     protected CommandBar createAnalysisToolBar() {
         // context of action in module.xml used as key
         final CommandBar toolBar = new CommandBar("analysisToolBar");
-        toolBar.setTitle("Analysis");
+        toolBar.setTitle("Processors");
         toolBar.addDockableBarListener(new ToolBarListener());
 
-        //addCommandsToToolBar(toolBar, new String[]{
-        //        "openInformationDialog",
-        //});
+        addCommandsToToolBar(toolBar, new String[]{
+                "openGraphBuilderDialog",
+        });
 
         return toolBar;
     }

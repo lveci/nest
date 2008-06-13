@@ -168,6 +168,20 @@
             <separatorBefore>true</separatorBefore>
         </action>
 
+        <action>
+            <id>openGraphBuilderDialog</id>
+            <class>org.esa.nest.dat.actions.OpenGraphBuilderDialogAction</class>
+            <parent>tools</parent>
+            <text>Graph Builder</text>
+            <mnemonic>G</mnemonic>
+            <separatorAfter>true</separatorAfter>
+            <shortDescr>Open Graph Builder dialog.</shortDescr>
+            <description>Open Graph Builder dialog.</description>
+            <smallIcon>icons/cog16.png</smallIcon>
+            <largeIcon>icons/cog.png</largeIcon>
+            <helpId>GraphBuilderDialog</helpId>
+        </action>
+
     </extension>
 
 

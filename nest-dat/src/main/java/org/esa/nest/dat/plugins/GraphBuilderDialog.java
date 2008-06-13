@@ -3,6 +3,8 @@ package org.esa.nest.dat.plugins;
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.ui.UIUtils;
+import org.esa.beam.framework.ui.ModelessDialog;
+import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.nest.util.DatUtils;
@@ -18,7 +20,7 @@ import java.util.*;
 /**
  *  Provides the User Interface for creating, loading and saving Graphs
  */
-public class GraphBuilderDialog implements Observer {
+public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
     private static final ImageIcon processIcon = DatUtils.LoadIcon("org/esa/nest/icons/cog.png");
     private static final ImageIcon saveIcon = DatUtils.LoadIcon("org/esa/nest/icons/save.png");
@@ -31,34 +33,22 @@ public class GraphBuilderDialog implements Observer {
     private JPanel progressPanel;
     private JProgressBar progressBar;
     private ProgressBarProgressMonitor progBarMonitor = null;
-    private JFrame mainFrame;
     private boolean initGraphEnabled = true;
 
     private final GraphExecuter graphEx;
 
     //TabbedPanel
     private JTabbedPane tabbedPanel;
-    private static final ImageIcon OpIcon = UIUtils.loadImageIcon("icons/Gears20.gif");
+    private static final ImageIcon OpIcon = UIUtils.loadImageIcon("icons/cog_add.png");
 
-    public GraphBuilderDialog() {
+    public GraphBuilderDialog(AppContext appContext, String title, String helpID) {
+         super(appContext.getApplicationWindow(), title, ID_CLOSE|ID_HELP, helpID);
 
          graphEx = new GraphExecuter();
          graphEx.addObserver(this);
-    }
 
-    /**
-     * Creates a new JFrame on the initial call and return the existing JFrame on subsequent calls
-     * @return The JFrame for the dialog
-     */
-    public JFrame getFrame() {
-        if (mainFrame == null) {
-            mainFrame = new JFrame("Graph Builder");
-            mainFrame.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-            initUI();
-
-            mainFrame.setBounds(new Rectangle(200, 100, 500, 600));
-        }
-        return mainFrame;
+        initUI();
+        super.getJDialog().setMinimumSize(new Dimension(500, 700));
     }
 
     /**
@@ -125,7 +115,7 @@ public class GraphBuilderDialog implements Observer {
         mainPanel.add(southPanel, BorderLayout.SOUTH);
         mainPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
-        mainFrame.add(mainPanel);
+        setContent(mainPanel);
     }
 
     private void initButtonPanel(final JPanel panel) {
@@ -194,8 +184,7 @@ public class GraphBuilderDialog implements Observer {
             final SwingWorker processThread = new ProcessThread(progBarMonitor);
             processThread.execute();
         } else {
-            JOptionPane.showMessageDialog(mainFrame, statusLabel.getText(), "Please Correct Error Before Processing Graph",
-                                          JOptionPane.ERROR_MESSAGE);
+            showErrorDialog(statusLabel.getText());
         }
     }
 
@@ -212,8 +201,6 @@ public class GraphBuilderDialog implements Observer {
             return true;
         } catch(GraphException e) {
             statusLabel.setText(e.getMessage());
-            //    JOptionPane.showMessageDialog(mainFrame, e.getMessage(), "Error Initializing Graph",
-            //                              JOptionPane.ERROR_MESSAGE);
         }
         return false;
     }
@@ -227,12 +214,10 @@ public class GraphBuilderDialog implements Observer {
             try {
                 graphEx.saveGraph();
             } catch(GraphException e) {
-                JOptionPane.showMessageDialog(mainFrame, e.getMessage(), "Error Saving Graph",
-                                          JOptionPane.ERROR_MESSAGE);
+                showErrorDialog(e.getMessage());
             }
         } else {
-            JOptionPane.showMessageDialog(mainFrame, statusLabel.getText(), "Please Correct Error Before Saving Graph",
-                                          JOptionPane.ERROR_MESSAGE);
+            showErrorDialog(statusLabel.getText());
         }
     }
 
@@ -247,8 +232,7 @@ public class GraphBuilderDialog implements Observer {
             graphPanel.repaint();
             initGraphEnabled = true;
         } catch(GraphException e) {
-            JOptionPane.showMessageDialog(mainFrame, e.getMessage(), "Error Loading Graph",
-                                          JOptionPane.ERROR_MESSAGE);
+            showErrorDialog(e.getMessage());
         }
     }
 
@@ -310,7 +294,7 @@ public class GraphBuilderDialog implements Observer {
         String opID = node.getID();
         if(event.eventType == GraphExecuter.events.ADD_EVENT) {
 
-            tabbedPanel.addTab(opID, OpIcon, CreateOperatorTab(node), opID + " Operator");
+            tabbedPanel.addTab(opID, null, CreateOperatorTab(node), opID + " Operator");
         } else if(event.eventType == GraphExecuter.events.REMOVE_EVENT) {
 
             int index = tabbedPanel.indexOfTab(opID);
