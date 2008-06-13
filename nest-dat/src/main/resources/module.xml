@@ -55,6 +55,7 @@
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
                     <id>org.esa.beam.scripting.visat.ScriptConsoleToolView</id>
                     <id>org.esa.beam.visat.toolviews.diag.JaiMonitorToolView</id>
+                    <id>org.esa.beam.visat.toolviews.lm.LayersToolView</id>
                 </excludedToolViews>
             </applicationDescriptor>
     </extension>

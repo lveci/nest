@@ -42,7 +42,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private static final ImageIcon OpIcon = UIUtils.loadImageIcon("icons/cog_add.png");
 
     public GraphBuilderDialog(AppContext appContext, String title, String helpID) {
-         super(appContext.getApplicationWindow(), title, ID_CLOSE|ID_HELP, helpID);
+         super(appContext.getApplicationWindow(), title, 0, helpID);
 
          graphEx = new GraphExecuter();
          graphEx.addObserver(this);
