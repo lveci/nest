@@ -1,5 +1,5 @@
 /*
- * $Id: BaseRecord.java,v 1.2 2008-05-26 19:32:10 lveci Exp $
+ * $Id: BaseRecord.java,v 1.3 2008-06-17 20:35:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -20,7 +20,6 @@ import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.nest.dataio.ceos.CeosDB;
 import org.esa.nest.util.DatUtils;
-import org.esa.nest.util.XMLSupport;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
@@ -56,13 +55,6 @@ public class BaseRecord {
 
         db = new CeosDB(defFile);
         db.readRecord(reader);
-
-   /*     _recordNumber = reader.readB4();
-        _firstRecordSubtype = reader.readB1();
-        _recordTypeCode = reader.readB1();
-        _secondRecordSubtype = reader.readB1();
-        _thirdRecordSubtype = reader.readB1();
-        _recordLength = reader.readB4();  */
     }
 
     public BaseRecord(final CeosFileReader reader, final long startPos, CeosDB db) throws
@@ -78,13 +70,6 @@ public class BaseRecord {
         }
 
         db.readRecord(reader);
-
-   /*     _recordNumber = reader.readB4();
-        _firstRecordSubtype = reader.readB1();
-        _recordTypeCode = reader.readB1();
-        _secondRecordSubtype = reader.readB1();
-        _thirdRecordSubtype = reader.readB1();
-        _recordLength = reader.readB4();  */
     }
 
     public String getAttributeString(String name) {
@@ -98,26 +83,6 @@ public class BaseRecord {
     public Double getAttributeDouble(String name) {
         return db.getAttributeDouble(name);
     }
-
- /*   public int getRecordNumber() {
-        return _recordNumber;
-    }
-
-    public int getFirstRecordSubtype() {
-        return _firstRecordSubtype;
-    }
-
-    public int getRecordTypeCode() {
-        return _recordTypeCode;
-    }
-
-    public int getSecondRecordSubtype() {
-        return _secondRecordSubtype;
-    }
-
-    public int getThirdRecordSubtype() {
-        return _thirdRecordSubtype;
-    }    */
 
     public int getRecordLength() {
         return getAttributeInt("Record Length");
@@ -139,13 +104,7 @@ public class BaseRecord {
         return getStartPos() + relativePosition;
     }
 
-    public void assignMetadataTo(final MetadataElement elem, final String suffix) {
-      /*  elem.setAttributeInt("Record number", _recordNumber);
-        elem.setAttributeInt("First record subtype", _firstRecordSubtype);
-        elem.setAttributeInt("Record type code", _recordTypeCode);
-        elem.setAttributeInt("Second record subtype", _secondRecordSubtype);
-        elem.setAttributeInt("Third record subtype", _thirdRecordSubtype);
-        elem.setAttributeInt("Record length", _recordLength); */
+    public void assignMetadataTo(final MetadataElement elem) {
 
         Map metadata = db.getMetadataElement();
         Set keys = metadata.keySet();                           // The set of keys in the map.
@@ -155,8 +114,10 @@ public class BaseRecord {
 
             if(value instanceof String)
                 elem.setAttributeString((String)key, value.toString());
-            else
+            else if(value instanceof Integer)
                 elem.setAttributeInt((String)key, (Integer)value);
+            else 
+                elem.setAttributeString((String)key, String.valueOf(value));
         }
     }
 
@@ -169,9 +130,9 @@ public class BaseRecord {
     protected final long[] readLongs(final int numLongs, final int relativePosition) throws
                                                                                      IOException,
                                                                                      IllegalCeosFormatException {
-        getReader().seek(getAbsolutPosition(relativePosition));
+        _reader.seek(getAbsolutPosition(relativePosition));
         final long[] coeffs = new long[numLongs];
-        getReader().readB8(coeffs);
+        _reader.readB8(coeffs);
         return coeffs;
     }
 
@@ -179,10 +140,10 @@ public class BaseRecord {
                                                                                                             IOException,
                                                                                                             IllegalCeosFormatException {
         final long[][] longs = new long[numArrays][];
-        getReader().seek(getAbsolutPosition(relativePosition));
+        _reader.seek(getAbsolutPosition(relativePosition));
         for (int i = 0; i < longs.length; i++) {
             final long[] coeffs = new long[numLongs];
-            getReader().readB8(coeffs);
+            _reader.readB8(coeffs);
             longs[i] = coeffs;
         }
         return longs;

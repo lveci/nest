@@ -100,7 +100,7 @@
         <!--module>beam-binning</module-->
         <!--module>beam-unmix</module-->
         <!--module>beam-cluster</module-->
-        <!--module>beam-collocation</module-->
+        <module>beam-collocation</module>
 
         <!--module>beam-avhrr-reader</module-->
         <!--module>beam-atsr-reader</module-->

@@ -1,5 +1,5 @@
 /*
- * $Id: FilePointerRecord.java,v 1.2 2008-05-26 19:32:10 lveci Exp $
+ * $Id: FilePointerRecord.java,v 1.3 2008-06-17 20:35:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -143,7 +143,7 @@ public class FilePointerRecord extends BaseRecord {
         final MetadataElement elem = createMetadataElement("FilePointerRecord", suffix);
         root.addElement(elem);
 
-        super.assignMetadataTo(elem, null);
+        super.assignMetadataTo(elem);
 
     /*    elem.setAttributeString("Code character", _codeCharacter);
         elem.setAttributeInt("File pointer number", _filePointerNumber);

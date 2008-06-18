@@ -11,7 +11,7 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
 /*
- * $Id: RadarsatImageFile.java,v 1.3 2008-05-27 21:02:12 lveci Exp $
+ * $Id: RadarsatImageFile.java,v 1.4 2008-06-17 20:35:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,7 +32,7 @@ import java.io.IOException;
  * This class represents an image file of an Avnir-2 product.
  *
  * @author Marco Peters
- * @version $Revision: 1.3 $ $Date: 2008-05-27 21:02:12 $
+ * @version $Revision: 1.4 $ $Date: 2008-06-17 20:35:10 $
  */
 class RadarsatImageFile {
 
@@ -56,7 +56,7 @@ class RadarsatImageFile {
         _imageRecords[0] = new ImageRecord(_ceosReader, -1, mission, image_recordDefinition);
         _imageRecordLength = _imageRecords[0].getRecordLength();
         _startPosImageRecords = _imageRecords[0].getStartPos();
-        _imageNumber = _imageRecords[0].getImageNumber();
+        _imageNumber = 1;
     }
 
     public String getBandName() {
@@ -64,7 +64,7 @@ class RadarsatImageFile {
     }
 
     public String getBandDescription() {
-        return String.format(RadarsatConstants.BAND_DESCRIPTION_FORMAT_STRING, new Object[]{_imageNumber});
+        return "";
     }
 
     public int getBandIndex() {

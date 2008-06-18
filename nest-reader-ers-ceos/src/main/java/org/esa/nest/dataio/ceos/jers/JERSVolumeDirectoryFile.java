@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /*
- * $Id: JERSVolumeDirectoryFile.java,v 1.2 2008-05-26 21:10:46 lveci Exp $
+ * $Id: JERSVolumeDirectoryFile.java,v 1.3 2008-06-17 20:35:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -90,7 +90,7 @@ class JERSVolumeDirectoryFile {
     }
 
     public void assignMetadataTo(final MetadataElement elem) {
-        _volumeDescriptorRecord.assignMetadataTo(elem, null);
+        _volumeDescriptorRecord.assignMetadataTo(elem);
     }
 
 }

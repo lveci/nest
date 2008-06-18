@@ -1,5 +1,5 @@
 /*
- * $Id: ImageRecord.java,v 1.2 2008-05-26 19:32:10 lveci Exp $
+ * $Id: ImageRecord.java,v 1.3 2008-06-17 20:35:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -24,12 +24,12 @@ import java.io.IOException;
 
 public class ImageRecord extends BaseRecord {
 
-    public int _prefixDataLineNumber;
-    public int _imageNumber;
-    public int _scanStartTimeMillisAtDay;
-    public short _scanStartTimeMicros;
-    public int _numLeftDummyPixels;
-    public int _numRightDummyPixels;
+    //public int _prefixDataLineNumber;
+    //public int _imageNumber;
+   // public int _scanStartTimeMillisAtDay;
+   // public short _scanStartTimeMicros;
+   // public int _numLeftDummyPixels;
+   //public int _numRightDummyPixels;
     public long _imageDataStart;
 
     public ImageRecord(final CeosFileReader reader, String mission, String definitionFile)
@@ -42,7 +42,7 @@ public class ImageRecord extends BaseRecord {
         super(reader, startPos, mission, definitionFile);
 
         //_prefixDataLineNumber = reader.readB4();
-        _imageNumber = 1;//reader.readB4();
+        //_imageNumber = 1;//reader.readB4();
         //_scanStartTimeMillisAtDay = reader.readB4();
         //_scanStartTimeMicros = reader.readB2();
         //_numLeftDummyPixels = reader.readB4();
@@ -55,7 +55,7 @@ public class ImageRecord extends BaseRecord {
             throws IOException, IllegalCeosFormatException {
         super(reader, startPos, db);
 
-        _imageNumber = 1;
+        //_imageNumber = 1;
         _imageDataStart = reader.getCurrentPos();
     }
 
@@ -63,9 +63,9 @@ public class ImageRecord extends BaseRecord {
         return _prefixDataLineNumber;
     }  */
 
-    public int getImageNumber() {
-        return _imageNumber;
-    }
+    //public int getImageNumber() {
+    //    return _imageNumber;
+    //}
 
    /* public int getScanStartTimeMillisAtDay() {
         return _scanStartTimeMillisAtDay;

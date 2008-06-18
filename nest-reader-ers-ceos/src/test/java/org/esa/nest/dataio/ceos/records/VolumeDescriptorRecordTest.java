@@ -50,7 +50,7 @@ public class VolumeDescriptorRecordTest extends TestCase {
         final BaseRecord record = new BaseRecord(_reader, _prefix.length(), format, volume_desc_recordDefinitionFile);
         final MetadataElement volumeMetadata = new MetadataElement("VOLUME_DESCRIPTOR");
 
-        record.assignMetadataTo(volumeMetadata, "suffix");
+        record.assignMetadataTo(volumeMetadata);
 
         assertEquals(26, volumeMetadata.getNumAttributes());
         assertEquals(0, volumeMetadata.getNumElements());

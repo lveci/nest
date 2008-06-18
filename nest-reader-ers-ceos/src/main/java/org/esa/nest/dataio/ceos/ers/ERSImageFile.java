@@ -11,7 +11,7 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
 /*
- * $Id: ERSImageFile.java,v 1.6 2008-05-26 19:32:10 lveci Exp $
+ * $Id: ERSImageFile.java,v 1.7 2008-06-17 20:35:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,14 +31,13 @@ import java.io.IOException;
 /**
  * This class represents an image file of an ERS product.
  *
- * @version $Revision: 1.6 $ $Date: 2008-05-26 19:32:10 $
+ * @version $Revision: 1.7 $ $Date: 2008-06-17 20:35:10 $
  */
 class ERSImageFile {
 
     private final BaseRecord _imageFDR;
     private final ImageRecord[] _imageRecords;
     private CeosFileReader _ceosReader;
-    private final int _imageNumber;
     private int _imageRecordLength;
     private long _startPosImageRecords;
 
@@ -56,19 +55,14 @@ class ERSImageFile {
 
         _imageRecordLength = _imageRecords[0].getRecordLength();
         _startPosImageRecords = _imageRecords[0].getStartPos();
-        _imageNumber = _imageRecords[0].getImageNumber();
     }
 
     public String getBandName() {
-        return ERSConstants.BANDNAME_PREFIX + _imageNumber;
+        return ERSConstants.BANDNAME_PREFIX;
     }
 
     public String getBandDescription() {
-        return String.format(ERSConstants.BAND_DESCRIPTION_FORMAT_STRING, new Object[]{_imageNumber});
-    }
-
-    public int getBandIndex() {
-        return _imageNumber;
+        return "";
     }
 
     public int getRasterWidth() {
@@ -83,41 +77,8 @@ class ERSImageFile {
         return ERSConstants.GEOPHYSICAL_UNIT;
     }
 
-    public float getSpectralWavelength() {
-        final int bandIndex = _imageNumber;
-
-        switch (bandIndex) {
-        case 1:
-            return ERSConstants.WAVELENGTH_BAND_1;
-        case 2:
-            return ERSConstants.WAVELENGTH_BAND_2;
-        case 3:
-            return ERSConstants.WAVELENGTH_BAND_3;
-        case 4:
-            return ERSConstants.WAVELENGTH_BAND_4;
-        default:
-            return 0;
-        }
-    }
-
-    public float getSpectralBandwidth() {
-        final int bandIndex = _imageNumber;
-
-        switch (bandIndex) {
-        case 1:
-            return ERSConstants.BANDWIDTH_BAND_1;
-        case 2:
-            return ERSConstants.BANDWIDTH_BAND_2;
-        case 3:
-            return ERSConstants.BANDWIDTH_BAND_3;
-        case 4:
-            return ERSConstants.BANDWIDTH_BAND_4;
-        default:
-            return 0;
-        }
-    }
-
-   /* public int getTotalMillisInDayOfLine(final int y) throws IOException,
+    /*
+    public int getTotalMillisInDayOfLine(final int y) throws IOException,
                                                              IllegalCeosFormatException {
         return getImageRecord(y).getScanStartTimeMillisAtDay();
     }

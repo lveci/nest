@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.Calendar;
 
 /*
- * $Id: ERSLeaderFile.java,v 1.3 2008-05-26 19:32:10 lveci Exp $
+ * $Id: ERSLeaderFile.java,v 1.4 2008-06-17 20:35:10 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -33,7 +33,7 @@ import java.util.Calendar;
  * This class represents a leader file of an Avnir-2 product.
  *
  * @author Marco Peters
- * @version $Revision: 1.3 $ $Date: 2008-05-26 19:32:10 $
+ * @version $Revision: 1.4 $ $Date: 2008-06-17 20:35:10 $
  */
 class ERSLeaderFile {
 
@@ -114,7 +114,7 @@ class ERSLeaderFile {
 
     public String getUsedProjection() throws IOException,
                                              IllegalCeosFormatException {
-             return "";
+        return _mapProjRecord.getAttributeString("Map projection descriptor");
        // return _sceneHeaderRecord.getMapProjectionMethod().trim();
 //        if (PROJECTION_KEY_RAW.equals(projKey)) {
 //            return PalsarConstants.MAP_PROJECTION_RAW;
@@ -481,22 +481,34 @@ class ERSLeaderFile {
         return _ancillary1Record.getF4FunctionCoeffs_1B2();
     }     */
 
+    public void addLeaderMetadata(MetadataElement sphElem) {
+        MetadataElement metadata = new MetadataElement("Leader File Descriptor");
+         _leaderFDR.assignMetadataTo(metadata);
+        sphElem.addElement(metadata);
+
+        metadata = new MetadataElement("Scene Parameters");
+        _sceneHeaderRecord.assignMetadataTo(metadata);
+        sphElem.addElement(metadata);
+
+        metadata = new MetadataElement("Map Projection");
+        _mapProjRecord.assignMetadataTo(metadata);
+        sphElem.addElement(metadata);
+
+        metadata = new MetadataElement("Platform Position");
+        _platformPositionRecord.assignMetadataTo(metadata);
+        sphElem.addElement(metadata);
+
+        metadata = new MetadataElement("Facility");
+        _facilityRecord.assignMetadataTo(metadata);
+        sphElem.addElement(metadata);
+    }
+
     public MetadataElement getMapProjectionMetadata() throws IOException,
                                                              IllegalCeosFormatException {
         final MetadataElement projMetadata = new MetadataElement("Map Projection");
 
         addGeneralProjectionMetadata(projMetadata);
 
-        final String usedProjection = getUsedProjection();
-        if (usedProjection.equalsIgnoreCase(ERSConstants.MAP_PROJECTION_RAW)) {
-            addRawProjectionMetadata(projMetadata);
-        } else if (usedProjection.equalsIgnoreCase(ERSConstants.MAP_PROJECTION_UTM)) {
-            addGeneralCorrectedMetadata(projMetadata);
-            addUTMProjectionMetadata(projMetadata);
-        } else if (usedProjection.equalsIgnoreCase(ERSConstants.MAP_PROJECTION_PS)) {
-            addGeneralCorrectedMetadata(projMetadata);
-            addPSProjectionMetadata(projMetadata);
-        }
         return projMetadata;
     }
 
@@ -627,87 +639,6 @@ class ERSLeaderFile {
                      UNIT_DEGREE);
         addAttribute(projMeta, "SCENE_LOWER_RIGHT_LONGITUDE", ProductData.createInstance(new double[]{lonCorners[3]}),
                      UNIT_DEGREE);
-    }
-
-    private void addRawProjectionMetadata(final MetadataElement projMeta) throws
-                                                                          IOException,
-                                                                          IllegalCeosFormatException {
-    /*    for (int i = 1; i <= 4; i++) {
-            final double[][] uncorrectedTransformationCoeffs = getUncorrectedTransformationCoeffs(i);
-            for (int j = 0; j < uncorrectedTransformationCoeffs[0].length; j++) {
-                final double coeffLat = uncorrectedTransformationCoeffs[0][j];
-                addAttribute(projMeta, "BAND[" + i + "]_COEFFICIENTS_LATITUDE." + j,
-                             ProductData.createInstance(new double[]{coeffLat}));
-            }
-            for (int j = 0; j < uncorrectedTransformationCoeffs[1].length; j++) {
-                final double coeffLon = uncorrectedTransformationCoeffs[1][j];
-                addAttribute(projMeta, "BAND[" + i + "]_COEFFICIENTS_LONGITUDE." + j,
-                             ProductData.createInstance(new double[]{coeffLon}));
-            }
-            for (int j = 0; j < uncorrectedTransformationCoeffs[2].length; j++) {
-                final double coeffX = uncorrectedTransformationCoeffs[2][j];
-                addAttribute(projMeta, "BAND[" + i + "]_COEFFICIENTS_X." + j,
-                             ProductData.createInstance(new double[]{coeffX}));
-            }
-            for (int j = 0; j < uncorrectedTransformationCoeffs[3].length; j++) {
-                final double coeffY = uncorrectedTransformationCoeffs[3][j];
-                addAttribute(projMeta, "BAND[" + i + "]_COEFFICIENTS_Y." + j,
-                             ProductData.createInstance(new double[]{coeffY}));
-            }
-        }          */
-
-       /* addAttribute(projMeta, "PIXELS_PER_LINE",
-                     ProductData.createInstance(new long[]{getNominalPixelsPerLine_1A_1B1()}));
-        addAttribute(projMeta, "LINES_PER_SCENE",
-                     ProductData.createInstance(new long[]{getNominalLinesPerScene_1A_1B1()}));
-        addAttribute(projMeta, "PIXEL_SIZE_X_CENTER",
-                     ProductData.createInstance(new double[]{getNominalInterPixelDistance_1A_1B1()}), UNIT_METER);
-        addAttribute(projMeta, "PIXEL_SIZE_Y_CENTER",
-                     ProductData.createInstance(new double[]{getNominalInterLineDistance_1A_1B1()}), UNIT_METER);
-        addAttribute(projMeta, "IMAGE_SKEW_CENTER", ProductData.createInstance(new double[]{getImageSkew()}),
-                     "milliradian");   */
-
-    }
-
-    private void addUTMProjectionMetadata(final MetadataElement projMeta) throws
-                                                                          IOException,
-                                                                          IllegalCeosFormatException {
-      /*  addAttribute(projMeta, "HEMISPHERE", ProductData.createInstance(isUTMSouthHemisphere() ? "South" : "North"));
-        addAttribute(projMeta, "UTM_ZONE_NUMBER", ProductData.createInstance(new long[]{getUTMZoneIndex()}));
-        addAttribute(projMeta, "UTM_NORTHING", ProductData.createInstance(new double[]{getUTMNorthing()}),
-                     UNIT_KILOMETER);
-        addAttribute(projMeta, "UTM_EASTING", ProductData.createInstance(new double[]{getUTMEasting()}),
-                     UNIT_KILOMETER);
-        final MetadataAttribute orientation = addAttribute(projMeta, "ORIENTATION",
-                                                           ProductData.createInstance(new double[]{
-                                                                   getUTMOrientationAngle()
-                                                           }),
-                                                           UNIT_DEGREE);
-        orientation.setDescription("Angle between the map projection vertical axis and the true north at scene center"); */
-
-    }
-
-    private void addPSProjectionMetadata(final MetadataElement projMeta) throws
-                                                                         IOException,
-                                                                         IllegalCeosFormatException {
-      /*  final GeoPos origin = getPSProjectionOrigin();
-        addAttribute(projMeta, "MAP_PROJECTION_ORIGIN",
-                     ProductData.createInstance(origin.getLatString() + " , " + origin.getLonString()));
-
-        final GeoPos reference = getPSReferencePoint();
-        addAttribute(projMeta, "REFERENCE_POINT",
-                     ProductData.createInstance(reference.getLatString() + " , " + reference.getLonString()));
-
-        addAttribute(projMeta, "COORDINATE_CENTER_X", ProductData.createInstance(new double[]{getPSXCoordinate()}),
-                     UNIT_KILOMETER);
-        addAttribute(projMeta, "COORDINATE_CENTER_Y)", ProductData.createInstance(new double[]{getPSYCoordinate()}),
-                     UNIT_KILOMETER);
-
-        final MetadataAttribute orientation = addAttribute(projMeta, "ORIENTATION",
-                                                           ProductData.createInstance(
-                                                                   new double[]{getPSOrientationAngle()}),
-                                                           UNIT_DEGREE);
-        orientation.setDescription("Angle between the map projection vertical axis and the true north at scene center");  */
     }
 
     private void addGeneralCorrectedMetadata(final MetadataElement projMeta) throws

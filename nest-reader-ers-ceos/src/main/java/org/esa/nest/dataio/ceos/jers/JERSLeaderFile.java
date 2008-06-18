@@ -463,6 +463,28 @@ class JERSLeaderFile {
         return _ancillary1Record.getF4FunctionCoeffs_1B2();
     }          */
 
+    public void addLeaderMetadata(MetadataElement sphElem) {
+        MetadataElement metadata = new MetadataElement("Leader File Descriptor");
+         _leaderFDR.assignMetadataTo(metadata);
+        sphElem.addElement(metadata);
+
+        metadata = new MetadataElement("Scene Parameters");
+        _sceneHeaderRecord.assignMetadataTo(metadata);
+        sphElem.addElement(metadata);
+
+        metadata = new MetadataElement("Map Projection");
+        _mapProjRecord.assignMetadataTo(metadata);
+        sphElem.addElement(metadata);
+
+        metadata = new MetadataElement("Platform Position");
+        _platformPositionRecord.assignMetadataTo(metadata);
+        sphElem.addElement(metadata);
+
+        metadata = new MetadataElement("Facility");
+        _facilityRecord.assignMetadataTo(metadata);
+        sphElem.addElement(metadata);
+    }
+
     public MetadataElement getMapProjectionMetadata() throws IOException,
                                                              IllegalCeosFormatException {
         final MetadataElement projMetadata = new MetadataElement("Map Projection");

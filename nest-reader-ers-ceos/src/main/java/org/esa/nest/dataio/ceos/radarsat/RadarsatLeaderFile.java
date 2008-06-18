@@ -93,6 +93,25 @@ class RadarsatLeaderFile {
         return new double[]{lonUL, lonUR, lonLL, lonLR};
     }   */
 
+    public void addLeaderMetadata(MetadataElement sphElem) {
+        MetadataElement metadata = new MetadataElement("Leader File Descriptor");
+         _leaderFDR.assignMetadataTo(metadata);
+        sphElem.addElement(metadata);
+
+        metadata = new MetadataElement("Map Projection");
+        _mapProjRecord.assignMetadataTo(metadata);
+        sphElem.addElement(metadata);
+
+        metadata = new MetadataElement("Radiometric");
+        _radiometricRecord.assignMetadataTo(metadata);
+        sphElem.addElement(metadata);
+
+        metadata = new MetadataElement("Radiometric Compensation");
+        _radiometricCompRecord.assignMetadataTo(metadata);
+        sphElem.addElement(metadata);
+
+    }
+
     public String getUsedProjection() throws IOException,
                                              IllegalCeosFormatException {
          return "";

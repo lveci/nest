@@ -89,12 +89,11 @@ class JERSProductDirectory {
             product.addBand(createBand(ImageFile));
         }
         /*product.setStartTime(getUTCScanStartTime());
-        product.setEndTime(getUTCScanStopTime());
+        product.setEndTime(getUTCScanStopTime());*/
         product.setDescription(getProductDescription());
 
-                                */
-        //addGeoCoding(product);
 
+        addGeoCoding(product);
         addMetaData(product);
 
         return product;
@@ -253,9 +252,7 @@ class JERSProductDirectory {
     private void addMetaData(final Product product) throws IOException,
                                                            IllegalCeosFormatException {
         final MetadataElement metadata = new MetadataElement("SPH");
-        //metadata.addElement(_leaderFile.getMapProjectionMetadata());
-        //metadata.addElement(_leaderFile.getRadiometricMetadata());
-        //metadata.addElement(_leaderFile.getPlatformMetadata());
+        _leaderFile.addLeaderMetadata(metadata);
         addSummaryMetadata(metadata);
 
         product.getMetadataRoot().addElement(metadata);
@@ -351,7 +348,7 @@ class JERSProductDirectory {
     }   */
 
     private ImageInputStream createInputStream(final String fileName) throws IOException {
-        return (ImageInputStream) new FileImageInputStream(new File(_baseDir, fileName));
+        return new FileImageInputStream(new File(_baseDir, fileName));
     }
 
 }

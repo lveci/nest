@@ -1,12 +1,12 @@
 package org.esa.nest.dataio.ceos.ers;
 
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.MetadataAttribute;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.nest.dataio.ceos.CeosHelper;
+import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataop.maptransf.*;
 import org.esa.beam.util.Guardian;
+import org.esa.beam.util.Debug;
+import org.esa.beam.util.math.FXYSum;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
@@ -63,15 +63,15 @@ class ERSProductDirectory {
                                             _sceneWidth, _sceneHeight);
         product.setFileLocation(_baseDir);
 
+        int index = 0;
         for (final ERSImageFile ImageFile : _imageFiles) {
-            product.addBand(createBand(ImageFile));
+            product.addBand(createBand(ImageFile, index++));
         }
         //product.setStartTime(getUTCScanStartTime());
         //product.setEndTime(getUTCScanStopTime());
         product.setDescription(getProductDescription());
 
         addGeoCoding(product);
-
         addMetaData(product);
 
         return product;
@@ -86,28 +86,31 @@ class ERSProductDirectory {
                                                             IOException {
 
         final String usedProjection = _leaderFile.getUsedProjection();
-      /*  if (ERSConstants.MAP_PROJECTION_RAW.equalsIgnoreCase(usedProjection)) {
+       // if (ERSConstants.MAP_PROJECTION_RAW.equalsIgnoreCase(usedProjection)) {
             final Band[] bands = product.getBands();
             for (int i = 0; i < bands.length; i++) {
                 final Band band = bands[i];
-                final ERSImageFile imageFile = getImageFile(band);
-                final int bandIndex = imageFile.getBandIndex();
+                /*final int bandIndex = i;
                 final double[][] uncorrectedCoeffs = _leaderFile.getUncorrectedTransformationCoeffs(bandIndex);
-
 
                 final FXYSum.Cubic funcLat = new FXYSum.Cubic(CeosHelper.sortToFXYSumOrder(uncorrectedCoeffs[0]));
                 final FXYSum.Cubic funcLon = new FXYSum.Cubic(CeosHelper.sortToFXYSumOrder(uncorrectedCoeffs[1]));
                 final FXYSum.Cubic funcX = new FXYSum.Cubic(CeosHelper.sortToFXYSumOrder(uncorrectedCoeffs[2]));
-                final FXYSum.Cubic funcY = new FXYSum.Cubic(CeosHelper.sortToFXYSumOrder(uncorrectedCoeffs[3]));
+                final FXYSum.Cubic funcY = new FXYSum.Cubic(CeosHelper.sortToFXYSumOrder(uncorrectedCoeffs[3]));  */
+
+                final FXYSum.Linear funcLat = new FXYSum.Linear();
+                final FXYSum.Linear funcLon = new FXYSum.Linear();
+                final FXYSum.Linear funcX = new FXYSum.Linear();
+                final FXYSum.Linear funcY = new FXYSum.Linear();
 
                 final FXYGeoCoding gc = new FXYGeoCoding(0.0f, 0.0f, 1.0f, 1.0f,
                                                          funcX, funcY,
                                                          funcLat, funcLon,
-                                                         Datum.ITRF_97);
+                                                         Datum.WGS_84);
                 band.setGeoCoding(gc);
             }
 
-        } else if (ERSConstants.MAP_PROJECTION_UTM.equalsIgnoreCase(usedProjection)) {
+       /* }  else if (ERSConstants.MAP_PROJECTION_UTM.equalsIgnoreCase(usedProjection)) {
             final int zoneIndex = (int) _leaderFile.getUTMZoneIndex();
 
             final boolean isSouth = _leaderFile.isUTMSouthHemisphere();
@@ -131,7 +134,7 @@ class ERSProductDirectory {
             mapInfo.setSceneWidth(_sceneWidth);
             mapInfo.setSceneHeight(_sceneHeight);
             product.setGeoCoding(new MapGeoCoding(mapInfo));
-
+                        
 
         } else if (ERSConstants.MAP_PROJECTION_PS.equalsIgnoreCase(usedProjection)) {
             final double[] parameterValues = StereographicDescriptor.PARAMETER_DEFAULT_VALUES;
@@ -161,23 +164,12 @@ class ERSProductDirectory {
             mapInfo.setSceneWidth(sceneRasterWidth);
             mapInfo.setSceneHeight(sceneRasterHeight);
             product.setGeoCoding(new MapGeoCoding(mapInfo));
-                  
-            // Alternative geo-coding for polar-stereographic
-//            final double[][] l1B2Coeffs = _leaderFile.getCorrectedTransformationCoeffs();
-//            final FXYSum.Cubic funcLat = new FXYSum.Cubic(CeosHelper.sortToFXYSumOrder(l1B2Coeffs[0]));
-//            final FXYSum.Cubic funcLon = new FXYSum.Cubic(CeosHelper.sortToFXYSumOrder(l1B2Coeffs[1]));
-//            final FXYSum.Cubic funcX = new FXYSum.Cubic(CeosHelper.sortToFXYSumOrder(l1B2Coeffs[2]));
-//            final FXYSum.Cubic funcY = new FXYSum.Cubic(CeosHelper.sortToFXYSumOrder(l1B2Coeffs[3]));
-//            final FXYGeoCoding funcGeoCoding = new FXYGeoCoding(0.0f, 0.0f, 1.0f, 1.0f,
-//                                                                funcX, funcY, funcLat, funcLon,
-//                                                                Datum.ITRF_97);
-//            product.setGeoCoding(funcGeoCoding);
 
         } else {
             Debug.trace("Unknown map projection method. Could not create geo-coding.");
-        }
+        }                          */
 
-         */
+
     }
 
     public ERSImageFile getImageFile(final Band band) throws IOException,
@@ -202,14 +194,11 @@ class ERSProductDirectory {
         _leaderFile = null;
     }
 
-    private Band createBand(final ERSImageFile ImageFile) throws IOException,
+    private Band createBand(final ERSImageFile ImageFile, int index) throws IOException,
                                                                           IllegalCeosFormatException {
         final Band band = new Band(ImageFile.getBandName(), ProductData.TYPE_INT16,
                                    _sceneWidth, _sceneHeight);
-        final int bandIndex = ImageFile.getBandIndex();
-        band.setSpectralBandIndex(bandIndex - 1);
-        band.setSpectralWavelength(ImageFile.getSpectralWavelength());
-        band.setSpectralBandwidth(ImageFile.getSpectralBandwidth());
+        final int bandIndex = index;
         band.setUnit(ERSImageFile.getGeophysicalUnit());
         
       /*  final double scalingFactor = _leaderFile.getAbsoluteCalibrationGain(bandIndex);
@@ -230,9 +219,7 @@ class ERSProductDirectory {
     private void addMetaData(final Product product) throws IOException,
                                                            IllegalCeosFormatException {
         final MetadataElement metadata = new MetadataElement("SPH");
-        metadata.addElement(_leaderFile.getMapProjectionMetadata());
-        metadata.addElement(_leaderFile.getRadiometricMetadata());
-        metadata.addElement(_leaderFile.getPlatformMetadata());
+        _leaderFile.addLeaderMetadata(metadata);
         addSummaryMetadata(metadata);
 
         product.getMetadataRoot().addElement(metadata);
@@ -262,7 +249,7 @@ class ERSProductDirectory {
         for (Object sortedEntry : sortedEntries) {
             final Map.Entry entry = (Map.Entry) sortedEntry;
             final String data = (String) entry.getValue();
-            // stripp of double quotes
+            // strip of double quotes
             final String strippedData = data.substring(1, data.length() - 1);
             final MetadataAttribute attribute = new MetadataAttribute((String) entry.getKey(),
                     new ProductData.ASCII(strippedData),
@@ -313,7 +300,8 @@ class ERSProductDirectory {
         }
     }
 
-    /*private ProductData.UTC getUTCScanStartTime() throws IOException,
+    /*
+    private ProductData.UTC getUTCScanStartTime() throws IOException,
                                                          IllegalCeosFormatException {
         final Calendar imageStartDate = _leaderFile.getDateImageWasTaken();
         imageStartDate.add(Calendar.MILLISECOND, _imageFiles[0].getTotalMillisInDayOfLine(0));
@@ -325,10 +313,10 @@ class ERSProductDirectory {
         final Calendar imageStartDate = _leaderFile.getDateImageWasTaken();
         imageStartDate.add(Calendar.MILLISECOND, _imageFiles[0].getTotalMillisInDayOfLine(_sceneHeight - 1));
         return ProductData.UTC.create(imageStartDate.getTime(), _imageFiles[0].getMicrosecondsOfLine(_sceneHeight - 1));
-    }   */
+    }  */
 
     private ImageInputStream createInputStream(final String fileName) throws IOException {
-        return (ImageInputStream) new FileImageInputStream(new File(_baseDir, fileName));
+        return new FileImageInputStream(new File(_baseDir, fileName));
     }
 
 }
