@@ -15,17 +15,6 @@ import java.util.Calendar;
 
 class JERSLeaderFile {
 
-    private static final String UNIT_METER = "meter";
-    private static final String UNIT_KILOMETER = "kilometer";
-    private static final String UNIT_DEGREE = "degree";
-    private static final String UNIT_SECOND = "second";
-    private static final String UNIT_METER_PER_SECOND = "m/sec";
-    private static final String UNIT_DEGREE_PER_SECOND = "deg/sec";
-
-    private static final String PROJECTION_KEY_RAW = "NNNNN";
-    private static final String PROJECTION_KEY_UTM = "YNNNN";
-    private static final String PROJECTION_KEY_PS = "NNNNY";
-
     public final BaseRecord _leaderFDR;
     public final BaseSceneHeaderRecord _sceneHeaderRecord;
     public final BaseRecord _mapProjRecord;
@@ -62,38 +51,24 @@ class JERSLeaderFile {
         return _sceneHeaderRecord.getDateImageWasTaken();
     }
 
-  /*  public String getProductLevel() throws IOException,
+    public float[] getLatCorners() throws IOException,
                                            IllegalCeosFormatException {
-        return _sceneHeaderRecord.getProductLevel();
+        final double latUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic latitude");
+        final double latUR = _mapProjRecord.getAttributeDouble("1st line last valid pixel geodetic latitude");
+        final double latLL = _mapProjRecord.getAttributeDouble("Last line 1st pixel geodetic latitude");
+        final double latLR = _mapProjRecord.getAttributeDouble("Last line last valid pixel geodetic latitude");
+        return new float[]{(float)latUL, (float)latUR, (float)latLL, (float)latLR};
     }
 
-    public String getProcessingCode() throws IOException,
-                                             IllegalCeosFormatException {
-        return _sceneHeaderRecord.getProcessingCode();
-    }
-
-    public Calendar getDateImageWasTaken() {
-        return _sceneHeaderRecord.getDateImageWasTaken();
-    }
-
-    public double[] getLatCorners() throws IOException,
+    public float[] getLonCorners() throws IOException,
                                            IllegalCeosFormatException {
-        final double latUL = _sceneHeaderRecord.getSceneCornerUpperLeftLat();
-        final double latUR = _sceneHeaderRecord.getSceneCornerUpperRightLat();
-        final double latLL = _sceneHeaderRecord.getSceneCornerLowerLeftLat();
-        final double latLR = _sceneHeaderRecord.getSceneCornerLowerRightLat();
-        return new double[]{latUL, latUR, latLL, latLR};
+        final double lonUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel longitude");
+        final double lonUR = _mapProjRecord.getAttributeDouble("1st line last valid pixel longitude");
+        final double lonLL = _mapProjRecord.getAttributeDouble("Last line 1st pixel longitude");
+        final double lonLR = _mapProjRecord.getAttributeDouble("Last line last valid pixel longitude");
+        return new float[]{(float)lonUL, (float)lonUR, (float)lonLL, (float)lonLR};
     }
-
-    public double[] getLonCorners() throws IOException,
-                                           IllegalCeosFormatException {
-        final double lonUL = _sceneHeaderRecord.getSceneCornerUpperLeftLon();
-        final double lonUR = _sceneHeaderRecord.getSceneCornerUpperRightLon();
-        final double lonLL = _sceneHeaderRecord.getSceneCornerLowerLeftLon();
-        final double lonLR = _sceneHeaderRecord.getSceneCornerLowerLeftLat();
-        return new double[]{lonUL, lonUR, lonLL, lonLR};
-    }
-           */
+           
     public String getUsedProjection() throws IOException,
                                              IllegalCeosFormatException {
           return "";

@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.Calendar;
 
 /*
- * $Id: ERSLeaderFile.java,v 1.4 2008-06-17 20:35:10 lveci Exp $
+ * $Id: ERSLeaderFile.java,v 1.5 2008-06-19 17:42:37 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -33,7 +33,7 @@ import java.util.Calendar;
  * This class represents a leader file of an Avnir-2 product.
  *
  * @author Marco Peters
- * @version $Revision: 1.4 $ $Date: 2008-06-17 20:35:10 $
+ * @version $Revision: 1.5 $ $Date: 2008-06-19 17:42:37 $
  */
 class ERSLeaderFile {
 
@@ -94,22 +94,22 @@ class ERSLeaderFile {
         return _sceneHeaderRecord.getDateImageWasTaken();
     }    */
 
-    public double[] getLatCorners() throws IOException,
+    public float[] getLatCorners() throws IOException,
                                            IllegalCeosFormatException {
         final double latUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic latitude");
         final double latUR = _mapProjRecord.getAttributeDouble("1st line last valid pixel geodetic latitude");
         final double latLL = _mapProjRecord.getAttributeDouble("Last line 1st pixel geodetic latitude");
         final double latLR = _mapProjRecord.getAttributeDouble("Last line last valid pixel geodetic latitude");
-        return new double[]{latUL, latUR, latLL, latLR};
+        return new float[]{(float)latUL, (float)latUR, (float)latLL, (float)latLR};
     }
 
-    public double[] getLonCorners() throws IOException,
+    public float[] getLonCorners() throws IOException,
                                            IllegalCeosFormatException {
         final double lonUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel longitude");
         final double lonUR = _mapProjRecord.getAttributeDouble("1st line last valid pixel longitude");
         final double lonLL = _mapProjRecord.getAttributeDouble("Last line 1st pixel longitude");
         final double lonLR = _mapProjRecord.getAttributeDouble("Last line last valid pixel longitude");
-        return new double[]{lonUL, lonUR, lonLL, lonLR};
+        return new float[]{(float)lonUL, (float)lonUR, (float)lonLL, (float)lonLR};
     }
 
     public String getUsedProjection() throws IOException,
@@ -620,24 +620,24 @@ class ERSLeaderFile {
 
         addAttribute(projMeta, "GEODETIC_DATUM", ProductData.createInstance(getDatumName()));   */
 
-        final double[] latCorners = getLatCorners();
-        final double[] lonCorners = getLonCorners();
+        final float[] latCorners = getLatCorners();
+        final float[] lonCorners = getLonCorners();
 
-        addAttribute(projMeta, "SCENE_UPPER_LEFT_LATITUDE", ProductData.createInstance(new double[]{latCorners[0]}),
+        addAttribute(projMeta, "SCENE_UPPER_LEFT_LATITUDE", ProductData.createInstance(new float[]{latCorners[0]}),
                      UNIT_DEGREE);
-        addAttribute(projMeta, "SCENE_UPPER_LEFT_LONGITUDE", ProductData.createInstance(new double[]{lonCorners[0]}),
+        addAttribute(projMeta, "SCENE_UPPER_LEFT_LONGITUDE", ProductData.createInstance(new float[]{lonCorners[0]}),
                      UNIT_DEGREE);
-        addAttribute(projMeta, "SCENE_UPPER_RIGHT_LATITUDE", ProductData.createInstance(new double[]{latCorners[1]}),
+        addAttribute(projMeta, "SCENE_UPPER_RIGHT_LATITUDE", ProductData.createInstance(new float[]{latCorners[1]}),
                      UNIT_DEGREE);
-        addAttribute(projMeta, "SCENE_UPPER_RIGHT_LONGITUDE", ProductData.createInstance(new double[]{lonCorners[1]}),
+        addAttribute(projMeta, "SCENE_UPPER_RIGHT_LONGITUDE", ProductData.createInstance(new float[]{lonCorners[1]}),
                      UNIT_DEGREE);
-        addAttribute(projMeta, "SCENE_LOWER_LEFT_LATITUDE", ProductData.createInstance(new double[]{latCorners[2]}),
+        addAttribute(projMeta, "SCENE_LOWER_LEFT_LATITUDE", ProductData.createInstance(new float[]{latCorners[2]}),
                      UNIT_DEGREE);
-        addAttribute(projMeta, "SCENE_LOWER_LEFT_LONGITUDE", ProductData.createInstance(new double[]{lonCorners[2]}),
+        addAttribute(projMeta, "SCENE_LOWER_LEFT_LONGITUDE", ProductData.createInstance(new float[]{lonCorners[2]}),
                      UNIT_DEGREE);
-        addAttribute(projMeta, "SCENE_LOWER_RIGHT_LATITUDE", ProductData.createInstance(new double[]{latCorners[3]}),
+        addAttribute(projMeta, "SCENE_LOWER_RIGHT_LATITUDE", ProductData.createInstance(new float[]{latCorners[3]}),
                      UNIT_DEGREE);
-        addAttribute(projMeta, "SCENE_LOWER_RIGHT_LONGITUDE", ProductData.createInstance(new double[]{lonCorners[3]}),
+        addAttribute(projMeta, "SCENE_LOWER_RIGHT_LONGITUDE", ProductData.createInstance(new float[]{lonCorners[3]}),
                      UNIT_DEGREE);
     }
 

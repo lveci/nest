@@ -1,11 +1,8 @@
 package org.esa.nest.dataio.ceos.radarsat;
 
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.MetadataAttribute;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
 
 import javax.imageio.stream.FileImageInputStream;
@@ -90,100 +87,18 @@ class RadarsatProductDirectory {
     private void addGeoCoding(final Product product) throws IllegalCeosFormatException,
                                                             IOException {
 
-     /*   //final String usedProjection = _leaderFile.getUsedProjection();
-        final String usedProjection = "NNNNN";  // luis tmp
-        if (RadarsatConstants.MAP_PROJECTION_RAW.equalsIgnoreCase(usedProjection)) {
-            final Band[] bands = product.getBands();
-            for (int i = 0; i < bands.length; i++) {
-                final Band band = bands[i];
-                final RadarsatImageFile imageFile = getImageFile(band);
-                final int bandIndex = imageFile.getBandIndex();
-                final double[][] uncorrectedCoeffs = _leaderFile.getUncorrectedTransformationCoeffs(bandIndex);
+        TiePointGrid latGrid = new TiePointGrid("lat", 2, 2, 0.5f, 0.5f, 
+                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
+                                                _leaderFile.getLatCorners());
+        TiePointGrid lonGrid = new TiePointGrid("lon", 2, 2, 0.5f, 0.5f,
+                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
+                                                _leaderFile.getLonCorners(),
+                                                TiePointGrid.DISCONT_AT_360);
+        TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
 
-
-                final FXYSum.Cubic funcLat = new FXYSum.Cubic(CeosHelper.sortToFXYSumOrder(uncorrectedCoeffs[0]));
-                final FXYSum.Cubic funcLon = new FXYSum.Cubic(CeosHelper.sortToFXYSumOrder(uncorrectedCoeffs[1]));
-                final FXYSum.Cubic funcX = new FXYSum.Cubic(CeosHelper.sortToFXYSumOrder(uncorrectedCoeffs[2]));
-                final FXYSum.Cubic funcY = new FXYSum.Cubic(CeosHelper.sortToFXYSumOrder(uncorrectedCoeffs[3]));
-
-                final FXYGeoCoding gc = new FXYGeoCoding(0.0f, 0.0f, 1.0f, 1.0f,
-                                                         funcX, funcY,
-                                                         funcLat, funcLon,
-                                                         Datum.ITRF_97);
-                band.setGeoCoding(gc);
-            }
-
-        } else if (RadarsatConstants.MAP_PROJECTION_UTM.equalsIgnoreCase(usedProjection)) {
-            final int zoneIndex = (int) _leaderFile.getUTMZoneIndex();
-
-            final boolean isSouth = _leaderFile.isUTMSouthHemisphere();
-
-            double easting = _leaderFile.getUTMEasting() * METER_PER_KILOMETER;     // km -> meter
-            easting += UTM_FALSE_EASTING;
-            double northing = _leaderFile.getUTMNorthing() * METER_PER_KILOMETER;    // km -> meter
-            if (northing < 0) {
-                northing += UTM_FALSE_NORTHING;
-            }
-
-            final double pixelSizeX = _leaderFile.getNominalInterPixelDistance();
-            final double pixelSizeY = _leaderFile.getNominalInterLineDistance();
-            final float orientationAngle = (float) _leaderFile.getUTMOrientationAngle();
-
-            final MapInfo mapInfo = new MapInfo(UTM.createProjection(zoneIndex - 1, isSouth),
-                                                _sceneWidth * 0.5f, _sceneHeight * 0.5f,
-                                                (float) easting, (float) northing,
-                                                (float) pixelSizeX, (float) pixelSizeY, Datum.ITRF_97);
-            mapInfo.setOrientation(orientationAngle);
-            mapInfo.setSceneWidth(_sceneWidth);
-            mapInfo.setSceneHeight(_sceneHeight);
-            product.setGeoCoding(new MapGeoCoding(mapInfo));
-
-
-        } else if (RadarsatConstants.MAP_PROJECTION_PS.equalsIgnoreCase(usedProjection)) {
-            final double[] parameterValues = StereographicDescriptor.PARAMETER_DEFAULT_VALUES;
-            parameterValues[0] = Ellipsoid.GRS_80.getSemiMajor();
-            parameterValues[1] = Ellipsoid.GRS_80.getSemiMinor();
-            final GeoPos psReferencePoint = _leaderFile.getPSReferencePoint();
-            final GeoPos psProjectionOrigin = _leaderFile.getPSProjectionOrigin();
-
-            parameterValues[2] = psProjectionOrigin.getLat();         // Latitude_True_Scale
-            parameterValues[3] = psReferencePoint.getLon();       // Central_Meridian
-
-
-            final MapTransform transform = MapTransformFactory.createTransform(StereographicDescriptor.TYPE_ID,
-                                                                               parameterValues);
-            final MapProjection projection = new MapProjection(StereographicDescriptor.NAME, transform);
-            final double pixelSizeX = _leaderFile.getNominalInterPixelDistance();
-            final double pixelSizeY = _leaderFile.getNominalInterLineDistance();
-            final double easting = _leaderFile.getPSXCoordinate() * METER_PER_KILOMETER;
-            final double northing = _leaderFile.getPSYCoordinate() * METER_PER_KILOMETER;
-            final int sceneRasterWidth = product.getSceneRasterWidth();
-            final int sceneRasterHeight = product.getSceneRasterHeight();
-            final MapInfo mapInfo = new MapInfo(projection,
-                                                sceneRasterWidth * 0.5f, sceneRasterHeight * 0.5f,
-                                                (float) easting, (float) northing,
-                                                (float) pixelSizeX, (float) pixelSizeY, Datum.ITRF_97);
-            mapInfo.setOrientation((float) _leaderFile.getPSOrientationAngle());
-            mapInfo.setSceneWidth(sceneRasterWidth);
-            mapInfo.setSceneHeight(sceneRasterHeight);
-            product.setGeoCoding(new MapGeoCoding(mapInfo));
-
-            // Alternative geo-coding for polar-stereographic
-//            final double[][] l1B2Coeffs = _leaderFile.getCorrectedTransformationCoeffs();
-//            final FXYSum.Cubic funcLat = new FXYSum.Cubic(CeosHelper.sortToFXYSumOrder(l1B2Coeffs[0]));
-//            final FXYSum.Cubic funcLon = new FXYSum.Cubic(CeosHelper.sortToFXYSumOrder(l1B2Coeffs[1]));
-//            final FXYSum.Cubic funcX = new FXYSum.Cubic(CeosHelper.sortToFXYSumOrder(l1B2Coeffs[2]));
-//            final FXYSum.Cubic funcY = new FXYSum.Cubic(CeosHelper.sortToFXYSumOrder(l1B2Coeffs[3]));
-//            final FXYGeoCoding funcGeoCoding = new FXYGeoCoding(0.0f, 0.0f, 1.0f, 1.0f,
-//                                                                funcX, funcY, funcLat, funcLon,
-//                                                                Datum.ITRF_97);
-//            product.setGeoCoding(funcGeoCoding);
-
-        } else {
-            Debug.trace("Unknown map projection method. Could not create geo-coding.");
-        }
-
-            */
+        product.addTiePointGrid(latGrid);
+        product.addTiePointGrid(lonGrid);
+        product.setGeoCoding(tpGeoCoding);
     }
 
     public RadarsatImageFile getImageFile(final Band band) throws IOException,
