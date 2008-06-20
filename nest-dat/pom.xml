@@ -44,7 +44,12 @@
             <artifactId>jogl</artifactId>
 			<version>1.0.0</version>
         </dependency>
-		<!--dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <!--dependency>
             <groupId>javax.media</groupId>
             <artifactId>gluegen-rt</artifactId>
 			<version>1.1.1</version>
