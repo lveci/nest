@@ -5,7 +5,6 @@ import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.stat.StatisticDialogHelper;
 import org.esa.beam.visat.toolviews.stat.StatisticsToolView;
-import org.esa.nest.dat.toolviews.DatStatisticsToolView;
 
 public class OpenInformationDialogAction extends ExecCommand {
 

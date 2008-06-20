@@ -28,6 +28,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
 
     private Object menuContext;
     private DefaultMutableTreeNode selectedNode;
+    private Project project = Project.instance();
 
     /**
      * Constructs a new single selection <code>ProductTree</code>.
@@ -98,17 +99,17 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                 menuItem.setEnabled(false);
             if (selectedNode.isRoot()) {
                 addSeparator(popup);
+                createMenuItem(popup, "New Project...");
+                createMenuItem(popup, "Load Project...");
                 createMenuItem(popup, "Save Project As...");
+                createMenuItem(popup, "Close Project");
                 addSeparator(popup);
                 createMenuItem(popup, "Expand All");
             }
         } else if (context instanceof File) {
+            createMenuItem(popup, "Open Product");
             createMenuItem(popup, "Remove Product");
-        } else if (context instanceof MetadataElement) {
-
-        } else if (context instanceof RasterDataNode) {
-
-        }
+        } 
 
         return popup;
     }
@@ -134,29 +135,41 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
 
         if (e.getActionCommand().equals("Create Folder")) {
             Project.ProjectSubFolder subFolder = (Project.ProjectSubFolder) menuContext;
-            Project.instance().CreateNewFolder(subFolder);
-        } else if (e.getActionCommand().equals("Remove Folder")) {
+            project.CreateNewFolder(subFolder);
+        } else if(e.getActionCommand().equals("Remove Folder")) {
             DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
             if (parentNode != null) {
                 Object context = parentNode.getUserObject();
                 if (context != null) {
                     Project.ProjectSubFolder parentFolder = (Project.ProjectSubFolder) context;
                     Project.ProjectSubFolder subFolder = (Project.ProjectSubFolder) menuContext;
-                    Project.instance().DeleteFolder(parentFolder, subFolder);
+                    project.DeleteFolder(parentFolder, subFolder);
                 }
             }
-        } else if (e.getActionCommand().equals("Remove Product")) {
+        } else if(e.getActionCommand().equals("Remove Product")) {
             DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
             if (parentNode != null) {
                 Object context = parentNode.getUserObject();
                 if (context != null) {
                     Project.ProjectSubFolder parentFolder = (Project.ProjectSubFolder) context;
                     File file = (File) menuContext;
-                    Project.instance().RemoveFile(parentFolder, file);
+                    project.RemoveFile(parentFolder, file);
                 }
             }
-        } else if (e.getActionCommand().equals("Expand All")) {
+        } else if(e.getActionCommand().equals("Open Product")) {
+
+            File file = (File) menuContext;
+            VisatApp.getApp().openProduct(file);
+        } else if(e.getActionCommand().equals("Expand All")) {
             expandAll();
+        } else if(e.getActionCommand().equals("New Project...")) {
+            project.CreateNewProject();
+        } else if(e.getActionCommand().equals("Load Project...")) {
+            project.LoadProject();
+        } else if(e.getActionCommand().equals("Save Project As...")) {
+            project.SaveProjectAs();
+        } else if(e.getActionCommand().equals("Close Project")) {
+            project.CloseProject();
         }
     }
 

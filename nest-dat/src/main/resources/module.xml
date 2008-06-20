@@ -62,26 +62,12 @@
 
 
     <extension point="beam-ui:toolViews">
-        <!--toolView>
-            <id>org.esa.nest.dat.toolviews.DatStatisticsToolView</id>
-            <class>org.esa.nest.dat.toolviews.DatStatisticsToolView</class>
-            <title>Statistics View</title>
-            <tabTitle>Statistics</tabTitle>
-            <mnemonic>t</mnemonic>
-            <accelerator>ctrl alt T</accelerator>
-            <description>Display statistics for a selected band.</description>
-            <smallIcon>/org/esa/beam/resources/images/icons/Information16.gif</smallIcon>
-            <largeIcon>/org/esa/beam/resources/images/icons/Information24.gif</largeIcon>
-            <helpId>statisticsToolView</helpId>
-            <initState>HIDDEN</initState>
-            <initSide>SOUTH</initSide>
-            <initIndex>0</initIndex>
-        </toolView-->
+
         <toolView>
             <id>org.esa.nest.dat.toolviews.Projects.ProjectsToolView</id>
             <class>org.esa.nest.dat.toolviews.Projects.ProjectsToolView</class>
-            <title>Projects</title>
-            <tabTitle>Projects</tabTitle>
+            <title>Project</title>
+            <tabTitle>Project</tabTitle>
             <mnemonic>P</mnemonic>
             <accelerator>ctrl alt P</accelerator>
             <smallIcon>/org/esa/nest/icons/project_sm.png</smallIcon>

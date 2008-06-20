@@ -111,15 +111,21 @@ public class ProjectsToolView extends AbstractToolView implements Observer {
 
         rootNode.removeAllChildren();
 
-        rootNode.setUserObject(project.getProjectSubFolders());
-        projectTree.setRootVisible(true);
+        Project.ProjectSubFolder projectFolders = project.getProjectSubFolders();
+        if(projectFolders == null) {
+            projectTree.setRootVisible(false);
+            projectTree.populateTree(rootNode);
+        } else {
+            rootNode.setUserObject(project.getProjectSubFolders());
+            projectTree.setRootVisible(true);
 
-        Vector subFolders = project.getProjectSubFolders().getSubFolders();
-        PopulateNode(subFolders, rootNode);
-        projectTree.populateTree(rootNode);
+            Vector subFolders = project.getProjectSubFolders().getSubFolders();
+            PopulateNode(subFolders, rootNode);
+            projectTree.populateTree(rootNode);
 
-        project.SaveProject();
-        
-        //FindSubFolders(project.getProjectFolder(), rootNode);
+            project.SaveProject();
+
+            //FindSubFolders(project.getProjectFolder(), rootNode);
+        }
     }
 }

@@ -134,11 +134,28 @@ public class Project extends Observable {
         return projectSubFolders;
     }
 
+    public void CloseProject() {
+        projectSubFolders = null;
+        notifyEvent();
+    }
+
     public void SaveWorkSpace() {
 
     }
 
+    public void SaveProjectAs() {
+        File file = DatUtils.GetFilePath("Save Project", "XML", "xml", "Project File", true);
+        if(file == null) return;
+        
+        projectFile = file;
+        projectFolder = file.getParentFile();
+
+        SaveProject();
+    }
+
     public void SaveProject() {
+        if(projectSubFolders == null)
+            return;
 
         Element root = new Element("Project");
         root.setAttribute("name", getProjectName());
