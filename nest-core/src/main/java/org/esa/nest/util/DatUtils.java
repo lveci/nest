@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.FileInputStream;
+import java.net.URISyntaxException;
 
 import com.bc.ceres.core.runtime.internal.RuntimeActivator;
 
@@ -31,12 +32,15 @@ public class DatUtils {
 
     public static File GetFilePath(String title, String formatName, String extension, String description,
                                      boolean isSave) {
-        BeamFileFilter xmlFilter = new BeamFileFilter(formatName, extension, description);
+        BeamFileFilter fileFilter = null;
+        if(!extension.isEmpty()) {
+            fileFilter = new BeamFileFilter(formatName, extension, description);
+        }
         File file;
         if (isSave)
-            file = VisatApp.getApp().showFileSaveDialog(title, false, xmlFilter, '.' + extension, description);
+            file = VisatApp.getApp().showFileSaveDialog(title, false, fileFilter, '.' + extension, description);
         else
-            file = VisatApp.getApp().showFileOpenDialog(title, false, xmlFilter, extension);
+            file = VisatApp.getApp().showFileOpenDialog(title, false, fileFilter);
         if (file == null) {
             return null;
         }
@@ -52,7 +56,11 @@ public class DatUtils {
         // If not found in jar, then load from disk
         java.net.URL resURL = DatUtils.class.getClassLoader().getResource(filename);
         if (resURL != null) {
-            return new FileInputStream(resURL.getPath());
+            try {
+                return new FileInputStream(resURL.toURI().getPath());
+            } catch(URISyntaxException e) {
+                //
+            }
         }
 
         return new FileInputStream(filename);
@@ -63,7 +71,11 @@ public class DatUtils {
         // load from disk
         java.net.URL resURL = theClass.getClassLoader().getResource(filename);
         if (resURL != null) {
-            return new File(resURL.getPath());
+            try {
+                return new File(resURL.toURI().getPath());
+            } catch(URISyntaxException e) {
+                return null;
+            }
         }
 
         return null;

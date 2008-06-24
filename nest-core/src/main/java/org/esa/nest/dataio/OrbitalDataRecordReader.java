@@ -45,13 +45,10 @@ public class OrbitalDataRecordReader {
 
         try {
             in = new DataInputStream(new BufferedInputStream(DatUtils.getResourceAsStream(path)));
-        } catch(FileNotFoundException e) {
+        } catch(Exception e) {
             in = null;
             return false;
-        } catch(IOException e) {
-            in = null;
-            return false;
-        }
+        } 
         return true;
     }
 

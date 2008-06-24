@@ -7,6 +7,7 @@ import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.gpf.graph.GraphException;
+import org.esa.beam.framework.gpf.graph.Graph;
 import org.esa.nest.util.DatUtils;
 import org.esa.nest.dat.DatContext;
 
@@ -36,6 +37,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private boolean initGraphEnabled = true;
 
     private final GraphExecuter graphEx;
+    private int graphCount;
 
     //TabbedPanel
     private JTabbedPane tabbedPanel;
@@ -180,11 +182,48 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private void DoProcessing() {
 
         if(ValidateAllNodes()) {
-            progBarMonitor = new ProgressBarProgressMonitor(progressBar, null);
-            final SwingWorker processThread = new ProcessThread(progBarMonitor);
-            processThread.execute();
+
+            Stack theReaderStack = graphEx.FindStacks();
+
+            if(!theReaderStack.isEmpty()) {
+                graphCount = 0;
+                try {
+                    ReplaceAllStacks(graphEx.getGraph(), theReaderStack);
+                } catch(GraphException e) {
+                    statusLabel.setText(e.getMessage());
+                }
+            } else {
+                progBarMonitor = new ProgressBarProgressMonitor(progressBar, null);
+                final SwingWorker processThread = new ProcessThread(progBarMonitor);
+                processThread.execute();
+            }
+
         } else {
             showErrorDialog(statusLabel.getText());
+        }
+    }
+
+    private void ReplaceAllStacks(Graph graph, Stack readerStack) throws GraphException {
+        GraphExecuter.StackNode stackNode = (GraphExecuter.StackNode)readerStack.pop();
+
+        for (Enumeration e = stackNode.fileList.elements(); e.hasMoreElements();)
+        {
+            GraphExecuter.ReplaceStackWithReader(graph, stackNode.nodeID, (String)e.nextElement());
+
+            if(readerStack.isEmpty()) {
+                System.out.print("executing graph " + graphCount); System.out.println();
+
+                GraphExecuter.IncrementWriterFiles(graph, graphCount);
+
+                progBarMonitor = new ProgressBarProgressMonitor(progressBar, null);
+                graphEx.recreateGraphContext();
+                graphEx.executeGraph(progBarMonitor);
+
+                GraphExecuter.RestoreWriterFiles(graph, graphCount);
+                graphCount++;
+            } else {
+                ReplaceAllStacks(graph, readerStack);
+            }
         }
     }
 
@@ -339,7 +378,6 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         }
 
     }
-
 
     /**
      * A {@link com.bc.ceres.core.ProgressMonitor} which uses a

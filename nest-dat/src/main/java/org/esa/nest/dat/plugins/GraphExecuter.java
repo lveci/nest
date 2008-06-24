@@ -3,9 +3,15 @@ package org.esa.nest.dat.plugins;
 import com.bc.ceres.core.ProgressMonitor;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.OperatorSpiRegistry;
+import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.operators.common.ReadOp;
+import org.esa.beam.framework.gpf.operators.common.WriteOp;
+import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.graph.*;
 import org.esa.nest.util.DatUtils;
 
+import javax.swing.*;
 import java.util.*;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -18,7 +24,6 @@ public class GraphExecuter extends Observable {
     private Graph graph;
     private GraphContext graphContext;
     private final GraphProcessor processor;
-    private Xpp3Dom presentationXML = new Xpp3Dom("Presentation");
 
     private int idCount = 0;
     private final Vector nodeList = new Vector(30);
@@ -71,6 +76,13 @@ public class GraphExecuter extends Observable {
         return gpf.getOperatorSpiRegistry().getAliases();
     }
 
+    boolean isOperatorInternal(String alias) {
+        final OperatorSpiRegistry registry = gpf.getOperatorSpiRegistry();
+        final OperatorSpi operatorSpi = registry.getOperatorSpi(alias);
+        final OperatorMetadata operatorMetadata = operatorSpi.getOperatorClass().getAnnotation(OperatorMetadata.class);
+        return !(operatorMetadata != null && !operatorMetadata.internal());
+    }
+
     GraphNode addOperator(String opName) {
 
         String id = opName + ++idCount;
@@ -119,11 +131,12 @@ public class GraphExecuter extends Observable {
 
     void AssignAllParameters() {
 
+        Xpp3Dom presentationXML = new Xpp3Dom("Presentation");
+
         for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
         {
             GraphNode n = (GraphNode) e.nextElement();
             n.AssignParameters(presentationXML);
-
         }
 
         graph.setAppData("Presentation", presentationXML);
@@ -153,11 +166,15 @@ public class GraphExecuter extends Observable {
     void InitGraph() throws GraphException {
         if(IsGraphComplete()) {
             AssignAllParameters();
-            if(graphContext != null)
-                GraphProcessor.disposeGraphContext(graphContext);
-
-            graphContext = processor.createGraphContext(graph, ProgressMonitor.NULL);
+            recreateGraphContext();
         }
+    }
+
+    void recreateGraphContext() throws GraphException {
+        if(graphContext != null)
+            GraphProcessor.disposeGraphContext(graphContext);
+
+        graphContext = processor.createGraphContext(graph, ProgressMonitor.NULL);
     }
 
     /**
@@ -208,9 +225,12 @@ public class GraphExecuter extends Observable {
                 graph = graphFromFile;
                 nodeList.clear();
 
+                Xpp3Dom presentationXML;
                 Xpp3Dom xml = graph.getApplicationData("Presentation");
                 if(xml != null)
                     presentationXML = xml;
+                else
+                    presentationXML = new Xpp3Dom("Presentation");
 
                 Node[] nodes = graph.getNodes();
                 for (Node n : nodes) {
@@ -227,6 +247,97 @@ public class GraphExecuter extends Observable {
         } catch(IOException e) {
             throw new GraphException("Unable to load graph " + filePath);
         }
+    }
+
+    Graph getGraph() {
+        return graph;
+    }
+
+    Stack FindStacks() {
+        final String SEPARATOR = ",";
+        final String SEPARATOR_ESC = "\\u002C"; // Unicode escape repr. of ','
+        Stack theReaderStack = new Stack();
+
+        Node[] nodes = graph.getNodes();
+        for(Node n : nodes) {
+            if(n.getOperatorName().equalsIgnoreCase("StackReader")) {
+                StackNode stackNode = new StackNode();
+                stackNode.nodeID = n.getId();
+
+                Xpp3Dom config = n.getConfiguration();
+                Xpp3Dom[] params = config.getChildren();
+                for(Xpp3Dom p : params) {
+                    if(p.getName().equals("fileList")) {
+
+                        StringTokenizer st = new StringTokenizer(p.getValue(), SEPARATOR);
+                        int length = st.countTokens();
+                        for (int i = 0; i < length; i++) {
+                            String str = st.nextToken().replace(SEPARATOR_ESC, SEPARATOR);
+                            stackNode.fileList.add(str);
+                        }
+                        break;
+                    }
+                }
+                theReaderStack.push(stackNode);
+            }
+        }
+        return theReaderStack;
+    }
+
+    static void ReplaceStackWithReader(Graph graph, String id, String value) {
+
+        Node newNode = new Node(id, OperatorSpi.getOperatorAlias(ReadOp.class));
+        Xpp3Dom config = new Xpp3Dom("parameters");
+        Xpp3Dom fileParam = new Xpp3Dom("file");
+        fileParam.setValue(value);
+        config.addChild(fileParam);
+        newNode.setConfiguration(config);
+
+        graph.removeNode(id);
+        graph.addNode(newNode);
+    }
+
+    static void IncrementWriterFiles(Graph graph, int count) {
+        String countTag = "-" + count;
+        Node[] nodes = graph.getNodes();
+        for(Node n : nodes) {
+            if(n.getOperatorName().equalsIgnoreCase(OperatorSpi.getOperatorAlias(WriteOp.class))) {
+                Xpp3Dom config = n.getConfiguration();
+                Xpp3Dom fileParam = config.getChild("file");
+                String filePath = fileParam.getValue();
+                String newPath;
+                if(filePath.contains(".")) {
+                    int idx = filePath.indexOf('.');
+                    newPath = filePath.substring(0, idx) + countTag + filePath.substring(idx, filePath.length());
+                } else {
+                    newPath = filePath + countTag;
+                }
+
+                fileParam.setValue(newPath);
+            }
+        }
+    }
+
+    static void RestoreWriterFiles(Graph graph, int count) {
+        String countTag = "-" + count;
+        Node[] nodes = graph.getNodes();
+        for(Node n : nodes) {
+            if(n.getOperatorName().equalsIgnoreCase(OperatorSpi.getOperatorAlias(WriteOp.class))) {
+                Xpp3Dom config = n.getConfiguration();
+                Xpp3Dom fileParam = config.getChild("file");
+                String filePath = fileParam.getValue();
+                if(filePath.contains(countTag)) {
+                    int idx = filePath.indexOf(countTag);
+                    String newPath = filePath.substring(0, idx) + filePath.substring(idx+countTag.length(), filePath.length());
+                    fileParam.setValue(newPath);
+                }
+            }
+        }
+    }
+
+    static class StackNode {
+        String nodeID;
+        Vector fileList = new Vector(10);
     }
 
     static class GraphEvent {

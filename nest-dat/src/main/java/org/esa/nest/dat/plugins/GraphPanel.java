@@ -54,11 +54,13 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
         // get operator list from graph executor
         Set gpfOperatorSet = graphEx.GetOperatorList();
         // add operators
-        for (Object anAliasSet : gpfOperatorSet) {
-            JMenuItem item = new JMenuItem((String)anAliasSet, opIcon);
-            item.setHorizontalTextPosition(JMenuItem.RIGHT);
-            item.addActionListener(addListener);
-            addMenu.add(item);
+        for (Object anAlias : gpfOperatorSet) {
+            if(!graphEx.isOperatorInternal((String)anAlias)) {
+                JMenuItem item = new JMenuItem((String)anAlias, opIcon);
+                item.setHorizontalTextPosition(JMenuItem.RIGHT);
+                item.addActionListener(addListener);
+                addMenu.add(item);
+            }
         }
     }
 

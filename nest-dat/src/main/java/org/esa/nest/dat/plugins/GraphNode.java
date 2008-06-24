@@ -3,6 +3,7 @@ package org.esa.nest.dat.plugins;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.internal.Xpp3DomElement;
 import org.esa.beam.framework.gpf.graph.Node;
 import org.esa.beam.framework.gpf.graph.NodeSource;
 import org.esa.beam.framework.gpf.ui.OperatorUI;
@@ -12,7 +13,6 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Represents a node of the graph for the GraphBuilder
@@ -70,21 +70,9 @@ public class GraphNode {
 
     void AssignParameters(Xpp3Dom presentationXML) {
 
-        updateParameterMap();
-        Xpp3Dom config = node.getConfiguration();
-        Set keys = parameterMap.keySet();                           // The set of keys in the map.
-        for (Object key : keys) {
-            Object value = parameterMap.get(key);                   // Get the value for that key.
-            if (value == null) continue;
-
-            Xpp3Dom xml = config.getChild((String) key);
-            if (xml == null) {
-                xml = new Xpp3Dom((String) key);
-                config.addChild(xml);
-            }
-
-            xml.setValue(value.toString());
-        }
+        Xpp3DomElement config = Xpp3DomElement.createDomElement("parameters");
+        updateParameterMap(config);
+        node.setConfiguration(config.getXpp3Dom());
 
         AssignDisplayParameters(presentationXML);
     }
@@ -214,9 +202,11 @@ public class GraphNode {
         return operatorUI.validateParameters();
     }
 
-    void updateParameterMap() {
-        if(operatorUI != null)
+    void updateParameterMap(Xpp3DomElement parentElement) {
+        if(operatorUI != null) {
             operatorUI.updateParameters();
+            operatorUI.convertToDOM(parentElement);
+        }
     }
 
     OperatorUI GetOperatorUI() {
