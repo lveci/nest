@@ -25,6 +25,7 @@ public class CeosDB {
          B1(3),
          B4(4),
          Fn(5),
+         B2(6),
          Debug(-1);
 
          private int theValue;
@@ -88,6 +89,13 @@ public class CeosDB {
                         //System.out.print(" = " + tmp);
                         //metadata.put(name , tmp);
                         metadata.put(name , reader.readB1());
+                    } else if(type == CeosDBTypes.B2.value()) {
+
+                        //int tmp = reader.readB2();
+                        //System.out.print(" = " + tmp);
+                        //metadata.put(name , tmp);
+                        metadata.put(name , reader.readB2());
+
                     } else if(type == CeosDBTypes.B4.value()) {
 
                         //int tmp = reader.readB4();

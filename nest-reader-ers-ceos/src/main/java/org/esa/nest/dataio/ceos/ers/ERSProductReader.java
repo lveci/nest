@@ -110,12 +110,22 @@ public class ERSProductReader extends AbstractProductReader {
                                           ProgressMonitor pm) throws IOException {
         try {
             final ERSImageFile imageFile = _dataDir.getImageFile(destBand);
-            imageFile.readBandRasterData(sourceOffsetX, sourceOffsetY,
+            if(_dataDir.isSLC()) {
+                imageFile.readBandRasterDataSLC(sourceOffsetX, sourceOffsetY,
+                                         sourceWidth, sourceHeight,
+                                         sourceStepX, sourceStepY,
+                                         destOffsetX, destOffsetY,
+                                         destWidth, destHeight,
+                                         destBuffer, !destBand.getName().startsWith("q"), pm);
+
+            } else {
+                imageFile.readBandRasterData(sourceOffsetX, sourceOffsetY,
                                          sourceWidth, sourceHeight,
                                          sourceStepX, sourceStepY,
                                          destOffsetX, destOffsetY,
                                          destWidth, destHeight,
                                          destBuffer, pm);
+            }
         } catch (IllegalCeosFormatException e) {
             final IOException ioException = new IOException(e.getMessage());
             ioException.initCause(e);

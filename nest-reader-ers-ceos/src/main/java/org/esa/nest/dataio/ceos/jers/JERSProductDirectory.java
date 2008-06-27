@@ -164,13 +164,10 @@ class JERSProductDirectory {
                                                            IllegalCeosFormatException {
         final MetadataElement metadata = new MetadataElement("SPH");
         _leaderFile.addLeaderMetadata(metadata);
+        _volumeDirectoryFile.assignMetadataTo(metadata);
         addSummaryMetadata(metadata);
 
         product.getMetadataRoot().addElement(metadata);
-
-        final MetadataElement volumeDescriptor = new MetadataElement("VOLUME_DESCRIPTOR");
-        _volumeDirectoryFile.assignMetadataTo(volumeDescriptor);
-        product.getMetadataRoot().addElement(volumeDescriptor);
     }
 
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {

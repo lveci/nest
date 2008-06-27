@@ -6,12 +6,13 @@ import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.nest.dataio.ceos.records.ImageRecord;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.MetadataElement;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
 /*
- * $Id: ERSImageFile.java,v 1.7 2008-06-17 20:35:10 lveci Exp $
+ * $Id: ERSImageFile.java,v 1.8 2008-06-27 19:35:52 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +32,7 @@ import java.io.IOException;
 /**
  * This class represents an image file of an ERS product.
  *
- * @version $Revision: 1.7 $ $Date: 2008-06-17 20:35:10 $
+ * @version $Revision: 1.8 $ $Date: 2008-06-27 19:35:52 $
  */
 class ERSImageFile {
 
@@ -75,6 +76,12 @@ class ERSImageFile {
 
     public static String getGeophysicalUnit() {
         return ERSConstants.GEOPHYSICAL_UNIT;
+    }
+
+    public void assignMetadataTo(MetadataElement rootElem, int count) {
+        MetadataElement metadata = new MetadataElement("Image Descriptor " + count);
+         _imageFDR.assignMetadataTo(metadata);
+        rootElem.addElement(metadata);
     }
 
     /*
@@ -134,6 +141,50 @@ class ERSImageFile {
         }
     }
 
+    public void readBandRasterDataSLC(final int sourceOffsetX, final int sourceOffsetY,
+                                   final int sourceWidth, final int sourceHeight,
+                                   final int sourceStepX, final int sourceStepY,
+                                   final int destOffsetX, final int destOffsetY,
+                                   final int destWidth, final int destHeight,
+                                   final ProductData destBuffer, boolean oneOf2,
+                                   ProgressMonitor pm) throws IOException, IllegalCeosFormatException
+    {
+        final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
+        ImageRecord imageRecord;
+
+        int x = sourceOffsetX * 2;
+
+        pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceOffsetY);
+        try {
+            final short[] srcLine = new short[sourceWidth * 2];
+            final short[] destLine = new short[destWidth];
+            for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
+                if (pm.isCanceled()) {
+                    break;
+                }
+
+                // Read source line
+                imageRecord = getImageRecord(y);
+                _ceosReader.seek(imageRecord.getImageDataStart() + x);
+                _ceosReader.readB2(srcLine);
+
+                // Copy source line into destination buffer
+                final int currentLineIndex = (y - sourceOffsetY) * destWidth;
+                if (oneOf2)
+                    copyLine1Of2(srcLine, destLine, sourceStepX);
+                else
+                    copyLine2Of2(srcLine, destLine, sourceStepX);
+                
+                System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+
+                pm.worked(1);
+            }
+
+        } finally {
+            pm.done();
+        }
+    }
+
     private ImageRecord getImageRecord(final int line) throws IOException,
                                                               IllegalCeosFormatException {
         if (_imageRecords[line] == null) {
@@ -147,6 +198,20 @@ class ERSImageFile {
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; x++, i += sourceStepX) {
             destLine[x] = srcLine[i];
+        }
+    }
+
+    private static void copyLine1Of2(final short[] srcLine, final short[] destLine,
+                          final int sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length; x++, i += sourceStepX) {
+            destLine[x] = srcLine[2 * i];
+        }
+    }
+
+    private static void copyLine2Of2(final short[] srcLine, final short[] destLine,
+                          final int sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length-1; x++, i += sourceStepX) {
+            destLine[x] = srcLine[2 * i + 1];
         }
     }
 

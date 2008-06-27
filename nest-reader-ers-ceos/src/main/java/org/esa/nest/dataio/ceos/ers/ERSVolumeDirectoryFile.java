@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /*
- * $Id: ERSVolumeDirectoryFile.java,v 1.3 2008-06-17 20:35:10 lveci Exp $
+ * $Id: ERSVolumeDirectoryFile.java,v 1.4 2008-06-27 19:35:52 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -89,8 +89,21 @@ class ERSVolumeDirectoryFile {
         return CeosHelper.getProductName(_textRecord);
     }
 
-    public void assignMetadataTo(final MetadataElement elem) {
-        _volumeDescriptorRecord.assignMetadataTo(elem);
+    public void assignMetadataTo(final MetadataElement rootElem) {
+        MetadataElement metadata = new MetadataElement("Volume Descriptor");
+        _volumeDescriptorRecord.assignMetadataTo(metadata);
+        rootElem.addElement(metadata);
+
+        metadata = new MetadataElement("Text Record");
+        _textRecord.assignMetadataTo(metadata);
+        rootElem.addElement(metadata);
+
+        int i = 1;
+        for(FilePointerRecord fp : _filePointerRecords) {
+            metadata = new MetadataElement("File Pointer Record " + i++);
+            fp.assignMetadataTo(metadata);
+            rootElem.addElement(metadata);
+        }
     }
 
 }
