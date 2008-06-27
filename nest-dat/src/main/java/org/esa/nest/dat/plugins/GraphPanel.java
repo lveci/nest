@@ -12,6 +12,7 @@ import java.awt.event.*;
 import java.util.Set;
 import java.util.Vector;
 import java.util.Enumeration;
+import java.util.Arrays;
 
 /**
  * Draws and Edits the graph graphically
@@ -52,11 +53,15 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
         addMenu = new JMenu("Add");
 
         // get operator list from graph executor
-        Set gpfOperatorSet = graphEx.GetOperatorList();
+        Set<String> gpfOperatorSet = graphEx.GetOperatorList();
+        String[] aliasList = new String[gpfOperatorSet.size()];
+        gpfOperatorSet.toArray(aliasList);
+        Arrays.sort(aliasList);
+
         // add operators
-        for (Object anAlias : gpfOperatorSet) {
-            if(!graphEx.isOperatorInternal((String)anAlias)) {
-                JMenuItem item = new JMenuItem((String)anAlias, opIcon);
+        for (String anAlias : aliasList) {
+            if(!graphEx.isOperatorInternal(anAlias)) {
+                JMenuItem item = new JMenuItem(anAlias, opIcon);
                 item.setHorizontalTextPosition(JMenuItem.RIGHT);
                 item.addActionListener(addListener);
                 addMenu.add(item);

@@ -72,7 +72,7 @@ public class GraphExecuter extends Observable {
      * Gets the list of operators
      * @return set of operator names
      */
-    Set GetOperatorList() {
+    Set<String> GetOperatorList() {
         return gpf.getOperatorSpiRegistry().getAliases();
     }
 
