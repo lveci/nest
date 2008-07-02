@@ -13,7 +13,6 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import java.awt.*;
-import java.io.File;
 import java.util.Enumeration;
 import java.util.Observer;
 import java.util.Vector;
@@ -63,24 +62,11 @@ public class ProjectsToolView extends AbstractToolView implements Observer {
         return projectTree;
     }
 
-    private static void FindSubFolders(File currentFolder, DefaultMutableTreeNode treeNode) {
-        File[] files = currentFolder.listFiles();
-
-        for(File f : files) {
-            if(f.isDirectory()) {
-                final DefaultMutableTreeNode folderNode = new DefaultMutableTreeNode(f.getName());
-                treeNode.add(folderNode);
-
-                FindSubFolders(f, folderNode);
-            }
-        }
-    }
-
     private static void PopulateNode(Vector subFolders, DefaultMutableTreeNode treeNode) {
 
         for (Enumeration e = subFolders.elements(); e.hasMoreElements();)
         {
-            Project.ProjectSubFolder folder = (Project.ProjectSubFolder)e.nextElement();
+            ProjectSubFolder folder = (ProjectSubFolder)e.nextElement();
 
             final DefaultMutableTreeNode folderNode = new DefaultMutableTreeNode(folder);
             treeNode.add(folderNode);
@@ -111,7 +97,7 @@ public class ProjectsToolView extends AbstractToolView implements Observer {
 
         rootNode.removeAllChildren();
 
-        Project.ProjectSubFolder projectFolders = project.getProjectSubFolders();
+        ProjectSubFolder projectFolders = project.getProjectSubFolders();
         if(projectFolders == null) {
             projectTree.setRootVisible(false);
             projectTree.populateTree(rootNode);
@@ -124,8 +110,6 @@ public class ProjectsToolView extends AbstractToolView implements Observer {
             projectTree.populateTree(rootNode);
 
             project.SaveProject();
-
-            //FindSubFolders(project.getProjectFolder(), rootNode);
         }
     }
 }

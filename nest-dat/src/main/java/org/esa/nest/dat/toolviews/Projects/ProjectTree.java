@@ -1,12 +1,9 @@
 package org.esa.nest.dat.toolviews.Projects;
 
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.ui.PopupMenuFactory;
 import org.esa.beam.framework.ui.PopupMenuHandler;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.util.DatUtils;
 
 import javax.swing.*;
 import javax.swing.tree.*;
@@ -91,10 +88,10 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
         JPopupMenu popup = new JPopupMenu();
         menuContext = context;
 
-        if (context instanceof Project.ProjectSubFolder) {
+        if (context instanceof ProjectSubFolder) {
             createMenuItem(popup, "Create Folder");
             JMenuItem menuItem = createMenuItem(popup, "Remove Folder");
-            Project.ProjectSubFolder folder = (Project.ProjectSubFolder) context;
+            ProjectSubFolder folder = (ProjectSubFolder) context;
             if (!folder.canBeRemoved())
                 menuItem.setEnabled(false);
             if (selectedNode.isRoot()) {
@@ -134,15 +131,15 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
     public void actionPerformed(ActionEvent e) {
 
         if (e.getActionCommand().equals("Create Folder")) {
-            Project.ProjectSubFolder subFolder = (Project.ProjectSubFolder) menuContext;
+            ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
             project.CreateNewFolder(subFolder);
         } else if(e.getActionCommand().equals("Remove Folder")) {
             DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
             if (parentNode != null) {
                 Object context = parentNode.getUserObject();
                 if (context != null) {
-                    Project.ProjectSubFolder parentFolder = (Project.ProjectSubFolder) context;
-                    Project.ProjectSubFolder subFolder = (Project.ProjectSubFolder) menuContext;
+                    ProjectSubFolder parentFolder = (ProjectSubFolder) context;
+                    ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
                     project.DeleteFolder(parentFolder, subFolder);
                 }
             }
@@ -151,7 +148,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
             if (parentNode != null) {
                 Object context = parentNode.getUserObject();
                 if (context != null) {
-                    Project.ProjectSubFolder parentFolder = (Project.ProjectSubFolder) context;
+                    ProjectSubFolder parentFolder = (ProjectSubFolder) context;
                     File file = (File) menuContext;
                     project.RemoveFile(parentFolder, file);
                 }
@@ -294,8 +291,8 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                 File file = (File) value;
                 this.setText(file.getName());
                 this.setIcon(productIcon);
-            } else if (value instanceof Project.ProjectSubFolder) {
-                Project.ProjectSubFolder subFolder = (Project.ProjectSubFolder) value;
+            } else if (value instanceof ProjectSubFolder) {
+                ProjectSubFolder subFolder = (ProjectSubFolder) value;
                 this.setText(subFolder.getName());
                 this.setIcon(projectIcon);
             }
@@ -328,8 +325,8 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                 if(context instanceof File) {
                     File file = (File)context;
                     return new StringSelection(file.getAbsolutePath());
-                } else if(context instanceof Project.ProjectSubFolder) {
-                    Project.ProjectSubFolder parentFolder = (Project.ProjectSubFolder) context;
+                } else if(context instanceof ProjectSubFolder) {
+                    ProjectSubFolder parentFolder = (ProjectSubFolder) context;
 
                     return new StringSelection(parentFolder.getPath().getAbsolutePath());
                 }

@@ -68,6 +68,29 @@ public class Project extends Observable {
         }
     }
 
+    private static boolean findSubFolders(File currentFolder, ProjectSubFolder projSubFolder) {
+        File[] files = currentFolder.listFiles();
+        boolean hasProducts = false;
+
+        for(File f : files) {
+            if(f.isDirectory()) {
+                ProjectSubFolder newProjFolder = projSubFolder.addSubFolder(f.getName());
+
+                if(findSubFolders(f, newProjFolder))
+                    hasProducts = true;
+                else 
+                    projSubFolder.removeSubFolder(newProjFolder);
+            } else {
+                ProductReader reader = ProductIO.getProductReaderForFile(f);
+                if (reader != null) {
+                    projSubFolder.addFile(f);
+                    hasProducts = true;
+                }
+            }
+        }
+        return hasProducts;
+    }
+
     public File getProjectFolder() {
         return projectFolder;
     }
@@ -96,12 +119,17 @@ public class Project extends Observable {
         importedFolder.setRemoveable(false);
         ProjectSubFolder processedFolder = projectSubFolders.addSubFolder("Processed Products");
         processedFolder.setRemoveable(false);
+        processedFolder.setPhysical(true);
         processedFolder.addSubFolder("Calibrated Products");
         processedFolder.addSubFolder("Coregistered Products");
         processedFolder.addSubFolder("Orthorectified Products");
+
+        findSubFolders(projectFolder, processedFolder);
     }
 
     private void addImportedProduct(Product product) {
+        if(projectSubFolders.containsFile(product.getFileLocation()))
+            return;
         ProjectSubFolder importFolder = projectSubFolders.addSubFolder("Imported Products");
         ProjectSubFolder destFolder = importFolder;
         String[] formats = product.getProductReader().getReaderPlugIn().getFormatNames();
@@ -228,7 +256,7 @@ public class Project extends Observable {
                         if (reader != null) {
                             try {
                                 //Product product = reader.readProductNodes(prodFile, null);
-                                subFolder.fileList.add(prodFile);
+                                subFolder.addFile(prodFile);
                             } catch(Exception e) {
                                 VisatApp.getApp().showErrorDialog(e.getMessage());
                             }
@@ -242,122 +270,6 @@ public class Project extends Observable {
             }
         };
         worker.executeWithBlocking();
-    }
-
-    public static class ProjectSubFolder {
-
-        private String folderName;
-        private File path;
-        private Vector fileList = new Vector(20);
-        private Vector subFolders = new Vector(10);
-        private boolean removeable = true;
-
-        ProjectSubFolder(File parentPath, String name) {
-            path = new File(parentPath, name);
-            folderName = name;
-        }
-
-        void setRemoveable(boolean flag) {
-            removeable = flag;
-        }
-
-        public boolean canBeRemoved() {
-            return removeable;
-        }
-
-        public String getName() {
-            return folderName;
-        }
-
-        public File getPath() {
-            return path;
-        }
-
-        void clear() {
-            fileList.clear();
-            subFolders.clear();
-        }
-
-        void addFile(File file) {
-            if(!fileList.contains(file))
-                fileList.add(file);
-        }
-
-        ProjectSubFolder addSubFolder(String name) {
-            int idx = findFolder(name);
-            if(idx >= 0)
-                return (ProjectSubFolder)subFolders.elementAt(idx);
-            ProjectSubFolder newFolder = new ProjectSubFolder(path, name);
-            subFolders.add(newFolder);
-            return newFolder;
-        }
-
-        void removeSubFolder(ProjectSubFolder subFolder) {
-            subFolders.remove(subFolder);
-        }
-
-        void removeFile(File file) {
-            fileList.remove(file);
-        }
-
-        public int findFolder(String name) {
-            for(int i=0; i < subFolders.size(); ++i) {
-                ProjectSubFolder folder = (ProjectSubFolder)subFolders.elementAt(i);
-                if(folder.getName().equals(name))
-                    return i;
-            }
-            return -1;
-        }
-
-        public Vector getSubFolders() {
-            return subFolders;
-        }
-
-        public Vector getFileList() {
-            return fileList;
-        }
-
-        public Element toXML() {
-            Element elem = new Element("subFolder");
-            elem.setAttribute("name", folderName);
-
-            for(int i=0; i < subFolders.size(); ++i) {
-                ProjectSubFolder sub = (ProjectSubFolder)subFolders.elementAt(i);
-                Element subElem = sub.toXML();
-                elem.addContent(subElem);
-            }
-
-            for(int i=0; i < fileList.size(); ++i) {
-                File file = (File)fileList.elementAt(i);
-                Element fileElem = new Element("product");
-                fileElem.setAttribute("path", file.getAbsolutePath());
-                elem.addContent(fileElem);
-            }
-
-            return elem;
-        }
-
-        public void fromXML(Element elem, Vector folderList, Vector prodList) {
-            List children = elem.getContent();
-            for (Object aChild : children) {
-                if (aChild instanceof Element) {
-                    Element child = (Element) aChild;
-                    if(child.getName().equals("subFolder")) {
-                        Attribute attrib = child.getAttribute("name");
-                        ProjectSubFolder subFolder = addSubFolder(attrib.getValue());
-                        subFolder.fromXML(child, folderList, prodList);
-                    } else if(child.getName().equals("product")) {
-                        Attribute attrib = child.getAttribute("path");
-
-                        File file = new File(attrib.getValue());
-                        if (file.exists()) {
-                            folderList.add(this);
-                            prodList.add(file);
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private class ProjectPTL implements ProductTreeListener {
