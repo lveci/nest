@@ -9,6 +9,7 @@ import org.esa.beam.framework.dataio.ProductReader;
 
 import java.io.IOException;
 import java.io.File;
+import java.util.Arrays;
 
 /**
  * Created by IntelliJ IDEA.
@@ -20,10 +21,41 @@ public class TestSRTMElevationModel extends TestCase {
 
 
     final SRTMElevationModelDescriptor demDescriptor = new SRTMElevationModelDescriptor();
+    String[] expectedValues = {
+            "w180n90.dem",
+            "w180n40.dem",
+            "w180s10.dem",
+            "w140n90.dem",
+            "w140n40.dem",
+            "w140s10.dem",
+            "w100n90.dem",
+            "w100n40.dem",
+            "w100s10.dem",
+            "w060n90.dem",
+            "w060n40.dem",
+            "w060s10.dem",
+            "w020n90.dem",
+            "w020n40.dem",
+            "w020s10.dem",
+            "e020n90.dem",
+            "e020n40.dem",
+            "e020s10.dem",
+            "e060n90.dem",
+            "e060n40.dem",
+            "e060s10.dem",
+            "e100n90.dem",
+            "e100n40.dem",
+            "e100s10.dem",
+            "e140n90.dem",
+            "e140n40.dem",
+            "e140s10.dem"
+    };
 
     public void testCreateEleveationTiles()
     {
         if(!demDescriptor.isDemInstalled()) return;
+        String[] fileNames = new String[expectedValues.length];
+        int count = 0;
 
         for (int i = 0; i < SRTMElevationModelDescriptor.NUM_X_TILES; i++) {
             for (int j = 0; j < SRTMElevationModelDescriptor.NUM_Y_TILES; j++) {
@@ -32,12 +64,13 @@ public class TestSRTMElevationModel extends TestCase {
                 final int minLat = j * -SRTMElevationModelDescriptor.DEGREE_RES_X + 90;
 
                 File file = demDescriptor.getTileFile(minLon, minLat);
-                System.out.print(file.getName());
-                System.out.println();
+                fileNames[count++] = file.getName();
 
                 assertTrue(file.exists());
             }
         }
+
+        assertTrue(Arrays.equals(expectedValues, fileNames));
     }
 
     public void testElevationModel() {

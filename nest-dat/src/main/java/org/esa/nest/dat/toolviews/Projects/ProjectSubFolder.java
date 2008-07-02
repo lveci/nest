@@ -21,10 +21,19 @@ public class ProjectSubFolder {
     private Vector<ProjectSubFolder> subFolders = new Vector<ProjectSubFolder>(10);
     private boolean removeable = true;
     private boolean physical = false;
+    private boolean createdByUser = false;
 
-    ProjectSubFolder(File parentPath, String name) {
-        path = new File(parentPath, name);
+    ProjectSubFolder(File newPath, String name) {
+        path = newPath;
         folderName = name;
+    }
+
+    void setCreatedByUser(boolean flag) {
+        createdByUser = flag;
+    }
+
+    boolean isCreatedByUser() {
+        return createdByUser;
     }
 
     void setRemoveable(boolean flag) {
@@ -62,11 +71,29 @@ public class ProjectSubFolder {
     }
 
     ProjectSubFolder addSubFolder(String name) {
-        int idx = findFolder(name);
-        if(idx >= 0)
-            return subFolders.elementAt(idx);
-        ProjectSubFolder newFolder = new ProjectSubFolder(path, name);
+        ProjectSubFolder newFolder = findFolder(name);
+        if(newFolder != null)
+            return newFolder;
+
+        newFolder = new ProjectSubFolder(new File(path, name), name);
         newFolder.setPhysical(physical);
+        if(physical) {
+            if(!newFolder.getPath().exists())
+                newFolder.getPath().mkdir();
+        }
+        subFolders.add(newFolder);
+        return newFolder;
+    }
+
+    ProjectSubFolder addSubFolder(ProjectSubFolder newFolder) {
+        if(findFolder(newFolder.getName()) != null)
+            return newFolder;
+
+        newFolder.setPhysical(physical);
+        if(physical) {
+            if(!newFolder.getPath().exists())
+                newFolder.getPath().mkdir();
+        }
         subFolders.add(newFolder);
         return newFolder;
     }
@@ -79,13 +106,13 @@ public class ProjectSubFolder {
         fileList.remove(file);
     }
 
-    public int findFolder(String name) {
+    public ProjectSubFolder findFolder(String name) {
         for(int i=0; i < subFolders.size(); ++i) {
             ProjectSubFolder folder = subFolders.elementAt(i);
             if(folder.getName().equals(name))
-                return i;
+                return folder;
         }
-        return -1;
+        return null;
     }
 
     public boolean containsFile(File file) {
@@ -111,6 +138,8 @@ public class ProjectSubFolder {
     public Element toXML() {
         Element elem = new Element("subFolder");
         elem.setAttribute("name", folderName);
+        if(createdByUser)
+            elem.setAttribute("user", "true");
 
         for(int i=0; i < subFolders.size(); ++i) {
             ProjectSubFolder sub = subFolders.elementAt(i);
@@ -119,7 +148,7 @@ public class ProjectSubFolder {
         }
 
         for(int i=0; i < fileList.size(); ++i) {
-            File file = (File)fileList.elementAt(i);
+            File file = fileList.elementAt(i);
             Element fileElem = new Element("product");
             fileElem.setAttribute("path", file.getAbsolutePath());
             elem.addContent(fileElem);
@@ -136,6 +165,9 @@ public class ProjectSubFolder {
                 if(child.getName().equals("subFolder")) {
                     Attribute attrib = child.getAttribute("name");
                     ProjectSubFolder subFolder = addSubFolder(attrib.getValue());
+                    Attribute attribUser = child.getAttribute("user");
+                    if(attribUser != null && attrib.getValue().equals("true"))
+                        createdByUser = true;
                     subFolder.fromXML(child, folderList, prodList);
                 } else if(child.getName().equals("product")) {
                     Attribute attrib = child.getAttribute("path");

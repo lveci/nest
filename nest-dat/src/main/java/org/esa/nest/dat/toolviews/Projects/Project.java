@@ -78,7 +78,7 @@ public class Project extends Observable {
 
                 if(findSubFolders(f, newProjFolder))
                     hasProducts = true;
-                else 
+                else if(!newProjFolder.isCreatedByUser())
                     projSubFolder.removeSubFolder(newProjFolder);
             } else {
                 ProductReader reader = ProductIO.getProductReaderForFile(f);
@@ -117,19 +117,33 @@ public class Project extends Observable {
         stacksFolder.setRemoveable(false);
         ProjectSubFolder importedFolder = projectSubFolders.addSubFolder("Imported Products");
         importedFolder.setRemoveable(false);
-        ProjectSubFolder processedFolder = projectSubFolders.addSubFolder("Processed Products");
+        ProjectSubFolder processedFolder = new ProjectSubFolder(projectFolder, "Processed Products");
+        projectSubFolders.addSubFolder(processedFolder);
         processedFolder.setRemoveable(false);
         processedFolder.setPhysical(true);
-        processedFolder.addSubFolder("Calibrated Products");
-        processedFolder.addSubFolder("Coregistered Products");
-        processedFolder.addSubFolder("Orthorectified Products");
 
-        findSubFolders(projectFolder, processedFolder);
+        findSubFolders(processedFolder.getPath(), processedFolder);
+
+        ProjectSubFolder newFolder = processedFolder.addSubFolder("Calibrated Products");
+        newFolder.setCreatedByUser(true);
+        newFolder = processedFolder.addSubFolder("Coregistered Products");
+        newFolder.setCreatedByUser(true);
+        newFolder = processedFolder.addSubFolder("Orthorectified Products");
+        newFolder.setCreatedByUser(true);
+
+        VisatApp.getApp().getPreferences().setPropertyString(
+                BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, projectFolder.getAbsolutePath());
     }
 
     private void addImportedProduct(Product product) {
         if(projectSubFolders.containsFile(product.getFileLocation()))
             return;
+        
+        ProjectSubFolder processedFolder = projectSubFolders.findFolder("Processed Products");
+        findSubFolders(processedFolder.getPath(), processedFolder);
+        if(projectSubFolders.containsFile(product.getFileLocation()))
+            return;
+
         ProjectSubFolder importFolder = projectSubFolders.addSubFolder("Imported Products");
         ProjectSubFolder destFolder = importFolder;
         String[] formats = product.getProductReader().getReaderPlugIn().getFormatNames();
@@ -143,7 +157,8 @@ public class Project extends Observable {
         PromptDialog dlg = new PromptDialog("New Folder", "Name", "");
         dlg.show();
         if(dlg.IsOK()) {
-            subFolder.addSubFolder(dlg.getValue());
+            ProjectSubFolder newFolder = subFolder.addSubFolder(dlg.getValue());
+            newFolder.setCreatedByUser(true);
             notifyEvent();
         }
     }
@@ -233,9 +248,6 @@ public class Project extends Observable {
         }
 
         loadProducts(folderList, prodList);
-
-        VisatApp.getApp().getPreferences().setPropertyString(
-                BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, projectFolder.getAbsolutePath());
 
         notifyEvent();
     }
