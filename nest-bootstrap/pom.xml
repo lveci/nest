@@ -64,10 +64,6 @@
             <artifactId>jcommon</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.lowagie</groupId>
-            <artifactId>itext</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.help</groupId>
             <artifactId>jhall</artifactId>
         </dependency>
@@ -108,7 +104,12 @@
             <artifactId>junit</artifactId>
             <scope>compile</scope>
         </dependency>
-		<dependency>
+        <dependency>
+            <groupId>ncsa.hdf</groupId>
+            <artifactId>lib-hdf</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>javax.media</groupId>
             <artifactId>jogl</artifactId>
 		    <version>1.0.0</version>

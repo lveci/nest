@@ -2,6 +2,7 @@
 package org.esa.nest.dat;
 
 import com.jidesoft.action.CommandBar;
+import com.jidesoft.action.CommandMenuBar;
 import org.esa.beam.framework.ui.*;
 import org.esa.beam.framework.ui.application.ApplicationDescriptor;
 import org.esa.beam.visat.*;
@@ -42,6 +43,30 @@ public final class DatApp extends VisatApp {
         return toolBar;
     }
 
+    /**
+     * Overrides the base class version in order to creates the menu bar for VISAT.
+     */
+    @Override
+    protected CommandBar createMainMenuBar() {
+        final CommandMenuBar menuBar = new CommandMenuBar("Main Menu");
+        menuBar.setHidable(false);
+        menuBar.setStretch(true);
+
+        menuBar.add(createJMenu("file", "File", 'F')); /*I18N*/
+        menuBar.add(createJMenu("edit", "Edit", 'E')); /*I18N*/
+        menuBar.add(createJMenu("view", "View", 'V'));  /*I18N*/
+        menuBar.add(createJMenu("data", "Analysis", 'A')); /*I18N*/
+        menuBar.add(createJMenu("tools", "Utilities", 'T')); /*I18N*/
+        menuBar.add(createJMenu("sartools", "SAR Tools", 'T')); /*I18N*/
+        menuBar.add(createJMenu("geometry", "Geometry", 'T')); /*I18N*/
+        menuBar.add(createJMenu("insar", "InSAR", 'T')); /*I18N*/
+        menuBar.add(createJMenu("window", "Window", 'W')); /*I18N*/
+        menuBar.add(createJMenu("help", "Help", 'H')); /*I18N*/
+
+        return menuBar;
+    }
+
+    @Override
     protected CommandBar createAnalysisToolBar() {
         // context of action in module.xml used as key
         final CommandBar toolBar = new CommandBar("analysisToolBar");
@@ -50,6 +75,7 @@ public final class DatApp extends VisatApp {
 
         addCommandsToToolBar(toolBar, new String[]{
                 "openGraphBuilderDialog",
+                "openInformationDialog",
         });
 
         return toolBar;
