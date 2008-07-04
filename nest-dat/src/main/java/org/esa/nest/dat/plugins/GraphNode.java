@@ -51,6 +51,8 @@ public class GraphNode {
     void initParameters() {
 
         final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(node.getOperatorName());
+        if(operatorSpi == null) return;
+
         ValueContainerFactory factory = new ValueContainerFactory(new ParameterDescriptorFactory());
         ValueContainer valueContainer = factory.createMapBackedValueContainer(operatorSpi.getOperatorClass(), parameterMap);
 

@@ -24,7 +24,7 @@ public class TestGraphNode extends TestCase {
     }
 
     public void setUp() throws Exception {
-        node = new Node("id", "testNodeOp");
+        node = new Node("id", "readOp");
         Xpp3Dom parameters = new Xpp3Dom("parameters");
         node.setConfiguration(parameters);
 
