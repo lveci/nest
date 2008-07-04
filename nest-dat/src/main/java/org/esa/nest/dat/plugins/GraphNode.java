@@ -53,8 +53,8 @@ public class GraphNode {
         final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(node.getOperatorName());
         if(operatorSpi == null) return;
 
-        ValueContainerFactory factory = new ValueContainerFactory(new ParameterDescriptorFactory());
-        ValueContainer valueContainer = factory.createMapBackedValueContainer(operatorSpi.getOperatorClass(), parameterMap);
+        ParameterDescriptorFactory parameterDescriptorFactory = new ParameterDescriptorFactory();
+        ValueContainer valueContainer = ValueContainer.createMapBacked(parameterMap, operatorSpi.getOperatorClass(), parameterDescriptorFactory);
 
         Xpp3Dom config = node.getConfiguration();
         int count = config.getChildCount();
