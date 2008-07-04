@@ -1,8 +1,10 @@
 package org.esa.nest.dat.plugins;
 
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
+import com.bc.ceres.binding.*;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.framework.gpf.internal.Xpp3DomElement;
 import org.esa.beam.framework.gpf.graph.Node;
 import org.esa.beam.framework.gpf.graph.NodeSource;
@@ -48,13 +50,37 @@ public class GraphNode {
 
     void initParameters() {
 
+        final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(node.getOperatorName());
+        ValueContainerFactory factory = new ValueContainerFactory(new ParameterDescriptorFactory());
+        ValueContainer valueContainer = factory.createMapBackedValueContainer(operatorSpi.getOperatorClass(), parameterMap);
+
         Xpp3Dom config = node.getConfiguration();
         int count = config.getChildCount();
         for (int i = 0; i < count; ++i) {
             Xpp3Dom child = config.getChild(i);
-
-            parameterMap.put(child.getName(), child.getValue());
+            String name = child.getName();
+            
+            try {
+                Converter converter = getConverter(valueContainer, name);
+                parameterMap.put(name, converter.parse(child.getValue()));
+            } catch(ConversionException e) {
+                throw new IllegalArgumentException(name);
+            }
         }
+    }
+
+
+    private static Converter getConverter(ValueContainer valueContainer, String name) {
+        final ValueModel[] models = valueContainer.getModels();
+
+        for (ValueModel model : models) {
+
+            final ValueDescriptor descriptor = model.getDescriptor();
+            if(descriptor != null && descriptor.getName().equals(name)) {
+                return descriptor.getConverter();
+            }
+        }
+        return null;
     }
 
     void setDisplayParameters(Xpp3Dom params) {
