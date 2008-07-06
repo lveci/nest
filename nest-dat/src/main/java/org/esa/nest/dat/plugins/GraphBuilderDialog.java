@@ -17,6 +17,8 @@ import javax.swing.event.ChangeEvent;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 /**
  *  Provides the User Interface for creating, loading and saving Graphs
@@ -38,6 +40,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
     private final GraphExecuter graphEx;
     private int graphCount;
+    private Date executeStartTime;
 
     //TabbedPanel
     private JTabbedPane tabbedPanel;
@@ -193,6 +196,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
                     statusLabel.setText(e.getMessage());
                 }
             } else {
+                progressBar.setValue(0);
                 progBarMonitor = new ProgressBarProgressMonitor(progressBar, null);
                 final SwingWorker processThread = new ProcessThread(progBarMonitor);
                 processThread.execute();
@@ -215,6 +219,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
                 GraphExecuter.IncrementWriterFiles(graph, graphCount);
 
+                progressBar.setValue(0);
                 progBarMonitor = new ProgressBarProgressMonitor(progressBar, null);
                 graphEx.recreateGraphContext();
                 graphEx.executeGraph(progBarMonitor);
@@ -363,10 +368,20 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
             pm.beginTask("Processing Graph...", 10);
             try {
+                executeStartTime = Calendar.getInstance().getTime();
                 graphEx.executeGraph(pm);
+
             } catch(Exception e) {
                 System.out.print(e.getMessage());
             } finally {
+                Date now = Calendar.getInstance().getTime();
+                long diff = (now.getTime() - executeStartTime.getTime()) / 1000;
+                if(diff > 120) {
+                    float minutes = diff / 60f;
+                    statusLabel.setText("Processing completed in " + minutes + " minutes");
+                } else {
+                    statusLabel.setText("Processing completed in " + diff + " seconds");
+                }
                 pm.done();
             }
             return graphEx;
