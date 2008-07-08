@@ -41,6 +41,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private final GraphExecuter graphEx;
     private int graphCount;
     private Date executeStartTime;
+    private boolean isProcessing = false;
 
     //TabbedPanel
     private JTabbedPane tabbedPanel;
@@ -300,7 +301,8 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
      */
     boolean ValidateAllNodes() {
 
-        //todo check for correct number of sources and possibly source types?
+        if(isProcessing) return false;
+        
         UIValidation validation = null;
         StringBuilder msg = new StringBuilder(100);
         Vector nodeList = graphEx.GetGraphNodes();
@@ -369,6 +371,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
             pm.beginTask("Processing Graph...", 10);
             try {
                 executeStartTime = Calendar.getInstance().getTime();
+                isProcessing = true;
                 graphEx.executeGraph(pm);
 
             } catch(Exception e) {
@@ -382,6 +385,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
                 } else {
                     statusLabel.setText("Processing completed in " + diff + " seconds");
                 }
+                isProcessing = false;
                 pm.done();
             }
             return graphEx;

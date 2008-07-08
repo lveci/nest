@@ -128,8 +128,8 @@ public class Project extends Observable {
         newFolder.setCreatedByUser(true);
         newFolder = processedFolder.addSubFolder("Coregistered Products");
         newFolder.setCreatedByUser(true);
-        newFolder = processedFolder.addSubFolder("Orthorectified Products");
-        newFolder.setCreatedByUser(true);
+        //newFolder = processedFolder.addSubFolder("Orthorectified Products");
+        //newFolder.setCreatedByUser(true);
 
         VisatApp.getApp().getPreferences().setPropertyString(
                 BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, projectFolder.getAbsolutePath());
