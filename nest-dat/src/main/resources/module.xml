@@ -38,12 +38,6 @@
                 <frameIcon>/org/esa/nest/dat/images/frame-icon.png</frameIcon>
                 <image>/org/esa/nest/dat/images/about.jpg</image>
                 <excludedActions>
-                    <!--id>openGeoCodingInfoDialog</id-->
-                    <!--id>openStatisticsDialog</id-->
-                    <!--id>openHistogramDialog</id-->
-                    <!--id>openScatterPlotDialog</id-->
-                    <!--id>openProfilePlotDialog</id-->
-                    <!--id>openCoordListDialog</id-->
                     <id>orthorectification</id>
                     <id>showDataSources</id>
                     <id>showUpdateDialog</id>
