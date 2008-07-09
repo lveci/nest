@@ -9,7 +9,6 @@ import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.gpf.graph.Graph;
 import org.esa.nest.util.DatUtils;
-import org.esa.nest.dat.DatContext;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
@@ -17,8 +16,6 @@ import javax.swing.event.ChangeEvent;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 
 /**
  *  Provides the User Interface for creating, loading and saving Graphs
@@ -29,6 +26,8 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private static final ImageIcon saveIcon = DatUtils.LoadIcon("org/esa/nest/icons/save.png");
     private static final ImageIcon loadIcon = DatUtils.LoadIcon("org/esa/nest/icons/open.png");
     private static final ImageIcon clearIcon = DatUtils.LoadIcon("org/esa/nest/icons/edit-clear.png");
+
+    private AppContext appContext;
     private JPanel mainPanel;
     private GraphPanel graphPanel;
     private JLabel statusLabel;
@@ -47,11 +46,12 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private JTabbedPane tabbedPanel;
     private static final ImageIcon OpIcon = UIUtils.loadImageIcon("icons/cog_add.png");
 
-    public GraphBuilderDialog(AppContext appContext, String title, String helpID) {
-         super(appContext.getApplicationWindow(), title, 0, helpID);
+    public GraphBuilderDialog(AppContext theAppContext, String title, String helpID) {
+        super(theAppContext.getApplicationWindow(), title, 0, helpID);
 
-         graphEx = new GraphExecuter();
-         graphEx.addObserver(this);
+        appContext = theAppContext;
+        graphEx = new GraphExecuter();
+        graphEx.addObserver(this);
 
         initUI();
         super.getJDialog().setMinimumSize(new Dimension(500, 700));
@@ -335,26 +335,30 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
      */
     public void update(java.util.Observable subject, java.lang.Object data) {
 
-        GraphExecuter.GraphEvent event = (GraphExecuter.GraphEvent)data;
-        GraphNode node = (GraphNode)event.data;
-        String opID = node.getID();
-        if(event.eventType == GraphExecuter.events.ADD_EVENT) {
+        try {
+            GraphExecuter.GraphEvent event = (GraphExecuter.GraphEvent)data;
+            GraphNode node = (GraphNode)event.data;
+            String opID = node.getID();
+            if(event.eventType == GraphExecuter.events.ADD_EVENT) {
 
-            tabbedPanel.addTab(opID, null, CreateOperatorTab(node), opID + " Operator");
-        } else if(event.eventType == GraphExecuter.events.REMOVE_EVENT) {
+                tabbedPanel.addTab(opID, null, CreateOperatorTab(node), opID + " Operator");
+            } else if(event.eventType == GraphExecuter.events.REMOVE_EVENT) {
 
-            int index = tabbedPanel.indexOfTab(opID);
-            tabbedPanel.remove(index);
-        } else if(event.eventType == GraphExecuter.events.SELECT_EVENT) {
+                int index = tabbedPanel.indexOfTab(opID);
+                tabbedPanel.remove(index);
+            } else if(event.eventType == GraphExecuter.events.SELECT_EVENT) {
 
-            int index = tabbedPanel.indexOfTab(opID);
-            tabbedPanel.setSelectedIndex(index);
+                int index = tabbedPanel.indexOfTab(opID);
+                tabbedPanel.setSelectedIndex(index);
+            }
+        } catch(Exception e) {
+            statusLabel.setText(e.getMessage());   
         }
     }
 
-    private static JComponent CreateOperatorTab(GraphNode node) {
+    private JComponent CreateOperatorTab(GraphNode node) {
 
-        return node.GetOperatorUI().CreateOpTab(node.getOperatorName(), node.getParameterMap(), new DatContext(""));
+        return node.GetOperatorUI().CreateOpTab(node.getOperatorName(), node.getParameterMap(), appContext);
     }
 
     private class ProcessThread extends SwingWorker<GraphExecuter, Object> {

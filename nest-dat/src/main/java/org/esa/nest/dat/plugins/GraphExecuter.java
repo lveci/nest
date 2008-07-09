@@ -11,7 +11,6 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.graph.*;
 import org.esa.nest.util.DatUtils;
 
-import javax.swing.*;
 import java.util.*;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -167,6 +166,12 @@ public class GraphExecuter extends Observable {
         if(IsGraphComplete()) {
             AssignAllParameters();
             recreateGraphContext();
+
+            for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
+            {
+                GraphNode n = (GraphNode) e.nextElement();
+                n.setSourceProducts(graphContext.getNodeContext(n.getNode()).getSourceProducts());
+            }
         }
     }
 
@@ -260,7 +265,7 @@ public class GraphExecuter extends Observable {
 
         Node[] nodes = graph.getNodes();
         for(Node n : nodes) {
-            if(n.getOperatorName().equalsIgnoreCase("StackReader")) {
+            if(n.getOperatorName().equalsIgnoreCase("Stack-Reader")) {
                 StackNode stackNode = new StackNode();
                 stackNode.nodeID = n.getId();
 

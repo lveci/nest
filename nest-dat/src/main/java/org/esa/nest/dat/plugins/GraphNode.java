@@ -8,8 +8,9 @@ import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.framework.gpf.internal.Xpp3DomElement;
 import org.esa.beam.framework.gpf.graph.Node;
 import org.esa.beam.framework.gpf.graph.NodeSource;
-import org.esa.beam.framework.gpf.ui.OperatorUI;
+import org.esa.beam.framework.gpf.OperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
+import org.esa.beam.framework.datamodel.Product;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -228,6 +229,12 @@ public class GraphNode {
 
     UIValidation validateParameterMap() {
         return operatorUI.validateParameters();
+    }
+
+    void setSourceProducts(Product[] products) {
+        if(operatorUI != null) {
+            operatorUI.setSourceProducts(products);
+        }
     }
 
     void updateParameterMap(Xpp3DomElement parentElement) {
