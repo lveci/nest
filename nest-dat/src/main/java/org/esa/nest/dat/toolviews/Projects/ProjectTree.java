@@ -100,12 +100,20 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                 createMenuItem(popup, "Load Project...");
                 createMenuItem(popup, "Save Project As...");
                 createMenuItem(popup, "Close Project");
+                createMenuItem(popup, "Refresh Project");
                 addSeparator(popup);
                 createMenuItem(popup, "Expand All");
             }
+            if(folder.getFolderType() == ProjectSubFolder.FolderType.STACK) {
+                addSeparator(popup);
+                createMenuItem(popup, "New Stack...");
+            } else if(folder.getFolderType() == ProjectSubFolder.FolderType.GRAPH) {
+                addSeparator(popup);
+                createMenuItem(popup, "New Graph...");
+            }
         } else if (context instanceof File) {
-            createMenuItem(popup, "Open Product");
-            createMenuItem(popup, "Remove Product");
+            createMenuItem(popup, "Open");
+            createMenuItem(popup, "Remove");
         } 
 
         return popup;
@@ -130,33 +138,30 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
      */
     public void actionPerformed(ActionEvent e) {
 
+        DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
+
         if (e.getActionCommand().equals("Create Folder")) {
             ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
-            project.CreateNewFolder(subFolder);
+            project.createNewFolder(subFolder);
         } else if(e.getActionCommand().equals("Remove Folder")) {
-            DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
             if (parentNode != null) {
                 Object context = parentNode.getUserObject();
                 if (context != null) {
                     ProjectSubFolder parentFolder = (ProjectSubFolder) context;
                     ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
-                    project.DeleteFolder(parentFolder, subFolder);
+                    project.deleteFolder(parentFolder, subFolder);
                 }
             }
-        } else if(e.getActionCommand().equals("Remove Product")) {
-            DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
-            if (parentNode != null) {
-                Object context = parentNode.getUserObject();
-                if (context != null) {
-                    ProjectSubFolder parentFolder = (ProjectSubFolder) context;
-                    File file = (File) menuContext;
-                    project.RemoveFile(parentFolder, file);
-                }
+        } else if(e.getActionCommand().equals("Remove")) {
+            ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
+            if (parentNode != null && parentFolder != null) {
+                File file = (File) menuContext;
+                project.removeFile(parentFolder, file);
             }
-        } else if(e.getActionCommand().equals("Open Product")) {
-
+        } else if(e.getActionCommand().equals("Open")) {
+            ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
             File file = (File) menuContext;
-            VisatApp.getApp().openProduct(file);
+            Project.openFile(parentFolder, file);
         } else if(e.getActionCommand().equals("Expand All")) {
             expandAll();
         } else if(e.getActionCommand().equals("New Project...")) {
@@ -167,6 +172,14 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
             project.SaveProjectAs();
         } else if(e.getActionCommand().equals("Close Project")) {
             project.CloseProject();
+        } else if(e.getActionCommand().equals("Refresh Project")) {
+            project.refreshProjectTree();
+        } else if(e.getActionCommand().equals("New Stack...")) {
+            ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
+            project.createNewStack(subFolder);
+        } else if(e.getActionCommand().equals("New Graph...")) {
+            ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
+            Project.createNewGraph(subFolder);
         }
     }
 
@@ -231,11 +244,14 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                 if (clickCount > 1) {
                     TreePath selPath = getPathForLocation(event.getX(), event.getY());
                     DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
+                    DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) node.getParent();
 
                     Object o = node.getUserObject();
                     if (o instanceof File) {
                         File file = (File) o;
-                        VisatApp.getApp().openProduct(file);
+
+                        ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
+                        Project.openFile(parentFolder,file);
                     }
                 }
             }

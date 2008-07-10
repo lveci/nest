@@ -16,6 +16,7 @@ import javax.swing.event.ChangeEvent;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.io.File;
 
 /**
  *  Provides the User Interface for creating, loading and saving Graphs
@@ -270,10 +271,21 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
      * Loads a new graph from a file
      */
     private void LoadGraph() {
+        File file = DatUtils.GetFilePath("Load Graph", "XML", "xml", "GraphFile", false);
+        if(file == null) return;
+
+        LoadGraph(file);
+    }
+
+    /**
+     * Loads a new graph from a file
+     * @param file the graph file to load
+     */
+    public void LoadGraph(File file) {
         try {
             initGraphEnabled = false;
             tabbedPanel.removeAll();
-            graphEx.loadGraph();
+            graphEx.loadGraph(file);
             graphPanel.repaint();
             initGraphEnabled = true;
         } catch(GraphException e) {

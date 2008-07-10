@@ -3,9 +3,13 @@ package org.esa.nest.dat.toolviews.Projects;
 import org.esa.nest.util.XMLSupport;
 import org.esa.nest.util.DatUtils;
 import org.esa.nest.dat.dialogs.PromptDialog;
+import org.esa.nest.dat.dialogs.StackDialog;
+import org.esa.nest.dat.plugins.GraphBuilderDialog;
+import org.esa.nest.dat.DatContext;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.framework.ui.product.ProductTreeListener;
 import org.esa.beam.framework.ui.BasicApp;
+import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductIO;
@@ -45,7 +49,7 @@ public class Project extends Observable {
         return _instance;
     }
 
-    private void notifyEvent() {
+    void notifyEvent() {
         setChanged();
         notifyObservers();
         clearChanged();
@@ -81,8 +85,17 @@ public class Project extends Observable {
                 else if(!newProjFolder.isCreatedByUser())
                     projSubFolder.removeSubFolder(newProjFolder);
             } else {
-                ProductReader reader = ProductIO.getProductReaderForFile(f);
-                if (reader != null) {
+                boolean found = false;
+                ProjectSubFolder.FolderType folderType = projSubFolder.getFolderType();
+                if(folderType == ProjectSubFolder.FolderType.PRODUCT) {
+                    ProductReader reader = ProductIO.getProductReaderForFile(f);
+                    found = reader != null;
+                } else if(folderType == ProjectSubFolder.FolderType.STACK ||
+                        folderType == ProjectSubFolder.FolderType.GRAPH) {
+                    found = f.getName().toLowerCase().endsWith(".xml");
+                }
+
+                if(found) {
                     projSubFolder.addFile(f);
                     hasProducts = true;
                 }
@@ -111,18 +124,30 @@ public class Project extends Observable {
         projectFile = file;
         projectFolder = file.getParentFile();
 
-        projectSubFolders = new ProjectSubFolder(projectFolder, getProjectName());
+        projectSubFolders = new ProjectSubFolder(projectFolder, getProjectName(), false,
+                                                ProjectSubFolder.FolderType.ROOT);
         projectSubFolders.setRemoveable(false);
-        ProjectSubFolder stacksFolder = projectSubFolders.addSubFolder("Stacks");
+
+        ProjectSubFolder stacksFolder = new ProjectSubFolder(
+                new File(projectFolder, "Stacks"), "Stacks", true, ProjectSubFolder.FolderType.STACK);
+        projectSubFolders.addSubFolder(stacksFolder);
         stacksFolder.setRemoveable(false);
+
+        ProjectSubFolder graphsFolder = new ProjectSubFolder(
+                new File(projectFolder, "Graphs"), "Graphs", true, ProjectSubFolder.FolderType.GRAPH);
+        projectSubFolders.addSubFolder(graphsFolder);
+        graphsFolder.setRemoveable(false);
+
         ProjectSubFolder importedFolder = projectSubFolders.addSubFolder("Imported Products");
         importedFolder.setRemoveable(false);
-        ProjectSubFolder processedFolder = new ProjectSubFolder(projectFolder, "Processed Products");
+
+        ProjectSubFolder processedFolder = new ProjectSubFolder(
+                new File(projectFolder, "Processed Products"), "Processed Products", true,
+                ProjectSubFolder.FolderType.PRODUCT);
         projectSubFolders.addSubFolder(processedFolder);
         processedFolder.setRemoveable(false);
-        processedFolder.setPhysical(true);
 
-        findSubFolders(processedFolder.getPath(), processedFolder);
+        refreshProjectTree();
 
         ProjectSubFolder newFolder = processedFolder.addSubFolder("Calibrated Products");
         newFolder.setCreatedByUser(true);
@@ -139,8 +164,7 @@ public class Project extends Observable {
         if(projectSubFolders.containsFile(product.getFileLocation()))
             return;
         
-        ProjectSubFolder processedFolder = projectSubFolders.findFolder("Processed Products");
-        findSubFolders(processedFolder.getPath(), processedFolder);
+        refreshProjectTree();
         if(projectSubFolders.containsFile(product.getFileLocation()))
             return;
 
@@ -153,7 +177,17 @@ public class Project extends Observable {
         destFolder.addFile(product.getFileLocation());
     }
 
-    public void CreateNewFolder(ProjectSubFolder subFolder) {
+    public void refreshProjectTree() {
+        ProjectSubFolder stacksFolder = projectSubFolders.findFolder("Stacks");
+        findSubFolders(stacksFolder.getPath(), stacksFolder);
+        ProjectSubFolder graphsFolder = projectSubFolders.findFolder("Graphs");
+        findSubFolders(graphsFolder.getPath(), graphsFolder);
+        ProjectSubFolder processedFolder = projectSubFolders.findFolder("Processed Products");
+        findSubFolders(processedFolder.getPath(), processedFolder);
+        notifyEvent();
+    }
+
+    public void createNewFolder(ProjectSubFolder subFolder) {
         PromptDialog dlg = new PromptDialog("New Folder", "Name", "");
         dlg.show();
         if(dlg.IsOK()) {
@@ -163,13 +197,44 @@ public class Project extends Observable {
         }
     }
 
-    public void DeleteFolder(ProjectSubFolder parentFolder, ProjectSubFolder subFolder) {
+    public void createNewStack(ProjectSubFolder subFolder) {
+        StackDialog dlg = new StackDialog("New Stack", "Name", "");
+        dlg.show();
+        if(dlg.IsOK()) {
+            //ProjectSubFolder newFolder = subFolder.addSubFolder(dlg.getValue());
+            //newFolder.setCreatedByUser(true);
+            notifyEvent();
+        }
+    }
+
+    public static void createNewGraph(ProjectSubFolder subFolder) {
+        ModelessDialog dialog = new GraphBuilderDialog(new DatContext(""), "Graph Builder", null);
+        dialog.show();
+    }
+
+    public static void openFile(ProjectSubFolder parentFolder, File file) {
+        if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.STACK) {
+
+        } else if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.GRAPH) {
+            GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "Graph Builder", null);
+            dialog.show();
+            dialog.LoadGraph(file);
+        } else if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.PRODUCT) {
+            VisatApp.getApp().openProduct(file);
+        }
+    }
+
+    public void deleteFolder(ProjectSubFolder parentFolder, ProjectSubFolder subFolder) {
         parentFolder.removeSubFolder(subFolder);
         notifyEvent();
     }
 
-    public void RemoveFile(ProjectSubFolder parentFolder, File file) {
+    public void removeFile(ProjectSubFolder parentFolder, File file) {
         parentFolder.removeFile(file);
+        if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.STACK ||
+           parentFolder.getFolderType() == ProjectSubFolder.FolderType.GRAPH)
+            file.delete();
+
         notifyEvent();
     }
 

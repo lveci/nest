@@ -20,7 +20,8 @@ public class TestProjectSubFolders extends TestCase {
     private File projectFolder = new File(".");
 
     public void setUp() throws Exception {
-        projectSubFolders = new ProjectSubFolder(projectFolder, "Project");
+        projectSubFolders = new ProjectSubFolder(projectFolder, "Project", false,
+                ProjectSubFolder.FolderType.ROOT);
     }
 
     public void tearDown() throws Exception {
@@ -55,7 +56,8 @@ public class TestProjectSubFolders extends TestCase {
 
         Element xmlElement = projectSubFolders.toXML();
 
-        ProjectSubFolder loadedProject = new ProjectSubFolder(new File("."), "Project");
+        ProjectSubFolder loadedProject = new ProjectSubFolder(new File("."), "Project", false,
+                ProjectSubFolder.FolderType.ROOT);
 
         Vector folderList = new Vector(30);
         Vector prodList = new Vector(50);

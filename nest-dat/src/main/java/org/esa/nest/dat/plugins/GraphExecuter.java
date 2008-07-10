@@ -213,9 +213,8 @@ public class GraphExecuter extends Observable {
         }
     }
 
-    void loadGraph() throws GraphException {
+    void loadGraph(File filePath) throws GraphException {
 
-        File filePath = DatUtils.GetFilePath("Load Graph", "XML", "xml", "GraphFile", false);
         try {
             if(filePath == null) return;
             FileReader fileReader = new FileReader(filePath.getAbsolutePath());

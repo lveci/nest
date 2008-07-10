@@ -62,7 +62,7 @@ public class GraphNode {
         for (int i = 0; i < count; ++i) {
             Xpp3Dom child = config.getChild(i);
             String name = child.getName();
-            
+
             try {
                 Converter converter = getConverter(valueContainer, name);
                 parameterMap.put(name, converter.parse(child.getValue()));
@@ -79,7 +79,8 @@ public class GraphNode {
         for (ValueModel model : models) {
 
             final ValueDescriptor descriptor = model.getDescriptor();
-            if(descriptor != null && descriptor.getName().equals(name)) {
+            if(descriptor != null && (descriptor.getName().equals(name) ||
+               (descriptor.getAlias() != null && descriptor.getAlias().equals(name)))) {
                 return descriptor.getConverter();
             }
         }

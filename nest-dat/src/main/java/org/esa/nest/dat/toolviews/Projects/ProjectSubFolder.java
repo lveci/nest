@@ -22,10 +22,18 @@ public class ProjectSubFolder {
     private boolean removeable = true;
     private boolean physical = false;
     private boolean createdByUser = false;
+    private FolderType folderType;
 
-    ProjectSubFolder(File newPath, String name) {
+    enum FolderType { ROOT, STACK, GRAPH, PRODUCT }
+
+    ProjectSubFolder(File newPath, String name, boolean isPhysical, FolderType type) {
         path = newPath;
         folderName = name;
+        physical = isPhysical;
+        folderType = type;
+
+        if(physical && !path.exists())
+            path.mkdir();
     }
 
     void setCreatedByUser(boolean flag) {
@@ -34,6 +42,10 @@ public class ProjectSubFolder {
 
     boolean isCreatedByUser() {
         return createdByUser;
+    }
+
+    FolderType getFolderType() {
+        return folderType;
     }
 
     void setRemoveable(boolean flag) {
@@ -75,12 +87,7 @@ public class ProjectSubFolder {
         if(newFolder != null)
             return newFolder;
 
-        newFolder = new ProjectSubFolder(new File(path, name), name);
-        newFolder.setPhysical(physical);
-        if(physical) {
-            if(!newFolder.getPath().exists())
-                newFolder.getPath().mkdir();
-        }
+        newFolder = new ProjectSubFolder(new File(path, name), name, physical, folderType);
         subFolders.add(newFolder);
         return newFolder;
     }
