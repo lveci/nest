@@ -157,7 +157,7 @@ public class Project extends Observable {
         //newFolder.setCreatedByUser(true);
 
         VisatApp.getApp().getPreferences().setPropertyString(
-                BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, projectFolder.getAbsolutePath());
+                BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, processedFolder.getPath().getAbsolutePath());
     }
 
     private void addImportedProduct(Product product) {
