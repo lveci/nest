@@ -96,7 +96,7 @@
             <class>org.esa.nest.dat.actions.LoadProjectAction</class>
             <parent>file</parent>
             <text>Load Project...</text>
-            <accelerator>control O</accelerator>
+            <accelerator>control L</accelerator>
             <placeBefore>openProductGrabber</placeBefore>
             <shortDescr>Load a project</shortDescr>
             <description>Load a project</description>

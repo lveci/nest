@@ -100,6 +100,17 @@ public class JERSProductReader extends AbstractProductReader {
         return product;
     }
 
+    DecodeQualification checkProductQualification(File file) {
+        try {
+            _dataDir = new JERSProductDirectory(file.getParentFile());
+        } catch (Exception e) {
+            return DecodeQualification.UNABLE;
+        }
+        if(_dataDir.isJERS())
+            return DecodeQualification.INTENDED;
+        return DecodeQualification.SUITABLE;
+    }
+
     /**
      * {@inheritDoc}
      */

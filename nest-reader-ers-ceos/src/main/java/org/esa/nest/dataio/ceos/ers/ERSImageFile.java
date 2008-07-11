@@ -12,7 +12,7 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
 /*
- * $Id: ERSImageFile.java,v 1.8 2008-06-27 19:35:52 lveci Exp $
+ * $Id: ERSImageFile.java,v 1.9 2008-07-10 20:49:51 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,7 +32,7 @@ import java.io.IOException;
 /**
  * This class represents an image file of an ERS product.
  *
- * @version $Revision: 1.8 $ $Date: 2008-06-27 19:35:52 $
+ * @version $Revision: 1.9 $ $Date: 2008-07-10 20:49:51 $
  */
 class ERSImageFile {
 
@@ -185,7 +185,7 @@ class ERSImageFile {
         }
     }
 
-    private ImageRecord getImageRecord(final int line) throws IOException,
+    private final ImageRecord getImageRecord(final int line) throws IOException,
                                                               IllegalCeosFormatException {
         if (_imageRecords[line] == null) {
             _ceosReader.seek(_imageRecordLength * line + _startPosImageRecords);

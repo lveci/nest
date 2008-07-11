@@ -48,6 +48,7 @@ class JERSProductDirectory {
     private JERSImageFile[] _imageFiles;
     private JERSLeaderFile _leaderFile;
 
+    private String productType;
     private final int _sceneWidth;
     private final int _sceneHeight;
 
@@ -65,6 +66,7 @@ class JERSProductDirectory {
             _imageFiles[i] = new JERSImageFile(createInputStream(imageFileNames[i]));
         }
 
+        productType = _volumeDirectoryFile.getProductType();
         _sceneWidth = _imageFiles[0].getRasterWidth();
         _sceneHeight = _imageFiles[0].getRasterHeight();
         assertSameWidthAndHeightForAllImages();
@@ -73,7 +75,7 @@ class JERSProductDirectory {
     public Product createProduct() throws IOException,
                                           IllegalCeosFormatException {
         final Product product = new Product(getProductName(),
-                                            getProductType(),
+                                            productType,
                                             _sceneWidth, _sceneHeight);
         product.setFileLocation(_baseDir);
 
@@ -91,9 +93,12 @@ class JERSProductDirectory {
         return product;
     }
 
-    private String getProductType() throws IOException,
-                                           IllegalCeosFormatException {
-        return JERSConstants.PRODUCT_TYPE_PREFIX + _leaderFile.getProductLevel();
+    public boolean isJERS() {
+        return (productType.contains("JERS"));
+    }
+
+    public String getProductType() {
+        return productType;
     }
 
     private void addGeoCoding(final Product product) throws IllegalCeosFormatException,

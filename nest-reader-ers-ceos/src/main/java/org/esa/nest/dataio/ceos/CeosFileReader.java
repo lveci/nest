@@ -1,5 +1,5 @@
 /*
- * $Id: CeosFileReader.java,v 1.8 2008-05-27 20:45:24 lveci Exp $
+ * $Id: CeosFileReader.java,v 1.9 2008-07-10 20:49:51 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -23,7 +23,7 @@ import java.io.IOException;
  * A reader for reading files in the CEOS format
  *
  */
-public class CeosFileReader {
+public final class CeosFileReader {
 
     private static final String EM_EXPECTED_X_FOUND_Y_BYTES = "Expected bytes to read %d, but only found %d";
     private static final String EM_READING_X_TYPE = "Reading '%s'-Type";

@@ -1,7 +1,10 @@
 package org.esa.nest.dataio.ceos.ers;
 
 import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.nest.dataio.ceos.CEOSProductReaderPlugIn;
+
+import java.io.File;
 
 /**
  * The ReaderPlugIn for ERS CEOS products.
@@ -18,8 +21,15 @@ public class ERSProductReaderPlugIn extends CEOSProductReaderPlugIn {
      *
      * @return a new reader instance, never <code>null</code>
      */
+    @Override
     public ProductReader createReaderInstance() {
         return new ERSProductReader(this);
+    }
+
+    @Override
+    protected DecodeQualification checkProductQualification(File file) {
+        ERSProductReader reader = new ERSProductReader(this);
+        return reader.checkProductQualification(file);
     }
 
 }

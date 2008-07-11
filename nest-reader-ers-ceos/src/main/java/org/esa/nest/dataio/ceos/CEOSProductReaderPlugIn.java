@@ -47,10 +47,14 @@ public class CEOSProductReaderPlugIn implements ProductReaderPlugIn {
             };
             final File[] files = parentDir.listFiles(filter);
             if (files != null && files.length >= constants.getMinimumNumFiles()) {
-                return DecodeQualification.INTENDED;
+                return checkProductQualification(file);
             }
         }
         return DecodeQualification.UNABLE;
+    }
+
+    protected DecodeQualification checkProductQualification(File file) {
+        return DecodeQualification.SUITABLE;
     }
 
      public static File getFileFromInput(final Object input) {

@@ -77,18 +77,18 @@ public class ERSProductReader extends AbstractProductReader {
      * @throws java.io.IOException if an I/O error occurs
      */
     @Override
-    protected Product readProductNodesImpl() throws IOException,
-                                                    IllegalFileFormatException {
+    protected Product readProductNodesImpl() throws IOException {
         final ProductReaderPlugIn readerPlugIn = getReaderPlugIn();
         final Object input = getInput();
         if (readerPlugIn.getDecodeQualification(input) == DecodeQualification.UNABLE) {
             throw new IOException("Unsupported product format."); /*I18N*/
         }
         final File fileFromInput = getFileFromInput(getInput());
-        Product product = null;
+        Product product;
         try {
             _dataDir = new ERSProductDirectory(fileFromInput.getParentFile());
             product = _dataDir.createProduct();
+            product.setFileLocation(fileFromInput);
         } catch (IllegalCeosFormatException e) {
             final IOException ioException = new IOException(e.getMessage());
             ioException.initCause(e);
@@ -98,6 +98,17 @@ public class ERSProductReader extends AbstractProductReader {
         product.setModified(false);
 
         return product;
+    }
+
+    DecodeQualification checkProductQualification(File file) {
+        try {
+            _dataDir = new ERSProductDirectory(file.getParentFile());
+        } catch (Exception e) {
+            return DecodeQualification.UNABLE;
+        }
+        if(_dataDir.isERS())
+            return DecodeQualification.INTENDED;
+        return DecodeQualification.SUITABLE;
     }
 
     /**

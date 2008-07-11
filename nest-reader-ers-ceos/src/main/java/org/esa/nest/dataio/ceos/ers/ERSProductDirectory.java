@@ -50,7 +50,7 @@ class ERSProductDirectory {
         _volumeDirectoryFile = new ERSVolumeDirectoryFile(_baseDir);
         _leaderFile = new ERSLeaderFile(createInputStream(ERSVolumeDirectoryFile.getLeaderFileName()));
 
-        productType = _leaderFile.getProductType();
+        productType = _volumeDirectoryFile.getProductType();
         isProductSLC = productType.equals(SLC_PRODUCT_TYPE);
 
         final String[] imageFileNames = _volumeDirectoryFile.getImageFileNames();
@@ -69,12 +69,15 @@ class ERSProductDirectory {
         return isProductSLC;
     }
 
+    public boolean isERS() {
+        return (productType.contains("ERS-1") || productType.contains("ERS-2"));
+    }
+
     public Product createProduct() throws IOException,
                                           IllegalCeosFormatException {
         final Product product = new Product(getProductName(),
-                                            getProductType(),
+                                            productType,
                                             _sceneWidth, _sceneHeight);
-        product.setFileLocation(_baseDir);
 
         if(_imageFiles.length > 1) {
             int index = 1;
@@ -117,9 +120,8 @@ class ERSProductDirectory {
         return product;
     }
 
-    private String getProductType() throws IOException,
-                                           IllegalCeosFormatException {
-        return ERSConstants.PRODUCT_TYPE_PREFIX + _leaderFile.getProductLevel();
+    public String getProductType() {
+        return productType;
     }
 
     private void addGeoCoding(final Product product) throws IllegalCeosFormatException,
@@ -156,8 +158,7 @@ class ERSProductDirectory {
         _leaderFile = null;
     }
 
-    private Band createBand(final ERSImageFile ImageFile, String name) throws IOException,
-                                                                          IllegalCeosFormatException {
+    private Band createBand(final ERSImageFile ImageFile, String name) {
         final Band band = new Band(name, ProductData.TYPE_INT16,
                                    _sceneWidth, _sceneHeight);
 
