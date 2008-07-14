@@ -1,0 +1,25 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+
+    <symbolicName>nest-help</symbolicName>
+    <name>NEST Help</name>
+    <version>1B</version>
+    <packaging>dir</packaging>
+
+
+    <description>Provides the software user manual.</description>
+
+    <categories>System,Help</categories>
+
+    <dependency>
+        <module>beam-ui</module>
+    </dependency>
+
+    <extension point="beam-ui:helpSets">
+        <helpSet>
+            <id>nest-help</id>
+            <path>doc/help/nest.hs</path>
+        </helpSet>
+    </extension>
+
+</module>

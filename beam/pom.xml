@@ -84,10 +84,10 @@
         <module>beam-visat-rcp</module>
         <module>beam-visat</module>
         <module>beam-gpf</module>
-        <module>beam-gpf-docgen</module>
+        <!--module>beam-gpf-docgen</module-->
         <module>beam-processing</module>
         <module>beam-scripting</module>
-        <module>beam-help</module>
+        <!--module>beam-help</module-->
 
         <!--module>beam-meris-cloud</module-->
         <!--module>beam-meris-smac</module-->
@@ -96,7 +96,7 @@
         <!--module>beam-meris-ndvi</module-->
         <!--module>beam-aatsr-sst</module-->
         <!--module>beam-flhmci</module-->
-        <module>beam-mosaic</module>
+        <!--module>beam-mosaic</module-->
         <!--module>beam-binning</module-->
         <!--module>beam-unmix</module-->
         <!--module>beam-cluster</module-->

@@ -41,6 +41,7 @@
     <modules>
 		<module>beam</module>
 		<module>nest-bootstrap</module>
+		<module>nest-help</module>
 		<module>nest-core</module>
 		<module>nest-dat</module>
 		<module>nest-3d-view</module> 
