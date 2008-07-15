@@ -15,7 +15,6 @@
     <mapID target="beamDataSources" url="general/BeamDataSources.html"/>
     <mapID target="beamRelatedLinks" url="general/BeamRelatedLinks.html"/>
     <mapID target="beamDimapFormat" url="general/BeamDimapFormat.html"/>
-    <mapID target="pconvertTool" url="general/PConvertUsage.html"/>
     <mapID target="resamplingMethods" url="general/ResamplingMethods.html"/>
     <mapID target="envisatProducts" url="general/envisat-products/index.html"/> <!-- todo -->
 
@@ -29,7 +28,6 @@
     <mapID target="toolsMenu" url="visat/ToolsMenu.html"/>
     <mapID target="windowMenu" url="visat/WindowMenu.html"/>
     <mapID target="helpMenu" url="visat/HelpMenu.html"/>
-    <mapID target="moduleManager" url="visat/ModuleManager.html"/>
     <mapID target="productBrowser" url="visat/ProductBrowser.html"/>
     <mapID target="pixelInfoView" url="visat/ProductBrowser.html#pixelView"/>
     <mapID target="propertyEditor" url="visat/PropertyEditor.html"/>
@@ -96,6 +94,6 @@
     <mapID target="flipDialog" url="visat/DataFlip.html"/>
     <mapID target="pixelGeoCodingSetup" url="visat/PixelGeoCoding.html"/>
 
-    <mapID target="dataProcessors" url="processors/ProcessorCommons.html"/>
-
+	<mapID target="SpeckleFilterOp" url="operators/SpeckleFilterOp.html"/>
+	
 </map>
