@@ -96,8 +96,8 @@ public class ProjectSubFolder {
         if(findFolder(newFolder.getName()) != null)
             return newFolder;
 
-        newFolder.setPhysical(physical);
         if(physical) {
+            newFolder.setPhysical(physical);
             if(!newFolder.getPath().exists())
                 newFolder.getPath().mkdir();
         }
