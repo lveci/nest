@@ -136,10 +136,19 @@ public class DatUtils {
                 return outFile3;
         }
 
-        return findHomeFolder(File.separator + "config" + File.separator + filename);
+        return findInHomeFolder(File.separator + "config" + File.separator + filename);
     }
 
-    public static File findHomeFolder(String filename)
+    public static File findHomeFolder()
+    {
+        File homePath = SystemUtils.getBeamHomeDir();
+        String homePathStr = homePath.getAbsolutePath();
+        if(homePathStr.endsWith(".") && homePathStr.length() > 1)
+            homePathStr = homePathStr.substring(0, homePathStr.lastIndexOf(File.separator));
+        return new File(homePathStr);
+    }
+
+    public static File findInHomeFolder(String filename)
     {
         File homePath = SystemUtils.getBeamHomeDir();
         String homePathStr = homePath.getAbsolutePath();

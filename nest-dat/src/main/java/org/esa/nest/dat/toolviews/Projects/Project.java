@@ -115,8 +115,8 @@ public class Project extends Observable {
         return name;
     }
 
-    private void initProject(File file) {
-        if(productTreeListener == null) {
+    protected void initProject(File file) {
+        if(productTreeListener == null && VisatApp.getApp() != null) {
             productTreeListener = new Project.ProjectPTL();
             VisatApp.getApp().addProductTreeListener(productTreeListener);
         }
@@ -156,7 +156,8 @@ public class Project extends Observable {
         //newFolder = processedFolder.addSubFolder("Orthorectified Products");
         //newFolder.setCreatedByUser(true);
 
-        VisatApp.getApp().getPreferences().setPropertyString(
+        if(VisatApp.getApp() != null)
+            VisatApp.getApp().getPreferences().setPropertyString(
                 BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, processedFolder.getPath().getAbsolutePath());
     }
 

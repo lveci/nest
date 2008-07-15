@@ -2,8 +2,6 @@ package org.esa.nest.util;
 
 import junit.framework.TestCase;
 
-import java.util.Map;
-import java.util.Properties;
 import java.io.File;
 
 /**
@@ -27,7 +25,7 @@ public class TestDatUtils extends TestCase {
 
     public void testFindHomeFolder()
     {
-        File file = DatUtils.findHomeFolder(File.separator + "config" + File.separator + "settings.xml");
+        File file = DatUtils.findInHomeFolder(File.separator + "config" + File.separator + "settings.xml");
 
         assertTrue(file != null);
         assertTrue(file.exists());

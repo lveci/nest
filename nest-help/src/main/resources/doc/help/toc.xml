@@ -16,7 +16,7 @@
         <tocitem text="ENVISAT Products" target="envisatProducts"/>
     </tocitem>
 
-    <tocitem text="VISAT">
+    <tocitem text="DAT">
         <tocitem text="Introduction" target="visat"/>
         <tocitem text="Tools">
             <tocitem text="Import and Export Tools">
@@ -115,8 +115,20 @@
         </tocitem>
     </tocitem>
 
-	<tocitem text="Operaotors">
+	<tocitem text="Graph Processing">
+            <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>
+	</tocitem>
+	
+	<tocitem text="GPT">
+            <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>
+	</tocitem>
+	
+	<tocitem text="Operators">
             <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>
 	</tocitem>		
-			
+	
+	<tocitem text="Tutorials">
+            <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>
+	</tocitem>
+	
 </toc>
