@@ -1,27 +1,22 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
-    <symbolicName>nest-core</symbolicName>
+    <symbolicName>nest-op-coregistration</symbolicName>
     <version>1C</version>
-    <name>NEST Core</name>
-
-    <description>
-        NEST Core
-    </description>
-
-    <vendor>Array Systems Computing Inc</vendor>
+    <name>NEST Coregistration</name>
+    <description>NEST Coregistration</description>
+	
+	<vendor>Array Systems Computing Inc</vendor>
     <contactAddress>1120 Finch Ave W. Toronto (Canada)</contactAddress>
     <copyright>(C) 2007 by Array Systems Computing Inc</copyright>
     <url>http://www.array.ca/nest</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
-
-    <dependency>
-        <module>beam-core</module>
+	
+	<dependency>
+        <module>beam-visat</module>
+        <optional>true</optional>
     </dependency>
     <dependency>
-        <module>beam-visat-rcp</module>
+        <module>beam-gpf</module>
     </dependency>
-    
-    <categories>System</categories>
-
-
+	
 </module>

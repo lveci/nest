@@ -7,7 +7,7 @@
     <url>http://www.array.ca/nest</url>
     <groupId>org.esa.nest</groupId>
     <artifactId>nest</artifactId>
-    <version>1B</version>
+    <version>1C</version>
 
     <packaging>pom</packaging>
 
@@ -17,11 +17,6 @@
     </organization>
 
     <inceptionYear>2007</inceptionYear>
-
-    <issueManagement>
-        <system>JIRA</system>
-        <url>http://www.brockmann-consult.de/beam-issues</url>
-    </issueManagement>
 
     <licenses>
         <license>
@@ -52,7 +47,7 @@
 	    <module>nest-op-speckle-filter</module>
 	    <module>nest-op-asar-calibration</module>
 	    <!--module>nest-op-ers-calibration</module-->
-	    <module>nest-op-gcp-selection</module>
+	    <module>nest-op-coregistration</module>
 	    <module>nest-op-data-analysis</module>
 		<module>nest-op-wss-deburst</module>
   </modules>
@@ -65,60 +60,77 @@
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-launcher</artifactId>
-                <version>0.7</version>
+                <version>0.8-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-core</artifactId>
-                <version>0.7</version>
+                <version>0.8-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-binding</artifactId>
-                <version>0.7</version>
+                <version>0.8-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-ui</artifactId>
-                <version>0.7</version>
+                <version>0.8-SNAPSHOT</version>
             </dependency>
 
+			<dependency>
+                <groupId>com.bc.ceres</groupId>
+                <artifactId>ceres-binio</artifactId>
+                <version>0.5-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.bc.ceres</groupId>
+                <artifactId>ceres-glayer</artifactId>
+                <version>0.5-SNAPSHOT</version>
+            </dependency>
+			
             <!-- BEAM System Level Modules ############################################# -->
 
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-core</artifactId>
-                <version>4.2</version>
+                <version>4.5-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-gpf</artifactId>
-                <version>4.2</version>
+                <version>4.5-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-ui</artifactId>
-                <version>4.2</version>
+                <version>4.5-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-processing</artifactId>
-                <version>4.2</version>
+                <version>4.5-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-processing-chain</artifactId>
-                <version>4.2</version>
+                <version>4.5-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-visat-rcp</artifactId>
-                <version>4.2</version>
+                <version>4.5-SNAPSHOT</version>
             </dependency>
-
+			<dependency>
+                <groupId>org.esa.beam</groupId>
+                <artifactId>beam-visat</artifactId>
+                <version>4.5-SNAPSHOT</version>
+            </dependency>
+			
             <!-- BEAM Modules ############################################# -->
 
             <dependency>
@@ -144,7 +156,7 @@
             <dependency>
                 <groupId>org.esa.nest</groupId>
                 <artifactId>nest-core</artifactId>
-                <version>1B</version>
+                <version>1C</version>
             </dependency>
 
             <!-- JAI Libraries ############################################# -->

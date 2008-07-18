@@ -1,0 +1,3 @@
+org.esa.nest.gpf.GCPSelectionOperator$Spi
+org.esa.nest.gpf.CollocateOp$Spi
+org.esa.nest.gpf.WARPOperator$Spi
