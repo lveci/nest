@@ -30,4 +30,24 @@
 
     <categories>Processing</categories>
 
+    <extension point="beam-ui:actions">
+
+        <action>
+            <id>SlantRangeGroundRangeOp</id>
+            <class>org.esa.nest.dat.SRGROpAction</class>
+            <text>Slant Range to Ground Range</text>
+            <shortDescr>Converts a product to/from slant range to/from ground range</shortDescr>
+            <parent>geometry</parent>
+        </action>
+
+        <action>
+            <id>MultilookOp</id>
+            <class>org.esa.nest.dat.MultilookOpAction</class>
+            <text>Multilooking</text>
+            <shortDescr>Multilook an image</shortDescr>
+            <parent>sartools</parent>
+        </action>
+
+    </extension>
+
 </module>

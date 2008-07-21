@@ -1,1 +1,3 @@
 org.esa.nest.gpf.DataAnalysisOperator$Spi
+org.esa.nest.gpf.SRGROperator$Spi
+org.esa.nest.gpf.MultilookOperator$Spi
