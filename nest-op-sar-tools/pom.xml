@@ -7,10 +7,10 @@
   <modelVersion>4.0.0</modelVersion>
   
   <groupId>org.esa.nest</groupId>
-  <artifactId>nest-op-data-analysis</artifactId>
-  <name>NEST Data Analysis Operator</name>
+  <artifactId>nest-op-sar-tools</artifactId>
+  <name>NEST SAR Tools</name>
   <version>1C</version>
-  <description>Provides statistical analysis over the data</description>
+  <description>Provides various operators for processing on SAR data</description>
   
   <dependencies>
     <dependency>

@@ -2,8 +2,8 @@
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-op-data-analysis</symbolicName>
     <version>1C</version>
-    <name>nest-op-data-analysis</name>
-    <description>NEST Data Analysis Operator</description>
+    <name>nest-op-sar-tools</name>
+    <description>NEST SAR Tools</description>
 	
 	<vendor>Array Systems Computing Inc</vendor>
     <contactAddress>1120 Finch Ave W. Toronto (Canada)</contactAddress>
