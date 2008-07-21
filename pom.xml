@@ -46,9 +46,9 @@
 		<module>nest-op-filter</module>
 	    <module>nest-op-speckle-filter</module>
 	    <module>nest-op-asar-calibration</module>
-	    <!--module>nest-op-ers-calibration</module-->
+	    <module>nest-op-ers-calibration</module>
 	    <module>nest-op-coregistration</module>
-	    <module>nest-op-data-analysis</module>
+	    <module>nest-op-sar-tools</module>
 		<module>nest-op-wss-deburst</module>
   </modules>
 

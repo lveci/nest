@@ -34,7 +34,7 @@ public final class DatApp extends VisatApp {
         toolBar.addDockableBarListener(new ToolBarListener());
 
         addCommandsToToolBar(toolBar, new String[]{
-                "open",
+                "openRaster",
                 "save",
                 null,
                 "properties",

@@ -1,0 +1,38 @@
+<?xml version="1.0"?><project>
+  <parent>
+    <artifactId>nest</artifactId>
+    <groupId>org.esa.nest</groupId>
+    <version>1C</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  
+  <groupId>org.esa.nest</groupId>
+  <artifactId>nest-op-data-analysis</artifactId>
+  <name>NEST Data Analysis Operator</name>
+  <version>1C</version>
+  <description>Provides statistical analysis over the data</description>
+  
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.bc.ceres</groupId>
+      <artifactId>ceres-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.esa.beam</groupId>
+      <artifactId>beam-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.esa.beam</groupId>
+      <artifactId>beam-gpf</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.esa.beam</groupId>
+      <artifactId>beam-visat-rcp</artifactId>
+    </dependency>
+  </dependencies>
+  
+</project>

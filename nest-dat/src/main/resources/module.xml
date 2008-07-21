@@ -42,6 +42,7 @@
                     <id>showDataSources</id>
                     <id>showUpdateDialog</id>
                     <id>new</id>
+                    <id>open</id>
                     <id>reopen</id>
                     <id>createAsarNrcsBands</id>
                 </excludedActions>
@@ -75,6 +76,37 @@
     </extension>
 
     <extension point="beam-ui:actions">
+
+      <action>
+            <id>openRaster</id>
+            <class>org.esa.beam.visat.actions.OpenAction</class>
+            <parent>file</parent>
+            <text>Open Raster Dataset</text>
+            <mnemonic>O</mnemonic>
+            <accelerator>control O</accelerator>
+            <placeBefore>openVector</placeBefore>
+            <shortDescr>Open a data product.</shortDescr>
+            <description>Open a data product.</description>
+            <smallIcon>icons/Open16.gif</smallIcon>
+            <largeIcon>icons/Open24.gif</largeIcon>
+            <helpId>open</helpId>
+      </action>
+
+      <action>
+            <id>openVector</id>
+            <class>org.esa.beam.visat.actions.OpenAction</class>
+            <parent>file</parent>
+            <text>Open Vector Dataset</text>
+            <mnemonic>V</mnemonic>
+            <accelerator>control V</accelerator>
+            <placeBefore>newProject</placeBefore>
+            <shortDescr>Open a vector product.</shortDescr>
+            <description>Open a vector product.</description>
+            <smallIcon>icons/Open16.gif</smallIcon>
+            <largeIcon>icons/Open24.gif</largeIcon>
+            <helpId>open</helpId>
+      </action>
+
 
       <action>
             <id>newProject</id>
