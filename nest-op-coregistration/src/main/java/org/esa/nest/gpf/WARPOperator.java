@@ -46,7 +46,7 @@ public class WARPOperator extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(description = "The order of WARP polynomial function", interval = "[1, 3]", defaultValue = "1")
+    @Parameter(description = "The order of WARP polynomial function", interval = "[1, 3]", defaultValue = "2")
     private int warpPolynomialOrder;
 
     private Product masterProduct;
@@ -57,6 +57,7 @@ public class WARPOperator extends Operator {
 
     private ProductNodeGroup<Pin> masterGcpGroup;
     private ProductNodeGroup<Pin> slaveGcpGroup;
+    private ProductNodeGroup<Pin> targetGcpGroup;
 
     private WarpPolynomial warp;
     private int imageWidth;
@@ -107,12 +108,19 @@ public class WARPOperator extends Operator {
 
         masterGcpGroup = masterProduct.getGcpGroup();
         slaveGcpGroup = slaveProduct.getGcpGroup();
+        targetGcpGroup = targetProduct.getGcpGroup();
 
         // coregistrated image should have the same geo-coding as the master image
         ProductUtils.copyGeoCoding(masterProduct, targetProduct);
         ProductUtils.copyMetadata(masterProduct, targetProduct);
         ProductUtils.copyTiePointGrids(masterProduct, targetProduct);
         ProductUtils.copyFlagCodings(masterProduct, targetProduct);
+
+        // copy slave GCPs to target product
+        setTargetGCPs();
+
+        // compute warp polynomial
+        computeWARPPolynomial();
 
         targetProduct.setPreferredTileSize(slaveProduct.getSceneRasterWidth(), 256);
     }
@@ -145,9 +153,6 @@ public class WARPOperator extends Operator {
         Tile sourceRaster = getSourceTile(slaveBand, targetTileRectangle, pm);
         RenderedImage srcImage = sourceRaster.getRasterDataNode().getSourceImage(); //getImage();
 
-        // compute warp polynomial
-        getWARPPolynomial();
-
         // get warped image
         RenderedOp warpedImage = createWarpImage(srcImage);
 
@@ -158,61 +163,53 @@ public class WARPOperator extends Operator {
     }
 
     /**
-     * Get WARP polynomial function using master and slave GCP pairs.
+     * Copy slave GCPs to target product.
      */
-    void getWARPPolynomial() {
+    void setTargetGCPs() {
 
-        int numValidGCPs = 0;
-        Vector mValidGCPPos = new Vector();
-        Vector sValidGCPPos = new Vector();
+        targetGcpGroup.removeAll();
         for(int i = 0; i < slaveGcpGroup.getNodeCount(); ++i) {
+
             Pin sPin = slaveGcpGroup.get(i);
-            PixelPos sGCPPos = sPin.getPixelPos();
-            String sName = sPin.getName();
-            //System.out.println("WARP: slave gcp[" + i + "] = " + "(" + sGCPPos.x + "," + sGCPPos.y + ")");
+            Pin tPin = new Pin(sPin.getName(),
+                               sPin.getLabel(),
+                               sPin.getDescription(),
+                               sPin.getPixelPos(),
+                               sPin.getGeoPos(),
+                               sPin.getSymbol());
 
-            if (Float.compare(sGCPPos.x, -1.0f) != 0 && Float.compare(sGCPPos.y, -1.0f) != 0) {
-                PixelPos mGCPPos = masterGcpGroup.get(sName).getPixelPos();
-                System.out.println("WARP: master gcp[" + i + "] = " + "(" + mGCPPos.x + "," + mGCPPos.y + ")");
-
-                mValidGCPPos.add(new PixelPos(mGCPPos.x, mGCPPos.y));
-                sValidGCPPos.add(new PixelPos(sGCPPos.x, sGCPPos.y));
-                numValidGCPs++;
-            } else {
-                //System.out.println("WARP: found invalid GCP(" + i + ").");
-            }
+            targetGcpGroup.add(tPin);
         }
-        //System.out.println("Total GCPs available = " + slaveGcpGroup.getNodeCount());
-        //System.out.println("numValidGCPs = " + numValidGCPs);
+    }
 
+    /**
+     * Compute WARP polynomial function using master and slave GCP pairs.
+     */
+    void computeWARPPolynomial() {
+
+        int numValidGCPs = slaveGcpGroup.getNodeCount();
         int pointsRequired = (warpPolynomialOrder + 2)*(warpPolynomialOrder + 1) / 2;
+        //System.out.println("numValidGCPs = " + numValidGCPs);
         //System.out.println("warpPolynomialOrder = " + warpPolynomialOrder + ", pointsRequired = " + pointsRequired);
         if (numValidGCPs < pointsRequired) {
-            //throw new OperatorException("Not enough GCPs for creating WARP polynomial of order " + warpPolynomialOrder);
-
-            // if the tile does not have enough valid GCPs, then copy the tile without warping. Here we try to create
-            // an identity warp function.
-
-            mValidGCPPos.clear();
-            sValidGCPPos.clear();
-            numValidGCPs = 0;
-            for(int i = 0; i < slaveGcpGroup.getNodeCount(); ++i) {
-                PixelPos mGCPPos = masterGcpGroup.get(slaveGcpGroup.get(i).getName()).getPixelPos();
-                mValidGCPPos.add(new PixelPos(mGCPPos.x, mGCPPos.y));
-                sValidGCPPos.add(new PixelPos(mGCPPos.x, mGCPPos.y));
-                numValidGCPs++;
-            }
-            
+            throw new OperatorException("Not enough GCPs for creating WARP polynomial of order " + warpPolynomialOrder);
         }
 
         float[] masterCoords = new float[2*numValidGCPs];
         float[] slaveCoords = new float[2*numValidGCPs];
-        for (int i = 0; i < numValidGCPs; i++) {
-            PixelPos mGCPPos = (PixelPos)mValidGCPPos.get(i);
+
+        for(int i = 0; i < numValidGCPs; ++i) {
+
+            Pin sPin = slaveGcpGroup.get(i);
+            PixelPos sGCPPos = sPin.getPixelPos();
+            //System.out.println("WARP: slave gcp[" + i + "] = " + "(" + sGCPPos.x + "," + sGCPPos.y + ")");
+
+            PixelPos mGCPPos = masterGcpGroup.get(sPin.getName()).getPixelPos();
+            //System.out.println("WARP: master gcp[" + i + "] = " + "(" + mGCPPos.x + "," + mGCPPos.y + ")");
+
             masterCoords[2*i] = mGCPPos.x;
             masterCoords[2*i+1] = mGCPPos.y;
 
-            PixelPos sGCPPos = (PixelPos)sValidGCPPos.get(i);
             slaveCoords[2*i] = sGCPPos.x;
             slaveCoords[2*i+1] = sGCPPos.y;
         }

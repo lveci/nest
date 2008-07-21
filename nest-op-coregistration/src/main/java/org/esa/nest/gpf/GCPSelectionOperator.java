@@ -46,17 +46,13 @@ public class GCPSelectionOperator extends Operator {
     private Product targetProduct;
 
     @Parameter(valueSet = {"32","64","128","256","512","1024"}, defaultValue = "32")
-    private String imagetteWidth;
+    private String coarseRegistrationWindowWidth;
     @Parameter(valueSet = {"32","64","128","256","512","1024"}, defaultValue = "32")
-    private String imagetteHeight;
+    private String coarseRegistrationWindowHeight;
     @Parameter(valueSet = {"2","4","8","16"}, defaultValue = "2")
     private String rowInterpFactor;
     @Parameter(valueSet = {"2","4","8","16"}, defaultValue = "2")
     private String columnInterpFactor;
-    @Parameter(description = "Number of GCPs per tile row", interval = "[3, 100]", defaultValue = "4")
-    private int numGCPsPerTileRow;
-    @Parameter(description = "Number of GCPs per tile column", interval = "[3, 100]", defaultValue = "4")
-    private int numGCPsPerTileCol;
     @Parameter(description = "The maximum number of iterations", interval = "(1, 100]", defaultValue = "10")
     private int maxIteration;
     @Parameter(description = "Threshold for quality parameter Q = max/mean", interval = "[1, *)", defaultValue = "1.1")
@@ -72,9 +68,6 @@ public class GCPSelectionOperator extends Operator {
     private ProductNodeGroup<Pin> masterGcpGroup;
     private ProductNodeGroup<Pin> targetGcpGroup;
 
-    private TiePointGrid latitude;
-    private TiePointGrid longitude;
-
     private Tile masterImagetteRaster;
     private Tile slaveImagetteRaster;
 
@@ -85,8 +78,6 @@ public class GCPSelectionOperator extends Operator {
     private int height; // column dimension for master and slave imagette, must be power of 2
     private int rowUpSamplingFactor; // cross correlation interpolation factor in row direction, must be power of 2
     private int colUpSamplingFactor; // cross correlation interpolation factor in column direction, must be power of 2
-    private int gcpIdx;
-    private boolean useAutoSetGCPs; // flag indicating using automatically set grid GCPs
 
     /**
      * Default constructor. The graph processing framework
@@ -124,14 +115,11 @@ public class GCPSelectionOperator extends Operator {
         targetProduct.addBand(slaveBand.getName(), slaveBand.getDataType());
 
         masterGcpGroup = masterProduct.getGcpGroup();
-        targetGcpGroup = targetProduct.getGcpGroup();
-
-        if (masterGcpGroup.getNodeCount() > 0) {
-            useAutoSetGCPs = false;
-        } else {
-            useAutoSetGCPs = true;
+        if (masterGcpGroup.getNodeCount() <= 0) {
+            throw new OperatorException("No master GCPs have been found.");
         }
-        //masterGcpGroup.removeAll();
+
+        targetGcpGroup = targetProduct.getGcpGroup();
         targetGcpGroup.removeAll();
 
         ProductUtils.copyGeoCoding(slaveProduct, targetProduct);
@@ -139,14 +127,10 @@ public class GCPSelectionOperator extends Operator {
         ProductUtils.copyTiePointGrids(slaveProduct, targetProduct);
         ProductUtils.copyFlagCodings(slaveProduct, targetProduct);
 
-        latitude = getLatitude();
-        longitude = getLongitude();
-
-        width = Integer.parseInt(imagetteWidth);
-        height = Integer.parseInt(imagetteHeight);
+        width = Integer.parseInt(coarseRegistrationWindowWidth);
+        height = Integer.parseInt(coarseRegistrationWindowHeight);
         rowUpSamplingFactor = Integer.parseInt(rowInterpFactor);
         colUpSamplingFactor = Integer.parseInt(columnInterpFactor);
-        gcpIdx = 0;
 
         targetProduct.setPreferredTileSize(slaveProduct.getSceneRasterWidth(), 256);
     }
@@ -174,70 +158,21 @@ public class GCPSelectionOperator extends Operator {
         int h = targetTileRectangle.height;
         //System.out.println("GCPSelectionOperator: x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        // set master and slave GCPs
-        if (useAutoSetGCPs) {
-            setAutoMasterSlaveGCPs(x0, y0, w, h);
-        } else {
-            setUserMasterSlaveGCPs(x0, y0, w, h);
-        }
+        computeSlaveGCPs(x0, y0, w, h);
 
         // copy salve data to target
         targetTile.setRawSamples(getSourceTile(slaveBand, targetTile.getRectangle(), pm).getRawSamples());
     }
 
     /**
-     * Set initial master GCPs for the given tile.
+     * Compute slave GCPs for the given tile.
      *
      * @param x0 The x coordinate for the upper left point in the current tile.
      * @param y0 The y coordinate for the upper left point in the current tile.
      * @param w The width of the tile.
      * @param h The height of the tile.
      */
-    void setAutoMasterSlaveGCPs(int x0, int y0, int w, int h) {
-
-        PinSymbol defaultPinSymbol = PinSymbol.createDefaultPinSymbol();
-        for (int i = 0; i < numGCPsPerTileCol; i++) {
-            int yi = y0 + (int)((i+1)*h/(numGCPsPerTileCol + 1));
-            for (int j = 0; j < numGCPsPerTileRow; j++) {
-
-                // set initial master GCP positions
-                int xj = x0 + (int)((j+1)*w/(numGCPsPerTileRow + 1));
-                float lat = latitude.getPixelFloat(xj + 0.5f, yi + 0.5f);
-                float lon = longitude.getPixelFloat(xj + 0.5f, yi + 0.5f);
-                PixelPos mGCPPixelPos = new PixelPos(xj, yi);
-                GeoPos mGCPGeoPos = new GeoPos(lat, lon);
-                Pin mPin = new Pin("gcp_" + gcpIdx, "GCP " + gcpIdx, "", mGCPPixelPos, mGCPGeoPos, defaultPinSymbol);
-                masterGcpGroup.add(mPin);
-                //System.out.println("master gcp[" + gcpIdx + "] = " + "(" + xj + "," + yi + ")");
-
-                // set initial salve GCP positions
-                PixelPos sGCPPixelPos = slaveBand.getGeoCoding().getPixelPos(mGCPGeoPos, null);
-                Pin sPin = new Pin("gcp_" + gcpIdx, "GCP " + gcpIdx, "", sGCPPixelPos, mGCPGeoPos, defaultPinSymbol);
-                targetGcpGroup.add(sPin);
-                //System.out.println("Initial slave gcp[" + gcpIdx + "] = " + "(" + sGCPPixelPos.x + "," + sGCPPixelPos.y + ")");
-
-                // get accurate slave GCP positions
-                if (!getSlaveGCPPosition(mGCPPixelPos, sGCPPixelPos)) {
-                    sGCPPixelPos.x = -1.0f;
-                    sGCPPixelPos.y = -1.0f;
-                    //System.out.println("GCP(" + gcpIdx + ") is invalid.");
-                }
-                targetGcpGroup.get(gcpIdx).setPixelPos(sGCPPixelPos);
-                //System.out.println("Final slave gcp[" + gcpIdx + "] = " + "(" + sGCPPixelPos.x + "," + sGCPPixelPos.y + ")");
-
-                gcpIdx++;
-            }
-        }
-    }
-    /**
-     * Set initial master GCPs for the given tile.
-     *
-     * @param x0 The x coordinate for the upper left point in the current tile.
-     * @param y0 The y coordinate for the upper left point in the current tile.
-     * @param w The width of the tile.
-     * @param h The height of the tile.
-     */
-    void setUserMasterSlaveGCPs(int x0, int y0, int w, int h) {
+    void computeSlaveGCPs (int x0, int y0, int w, int h) {
 
         for(int i = 0; i < masterGcpGroup.getNodeCount(); i++) {
 
@@ -251,74 +186,41 @@ public class GCPSelectionOperator extends Operator {
                 //System.out.println("master gcp[" + i + "] = " + "(" + mGCPPixelPos.x + "," + mGCPPixelPos.y + ")");
                 //System.out.println("init slave gcp[" + i + "] = " + "(" + sGCPPixelPos.x + "," + sGCPPixelPos.y + ")");
 
-                if (!getSlaveGCPPosition(mGCPPixelPos, sGCPPixelPos)) {
-                    sGCPPixelPos.x = -1.0f;
-                    sGCPPixelPos.y = -1.0f;
-                    //System.out.println("GCP(" + i + ") is invalid.");
+                if (getSlaveGCPPosition(mGCPPixelPos, sGCPPixelPos)) {
+
+                    Pin sPin = new Pin(mPin.getName(),
+                                       mPin.getLabel(),
+                                       mPin.getDescription(),
+                                       sGCPPixelPos,
+                                       mGCPGeoPos,
+                                       mPin.getSymbol());
+
+                    targetGcpGroup.add(sPin);
+                    //System.out.println("final slave gcp[" + i + "] = " + "(" + sGCPPixelPos.x + "," + sGCPPixelPos.y + ")");
+                    //System.out.println();
+
+                } else {
+
+                    System.out.println("GCP(" + i + ") is invalid.");
                 }
-                //System.out.println("final slave gcp[" + i + "] = " + "(" + sGCPPixelPos.x + "," + sGCPPixelPos.y + ")");
-                //System.out.println();
-
-                Pin sPin = new Pin(mPin.getName(),
-                                   mPin.getLabel(),
-                                   mPin.getDescription(),
-                                   sGCPPixelPos,
-                                   mGCPGeoPos,
-                                   mPin.getSymbol());
-
-                targetGcpGroup.add(sPin);
             }
         }        
     }
 
     /**
-     * Check if a given GCP is covered by the current tile.
+     * Check if a given GCP is within the given tile.
      *
      * @param pixelPos The GCP pixel position.
      * @param x0 The x coordinate for the upper left point in the current tile.
      * @param y0 The y coordinate for the upper left point in the current tile.
      * @param w The width of the tile.
      * @param h The height of the tile.
-     * @return flag Return true if the GCP is covered by the tile, false otherwise.
+     * @return flag Return true if the GCP is within the given tile, false otherwise.
      */
     boolean checkGCPValidity(PixelPos pixelPos, int x0, int y0, int w, int h) {
 
         return (pixelPos.x >= x0 && pixelPos.x < x0 + w &&
                 pixelPos.y >= y0 && pixelPos.y < y0 + h);
-    }
-
-    /**
-     * Get latitude tie point grid.
-     *
-     * @return srcTPG The latitude tie point grid.
-     */
-    TiePointGrid getLatitude() {
-
-        for (int i = 0; i < masterProduct.getNumTiePointGrids(); i++) {
-            TiePointGrid srcTPG = masterProduct.getTiePointGridAt(i);
-            if (srcTPG.getName().equals("latitude")) {
-                return srcTPG;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Get longitude tie point grid.
-     *
-     * @return srcTPG The longitude tie point grid.
-     */
-    TiePointGrid getLongitude() {
-
-        for (int i = 0; i < masterProduct.getNumTiePointGrids(); i++) {
-            TiePointGrid srcTPG = masterProduct.getTiePointGridAt(i);
-            if (srcTPG.getName().equals("longitude")) {
-                return srcTPG;
-            }
-        }
-
-        return null;
     }
 
     boolean getSlaveGCPPosition(PixelPos mGCPPixelPos, PixelPos sGCPPixelPos) {
