@@ -1,0 +1,40 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>nest-reader-generic</symbolicName>
+    <version>1C</version>
+    <name>NEST Generic Binary Product Reader</name>
+
+    <description>
+        Reads generic binary products.
+    </description>
+
+    <dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>nest-core</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat-rcp</module>
+        <optional>true</optional>
+    </dependency>
+
+    <categories>Reader</categories>
+
+    <extension point="beam-ui:actions">
+        <action>
+            <id>importERSCEOSProduct</id>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <formatName>ERS CEOS</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <mnemonic>R</mnemonic>
+            <shortDescr>Import an ERS CEOS data product or product subset.</shortDescr>
+            <description>Import an ERS CEOS data product or product subset.</description>
+            <largeIcon>icons/Import24.gif</largeIcon>
+            <helpId>importPalsarProduct</helpId>
+            <placeAfter>importNetcdfProduct</placeAfter>
+        </action>
+
+    </extension>
+
+</module>
