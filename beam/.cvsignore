@@ -6,6 +6,7 @@
 .settings
 .svn*
 beam*
+ceres*
 lib-*
 target
 log
