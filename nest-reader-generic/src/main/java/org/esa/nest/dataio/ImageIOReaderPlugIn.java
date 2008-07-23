@@ -54,7 +54,12 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
     }
 
     protected DecodeQualification checkProductQualification(File file) {
-        return DecodeQualification.SUITABLE;
+        for(String ext : FORMAT_FILE_EXTENSIONS) {
+            if(!ext.isEmpty() && file.getName().toLowerCase().endsWith(ext.toLowerCase()))
+                return DecodeQualification.SUITABLE;
+        }
+
+        return DecodeQualification.UNABLE;
     }
 
      public static File getFileFromInput(final Object input) {

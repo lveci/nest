@@ -98,12 +98,12 @@
         <module>beam-meris-radtorefl</module>
         <module>beam-meris-ndvi</module>
         <module>beam-aatsr-sst</module>
-        <module>beam-flhmci</module>
+        <module>beam-flhmci</module> -->
         <module>beam-mosaic</module>
-        <module>beam-binning</module>
+     <!--   <module>beam-binning</module>
         <module>beam-unmix</module>
         <module>beam-cluster-analysis</module>
-        <module>beam-collocation</module> -->
+        <module>beam-collocation</module>  -->
 
         <!--module>beam-avhrr-reader</module-->
         <!--module>beam-atsr-reader</module-->

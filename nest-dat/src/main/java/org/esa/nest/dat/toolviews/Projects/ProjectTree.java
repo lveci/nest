@@ -90,10 +90,13 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
 
         if (context instanceof ProjectSubFolder) {
             createMenuItem(popup, "Create Folder");
-            JMenuItem menuItem = createMenuItem(popup, "Remove Folder");
+            JMenuItem menuItemRename = createMenuItem(popup, "Rename Folder");
+            JMenuItem menuItemRemove = createMenuItem(popup, "Remove Folder");
             ProjectSubFolder folder = (ProjectSubFolder) context;
-            if (!folder.canBeRemoved())
-                menuItem.setEnabled(false);
+            if (!folder.canBeRemoved()) {
+                menuItemRename.setEnabled(false);
+                menuItemRemove.setEnabled(false);
+            }
             if (selectedNode.isRoot()) {
                 addSeparator(popup);
                 createMenuItem(popup, "New Project...");
@@ -150,6 +153,14 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                     ProjectSubFolder parentFolder = (ProjectSubFolder) context;
                     ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
                     project.deleteFolder(parentFolder, subFolder);
+                }
+            }
+        } else if(e.getActionCommand().equals("Rename Folder")) {
+            if (parentNode != null) {
+                Object context = parentNode.getUserObject();
+                if (context != null) {
+                    ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
+                    project.renameFolder(subFolder);
                 }
             }
         } else if(e.getActionCommand().equals("Remove")) {

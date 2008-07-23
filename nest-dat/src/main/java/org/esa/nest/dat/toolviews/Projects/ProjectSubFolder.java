@@ -105,6 +105,17 @@ public class ProjectSubFolder {
         return newFolder;
     }
 
+    void renameTo(String newName) {
+
+        if(physical) {
+            String newPath = path.getParent() + File.separator + folderName;
+            File newFile = new File(newPath);
+            if(path.renameTo(newFile))
+                folderName = newName;
+        } else
+            folderName = newName;
+    }
+
     void removeSubFolder(ProjectSubFolder subFolder) {
         subFolders.remove(subFolder);
     }

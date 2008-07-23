@@ -1,3 +1,5 @@
 org.esa.nest.gpf.DataAnalysisOperator$Spi
 org.esa.nest.gpf.SRGROperator$Spi
 org.esa.nest.gpf.MultilookOperator$Spi
+org.esa.nest.gpf.OversamplingOperator$Spi
+org.esa.nest.gpf.UndersamplingOperator$Spi

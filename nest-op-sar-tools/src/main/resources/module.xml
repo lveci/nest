@@ -48,6 +48,29 @@
             <parent>sartools</parent>
         </action>
 
+        <action>
+            <id>Resampling</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Resampling</text>
+            <parent>tools</parent>
+        </action>
+
+        <action>
+            <id>OverSamplingOp</id>
+            <class>org.esa.nest.dat.OverSamplingOpAction</class>
+            <text>Oversampling</text>
+            <shortDescr>Over sample an image</shortDescr>
+            <parent>Resampling</parent>
+        </action>
+
+        <action>
+            <id>UnderSamplingOp</id>
+            <class>org.esa.nest.dat.UnderSamplingOpAction</class>
+            <text>Undersampling</text>
+            <shortDescr>Under sample an image</shortDescr>
+            <parent>Resampling</parent>
+        </action>
+
     </extension>
 
 </module>

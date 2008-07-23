@@ -230,6 +230,15 @@ public class Project extends Observable {
         notifyEvent();
     }
 
+    public void renameFolder(ProjectSubFolder subFolder) {
+        PromptDialog dlg = new PromptDialog("Rename Folder", "Name", "");
+        dlg.show();
+        if(dlg.IsOK()) {
+            subFolder.renameTo(dlg.getValue());
+            notifyEvent();
+        }
+    }
+
     public void removeFile(ProjectSubFolder parentFolder, File file) {
         parentFolder.removeFile(file);
         if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.STACK ||

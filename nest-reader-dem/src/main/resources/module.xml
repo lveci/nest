@@ -20,5 +20,18 @@
      </dependency>
     
     <categories>Reader,DEM</categories>
-   
+
+    <extension point="beam-ui:actions">
+        <action>
+            <id>importACEDEMProduct</id>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <formatName>ACE</formatName>
+            <text>Import ACE DEM Tile...</text>
+            <mnemonic>A</mnemonic>
+            <shortDescr>Import a ACE DEM tile or tile subset.</shortDescr>
+            <description>Import a ACE DEM tile or tile subset.</description>
+            <helpId>importACEProduct</helpId>
+        </action>
+    </extension>
+
 </module>
