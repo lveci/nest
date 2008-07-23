@@ -71,6 +71,22 @@
             <parent>Resampling</parent>
         </action>
 
+        <action>
+            <id>DatasetConversion</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Dataset Conversion</text>
+            <parent>tools</parent>
+        </action>
+
+        <action>
+            <id>FormatChange</id>
+            <class>org.esa.nest.dat.FormatChangeOpAction</class>
+            <text>DataType Format Change</text>
+            <shortDescr>Change the datatype of the product</shortDescr>
+            <parent>DatasetConversion</parent>
+        </action>
+
+
     </extension>
 
 </module>

@@ -1,5 +1,5 @@
 /*
- * $Id: FilePointerRecord.java,v 1.3 2008-06-17 20:35:10 lveci Exp $
+ * $Id: FilePointerRecord.java,v 1.4 2008-07-23 19:47:17 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,9 +16,9 @@
  */
 package org.esa.nest.dataio.ceos.records;
 
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
-import org.esa.beam.framework.datamodel.MetadataElement;
 
 import java.io.IOException;
 

@@ -45,6 +45,7 @@
                     <id>open</id>
                     <id>reopen</id>
                     <id>createAsarNrcsBands</id>
+                    <id>selectionTool</id>
                 </excludedActions>
                 <excludedToolViews>
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
@@ -232,6 +233,18 @@
         </action>
 
         <action>
+            <id>editMetadata</id>
+            <class>org.esa.nest.dat.actions.EditMetadataAction</class>
+            <text>Edit Metadata</text>
+            <shortDescr>Edit product metadata</shortDescr>
+            <description>Edit product metadata</description>
+            <helpId>editMetadata</helpId>
+            <parent>tools</parent>
+            <placeAfter>openGraphBuilderDialog</placeAfter>
+            <separatorAfter>true</separatorAfter>
+        </action>
+
+        <action>
             <id>showLayersToolBar</id>
             <class>org.esa.beam.visat.actions.ShowToolBarAction</class>
             <context>layersToolBar</context>
@@ -245,6 +258,18 @@
             <shortDescr>Toggle visibility of the layers tool bar.</shortDescr>
             <description>Toggle visibility of the layers tool bar.</description>
             <helpId>showLayersToolBar</helpId>
+        </action>
+
+        <action>
+            <id>crossHairTool</id>
+            <class>org.esa.beam.visat.actions.ToolAction</class>
+            <tool>org.esa.nest.dat.tool.CrossHairTool</tool>
+            <parent>tools</parent>
+            <text>Select</text>
+            <shortDescr>Selection Tool</shortDescr>
+            <largeIcon>icons/CrossHairTool.gif</largeIcon>
+            <selected>true</selected>
+            <helpId>selectTool</helpId>
         </action>
 
     </extension>

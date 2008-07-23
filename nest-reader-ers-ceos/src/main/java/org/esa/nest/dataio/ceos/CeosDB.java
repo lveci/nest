@@ -1,14 +1,14 @@
 package org.esa.nest.dataio.ceos;
 
-import org.jdom.Element;
-import org.jdom.Attribute;
 import org.esa.nest.util.XMLSupport;
+import org.jdom.Attribute;
+import org.jdom.Element;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.io.IOException;
-import java.io.File;
 
 /**
  * Created by IntelliJ IDEA.

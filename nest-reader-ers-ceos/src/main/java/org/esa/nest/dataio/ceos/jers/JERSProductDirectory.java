@@ -1,33 +1,18 @@
 package org.esa.nest.dataio.ceos.jers;
 
-import org.esa.nest.dataio.ceos.CeosHelper;
-import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
-import org.esa.nest.dataio.ceos.ers.*;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
-import org.esa.beam.framework.dataop.maptransf.Ellipsoid;
-import org.esa.beam.framework.dataop.maptransf.MapInfo;
-import org.esa.beam.framework.dataop.maptransf.MapProjection;
-import org.esa.beam.framework.dataop.maptransf.MapTransform;
-import org.esa.beam.framework.dataop.maptransf.MapTransformFactory;
-import org.esa.beam.framework.dataop.maptransf.StereographicDescriptor;
-import org.esa.beam.framework.dataop.maptransf.UTM;
-import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
-import org.esa.beam.util.math.FXYSum;
+import org.esa.nest.dataio.ceos.CEOSImageFile;
+import org.esa.nest.dataio.ceos.CEOSProductDirectory;
+import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * This class represents a product directory of an Avnir-2 product.
@@ -37,7 +22,7 @@ import java.util.TreeSet;
  *
  * @author Marco Peters
  */
-class JERSProductDirectory {
+class JERSProductDirectory extends CEOSProductDirectory {
 
     private static final double UTM_FALSE_EASTING = 500000.00;
     private static final double UTM_FALSE_NORTHING = 10000000.00;
@@ -48,16 +33,23 @@ class JERSProductDirectory {
     private JERSImageFile[] _imageFiles;
     private JERSLeaderFile _leaderFile;
 
-    private String productType;
-    private final int _sceneWidth;
-    private final int _sceneHeight;
+    private int _sceneWidth;
+    private int _sceneHeight;
+
+    private static String SLC_PRODUCT_TYPE = "SAR SINGLE LOOK COMPLEX IMAGE   ";
+    
+    private transient Map<String, JERSImageFile> bandImageFileMap = new HashMap<String, JERSImageFile>(1);
 
     public JERSProductDirectory(final File dir) throws IOException,
                                                          IllegalCeosFormatException {
         Guardian.assertNotNull("dir", dir);
 
         _baseDir = dir;
-        _volumeDirectoryFile = new JERSVolumeDirectoryFile(_baseDir);
+
+    }
+
+    protected void readProductDirectory() throws IOException, IllegalCeosFormatException {
+        readVolumeDirectoryFile();
         _leaderFile = new JERSLeaderFile(createInputStream(_volumeDirectoryFile.getLeaderFileName()));
 
         final String[] imageFileNames = _volumeDirectoryFile.getImageFileNames();
@@ -72,20 +64,54 @@ class JERSProductDirectory {
         assertSameWidthAndHeightForAllImages();
     }
 
+    private void readVolumeDirectoryFile() throws IOException, IllegalCeosFormatException {
+        if(_volumeDirectoryFile == null)
+            _volumeDirectoryFile = new JERSVolumeDirectoryFile(_baseDir);
+
+        productType = _volumeDirectoryFile.getProductType();
+        isProductSLC = productType.equals(SLC_PRODUCT_TYPE);
+    }
+
     public Product createProduct() throws IOException,
                                           IllegalCeosFormatException {
         final Product product = new Product(getProductName(),
                                             productType,
                                             _sceneWidth, _sceneHeight);
-        product.setFileLocation(_baseDir);
 
-        for (final JERSImageFile ImageFile : _imageFiles) {
-            product.addBand(createBand(ImageFile));
+        if(_imageFiles.length > 1) {
+            int index = 1;
+            for (final JERSImageFile imageFile : _imageFiles) {
+
+                if(isProductSLC) {
+                    String bandName = "i_" + index;
+                    product.addBand(createBand(bandName));
+                    bandImageFileMap.put(bandName, imageFile);
+                    bandName = "q_" + index;
+                    product.addBand(createBand(bandName));
+                    bandImageFileMap.put(bandName, imageFile);
+                    ++index;
+                } else {
+                    String bandName = "amplitude_" + index++;
+                    product.addBand(createBand(bandName));
+                    bandImageFileMap.put(bandName, imageFile);
+                }
+            }
+        } else {
+            JERSImageFile imageFile = _imageFiles[0];
+            if(isProductSLC) {
+                product.addBand(createBand("i"));
+                bandImageFileMap.put("i", imageFile);
+                product.addBand(createBand("q"));
+                bandImageFileMap.put("q", imageFile);
+            } else {
+                product.addBand(createBand("amplitude"));
+                bandImageFileMap.put("amplitude", imageFile);
+            }
         }
-        /*product.setStartTime(getUTCScanStartTime());
-        product.setEndTime(getUTCScanStopTime());*/
-        product.setDescription(getProductDescription());
 
+        //product.setStartTime(getUTCScanStartTime());
+        //product.setEndTime(getUTCScanStopTime());
+        product.setDescription(getProductDescription());
 
         addGeoCoding(product);
         addMetaData(product);
@@ -93,12 +119,10 @@ class JERSProductDirectory {
         return product;
     }
 
-    public boolean isJERS() {
+    public boolean isJERS() throws IOException, IllegalCeosFormatException {
+        if(productType == null || _volumeDirectoryFile == null)
+            readVolumeDirectoryFile();
         return (productType.contains("JERS"));
-    }
-
-    public String getProductType() {
-        return productType;
     }
 
     private void addGeoCoding(final Product product) throws IllegalCeosFormatException,
@@ -119,14 +143,9 @@ class JERSProductDirectory {
 
     }
 
-    public JERSImageFile getImageFile(final Band band) throws IOException,
+    public CEOSImageFile getImageFile(final Band band) throws IOException,
                                                                 IllegalCeosFormatException {
-        for (final JERSImageFile imageFile : _imageFiles) {
-            if (band.getName().equals(imageFile.getBandName())) {
-                return imageFile;
-            }
-        }
-        return null;
+        return bandImageFileMap.get(band.getName());
     }
 
     public void close() throws IOException {
@@ -141,16 +160,15 @@ class JERSProductDirectory {
         _leaderFile = null;
     }
 
-    private Band createBand(final JERSImageFile ImageFile) throws IOException,
-                                                                          IllegalCeosFormatException {
-        final Band band = new Band(ImageFile.getBandName(), ProductData.TYPE_INT16,
+    private Band createBand(String name) {
+        final Band band = new Band(name, ProductData.TYPE_INT16,
                                    _sceneWidth, _sceneHeight);
-        final int bandIndex = ImageFile.getBandIndex();
-        band.setSpectralBandIndex(bandIndex - 1);
-        band.setSpectralWavelength(ImageFile.getSpectralWavelength());
-        band.setSpectralBandwidth(ImageFile.getSpectralBandwidth());
-        band.setUnit(ImageFile.getGeophysicalUnit());
-      /*  final double scalingFactor = _leaderFile.getAbsoluteCalibrationGain(bandIndex);
+
+        band.setUnit(JERSImageFile.getGeophysicalUnit());
+
+      /*
+        final int bandIndex = index;
+        final double scalingFactor = _leaderFile.getAbsoluteCalibrationGain(bandIndex);
         final double scalingOffset = _leaderFile.getAbsoluteCalibrationOffset(bandIndex);
         band.setScalingFactor(scalingFactor);
         band.setScalingOffset(scalingOffset);

@@ -1,19 +1,19 @@
 package org.esa.nest.dataio.ceos.ers;
 
+import org.esa.beam.framework.datamodel.MetadataAttribute;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.BaseSceneHeaderRecord;
-import org.esa.beam.framework.datamodel.MetadataAttribute;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.ProductData;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 import java.util.Calendar;
 
 /*
- * $Id: ERSLeaderFile.java,v 1.6 2008-06-27 19:35:52 lveci Exp $
+ * $Id: ERSLeaderFile.java,v 1.7 2008-07-23 19:47:17 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -33,7 +33,7 @@ import java.util.Calendar;
  * This class represents a leader file of an Avnir-2 product.
  *
  * @author Marco Peters
- * @version $Revision: 1.6 $ $Date: 2008-06-27 19:35:52 $
+ * @version $Revision: 1.7 $ $Date: 2008-07-23 19:47:17 $
  */
 class ERSLeaderFile {
 

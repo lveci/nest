@@ -1,12 +1,11 @@
 package org.esa.nest.dataio.ceos.ers;
 
-import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
-import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.dataop.maptransf.*;
+import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
-import org.esa.beam.util.Debug;
-import org.esa.beam.util.math.FXYSum;
+import org.esa.nest.dataio.ceos.CEOSImageFile;
+import org.esa.nest.dataio.ceos.CEOSProductDirectory;
+import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
@@ -23,7 +22,7 @@ import java.util.*;
  *
  * @author Marco Peters
  */
-class ERSProductDirectory {
+class ERSProductDirectory extends CEOSProductDirectory {
 
     private static final double UTM_FALSE_EASTING = 500000.00;
     private static final double UTM_FALSE_NORTHING = 10000000.00;
@@ -34,24 +33,22 @@ class ERSProductDirectory {
     private ERSImageFile[] _imageFiles;
     private ERSLeaderFile _leaderFile;
 
-    private final int _sceneWidth;
-    private final int _sceneHeight;
+    private int _sceneWidth;
+    private int _sceneHeight;
 
-    private String productType;
-    private String SLC_PRODUCT_TYPE = "SAR SINGLE LOOK COMPLEX IMAGE   ";
-    private boolean isProductSLC = false;
+    private static String SLC_PRODUCT_TYPE = "SAR SINGLE LOOK COMPLEX IMAGE   ";
+
     private transient Map<String, ERSImageFile> bandImageFileMap = new HashMap<String, ERSImageFile>(1);
 
-    public ERSProductDirectory(final File dir) throws IOException,
-                                                         IllegalCeosFormatException {
+    public ERSProductDirectory(final File dir) {
         Guardian.assertNotNull("dir", dir);
 
         _baseDir = dir;
-        _volumeDirectoryFile = new ERSVolumeDirectoryFile(_baseDir);
-        _leaderFile = new ERSLeaderFile(createInputStream(ERSVolumeDirectoryFile.getLeaderFileName()));
+    }
 
-        productType = _volumeDirectoryFile.getProductType();
-        isProductSLC = productType.equals(SLC_PRODUCT_TYPE);
+    protected void readProductDirectory() throws IOException, IllegalCeosFormatException {
+        readVolumeDirectoryFile();
+        _leaderFile = new ERSLeaderFile(createInputStream(ERSVolumeDirectoryFile.getLeaderFileName()));
 
         final String[] imageFileNames = _volumeDirectoryFile.getImageFileNames();
         int numImageFiles = imageFileNames.length;
@@ -65,11 +62,17 @@ class ERSProductDirectory {
         assertSameWidthAndHeightForAllImages();
     }
 
-    public boolean isSLC() {
-        return isProductSLC;
+    private void readVolumeDirectoryFile() throws IOException, IllegalCeosFormatException {
+        if(_volumeDirectoryFile == null)
+            _volumeDirectoryFile = new ERSVolumeDirectoryFile(_baseDir);
+
+        productType = _volumeDirectoryFile.getProductType();
+        isProductSLC = productType.equals(SLC_PRODUCT_TYPE);
     }
 
-    public boolean isERS() {
+    public boolean isERS() throws IOException, IllegalCeosFormatException {
+        if(productType == null || _volumeDirectoryFile == null)
+            readVolumeDirectoryFile();
         return (productType.contains("ERS-1") || productType.contains("ERS-2"));
     }
 
@@ -85,27 +88,27 @@ class ERSProductDirectory {
 
                 if(isProductSLC) {
                     String bandName = "i_" + index;
-                    product.addBand(createBand(imageFile, bandName));
+                    product.addBand(createBand(bandName));
                     bandImageFileMap.put(bandName, imageFile);
                     bandName = "q_" + index;
-                    product.addBand(createBand(imageFile, bandName));
+                    product.addBand(createBand(bandName));
                     bandImageFileMap.put(bandName, imageFile);
                     ++index;
                 } else {
                     String bandName = "amplitude_" + index++;
-                    product.addBand(createBand(imageFile, bandName));
+                    product.addBand(createBand(bandName));
                     bandImageFileMap.put(bandName, imageFile);
                 }
             }
         } else {
             ERSImageFile imageFile = _imageFiles[0];
             if(isProductSLC) {
-                product.addBand(createBand(imageFile, "i"));
+                product.addBand(createBand("i"));
                 bandImageFileMap.put("i", imageFile);
-                product.addBand(createBand(imageFile, "q"));
+                product.addBand(createBand("q"));
                 bandImageFileMap.put("q", imageFile);
             } else {
-                product.addBand(createBand(imageFile, "amplitude"));
+                product.addBand(createBand("amplitude"));
                 bandImageFileMap.put("amplitude", imageFile);
             }
         }
@@ -118,10 +121,6 @@ class ERSProductDirectory {
         addMetaData(product);
 
         return product;
-    }
-
-    public String getProductType() {
-        return productType;
     }
 
     private void addGeoCoding(final Product product) throws IllegalCeosFormatException,
@@ -141,7 +140,7 @@ class ERSProductDirectory {
         product.setGeoCoding(tpGeoCoding);
     }
 
-    public ERSImageFile getImageFile(final Band band) throws IOException,
+    public CEOSImageFile getImageFile(final Band band) throws IOException,
                                                                 IllegalCeosFormatException {
         return bandImageFileMap.get(band.getName());
     }
@@ -158,7 +157,7 @@ class ERSProductDirectory {
         _leaderFile = null;
     }
 
-    private Band createBand(final ERSImageFile ImageFile, String name) {
+    private Band createBand(String name) {
         final Band band = new Band(name, ProductData.TYPE_INT16,
                                    _sceneWidth, _sceneHeight);
 

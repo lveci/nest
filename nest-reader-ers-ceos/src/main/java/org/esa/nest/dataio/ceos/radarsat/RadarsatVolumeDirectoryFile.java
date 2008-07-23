@@ -1,11 +1,11 @@
 package org.esa.nest.dataio.ceos.radarsat;
 
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
-import org.esa.nest.dataio.ceos.records.FilePointerRecord;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
-import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.nest.dataio.ceos.records.FilePointerRecord;
 
 import javax.imageio.stream.FileImageInputStream;
 import java.io.File;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /*
- * $Id: RadarsatVolumeDirectoryFile.java,v 1.3 2008-06-27 19:35:52 lveci Exp $
+ * $Id: RadarsatVolumeDirectoryFile.java,v 1.4 2008-07-23 19:47:17 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -63,7 +63,7 @@ class RadarsatVolumeDirectoryFile {
 
     public String[] getImageFileNames() throws IOException,
                                                IllegalCeosFormatException {
-        final ArrayList list = new ArrayList();
+        final ArrayList<String> list = new ArrayList<String>();
         for (final FilePointerRecord filePointerRecord : _filePointerRecords) {
             if (filePointerRecord.isImageFileRecord()) {
                 final String fileID = filePointerRecord.getAttributeString("File ID");
@@ -71,7 +71,7 @@ class RadarsatVolumeDirectoryFile {
             }
         }
         list.add("DAT_01.001");
-        return (String[]) list.toArray(new String[list.size()]);
+        return list.toArray(new String[list.size()]);
     }
 
     public void close() throws IOException {
@@ -87,6 +87,10 @@ class RadarsatVolumeDirectoryFile {
 
     public String getProductName() {
         return CeosHelper.getProductName(_textRecord);
+    }
+
+    public String getProductType() {
+        return _textRecord.getAttributeString("Product type specifier");
     }
 
     public void assignMetadataTo(final MetadataElement rootElem) {

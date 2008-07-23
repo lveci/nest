@@ -1,16 +1,15 @@
 package org.esa.nest.dataio.ceos;
 
+import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
+import org.esa.nest.dataio.ceos.ers.ERSProductReader;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Locale;
-
-import org.esa.nest.dataio.ceos.ers.ERSProductReader;
 
 /**
  * The ReaderPlugIn for CEOS products.
@@ -29,7 +28,7 @@ public class CEOSProductReaderPlugIn implements ProductReaderPlugIn {
      * @return true if this product reader can decode the given input, otherwise false.
      */
     public DecodeQualification getDecodeQualification(final Object input) {
-        final File file = getFileFromInput(input);
+        final File file = ERSProductReader.getFileFromInput(input);
         if (file == null) {
             return DecodeQualification.UNABLE;
         }
@@ -55,15 +54,6 @@ public class CEOSProductReaderPlugIn implements ProductReaderPlugIn {
 
     protected DecodeQualification checkProductQualification(File file) {
         return DecodeQualification.SUITABLE;
-    }
-
-     public static File getFileFromInput(final Object input) {
-        if (input instanceof String) {
-            return new File((String) input);
-        } else if (input instanceof File) {
-            return (File) input;
-        }
-        return null;
     }
 
     /**

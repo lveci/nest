@@ -2,8 +2,6 @@ package org.esa.nest.dataio.ceos.jers;
 
 import org.esa.nest.dataio.ceos.CEOSConstants;
 
-import java.io.File;
-
 /**
  * Several constants used for reading JERS products.
  */

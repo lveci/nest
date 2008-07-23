@@ -1,18 +1,13 @@
-package org.esa.nest.dataio.ceos.radarsat;
+package org.esa.nest.dataio.ceos;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.nest.dataio.ceos.CEOSImageFile;
-import org.esa.nest.dataio.ceos.CeosFileReader;
-import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
-import org.esa.nest.dataio.ceos.ers.ERSImageFDR;
 import org.esa.nest.dataio.ceos.records.ImageRecord;
 
-import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
 /*
- * $Id: RadarsatImageFile.java,v 1.5 2008-07-23 19:47:17 lveci Exp $
+ * $Id: CEOSImageFile.java,v 1.1 2008-07-23 19:47:17 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -30,67 +25,19 @@ import java.io.IOException;
 
 
 /**
- * This class represents an image file of an Avnir-2 product.
+ * This class represents an image file of an ERS product.
  *
- * @author Marco Peters
- * @version $Revision: 1.5 $ $Date: 2008-07-23 19:47:17 $
+ * @version $Revision: 1.1 $ $Date: 2008-07-23 19:47:17 $
  */
-class RadarsatImageFile extends CEOSImageFile {
+public abstract class CEOSImageFile {
 
-    private final ERSImageFDR _imageFDR;
-    private final int _imageNumber;
+    protected CeosFileReader _ceosReader;
+    protected ImageRecord[] _imageRecords = null;
 
-    private static String mission = "radarsat";
-    private static String image_recordDefinitionFile = "image_file.xml";
-    private static String image_recordDefinition = "image_record.xml";
+    protected int _imageRecordLength = 0;
+    protected long _startPosImageRecords = 0;
 
-    public RadarsatImageFile(final ImageInputStream imageStream) throws IOException,
-                                                                      IllegalCeosFormatException {
-        _ceosReader = new CeosFileReader(imageStream);
-        _imageFDR = new ERSImageFDR(_ceosReader, -1, mission, image_recordDefinitionFile);
-        _ceosReader.seek(_imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()));
-        _imageRecords = new ImageRecord[_imageFDR.getAttributeInt("Number of lines per data set")];
-        _imageRecords[0] = new ImageRecord(_ceosReader, -1, mission, image_recordDefinition);
-        _imageRecordLength = _imageRecords[0].getRecordLength();
-        _startPosImageRecords = _imageRecords[0].getStartPos();
-        _imageNumber = 1;
-    }
-
-    public String getBandName() {
-        return RadarsatConstants.BANDNAME_PREFIX + _imageNumber;
-    }
-
-    public String getBandDescription() {
-        return "";
-    }
-
-    public int getBandIndex() {
-        return _imageNumber;
-    }
-
-    public int getRasterWidth() {
-        return _imageFDR.getAttributeInt("Number of pixels per line per SAR channel");//getNumImagePixelsPerLine();
-    }
-
-    public int getRasterHeight() {
-        return _imageFDR.getAttributeInt("Number of lines per data set");
-    }
-
-    public static String getGeophysicalUnit() {
-        return RadarsatConstants.GEOPHYSICAL_UNIT;
-    }
-
-
- /*
-    public int getTotalMillisInDayOfLine(final int y) throws IOException,
-                                                             IllegalCeosFormatException {
-        return getImageRecord(y).getScanStartTimeMillisAtDay();
-    }
-
-    public int getMicrosecondsOfLine(final int y) throws IOException,
-                                                         IllegalCeosFormatException {
-        return getImageRecord(y).getScanStartTimeMicros();
-    }   */
+    public abstract String getBandName();
 
     public void readBandRasterData(final int sourceOffsetX, final int sourceOffsetY,
                                    final int sourceWidth, final int sourceHeight,
@@ -103,10 +50,12 @@ class RadarsatImageFile extends CEOSImageFile {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         ImageRecord imageRecord;
 
+        int x = sourceOffsetX * 2;
+
         pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceOffsetY);
         try {
-            final byte[] srcLine = new byte[sourceWidth];
-            final byte[] destLine = new byte[destWidth];
+            final short[] srcLine = new short[sourceWidth];
+            final short[] destLine = new short[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
@@ -114,8 +63,8 @@ class RadarsatImageFile extends CEOSImageFile {
 
                 // Read source line
                 imageRecord = getImageRecord(y);
-                _ceosReader.seek(imageRecord.getImageDataStart() + sourceOffsetX);
-                _ceosReader.readB1(srcLine);
+                _ceosReader.seek(imageRecord.getImageDataStart() + x);
+                _ceosReader.readB2(srcLine);
 
                 // Copy source line into destination buffer
                 final int currentLineIndex = (y - sourceOffsetY) * destWidth;
@@ -151,8 +100,8 @@ class RadarsatImageFile extends CEOSImageFile {
 
         pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceOffsetY);
         try {
-            final byte[] srcLine = new byte[sourceWidth * 2];
-            final byte[] destLine = new byte[destWidth];
+            final short[] srcLine = new short[sourceWidth * 2];
+            final short[] destLine = new short[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
@@ -161,7 +110,7 @@ class RadarsatImageFile extends CEOSImageFile {
                 // Read source line
                 imageRecord = getImageRecord(y);
                 _ceosReader.seek(imageRecord.getImageDataStart() + x);
-                _ceosReader.readB1(srcLine);
+                _ceosReader.readB2(srcLine);
 
                 // Copy source line into destination buffer
                 final int currentLineIndex = (y - sourceOffsetY) * destWidth;
@@ -180,4 +129,59 @@ class RadarsatImageFile extends CEOSImageFile {
         }
     }
 
+    protected static void copyLine(final short[] srcLine, final short[] destLine,
+                          final int sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length; x++, i += sourceStepX) {
+            destLine[x] = srcLine[i];
+        }
+    }
+
+    protected static void copyLine(final byte[] srcLine, final byte[] destLine,
+                          final int sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length; x++, i += sourceStepX) {
+            destLine[x] = srcLine[i];
+        }
+    }
+
+    protected static void copyLine1Of2(final short[] srcLine, final short[] destLine,
+                          final int sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length; x++, i += sourceStepX) {
+            destLine[x] = srcLine[2 * i];
+        }
+    }
+
+    protected static void copyLine1Of2(final byte[] srcLine, final byte[] destLine,
+                          final int sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length; x++, i += sourceStepX) {
+            destLine[x] = srcLine[2 * i];
+        }
+    }
+
+    protected static void copyLine2Of2(final short[] srcLine, final short[] destLine,
+                          final int sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length-1; x++, i += sourceStepX) {
+            destLine[x] = srcLine[2 * i + 1];
+        }
+    }
+
+    protected static void copyLine2Of2(final byte[] srcLine, final byte[] destLine,
+                          final int sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length-1; x++, i += sourceStepX) {
+            destLine[x] = srcLine[2 * i + 1];
+        }
+    }
+
+    protected final ImageRecord getImageRecord(final int line) throws IOException,
+                                                              IllegalCeosFormatException {
+        if (_imageRecords[line] == null) {
+            _ceosReader.seek(_imageRecordLength * line + _startPosImageRecords);
+            _imageRecords[line] = new ImageRecord(_ceosReader, _ceosReader.getCurrentPos(), _imageRecords[0].getCeosDatabase());
+        }
+        return _imageRecords[line];
+    }
+
+    public void close() throws IOException {
+        _ceosReader.close();
+        _ceosReader = null;
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: CeosHelper.java,v 1.2 2008-05-26 19:32:10 lveci Exp $
+ * $Id: CeosHelper.java,v 1.3 2008-07-23 19:47:17 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,9 +16,9 @@
  */
 package org.esa.nest.dataio.ceos;
 
-import org.esa.nest.dataio.ceos.records.FilePointerRecord;
-import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.nest.dataio.ceos.records.BaseRecord;
+import org.esa.nest.dataio.ceos.records.FilePointerRecord;
 
 import java.io.File;
 import java.io.FilenameFilter;

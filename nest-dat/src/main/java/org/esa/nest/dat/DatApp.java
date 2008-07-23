@@ -80,4 +80,36 @@ public final class DatApp extends VisatApp {
 
         return toolBar;
     }
+
+    @Override
+    protected CommandBar createToolsToolBar() {
+        // context of action in module.xml used as key
+        final CommandBar toolBar = new CommandBar("toolsToolBar");
+        toolBar.setTitle("Tools");
+        toolBar.addDockableBarListener(new ToolBarListener());
+
+        addCommandsToToolBar(toolBar, new String[]{
+                // These IDs are defined in the module.xml
+                //"selectTool",
+                "crossHairTool",
+                "rangeFinder",
+                "zoomTool",
+                "pannerTool",
+                "pinTool",
+                "gcpTool",
+                null,
+                //"drawLineTool",
+                "drawRectangleTool",
+                "drawEllipseTool",
+                //"drawPolylineTool",
+                "drawPolygonTool",
+                //"deleteShape",
+//                "magicStickTool",
+                null,
+                "convertShapeToROI",
+                //"convertROIToShape",
+        });
+
+        return toolBar;
+    }
 }
