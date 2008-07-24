@@ -65,8 +65,9 @@ public class TestOrbitalDataRecordReader extends TestCase {
         assertTrue(res);
 
         OrbitalDataRecordReader.OrbitDataRecord[] orbits = reader.getDataRecords();
+        System.out.print("Num Orbits " + orbits.length);
         for(int i=0; i < 2; ++i) {
-            System.out.print("Orbit time " + orbits[i].time);
+            System.out.print(" Orbit time " + orbits[i].time);
             System.out.print(" lat " + orbits[i].latitude);
             System.out.print(" lng " + orbits[i].longitude);
             System.out.print(" hgt " + orbits[i].heightOfCenterOfMass);

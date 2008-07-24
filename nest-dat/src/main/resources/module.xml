@@ -239,8 +239,19 @@
             <shortDescr>Edit product metadata</shortDescr>
             <description>Edit product metadata</description>
             <helpId>editMetadata</helpId>
-            <parent>tools</parent>
-            <placeAfter>openGraphBuilderDialog</placeAfter>
+            <placeBefore>Calibration</placeBefore>
+            <parent>sartools</parent>
+        </action>
+
+        <action>
+            <id>applyOrbitFile</id>
+            <class>org.esa.nest.dat.actions.ApplyOrbitFileAction</class>
+            <text>Apply Orbit File</text>
+            <shortDescr>Apply Orbit File to Product</shortDescr>
+            <description>Update product metadata with orbit file</description>
+            <helpId>applyOrbitFile</helpId>
+            <parent>sartools</parent>
+            <placeAfter>editMetadata</placeAfter>
             <separatorAfter>true</separatorAfter>
         </action>
 
@@ -253,8 +264,8 @@
             <mnemonic>L</mnemonic>
             <placeAfter>showAnalysisToolBar</placeAfter>
             <placeBefore>showToolsToolBar</placeBefore>
-            <selected>true</selected>
-            <toggle>false</toggle>
+            <selected>false</selected>
+            <toggle>true</toggle>
             <shortDescr>Toggle visibility of the layers tool bar.</shortDescr>
             <description>Toggle visibility of the layers tool bar.</description>
             <helpId>showLayersToolBar</helpId>

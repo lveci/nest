@@ -10,7 +10,7 @@ import java.io.*;
  * Date: Feb 26, 2008
  * To change this template use File | Settings | File Templates.
  */
-public class OrbitalDataRecordReader {
+public final class OrbitalDataRecordReader {
 
     private DataInputStream in = null;
 
