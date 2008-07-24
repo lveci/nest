@@ -95,7 +95,7 @@
 
         <action>
             <id>forwardTerrainCorrectionOp</id>
-            <class>org.esa.nest.dat.forwardTerrainCorrectionOAction</class>
+            <class>org.esa.nest.dat.ForwardTerrainCorrectionOpAction</class>
             <text>Forward</text>
             <shortDescr>Terrain Correction Forward Method</shortDescr>
             <parent>TerrainCorrectionGroup</parent>
@@ -103,7 +103,7 @@
 
         <action>
             <id>backwardTerrainCorrectionO</id>
-            <class>org.esa.nest.dat.backwardTerrainCorrectionOAction</class>
+            <class>org.esa.nest.dat.BackwardTerrainCorrectionOpAction</class>
             <text>Backward</text>
             <shortDescr>Terrain Correction Backward Method</shortDescr>
             <parent>TerrainCorrectionGroup</parent>
