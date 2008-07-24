@@ -49,6 +49,9 @@ public class WARPOperator extends Operator {
     @Parameter(description = "The order of WARP polynomial function", interval = "[1, 3]", defaultValue = "2")
     private int warpPolynomialOrder;
 
+    @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR, BICUBIC, BICUBIC2}, defaultValue = BILINEAR)
+    private String interpolationMethod;
+
     private Product masterProduct;
     private Product slaveProduct;
 
@@ -60,8 +63,12 @@ public class WARPOperator extends Operator {
     private ProductNodeGroup<Pin> targetGcpGroup;
 
     private WarpPolynomial warp;
-    private int imageWidth;
-    private int imageHeight;
+    private Interpolation interp;
+
+    private static final String NEAREST_NEIGHBOR = "Nearest-neighbor interpolation";
+    private static final String BILINEAR = "Bilinear interpolation";
+    private static final String BICUBIC = "Bicubic interpolation";
+    private static final String BICUBIC2 = "Bicubic2 interpolation";
 
     /**
      * Default constructor. The graph processing framework
@@ -98,13 +105,6 @@ public class WARPOperator extends Operator {
         slaveBand = slaveProduct.getBandAt(0);
 
         targetProduct.addBand(slaveBand.getName(), ProductData.TYPE_FLOAT32);
-        
-        imageWidth = slaveProduct.getSceneRasterWidth();
-        imageHeight = slaveProduct.getSceneRasterHeight();
-
-        //System.out.println("slave image width = " + imageWidth);
-        //System.out.println("slave image height = " + imageHeight);
-        //System.out.println("slave image data type = " + slaveBand.getDataType());
 
         masterGcpGroup = masterProduct.getGcpGroup();
         slaveGcpGroup = slaveProduct.getGcpGroup();
@@ -121,6 +121,17 @@ public class WARPOperator extends Operator {
 
         // compute warp polynomial
         computeWARPPolynomial();
+
+        // determine interpolation method for warp function
+        if (interpolationMethod.equals(NEAREST_NEIGHBOR)) {
+            interp = new InterpolationNearest();
+        } else if (interpolationMethod.equals(BILINEAR)) {
+            interp = new InterpolationBilinear();
+        } else if (interpolationMethod.equals(BICUBIC)) {
+            interp = new InterpolationBicubic(8);
+        } else if (interpolationMethod.equals(BICUBIC2)) {
+            interp = new InterpolationBicubic2(8);
+        }
 
         targetProduct.setPreferredTileSize(slaveProduct.getSceneRasterWidth(), 256);
     }
@@ -151,7 +162,7 @@ public class WARPOperator extends Operator {
 
         // create source image
         Tile sourceRaster = getSourceTile(slaveBand, targetTileRectangle, pm);
-        RenderedImage srcImage = sourceRaster.getRasterDataNode().getSourceImage(); //getImage();
+        RenderedImage srcImage = sourceRaster.getRasterDataNode().getSourceImage();
 
         // get warped image
         RenderedOp warpedImage = createWarpImage(srcImage);
@@ -280,16 +291,19 @@ public class WARPOperator extends Operator {
     RenderedOp createWarpImage(RenderedImage srcImage) {
 
         // reformat source image by casting pixel values from ushort to float
+        /*
         ParameterBlock pb1 = new ParameterBlock();
         pb1.addSource(srcImage);
         pb1.add(DataBuffer.TYPE_FLOAT);
         RenderedImage srcImageFloat = JAI.create("format", pb1);
+        */
 
         // get warped image
         ParameterBlock pb2 = new ParameterBlock();
-        pb2.addSource(srcImageFloat);
+//        pb2.addSource(srcImageFloat);
+        pb2.addSource(srcImage);
         pb2.add(warp);
-        pb2.add(new InterpolationBilinear());
+        pb2.add(interp);
         return JAI.create("warp", pb2);
     }
 
