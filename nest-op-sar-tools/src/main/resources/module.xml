@@ -86,6 +86,28 @@
             <parent>DatasetConversion</parent>
         </action>
 
+        <action>
+            <id>TerrainCorrectionGroup</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Terrain Correction</text>
+            <parent>geometry</parent>
+        </action>
+
+        <action>
+            <id>forwardTerrainCorrectionOp</id>
+            <class>org.esa.nest.dat.forwardTerrainCorrectionOAction</class>
+            <text>Forward</text>
+            <shortDescr>Terrain Correction Forward Method</shortDescr>
+            <parent>TerrainCorrectionGroup</parent>
+        </action>
+
+        <action>
+            <id>backwardTerrainCorrectionO</id>
+            <class>org.esa.nest.dat.backwardTerrainCorrectionOAction</class>
+            <text>Backward</text>
+            <shortDescr>Terrain Correction Backward Method</shortDescr>
+            <parent>TerrainCorrectionGroup</parent>
+        </action>
 
     </extension>
 
