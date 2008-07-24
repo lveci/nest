@@ -22,4 +22,9 @@ public class OverSamplingOpAction extends AbstractVisatAction {
         dialog.show();
 
     }
+
+    @Override
+    public void updateState(final CommandEvent event) {
+        setEnabled(false);
+    }
 }
