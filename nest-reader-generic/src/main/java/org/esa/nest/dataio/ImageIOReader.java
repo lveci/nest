@@ -33,6 +33,10 @@ public class ImageIOReader extends AbstractProductReader {
     private int sceneHeight;
     private int dataType;
 
+    ImageOutputStream stream;
+    ImageReader reader;
+    ImageReadParam param;
+
     private transient Map<Band, BandInfo> bandMap = new HashMap<Band, BandInfo>(3);
 
     /**
@@ -79,10 +83,10 @@ public class ImageIOReader extends AbstractProductReader {
         }
         final File inputFile = getFileFromInput(getInput());
 
-        ImageOutputStream stream = ImageIO.createImageOutputStream(inputFile);
+        stream = ImageIO.createImageOutputStream(inputFile);
         Iterator iter = ImageIO.getImageReaders(stream);
-        ImageReader reader = (ImageReader) iter.next();
-        ImageReadParam param = reader.getDefaultReadParam();
+        reader = (ImageReader) iter.next();
+        param = reader.getDefaultReadParam();
         reader.setInput(stream);
 
         final IIOMetadata iioMetadata = reader.getImageMetadata(0);
@@ -104,17 +108,13 @@ public class ImageIOReader extends AbstractProductReader {
 
         for(int i=0; i < numImages; ++i) {
 
-            IIOImage iioImage = reader.readAll(i, param);
-
             for(int b=0; b < numBands; ++b) {
                 final Band band = new Band("band"+ (i+b), dataType,
                                    sceneWidth, sceneHeight);
                 product.addBand(band);
-                bandMap.put(band, new BandInfo(iioImage, b));
+                bandMap.put(band, new BandInfo(i, b));
             }
         }
-
-
 
         //product.setDescription(getProductDescription());
 
@@ -124,10 +124,14 @@ public class ImageIOReader extends AbstractProductReader {
         product.setProductReader(this);
         product.setModified(false);
 
+        return product;
+    }
+
+    public void close() throws IOException {
+        super.close();
+
         stream.close();
         reader.dispose();
-
-        return product;
     }
 
     DecodeQualification checkProductQualification(File file) {
@@ -152,27 +156,36 @@ public class ImageIOReader extends AbstractProductReader {
 
         BandInfo bandInfo = bandMap.get(destBand);
 
-        java.awt.image.Raster data = bandInfo.iioImage.getRenderedImage().getData(
-                new Rectangle(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight));
+        Rectangle srcRect = new Rectangle(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight);
+        Rectangle dstRect = new Rectangle(0, 0, sourceWidth, sourceHeight);
+
+        param.setSourceRegion(srcRect);
+        IIOImage iioImage = reader.readAll(bandInfo.imageID, param);
+
+        java.awt.image.Raster data = iioImage.getRenderedImage().getData();
 
         int size = destBuffer.getNumElems();
         int elemSize = data.getNumDataElements();
 
         int[] b = new int[size * elemSize];
-        data.getPixels(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, b);
+        data.getPixels(0, 0, sourceWidth, sourceHeight, b);
 
-        int length = b.length;
-        for(int i=0, j=bandInfo.bandSampleOffset; i < size && j < length; ++i, j+=elemSize) {
-            destBuffer.setElemIntAt(i, b[j]);
-        }
-
+        //if(elemSize == 1) {
+        //    System.arraycopy(b, 0, destBuffer.getElems(), 0, destWidth);
+        //} else {
+            int length = b.length;
+            for(int i=0, j=bandInfo.bandSampleOffset; i < size && j < length; ++i, j+=elemSize) {
+                destBuffer.setElemIntAt(i, b[j]);
+            }
+        //}
     }
 
     private static class BandInfo {
-        IIOImage iioImage;
+        //IIOImage iioImage;
+        int imageID;
         int bandSampleOffset;
-        public BandInfo(IIOImage image, int offset) {
-            iioImage = image;
+        public BandInfo(int id, int offset) {
+            imageID = id;
             bandSampleOffset = offset;
         }
     }
