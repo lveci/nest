@@ -17,7 +17,7 @@
     -->
     <info>
         <appname>Next ESA SAR Toolbox</appname>
-        <appversion>1B</appversion>
+        <appversion>1C</appversion>
         <url>http://www.array.ca/nest</url>
     </info>
     
@@ -71,15 +71,11 @@
             <description>The base files</description>
 			<file src="uninstall.bat" targetdir="$INSTALL_PATH"/>
 			<file src="uninstall.sh" targetdir="$INSTALL_PATH"/>
-			<file src="target/nest-1B-bin.dir" targetdir="$INSTALL_PATH"/>
+			<file src="target/nest-1C-bin.dir" targetdir="$INSTALL_PATH"/>
         </pack>
         <pack name="Docs" required="no">
             <description>The documentation</description>
             <file src="readme.html" targetdir="$INSTALL_PATH"/> <!-- Reccursive adding -->
-        </pack>
-        <pack name="Sources" required="no">
-            <description>The sources</description>
-            <file src="target/nest-1B-src.zip" targetdir="$INSTALL_PATH"/>
         </pack>
     </packs>
     
