@@ -1,6 +1,6 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
-    <symbolicName>nest-op-data-analysis</symbolicName>
+    <symbolicName>nest-op-sar-tools</symbolicName>
     <version>1C</version>
     <name>nest-op-sar-tools</name>
     <description>NEST SAR Tools</description>

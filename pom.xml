@@ -50,6 +50,7 @@
 	    <module>nest-op-ers-calibration</module>
 	    <module>nest-op-coregistration</module>
 	    <module>nest-op-sar-tools</module>
+		<module>nest-op-ocean-tools</module>
 		<module>nest-op-wss-deburst</module>
   </modules>
 
@@ -226,7 +227,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>3.8.1</version>
+                <version>4.4</version>
             </dependency>
 			
 			<dependency>
