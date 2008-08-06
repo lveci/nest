@@ -267,8 +267,28 @@ public class SRGROperator extends Operator {
      */
     void computeGroundRangeSpacing() {
 
+        // get satellite pass
+        MetadataElement sph = sourceProduct.getMetadataRoot().getElement("SPH");
+        if (sph == null) {
+            throw new OperatorException("SPH not found");
+        }
+
+        MetadataAttribute passAttr = sph.getAttribute("pass");
+        if (passAttr == null) {
+            throw new OperatorException("pass not found");
+        }
+
+        String pass = passAttr.getData().getElemString();
+        //System.out.println("pass is " + pass);
+
         // get near range incidence angle
-        double alpha = incidenceAngle.getPixelFloat(sourceImageWidth - 0.5f, 0.5f) * MathUtils.DTOR;
+        double alpha;
+        if (pass.equals("DESCENDING")) {
+            alpha = incidenceAngle.getPixelFloat(sourceImageWidth - 0.5f, 0.5f) * MathUtils.DTOR;
+        } else {
+            alpha = incidenceAngle.getPixelFloat(0.5f, 0.5f) * MathUtils.DTOR;
+        }
+        
         groundRangeSpacing = slantRangeSpacing / Math.sin(alpha);
     }
 
