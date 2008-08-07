@@ -241,6 +241,19 @@
             <helpId>editMetadata</helpId>
             <placeBefore>Calibration</placeBefore>
             <parent>sartools</parent>
+            <context>metadata</context>
+        </action>
+
+        <action>
+            <id>searchMetadata</id>
+            <class>org.esa.nest.dat.actions.SearchMetadataAction</class>
+            <text>Search Metadata</text>
+            <shortDescr>Search product metadata</shortDescr>
+            <description>Search product metadata</description>
+            <helpId>searchMetadata</helpId>
+            <placeAfter>editMetadata</placeAfter>
+            <parent>sartools</parent>
+            <context>metadata</context>
         </action>
 
         <action>

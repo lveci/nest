@@ -170,12 +170,27 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
     private void addMetaData(final Product product) throws IOException,
                                                            IllegalCeosFormatException {
-        final MetadataElement metadata = new MetadataElement("SPH");
-        _leaderFile.addLeaderMetadata(metadata);
-        _volumeDirectoryFile.assignMetadataTo(metadata);
-        addSummaryMetadata(metadata);
 
-        product.getMetadataRoot().addElement(metadata);
+        final MetadataElement root = product.getMetadataRoot();
+        root.addElement(new MetadataElement("Abstracted Metadata"));
+
+        final MetadataElement leadMetadata = new MetadataElement("Leader");
+        _leaderFile.addLeaderMetadata(leadMetadata);
+        root.addElement(leadMetadata);
+
+        final MetadataElement volMetadata = new MetadataElement("Volume");
+        _volumeDirectoryFile.assignMetadataTo(volMetadata);
+        root.addElement(volMetadata);
+
+        addSummaryMetadata(root);
+        addAbstractedMetadataHeader(root);
+    }
+
+    private static void addAbstractedMetadataHeader(MetadataElement root) {
+
+        MetadataElement absRoot = root.getElement("Abstracted Metadata");
+
+
     }
 
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {

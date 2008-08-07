@@ -66,7 +66,7 @@ public class SRGROperator extends Operator {
     @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR, BICUBIC, SINC}, defaultValue = BILINEAR)
     private String interpolationMethod;
 
-    private MetadataElement mppAds;
+    private MetadataElement absRoot;
     private TiePointGrid incidenceAngle;
     private GeoCoding geoCoding;
     private boolean srgrFlag;
@@ -84,6 +84,10 @@ public class SRGROperator extends Operator {
     private static final String BILINEAR = "Bilinear interpolation";
     private static final String BICUBIC = "Bicubic interpolation";
     private static final String SINC = "Sinc interpolation";
+
+    private static double a = 6378137; // m
+    private static double earthFlatCoef = 298.257223563;
+    private static double e = 2 / earthFlatCoef - 1 / (earthFlatCoef * earthFlatCoef);
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -105,7 +109,7 @@ public class SRGROperator extends Operator {
             throw new OperatorException("numRangePoints must be greater than warpPolynomialOrder");
         }
 
-        getMainProcParamADS();
+        absRoot = sourceProduct.getMetadataRoot().getElement("Abstracted Metadata");
 
         getSRGRFlag();
 
@@ -200,22 +204,11 @@ public class SRGROperator extends Operator {
     }
 
     /**
-     * Get Main Processing Parameters ADSR from metadata.
-     */
-    void getMainProcParamADS() {
-
-        mppAds = sourceProduct.getMetadataRoot().getElement("MAIN_PROCESSING_PARAMS_ADS");
-        if (mppAds == null) {
-            throw new OperatorException("MAIN_PROCESSING_PARAMS_ADS not found");
-        }
-    }
-
-    /**
      * Get srgr_flag from metadata.
      */
     void getSRGRFlag() {
 
-        MetadataAttribute srgrFlagAttr = mppAds.getAttribute("srgr_flag");
+        MetadataAttribute srgrFlagAttr = absRoot.getAttribute("srgr_flag");
         if (srgrFlagAttr == null) {
             throw new OperatorException("srgr_flag not found");
         }
@@ -227,7 +220,7 @@ public class SRGROperator extends Operator {
      */
     void getSlantRangeSpacing() {
         
-        MetadataAttribute rangeSpacingAttr = mppAds.getAttribute("range_spacing");
+        MetadataAttribute rangeSpacingAttr = absRoot.getAttribute("range_spacing");
         if (rangeSpacingAttr == null) {
             throw new OperatorException("range_spacing not found");
         }
@@ -268,12 +261,7 @@ public class SRGROperator extends Operator {
     void computeGroundRangeSpacing() {
 
         // get satellite pass
-        MetadataElement sph = sourceProduct.getMetadataRoot().getElement("SPH");
-        if (sph == null) {
-            throw new OperatorException("SPH not found");
-        }
-
-        MetadataAttribute passAttr = sph.getAttribute("pass");
+        MetadataAttribute passAttr = absRoot.getAttribute("pass");
         if (passAttr == null) {
             throw new OperatorException("pass not found");
         }
@@ -314,8 +302,6 @@ public class SRGROperator extends Operator {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-
-        // create NEST metadata
     }
 
     /**
@@ -383,24 +369,25 @@ public class SRGROperator extends Operator {
      * @param geoPos The geo position of a given pixel.
      * @param xyz The xyz coordinates of the given pixel.
      */
-    void geo2xyz(GeoPos geoPos, double xyz[]) {
+    private static void geo2xyz(GeoPos geoPos, double xyz[]) {
 
         double lat = (double)geoPos.lat * MathUtils.DTOR;
         double lon = (double)geoPos.lon * MathUtils.DTOR;
-        double a = 6378137; // m
-        double earthFlatCoef = 298.257223563;
-        double e = 2 / earthFlatCoef - 1 / (earthFlatCoef * earthFlatCoef);
-        double N = a / Math.sqrt(1 - Math.pow(e*Math.sin(lat), 2));
 
-        xyz[0] = N * Math.cos(lat) * Math.cos(lon);
-        xyz[1] = N * Math.cos(lat) * Math.sin(lon);
-        xyz[2] = (1 - e * e) * N * Math.sin(lat);
+        double sinLat = Math.sin(lat);
+        double cosLat = Math.cos(lat);
+        double N = a / Math.sqrt(1 - Math.pow(e*sinLat, 2));
+
+        xyz[0] = N * cosLat * Math.cos(lon);
+        xyz[1] = N * cosLat * Math.sin(lon);
+        xyz[2] = (1 - e * e) * N * sinLat;
     }
 
     /**
      * Get Vandermonde matrix constructed from a given distance array.
      *
      * @param d The given range distance array.
+     * @return the matrix
      */
     Matrix createVandermondeMatrix(double[] d) {
 
