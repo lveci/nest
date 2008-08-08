@@ -18,38 +18,33 @@
 
     <tocitem text="DAT">
         <tocitem text="Introduction" target="visat"/>
+		<tocitem text="Import">
+            <tocitem text="Import ENVISAT Data Product" target="importEnvisatProduct"/>
+            <tocitem text="Import ERS1/2 Data Product" target="importErsProduct"/>
+            <tocitem text="Import BEAM-DIMAP Data Product" target="importDimapProduct"/>
+            <tocitem text="Import LANDSAT 5 TM Data Product" target="importLandsatTMProduct"/>
+            <tocitem text="Import NetCDF Data Product" target="importNetCDF"/>
+            <tocitem text="Import GETASSE30 Tile" target="importGETASSE30"/>
+			
+			<tocitem text="Product Subset Dialog" target="subsetDialog"/>
+            <tocitem text="Product Grabber" target="productGrabber"/>
+			<tocitem text="Import Transect Data" target="importTransectData"/>
+		</tocitem>
+		
+		<tocitem text="Import">
+            <tocitem text="Export BEAM-DIMAP Data Product" target="exportDimapProduct"/>
+            <tocitem text="Export HDF-5 Data Product" target="exportHdf5Product"/>
+            <tocitem text="Export ENVI GCP File" target="exportEnviGcpFile"/>
+            <tocitem text="Export Displayed Image" target="exportImageFile"/>
+            <tocitem text="Export KML" target="exportKml"/>
+            <tocitem text="Export GeoTIFF Product" target="exportGeoTIFF"/>
+            <tocitem text="Export Roi Pixels" target="exportROIPixels"/>
+            <tocitem text="Export Transect Pixels" target="exportTransectPixels"/>
+            <tocitem text="Export Colour Legend" target="exportLegendImageFile"/>
+            <tocitem text="Export Colour Palette" target="exportColorPalette"/>
+        </tocitem>
         <tocitem text="Tools">
-            <tocitem text="Import and Export Tools">
-                <tocitem text="Import Transect Data" target="importTransectData"/>
-                <tocitem text="Import ENVISAT Data Product" target="importEnvisatProduct"/>
-                <tocitem text="Import ERS1/2 Data Product" target="importErsProduct"/>
-                <tocitem text="Import ATSR Data Product" target="importAtsrProduct"/>
-                <tocitem text="Import MODIS Data Product" target="importModisProduct"/>
-                <tocitem text="Import MERIS Binned Level-3 Data Product" target="importMerisBinnedL3Product"/>
-                <tocitem text="Import BEAM-DIMAP Data Product" target="importDimapProduct"/>
-                <tocitem text="Import LANDSAT 5 TM Data Product" target="importLandsatTMProduct"/>
-                <tocitem text="Import NOAA-AVHRR/3 Level-1b Data Product" target="importAVHRR"/>
-                <tocitem text="Import NASA Ocean Color Product" target="importNasaObpgProduct"/>
-                <tocitem text="Import ALOS/AVNIR-2 Data Product" target="importAvnir2Product"/>
-                <tocitem text="Import ALOS/PRISM Data Product" target="importPrismProduct"/>
-                <tocitem text="Import CHRIS Data Product" target="importChrisProduct"/>
-                <tocitem text="Import NetCDF Data Product" target="importNetCDF"/>
-                <tocitem text="Import GETASSE30 Tile" target="importGETASSE30"/>
-
-                <tocitem text="Export BEAM-DIMAP Data Product" target="exportDimapProduct"/>
-                <tocitem text="Export HDF-5 Data Product" target="exportHdf5Product"/>
-                <tocitem text="Export ENVI GCP File" target="exportEnviGcpFile"/>
-                <tocitem text="Export Displayed Image" target="exportImageFile"/>
-                <tocitem text="Export KML" target="exportKml"/>
-                <tocitem text="Export GeoTIFF Product" target="exportGeoTIFF"/>
-                <tocitem text="Export Roi Pixels" target="exportROIPixels"/>
-                <tocitem text="Export Transect Pixels" target="exportTransectPixels"/>
-                <tocitem text="Export Colour Legend" target="exportLegendImageFile"/>
-                <tocitem text="Export Colour Palette" target="exportColorPalette"/>
-
-                <tocitem text="Product Subset Dialog" target="subsetDialog"/>
-                <tocitem text="Product Grabber" target="productGrabber"/>
-            </tocitem>
+            
 
             <tocitem text="Imaging Tools">
                 <tocitem text="Image View" target="imageView"/>
@@ -84,16 +79,9 @@
                     <tocitem text="Map Projection Dialog" target="mapProjection"/>
                     <tocitem text="Resampling Methods" target="resamplingMethods"/>
                 </tocitem>
-                <tocitem text="Orthorectification" target="orthorectificationDialog">
-                    <tocitem text="Orthorectification Dialog" target="orthorectificationDialog"/>
-                    <tocitem text="Orthorectification Algorithm" target="orthorectification"/>
-                    <tocitem text="GETASSE30 Elevation Model" target="demGETASSE30"/>
-                    <tocitem text="Create Elevation Band" target="createElevationBand"/>
-                </tocitem>
                 <tocitem text="Data Flip" target="dataFlip"/>
                 <tocitem text="Attach Pixel-based Geo-Coding" target="pixelGeoCodingSetup"/>
                 <tocitem text="Create Elevation Band" target="createElevationBand"/>
-                <tocitem text="Create ASAR NRCS Bands" target="createAsarNrcsBands"/>
                 <tocitem text="Create Filtered Band" target="createFilteredBand"/>
             </tocitem>
         </tocitem>

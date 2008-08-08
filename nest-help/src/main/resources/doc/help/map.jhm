@@ -36,17 +36,9 @@
     <mapID target="importDimapProduct" url="visat/ImportDimap.html"/>
     <mapID target="importEnvisatProduct" url="visat/ImportEnvisat.html"/>
     <mapID target="importErsProduct" url="visat/ImportErs.html"/>
-    <mapID target="importMerisBinnedL3Product" url="visat/ImportMerisBinnedL3.html"/>
-    <mapID target="importModisProduct" url="visat/ImportModis.html"/>
-    <mapID target="importAtsrProduct" url="visat/ImportATSR.html"/>
     <mapID target="importGETASSE30" url="visat/ImportGETASSE30.html"/>
     <mapID target="importTransectData" url="visat/ImportTransectData.html"/>
     <mapID target="importLandsatTMProduct" url="visat/ImportLandsatTM.html"/>
-    <mapID target="importAVHRR" url="visat/ImportAVHRR.html"/>
-    <mapID target="importAvnir2Product" url="visat/ImportAVNIR2.html"/>
-    <mapID target="importNasaObpgProduct" url="visat/ImportNasaObpgHDF.html"/>
-    <mapID target="importChrisProduct" url="visat/ImportChris.html"/>
-    <mapID target="importPrismProduct" url="visat/ImportPRISM.html"/>
     <mapID target="importNetCDF" url="visat/ImportNetCDF.html"/>
     <mapID target="exportDimapProduct" url="visat/ExportDimapProduct.html"/>
     <mapID target="exportEnviGcpFile" url="visat/ExportEnviGcpFile.html"/>
@@ -89,7 +81,6 @@
     <mapID target="orthorectification" url="visat/Orthorectification.html"/>
     <mapID target="demGETASSE30" url="visat/GETASSE30ElevationModel.html"/>
     <mapID target="createElevationBand" url="visat/CreateElevationBand.html"/>
-    <mapID target="createAsarNrcsBands" url="visat/CreateAsarNrcsBands.html"/>
     <mapID target="dataFlip" url="visat/DataFlip.html"/>
     <mapID target="flipDialog" url="visat/DataFlip.html"/>
     <mapID target="pixelGeoCodingSetup" url="visat/PixelGeoCoding.html"/>

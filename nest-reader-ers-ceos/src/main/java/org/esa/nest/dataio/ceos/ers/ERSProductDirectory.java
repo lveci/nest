@@ -183,7 +183,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
     private void addMetaData(final Product product) throws IOException,
                                                            IllegalCeosFormatException {
         final MetadataElement root = product.getMetadataRoot();
-        root.addElement(new MetadataElement("Abstracted Metadata"));
+        root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
 
         final MetadataElement leadMetadata = new MetadataElement("Leader");
         _leaderFile.addLeaderMetadata(leadMetadata);
@@ -204,7 +204,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
     private static void addAbstractedMetadataHeader(MetadataElement root) {
 
-        MetadataElement absRoot = root.getElement("Abstracted Metadata");
+        MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
 
 
     }
