@@ -5,13 +5,13 @@
     <name>ERS 1 and 2 CEOS Product Reader</name>
 
     <description>
-        Enables BEAM to read ERS data products in CEOS format.
+        Enables reading of ERS data products in CEOS format.
     </description>
 
-    <vendor>Brockmann Consult GmbH</vendor>
-    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
-    <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
-    <url>http://envisat.esa.int/beam</url>
+    <vendor>Array Systems Computing Inc</vendor>
+    <contactAddress>1120 Finch Ave W. Toronto (Canada)</contactAddress>
+    <copyright>(C) 2007 by Array Systems Computing Inc</copyright>
+    <url>http://www.array.ca/nest</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
 
     <dependency>
@@ -33,19 +33,16 @@
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>ERS CEOS</formatName>
             <useAllFileFilter>true</useAllFileFilter>
-            <mnemonic>R</mnemonic>
             <shortDescr>Import an ERS CEOS data product or product subset.</shortDescr>
             <description>Import an ERS CEOS data product or product subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
             <helpId>importPalsarProduct</helpId>
-            <placeAfter>importNetcdfProduct</placeAfter>
         </action>
         <action>
             <id>importJERSCEOSProduct</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>JERS CEOS</formatName>
             <useAllFileFilter>true</useAllFileFilter>
-            <mnemonic>J</mnemonic>
             <shortDescr>Import a JERS CEOS data product or product subset.</shortDescr>
             <description>Import a JERS CEOS data product or product subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
@@ -57,7 +54,6 @@
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>Radarsat 1 CEOS</formatName>
             <useAllFileFilter>true</useAllFileFilter>
-            <mnemonic>D</mnemonic>
             <shortDescr>Import a Radarsat 1 CEOS data product or product subset.</shortDescr>
             <description>Import an Radarsat 1 CEOS data product or product subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
