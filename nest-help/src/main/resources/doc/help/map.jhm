@@ -17,6 +17,7 @@
     <mapID target="resamplingMethods" url="general/ResamplingMethods.html"/>
 
     <mapID target="visat" url="visat/dat.html"/>
+	<mapID target="dat" url="visat/dat.html"/>
     <mapID target="mainToolbar" url="visat/Toolbars.html"/>
     <mapID target="menuBar" url="visat/MenuBar.html"/>
     <mapID target="fileMenu" url="visat/FileMenu.html"/>
