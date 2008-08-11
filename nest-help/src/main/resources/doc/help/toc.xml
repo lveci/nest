@@ -11,9 +11,7 @@
         <tocitem text="Overview" target="beamOverview"/>
         <tocitem text="Definitions" target="beamDefinitions"/>
         <tocitem text="Data Sources" target="beamDataSources"/>
-        <tocitem text="Related Links" target="beamRelatedLinks"/>
         <tocitem text="BEAM-DIMAP Format" target="beamDimapFormat"/>
-        <tocitem text="ENVISAT Products" target="envisatProducts"/>
     </tocitem>
 
     <tocitem text="DAT">

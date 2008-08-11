@@ -85,6 +85,23 @@
     <mapID target="flipDialog" url="visat/DataFlip.html"/>
     <mapID target="pixelGeoCodingSetup" url="visat/PixelGeoCoding.html"/>
 
+	<!--Graph Processing-->
+	
+	<!--Operators-->
 	<mapID target="SpeckleFilterOp" url="operators/SpeckleFilterOp.html"/>
+	
+	<!--Tutorials-->
+	<mapID target="remote_sensing" url="tutorials/remote_sensing.html"/>
+	<mapID target="sar" url="tutorials/sar.html"/>
+	<mapID target="using_dat" url="tutorials/using_dat.html"/>
+	<mapID target="coregistering_products" url="tutorials/coregistering_products.html"/>
+		
+	<!--Development-->
+	<mapID target="general_design" url="development/general_design.html"/>
+	<mapID target="detailed_design" url="development/detailed_design.html"/>
+	<mapID target="build_source" url="development/build_source.html"/>
+	<mapID target="developing_reader" url="development/developing_reader.html"/>
+	<mapID target="developing_writer" url="development/developing_writer.html"/>
+	<mapID target="developing_operator" url="development/developing_operator.html"/>
 	
 </map>
