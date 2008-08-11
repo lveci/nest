@@ -68,17 +68,16 @@ public class DatUtils {
 
     public static File getResourceAsFile(final String filename, Class theClass) throws IOException {
 
-        // load from disk
-        java.net.URL resURL = theClass.getClassLoader().getResource(filename);
-        if (resURL != null) {
-            try {
-                return new File(resURL.toURI().getPath());
-            } catch(URISyntaxException e) {
-                return null;
+        try {
+            // load from disk
+            java.net.URL resURL = theClass.getClassLoader().getResource(filename);
+            if (resURL != null) {
+                return new File(resURL.getFile());
             }
+        } catch(Exception e) {
+            throw new IOException("Unable to open "+ filename);
         }
-
-        return null;
+        throw new IOException("resURL==null Unable to open "+ filename);
     }
 
 

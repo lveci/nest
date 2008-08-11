@@ -39,9 +39,15 @@ public class CeosDB {
     private Map metadata;
     private org.jdom.Document xmlDoc;
 
-    public CeosDB(File defFile) throws IOException {
+    public CeosDB(String defFile) throws IOException {
 
-        xmlDoc = XMLSupport.LoadXML(defFile.getAbsolutePath());
+        try {
+
+            xmlDoc = XMLSupport.LoadXMLFromResource(defFile, this.getClass());
+
+        } catch(Exception e) {
+            System.out.println(e.toString());
+        }
         metadata = new HashMap(100);
     }
 
