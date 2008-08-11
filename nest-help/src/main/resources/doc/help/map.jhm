@@ -13,10 +13,8 @@
     <mapID target="beamOverview" url="general/BeamOverview.html"/>
     <mapID target="beamDefinitions" url="general/BeamDefinitions.html"/>
     <mapID target="beamDataSources" url="general/BeamDataSources.html"/>
-    <mapID target="beamRelatedLinks" url="general/BeamRelatedLinks.html"/>
     <mapID target="beamDimapFormat" url="general/BeamDimapFormat.html"/>
     <mapID target="resamplingMethods" url="general/ResamplingMethods.html"/>
-    <mapID target="envisatProducts" url="general/envisat-products/index.html"/> <!-- todo -->
 
     <mapID target="visat" url="visat/dat.html"/>
     <mapID target="mainToolbar" url="visat/Toolbars.html"/>
