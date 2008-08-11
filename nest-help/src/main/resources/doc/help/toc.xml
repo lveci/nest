@@ -104,19 +104,37 @@
     </tocitem>
 
 	<tocitem text="Graph Processing">
-            <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>
+        <tocitem text="Introduction" target="introduction"/>
+		
+		<tocitem text="GPT">
+	            <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>
+				<tocitem text="WSS Deburst" target="WSSDeburstOp"/>
+		</tocitem>
+		
+		<tocitem text="Graph Builder">
+	            <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>
+				<tocitem text="WSS Deburst" target="WSSDeburstOp"/>
+		</tocitem>
+		
+		<tocitem text="Operators">
+	            <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>
+		</tocitem>		
 	</tocitem>
-	
-	<tocitem text="GPT">
-            <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>
-	</tocitem>
-	
-	<tocitem text="Operators">
-            <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>
-	</tocitem>		
 	
 	<tocitem text="Tutorials">
-            <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>
+        <tocitem text="Remote Sensing" target="remote_sensing"/>
+		<tocitem text="Synthetic Aperture Radar" target="sar"/>
+		<tocitem text="Using the DAT" target="using_dat"/>
+		<tocitem text="Coregistering Products" target="coregistering_products"/>
 	</tocitem>
 	
+	<tocitem text="Tutorials">
+        <tocitem text="General Design" target="general_design"/>
+		<tocitem text="Detailed Design" target="detailed_design"/>
+		<tocitem text="Building the Source" target="builing_source"/>
+		<tocitem text="Developing a Reader" target="developing_reader"/>
+		<tocitem text="Developing a Writer" target="developing_writer"/>
+		<tocitem text="Developing an Operator" target="developing_operator"/>
+	</tocitem>
+		
 </toc>
