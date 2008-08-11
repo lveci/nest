@@ -7,6 +7,7 @@ import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.util.Debug;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,9 +79,9 @@ public abstract class CEOSProductReader extends AbstractProductReader {
      */
     @Override
     protected Product readProductNodesImpl() throws IOException {
-        final ProductReaderPlugIn readerPlugIn = getReaderPlugIn();
+        //final ProductReaderPlugIn readerPlugIn = getReaderPlugIn();
         final Object input = getInput();
-        
+
         final File fileFromInput = getFileFromInput(input);
         Product product;
         try {
@@ -89,6 +90,7 @@ public abstract class CEOSProductReader extends AbstractProductReader {
             product = _dataDir.createProduct();
             product.setFileLocation(fileFromInput);
         } catch (IllegalCeosFormatException e) {
+            Debug.trace(e.toString());
             final IOException ioException = new IOException(e.getMessage());
             ioException.initCause(e);
             throw ioException;

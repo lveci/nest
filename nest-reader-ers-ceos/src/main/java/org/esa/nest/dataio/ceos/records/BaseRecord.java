@@ -1,5 +1,5 @@
 /*
- * $Id: BaseRecord.java,v 1.4 2008-07-23 19:47:17 lveci Exp $
+ * $Id: BaseRecord.java,v 1.5 2008-08-10 21:33:55 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -50,10 +50,9 @@ public class BaseRecord {
             _startPos = reader.getCurrentPos();
         }
 
-        File defFile = DatUtils.getResourceAsFile(ceosDBPath + '/' +
-                                                    mission + '/' + recordDefinitionFileName, this.getClass());
+        String resPath = ceosDBPath + '/' + mission + '/' + recordDefinitionFileName;
 
-        db = new CeosDB(defFile);
+        db = new CeosDB(resPath);
         db.readRecord(reader);
     }
 

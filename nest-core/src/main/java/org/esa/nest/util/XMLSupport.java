@@ -55,4 +55,12 @@ public class XMLSupport {
         }
     }
 
+    public static org.jdom.Document LoadXMLFromResource(String filePath, Class theClass) throws IOException {
+       
+        java.net.URL resURL = theClass.getClassLoader().getResource(filePath);
+        if (resURL != null)
+            return LoadXML(resURL.toString());
+        return null;
+    }
+
 }

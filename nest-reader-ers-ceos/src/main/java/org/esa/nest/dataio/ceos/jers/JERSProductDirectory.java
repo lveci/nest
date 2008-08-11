@@ -50,7 +50,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
 
     protected void readProductDirectory() throws IOException, IllegalCeosFormatException {
         readVolumeDirectoryFile();
-        _leaderFile = new JERSLeaderFile(createInputStream(_volumeDirectoryFile.getLeaderFileName()));
+        _leaderFile = new JERSLeaderFile(createInputStream(JERSVolumeDirectoryFile.getLeaderFileName()));
 
         final String[] imageFileNames = _volumeDirectoryFile.getImageFileNames();
         _imageFiles = new JERSImageFile[imageFileNames.length];

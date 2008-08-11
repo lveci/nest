@@ -39,6 +39,8 @@ public class JERSProductReader extends CEOSProductReader {
             return DecodeQualification.SUITABLE;
             
         } catch (Exception e) {
+            System.out.println(e.toString());
+
             return DecodeQualification.UNABLE;
         }
     }
