@@ -18,7 +18,7 @@
     <mapID target="resamplingMethods" url="general/ResamplingMethods.html"/>
     <mapID target="envisatProducts" url="general/envisat-products/index.html"/> <!-- todo -->
 
-    <mapID target="visat" url="visat/index.html"/>
+    <mapID target="visat" url="visat/dat.html"/>
     <mapID target="mainToolbar" url="visat/Toolbars.html"/>
     <mapID target="menuBar" url="visat/MenuBar.html"/>
     <mapID target="fileMenu" url="visat/FileMenu.html"/>

@@ -17,7 +17,7 @@
     </tocitem>
 
     <tocitem text="DAT">
-        <tocitem text="Introduction" target="visat"/>
+        <tocitem text="Display and Analysis Tool" target="dat"/>
 		<tocitem text="Import">
             <tocitem text="Import ENVISAT Data Product" target="importEnvisatProduct"/>
             <tocitem text="Import ERS1/2 Data Product" target="importErsProduct"/>
@@ -25,13 +25,13 @@
             <tocitem text="Import LANDSAT 5 TM Data Product" target="importLandsatTMProduct"/>
             <tocitem text="Import NetCDF Data Product" target="importNetCDF"/>
             <tocitem text="Import GETASSE30 Tile" target="importGETASSE30"/>
+			<tocitem text="Import Transect Data" target="importTransectData"/>
 			
 			<tocitem text="Product Subset Dialog" target="subsetDialog"/>
             <tocitem text="Product Grabber" target="productGrabber"/>
-			<tocitem text="Import Transect Data" target="importTransectData"/>
 		</tocitem>
 		
-		<tocitem text="Import">
+		<tocitem text="Export">
             <tocitem text="Export BEAM-DIMAP Data Product" target="exportDimapProduct"/>
             <tocitem text="Export HDF-5 Data Product" target="exportHdf5Product"/>
             <tocitem text="Export ENVI GCP File" target="exportEnviGcpFile"/>
