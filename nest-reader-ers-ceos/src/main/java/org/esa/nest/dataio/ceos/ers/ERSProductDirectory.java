@@ -36,7 +36,8 @@ class ERSProductDirectory extends CEOSProductDirectory {
     private int _sceneWidth;
     private int _sceneHeight;
 
-    private static String SLC_PRODUCT_TYPE = "SAR SINGLE LOOK COMPLEX IMAGE   ";
+    //private static String SLC_PRODUCT_TYPE = "SAR SINGLE LOOK COMPLEX IMAGE   ";
+    //private static String ERS1_SLC_PRODUCT_TYPE = "PRODUCT: ERS-1.SAR.SLC                  ";
 
     private transient Map<String, ERSImageFile> bandImageFileMap = new HashMap<String, ERSImageFile>(1);
 
@@ -67,7 +68,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
             _volumeDirectoryFile = new ERSVolumeDirectoryFile(_baseDir);
 
         productType = _volumeDirectoryFile.getProductType();
-        isProductSLC = productType.equals(SLC_PRODUCT_TYPE);
+        isProductSLC = productType.contains("SLC");
     }
 
     public boolean isERS() throws IOException, IllegalCeosFormatException {
