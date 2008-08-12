@@ -27,7 +27,6 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
 
-import javax.media.jai.JAI;
 import java.awt.*;
 
 import Jama.Matrix;
@@ -44,12 +43,8 @@ import Jama.Matrix;
  * Slant Range to Ground Range Conversion.
  */
 
-/**
- * The sample operator implementation for an algorithm
- * that can compute bands independently of each other.
- */
 @OperatorMetadata(alias="SRGR")
-public class SRGROperator extends Operator {
+public class SRGROp extends Operator {
 
     @SourceProduct
     private Product sourceProduct;
@@ -413,7 +408,7 @@ public class SRGROperator extends Operator {
      */
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(SRGROperator.class);
+            super(SRGROp.class);
         }
     }
 }

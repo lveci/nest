@@ -1,6 +1,7 @@
 package org.esa.nest.dataio.ceos.radarsat;
 
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
+import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.CEOSProductReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
@@ -26,5 +27,20 @@ public class RadarsatProductReader extends CEOSProductReader {
 
     protected CEOSProductDirectory createProductDirectory(File inputFile) throws IOException, IllegalCeosFormatException {
         return new RadarsatProductDirectory(inputFile.getParentFile());
+    }
+
+    DecodeQualification checkProductQualification(File file) {
+
+        try {
+            _dataDir = createProductDirectory(file);
+
+            RadarsatProductDirectory dataDir = (RadarsatProductDirectory)_dataDir;
+            if(dataDir.isRadarsat())
+                return DecodeQualification.INTENDED;
+            return DecodeQualification.SUITABLE;
+
+        } catch (Exception e) {
+            return DecodeQualification.UNABLE;
+        }
     }
 }

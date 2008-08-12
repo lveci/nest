@@ -15,12 +15,11 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * This class represents a product directory of an Avnir-2 product.
+ * This class represents a product directory.
  * <p/>
  * <p>This class is public for the benefit of the implementation of another (internal) class and its API may
  * change in future releases of the software.</p>
  *
- * @author Marco Peters
  */
 class ERSProductDirectory extends CEOSProductDirectory {
 
@@ -68,7 +67,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
             _volumeDirectoryFile = new ERSVolumeDirectoryFile(_baseDir);
 
         productType = _volumeDirectoryFile.getProductType();
-        isProductSLC = productType.contains("SLC");
+        isProductSLC = productType.contains("SLC") || productType.contains("COMPLEX");
     }
 
     public boolean isERS() throws IOException, IllegalCeosFormatException {

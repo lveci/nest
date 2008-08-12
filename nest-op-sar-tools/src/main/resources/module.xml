@@ -85,9 +85,37 @@
         <action>
             <id>FormatChangeOp</id>
             <class>org.esa.nest.dat.FormatChangeOpAction</class>
-            <text>DataType Format Change</text>
+            <text>Datatype Format Change</text>
             <shortDescr>Change the datatype of the product</shortDescr>
             <parent>DatasetConversion</parent>
+            <helpId>FormatChangeOp</helpId>
+        </action>
+
+        <action>
+            <id>AmplitudeToIntensityOp</id>
+            <class>org.esa.nest.dat.AmplitudeToIntensityOpAction</class>
+            <text>Amplitude to/from Intensity</text>
+            <shortDescr>Change the data Amplitude to/from Intensity</shortDescr>
+            <parent>DatasetConversion</parent>
+            <helpId>AmplitudeToIntensityOp</helpId>
+        </action>
+
+        <action>
+            <id>ComplexToIntensityOp</id>
+            <class>org.esa.nest.dat.ComplexToIntensityOpAction</class>
+            <text>Complex to Intensity</text>
+            <shortDescr>Change the data from Complex to Intensity</shortDescr>
+            <parent>DatasetConversion</parent>
+            <helpId>ComplexToIntensityOp</helpId>
+        </action>
+
+        <action>
+            <id>LinearTodBOp</id>
+            <class>org.esa.nest.dat.LinearTodBOpAction</class>
+            <text>Linear to/from dB</text>
+            <shortDescr>Change the data Linear to/from dB</shortDescr>
+            <parent>DatasetConversion</parent>
+            <helpId>LinearTodBOp</helpId>
         </action>
 
         <action>

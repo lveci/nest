@@ -6,10 +6,10 @@ import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.beam.visat.actions.AbstractVisatAction;
 
 /**
- * FormatChange action.
+ * LinearTodB action.
  *
  */
-public class FormatChangeOpAction extends AbstractVisatAction {
+public class LinearTodBOpAction extends AbstractVisatAction {
 
     private ModelessDialog dialog;
 
@@ -17,7 +17,7 @@ public class FormatChangeOpAction extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("Format-Change", getAppContext(), "Format-Change", getHelpId());
+            dialog = new DefaultSingleTargetProductDialog("Convert-Linear-dB", getAppContext(), "Convert-Linear-dB", getHelpId());
         }
         dialog.show();
 

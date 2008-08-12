@@ -21,25 +21,19 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
-import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 
 import javax.media.jai.JAI;
 import java.awt.*;
-import java.util.HashMap;
 
 /**
- * Multilooking
+ * Oversample
  */
 
-/**
- * The sample operator implementation for an algorithm
- * that can compute bands independently of each other.
- */
 @OperatorMetadata(alias="Oversample")
-public class OversamplingOperator extends Operator {
+public class OversamplingOp extends Operator {
 
     @SourceProduct
     private Product sourceProduct;
@@ -107,7 +101,7 @@ public class OversamplingOperator extends Operator {
      */
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(OversamplingOperator.class);
+            super(OversamplingOp.class);
         }
     }
 }

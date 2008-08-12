@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /*
- * $Id: JERSVolumeDirectoryFile.java,v 1.6 2008-07-23 19:47:17 lveci Exp $
+ * $Id: JERSVolumeDirectoryFile.java,v 1.7 2008-08-12 19:49:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -61,10 +61,6 @@ class JERSVolumeDirectoryFile {
         return "NUL_DAT.001";
     }
 
-    public String getProductType() {
-        return _textRecord.getAttributeString("Product type specifier");
-    }
-
     public String[] getImageFileNames() throws IOException,
                                                IllegalCeosFormatException {
         final ArrayList<String> list = new ArrayList<String>(2);
@@ -91,6 +87,10 @@ class JERSVolumeDirectoryFile {
 
     public String getProductName() {
         return CeosHelper.getProductName(_textRecord);
+    }
+
+    public String getProductType() {
+        return _textRecord.getAttributeString("Product type specifier");
     }
 
     public void assignMetadataTo(final MetadataElement rootElem) {

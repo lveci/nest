@@ -15,12 +15,11 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * This class represents a product directory of an Avnir-2 product.
+ * This class represents a product directory.
  * <p/>
  * <p>This class is public for the benefit of the implementation of another (internal) class and its API may
  * change in future releases of the software.</p>
  *
- * @author Marco Peters
  */
 class RadarsatProductDirectory extends CEOSProductDirectory {
 
@@ -49,7 +48,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
     protected void readProductDirectory() throws IOException, IllegalCeosFormatException {
         _volumeDirectoryFile = new RadarsatVolumeDirectoryFile(_baseDir);
-        _leaderFile = new RadarsatLeaderFile(createInputStream(_volumeDirectoryFile.getLeaderFileName()));
+        _leaderFile = new RadarsatLeaderFile(createInputStream(RadarsatVolumeDirectoryFile.getLeaderFileName()));
 
         final String[] imageFileNames = _volumeDirectoryFile.getImageFileNames();
         _imageFiles = new RadarsatImageFile[imageFileNames.length];
@@ -61,6 +60,14 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         _sceneWidth = _imageFiles[0].getRasterWidth();
         _sceneHeight = _imageFiles[0].getRasterHeight();
         assertSameWidthAndHeightForAllImages();
+    }
+
+    private void readVolumeDirectoryFile() throws IOException, IllegalCeosFormatException {
+        if(_volumeDirectoryFile == null)
+            _volumeDirectoryFile = new RadarsatVolumeDirectoryFile(_baseDir);
+
+        productType = _volumeDirectoryFile.getProductType();
+        isProductSLC = productType.contains("SLC") || productType.contains("COMPLEX");
     }
 
     public Product createProduct() throws IOException,
@@ -109,6 +116,12 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         addMetaData(product);
 
         return product;
+    }
+
+    public boolean isRadarsat() throws IOException, IllegalCeosFormatException {
+        if(productType == null || _volumeDirectoryFile == null)
+            readVolumeDirectoryFile();
+        return (productType.contains("ERS-1") || productType.contains("ERS-2"));
     }
 
     private void addGeoCoding(final Product product) throws IllegalCeosFormatException,

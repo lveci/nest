@@ -3,13 +3,7 @@ package org.esa.nest.gpf;
 import junit.framework.TestCase;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
 import org.esa.beam.framework.datamodel.*;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Arrays;
 
 import com.bc.ceres.core.ProgressMonitor;
 
@@ -22,7 +16,7 @@ public class TestDataAnalysisOperator extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        spi = new DataAnalysisOperator.Spi();
+        spi = new DataAnalysisOp.Spi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(spi);
     }
 
@@ -35,7 +29,7 @@ public class TestDataAnalysisOperator extends TestCase {
 
         Product sourceProduct = createTestProduct(4, 4);
 
-        DataAnalysisOperator op = (DataAnalysisOperator)spi.createOperator();
+        DataAnalysisOp op = (DataAnalysisOp)spi.createOperator();
         assertNotNull(op);
         op.setSourceProduct(sourceProduct);
 

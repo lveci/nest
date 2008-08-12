@@ -21,7 +21,6 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
-import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
@@ -41,7 +40,7 @@ import java.util.HashMap;
  * that can compute bands independently of each other.
  */
 @OperatorMetadata(alias="Data-Analysis")
-public class DataAnalysisOperator extends Operator {
+public class DataAnalysisOp extends Operator {
 
     @SourceProduct
     private Product sourceProduct;
@@ -67,7 +66,7 @@ public class DataAnalysisOperator extends Operator {
      * Default constructor. The graph processing framework
      * requires that an operator has a default constructor.
      */
-    public DataAnalysisOperator() {
+    public DataAnalysisOp() {
     }
 
     /**
@@ -300,7 +299,7 @@ public class DataAnalysisOperator extends Operator {
      */
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(DataAnalysisOperator.class);
+            super(DataAnalysisOp.class);
         }
     }
 }

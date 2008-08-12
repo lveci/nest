@@ -6,7 +6,7 @@ import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.beam.visat.actions.AbstractVisatAction;
 
 /**
- * ASAR Calibration action.
+ * SRGROp action.
  *
  */
 public class SRGROpAction extends AbstractVisatAction {

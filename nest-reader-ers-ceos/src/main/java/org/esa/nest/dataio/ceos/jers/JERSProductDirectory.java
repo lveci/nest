@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * This class represents a product directory of an Avnir-2 product.
+ * This class represents a product directory.
  * <p/>
  * <p>This class is public for the benefit of the implementation of another (internal) class and its API may
  * change in future releases of the software.</p>
@@ -36,7 +36,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
     private int _sceneWidth;
     private int _sceneHeight;
 
-    private static String SLC_PRODUCT_TYPE = "SAR SINGLE LOOK COMPLEX IMAGE   ";
+    //private static String SLC_PRODUCT_TYPE = "SAR SINGLE LOOK COMPLEX IMAGE   ";
     
     private transient Map<String, JERSImageFile> bandImageFileMap = new HashMap<String, JERSImageFile>(1);
 
@@ -69,7 +69,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
             _volumeDirectoryFile = new JERSVolumeDirectoryFile(_baseDir);
 
         productType = _volumeDirectoryFile.getProductType();
-        isProductSLC = productType.equals(SLC_PRODUCT_TYPE);
+        isProductSLC = productType.contains("SLC") || productType.contains("COMPLEX");
     }
 
     public Product createProduct() throws IOException,

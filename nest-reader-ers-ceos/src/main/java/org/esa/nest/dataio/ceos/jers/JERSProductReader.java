@@ -30,6 +30,7 @@ public class JERSProductReader extends CEOSProductReader {
     }
 
     DecodeQualification checkProductQualification(File file) {
+
         try {
             _dataDir = createProductDirectory(file);
 

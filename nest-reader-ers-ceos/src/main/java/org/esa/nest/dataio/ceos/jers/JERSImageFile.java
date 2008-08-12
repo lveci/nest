@@ -1,18 +1,16 @@
 package org.esa.nest.dataio.ceos.jers;
 
-import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
-import org.esa.nest.dataio.ceos.ers.ERSImageFDR;
 import org.esa.nest.dataio.ceos.records.ImageRecord;
+import org.esa.nest.dataio.ceos.records.BaseRecord;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
 /*
- * $Id: JERSImageFile.java,v 1.3 2008-07-23 19:47:17 lveci Exp $
+ * $Id: JERSImageFile.java,v 1.4 2008-08-12 19:49:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -33,21 +31,21 @@ import java.io.IOException;
  * This class represents an image file of an Avnir-2 product.
  *
  * @author Marco Peters
- * @version $Revision: 1.3 $ $Date: 2008-07-23 19:47:17 $
+ * @version $Revision: 1.4 $ $Date: 2008-08-12 19:49:23 $
  */
 class JERSImageFile extends CEOSImageFile {
 
-    private final ERSImageFDR _imageFDR;
+    private final BaseRecord _imageFDR;
     private final int _imageNumber;
 
     private static String mission = "jers";
-    private static String image_recordDefinitionFile = "image_file.xml";
+    private static String image_DefinitionFile = "image_file.xml";
     private static String image_recordDefinition = "image_record.xml";
 
     public JERSImageFile(final ImageInputStream imageStream) throws IOException,
                                                                       IllegalCeosFormatException {
         _ceosReader = new CeosFileReader(imageStream);
-        _imageFDR = new ERSImageFDR(_ceosReader, -1, mission, image_recordDefinitionFile);
+        _imageFDR = new BaseRecord(_ceosReader, -1, mission, image_DefinitionFile);
         _ceosReader.seek(_imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()));
         _imageRecords = new ImageRecord[_imageFDR.getAttributeInt("Number of lines per data set")];
         _imageRecords[0] = new ImageRecord(_ceosReader, -1, mission, image_recordDefinition);

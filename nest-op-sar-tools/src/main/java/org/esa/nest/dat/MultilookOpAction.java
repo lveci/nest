@@ -7,7 +7,7 @@ import org.esa.beam.visat.actions.AbstractVisatAction;
 import org.esa.beam.visat.VisatApp;
 
 /**
- * ASAR Calibration action.
+ * MultilookOp action.
  *
  */
 public class MultilookOpAction extends AbstractVisatAction {

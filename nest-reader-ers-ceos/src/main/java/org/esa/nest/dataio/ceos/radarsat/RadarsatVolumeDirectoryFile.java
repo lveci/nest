@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /*
- * $Id: RadarsatVolumeDirectoryFile.java,v 1.4 2008-07-23 19:47:17 lveci Exp $
+ * $Id: RadarsatVolumeDirectoryFile.java,v 1.5 2008-08-12 19:49:24 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -57,13 +57,13 @@ class RadarsatVolumeDirectoryFile {
         return "LEA_01.001";
     }
 
-    public String getTrailerFileName() {
+    public static String getTrailerFileName() {
         return "NUL_DAT.001";
     }
 
     public String[] getImageFileNames() throws IOException,
                                                IllegalCeosFormatException {
-        final ArrayList<String> list = new ArrayList<String>();
+        final ArrayList<String> list = new ArrayList<String>(2);
         for (final FilePointerRecord filePointerRecord : _filePointerRecords) {
             if (filePointerRecord.isImageFileRecord()) {
                 final String fileID = filePointerRecord.getAttributeString("File ID");
@@ -94,7 +94,7 @@ class RadarsatVolumeDirectoryFile {
     }
 
     public void assignMetadataTo(final MetadataElement rootElem) {
-       MetadataElement metadata = new MetadataElement("Volume Descriptor");
+        MetadataElement metadata = new MetadataElement("Volume Descriptor");
         _volumeDescriptorRecord.assignMetadataTo(metadata);
         rootElem.addElement(metadata);
 

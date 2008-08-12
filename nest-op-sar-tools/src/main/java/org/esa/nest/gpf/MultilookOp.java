@@ -21,14 +21,12 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
-import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 
 import javax.media.jai.JAI;
 import java.awt.*;
-import java.util.HashMap;
 
 /**
  * Multilooking
@@ -38,32 +36,14 @@ import java.util.HashMap;
  * The sample operator implementation for an algorithm
  * that can compute bands independently of each other.
  */
-@OperatorMetadata(alias="Format-Change")
-public class FormatChangeOperator extends Operator {
+@OperatorMetadata(alias="Multilook")
+public class MultilookOp extends Operator {
 
     @SourceProduct
     private Product sourceProduct;
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(valueSet = { ProductData.TYPESTRING_INT8,
-                            ProductData.TYPESTRING_INT16,
-                            ProductData.TYPESTRING_INT32,
-                            ProductData.TYPESTRING_UINT8,
-                            ProductData.TYPESTRING_UINT16,
-                            ProductData.TYPESTRING_UINT32,
-                            ProductData.TYPESTRING_FLOAT32,
-                            ProductData.TYPESTRING_FLOAT64
-            }, defaultValue = ProductData.TYPESTRING_FLOAT32)
-    private String targetDataType;
-    private int dataType;
-
-    @Parameter(valueSet = { "None",
-                            "Linear (slope and intercept)",
-                            "Linear (between min max)",
-                            "Logarithmic"
-            }, defaultValue = "None")
-    private String scaling;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -93,10 +73,7 @@ public class FormatChangeOperator extends Operator {
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
 
-        dataType = ProductData.getType(targetDataType);
-        for(Band band : sourceProduct.getBands()) {
-            targetProduct.addBand(band.getName(), dataType);
-        }
+
     }
 
     /**
@@ -112,41 +89,9 @@ public class FormatChangeOperator extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
-        Band sourceBand = sourceProduct.getBand(targetBand.getName());
-        Tile srcTile = getSourceTile(sourceBand, targetTile.getRectangle(), pm);
+        Rectangle targetTileRectangle = targetTile.getRectangle();
 
-        try {
-            ProductData srcData = srcTile.getRawSamples();
-            ProductData dstData = targetTile.getRawSamples();
 
-            int numElem = dstData.getNumElems();
-            if(dataType == ProductData.TYPE_FLOAT32) {
-                for(int i=0; i < numElem; ++i) {
-                    dstData.setElemFloatAt(i, srcData.getElemFloatAt(i));
-                }
-            }
-            else if(dataType == ProductData.TYPE_FLOAT64) {
-                for(int i=0; i < numElem; ++i) {
-                    dstData.setElemDoubleAt(i, srcData.getElemDoubleAt(i));
-                }
-            }
-            else if(dataType == ProductData.TYPE_INT8 || dataType == ProductData.TYPE_INT16 ||
-                    dataType == ProductData.TYPE_INT32) {
-                for(int i=0; i < numElem; ++i) {
-                    dstData.setElemIntAt(i, srcData.getElemIntAt(i));
-                }
-            }
-            else if(dataType == ProductData.TYPE_UINT8 || dataType == ProductData.TYPE_UINT16 ||
-                    dataType == ProductData.TYPE_UINT32) {
-                for(int i=0; i < numElem; ++i) {
-                    dstData.setElemUIntAt(i, srcData.getElemUIntAt(i));
-                }
-            }
-
-            targetTile.setRawSamples(dstData);
-        } catch(Exception e) {
-            System.out.println(e.toString());
-        }
     }
 
 
@@ -160,7 +105,7 @@ public class FormatChangeOperator extends Operator {
      */
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(FormatChangeOperator.class);
+            super(MultilookOp.class);
         }
     }
 }

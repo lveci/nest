@@ -6,10 +6,10 @@ import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.beam.visat.actions.AbstractVisatAction;
 
 /**
- * FormatChange action.
+ * AmplitudeToIntensityOp action.
  *
  */
-public class FormatChangeOpAction extends AbstractVisatAction {
+public class AmplitudeToIntensityOpAction extends AbstractVisatAction {
 
     private ModelessDialog dialog;
 
@@ -17,7 +17,8 @@ public class FormatChangeOpAction extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("Format-Change", getAppContext(), "Format-Change", getHelpId());
+            dialog = new DefaultSingleTargetProductDialog("Convert-Amplitude-Intensity", getAppContext(),
+                    "Convert-Amplitude-Intensity", getHelpId());
         }
         dialog.show();
 

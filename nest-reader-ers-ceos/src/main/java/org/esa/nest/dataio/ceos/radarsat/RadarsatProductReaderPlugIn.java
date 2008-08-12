@@ -1,7 +1,10 @@
 package org.esa.nest.dataio.ceos.radarsat;
 
 import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.nest.dataio.ceos.CEOSProductReaderPlugIn;
+
+import java.io.File;
 
 /**
  * The ReaderPlugIn for Radarsat 1 products.
@@ -19,8 +22,14 @@ public class RadarsatProductReaderPlugIn extends CEOSProductReaderPlugIn {
      *
      * @return a new reader instance, never <code>null</code>
      */
+    @Override
     public ProductReader createReaderInstance() {
         return new RadarsatProductReader(this);
     }
 
+    @Override
+    protected DecodeQualification checkProductQualification(File file) {
+        RadarsatProductReader reader = new RadarsatProductReader(this);
+        return reader.checkProductQualification(file);
+    }
 }

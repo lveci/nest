@@ -34,15 +34,11 @@ import java.awt.*;
 import java.io.IOException;
 
 /**
- * Multilooking
+ * Undersample
  */
 
-/**
- * The sample operator implementation for an algorithm
- * that can compute bands independently of each other.
- */
 @OperatorMetadata(alias="Undersample")
-public class UndersamplingOperator extends Operator {
+public class UndersamplingOp extends Operator {
 
     @SourceProduct
     private Product sourceProduct;
@@ -102,7 +98,7 @@ public class UndersamplingOperator extends Operator {
      */
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(UndersamplingOperator.class);
+            super(UndersamplingOp.class);
         }
     }
 }

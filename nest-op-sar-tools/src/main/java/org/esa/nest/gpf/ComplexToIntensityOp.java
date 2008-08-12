@@ -27,24 +27,24 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 
 import javax.media.jai.JAI;
-import java.awt.*;
-import java.util.HashMap;
 
 /**
- * Multilooking
+ * Convert-Complex-Intensity
  */
 
-/**
- * The sample operator implementation for an algorithm
- * that can compute bands independently of each other.
- */
-@OperatorMetadata(alias="Multilook")
-public class MultilookOperator extends Operator {
+@OperatorMetadata(alias="Convert-Complex-Intensity")
+public class ComplexToIntensityOp extends Operator {
 
     @SourceProduct
     private Product sourceProduct;
     @TargetProduct
     private Product targetProduct;
+
+    private final static String AMPLITUDE = "Amplitude";
+    private final static String INTENSITY = "Intensity";
+
+    @Parameter(valueSet = { AMPLITUDE, INTENSITY }, defaultValue = INTENSITY)
+    private String convertTo;
 
 
     /**
@@ -75,7 +75,9 @@ public class MultilookOperator extends Operator {
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
 
-
+        for(Band band : sourceProduct.getBands()) {
+            targetProduct.addBand(band.getName(), ProductData.TYPE_FLOAT64);
+        }
     }
 
     /**
@@ -91,9 +93,29 @@ public class MultilookOperator extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
-        Rectangle targetTileRectangle = targetTile.getRectangle();
+        Band sourceBand = sourceProduct.getBand(targetBand.getName());
+        Tile srcTile = getSourceTile(sourceBand, targetTile.getRectangle(), pm);
 
+        try {
+            ProductData srcData = srcTile.getRawSamples();
+            ProductData dstData = targetTile.getRawSamples();
 
+            int numElem = dstData.getNumElems();
+            if(convertTo.equals(INTENSITY)) {
+                for(int i=0; i < numElem; ++i) {
+                    double val = srcData.getElemDoubleAt(i);
+                    dstData.setElemDoubleAt(i, val * val);
+                }
+            } else {
+                for(int i=0; i < numElem; ++i) {
+                    dstData.setElemDoubleAt(i, Math.sqrt(srcData.getElemDoubleAt(i)));
+                }
+            }
+
+            targetTile.setRawSamples(dstData);
+        } catch(Exception e) {
+            System.out.println(e.toString());
+        }
     }
 
 
@@ -107,7 +129,7 @@ public class MultilookOperator extends Operator {
      */
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(MultilookOperator.class);
+            super(ComplexToIntensityOp.class);
         }
     }
 }
