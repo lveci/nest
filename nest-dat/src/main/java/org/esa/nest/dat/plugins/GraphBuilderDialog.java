@@ -8,6 +8,7 @@ import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.gpf.graph.Graph;
+import org.esa.beam.framework.help.HelpSys;
 import org.esa.nest.util.DatUtils;
 
 import javax.swing.*;
@@ -27,6 +28,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private static final ImageIcon saveIcon = DatUtils.LoadIcon("org/esa/nest/icons/save.png");
     private static final ImageIcon loadIcon = DatUtils.LoadIcon("org/esa/nest/icons/open.png");
     private static final ImageIcon clearIcon = DatUtils.LoadIcon("org/esa/nest/icons/edit-clear.png");
+    private static final ImageIcon helpIcon = DatUtils.LoadIcon("org/esa/nest/icons/help-browser.png");
 
     private AppContext appContext;
     private JPanel mainPanel;
@@ -163,10 +165,19 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
             }
         });
 
+        JButton helpButton = CreateButton("helpButton", "Help", helpIcon, panel);
+        helpButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(final ActionEvent e) {
+                OnHelp();
+            }
+        });
+
         gbc.weightx = 0;
         panel.add(loadButton, gbc);
         panel.add(saveButton, gbc);
         panel.add(clearButton, gbc);
+        panel.add(helpButton, gbc);
         panel.add(processButton, gbc);
     }
 
@@ -304,6 +315,13 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         graphPanel.repaint();
         initGraphEnabled = true;
         statusLabel.setText("");
+    }
+
+    /**
+     * Call Help
+     */             
+    private static void OnHelp() {
+        HelpSys.showTheme("graph_builder");
     }
 
     /**
