@@ -17,7 +17,7 @@ public class UnderSamplingOpAction extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("Undersample", getAppContext(), "Undersample", null);
+            dialog = new DefaultSingleTargetProductDialog("Undersample", getAppContext(), "Undersample", getHelpId());
         }
         dialog.show();
 

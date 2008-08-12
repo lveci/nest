@@ -31,9 +31,8 @@ import java.awt.*;
 import java.util.HashMap;
 
 /**
- * Calibration for ASAR data products.
+ * Generate Data Analysis Statistics
  *
- * @todo use band.isSynthetic() to detect virtual band seem not working, currently band name is used
  * @todo the computed statistics should be outout to file
  */
 

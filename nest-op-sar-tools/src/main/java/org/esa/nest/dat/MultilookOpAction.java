@@ -18,7 +18,7 @@ public class MultilookOpAction extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("Multilook", getAppContext(), "Multilook", null);
+            dialog = new DefaultSingleTargetProductDialog("Multilook", getAppContext(), "Multilook", getHelpId());
         }
         dialog.show();
 

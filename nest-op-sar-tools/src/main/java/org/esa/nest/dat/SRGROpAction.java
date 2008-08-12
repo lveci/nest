@@ -17,7 +17,7 @@ public class SRGROpAction extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("SRGR", getAppContext(), "Slant Range to Ground Range", null);
+            dialog = new DefaultSingleTargetProductDialog("SRGR", getAppContext(), "Slant Range to Ground Range", getHelpId());
         }
         dialog.show();
 

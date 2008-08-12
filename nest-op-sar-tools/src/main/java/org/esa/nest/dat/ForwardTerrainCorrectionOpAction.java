@@ -18,7 +18,8 @@ public class ForwardTerrainCorrectionOpAction extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("Forward-Terrain-Correction", getAppContext(), "Forward-Terrain-Correction", null);
+            dialog = new DefaultSingleTargetProductDialog("Forward-Terrain-Correction", getAppContext(),
+                    "Forward-Terrain-Correction", getHelpId());
         }
         dialog.show();
 

@@ -17,7 +17,7 @@ public class OverSamplingOpAction extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("Oversample", getAppContext(), "Oversample", null);
+            dialog = new DefaultSingleTargetProductDialog("Oversample", getAppContext(), "Oversample", getHelpId());
         }
         dialog.show();
 

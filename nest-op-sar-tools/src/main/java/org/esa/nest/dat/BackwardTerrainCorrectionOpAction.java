@@ -18,7 +18,8 @@ public class BackwardTerrainCorrectionOpAction extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("Backward-Terrain-Correction", getAppContext(), "Backward-Terrain-Correction", null);
+            dialog = new DefaultSingleTargetProductDialog("Backward-Terrain-Correction",
+                    getAppContext(), "Backward-Terrain-Correction", getHelpId());
         }
         dialog.show();
 

@@ -17,14 +17,10 @@ public class FormatChangeOpAction extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("Format-Change", getAppContext(), "Format-Change", null);
+            dialog = new DefaultSingleTargetProductDialog("Format-Change", getAppContext(), "Format-Change", getHelpId());
         }
         dialog.show();
 
     }
 
-    @Override
-    public void updateState(final CommandEvent event) {
-        setEnabled(false);
-    }
 }
