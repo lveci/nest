@@ -38,6 +38,7 @@
             <text>Slant Range to Ground Range</text>
             <shortDescr>Converts a product to/from slant range to/from ground range</shortDescr>
             <parent>geometry</parent>
+            <helpId>SRGROp</helpId>
         </action>
 
         <action>
@@ -46,6 +47,7 @@
             <text>Multilooking</text>
             <shortDescr>Multilook an image</shortDescr>
             <parent>sartools</parent>
+            <helpId>MultilookOp</helpId>
         </action>
 
         <action>
@@ -61,6 +63,7 @@
             <text>Oversampling</text>
             <shortDescr>Over sample an image</shortDescr>
             <parent>Resampling</parent>
+            <helpId>OverSampleOp</helpId>
         </action>
 
         <action>
@@ -69,6 +72,7 @@
             <text>Undersampling</text>
             <shortDescr>Under sample an image</shortDescr>
             <parent>Resampling</parent>
+            <helpId>UnderSampleOp</helpId>
         </action>
 
         <action>
@@ -79,7 +83,7 @@
         </action>
 
         <action>
-            <id>FormatChange</id>
+            <id>FormatChangeOp</id>
             <class>org.esa.nest.dat.FormatChangeOpAction</class>
             <text>DataType Format Change</text>
             <shortDescr>Change the datatype of the product</shortDescr>
@@ -102,7 +106,7 @@
         </action>
 
         <action>
-            <id>backwardTerrainCorrectionO</id>
+            <id>backwardTerrainCorrectionOp</id>
             <class>org.esa.nest.dat.BackwardTerrainCorrectionOpAction</class>
             <text>Backward</text>
             <shortDescr>Terrain Correction Backward Method</shortDescr>
