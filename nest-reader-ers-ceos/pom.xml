@@ -25,10 +25,5 @@
             <groupId>org.esa.nest</groupId>
             <artifactId>nest-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
 </project>

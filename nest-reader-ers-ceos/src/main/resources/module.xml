@@ -20,10 +20,6 @@
     <dependency>
         <module>nest-core</module>
     </dependency>
-    <dependency>
-        <module>beam-visat-rcp</module>
-        <optional>true</optional>
-    </dependency>
 
     <categories>Reader,ERS</categories>
 
