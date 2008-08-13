@@ -36,6 +36,8 @@ class ERSProductDirectory extends CEOSProductDirectory {
     private int _sceneWidth;
     private int _sceneHeight;
 
+    private final static String ERS1_MISSION = "ERS-1";
+    private final static String ERS2_MISSION = "ERS-2";
     //private static String SLC_PRODUCT_TYPE = "SAR SINGLE LOOK COMPLEX IMAGE   ";
     //private static String ERS1_SLC_PRODUCT_TYPE = "PRODUCT: ERS-1.SAR.SLC                  ";
 
@@ -74,7 +76,23 @@ class ERSProductDirectory extends CEOSProductDirectory {
     public boolean isERS() throws IOException, IllegalCeosFormatException {
         if(productType == null || _volumeDirectoryFile == null)
             readVolumeDirectoryFile();
-        return (productType.contains("ERS-1") || productType.contains("ERS-2"));
+        return (productType.contains(ERS1_MISSION) || productType.contains(ERS2_MISSION));
+    }
+
+    public String getMission() {
+        if(productType.contains(ERS1_MISSION))
+            return ERS1_MISSION;
+        else if(productType.contains(ERS2_MISSION))
+            return ERS2_MISSION;
+        else
+            return "";
+    }
+
+    public String getSampleType() {
+        if(isProductSLC)
+            return "COMPLEX";
+        else
+            return "DETECTED";
     }
 
     public Product createProduct() throws IOException,
@@ -181,8 +199,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         return band;
     }
 
-    private void addMetaData(final Product product) throws IOException,
-                                                           IllegalCeosFormatException {
+    private void addMetaData(final Product product) throws IOException {
         final MetadataElement root = product.getMetadataRoot();
         root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
 
@@ -203,13 +220,19 @@ class ERSProductDirectory extends CEOSProductDirectory {
         addAbstractedMetadataHeader(root);
     }
 
-    private static void addAbstractedMetadataHeader(MetadataElement root) {
+    private void addAbstractedMetadataHeader(MetadataElement root) {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
         MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
 
+        //mph
+        AbstractMetadata.setAttributeString(absRoot, "PRODUCT", getProductName());
+        AbstractMetadata.setAttributeString(absRoot, "PRODUCT_TYPE", getProductType());
+        AbstractMetadata.setAttributeString(absRoot, "MISSION", getMission());
 
+        //sph
+        AbstractMetadata.setAttributeString(absRoot, "SAMPLE_TYPE", getSampleType());
     }
 
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {
@@ -243,7 +266,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         parent.addElement(summaryMetadata);
     }
 
-    private int getMinSampleValue(final int[] histogram) {
+    private static int getMinSampleValue(final int[] histogram) {
         // search for first non zero value
         for (int i = 0; i < histogram.length; i++) {
             if (histogram[i] != 0) {
@@ -253,7 +276,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         return 0;
     }
 
-    private int getMaxSampleValue(final int[] histogram) {
+    private static int getMaxSampleValue(final int[] histogram) {
         // search for first non zero value backwards
         for (int i = histogram.length - 1; i >= 0; i--) {
             if (histogram[i] != 0) {
@@ -267,13 +290,11 @@ class ERSProductDirectory extends CEOSProductDirectory {
         return _volumeDirectoryFile.getProductName();
     }
 
-    private String getProductDescription() throws IOException,
-                                                  IllegalCeosFormatException {
+    private String getProductDescription() {
         return ERSConstants.PRODUCT_DESCRIPTION_PREFIX + _leaderFile.getProductLevel();
     }
 
-    private void assertSameWidthAndHeightForAllImages() throws IOException,
-                                                               IllegalCeosFormatException {
+    private void assertSameWidthAndHeightForAllImages() {
         for (int i = 0; i < _imageFiles.length; i++) {
             final ERSImageFile imageFile = _imageFiles[i];
             Guardian.assertTrue("_sceneWidth == imageFile[" + i + "].getRasterWidth()",
