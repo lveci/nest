@@ -16,10 +16,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Collection;
 import java.awt.*;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.ImageReadParam;
-import javax.imageio.IIOImage;
+import javax.imageio.*;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageOutputStream;
 
@@ -92,15 +89,20 @@ public class ImageIOReader extends AbstractProductReader {
         final IIOMetadata iioMetadata = reader.getImageMetadata(0);
 
         int numImages = reader.getNumImages(true);
-        
+        int numBands = 3;
+
         sceneWidth = reader.getWidth(0);
         sceneHeight = reader.getHeight(0);
-        int type = reader.getRawImageType(0).getBufferedImageType();
-        dataType = ProductData.TYPE_INT32;
-        if(type > dataType)
-            dataType = type;
 
-        int numBands = reader.getRawImageType(0).getNumBands();
+        dataType = ProductData.TYPE_INT32;
+        ImageTypeSpecifier its = reader.getRawImageType(0);
+        if(its != null) {
+            numBands = reader.getRawImageType(0).getNumBands();
+            int type = its.getBufferedImageType();
+
+            if(type > dataType)
+                dataType = type;
+        }                                                           
 
         final Product product = new Product(inputFile.getName(),
                                             "productType",
