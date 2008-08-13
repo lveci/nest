@@ -80,9 +80,9 @@ class ERSProductDirectory extends CEOSProductDirectory {
     }
 
     public String getMission() {
-        if(productType.contains(ERS1_MISSION))
+        if(productType.contains(ERS1_MISSION) || productType.contains("ERS1"))
             return ERS1_MISSION;
-        else if(productType.contains(ERS2_MISSION))
+        else if(productType.contains(ERS2_MISSION) || productType.contains("ERS2"))
             return ERS2_MISSION;
         else
             return "";

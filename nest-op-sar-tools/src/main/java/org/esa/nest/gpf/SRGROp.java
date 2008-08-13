@@ -221,6 +221,9 @@ public class SRGROp extends Operator {
         }
 
         slantRangeSpacing = (double)rangeSpacingAttr.getData().getElemFloat();
+        if(slantRangeSpacing == 0) {
+            throw new OperatorException("slantRangeSpacing should not be zero");
+        }
     }
 
     /**
