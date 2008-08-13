@@ -6,6 +6,7 @@ import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
+import org.esa.nest.dataio.AbstractMetadata;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
@@ -205,10 +206,19 @@ class JERSProductDirectory extends CEOSProductDirectory {
         addAbstractedMetadataHeader(root);
     }
 
-    private static void addAbstractedMetadataHeader(MetadataElement root) {
+    private void addAbstractedMetadataHeader(MetadataElement root) {
 
-        MetadataElement absRoot = root.getElement("Abstracted Metadata");
+        AbstractMetadata.addAbstractedMetadataHeader(root);
 
+        MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+
+        //mph
+        AbstractMetadata.setAttributeString(absRoot, "PRODUCT", getProductName());
+        AbstractMetadata.setAttributeString(absRoot, "PRODUCT_TYPE", getProductType());
+        AbstractMetadata.setAttributeString(absRoot, "MISSION", "JERS-1");
+
+        //sph
+        AbstractMetadata.setAttributeString(absRoot, "SAMPLE_TYPE", getSampleType());
     }
 
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {

@@ -6,6 +6,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
+import org.esa.nest.dataio.ceos.records.BaseSceneHeaderRecord;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;

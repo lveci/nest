@@ -1,5 +1,5 @@
 /*
- * $Id: CeosFileReader.java,v 1.9 2008-07-10 20:49:51 lveci Exp $
+ * $Id: CeosFileReader.java,v 1.10 2008-08-13 17:40:57 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -173,7 +173,7 @@ public final class CeosFileReader {
         }
         if (bytesRead != n) {
             final String message = String.format(CeosFileReader.EM_EXPECTED_X_FOUND_Y_BYTES,
-                                                 new Object[]{n, bytesRead});
+                                                 n, bytesRead);
             throw new IllegalCeosFormatException(message, streamPosition);
         }
         return new String(bytes);

@@ -88,13 +88,6 @@ class ERSProductDirectory extends CEOSProductDirectory {
             return "";
     }
 
-    public String getSampleType() {
-        if(isProductSLC)
-            return "COMPLEX";
-        else
-            return "DETECTED";
-    }
-
     public Product createProduct() throws IOException,
                                           IllegalCeosFormatException {
         final Product product = new Product(getProductName(),
@@ -229,9 +222,12 @@ class ERSProductDirectory extends CEOSProductDirectory {
         //mph
         AbstractMetadata.setAttributeString(absRoot, "PRODUCT", getProductName());
         AbstractMetadata.setAttributeString(absRoot, "PRODUCT_TYPE", getProductType());
+        AbstractMetadata.setAttributeString(absRoot, "SPH_DESCRIPTOR",
+                _leaderFile.getSceneRecord().getAttributeString("Product type descriptor"));
         AbstractMetadata.setAttributeString(absRoot, "MISSION", getMission());
 
         //sph
+
         AbstractMetadata.setAttributeString(absRoot, "SAMPLE_TYPE", getSampleType());
     }
 

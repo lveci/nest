@@ -1,5 +1,5 @@
 /*
- * $Id: BaseRecord.java,v 1.5 2008-08-10 21:33:55 lveci Exp $
+ * $Id: BaseRecord.java,v 1.6 2008-08-13 17:40:57 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -22,9 +22,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.ceos.CeosDB;
 import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
-import org.esa.nest.util.DatUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;

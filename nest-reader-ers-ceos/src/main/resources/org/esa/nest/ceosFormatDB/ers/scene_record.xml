@@ -84,7 +84,7 @@
 	<rec name="Processing system identifier" type="1" num="8"/>
 	<rec name="Processing version identifier" type="1" num="8"/>
 	<rec name="skipBytes" type="0" num="32"/>
-	<rec name="Product type specifier" type="1" num="32"/>
+	<rec name="Product type descriptor" type="1" num="32"/>
 	<rec name="Processing algorithm identifier" type="1" num="32"/>
 	<rec name="Nominal number of looks processed in azimuth" type="5" num="16"/>
 	<rec name="Nominal number of looks processed in range" type="5" num="16"/>

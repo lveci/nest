@@ -4,7 +4,6 @@ import org.esa.nest.util.XMLSupport;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +56,6 @@ public class CeosDB {
 
     public void readRecord(CeosFileReader reader) throws IOException, IllegalCeosFormatException
     {
-        try {
         Element root = xmlDoc.getRootElement();
 
         List children = root.getContent();
@@ -130,10 +128,6 @@ public class CeosDB {
             }
         }
         //System.out.println();
-
-        } catch(IllegalCeosFormatException e) {
-            throw e;
-        }
     }
 
     public String getAttributeString(String name) {

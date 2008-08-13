@@ -1,8 +1,6 @@
 package org.esa.nest.dataio.ceos.ers;
 
-import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
@@ -13,7 +11,7 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
 /*
- * $Id: ERSImageFile.java,v 1.10 2008-07-23 19:47:17 lveci Exp $
+ * $Id: ERSImageFile.java,v 1.11 2008-08-13 17:40:57 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -33,7 +31,7 @@ import java.io.IOException;
 /**
  * This class represents an image file of an ERS product.
  *
- * @version $Revision: 1.10 $ $Date: 2008-07-23 19:47:17 $
+ * @version $Revision: 1.11 $ $Date: 2008-08-13 17:40:57 $
  */
 class ERSImageFile extends CEOSImageFile {
 

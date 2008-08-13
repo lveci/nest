@@ -28,11 +28,9 @@ public class AbstractMetadata {
         // MPH
         addAbstractedAttribute(absRoot, "PRODUCT", ProductData.TYPE_ASCII, "", "Product Name");
         addAbstractedAttribute(absRoot, "PRODUCT_TYPE", ProductData.TYPE_ASCII, "", "Product Type");
+        addAbstractedAttribute(absRoot, "SPH_DESCRIPTOR", ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, "MISSION", ProductData.TYPE_ASCII, "", "");
-
         addAbstractedAttribute(absRoot, "PROC_TIME", ProductData.TYPE_UTC, "", "");
-        addAbstractedAttribute(absRoot, "SENSING_START", ProductData.TYPE_UTC, "", "");
-        addAbstractedAttribute(absRoot, "SENSING_STOP", ProductData.TYPE_UTC, "", "");
         addAbstractedAttribute(absRoot, "CYCLE", ProductData.TYPE_INT32, "", "");
         addAbstractedAttribute(absRoot, "REL_ORBIT", ProductData.TYPE_INT32, "", "");
         addAbstractedAttribute(absRoot, "ABS_ORBIT", ProductData.TYPE_INT32, "", "");
@@ -41,13 +39,40 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, "TOT_SIZE", ProductData.TYPE_UINT32, "bytes", "");
 
         // SPH
-        addAbstractedAttribute(absRoot, "PASS", ProductData.TYPE_ASCII, "", "ASCENDING or DESCENDING");
+        addAbstractedAttribute(absRoot, "NUM_SLICES", ProductData.TYPE_INT32, "", "");
+        addAbstractedAttribute(absRoot, "first_line_time", ProductData.TYPE_UTC, "", "");
+        addAbstractedAttribute(absRoot, "last_line_time", ProductData.TYPE_UTC, "", "");
+        addAbstractedAttribute(absRoot, "first_near_lat", ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, "first_near_long", ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, "first_mid_lat", ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, "first_mid_long", ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, "first_far_lat", ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, "first_far_long", ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, "last_near_lat", ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, "last_near_long", ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, "last_mid_lat", ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, "last_mid_long", ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, "last_far_lat", ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, "last_far_long", ProductData.TYPE_INT32, "deg", "");
+        
         addAbstractedAttribute(absRoot, "SWATH", ProductData.TYPE_ASCII, "", "Swath name");
+        addAbstractedAttribute(absRoot, "PASS", ProductData.TYPE_ASCII, "", "ASCENDING or DESCENDING");
         addAbstractedAttribute(absRoot, "SAMPLE_TYPE", ProductData.TYPE_ASCII, "", "DETECTED or COMPLEX");
+        addAbstractedAttribute(absRoot, "mds1_tx_rx_polar", ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, "mds2_tx_rx_polar", ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, "compression", ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, "azimuth_looks", ProductData.TYPE_INT32, "", "");
+        addAbstractedAttribute(absRoot, "range_looks", ProductData.TYPE_INT32, "", "");
+        addAbstractedAttribute(absRoot, "range_spacing", ProductData.TYPE_FLOAT64, "m", "Range sample spacing");
+        addAbstractedAttribute(absRoot, "azimuth_spacing", ProductData.TYPE_FLOAT64, "m", "");
+        addAbstractedAttribute(absRoot, "line_time_interval", ProductData.TYPE_FLOAT64, "s", "");
+        addAbstractedAttribute(absRoot, "data_type", ProductData.TYPE_ASCII, "", "");         
+
+        addAbstractedAttribute(absRoot, "num_output_lines", ProductData.TYPE_UINT32, "lines", "");
+        addAbstractedAttribute(absRoot, "num_samples_per_line", ProductData.TYPE_UINT32, "samples", "");
 
         // SRGR
-        addAbstractedAttribute(absRoot, "srgr_flag", ProductData.TYPE_UINT8, "flag", "True if in ground range");
-        addAbstractedAttribute(absRoot, "range_spacing", ProductData.TYPE_FLOAT32, "m", "Range sample spacing");
+        addAbstractedAttribute(absRoot, "srgr_flag", ProductData.TYPE_UINT8, "flag", "SRGR applied");
 
     }
 

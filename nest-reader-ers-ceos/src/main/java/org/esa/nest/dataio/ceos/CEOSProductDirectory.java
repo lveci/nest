@@ -24,6 +24,13 @@ public abstract class CEOSProductDirectory {
     public boolean isSLC() {
         return isProductSLC;
     }
+    
+    public String getSampleType() {
+        if(isProductSLC)
+            return "COMPLEX";
+        else
+            return "DETECTED";
+    }
 
     public String getProductType() {
         return productType;

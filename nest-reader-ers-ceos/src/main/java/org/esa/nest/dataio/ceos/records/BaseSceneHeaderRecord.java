@@ -1,5 +1,5 @@
 /*
- * $Id: BaseSceneHeaderRecord.java,v 1.4 2008-05-26 19:32:10 lveci Exp $
+ * $Id: BaseSceneHeaderRecord.java,v 1.5 2008-08-13 17:40:57 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -26,7 +26,7 @@ import java.util.HashMap;
 public class BaseSceneHeaderRecord extends BaseRecord {
 
     private static final int YEAR_OFFSET = 2000;
-    private static final HashMap MONTH_TABLE = new HashMap();
+    private static final HashMap MONTH_TABLE = new HashMap(12);
 
     static {
         MONTH_TABLE.put("Jan", 1);
