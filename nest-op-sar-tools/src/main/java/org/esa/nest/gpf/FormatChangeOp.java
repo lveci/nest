@@ -32,7 +32,7 @@ import javax.media.jai.JAI;
  * Format-Change
  */
 
-@OperatorMetadata(alias="Format-Change")
+@OperatorMetadata(alias="Convert-Datatype")
 public class FormatChangeOp extends Operator {
 
     @SourceProduct

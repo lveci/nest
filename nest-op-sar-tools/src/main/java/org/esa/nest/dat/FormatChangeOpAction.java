@@ -17,7 +17,7 @@ public class FormatChangeOpAction extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("Format-Change", getAppContext(), "Format-Change", getHelpId());
+            dialog = new DefaultSingleTargetProductDialog("Convert-Datatype", getAppContext(), "Convert-Datatype", getHelpId());
         }
         dialog.show();
 
