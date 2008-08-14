@@ -49,11 +49,10 @@
 	<rec name="I/Q non-orthogonality correction" type="5" num="16"/>
 	<rec name="skipBytes" type="0" num="16"/>
 	<rec name="Noise power per sample" type="5" num="16"/>	
-	<rec name="Calibration pulse time delay" type="2" num="16"/>
+	<rec name="Calibration pulse time delay" type="5" num="16"/>
 	<rec name="Number of valid calibration pulses" type="2" num="4"/>
 	<rec name="Number of valid noise pulses" type="2" num="4"/>
 	<rec name="Number of valid replica pulses" type="2" num="4"/>
-	
 	<rec name="First sample in replica" type="5" num="16"/>
 	<rec name="Mean calibration pulse power" type="5" num="16"/>
 	<rec name="Mean noise pulse power" type="5" num="16"/>

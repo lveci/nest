@@ -37,9 +37,11 @@ public class CeosDB {
 
     private Map metadata;
     private org.jdom.Document xmlDoc;
+    private final String definitionFile;
 
     public CeosDB(String defFile) throws IOException {
 
+        definitionFile = defFile;
         try {
 
             xmlDoc = XMLSupport.LoadXMLFromResource(defFile, this.getClass());
@@ -58,6 +60,8 @@ public class CeosDB {
     {
         Element root = xmlDoc.getRootElement();
 
+        try {
+            
         List children = root.getContent();
         for (Object aChild : children) {
             if (aChild instanceof Element) {
@@ -128,6 +132,12 @@ public class CeosDB {
             }
         }
         //System.out.println();
+
+        } catch(IllegalCeosFormatException e) {
+            System.out.println(e.toString() + " in " + definitionFile);
+           
+            throw e;
+        }
     }
 
     public String getAttributeString(String name) {
