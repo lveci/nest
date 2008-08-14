@@ -70,4 +70,71 @@
 	<rec name="Estimated noise equivalent s o" type="5" num="16"/>
 	<rec name="Date on which K was generated" type="1" num="6"/>
 	<rec name="K version number" type="1" num="4"/>
+	
+	<!--Varous Parameters from SPH -->
+	<rec name="Number of duplicated input lines" type="2" num="4"/>
+	<rec name="Estimated bit error rate" type="5" num="16"/>
+	<rec name="skipBytes" type="0" num="12"/>
+	<rec name="Output image mean" type="5" num="16"/>
+	<rec name="Output image standard deviation" type="5" num="16"/>
+	<rec name="Output image maximum value" type="5" num="16"/>
+	<rec name="Time of raw data first input range line" type="1" num="24"/>
+	<rec name="Time of ascending node state vector" type="1" num="24"/>
+	<rec name="Ascending node state vector X" type="5" num="22"/>
+	<rec name="Ascending node state vector Y" type="5" num="22"/>
+	<rec name="Ascending node state vector Z" type="5" num="22"/>
+	<rec name="Ascending node state vector X'" type="5" num="22"/>
+	<rec name="Ascending node state vector Y'" type="5" num="22"/>
+	<rec name="Ascending node state vector Z'" type="5" num="22"/>
+	<rec name="Output pixel bit length" type="2" num="4"/>
+	<rec name="Processor gain #1" type="5" num="16"/>
+	<rec name="Processor gain #2" type="5" num="16"/>
+	<rec name="Processor gain #3" type="5" num="16"/>
+	<rec name="Peak location of CCF between first and nominal" type="2" num="4"/>
+	<rec name="3-dB width of CCF" type="5" num="16"/>
+	<rec name="First side lobe level of chirp CCF" type="5" num="16"/>
+	<rec name="ISLR of chirp CCF" type="5" num="16"/>
+	<rec name="Peak location of CCF between last and nominal" type="2" num="4"/>
+	<rec name="Roll tilt mode flag" type="2" num="4"/>
+	<rec name="Raw data correction flag" type="2" num="4"/>
+	<rec name="Look detection flag" type="2" num="4"/>
+	<rec name="Doppler ambiguity estimation flag" type="2" num="4"/>
+	<rec name="Azimuth baseband conversion flag" type="2" num="4"/>
+	<rec name="Samples per line used for the raw data analysis" type="2" num="4"/>
+	<rec name="Range lines skip factor for raw data analysis" type="2" num="4"/>
+	<rec name="Time of input state vector used to processed the image" type="1" num="24"/>
+	<rec name="Input state vector - Position vector X" type="5" num="22"/>
+	<rec name="Input state vector - Position vector Y" type="5" num="22"/>
+	<rec name="Input state vector - Position vector Z" type="5" num="22"/>
+	<rec name="Input state vector - Position vector X'" type="5" num="22"/>
+	<rec name="Input state vector - Position vector Y'" type="5" num="22"/>
+	<rec name="Input state vector - Position vector Z'" type="5" num="22"/>
+	
+	<rec name="Input state vector type flag" type="2" num="4"/>
+	<rec name="Window coefficient for range-matched filter" type="5" num="16"/>
+	<rec name="Window coefficient for azimuth-matched filter" type="5" num="16"/>
+	<rec name="Update period of range-matched filter" type="2" num="4"/>
+	<rec name="Look scalar gains 1" type="5" num="16"/>
+	<rec name="Look scalar gains 2" type="5" num="16"/>
+	<rec name="Look scalar gains 3" type="5" num="16"/>
+	<rec name="Look scalar gains 4" type="5" num="16"/>
+	<rec name="Look scalar gains 5" type="5" num="16"/>
+	<rec name="Look scalar gains 6" type="5" num="16"/>
+	<rec name="Look scalar gains 7" type="5" num="16"/>
+	<rec name="Look scalar gains 8" type="5" num="16"/>
+	<rec name="Sampling window start time bias" type="2" num="4"/>
+	<rec name="Doppler centroid cubic coefficient" type="5" num="22"/>
+	<rec name="PRF code of first range line" type="2" num="4"/>
+	<rec name="PRF code of last range line" type="2" num="4"/>
+	<rec name="Sampl. wind. start time code of first range line" type="2" num="4"/>
+	<rec name="Sampl. wind. start time code of last range line" type="2" num="4"/>
+	<rec name="Calibration system gain of last processed line" type="2" num="4"/>
+	<rec name="Receiver gain of last processed line" type="2" num="4"/>
+	<rec name="First processed range sample" type="2" num="4"/>
+	<rec name="Azimuth FFT/IFFT ratio" type="2" num="4"/>
+	<rec name="Number of azimuth blocks processed" type="2" num="4"/>
+	<rec name="Number of input raw data lines" type="2" num="8"/>
+	<rec name="Initial Doppler ambiguity number" type="2" num="4"/>
+	
+	
 </ceos>

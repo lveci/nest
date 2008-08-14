@@ -1,5 +1,5 @@
 /*
- * $Id: BaseRecord.java,v 1.6 2008-08-13 17:40:57 lveci Exp $
+ * $Id: BaseRecord.java,v 1.7 2008-08-14 17:00:02 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -109,12 +109,17 @@ public class BaseRecord {
             Object value = metadata.get(key);                   // Get the value for that key.
             if (value == null) continue;
 
-            if(value instanceof String)
+            if(value instanceof String) {
                 elem.setAttributeString((String)key, value.toString());
-            else if(value instanceof Integer)
+            } else if(value instanceof Integer) {
                 elem.setAttributeInt((String)key, (Integer)value);
-            else 
+            } else if(value instanceof Double) {
+                MetadataAttribute attrib = new MetadataAttribute((String)key, ProductData.TYPE_FLOAT64, 1);
+                attrib.getData().setElemDouble((Double)value);
+                elem.addAttribute(attrib);
+            } else {
                 elem.setAttributeString((String)key, String.valueOf(value));
+            }
         }
     }
 
