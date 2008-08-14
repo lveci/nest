@@ -18,7 +18,7 @@
 	<rec name="Increment between table entries" type="2" num="4"/>
 	<rec name="Output scaling gain table" type="0" num="8192"/>
 	<rec name="skipBytes" type="0" num="4"/>
-	<rec name="Thermal noise reference level " type="5" num="16"/>
+	<rec name="Thermal noise reference level" type="5" num="16"/>
 	<rec name="Scaling offset" type="0" num="16"/>
 	<rec name="Calibration constant" type="5" num="16"/>
 </ceos>
