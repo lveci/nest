@@ -79,12 +79,41 @@
     <extension point="beam-ui:actions">
 
       <action>
+            <id>newProject</id>
+            <class>org.esa.nest.dat.actions.NewProjectAction</class>
+            <parent>file</parent>
+            <text>New Project...</text>
+            <accelerator>control P</accelerator>
+            <placeBefore>loadProject</placeBefore>
+            <shortDescr>Create a new project</shortDescr>
+            <description>Create a new project</description>
+            <smallIcon>/org/esa/nest/icons/project-new.png</smallIcon>
+            <largeIcon>/org/esa/nest/icons/project-new.png</largeIcon>
+            <helpId>newProject</helpId>
+      </action>
+
+      <action>
+            <id>loadProject</id>
+            <class>org.esa.nest.dat.actions.LoadProjectAction</class>
+            <parent>file</parent>
+            <text>Load Project...</text>
+            <accelerator>control L</accelerator>
+            <placeBefore>openRaster</placeBefore>
+            <shortDescr>Load a project</shortDescr>
+            <description>Load a project</description>
+            <smallIcon>/org/esa/nest/icons/project_sm.png</smallIcon>
+            <largeIcon>/org/esa/nest/icons/project.png</largeIcon>
+            <helpId>loadProject</helpId>
+      </action>
+
+      <action>
             <id>openRaster</id>
             <class>org.esa.beam.visat.actions.OpenAction</class>
             <parent>file</parent>
             <text>Open Raster Dataset</text>
             <mnemonic>O</mnemonic>
             <accelerator>control O</accelerator>
+            <separatorBefore>true</separatorBefore>
             <placeBefore>openVector</placeBefore>
             <shortDescr>Open a data product.</shortDescr>
             <description>Open a data product.</description>
@@ -100,42 +129,12 @@
             <text>Open Vector Dataset</text>
             <mnemonic>V</mnemonic>
             <accelerator>control V</accelerator>
-            <placeBefore>newProject</placeBefore>
+            <placeBefore>openProductGrabber</placeBefore>
             <shortDescr>Open a vector product.</shortDescr>
             <description>Open a vector product.</description>
             <smallIcon>icons/Open16.gif</smallIcon>
             <largeIcon>icons/Open24.gif</largeIcon>
             <helpId>open</helpId>
-      </action>
-
-
-      <action>
-            <id>newProject</id>
-            <class>org.esa.nest.dat.actions.NewProjectAction</class>
-            <parent>file</parent>
-            <text>New Project...</text>
-            <accelerator>control P</accelerator>
-            <separatorBefore>true</separatorBefore>
-            <placeBefore>loadProject</placeBefore>
-            <shortDescr>Create a new project</shortDescr>
-            <description>Create a new project</description>
-            <smallIcon>/org/esa/nest/icons/project-new.png</smallIcon>
-            <largeIcon>/org/esa/nest/icons/project-new.png</largeIcon>
-            <helpId>newProject</helpId>
-      </action>
-
-      <action>
-            <id>loadProject</id>
-            <class>org.esa.nest.dat.actions.LoadProjectAction</class>
-            <parent>file</parent>
-            <text>Load Project...</text>
-            <accelerator>control L</accelerator>
-            <placeBefore>openProductGrabber</placeBefore>
-            <shortDescr>Load a project</shortDescr>
-            <description>Load a project</description>
-            <smallIcon>/org/esa/nest/icons/project_sm.png</smallIcon>
-            <largeIcon>/org/esa/nest/icons/project.png</largeIcon>
-            <helpId>loadProject</helpId>
       </action>
 
         <action>

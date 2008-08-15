@@ -17,7 +17,7 @@ public class ProjectSubFolder {
 
     private String folderName;
     private File path;
-    private Vector<File> fileList = new Vector<File>(20);
+    private Vector<ProjectFile> fileList = new Vector<ProjectFile>(20);
     private Vector<ProjectSubFolder> subFolders = new Vector<ProjectSubFolder>(10);
     private boolean removeable = true;
     private boolean physical = false;
@@ -46,6 +46,10 @@ public class ProjectSubFolder {
 
     FolderType getFolderType() {
         return folderType;
+    }
+
+    public void setFolderType(FolderType type) {
+        folderType = type;
     }
 
     void setRemoveable(boolean flag) {
@@ -77,7 +81,7 @@ public class ProjectSubFolder {
         subFolders.clear();
     }
 
-    void addFile(File file) {
+    void addFile(ProjectFile file) {
         if(!fileList.contains(file))
             fileList.add(file);
     }
@@ -121,7 +125,13 @@ public class ProjectSubFolder {
     }
 
     void removeFile(File file) {
-        fileList.remove(file);
+
+        for(ProjectFile projFile : fileList) {
+            if(projFile.getFile().equals(file)) {
+                fileList.remove(projFile);
+                return;
+            }
+        }
     }
 
     public ProjectSubFolder findFolder(String name) {
@@ -134,8 +144,10 @@ public class ProjectSubFolder {
     }
 
     public boolean containsFile(File file) {
-        if(fileList.contains(file)) {
-            return true;
+        for(ProjectFile projFile : fileList) {
+            if(projFile.getFile().equals(file)) {
+                return true;
+            }
         }
         for(int i=0; i < subFolders.size(); ++i) {
             ProjectSubFolder folder = subFolders.elementAt(i);
@@ -145,11 +157,11 @@ public class ProjectSubFolder {
         return false;
     }
 
-    public Vector getSubFolders() {
+    public Vector<ProjectSubFolder> getSubFolders() {
         return subFolders;
     }
 
-    public Vector getFileList() {
+    public Vector<ProjectFile> getFileList() {
         return fileList;
     }
 
@@ -166,16 +178,17 @@ public class ProjectSubFolder {
         }
 
         for(int i=0; i < fileList.size(); ++i) {
-            File file = fileList.elementAt(i);
+            ProjectFile projFile = fileList.elementAt(i);
             Element fileElem = new Element("product");
-            fileElem.setAttribute("path", file.getAbsolutePath());
+            fileElem.setAttribute("path", projFile.getFile().getAbsolutePath());
+            fileElem.setAttribute("name", projFile.getDisplayName());
             elem.addContent(fileElem);
         }
 
         return elem;
     }
 
-    public void fromXML(Element elem, Vector folderList, Vector prodList) {
+    public void fromXML(Element elem, Vector<ProjectSubFolder> folderList, Vector<ProjectFile> prodList) {
         List children = elem.getContent();
         for (Object aChild : children) {
             if (aChild instanceof Element) {
@@ -188,15 +201,35 @@ public class ProjectSubFolder {
                         createdByUser = true;
                     subFolder.fromXML(child, folderList, prodList);
                 } else if(child.getName().equals("product")) {
-                    Attribute attrib = child.getAttribute("path");
+                    Attribute pathAttrib = child.getAttribute("path");
+                    Attribute nameAttrib = child.getAttribute("name");
 
-                    File file = new File(attrib.getValue());
+                    File file = new File(pathAttrib.getValue());
                     if (file.exists()) {
                         folderList.add(this);
-                        prodList.add(file);
+                        prodList.add(new ProjectFile(file, nameAttrib.getValue()));
                     }
                 }
             }
+        }
+    }
+
+
+    public static class ProjectFile {
+        private final File file;
+        private final String displayName;
+
+        ProjectFile(File f, String name) {
+            file = f;
+            displayName = name.trim();
+        }
+
+        public File getFile() {
+            return file;
+        }
+
+        public String getDisplayName() {
+            return displayName;
         }
     }
 }

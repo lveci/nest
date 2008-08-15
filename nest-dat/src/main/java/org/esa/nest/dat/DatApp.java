@@ -109,11 +109,11 @@ public final class DatApp extends VisatApp {
         toolBar.addDockableBarListener(new ToolBarListener());
 
         addCommandsToToolBar(toolBar, new String[]{
-                "openRaster",
-                "save",
-                null,
                 "newProject",
                 "loadProject",
+                null,
+                "openRaster",
+                "save",
                 null,
                 "properties",
         });
@@ -186,7 +186,7 @@ public final class DatApp extends VisatApp {
                 //"drawPolylineTool",
                 "drawPolygonTool",
                 //"deleteShape",
-//                "magicStickTool",
+                //"magicStickTool",
                 null,
                 "convertShapeToROI",
                 "org.esa.beam.visat.toolviews.roi.RoiManagerToolView.showCmd",

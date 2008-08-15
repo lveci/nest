@@ -38,6 +38,7 @@ public class Project extends Observable {
     private File projectFile;
     private ProjectPTL productTreeListener;
     private ProjectSubFolder projectSubFolders;
+    private final static boolean SAVE_PROJECT = true;
 
     /**
     * @return The unique instance of this class.
@@ -49,10 +50,12 @@ public class Project extends Observable {
         return _instance;
     }
 
-    void notifyEvent() {
+    void notifyEvent(boolean saveProject) {
         setChanged();
         notifyObservers();
         clearChanged();
+        if(saveProject)
+            SaveProject();
     }
 
     public void CreateNewProject() {
@@ -60,7 +63,7 @@ public class Project extends Observable {
         if(file != null) {
             initProject(file);
             addExistingOpenedProducts();
-            notifyEvent();
+            notifyEvent(SAVE_PROJECT);
         }
     }
 
@@ -96,7 +99,7 @@ public class Project extends Observable {
                 }
 
                 if(found) {
-                    projSubFolder.addFile(f);
+                    projSubFolder.addFile(new ProjectSubFolder.ProjectFile(f, f.getName()));
                     hasProducts = true;
                 }
             }
@@ -140,6 +143,7 @@ public class Project extends Observable {
 
         ProjectSubFolder importedFolder = projectSubFolders.addSubFolder("Imported Products");
         importedFolder.setRemoveable(false);
+        importedFolder.setFolderType(ProjectSubFolder.FolderType.PRODUCT);
 
         ProjectSubFolder processedFolder = new ProjectSubFolder(
                 new File(projectFolder, "Processed Products"), "Processed Products", true,
@@ -175,7 +179,7 @@ public class Project extends Observable {
         if(formats.length > 0)
             destFolder = importFolder.addSubFolder(formats[0]);
 
-        destFolder.addFile(product.getFileLocation());
+        destFolder.addFile(new ProjectSubFolder.ProjectFile(product.getFileLocation(), product.getName()));
     }
 
     public void refreshProjectTree() {
@@ -185,7 +189,6 @@ public class Project extends Observable {
         findSubFolders(graphsFolder.getPath(), graphsFolder);
         ProjectSubFolder processedFolder = projectSubFolders.findFolder("Processed Products");
         findSubFolders(processedFolder.getPath(), processedFolder);
-        notifyEvent();
     }
 
     public void createNewFolder(ProjectSubFolder subFolder) {
@@ -194,7 +197,7 @@ public class Project extends Observable {
         if(dlg.IsOK()) {
             ProjectSubFolder newFolder = subFolder.addSubFolder(dlg.getValue());
             newFolder.setCreatedByUser(true);
-            notifyEvent();
+            notifyEvent(SAVE_PROJECT);
         }
     }
 
@@ -204,7 +207,7 @@ public class Project extends Observable {
         if(dlg.IsOK()) {
             //ProjectSubFolder newFolder = subFolder.addSubFolder(dlg.getValue());
             //newFolder.setCreatedByUser(true);
-            notifyEvent();
+            notifyEvent(SAVE_PROJECT);
         }
     }
 
@@ -227,7 +230,7 @@ public class Project extends Observable {
 
     public void deleteFolder(ProjectSubFolder parentFolder, ProjectSubFolder subFolder) {
         parentFolder.removeSubFolder(subFolder);
-        notifyEvent();
+        notifyEvent(SAVE_PROJECT);
     }
 
     public void renameFolder(ProjectSubFolder subFolder) {
@@ -235,7 +238,7 @@ public class Project extends Observable {
         dlg.show();
         if(dlg.IsOK()) {
             subFolder.renameTo(dlg.getValue());
-            notifyEvent();
+            notifyEvent(SAVE_PROJECT);
         }
     }
 
@@ -245,7 +248,7 @@ public class Project extends Observable {
            parentFolder.getFolderType() == ProjectSubFolder.FolderType.GRAPH)
             file.delete();
 
-        notifyEvent();
+        notifyEvent(SAVE_PROJECT);
     }
 
     public ProjectSubFolder getProjectSubFolders() {
@@ -254,7 +257,7 @@ public class Project extends Observable {
 
     public void CloseProject() {
         projectSubFolders = null;
-        notifyEvent();
+        notifyEvent(false);
     }
 
     public void SaveWorkSpace() {
@@ -305,8 +308,8 @@ public class Project extends Observable {
             return;
         }
 
-        Vector folderList = new Vector(30);
-        Vector prodList = new Vector(50);
+        Vector<ProjectSubFolder> folderList = new Vector<ProjectSubFolder>(30);
+        Vector<ProjectSubFolder.ProjectFile> prodList = new Vector<ProjectSubFolder.ProjectFile>(50);
 
         Element root = doc.getRootElement();
 
@@ -324,10 +327,11 @@ public class Project extends Observable {
 
         loadProducts(folderList, prodList);
 
-        notifyEvent();
+        notifyEvent(false);
     }
 
-    private static void loadProducts(final Vector folderList, final Vector prodList) {
+    private static void loadProducts(final Vector<ProjectSubFolder> folderList,
+                                     final Vector<ProjectSubFolder.ProjectFile> prodList) {
 
         ProgressMonitorSwingWorker worker = new ProgressMonitorSwingWorker(VisatApp.getApp().getMainFrame(), "Opening Project") {
             @Override
@@ -336,14 +340,15 @@ public class Project extends Observable {
                 try {
                     for(int i=0; i < prodList.size(); ++i) {
 
-                        ProjectSubFolder subFolder = (ProjectSubFolder)folderList.get(i);
-                        File prodFile = (File)prodList.get(i);
+                        ProjectSubFolder subFolder = folderList.get(i);
+                        ProjectSubFolder.ProjectFile projFile = prodList.get(i);
+                        File prodFile = projFile.getFile();
 
                         ProductReader reader = ProductIO.getProductReaderForFile(prodFile);
                         if (reader != null) {
                             try {
                                 //Product product = reader.readProductNodes(prodFile, null);
-                                subFolder.addFile(prodFile);
+                                subFolder.addFile(projFile);
                             } catch(Exception e) {
                                 VisatApp.getApp().showErrorDialog(e.getMessage());
                             }
@@ -367,7 +372,7 @@ public class Project extends Observable {
         public void productAdded(final Product product) {
             if(projectSubFolders == null) return;
             addImportedProduct(product);
-            notifyEvent();
+            notifyEvent(SAVE_PROJECT);
         }
 
         public void productRemoved(final Product product) {

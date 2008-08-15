@@ -4,10 +4,7 @@ import com.jidesoft.icons.IconsFactory;
 import com.jidesoft.swing.JideScrollPane;
 import com.jidesoft.swing.JideSplitPane;
 import org.esa.beam.framework.ui.application.support.AbstractToolView;
-import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.lm.LayersToolView;
-import org.esa.nest.dat.toolviews.Projects.Project;
-import org.esa.nest.dat.toolviews.Projects.ProjectTree;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -23,14 +20,12 @@ import java.util.Vector;
 public class ProjectsToolView extends AbstractToolView implements Observer {
 
     public static final String ID = ProjectsToolView.class.getName();
-    private VisatApp visatApp;
 
     private ProjectTree projectTree;
     private DefaultMutableTreeNode rootNode;
     private Project project = Project.instance();
 
     public ProjectsToolView() {
-        this.visatApp = VisatApp.getApp();
         Project.instance().addObserver(this);
     }
 
@@ -62,7 +57,7 @@ public class ProjectsToolView extends AbstractToolView implements Observer {
         return projectTree;
     }
 
-    private static void PopulateNode(Vector subFolders, DefaultMutableTreeNode treeNode) {
+    private static void PopulateNode(Vector<ProjectSubFolder> subFolders, DefaultMutableTreeNode treeNode) {
 
         for (Enumeration e = subFolders.elements(); e.hasMoreElements();)
         {
@@ -71,14 +66,14 @@ public class ProjectsToolView extends AbstractToolView implements Observer {
             final DefaultMutableTreeNode folderNode = new DefaultMutableTreeNode(folder);
             treeNode.add(folderNode);
 
-            Vector fileList = folder.getFileList();
+            Vector<ProjectSubFolder.ProjectFile> fileList = folder.getFileList();
             for (Enumeration file = fileList.elements(); file.hasMoreElements();)
             {
                 final DefaultMutableTreeNode fileNode = new DefaultMutableTreeNode(file.nextElement());
                 folderNode.add(fileNode);
             }
 
-            Vector moreFolders = folder.getSubFolders();
+            Vector<ProjectSubFolder> moreFolders = folder.getSubFolders();
             if(!moreFolders.isEmpty())
                 PopulateNode(moreFolders, folderNode);
         }
@@ -105,11 +100,9 @@ public class ProjectsToolView extends AbstractToolView implements Observer {
             rootNode.setUserObject(project.getProjectSubFolders());
             projectTree.setRootVisible(true);
 
-            Vector subFolders = project.getProjectSubFolders().getSubFolders();
+            Vector<ProjectSubFolder> subFolders = project.getProjectSubFolders().getSubFolders();
             PopulateNode(subFolders, rootNode);
             projectTree.populateTree(rootNode);
-
-            project.SaveProject();
         }
     }
 }

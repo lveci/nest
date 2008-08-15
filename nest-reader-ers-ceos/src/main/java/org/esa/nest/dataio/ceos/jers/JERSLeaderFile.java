@@ -44,7 +44,7 @@ class JERSLeaderFile {
     }
 
     public String getProductLevel() {
-        return _sceneHeaderRecord.getAttributeString("Scene reference number");
+        return _sceneHeaderRecord.getAttributeString("Scene reference number").trim();
     }
 
     public Calendar getDateImageWasTaken() {

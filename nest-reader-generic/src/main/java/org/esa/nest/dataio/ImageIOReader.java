@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Collection;
 import java.awt.*;
+import java.awt.image.RenderedImage;
 import javax.imageio.*;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageOutputStream;
@@ -108,10 +109,11 @@ public class ImageIOReader extends AbstractProductReader {
                                             "productType",
                                             sceneWidth, sceneHeight);
 
+        int bandCnt = 1;
         for(int i=0; i < numImages; ++i) {
 
             for(int b=0; b < numBands; ++b) {
-                final Band band = new Band("band"+ (i+b), dataType,
+                final Band band = new Band("band"+ bandCnt++, dataType,
                                    sceneWidth, sceneHeight);
                 product.addBand(band);
                 bandMap.put(band, new BandInfo(i, b));
@@ -162,9 +164,14 @@ public class ImageIOReader extends AbstractProductReader {
         Rectangle dstRect = new Rectangle(0, 0, sourceWidth, sourceHeight);
 
         param.setSourceRegion(srcRect);
-        IIOImage iioImage = reader.readAll(bandInfo.imageID, param);
+        param.setSourceBands(new int[]{bandInfo.imageID});
+        param.setDestinationBands(new int[]{0});
 
-        java.awt.image.Raster data = iioImage.getRenderedImage().getData();
+        final RenderedImage image = reader.read(0, param);
+        java.awt.image.Raster data = image.getData();
+
+        //IIOImage iioImage = reader.readAll(bandInfo.imageID, param);
+        //java.awt.image.Raster data = iioImage.getRenderedImage().getData();
 
         int size = destBuffer.getNumElems();
         int elemSize = data.getNumDataElements();

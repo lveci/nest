@@ -17,7 +17,7 @@ public class JERSConstants implements CEOSConstants {
     final static String GEOPHYSICAL_UNIT = "mw / (m^2*sr*nm)";
     final static String BANDNAME_PREFIX = "sar_band_";
     final static String BAND_DESCRIPTION_FORMAT_STRING = "Radiance, Band %d";    /*I18N*/
-    final static String PRODUCT_DESCRIPTION_PREFIX = "JERS product Level ";
+    final static String PRODUCT_DESCRIPTION_PREFIX = "JERS product ";
 
     final static String SUMMARY_FILE_NAME = "summary.txt";
 

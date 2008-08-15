@@ -1,5 +1,5 @@
 /*
- * $Id: CeosHelper.java,v 1.3 2008-07-23 19:47:17 lveci Exp $
+ * $Id: CeosHelper.java,v 1.4 2008-08-14 21:50:05 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -79,8 +79,8 @@ public class CeosHelper {
     }
 
     public static String getProductName(final BaseRecord textRecord) {
-        return textRecord.getAttributeString("Scene identification") + '-' +
-                textRecord.getAttributeString("Product type specifier");
+        return textRecord.getAttributeString("Scene identification").trim() + '-' +
+                textRecord.getAttributeString("Product type specifier").trim();
     }
 
     public static ProductData.UTC createUTCDate(final int year, final int dayOfYear, final int millisInDay) {
