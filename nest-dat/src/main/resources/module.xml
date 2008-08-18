@@ -295,6 +295,16 @@
             <helpId>selectTool</helpId>
         </action>
 
+        <action>
+            <id>virtualToRealBand</id>
+            <class>org.esa.nest.dat.actions.VirtualToRealBandAction</class>
+            <parent>tools</parent>
+            <text>Virtual To Real Band</text>
+            <shortDescr>Convert a virtual band to a real band</shortDescr>
+            <context>band</context>
+            <helpId>virtualToRealBand</helpId>
+        </action>
+
     </extension>
 
 
