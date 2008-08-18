@@ -1,13 +1,10 @@
 package org.esa.nest.dat.actions;
 
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.visat.VisatApp;
-import org.esa.beam.visat.dialogs.BandArithmetikDialog;
 import org.esa.beam.util.Debug;
-import org.esa.beam.util.math.MathUtils;
 
 import javax.swing.*;
 
@@ -25,11 +22,13 @@ import java.io.IOException;
  */
 public class VirtualToRealBandAction extends ExecCommand {
 
-    private BandArithmetikDialog _bandArithmetikDialog;
-
     @Override
     public void actionPerformed(final CommandEvent event) {
-        openBandArithmeticDialog(VisatApp.getApp(), event.getCommand().getHelpId());
+
+        final Product targetProduct = VisatApp.getApp().getSelectedProduct();
+        final String srcBandName = VisatApp.getApp().getSelectedProductNode().getName();
+        final Band srcBand = targetProduct.getBand(srcBandName);
+        convertVirtualToRealBand(targetProduct, srcBand, VisatApp.getApp());
     }
 
     @Override
@@ -40,15 +39,12 @@ public class VirtualToRealBandAction extends ExecCommand {
         event.getSelectableCommand().setEnabled(raster != null && raster.isSynthetic());
     }
 
-    private void openBandArithmeticDialog(final VisatApp visatApp, final String helpId) {
+    protected static void convertVirtualToRealBand(final Product targetProduct, final Band srcBand,
+                                                   final VisatApp visatApp) {
 
-        final Product targetProduct = visatApp.getSelectedProduct();
-        final String srcBandName = visatApp.getSelectedProductNode().getName();
-        final Band srcBand = targetProduct.getBand(srcBandName);
-        final Band targetBand = new Band("new_"+srcBandName, srcBand.getDataType(),
+        final Band targetBand = new Band("new_"+srcBand.getName(), srcBand.getDataType(),
                 srcBand.getSceneRasterWidth(), srcBand.getSceneRasterHeight());
 
-        final boolean checkInvalids = false;
         final boolean noDataValueUsed = false;
         final double noDataValue = srcBand.getNoDataValue();
 
@@ -62,67 +58,91 @@ public class VirtualToRealBandAction extends ExecCommand {
         try {
             targetBand.createCompatibleRasterData();
         } catch (OutOfMemoryError e) {
-            visatApp.showOutOfMemoryErrorDialog("The new band could not be created.");
+            VisatApp.getApp().showOutOfMemoryErrorDialog("The new band could not be created.");
         }
 
-        final String expression = srcBandName;
-        targetBand.setSynthetic(true);
+        final String expression = srcBand.getName();
+        targetBand.setSynthetic(false);
 
-        SwingWorker swingWorker = new SwingWorker() {
+        if(visatApp != null) {
             final ProgressMonitor pm = new DialogProgressMonitor(visatApp.getMainFrame(),
-                    "Converting Virutal Band to Real",
+                    "Converting Virtual Band to Real",
                     Dialog.ModalityType.APPLICATION_MODAL);
 
-            String _errorMessage;
-            int _numInvalids;
+            SwingWorker swingWorker = new SwingWorker() {
 
-            @Override
-            protected Object doInBackground() throws Exception {
-                _errorMessage = null;
-                try {
-                    _numInvalids = targetBand.computeBand(expression,
-                                                           new Product[] {targetProduct},
-                                                           checkInvalids,
-                                                           noDataValueUsed,
-                                                           noDataValue,
-                                                           pm);
-                    targetBand.fireProductNodeDataChanged();
-                } catch (IOException e) {
-                    Debug.trace(e);
-                    _errorMessage = "The band could not be created.\nAn I/O error occurred:\n" + e.getMessage();
-                } catch (ParseException e) {
-                    Debug.trace(e);
-                    _errorMessage = "The band could not be created.\nAn expression parse error occurred:\n" + e.getMessage();
-                } catch (EvalException e) {
-                    Debug.trace(e);
-                    _errorMessage = "The band could not be created.\nAn expression evaluation error occured:\n" + e.getMessage();
-                } finally {
+                String _errorMessage;
+
+                @Override
+                protected Object doInBackground() throws Exception {
+                    _errorMessage = computeBand(targetProduct, targetBand, expression,
+                            noDataValue, pm);
+                    return null;
                 }
-                return null;
 
+                @Override
+                public void done() {
+                    boolean ok = true;
+                    if (_errorMessage != null) {
+                        if(visatApp != null)
+                            visatApp.showErrorDialog(_errorMessage);
+                        ok = false;
+                    } else if (pm.isCanceled()) {
+                        if(visatApp != null)
+                            visatApp.showErrorDialog("Operation has been canceled.");
+                        ok = false;
+                    }
+
+                    if(ok) {
+                        targetBand.setModified(true);
+                        targetProduct.removeBand(srcBand);
+                        targetBand.setName(srcBand.getName());
+                    } else {
+                        targetProduct.removeBand(targetProduct.getBand(targetBand.getName()));
+                    }
+                }
+            };
+
+            swingWorker.execute();
+
+        } else {
+            final ProgressMonitor pm = ProgressMonitor.NULL;
+
+            String _errorMessage = computeBand(targetProduct, targetBand, expression,
+                            noDataValue, pm);
+
+            if (_errorMessage == null) {
+                targetBand.setModified(true);
+                targetProduct.removeBand(srcBand);
+                targetBand.setName(srcBand.getName());
+            } else {
+                targetProduct.removeBand(targetProduct.getBand(targetBand.getName()));
             }
+        }
 
-            @Override
-            public void done() {
-                boolean ok = true;
-                if (_errorMessage != null) {
-                    visatApp.showErrorDialog(_errorMessage);
-                    ok = false;
-                } else if (pm.isCanceled()) {
-                    visatApp.showErrorDialog("Band arithmetic has been canceled.");
-                    ok = false;
-                }
+    }
 
-                if(ok) {
-                    targetBand.setModified(true);
-                    targetProduct.removeBand(srcBand);
-                    targetBand.setName(srcBandName);
-                } else {
-                    targetProduct.removeBand(targetProduct.getBand(targetBand.getName()));
-                }
-            }
-        };
-
-        swingWorker.execute();
+    protected static String computeBand(Product targetProduct, Band targetBand, String expression,
+                                        double noDataValue, ProgressMonitor pm) {
+        String errorMessage = null;
+        try {
+            targetBand.computeBand(expression,
+                    new Product[] {targetProduct},
+                    false,
+                    false,
+                    noDataValue,
+                    pm);
+            targetBand.fireProductNodeDataChanged();
+        } catch (IOException e) {
+            Debug.trace(e);
+            errorMessage = "The band could not be created.\nAn I/O error occurred:\n" + e.getMessage();
+        } catch (ParseException e) {
+            Debug.trace(e);
+            errorMessage = "The band could not be created.\nAn expression parse error occurred:\n" + e.getMessage();
+        } catch (EvalException e) {
+            Debug.trace(e);
+            errorMessage = "The band could not be created.\nAn expression evaluation error occured:\n" + e.getMessage();
+        }
+        return errorMessage;
     }
 }
