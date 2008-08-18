@@ -11,11 +11,32 @@
         <tocitem text="Overview" target="NestOverview"/>
         <tocitem text="Definitions" target="beamDefinitions"/>
         <tocitem text="Data Sources" target="beamDataSources"/>
-        <tocitem text="BEAM-DIMAP Format" target="beamDimapFormat"/>
     </tocitem>
 
     <tocitem text="DAT">
         <tocitem text="Display and Analysis Tool" target="dat"/>
+		<tocitem text="Project View" target="projectView"/>
+		<tocitem text="Product View" target="productBrowser"/>
+        <tocitem text="Pixel Info View" target="pixelInfoView"/>
+		<tocitem text="Image View" target="imageView"/>
+        <tocitem text="Navigation Window" target="showNavigationWnd"/>
+        <tocitem text="Colour Manipulation" target="showColorManipulationWnd"/>
+		<tocitem text="Product World Map" target="showWorldMapWnd"/>
+        <tocitem text="Preferences Dialog" target="preferences"/>
+        
+		<tocitem text="Menus">
+			<tocitem text="Main Toolbar" target="mainToolbar"/>
+	        <tocitem text="File Menu" target="fileMenu"/>
+	        <tocitem text="Edit Menu" target="editMenu"/>
+	        <tocitem text="View Menu" target="viewMenu"/>
+	        <tocitem text="Analysis Menu" target="analysisMenu"/>
+	        <tocitem text="Utilities Menu" target="toolsMenu"/>
+			<tocitem text="SAR Tools Menu" target="sarToolsMenu"/>
+			<tocitem text="Geometry Menu" target="geometryMenu"/>
+	        <tocitem text="Window Menu" target="windowMenu"/>
+	        <tocitem text="Help Menu" target="helpMenu"/>
+		</tocitem>
+		
 		<tocitem text="Import">
             <tocitem text="Import ENVISAT Data Product" target="importEnvisatProduct"/>
             <tocitem text="Import ERS1/2 Data Product" target="importErsProduct"/>
@@ -44,9 +65,6 @@
         <tocitem text="Tools">
             
             <tocitem text="Imaging Tools">
-                <tocitem text="Image View" target="imageView"/>
-                <tocitem text="Navigation Window" target="showNavigationWnd"/>
-                <tocitem text="Colour Manipulation" target="showColorManipulationWnd"/>
                 <tocitem text="RGB-Image Profile" target="rgbImageProfile"/>
                 <tocitem text="No Data Overlay" target="noDataOverlay"/>
                 <tocitem text="Bitmask Overlay" target="showBitmaskOverlayWnd"/>
@@ -54,11 +72,9 @@
             </tocitem>
 
             <tocitem text="Analysis Tools">
-                <tocitem text="Product World Map" target="showWorldMapWnd"/>
                 <tocitem text="Product GCP Manager" target="showGcpManagerWnd"/>
                 <tocitem text="Product Pin Manager" target="showPinManagerWnd"/>
                 <tocitem text="Band ROI Definition" target="showROIDefWnd"/>
-                <tocitem text="Product Spectrum" target="showSpectrumWnd"/>
                 <tocitem text="Product/Band Information" target="informationDialog"/>
                 <tocitem text="Product/Band Geo-Coding Information" target="geoCodingInfoDialog"/>
                 <tocitem text="Band Statistics" target="statisticsDialog"/>
@@ -83,21 +99,6 @@
             </tocitem>
         </tocitem>
 
-        <tocitem text="Reference">
-            <tocitem text="Product Browser" target="productBrowser"/>
-            <tocitem text="Pixel Info View" target="pixelInfoView"/>
-            <tocitem text="Preferences Dialog" target="preferences"/>
-            <tocitem text="Main Toolbar" target="mainToolbar"/>
-            <tocitem text="Main Menu Bar" target="menuBar"/>
-            <tocitem text="File Menu" target="fileMenu"/>
-            <tocitem text="Edit Menu" target="editMenu"/>
-            <tocitem text="View Menu" target="viewMenu"/>
-            <tocitem text="Analysis Menu" target="analysisMenu"/>
-            <tocitem text="Tools Menu" target="toolsMenu"/>
-            <tocitem text="Window Menu" target="windowMenu"/>
-            <tocitem text="Help Menu" target="helpMenu"/>
-            <tocitem text="No-Data Value" target="noDataValue"/>
-        </tocitem>
     </tocitem>
 
 	<tocitem text="Graph Processing">
@@ -138,6 +139,7 @@
 	<tocitem text="Development">
         <tocitem text="General Design" target="general_design"/>
 		<tocitem text="Detailed Design" target="detailed_design"/>
+		<tocitem text="Open Source Development" target="open_source"/>
 		<tocitem text="Building the Source" target="build_source"/>
 		<tocitem text="Developing a Reader" target="developing_reader"/>
 		<tocitem text="Developing a Writer" target="developing_writer"/>

@@ -18,18 +18,39 @@
     <li><a href="general/NestOverview.html">Overview</a></li>
     <li><a href="general/BeamDefinitions.html">Definitions</a></li>
     <li><a href="general/BeamDataSources.html">Data Sources</a></li>
-    <li><a href="general/BeamDimapFormat.html">BEAM-DIMAP Format</a></li>
 </ul>
 
 <h3>DAT</h3>
 <ul>
 	<li><a href="visat/dat.html">Display and Analysis Tool</a></li>
+	<li><a href="visat/ProjectView.html">Project View</a></li>
+	<li><a href="visat/ProductBrowser.html">Product View</a></li>
+	<li><a href="visat/ProductBrowser.html#pixelView">Pixel Info View</a></li>
+	<li><a href="visat/ProductSceneView.html">Image View</a></li>
+	<li><a href="visat/NavigationWindow.html">Navigation Window</a></li>
+    <li><a href="visat/ColorManipulationWindow.html">Colour Manipulation</a></li>
+	<li><a href="visat/WorldMap.html">Product World Map</a></li>
+	<li><a href="visat/PreferencesDialog.html">Preferences Dialog</a></li>
+	
+<h4>Menus</h4>
+	<ul>
+	<li><a href="visat/Toolbars.html">Main Toolbar</a></li>
+	<li><a href="visat/FileMenu.html">File Menu</a></li>
+	<li><a href="visat/EditMenu.html">Edit Menu</a></li>
+	<li><a href="visat/ViewMenu.html">View Menu</a></li>
+	<li><a href="visat/AnalysisMenu.html">Analysis Menu</a></li>
+	<li><a href="visat/ToolsMenu.html">Utilities Menu</a></li>
+	<li><a href="visat/SARToolsMenu.html">SAR Tools Menu</a></li>
+	<li><a href="visat/GeometryMenu.html">Geometry Menu</a></li>
+	<li><a href="visat/WindowMenu.html">Window Menu</a></li>
+	<li><a href="visat/HelpMenu.html">Help Menu</a></li>
+	</ul>
 	
 <h4>Import</h4>
     <ul>
         <li><a href="visat/ImportEnvisat.html">Import ENVISAT (MERIS,AATSR,ASAR) Product</a></li>
         <li><a href="visat/ImportErs.html">Import ERS1/2 (ATSR,SAR) Product</a></li>
-        <li><a href="visat/ImportDimap.html">Import BEAM-DIMAP Product</a></li>
+        <li><a href="general/BeamDimapFormat.html">Import BEAM-DIMAP Product</a></li>
         <li><a href="visat/ImportLandsatTM.html">Import LANDSAT 5 TM Product</a></li>
         <li><a href="visat/ImportNetCDF.html">Import NetCDF Product</a></li>
         <li><a href="visat/GETASSE30ElevationModel.html">Import GETASSE30 Tile</a></li>
@@ -55,9 +76,6 @@
 <ul>
     <li><b>Imaging Tools</b></li>
     <ul>
-        <li><a href="visat/ProductSceneView.html">Image View</a></li>
-        <li><a href="visat/NavigationWindow.html">Navigation Window</a></li>
-        <li><a href="visat/ColorManipulationWindow.html">Colour Manipulation</a></li>
         <li><a href="visat/RGBImageProfile.html">RGB-Image Profile</a></li>
         <li><a href="visat/NoDataOverlay.html">No Data Overlay</a></li>
         <li><a href="visat/BitmaskOverlayWindow.html">Bitmask Overlay</a></li>
@@ -65,11 +83,9 @@
     </ul>
     <li><b>Analysis Tools</b></li>
     <ul>
-        <li><a href="visat/WorldMap.html">Product World Map</a></li>
         <li><a href="visat/GcpManagement.html">Product GCP Manager</a></li>
         <li><a href="visat/PinManagement.html">Product Pin Manager</a></li>
         <li><a href="visat/ShapeAndROIHandling.html">Band ROI Definition</a></li>
-        <li><a href="visat/SpectrumWindow.html">Product Spectrum</a></li>
         <li><a href="visat/InformationDialog.html">Product/Band Information</a></li>
         <li><a href="visat/GeoCodingInfo.html">Product/Band Geo-Coding Information</a></li>
         <li><a href="visat/StatisticsDialog.html">Band Statistics</a></li>
@@ -94,29 +110,13 @@
         <li><a href="visat/CreateFilteredBand.html">Create Filtered Band</a></li>
     </ul>
 </ul>
-
-<h4>Reference</h4>
-	<ul>
-	    <li><a href="visat/ProductBrowser.html">Product Browser</a></li>
-	    <li><a href="visat/ProductBrowser.html#pixelView">Pixel Info View</a></li>
-	    <li><a href="visat/PreferencesDialog.html">Preferences Dialog</a></li>
-	    <li><a href="visat/Toolbars.html">Main Toolbar</a></li>
-	    <li><a href="visat/MenuBar.html">Main Menu Bar</a></li>
-	    <li><a href="visat/FileMenu.html">File Menu</a></li>
-	    <li><a href="visat/EditMenu.html">Edit Menu</a></li>
-	    <li><a href="visat/ViewMenu.html">View Menu</a></li>
-	    <li><a href="visat/AnalysisMenu.html">Analysis Menu</a></li>
-	    <li><a href="visat/ToolsMenu.html">Tools Menu</a></li>
-	    <li><a href="visat/WindowMenu.html">Window Menu</a></li>
-	    <li><a href="visat/HelpMenu.html">Help Menu</a></li>
-	    <li><a href="visat/NoDataValue.html">No-Data Value</a></li>
-	</ul>
 </ul>
 
 <h3>Graph Processing</h3>
 <ul>
 	<li><a href="operators/introduction.html">Introduction</a></li>
 </ul>
+
 <ul>
 <h4>GPT</h4>
 <ul>
@@ -154,13 +154,14 @@
 <ul>
 	<li><a href="development/general_design.html">General Design</a></li>
 	<li><a href="development/detailed_design.html">Detailed Design</a></li>
+	<li><a href="development/open_source.html">Open Source Development</a></li>
 	<li><a href="development/build_source.html">Building the Source</a></li>
 	<li><a href="development/developing_reader.html">Developing a Reader</a></li>
 	<li><a href="development/developing_writer.html">Developing a Writer</a></li>
 	<li><a href="development/developing_operator.html">Developing an Operator</a></li>
 </ul>
 
-</ul>
+
 
 </body>
 </html>
