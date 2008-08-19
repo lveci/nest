@@ -1,0 +1,7 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>${artifactId}</symbolicName>
+    <version>${version}</version>
+    <name>${artifactId}</name>
+    <description>BEAM GPF Module ${artifactId}</description>
+</module>

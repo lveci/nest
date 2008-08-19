@@ -15,7 +15,8 @@
     <mapID target="beamDataSources" url="general/BeamDataSources.html"/>
 
     <mapID target="visat" url="visat/dat.html"/>
-	<mapID target="dat" url="visat/dat.html"/>
+	<mapID target="dat" url="visat/dat.html"/>	
+	<mapID target="ToolWindows" url="visat/ToolWindows.html"/>
     <mapID target="mainToolbar" url="visat/Toolbars.html"/>
     <mapID target="fileMenu" url="visat/FileMenu.html"/>
     <mapID target="editMenu" url="visat/EditMenu.html"/>
