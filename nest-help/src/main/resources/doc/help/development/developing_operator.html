@@ -2,28 +2,41 @@
 <html>
 <head>
 
+
     
     
+  
+  
   <title>NEST Help - Speckle Filter</title>
   <link rel="stylesheet" href="../style.css">
 </head>
 
+
 <body>
+
 
 <table class="header">
 
+
     <tbody>
+
     <tr class="header">
 
+
         <td class="header">&nbsp; Developing An Operator</td>
+
 
         
     <td class="header" align="right"><a href="../general/BeamOverview.html"><img src="../images/BeamHeader.jpg" border="0"></a></td>
 
+
     </tr>
 
+
+  
   </tbody>
 </table>
+
 
 
 <h3>Operators</h3>
@@ -31,7 +44,95 @@
 
 
 
+
+intro<br>
 <br>
+<br>
+<br>
+<br>
+<h3>Maven GPF Archetype</h3>
+The Maven 2 Archetype Plugin for NEST GPF modules is used to create archetypes for NEST&nbsp;GPF modules.<br>
+<br>
+A
+Maven Archetype is a template toolkit for generating a new module
+package. By using the Maven Archetype you can create a module structure
+easily and get started adding your code to the module.<br>
+<br>
+A GPF Archetype will generate a single tile and a multi tile Operator within the same package.<br>
+Before begining, make sure that you have built the NEST source code and do a <span style="font-weight: bold;">maven install</span> to ensure that all dependencies are in the repository.<br>
+<br>
+From the command line type the following from the NEST source code root folder.:<br>
+<br>
+<blockquote>
+        <code>mvn archetype:create<br>
+
+
+            -DarchetypeGroupId=org.esa.</code><code>nest</code><code>.maven<br>
+
+
+            -DarchetypeArtifactId=maven-</code><code>nest</code><code>-gpf-archetype<br>
+
+
+            -DarchetypeVersion=1.0<br>
+
+
+            -DgroupId=<i>myGroupId</i><br>
+
+
+            -DartifactId=<i>myArtifactId</i><br>
+
+
+            -Dversion=<i>myVersion</i><br>
+
+
+            -DpackageName=<i>myPackageName</i>
+        </code>
+    </blockquote>
+
+
+
+
+<p>where
+    </p>
+
+<ul>
+  <li><code><i>myGroupId</i></code> will become the <code>groupId</code> of the generated POM</li>
+  <li><code><i>myArtifactId</i></code> will become the <code>artifactId</code> of the generated POM and the&nbsp;NEST
+            module's
+            <code>symbolicName</code>.</li>
+  <li><code><i>myVersion</i></code> will become the <code>version</code>
+            of the generated POM and&nbsp;NEST module. Defaults to <code>1.0-SNAPSHOT</code>.</li>
+  <li><code><i>myPackageName</i></code> will become the source package name. Defaults to the value of <code><i>myGroupId</i>
+        </code>.</li>
+</ul>
+
+
+
+
+<p>Please also refer to the documentation of the
+    <a href="http://maven.apache.org/plugins/maven-archetype-plugin/">Maven 2 Archetype Plugin</a>.
+</p>
+
+
+
+<h4>Example</h4>
+
+
+
+<blockquote>
+        <code>mvn archetype:create
+            -DarchetypeGroupId=org.esa.nest.maven
+            -DarchetypeArtifactId=maven-</code><code>nest</code><code>-gpf-archetype
+            -DarchetypeVersion=1.0
+            -DgroupId=org.esa.nest
+            -DartifactId=nest-sar-op
+        </code>
+    </blockquote>
+<blockquote><code><br>
+  </code>
+    </blockquote>
+<br>
+
 
 <hr>
 </body>
