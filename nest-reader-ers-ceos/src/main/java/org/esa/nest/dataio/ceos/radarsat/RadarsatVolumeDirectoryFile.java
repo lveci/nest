@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /*
- * $Id: RadarsatVolumeDirectoryFile.java,v 1.5 2008-08-12 19:49:24 lveci Exp $
+ * $Id: RadarsatVolumeDirectoryFile.java,v 1.6 2008-08-19 15:23:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -51,6 +51,10 @@ class RadarsatVolumeDirectoryFile {
         _volumeDescriptorRecord = new BaseRecord(_ceosReader, -1, mission, volume_desc_recordDefinitionFile);
         _filePointerRecords = CeosHelper.readFilePointers(_volumeDescriptorRecord);
         _textRecord = new BaseRecord(_ceosReader, -1, mission, text_recordDefinitionFile);
+    }
+
+    public BaseRecord getTextRecord() {
+        return _textRecord;
     }
 
     public static String getLeaderFileName() {

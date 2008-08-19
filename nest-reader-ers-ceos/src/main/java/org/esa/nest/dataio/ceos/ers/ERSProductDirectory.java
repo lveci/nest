@@ -76,7 +76,8 @@ class ERSProductDirectory extends CEOSProductDirectory {
     public boolean isERS() throws IOException, IllegalCeosFormatException {
         if(productType == null || _volumeDirectoryFile == null)
             readVolumeDirectoryFile();
-        return (productType.contains(ERS1_MISSION) || productType.contains(ERS2_MISSION));
+        return (productType.contains(ERS1_MISSION) || productType.contains(ERS2_MISSION) ||
+                productType.contains("ERS1") || productType.contains("ERS2"));
     }
 
     public String getMission() {
@@ -100,28 +101,40 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
                 if(isProductSLC) {
                     String bandName = "i_" + index;
-                    product.addBand(createBand(bandName));
+                    Band bandI = createBand(bandName);
+                    product.addBand(bandI);
                     bandImageFileMap.put(bandName, imageFile);
                     bandName = "q_" + index;
-                    product.addBand(createBand(bandName));
+                    Band bandQ = createBand(bandName);
+                    product.addBand(bandQ);
                     bandImageFileMap.put(bandName, imageFile);
+
+                    createVirtualIntensityBand(product, bandI, bandQ, "_"+index);
                     ++index;
                 } else {
-                    String bandName = "amplitude_" + index++;
-                    product.addBand(createBand(bandName));
+                    String bandName = "amplitude_" + index;
+                    Band band = createBand(bandName);
+                    product.addBand(band);
                     bandImageFileMap.put(bandName, imageFile);
+                    createVirtualIntensityBand(product, band, "_"+index);
+                    ++index;
                 }
             }
         } else {
             ERSImageFile imageFile = _imageFiles[0];
             if(isProductSLC) {
-                product.addBand(createBand("i"));
+                Band bandI = createBand("i");
+                product.addBand(bandI);
                 bandImageFileMap.put("i", imageFile);
-                product.addBand(createBand("q"));
+                Band bandQ = createBand("q");
+                product.addBand(bandQ);
                 bandImageFileMap.put("q", imageFile);
+                createVirtualIntensityBand(product, bandI, bandQ, "");
             } else {
-                product.addBand(createBand("amplitude"));
+                Band band = createBand("amplitude");
+                product.addBand(band);
                 bandImageFileMap.put("amplitude", imageFile);
+                createVirtualIntensityBand(product, band, "");
             }
         }
 
@@ -220,11 +233,21 @@ class ERSProductDirectory extends CEOSProductDirectory {
         MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
 
         //mph
-        AbstractMetadata.setAttributeString(absRoot, "PRODUCT", getProductName());
-        AbstractMetadata.setAttributeString(absRoot, "PRODUCT_TYPE", getProductType());
-        AbstractMetadata.setAttributeString(absRoot, "SPH_DESCRIPTOR",
+        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.PRODUCT, getProductName());
+        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.PRODUCT_TYPE, getProductType());
+        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
                 _leaderFile.getSceneRecord().getAttributeString("Product type descriptor"));
-        AbstractMetadata.setAttributeString(absRoot, "MISSION", getMission());
+        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.MISSION, getMission());
+
+        String procTime = _volumeDirectoryFile.getTextRecord().getAttributeString("Location and datetime of product creation").trim();
+        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.PROC_TIME, procTime );
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT,
+                Integer.parseInt(_leaderFile.getSceneRecord().getAttributeString("Orbit number").trim()));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
+                Integer.parseInt(_leaderFile.getSceneRecord().getAttributeString("Orbit number").trim()));
+        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
+                _leaderFile.getFacilityRecord().getAttributeString("Time of input state vector used to processed the image"));
+
 
         //sph
 

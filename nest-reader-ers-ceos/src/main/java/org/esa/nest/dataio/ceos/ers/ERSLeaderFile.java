@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.Calendar;
 
 /*
- * $Id: ERSLeaderFile.java,v 1.9 2008-08-14 21:50:05 lveci Exp $
+ * $Id: ERSLeaderFile.java,v 1.10 2008-08-19 15:23:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -33,7 +33,7 @@ import java.util.Calendar;
  * This class represents a leader file of an Avnir-2 product.
  *
  * @author Marco Peters
- * @version $Revision: 1.9 $ $Date: 2008-08-14 21:50:05 $
+ * @version $Revision: 1.10 $ $Date: 2008-08-19 15:23:23 $
  */
 class ERSLeaderFile {
 
@@ -90,6 +90,10 @@ class ERSLeaderFile {
 
     public BaseRecord getSceneRecord() {
         return _sceneHeaderRecord;
+    }
+
+    public BaseRecord getFacilityRecord() {
+        return _facilityRecord;
     }
 
      /*

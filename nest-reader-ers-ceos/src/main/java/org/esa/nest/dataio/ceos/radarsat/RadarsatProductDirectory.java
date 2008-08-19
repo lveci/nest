@@ -84,28 +84,40 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
                 if(isProductSLC) {
                     String bandName = "i_" + index;
-                    product.addBand(createBand(bandName));
+                    Band bandI = createBand(bandName);
+                    product.addBand(bandI);
                     bandImageFileMap.put(bandName, imageFile);
                     bandName = "q_" + index;
-                    product.addBand(createBand(bandName));
+                    Band bandQ = createBand(bandName);
+                    product.addBand(bandQ);
                     bandImageFileMap.put(bandName, imageFile);
+
+                    createVirtualIntensityBand(product, bandI, bandQ, "_"+index);
                     ++index;
                 } else {
-                    String bandName = "amplitude_" + index++;
-                    product.addBand(createBand(bandName));
+                    String bandName = "amplitude_" + index;
+                    Band band = createBand(bandName);
+                    product.addBand(band);
                     bandImageFileMap.put(bandName, imageFile);
+                    createVirtualIntensityBand(product, band, "_"+index);
+                    ++index;
                 }
             }
         } else {
             RadarsatImageFile imageFile = _imageFiles[0];
             if(isProductSLC) {
-                product.addBand(createBand("i"));
+                Band bandI = createBand("i");
+                product.addBand(bandI);
                 bandImageFileMap.put("i", imageFile);
-                product.addBand(createBand("q"));
+                Band bandQ = createBand("q");
+                product.addBand(bandQ);
                 bandImageFileMap.put("q", imageFile);
+                createVirtualIntensityBand(product, bandI, bandQ, "");
             } else {
-                product.addBand(createBand("amplitude"));
+                Band band = createBand("amplitude");
+                product.addBand(band);
                 bandImageFileMap.put("amplitude", imageFile);
+                createVirtualIntensityBand(product, band, "");
             }
         }
 

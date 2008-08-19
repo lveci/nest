@@ -4,6 +4,7 @@ import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.util.Debug;
 
 /**
  * Created by IntelliJ IDEA.
@@ -13,6 +14,52 @@ import org.esa.beam.framework.datamodel.ProductData;
  */
 public class AbstractMetadata {
 
+    public static final String PRODUCT = "PRODUCT";
+    public static final String PRODUCT_TYPE = "PRODUCT_TYPE";
+    public static final String SPH_DESCRIPTOR = "SPH_DESCRIPTOR";
+    public static final String MISSION = "MISSION";
+    public static final String PROC_TIME = "PROC_TIME";
+    public static final String CYCLE = "CYCLE";
+    public static final String REL_ORBIT = "REL_ORBIT";
+    public static final String ABS_ORBIT = "ABS_ORBIT";
+    public static final String STATE_VECTOR_TIME = "STATE_VECTOR_TIME";
+    public static final String VECTOR_SOURCE = "VECTOR_SOURCE";
+    public static final String TOT_SIZE = "TOT_SIZE";
+
+    // SPH
+    public static final String NUM_SLICES = "NUM_SLICES";
+    public static final String first_line_time = "first_line_time";
+    public static final String last_line_time = "last_line_time";
+    public static final String first_near_lat = "first_near_lat";
+    public static final String first_near_long = "first_near_long";
+    public static final String first_mid_lat = "first_mid_lat";
+    public static final String first_mid_long = "first_mid_long";
+    public static final String first_far_lat = "first_far_lat";
+    public static final String first_far_long = "first_far_long";
+    public static final String last_near_lat = "last_near_lat";
+    public static final String last_near_long = "last_near_long";
+    public static final String last_mid_lat = "last_mid_lat";
+    public static final String last_mid_long = "last_mid_long";
+    public static final String last_far_lat = "last_far_lat";
+    public static final String last_far_long = "last_far_long";
+
+    public static final String SWATH = "SWATH";
+    public static final String PASS = "PASS";
+    public static final String SAMPLE_TYPE = "SAMPLE_TYPE";
+    public static final String mds1_tx_rx_polar = "mds1_tx_rx_polar";
+    public static final String mds2_tx_rx_polar = "mds2_tx_rx_polar";
+    public static final String compression = "compression";
+    public static final String azimuth_looks = "azimuth_looks";
+    public static final String range_looks = "range_looks";
+    public static final String range_spacing = "range_spacing";
+    public static final String azimuth_spacing = "azimuth_spacing";
+    public static final String line_time_interval = "line_time_interval";
+    public static final String data_type = "data_type";
+
+    public static final String num_output_lines = "num_output_lines";
+    public static final String num_samples_per_line = "num_samples_per_line";
+    // SRGR
+    public static final String srgr_flag = "srgr_flag";
 
     /**
      * Abstract common metadata from products to be used uniformly by all operators
@@ -26,53 +73,53 @@ public class AbstractMetadata {
         }
 
         // MPH
-        addAbstractedAttribute(absRoot, "PRODUCT", ProductData.TYPE_ASCII, "", "Product Name");
-        addAbstractedAttribute(absRoot, "PRODUCT_TYPE", ProductData.TYPE_ASCII, "", "Product Type");
-        addAbstractedAttribute(absRoot, "SPH_DESCRIPTOR", ProductData.TYPE_ASCII, "", "");
-        addAbstractedAttribute(absRoot, "MISSION", ProductData.TYPE_ASCII, "", "");
-        addAbstractedAttribute(absRoot, "PROC_TIME", ProductData.TYPE_UTC, "", "");
-        addAbstractedAttribute(absRoot, "CYCLE", ProductData.TYPE_INT32, "", "");
-        addAbstractedAttribute(absRoot, "REL_ORBIT", ProductData.TYPE_INT32, "", "");
-        addAbstractedAttribute(absRoot, "ABS_ORBIT", ProductData.TYPE_INT32, "", "");
-        addAbstractedAttribute(absRoot, "STATE_VECTOR_TIME", ProductData.TYPE_ASCII, "", "");
-        addAbstractedAttribute(absRoot, "VECTOR_SOURCE", ProductData.TYPE_ASCII, "", "");
-        addAbstractedAttribute(absRoot, "TOT_SIZE", ProductData.TYPE_UINT32, "bytes", "");
+        addAbstractedAttribute(absRoot, PRODUCT, ProductData.TYPE_ASCII, "", "Product Name");
+        addAbstractedAttribute(absRoot, PRODUCT_TYPE, ProductData.TYPE_ASCII, "", "Product Type");
+        addAbstractedAttribute(absRoot, SPH_DESCRIPTOR, ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, MISSION, ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, PROC_TIME, ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, CYCLE, ProductData.TYPE_INT32, "", "");
+        addAbstractedAttribute(absRoot, REL_ORBIT, ProductData.TYPE_INT32, "", "");
+        addAbstractedAttribute(absRoot, ABS_ORBIT, ProductData.TYPE_INT32, "", "");
+        addAbstractedAttribute(absRoot, STATE_VECTOR_TIME, ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, VECTOR_SOURCE, ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, TOT_SIZE, ProductData.TYPE_UINT32, "bytes", "");
 
         // SPH
-        addAbstractedAttribute(absRoot, "NUM_SLICES", ProductData.TYPE_INT32, "", "");
-        addAbstractedAttribute(absRoot, "first_line_time", ProductData.TYPE_UTC, "", "");
-        addAbstractedAttribute(absRoot, "last_line_time", ProductData.TYPE_UTC, "", "");
-        addAbstractedAttribute(absRoot, "first_near_lat", ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, "first_near_long", ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, "first_mid_lat", ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, "first_mid_long", ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, "first_far_lat", ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, "first_far_long", ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, "last_near_lat", ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, "last_near_long", ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, "last_mid_lat", ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, "last_mid_long", ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, "last_far_lat", ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, "last_far_long", ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, NUM_SLICES, ProductData.TYPE_INT32, "", "");
+        addAbstractedAttribute(absRoot, first_line_time, ProductData.TYPE_UTC, "", "");
+        addAbstractedAttribute(absRoot, last_line_time, ProductData.TYPE_UTC, "", "");
+        addAbstractedAttribute(absRoot, first_near_lat, ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, first_near_long, ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, first_mid_lat, ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, first_mid_long, ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, first_far_lat, ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, first_far_long, ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, last_near_lat, ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, last_near_long, ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, last_mid_lat, ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, last_mid_long, ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, last_far_lat, ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, last_far_long, ProductData.TYPE_INT32, "deg", "");
         
-        addAbstractedAttribute(absRoot, "SWATH", ProductData.TYPE_ASCII, "", "Swath name");
-        addAbstractedAttribute(absRoot, "PASS", ProductData.TYPE_ASCII, "", "ASCENDING or DESCENDING");
-        addAbstractedAttribute(absRoot, "SAMPLE_TYPE", ProductData.TYPE_ASCII, "", "DETECTED or COMPLEX");
-        addAbstractedAttribute(absRoot, "mds1_tx_rx_polar", ProductData.TYPE_ASCII, "", "");
-        addAbstractedAttribute(absRoot, "mds2_tx_rx_polar", ProductData.TYPE_ASCII, "", "");
-        addAbstractedAttribute(absRoot, "compression", ProductData.TYPE_ASCII, "", "");
-        addAbstractedAttribute(absRoot, "azimuth_looks", ProductData.TYPE_INT32, "", "");
-        addAbstractedAttribute(absRoot, "range_looks", ProductData.TYPE_INT32, "", "");
-        addAbstractedAttribute(absRoot, "range_spacing", ProductData.TYPE_FLOAT64, "m", "Range sample spacing");
-        addAbstractedAttribute(absRoot, "azimuth_spacing", ProductData.TYPE_FLOAT64, "m", "");
-        addAbstractedAttribute(absRoot, "line_time_interval", ProductData.TYPE_FLOAT64, "s", "");
-        addAbstractedAttribute(absRoot, "data_type", ProductData.TYPE_ASCII, "", "");         
+        addAbstractedAttribute(absRoot, SWATH, ProductData.TYPE_ASCII, "", "Swath name");
+        addAbstractedAttribute(absRoot, PASS, ProductData.TYPE_ASCII, "", "ASCENDING or DESCENDING");
+        addAbstractedAttribute(absRoot, SAMPLE_TYPE, ProductData.TYPE_ASCII, "", "DETECTED or COMPLEX");
+        addAbstractedAttribute(absRoot, mds1_tx_rx_polar, ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, mds2_tx_rx_polar, ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, compression, ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, azimuth_looks, ProductData.TYPE_INT32, "", "");
+        addAbstractedAttribute(absRoot, range_looks, ProductData.TYPE_INT32, "", "");
+        addAbstractedAttribute(absRoot, range_spacing, ProductData.TYPE_FLOAT64, "m", "Range sample spacing");
+        addAbstractedAttribute(absRoot, azimuth_spacing, ProductData.TYPE_FLOAT64, "m", "");
+        addAbstractedAttribute(absRoot, line_time_interval, ProductData.TYPE_FLOAT64, "s", "");
+        addAbstractedAttribute(absRoot, data_type, ProductData.TYPE_ASCII, "", "");
 
-        addAbstractedAttribute(absRoot, "num_output_lines", ProductData.TYPE_UINT32, "lines", "");
-        addAbstractedAttribute(absRoot, "num_samples_per_line", ProductData.TYPE_UINT32, "samples", "");
+        addAbstractedAttribute(absRoot, num_output_lines, ProductData.TYPE_UINT32, "lines", "");
+        addAbstractedAttribute(absRoot, num_samples_per_line, ProductData.TYPE_UINT32, "samples", "");
 
         // SRGR
-        addAbstractedAttribute(absRoot, "srgr_flag", ProductData.TYPE_UINT8, "flag", "SRGR applied");
+        addAbstractedAttribute(absRoot, srgr_flag, ProductData.TYPE_UINT8, "flag", "SRGR applied");
 
     }
 
@@ -103,7 +150,39 @@ public class AbstractMetadata {
      */
     public static void setAttributeString(MetadataElement dest, String tag, String value) {
         MetadataAttribute attrib = dest.getAttribute(tag);
-        if(attrib != null)
+        if(attrib == null)
+            System.out.println(tag + " not found in metadata");
+        if(value == null)
+            System.out.println(tag + " metadata value is null");
+        if(attrib != null && value != null)
             attrib.getData().setElems(value);
+    }
+
+    /**
+     * Sets an attribute as an int
+     * @param dest the destination element
+     * @param tag the name of the attribute
+     * @param value the string value
+     */
+    public static void setAttribute(MetadataElement dest, String tag, int value) {
+        MetadataAttribute attrib = dest.getAttribute(tag);
+        if(attrib == null)
+            System.out.println(tag + " not found in metadata");
+        if(attrib != null)
+            attrib.getData().setElemInt(value);
+    }
+
+    /**
+     * Sets an attribute as a double
+     * @param dest the destination element
+     * @param tag the name of the attribute
+     * @param value the string value
+     */
+    public static void setAttribute(MetadataElement dest, String tag, double value) {
+        MetadataAttribute attrib = dest.getAttribute(tag);
+        if(attrib == null)
+            System.out.println(tag + " not found in metadata");
+        if(attrib != null)
+            attrib.getData().setElemDouble(value);
     }
 }
