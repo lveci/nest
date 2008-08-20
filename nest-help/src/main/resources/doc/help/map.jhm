@@ -103,7 +103,7 @@
 	<mapID target="UnderSampleOp" url="operators/UnderSampleOp.html"/>
 	<mapID target="WarpOp" url="operators/WarpOp.html"/>	
 	<mapID target="WSSDeburstOp" url="operators/WSSDeburstOp.html"/>
-	<mapID target="WSSMosiacOp" url="operators/WSSMosiacOp.html"/>
+	<mapID target="WSSMosaicOp" url="operators/WSSMosaicOp.html"/>
 	
 	<!--Tutorials-->
 	<mapID target="remote_sensing" url="tutorials/remote_sensing.html"/>

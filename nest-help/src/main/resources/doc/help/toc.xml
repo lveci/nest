@@ -124,7 +124,7 @@
 			<tocitem text="Under Sample" target="UnderSampleOp"/>
 			<tocitem text="Warp" target="WarpOp"/>
 			<tocitem text="WSS Deburst" target="WSSDeburstOp"/>
-			<tocitem text="WSS Mosaic" target="WSSMosiacOp"/>
+			<tocitem text="WSS Mosaic" target="WSSMosaicOp"/>
 		</tocitem>		
 	</tocitem>
 	
