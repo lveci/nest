@@ -35,7 +35,7 @@ public class CeosDB {
          }
      }
 
-    private Map metadata;
+    private Map metaMap;
     private org.jdom.Document xmlDoc;
     private final String definitionFile;
 
@@ -49,11 +49,11 @@ public class CeosDB {
         } catch(Exception e) {
             System.out.println(e.toString());
         }
-        metadata = new HashMap(100);
+        metaMap = new HashMap(100);
     }
 
     public Map getMetadataElement() {
-        return metadata;
+        return metaMap;
     }
 
     public void readRecord(CeosFileReader reader) throws IOException, IllegalCeosFormatException
@@ -83,39 +83,38 @@ public class CeosDB {
 
                         //String tmp = reader.readAn(num);
                         //System.out.print(" = " + tmp);
-                        //metadata.put(name , tmp);
-                        metadata.put(name , reader.readAn(num));
+                        //metaMap.put(name , tmp);
+                        metaMap.put(name , reader.readAn(num));
                     } else if(type == CeosDBTypes.In.value()) {
 
                         //int tmp = (int)reader.readIn(num);
                         //System.out.print(" = " + tmp);
-                        //metadata.put(name , tmp);
-                        metadata.put(name , (int)reader.readIn(num));
+                        //metaMap.put(name , tmp);
+                        metaMap.put(name , (int)reader.readIn(num));
                     } else if(type == CeosDBTypes.B1.value()) {
 
                         //int tmp = reader.readB1();
                         //System.out.print(" = " + tmp);
-                        //metadata.put(name , tmp);
-                        metadata.put(name , reader.readB1());
+                        //metaMap.put(name , tmp);
+                        metaMap.put(name , reader.readB1());
                     } else if(type == CeosDBTypes.B2.value()) {
 
                         //int tmp = reader.readB2();
                         //System.out.print(" = " + tmp);
-                        //metadata.put(name , tmp);
-                        metadata.put(name , reader.readB2());
-
+                        //metaMap.put(name , tmp);
+                        metaMap.put(name , reader.readB2());
                     } else if(type == CeosDBTypes.B4.value()) {
 
                         //int tmp = reader.readB4();
                         //System.out.print(" = " + tmp);
-                        //metadata.put(name , tmp);
-                        metadata.put(name , reader.readB4());
+                        //metaMap.put(name , tmp);
+                        metaMap.put(name , reader.readB4());
                     } else if(type == CeosDBTypes.Fn.value()) {
 
                         //double tmp = reader.readFn(num);
                         //System.out.print(" = " + tmp);
-                        //metadata.put(name , tmp);
-                        metadata.put(name , reader.readFn(num));
+                        //metaMap.put(name , tmp);
+                        metaMap.put(name , reader.readFn(num));
                     } else if(type == CeosDBTypes.Debug.value()) {
 
                         for(int i=0; i < num; ++i) {
@@ -141,14 +140,14 @@ public class CeosDB {
     }
 
     public String getAttributeString(String name) {
-        return (String)metadata.get(name);
+        return (String) metaMap.get(name);
     }
     
     public int getAttributeInt(String name) {
-        return (Integer)metadata.get(name);
+        return (Integer) metaMap.get(name);
     }
 
     public Double getAttributeDouble(String name) {
-        return (Double)metadata.get(name);
+        return (Double) metaMap.get(name);
     }
 }

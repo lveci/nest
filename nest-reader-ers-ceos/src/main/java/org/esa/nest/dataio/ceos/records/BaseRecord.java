@@ -1,5 +1,5 @@
 /*
- * $Id: BaseRecord.java,v 1.7 2008-08-14 17:00:02 lveci Exp $
+ * $Id: BaseRecord.java,v 1.8 2008-08-19 20:53:18 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -54,6 +54,9 @@ public class BaseRecord {
         db.readRecord(reader);
     }
 
+    /*
+    Quick read using exiting ceosDB for ImageRecord
+     */
     public BaseRecord(final CeosFileReader reader, final long startPos, CeosDB db) throws
                                                                         IOException,
                                                                         IllegalCeosFormatException {
@@ -98,7 +101,7 @@ public class BaseRecord {
     }
 
     public long getAbsolutPosition(final long relativePosition) {
-        return getStartPos() + relativePosition;
+        return _startPos + relativePosition;
     }
 
     public void assignMetadataTo(final MetadataElement elem) {
@@ -123,12 +126,6 @@ public class BaseRecord {
         }
     }
 
-    public static void addIntAttributte(final MetadataElement elem, final String name, final int value) {
-        final ProductData data = ProductData.createInstance(ProductData.TYPE_INT8);
-        data.setElemInt(value);
-        elem.addAttribute(new MetadataAttribute(name, data, true));
-    }
-
     protected final long[] readLongs(final int numLongs, final int relativePosition) throws
                                                                                      IOException,
                                                                                      IllegalCeosFormatException {
@@ -138,9 +135,10 @@ public class BaseRecord {
         return coeffs;
     }
 
-    protected final long[][] readLongs(final int numArrays, final int numLongs, final int relativePosition) throws
-                                                                                                            IOException,
-                                                                                                            IllegalCeosFormatException {
+    protected final long[][] readLongs(final int numArrays, final int numLongs,
+                                       final int relativePosition) throws
+                                                                         IOException,
+                                                                         IllegalCeosFormatException {
         final long[][] longs = new long[numArrays][];
         _reader.seek(getAbsolutPosition(relativePosition));
         for (int i = 0; i < longs.length; i++) {
