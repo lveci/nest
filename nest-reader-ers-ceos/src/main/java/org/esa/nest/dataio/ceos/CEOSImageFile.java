@@ -7,7 +7,7 @@ import org.esa.nest.dataio.ceos.records.ImageRecord;
 import java.io.IOException;
 
 /*
- * $Id: CEOSImageFile.java,v 1.1 2008-07-23 19:47:17 lveci Exp $
+ * $Id: CEOSImageFile.java,v 1.2 2008-08-19 21:05:51 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,7 +27,7 @@ import java.io.IOException;
 /**
  * This class represents an image file of an ERS product.
  *
- * @version $Revision: 1.1 $ $Date: 2008-07-23 19:47:17 $
+ * @version $Revision: 1.2 $ $Date: 2008-08-19 21:05:51 $
  */
 public abstract class CEOSImageFile {
 
@@ -48,7 +48,7 @@ public abstract class CEOSImageFile {
                                                                                             IllegalCeosFormatException
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
-        ImageRecord imageRecord;
+        //ImageRecord imageRecord;
 
         int x = sourceOffsetX * 2;
 
@@ -62,8 +62,8 @@ public abstract class CEOSImageFile {
                 }
 
                 // Read source line
-                imageRecord = getImageRecord(y);
-                _ceosReader.seek(imageRecord.getImageDataStart() + x);
+                //imageRecord = getImageRecord(y);
+                _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
                 _ceosReader.readB2(srcLine);
 
                 // Copy source line into destination buffer
@@ -94,7 +94,7 @@ public abstract class CEOSImageFile {
                                    ProgressMonitor pm) throws IOException, IllegalCeosFormatException
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
-        ImageRecord imageRecord;
+        //ImageRecord imageRecord;
 
         int x = sourceOffsetX * 2;
 
@@ -108,8 +108,8 @@ public abstract class CEOSImageFile {
                 }
 
                 // Read source line
-                imageRecord = getImageRecord(y);
-                _ceosReader.seek(imageRecord.getImageDataStart() + x);
+                //imageRecord = getImageRecord(y);
+                _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
                 _ceosReader.readB2(srcLine);
 
                 // Copy source line into destination buffer
