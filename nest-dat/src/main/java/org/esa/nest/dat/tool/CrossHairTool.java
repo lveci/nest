@@ -1,5 +1,5 @@
 /*
- * $Id: CrossHairTool.java,v 1.1 2008-07-23 19:48:00 lveci Exp $
+ * $Id: CrossHairTool.java,v 1.2 2008-08-21 11:53:28 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -99,14 +99,10 @@ public class CrossHairTool extends AbstractTool {
     }
 
     private void handleInputEvent(ToolInputEvent e, Delegator method) {
-        final GraphicsPane graphicsPane = (GraphicsPane) e.getComponent();
-        final LayerModel layerModel = graphicsPane.getLayerModel();
-        for (int i = 0; i < layerModel.getLayerCount(); i++) {
-            final Layer layer = layerModel.getLayer(i);
-            AbstractTool delegate = getDelegateTool(layer);
-            if (delegate != null) {
-                method.execute(delegate, e);
-            }
+        final ProductSceneView psv = (ProductSceneView)getDrawingEditor();
+        final AbstractTool[] tools = psv.getSelectToolDelegates();
+        for (AbstractTool tool : tools) {
+            method.execute(tool, e);
         }
     }
 
