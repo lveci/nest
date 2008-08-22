@@ -15,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Enumeration;
+import java.io.File;
 
 /**
  * A tree-view component for Projects
@@ -105,9 +106,9 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                 addSeparator(popup);
                 createMenuItem(popup, "Expand All");
             }
-            if(folder.getFolderType() == ProjectSubFolder.FolderType.STACK) {
+            if(folder.getFolderType() == ProjectSubFolder.FolderType.PRODUCTSET) {
                 addSeparator(popup);
-                createMenuItem(popup, "New Stack...");
+                createMenuItem(popup, "New ProductSet...");
             } else if(folder.getFolderType() == ProjectSubFolder.FolderType.GRAPH) {
                 addSeparator(popup);
                 createMenuItem(popup, "New Graph...");
@@ -183,9 +184,9 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
             project.CloseProject();
         } else if(e.getActionCommand().equals("Refresh Project")) {
             project.refreshProjectTree();
-        } else if(e.getActionCommand().equals("New Stack...")) {
+        } else if(e.getActionCommand().equals("New ProductSet...")) {
             ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
-            project.createNewStack(subFolder);
+            project.createNewProductSet(subFolder);
         } else if(e.getActionCommand().equals("New Graph...")) {
             ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
             Project.createNewGraph(subFolder);
@@ -201,9 +202,9 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
      * If expand is true, expands all nodes in the tree.
      * Otherwise, collapses all nodes in the tree.
      *
-     * @param tree
-     * @param parent
-     * @param expand
+     * @param tree the tree
+     * @param parent the parent path
+     * @param expand or collapse
      */
     private static void expandAll(JTree tree, TreePath parent, boolean expand) {
         // Traverse children
@@ -345,11 +346,19 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
             TreePath path = tree.getSelectionPath();
 
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+            DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) node.getParent();
+
             Object context = node.getUserObject();
             if (context != null) {
                 if(context instanceof ProjectSubFolder.ProjectFile) {
+                    ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
                     ProjectSubFolder.ProjectFile file = (ProjectSubFolder.ProjectFile)context;
-                    return new StringSelection(file.getFile().getAbsolutePath());
+
+                    if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.PRODUCTSET) {
+                        return new StringSelection(ProductSet.GetListAsString(file.getFile()));    
+                    } else {
+                        return new StringSelection(file.getFile().getAbsolutePath());
+                    }
                 } else if(context instanceof ProjectSubFolder) {
                     ProjectSubFolder parentFolder = (ProjectSubFolder) context;
 
@@ -360,7 +369,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
         }
 
         /**
-         * Perform the actual import.  This demo only supports drag and drop.
+         * Perform the actual import.  This only supports drag and drop.
          */
         public boolean importData(TransferHandler.TransferSupport info) {
             if (!info.isDrop()) {
@@ -386,7 +395,18 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
 
             // Perform the actual import.
             for (String value : values) {
+                TreePath dropPath = tree.getDropLocation().getPath();
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) dropPath.getLastPathComponent();
+                DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) node.getParent();
 
+                Object o = node.getUserObject();
+                if (o instanceof ProjectSubFolder.ProjectFile) {
+                    ProjectSubFolder.ProjectFile projFile = (ProjectSubFolder.ProjectFile)o;
+                    ProjectSubFolder projSubFolder = (ProjectSubFolder)parentNode.getUserObject();
+                    if(projSubFolder.getFolderType() == ProjectSubFolder.FolderType.PRODUCTSET) {
+                        ProductSet.AddProduct(projFile.getFile(), new File(value));
+                    }
+                }
             }
             return true;
         }

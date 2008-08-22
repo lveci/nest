@@ -39,7 +39,7 @@ public class TestProject extends TestCase {
 
         assertEquals(files[0].getName(), "Graphs");
         assertEquals(files[1].getName(), "Processed Products");
-        assertEquals(files[2].getName(), "Stacks");
+        assertEquals(files[2].getName(), "ProductSets");
 
     }
 

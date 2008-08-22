@@ -24,7 +24,7 @@ public class ProjectSubFolder {
     private boolean createdByUser = false;
     private FolderType folderType;
 
-    enum FolderType { ROOT, STACK, GRAPH, PRODUCT }
+    enum FolderType { ROOT, PRODUCTSET, GRAPH, PRODUCT }
 
     ProjectSubFolder(File newPath, String name, boolean isPhysical, FolderType type) {
         path = newPath;

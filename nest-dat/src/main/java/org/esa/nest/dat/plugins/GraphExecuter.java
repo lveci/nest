@@ -264,7 +264,7 @@ public class GraphExecuter extends Observable {
 
         Node[] nodes = graph.getNodes();
         for(Node n : nodes) {
-            if(n.getOperatorName().equalsIgnoreCase("Stack-Reader")) {
+            if(n.getOperatorName().equalsIgnoreCase("ProductSet-Reader")) {
                 StackNode stackNode = new StackNode();
                 stackNode.nodeID = n.getId();
 
