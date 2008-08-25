@@ -49,7 +49,7 @@ class ERSLeaderFile {
         _reader.seek(_platformPositionRecord.getAbsolutPosition(_platformPositionRecord.getRecordLength()));
         _facilityRecord = new BaseRecord(_reader, -1, mission, facility_recordDefinitionFile);
         _reader.seek(_facilityRecord.getAbsolutPosition(_facilityRecord.getRecordLength()));
-        if(_reader.getCurrentPos() < _reader.getLength())
+        if(_reader.getCurrentPos() + 4000 < _reader.getLength())
             _facilityRelatedPCSRecord = new BaseRecord(_reader, -1, mission, facilityRelatedPCS_recordDefinitionFile);
         else
             _facilityRelatedPCSRecord = null;
