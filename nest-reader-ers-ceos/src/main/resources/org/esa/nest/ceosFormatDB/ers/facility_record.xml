@@ -136,5 +136,44 @@
 	<rec name="Number of input raw data lines" type="2" num="8"/>
 	<rec name="Initial Doppler ambiguity number" type="2" num="4"/>
 	
+	<rec name="Pulse width of the chirp CCF" type="5" num="16"/>
+	<rec name="First sidelobe of the chirp CCF" type="5" num="16"/>
+	<rec name="ISLR of the chirp CCF" type="5" num="16"/>
+	<rec name="Mean of input I data" type="5" num="16"/>
+	<rec name="Mean of input Q data" type="5" num="16"/>
+	<rec name="Standard deviation of input I data" type="5" num="16"/>
+	<rec name="Standard deviation of input Q data" type="5" num="16"/>
+	<rec name="Doppler ambiguity confidence threshold I" type="5" num="16"/>
+	<rec name="Doppler ambiguity confidence threshold Q" type="5" num="16"/>
+	<rec name="Mean of output data" type="5" num="16"/>
+	<rec name="Standard deviation of output data" type="5" num="16"/>
+	<rec name="Satellite binary time of first range line" type="5" num="16"/>
+	<rec name="Number of valid pixels per range line" type="2" num="4"/>
+	<rec name="Number of range samples" type="2" num="4"/>
+	<rec name="IQ gain imbalance - Lower bound" type="5" num="16"/>
+	<rec name="IQ gain imbalance - Upper bound" type="5" num="16"/>
+	<rec name="IQ quadrature departure - Lower bound" type="5" num="16"/>
+	<rec name="IQ quadrature departure - Upper bound" type="5" num="16"/>
+	<rec name="3-dB look bandwidth" type="5" num="16"/>
+	<rec name="3-dB processed Doppler bandwidth" type="5" num="16"/>
+	<rec name="Range spreading loss compensation flag" type="2" num="4"/>
+	<rec name="Datation flag" type="2" num="1"/>
+	<rec name="Maximum error of range line timing" type="2" num="7"/>
+	<rec name="Format number of range line" type="2" num="7"/>
+	<rec name="Automatic look scalar gain flag" type="2" num="1"/>
+	<rec name="Maximum value of look scalar gain" type="2" num="4"/>
+	<rec name="Replica normalisation method flag" type="2" num="4"/>
+	
+	<rec name="coefficients of the ground range to slant range conversion polynomial 1" type="5" num="20"/>
+	<rec name="coefficients of the ground range to slant range conversion polynomial 2" type="5" num="20"/>
+	<rec name="coefficients of the ground range to slant range conversion polynomial 3" type="5" num="20"/>
+	<rec name="coefficients of the ground range to slant range conversion polynomial 4" type="5" num="20"/>
+	
+	<rec name="coefficients of the antenna elevation pattern polynomial 1" type="5" num="20"/>
+	<rec name="coefficients of the antenna elevation pattern polynomial 2" type="5" num="20"/>
+	<rec name="coefficients of the antenna elevation pattern polynomial 3" type="5" num="20"/>
+	<rec name="coefficients of the antenna elevation pattern polynomial 4" type="5" num="20"/>
+	<rec name="coefficients of the antenna elevation pattern polynomial 5" type="5" num="20"/>
+	<rec name="Range time of origin of antenna pattern polynomial" type="5" num="16"/>
 	
 </ceos>

@@ -59,6 +59,7 @@ public class CeosDB {
     public void readRecord(CeosFileReader reader) throws IOException, IllegalCeosFormatException
     {
         Element root = xmlDoc.getRootElement();
+        String name = "";
 
         try {
             
@@ -71,7 +72,7 @@ public class CeosDB {
                 Attribute numAttrib = child.getAttribute("num");
                 if(nameAttrib != null && typeAttrib != null && numAttrib != null) {
 
-                    String name = nameAttrib.getValue();
+                    name = nameAttrib.getValue();
                     int type = Integer.parseInt(typeAttrib.getValue());
                     int num = Integer.parseInt(numAttrib.getValue());
 
@@ -122,6 +123,7 @@ public class CeosDB {
                             if(!tmp.isEmpty() && !tmp.equals(" "))
                                 System.out.print(tmp);
                         }
+                        System.out.println();
                     } else {
                         throw new IllegalCeosFormatException("Unknown type " + type, reader.getCurrentPos());
                     }
@@ -133,7 +135,7 @@ public class CeosDB {
         //System.out.println();
 
         } catch(IllegalCeosFormatException e) {
-            System.out.println(e.toString() + " in " + definitionFile);
+            System.out.println(e.toString() + " for "+ name + " in " + definitionFile);
            
             throw e;
         }

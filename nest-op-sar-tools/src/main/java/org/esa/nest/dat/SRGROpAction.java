@@ -23,8 +23,4 @@ public class SRGROpAction extends AbstractVisatAction {
 
     }
 
-    @Override
-    public void updateState(final CommandEvent event) {
-        setEnabled(true);
-    }
 }
