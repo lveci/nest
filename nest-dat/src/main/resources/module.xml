@@ -124,7 +124,7 @@
 
       <action>
             <id>openVector</id>
-            <class>org.esa.beam.visat.actions.OpenAction</class>
+            <class>org.esa.nest.dat.actions.OpenVectorAction</class>
             <parent>file</parent>
             <text>Open Vector Dataset</text>
             <mnemonic>V</mnemonic>

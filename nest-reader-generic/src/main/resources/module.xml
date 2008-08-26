@@ -19,16 +19,15 @@
 
     <extension point="beam-ui:actions">
         <action>
-            <id>importERSCEOSProduct</id>
+            <id>importImageIO</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
-            <formatName>ERS CEOS</formatName>
+            <formatName>ImageIO</formatName>
+            <readerPlugin>org.esa.nest.dataio.ImageIOReaderPlugIn</readerPlugin>
             <useAllFileFilter>true</useAllFileFilter>
-            <mnemonic>R</mnemonic>
-            <shortDescr>Import an ERS CEOS data product or product subset.</shortDescr>
-            <description>Import an ERS CEOS data product or product subset.</description>
+            <shortDescr>Import an ImageIO supported file format</shortDescr>
+            <description>Import an ImageIO supported file format</description>
             <largeIcon>icons/Import24.gif</largeIcon>
-            <helpId>importPalsarProduct</helpId>
-            <placeAfter>importNetcdfProduct</placeAfter>
+            <helpId>importImageIO</helpId>
         </action>
 
     </extension>

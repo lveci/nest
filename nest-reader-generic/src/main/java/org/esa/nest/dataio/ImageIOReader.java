@@ -8,6 +8,7 @@ import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.ImageInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -82,6 +83,9 @@ public class ImageIOReader extends AbstractProductReader {
         final File inputFile = getFileFromInput(getInput());
 
         stream = ImageIO.createImageOutputStream(inputFile);
+        if(stream == null)
+            throw new IOException("Unable to open " + inputFile.toString());
+        
         Iterator iter = ImageIO.getImageReaders(stream);
         reader = (ImageReader) iter.next();
         param = reader.getDefaultReadParam();
@@ -153,7 +157,7 @@ public class ImageIOReader extends AbstractProductReader {
      * {@inheritDoc}
      */
     @Override
-    protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight,
+    protected synchronized void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight,
                                           int sourceStepX, int sourceStepY, Band destBand, int destOffsetX,
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {

@@ -226,7 +226,7 @@ public final class DatApp extends VisatApp {
                 "gcpTool",
                 "org.esa.beam.visat.toolviews.pin.GcpManagerToolView.showCmd",
                 null,
-                //"drawLineTool",
+                "drawLineTool",
                 "drawRectangleTool",
                 "drawEllipseTool",
                 //"drawPolylineTool",

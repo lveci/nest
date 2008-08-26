@@ -5,9 +5,10 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.ceos.records.ImageRecord;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /*
- * $Id: CEOSImageFile.java,v 1.2 2008-08-19 21:05:51 lveci Exp $
+ * $Id: CEOSImageFile.java,v 1.3 2008-08-26 17:00:57 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,7 +28,7 @@ import java.io.IOException;
 /**
  * This class represents an image file of an ERS product.
  *
- * @version $Revision: 1.2 $ $Date: 2008-08-19 21:05:51 $
+ * @version $Revision: 1.3 $ $Date: 2008-08-26 17:00:57 $
  */
 public abstract class CEOSImageFile {
 

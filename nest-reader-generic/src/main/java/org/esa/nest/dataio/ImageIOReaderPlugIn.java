@@ -132,12 +132,11 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
         return PLUGIN_DESCRIPTION;
     }
 
-    public class FileFilter extends BeamFileFilter {
+    public static class FileFilter extends BeamFileFilter {
 
         public FileFilter() {
-            super();
-            setFormatName(FORMAT_NAMES[0]);
-            setDescription(PLUGIN_DESCRIPTION);
+            super(FORMAT_NAMES[0], FORMAT_FILE_EXTENSIONS, PLUGIN_DESCRIPTION);
+
         }
 
         /**
@@ -151,7 +150,7 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
          */
         public boolean accept(final File file) {
             if (super.accept(file)) {
-                if (file.isDirectory()) {
+                if (file.isDirectory() || checkExtension(file)) {
                     return true;
                 }
             }
