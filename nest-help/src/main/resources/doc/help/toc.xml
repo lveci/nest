@@ -41,10 +41,15 @@
 		<tocitem text="Import">
             <tocitem text="Import ENVISAT Data Product" target="importEnvisatProduct"/>
             <tocitem text="Import ERS1/2 Data Product" target="importErsProduct"/>
+			<tocitem text="Import ERS1/2 CEOS Data Product" target="ImportERSCeos"/>
+			<tocitem text="Import JERS CEOS Data Product" target="ImportJERSCeos"/>
+			<tocitem text="Import Radarsat-1 Data Product" target="ImportRadarsat1"/>
+			<tocitem text="Import ImageIO Data Product" target="ImportImageIO"/>
             <tocitem text="Import BEAM-DIMAP Data Product" target="importDimapProduct"/>
             <tocitem text="Import LANDSAT 5 TM Data Product" target="importLandsatTMProduct"/>
             <tocitem text="Import NetCDF Data Product" target="importNetCDF"/>
             <tocitem text="Import GETASSE30 Tile" target="importGETASSE30"/>
+			<tocitem text="Import ACE DEM Tile" target="importACE"/>
 			<tocitem text="Import Transect Data" target="importTransectData"/>
 			
 			<tocitem text="Product Subset Dialog" target="subsetDialog"/>

@@ -36,7 +36,12 @@
     <mapID target="importDimapProduct" url="general/BeamDimapFormat.html"/>
     <mapID target="importEnvisatProduct" url="visat/ImportEnvisat.html"/>
     <mapID target="importErsProduct" url="visat/ImportErs.html"/>
-    <mapID target="importGETASSE30" url="visat/ImportGETASSE30.html"/>
+	<mapID target="ImportERSCeos" url="visat/ImportERSCeos.html"/>
+	<mapID target="ImportJERSCeos" url="visat/ImportJERSCeos.html"/>
+	<mapID target="ImportRadarsat1" url="visat/ImportRadarsat1.html"/>
+	<mapID target="ImportImageIO" url="visat/ImportImageIO.html"/>
+    <mapID target="importGETASSE30" url="visat/GETASSE30ElevationModel.html"/>
+	<mapID target="importACE" url="visat/ImportACE.html"/>
     <mapID target="importTransectData" url="visat/ImportTransectData.html"/>
     <mapID target="importLandsatTMProduct" url="visat/ImportLandsatTM.html"/>
     <mapID target="importNetCDF" url="visat/ImportNetCDF.html"/>
