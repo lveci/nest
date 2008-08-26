@@ -62,10 +62,13 @@ public class GraphNode {
         for (int i = 0; i < count; ++i) {
             Xpp3Dom child = config.getChild(i);
             String name = child.getName();
+            String value = child.getValue();
+            if(name == null || value == null)
+                continue;
 
             try {
                 Converter converter = getConverter(valueContainer, name);
-                parameterMap.put(name, converter.parse(child.getValue()));
+                parameterMap.put(name, converter.parse(value));
             } catch(ConversionException e) {
                 throw new IllegalArgumentException(name);
             }

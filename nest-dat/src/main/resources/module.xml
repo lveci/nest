@@ -184,7 +184,7 @@
         <action>
             <id>openGraphBuilderDialog</id>
             <class>org.esa.nest.dat.actions.OpenGraphBuilderDialogAction</class>
-            <parent>tools</parent>
+            <parent>graphs</parent>
             <text>Graph Builder</text>
             <mnemonic>G</mnemonic>
             <separatorAfter>true</separatorAfter>

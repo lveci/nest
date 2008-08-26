@@ -9,10 +9,15 @@ import org.esa.beam.framework.ui.*;
 import org.esa.beam.framework.ui.application.ApplicationDescriptor;
 import org.esa.beam.framework.ui.application.ToolViewDescriptor;
 import org.esa.beam.visat.*;
+import org.esa.nest.dat.plugins.GraphBuilderDialog;
 
+import javax.swing.*;
 import java.beans.PropertyVetoException;
 import java.util.List;
 import java.util.ArrayList;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.io.File;
 
 public final class DatApp extends VisatApp {
     public DatApp(ApplicationDescriptor applicationDescriptor) {
@@ -59,6 +64,8 @@ public final class DatApp extends VisatApp {
             getMainFrame().getDockableBarManager().addDockableBar(analysisToolBar);
             pm.worked(1);
 
+            updateGraphMenu();
+            
            /* if (ProductSceneImage.isInTiledImagingMode()) {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
@@ -136,6 +143,7 @@ public final class DatApp extends VisatApp {
         menuBar.add(createJMenu("data", "Analysis", 'A')); /*I18N*/
         menuBar.add(createJMenu("tools", "Utilities", 'T')); /*I18N*/
         menuBar.add(createJMenu("sartools", "SAR Tools", 'S')); /*I18N*/
+        menuBar.add(createJMenu("graphs", "Graphs", 'R')); /*I18N*/
         menuBar.add(createJMenu("geometry", "Geometry", 'G')); /*I18N*/
         menuBar.add(createJMenu("insar", "InSAR", 'I')); /*I18N*/
         menuBar.add(createJMenu("exploitation", "Exploitation", 'E')); /*I18N*/
@@ -144,6 +152,44 @@ public final class DatApp extends VisatApp {
 
         return menuBar;
     }
+
+    private void updateGraphMenu() {
+        final JMenu menu = findMenu("graphs");
+        if (menu == null) {
+            return;
+        }
+
+        final String homeUrl = System.getProperty("nest.home", ".");
+        File graphPath = new File(homeUrl, File.separator + "graphs");
+        if(!graphPath.exists()) return;
+
+        createGraphMenu(menu, graphPath);
+    }
+
+    private static void createGraphMenu(JMenu menu, File path) {
+        File[] filesList = path.listFiles();
+        if(filesList == null || filesList.length == 0) return;
+
+        for (final File file : filesList) {
+            if(file.isDirectory() && !file.isHidden()) {
+                JMenu subMenu = new JMenu(file.getName());
+                menu.add(subMenu);
+                createGraphMenu(subMenu, file);
+            } else if(file.getName().toLowerCase().endsWith(".xml")) {
+                final JMenuItem item = new JMenuItem(file.getName());
+                item.addActionListener(new ActionListener() {
+
+                    public void actionPerformed(final ActionEvent e) {
+                        GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "Graph Builder", "graph_builder");
+                        dialog.show();
+                        dialog.LoadGraph(file);
+                    }
+                });
+                menu.add(item);
+            }
+        }
+    }
+
 
     @Override
     protected CommandBar createAnalysisToolBar() {
