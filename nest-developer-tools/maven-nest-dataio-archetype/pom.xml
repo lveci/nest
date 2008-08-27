@@ -7,4 +7,28 @@
     <name>Maven 2 NEST Data I/O Archetype Plugin</name>
     <description>A Maven 2 archetype for projects using NEST Data I/O framework.</description>
     <packaging>maven-plugin</packaging>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.4</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.bc.ceres</groupId>
+            <artifactId>ceres-core</artifactId>
+            <version>0.8-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-core</artifactId>
+            <version>4.5-SNAPSHOT</version>
+        </dependency>
+
+    </dependencies>
+
 </project>
