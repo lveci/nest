@@ -34,9 +34,29 @@ import java.util.Vector;
 import java.io.File;
 
 /**
- * The sample operator implementation for an algorithm
- * that can compute bands independently of each other.
+ * Image co-registration is fundamental for Interferometry SAR (InSAR) imaging and its applications, such as
+ * DEM map generation and analysis. To obtain a high quality InSAR image, the individual complex images need
+ * to be co-registered to sub-pixel accuracy. The co-registration is accomplished through an alignment of a
+ * master image with a slave image.
+ *
+ * To achieve the alignment of master and slave images, the first step is to generate a set of uniformly
+ * spaced ground control points (GCPs) in the master image, along with the corresponding GCPs in the slave
+ * image. Details of the generation of the GCP pairs are given in GCPSelectionOperator. The next step is to
+ * construct a warp distortion function from the computed GCP pairs and generate co-registered slave image.
+ *
+ * This operator computes the warp function from the master-slave GCP pairs for given polynomial order.
+ * Basically coefficients of two polynomials are determined from the GCP pairs with each polynomial for
+ * one coordinate of the image pixel. With the warp function determined, the co-registered image can be
+ * obtained by mapping slave image pixels to master image pixels. In particular, for each pixel position in
+ * the master image, warp function produces its corresponding pixel position in the slave image, and the
+ * pixel value is computed through interpolation. The following interpolation methods are available:
+ *
+ * 1. Nearest-neighbour interpolation
+ * 2. Bilinear interpolation
+ * 3. Bicubic interpolation
+ * 4. Bicubic2 interpolation 
  */
+
 @OperatorMetadata(alias="WARP-Creation",
                   description = "Create WARP Function And Get Co-registrated Images")
 public class WARPOperator extends Operator {
@@ -124,13 +144,17 @@ public class WARPOperator extends Operator {
 
         // determine interpolation method for warp function
         if (interpolationMethod.equals(NEAREST_NEIGHBOR)) {
-            interp = new InterpolationNearest();
+//            interp = new InterpolationNearest();
+            interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
         } else if (interpolationMethod.equals(BILINEAR)) {
-            interp = new InterpolationBilinear();
+//            interp = new InterpolationBilinear();
+            interp = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
         } else if (interpolationMethod.equals(BICUBIC)) {
-            interp = new InterpolationBicubic(8);
+//            interp = new InterpolationBicubic(8);
+            interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
         } else if (interpolationMethod.equals(BICUBIC2)) {
-            interp = new InterpolationBicubic2(8);
+//            interp = new InterpolationBicubic2(8);
+            interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC_2);
         }
 
         targetProduct.setPreferredTileSize(slaveProduct.getSceneRasterWidth(), 256);

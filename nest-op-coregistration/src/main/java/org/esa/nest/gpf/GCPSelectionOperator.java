@@ -33,9 +33,23 @@ import java.awt.image.renderable.ParameterBlock;
 import java.util.Hashtable;
 
 /**
- * The sample operator implementation for an algorithm
- * that can compute bands independently of each other.
+ * Image co-registration is fundamental for Interferometry SAR (InSAR) imaging and its applications, such as
+ * DEM map generation and analysis. To obtain a high quality InSAR image, the individual complex images need
+ * to be co-registered to sub-pixel accuracy. The co-registration is accomplished through an alignment of a
+ * master image with a slave image.
+ *
+ * To achieve the alignment of master and slave images, the first step is to generate a set of uniformly
+ * spaced ground control points (GCPs) in the master image, along with the corresponding GCPs in the slave
+ * image. These GCP pairs are used in constructing a warp distortion function, which establishes a map
+ * between pixels in the slave and master images.
+ *
+ * This operator computes the slave GCPS for given master GCPs. First the geometric information of the
+ * master GCPs is used in determining the initial positions of the slave GCPs. Then a cross-correlation
+ * is performed between imagettes surrounding each master GCP and its corresponding slave GCP to obtain
+ * accurate slave GCP position. This step is repeated several times until the slave GCP position is
+ * accurate enough.
  */
+
 @OperatorMetadata(alias="GCP-Selection",
                   description = "Automatic Selection of Ground Control Points")
 public class GCPSelectionOperator extends Operator {

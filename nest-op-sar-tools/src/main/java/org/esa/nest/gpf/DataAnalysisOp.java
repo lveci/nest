@@ -30,7 +30,13 @@ import java.awt.*;
 import java.util.HashMap;
 
 /**
- * Generate Data Analysis Statistics
+ * The operator evaluates the following local statistics for the user selected area of the image, and produces
+ * an image file of the result:
+ *
+ * 1. Mean
+ * 2. Standard deviation
+ * 3. Coefficient of variation
+ * 4. Equivalent number of looks
  *
  * @todo the computed statistics should be outout to file
  */
