@@ -1,5 +1,5 @@
 /*
- * $Id: CeosHelper.java,v 1.4 2008-08-14 21:50:05 lveci Exp $
+ * $Id: CeosHelper.java,v 1.5 2008-08-27 17:32:31 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -24,10 +24,12 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.ArrayList;
 
 public class CeosHelper {
 
-    private static final String VOLUME_FILE_PREFIX = "VDF_";
+    private static final String VOLUME_DESC_FILE_PREFIX = "VDF_";
+    private static final String VOLUME_FILE_PREFIX = "VOL-";
     private static final String LEADER_FILE_PREFIX = "LEA_";
     private static final String IMAGE_FILE_PREFIX = "DAT_";
     private static final String TRAILER_FILE_PREFIX = "NUL_";
@@ -35,7 +37,8 @@ public class CeosHelper {
     public static File getVolumeFile(final File baseDir) throws IOException {
         final File[] files = baseDir.listFiles(new FilenameFilter() {
             public boolean accept(final File dir, final String name) {
-                return name.toUpperCase().startsWith(VOLUME_FILE_PREFIX);
+                return name.toUpperCase().startsWith(VOLUME_DESC_FILE_PREFIX) ||
+                        name.toUpperCase().startsWith(VOLUME_FILE_PREFIX);
             }
         });
         if (files == null || files.length < 1) {
@@ -49,7 +52,7 @@ public class CeosHelper {
         return files[0];
     }
 
-    public static FilePointerRecord[] readFilePointers(final BaseRecord vdr) throws
+    public static FilePointerRecord[] readFilePointers(final BaseRecord vdr, String mission) throws
                                                                                          IllegalCeosFormatException,
                                                                                          IOException {
         final int numFilePointers = vdr.getAttributeInt("Number of filepointer records");
@@ -57,7 +60,7 @@ public class CeosHelper {
         reader.seek(vdr.getRecordLength());
         final FilePointerRecord[] filePointers = new FilePointerRecord[numFilePointers];
         for (int i = 0; i < numFilePointers; i++) {
-            filePointers[i] = new FilePointerRecord(reader);
+            filePointers[i] = new FilePointerRecord(reader, mission);
         }
         return filePointers;
     }

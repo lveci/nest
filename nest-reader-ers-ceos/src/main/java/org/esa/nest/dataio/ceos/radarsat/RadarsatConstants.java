@@ -21,28 +21,6 @@ public class RadarsatConstants implements CEOSConstants {
 
     final static String SUMMARY_FILE_NAME = "summary.txt";
 
-    /**
-     * Taken from <a href="http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm">http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm</a>
-     */
-    final static float WAVELENGTH_BAND_1 = 420.0F;
-    /**
-     * Taken from <a href="http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm">http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm</a>
-     */
-    final static float WAVELENGTH_BAND_2 = 520.0F;
-    /**
-     * Taken from <a href="http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm">http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm</a>
-     */
-    final static float WAVELENGTH_BAND_3 = 610.0F;
-    /**
-     * Taken from <a href="http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm">http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm</a>
-     */
-    final static float WAVELENGTH_BAND_4 = 760.0F;
-
-    final static float BANDWIDTH_BAND_1 = 80.0F;
-    final static float BANDWIDTH_BAND_2 = BANDWIDTH_BAND_1;
-    final static float BANDWIDTH_BAND_3 = BANDWIDTH_BAND_1;
-    final static float BANDWIDTH_BAND_4 = 130.0F;
-
     final static String MAP_PROJECTION_RAW = "NNNNN";
     final static String MAP_PROJECTION_UTM = "YNNNN";
     final static String MAP_PROJECTION_PS = "NNNNY";

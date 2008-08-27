@@ -1,4 +1,4 @@
-package org.esa.nest.dataio.ceos.jers;
+package org.esa.nest.dataio.ceos.alos;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.dataio.ceos.CeosFileReader;
@@ -12,39 +12,23 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-/*
- * $Id: JERSVolumeDirectoryFile.java,v 1.9 2008-08-27 17:32:31 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
 
 /**
- * This class represents a volume directory file of JERS product.
+ * This class represents a volume directory file of Palsar product.
  *
  */
-class JERSVolumeDirectoryFile {
+class AlosPalsarVolumeDirectoryFile {
 
     private CeosFileReader _ceosReader;
     private BaseRecord _volumeDescriptorRecord;
     private FilePointerRecord[] _filePointerRecords;
     private BaseRecord _textRecord;
 
-    private static String mission = "jers";
+    private static String mission = "alos";
     private static String volume_desc_recordDefinitionFile = "volume_descriptor.xml";
     private static String text_recordDefinitionFile = "text_record.xml";
 
-    public JERSVolumeDirectoryFile(final File baseDir) throws IOException,
+    public AlosPalsarVolumeDirectoryFile(final File baseDir) throws IOException,
                                                                 IllegalCeosFormatException {
         final File volumeFile = CeosHelper.getVolumeFile(baseDir);
         _ceosReader = new CeosFileReader(new FileImageInputStream(volumeFile));

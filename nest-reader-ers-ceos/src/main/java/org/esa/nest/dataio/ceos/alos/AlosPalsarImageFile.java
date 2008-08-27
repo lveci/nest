@@ -1,25 +1,26 @@
-package org.esa.nest.dataio.ceos.jers;
+package org.esa.nest.dataio.ceos.alos;
 
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.nest.dataio.ceos.records.ImageRecord;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
+import org.esa.beam.framework.datamodel.MetadataElement;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
 
-class JERSImageFile extends CEOSImageFile {
+class AlosPalsarImageFile extends CEOSImageFile {
 
     private final BaseRecord _imageFDR;
     private final int _imageNumber;
 
-    private static String mission = "jers";
+    private static String mission = "alos";
     private static String image_DefinitionFile = "image_file.xml";
     private static String image_recordDefinition = "image_record.xml";
 
-    public JERSImageFile(final ImageInputStream imageStream) throws IOException,
+    public AlosPalsarImageFile(final ImageInputStream imageStream) throws IOException,
                                                                       IllegalCeosFormatException {
         _ceosReader = new CeosFileReader(imageStream);
         _imageFDR = new BaseRecord(_ceosReader, -1, mission, image_DefinitionFile);
@@ -32,7 +33,7 @@ class JERSImageFile extends CEOSImageFile {
     }
 
     public String getBandName() {
-        return JERSConstants.BANDNAME_PREFIX + _imageNumber;
+        return AlosPalsarConstants.BANDNAME_PREFIX + _imageNumber;
     }
 
     public String getBandDescription() {
@@ -52,10 +53,14 @@ class JERSImageFile extends CEOSImageFile {
     }
 
     public static String getGeophysicalUnit() {
-        return JERSConstants.GEOPHYSICAL_UNIT;
+        return AlosPalsarConstants.GEOPHYSICAL_UNIT;
     }
 
-
+    public void assignMetadataTo(MetadataElement rootElem, int count) {
+        MetadataElement metadata = new MetadataElement("Image Descriptor " + count);
+         _imageFDR.assignMetadataTo(metadata);
+        rootElem.addElement(metadata);
+    }
 
  /*   public int getTotalMillisInDayOfLine(final int y) throws IOException,
                                                              IllegalCeosFormatException {

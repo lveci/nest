@@ -51,7 +51,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         _volumeDirectoryFile = new RadarsatVolumeDirectoryFile(_baseDir);
         _leaderFile = new RadarsatLeaderFile(createInputStream(RadarsatVolumeDirectoryFile.getLeaderFileName()));
 
-        final String[] imageFileNames = _volumeDirectoryFile.getImageFileNames();
+        final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, "DAT_");
         _imageFiles = new RadarsatImageFile[imageFileNames.length];
         for (int i = 0; i < _imageFiles.length; i++) {
             _imageFiles[i] = new RadarsatImageFile(createInputStream(imageFileNames[i]));

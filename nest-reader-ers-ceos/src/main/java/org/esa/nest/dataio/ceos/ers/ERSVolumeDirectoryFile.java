@@ -12,25 +12,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-/*
- * $Id: ERSVolumeDirectoryFile.java,v 1.7 2008-08-19 15:23:23 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
-
 /**
- * This class represents a volume directory file of Palsar product.
+ * This class represents a volume directory file of ERS product.
  *
  */
 class ERSVolumeDirectoryFile {
@@ -49,7 +32,7 @@ class ERSVolumeDirectoryFile {
         final File volumeFile = CeosHelper.getVolumeFile(baseDir);
         _ceosReader = new CeosFileReader(new FileImageInputStream(volumeFile));
         _volumeDescriptorRecord = new BaseRecord(_ceosReader, -1, mission, volume_desc_recordDefinitionFile);
-        _filePointerRecords = CeosHelper.readFilePointers(_volumeDescriptorRecord);
+        _filePointerRecords = CeosHelper.readFilePointers(_volumeDescriptorRecord, mission);
         _textRecord = new BaseRecord(_ceosReader, -1, mission, text_recordDefinitionFile);
     }
 
@@ -63,19 +46,6 @@ class ERSVolumeDirectoryFile {
 
     public static String getTrailerFileName() {
         return "NUL_DAT.001";
-    }
-
-    public String[] getImageFileNames() throws IOException,
-                                               IllegalCeosFormatException {
-        final ArrayList<String> list = new ArrayList<String>(2);
-        for (final FilePointerRecord filePointerRecord : _filePointerRecords) {
-            if (filePointerRecord.isImageFileRecord()) {
-                final String fileID = filePointerRecord.getAttributeString("File ID");
-                list.add(CeosHelper.getImageFileName(_textRecord, fileID.substring(15)));
-            }
-        }
-        list.add("DAT_01.001");
-        return list.toArray(new String[list.size()]);
     }
 
     public void close() throws IOException {

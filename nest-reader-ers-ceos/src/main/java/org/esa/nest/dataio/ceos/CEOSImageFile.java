@@ -5,30 +5,15 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.ceos.records.ImageRecord;
 
 import java.io.IOException;
+import java.io.File;
 import java.util.Arrays;
-
-/*
- * $Id: CEOSImageFile.java,v 1.3 2008-08-26 17:00:57 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
+import java.util.ArrayList;
 
 
 /**
- * This class represents an image file of an ERS product.
+ * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.3 $ $Date: 2008-08-26 17:00:57 $
+ * @version $Revision: 1.4 $ $Date: 2008-08-27 17:32:31 $
  */
 public abstract class CEOSImageFile {
 
@@ -39,6 +24,18 @@ public abstract class CEOSImageFile {
     protected long _startPosImageRecords = 0;
 
     public abstract String getBandName();
+
+    public static String[] getImageFileNames(File baseDir, String prefix) throws IOException,
+                                               IllegalCeosFormatException {
+        final ArrayList<String> list = new ArrayList<String>(2);
+        File[] fileList = baseDir.listFiles();
+        for (File file : fileList) {
+            if (file.getName().toUpperCase().startsWith(prefix)) {
+                list.add(file.getName());
+            }
+        }
+        return list.toArray(new String[list.size()]);
+    }
 
     public void readBandRasterData(final int sourceOffsetX, final int sourceOffsetY,
                                    final int sourceWidth, final int sourceHeight,

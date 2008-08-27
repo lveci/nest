@@ -10,28 +10,10 @@ import org.esa.nest.dataio.ceos.records.ImageRecord;
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 
-/*
- * $Id: ERSImageFile.java,v 1.11 2008-08-13 17:40:57 lveci Exp $
- *
- * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation. This program is distributed in the hope it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
-
-
 /**
- * This class represents an image file of an ERS product.
+ * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.11 $ $Date: 2008-08-13 17:40:57 $
+ * @version $Revision: 1.12 $ $Date: 2008-08-27 17:32:31 $
  */
 class ERSImageFile extends CEOSImageFile {
 

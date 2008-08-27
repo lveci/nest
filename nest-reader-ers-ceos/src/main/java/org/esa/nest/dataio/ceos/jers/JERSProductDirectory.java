@@ -37,8 +37,6 @@ class JERSProductDirectory extends CEOSProductDirectory {
     private int _sceneWidth;
     private int _sceneHeight;
 
-    //private static String SLC_PRODUCT_TYPE = "SAR SINGLE LOOK COMPLEX IMAGE   ";
-    
     private transient Map<String, JERSImageFile> bandImageFileMap = new HashMap<String, JERSImageFile>(1);
 
     public JERSProductDirectory(final File dir) throws IOException,
@@ -53,7 +51,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
         readVolumeDirectoryFile();
         _leaderFile = new JERSLeaderFile(createInputStream(JERSVolumeDirectoryFile.getLeaderFileName()));
 
-        final String[] imageFileNames = _volumeDirectoryFile.getImageFileNames();
+        final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, "DAT_");
         _imageFiles = new JERSImageFile[imageFileNames.length];
         for (int i = 0; i < _imageFiles.length; i++) {
             _imageFiles[i] = new JERSImageFile(createInputStream(imageFileNames[i]));

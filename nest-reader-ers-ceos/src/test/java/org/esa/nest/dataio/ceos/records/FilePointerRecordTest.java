@@ -29,7 +29,7 @@ public class FilePointerRecordTest extends TestCase {
 
     public void testInit_SimpleConstructor() throws IOException, IllegalCeosFormatException {
         _ios.seek(_prefix.length());
-        final FilePointerRecord record = new FilePointerRecord(_reader);
+        final FilePointerRecord record = new FilePointerRecord(_reader, "ers");
 
         assertRecord(record);
         assertEquals(_prefix.length(), record.getStartPos());
@@ -37,7 +37,7 @@ public class FilePointerRecordTest extends TestCase {
     }
 
     public void testInit() throws IOException, IllegalCeosFormatException {
-        final FilePointerRecord record = new FilePointerRecord(_reader, _prefix.length());
+        final FilePointerRecord record = new FilePointerRecord(_reader, "ers", _prefix.length());
 
         assertRecord(record);
         assertEquals(_prefix.length(), record.getStartPos());
@@ -46,7 +46,7 @@ public class FilePointerRecordTest extends TestCase {
 
     public void testAssignMetadataTo() throws IOException,
                                               IllegalCeosFormatException {
-        final FilePointerRecord record = new FilePointerRecord(_reader, _prefix.length());
+        final FilePointerRecord record = new FilePointerRecord(_reader, "ers", _prefix.length());
         final MetadataElement elem = new MetadataElement("elem");
 
         record.assignMetadataTo(elem, "suffix");

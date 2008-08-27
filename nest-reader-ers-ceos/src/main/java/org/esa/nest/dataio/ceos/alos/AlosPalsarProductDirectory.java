@@ -1,4 +1,4 @@
-package org.esa.nest.dataio.ceos.ers;
+package org.esa.nest.dataio.ceos.alos;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
@@ -6,7 +6,6 @@ import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
-import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.AbstractMetadata;
 
 import javax.imageio.stream.FileImageInputStream;
@@ -23,16 +22,16 @@ import java.util.*;
  * change in future releases of the software.</p>
  *
  */
-class ERSProductDirectory extends CEOSProductDirectory {
+class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
     private static final double UTM_FALSE_EASTING = 500000.00;
     private static final double UTM_FALSE_NORTHING = 10000000.00;
     private static final int METER_PER_KILOMETER = 1000;
 
     private final File _baseDir;
-    private ERSVolumeDirectoryFile _volumeDirectoryFile;
-    private ERSImageFile[] _imageFiles;
-    private ERSLeaderFile _leaderFile;
+    private AlosPalsarVolumeDirectoryFile _volumeDirectoryFile;
+    private AlosPalsarImageFile[] _imageFiles;
+    private AlosPalsarLeaderFile _leaderFile;
 
     private int _sceneWidth;
     private int _sceneHeight;
@@ -42,9 +41,9 @@ class ERSProductDirectory extends CEOSProductDirectory {
     //private static String SLC_PRODUCT_TYPE = "SAR SINGLE LOOK COMPLEX IMAGE   ";
     //private static String ERS1_SLC_PRODUCT_TYPE = "PRODUCT: ERS-1.SAR.SLC                  ";
 
-    private transient Map<String, ERSImageFile> bandImageFileMap = new HashMap<String, ERSImageFile>(1);
+    private transient Map<String, AlosPalsarImageFile> bandImageFileMap = new HashMap<String, AlosPalsarImageFile>(1);
 
-    public ERSProductDirectory(final File dir) {
+    public AlosPalsarProductDirectory(final File dir) {
         Guardian.assertNotNull("dir", dir);
 
         _baseDir = dir;
@@ -52,13 +51,13 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
     protected void readProductDirectory() throws IOException, IllegalCeosFormatException {
         readVolumeDirectoryFile();
-        _leaderFile = new ERSLeaderFile(createInputStream(ERSVolumeDirectoryFile.getLeaderFileName()));
+        //_leaderFile = new AlosPalsarLeaderFile(createInputStream(AlosPalsarVolumeDirectoryFile.getLeaderFileName()));
 
-        final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, "DAT_");
+        final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, "IMG-");
         int numImageFiles = imageFileNames.length;
-        _imageFiles = new ERSImageFile[numImageFiles];
+        _imageFiles = new AlosPalsarImageFile[numImageFiles];
         for (int i = 0; i < numImageFiles; i++) {
-            _imageFiles[i] = new ERSImageFile(createInputStream(imageFileNames[i]));
+            _imageFiles[i] = new AlosPalsarImageFile(createInputStream(imageFileNames[i]));
         }
 
         _sceneWidth = _imageFiles[0].getRasterWidth();
@@ -68,17 +67,18 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
     private void readVolumeDirectoryFile() throws IOException, IllegalCeosFormatException {
         if(_volumeDirectoryFile == null)
-            _volumeDirectoryFile = new ERSVolumeDirectoryFile(_baseDir);
+            _volumeDirectoryFile = new AlosPalsarVolumeDirectoryFile(_baseDir);
 
         productType = _volumeDirectoryFile.getProductType();
         isProductSLC = productType.contains("SLC") || productType.contains("COMPLEX");
     }
 
-    public boolean isERS() throws IOException, IllegalCeosFormatException {
+    public boolean isALOS() throws IOException, IllegalCeosFormatException {
         if(productType == null || _volumeDirectoryFile == null)
             readVolumeDirectoryFile();
-        return (productType.contains(ERS1_MISSION) || productType.contains(ERS2_MISSION) ||
-                productType.contains("ERS1") || productType.contains("ERS2"));
+        return true; // luis
+        //return (productType.contains(ERS1_MISSION) || productType.contains(ERS2_MISSION) ||
+        //        productType.contains("ERS1") || productType.contains("ERS2"));
     }
 
     public String getMission() {
@@ -98,7 +98,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
         if(_imageFiles.length > 1) {
             int index = 1;
-            for (final ERSImageFile imageFile : _imageFiles) {
+            for (final AlosPalsarImageFile imageFile : _imageFiles) {
 
                 if(isProductSLC) {
                     String bandName = "i_" + index;
@@ -122,7 +122,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 }
             }
         } else {
-            ERSImageFile imageFile = _imageFiles[0];
+            AlosPalsarImageFile imageFile = _imageFiles[0];
             if(isProductSLC) {
                 Band bandI = createBand("i");
                 product.addBand(bandI);
@@ -152,7 +152,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
     private void addGeoCoding(final Product product) throws IllegalCeosFormatException,
                                                             IOException {
 
-        TiePointGrid latGrid = new TiePointGrid("lat", 2, 2, 0.5f, 0.5f, 
+  /*      TiePointGrid latGrid = new TiePointGrid("lat", 2, 2, 0.5f, 0.5f,
                 product.getSceneRasterWidth(), product.getSceneRasterHeight(),
                                                 _leaderFile.getLatCorners());
         TiePointGrid lonGrid = new TiePointGrid("lon", 2, 2, 0.5f, 0.5f,
@@ -163,7 +163,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
-        product.setGeoCoding(tpGeoCoding);
+        product.setGeoCoding(tpGeoCoding);       */
     }
 
     public CEOSImageFile getImageFile(final Band band) throws IOException,
@@ -179,7 +179,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         _imageFiles = null;
         _volumeDirectoryFile.close();
         _volumeDirectoryFile = null;
-        _leaderFile.close();
+        //_leaderFile.close();
         _leaderFile = null;
     }
 
@@ -187,8 +187,8 @@ class ERSProductDirectory extends CEOSProductDirectory {
         final Band band = new Band(name, ProductData.TYPE_INT16,
                                    _sceneWidth, _sceneHeight);
 
-        band.setUnit(ERSImageFile.getGeophysicalUnit());
-        
+        band.setUnit(AlosPalsarImageFile.getGeophysicalUnit());
+
       /*
         final int bandIndex = index;
         final double scalingFactor = _leaderFile.getAbsoluteCalibrationGain(bandIndex);
@@ -210,16 +210,16 @@ class ERSProductDirectory extends CEOSProductDirectory {
         final MetadataElement root = product.getMetadataRoot();
         root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
 
-        final MetadataElement leadMetadata = new MetadataElement("Leader");
-        _leaderFile.addLeaderMetadata(leadMetadata);
-        root.addElement(leadMetadata);
+        //final MetadataElement leadMetadata = new MetadataElement("Leader");
+        //_leaderFile.addLeaderMetadata(leadMetadata);
+       // root.addElement(leadMetadata);
 
         final MetadataElement volMetadata = new MetadataElement("Volume");
         _volumeDirectoryFile.assignMetadataTo(volMetadata);
         root.addElement(volMetadata);
 
         int c = 1;
-        for (final ERSImageFile imageFile : _imageFiles) {
+        for (final AlosPalsarImageFile imageFile : _imageFiles) {
             imageFile.assignMetadataTo(root, c++);
         }
 
@@ -233,7 +233,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
         MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
 
-        //mph
+ /*       //mph
         AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.PRODUCT, getProductName());
         AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.PRODUCT_TYPE, getProductType());
         AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
@@ -249,7 +249,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
                 _leaderFile.getFacilityRecord().getAttributeString("Time of input state vector used to processed the image"));
 
-
+                                                                 */
         //sph
 
         AbstractMetadata.setAttributeString(absRoot, "SAMPLE_TYPE", getSampleType());
@@ -258,7 +258,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {
         final MetadataElement summaryMetadata = new MetadataElement("Summary Information");
         final Properties properties = new Properties();
-        final File file = new File(_baseDir, ERSConstants.SUMMARY_FILE_NAME);
+        final File file = new File(_baseDir, AlosPalsarConstants.SUMMARY_FILE_NAME);
         if (!file.exists()) {
             return;
         }
@@ -311,12 +311,12 @@ class ERSProductDirectory extends CEOSProductDirectory {
     }
 
     private String getProductDescription() {
-        return ERSConstants.PRODUCT_DESCRIPTION_PREFIX + _leaderFile.getProductLevel();
+        return AlosPalsarConstants.PRODUCT_DESCRIPTION_PREFIX;// + _leaderFile.getProductLevel();
     }
 
     private void assertSameWidthAndHeightForAllImages() {
         for (int i = 0; i < _imageFiles.length; i++) {
-            final ERSImageFile imageFile = _imageFiles[i];
+            final AlosPalsarImageFile imageFile = _imageFiles[i];
             Guardian.assertTrue("_sceneWidth == imageFile[" + i + "].getRasterWidth()",
                                 _sceneWidth == imageFile.getRasterWidth());
             Guardian.assertTrue("_sceneHeight == imageFile[" + i + "].getRasterHeight()",
