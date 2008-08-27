@@ -9,8 +9,8 @@
 	<rec name="Data Set Summary Record sequence number" type="2" num="4"/>
 	
 	<rec name="SAR channel indicator" type="2" num="4"/>
-	<rec name="skipBytes" type="0" num="16"/>	
-	<rec name="Scene reference number" type="1" num="32"/>
+	<rec name="scene identifier" type="1" num="32"/>	
+	<rec name="Scene reference number" type="1" num="16"/>
     <rec name="Scene centre time" type="1" num="32"/>
 	<rec name="skipBytes" type="0" num="16"/>
     <rec name="scene centre geodetic latitude" type="5" num="16"/>
@@ -19,8 +19,8 @@
     <rec name="Ellipsoid designator" type="1" num="16"/>
 	<rec name="Ellipsoid semimajor axis" type="5" num="16"/>
 	<rec name="Ellipsoid semiminor axis" type="5" num="16"/>
-	<rec name="Earth mass times gravitational constant" type="5" num="16"/>
-	<rec name="skipBytes" type="0" num="16"/>
+	<rec name="Earth mass" type="5" num="16"/>
+	<rec name="gravitational constant" type="5" num="16"/>
 	<rec name="Ellipsoid J2 parameter" type="5" num="16"/>
 	<rec name="Ellipsoid J3 parameter" type="5" num="16"/>
 	<rec name="Ellipsoid J4 parameter" type="5" num="16"/>
@@ -42,7 +42,7 @@
 	<rec name="Sensor platform heading at nadir" type="5" num="8"/>
 	<rec name="Sensor clock angle" type="5" num="8"/>
 	<rec name="Incidence angle at scene centre" type="5" num="8"/>
-	<rec name="Radar frequency" type="5" num="8"/>
+	<rec name="skipBytes" type="0" num="8"/>
 	<rec name="Radar wavelength" type="5" num="16"/>
 	<rec name="Motion compensation indicator" type="1" num="2"/>
 	<rec name="Range pulse code specifier" type="1" num="16"/>
@@ -61,29 +61,32 @@
 	<rec name="Range sampling rate" type="5" num="16"/>
 	<rec name="Range gate delay" type="0" num="16"/>
 	<rec name="Range pulse length" type="5" num="16"/>
-	<rec name="skipBytes" type="0" num="4"/>
+	<rec name="Base band conversion flag" type="0" num="4"/>
 	<rec name="Range compressed flag" type="1" num="4"/> 
-	<rec name="skipBytes" type="0" num="32"/>
+	<rec name="Reciever gain for like polarized" type="5" num="16"/>
+	<rec name="Reciever gain for cross polarized" type="5" num="16"/>
 	<rec name="Quantization per channel I Q" type="2" num="8"/>
 	<rec name="Quantizer descriptor" type="1" num="12"/>
 	<rec name="DC Bias for I-component" type="5" num="16"/>
 	<rec name="DC Bias for Q-component" type="5" num="16"/>
 	<rec name="Gain imbalance for I Q" type="5" num="16"/>
-	<rec name="skipBytes" type="0" num="48"/>
-	<rec name="Antenna mechanical boresight angle" type="5" num="16"/>
-	<rec name="skipBytes" type="0" num="4"/>
-	<rec name="Pulse Repetition Frequency" type="5" num="16"/>
 	<rec name="skipBytes" type="0" num="32"/>
+	<rec name="Antenna electrical boresight angle" type="5" num="16"/>
+	<rec name="Antenna mechanical boresight angle" type="5" num="16"/>
+	<rec name="Echo tracker flag" type="1" num="4"/>
+	<rec name="Pulse Repetition Frequency" type="5" num="16"/>
+	<rec name="Effective two-way antenna elevation 3dB beam width at boresight" type="5" num="16"/>
+	<rec name="Effective two-way antenna azimuth 3dB beam width at electrical boresight" type="5" num="16"/>
 	<!-- SENSOR SPECIFIC PARAMETERS -->
 	<rec name="Satellite encoded binary time code" type="2" num="16"/>
 	<rec name="Satellite clock time" type="1" num="32"/>
-	<rec name="Satellite clock step length" type="2" num="8"/>
-	<rec name="skipBytes" type="0" num="8"/>
+	<rec name="Satellite clock step length" type="2" num="16"/>
 	<!-- GENERAL PROCESSING PARAMETERS -->
 	<rec name="Processing facility identifier" type="1" num="16"/>
 	<rec name="Processing system identifier" type="1" num="8"/>
 	<rec name="Processing version identifier" type="1" num="8"/>
-	<rec name="skipBytes" type="0" num="32"/>
+	<rec name="Processing facility process code" type="1" num="16"/>
+	<rec name="Product level code" type="1" num="16"/>
 	<rec name="Product type descriptor" type="1" num="32"/>
 	<rec name="Processing algorithm identifier" type="1" num="32"/>
 	<rec name="Nominal number of looks processed in azimuth" type="5" num="16"/>
@@ -97,7 +100,8 @@
 	<rec name="Data input source" type="1" num="16"/>
 	<rec name="Nominal resolution in range" type="5" num="16"/>
 	<rec name="Nominal resolution in azimuth" type="5" num="16"/>
-	<rec name="skipBytes" type="0" num="32"/>
+	<rec name="Constant radiometric Bias" type="5" num="16"/>
+	<rec name="Linear radiometric Gain" type="5" num="16"/>
 	<rec name="Along track Doppler frequency centroid constant term" type="5" num="16"/>
 	<rec name="Along track Doppler frequency centroid linear term" type="5" num="16"/>
 	<rec name="Along track Doppler frequency centroid quadratic term" type="5" num="16"/>
@@ -121,12 +125,27 @@
 	<rec name="Line spacing" type="5" num="16"/>
 	<rec name="Pixel spacing" type="5" num="16"/>
 	<rec name="Processor range compression designator" type="1" num="16"/>
-	<rec name="skipBytes" type="0" num="32"/>
+	<rec name="Doppler center frequency constant term" type="5" num="16"/>
+	<rec name="Doppler center frequency linear term" type="5" num="16"/>
 	<!-- SENSOR SPECIFIC LOCAL USE SEGMENT -->
-	<rec name="Zero-doppler range time of first range pixel" type="5" num="16"/>
-	<rec name="Zero-doppler range time of first centre pixel" type="5" num="16"/>
-	<rec name="Zero-doppler range time of first last range pixel" type="5" num="16"/>
-	<rec name="Zero-doppler azimuth time of first azimuth pixel" type="1" num="24"/>
-	<rec name="Zero-doppler azimuth time of centre azimuth pixel" type="1" num="24"/>
-	<rec name="Zero-doppler azimuth time of last azimuth pixel" type="1" num="24"/>	
+	<rec name="Calibration data indicator" type="2" num="4"/>
+	<rec name="Start line of calibration at upper image" type="2" num="8"/>
+	<rec name="Stop line of calibration at upper image" type="2" num="8"/>
+	<rec name="Start line of calibration at bottom image" type="2" num="8"/>
+	<rec name="Stop line of calibration at bottom image" type="2" num="8"/>
+	<rec name="PRF switching indicator" type="2" num="4"/>	
+	<rec name="Line locator of PRF switching" type="2" num="8"/>
+
+	<rec name="Direction of beam center in scene center" type="5" num="16"/>
+	<rec name="Yew steering mode flag" type="2" num="4"/>
+	<rec name="Parameter table number of auto setting" type="2" num="4"/>
+	<rec name="Nominal offnadir angle" type="5" num="16"/>
+	<rec name="Antenna beam number" type="2" num="4"/>
+	<rec name="skipBytes" type="0" num="28"/>
+	<rec name="Incidence angle constant term" type="5" num="20"/>
+	<rec name="Incidence angle linear term" type="5" num="20"/>
+	<rec name="Incidence angle quadratic term" type="5" num="20"/>
+	<rec name="Incidence angle cubic term" type="5" num="20"/>
+	<rec name="Incidence angle fourth term" type="5" num="20"/>
+	<rec name="Incidence angle fifth term" type="5" num="20"/>
 </ceos>

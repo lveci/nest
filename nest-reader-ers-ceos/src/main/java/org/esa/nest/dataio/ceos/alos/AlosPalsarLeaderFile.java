@@ -24,8 +24,7 @@ class AlosPalsarLeaderFile {
     public final BaseSceneHeaderRecord _sceneHeaderRecord;
     public final BaseRecord _mapProjRecord;
     public final BaseRecord _platformPositionRecord;
-    public final BaseRecord _facilityRecord;
-    public final BaseRecord _facilityRelatedPCSRecord;
+    public final BaseRecord _facilityRecord = null;
     public CeosFileReader _reader;
 
     private static String mission = "alos";
@@ -34,7 +33,6 @@ class AlosPalsarLeaderFile {
     private static String mapproj_recordDefinitionFile = "map_proj_record.xml";
     private static String platform_recordDefinitionFile = "platform_position_record.xml";
     private static String facility_recordDefinitionFile = "facility_record.xml";
-    private static String facilityRelatedPCS_recordDefinitionFile = "facility_related_pcs_record.xml";
 
     public AlosPalsarLeaderFile(final ImageInputStream leaderStream) throws IOException,
                                                                         IllegalCeosFormatException {
@@ -47,12 +45,7 @@ class AlosPalsarLeaderFile {
         _reader.seek(_mapProjRecord.getAbsolutPosition(_mapProjRecord.getRecordLength()));
         _platformPositionRecord = new BaseRecord(_reader, -1, mission, platform_recordDefinitionFile);
         _reader.seek(_platformPositionRecord.getAbsolutPosition(_platformPositionRecord.getRecordLength()));
-        _facilityRecord = new BaseRecord(_reader, -1, mission, facility_recordDefinitionFile);
-        _reader.seek(_facilityRecord.getAbsolutPosition(_facilityRecord.getRecordLength()));
-        if(_reader.getCurrentPos() + 4000 < _reader.getLength())
-            _facilityRelatedPCSRecord = new BaseRecord(_reader, -1, mission, facilityRelatedPCS_recordDefinitionFile);
-        else
-            _facilityRelatedPCSRecord = null;
+        //_facilityRecord = new BaseRecord(_reader, -1, mission, facility_recordDefinitionFile);
     }
 
     public String getProductLevel() {
@@ -115,15 +108,9 @@ class AlosPalsarLeaderFile {
         _platformPositionRecord.assignMetadataTo(metadata);
         sphElem.addElement(metadata);
 
-        metadata = new MetadataElement("Facility Related");
-        _facilityRecord.assignMetadataTo(metadata);
-        sphElem.addElement(metadata);
-
-        if(_facilityRelatedPCSRecord != null) {
-            metadata = new MetadataElement("Facility Related PCS");
-            _facilityRelatedPCSRecord.assignMetadataTo(metadata);
-            sphElem.addElement(metadata);
-        }
+        //metadata = new MetadataElement("Facility Related");
+        //_facilityRecord.assignMetadataTo(metadata);
+        //sphElem.addElement(metadata);
     }
 
     public MetadataElement getMapProjectionMetadata() throws IOException,

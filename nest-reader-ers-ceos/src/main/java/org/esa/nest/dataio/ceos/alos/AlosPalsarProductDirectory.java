@@ -37,11 +37,6 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     private int _sceneWidth;
     private int _sceneHeight;
 
-    private final static String ERS1_MISSION = "ERS-1";
-    private final static String ERS2_MISSION = "ERS-2";
-    //private static String SLC_PRODUCT_TYPE = "SAR SINGLE LOOK COMPLEX IMAGE   ";
-    //private static String ERS1_SLC_PRODUCT_TYPE = "PRODUCT: ERS-1.SAR.SLC                  ";
-
     private transient Map<String, AlosPalsarImageFile> bandImageFileMap = new HashMap<String, AlosPalsarImageFile>(1);
 
     public AlosPalsarProductDirectory(final File dir) {
@@ -52,7 +47,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
     protected void readProductDirectory() throws IOException, IllegalCeosFormatException {
         readVolumeDirectoryFile();
-        //_leaderFile = new AlosPalsarLeaderFile(new FileImageInputStream(CeosHelper.getCEOSFile(_baseDir, "LED")));
+        _leaderFile = new AlosPalsarLeaderFile(new FileImageInputStream(CeosHelper.getCEOSFile(_baseDir, "LED")));
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, "IMG-");
         int numImageFiles = imageFileNames.length;
@@ -75,20 +70,13 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     }
 
     public boolean isALOS() throws IOException, IllegalCeosFormatException {
-        if(productType == null || _volumeDirectoryFile == null)
-            readVolumeDirectoryFile();
-        return true; // luis
-        //return (productType.contains(ERS1_MISSION) || productType.contains(ERS2_MISSION) ||
-        //        productType.contains("ERS1") || productType.contains("ERS2"));
+        //if(productType == null || _volumeDirectoryFile == null)
+        //    readVolumeDirectoryFile();
+        return true;
     }
 
     public String getMission() {
-        if(productType.contains(ERS1_MISSION) || productType.contains("ERS1"))
-            return ERS1_MISSION;
-        else if(productType.contains(ERS2_MISSION) || productType.contains("ERS2"))
-            return ERS2_MISSION;
-        else
-            return "";
+        return "ALOS";
     }
 
     public Product createProduct() throws IOException,
@@ -153,7 +141,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     private void addGeoCoding(final Product product) throws IllegalCeosFormatException,
                                                             IOException {
 
-  /*      TiePointGrid latGrid = new TiePointGrid("lat", 2, 2, 0.5f, 0.5f,
+        TiePointGrid latGrid = new TiePointGrid("lat", 2, 2, 0.5f, 0.5f,
                 product.getSceneRasterWidth(), product.getSceneRasterHeight(),
                                                 _leaderFile.getLatCorners());
         TiePointGrid lonGrid = new TiePointGrid("lon", 2, 2, 0.5f, 0.5f,
@@ -164,7 +152,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
-        product.setGeoCoding(tpGeoCoding);       */
+        product.setGeoCoding(tpGeoCoding);
     }
 
     public CEOSImageFile getImageFile(final Band band) throws IOException,
@@ -180,7 +168,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         _imageFiles = null;
         _volumeDirectoryFile.close();
         _volumeDirectoryFile = null;
-        //_leaderFile.close();
+        _leaderFile.close();
         _leaderFile = null;
     }
 
@@ -211,9 +199,9 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         final MetadataElement root = product.getMetadataRoot();
         root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
 
-        //final MetadataElement leadMetadata = new MetadataElement("Leader");
-        //_leaderFile.addLeaderMetadata(leadMetadata);
-       // root.addElement(leadMetadata);
+        final MetadataElement leadMetadata = new MetadataElement("Leader");
+        _leaderFile.addLeaderMetadata(leadMetadata);
+        root.addElement(leadMetadata);
 
         final MetadataElement volMetadata = new MetadataElement("Volume");
         _volumeDirectoryFile.assignMetadataTo(volMetadata);
@@ -312,7 +300,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     }
 
     private String getProductDescription() {
-        return AlosPalsarConstants.PRODUCT_DESCRIPTION_PREFIX;// + _leaderFile.getProductLevel();
+        return AlosPalsarConstants.PRODUCT_DESCRIPTION_PREFIX + _leaderFile.getProductLevel();
     }
 
     private void assertSameWidthAndHeightForAllImages() {

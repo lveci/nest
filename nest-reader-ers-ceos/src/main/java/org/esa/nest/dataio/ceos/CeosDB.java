@@ -59,8 +59,8 @@ public class CeosDB {
     public void readRecord(CeosFileReader reader) throws IOException, IllegalCeosFormatException
     {
         Element root = xmlDoc.getRootElement();
-        String name = "";
-            
+        System.out.println(definitionFile);
+        
         List children = root.getContent();
         for (Object aChild : children) {
             if (aChild instanceof Element) {
@@ -86,10 +86,8 @@ public class CeosDB {
                 }
                 
                 DecodeElement(reader, metaMap, child, null);
-
             }
         }
-        //System.out.println();
 
     }
 
@@ -109,46 +107,46 @@ public class CeosDB {
                 int type = Integer.parseInt(typeAttrib.getValue());
                 int num = Integer.parseInt(numAttrib.getValue());
 
-                //System.out.print(" " + reader.getCurrentPos() + ' ' + name + ' ' + type + ' ' + num);
+                System.out.print(" " + reader.getCurrentPos() + ' ' + name + ' ' + type + ' ' + num);
 
                 if(type == CeosDBTypes.Skip.value()) {
                     reader.skipBytes(num); // blank
                 } else if(type == CeosDBTypes.An.value()) {
 
-                    //String tmp = reader.readAn(num);
-                    //System.out.print(" = " + tmp);
-                    //metaMap.put(name , tmp);
-                    metaMap.put(name , reader.readAn(num));
+                    String tmp = reader.readAn(num);
+                    System.out.print(" = " + tmp);
+                    metaMap.put(name , tmp);
+                    //metaMap.put(name , reader.readAn(num));
                 } else if(type == CeosDBTypes.In.value()) {
 
-                    //int tmp = (int)reader.readIn(num);
-                    //System.out.print(" = " + tmp);
-                    //metaMap.put(name , tmp);
-                    metaMap.put(name , (int)reader.readIn(num));
+                    int tmp = (int)reader.readIn(num);
+                    System.out.print(" = " + tmp);
+                    metaMap.put(name , tmp);
+                    //metaMap.put(name , (int)reader.readIn(num));
                 } else if(type == CeosDBTypes.B1.value()) {
 
-                    //int tmp = reader.readB1();
-                    //System.out.print(" = " + tmp);
-                    //metaMap.put(name , tmp);
-                    metaMap.put(name , reader.readB1());
+                    int tmp = reader.readB1();
+                    System.out.print(" = " + tmp);
+                    metaMap.put(name , tmp);
+                    //metaMap.put(name , reader.readB1());
                 } else if(type == CeosDBTypes.B2.value()) {
 
-                    //int tmp = reader.readB2();
-                    //System.out.print(" = " + tmp);
-                    //metaMap.put(name , tmp);
-                    metaMap.put(name , reader.readB2());
+                    int tmp = reader.readB2();
+                    System.out.print(" = " + tmp);
+                    metaMap.put(name , tmp);
+                    //metaMap.put(name , reader.readB2());
                 } else if(type == CeosDBTypes.B4.value()) {
 
-                    //int tmp = reader.readB4();
-                    //System.out.print(" = " + tmp);
-                    //metaMap.put(name , tmp);
-                    metaMap.put(name , reader.readB4());
+                    int tmp = reader.readB4();
+                    System.out.print(" = " + tmp);
+                    metaMap.put(name , tmp);
+                    //metaMap.put(name , reader.readB4());
                 } else if(type == CeosDBTypes.Fn.value()) {
 
-                    //double tmp = reader.readFn(num);
-                    //System.out.print(" = " + tmp);
-                    //metaMap.put(name , tmp);
-                    metaMap.put(name , reader.readFn(num));
+                    double tmp = reader.readFn(num);
+                    System.out.print(" = " + tmp);
+                    metaMap.put(name , tmp);
+                    //metaMap.put(name , reader.readFn(num));
                 } else if(type == CeosDBTypes.Debug.value()) {
 
                     for(int i=0; i < num; ++i) {
@@ -160,7 +158,7 @@ public class CeosDB {
                 } else {
                     throw new IllegalCeosFormatException("Unknown type " + type, reader.getCurrentPos());
                 }
-                //System.out.println();
+                System.out.println();
             }
 
         } catch(IllegalCeosFormatException e) {
