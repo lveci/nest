@@ -44,6 +44,9 @@
 			<tocitem text="Import ERS1/2 CEOS Data Product" target="ImportERSCeos"/>
 			<tocitem text="Import JERS CEOS Data Product" target="ImportJERSCeos"/>
 			<tocitem text="Import Radarsat-1 Data Product" target="ImportRadarsat1"/>
+			<tocitem text="Import ALOS PALSAR Data Product" target="ImportAlosPalsar"/>
+			<tocitem text="Import ALOS AVNIR2 Data Product" target="ImportAVNIR2"/>
+			<tocitem text="Import ALOS PRISM Data Product" target="ImportPRISM"/>
 			<tocitem text="Import ImageIO Data Product" target="ImportImageIO"/>
             <tocitem text="Import BEAM-DIMAP Data Product" target="importDimapProduct"/>
             <tocitem text="Import LANDSAT 5 TM Data Product" target="importLandsatTMProduct"/>
