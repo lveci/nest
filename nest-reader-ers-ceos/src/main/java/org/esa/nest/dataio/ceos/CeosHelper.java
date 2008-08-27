@@ -1,5 +1,5 @@
 /*
- * $Id: CeosHelper.java,v 1.5 2008-08-27 17:32:31 lveci Exp $
+ * $Id: CeosHelper.java,v 1.6 2008-08-27 17:54:38 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -65,12 +65,13 @@ public class CeosHelper {
         return filePointers;
     }
 
-    public static String getLeaderFileName(final BaseRecord textRecord) {
-        return LEADER_FILE_PREFIX + getProductName(textRecord);
-    }
-
-    public static String getTrailerFileName(final BaseRecord textRecord) {
-        return TRAILER_FILE_PREFIX + getProductName(textRecord);
+    public static File getCEOSFile(File baseDir, String prefix) throws IOException {
+        File[] fileList = baseDir.listFiles();
+        for (File file : fileList) {
+            if (file.getName().toUpperCase().startsWith(prefix))
+                return file;
+        }
+        throw new IOException("unable to find file starting with " + prefix);
     }
 
     public static String getImageFileName(final BaseRecord textRecord, final String ccd) {

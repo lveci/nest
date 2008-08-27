@@ -6,6 +6,7 @@ import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
+import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.AbstractMetadata;
 
 import javax.imageio.stream.FileImageInputStream;
@@ -51,7 +52,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
     protected void readProductDirectory() throws IOException, IllegalCeosFormatException {
         readVolumeDirectoryFile();
-        //_leaderFile = new AlosPalsarLeaderFile(createInputStream(AlosPalsarVolumeDirectoryFile.getLeaderFileName()));
+        //_leaderFile = new AlosPalsarLeaderFile(new FileImageInputStream(CeosHelper.getCEOSFile(_baseDir, "LED")));
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, "IMG-");
         int numImageFiles = imageFileNames.length;

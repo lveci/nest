@@ -41,14 +41,6 @@ class AlosPalsarVolumeDirectoryFile {
         return _textRecord;
     }
 
-    public static String getLeaderFileName() {
-        return "LEA_01.001";
-    }
-
-    public static String getTrailerFileName() {
-        return "NUL_DAT.001";
-    }
-
     public void close() throws IOException {
         _ceosReader.close();
         _ceosReader = null;

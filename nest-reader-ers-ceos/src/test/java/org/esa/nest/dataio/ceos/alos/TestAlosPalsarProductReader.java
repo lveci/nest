@@ -18,7 +18,7 @@ public class TestAlosPalsarProductReader extends TestCase {
     AlosPalsarProductReaderPlugIn readerPlugin;
     ProductReader reader;
 
-    String filePath = "P:\\nest\\nest\\ESA Data\\RADAR\\ALOS PALSAR\\l1data\\VOL-ALPSRS023482850-W1.5GUD";
+    String filePath = "P:\\nest\\nest\\ESA Data\\RADAR\\ALOS PALSAR\\acres\\solomon_islands_tsunami\\04651_03_PALSAR_WB1_west_PRE\\scene01\\VOL-ALPSRS042143750-W1.5GUD";
 
     public TestAlosPalsarProductReader(String name) {
         super(name);

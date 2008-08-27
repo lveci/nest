@@ -13,7 +13,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.4 $ $Date: 2008-08-27 17:32:31 $
+ * @version $Revision: 1.5 $ $Date: 2008-08-27 17:54:38 $
  */
 public abstract class CEOSImageFile {
 
@@ -25,8 +25,7 @@ public abstract class CEOSImageFile {
 
     public abstract String getBandName();
 
-    public static String[] getImageFileNames(File baseDir, String prefix) throws IOException,
-                                               IllegalCeosFormatException {
+    public static String[] getImageFileNames(File baseDir, String prefix) {
         final ArrayList<String> list = new ArrayList<String>(2);
         File[] fileList = baseDir.listFiles();
         for (File file : fileList) {
