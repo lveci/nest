@@ -60,85 +60,115 @@ public class CeosDB {
     {
         Element root = xmlDoc.getRootElement();
         String name = "";
-
-        try {
             
         List children = root.getContent();
         for (Object aChild : children) {
             if (aChild instanceof Element) {
                 Element child = (Element) aChild;
-                Attribute nameAttrib = child.getAttribute("name");
-                Attribute typeAttrib = child.getAttribute("type");
-                Attribute numAttrib = child.getAttribute("num");
-                if(nameAttrib != null && typeAttrib != null && numAttrib != null) {
 
-                    name = nameAttrib.getValue();
-                    int type = Integer.parseInt(typeAttrib.getValue());
-                    int num = Integer.parseInt(numAttrib.getValue());
+                if(child.getName().equals("struct")) {
+                    Attribute loopAttrib = child.getAttribute("loop");
+                    String loopName = loopAttrib.getValue();
+                    int loop = getAttributeInt(loopName);
 
-                    //System.out.print(" " + reader.getCurrentPos() + ' ' + name + ' ' + type + ' ' + num);
+                    List structChildren = child.getChildren();
+                    for(int l=1; l <= loop; ++l) {
 
-                    if(type == CeosDBTypes.Skip.value()) {
-                        reader.skipBytes(num); // blank
-                    } else if(type == CeosDBTypes.An.value()) {
+                        String suffix = " " + l;
+                        for (Object aStructChild : structChildren) {
+                            if (aStructChild instanceof Element) {
+                                Element structChild = (Element) aStructChild;
 
-                        //String tmp = reader.readAn(num);
-                        //System.out.print(" = " + tmp);
-                        //metaMap.put(name , tmp);
-                        metaMap.put(name , reader.readAn(num));
-                    } else if(type == CeosDBTypes.In.value()) {
-
-                        //int tmp = (int)reader.readIn(num);
-                        //System.out.print(" = " + tmp);
-                        //metaMap.put(name , tmp);
-                        metaMap.put(name , (int)reader.readIn(num));
-                    } else if(type == CeosDBTypes.B1.value()) {
-
-                        //int tmp = reader.readB1();
-                        //System.out.print(" = " + tmp);
-                        //metaMap.put(name , tmp);
-                        metaMap.put(name , reader.readB1());
-                    } else if(type == CeosDBTypes.B2.value()) {
-
-                        //int tmp = reader.readB2();
-                        //System.out.print(" = " + tmp);
-                        //metaMap.put(name , tmp);
-                        metaMap.put(name , reader.readB2());
-                    } else if(type == CeosDBTypes.B4.value()) {
-
-                        //int tmp = reader.readB4();
-                        //System.out.print(" = " + tmp);
-                        //metaMap.put(name , tmp);
-                        metaMap.put(name , reader.readB4());
-                    } else if(type == CeosDBTypes.Fn.value()) {
-
-                        //double tmp = reader.readFn(num);
-                        //System.out.print(" = " + tmp);
-                        //metaMap.put(name , tmp);
-                        metaMap.put(name , reader.readFn(num));
-                    } else if(type == CeosDBTypes.Debug.value()) {
-
-                        for(int i=0; i < num; ++i) {
-                            String tmp = reader.readAn(1);
-                            if(!tmp.isEmpty() && !tmp.equals(" "))
-                                System.out.print(tmp);
+                                DecodeElement(reader, metaMap, structChild, suffix);
+                            }
                         }
-                        System.out.println();
-                    } else {
-                        throw new IllegalCeosFormatException("Unknown type " + type, reader.getCurrentPos());
                     }
-
-                    //System.out.println();
                 }
+                
+                DecodeElement(reader, metaMap, child, null);
+
             }
         }
         //System.out.println();
 
+    }
+
+    private static void DecodeElement(CeosFileReader reader, Map metaMap, Element child, String suffix)
+            throws IOException, IllegalCeosFormatException {
+
+        String name="";
+        try {
+            Attribute nameAttrib = child.getAttribute("name");
+            Attribute typeAttrib = child.getAttribute("type");
+            Attribute numAttrib = child.getAttribute("num");
+            if(nameAttrib != null && typeAttrib != null && numAttrib != null) {
+
+                name = nameAttrib.getValue();
+                if(suffix != null)
+                    name += suffix;
+                int type = Integer.parseInt(typeAttrib.getValue());
+                int num = Integer.parseInt(numAttrib.getValue());
+
+                //System.out.print(" " + reader.getCurrentPos() + ' ' + name + ' ' + type + ' ' + num);
+
+                if(type == CeosDBTypes.Skip.value()) {
+                    reader.skipBytes(num); // blank
+                } else if(type == CeosDBTypes.An.value()) {
+
+                    //String tmp = reader.readAn(num);
+                    //System.out.print(" = " + tmp);
+                    //metaMap.put(name , tmp);
+                    metaMap.put(name , reader.readAn(num));
+                } else if(type == CeosDBTypes.In.value()) {
+
+                    //int tmp = (int)reader.readIn(num);
+                    //System.out.print(" = " + tmp);
+                    //metaMap.put(name , tmp);
+                    metaMap.put(name , (int)reader.readIn(num));
+                } else if(type == CeosDBTypes.B1.value()) {
+
+                    //int tmp = reader.readB1();
+                    //System.out.print(" = " + tmp);
+                    //metaMap.put(name , tmp);
+                    metaMap.put(name , reader.readB1());
+                } else if(type == CeosDBTypes.B2.value()) {
+
+                    //int tmp = reader.readB2();
+                    //System.out.print(" = " + tmp);
+                    //metaMap.put(name , tmp);
+                    metaMap.put(name , reader.readB2());
+                } else if(type == CeosDBTypes.B4.value()) {
+
+                    //int tmp = reader.readB4();
+                    //System.out.print(" = " + tmp);
+                    //metaMap.put(name , tmp);
+                    metaMap.put(name , reader.readB4());
+                } else if(type == CeosDBTypes.Fn.value()) {
+
+                    //double tmp = reader.readFn(num);
+                    //System.out.print(" = " + tmp);
+                    //metaMap.put(name , tmp);
+                    metaMap.put(name , reader.readFn(num));
+                } else if(type == CeosDBTypes.Debug.value()) {
+
+                    for(int i=0; i < num; ++i) {
+                        String tmp = reader.readAn(1);
+                        if(!tmp.isEmpty() && !tmp.equals(" "))
+                            System.out.print(tmp);
+                    }
+                    System.out.println();
+                } else {
+                    throw new IllegalCeosFormatException("Unknown type " + type, reader.getCurrentPos());
+                }
+                //System.out.println();
+            }
+
         } catch(IllegalCeosFormatException e) {
-            System.out.println(e.toString() + " for "+ name + " in " + definitionFile);
-           
+            System.out.println(e.toString() + " for "+ name);
+
             throw e;
         }
+
     }
 
     public String getAttributeString(String name) {
