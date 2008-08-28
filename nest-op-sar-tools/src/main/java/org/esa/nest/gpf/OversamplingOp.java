@@ -32,7 +32,7 @@ import java.awt.*;
  * Oversample
  */
 
-@OperatorMetadata(alias="Oversample")
+@OperatorMetadata(alias="Oversample", internal=true)
 public class OversamplingOp extends Operator {
 
     @SourceProduct
