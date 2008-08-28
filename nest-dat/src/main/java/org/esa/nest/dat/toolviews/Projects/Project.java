@@ -160,9 +160,11 @@ public class Project extends Observable {
         //newFolder = processedFolder.addSubFolder("Orthorectified Products");
         //newFolder.setCreatedByUser(true);
 
-        if(VisatApp.getApp() != null)
+        if(VisatApp.getApp() != null) {
             VisatApp.getApp().getPreferences().setPropertyString(
                 BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, processedFolder.getPath().getAbsolutePath());
+            VisatApp.getApp().updateState();
+        }
     }
 
     private void addImportedProduct(Product product) {
@@ -259,6 +261,14 @@ public class Project extends Observable {
     public void CloseProject() {
         projectSubFolders = null;
         notifyEvent(false);
+
+        if(VisatApp.getApp() != null) {
+            VisatApp.getApp().updateState();
+        }
+    }
+
+    public boolean IsProjectOpen() {
+        return projectSubFolders != null;
     }
 
     public void SaveWorkSpace() {

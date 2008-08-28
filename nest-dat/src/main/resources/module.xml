@@ -98,12 +98,34 @@
             <parent>file</parent>
             <text>Load Project...</text>
             <accelerator>control L</accelerator>
-            <placeBefore>openRaster</placeBefore>
+            <placeBefore>saveProjectAs</placeBefore>
             <shortDescr>Load a project</shortDescr>
             <description>Load a project</description>
             <smallIcon>/org/esa/nest/icons/project_sm.png</smallIcon>
             <largeIcon>/org/esa/nest/icons/project.png</largeIcon>
             <helpId>loadProject</helpId>
+      </action>
+
+      <action>
+            <id>saveProjectAs</id>
+            <class>org.esa.nest.dat.actions.SaveProjectAsAction</class>
+            <parent>file</parent>
+            <text>Save Project As...</text>
+            <placeBefore>closeProject</placeBefore>
+            <shortDescr>Save current project to a new location</shortDescr>
+            <description>Save current project to a new location</description>
+            <smallIcon>icons/Save16.gif</smallIcon>
+            <largeIcon>icons/Save24.gif</largeIcon>
+      </action>
+
+      <action>
+            <id>closeProject</id>
+            <class>org.esa.nest.dat.actions.CloseProjectAction</class>
+            <parent>file</parent>
+            <text>Close Project</text>
+            <placeBefore>openRaster</placeBefore>
+            <shortDescr>Close current project</shortDescr>
+            <description>Close current project</description>
       </action>
 
       <action>

@@ -120,6 +120,7 @@ public final class DatApp extends VisatApp {
                 "loadProject",
                 null,
                 "openRaster",
+                "openVector",
                 "save",
                 null,
                 "properties",
