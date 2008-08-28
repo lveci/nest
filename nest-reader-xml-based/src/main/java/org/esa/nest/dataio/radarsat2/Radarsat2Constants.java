@@ -1,0 +1,38 @@
+package org.esa.nest.dataio.radarsat2;
+
+import java.io.File;
+
+/**
+ * Several constants used for reading Radarsat2 products.
+ */
+public class Radarsat2Constants {
+
+    final static String[] FORMAT_NAMES = new String[]{"Radarsat2"};
+    final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
+    final static String PLUGIN_DESCRIPTION = "Radarsat2 Products";      /*I18N*/
+    final static String PRODUCT_TYPE_PREFIX = "";
+    final static String PRODUCT_HEADER_PREFIX = "PRODUCT";
+
+    final static String PRODUCT_DESCRIPTION_PREFIX = "Radarsat2 product ";
+
+    private final static String INDICATION_KEY = "xml";
+
+    final static Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
+
+    public static String getIndicationKey() {
+        return INDICATION_KEY;
+    }
+
+    public static String getPluginDescription() {
+        return PLUGIN_DESCRIPTION;
+    }
+
+    public static String[] getFormatNames() {
+        return FORMAT_NAMES;
+    }
+
+    public static String[] getForamtFileExtensions() {
+        return FORMAT_FILE_EXTENSIONS;
+    }
+
+}

@@ -28,12 +28,23 @@
 
     <extension point="beam-ui:actions">
         <action>
+            <id>importRadarsat2Product</id>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <formatName>Radarsat2</formatName>
+            <shortDescr>Import a Radarsat2 data product or product subset.</shortDescr>
+            <description>Import a Radarsat2 data product or product subset.</description>
+            <largeIcon>icons/Import24.gif</largeIcon>
+            <placeAfter>importRadarsatProduct</placeAfter>
+            <helpId>importRadarsat2Product</helpId>
+        </action>
+        <action>
             <id>importTerraSarXProduct</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>TerraSarX</formatName>
             <shortDescr>Import a TerraSarX data product or product subset.</shortDescr>
             <description>Import a TerraSarX data product or product subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
+            <placeAfter>importRadarsat2Product</placeAfter>
             <helpId>importTerraSarXProduct</helpId>
         </action>
 

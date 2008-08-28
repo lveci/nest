@@ -30,7 +30,7 @@ public class ImageIOReader extends AbstractProductReader {
 
     ImageIOFile imgIOFile;
 
-    private transient Map<Band, BandInfo> bandMap = new HashMap<Band, BandInfo>(3);
+    private transient Map<Band, ImageIOFile.BandInfo> bandMap = new HashMap<Band, ImageIOFile.BandInfo>(3);
 
     /**
      * Constructs a new abstract product reader.
@@ -89,7 +89,7 @@ public class ImageIOReader extends AbstractProductReader {
                 final Band band = new Band("band"+ bandCnt++, imgIOFile.getDataType(),
                                    imgIOFile.getSceneWidth(), imgIOFile.getSceneHeight());
                 product.addBand(band);
-                bandMap.put(band, new BandInfo(i, b));
+                bandMap.put(band, new ImageIOFile.BandInfo(imgIOFile, i, b));
             }
         }
 
@@ -130,18 +130,10 @@ public class ImageIOReader extends AbstractProductReader {
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
 
-        BandInfo bandInfo = bandMap.get(destBand);
+        ImageIOFile.BandInfo bandInfo = bandMap.get(destBand);
 
         imgIOFile.readImageIORasterBand(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
                               destBuffer, pm, bandInfo.imageID, bandInfo.bandSampleOffset);
     }
 
-    private static class BandInfo {
-        int imageID;
-        int bandSampleOffset;
-        public BandInfo(int id, int offset) {
-            imageID = id;
-            bandSampleOffset = offset;
-        }
-    }
 }

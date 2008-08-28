@@ -1,2 +1,2 @@
 org.esa.nest.dataio.terrasarx.TerraSarXProductReaderPlugIn
-
+org.esa.nest.dataio.radarsat2.Radarsat2ProductReaderPlugIn

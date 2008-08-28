@@ -1,4 +1,4 @@
-package org.esa.nest.dataio.terrasarx;
+package org.esa.nest.dataio.radarsat2;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.AbstractProductReader;
@@ -17,7 +17,7 @@ import java.io.IOException;
  * The product reader for TerraSarX products.
  *
  */
-public class TerraSarXProductReader extends AbstractProductReader {
+public class Radarsat2ProductReader extends AbstractProductReader {
 
     protected XMLProductDirectory _dataDir;
 
@@ -27,7 +27,7 @@ public class TerraSarXProductReader extends AbstractProductReader {
      * @param readerPlugIn the reader plug-in which created this reader, can be <code>null</code> for internal reader
      *                     implementations
      */
-    public TerraSarXProductReader(final ProductReaderPlugIn readerPlugIn) {
+    public Radarsat2ProductReader(final ProductReaderPlugIn readerPlugIn) {
        super(readerPlugIn);
     }
 
@@ -83,7 +83,7 @@ public class TerraSarXProductReader extends AbstractProductReader {
         final File fileFromInput = getFileFromInput(input);
         Product product;
         try {
-            _dataDir = new XMLProductDirectory(fileFromInput, new File(fileFromInput.getParentFile(), "IMAGEDATA"));
+            _dataDir = new XMLProductDirectory(fileFromInput, fileFromInput.getParentFile());
             _dataDir.readProductDirectory();
             product = _dataDir.createProduct();
             product.setFileLocation(fileFromInput);

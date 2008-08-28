@@ -132,4 +132,15 @@ public class ImageIOFile {
         //}
     }
 
+    public static class BandInfo {
+        public int imageID;
+        public int bandSampleOffset;
+        public ImageIOFile img;
+        
+        public BandInfo(ImageIOFile imgFile, int id, int offset) {
+            img = imgFile;
+            imageID = id;
+            bandSampleOffset = offset;
+        }
+    }
 }
