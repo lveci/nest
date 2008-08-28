@@ -7,6 +7,7 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.Debug;
+import org.esa.nest.dataio.ImageIOFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -105,32 +106,11 @@ public class TerraSarXProductReader extends AbstractProductReader {
                                           int sourceStepX, int sourceStepY, Band destBand, int destOffsetX,
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
-   /*     try {
-            final CEOSImageFile imageFile = _dataDir.getImageFile(destBand);
-            if(_dataDir.isSLC()) {
-                boolean oneOf2 = !destBand.getName().startsWith("q");
 
-                imageFile.readBandRasterDataSLC(sourceOffsetX, sourceOffsetY,
-                                         sourceWidth, sourceHeight,
-                                         sourceStepX, sourceStepY,
-                                         destOffsetX, destOffsetY,
-                                         destWidth, destHeight,
-                                         destBuffer, oneOf2, pm);
-
-            } else {
-                imageFile.readBandRasterData(sourceOffsetX, sourceOffsetY,
-                                         sourceWidth, sourceHeight,
-                                         sourceStepX, sourceStepY,
-                                         destOffsetX, destOffsetY,
-                                         destWidth, destHeight,
-                                         destBuffer, pm);
-            }
-
-        } catch (Exception e) {
-            final IOException ioException = new IOException(e.getMessage());
-            ioException.initCause(e);
-            throw ioException;
-        }  */
-
+        ImageIOFile img = _dataDir.getBandImageFile(destBand.getName());
+        if(img != null) {
+            img.readImageIORasterBand(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
+                                        destBuffer, pm, 0, 0);
+        }
     }
 }

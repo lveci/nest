@@ -20,6 +20,9 @@
     <dependency>
         <module>nest-core</module>
     </dependency>
+    <dependency>
+        <module>nest-reader-generic</module>
+    </dependency>
 
     <categories>Reader</categories>
 

@@ -4,6 +4,7 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.AbstractMetadata;
+import org.esa.nest.dataio.ImageIOFile;
 import org.esa.nest.util.XMLSupport;
 import org.jdom.Element;
 import org.jdom.Attribute;
@@ -32,7 +33,7 @@ class XMLProductDirectory {
     private int _sceneHeight;
     private String productType = "Type";
 
-    //private transient Map<String, ERSImageFile> bandImageFileMap = new HashMap<String, ERSImageFile>(1);
+    private transient Map<String, ImageIOFile> bandImageFileMap = new HashMap<String, ImageIOFile>(1);
 
     public XMLProductDirectory(final File file) {
         Guardian.assertNotNull("file", file);
@@ -45,16 +46,18 @@ class XMLProductDirectory {
 
         xmlDoc = XMLSupport.LoadXML(_xmlHeader.getAbsolutePath());
 
-   /*     final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, "DAT_");
-        int numImageFiles = imageFileNames.length;
-        _imageFiles = new ERSImageFile[numImageFiles];
-        for (int i = 0; i < numImageFiles; i++) {
-            _imageFiles[i] = new ERSImageFile(createInputStream(imageFileNames[i]));
-        }
+        File imgFolder = new File(_baseDir, "IMAGEDATA");
 
-        _sceneWidth = _imageFiles[0].getRasterWidth();
-        _sceneHeight = _imageFiles[0].getRasterHeight();
-        assertSameWidthAndHeightForAllImages();     */
+        File[] fileList = imgFolder.listFiles();
+        for (File file : fileList) {
+            if (file.getName().toUpperCase().endsWith("TIF")) {
+                ImageIOFile img = new ImageIOFile(file);
+                bandImageFileMap.put(img.getName(), img);
+
+                _sceneWidth = img.getSceneWidth();
+                _sceneHeight = img.getSceneHeight();
+            }
+        }   
     }
 
     public Product createProduct() throws IOException {
@@ -62,48 +65,14 @@ class XMLProductDirectory {
                                             productType,
                                             _sceneWidth, _sceneHeight);
 
-     /*   if(_imageFiles.length > 1) {
-            int index = 1;
-            for (final ERSImageFile imageFile : _imageFiles) {
+        Set keys = bandImageFileMap.keySet();                           // The set of keys in the map.
+        for (Object key : keys) {
+            ImageIOFile img = bandImageFileMap.get(key);
 
-                if(isProductSLC) {
-                    String bandName = "i_" + index;
-                    Band bandI = createBand(bandName);
-                    product.addBand(bandI);
-                    bandImageFileMap.put(bandName, imageFile);
-                    bandName = "q_" + index;
-                    Band bandQ = createBand(bandName);
-                    product.addBand(bandQ);
-                    bandImageFileMap.put(bandName, imageFile);
-
-                    CEOSProductDirectory.createVirtualIntensityBand(product, bandI, bandQ, "_"+index);
-                    ++index;
-                } else {
-                    String bandName = "amplitude_" + index;
-                    Band band = createBand(bandName);
-                    product.addBand(band);
-                    bandImageFileMap.put(bandName, imageFile);
-                    CEOSProductDirectory.createVirtualIntensityBand(product, band, "_"+index);
-                    ++index;
-                }
-            }
-        } else {
-            ERSImageFile imageFile = _imageFiles[0];
-            if(isProductSLC) {
-                Band bandI = createBand("i");
-                product.addBand(bandI);
-                bandImageFileMap.put("i", imageFile);
-                Band bandQ = createBand("q");
-                product.addBand(bandQ);
-                bandImageFileMap.put("q", imageFile);
-                CEOSProductDirectory.createVirtualIntensityBand(product, bandI, bandQ, "");
-            } else {
-                Band band = createBand("amplitude");
-                product.addBand(band);
-                bandImageFileMap.put("amplitude", imageFile);
-                CEOSProductDirectory.createVirtualIntensityBand(product, band, "");
-            }
-        }                     */
+            final Band band = new Band(img.getName(), img.getDataType(),
+                                   img.getSceneWidth(), img.getSceneHeight());
+            product.addBand(band);
+        }
 
         //product.setStartTime(getUTCScanStartTime());
         //product.setEndTime(getUTCScanStopTime());
@@ -113,6 +82,10 @@ class XMLProductDirectory {
         addMetaData(product);
 
         return product;
+    }
+
+    public ImageIOFile getBandImageFile(String bandName) {
+        return bandImageFileMap.get(bandName);
     }
 
     private void addGeoCoding(final Product product) throws IOException {
@@ -132,30 +105,11 @@ class XMLProductDirectory {
     }
 
     public void close() throws IOException {
-
-    }
-
-    private Band createBand(String name) {
-        final Band band = new Band(name, ProductData.TYPE_INT16,
-                                   _sceneWidth, _sceneHeight);
-
-        //band.setUnit(ERSImageFile.getGeophysicalUnit());
-
-      /*
-        final int bandIndex = index;
-        final double scalingFactor = _leaderFile.getAbsoluteCalibrationGain(bandIndex);
-        final double scalingOffset = _leaderFile.getAbsoluteCalibrationOffset(bandIndex);
-        band.setScalingFactor(scalingFactor);
-        band.setScalingOffset(scalingOffset);
-        band.setNoDataValueUsed(false);
-        final int[] histogramBins = _trailerFile.getHistogramBinsForBand(bandIndex);
-        final float scaledMinSample = (float) (getMinSampleValue(histogramBins) * scalingFactor + scalingOffset);
-        final float scaledMaxSample = (float) (getMaxSampleValue(histogramBins) * scalingFactor + scalingOffset);
-        final ImageInfo imageInfo = new ImageInfo(scaledMinSample, scaledMaxSample, histogramBins);
-        band.setImageInfo(imageInfo);
-        band.setDescription("Radiance band " + ImageFile.getBandIndex());
-        */
-        return band;
+        Set keys = bandImageFileMap.keySet();                           // The set of keys in the map.
+        for (Object key : keys) {
+            ImageIOFile img = bandImageFileMap.get(key);
+            img.close();
+        }
     }
 
     private void addMetaData(final Product product) throws IOException {
@@ -170,26 +124,31 @@ class XMLProductDirectory {
 
     private static void AddXMLMetadata(Element xmlRoot, MetadataElement metadataRoot) {
 
-        MetadataElement metaElem = new MetadataElement(xmlRoot.getName());
-        xmlRoot.getAttributes();
+        if(xmlRoot.getChildren().size() == 0) {
+            if(!xmlRoot.getValue().isEmpty())
+                metadataRoot.setAttributeString(xmlRoot.getName(), xmlRoot.getValue());
+        } else {
+            MetadataElement metaElem = new MetadataElement(xmlRoot.getName());
+            xmlRoot.getAttributes();
 
-        List children = xmlRoot.getContent();
-        for (Object aChild : children) {
-            if (aChild instanceof Element) {
-                Element child = (Element) aChild;
-                AddXMLMetadata(child, metaElem);
-            } else if(aChild instanceof Attribute) {
-                Attribute childAtrrib = (Attribute) aChild;
-                metaElem.setAttributeString(childAtrrib.getName(), childAtrrib.getValue());
+            List children = xmlRoot.getContent();
+            for (Object aChild : children) {
+                if (aChild instanceof Element) {
+                    Element childElem = (Element) aChild;
+                    AddXMLMetadata(childElem, metaElem);
+                } else if(aChild instanceof Attribute) {
+                    Attribute childAtrrib = (Attribute) aChild;
+                    metaElem.setAttributeString(childAtrrib.getName(), childAtrrib.getValue());
+                }
             }
-        }
 
-        List<Attribute> xmlAttribs = xmlRoot.getAttributes();
-        for (Attribute aChild : xmlAttribs) {
-            metaElem.setAttributeString(aChild.getName(), aChild.getValue());
-        }
+            List<Attribute> xmlAttribs = xmlRoot.getAttributes();
+            for (Attribute aChild : xmlAttribs) {
+                metaElem.setAttributeString(aChild.getName(), aChild.getValue());
+            }
 
-        metadataRoot.addElement(metaElem);
+            metadataRoot.addElement(metaElem);
+        }
     }
 
     private void addAbstractedMetadataHeader(MetadataElement root) {
