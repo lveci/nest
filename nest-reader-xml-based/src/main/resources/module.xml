@@ -1,0 +1,39 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>nest-reader-xml-based</symbolicName>
+    <version>1C</version>
+    <name>TerraSarX and Radarsat-2 Product Reader</name>
+
+    <description>
+        Enables reading of TerraSarX and Radarsat-2 data products in XML/GeoTIFF format.
+    </description>
+
+    <vendor>Array Systems Computing Inc</vendor>
+    <contactAddress>1120 Finch Ave W. Toronto (Canada)</contactAddress>
+    <copyright>(C) 2007 by Array Systems Computing Inc</copyright>
+    <url>http://www.array.ca/nest</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>nest-core</module>
+    </dependency>
+
+    <categories>Reader</categories>
+
+    <extension point="beam-ui:actions">
+        <action>
+            <id>importTerraSarXProduct</id>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <formatName>TerraSarX</formatName>
+            <shortDescr>Import a TerraSarX data product or product subset.</shortDescr>
+            <description>Import a TerraSarX data product or product subset.</description>
+            <largeIcon>icons/Import24.gif</largeIcon>
+            <helpId>importTerraSarXProduct</helpId>
+        </action>
+
+    </extension>
+
+</module>
