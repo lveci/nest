@@ -40,10 +40,10 @@ public class LinearTodBOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    private final static String AMPLITUDE = "Amplitude";
-    private final static String INTENSITY = "Intensity";
+    private final static String LINEAR = "Linear";
+    private final static String DB = "dB";
 
-    @Parameter(valueSet = { AMPLITUDE, INTENSITY }, defaultValue = INTENSITY)
+    @Parameter(valueSet = { LINEAR, DB }, defaultValue = DB)
     private String convertTo;
 
 
@@ -101,14 +101,13 @@ public class LinearTodBOp extends Operator {
             ProductData dstData = targetTile.getRawSamples();
 
             int numElem = dstData.getNumElems();
-            if(convertTo.equals(INTENSITY)) {
+            if(convertTo.equals(DB)) {
                 for(int i=0; i < numElem; ++i) {
-                    double val = srcData.getElemDoubleAt(i);
-                    dstData.setElemDoubleAt(i, val * val);
+                    dstData.setElemDoubleAt(i, 10.0 * Math.log10(srcData.getElemDoubleAt(i)));
                 }
             } else {
                 for(int i=0; i < numElem; ++i) {
-                    dstData.setElemDoubleAt(i, Math.sqrt(srcData.getElemDoubleAt(i)));
+                    dstData.setElemDoubleAt(i, Math.pow(10, srcData.getElemDoubleAt(i)/10.0));
                 }
             }
 
