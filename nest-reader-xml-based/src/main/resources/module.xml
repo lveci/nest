@@ -30,7 +30,7 @@
         <action>
             <id>importRadarsat2Product</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
-            <formatName>Radarsat2</formatName>
+            <formatName>Radarsat 2</formatName>
             <shortDescr>Import a Radarsat2 data product or product subset.</shortDescr>
             <description>Import a Radarsat2 data product or product subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>

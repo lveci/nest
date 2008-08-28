@@ -7,7 +7,7 @@ import java.io.File;
  */
 public class Radarsat2Constants {
 
-    final static String[] FORMAT_NAMES = new String[]{"Radarsat2"};
+    final static String[] FORMAT_NAMES = new String[]{"Radarsat 2"};
     final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
     final static String PLUGIN_DESCRIPTION = "Radarsat2 Products";      /*I18N*/
     final static String PRODUCT_TYPE_PREFIX = "";
