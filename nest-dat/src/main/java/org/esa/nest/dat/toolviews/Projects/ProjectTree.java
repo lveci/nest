@@ -106,7 +106,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                 addSeparator(popup);
                 createMenuItem(popup, "Expand All");
             }
-            if(!folder.isPhysical()) {
+            if(!folder.isPhysical() && !selectedNode.isRoot()) {
                 createMenuItem(popup, "Clear");
             }
             if(folder.getFolderType() == ProjectSubFolder.FolderType.PRODUCTSET) {
