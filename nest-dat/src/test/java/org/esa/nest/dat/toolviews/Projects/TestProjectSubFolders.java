@@ -51,8 +51,8 @@ public class TestProjectSubFolders extends TestCase {
         ProjectSubFolder folder1 = projectSubFolders.addSubFolder("Folder1");
         ProjectSubFolder folder2 = projectSubFolders.addSubFolder("Folder2");
 
-        folder1.addFile(new ProjectSubFolder.ProjectFile(new File("abc"), "abc"));
-        folder2.addFile(new ProjectSubFolder.ProjectFile(new File("xyz"), "xyz"));
+        folder1.addFile(new ProjectFile(new File("abc"), "abc"));
+        folder2.addFile(new ProjectFile(new File("xyz"), "xyz"));
 
         Element xmlElement = projectSubFolders.toXML();
 

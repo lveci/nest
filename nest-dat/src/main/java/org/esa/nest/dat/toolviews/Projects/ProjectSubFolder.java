@@ -215,21 +215,4 @@ public class ProjectSubFolder {
     }
 
 
-    public static class ProjectFile {
-        private final File file;
-        private final String displayName;
-
-        ProjectFile(File f, String name) {
-            file = f;
-            displayName = name.trim();
-        }
-
-        public File getFile() {
-            return file;
-        }
-
-        public String getDisplayName() {
-            return displayName;
-        }
-    }
 }

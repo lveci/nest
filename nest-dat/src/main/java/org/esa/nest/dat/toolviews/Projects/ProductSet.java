@@ -15,10 +15,9 @@ import java.util.Vector;
 import java.util.List;
 
 /**
- * Created by IntelliJ IDEA.
+ * Defines a list of Products
  * User: lveci
  * Date: Aug 20, 2008
- * To change this template use File | Settings | File Templates.
  */
 public class ProductSet {
 

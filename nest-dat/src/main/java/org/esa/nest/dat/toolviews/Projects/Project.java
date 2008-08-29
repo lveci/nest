@@ -99,7 +99,7 @@ public class Project extends Observable {
                 }
 
                 if(found) {
-                    projSubFolder.addFile(new ProjectSubFolder.ProjectFile(f, f.getName()));
+                    projSubFolder.addFile(new ProjectFile(f, f.getName()));
                     hasProducts = true;
                 }
             }
@@ -181,7 +181,7 @@ public class Project extends Observable {
         if(formats.length > 0)
             destFolder = importFolder.addSubFolder(formats[0]);
 
-        destFolder.addFile(new ProjectSubFolder.ProjectFile(product.getFileLocation(), product.getName()));
+        destFolder.addFile(new ProjectFile(product.getFileLocation(), product.getName()));
     }
 
     public void refreshProjectTree() {
@@ -209,7 +209,7 @@ public class Project extends Observable {
         ProductSetDialog dlg = new ProductSetDialog("New ProductSet", prodSet);
         dlg.show();
         if(dlg.IsOK()) {
-            subFolder.addFile(new ProjectSubFolder.ProjectFile(prodSet.getFile(), prodSet.getName()));
+            subFolder.addFile(new ProjectFile(prodSet.getFile(), prodSet.getName()));
             notifyEvent(SAVE_PROJECT);
         }
     }
@@ -320,7 +320,7 @@ public class Project extends Observable {
         }
 
         Vector<ProjectSubFolder> folderList = new Vector<ProjectSubFolder>(30);
-        Vector<ProjectSubFolder.ProjectFile> prodList = new Vector<ProjectSubFolder.ProjectFile>(50);
+        Vector<ProjectFile> prodList = new Vector<ProjectFile>(50);
 
         Element root = doc.getRootElement();
 
@@ -342,7 +342,7 @@ public class Project extends Observable {
     }
 
     private static void loadProducts(final Vector<ProjectSubFolder> folderList,
-                                     final Vector<ProjectSubFolder.ProjectFile> prodList) {
+                                     final Vector<ProjectFile> prodList) {
 
         ProgressMonitorSwingWorker worker = new ProgressMonitorSwingWorker(VisatApp.getApp().getMainFrame(), "Opening Project") {
             @Override
@@ -352,7 +352,7 @@ public class Project extends Observable {
                     for(int i=0; i < prodList.size(); ++i) {
 
                         ProjectSubFolder subFolder = folderList.get(i);
-                        ProjectSubFolder.ProjectFile projFile = prodList.get(i);
+                        ProjectFile projFile = prodList.get(i);
                         File prodFile = projFile.getFile();
 
                         ProductReader reader = ProductIO.getProductReaderForFile(prodFile);

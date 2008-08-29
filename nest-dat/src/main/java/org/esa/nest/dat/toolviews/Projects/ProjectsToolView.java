@@ -66,7 +66,7 @@ public class ProjectsToolView extends AbstractToolView implements Observer {
             final DefaultMutableTreeNode folderNode = new DefaultMutableTreeNode(folder);
             treeNode.add(folderNode);
 
-            Vector<ProjectSubFolder.ProjectFile> fileList = folder.getFileList();
+            Vector<ProjectFile> fileList = folder.getFileList();
             for (Enumeration file = fileList.elements(); file.hasMoreElements();)
             {
                 final DefaultMutableTreeNode fileNode = new DefaultMutableTreeNode(file.nextElement());
