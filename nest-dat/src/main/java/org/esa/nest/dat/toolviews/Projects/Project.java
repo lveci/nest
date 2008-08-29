@@ -205,6 +205,8 @@ public class Project extends Observable {
         if(dlg.IsOK()) {
             ProjectSubFolder newFolder = subFolder.addSubFolder(dlg.getValue());
             newFolder.setCreatedByUser(true);
+            if(subFolder == projectSubFolders || subFolder.isPhysical())
+                newFolder.setPhysical(true);
             notifyEvent(SAVE_PROJECT);
         }
     }
