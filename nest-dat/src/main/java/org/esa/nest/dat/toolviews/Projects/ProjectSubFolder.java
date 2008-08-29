@@ -82,7 +82,7 @@ public class ProjectSubFolder {
     }
 
     void addFile(ProjectFile file) {
-        if(!fileList.contains(file))
+        if(!containsFile(file.getFile()))
             fileList.add(file);
     }
 

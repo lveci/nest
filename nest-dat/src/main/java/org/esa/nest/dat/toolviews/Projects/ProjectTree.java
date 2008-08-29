@@ -106,6 +106,9 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                 addSeparator(popup);
                 createMenuItem(popup, "Expand All");
             }
+            if(!folder.isPhysical()) {
+                createMenuItem(popup, "Clear");
+            }
             if(folder.getFolderType() == ProjectSubFolder.FolderType.PRODUCTSET) {
                 addSeparator(popup);
                 createMenuItem(popup, "New ProductSet...");
@@ -120,7 +123,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
             DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
             ProjectSubFolder folder = (ProjectSubFolder)parentNode.getUserObject();
             if(!folder.isPhysical()) {
-                
+                createMenuItem(popup, "Import as DIMAP");
             }
         } 
 
@@ -178,6 +181,13 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
             ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
             ProjectFile file = (ProjectFile) menuContext;
             Project.openFile(parentFolder, file.getFile());
+        } else if(e.getActionCommand().equals("Import as DIMAP")) {
+            ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
+            ProjectFile file = (ProjectFile) menuContext;
+            project.importFile(parentFolder, file.getFile());
+        } else if(e.getActionCommand().equals("Clear")) {
+            ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
+            project.clearFolder(subFolder);
         } else if(e.getActionCommand().equals("Expand All")) {
             expandAll();
         } else if(e.getActionCommand().equals("New Project...")) {
@@ -190,6 +200,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
             project.CloseProject();
         } else if(e.getActionCommand().equals("Refresh Project")) {
             project.refreshProjectTree();
+            project.notifyEvent(true);
         } else if(e.getActionCommand().equals("New ProductSet...")) {
             ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
             project.createNewProductSet(subFolder);
