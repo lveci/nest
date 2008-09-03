@@ -12,7 +12,7 @@ import java.io.FilenameFilter;
 import java.util.Locale;
 
 /**
- * The ReaderPlugIn for CEOS products.
+ * The ReaderPlugIn for ImageIO products.
  *
  */
 public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
