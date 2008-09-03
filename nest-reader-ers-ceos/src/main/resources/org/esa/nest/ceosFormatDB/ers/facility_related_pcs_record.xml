@@ -8,6 +8,6 @@
 	<rec name="Record Length" type="4" num="1"/>
 	<rec name="Name of this facility record" type="1" num="64"/>
 	<rec name="skipBytes" type="0" num="3372"/>
-	<rec name="chirp average density" type="1" num="16"/>
+	<rec name="chirp average density" type="0" num="16"/>
 		
 </ceos>

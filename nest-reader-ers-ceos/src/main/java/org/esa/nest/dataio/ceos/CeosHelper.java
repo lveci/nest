@@ -1,5 +1,5 @@
 /*
- * $Id: CeosHelper.java,v 1.6 2008-08-27 17:54:38 lveci Exp $
+ * $Id: CeosHelper.java,v 1.7 2008-09-03 19:26:54 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,6 +17,7 @@
 package org.esa.nest.dataio.ceos;
 
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.util.StringUtils;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.FilePointerRecord;
 
@@ -83,8 +84,9 @@ public class CeosHelper {
     }
 
     public static String getProductName(final BaseRecord textRecord) {
-        return textRecord.getAttributeString("Scene identification").trim() + '-' +
+        String name = textRecord.getAttributeString("Scene identification").trim() + '-' +
                 textRecord.getAttributeString("Product type specifier").trim();
+        return StringUtils.createValidName(name, new char[]{'_', '-', '.'}, '_');
     }
 
     public static ProductData.UTC createUTCDate(final int year, final int dayOfYear, final int millisInDay) {
