@@ -51,6 +51,15 @@
         </action>
 
         <action>
+            <id>FocusingAdjustmentOp</id>
+            <class>org.esa.nest.dat.FocusingAdjustmentOpAction</class>
+            <text>Focusing Adjustment</text>
+            <shortDescr>Focusing Adjustment</shortDescr>
+            <parent>sartools</parent>
+            <helpId>FocusingAdjustmentOp</helpId>
+        </action>
+
+        <action>
             <id>Resampling</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>Resampling</text>
