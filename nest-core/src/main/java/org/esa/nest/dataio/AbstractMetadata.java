@@ -4,7 +4,6 @@ import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.util.Debug;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,6 +18,7 @@ public class AbstractMetadata {
     public static final String SPH_DESCRIPTOR = "SPH_DESCRIPTOR";
     public static final String MISSION = "MISSION";
     public static final String PROC_TIME = "PROC_TIME";
+    public static final String ProcessingSystemIdentifier = "Processing system identifier";
     public static final String CYCLE = "CYCLE";
     public static final String REL_ORBIT = "REL_ORBIT";
     public static final String ABS_ORBIT = "ABS_ORBIT";
@@ -62,6 +62,10 @@ public class AbstractMetadata {
     // SRGR
     public static final String srgr_flag = "srgr_flag";
 
+    // calibration
+    public static final String ant_elev_corr_flag = "ant_elev_corr_flag";
+    public static final String range_spread_comp_flag = "range_spread_comp_flag";
+
     /**
      * Abstract common metadata from products to be used uniformly by all operators
      * @param root the product metadata root
@@ -79,6 +83,7 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, SPH_DESCRIPTOR, ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, MISSION, ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, PROC_TIME, ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, ProcessingSystemIdentifier, ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, CYCLE, ProductData.TYPE_INT32, "", "");
         addAbstractedAttribute(absRoot, REL_ORBIT, ProductData.TYPE_INT32, "", "");
         addAbstractedAttribute(absRoot, ABS_ORBIT, ProductData.TYPE_INT32, "", "");
@@ -123,6 +128,9 @@ public class AbstractMetadata {
         // SRGR
         addAbstractedAttribute(absRoot, srgr_flag, ProductData.TYPE_UINT8, "flag", "SRGR applied");
 
+        // calibration
+        addAbstractedAttribute(absRoot, ant_elev_corr_flag, ProductData.TYPE_UINT8, "flag", "Antenna elevation applied");
+        addAbstractedAttribute(absRoot, range_spread_comp_flag, ProductData.TYPE_UINT8, "flag", "range spread compensation applied");
     }
 
     /**
