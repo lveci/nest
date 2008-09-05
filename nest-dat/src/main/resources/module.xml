@@ -35,8 +35,8 @@
             <applicationDescriptor>
                 <applicationId>DatMain</applicationId>
                 <displayName>DAT</displayName>
-                <frameIcon>/org/esa/nest/dat/images/frame-icon.png</frameIcon>
-                <image>/org/esa/nest/dat/images/about.jpg</image>
+                <frameIcon>/org/esa/nest/dat/icons/dat.png</frameIcon>
+                <image>/org/esa/nest/dat/icons/nest_splash.png</image>
                 <excludedActions>
                     <id>orthorectification</id>
                     <id>showDataSources</id>

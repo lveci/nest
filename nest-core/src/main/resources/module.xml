@@ -20,6 +20,9 @@
     <dependency>
         <module>beam-visat-rcp</module>
     </dependency>
+    <dependency>
+        <module>beam-envisat-reader</module>
+    </dependency>
     
     <categories>System</categories>
 

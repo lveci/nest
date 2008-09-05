@@ -53,6 +53,7 @@ public class AbstractMetadata {
     public static final String range_looks = "range_looks";
     public static final String range_spacing = "range_spacing";
     public static final String azimuth_spacing = "azimuth_spacing";
+    public static final String pulse_repetition_frequency = "pulse_repetition_frequency";
     public static final String line_time_interval = "line_time_interval";
     public static final String data_type = "data_type";
 
@@ -112,6 +113,7 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, range_looks, ProductData.TYPE_INT32, "", "");
         addAbstractedAttribute(absRoot, range_spacing, ProductData.TYPE_FLOAT64, "m", "Range sample spacing");
         addAbstractedAttribute(absRoot, azimuth_spacing, ProductData.TYPE_FLOAT64, "m", "");
+        addAbstractedAttribute(absRoot, pulse_repetition_frequency, ProductData.TYPE_INT32, "", "");
         addAbstractedAttribute(absRoot, line_time_interval, ProductData.TYPE_FLOAT64, "s", "");
         addAbstractedAttribute(absRoot, data_type, ProductData.TYPE_ASCII, "", "");
 

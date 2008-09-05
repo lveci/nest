@@ -18,16 +18,9 @@ import java.util.*;
 
 /**
  * This class represents a product directory.
- * <p/>
- * <p>This class is public for the benefit of the implementation of another (internal) class and its API may
- * change in future releases of the software.</p>
  *
  */
 class ERSProductDirectory extends CEOSProductDirectory {
-
-    private static final double UTM_FALSE_EASTING = 500000.00;
-    private static final double UTM_FALSE_NORTHING = 10000000.00;
-    private static final int METER_PER_KILOMETER = 1000;
 
     private final File _baseDir;
     private ERSVolumeDirectoryFile _volumeDirectoryFile;
@@ -39,8 +32,6 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
     private final static String ERS1_MISSION = "ERS-1";
     private final static String ERS2_MISSION = "ERS-2";
-    //private static String SLC_PRODUCT_TYPE = "SAR SINGLE LOOK COMPLEX IMAGE   ";
-    //private static String ERS1_SLC_PRODUCT_TYPE = "PRODUCT: ERS-1.SAR.SLC                  ";
 
     private transient Map<String, ERSImageFile> bandImageFileMap = new HashMap<String, ERSImageFile>(1);
 
