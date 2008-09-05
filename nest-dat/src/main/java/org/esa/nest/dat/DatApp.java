@@ -201,6 +201,7 @@ public final class DatApp extends VisatApp {
 
         addCommandsToToolBar(toolBar, new String[]{
                 "openGraphBuilderDialog",
+                "editMetadata",
                 "openInformationDialog",
         });
 

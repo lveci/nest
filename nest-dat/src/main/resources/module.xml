@@ -263,6 +263,7 @@
             <placeBefore>Calibration</placeBefore>
             <parent>sartools</parent>
             <context>metadata</context>
+            <largeIcon>/org/esa/nest/icons/metadata_edit.png</largeIcon>
         </action>
 
         <action>
