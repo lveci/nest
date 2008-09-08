@@ -51,6 +51,9 @@ public abstract class CEOSProductDirectory {
         virtBand.setUnit("intensity");
         virtBand.setDescription("Intensity from complex data");
         product.addBand(virtBand);
+
+        // set as band to use for quicklook
+        product.setQuicklookBandName(virtBand.getName());
     }
 
     protected static void createVirtualIntensityBand(Product product, Band band, String countStr) {
