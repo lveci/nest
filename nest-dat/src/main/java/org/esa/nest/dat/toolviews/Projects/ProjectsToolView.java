@@ -31,15 +31,15 @@ public class ProjectsToolView extends AbstractToolView implements Observer {
 
     @Override
     public JComponent createControl() {
-        final JScrollPane layerScrollPane = new JideScrollPane(createTree());
-        layerScrollPane.setPreferredSize(new Dimension(320, 480));
-        layerScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        layerScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        layerScrollPane.setBorder(null);
-        layerScrollPane.setViewportBorder(null);
+        final JScrollPane prjScrollPane = new JideScrollPane(createTree());
+        prjScrollPane.setPreferredSize(new Dimension(320, 480));
+        prjScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        prjScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        prjScrollPane.setBorder(null);
+        prjScrollPane.setViewportBorder(null);
 
         final JideSplitPane splitPane = new JideSplitPane(JideSplitPane.VERTICAL_SPLIT);
-        splitPane.addPane(layerScrollPane);
+        splitPane.addPane(prjScrollPane);
 
         return splitPane;
     }
