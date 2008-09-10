@@ -32,6 +32,10 @@ import javax.media.jai.InterpolationNearest;
 import java.awt.*;
 import java.awt.image.renderable.ParameterBlock;
 
+/*
+ * todo Currently the incidence angle is obtained from different places in the metadata for ERS and ASAR products.
+ * todo In future, it should always be get from the abstracted metadata.
+ */
 /**
  * Original SAR images generally appears with inherent speckle noise. Multi-look integration is one category
  * of methods to reduce this inherent speckle noise. The frequency-domain method consis of
