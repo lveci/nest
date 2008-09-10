@@ -43,7 +43,6 @@
                     <id>showUpdateDialog</id>
                     <id>new</id>
                     <id>open</id>
-                    <id>reopen</id>
                     <id>createAsarNrcsBands</id>
                     <id>selectionTool</id>
                 </excludedActions>
@@ -84,7 +83,7 @@
             <parent>file</parent>
             <text>New Project...</text>
             <accelerator>control P</accelerator>
-            <placeBefore>loadProject</placeBefore>
+            <!--placeBefore>loadProject</placeBefore-->
             <shortDescr>Create a new project</shortDescr>
             <description>Create a new project</description>
             <smallIcon>/org/esa/nest/icons/project-new.png</smallIcon>
@@ -98,7 +97,8 @@
             <parent>file</parent>
             <text>Load Project...</text>
             <accelerator>control L</accelerator>
-            <placeBefore>saveProjectAs</placeBefore>
+            <!--placeBefore>saveProjectAs</placeBefore-->
+            <placeAfter>newProject</placeAfter>
             <shortDescr>Load a project</shortDescr>
             <description>Load a project</description>
             <smallIcon>/org/esa/nest/icons/project_sm.png</smallIcon>
@@ -111,7 +111,8 @@
             <class>org.esa.nest.dat.actions.SaveProjectAsAction</class>
             <parent>file</parent>
             <text>Save Project As...</text>
-            <placeBefore>closeProject</placeBefore>
+            <!--placeBefore>closeProject</placeBefore-->
+            <placeAfter>openProductGrabber</placeAfter>
             <shortDescr>Save current project to a new location</shortDescr>
             <description>Save current project to a new location</description>
             <smallIcon>icons/Save16.gif</smallIcon>
@@ -123,7 +124,8 @@
             <class>org.esa.nest.dat.actions.CloseProjectAction</class>
             <parent>file</parent>
             <text>Close Project</text>
-            <placeBefore>openRaster</placeBefore>
+            <!--placeBefore>openRaster</placeBefore-->
+            <placeAfter>saveProjectAs</placeAfter>
             <shortDescr>Close current project</shortDescr>
             <description>Close current project</description>
       </action>
@@ -136,7 +138,7 @@
             <mnemonic>O</mnemonic>
             <accelerator>control O</accelerator>
             <separatorBefore>true</separatorBefore>
-            <placeBefore>openVector</placeBefore>
+            <placeAfter>closeProject</placeAfter>
             <shortDescr>Open a data product.</shortDescr>
             <description>Open a data product.</description>
             <smallIcon>icons/Open16.gif</smallIcon>
@@ -148,16 +150,92 @@
             <id>openVector</id>
             <class>org.esa.nest.dat.actions.OpenVectorAction</class>
             <parent>file</parent>
+            <placeAfter>openRaster</placeAfter>
             <text>Open Vector Dataset</text>
             <mnemonic>V</mnemonic>
             <accelerator>control V</accelerator>
-            <placeBefore>openProductGrabber</placeBefore>
             <shortDescr>Open a vector product.</shortDescr>
             <description>Open a vector product.</description>
             <smallIcon>icons/Open16.gif</smallIcon>
             <largeIcon>icons/Open24.gif</largeIcon>
             <helpId>open</helpId>
       </action>
+
+        <action>
+            <id>reopen</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <parent>file</parent>
+            <text>Reopen</text>
+            <mnemonic>R</mnemonic>
+            <placeAfter>openVector</placeAfter>
+            <shortDescr>Re-open a BEAM-DIMAP data product.</shortDescr>
+            <longDescr>Re-open a BEAM-DIMAP data product.</longDescr>
+            <smallIcon>icons/History16.gif</smallIcon>
+            <largeIcon>icons/History24.gif</largeIcon>
+            <helpID>reopen</helpID>
+        </action>
+
+        <action>
+            <id>close</id>
+            <class>org.esa.beam.visat.actions.CloseAction</class>
+            <parent>file</parent>
+            <text>Close</text>
+            <mnemonic>C</mnemonic>
+            <accelerator>control W</accelerator>
+            <placeAfter>reopen</placeAfter>
+            <shortDescr>Close an open data product.</shortDescr>
+            <description>Close an open data product.</description>
+            <smallIcon>icons/Close16.gif</smallIcon>
+            <largeIcon>icons/Close24.gif</largeIcon>
+            <helpId>close</helpId>
+            <context>product</context>
+        </action>
+
+        <action>
+            <id>closeAll</id>
+            <class>org.esa.beam.visat.actions.CloseAllAction</class>
+            <parent>file</parent>
+            <text>Close All</text>
+            <placeAfter>close</placeAfter>
+            <shortDescr>Closes all opened data products.</shortDescr>
+            <description>Closes all opened data products.</description>
+            <smallIcon>icons/Close16.gif</smallIcon>
+            <largeIcon>icons/Close24.gif</largeIcon>
+            <helpId>closeAll</helpId>
+            <context>product</context>
+        </action>
+
+        <action>
+            <id>save</id>
+            <class>org.esa.beam.visat.actions.SaveAction</class>
+            <parent>file</parent>
+            <text>Save</text>
+            <mnemonic>S</mnemonic>
+            <placeAfter>closeAll</placeAfter>
+            <separatorBefore>true</separatorBefore>
+            <shortDescr>Save a BEAM-DIMAP data product.</shortDescr>
+            <description>Save a BEAM-DIMAP data product.</description>
+            <accelerator>control S</accelerator>
+            <smallIcon>icons/Save16.gif</smallIcon>
+            <largeIcon>icons/Save24.gif</largeIcon>
+            <helpId>save</helpId>
+        </action>
+
+        <action>
+            <id>saveAs</id>
+            <class>org.esa.beam.visat.actions.SaveAsAction</class>
+            <parent>file</parent>
+            <text>Save As...</text>
+            <mnemonic>A</mnemonic>
+            <placeAfter>save</placeAfter>
+            <separatorAfter>true</separatorAfter>
+            <shortDescr>Save a BEAM-DIMAP data product with a different name.</shortDescr>
+            <description>Save a BEAM-DIMAP data product with a different name.</description>
+            <accelerator></accelerator>
+            <smallIcon>icons/SaveAs16.gif</smallIcon>
+            <largeIcon>icons/SaveAs24.gif</largeIcon>
+            <helpId>saveAs</helpId>
+        </action>
 
         <action>
             <id>openInformationDialog</id>

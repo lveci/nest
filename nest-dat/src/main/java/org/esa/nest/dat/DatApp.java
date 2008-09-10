@@ -124,8 +124,6 @@ public final class DatApp extends VisatApp {
                 "openRaster",
                 "openVector",
                 "save",
-                null,
-                "properties",
         });
 
         return toolBar;
