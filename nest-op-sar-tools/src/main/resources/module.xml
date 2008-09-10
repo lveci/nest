@@ -42,6 +42,15 @@
         </action>
 
         <action>
+            <id>GeographicToSatelliteOp</id>
+            <class>org.esa.nest.dat.GeographicToSatelliteOpAction</class>
+            <text>Geographic To Satellite Geometry</text>
+            <shortDescr>Converts from geographic to satellite geometry</shortDescr>
+            <parent>geometry</parent>
+            <helpId>GeographicToSatelliteOp</helpId>
+        </action>
+
+        <action>
             <id>MultilookOp</id>
             <class>org.esa.nest.dat.MultilookOpAction</class>
             <text>Multilooking</text>

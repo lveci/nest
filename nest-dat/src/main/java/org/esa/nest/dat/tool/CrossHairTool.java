@@ -1,5 +1,5 @@
 /*
- * $Id: CrossHairTool.java,v 1.2 2008-08-21 11:53:28 lveci Exp $
+ * $Id: CrossHairTool.java,v 1.3 2008-09-09 22:09:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,14 +16,9 @@
  */
 package org.esa.nest.dat.tool;
 
-import com.bc.layer.AbstractLayer;
-import com.bc.layer.Layer;
-import com.bc.layer.LayerModel;
-import com.bc.swing.GraphicsPane;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.framework.ui.tool.AbstractTool;
 import org.esa.beam.framework.ui.tool.ToolInputEvent;
-import org.esa.beam.framework.ui.UIUtils;
 import org.esa.nest.util.DatUtils;
 
 import javax.swing.*;
@@ -84,18 +79,6 @@ public class CrossHairTool extends AbstractTool {
     @Override
     public void mouseDragged(ToolInputEvent e) {
         handleInputEvent(e, DRAG);
-    }
-
-    private AbstractTool getDelegateTool(Layer layer) {
-        AbstractTool delegate = null;
-        if (layer instanceof AbstractLayer) {
-            AbstractLayer abstractLayer = (AbstractLayer) layer;
-            final Object value = abstractLayer.getPropertyValue(SELECT_TOOL_PROPERTY_NAME);
-            if (value instanceof AbstractTool) {
-                delegate = (AbstractTool) value;
-            }
-        }
-        return delegate;
     }
 
     private void handleInputEvent(ToolInputEvent e, Delegator method) {

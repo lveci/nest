@@ -14,15 +14,15 @@ import org.esa.nest.dataio.ApplyOrbitFile;
  * This action to apply orbit file
  *
  * @author lveci
- * @version $Revision: 1.3 $ $Date: 2008-09-08 21:00:11 $
+ * @version $Revision: 1.4 $ $Date: 2008-09-09 22:09:22 $
  */
 public class ApplyOrbitFileAction extends ExecCommand {
 
     @Override
     public void actionPerformed(final CommandEvent event) {
         
-        final Product partentProduct = VisatApp.getApp().getSelectedProduct();
-        final OrbitFileDialog dialog = new OrbitFileDialog(VisatApp.getApp().getMainFrame(), partentProduct, getHelpId());
+        final Product parentProduct = VisatApp.getApp().getSelectedProduct();
+        final OrbitFileDialog dialog = new OrbitFileDialog(VisatApp.getApp().getMainFrame(), parentProduct, getHelpId());
         if (dialog.show() == ModalDialog.ID_OK) {
             final Product product = dialog.getResultProduct();
             if (product != null) {
