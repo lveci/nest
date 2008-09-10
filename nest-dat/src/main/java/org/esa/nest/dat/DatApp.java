@@ -22,6 +22,8 @@ import java.io.File;
 public final class DatApp extends VisatApp {
     public DatApp(ApplicationDescriptor applicationDescriptor) {
         super(applicationDescriptor);
+
+        DEFAULT_VALUE_SAVE_PRODUCT_ANNOTATIONS = true;
     }
 
     public static DatApp getApp() {

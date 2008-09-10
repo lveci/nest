@@ -318,14 +318,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                                                       boolean leaf,
                                                       int row,
                                                       boolean hasFocus) {
-
-            super.getTreeCellRendererComponent(tree,
-                    value,
-                    sel,
-                    expanded,
-                    leaf,
-                    row,
-                    hasFocus);
+            super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
             DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) value;
             value = treeNode.getUserObject();
