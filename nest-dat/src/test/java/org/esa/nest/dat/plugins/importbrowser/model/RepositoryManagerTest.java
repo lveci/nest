@@ -165,4 +165,5 @@ public class RepositoryManagerTest extends TestCase {
             countedEvents++;
         }
     }
+
 }
