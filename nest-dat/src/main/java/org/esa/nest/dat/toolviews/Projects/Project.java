@@ -262,6 +262,17 @@ public class Project extends Observable {
         }
     }
 
+    public void ImportFileList(File[] productFilesToOpen) {
+        if(!IsProjectOpen()) {
+            CreateNewProject();
+        }
+
+        ProjectSubFolder processedFolder = projectSubFolders.findFolder("Processed Products");
+        for(File f : productFilesToOpen) {
+            importFile(processedFolder, f);
+        }
+    }
+
     public void deleteFolder(ProjectSubFolder parentFolder, ProjectSubFolder subFolder) {
         parentFolder.removeSubFolder(subFolder);
         notifyEvent(SAVE_PROJECT);
