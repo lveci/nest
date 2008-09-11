@@ -33,8 +33,8 @@ import java.awt.*;
 import java.awt.image.renderable.ParameterBlock;
 
 /*
- * todo Currently the incidence angle is obtained from different places in the metadata for ERS and ASAR products.
- * todo In future, it should always be get from the abstracted metadata.
+ * todo Incidence angle, azimuth spacing, range spacing, azimuth looks and range looks should all be obtained
+ * todo from the abstracted metadata, mission type should not be used.
  */
 /**
  * Original SAR images generally appears with inherent speckle noise. Multi-look integration is one category
@@ -60,7 +60,7 @@ public class MultilookOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(description = "The user defined multi-look factor", interval = "[1, *)", defaultValue = "1")
+    @Parameter(description = "The user defined multi-look factor", interval = "[2, *)", defaultValue = "2")
     private int multiLookFactor;
 
     private Band sourceBand1;
@@ -69,6 +69,7 @@ public class MultilookOp extends Operator {
 
     private String sampleType;
     private String missionType;
+    private boolean srgrFlag;
     private int numAzimuthLooks;
     private int numRangeLooks;
     private int azimuthFactor;
@@ -97,10 +98,13 @@ public class MultilookOp extends Operator {
 
         getSampleType();
         getMissionType();
+        getSRGRFlag();
         getRangeAzimuthSpacing();
         getRangeAzimuthLooks();
         getSourceImageDimension();
-        getIncidenceAngleAtCentreRangePixel();
+        if (!srgrFlag) {
+            getIncidenceAngleAtCentreRangePixel();
+        }
         computeRangeAzimuthMultiLookFactors();
         createTargetProduct();
 
@@ -191,6 +195,25 @@ public class MultilookOp extends Operator {
 
         missionType = missionTypeAttr.getData().getElemString();
         System.out.println("Mission is " + missionType);
+    }
+
+    /**
+     * Get srgr flag.
+     */
+    void getSRGRFlag() {
+
+        MetadataElement abs = sourceProduct.getMetadataRoot().getElement("Abstracted Metadata");
+        if (abs == null) {
+            throw new OperatorException("Abstracted Metadata not found");
+        }
+
+        MetadataAttribute attr = abs.getAttribute("srgr_flag");
+        if (attr == null) {
+            throw new OperatorException("srgr_flag not found");
+        }
+
+        srgrFlag = attr.getData().getElemBoolean();
+        System.out.println("SRGR flag is " + srgrFlag);
     }
 
     /**
@@ -377,8 +400,12 @@ public class MultilookOp extends Operator {
      */
     void computeRangeAzimuthMultiLookFactors() {
 
-        double theta = incidenceAngleAtCentreRangePixel*MathUtils.DTOR;
-        double groundRangeSpacing = rangeSpacing / Math.sin(theta);
+        double groundRangeSpacing;
+        if (srgrFlag) {
+            groundRangeSpacing = rangeSpacing;
+        } else {
+            groundRangeSpacing = rangeSpacing / Math.sin(incidenceAngleAtCentreRangePixel*MathUtils.DTOR);
+        }
 
         if (groundRangeSpacing < azimuthSpacing) {
 
@@ -438,14 +465,46 @@ public class MultilookOp extends Operator {
         if (azimuthLooksAttr == null) {
             throw new OperatorException("azimuth_looks not found");
         }
+        azimuthLooksAttr.getData().setElemFloat(numAzimuthLooks*azimuthFactor);
 
         MetadataAttribute rangeLooksAttr = abs.getAttribute("RANGE_LOOKS");
         if (rangeLooksAttr == null) {
             throw new OperatorException("range_looks not found");
         }
-
-        azimuthLooksAttr.getData().setElemFloat(numAzimuthLooks*azimuthFactor);
         rangeLooksAttr.getData().setElemFloat(numRangeLooks*rangeFactor);
+
+        MetadataAttribute azimuthSpacingAttr = abs.getAttribute("azimuth_spacing");
+        if (azimuthSpacingAttr == null) {
+            throw new OperatorException("azimuth_spacing not found");
+        }
+        azimuthSpacingAttr.getData().setElemFloat((float)(azimuthSpacing*azimuthFactor));
+
+        MetadataAttribute rangeSpacingAttr = abs.getAttribute("range_spacing");
+        if (rangeSpacingAttr == null) {
+            throw new OperatorException("range_spacing not found");
+        }
+        rangeSpacingAttr.getData().setElemFloat((float)(rangeSpacing*rangeFactor));
+
+        MetadataAttribute lineTimeintervalAttr = abs.getAttribute("LINE_TIME_INTERVAL");
+        if (lineTimeintervalAttr == null) {
+            throw new OperatorException("LINE_TIME_INTERVAL not found");
+        }
+        float oldLineTimeInterval = lineTimeintervalAttr.getData().getElemFloat();
+        lineTimeintervalAttr.getData().setElemFloat(oldLineTimeInterval*azimuthFactor);
+
+        MetadataAttribute firstLineTimeAttr = abs.getAttribute("FIRST_LINE_TIME");
+        if (firstLineTimeAttr == null) {
+            throw new OperatorException("FIRST_LINE_TIME not found");
+        }
+        String oldFirstLineTime = firstLineTimeAttr.getData().getElemString();
+        int idx = oldFirstLineTime.lastIndexOf(":") + 1;
+        String oldSecondsStr = oldFirstLineTime.substring(idx);
+        double oldSeconds = Double.parseDouble(oldSecondsStr);
+        double newSeconds = oldSeconds + oldLineTimeInterval*((azimuthFactor - 1)/2);
+        String newFirstLineTime = oldFirstLineTime.subSequence(0,idx) + "" + newSeconds + "000000";
+        abs.removeAttribute(firstLineTimeAttr);
+        abs.addAttribute(new MetadataAttribute(
+                "FIRST_LINE_TIME", ProductData.createInstance(newFirstLineTime.substring(0,26)), false));        
     }
 
     /**
