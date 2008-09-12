@@ -27,23 +27,28 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 
 import javax.media.jai.JAI;
+import java.util.ArrayList;
 
 /**
  * Convert-Linear-dB
  */
 
-@OperatorMetadata(alias="Convert-Linear-dB")
+@OperatorMetadata(alias="Convert-Linear-dB", description="Converts Linear to dB or dB to Linear")
 public class LinearTodBOp extends Operator {
 
-    @SourceProduct
+    @SourceProduct(alias="source")
     private Product sourceProduct;
     @TargetProduct
     private Product targetProduct;
 
+    @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
+            sourceProductId="source", label="Source Bands")
+    String[] sourceBandNames;
+
     private final static String LINEAR = "Linear";
     private final static String DB = "dB";
 
-    @Parameter(valueSet = { LINEAR, DB }, defaultValue = DB)
+    @Parameter(valueSet = { LINEAR, DB }, defaultValue = DB, label="Convert To")
     private String convertTo;
 
 
@@ -68,15 +73,40 @@ public class LinearTodBOp extends Operator {
                                     sourceProduct.getSceneRasterWidth(),
                                     sourceProduct.getSceneRasterHeight());
 
+        addSelectedBands();
+
         targetProduct.setPreferredTileSize(JAI.getDefaultTileSize());
 
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
+    }
 
-        for(Band band : sourceProduct.getBands()) {
-            targetProduct.addBand(band.getName(), ProductData.TYPE_FLOAT64);
+    private void addSelectedBands() {
+        if (sourceBandNames == null || sourceBandNames.length == 0) {
+            Band[] bands = sourceProduct.getBands();
+            ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            for (Band band : bands) {
+                bandNameList.add(band.getName());
+            }
+            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
+        }
+
+        Band[] sourceBands = new Band[sourceBandNames.length];
+        for (int i = 0; i < sourceBandNames.length; i++) {
+            String sourceBandName = sourceBandNames[i];
+            Band sourceBand = sourceProduct.getBand(sourceBandName);
+            if (sourceBand == null) {
+                throw new OperatorException("Source band not found: " + sourceBandName);
+            }
+            sourceBands[i] = sourceBand;
+        }
+
+        for(Band srcBand : sourceBands) {
+            Band targetBand = new Band(srcBand.getName(), ProductData.TYPE_FLOAT64,
+                    sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+            targetProduct.addBand(targetBand);
         }
     }
 

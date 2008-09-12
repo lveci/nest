@@ -24,4 +24,9 @@ public class ComplexToIntensityOpAction extends AbstractVisatAction {
 
     }
 
+    @Override
+    public void updateState(final CommandEvent event) {
+        setEnabled(false);
+    }
+
 }

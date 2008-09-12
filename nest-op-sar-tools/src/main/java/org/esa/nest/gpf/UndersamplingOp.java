@@ -32,6 +32,7 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Undersample
@@ -40,14 +41,18 @@ import java.io.IOException;
 @OperatorMetadata(alias="Undersample")
 public class UndersamplingOp extends Operator {
 
-    @SourceProduct
+    @SourceProduct(alias="source")
     private Product sourceProduct;
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(defaultValue = "2")
+    @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
+            sourceProductId="source", label="Source Bands")
+    String[] sourceBandNames;
+
+    @Parameter(defaultValue = "2", label=" Sub-Sampling in X")
     private int subSamplingX = 2;
-    @Parameter(defaultValue = "2")
+    @Parameter(defaultValue = "2", label=" Sub-Sampling in Y")
     private int subSamplingY = 2;
 
     private ProductReader subsetReader;
@@ -55,11 +60,20 @@ public class UndersamplingOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
+        if (sourceBandNames == null || sourceBandNames.length == 0) {
+            Band[] bands = sourceProduct.getBands();
+            ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            for (Band band : bands) {
+                bandNameList.add(band.getName());
+            }
+            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
+        }
+
         subsetReader = new ProductSubsetBuilder();
         ProductSubsetDef subsetDef = new ProductSubsetDef();
 
         subsetDef.addNodeNames(sourceProduct.getTiePointGridNames());
-        subsetDef.addNodeNames(sourceProduct.getBandNames());
+        subsetDef.addNodeNames(sourceBandNames);
         subsetDef.setSubSampling(subSamplingX, subSamplingY);
         subsetDef.setIgnoreMetadata(false);
 

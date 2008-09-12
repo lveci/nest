@@ -32,7 +32,7 @@ import javax.media.jai.JAI;
  * Format-Change
  */
 
-@OperatorMetadata(alias="Convert-Datatype")
+@OperatorMetadata(alias="Convert-Datatype", description="Convert product data type")
 public class FormatChangeOp extends Operator {
 
     @SourceProduct
@@ -48,7 +48,8 @@ public class FormatChangeOp extends Operator {
                             ProductData.TYPESTRING_UINT32,
                             ProductData.TYPESTRING_FLOAT32,
                             ProductData.TYPESTRING_FLOAT64
-            }, defaultValue = ProductData.TYPESTRING_FLOAT32)
+            }, defaultValue = ProductData.TYPESTRING_FLOAT32
+            , label="Target Data Type")
     private String targetDataType;
     private int dataType;
 
@@ -56,7 +57,7 @@ public class FormatChangeOp extends Operator {
                             "Linear (slope and intercept)",
                             "Linear (between min max)",
                             "Logarithmic"
-            }, defaultValue = "None")
+            }, defaultValue = "None", label="Scaling")
     private String scaling;
 
     /**

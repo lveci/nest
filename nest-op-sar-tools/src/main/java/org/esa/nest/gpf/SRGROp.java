@@ -29,6 +29,7 @@ import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 import Jama.Matrix;
 /**
@@ -44,22 +45,27 @@ import Jama.Matrix;
  * Slant Range to Ground Range Conversion.
  */
 
-@OperatorMetadata(alias="SRGR")
+@OperatorMetadata(alias="SRGR", description="Converts Slant Range to Ground Range")
 public class SRGROp extends Operator {
 
-    @SourceProduct
+    @SourceProduct(alias="source")
     private Product sourceProduct;
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(description = "The order of WARP polynomial function", interval = "[1, *)", defaultValue = "4")
+    @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
+            sourceProductId="source", label="Source Bands")
+    String[] sourceBandNames;
+
+    @Parameter(description = "The order of WARP polynomial function", interval = "[1, *)", defaultValue = "4",
+                label="Warp Polynomial Order")
     private int warpPolynomialOrder;
 
     @Parameter(description = "The number of range points used in computing WARP polynomial",
-               interval = "(1, *)", defaultValue = "100")
+               interval = "(1, *)", defaultValue = "100", label="Number of Range Points")
     private int numRangePoints;
 
-    @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR, BICUBIC, SINC}, defaultValue = BILINEAR)
+    @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR, BICUBIC, SINC}, defaultValue = BILINEAR, label="Interpolation Method")
     private String interpolationMethod;
 
     private MetadataElement absRoot;
@@ -289,11 +295,7 @@ public class SRGROp extends Operator {
                                     sourceProduct.getSceneRasterWidth(),
                                     sourceProduct.getSceneRasterHeight());
 
-        for(Band band : sourceProduct.getBands()) {
-            if (!band.isSynthetic()) {
-                targetProduct.addBand(band.getName(), ProductData.TYPE_FLOAT32);
-            }
-        }
+        addSelectedBands();
 
         targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 256);
 
@@ -301,6 +303,33 @@ public class SRGROp extends Operator {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
+    }
+
+    private void addSelectedBands() {
+        if (sourceBandNames == null || sourceBandNames.length == 0) {
+            Band[] bands = sourceProduct.getBands();
+            ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            for (Band band : bands) {
+                bandNameList.add(band.getName());
+            }
+            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
+        }
+
+        Band[] sourceBands = new Band[sourceBandNames.length];
+        for (int i = 0; i < sourceBandNames.length; i++) {
+            String sourceBandName = sourceBandNames[i];
+            Band sourceBand = sourceProduct.getBand(sourceBandName);
+            if (sourceBand == null) {
+                throw new OperatorException("Source band not found: " + sourceBandName);
+            }
+            sourceBands[i] = sourceBand;
+        }
+
+        for(Band srcBand : sourceBands) {
+            Band targetBand = new Band(srcBand.getName(), ProductData.TYPE_FLOAT32,
+                    sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+            targetProduct.addBand(targetBand);
+        }
     }
 
     /**
