@@ -6,7 +6,6 @@ import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
-import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.imageio.stream.FileImageInputStream;
@@ -216,15 +215,15 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
 
         //mph
-        AbstractMetadata.setAttributeString(absRoot, "PRODUCT", getProductName());
-        AbstractMetadata.setAttributeString(absRoot, "PRODUCT_TYPE", getProductType());
-        AbstractMetadata.setAttributeString(absRoot, "MISSION", "RADARSAT-1");
+        AbstractMetadata.setAttribute(absRoot, "PRODUCT", getProductName());
+        AbstractMetadata.setAttribute(absRoot, "PRODUCT_TYPE", getProductType());
+        AbstractMetadata.setAttribute(absRoot, "MISSION", "RADARSAT-1");
 
-        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.PROC_TIME, getProcTime() );
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, getProcTime() );
 
 
         //sph
-        AbstractMetadata.setAttributeString(absRoot, "SAMPLE_TYPE", getSampleType());
+        AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
                 _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-pixel distance in output scene"));

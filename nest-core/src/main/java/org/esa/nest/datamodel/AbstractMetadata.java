@@ -158,7 +158,7 @@ public class AbstractMetadata {
      * @param tag the name of the attribute
      * @param value the string value
      */
-    public static void setAttributeString(MetadataElement dest, String tag, String value) {
+    public static void setAttribute(MetadataElement dest, String tag, String value) {
         MetadataAttribute attrib = dest.getAttribute(tag);
         if(attrib == null)
             System.out.println(tag + " not found in metadata");

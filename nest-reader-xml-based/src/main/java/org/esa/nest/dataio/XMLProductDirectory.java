@@ -179,25 +179,25 @@ public class XMLProductDirectory {
         MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
 
         //mph
-        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.PRODUCT, getProductName());
-        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.PRODUCT_TYPE, getProductType());
-        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, getProductName());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, getProductType());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
                 _leaderFile.getSceneRecord().getAttributeString("Product type descriptor"));
-        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.MISSION, getMission());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, getMission());
 
         String procTime = _volumeDirectoryFile.getTextRecord().getAttributeString("Location and datetime of product creation").trim();
-        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.PROC_TIME, procTime );
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, procTime );
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT,
                 Integer.parseInt(_leaderFile.getSceneRecord().getAttributeString("Orbit number").trim()));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
                 Integer.parseInt(_leaderFile.getSceneRecord().getAttributeString("Orbit number").trim()));
-        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
                 _leaderFile.getFacilityRecord().getAttributeString("Time of input state vector used to processed the image"));
 
 
         //sph
 
-        AbstractMetadata.setAttributeString(absRoot, "SAMPLE_TYPE", getSampleType());    */
+        AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());    */
     }
 
     private String getProductName() {

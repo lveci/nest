@@ -225,14 +225,14 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         BaseRecord sceneRec = _leaderFile.getSceneRecord();
 
         //mph
-        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.PRODUCT, getProductName());
-        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.PRODUCT_TYPE, getProductType());
-        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, getProductName());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, getProductType());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
                 _leaderFile.getSceneRecord().getAttributeString("Product type descriptor"));
-        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.MISSION, getMission());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, getMission());
 
-        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.PROC_TIME, getProcTime() );
-        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.ProcessingSystemIdentifier,
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, getProcTime() );
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier,
                 sceneRec.getAttributeString("Processing system identifier").trim() );
         // cycle n/a?
 
@@ -240,7 +240,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
                 Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
-        //AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
+        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
         //        _leaderFile.getFacilityRecord().getAttributeString("Time of input state vector used to processed the image"));
 
 
@@ -248,7 +248,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
         //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS,
         //        _leaderFile.getFacilityRecord().getAttributeInt("Input state vector type flag"));
-        AbstractMetadata.setAttributeString(absRoot, "SAMPLE_TYPE", getSampleType());
+        AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
                 _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-pixel distance in output scene"));
