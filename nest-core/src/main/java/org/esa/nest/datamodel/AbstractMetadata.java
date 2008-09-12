@@ -1,4 +1,4 @@
-package org.esa.nest.dataio;
+package org.esa.nest.datamodel;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;

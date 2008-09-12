@@ -26,6 +26,7 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.awt.*;
 
@@ -203,9 +204,9 @@ public class SRGROp extends Operator {
      */
     void getSRGRFlag() {
 
-        MetadataAttribute srgrFlagAttr = absRoot.getAttribute("srgr_flag");
+        MetadataAttribute srgrFlagAttr = absRoot.getAttribute(AbstractMetadata.srgr_flag);
         if (srgrFlagAttr == null) {
-            throw new OperatorException("srgr_flag not found");
+            throw new OperatorException(AbstractMetadata.srgr_flag + " not found");
         }
         srgrFlag = srgrFlagAttr.getData().getElemBoolean();
     }
@@ -215,9 +216,9 @@ public class SRGROp extends Operator {
      */
     void getSlantRangeSpacing() {
         
-        MetadataAttribute rangeSpacingAttr = absRoot.getAttribute("range_spacing");
+        MetadataAttribute rangeSpacingAttr = absRoot.getAttribute(AbstractMetadata.range_spacing);
         if (rangeSpacingAttr == null) {
-            throw new OperatorException("range_spacing not found");
+            throw new OperatorException(AbstractMetadata.range_spacing +" not found");
         }
 
         slantRangeSpacing = (double)rangeSpacingAttr.getData().getElemFloat();
@@ -259,9 +260,9 @@ public class SRGROp extends Operator {
     void computeGroundRangeSpacing() {
 
         // get satellite pass
-        MetadataAttribute passAttr = absRoot.getAttribute("pass");
+        MetadataAttribute passAttr = absRoot.getAttribute(AbstractMetadata.PASS);
         if (passAttr == null) {
-            throw new OperatorException("pass not found");
+            throw new OperatorException(AbstractMetadata.PASS +" not found");
         }
 
         String pass = passAttr.getData().getElemString();

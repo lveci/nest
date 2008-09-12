@@ -1,16 +1,12 @@
 package org.esa.nest.dataio;
 
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
-import org.esa.nest.dataio.AbstractMetadata;
 import org.esa.nest.dataio.ImageIOFile;
 import org.esa.nest.util.XMLSupport;
 import org.jdom.Element;
 import org.jdom.Attribute;
 
-import javax.imageio.stream.FileImageInputStream;
-import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;

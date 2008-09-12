@@ -67,12 +67,16 @@ class ERSLeaderFile {
         return _sceneHeaderRecord.getAttributeString("Product type specifier");
     }
 
-    public BaseRecord getSceneRecord() {
+    public final BaseRecord getSceneRecord() {
         return _sceneHeaderRecord;
     }
 
-    public BaseRecord getFacilityRecord() {
+    public final BaseRecord getFacilityRecord() {
         return _facilityRecord;
+    }
+
+    public final BaseRecord getMapProjRecord() {
+        return _mapProjRecord;
     }
 
     public float[] getLatCorners() throws IOException,
