@@ -26,6 +26,7 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.media.jai.JAI;
 import javax.media.jai.InterpolationNearest;
@@ -33,8 +34,7 @@ import java.awt.*;
 import java.awt.image.renderable.ParameterBlock;
 
 /*
- * todo Incidence angle, azimuth spacing, range spacing, azimuth looks and range looks should all be obtained
- * todo from the abstracted metadata, mission type should not be used.
+ * todo Incidence angle should all be obtained from the abstracted metadata, mission type should not be used.
  */
 /**
  * Original SAR images generally appears with inherent speckle noise. Multi-look integration is one category
@@ -67,6 +67,7 @@ public class MultilookOp extends Operator {
     private Band sourceBand2;
     private Band targetBand;
 
+    private MetadataElement absRoot;
     private String sampleType;
     private String missionType;
     private boolean srgrFlag;
@@ -95,6 +96,11 @@ public class MultilookOp extends Operator {
      */
     @Override
     public void initialize() throws OperatorException {
+
+        absRoot = sourceProduct.getMetadataRoot().getElement("Abstracted Metadata");
+        if (absRoot == null) {
+            throw new OperatorException("Abstracted Metadata not found");
+        }
 
         getSampleType();
         getMissionType();
@@ -164,14 +170,9 @@ public class MultilookOp extends Operator {
      */
     void getSampleType() {
 
-        MetadataElement abs = sourceProduct.getMetadataRoot().getElement("Abstracted Metadata");
-        if (abs == null) {
-            throw new OperatorException("Abstracted Metadata not found");
-        }
-
-        MetadataAttribute sampleTypeAttr = abs.getAttribute("SAMPLE_TYPE");
+        MetadataAttribute sampleTypeAttr = absRoot.getAttribute(AbstractMetadata.SAMPLE_TYPE);
         if (sampleTypeAttr == null) {
-            throw new OperatorException("sample_type not found");
+            throw new OperatorException(AbstractMetadata.SAMPLE_TYPE + " not found");
         }
 
         sampleType = sampleTypeAttr.getData().getElemString();
@@ -183,14 +184,9 @@ public class MultilookOp extends Operator {
      */
     void getMissionType() {
 
-        MetadataElement abs = sourceProduct.getMetadataRoot().getElement("Abstracted Metadata");
-        if (abs == null) {
-            throw new OperatorException("Abstracted Metadata not found");
-        }
-
-        MetadataAttribute missionTypeAttr = abs.getAttribute("MISSION");
+        MetadataAttribute missionTypeAttr = absRoot.getAttribute(AbstractMetadata.MISSION);
         if (missionTypeAttr == null) {
-            throw new OperatorException("mission not found");
+            throw new OperatorException(AbstractMetadata.MISSION + " not found");
         }
 
         missionType = missionTypeAttr.getData().getElemString();
@@ -202,14 +198,9 @@ public class MultilookOp extends Operator {
      */
     void getSRGRFlag() {
 
-        MetadataElement abs = sourceProduct.getMetadataRoot().getElement("Abstracted Metadata");
-        if (abs == null) {
-            throw new OperatorException("Abstracted Metadata not found");
-        }
-
-        MetadataAttribute attr = abs.getAttribute("srgr_flag");
+        MetadataAttribute attr = absRoot.getAttribute(AbstractMetadata.srgr_flag);
         if (attr == null) {
-            throw new OperatorException("srgr_flag not found");
+            throw new OperatorException(AbstractMetadata.srgr_flag + " not found");
         }
 
         srgrFlag = attr.getData().getElemBoolean();
@@ -221,45 +212,14 @@ public class MultilookOp extends Operator {
      */
     void getRangeAzimuthSpacing() {
 
-        MetadataAttribute rangeSpacingAttr = null;
-        MetadataAttribute azimuthSpacingAttr = null;
+        MetadataAttribute rangeSpacingAttr = absRoot.getAttribute(AbstractMetadata.range_spacing);
+        if (rangeSpacingAttr == null) {
+            throw new OperatorException(AbstractMetadata.range_spacing + " not found");
+        }
 
-        if (missionType.contains("ENVISAT")) {
-
-            // get range spacing (in m) from abstracted metadata
-            MetadataElement abs = sourceProduct.getMetadataRoot().getElement("Abstracted Metadata");
-            if (abs == null) {
-                throw new OperatorException("Abstracted Metadata not found");
-            }
-
-            rangeSpacingAttr = abs.getAttribute("range_spacing");
-            if (rangeSpacingAttr == null) {
-                throw new OperatorException("range_spacing not found");
-            }
-
-            azimuthSpacingAttr = abs.getAttribute("azimuth_spacing");
-            if (azimuthSpacingAttr == null) {
-                throw new OperatorException("azimuth_spacing not found");
-            }
-
-        } else if (missionType.contains("ERS")) {
-
-            // For now, get azimuth and range spacings from ERS metadata
-            // Fields 121 and 122 in PRI Data Set Summary Record (in m)
-            MetadataElement facility = sourceProduct.getMetadataRoot().getElement("Leader").getElement("Scene Parameters");
-            if (facility == null) {
-                throw new OperatorException("Scene Parameters not found");
-            }
-
-            rangeSpacingAttr = facility.getAttribute("pixel spacing");
-            if (rangeSpacingAttr == null) {
-                throw new OperatorException("Pixel spacing not found");
-            }
-
-            azimuthSpacingAttr = facility.getAttribute("line spacing");
-            if (azimuthSpacingAttr == null) {
-                throw new OperatorException("Line spacing not found");
-            }
+        MetadataAttribute azimuthSpacingAttr = absRoot.getAttribute(AbstractMetadata.azimuth_spacing);
+        if (azimuthSpacingAttr == null) {
+            throw new OperatorException(AbstractMetadata.azimuth_spacing + " not found");
         }
 
         rangeSpacing = rangeSpacingAttr.getData().getElemFloat();
@@ -273,44 +233,14 @@ public class MultilookOp extends Operator {
      */
     void getRangeAzimuthLooks() {
 
-        MetadataAttribute azimuthLooksAttr = null;
-        MetadataAttribute rangeLooksAttr = null;
+        MetadataAttribute azimuthLooksAttr = absRoot.getAttribute(AbstractMetadata.azimuth_looks);
+        if (azimuthLooksAttr == null) {
+            throw new OperatorException(AbstractMetadata.azimuth_looks + " not found");
+        }
 
-        if (missionType.contains("ENVISAT")) {
-
-            MetadataElement abs = sourceProduct.getMetadataRoot().getElement("Abstracted Metadata");
-            if (abs == null) {
-                throw new OperatorException("Abstracted Metadata not found");
-            }
-
-            azimuthLooksAttr = abs.getAttribute("AZIMUTH_LOOKS");
-            if (azimuthLooksAttr == null) {
-                throw new OperatorException("azimuth_looks not found");
-            }
-
-            rangeLooksAttr = abs.getAttribute("RANGE_LOOKS");
-            if (rangeLooksAttr == null) {
-                throw new OperatorException("range_looks not found");
-            }
-
-        } else if (missionType.contains("ERS")) {
-
-            // For now, get azimuth and range looks from ERS metadata
-            // Fields 88 and 89 in PRI Data Set Summary Record (in m)
-            MetadataElement facility = sourceProduct.getMetadataRoot().getElement("Leader").getElement("Scene Parameters");
-            if (facility == null) {
-                throw new OperatorException("Scene Parameters not found");
-            }
-
-            azimuthLooksAttr = facility.getAttribute("Nominal number of looks processed in azimuth");
-            if (azimuthLooksAttr == null) {
-                throw new OperatorException("Nominal number of looks processed in azimuth not found");
-            }
-
-            rangeLooksAttr = facility.getAttribute("Nominal number of looks processed in range");
-            if (rangeLooksAttr == null) {
-                throw new OperatorException("Nominal number of looks processed in range not found");
-            }
+        MetadataAttribute rangeLooksAttr = absRoot.getAttribute(AbstractMetadata.range_looks);
+        if (rangeLooksAttr == null) {
+            throw new OperatorException(AbstractMetadata.range_looks + " not found");
         }
 
         numAzimuthLooks = azimuthLooksAttr.getData().getElemInt();
@@ -461,40 +391,40 @@ public class MultilookOp extends Operator {
             throw new OperatorException("Abstracted Metadata not found");
         }
 
-        MetadataAttribute azimuthLooksAttr = abs.getAttribute("AZIMUTH_LOOKS");
+        MetadataAttribute azimuthLooksAttr = abs.getAttribute(AbstractMetadata.azimuth_looks);
         if (azimuthLooksAttr == null) {
-            throw new OperatorException("azimuth_looks not found");
+            throw new OperatorException(AbstractMetadata.azimuth_looks + " not found");
         }
         azimuthLooksAttr.getData().setElemFloat(numAzimuthLooks*azimuthFactor);
 
-        MetadataAttribute rangeLooksAttr = abs.getAttribute("RANGE_LOOKS");
+        MetadataAttribute rangeLooksAttr = abs.getAttribute(AbstractMetadata.range_looks);
         if (rangeLooksAttr == null) {
-            throw new OperatorException("range_looks not found");
+            throw new OperatorException(AbstractMetadata.range_looks + " not found");
         }
         rangeLooksAttr.getData().setElemFloat(numRangeLooks*rangeFactor);
 
-        MetadataAttribute azimuthSpacingAttr = abs.getAttribute("azimuth_spacing");
+        MetadataAttribute azimuthSpacingAttr = abs.getAttribute(AbstractMetadata.azimuth_spacing);
         if (azimuthSpacingAttr == null) {
-            throw new OperatorException("azimuth_spacing not found");
+            throw new OperatorException(AbstractMetadata.azimuth_spacing + " not found");
         }
         azimuthSpacingAttr.getData().setElemFloat((float)(azimuthSpacing*azimuthFactor));
 
-        MetadataAttribute rangeSpacingAttr = abs.getAttribute("range_spacing");
+        MetadataAttribute rangeSpacingAttr = abs.getAttribute(AbstractMetadata.range_spacing);
         if (rangeSpacingAttr == null) {
-            throw new OperatorException("range_spacing not found");
+            throw new OperatorException(AbstractMetadata.range_spacing + " not found");
         }
         rangeSpacingAttr.getData().setElemFloat((float)(rangeSpacing*rangeFactor));
 
-        MetadataAttribute lineTimeintervalAttr = abs.getAttribute("LINE_TIME_INTERVAL");
+        MetadataAttribute lineTimeintervalAttr = abs.getAttribute(AbstractMetadata.line_time_interval);
         if (lineTimeintervalAttr == null) {
-            throw new OperatorException("LINE_TIME_INTERVAL not found");
+            throw new OperatorException(AbstractMetadata.line_time_interval + " not found");
         }
         float oldLineTimeInterval = lineTimeintervalAttr.getData().getElemFloat();
         lineTimeintervalAttr.getData().setElemFloat(oldLineTimeInterval*azimuthFactor);
 
-        MetadataAttribute firstLineTimeAttr = abs.getAttribute("FIRST_LINE_TIME");
+        MetadataAttribute firstLineTimeAttr = abs.getAttribute(AbstractMetadata.first_line_time);
         if (firstLineTimeAttr == null) {
-            throw new OperatorException("FIRST_LINE_TIME not found");
+            throw new OperatorException(AbstractMetadata.first_line_time + " not found");
         }
         String oldFirstLineTime = firstLineTimeAttr.getData().getElemString();
         int idx = oldFirstLineTime.lastIndexOf(":") + 1;
@@ -504,7 +434,7 @@ public class MultilookOp extends Operator {
         String newFirstLineTime = oldFirstLineTime.subSequence(0,idx) + "" + newSeconds + "000000";
         abs.removeAttribute(firstLineTimeAttr);
         abs.addAttribute(new MetadataAttribute(
-                "FIRST_LINE_TIME", ProductData.createInstance(newFirstLineTime.substring(0,26)), false));        
+                AbstractMetadata.first_line_time, ProductData.createInstance(newFirstLineTime.substring(0,26)), false));        
     }
 
     /**
