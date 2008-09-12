@@ -77,8 +77,8 @@
         <!-- the bootstrap module has no sources,
              its only purpose is to construct a class path for VISAT
         -->
-        <!--module>beam-bootstrap</module>
-		<module>beam-installer</module-->
+        <!--module>beam-bootstrap</module-->
+        <!--module>beam-installer</module-->
 
         <module>beam-core</module>
         <module>beam-ui</module>
@@ -92,31 +92,32 @@
         <!--module>beam-help</module-->
         <module>beam-pview</module>
 
-     <!--   <module>beam-meris-cloud</module>
+        <!--module>beam-meris-cloud</module>
         <module>beam-meris-smac</module>
         <module>beam-meris-smile</module>
         <module>beam-meris-radtorefl</module>
         <module>beam-meris-ndvi</module>
         <module>beam-aatsr-sst</module>
-        <module>beam-flhmci</module> 
+        <module>beam-flhmci</module>
         <module>beam-mosaic</module>
         <module>beam-binning</module>
         <module>beam-unmix</module>
         <module>beam-cluster-analysis</module>
-        <module>beam-collocation</module>  -->
+        <module>beam-collocation</module-->
 
-        <!--module>beam-avhrr-reader</module-->
-        <!--module>beam-atsr-reader</module-->
+        <!--module>beam-avhrr-reader</module>
+        <module>beam-atsr-reader</module-->
         <module>beam-alos-reader</module>
         <module>beam-netcdf-reader</module>
         <!--module>beam-merisl3-reader</module-->
         <module>beam-getasse30-reader</module>
         <module>beam-envisat-reader</module>
-    <!--    <module>beam-modis-reader</module>
+        <!--module>beam-modis-reader</module>
         <module>beam-obpg-reader</module>
         <module>beam-chris-reader</module>
-        <module>beam-landsat-reader</module> -->
-        <module>beam-geotiff-writer</module>
+        <module>beam-landsat-reader</module-->
+        <!--<module>beam-geotiff-writer</module>-->
+        <module>beam-geotiff</module>
         <module>beam-hdf5-writer</module>
         <module>beam-shapefile-reader</module>
 
@@ -432,7 +433,7 @@
                 <version>2.3-bc</version>
             </plugin>
 
-            <!--plugin>
+            <plugin>
                 <groupId>com.bc.maven.plugins</groupId>
                 <artifactId>maven-template-plugin</artifactId>
                 <version>1.1</version>
@@ -484,7 +485,7 @@
                         </template>
                     </templates>
                 </configuration>
-            </plugin-->
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
