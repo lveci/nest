@@ -1,6 +1,5 @@
 package org.esa.nest.dat;
 
-import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.beam.visat.actions.AbstractVisatAction;
@@ -12,7 +11,7 @@ import org.esa.beam.visat.VisatApp;
  */
 public class MultilookOpAction extends AbstractVisatAction {
 
-    private ModelessDialog dialog;
+    private DefaultSingleTargetProductDialog dialog;
 
     @Override
     public void actionPerformed(CommandEvent event) {
@@ -20,6 +19,7 @@ public class MultilookOpAction extends AbstractVisatAction {
         VisatApp.getApp().showWarningDialog("Currently with simple multilooking, the detection for complex data is performed without any resampling");
         if (dialog == null) {
             dialog = new DefaultSingleTargetProductDialog("Multilook", getAppContext(), "Multilook", getHelpId());
+            dialog.setTargetProductNameSuffix("_multilooked");
         }
         dialog.show();
 
