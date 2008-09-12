@@ -224,9 +224,9 @@ public final class DatApp extends VisatApp {
                 "pannerTool",
                 null,
                 "pinTool",
-                "org.esa.beam.visat.toolviews.pin.PinManagerToolView.showCmd",
+                //"org.esa.beam.visat.toolviews.pin.PinManagerToolView.showCmd",
                 "gcpTool",
-                "org.esa.beam.visat.toolviews.pin.GcpManagerToolView.showCmd",
+                //"org.esa.beam.visat.toolviews.pin.GcpManagerToolView.showCmd",
                 null,
                 "drawLineTool",
                 "drawRectangleTool",
@@ -237,8 +237,8 @@ public final class DatApp extends VisatApp {
                 //"magicStickTool",
                 null,
                 "convertShapeToROI",
-                "org.esa.beam.visat.toolviews.roi.RoiManagerToolView.showCmd",
-                "org.esa.beam.visat.toolviews.bitmask.BitmaskOverlayToolView.showCmd",
+                //"org.esa.beam.visat.toolviews.roi.RoiManagerToolView.showCmd",
+                //"org.esa.beam.visat.toolviews.bitmask.BitmaskOverlayToolView.showCmd",
                 //"convertROIToShape",
         });
 
