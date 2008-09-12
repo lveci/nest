@@ -265,7 +265,10 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
     private String getProcTime() {
         String procTime = _volumeDirectoryFile.getTextRecord().getAttributeString("Location and datetime of product creation").trim();
-        return procTime.substring(procTime.indexOf("  "), procTime.length()).trim();
+        int i = procTime.indexOf("  ");
+        if(i >= 0)
+            return procTime.substring(i+1, procTime.length()).trim();
+        return procTime;
     }
 
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {

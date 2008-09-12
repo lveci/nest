@@ -59,6 +59,10 @@ class JERSLeaderFile {
         return _facilityRecord;
     }
 
+    public BaseRecord getMapProjRecord() {
+        return _mapProjRecord;
+    }
+
     public float[] getLatCorners() throws IOException,
                                            IllegalCeosFormatException {
         final double latUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic latitude");

@@ -57,6 +57,12 @@ class RadarsatLeaderFile {
 
     }
 
+    public BaseRecord getMapProjRecord() {
+        return _mapProjRecord;
+    }
+
+
+
     public String getProductLevel() {
         return "ref num";//_sceneHeaderRecord.getAttributeString("Scene reference number");
     }

@@ -7,6 +7,7 @@ import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.nest.dataio.ceos.CeosHelper;
+import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.imageio.stream.FileImageInputStream;
@@ -221,27 +222,52 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
         MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        BaseRecord sceneRec = _leaderFile.getSceneRecord();
 
- /*       //mph
+        //mph
         AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.PRODUCT, getProductName());
         AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.PRODUCT_TYPE, getProductType());
         AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
                 _leaderFile.getSceneRecord().getAttributeString("Product type descriptor"));
         AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.MISSION, getMission());
 
-        String procTime = _volumeDirectoryFile.getTextRecord().getAttributeString("Location and datetime of product creation").trim();
-        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.PROC_TIME, procTime );
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT,
-                Integer.parseInt(_leaderFile.getSceneRecord().getAttributeString("Orbit number").trim()));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
-                Integer.parseInt(_leaderFile.getSceneRecord().getAttributeString("Orbit number").trim()));
-        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
-                _leaderFile.getFacilityRecord().getAttributeString("Time of input state vector used to processed the image"));
+        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.PROC_TIME, getProcTime() );
+        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.ProcessingSystemIdentifier,
+                sceneRec.getAttributeString("Processing system identifier").trim() );
+        // cycle n/a?
 
-                                                                 */
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT,
+                Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
+                Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
+        //AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
+        //        _leaderFile.getFacilityRecord().getAttributeString("Time of input state vector used to processed the image"));
+
+
         //sph
 
+        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS,
+        //        _leaderFile.getFacilityRecord().getAttributeInt("Input state vector type flag"));
         AbstractMetadata.setAttributeString(absRoot, "SAMPLE_TYPE", getSampleType());
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
+                _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-pixel distance in output scene"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
+                _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-line distance in output scene"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
+                sceneRec.getAttributeDouble("Nominal number of looks processed in azimuth"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks,
+                sceneRec.getAttributeDouble("Nominal number of looks processed in range"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
+                sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
+    }
+
+    private String getProcTime() {
+        String procTime = _volumeDirectoryFile.getTextRecord().getAttributeString("Location and datetime of product creation").trim();
+        int i = procTime.indexOf("  ");
+        if(i >= 0)
+            return procTime.substring(i+1, procTime.length()).trim();
+        return procTime;
     }
 
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {

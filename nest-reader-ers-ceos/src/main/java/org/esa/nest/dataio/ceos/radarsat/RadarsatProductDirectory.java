@@ -6,6 +6,7 @@ import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
+import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.imageio.stream.FileImageInputStream;
@@ -24,15 +25,10 @@ import java.util.*;
  */
 class RadarsatProductDirectory extends CEOSProductDirectory {
 
-    private static final double UTM_FALSE_EASTING = 500000.00;
-    private static final double UTM_FALSE_NORTHING = 10000000.00;
-    private static final int METER_PER_KILOMETER = 1000;
-
     private final File _baseDir;
     private RadarsatVolumeDirectoryFile _volumeDirectoryFile;
     private RadarsatImageFile[] _imageFiles;
     private RadarsatLeaderFile _leaderFile;
-
 
     private int _sceneWidth;
     private int _sceneHeight;
@@ -218,13 +214,30 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
 
+
         //mph
         AbstractMetadata.setAttributeString(absRoot, "PRODUCT", getProductName());
         AbstractMetadata.setAttributeString(absRoot, "PRODUCT_TYPE", getProductType());
         AbstractMetadata.setAttributeString(absRoot, "MISSION", "RADARSAT-1");
 
+        AbstractMetadata.setAttributeString(absRoot, AbstractMetadata.PROC_TIME, getProcTime() );
+
+
         //sph
         AbstractMetadata.setAttributeString(absRoot, "SAMPLE_TYPE", getSampleType());
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
+                _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-pixel distance in output scene"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
+                _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-line distance in output scene"));
+    }
+
+    private String getProcTime() {
+        String procTime = _volumeDirectoryFile.getTextRecord().getAttributeString("Location and datetime of product creation").trim();
+        int i = procTime.indexOf("  ");
+        if(i >= 0)
+            return procTime.substring(i+1, procTime.length()).trim();
+        return procTime;
     }
 
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {

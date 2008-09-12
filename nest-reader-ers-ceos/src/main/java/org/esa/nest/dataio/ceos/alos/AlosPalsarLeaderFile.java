@@ -64,9 +64,13 @@ class AlosPalsarLeaderFile {
         return _sceneHeaderRecord;
     }
 
-    public BaseRecord getFacilityRecord() {
-        return _facilityRecord;
+    public BaseRecord getMapProjRecord() {
+        return _mapProjRecord;
     }
+
+    //public BaseRecord getFacilityRecord() {
+    //    return _facilityRecord;
+    //}
 
     public float[] getLatCorners() throws IOException,
                                            IllegalCeosFormatException {
