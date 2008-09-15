@@ -240,8 +240,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
 
 
         //sph
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS,
-                _leaderFile.getFacilityRecord().getAttributeInt("Input state vector type flag"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass());
         AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
@@ -262,6 +261,12 @@ class JERSProductDirectory extends CEOSProductDirectory {
         if(i >= 0)
             return procTime.substring(i+1, procTime.length()).trim();
         return procTime;
+    }
+
+    private String getPass() {
+        double heading = _leaderFile.getMapProjRecord().getAttributeDouble("Platform heading at nadir corresponding to scene centre");
+        if(heading > 90) return "DESCENDING";
+        else return "ASCENDING";
     }
 
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {
