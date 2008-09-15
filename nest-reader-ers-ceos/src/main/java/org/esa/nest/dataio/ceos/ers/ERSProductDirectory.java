@@ -271,9 +271,9 @@ class ERSProductDirectory extends CEOSProductDirectory {
     }
 
     private String getPass() {
-        int vectorType = _leaderFile.getFacilityRecord().getAttributeInt("Input state vector type flag");
-        if(vectorType == 0) return "ASCENDING";
-        else return "DESCENDING";
+        double heading = _leaderFile.getMapProjRecord().getAttributeDouble("Platform heading at nadir corresponding to scene centre");
+        if(heading > 90) return "DESCENDING";
+        else return "ASCENDING";
     }
 
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {
