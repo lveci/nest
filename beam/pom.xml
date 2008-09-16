@@ -90,7 +90,7 @@
         <module>beam-processing</module>
         <module>beam-scripting</module>
         <!--module>beam-help</module-->
-        <module>beam-pview</module>
+        <!--module>beam-pview</module-->
 
         <!--module>beam-meris-cloud</module>
         <module>beam-meris-smac</module>

@@ -53,10 +53,10 @@ public class FormatChangeOp extends Operator {
     private String targetDataType;
     private int dataType;
 
-    @Parameter(valueSet = { "None",
-                            "Linear (slope and intercept)",
-                            "Linear (between min max)",
-                            "Logarithmic"
+    @Parameter(valueSet = { "None"//,
+                            //"Linear (slope and intercept)",
+                            //"Linear (between min max)",
+                            //"Logarithmic"
             }, defaultValue = "None", label="Scaling")
     private String scaling;
 
