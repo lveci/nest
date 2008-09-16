@@ -24,6 +24,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.framework.gpf.annotations.Parameter;
+import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
@@ -35,9 +36,8 @@ import Jama.Matrix;
 /**
  * Calibration for ASAR data products.
  *
- * @todo handle ERS product
- * @todo handle case that output image has different dimension than the input image
- * @todo use bilinear, nearest neighbor, cubic and sinc interpolation methods
+ * @todo handle Incidence angle should be obtained from the abstracted metadata, mission type should not be used
+ * @todo should use user selected interpolation methods
  * @todo output warp coefficients of all tiles to NEST metadata
  * @todo compute xyz from lat/lon using library
  */
@@ -65,21 +65,23 @@ public class SRGROp extends Operator {
                interval = "(1, *)", defaultValue = "100", label="Number of Range Points")
     private int numRangePoints;
 
-    @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR, BICUBIC, SINC}, defaultValue = BILINEAR, label="Interpolation Method")
-    private String interpolationMethod;
+//    @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR, BICUBIC, SINC}, defaultValue = BILINEAR, label="Interpolation Method")
+//    private String interpolationMethod;
 
     private MetadataElement absRoot;
-    private TiePointGrid incidenceAngle;
     private GeoCoding geoCoding;
+    private String missionType;
     private boolean srgrFlag;
     private double slantRangeSpacing; // in m
     private double groundRangeSpacing; // in m
+    private double nearRangeIncidenceAngle; // in degree
     private double[] slantRangeDistanceArray; // slant range distance from each selected range point to the 1st one
     private double[] groundRangeDistanceArray; // ground range distance from each selected range point to the first one
     private double[] warpPolynomialCoef; // coefficients for warp polynomial
 
     private int sourceImageWidth;
     private int sourceImageHeight;
+    private int targetImageWidth;
     private int tileIdx;
 
     private static final String NEAREST_NEIGHBOR = "Nearest-neighbor interpolation";
@@ -112,6 +114,9 @@ public class SRGROp extends Operator {
         }
 
         absRoot = sourceProduct.getMetadataRoot().getElement("Abstracted Metadata");
+        if (absRoot == null) {
+            throw new OperatorException("Abstracted Metadata not found");
+        }
 
         getSRGRFlag();
 
@@ -126,10 +131,9 @@ public class SRGROp extends Operator {
         geoCoding = sourceProduct.getGeoCoding();
 
         computeSlantRangeDistanceArray();
+        getNearRangeIncidenceAngle();
 
-        getIncidenceAngle();
-
-        computeGroundRangeSpacing();
+        groundRangeSpacing = slantRangeSpacing / Math.sin(nearRangeIncidenceAngle*MathUtils.DTOR);
 
         createTargetProduct();
 
@@ -164,22 +168,24 @@ public class SRGROp extends Operator {
 
         // compute ground range image pixel values
         Band sourceBand = sourceProduct.getBand(targetBand.getName());
-        Tile sourceRaster = getSourceTile(sourceBand, targetTileRectangle, pm);
+        Rectangle sourceTileRectangle = new Rectangle(x0, y0, sourceImageWidth, h);
+        Tile sourceRaster = getSourceTile(sourceBand, sourceTileRectangle, pm);
 
-        for (int y = y0; y < y0 + h; y++) {
-            for (int x = x0; x < x0 + w; x++) {
+        for (int x = x0; x < x0 + w; x++) {
 
-                double srpp = getSlantRangePixelPosition(x);
+            double srpp = getSlantRangePixelPosition(x);
 
-                // get pixel value by interpolation
-                int x1, x2;
-                if (srpp < x0 + w - 1) {
-                    x1 = (int)srpp;
-                    x2 = x1 + 1;
-                } else {
-                    x1 = x0 + w - 2;
-                    x2 = x0 + w - 1;
-                }
+            int x1, x2;
+            if (srpp < x0 + sourceImageWidth - 1) {
+                x1 = (int)srpp;
+                x2 = x1 + 1;
+            } else {
+                x1 = x0 + sourceImageWidth - 2;
+                x2 = x0 + sourceImageWidth - 1;
+            }
+
+            for (int y = y0; y < y0 + h; y++) {
+
                 double v1 = sourceRaster.getSampleDouble(x1, y);
                 double v2 = sourceRaster.getSampleDouble(x2, y);
                 double v = (x2 - srpp)*v1 + (srpp - x1)*v2;
@@ -196,6 +202,10 @@ public class SRGROp extends Operator {
      * @return The pixel index in the slant range image
      */
     double getSlantRangePixelPosition(int x) {
+
+        if (x == 0) {
+            return 0.0;
+        }
 
         double dg = groundRangeSpacing * x;
         double ds = 0.0;
@@ -224,12 +234,12 @@ public class SRGROp extends Operator {
         
         MetadataAttribute rangeSpacingAttr = absRoot.getAttribute(AbstractMetadata.range_spacing);
         if (rangeSpacingAttr == null) {
-            throw new OperatorException(AbstractMetadata.range_spacing +" not found");
+            throw new OperatorException(AbstractMetadata.range_spacing + " not found");
         }
 
         slantRangeSpacing = (double)rangeSpacingAttr.getData().getElemFloat();
         if(slantRangeSpacing == 0) {
-            throw new OperatorException("slantRangeSpacing should not be zero");
+            throw new OperatorException(AbstractMetadata.range_spacing + " is zero");
         }
     }
 
@@ -247,65 +257,176 @@ public class SRGROp extends Operator {
     }
 
     /**
-     * Get incidence angle tie point grid.
+     * Get near range incidence angle (in degree).
      */
-    void getIncidenceAngle() {
+    void getNearRangeIncidenceAngle() {
+
+        MetadataAttribute passAttr = absRoot.getAttribute(AbstractMetadata.PASS);
+        if (passAttr == null) {
+            throw new OperatorException(AbstractMetadata.PASS + " not found");
+        }
+        String pass = passAttr.getData().getElemString();
+        //System.out.println("pass is " + pass);
+
+        getMissionType();
+
+        if (missionType.contains("ERS")) {
+            nearRangeIncidenceAngle = getIncidenceAngleForERSProduct(pass);
+        } else if (missionType.contains("ENVISAT")) {
+            nearRangeIncidenceAngle = getIncidenceAngleForASARProduct(pass);
+        } else {
+            throw new OperatorException("Invalid mission type");
+        }
+        System.out.println("Near range incidence angle is " + nearRangeIncidenceAngle);
+    }
+
+    /**
+     * Get the near range incidence angle for ERS product(in degree).
+     *
+     * @param pass Satellite pass (ascending or descending)
+     * @return The incidence angle.
+     */
+    double getIncidenceAngleForERSProduct(String pass) {
+        // Field 56 or 58 in PRI Facility Related Data Record (in degree)
+        MetadataElement facility = sourceProduct.getMetadataRoot().getElement("Leader").getElement("Facility Related");
+        if (facility == null) {
+            throw new OperatorException("Facility Related not found");
+        }
+
+        String incidenceAngle;
+        if (pass.contains("DESCENDING")) {
+            incidenceAngle = "Incidence angle at last valid range pixel";
+        } else {
+            incidenceAngle = "Incidence angle at first range pixel";
+        }
+
+        MetadataAttribute attr = facility.getAttribute(incidenceAngle);
+        if (attr == null) {
+            throw new OperatorException(incidenceAngle + " not found");
+        }
+
+        return attr.getData().getElemFloat();
+    }
+
+    /**
+     * Get the near range incidence angle for ASAR product(in degree).
+     *
+     * @param pass Satellite pass (ascending or descending)
+     * @return The incidence angle.
+     */
+    double getIncidenceAngleForASARProduct(String pass) {
+
+        TiePointGrid incidenceAngle = getIncidenceAngle();
+
+        double alpha;
+        if (pass.contains("DESCENDING")) {
+            alpha = incidenceAngle.getPixelFloat(sourceImageWidth - 0.5f, 0.5f);
+        } else {
+            alpha = incidenceAngle.getPixelFloat(0.5f, 0.5f);
+        }
+        return alpha;
+    }
+
+    /**
+     * Get incidence angle tie point grid.
+     *
+     * @return srcTPG The incidence angle tie point grid.
+     */
+    TiePointGrid getIncidenceAngle() {
 
         for (int i = 0; i < sourceProduct.getNumTiePointGrids(); i++) {
             TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
             if (srcTPG.getName().equals("incident_angle")) {
-                incidenceAngle = srcTPG;
-                break;
+                return srcTPG;
             }
         }
+        return null;
     }
 
     /**
-     * Compute ground range spacing.
+     * Get the mission type.
      */
-    void computeGroundRangeSpacing() {
+    void getMissionType() {
 
-        // get satellite pass
-        MetadataAttribute passAttr = absRoot.getAttribute(AbstractMetadata.PASS);
-        if (passAttr == null) {
-            throw new OperatorException(AbstractMetadata.PASS +" not found");
+        MetadataAttribute missionTypeAttr = absRoot.getAttribute(AbstractMetadata.MISSION);
+        if (missionTypeAttr == null) {
+            throw new OperatorException(AbstractMetadata.MISSION + " not found");
         }
 
-        String pass = passAttr.getData().getElemString();
-        //System.out.println("pass is " + pass);
-
-        // get near range incidence angle
-        double alpha;
-        if (pass.equals("DESCENDING")) {
-            alpha = incidenceAngle.getPixelFloat(sourceImageWidth - 0.5f, 0.5f) * MathUtils.DTOR;
-        } else {
-            alpha = incidenceAngle.getPixelFloat(0.5f, 0.5f) * MathUtils.DTOR;
-        }
-        
-        groundRangeSpacing = slantRangeSpacing / Math.sin(alpha);
+        missionType = missionTypeAttr.getData().getElemString();
+        System.out.println("Mission is " + missionType);
     }
-
+    
     /**
      * Create target product.
      */
     void createTargetProduct() {
 
+        computeTargetImageWidth();
+
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),
-                                    sourceProduct.getSceneRasterWidth(),
-                                    sourceProduct.getSceneRasterHeight());
+                                    targetImageWidth,
+                                    sourceImageHeight);
 
         addSelectedBands();
 
-        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 256);
+        targetProduct.setPreferredTileSize(targetImageWidth, 256);
 
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
+
+        updateTargetProductMetadata();
+    }
+
+    void computeTargetImageWidth() {
+
+        double[] xyz = new double[3];
+        GeoPos geoPos = geoCoding.getGeoPos(new PixelPos(0, 0), null);
+        geo2xyz(geoPos, xyz);
+        double xP0 = xyz[0];
+        double yP0 = xyz[1];
+        double zP0 = xyz[2];
+
+        double totalDistance = 0.0;
+        for (int i = 1; i < sourceImageWidth; i++) {
+
+            geoPos = geoCoding.getGeoPos(new PixelPos(i, 0), null);
+            geo2xyz(geoPos, xyz);
+            totalDistance += Math.sqrt(Math.pow(xP0 - xyz[0], 2) +
+                                       Math.pow(yP0 - xyz[1], 2) +
+                                       Math.pow(zP0 - xyz[2], 2));
+
+            xP0 = xyz[0];
+            yP0 = xyz[1];
+            zP0 = xyz[2];
+        }
+
+        targetImageWidth = (int)(totalDistance / groundRangeSpacing);
+    }
+
+    /**
+     * Update metadata in the target product.
+     */
+    void updateTargetProductMetadata() {
+
+        MetadataElement abs = targetProduct.getMetadataRoot().getElement("Abstracted Metadata");
+        if (abs == null) {
+            throw new OperatorException("Abstracted Metadata not found");
+        }
+        abs.getAttribute(AbstractMetadata.srgr_flag).getData().setElemBoolean(true);
+
+        MetadataAttribute rangeSpacingAttr = abs.getAttribute(AbstractMetadata.range_spacing);
+        if (rangeSpacingAttr == null) {
+            throw new OperatorException(AbstractMetadata.range_spacing + " not found");
+        }
+        rangeSpacingAttr.getData().setElemFloat((float)(groundRangeSpacing));
     }
 
     private void addSelectedBands() {
+
         if (sourceBandNames == null || sourceBandNames.length == 0) {
             Band[] bands = sourceProduct.getBands();
             ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
@@ -326,9 +447,13 @@ public class SRGROp extends Operator {
         }
 
         for(Band srcBand : sourceBands) {
-            Band targetBand = new Band(srcBand.getName(), ProductData.TYPE_FLOAT32,
-                    sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
-            targetProduct.addBand(targetBand);
+            if (!srcBand.isSynthetic()) {
+                Band targetBand = new Band(srcBand.getName(),
+                                           ProductData.TYPE_FLOAT32,
+                                           targetImageWidth,
+                                           sourceImageHeight);
+                targetProduct.addBand(targetBand);
+            }            
         }
     }
 
@@ -352,13 +477,13 @@ public class SRGROp extends Operator {
     }
 
     /**
-     * Compute ground range distance from each selected range point to the 1st one.
+     * Compute ground range distance from each selected range point to the 1st one (in m).
      *
      * @param y0 The y coordinate of the upper left pixel in the current tile.
      */
     void computeGroundRangeDistanceArray(int y0) {
 
-        double[] pointToPointDistance = new double[numRangePoints - 1];
+        groundRangeDistanceArray = new double[numRangePoints - 1];
         double[] xyz = new double[3];
         int pixelsBetweenPoints = sourceImageWidth / numRangePoints;
 
@@ -376,18 +501,19 @@ public class SRGROp extends Operator {
 
             geoPos = geoCoding.getGeoPos(new PixelPos(pixelsBetweenPoints*(i+1), y0), null);
             geo2xyz(geoPos, xyz);
-            pointToPointDistance[i] = (float)Math.sqrt(Math.pow(xP0 - xyz[0], 2) +
-                                                       Math.pow(yP0 - xyz[1], 2) +
-                                                       Math.pow(zP0 - xyz[2], 2));
+            double pointToPointDistance = (float)Math.sqrt(Math.pow(xP0 - xyz[0], 2) +
+                                                           Math.pow(yP0 - xyz[1], 2) +
+                                                           Math.pow(zP0 - xyz[2], 2));
+
+            if (i == 0) {
+                groundRangeDistanceArray[i] = pointToPointDistance;
+            } else {
+                groundRangeDistanceArray[i] = groundRangeDistanceArray[i-1] + pointToPointDistance;
+            }
+
             xP0 = xyz[0];
             yP0 = xyz[1];
             zP0 = xyz[2];
-        }
-
-        groundRangeDistanceArray = new double[numRangePoints - 1];
-        groundRangeDistanceArray[0] = pointToPointDistance[0];
-        for (int i = 1; i < numRangePoints - 1; i++) {
-            groundRangeDistanceArray[i] = groundRangeDistanceArray[i-1] + pointToPointDistance[i];
         }
     }
 
@@ -406,9 +532,9 @@ public class SRGROp extends Operator {
         double cosLat = Math.cos(lat);
         double N = a / Math.sqrt(1 - Math.pow(e*sinLat, 2));
 
-        xyz[0] = N * cosLat * Math.cos(lon);
-        xyz[1] = N * cosLat * Math.sin(lon);
-        xyz[2] = (1 - e * e) * N * sinLat;
+        xyz[0] = N * cosLat * Math.cos(lon); // in m
+        xyz[1] = N * cosLat * Math.sin(lon); // in m
+        xyz[2] = (1 - e * e) * N * sinLat;   // in m
     }
 
     /**
