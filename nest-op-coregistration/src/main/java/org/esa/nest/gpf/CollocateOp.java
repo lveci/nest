@@ -99,7 +99,8 @@ public class CollocateOp extends Operator {
 
         for (final Band sourceBand : slaveProduct.getBands()) {
             String targetBandName = sourceBand.getName();
-            final Band targetBand = targetProduct.addBand(targetBandName, sourceBand.getDataType());
+            //final Band targetBand = targetProduct.addBand(targetBandName, sourceBand.getDataType());
+            final Band targetBand = targetProduct.addBand(targetBandName, ProductData.TYPE_FLOAT32);
             ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
             sourceRasterMap.put(targetBand, sourceBand);
         }
