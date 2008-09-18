@@ -135,14 +135,12 @@ public class DatAboutBox extends ModalDialog {
                 "&nbsp;&nbsp;<b>Rajesh Jha</b> (project manager)<br>" +
                 "&nbsp;&nbsp;<b>Shengli Dai</b> (project scientist)<br>" +
                 "&nbsp;&nbsp;<b>Luis Veci</b> (software lead)<br>" +
-                "&nbsp;&nbsp;<b>Daniel Danu</b> (developer)<br>" +
                 "&nbsp;&nbsp;<b>Jun Lu</b> (developer)<br>" +
                 "&nbsp;&nbsp;<b>Steven Truelove</b> (developer)<br>" +
                 "</td><td>" +
                 "&nbsp;&nbsp;<b>Andrew Taylor</b> (IT support)<br>" +
                 "&nbsp;&nbsp;<b>Iris Buchan</b> (quality assurance)<br>" +
                 "&nbsp;&nbsp;<b>Nisso Keslassy</b> (contracts officer)<br>" +
-                "&nbsp;&nbsp;<b>Kay Simpson</b> (technical writing)<br>" +
                 "&nbsp;&nbsp;<b>Sue Miller</b> (configuration management)<br>" +
                 "&nbsp;&nbsp;<b></b> <br>" +
                 "</td></tr>" +
@@ -170,6 +168,7 @@ public class DatAboutBox extends ModalDialog {
                 "<tr><td>" +
                 "&nbsp;&nbsp;<b>Marcus Engdahl</b> (technical officer)<br>" +
                 "&nbsp;&nbsp;<b>Andrea Minchella</b> (scientist)<br>" +
+                "&nbsp;&nbsp;<b>Romain Husson</b> (scientist)<br>" +
                 "&nbsp;&nbsp;<b>Nuno Miranda</b> (scientist)<br>" +
                 "</td></tr>" +
                 "</table>" +
