@@ -13,7 +13,7 @@ import java.io.IOException;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.12 $ $Date: 2008-08-27 17:32:31 $
+ * @version $Revision: 1.13 $ $Date: 2008-09-18 21:17:04 $
  */
 class ERSImageFile extends CEOSImageFile {
 
@@ -33,6 +33,10 @@ class ERSImageFile extends CEOSImageFile {
 
         _imageRecordLength = _imageRecords[0].getRecordLength();
         _startPosImageRecords = _imageRecords[0].getStartPos();
+    }
+
+    public BaseRecord getImageFileDescriptor() {
+        return _imageFDR;
     }
 
     public String getBandName() {

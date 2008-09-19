@@ -169,15 +169,23 @@ public class CeosDB {
 
     }
 
+    private Object get(String name) {
+        Object obj = metaMap.get(name);
+        if(obj == null) {
+            System.out.println("metadata "+name+" is null");
+        }
+        return obj;
+    }
+
     public String getAttributeString(String name) {
-        return (String) metaMap.get(name);
+        return (String) get(name);
     }
     
     public int getAttributeInt(String name) {
-        return (Integer) metaMap.get(name);
+        return (Integer) get(name);
     }
 
     public Double getAttributeDouble(String name) {
-        return (Double) metaMap.get(name);
+        return (Double) get(name);
     }
 }

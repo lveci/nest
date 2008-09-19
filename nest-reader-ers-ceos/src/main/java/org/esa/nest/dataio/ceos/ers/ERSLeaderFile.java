@@ -90,10 +90,10 @@ class ERSLeaderFile {
 
     public float[] getLonCorners() throws IOException,
                                            IllegalCeosFormatException {
-        final double lonUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel longitude");
-        final double lonUR = _mapProjRecord.getAttributeDouble("1st line last valid pixel longitude");
-        final double lonLL = _mapProjRecord.getAttributeDouble("Last line 1st pixel longitude");
-        final double lonLR = _mapProjRecord.getAttributeDouble("Last line last valid pixel longitude");
+        final double lonUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic longitude");
+        final double lonUR = _mapProjRecord.getAttributeDouble("1st line last valid pixel geodetic longitude");
+        final double lonLL = _mapProjRecord.getAttributeDouble("Last line 1st pixel geodetic longitude");
+        final double lonLR = _mapProjRecord.getAttributeDouble("Last line last valid pixel geodetic longitude");
         return new float[]{(float)lonUL, (float)lonUR, (float)lonLL, (float)lonLR};
     }
 

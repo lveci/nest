@@ -5,6 +5,8 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.ProductData;
 
+import java.text.ParseException;
+
 /**
  * Created by IntelliJ IDEA.
  * User: lveci
@@ -46,6 +48,7 @@ public class AbstractMetadata {
     public static final String SWATH = "SWATH";
     public static final String PASS = "PASS";
     public static final String SAMPLE_TYPE = "SAMPLE_TYPE";
+    public static final String algorithm = "algorithm";
     public static final String mds1_tx_rx_polar = "mds1_tx_rx_polar";
     public static final String mds2_tx_rx_polar = "mds2_tx_rx_polar";
     public static final String compression = "compression";
@@ -95,18 +98,18 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, NUM_SLICES, ProductData.TYPE_INT32, "", "");
         addAbstractedAttribute(absRoot, first_line_time, ProductData.TYPE_UTC, "", "");
         addAbstractedAttribute(absRoot, last_line_time, ProductData.TYPE_UTC, "", "");
-        addAbstractedAttribute(absRoot, first_near_lat, ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, first_near_long, ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, first_mid_lat, ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, first_mid_long, ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, first_far_lat, ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, first_far_long, ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, last_near_lat, ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, last_near_long, ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, last_mid_lat, ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, last_mid_long, ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, last_far_lat, ProductData.TYPE_INT32, "deg", "");
-        addAbstractedAttribute(absRoot, last_far_long, ProductData.TYPE_INT32, "deg", "");
+        addAbstractedAttribute(absRoot, first_near_lat, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(absRoot, first_near_long, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(absRoot, first_mid_lat, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(absRoot, first_mid_long, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(absRoot, first_far_lat, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(absRoot, first_far_long, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(absRoot, last_near_lat, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(absRoot, last_near_long, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(absRoot, last_mid_lat, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(absRoot, last_mid_long, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(absRoot, last_far_lat, ProductData.TYPE_FLOAT64, "deg", "");
+        addAbstractedAttribute(absRoot, last_far_long, ProductData.TYPE_FLOAT64, "deg", "");
         
         addAbstractedAttribute(absRoot, SWATH, ProductData.TYPE_ASCII, "", "Swath name");
         addAbstractedAttribute(absRoot, PASS, ProductData.TYPE_ASCII, "", "ASCENDING or DESCENDING");
@@ -169,6 +172,22 @@ public class AbstractMetadata {
     }
 
     /**
+     * Sets an attribute as a UTC
+     * @param dest the destination element
+     * @param tag the name of the attribute
+     * @param value the UTC value
+     */
+    public static void setAttribute(MetadataElement dest, String tag, ProductData.UTC value) {
+        MetadataAttribute attrib = dest.getAttribute(tag);
+        if(attrib == null)
+            System.out.println(tag + " not found in metadata");
+        if(value == null)
+            System.out.println(tag + " metadata value is null");
+        if(attrib != null && value != null)
+            attrib.getData().setElems(value.getArray());
+    }
+
+    /**
      * Sets an attribute as an int
      * @param dest the destination element
      * @param tag the name of the attribute
@@ -194,5 +213,13 @@ public class AbstractMetadata {
             System.out.println(tag + " not found in metadata");
         if(attrib != null)
             attrib.getData().setElemDouble(value);
+    }
+
+    public static ProductData.UTC parseUTC(String timeStr) {
+        try {
+            return ProductData.UTC.parse(timeStr);
+        } catch(ParseException e) {
+            return new ProductData.UTC(0);
+        }
     }
 }

@@ -26,12 +26,12 @@
 	<rec name="skipBytes" type="0" num="772"/>	
 	<!-- CORDINATES OF FOUR CORNER POINTS -->
 	<rec name="1st line 1st pixel geodetic latitude" type="5" num="16"/>
-	<rec name="1st line 1st pixel longitude" type="5" num="16"/>
+	<rec name="1st line 1st pixel geodetic longitude" type="5" num="16"/>
 	<rec name="1st line last valid pixel geodetic latitude" type="5" num="16"/>
-	<rec name="1st line last valid pixel longitude" type="5" num="16"/>
+	<rec name="1st line last valid pixel geodetic longitude" type="5" num="16"/>
 	<rec name="Last line last valid pixel geodetic latitude" type="5" num="16"/>
-	<rec name="Last line last valid pixel longitude" type="5" num="16"/>
+	<rec name="Last line last valid pixel geodetic longitude" type="5" num="16"/>
 	<rec name="Last line 1st pixel geodetic latitude" type="5" num="16"/>
-	<rec name="Last line 1st pixel longitude" type="5" num="16"/>
+	<rec name="Last line 1st pixel geodetic longitude" type="5" num="16"/>
 
 </ceos>
