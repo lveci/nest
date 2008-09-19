@@ -310,20 +310,6 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         }
     }
 
-  /*  private ProductData.UTC getUTCScanStartTime() throws IOException,
-                                                         IllegalCeosFormatException {
-        final Calendar imageStartDate = _leaderFile.getDateImageWasTaken();
-        imageStartDate.add(Calendar.MILLISECOND, _imageFiles[0].getTotalMillisInDayOfLine(0));
-        return ProductData.UTC.create(imageStartDate.getTime(), _imageFiles[0].getMicrosecondsOfLine(0));
-    }
-
-    private ProductData.UTC getUTCScanStopTime() throws IOException,
-                                                        IllegalCeosFormatException {
-        final Calendar imageStartDate = _leaderFile.getDateImageWasTaken();
-        imageStartDate.add(Calendar.MILLISECOND, _imageFiles[0].getTotalMillisInDayOfLine(_sceneHeight - 1));
-        return ProductData.UTC.create(imageStartDate.getTime(), _imageFiles[0].getMicrosecondsOfLine(_sceneHeight - 1));
-    }      */
-
     private ImageInputStream createInputStream(final String fileName) throws IOException {
         return new FileImageInputStream(new File(_baseDir, fileName));
     }

@@ -130,8 +130,8 @@ class ERSProductDirectory extends CEOSProductDirectory {
             }
         }
 
-        //product.setStartTime(getUTCScanStartTime());
-        //product.setEndTime(getUTCScanStopTime());
+        product.setStartTime(getUTCScanStartTime());
+        product.setEndTime(getUTCScanStopTime());
         product.setDescription(getProductDescription());
 
         addGeoCoding(product);
@@ -245,31 +245,27 @@ class ERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
                 _leaderFile.getFacilityRecord().getAttributeString("Time of input state vector used to processed the image"));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time,
-                AbstractMetadata.parseUTC(sceneRec.getAttributeString("Zero-doppler azimuth time of first azimuth pixel")) );
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time,
-                AbstractMetadata.parseUTC(sceneRec.getAttributeString("Zero-doppler azimuth time of last azimuth pixel")) );
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getUTCScanStartTime());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, getUTCScanStopTime());
+
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
                 mapProjRec.getAttributeDouble("1st line 1st pixel geodetic latitude"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_long,
                 mapProjRec.getAttributeDouble("1st line 1st pixel geodetic longitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_mid_lat,
-                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_mid_long,
-                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic longitude"));
+
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_lat,
-                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic latitude"));
+                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic latitude"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_long,
-                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));
+                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic longitude"));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_lat,
                 mapProjRec.getAttributeDouble("Last line 1st pixel geodetic latitude"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_long,
                 mapProjRec.getAttributeDouble("Last line 1st pixel geodetic longitude"));
-        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_mid_lat,
-        //        mapProjRec.getAttributeDouble("Processed scene centre geodetic latitude"));
-        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_mid_long,
-        //        mapProjRec.getAttributeDouble("Processed scene centre geodetic longitude"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_lat,
+                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic latitude"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long,
+                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));
 
         //sph
 
@@ -277,8 +273,8 @@ class ERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
                 sceneRec.getAttributeString("Processing algorithm identifier"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
-                sceneRec.getAttributeString("Processing algorithm identifier"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.compression,
+                sceneRec.getAttributeString("Processor range compression designator"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
                 getPolarization());
         
@@ -394,20 +390,15 @@ class ERSProductDirectory extends CEOSProductDirectory {
         }
     }
 
-    /*
-    private ProductData.UTC getUTCScanStartTime() throws IOException,
-                                                         IllegalCeosFormatException {
-        final Calendar imageStartDate = _leaderFile.getDateImageWasTaken();
-        imageStartDate.add(Calendar.MILLISECOND, _imageFiles[0].getTotalMillisInDayOfLine(0));
-        return ProductData.UTC.create(imageStartDate.getTime(), _imageFiles[0].getMicrosecondsOfLine(0));
+    private ProductData.UTC getUTCScanStartTime() {
+        return AbstractMetadata.parseUTC(_leaderFile.getSceneRecord().
+                getAttributeString("Zero-doppler azimuth time of first azimuth pixel"));
     }
 
-    private ProductData.UTC getUTCScanStopTime() throws IOException,
-                                                        IllegalCeosFormatException {
-        final Calendar imageStartDate = _leaderFile.getDateImageWasTaken();
-        imageStartDate.add(Calendar.MILLISECOND, _imageFiles[0].getTotalMillisInDayOfLine(_sceneHeight - 1));
-        return ProductData.UTC.create(imageStartDate.getTime(), _imageFiles[0].getMicrosecondsOfLine(_sceneHeight - 1));
-    }  */
+    private ProductData.UTC getUTCScanStopTime() {
+        return AbstractMetadata.parseUTC(_leaderFile.getSceneRecord().
+                getAttributeString("Zero-doppler azimuth time of last azimuth pixel"));
+    }
 
     private ImageInputStream createInputStream(final String fileName) throws IOException {
         return new FileImageInputStream(new File(_baseDir, fileName));

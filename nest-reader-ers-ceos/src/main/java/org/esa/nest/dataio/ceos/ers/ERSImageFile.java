@@ -13,11 +13,9 @@ import java.io.IOException;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.13 $ $Date: 2008-09-18 21:17:04 $
+ * @version $Revision: 1.14 $ $Date: 2008-09-19 16:51:03 $
  */
 class ERSImageFile extends CEOSImageFile {
-
-    private final BaseRecord _imageFDR;
 
     private static String mission = "ers";
     private static String image_DefinitionFile = "image_file.xml";
@@ -35,10 +33,6 @@ class ERSImageFile extends CEOSImageFile {
         _startPosImageRecords = _imageRecords[0].getStartPos();
     }
 
-    public BaseRecord getImageFileDescriptor() {
-        return _imageFDR;
-    }
-
     public String getBandName() {
         return ERSConstants.BANDNAME_PREFIX;
     }
@@ -47,34 +41,7 @@ class ERSImageFile extends CEOSImageFile {
         return "";
     }
 
-    public int getRasterWidth() {
-        return _imageFDR.getAttributeInt("Number of pixels per line per SAR channel");//getNumImagePixelsPerLine();
-    }
-
-    public int getRasterHeight() {
-        return _imageFDR.getAttributeInt("Number of lines per data set");
-    }
-
     public static String getGeophysicalUnit() {
         return ERSConstants.GEOPHYSICAL_UNIT;
     }
-
-    public void assignMetadataTo(MetadataElement rootElem, int count) {
-        MetadataElement metadata = new MetadataElement("Image Descriptor " + count);
-         _imageFDR.assignMetadataTo(metadata);
-        rootElem.addElement(metadata);
-    }
-
-    /*
-    public int getTotalMillisInDayOfLine(final int y) throws IOException,
-                                                             IllegalCeosFormatException {
-        return getImageRecord(y).getScanStartTimeMillisAtDay();
-    }
-
-    public int getMicrosecondsOfLine(final int y) throws IOException,
-                                                         IllegalCeosFormatException {
-        return getImageRecord(y).getScanStartTimeMicros();
-    }         */
-
-
 }

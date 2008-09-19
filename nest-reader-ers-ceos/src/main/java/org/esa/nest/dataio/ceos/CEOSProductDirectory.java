@@ -4,6 +4,7 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.IOException;
 
@@ -69,4 +70,5 @@ public abstract class CEOSProductDirectory {
         virtBand.setDescription("Intensity from complex data");
         product.addBand(virtBand);
     }
+
 }

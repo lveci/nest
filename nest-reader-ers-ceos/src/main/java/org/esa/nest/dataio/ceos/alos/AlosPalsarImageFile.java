@@ -13,7 +13,6 @@ import java.io.IOException;
 
 class AlosPalsarImageFile extends CEOSImageFile {
 
-    private final BaseRecord _imageFDR;
     private final int _imageNumber;
 
     private static String mission = "alos";
@@ -44,33 +43,7 @@ class AlosPalsarImageFile extends CEOSImageFile {
         return _imageNumber;
     }
 
-    public int getRasterWidth() {
-        return _imageFDR.getAttributeInt("Number of pixels per line per SAR channel");//getNumImagePixelsPerLine();
-    }
-
-    public int getRasterHeight() {
-        return _imageFDR.getAttributeInt("Number of lines per data set");
-    }
-
     public static String getGeophysicalUnit() {
         return AlosPalsarConstants.GEOPHYSICAL_UNIT;
     }
-
-    public void assignMetadataTo(MetadataElement rootElem, int count) {
-        MetadataElement metadata = new MetadataElement("Image Descriptor " + count);
-         _imageFDR.assignMetadataTo(metadata);
-        rootElem.addElement(metadata);
-    }
-
- /*   public int getTotalMillisInDayOfLine(final int y) throws IOException,
-                                                             IllegalCeosFormatException {
-        return getImageRecord(y).getScanStartTimeMillisAtDay();
-    }
-
-    public int getMicrosecondsOfLine(final int y) throws IOException,
-                                                         IllegalCeosFormatException {
-        return getImageRecord(y).getScanStartTimeMicros();
-    } */
-
-
 }

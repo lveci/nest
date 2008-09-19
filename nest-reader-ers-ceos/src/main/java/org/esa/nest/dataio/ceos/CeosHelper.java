@@ -1,5 +1,5 @@
 /*
- * $Id: CeosHelper.java,v 1.7 2008-09-03 19:26:54 lveci Exp $
+ * $Id: CeosHelper.java,v 1.8 2008-09-19 16:51:03 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -85,7 +85,7 @@ public class CeosHelper {
 
     public static String getProductName(final BaseRecord textRecord) {
         String name = textRecord.getAttributeString("Scene identification").trim() + '-' +
-                textRecord.getAttributeString("Product type specifier").trim();
+                textRecord.getAttributeString("Product type specifier").trim().replace("PRODUCT:", "");
         return StringUtils.createValidName(name, new char[]{'_', '-', '.'}, '_');
     }
 

@@ -2,7 +2,9 @@ package org.esa.nest.dataio.ceos;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.dataio.ceos.records.ImageRecord;
+import org.esa.nest.dataio.ceos.records.BaseRecord;
 
 import java.io.IOException;
 import java.io.File;
@@ -13,10 +15,11 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.5 $ $Date: 2008-08-27 17:54:38 $
+ * @version $Revision: 1.6 $ $Date: 2008-09-19 16:51:03 $
  */
 public abstract class CEOSImageFile {
 
+    protected BaseRecord _imageFDR = null;
     protected CeosFileReader _ceosReader;
     protected ImageRecord[] _imageRecords = null;
 
@@ -24,6 +27,24 @@ public abstract class CEOSImageFile {
     protected long _startPosImageRecords = 0;
 
     public abstract String getBandName();
+
+    public BaseRecord getImageFileDescriptor() {
+        return _imageFDR;
+    }
+
+    public int getRasterWidth() {
+        return _imageFDR.getAttributeInt("Number of pixels per line per SAR channel");
+    }
+
+    public int getRasterHeight() {
+        return _imageFDR.getAttributeInt("Number of lines per data set");
+    }
+
+    public void assignMetadataTo(MetadataElement rootElem, int count) {
+        MetadataElement metadata = new MetadataElement("Image Descriptor " + count);
+         _imageFDR.assignMetadataTo(metadata);
+        rootElem.addElement(metadata);
+    }
 
     public static String[] getImageFileNames(File baseDir, String prefix) {
         final ArrayList<String> list = new ArrayList<String>(2);

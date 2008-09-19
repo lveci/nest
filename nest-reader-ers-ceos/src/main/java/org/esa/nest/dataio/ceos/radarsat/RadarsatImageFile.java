@@ -18,7 +18,6 @@ import java.io.IOException;
  */
 class RadarsatImageFile extends CEOSImageFile {
 
-    private final BaseRecord _imageFDR;
     private final int _imageNumber;
 
     private static String mission = "radarsat";
@@ -49,29 +48,9 @@ class RadarsatImageFile extends CEOSImageFile {
         return _imageNumber;
     }
 
-    public int getRasterWidth() {
-        return _imageFDR.getAttributeInt("Number of pixels per line per SAR channel");//getNumImagePixelsPerLine();
-    }
-
-    public int getRasterHeight() {
-        return _imageFDR.getAttributeInt("Number of lines per data set");
-    }
-
     public static String getGeophysicalUnit() {
         return RadarsatConstants.GEOPHYSICAL_UNIT;
     }
-
-
- /*
-    public int getTotalMillisInDayOfLine(final int y) throws IOException,
-                                                             IllegalCeosFormatException {
-        return getImageRecord(y).getScanStartTimeMillisAtDay();
-    }
-
-    public int getMicrosecondsOfLine(final int y) throws IOException,
-                                                         IllegalCeosFormatException {
-        return getImageRecord(y).getScanStartTimeMicros();
-    }   */
 
     public void readBandRasterData(final int sourceOffsetX, final int sourceOffsetY,
                                    final int sourceWidth, final int sourceHeight,

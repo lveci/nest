@@ -64,7 +64,8 @@ class RadarsatVolumeDirectoryFile {
     }
 
     public String getProductType() {
-        return _textRecord.getAttributeString("Product type specifier");
+        String type = _textRecord.getAttributeString("Product type specifier").trim();
+        return type.replace("PRODUCT:", "");
     }
 
     public void assignMetadataTo(final MetadataElement rootElem) {

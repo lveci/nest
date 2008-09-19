@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /*
- * $Id: JERSVolumeDirectoryFile.java,v 1.9 2008-08-27 17:32:31 lveci Exp $
+ * $Id: JERSVolumeDirectoryFile.java,v 1.10 2008-09-19 16:51:03 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -81,7 +81,8 @@ class JERSVolumeDirectoryFile {
     }
 
     public String getProductType() {
-        return _textRecord.getAttributeString("Product type specifier");
+        String type = _textRecord.getAttributeString("Product type specifier").trim();
+        return type.replace("PRODUCT:", "");
     }
 
     public void assignMetadataTo(final MetadataElement rootElem) {
