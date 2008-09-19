@@ -415,12 +415,12 @@ public class MultilookOp extends Operator {
         }
         rangeSpacingAttr.getData().setElemFloat((float)(rangeSpacing*rangeFactor));
 
-        MetadataAttribute lineTimeintervalAttr = abs.getAttribute(AbstractMetadata.line_time_interval);
-        if (lineTimeintervalAttr == null) {
+        MetadataAttribute lineTimeIntervalAttr = abs.getAttribute(AbstractMetadata.line_time_interval);
+        if (lineTimeIntervalAttr == null) {
             throw new OperatorException(AbstractMetadata.line_time_interval + " not found");
         }
-        float oldLineTimeInterval = lineTimeintervalAttr.getData().getElemFloat();
-        lineTimeintervalAttr.getData().setElemFloat(oldLineTimeInterval*azimuthFactor);
+        float oldLineTimeInterval = lineTimeIntervalAttr.getData().getElemFloat();
+        lineTimeIntervalAttr.getData().setElemFloat(oldLineTimeInterval*azimuthFactor);
 
         MetadataAttribute firstLineTimeAttr = abs.getAttribute(AbstractMetadata.first_line_time);
         if (firstLineTimeAttr == null) {
@@ -430,11 +430,11 @@ public class MultilookOp extends Operator {
         int idx = oldFirstLineTime.lastIndexOf(":") + 1;
         String oldSecondsStr = oldFirstLineTime.substring(idx);
         double oldSeconds = Double.parseDouble(oldSecondsStr);
-        double newSeconds = oldSeconds + oldLineTimeInterval*((azimuthFactor - 1)/2);
+        double newSeconds = oldSeconds + oldLineTimeInterval*((azimuthFactor - 1)/2.0);
         String newFirstLineTime = oldFirstLineTime.subSequence(0,idx) + "" + newSeconds + "000000";
         abs.removeAttribute(firstLineTimeAttr);
         abs.addAttribute(new MetadataAttribute(
-                AbstractMetadata.first_line_time, ProductData.createInstance(newFirstLineTime.substring(0,26)), false));        
+                AbstractMetadata.first_line_time, ProductData.createInstance(newFirstLineTime.substring(0,27)), false));        
     }
 
     /**
