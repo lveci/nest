@@ -291,6 +291,10 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type,
                 "UInt"+_imageFiles[0].getImageFileDescriptor().getAttributeInt("Number of bits per sample"));
+
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag,
+                isGroundRange());
     }
 
     private String getProcTime() {
@@ -319,6 +323,13 @@ class ERSProductDirectory extends CEOSProductDirectory {
         else if(id.contains("VH")|| id.contains("V/H"))
             return "V/H";
         return id;
+    }
+
+    private int isGroundRange() {
+        String projDesc = _leaderFile.getMapProjRecord().getAttributeString("Map projection descriptor").toLowerCase();
+        if(projDesc.contains("slant"))
+            return 0;
+        return 1;
     }
 
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {
