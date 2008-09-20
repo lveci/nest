@@ -12,6 +12,7 @@ rmdir /S /Q beam-meris-ndvi
 rmdir /S /Q beam-meris-radtorefl
 rmdir /S /Q beam-meris-smac
 rmdir /S /Q beam-meris-smile
+rmdir /S /Q beam-obpg-reader
 rmdir /S /Q beam-pconvert
 rmdir /S /Q beam-unmix
 
