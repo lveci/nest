@@ -38,7 +38,7 @@ import Jama.Matrix;
  *
  * @todo handle Incidence angle should be obtained from the abstracted metadata, mission type should not be used
  * @todo should use user selected interpolation methods
- * @todo output warp coefficients of all tiles to NEST metadata
+ * @todo add virtual band in target product (see createVirtualIntensityBand() in WSSDeBuestOp.java)
  * @todo compute xyz from lat/lon using library
  */
 /**
@@ -65,7 +65,7 @@ public class SRGROp extends Operator {
                interval = "(1, *)", defaultValue = "100", label="Number of Range Points")
     private int numRangePoints;
 
-//    @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR, BICUBIC, SINC}, defaultValue = BILINEAR, label="Interpolation Method")
+//    @Parameter(valueSet = {NEAREST_NEIGHBOR, LINEAR, CUBIC, SINC}, defaultValue = LINEAR, label="Interpolation Method")
 //    private String interpolationMethod;
 
     private MetadataElement absRoot;
@@ -85,8 +85,8 @@ public class SRGROp extends Operator {
     private int tileIdx;
 
     private static final String NEAREST_NEIGHBOR = "Nearest-neighbor interpolation";
-    private static final String BILINEAR = "Bilinear interpolation";
-    private static final String BICUBIC = "Bicubic interpolation";
+    private static final String LINEAR = "Linear interpolation";
+    private static final String CUBIC = "Cubic interpolation";
     private static final String SINC = "Sinc interpolation";
 
     private static double a = 6378137; // m
@@ -109,7 +109,7 @@ public class SRGROp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        if (numRangePoints < warpPolynomialOrder + 1) {
+        if (numRangePoints < warpPolynomialOrder + 2) {
             throw new OperatorException("numRangePoints must be greater than warpPolynomialOrder");
         }
 
@@ -158,7 +158,7 @@ public class SRGROp extends Operator {
         int y0 = targetTileRectangle.y;
         int w = targetTileRectangle.width;
         int h = targetTileRectangle.height;
-        System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+        //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         // compute WARP polynomial coefficients
         if (tileIdx != y0) {
@@ -277,7 +277,7 @@ public class SRGROp extends Operator {
         } else {
             throw new OperatorException("Invalid mission type");
         }
-        System.out.println("Near range incidence angle is " + nearRangeIncidenceAngle);
+        //sysSystem.out.println("Near range incidence angle is " + nearRangeIncidenceAngle);
     }
 
     /**
@@ -354,7 +354,7 @@ public class SRGROp extends Operator {
         }
 
         missionType = missionTypeAttr.getData().getElemString();
-        System.out.println("Mission is " + missionType);
+        //System.out.println("Mission is " + missionType);
     }
     
     /**
@@ -447,13 +447,14 @@ public class SRGROp extends Operator {
         }
 
         for(Band srcBand : sourceBands) {
-            if (!srcBand.isSynthetic()) {
-                Band targetBand = new Band(srcBand.getName(),
-                                           ProductData.TYPE_FLOAT32,
-                                           targetImageWidth,
-                                           sourceImageHeight);
-                targetProduct.addBand(targetBand);
-            }            
+//            if (srcBand.getUnit() != null && srcBand.getUnit().contains("Phase")) {
+//                continue;
+//            }
+            Band targetBand = new Band(srcBand.getName(),
+                                       ProductData.TYPE_FLOAT32,
+                                       targetImageWidth,
+                                       sourceImageHeight);
+            targetProduct.addBand(targetBand);
         }
     }
 
@@ -557,6 +558,20 @@ public class SRGROp extends Operator {
         return new Matrix(array);
     }
 
+    /**
+     * Set the number of range points used for creating warp function.
+     * This function is used for unit test only.
+     *
+     * @param numPoints The number of range points.
+     */
+    public void setNumOfRangePoints(int numPoints) {
+        numRangePoints = numPoints;
+    }
+
+    public void setSourceBandName(String name) {
+        sourceBandNames = new String[1];
+        sourceBandNames[0] = name;
+    }
     /**
      * The SPI is used to register this operator in the graph processing framework
      * via the SPI configuration file
