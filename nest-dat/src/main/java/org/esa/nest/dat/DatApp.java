@@ -39,7 +39,7 @@ public final class DatApp extends VisatApp {
 
     @Override
     protected void initClientUI(ProgressMonitor pm) {
-        super.initClient(pm);
+        super.initClientUI(pm);
 
         updateGraphMenu();
     }
