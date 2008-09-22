@@ -102,6 +102,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
                     bandImageFileMap.put(bandName, imageFile);
 
                     createVirtualIntensityBand(product, bandI, bandQ, "_"+index);
+                    createVirtualPhaseBand(product, bandI, bandQ, "_"+index);
                     ++index;
                 } else {
                     String bandName = "amplitude_" + index;
@@ -122,6 +123,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 product.addBand(bandQ);
                 bandImageFileMap.put("q", imageFile);
                 createVirtualIntensityBand(product, bandI, bandQ, "");
+                createVirtualPhaseBand(product, bandI, bandQ, "");
             } else {
                 Band band = createBand("amplitude");
                 product.addBand(band);

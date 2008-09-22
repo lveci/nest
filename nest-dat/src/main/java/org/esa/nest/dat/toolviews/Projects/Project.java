@@ -10,6 +10,7 @@ import org.esa.beam.visat.dialogs.PromptDialog;
 import org.esa.beam.framework.ui.product.ProductTreeListener;
 import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.framework.ui.ModelessDialog;
+import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductIO;
@@ -56,6 +57,12 @@ public class Project extends Observable {
             SaveProject();
     }
 
+    public void showProjectsView() {
+        final ExecCommand command = VisatApp.getApp().getCommandManager().
+                getExecCommand("org.esa.nest.dat.toolviews.Projects.ProjectsToolView.showCmd");
+        command.execute();
+    }
+
     public void CreateNewProject() {
         File file = DatUtils.GetFilePath("Create Project", "xml", "xml", "Project File", true);
 
@@ -70,6 +77,7 @@ public class Project extends Observable {
             initProject(newProjectFile);
             addExistingOpenedProducts();
             notifyEvent(SAVE_PROJECT);
+            showProjectsView();
         }
     }
 
@@ -386,6 +394,7 @@ public class Project extends Observable {
         loadProducts(folderList, prodList);
 
         notifyEvent(false);
+        showProjectsView();
     }
 
     private static void loadProducts(final Vector<ProjectSubFolder> folderList,
