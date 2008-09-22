@@ -5,10 +5,8 @@ import org.esa.beam.framework.dataio.AbstractProductReader;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.IllegalFileFormatException;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.ImageInfo;
+import org.esa.beam.framework.datamodel.*;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +27,7 @@ import javax.imageio.stream.ImageOutputStream;
 public class ImageIOReader extends AbstractProductReader {
 
     ImageIOFile imgIOFile;
+    String productType;
 
     private transient Map<Band, ImageIOFile.BandInfo> bandMap = new HashMap<Band, ImageIOFile.BandInfo>(3);
 
@@ -78,8 +77,10 @@ public class ImageIOReader extends AbstractProductReader {
 
         imgIOFile = new ImageIOFile(inputFile);
 
+        productType = imgIOFile.reader.getFormatName();
+
         final Product product = new Product(imgIOFile.getName(),
-                                            "productType",
+                                            productType,
                                             imgIOFile.getSceneWidth(), imgIOFile.getSceneHeight());
 
         int bandCnt = 1;
@@ -96,10 +97,11 @@ public class ImageIOReader extends AbstractProductReader {
         //product.setDescription(getProductDescription());
 
         //addGeoCoding(product);
-        //addMetaData(product);
+        addMetaData(product);
 
         product.setProductReader(this);
         product.setModified(false);
+        product.setFileLocation(inputFile);
 
         return product;
     }
@@ -119,6 +121,18 @@ public class ImageIOReader extends AbstractProductReader {
         if(_dataDir.isERS())
             return DecodeQualification.INTENDED;*/
         return DecodeQualification.SUITABLE;
+    }
+
+    private void addMetaData(Product product) {
+        final MetadataElement root = product.getMetadataRoot();
+        root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
+
+        AbstractMetadata.addAbstractedMetadataHeader(root);
+
+        MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, imgIOFile.getName());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
     }
 
     /**

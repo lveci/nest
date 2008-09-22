@@ -19,7 +19,7 @@ import java.io.IOException;
  */
 public class TerraSarXProductReader extends AbstractProductReader {
 
-    protected XMLProductDirectory _dataDir;
+    private TerraSarXProductDirectory _dataDir;
 
     /**
      * Constructs a new abstract product reader.
@@ -83,7 +83,7 @@ public class TerraSarXProductReader extends AbstractProductReader {
         final File fileFromInput = getFileFromInput(input);
         Product product;
         try {
-            _dataDir = new XMLProductDirectory(fileFromInput, new File(fileFromInput.getParentFile(), "IMAGEDATA"));
+            _dataDir = new TerraSarXProductDirectory(fileFromInput, new File(fileFromInput.getParentFile(), "IMAGEDATA"));
             _dataDir.readProductDirectory();
             product = _dataDir.createProduct();
             product.setFileLocation(fileFromInput);

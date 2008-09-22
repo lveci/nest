@@ -182,11 +182,14 @@ public class Project extends Observable {
     }
 
     private void addProductLink(Product product) {
-        if(projectSubFolders.containsFile(product.getFileLocation()))
+        File productFile = product.getFileLocation();
+        if(productFile == null)
+            return;
+        if(projectSubFolders.containsFile(productFile))
             return;
         
         refreshProjectTree();
-        if(projectSubFolders.containsFile(product.getFileLocation()))
+        if(projectSubFolders.containsFile(productFile))
             return;
 
         ProjectSubFolder productLinksFolder = projectSubFolders.addSubFolder("External Product Links");
@@ -195,7 +198,7 @@ public class Project extends Observable {
         if(formats.length > 0)
             destFolder = productLinksFolder.addSubFolder(formats[0]);
 
-        destFolder.addFile(new ProjectFile(product.getFileLocation(), product.getName()));
+        destFolder.addFile(new ProjectFile(productFile, product.getName()));
     }
 
     public void refreshProjectTree() {

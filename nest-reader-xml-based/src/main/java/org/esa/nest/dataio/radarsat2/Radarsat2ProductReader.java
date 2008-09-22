@@ -14,12 +14,12 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * The product reader for TerraSarX products.
+ * The product reader for Radarsat2 products.
  *
  */
 public class Radarsat2ProductReader extends AbstractProductReader {
 
-    protected XMLProductDirectory _dataDir;
+    private Radarsat2ProductDirectory _dataDir;
 
     /**
      * Constructs a new abstract product reader.
@@ -83,7 +83,7 @@ public class Radarsat2ProductReader extends AbstractProductReader {
         final File fileFromInput = getFileFromInput(input);
         Product product;
         try {
-            _dataDir = new XMLProductDirectory(fileFromInput, fileFromInput.getParentFile());
+            _dataDir = new Radarsat2ProductDirectory(fileFromInput, fileFromInput.getParentFile());
             _dataDir.readProductDirectory();
             product = _dataDir.createProduct();
             product.setFileLocation(fileFromInput);

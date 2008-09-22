@@ -168,8 +168,9 @@ public class AbstractMetadata {
             System.out.println(tag + " not found in metadata");
         if(value == null)
             System.out.println(tag + " metadata value is null");
-        if(attrib != null && value != null)
+        if(attrib != null && value != null) {
             attrib.getData().setElems(value);
+        }
     }
 
     /**

@@ -2,8 +2,8 @@ package org.esa.nest.dataio;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
-import org.esa.nest.dataio.ImageIOFile;
 import org.esa.nest.util.XMLSupport;
+import org.esa.nest.datamodel.AbstractMetadata;
 import org.jdom.Element;
 import org.jdom.Attribute;
 
@@ -27,7 +27,6 @@ public class XMLProductDirectory {
 
     private int _sceneWidth;
     private int _sceneHeight;
-    private String productType = "Type";
 
     private transient Map<String, ImageIOFile> bandImageFileMap = new HashMap<String, ImageIOFile>(1);
    private transient Map<Band, ImageIOFile.BandInfo> bandMap = new HashMap<Band, ImageIOFile.BandInfo>(3);
@@ -57,8 +56,8 @@ public class XMLProductDirectory {
     }
 
     public Product createProduct() throws IOException {
-        final Product product = new Product(getProductName(),
-                                            productType,
+        final Product product = new Product(_xmlHeader.getName(),
+                                            "productType",
                                             _sceneWidth, _sceneHeight);
 
         int bandCnt = 1;
@@ -77,12 +76,14 @@ public class XMLProductDirectory {
             }
         }
 
-        //product.setStartTime(getUTCScanStartTime());
-        //product.setEndTime(getUTCScanStopTime());
-        product.setDescription(getProductDescription());
-
         addGeoCoding(product);
         addMetaData(product);
+
+        //product.setStartTime(getUTCScanStartTime());
+        //product.setEndTime(getUTCScanStopTime());
+        product.setName(getProductName());
+        product.setProductType(getProductType());
+        product.setDescription(getProductDescription());
 
         return product;
     }
@@ -91,28 +92,16 @@ public class XMLProductDirectory {
         return bandMap.get(destBand);
     }
 
-    private void addGeoCoding(final Product product) throws IOException {
-
-   /*     TiePointGrid latGrid = new TiePointGrid("lat", 2, 2, 0.5f, 0.5f,
-                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                                                _leaderFile.getLatCorners());
-        TiePointGrid lonGrid = new TiePointGrid("lon", 2, 2, 0.5f, 0.5f,
-                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                                                _leaderFile.getLonCorners(),
-                                                TiePointGrid.DISCONT_AT_360);
-        TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
-
-        product.addTiePointGrid(latGrid);
-        product.addTiePointGrid(lonGrid);
-        product.setGeoCoding(tpGeoCoding);  */
-    }
-
     public void close() throws IOException {
         Set keys = bandImageFileMap.keySet();                           // The set of keys in the map.
         for (Object key : keys) {
             ImageIOFile img = bandImageFileMap.get(key);
             img.close();
         }
+    }
+
+    protected void addGeoCoding(final Product product) throws IOException {
+
     }
 
     private void addMetaData(final Product product) throws IOException {
@@ -172,40 +161,24 @@ public class XMLProductDirectory {
         meta.addAttributeFast(attribute);
     }
 
-    private void addAbstractedMetadataHeader(MetadataElement root) {
+    protected void addAbstractedMetadataHeader(MetadataElement root) {
 
-    /*    AbstractMetadata.addAbstractedMetadataHeader(root);
+        AbstractMetadata.addAbstractedMetadataHeader(root);
 
         MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
 
-        //mph
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, getProductName());
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, getProductType());
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
-                _leaderFile.getSceneRecord().getAttributeString("Product type descriptor"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, getMission());
-
-        String procTime = _volumeDirectoryFile.getTextRecord().getAttributeString("Location and datetime of product creation").trim();
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, procTime );
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT,
-                Integer.parseInt(_leaderFile.getSceneRecord().getAttributeString("Orbit number").trim()));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
-                Integer.parseInt(_leaderFile.getSceneRecord().getAttributeString("Orbit number").trim()));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
-                _leaderFile.getFacilityRecord().getAttributeString("Time of input state vector used to processed the image"));
-
-
-        //sph
-
-        AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());    */
     }
 
-    private String getProductName() {
-        return "TerraSarX";//_volumeDirectoryFile.getProductName();
+    protected String getProductName() {
+        return _xmlHeader.getName();
     }
 
-    private String getProductDescription() {
-        return "TerraSarX";//ERSConstants.PRODUCT_DESCRIPTION_PREFIX + _leaderFile.getProductLevel();
+    protected String getProductDescription() {
+        return "";
+    }
+
+    protected String getProductType() {
+        return "XML-based Product";
     }
 
 }
