@@ -244,8 +244,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
         //        _leaderFile.getFacilityRecord().getAttributeString("Time of input state vector used to processed the image"));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getUTCScanStartTime());
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, getUTCScanStopTime());
+        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getUTCScanStartTime());
+        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, getUTCScanStopTime());
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
                 mapProjRec.getAttributeDouble("1st line 1st pixel geodetic latitude"));

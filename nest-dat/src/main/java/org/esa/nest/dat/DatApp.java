@@ -39,48 +39,9 @@ public final class DatApp extends VisatApp {
 
     @Override
     protected void initClientUI(ProgressMonitor pm) {
-        try {
-            pm.beginTask(String.format("Initialising %s UI components", getAppName()), 4);
+        super.initClient(pm);
 
-            CommandBar toolsToolBar = createToolsToolBar();
-            toolsToolBar.getContext().setInitSide(DockableBarContext.DOCK_SIDE_EAST);
-            toolsToolBar.getContext().setInitIndex(0);
-            getMainFrame().getDockableBarManager().addDockableBar(toolsToolBar);
-            pm.worked(1);
-
-            CommandBar viewsToolBar = createViewsToolBar();
-            viewsToolBar.getContext().setInitSide(DockableBarContext.DOCK_SIDE_NORTH);
-            viewsToolBar.getContext().setInitIndex(1);
-            getMainFrame().getDockableBarManager().addDockableBar(viewsToolBar);
-            pm.worked(1);
-
-            CommandBar layersToolBar = createLayersToolBar();
-            layersToolBar.getContext().setInitSide(DockableBarContext.DOCK_SIDE_NORTH);
-            layersToolBar.getContext().setInitIndex(1);
-            getMainFrame().getDockableBarManager().addDockableBar(layersToolBar);
-            pm.worked(1);
-
-            CommandBar analysisToolBar = createAnalysisToolBar();
-            analysisToolBar.getContext().setInitSide(DockableBarContext.DOCK_SIDE_NORTH);
-            analysisToolBar.getContext().setInitIndex(1);
-            getMainFrame().getDockableBarManager().addDockableBar(analysisToolBar);
-            pm.worked(1);
-
-            updateGraphMenu();
-            
-           /* if (ProductSceneImage.isInTiledImagingMode()) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        instance.showInfoDialog("You are using " + getAppName() + " in a new imaging mode.\n" +
-                                "THIS MODE IS STILL UNDER DEVELOPMENT!",
-                                                "beam.imageTiling.warn");
-                    }
-                });
-            }     */
-
-        } finally {
-            pm.done();
-        }
+        updateGraphMenu();
     }
 
     protected CommandBar createViewsToolBar() {
