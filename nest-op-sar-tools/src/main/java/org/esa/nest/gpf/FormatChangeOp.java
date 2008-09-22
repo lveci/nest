@@ -25,8 +25,10 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.media.jai.JAI;
+import java.util.ArrayList;
 
 /**
  * Format-Change
@@ -35,10 +37,14 @@ import javax.media.jai.JAI;
 @OperatorMetadata(alias="Convert-Datatype", description="Convert product data type")
 public class FormatChangeOp extends Operator {
 
-    @SourceProduct
+    @SourceProduct(alias="source")
     private Product sourceProduct;
     @TargetProduct
     private Product targetProduct;
+
+    @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
+            sourceProductId="source", label="Source Bands")
+    String[] sourceBandNames;
 
     @Parameter(valueSet = { ProductData.TYPESTRING_INT8,
                             ProductData.TYPESTRING_INT16,
@@ -89,8 +95,44 @@ public class FormatChangeOp extends Operator {
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
 
         dataType = ProductData.getType(targetDataType);
-        for(Band band : sourceProduct.getBands()) {
-            targetProduct.addBand(band.getName(), dataType);
+
+        addSelectedBands();
+
+        updateMetadata();
+    }
+
+    private void addSelectedBands() {
+        if (sourceBandNames == null || sourceBandNames.length == 0) {
+            Band[] bands = sourceProduct.getBands();
+            ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            for (Band band : bands) {
+                bandNameList.add(band.getName());
+            }
+            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
+        }
+
+        Band[] sourceBands = new Band[sourceBandNames.length];
+        for (int i = 0; i < sourceBandNames.length; i++) {
+            String sourceBandName = sourceBandNames[i];
+            Band sourceBand = sourceProduct.getBand(sourceBandName);
+            if (sourceBand == null) {
+                throw new OperatorException("Source band not found: " + sourceBandName);
+            }
+            sourceBands[i] = sourceBand;
+        }
+
+        for(Band srcBand : sourceBands) {
+            Band targetBand = new Band(srcBand.getName(), dataType,
+                    sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+            targetProduct.addBand(targetBand);
+        }
+    }
+
+    private void updateMetadata() {
+        MetadataElement root = targetProduct.getMetadataRoot();
+        MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        if(absRoot != null) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type, targetDataType);
         }
     }
 

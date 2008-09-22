@@ -92,42 +92,25 @@ class ERSProductDirectory extends CEOSProductDirectory {
             for (final ERSImageFile imageFile : _imageFiles) {
 
                 if(isProductSLC) {
-                    String bandName = "i_" + index;
-                    Band bandI = createBand(bandName);
-                    product.addBand(bandI);
-                    bandImageFileMap.put(bandName, imageFile);
-                    bandName = "q_" + index;
-                    Band bandQ = createBand(bandName);
-                    product.addBand(bandQ);
-                    bandImageFileMap.put(bandName, imageFile);
-
+                    Band bandI = createBand(product, "i_" + index, "real", imageFile);
+                    Band bandQ = createBand(product, "q_" + index, "real", imageFile);
                     createVirtualIntensityBand(product, bandI, bandQ, "_"+index);
                     createVirtualPhaseBand(product, bandI, bandQ, "_"+index);
-                    ++index;
                 } else {
-                    String bandName = "amplitude_" + index;
-                    Band band = createBand(bandName);
-                    product.addBand(band);
-                    bandImageFileMap.put(bandName, imageFile);
+                    Band band = createBand(product, "amplitude_" + index, "amplitude", imageFile);
                     createVirtualIntensityBand(product, band, "_"+index);
-                    ++index;
                 }
+                ++index;
             }
         } else {
             ERSImageFile imageFile = _imageFiles[0];
             if(isProductSLC) {
-                Band bandI = createBand("i");
-                product.addBand(bandI);
-                bandImageFileMap.put("i", imageFile);
-                Band bandQ = createBand("q");
-                product.addBand(bandQ);
-                bandImageFileMap.put("q", imageFile);
+                Band bandI = createBand(product, "i", "real", imageFile);
+                Band bandQ = createBand(product, "q", "imaginary", imageFile);
                 createVirtualIntensityBand(product, bandI, bandQ, "");
                 createVirtualPhaseBand(product, bandI, bandQ, "");
             } else {
-                Band band = createBand("amplitude");
-                product.addBand(band);
-                bandImageFileMap.put("amplitude", imageFile);
+                Band band = createBand(product, "amplitude", "amplitude", imageFile);
                 createVirtualIntensityBand(product, band, "");
             }
         }
@@ -176,12 +159,14 @@ class ERSProductDirectory extends CEOSProductDirectory {
         _leaderFile = null;
     }
 
-    private Band createBand(String name) {
+    private Band createBand(Product product, String name, String unit, ERSImageFile imageFile) {
         final Band band = new Band(name, ProductData.TYPE_INT16,
                                    _sceneWidth, _sceneHeight);
 
-        band.setUnit(ERSImageFile.getGeophysicalUnit());
-        
+        band.setUnit(unit);
+        product.addBand(band);
+        bandImageFileMap.put(name, imageFile);
+
       /*
         final int bandIndex = index;
         final double scalingFactor = _leaderFile.getAbsoluteCalibrationGain(bandIndex);
@@ -292,7 +277,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type,
-                "UInt"+_imageFiles[0].getImageFileDescriptor().getAttributeInt("Number of bits per sample"));
+                ProductData.getTypeString(ProductData.TYPE_INT16));
 
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag,
