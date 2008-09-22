@@ -14,7 +14,7 @@ import org.esa.nest.dataio.ApplyOrbitFile;
  * This action to apply orbit file
  *
  * @author lveci
- * @version $Revision: 1.4 $ $Date: 2008-09-09 22:09:22 $
+ * @version $Revision: 1.5 $ $Date: 2008-09-22 19:54:28 $
  */
 public class ApplyOrbitFileAction extends ExecCommand {
 
@@ -37,7 +37,8 @@ public class ApplyOrbitFileAction extends ExecCommand {
     @Override
     public void updateState(final CommandEvent event) {
         final Product product = VisatApp.getApp().getSelectedProduct();
-        setEnabled(product != null && product.getNumBands() + product.getNumTiePointGrids() > 0);
+        //setEnabled(product != null && product.getNumBands() + product.getNumTiePointGrids() > 0);
+        setEnabled(false);
     }
 
 }
