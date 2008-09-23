@@ -103,20 +103,19 @@
         <module>beam-binning</module>
         <module>beam-unmix</module>
         <module>beam-cluster-analysis</module>
-        <module>beam-collocation</module-->
+        <module>beam-collocation</module>
 
-        <!--module>beam-avhrr-reader</module>
+        <module>beam-avhrr-reader</module>
         <module>beam-atsr-reader</module-->
         <module>beam-alos-reader</module>
         <module>beam-netcdf-reader</module>
         <!--module>beam-merisl3-reader</module-->
         <module>beam-getasse30-reader</module>
         <module>beam-envisat-reader</module>
-        <!--module>beam-modis-reader</module>
-        <module>beam-obpg-reader</module>
-        <module>beam-chris-reader</module>
-        <module>beam-landsat-reader</module-->
-        <!--<module>beam-geotiff-writer</module>-->
+        <!--module>beam-modis-reader</module-->
+        <!--module>beam-obpg-reader</module-->
+        <!--module>beam-chris-reader</module-->
+        <module>beam-landsat-reader</module>
         <module>beam-geotiff</module>
         <module>beam-hdf5-writer</module>
         <module>beam-shapefile-reader</module>
@@ -377,8 +376,8 @@
                     <source>1.6</source>
                     <target>1.6</target>
                     <debug>true</debug>
-					<optimize>true</optimize>
                     <encoding>ISO-8859-1</encoding>
+					<optimize>true</optimize>
                 </configuration>
             </plugin>
 

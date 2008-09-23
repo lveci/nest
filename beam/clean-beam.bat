@@ -1,4 +1,5 @@
 rmdir /S /Q beam-aatsr-sst
+rmdir /S /Q beam-atsr-reader
 rmdir /S /Q beam-binning
 rmdir /S /Q beam-chris-reader
 rmdir /S /Q beam-cluster-analysis
@@ -12,6 +13,8 @@ rmdir /S /Q beam-meris-ndvi
 rmdir /S /Q beam-meris-radtorefl
 rmdir /S /Q beam-meris-smac
 rmdir /S /Q beam-meris-smile
+rmdir /S /Q beam-merisl3-reader
+rmdir /S /Q beam-modis-reader
 rmdir /S /Q beam-obpg-reader
 rmdir /S /Q beam-pconvert
 rmdir /S /Q beam-unmix
