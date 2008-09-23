@@ -76,7 +76,7 @@ public class TestSRGROperator extends TestCase {
      */
     private Product createTestProduct(int w, int h) {
 
-        Product testProduct = new Product("p", "ASA_APS_1P", w, h);
+        Product testProduct = new Product("source", "ASA_APS_1P", w, h);
 
         // create a Band: band1
         Band band1 = testProduct.addBand("band1", ProductData.TYPE_INT32);
@@ -105,49 +105,30 @@ public class TestSRGROperator extends TestCase {
         abs.addAttribute(new MetadataAttribute(AbstractMetadata.azimuth_spacing,
                 ProductData.createInstance(new float[] {4.0F}), false));
 
-        float[] incidence_angle = new float[64];
+        // create incidence angle tie point grid
+        float[] incidence_angle = new float[w*h];
         Arrays.fill(incidence_angle, 30.0f);
-        testProduct.addTiePointGrid(new TiePointGrid("incident_angle", 16, 4, 0, 0, 1, 1, incidence_angle));
+        testProduct.addTiePointGrid(new TiePointGrid("incident_angle", w, h, 0, 0, 1, 1, incidence_angle));
+
+        // create lat/lon tie point grids
+        float[] lat = new float[w*h];
+        float[] lon = new float[w*h];
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                int i = y*w + x;
+                lon[i] = 13.20f + x/10000.0f;
+                lat[i] = 51.60f + y/10000.0f;
+            }
+        }
+        TiePointGrid latGrid = new TiePointGrid("latitude", w, h, 0, 0, 1, 1, lat);
+        TiePointGrid lonGrid = new TiePointGrid("longitude", w, h, 0, 0, 1, 1, lon);
+        testProduct.addTiePointGrid(latGrid);
+        testProduct.addTiePointGrid(lonGrid);
 
         testProduct.getMetadataRoot().addElement(abs);
 
-        testProduct.setGeoCoding(new testGeoCoding());
+        // create geoCoding
+        testProduct.setGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
         return testProduct;
     }
-
-    public static class testGeoCoding implements GeoCoding {
-
-        public boolean isCrossingMeridianAt180() {
-            return true;
-        }
-
-        public Datum getDatum() {
-            return Datum.WGS_84;
-        }
-
-        public boolean canGetPixelPos() {
-            return false;
-        }
-
-        public boolean canGetGeoPos() {
-            return true;
-        }
-
-        public PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
-            return pixelPos;
-        }
-
-        public GeoPos getGeoPos(PixelPos pixelPos, GeoPos geoPos) {
-            if (geoPos == null) {
-                geoPos = new GeoPos();
-            }
-            geoPos.lon = 13.20f + pixelPos.x/10000.0f;
-            geoPos.lat = 51.60f + pixelPos.y/10000.0f;
-            return geoPos;
-        }
-
-        public void dispose() {
-        }
-    }
-
 }
