@@ -24,6 +24,8 @@ import java.io.IOException;
 
 import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
 
+import javax.swing.*;
+
 /**
  * A Project helps to organize your data by storing all your work in one folder.
  * User: lveci
@@ -159,6 +161,12 @@ public class Project extends Observable {
         productLinksFolder.setRemoveable(false);
         productLinksFolder.setFolderType(ProjectSubFolder.FolderType.PRODUCT);
 
+        ProjectSubFolder importedFolder = new ProjectSubFolder(
+                new File(projectFolder, "Imported Products"), "Imported Products", true,
+                ProjectSubFolder.FolderType.PRODUCT);
+        projectSubFolders.addSubFolder(importedFolder);
+        importedFolder.setRemoveable(false);
+
         ProjectSubFolder processedFolder = new ProjectSubFolder(
                 new File(projectFolder, "Processed Products"), "Processed Products", true,
                 ProjectSubFolder.FolderType.PRODUCT);
@@ -206,6 +214,8 @@ public class Project extends Observable {
         findSubFolders(productSetsFolder.getPath(), productSetsFolder);
         ProjectSubFolder graphsFolder = projectSubFolders.findFolder("Graphs");
         findSubFolders(graphsFolder.getPath(), graphsFolder);
+        ProjectSubFolder importedFolder = projectSubFolders.findFolder("Imported Products");
+        findSubFolders(importedFolder.getPath(), importedFolder);
         ProjectSubFolder processedFolder = projectSubFolders.findFolder("Processed Products");
         findSubFolders(processedFolder.getPath(), processedFolder);
     }
@@ -255,16 +265,29 @@ public class Project extends Observable {
 
             ProductReader reader = ProductIO.getProductReaderForFile(prodFile);
             if (reader != null) {
-                ProjectSubFolder processedFolder = projectSubFolders.findFolder("Processed Products");
-                File destFile = new File(processedFolder.getPath(), prodFile.getName());
+                ProjectSubFolder importedFolder = projectSubFolders.findFolder("Imported Products");
 
                 try {
-                    Product product = reader.readProductNodes(prodFile, null);
+                    final Product product = reader.readProductNodes(prodFile, null);
                     if(product != null) {
-                        VisatApp.getApp().writeProduct(product, destFile, "BEAM-DIMAP");
 
-                        refreshProjectTree();
-                        notifyEvent(SAVE_PROJECT);
+                        final File destFile = new File(importedFolder.getPath(), product.getName());
+                        final SwingWorker worker = new SwingWorker() {
+
+                            @Override
+                            protected Object doInBackground() throws Exception {
+                                VisatApp.getApp().writeProduct(product, destFile, "BEAM-DIMAP");
+                                return null;
+                            }
+
+                            @Override
+                            public void done() {
+                                refreshProjectTree();
+                                notifyEvent(SAVE_PROJECT);
+                            }
+                        };
+                        worker.execute();
+
                     }
                 } catch(Exception e) {
                     VisatApp.getApp().showErrorDialog(e.getMessage());
@@ -278,9 +301,9 @@ public class Project extends Observable {
             CreateNewProject();
         }
 
-        ProjectSubFolder processedFolder = projectSubFolders.findFolder("Processed Products");
+        ProjectSubFolder importedFolder = projectSubFolders.findFolder("Imported Products");
         for(File f : productFilesToOpen) {
-            importFile(processedFolder, f);
+            importFile(importedFolder, f);
         }
     }
 

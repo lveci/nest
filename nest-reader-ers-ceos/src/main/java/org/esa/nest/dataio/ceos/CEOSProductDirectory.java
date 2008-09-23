@@ -87,14 +87,14 @@ public abstract class CEOSProductDirectory {
 
     protected String getPolarization(String id) {
         id = id.toUpperCase();
-        if(id.contains("HH")|| id.contains("H/H"))
-            return "H-H";
-        else if(id.contains("VV")|| id.contains("V/V"))
-            return "V-V";
-        else if(id.contains("HV")|| id.contains("H/V"))
-            return "H-V";
-        else if(id.contains("VH")|| id.contains("V/H"))
-            return "V-H";
+        if(id.contains("HH") || id.contains("H/H") || id.contains("H-H"))
+            return "HH";
+        else if(id.contains("VV") || id.contains("V/V") || id.contains("V-V"))
+            return "VV";
+        else if(id.contains("HV") || id.contains("H/V") || id.contains("H-V"))
+            return "HV";
+        else if(id.contains("VH") || id.contains("V/H") || id.contains("V-H"))
+            return "VH";
         return id;
     }
 }
