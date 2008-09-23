@@ -90,7 +90,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                     createVirtualIntensityBand(product, bandI, bandQ, "_"+index);
                     ++index;
                 } else {
-                    String bandName = "amplitude_" + index;
+                    String bandName = "Amplitude_" + index;
                     Band band = createBand(bandName);
                     product.addBand(band);
                     bandImageFileMap.put(bandName, imageFile);
@@ -109,9 +109,9 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                 bandImageFileMap.put("q", imageFile);
                 createVirtualIntensityBand(product, bandI, bandQ, "");
             } else {
-                Band band = createBand("amplitude");
+                Band band = createBand("Amplitude");
                 product.addBand(band);
-                bandImageFileMap.put("amplitude", imageFile);
+                bandImageFileMap.put("Amplitude", imageFile);
                 createVirtualIntensityBand(product, band, "");
             }
         }

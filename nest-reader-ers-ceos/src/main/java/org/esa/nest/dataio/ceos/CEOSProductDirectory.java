@@ -85,4 +85,16 @@ public abstract class CEOSProductDirectory {
         product.addBand(virtBand);
     }
 
+    protected String getPolarization(String id) {
+        id = id.toUpperCase();
+        if(id.contains("HH")|| id.contains("H/H"))
+            return "H-H";
+        else if(id.contains("VV")|| id.contains("V/V"))
+            return "V-V";
+        else if(id.contains("HV")|| id.contains("H/V"))
+            return "H-V";
+        else if(id.contains("VH")|| id.contains("V/H"))
+            return "V-H";
+        return id;
+    }
 }

@@ -97,7 +97,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
                     createVirtualIntensityBand(product, bandI, bandQ, "_"+index);
                     createVirtualPhaseBand(product, bandI, bandQ, "_"+index);
                 } else {
-                    Band band = createBand(product, "amplitude_" + index, "amplitude", imageFile);
+                    Band band = createBand(product, "Amplitude_" + index, "amplitude", imageFile);
                     createVirtualIntensityBand(product, band, "_"+index);
                 }
                 ++index;
@@ -110,7 +110,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 createVirtualIntensityBand(product, bandI, bandQ, "");
                 createVirtualPhaseBand(product, bandI, bandQ, "");
             } else {
-                Band band = createBand(product, "amplitude", "amplitude", imageFile);
+                Band band = createBand(product, "Amplitude", "amplitude", imageFile);
                 createVirtualIntensityBand(product, band, "");
             }
         }
@@ -262,8 +262,9 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeString("Processing algorithm identifier"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.compression,
                 sceneRec.getAttributeString("Processor range compression designator"));
+
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
-                getPolarization());
+                getPolarization(_leaderFile.getSceneRecord().getAttributeString("Sensor ID and mode of operation for this channel")));
         
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
                 mapProjRec.getAttributeDouble("Nominal inter-pixel distance in output scene"));
@@ -296,20 +297,6 @@ class ERSProductDirectory extends CEOSProductDirectory {
         double heading = _leaderFile.getMapProjRecord().getAttributeDouble("Platform heading at nadir corresponding to scene centre");
         if(heading > 90) return "DESCENDING";
         else return "ASCENDING";
-    }
-
-    private String getPolarization() {
-        String id = _leaderFile.getSceneRecord().getAttributeString("Sensor ID and mode of operation for this channel");
-        id = id.toUpperCase();
-        if(id.contains("HH")|| id.contains("H/H"))
-            return "H/H";
-        else if(id.contains("VV")|| id.contains("V/V"))
-            return "V/V";
-        else if(id.contains("HV")|| id.contains("H/V"))
-            return "H/V";
-        else if(id.contains("VH")|| id.contains("V/H"))
-            return "V/H";
-        return id;
     }
 
     private int isGroundRange() {

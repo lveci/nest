@@ -103,7 +103,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                     createVirtualIntensityBand(product, bandI, bandQ, "_"+index);
                     ++index;
                 } else {
-                    String bandName = "amplitude_" + index;
+                    String bandName = "Amplitude_" + index;
                     Band band = createBand(bandName);
                     product.addBand(band);
                     bandImageFileMap.put(bandName, imageFile);
@@ -122,9 +122,9 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 bandImageFileMap.put("q", imageFile);
                 createVirtualIntensityBand(product, bandI, bandQ, "");
             } else {
-                Band band = createBand("amplitude");
+                Band band = createBand("Amplitude");
                 product.addBand(band);
-                bandImageFileMap.put("amplitude", imageFile);
+                bandImageFileMap.put("Amplitude", imageFile);
                 createVirtualIntensityBand(product, band, "");
             }
         }
@@ -274,7 +274,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.compression,
                 sceneRec.getAttributeString("Processor range compression designator"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
-                getPolarization());
+                getPolarization(_leaderFile.getSceneRecord().getAttributeString("Sensor ID and mode of operation for this channel")));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
                 _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-pixel distance in output scene"));
@@ -303,20 +303,6 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         double heading = _leaderFile.getMapProjRecord().getAttributeDouble("Platform heading at nadir corresponding to scene centre");
         if(heading > 90) return "DESCENDING";
         else return "ASCENDING";
-    }
-
-    private String getPolarization() {
-        String id = _leaderFile.getSceneRecord().getAttributeString("Sensor ID and mode of operation for this channel");
-        id = id.toUpperCase();
-        if(id.contains("HH")|| id.contains("H/H"))
-            return "H/H";
-        else if(id.contains("VV")|| id.contains("V/V"))
-            return "V/V";
-        else if(id.contains("HV")|| id.contains("H/V"))
-            return "H/V";
-        else if(id.contains("VH")|| id.contains("V/H"))
-            return "V/H";
-        return id;
     }
 
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {
