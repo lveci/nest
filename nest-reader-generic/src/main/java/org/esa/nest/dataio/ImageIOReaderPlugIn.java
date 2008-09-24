@@ -21,6 +21,7 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
 
 	final static String[] FORMAT_NAMES = ImageIO.getReaderFormatNames();
 	final static String[] FORMAT_FILE_EXTENSIONS = getFormatFileExtensions();
+    final static String[] IMAGEIO_FILE_EXTENSIONS = ImageIO.getReaderFileSuffixes();
     final static String PLUGIN_DESCRIPTION = "ImageIO Products";
     Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
 
@@ -32,9 +33,20 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
         extList.addAll(Arrays.asList(ioExt));
 
         // BEST extensions
-        extList.add("XT");
+        addBESTExt(extList, "XT");
+        addBESTExt(extList, "AP"); addBESTExt(extList, "PA");
+        addBESTExt(extList, "CA"); addBESTExt(extList, "IF"); addBESTExt(extList, "FI");
+        addBESTExt(extList, "DB"); addBESTExt(extList, "SG"); addBESTExt(extList, "OP");
+        addBESTExt(extList, "GC"); addBESTExt(extList, "OV"); addBESTExt(extList, "UN");
+        addBESTExt(extList, "CR"); addBESTExt(extList, "SF");
+        addBESTExt(extList, "BS"); addBESTExt(extList, "GA"); addBESTExt(extList, "AD");
 
         return extList.toArray(new String[extList.size()]);
+    }
+
+    private static void addBESTExt(ArrayList<String> extList, String ext) {
+        extList.add(ext+"i"); extList.add(ext+"f"); extList.add(ext+"c");
+        extList.add(ext+"s"); extList.add(ext+"t"); extList.add(ext+"r");
     }
 
     /**
@@ -74,7 +86,7 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
                 return DecodeQualification.INTENDED;
         }
 
-        return DecodeQualification.SUITABLE;
+        return DecodeQualification.UNABLE;
     }
 
      public static File getFileFromInput(final Object input) {
@@ -150,7 +162,7 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
     public static class FileFilter extends BeamFileFilter {
 
         public FileFilter() {
-            super(FORMAT_NAMES[0], FORMAT_FILE_EXTENSIONS, PLUGIN_DESCRIPTION);
+            super(FORMAT_NAMES[0], IMAGEIO_FILE_EXTENSIONS, PLUGIN_DESCRIPTION);
 
         }
 
