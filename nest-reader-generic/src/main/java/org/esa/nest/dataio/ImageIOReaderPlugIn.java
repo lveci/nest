@@ -10,6 +10,8 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Locale;
+import java.util.Arrays;
+import java.util.ArrayList;
 
 /**
  * The ReaderPlugIn for ImageIO products.
@@ -18,9 +20,22 @@ import java.util.Locale;
 public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
 
 	final static String[] FORMAT_NAMES = ImageIO.getReaderFormatNames();
-	final static String[] FORMAT_FILE_EXTENSIONS = ImageIO.getReaderFileSuffixes();
+	final static String[] FORMAT_FILE_EXTENSIONS = getFormatFileExtensions();
     final static String PLUGIN_DESCRIPTION = "ImageIO Products";
     Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
+
+    private static String[] getFormatFileExtensions() {
+
+        ArrayList<String> extList = new ArrayList<String>();
+        String[] ioExt = ImageIO.getReaderFileSuffixes();
+
+        extList.addAll(Arrays.asList(ioExt));
+
+        // BEST extensions
+        extList.add("XT");
+
+        return extList.toArray(new String[extList.size()]);
+    }
 
     /**
      * Checks whether the given object is an acceptable input for this product reader and if so, the method checks if it
@@ -56,10 +71,10 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
     protected DecodeQualification checkProductQualification(File file) {
         for(String ext : FORMAT_FILE_EXTENSIONS) {
             if(!ext.isEmpty() && file.getName().toLowerCase().endsWith(ext.toLowerCase()))
-                return DecodeQualification.SUITABLE;
+                return DecodeQualification.INTENDED;
         }
 
-        return DecodeQualification.UNABLE;
+        return DecodeQualification.SUITABLE;
     }
 
      public static File getFileFromInput(final Object input) {

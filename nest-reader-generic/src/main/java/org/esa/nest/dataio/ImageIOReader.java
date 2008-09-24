@@ -69,10 +69,6 @@ public class ImageIOReader extends AbstractProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
         final ProductReaderPlugIn readerPlugIn = getReaderPlugIn();
-        final Object input = getInput();
-        if (readerPlugIn.getDecodeQualification(input) == DecodeQualification.UNABLE) {
-            throw new IOException("Unsupported product format."); 
-        }
         final File inputFile = getFileFromInput(getInput());
 
         imgIOFile = new ImageIOFile(inputFile);
