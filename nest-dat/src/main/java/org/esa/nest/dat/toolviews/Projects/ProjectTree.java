@@ -3,6 +3,7 @@ package org.esa.nest.dat.toolviews.Projects;
 import org.esa.beam.framework.ui.PopupMenuFactory;
 import org.esa.beam.framework.ui.PopupMenuHandler;
 import org.esa.beam.framework.ui.UIUtils;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.plugins.importbrowser.ImportBrowserVPI;
 
 import javax.swing.*;
@@ -25,6 +26,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
 
     private Object menuContext;
     private DefaultMutableTreeNode selectedNode;
+    private TreePath selectedPath;
     private Project project = Project.instance();
 
     /**
@@ -68,11 +70,10 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
     }
 
     public JPopupMenu createPopupMenu(MouseEvent event) {
-        TreePath selPath = getPathForLocation(event.getX(), event.getY());
-        if (selPath != null) {
-            setSelectionPath(selPath);
-            selectedNode =
-                    (DefaultMutableTreeNode) getLastSelectedPathComponent();
+        selectedPath = getPathForLocation(event.getX(), event.getY());
+        if (selectedPath != null) {
+            setSelectionPath(selectedPath);
+            selectedNode = (DefaultMutableTreeNode) getLastSelectedPathComponent();
             if (selectedNode != null) {
                 Object context = selectedNode.getUserObject();
                 if (context != null) {
@@ -89,15 +90,15 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
         menuContext = context;
 
         if (context instanceof ProjectSubFolder) {
-            createMenuItem(popup, "Create Folder");
-            JMenuItem menuItemRename = createMenuItem(popup, "Rename Folder");
-            JMenuItem menuItemRemove = createMenuItem(popup, "Remove Folder");
             ProjectSubFolder folder = (ProjectSubFolder) context;
-            if (!folder.canBeRemoved()) {
-                menuItemRename.setEnabled(false);
-                menuItemRemove.setEnabled(false);
-            }
+
+            if(isExpanded(selectedPath))
+                createMenuItem(popup, "Collapse");
+            else
+                createMenuItem(popup, "Expand");
+
             if (selectedNode.isRoot()) {
+                createMenuItem(popup, "Expand All");
                 addSeparator(popup);
                 createMenuItem(popup, "New Project...");
                 createMenuItem(popup, "Load Project...");
@@ -105,13 +106,22 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                 createMenuItem(popup, "Close Project");
                 createMenuItem(popup, "Refresh Project");
                 addSeparator(popup);
-                createMenuItem(popup, "Import Dataset");
+                createMenuItem(popup, "Import Dataset");                
+            } else {
                 addSeparator(popup);
-                createMenuItem(popup, "Expand All");
+                createMenuItem(popup, "Create Folder");
+                JMenuItem menuItemRename = createMenuItem(popup, "Rename Folder");
+                JMenuItem menuItemRemove = createMenuItem(popup, "Remove Folder");
+
+                if (!folder.canBeRemoved()) {
+                    menuItemRename.setEnabled(false);
+                    menuItemRemove.setEnabled(false);
+                }
+                if(!folder.isPhysical()) {
+                    createMenuItem(popup, "Clear");
+                }
             }
-            if(!folder.isPhysical() && !selectedNode.isRoot()) {
-                createMenuItem(popup, "Clear");
-            }
+
             if(folder.getFolderType() == ProjectSubFolder.FolderType.PRODUCTSET) {
                 addSeparator(popup);
                 createMenuItem(popup, "New ProductSet...");
@@ -119,6 +129,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                 addSeparator(popup);
                 createMenuItem(popup, "New Graph...");
             } else if(folder.getFolderType() == ProjectSubFolder.FolderType.PRODUCT) {
+                addSeparator(popup);
                 createMenuItem(popup, "Import Dataset");
             }
         } else if (context instanceof ProjectFile) {
@@ -144,7 +155,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
     }
 
     private static void addSeparator(JPopupMenu popup) {
-        if (popup.getComponentCount() > 1) {
+        if (popup.getComponentCount() > 0) {
             popup.addSeparator();
         }
     }
@@ -180,7 +191,10 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
             ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
             if (parentNode != null && parentFolder != null) {
                 ProjectFile file = (ProjectFile) menuContext;
-                project.removeFile(parentFolder, file.getFile());
+                final int status = VisatApp.getApp().showQuestionDialog("Are you sure you want to delete the product "
+                        + file.getFile().toString(), "");
+                if (status == JOptionPane.YES_OPTION)
+                    project.removeFile(parentFolder, file.getFile());
             }
         } else if(e.getActionCommand().equals("Open")) {
             ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
@@ -197,6 +211,10 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
             project.clearFolder(subFolder);
         } else if(e.getActionCommand().equals("Expand All")) {
             expandAll();
+        } else if(e.getActionCommand().equals("Expand")) {
+            expandPath(selectedPath);
+        } else if(e.getActionCommand().equals("Collapse")) {
+            collapsePath(selectedPath);
         } else if(e.getActionCommand().equals("New Project...")) {
             project.CreateNewProject();
         } else if(e.getActionCommand().equals("Load Project...")) {

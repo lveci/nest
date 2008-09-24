@@ -331,9 +331,28 @@ public class Project extends Observable {
         if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.PRODUCTSET ||
            parentFolder.getFolderType() == ProjectSubFolder.FolderType.GRAPH)
             file.delete();
-
+        else if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.PRODUCT) {
+            if(file.getName().endsWith(".dim")) {
+                String pathStr = file.getAbsolutePath();
+                File dataDir = new File(pathStr.substring(0, pathStr.length()-4) + ".data");
+                if(dataDir.exists()) {
+                    deleteDir(dataDir);
+                    file.delete();
+                }
+            }
+        }
         notifyEvent(SAVE_PROJECT);
     }
+
+    private static void deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            for (String aChild : children) {
+                deleteDir(new File(dir, aChild));
+            }
+        }
+        dir.delete();
+	}
 
     public ProjectSubFolder getProjectSubFolders() {
         return projectSubFolders;

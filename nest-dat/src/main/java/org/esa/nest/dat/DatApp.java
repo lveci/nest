@@ -51,14 +51,27 @@ public final class DatApp extends VisatApp {
         toolBar.addDockableBarListener(new ToolBarListener());
 
         ToolViewDescriptor[] toolViewDescriptors = VisatActivator.getInstance().getToolViewDescriptors();
-        List<String> viewCommandIdList = new ArrayList<String>(5);
+        List<String> viewCommandIdList = new ArrayList<String>(10);
+
+        // add default views grouped
+        viewCommandIdList.add("org.esa.nest.dat.toolviews.Projects.ProjectsToolView.showCmd");
+        viewCommandIdList.add("org.esa.beam.visat.ProductsToolView.showCmd");
+        viewCommandIdList.add("org.esa.beam.visat.toolviews.pixelinfo.PixelInfoToolView.showCmd");
+        viewCommandIdList.add(null);
+        viewCommandIdList.add("org.esa.beam.visat.toolviews.nav.NavigationToolView.showCmd");
+        viewCommandIdList.add("org.esa.beam.visat.toolviews.imageinfo.ColorManipulationToolView.showCmd");
+        viewCommandIdList.add(null);
+
         for (ToolViewDescriptor toolViewDescriptor : toolViewDescriptors) {
             String id = toolViewDescriptor.getId();
-            if (!id.equals("org.esa.beam.visat.toolviews.stat.StatisticsToolView") &&
-                !id.equals("org.esa.beam.visat.toolviews.pin.PinManagerToolView") &&
-                !id.equals("org.esa.beam.visat.toolviews.pin.GcpManagerToolView") &&
-                !id.equals("org.esa.beam.visat.toolviews.roi.RoiManagerToolView") &&
-                !id.equals("org.esa.beam.visat.toolviews.bitmask.BitmaskOverlayToolView") ) {
+            if (id.equals("org.esa.beam.visat.toolviews.stat.StatisticsToolView") ||
+                id.equals("org.esa.beam.visat.toolviews.pin.PinManagerToolView") ||
+                id.equals("org.esa.beam.visat.toolviews.pin.GcpManagerToolView") ||
+                id.equals("org.esa.beam.visat.toolviews.roi.RoiManagerToolView") ||
+                id.equals("org.esa.beam.visat.toolviews.bitmask.BitmaskOverlayToolView") ) {
+                    continue;
+            }
+            if(!viewCommandIdList.contains(id+".showCmd")) {
                 viewCommandIdList.add(toolViewDescriptor.getId() + ".showCmd");
             }
         }
