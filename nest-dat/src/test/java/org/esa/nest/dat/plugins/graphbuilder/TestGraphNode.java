@@ -1,8 +1,9 @@
-package org.esa.nest.dat.plugins;
+package org.esa.nest.dat.plugins.graphbuilder;
 
 import junit.framework.TestCase;
 import org.esa.beam.framework.gpf.graph.Node;
 import org.esa.beam.framework.gpf.graph.NodeSource;
+import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 
 import java.awt.*;

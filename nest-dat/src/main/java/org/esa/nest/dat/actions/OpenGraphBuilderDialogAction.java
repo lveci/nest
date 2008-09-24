@@ -3,7 +3,7 @@ package org.esa.nest.dat.actions;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.visat.actions.AbstractVisatAction;
-import org.esa.nest.dat.plugins.GraphBuilderDialog;
+import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 
 public class OpenGraphBuilderDialogAction extends AbstractVisatAction {
 

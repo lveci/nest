@@ -3,7 +3,7 @@ package org.esa.nest.dat.toolviews.Projects;
 import org.esa.nest.util.XMLSupport;
 import org.esa.nest.util.DatUtils;
 import org.esa.nest.dat.dialogs.ProductSetDialog;
-import org.esa.nest.dat.plugins.GraphBuilderDialog;
+import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.dat.DatContext;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.dialogs.PromptDialog;

@@ -3,16 +3,14 @@ package org.esa.nest.dat;
 
 import com.jidesoft.action.CommandBar;
 import com.jidesoft.action.CommandMenuBar;
-import com.jidesoft.action.DockableBarContext;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.ui.*;
 import org.esa.beam.framework.ui.application.ApplicationDescriptor;
 import org.esa.beam.framework.ui.application.ToolViewDescriptor;
 import org.esa.beam.visat.*;
-import org.esa.nest.dat.plugins.GraphBuilderDialog;
+import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 
 import javax.swing.*;
-import java.beans.PropertyVetoException;
 import java.util.List;
 import java.util.ArrayList;
 import java.awt.event.ActionListener;
