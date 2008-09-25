@@ -255,6 +255,22 @@
         </action>
 
         <action>
+            <id>loadTabbedLayout</id>
+            <class>org.esa.nest.dat.actions.LoadTabbedLayoutAction</class>
+            <parent>layout</parent>
+            <text>Load Tabbed Layout</text>
+            <shortDescr>Load the tabbed layout.</shortDescr>
+        </action>
+
+        <action>
+            <id>loadSideBySideLayout</id>
+            <class>org.esa.nest.dat.actions.LoadSideBySideLayoutAction</class>
+            <parent>layout</parent>
+            <text>Load Side by Side Layout</text>
+            <shortDescr>Load the layout with Project and Product views side by side.</shortDescr>
+        </action>
+
+        <action>
             <id>openInformationDialog</id>
             <class>org.esa.nest.dat.actions.OpenInformationDialogAction</class>
             <placeBefore>openGeoCodingInfoDialog</placeBefore>
