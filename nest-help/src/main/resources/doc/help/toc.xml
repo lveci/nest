@@ -56,7 +56,7 @@
 			<tocitem text="Import Transect Data" target="importTransectData"/>
 			
 			<tocitem text="Product Subset Dialog" target="subsetDialog"/>
-            <tocitem text="Product Grabber" target="productGrabber"/>
+            <tocitem text="Import Browser" target="productGrabber"/>
 		</tocitem>
 		
 		<tocitem text="Export">
