@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<DOCUMENT type="Advanced Installer" CreateVersion="6.5.2" version="6.5.2" modules="freeware" RootPath="." Language="en">
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiPropsComponent">
+    <ROW Property="AI_MINJREVERSION" MultiBuildValue="DefaultBuild:1.5" ValueLocId="-"/>
+    <ROW Property="AI_MINRAM" MultiBuildValue="DefaultBuild:512" ValueLocId="-"/>
+    <ROW Property="ALLUSERS" Value="2"/>
+    <ROW Property="ARPNOMODIFY" MultiBuildValue="DefaultBuild:1"/>
+    <ROW Property="ARPNOREPAIR" Value="1"/>
+    <ROW Property="ARPPRODUCTICON" Value="controlPanelIcon.exe"/>
+    <ROW Property="ARPURLINFOABOUT" Value="www.array.ca/nest"/>
+    <ROW Property="BannerBitmap" Value="default_banner.bmp" Type="1"/>
+    <ROW Property="DialogBitmap" Value="default_dialog.bmp" Type="1"/>
+    <ROW Property="ESA" Value="ESA"/>
+    <ROW Property="Manufacturer" Value="Array Systems Computing Inc." ValueLocId="*"/>
+    <ROW Property="ProductCode" Value="1033:{5197F4C9-E38A-4ED1-964A-AEA4ECE60DBD} "/>
+    <ROW Property="ProductLanguage" Value="1033"/>
+    <ROW Property="ProductName" Value="Next ESA SAR Toolbox" ValueLocId="*"/>
+    <ROW Property="ProductVersion" Value="1.0.0"/>
+    <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
+    <ROW Property="UpgradeCode" Value="{F306E94A-1388-4219-9461-B0CB54813AC6}"/>
+    <ROW Property="WindowsFamily9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNT" MultiBuildValue="DefaultBuild:Windows 2000" ValueLocId="-"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiDirsComponent">
+    <ROW Directory="APPDIR" Directory_Parent="TARGETDIR" DefaultDir="APPDIR:." IsPseudoRoot="1"/>
+    <ROW Directory="Coregistration_DIR" Directory_Parent="graphs_DIR" DefaultDir="Coregi~1|Coregistration"/>
+    <ROW Directory="DesktopFolder" Directory_Parent="TARGETDIR" DefaultDir="Deskto~1|DesktopFolder" IsPseudoRoot="1"/>
+    <ROW Directory="SHORTCUTDIR" Directory_Parent="TARGETDIR" DefaultDir="SHORTC~1|SHORTCUTDIR" IsPseudoRoot="1"/>
+    <ROW Directory="TARGETDIR" DefaultDir="SourceDir"/>
+    <ROW Directory="bin_DIR" Directory_Parent="APPDIR" DefaultDir="bin"/>
+    <ROW Directory="config_DIR" Directory_Parent="APPDIR" DefaultDir="config"/>
+    <ROW Directory="graphs_DIR" Directory_Parent="APPDIR" DefaultDir="graphs"/>
+    <ROW Directory="lib_DIR" Directory_Parent="APPDIR" DefaultDir="lib"/>
+    <ROW Directory="licenses_DIR" Directory_Parent="APPDIR" DefaultDir="licenses"/>
+    <ROW Directory="modules_DIR" Directory_Parent="APPDIR" DefaultDir="modules"/>
+    <ROW Directory="res_DIR" Directory_Parent="APPDIR" DefaultDir="res"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiCompsComponent">
+    <ROW Component="CHANGELOG.txt" ComponentId="{DBFFF3FF-3E69-4E68-981D-B33EC50B906B}" Directory_="APPDIR" Attributes="0" KeyPath="CHANGELOG.txt" Type="0"/>
+    <ROW Component="DAT.exe" ComponentId="{0614E03E-D667-4730-9E3A-F54653A223AE}" Directory_="APPDIR" Attributes="0" KeyPath="DAT.exe"/>
+    <ROW Component="GCP_Selection.xml" ComponentId="{78F7C867-16C6-4D48-B45E-275689EB4189}" Directory_="Coregistration_DIR" Attributes="0" KeyPath="GCP_Selection.xml" Type="0"/>
+    <ROW Component="SHORTCUTDIR" ComponentId="{8331ACB6-48CE-4768-8F6B-94CB51EABCA2}" Directory_="SHORTCUTDIR" Attributes="0"/>
+    <ROW Component="bc_jnn_1.5.jar" ComponentId="{C7290D32-2A03-4C23-A6C8-DC347B254E21}" Directory_="lib_DIR" Attributes="0" KeyPath="bc_jnn_1.5.jar" Type="0"/>
+    <ROW Component="beam.config" ComponentId="{C68AEC6E-DFE4-4D97-9650-FFD6FD072000}" Directory_="config_DIR" Attributes="0" KeyPath="beam.config" Type="0"/>
+    <ROW Component="beam_alos_reader_1.0.jar" ComponentId="{1496C367-A696-4347-8121-B6E7BB99044C}" Directory_="modules_DIR" Attributes="0" KeyPath="beam_alos_reader_1.0.jar" Type="0"/>
+    <ROW Component="ceres_launcher.jar" ComponentId="{2BF6C6D8-C03A-4A9B-977B-E2AEF808FEFD}" Directory_="bin_DIR" Attributes="0" KeyPath="ceres_launcher.jar" Type="0"/>
+    <ROW Component="dat.png" ComponentId="{E4DF389B-7BD7-4067-A4D0-E9972AB8545F}" Directory_="res_DIR" Attributes="0" KeyPath="dat.png" Type="0"/>
+    <ROW Component="gdal_license.txt" ComponentId="{8AECB9C4-B638-48F1-A5B9-1B6C405673D2}" Directory_="licenses_DIR" Attributes="0" KeyPath="gdal_license.txt" Type="0"/>
+    <ROW Component="jogl.dll" ComponentId="{CACE90F1-07C5-4900-A422-6DB4DE1A23D6}" Directory_="APPDIR" Attributes="0" KeyPath="jogl.dll"/>
+    <ROW Component="jogl_awt.dll" ComponentId="{083C694A-D1A5-4679-886E-24552B8B27DD}" Directory_="APPDIR" Attributes="0" KeyPath="jogl_awt.dll"/>
+    <ROW Component="jogl_cg.dll" ComponentId="{211B9861-C319-448D-89F1-4E284710E335}" Directory_="APPDIR" Attributes="0" KeyPath="jogl_cg.dll"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatsComponent">
+    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0" Components="ceres_launcher.jar CHANGELOG.txt beam.config DAT.exe GCP_Selection.xml jogl.dll jogl_awt.dll jogl_cg.dll bc_jnn_1.5.jar gdal_license.txt beam_alos_reader_1.0.jar dat.png SHORTCUTDIR"/>
+    <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
+    <ROW File="CHANGELOG.txt" Component_="CHANGELOG.txt" FileName="CHANGE~1.txt|CHANGELOG.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\CHANGELOG.txt" SelfReg="false" Sequence="2"/>
+    <ROW File="DAT.exe" Component_="DAT.exe" FileName="DAT.exe" Attributes="0" SourcePath="target\nest-1C-bin.dir\DAT.exe" SelfReg="false" Sequence="8"/>
+    <ROW File="GCP_Selection.xml" Component_="GCP_Selection.xml" FileName="GCP_Se~1.xml|GCP_Selection.xml" Attributes="0" SourcePath="target\nest-1C-bin.dir\graphs\Coregistration\GCP_Selection.xml" SelfReg="false" Sequence="13"/>
+    <ROW File="Jama_1.0.2.jar" Component_="bc_jnn_1.5.jar" FileName="Jama-1~1.jar|Jama-1.0.2.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\Jama-1.0.2.jar" SelfReg="false" Sequence="27"/>
+    <ROW File="LICENSE.txt" Component_="CHANGELOG.txt" FileName="LICENSE.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\LICENSE.txt" SelfReg="false" Sequence="49"/>
+    <ROW File="MrSID_decoderSDK_license.txt" Component_="gdal_license.txt" FileName="MrSID_~1.txt|MrSID_decoderSDK_license.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\licenses\MrSID_decoderSDK_license.txt" SelfReg="false" Sequence="56"/>
+    <ROW File="NEST_Splashscreen080901.png" Component_="dat.png" FileName="NEST_S~1.png|NEST_Splashscreen080901.png" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\NEST_Splashscreen080901.png" SelfReg="false" Sequence="100"/>
+    <ROW File="Warp.xml" Component_="GCP_Selection.xml" FileName="Warp.xml" Attributes="0" SourcePath="target\nest-1C-bin.dir\graphs\Coregistration\Warp.xml" SelfReg="false" Sequence="14"/>
+    <ROW File="bc_jnn_1.5.jar" Component_="bc_jnn_1.5.jar" FileName="bc-jnn~1.jar|bc-jnn-1.5.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\bc-jnn-1.5.jar" SelfReg="false" Sequence="18"/>
+    <ROW File="beam.config" Component_="beam.config" FileName="beam~1.con|beam.config" Attributes="0" SourcePath="target\nest-1C-bin.dir\config\beam.config" SelfReg="false" Sequence="3"/>
+    <ROW File="beam_alos_reader_1.0.jar" Component_="beam_alos_reader_1.0.jar" FileName="beam-a~1.jar|beam-alos-reader-1.0.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\beam-alos-reader-1.0.jar" SelfReg="false" Sequence="57"/>
+    <ROW File="beam_core_4.5_SNAPSHOT.jar" Component_="beam_alos_reader_1.0.jar" FileName="beam-c~1.jar|beam-core-4.5-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\beam-core-4.5-SNAPSHOT.jar" SelfReg="false" Sequence="58"/>
+    <ROW File="beam_envisat_reader_1.2.jar" Component_="beam_alos_reader_1.0.jar" FileName="beam-e~1.jar|beam-envisat-reader-1.2.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\beam-envisat-reader-1.2.jar" SelfReg="false" Sequence="59"/>
+    <ROW File="beam_geotiff_1.0.jar" Component_="beam_alos_reader_1.0.jar" FileName="beam-g~1.jar|beam-geotiff-1.0.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\beam-geotiff-1.0.jar" SelfReg="false" Sequence="60"/>
+    <ROW File="beam_getasse30_reader_1.0.jar" Component_="beam_alos_reader_1.0.jar" FileName="beam-g~2.jar|beam-getasse30-reader-1.0.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\beam-getasse30-reader-1.0.jar" SelfReg="false" Sequence="61"/>
+    <ROW File="beam_gpf_4.5_SNAPSHOT.jar" Component_="beam_alos_reader_1.0.jar" FileName="beam-g~3.jar|beam-gpf-4.5-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\beam-gpf-4.5-SNAPSHOT.jar" SelfReg="false" Sequence="62"/>
+    <ROW File="beam_hdf5_writer_1.0.jar" Component_="beam_alos_reader_1.0.jar" FileName="beam-h~1.jar|beam-hdf5-writer-1.0.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\beam-hdf5-writer-1.0.jar" SelfReg="false" Sequence="63"/>
+    <ROW File="beam_netcdf_reader_1.0.201_SNAPSHOT.jar" Component_="beam_alos_reader_1.0.jar" FileName="beam-n~1.jar|beam-netcdf-reader-1.0.201-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\beam-netcdf-reader-1.0.201-SNAPSHOT.jar" SelfReg="false" Sequence="64"/>
+    <ROW File="beam_processing_4.5_SNAPSHOT.jar" Component_="beam_alos_reader_1.0.jar" FileName="beam-p~1.jar|beam-processing-4.5-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\beam-processing-4.5-SNAPSHOT.jar" SelfReg="false" Sequence="65"/>
+    <ROW File="beam_scripting_4.5_SNAPSHOT.jar" Component_="beam_alos_reader_1.0.jar" FileName="beam-s~1.jar|beam-scripting-4.5-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\beam-scripting-4.5-SNAPSHOT.jar" SelfReg="false" Sequence="66"/>
+    <ROW File="beam_shapefile_reader_2.0_SNAPSHOT.jar" Component_="beam_alos_reader_1.0.jar" FileName="beam-s~2.jar|beam-shapefile-reader-2.0-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\beam-shapefile-reader-2.0-SNAPSHOT.jar" SelfReg="false" Sequence="67"/>
+    <ROW File="beam_ui_4.5_SNAPSHOT.jar" Component_="beam_alos_reader_1.0.jar" FileName="beam-u~1.jar|beam-ui-4.5-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\beam-ui-4.5-SNAPSHOT.jar" SelfReg="false" Sequence="68"/>
+    <ROW File="beam_visat_4.5_SNAPSHOT.jar" Component_="beam_alos_reader_1.0.jar" FileName="beam-v~1.jar|beam-visat-4.5-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\beam-visat-4.5-SNAPSHOT.jar" SelfReg="false" Sequence="69"/>
+    <ROW File="beam_visat_rcp_4.5_SNAPSHOT.jar" Component_="beam_alos_reader_1.0.jar" FileName="beam-v~2.jar|beam-visat-rcp-4.5-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\beam-visat-rcp-4.5-SNAPSHOT.jar" SelfReg="false" Sequence="70"/>
+    <ROW File="ceres_binding_0.8_SNAPSHOT.jar" Component_="bc_jnn_1.5.jar" FileName="ceres-~1.jar|ceres-binding-0.8-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\ceres-binding-0.8-SNAPSHOT.jar" SelfReg="false" Sequence="19"/>
+    <ROW File="ceres_binding_0.8_SNAPSHOT.jar_1" Component_="beam_alos_reader_1.0.jar" FileName="ceres-~1.jar|ceres-binding-0.8-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\ceres-binding-0.8-SNAPSHOT.jar" SelfReg="false" Sequence="71"/>
+    <ROW File="ceres_binio_0.5_SNAPSHOT.jar" Component_="beam_alos_reader_1.0.jar" FileName="ceres-~2.jar|ceres-binio-0.5-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\ceres-binio-0.5-SNAPSHOT.jar" SelfReg="false" Sequence="72"/>
+    <ROW File="ceres_core_0.8_SNAPSHOT.jar" Component_="bc_jnn_1.5.jar" FileName="ceres-~2.jar|ceres-core-0.8-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\ceres-core-0.8-SNAPSHOT.jar" SelfReg="false" Sequence="20"/>
+    <ROW File="ceres_core_0.8_SNAPSHOT.jar_1" Component_="beam_alos_reader_1.0.jar" FileName="ceres-~3.jar|ceres-core-0.8-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\ceres-core-0.8-SNAPSHOT.jar" SelfReg="false" Sequence="73"/>
+    <ROW File="ceres_deploy_0.8_SNAPSHOT.jar" Component_="beam_alos_reader_1.0.jar" FileName="ceres-~4.jar|ceres-deploy-0.8-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\ceres-deploy-0.8-SNAPSHOT.jar" SelfReg="false" Sequence="74"/>
+    <ROW File="ceres_fs_0.1_SNAPSHOT.jar" Component_="beam_alos_reader_1.0.jar" FileName="ceres-~5.jar|ceres-fs-0.1-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\ceres-fs-0.1-SNAPSHOT.jar" SelfReg="false" Sequence="75"/>
+    <ROW File="ceres_glayer_0.5_SNAPSHOT.jar" Component_="bc_jnn_1.5.jar" FileName="ceres-~3.jar|ceres-glayer-0.5-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\ceres-glayer-0.5-SNAPSHOT.jar" SelfReg="false" Sequence="21"/>
+    <ROW File="ceres_glayer_0.5_SNAPSHOT.jar_1" Component_="beam_alos_reader_1.0.jar" FileName="ceres-~6.jar|ceres-glayer-0.5-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\ceres-glayer-0.5-SNAPSHOT.jar" SelfReg="false" Sequence="76"/>
+    <ROW File="ceres_launcher.jar" Component_="ceres_launcher.jar" FileName="ceres-~1.jar|ceres-launcher.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\bin\ceres-launcher.jar" SelfReg="false" Sequence="1"/>
+    <ROW File="ceres_launcher_0.8_SNAPSHOT.jar" Component_="beam_alos_reader_1.0.jar" FileName="ceres-~7.jar|ceres-launcher-0.8-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\ceres-launcher-0.8-SNAPSHOT.jar" SelfReg="false" Sequence="77"/>
+    <ROW File="ceres_site_0.8_SNAPSHOT.jar" Component_="beam_alos_reader_1.0.jar" FileName="ceres-~8.jar|ceres-site-0.8-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\ceres-site-0.8-SNAPSHOT.jar" SelfReg="false" Sequence="78"/>
+    <ROW File="ceres_ui_0.8_SNAPSHOT.jar" Component_="bc_jnn_1.5.jar" FileName="ceres-~4.jar|ceres-ui-0.8-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\ceres-ui-0.8-SNAPSHOT.jar" SelfReg="false" Sequence="22"/>
+    <ROW File="ceres_ui_0.8_SNAPSHOT.jar_1" Component_="beam_alos_reader_1.0.jar" FileName="ceres-~9.jar|ceres-ui-0.8-SNAPSHOT.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\ceres-ui-0.8-SNAPSHOT.jar" SelfReg="false" Sequence="79"/>
+    <ROW File="clibwrapper_jiio_1.1.jar" Component_="bc_jnn_1.5.jar" FileName="clibwr~1.jar|clibwrapper-jiio-1.1.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\clibwrapper-jiio-1.1.jar" SelfReg="false" Sequence="23"/>
+    <ROW File="dat.bat" Component_="CHANGELOG.txt" FileName="dat.bat" Attributes="0" SourcePath="target\nest-1C-bin.dir\dat.bat" SelfReg="false" Sequence="6"/>
+    <ROW File="dat.command" Component_="CHANGELOG.txt" FileName="dat~1.com|dat.command" Attributes="0" SourcePath="target\nest-1C-bin.dir\dat.command" SelfReg="false" Sequence="7"/>
+    <ROW File="dat.png" Component_="dat.png" FileName="dat.png" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\dat.png" SelfReg="false" Sequence="98"/>
+    <ROW File="dat.sh" Component_="CHANGELOG.txt" FileName="dat.sh" Attributes="0" SourcePath="target\nest-1C-bin.dir\dat.sh" SelfReg="false" Sequence="9"/>
+    <ROW File="earth_bathy_1024.bmp" Component_="dat.png" FileName="earth_~1.bmp|earth_bathy_1024.bmp" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\earth_bathy_1024.bmp" SelfReg="false" Sequence="99"/>
+    <ROW File="gdal_license.txt" Component_="gdal_license.txt" FileName="gdal_l~1.txt|gdal_license.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\licenses\gdal_license.txt" SelfReg="false" Sequence="50"/>
+    <ROW File="gpt.bat" Component_="CHANGELOG.txt" FileName="gpt.bat" Attributes="0" SourcePath="target\nest-1C-bin.dir\gpt.bat" SelfReg="false" Sequence="10"/>
+    <ROW File="gpt.command" Component_="CHANGELOG.txt" FileName="gpt~1.com|gpt.command" Attributes="0" SourcePath="target\nest-1C-bin.dir\gpt.command" SelfReg="false" Sequence="11"/>
+    <ROW File="gpt.sh" Component_="CHANGELOG.txt" FileName="gpt.sh" Attributes="0" SourcePath="target\nest-1C-bin.dir\gpt.sh" SelfReg="false" Sequence="12"/>
+    <ROW File="jai_codec_1.1.3.jar" Component_="bc_jnn_1.5.jar" FileName="jai-co~1.jar|jai-codec-1.1.3.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\jai-codec-1.1.3.jar" SelfReg="false" Sequence="24"/>
+    <ROW File="jai_core_1.1.3.jar" Component_="bc_jnn_1.5.jar" FileName="jai-co~2.jar|jai-core-1.1.3.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\jai-core-1.1.3.jar" SelfReg="false" Sequence="25"/>
+    <ROW File="jai_imageio_1.1.jar" Component_="bc_jnn_1.5.jar" FileName="jai-im~1.jar|jai-imageio-1.1.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\jai-imageio-1.1.jar" SelfReg="false" Sequence="26"/>
+    <ROW File="jai_license.txt" Component_="gdal_license.txt" FileName="jai_li~1.txt|jai_license.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\licenses\jai_license.txt" SelfReg="false" Sequence="51"/>
+    <ROW File="javahelp_2.0.02.jar" Component_="bc_jnn_1.5.jar" FileName="javahe~1.jar|javahelp-2.0.02.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\javahelp-2.0.02.jar" SelfReg="false" Sequence="28"/>
+    <ROW File="jcommon_1.0.13.jar" Component_="bc_jnn_1.5.jar" FileName="jcommo~1.jar|jcommon-1.0.13.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\jcommon-1.0.13.jar" SelfReg="false" Sequence="29"/>
+    <ROW File="jdom_1.1.jar" Component_="bc_jnn_1.5.jar" FileName="jdom-1~1.jar|jdom-1.1.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\jdom-1.1.jar" SelfReg="false" Sequence="30"/>
+    <ROW File="jdom_license.txt" Component_="gdal_license.txt" FileName="jdom_l~1.txt|jdom_license.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\licenses\jdom_license.txt" SelfReg="false" Sequence="52"/>
+    <ROW File="jfreechart_1.0.10.jar" Component_="bc_jnn_1.5.jar" FileName="jfreec~1.jar|jfreechart-1.0.10.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\jfreechart-1.0.10.jar" SelfReg="false" Sequence="31"/>
+    <ROW File="jide_action_2.2.7.jar" Component_="bc_jnn_1.5.jar" FileName="jide-a~1.jar|jide-action-2.2.7.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\jide-action-2.2.7.jar" SelfReg="false" Sequence="32"/>
+    <ROW File="jide_common_2.2.7.jar" Component_="bc_jnn_1.5.jar" FileName="jide-c~1.jar|jide-common-2.2.7.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\jide-common-2.2.7.jar" SelfReg="false" Sequence="33"/>
+    <ROW File="jide_components_2.2.7.jar" Component_="bc_jnn_1.5.jar" FileName="jide-c~2.jar|jide-components-2.2.7.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\jide-components-2.2.7.jar" SelfReg="false" Sequence="34"/>
+    <ROW File="jide_dock_2.2.7.jar" Component_="bc_jnn_1.5.jar" FileName="jide-d~1.jar|jide-dock-2.2.7.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\jide-dock-2.2.7.jar" SelfReg="false" Sequence="35"/>
+    <ROW File="jide_eula.html" Component_="gdal_license.txt" FileName="jide_e~1.htm|jide_eula.html" Attributes="0" SourcePath="target\nest-1C-bin.dir\licenses\jide_eula.html" SelfReg="false" Sequence="53"/>
+    <ROW File="jide_grids_2.2.7.jar" Component_="bc_jnn_1.5.jar" FileName="jide-g~1.jar|jide-grids-2.2.7.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\jide-grids-2.2.7.jar" SelfReg="false" Sequence="36"/>
+    <ROW File="jogl.dll" Component_="jogl.dll" FileName="jogl.dll" Attributes="0" SourcePath="target\nest-1C-bin.dir\jogl.dll" SelfReg="false" Sequence="15"/>
+    <ROW File="jogl_1.0.0.jar" Component_="bc_jnn_1.5.jar" FileName="jogl-1~1.jar|jogl-1.0.0.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\jogl-1.0.0.jar" SelfReg="false" Sequence="37"/>
+    <ROW File="jogl_awt.dll" Component_="jogl_awt.dll" FileName="jogl_awt.dll" Attributes="0" SourcePath="target\nest-1C-bin.dir\jogl_awt.dll" SelfReg="false" Sequence="16"/>
+    <ROW File="jogl_cg.dll" Component_="jogl_cg.dll" FileName="jogl_cg.dll" Attributes="0" SourcePath="target\nest-1C-bin.dir\jogl_cg.dll" SelfReg="false" Sequence="17"/>
+    <ROW File="jogl_license.txt" Component_="gdal_license.txt" FileName="jogl_l~1.txt|jogl_license.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\licenses\jogl_license.txt" SelfReg="false" Sequence="54"/>
+    <ROW File="junit_4.4.jar" Component_="bc_jnn_1.5.jar" FileName="junit-~1.jar|junit-4.4.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\junit-4.4.jar" SelfReg="false" Sequence="38"/>
+    <ROW File="junit_license.txt" Component_="gdal_license.txt" FileName="junit_~1.txt|junit_license.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\licenses\junit_license.txt" SelfReg="false" Sequence="55"/>
+    <ROW File="lib_hdf_2.3.jar" Component_="beam_alos_reader_1.0.jar" FileName="lib-hd~1.jar|lib-hdf-2.3.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\lib-hdf-2.3.jar" SelfReg="false" Sequence="80"/>
+    <ROW File="lib_netcdf_2.2.16.jar" Component_="beam_alos_reader_1.0.jar" FileName="lib-ne~1.jar|lib-netcdf-2.2.16.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\lib-netcdf-2.2.16.jar" SelfReg="false" Sequence="81"/>
+    <ROW File="libjogl.jnilib" Component_="CHANGELOG.txt" FileName="libjog~1.jni|libjogl.jnilib" Attributes="0" SourcePath="target\nest-1C-bin.dir\libjogl.jnilib" SelfReg="false" Sequence="42"/>
+    <ROW File="libjogl.so" Component_="CHANGELOG.txt" FileName="libjogl.so" Attributes="0" SourcePath="target\nest-1C-bin.dir\libjogl.so" SelfReg="false" Sequence="43"/>
+    <ROW File="libjogl_awt.jnilib" Component_="CHANGELOG.txt" FileName="libjog~2.jni|libjogl_awt.jnilib" Attributes="0" SourcePath="target\nest-1C-bin.dir\libjogl_awt.jnilib" SelfReg="false" Sequence="44"/>
+    <ROW File="libjogl_awt.so" Component_="CHANGELOG.txt" FileName="libjog~1.so|libjogl_awt.so" Attributes="0" SourcePath="target\nest-1C-bin.dir\libjogl_awt.so" SelfReg="false" Sequence="45"/>
+    <ROW File="libjogl_cg.jnilib" Component_="CHANGELOG.txt" FileName="libjog~3.jni|libjogl_cg.jnilib" Attributes="0" SourcePath="target\nest-1C-bin.dir\libjogl_cg.jnilib" SelfReg="false" Sequence="46"/>
+    <ROW File="libjogl_cg.so" Component_="CHANGELOG.txt" FileName="libjog~2.so|libjogl_cg.so" Attributes="0" SourcePath="target\nest-1C-bin.dir\libjogl_cg.so" SelfReg="false" Sequence="47"/>
+    <ROW File="libjogl_drihack.so" Component_="CHANGELOG.txt" FileName="libjog~3.so|libjogl_drihack.so" Attributes="0" SourcePath="target\nest-1C-bin.dir\libjogl_drihack.so" SelfReg="false" Sequence="48"/>
+    <ROW File="mlibwrapper_jai_1.1.3.jar" Component_="bc_jnn_1.5.jar" FileName="mlibwr~1.jar|mlibwrapper-jai-1.1.3.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\mlibwrapper-jai-1.1.3.jar" SelfReg="false" Sequence="39"/>
+    <ROW File="nest.config" Component_="beam.config" FileName="nest~1.con|nest.config" Attributes="0" SourcePath="target\nest-1C-bin.dir\config\nest.config" SelfReg="false" Sequence="4"/>
+    <ROW File="nest_core_1C.jar" Component_="beam_alos_reader_1.0.jar" FileName="nest-c~1.jar|nest-core-1C.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\nest-core-1C.jar" SelfReg="false" Sequence="82"/>
+    <ROW File="nest_dat_1C.jar" Component_="beam_alos_reader_1.0.jar" FileName="nest-d~1.jar|nest-dat-1C.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\nest-dat-1C.jar" SelfReg="false" Sequence="83"/>
+    <ROW File="nest_help_1C.jar" Component_="beam_alos_reader_1.0.jar" FileName="nest-h~1.jar|nest-help-1C.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\nest-help-1C.jar" SelfReg="false" Sequence="84"/>
+    <ROW File="nest_op_asar_calibration_1C.jar" Component_="beam_alos_reader_1.0.jar" FileName="nest-o~1.jar|nest-op-asar-calibration-1C.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\nest-op-asar-calibration-1C.jar" SelfReg="false" Sequence="85"/>
+    <ROW File="nest_op_coregistration_1C.jar" Component_="beam_alos_reader_1.0.jar" FileName="nest-o~2.jar|nest-op-coregistration-1C.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\nest-op-coregistration-1C.jar" SelfReg="false" Sequence="86"/>
+    <ROW File="nest_op_ers_calibration_1C.jar" Component_="beam_alos_reader_1.0.jar" FileName="nest-o~3.jar|nest-op-ers-calibration-1C.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\nest-op-ers-calibration-1C.jar" SelfReg="false" Sequence="87"/>
+    <ROW File="nest_op_filter_1C.jar" Component_="beam_alos_reader_1.0.jar" FileName="nest-o~4.jar|nest-op-filter-1C.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\nest-op-filter-1C.jar" SelfReg="false" Sequence="88"/>
+    <ROW File="nest_op_ocean_tools_1C.jar" Component_="beam_alos_reader_1.0.jar" FileName="nest-o~5.jar|nest-op-ocean-tools-1C.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\nest-op-ocean-tools-1C.jar" SelfReg="false" Sequence="89"/>
+    <ROW File="nest_op_sar_tools_1C.jar" Component_="beam_alos_reader_1.0.jar" FileName="nest-o~6.jar|nest-op-sar-tools-1C.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\nest-op-sar-tools-1C.jar" SelfReg="false" Sequence="90"/>
+    <ROW File="nest_op_speckle_filter_1C.jar" Component_="beam_alos_reader_1.0.jar" FileName="nest-o~7.jar|nest-op-speckle-filter-1C.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\nest-op-speckle-filter-1C.jar" SelfReg="false" Sequence="91"/>
+    <ROW File="nest_op_wss_deburst_1C.jar" Component_="beam_alos_reader_1.0.jar" FileName="nest-o~8.jar|nest-op-wss-deburst-1C.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\nest-op-wss-deburst-1C.jar" SelfReg="false" Sequence="92"/>
+    <ROW File="nest_reader_dem_1C.jar" Component_="beam_alos_reader_1.0.jar" FileName="nest-r~1.jar|nest-reader-dem-1C.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\nest-reader-dem-1C.jar" SelfReg="false" Sequence="93"/>
+    <ROW File="nest_reader_ers_ceos_1C.jar" Component_="beam_alos_reader_1.0.jar" FileName="nest-r~2.jar|nest-reader-ers-ceos-1C.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\nest-reader-ers-ceos-1C.jar" SelfReg="false" Sequence="94"/>
+    <ROW File="nest_reader_generic_1C.jar" Component_="beam_alos_reader_1.0.jar" FileName="nest-r~3.jar|nest-reader-generic-1C.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\nest-reader-generic-1C.jar" SelfReg="false" Sequence="95"/>
+    <ROW File="nest_reader_xml_based_1C.jar" Component_="beam_alos_reader_1.0.jar" FileName="nest-r~4.jar|nest-reader-xml-based-1C.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\nest-reader-xml-based-1C.jar" SelfReg="false" Sequence="96"/>
+    <ROW File="readme.html" Component_="CHANGELOG.txt" FileName="readme~1.htm|readme.html" Attributes="0" SourcePath="target\nest-1C-bin.dir\readme.html" SelfReg="false" Sequence="97"/>
+    <ROW File="settings.xml" Component_="beam.config" FileName="settings.xml" Attributes="0" SourcePath="target\nest-1C-bin.dir\config\settings.xml" SelfReg="false" Sequence="5"/>
+    <ROW File="splash.png" Component_="dat.png" FileName="splash.png" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\splash.png" SelfReg="false" Sequence="101"/>
+    <ROW File="xpp3_1.1.3.3.jar" Component_="bc_jnn_1.5.jar" FileName="xpp3-1~1.jar|xpp3-1.1.3.3.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\xpp3-1.1.3.3.jar" SelfReg="false" Sequence="40"/>
+    <ROW File="xstream_1.3.jar" Component_="bc_jnn_1.5.jar" FileName="xstrea~1.jar|xstream-1.3.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\xstream-1.3.jar" SelfReg="false" Sequence="41"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
+    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" Languages="en" InstallationType="4"/>
+    <ATTRIBUTE name="CurrentBuild" value="DefaultBuild"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.CacheComponent">
+    <ATTRIBUTE name="CacheIndex" value="install.txt"/>
+    <ATTRIBUTE name="Folder" value="..\..\Program Files\Caphyon\Advanced Installer 6.5.2\cache"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.DictionaryComponent">
+    <ROW Path="&lt;AI_DICTS&gt;ui.ail"/>
+    <ROW Path="&lt;AI_DICTS&gt;ui_en.ail"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.FragmentComponent">
+    <ROW Fragment="FolderDlg.aip" Path="&lt;AI_FRAGS&gt;FolderDlg.aip"/>
+    <ROW Fragment="StaticUIStrings.aip" Path="&lt;AI_FRAGS&gt;StaticUIStrings.aip"/>
+    <ROW Fragment="UI.aip" Path="&lt;AI_FRAGS&gt;UI.aip"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiBinaryComponent">
+    <ROW Name="aicustact.dll" SourcePath="&lt;AI_CUSTACTS&gt;aicustact.dll"/>
+    <ROW Name="default_banner.bmp" SourcePath="&lt;AI_RES&gt;default-banner.bmp"/>
+    <ROW Name="default_dialog.bmp" SourcePath="&lt;AI_RES&gt;default-dialog.bmp"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiControlComponent">
+    <ATTRIBUTE name="FixedSizeBitmaps" value="0"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiControlEventComponent">
+    <ROW Dialog_="FolderDlg" Control_="Back" Event="NewDialog" Argument="WelcomeDlg" Condition="AI_INSTALL" Ordering="1"/>
+    <ROW Dialog_="WelcomeDlg" Control_="Next" Event="NewDialog" Argument="FolderDlg" Condition="AI_INSTALL" Ordering="1"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="FolderDlg" Condition="AI_INSTALL" Ordering="1"/>
+    <ROW Dialog_="FolderDlg" Control_="Next" Event="NewDialog" Argument="VerifyReadyDlg" Condition="AI_INSTALL" Ordering="3"/>
+    <ROW Dialog_="MaintenanceTypeDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceWelcomeDlg" Condition="AI_MAINT" Ordering="1"/>
+    <ROW Dialog_="MaintenanceWelcomeDlg" Control_="Next" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT" Ordering="2"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="PatchWelcomeDlg" Condition="AI_PATCH" Ordering="1"/>
+    <ROW Dialog_="PatchWelcomeDlg" Control_="Next" Event="NewDialog" Argument="VerifyReadyDlg" Condition="AI_PATCH" Ordering="3"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiCreateFolderComponent">
+    <ROW Directory_="SHORTCUTDIR" Component_="SHORTCUTDIR"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiCustActComponent">
+    <ROW Action="AI_DOWNGRADE" Type="19" Target="4010"/>
+    <ROW Action="AI_DetectJRE" Type="1" Source="aicustact.dll" Target="RequiredJreExists"/>
+    <ROW Action="AI_PREPARE_UPGRADE" Type="65" Source="aicustact.dll" Target="PrepareUpgrade"/>
+    <ROW Action="AI_RESTORE_LOCATION" Type="65" Source="aicustact.dll" Target="RestoreLocation"/>
+    <ROW Action="AI_STORE_LOCATION" Type="51" Source="ARPINSTALLLOCATION" Target="[APPDIR]"/>
+    <ROW Action="SET_APPDIR" Type="307" Source="APPDIR" Target="[ProgramFilesFolder][Manufacturer]\[ProductName]" MultiBuildTarget="DefaultBuild:[ProgramFilesFolder][ESA]\[ProductName]"/>
+    <ROW Action="SET_SHORTCUTDIR" Type="307" Source="SHORTCUTDIR" Target="[ProgramMenuFolder][ProductName]"/>
+    <ROW Action="SET_TARGETDIR_TO_APPDIR" Type="51" Source="TARGETDIR" Target="[APPDIR]"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
+    <ROW Name="controlPanelIcon.exe" SourcePath="src\main\bin\win\DAT.exe" Index="0"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiInstExSeqComponent">
+    <ROW Action="AI_DOWNGRADE" Condition="AI_NEWERPRODUCTFOUND AND (UILevel &lt;&gt; 5)" Sequence="210"/>
+    <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="740"/>
+    <ROW Action="AI_STORE_LOCATION" Condition="Not Installed" Sequence="1545"/>
+    <ROW Action="AI_PREPARE_UPGRADE" Condition="AI_UPGRADE=&quot;No&quot; AND (Not Installed)" Sequence="1300"/>
+    <ROW Action="AI_DetectJRE" Condition="1" Sequence="398" Builds="DefaultBuild"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiInstallUISequenceComponent">
+    <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="740"/>
+    <ROW Action="AI_DetectJRE" Condition="1" Sequence="398" Builds="DefaultBuild"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiLaunchConditionsComponent">
+    <ROW Condition="AI_JREVERFOUND = 1" Description="[ProductName] cannot be installed on systems with JRE version smaller than [AI_MINJREVERSION]" DescriptionLocId="AI.LaunchCondition.Jre" IsPredefined="true" Builds="DefaultBuild"/>
+    <ROW Condition="PhysicalMemory &gt;= AI_MINRAM" Description="[ProductName] cannot be installed on systems with less physical memory than [AI_MINRAM] MB." DescriptionLocId="AI.LaunchCondition.RAM" IsPredefined="true" Builds="DefaultBuild"/>
+    <ROW Condition="Version9X OR VersionNT64 OR (VersionNT &gt;= 500 )" Description="[ProductName] cannot be installed on systems earlier than [WindowsTypeNT]" DescriptionLocId="AI.LaunchCondition.NoSpecificNT" IsPredefined="true" Builds="DefaultBuild"/>
+    <ROW Condition="VersionNT" Description="[ProductName] cannot be installed on [WindowsFamily9X]" DescriptionLocId="AI.LaunchCondition.No9X" IsPredefined="true" Builds="DefaultBuild"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiShortsComponent">
+    <ROW Shortcut="DAT.exe" Directory_="SHORTCUTDIR" Name="DAT.exe" Component_="DAT.exe" Target="[#DAT.exe]" Description="DAT.exe" Hotkey="0" IconIndex="0" ShowCmd="1" WkDir="APPDIR"/>
+    <ROW Shortcut="DAT.exe_1" Directory_="DesktopFolder" Name="DAT.exe" Component_="DAT.exe" Target="[#DAT.exe]" Description="DAT.exe" Hotkey="0" IconIndex="0" ShowCmd="1" WkDir="APPDIR"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiUpgradeComponent">
+    <ROW UpgradeCode="[|UpgradeCode]" VersionMax="[|ProductVersion]" Attributes="1025" ActionProperty="OLDPRODUCTS"/>
+    <ROW UpgradeCode="[|UpgradeCode]" VersionMin="[|ProductVersion]" Attributes="2" ActionProperty="AI_NEWERPRODUCTFOUND"/>
+  </COMPONENT>
+</DOCUMENT>
