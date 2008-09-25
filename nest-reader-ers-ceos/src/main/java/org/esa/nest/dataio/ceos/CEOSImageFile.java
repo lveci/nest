@@ -15,7 +15,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.6 $ $Date: 2008-09-19 16:51:03 $
+ * @version $Revision: 1.7 $ $Date: 2008-09-25 03:35:41 $
  */
 public abstract class CEOSImageFile {
 
@@ -112,7 +112,6 @@ public abstract class CEOSImageFile {
                                    ProgressMonitor pm) throws IOException, IllegalCeosFormatException
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
-        //ImageRecord imageRecord;
 
         int x = sourceOffsetX * 2;
 
@@ -126,16 +125,18 @@ public abstract class CEOSImageFile {
                 }
 
                 // Read source line
-                //imageRecord = getImageRecord(y);
+                //ImageRecord imageRecord = getImageRecord(y);
+                //_ceosReader.seek(imageRecord.getImageDataStart() + x);
                 _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
                 _ceosReader.readB2(srcLine);
 
                 // Copy source line into destination buffer
                 final int currentLineIndex = (y - sourceOffsetY) * destWidth;
-                if (oneOf2)
-                    copyLine1Of2(srcLine, destLine, sourceStepX);
-                else
-                    copyLine2Of2(srcLine, destLine, sourceStepX);
+                copyLine(srcLine, destLine, sourceStepX);
+                //if (oneOf2)
+                //    copyLine1Of2(srcLine, destLine, sourceStepX);
+                //else
+                //    copyLine2Of2(srcLine, destLine, sourceStepX);
 
                 System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
 

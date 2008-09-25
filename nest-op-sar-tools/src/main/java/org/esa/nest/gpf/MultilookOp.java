@@ -69,6 +69,7 @@ public class MultilookOp extends Operator {
 
     private MetadataElement absRoot;
     private String sampleType;
+    private boolean isDetected;
     private String missionType;
     private boolean srgrFlag;
     private int numAzimuthLooks;
@@ -116,9 +117,11 @@ public class MultilookOp extends Operator {
 
         if (sampleType.equals("DETECTED")) {
             sourceBand1 = sourceProduct.getBandAt(0);
+            isDetected = true;
         } else {
             sourceBand1 = sourceProduct.getBandAt(0);
             sourceBand2 = sourceProduct.getBandAt(1);
+            isDetected = false;
         }
     }
 
@@ -155,7 +158,7 @@ public class MultilookOp extends Operator {
 
         Tile sourceRaster1 = null;
         Tile sourceRaster2 = null;
-        if (sampleType.equals("DETECTED")) {
+        if (isDetected) {
             sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
         } else {
             sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
@@ -452,8 +455,10 @@ public class MultilookOp extends Operator {
             int tx0, int ty0, int tw, int th, Tile sourceRaster1, Tile sourceRaster2, Tile targetTile) {
 
         double meanValue;
-        for (int ty = ty0; ty < ty0 + th; ty++) {
-            for (int tx = tx0; tx < tx0 + tw; tx++) {
+        int maxy = ty0 + th;
+        int maxx = tx0 + tw;
+        for (int ty = ty0; ty < maxy; ty++) {
+            for (int tx = tx0; tx < maxx; tx++) {
                 meanValue = getMeanValue(tx, ty, sourceRaster1, sourceRaster2);
                 targetTile.setSample(tx, ty, meanValue);
             }
@@ -480,7 +485,7 @@ public class MultilookOp extends Operator {
         for (int y = yStart; y < yEnd; y++) {
             for (int x = xStart; x < xEnd; x++) {
 
-                if (sampleType.equals("DETECTED")) {
+                if (isDetected) {
                     double dn = sourceRaster1.getSampleDouble(x, y);
                     meanValue += dn*dn;
                 } else {

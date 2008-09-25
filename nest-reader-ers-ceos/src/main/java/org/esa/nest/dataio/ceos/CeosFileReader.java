@@ -160,7 +160,11 @@ public final class CeosFileReader {
                                                  n, bytesRead);
             throw new IllegalCeosFormatException(message, streamPosition);
         }
-        return new String(bytes);
+        String str = new String(bytes);
+        if(str.contains("\0"))
+            return str.replace("\0", " ");
+
+        return str;
     }
 
     public int[] readInArray(final int arraySize, final int intValLength) throws

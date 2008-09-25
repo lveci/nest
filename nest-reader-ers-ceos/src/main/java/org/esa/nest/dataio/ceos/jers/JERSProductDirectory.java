@@ -78,40 +78,25 @@ class JERSProductDirectory extends CEOSProductDirectory {
             for (final JERSImageFile imageFile : _imageFiles) {
 
                 if(isProductSLC) {
-                    String bandName = "i_" + index;
-                    Band bandI = createBand(bandName);
-                    product.addBand(bandI);
-                    bandImageFileMap.put(bandName, imageFile);
-                    bandName = "q_" + index;
-                    Band bandQ = createBand(bandName);
-                    product.addBand(bandQ);
-                    bandImageFileMap.put(bandName, imageFile);
-
+                    Band bandI = createBand(product, "i_" + index, "real", imageFile);
+                    Band bandQ = createBand(product, "q_" + index, "real", imageFile);
                     createVirtualIntensityBand(product, bandI, bandQ, "_"+index);
-                    ++index;
+                    createVirtualPhaseBand(product, bandI, bandQ, "_"+index);
                 } else {
-                    String bandName = "Amplitude_" + index;
-                    Band band = createBand(bandName);
-                    product.addBand(band);
-                    bandImageFileMap.put(bandName, imageFile);
+                    Band band = createBand(product, "Amplitude_" + index, "amplitude", imageFile);
                     createVirtualIntensityBand(product, band, "_"+index);
-                    ++index;
                 }
+                ++index;
             }
         } else {
             JERSImageFile imageFile = _imageFiles[0];
             if(isProductSLC) {
-                Band bandI = createBand("i");
-                product.addBand(bandI);
-                bandImageFileMap.put("i", imageFile);
-                Band bandQ = createBand("q");
-                product.addBand(bandQ);
-                bandImageFileMap.put("q", imageFile);
+                Band bandI = createBand(product, "i", "real", imageFile);
+                Band bandQ = createBand(product, "q", "imaginary", imageFile);
                 createVirtualIntensityBand(product, bandI, bandQ, "");
+                createVirtualPhaseBand(product, bandI, bandQ, "");
             } else {
-                Band band = createBand("Amplitude");
-                product.addBand(band);
-                bandImageFileMap.put("Amplitude", imageFile);
+                Band band = createBand(product, "Amplitude", "amplitude", imageFile);
                 createVirtualIntensityBand(product, band, "");
             }
         }
@@ -167,11 +152,13 @@ class JERSProductDirectory extends CEOSProductDirectory {
         _leaderFile = null;
     }
 
-    private Band createBand(String name) {
+    private Band createBand(Product product, String name, String unit, JERSImageFile imageFile) {
         final Band band = new Band(name, ProductData.TYPE_INT16,
                                    _sceneWidth, _sceneHeight);
 
-        band.setUnit(JERSImageFile.getGeophysicalUnit());
+        band.setUnit(unit);
+        product.addBand(band);
+        bandImageFileMap.put(name, imageFile);
 
       /*
         final int bandIndex = index;
@@ -193,7 +180,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
     private void addMetaData(final Product product) throws IOException,
                                                            IllegalCeosFormatException {
         final MetadataElement root = product.getMetadataRoot();
-        root.addElement(new MetadataElement("Abstracted Metadata"));
+        root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
 
         final MetadataElement leadMetadata = new MetadataElement("Leader");
         _leaderFile.addLeaderMetadata(leadMetadata);
@@ -262,19 +249,21 @@ class JERSProductDirectory extends CEOSProductDirectory {
                 mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));
 
         //sph
+
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass());
         AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
                 sceneRec.getAttributeString("Processing algorithm identifier"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.compression,
                 sceneRec.getAttributeString("Processor range compression designator"));
+
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
                 getPolarization(_leaderFile.getSceneRecord().getAttributeString("Sensor ID and mode of operation for this channel")));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
-                _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-pixel distance in output scene"));
+                mapProjRec.getAttributeDouble("Nominal inter-pixel distance in output scene"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
-                _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-line distance in output scene"));
+                mapProjRec.getAttributeDouble("Nominal inter-line distance in output scene"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
                 sceneRec.getAttributeDouble("Nominal number of looks processed in azimuth"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks,
@@ -283,7 +272,11 @@ class JERSProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type,
-                "UInt"+_imageFiles[0].getImageFileDescriptor().getAttributeInt("Number of bits per sample"));
+                ProductData.getTypeString(ProductData.TYPE_INT16));
+
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag,
+                isGroundRange());
     }
 
     private String getProcTime() {
@@ -298,6 +291,13 @@ class JERSProductDirectory extends CEOSProductDirectory {
         double heading = _leaderFile.getMapProjRecord().getAttributeDouble("Platform heading at nadir corresponding to scene centre");
         if(heading > 90) return "DESCENDING";
         else return "ASCENDING";
+    }
+
+    private int isGroundRange() {
+        String projDesc = _leaderFile.getMapProjRecord().getAttributeString("Map projection descriptor").toLowerCase();
+        if(projDesc.contains("slant"))
+            return 0;
+        return 1;
     }
 
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {

@@ -25,7 +25,7 @@ public class JERSConstants implements CEOSConstants {
     final static String MAP_PROJECTION_UTM = "YNNNN";
     final static String MAP_PROJECTION_PS = "NNNNY";
 
-    private final static String INDICATION_KEY = "001";
+    private final static String INDICATION_KEY = ".001";
     private final static int MINIMUM_FILES = 4;    // 4 image files + leader file + volume file + trailer file
 
     public String getVolumeFilePrefix() {
