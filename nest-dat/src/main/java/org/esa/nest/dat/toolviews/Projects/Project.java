@@ -19,6 +19,7 @@ import org.jdom.Element;
 import org.jdom.Attribute;
 
 import java.util.*;
+import java.util.Timer;
 import java.io.File;
 import java.io.IOException;
 
@@ -187,6 +188,21 @@ public class Project extends Observable {
                 BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, processedFolder.getPath().getAbsolutePath());
             VisatApp.getApp().updateState();
         }
+
+        // start refresh timer for any outside changes to project folder
+        startUpdateTimer();
+    }
+
+    private void startUpdateTimer() {
+
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+                public void run() {
+                    if(IsProjectOpen()) {
+                        refreshProjectTree();
+                    }
+                }
+            }, 5000, 1000*60);
     }
 
     private void addProductLink(Product product) {
@@ -513,5 +529,4 @@ public class Project extends Observable {
             //setSelectedProduct(product);
         }
     }
-
 }

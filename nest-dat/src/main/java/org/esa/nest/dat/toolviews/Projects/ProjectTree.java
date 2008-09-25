@@ -191,7 +191,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
             ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
             if (parentNode != null && parentFolder != null) {
                 ProjectFile file = (ProjectFile) menuContext;
-                final int status = VisatApp.getApp().showQuestionDialog("Are you sure you want to delete the product "
+                final int status = VisatApp.getApp().showQuestionDialog("Are you sure you want to delete "
                         + file.getFile().toString(), "");
                 if (status == JOptionPane.YES_OPTION)
                     project.removeFile(parentFolder, file.getFile());

@@ -42,7 +42,7 @@ public class CollocateOp extends Operator {
     private Product targetProduct;
 
     @Parameter(valueSet = {NEAREST_NEIGHBOUR, BILINEAR_INTERPOLATION, CUBIC_CONVOLUTION},
-               defaultValue = NEAREST_NEIGHBOUR, description = "The method to be used when resampling the slave grid onto the master grid.")
+               defaultValue = CUBIC_CONVOLUTION, description = "The method to be used when resampling the slave grid onto the master grid.")
     private String resamplingType;
 
     private transient Map<Band, RasterDataNode> sourceRasterMap;

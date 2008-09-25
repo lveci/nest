@@ -17,11 +17,12 @@ import java.util.Vector;
  * Date: Jun 5, 2008
  * To change this template use File | Settings | File Templates.
  */
-public class ProductSetDialog extends ModalDialog {
+public class ProductSetDialog extends ModelessDialog {
 
     private ProductSetReaderOpUI.FileModel fileModel;
     private JTextField nameField;
     ProductSet productSet;
+    JTable productSetTable;
     private boolean ok = false;
 
     public ProductSetDialog(String title, ProductSet prodSet) {
@@ -36,7 +37,7 @@ public class ProductSetDialog extends ModalDialog {
             fileModel.addFile(file);
         }
 
-        JComponent content =  ProductSetReaderOpUI.createComponent(fileModel);
+        JComponent content =  ProductSetReaderOpUI.createComponent(productSetTable, fileModel);
 
         final JPanel topPanel = new JPanel(new BorderLayout(4, 4));
         JLabel nameLabel = new JLabel("Name:");
