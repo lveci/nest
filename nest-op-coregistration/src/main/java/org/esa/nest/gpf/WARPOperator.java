@@ -66,10 +66,12 @@ public class WARPOperator extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(description = "The order of WARP polynomial function", interval = "[1, 3]", defaultValue = "2")
+    @Parameter(description = "The order of WARP polynomial function", interval = "[1, 3]", defaultValue = "2",
+                label="Warp Polynomial Order")
     private int warpPolynomialOrder;
 
-    @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR, BICUBIC, BICUBIC2}, defaultValue = BILINEAR)
+    @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR, BICUBIC, BICUBIC2}, defaultValue = BILINEAR,
+                label="Interpolation Method")
     private String interpolationMethod;
 
     private Product masterProduct;
