@@ -2,6 +2,7 @@ package org.esa.nest.gpf;
 
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
+import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.GridBagUtils;
 
@@ -53,6 +54,14 @@ public class MergeBandsOpUI extends BaseOperatorUI {
 
     public void updateParameters() {
         paramMap.put("productName", nameField.getText());
+
+        Object selectedValues[] = bandList.getSelectedValues();
+        String bandNames[] = new String[selectedValues.length];
+        for(int i=0; i<selectedValues.length; ++i) {
+            bandNames[i] = (String)selectedValues[i];
+        }
+
+        paramMap.put("selectedBandNames", bandNames);
     }
 
     private JComponent createPanel() {

@@ -1,5 +1,5 @@
 /*
- * $Id: MergeBandsOp.java,v 1.1 2008-09-25 21:26:07 lveci Exp $
+ * $Id: MergeBandsOp.java,v 1.2 2008-09-26 03:14:25 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -45,14 +45,14 @@ public class MergeBandsOp extends Operator {
 
     @SourceProducts
     private Product[] sourceProducts;
-
+    @TargetProduct
+    private Product targetProduct;
 
     @Parameter(defaultValue = "mergedProduct", description = "The name of the target product.")
     private String productName;
 
-    @TargetProduct
-    private Product targetProduct;
-
+    @Parameter(defaultValue = "none")
+    private String[] selectedBandNames;
 
     @Override
     public void initialize() throws OperatorException {
@@ -60,37 +60,41 @@ public class MergeBandsOp extends Operator {
         Product srcProduct = sourceProducts[0];
         final int sceneRasterWidth = srcProduct.getSceneRasterWidth();
         final int sceneRasterHeight = srcProduct.getSceneRasterHeight();
+
+        for(Product prod : sourceProducts) {
+            if(prod.getSceneRasterWidth() != sceneRasterWidth ||
+               prod.getSceneRasterHeight() != sceneRasterHeight)
+                throw new OperatorException("Source bands need to be coregistered");
+        }
+
         targetProduct = new Product(productName, srcProduct.getProductType(),
                 sceneRasterWidth, sceneRasterHeight);
 
         copyGeoCoding(srcProduct, targetProduct);
 
-     /*
-        Set<Product> allSrcProducts = new HashSet<Product>();
-        for (BandDesc bandDesc : bands) {
-            Product srcProduct = getSourceProduct(bandDesc.product);
-            if (StringUtils.isNotNullAndNotEmpty(bandDesc.name)) {
-                if (StringUtils.isNotNullAndNotEmpty(bandDesc.newName)) {
-                    copyBandWithFeatures(srcProduct, targetProduct, bandDesc.name, bandDesc.newName);
+        if(selectedBandNames != null) {
+
+          for(String name : selectedBandNames) {
+                if(name.contains("::")) {
+                    int index = name.indexOf("::");
+                    String bandName = name.substring(0, index);
+                    String productName = name.substring(index+2, name.length());
+                    Product srcProd = findSourceProduct(productName);
+                    if(srcProd != null)
+                        copyBandWithFeatures(srcProd, targetProduct, bandName);
                 } else {
-                    copyBandWithFeatures(srcProduct, targetProduct, bandDesc.name);
-                }
-                allSrcProducts.add(srcProduct);
-            } else if (StringUtils.isNotNullAndNotEmpty(bandDesc.nameExp)) {
-                Pattern pattern = Pattern.compile(bandDesc.nameExp);
-                for (String bandName : srcProduct.getBandNames()) {
-                    Matcher matcher = pattern.matcher(bandName);
-                    if (matcher.matches()) {
-                        copyBandWithFeatures(srcProduct, targetProduct, bandName);
-                        allSrcProducts.add(srcProduct);
-                    }
+                    copyBandWithFeatures(srcProduct, targetProduct, name);
                 }
             }
         }
+    }
 
-        for (Product srcProduct : allSrcProducts) {
-            ProductUtils.copyBitmaskDefsAndOverlays(srcProduct, targetProduct);
-        }   */
+    private Product findSourceProduct(String name) {
+        for(Product prod : sourceProducts) {
+            if(prod.getName().equals(name))
+                return prod;
+        }
+        return null;
     }
 
     /*
@@ -106,13 +110,11 @@ public class MergeBandsOp extends Operator {
         destinationProduct.setEndTime(sourceProduct.getEndTime());
     }
 
-    private void copyBandWithFeatures(Product srcProduct, Product outputProduct, String oldBandName, String newBandName) {
-        Band destBand = copyBandWithFeatures(srcProduct, outputProduct, oldBandName);
-        destBand.setName(newBandName);
-    }
-
     private Band copyBandWithFeatures(Product srcProduct, Product outputProduct, String bandName) {
-        Band destBand = ProductUtils.copyBand(bandName, srcProduct, outputProduct);
+
+        String newBandName = renameDuplicateBand(outputProduct, bandName, 1);
+
+        Band destBand = ProductUtils.copyBand(bandName, srcProduct, newBandName, outputProduct);
         Band srcBand = srcProduct.getBand(bandName);
         destBand.setSourceImage(srcBand.getSourceImage());
         if (srcBand.getFlagCoding() != null) {
@@ -130,6 +132,15 @@ public class MergeBandsOp extends Operator {
             destBand.setSampleCoding(outputProduct.getIndexCodingGroup().get(srcIndexCoding.getName()));
         }
         return destBand;
+    }
+
+    private String renameDuplicateBand(Product outputProduct, String bandName, int count) {
+        if(outputProduct.getBand(bandName) != null) {
+            ++count;
+            bandName += count;
+            bandName = renameDuplicateBand(outputProduct, bandName, count);
+        }
+        return bandName;
     }
 
     @Override
