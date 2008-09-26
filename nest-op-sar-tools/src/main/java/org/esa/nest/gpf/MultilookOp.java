@@ -32,6 +32,8 @@ import javax.media.jai.JAI;
 import javax.media.jai.InterpolationNearest;
 import java.awt.*;
 import java.awt.image.renderable.ParameterBlock;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /*
  * todo Incidence angle should all be obtained from the abstracted metadata, mission type should not be used.
@@ -55,10 +57,14 @@ import java.awt.image.renderable.ParameterBlock;
 @OperatorMetadata(alias="Multilook")
 public class MultilookOp extends Operator {
 
-    @SourceProduct
+    @SourceProduct(alias="source")
     private Product sourceProduct;
     @TargetProduct
     private Product targetProduct;
+
+    @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
+            sourceProductId="source", label="Source Bands")
+    String[] sourceBandNames;
 
     @Parameter(description = "The user defined multi-look factor", interval = "[2, *)", defaultValue = "2")
     private int multiLookFactor;
@@ -69,7 +75,6 @@ public class MultilookOp extends Operator {
 
     private MetadataElement absRoot;
     private String sampleType;
-    private boolean isDetected;
     private String missionType;
     private boolean srgrFlag;
     private int numAzimuthLooks;
@@ -78,9 +83,12 @@ public class MultilookOp extends Operator {
     private int rangeFactor;
     private int sourceImageWidth;
     private int sourceImageHeight;
+    private int targetImageWidth;
+    private int targetImageHeight;
     private double rangeSpacing;
     private double azimuthSpacing;
     private double incidenceAngleAtCentreRangePixel; // in degree
+    private HashMap<String, String[]> targetBandNameToSourceBandName;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -114,15 +122,6 @@ public class MultilookOp extends Operator {
         }
         computeRangeAzimuthMultiLookFactors();
         createTargetProduct();
-
-        if (sampleType.equals("DETECTED")) {
-            sourceBand1 = sourceProduct.getBandAt(0);
-            isDetected = true;
-        } else {
-            sourceBand1 = sourceProduct.getBandAt(0);
-            sourceBand2 = sourceProduct.getBandAt(1);
-            isDetected = false;
-        }
     }
 
     /**
@@ -156,16 +155,27 @@ public class MultilookOp extends Operator {
         System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
         System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
+        int dataIndicator = 0;
         Tile sourceRaster1 = null;
         Tile sourceRaster2 = null;
-        if (isDetected) {
+        String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
+        if (srcBandNames.length == 1) {
+            sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
             sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
+            if (sourceBand1.getUnit().contains("intensity")) {
+                dataIndicator = 0;
+            } else {
+                dataIndicator = 1;
+            }
         } else {
+            sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
+            sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
             sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
             sourceRaster2 = getSourceTile(sourceBand2, sourceTileRectangle, pm);
+            dataIndicator = 2;
         }
 
-        computeMultiLookImageUsingTimeDomainMethod(tx0, ty0, tw, th, sourceRaster1, sourceRaster2, targetTile);
+        computeMultiLookImageUsingTimeDomainMethod(tx0, ty0, tw, th, sourceRaster1, sourceRaster2, targetTile, dataIndicator);
     }
 
     /**
@@ -365,16 +375,15 @@ public class MultilookOp extends Operator {
      */
     void createTargetProduct() {
 
-        int targetImageWidth = sourceImageWidth / rangeFactor;
-        int targetImageHeight = sourceImageHeight / azimuthFactor;
+        targetImageWidth = sourceImageWidth / rangeFactor;
+        targetImageHeight = sourceImageHeight / azimuthFactor;
 
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),
                                     targetImageWidth,
                                     targetImageHeight);
 
-        targetBand = targetProduct.addBand("Multi-look", ProductData.TYPE_FLOAT32);
-        //targetProduct.setPreferredTileSize(targetImageWidth, 256);
+        addSelectedBands();
 
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
@@ -440,6 +449,76 @@ public class MultilookOp extends Operator {
                 AbstractMetadata.first_line_time, ProductData.createInstance(newFirstLineTime.substring(0,27)), false));        
     }
 
+    private void addSelectedBands() {
+
+        if (sourceBandNames == null || sourceBandNames.length == 0) {
+            Band[] bands = sourceProduct.getBands();
+            ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            for (Band band : bands) {
+                bandNameList.add(band.getName());
+            }
+            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
+        }
+
+        Band[] sourceBands = new Band[sourceBandNames.length];
+        for (int i = 0; i < sourceBandNames.length; i++) {
+            String sourceBandName = sourceBandNames[i];
+            Band sourceBand = sourceProduct.getBand(sourceBandName);
+            if (sourceBand == null) {
+                throw new OperatorException("Source band not found: " + sourceBandName);
+            }
+            sourceBands[i] = sourceBand;
+        }
+
+        String targetBandName;
+        targetBandNameToSourceBandName = new HashMap<String, String[]>();
+        int counter = 0;
+        for (int i = 0; i < sourceBands.length; i++) {
+
+            Band srcBand = sourceBands[i];
+            String unit = srcBand.getUnit();
+
+            if (unit != null && unit.contains("phase")) {
+
+                continue;
+
+            } else if (unit != null && unit.contains("imaginary")) {
+
+                throw new OperatorException("Real and imaginary bands should be selected in pairs");
+
+            } else if (unit != null && unit.contains("real")) {
+
+                if (i == sourceBands.length - 1) {
+                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
+                }
+                String nextUnit = sourceBands[i+1].getUnit();
+                if (nextUnit == null || !nextUnit.contains("imaginary")) {
+                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
+                }
+                String[] srcBandNames = new String[2];
+                srcBandNames[0] = srcBand.getName();
+                srcBandNames[1] = sourceBands[i+1].getName();
+                targetBandName = "intensity_iq" + counter;
+                targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                counter++;
+                i++;
+
+            } else {
+
+                String[] srcBandNames = {srcBand.getName()};
+                targetBandName = srcBand.getName();
+                targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+            }
+
+            Band targetBand = new Band(targetBandName,
+                                       ProductData.TYPE_FLOAT32,
+                                       targetImageWidth,
+                                       targetImageHeight);
+
+            targetProduct.addBand(targetBand);
+        }
+    }
+
     /**
      * Compute multi-looked image using time domain method.
      *
@@ -450,16 +529,17 @@ public class MultilookOp extends Operator {
      * @param sourceRaster1 The source raster for the 1st band.
      * @param sourceRaster2 The source raster for the 2nd band.
      * @param targetTile The current target tile associated with the target band to be computed.
+     * @param dataIndicator Integer indicating the unit of source data (0-intensity, 1-amplitude, 2-complex).
      */
     void computeMultiLookImageUsingTimeDomainMethod(
-            int tx0, int ty0, int tw, int th, Tile sourceRaster1, Tile sourceRaster2, Tile targetTile) {
+            int tx0, int ty0, int tw, int th, Tile sourceRaster1, Tile sourceRaster2, Tile targetTile, int dataIndicator) {
 
         double meanValue;
         int maxy = ty0 + th;
         int maxx = tx0 + tw;
         for (int ty = ty0; ty < maxy; ty++) {
             for (int tx = tx0; tx < maxx; tx++) {
-                meanValue = getMeanValue(tx, ty, sourceRaster1, sourceRaster2);
+                meanValue = getMeanValue(tx, ty, sourceRaster1, sourceRaster2, dataIndicator);
                 targetTile.setSample(tx, ty, meanValue);
             }
         }
@@ -472,9 +552,10 @@ public class MultilookOp extends Operator {
      * @param ty The y coordinate of a pixel in the current target tile.
      * @param sourceRaster1 The source raster for the 1st band.
      * @param sourceRaster2 The source raster for the 2nd band.
+     * @param dataIndicator Integer indicating the unit of source data (0-intensity, 1-amplitude, 2-complex).
      * @return The mean value.
      */
-    double getMeanValue(int tx, int ty, Tile sourceRaster1, Tile sourceRaster2) {
+    double getMeanValue(int tx, int ty, Tile sourceRaster1, Tile sourceRaster2, int dataIndicator) {
 
         int xStart = tx * rangeFactor;
         int yStart = ty * azimuthFactor;
@@ -485,7 +566,10 @@ public class MultilookOp extends Operator {
         for (int y = yStart; y < yEnd; y++) {
             for (int x = xStart; x < xEnd; x++) {
 
-                if (isDetected) {
+                if (dataIndicator == 0) { // intensity
+                    double dn2 = sourceRaster1.getSampleDouble(x, y);
+                    meanValue += dn2;
+                } else if (dataIndicator == 1) { // amplitude
                     double dn = sourceRaster1.getSampleDouble(x, y);
                     meanValue += dn*dn;
                 } else {
