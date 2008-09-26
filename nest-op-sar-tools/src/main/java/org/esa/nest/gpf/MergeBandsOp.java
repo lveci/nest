@@ -1,5 +1,5 @@
 /*
- * $Id: MergeBandsOp.java,v 1.2 2008-09-26 03:14:25 lveci Exp $
+ * $Id: MergeBandsOp.java,v 1.3 2008-09-26 04:14:01 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -72,8 +72,13 @@ public class MergeBandsOp extends Operator {
 
         copyGeoCoding(srcProduct, targetProduct);
 
-        if(selectedBandNames != null) {
-
+        if(selectedBandNames == null || selectedBandNames.length == 0) {
+            for(Product srcProd : sourceProducts) {
+                for(Band srcBand : srcProd.getBands()) {
+                    copyBandWithFeatures(srcProd, targetProduct, srcBand.getName());
+                }
+            }
+        } else {
           for(String name : selectedBandNames) {
                 if(name.contains("::")) {
                     int index = name.indexOf("::");
@@ -135,7 +140,9 @@ public class MergeBandsOp extends Operator {
     }
 
     private String renameDuplicateBand(Product outputProduct, String bandName, int count) {
-        if(outputProduct.getBand(bandName) != null) {
+        if(outputProduct.getBand(bandName) != null) {        
+            if(bandName.endsWith(""+count))
+                bandName = bandName.substring(0, bandName.lastIndexOf(""+count));
             ++count;
             bandName += count;
             bandName = renameDuplicateBand(outputProduct, bandName, count);

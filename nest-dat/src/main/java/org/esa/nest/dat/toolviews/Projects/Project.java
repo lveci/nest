@@ -200,9 +200,10 @@ public class Project extends Observable {
                 public void run() {
                     if(IsProjectOpen()) {
                         refreshProjectTree();
+                        notifyEvent(true);
                     }
                 }
-            }, 5000, 1000*60);
+            }, 5000, 1000*30);
     }
 
     private void addProductLink(Product product) {
