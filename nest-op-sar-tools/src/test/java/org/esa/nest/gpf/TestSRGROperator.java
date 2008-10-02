@@ -56,8 +56,8 @@ public class TestSRGROperator extends TestCase {
 
         // compare with expected outputs:
         float[] expectedValues = {1.0f, 3.0221484f, 5.0534487f, 7.0752897f, 9.097291f, 11.119023f, 13.130011f, 17.0f,
-        19.022148f, 21.053448f, 23.075289f, 25.09729f, 27.119024f, 29.13001f, 33.0f, 35.02215f, 37.053448f, 39.07529f,
-        41.09729f, 43.119022f, 45.13001f, 49.0f, 51.02215f, 53.053448f, 55.07529f, 57.09729f, 59.119022f, 61.13001f};
+        19.022148f, 21.053448f, 23.07529f, 25.09729f, 27.119024f, 29.13001f, 33.0f, 35.02215f, 37.053448f, 39.07529f,
+        41.09729f, 43.119022f, 45.130013f, 49.0f, 51.02215f, 53.053448f, 55.07529f, 57.09729f, 59.119022f, 61.130013f};
         assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
