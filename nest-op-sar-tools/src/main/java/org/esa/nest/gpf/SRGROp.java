@@ -447,9 +447,9 @@ public class SRGROp extends Operator {
         }
 
         for(Band srcBand : sourceBands) {
-//            if (srcBand.getUnit() != null && srcBand.getUnit().contains("Phase")) {
-//                continue;
-//            }
+            if (srcBand.getUnit() != null && srcBand.getUnit().contains("phase")) {
+                continue;
+            }
             Band targetBand = new Band(srcBand.getName(),
                                        ProductData.TYPE_FLOAT32,
                                        targetImageWidth,
@@ -502,9 +502,9 @@ public class SRGROp extends Operator {
 
             geoPos = geoCoding.getGeoPos(new PixelPos(pixelsBetweenPoints*(i+1), y0), null);
             geo2xyz(geoPos, xyz);
-            double pointToPointDistance = (float)Math.sqrt(Math.pow(xP0 - xyz[0], 2) +
-                                                           Math.pow(yP0 - xyz[1], 2) +
-                                                           Math.pow(zP0 - xyz[2], 2));
+            double pointToPointDistance = Math.sqrt(Math.pow(xP0 - xyz[0], 2) +
+                                                    Math.pow(yP0 - xyz[1], 2) +
+                                                    Math.pow(zP0 - xyz[2], 2));
 
             if (i == 0) {
                 groundRangeDistanceArray[i] = pointToPointDistance;
@@ -526,8 +526,8 @@ public class SRGROp extends Operator {
      */
     private static void geo2xyz(GeoPos geoPos, double xyz[]) {
 
-        double lat = (double)geoPos.lat * MathUtils.DTOR;
-        double lon = (double)geoPos.lon * MathUtils.DTOR;
+        double lat = ((double)geoPos.lat) * MathUtils.DTOR;
+        double lon = ((double)geoPos.lon) * MathUtils.DTOR;
 
         double sinLat = Math.sin(lat);
         double cosLat = Math.cos(lat);
