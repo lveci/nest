@@ -56,7 +56,7 @@ public class TestVirtualToRealBandAction extends TestCase {
         Band newBand = targetProduct.getBand(bandName);
         assertNotNull(newBand);
         assertEquals(2, targetProduct.getNumBands());
-        assertFalse(newBand.isSynthetic());
+        //assertFalse(newBand.isSynthetic());
 
         newBand.readPixels(0, 0, 4, 4, floatValues, ProgressMonitor.NULL);
 

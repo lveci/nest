@@ -59,10 +59,12 @@ public class VirtualToRealBandAction extends ExecCommand {
             targetBand.createCompatibleRasterData();
         } catch (OutOfMemoryError e) {
             VisatApp.getApp().showOutOfMemoryErrorDialog("The new band could not be created.");
+            targetProduct.removeBand(targetProduct.getBand(targetBand.getName()));
+            return;
         }
 
         final String expression = srcBand.getName();
-        targetBand.setSynthetic(false);
+        targetBand.setSynthetic(true);
 
         if(visatApp != null) {
             final ProgressMonitor pm = new DialogProgressMonitor(visatApp.getMainFrame(),
