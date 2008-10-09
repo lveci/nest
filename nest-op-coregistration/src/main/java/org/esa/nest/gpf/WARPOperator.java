@@ -31,6 +31,7 @@ import java.awt.image.*;
 import java.awt.image.renderable.ParameterBlock;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.ArrayList;
 import java.io.File;
 
 /**
@@ -66,6 +67,10 @@ public class WARPOperator extends Operator {
     @TargetProduct
     private Product targetProduct;
 
+    @Parameter(description = "The RMS threshold for eliminating invalid GCPs", interval = "(0, *)", defaultValue = "1.0",
+                label="RMS Threshold")
+    private float rmsThreshold;
+
     @Parameter(description = "The order of WARP polynomial function", interval = "[1, 3]", defaultValue = "2",
                 label="Warp Polynomial Order")
     private int warpPolynomialOrder;
@@ -80,9 +85,14 @@ public class WARPOperator extends Operator {
     private Band masterBand;
     private Band slaveBand;
 
-    private ProductNodeGroup<Pin> masterGcpGroup;
-    private ProductNodeGroup<Pin> slaveGcpGroup;
-    private ProductNodeGroup<Pin> targetGcpGroup;
+    private ProductNodeGroup<Pin> masterGCPGroup;
+    private ProductNodeGroup<Pin> slaveGCPGroup;
+    private ProductNodeGroup<Pin> targetGCPGroup;
+
+    private int numValidGCPs;
+    private float[] masterGCPCoords;
+    private float[] slaveGCPCoords;
+    private float[] rms;
 
     private WarpPolynomial warp;
     private Interpolation interp;
@@ -118,48 +128,30 @@ public class WARPOperator extends Operator {
         masterProduct = sourceProduct[0];
         slaveProduct = sourceProduct[1];
 
-        targetProduct = new Product(slaveProduct.getName(),
-                                    slaveProduct.getProductType(),
-                                    slaveProduct.getSceneRasterWidth(),
-                                    slaveProduct.getSceneRasterHeight());
-
         masterBand = masterProduct.getBandAt(0);
         slaveBand = slaveProduct.getBandAt(0);
 
-        targetProduct.addBand(slaveBand.getName(), ProductData.TYPE_FLOAT32);
-
-        masterGcpGroup = masterProduct.getGcpGroup();
-        slaveGcpGroup = slaveProduct.getGcpGroup();
-        targetGcpGroup = targetProduct.getGcpGroup();
-
-        // coregistrated image should have the same geo-coding as the master image
-        ProductUtils.copyGeoCoding(masterProduct, targetProduct);
-        ProductUtils.copyMetadata(masterProduct, targetProduct);
-        ProductUtils.copyTiePointGrids(masterProduct, targetProduct);
-        ProductUtils.copyFlagCodings(masterProduct, targetProduct);
-
-        // copy slave GCPs to target product
-        setTargetGCPs();
-
-        // compute warp polynomial
-        computeWARPPolynomial();
+        masterGCPGroup = masterProduct.getGcpGroup();
+        slaveGCPGroup = slaveProduct.getGcpGroup();
 
         // determine interpolation method for warp function
         if (interpolationMethod.equals(NEAREST_NEIGHBOR)) {
-//            interp = new InterpolationNearest();
             interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
         } else if (interpolationMethod.equals(BILINEAR)) {
-//            interp = new InterpolationBilinear();
             interp = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
         } else if (interpolationMethod.equals(BICUBIC)) {
-//            interp = new InterpolationBicubic(8);
             interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
         } else if (interpolationMethod.equals(BICUBIC2)) {
-//            interp = new InterpolationBicubic2(8);
             interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC_2);
         }
 
-        targetProduct.setPreferredTileSize(slaveProduct.getSceneRasterWidth(), 256);
+        computeWARPPolynomial(); // compute initial warp polynomial
+
+        eliminateGCPsBasedOnRMS();
+
+        computeWARPPolynomial(); // compute final warp polynomial
+
+        createTargetProduct();
     }
 
     /**
@@ -204,10 +196,11 @@ public class WARPOperator extends Operator {
      */
     void setTargetGCPs() {
 
-        targetGcpGroup.removeAll();
-        for(int i = 0; i < slaveGcpGroup.getNodeCount(); ++i) {
+        targetGCPGroup = targetProduct.getGcpGroup();
+        targetGCPGroup.removeAll();
 
-            Pin sPin = slaveGcpGroup.get(i);
+        for(int i = 0; i < slaveGCPGroup.getNodeCount(); ++i) {
+            Pin sPin = slaveGCPGroup.get(i);
             Pin tPin = new Pin(sPin.getName(),
                                sPin.getLabel(),
                                sPin.getDescription(),
@@ -215,7 +208,7 @@ public class WARPOperator extends Operator {
                                sPin.getGeoPos(),
                                sPin.getSymbol());
 
-            targetGcpGroup.add(tPin);
+            targetGCPGroup.add(tPin);
         }
     }
 
@@ -224,52 +217,52 @@ public class WARPOperator extends Operator {
      */
     void computeWARPPolynomial() {
 
-        int numValidGCPs = slaveGcpGroup.getNodeCount();
-        int pointsRequired = (warpPolynomialOrder + 2)*(warpPolynomialOrder + 1) / 2;
-        //System.out.println("numValidGCPs = " + numValidGCPs);
-        //System.out.println("warpPolynomialOrder = " + warpPolynomialOrder + ", pointsRequired = " + pointsRequired);
-        if (numValidGCPs < pointsRequired) {
+        getNumOfValidGCPs();
+
+        getMasterAndSlaveGCPCoordinates();
+
+        computeWARP();
+
+        computeRMS();
+
+        outputCoRegistrationInfo();
+    }
+
+    void getNumOfValidGCPs() {
+
+        numValidGCPs = slaveGCPGroup.getNodeCount();
+        if (numValidGCPs < (warpPolynomialOrder + 2)*(warpPolynomialOrder + 1) / 2) {
             throw new OperatorException("Not enough GCPs for creating WARP polynomial of order " + warpPolynomialOrder);
         }
+    }
 
-        float[] masterCoords = new float[2*numValidGCPs];
-        float[] slaveCoords = new float[2*numValidGCPs];
+    void getMasterAndSlaveGCPCoordinates() {
+
+        masterGCPCoords = new float[2*numValidGCPs];
+        slaveGCPCoords = new float[2*numValidGCPs];
 
         for(int i = 0; i < numValidGCPs; ++i) {
 
-            Pin sPin = slaveGcpGroup.get(i);
+            Pin sPin = slaveGCPGroup.get(i);
             PixelPos sGCPPos = sPin.getPixelPos();
             //System.out.println("WARP: slave gcp[" + i + "] = " + "(" + sGCPPos.x + "," + sGCPPos.y + ")");
 
-            PixelPos mGCPPos = masterGcpGroup.get(sPin.getName()).getPixelPos();
+            PixelPos mGCPPos = masterGCPGroup.get(sPin.getName()).getPixelPos();
             //System.out.println("WARP: master gcp[" + i + "] = " + "(" + mGCPPos.x + "," + mGCPPos.y + ")");
 
-            masterCoords[2*i] = mGCPPos.x;
-            masterCoords[2*i+1] = mGCPPos.y;
+            masterGCPCoords[2*i] = mGCPPos.x;
+            masterGCPCoords[2*i+1] = mGCPPos.y;
 
-            slaveCoords[2*i] = sGCPPos.x;
-            slaveCoords[2*i+1] = sGCPPos.y;
+            slaveGCPCoords[2*i] = sGCPPos.x;
+            slaveGCPCoords[2*i+1] = sGCPPos.y;
         }
+    }
 
-        /*
-        // First degree test setting:
-        int numValidGCPs = 6;
-        warpPolynomialOrder = 1;
-        float[] masterCoords = {-0.4326f, 1.1892f, -1.6656f, -0.0376f, 0.1253f, 0.3273f, 0.2877f, 0.1746f, -1.1465f, -0.1867f, 1.1909f, 0.7258f};
-        float[] slaveCoords = {0.9572f, 0.7922f, 0.4854f, 0.9595f, 0.8003f, 0.6557f, 0.1419f, 0.0357f, 0.4218f, 0.8491f, 0.9157f, 0.9340f};
+    void computeWARP() {
 
-        // Second degree test setting:
-        int numValidGCPs = 12;
-        warpPolynomialOrder = 2;
-        float[] masterCoords = {1.1908f, -2.1707f, -1.2025f, -0.0592f, -0.0198f, -1.0106f, -0.1567f, 0.6145f, -1.6041f, 0.5077f, 0.2573f, 1.6924f,
-                                -1.0565f, 0.5913f, 1.4151f, -0.6436f, -0.8051f, 0.3803f, 0.5287f, -1.0091f, 0.2193f, -0.0195f, -0.9219f, -0.0482f};
-        float[] slaveCoords = {0.7094f, 0.7513f, 0.7547f, 0.2551f, 0.2760f, 0.5060f, 0.6797f, 0.6991f, 0.6551f, 0.8909f, 0.1626f, 0.9593f,
-                               0.1190f, 0.5472f, 0.4984f, 0.1386f, 0.9597f, 0.1493f, 0.3404f, 0.2575f, 0.5853f, 0.8407f, 0.2238f, 0.2543f};
-        */
-
-        warp = WarpPolynomial.createWarp(slaveCoords, //source
+        warp = WarpPolynomial.createWarp(slaveGCPCoords, //source
                                          0,
-                                         masterCoords, // destination
+                                         masterGCPCoords, // destination
                                          0,
                                          2*numValidGCPs,
                                          1.0F,
@@ -277,7 +270,84 @@ public class WARPOperator extends Operator {
                                          1.0F,
                                          1.0F,
                                          warpPolynomialOrder);
+    }
 
+    void computeRMS() {
+
+        rms = new float[numValidGCPs];
+        PixelPos slavePos = new PixelPos(0.0f,0.0f);
+        for (int i = 0; i < rms.length; i++) {
+            getWarpedCoords(masterGCPCoords[2*i], masterGCPCoords[2*i+1], slavePos);
+            float dX = slavePos.x - slaveGCPCoords[2*i];
+            float dY = slavePos.y - slaveGCPCoords[2*i+1];
+            rms[i] = (float)Math.sqrt(dX*dX + dY*dY);
+        }
+    }
+
+    void eliminateGCPsBasedOnRMS() {
+
+        ArrayList pinList = new ArrayList();
+        for (int i = 0; i < rms.length; i++) {
+            if (rms[i] >= rmsThreshold) {
+                pinList.add(slaveGCPGroup.get(i));
+                //System.out.println("WARP: slave gcp[" + i + "] is eliminated");
+            }
+        }
+
+        for (int i = 0; i < pinList.size(); i++) {
+            slaveGCPGroup.remove((Pin)pinList.get(i));
+        }
+    }
+
+    void getWarpedCoords(float mX, float mY, PixelPos slavePos) {
+
+        float[] xCoeffs = warp.getXCoeffs();
+        float[] yCoeffs = warp.getYCoeffs();
+        if (xCoeffs.length != yCoeffs.length) {
+            throw new OperatorException("WARP has different number of coefficients for X and Y");
+        }
+
+        int numOfCoeffs = xCoeffs.length;
+        switch (warpPolynomialOrder) {
+            case 1:
+                if (numOfCoeffs != 3) {
+                    throw new OperatorException("Number of WARP coefficients do not match WARP degree");
+                }
+                slavePos.x = xCoeffs[0] + xCoeffs[1]*mX + xCoeffs[2]*mY;
+
+                slavePos.y = yCoeffs[0] + yCoeffs[1]*mX + yCoeffs[2]*mY;
+                break;
+
+            case 2:
+                if (numOfCoeffs != 6) {
+                    throw new OperatorException("Number of WARP coefficients do not match WARP degree");
+                }
+                slavePos.x = xCoeffs[0] + xCoeffs[1]*mX + xCoeffs[2]*mY +
+                             xCoeffs[3]*mX*mX + xCoeffs[4]*mX*mY + xCoeffs[5]*mY*mY;
+
+                slavePos.y = yCoeffs[0] + yCoeffs[1]*mX + yCoeffs[2]*mY +
+                             yCoeffs[3]*mX*mX + yCoeffs[4]*mX*mY + yCoeffs[5]*mY*mY;
+                break;
+
+            case 3:
+                if (numOfCoeffs != 10) {
+                    throw new OperatorException("Number of WARP coefficients do not match WARP degree");
+                }
+                slavePos.x = xCoeffs[0] + xCoeffs[1]*mX + xCoeffs[2]*mY +
+                             xCoeffs[3]*mX*mX + xCoeffs[4]*mX*mY + xCoeffs[5]*mY*mY +
+                             xCoeffs[6]*mX*mX*mX + xCoeffs[7]*mX*mX*mY + xCoeffs[8]*mX*mY*mY + xCoeffs[9]*mY*mY*mY;
+
+                slavePos.y = yCoeffs[0] + yCoeffs[1]*mX + yCoeffs[2]*mY +
+                             yCoeffs[3]*mX*mX + yCoeffs[4]*mX*mY + yCoeffs[5]*mY*mY +
+                             yCoeffs[6]*mX*mX*mX + yCoeffs[7]*mX*mX*mY + yCoeffs[8]*mX*mY*mY + yCoeffs[9]*mY*mY*mY;
+                break;
+
+            default:
+                throw new OperatorException("Incorrect WARP degree");
+        }
+    }
+
+    void outputCoRegistrationInfo() {
 
         System.out.println("WARP coefficients:");
         float[] xCoeffs = warp.getXCoeffs();
@@ -292,42 +362,67 @@ public class WARPOperator extends Operator {
             System.out.print(", ");
         }
         System.out.println();
+        System.out.println();
 
-        /*
-        float[][] coeffs = warp.getCoeffs();
-        for (int i = 0; i < coeffs.length; i++) {
-            for (int j = 0; j < coeffs[i].length; j++) {
-                System.out.print(coeffs[i][j]);
-                System.out.print(", ");
-            }
-            System.out.println();
+        System.out.println("No. |  Master GCP x   |  Master GCP y   |   Slave GCP x   |   Slave GCP y   |        RMS      |");
+        System.out.println("-----------------------------------------------------------------------------------------------");
+        for (int i = 0; i < rms.length; i++) {
+            System.out.format("%3d | %15.3f | %15.3f | %15.3f | %15.3f | %15.3f |\n",
+                              i+1, masterGCPCoords[2*i], masterGCPCoords[2*i+1],
+                              slaveGCPCoords[2*i], slaveGCPCoords[2*i+1], rms[i]);
         }
-        */
-        /*
-        // First degree test result:
-        // 0.4300   -0.0226    0.5040
-        // 0.5717   -0.1631    0.2410
+    }
 
-        // Second degree test result:
-        // 0.4875   -0.0327    0.0154   -0.0314   -0.2211   -0.0700
-        // 0.4322   -0.0527    0.1838   -0.0757   -0.1331    0.1121
+    void createTargetProduct() {
+
+        targetProduct = new Product(slaveProduct.getName(),
+                                    slaveProduct.getProductType(),
+                                    masterProduct.getSceneRasterWidth(),
+                                    masterProduct.getSceneRasterHeight());
+        /*
+        targetProduct = new Product(slaveProduct.getName(),
+                                    slaveProduct.getProductType(),
+                                    slaveProduct.getSceneRasterWidth(),
+                                    slaveProduct.getSceneRasterHeight());
+        */
+        targetProduct.addBand(slaveBand.getName(), ProductData.TYPE_FLOAT32);
+
+        // coregistrated image should have the same geo-coding as the master image
+        ProductUtils.copyGeoCoding(masterProduct, targetProduct);
+        ProductUtils.copyMetadata(masterProduct, targetProduct);
+        ProductUtils.copyTiePointGrids(masterProduct, targetProduct);
+        ProductUtils.copyFlagCodings(masterProduct, targetProduct);
+
+        setTargetGCPs(); // copy slave GCPs to target product
+        updateTargetMetadata();
+
+        targetProduct.setPreferredTileSize(slaveProduct.getSceneRasterWidth(), 256);
+    }
+
+    void updateTargetMetadata() {
+
+        // output RMS to Metadata
+        /*
+        MetadataElement elem = new MetadataElement("co-registrationInfo");
+        for (int i = 0; i < numValidGCPs; i++) {
+            elem.addAttribute(new MetadataAttribute("RMS_" + i,
+                    ProductData.createInstance(new float[]{rms[i]}), false));            
+        }
+        ProductUtils.addElementToHistory(targetProduct, elem);
         */
     }
 
     RenderedOp createWarpImage(RenderedImage srcImage) {
 
         // reformat source image by casting pixel values from ushort to float
-        /*
         ParameterBlock pb1 = new ParameterBlock();
         pb1.addSource(srcImage);
         pb1.add(DataBuffer.TYPE_FLOAT);
         RenderedImage srcImageFloat = JAI.create("format", pb1);
-        */
 
         // get warped image
         ParameterBlock pb2 = new ParameterBlock();
-//        pb2.addSource(srcImageFloat);
-        pb2.addSource(srcImage);
+        pb2.addSource(srcImageFloat);
         pb2.add(warp);
         pb2.add(interp);
         return JAI.create("warp", pb2);
