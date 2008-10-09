@@ -152,11 +152,11 @@ public class MultilookOp extends Operator {
         int h  = th * azimuthFactor;
         Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
 
-        System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
-        System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+        //System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
+        //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        int dataIndicator = 0;
-        Tile sourceRaster1 = null;
+        int dataIndicator;
+        Tile sourceRaster1;
         Tile sourceRaster2 = null;
         String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
         if (srcBandNames.length == 1) {
@@ -534,13 +534,16 @@ public class MultilookOp extends Operator {
     void computeMultiLookImageUsingTimeDomainMethod(
             int tx0, int ty0, int tw, int th, Tile sourceRaster1, Tile sourceRaster2, Tile targetTile, int dataIndicator) {
 
+        ProductData trgData = targetTile.getDataBuffer();
+
         double meanValue;
         int maxy = ty0 + th;
         int maxx = tx0 + tw;
         for (int ty = ty0; ty < maxy; ty++) {
             for (int tx = tx0; tx < maxx; tx++) {
+                int index = targetTile.getDataBufferIndex(tx, ty);
                 meanValue = getMeanValue(tx, ty, sourceRaster1, sourceRaster2, dataIndicator);
-                targetTile.setSample(tx, ty, meanValue);
+                trgData.setElemDoubleAt(index, meanValue);
             }
         }
     }
@@ -562,19 +565,23 @@ public class MultilookOp extends Operator {
         int xEnd = xStart + rangeFactor;
         int yEnd = yStart + azimuthFactor;
 
+        ProductData srcData1 = sourceRaster1.getDataBuffer();
+        ProductData srcData2 = sourceRaster2.getDataBuffer();
+
         double meanValue = 0.0;
         for (int y = yStart; y < yEnd; y++) {
             for (int x = xStart; x < xEnd; x++) {
 
+                int index = sourceRaster1.getDataBufferIndex(x, y);
+
                 if (dataIndicator == 0) { // intensity
-                    double dn2 = sourceRaster1.getSampleDouble(x, y);
-                    meanValue += dn2;
+                    meanValue += srcData1.getElemDoubleAt(index);
                 } else if (dataIndicator == 1) { // amplitude
-                    double dn = sourceRaster1.getSampleDouble(x, y);
+                    double dn = srcData1.getElemDoubleAt(index);
                     meanValue += dn*dn;
                 } else {
-                    double i = sourceRaster1.getSampleDouble(x, y);
-                    double q = sourceRaster2.getSampleDouble(x, y);
+                    double i = srcData1.getElemDoubleAt(index);
+                    double q = srcData2.getElemDoubleAt(index);
                     meanValue += i*i + q*q;
                 }
             }
