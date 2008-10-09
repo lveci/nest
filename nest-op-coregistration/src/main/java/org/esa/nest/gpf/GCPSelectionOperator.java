@@ -59,20 +59,20 @@ public class GCPSelectionOperator extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(valueSet = {"32","64","128","256","512","1024"}, defaultValue = "32", label="Window Width")
+    @Parameter(valueSet = {"32","64","128","256","512","1024"}, defaultValue = "64", label="Window Width")
     private String coarseRegistrationWindowWidth;
-    @Parameter(valueSet = {"32","64","128","256","512","1024"}, defaultValue = "32", label="Window Height")
+    @Parameter(valueSet = {"32","64","128","256","512","1024"}, defaultValue = "64", label="Window Height")
     private String coarseRegistrationWindowHeight;
     @Parameter(valueSet = {"2","4","8","16"}, defaultValue = "2", label="Row Interpolation Factor")
     private String rowInterpFactor;
     @Parameter(valueSet = {"2","4","8","16"}, defaultValue = "2", label="Column Interpolation Factor")
     private String columnInterpFactor;
-    @Parameter(description = "The maximum number of iterations", interval = "(1, 100]", defaultValue = "10",
+    @Parameter(description = "The maximum number of iterations", interval = "(1, 10]", defaultValue = "2",
                 label="Max Iterations")
     private int maxIteration;
-    @Parameter(description = "Threshold for quality parameter Q = max/mean", interval = "[1, *)", defaultValue = "1.1",
-                label="Quality Threshold")
-    private double qualityThreshold;
+//    @Parameter(description = "Threshold for quality parameter Q = max/mean", interval = "[1, *)", defaultValue = "1.1",
+//                label="Quality Threshold")
+//    private double qualityThreshold;
     @Parameter(description = "Tolerance in slave GCP validation check", interval = "(0, *)", defaultValue = "0.1",
                 label="GCP Tolerance")
     private double gcpTolerance;
@@ -200,6 +200,12 @@ public class GCPSelectionOperator extends Operator {
 
                 GeoPos mGCPGeoPos = mPin.getGeoPos();
                 PixelPos sGCPPixelPos = slaveBand.getGeoCoding().getPixelPos(mGCPGeoPos, null);
+
+                if (sGCPPixelPos.x < 0.0f || sGCPPixelPos.x >= slaveProduct.getSceneRasterWidth() ||
+                    sGCPPixelPos.y < 0.0f || sGCPPixelPos.y >= slaveProduct.getSceneRasterHeight()) {
+                    System.out.println("GCP(" + i + ") is invalid.");
+                    continue;
+                }
                 //System.out.println("master gcp[" + i + "] = " + "(" + mGCPPixelPos.x + "," + mGCPPixelPos.y + ")");
                 //System.out.println("init slave gcp[" + i + "] = " + "(" + sGCPPixelPos.x + "," + sGCPPixelPos.y + ")");
 
@@ -352,14 +358,16 @@ public class GCPSelectionOperator extends Operator {
 
         // check peak validity
         double mean = getMean(crossCorrelatedImage);
-        double max = getMax(crossCorrelatedImage);
         if (Double.compare(mean, 0.0) == 0) {
             return false;
         }
+        /*
+        double max = getMax(crossCorrelatedImage);
         double qualityParam = max / mean;
         if (qualityParam <= qualityThreshold) {
             return false;
         }
+        */
 
         // get peak shift: row and col
         int w = crossCorrelatedImage.getWidth();
