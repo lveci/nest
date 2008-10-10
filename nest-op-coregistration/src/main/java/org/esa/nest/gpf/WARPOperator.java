@@ -33,6 +33,9 @@ import java.util.Hashtable;
 import java.util.Vector;
 import java.util.ArrayList;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.DecimalFormat;
 
 /**
  * Image co-registration is fundamental for Interferometry SAR (InSAR) imaging and its applications, such as
@@ -370,6 +373,43 @@ public class WARPOperator extends Operator {
             System.out.format("%3d | %15.3f | %15.3f | %15.3f | %15.3f | %15.3f |\n",
                               i+1, masterGCPCoords[2*i], masterGCPCoords[2*i+1],
                               slaveGCPCoords[2*i], slaveGCPCoords[2*i+1], rms[i]);
+        }
+
+        FileWriter fw;
+        String str;
+        DecimalFormat myformat = new DecimalFormat("###########.000");
+        try {
+            fw = new FileWriter("residual.txt");
+            str = "WARP coefficients:" + "\r\n";
+            fw.write(str);
+            for (int i = 0; i < xCoeffs.length; i++) {
+                str = xCoeffs[i] + ", ";
+                fw.write(str);
+            }
+            str = " " + "\r\n";
+            fw.write(str);
+            for (int j = 0; j < yCoeffs.length; j++) {
+                str = yCoeffs[j] + ", ";
+                fw.write(str);
+            }
+            str = "\r\n";
+            fw.write(str);
+            str = "No. |  Master GCP x   |  Master GCP y   |   Slave GCP x   |   Slave GCP y   |        RMS      |" + "\r\n";
+            fw.write(str);
+            str = "-----------------------------------------------------------------------------------------------" + "\r\n";
+            fw.write(str);
+            for (int i = 0; i < rms.length; i++) {
+                str = i + " | " +
+                      myformat.format(masterGCPCoords[2*i]) + " | " +
+                      myformat.format(masterGCPCoords[2*i+1]) + " | " +
+                      myformat.format(slaveGCPCoords[2*i]) + " | " +
+                      myformat.format(slaveGCPCoords[2*i+1]) + " | " +
+                      myformat.format(rms[i]) + " | " + "\r\n";
+                fw.write(str);
+            }
+            fw.close();
+        } catch(IOException exc) {
+            throw new OperatorException(exc);
         }
     }
 
