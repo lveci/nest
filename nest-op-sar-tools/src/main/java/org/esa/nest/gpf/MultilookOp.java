@@ -55,7 +55,7 @@ import java.util.HashMap;
  */
 
 @OperatorMetadata(alias="Multilook")
-public class MultilookOp extends Operator {
+public final class MultilookOp extends Operator {
 
     @SourceProduct(alias="source")
     private Product sourceProduct;
@@ -566,7 +566,9 @@ public class MultilookOp extends Operator {
         int yEnd = yStart + azimuthFactor;
 
         ProductData srcData1 = sourceRaster1.getDataBuffer();
-        ProductData srcData2 = sourceRaster2.getDataBuffer();
+        ProductData srcData2 = null;
+        if(sourceRaster2 != null)
+            srcData2 = sourceRaster2.getDataBuffer();
 
         double meanValue = 0.0;
         for (int y = yStart; y < yEnd; y++) {
