@@ -295,9 +295,13 @@ public class CollocateOp extends Operator {
     private static class ResamplingRaster implements Resampling.Raster {
 
         private final Tile tile;
+        private final boolean usesNoData;
 
         public ResamplingRaster(Tile tile) {
             this.tile = tile;
+
+            final RasterDataNode rasterDataNode = tile.getRasterDataNode();
+            usesNoData = rasterDataNode.isNoDataValueUsed();
         }
 
         public final int getWidth() {
@@ -311,7 +315,7 @@ public class CollocateOp extends Operator {
         public final float getSample(int x, int y) throws Exception {
             final double sample = tile.getSampleDouble(x, y);
 
-            if (isNoDataValue(sample)) {
+            if (usesNoData && isNoDataValue(sample)) {
                 return Float.NaN;
             }
 

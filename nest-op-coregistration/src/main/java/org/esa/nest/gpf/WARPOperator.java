@@ -253,11 +253,12 @@ public class WARPOperator extends Operator {
             PixelPos mGCPPos = masterGCPGroup.get(sPin.getName()).getPixelPos();
             //System.out.println("WARP: master gcp[" + i + "] = " + "(" + mGCPPos.x + "," + mGCPPos.y + ")");
 
-            masterGCPCoords[2*i] = mGCPPos.x;
-            masterGCPCoords[2*i+1] = mGCPPos.y;
+            int j = 2 * i;
+            masterGCPCoords[j] = mGCPPos.x;
+            masterGCPCoords[j+1] = mGCPPos.y;
+            slaveGCPCoords[j] = sGCPPos.x;
+            slaveGCPCoords[j+1] = sGCPPos.y;
 
-            slaveGCPCoords[2*i] = sGCPPos.x;
-            slaveGCPCoords[2*i+1] = sGCPPos.y;
         }
     }
 
@@ -354,14 +355,14 @@ public class WARPOperator extends Operator {
 
         System.out.println("WARP coefficients:");
         float[] xCoeffs = warp.getXCoeffs();
-        for (int i = 0; i < xCoeffs.length; i++) {
-            System.out.print(xCoeffs[i]);
+        for (float xCoeff : xCoeffs) {
+            System.out.print(xCoeff);
             System.out.print(", ");
         }
         System.out.println();
         float[] yCoeffs = warp.getYCoeffs();
-        for (int j = 0; j < yCoeffs.length; j++) {
-            System.out.print(yCoeffs[j]);
+        for (float yCoeff : yCoeffs) {
+            System.out.print(yCoeff);
             System.out.print(", ");
         }
         System.out.println();

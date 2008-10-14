@@ -15,7 +15,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.7 $ $Date: 2008-09-25 03:35:41 $
+ * @version $Revision: 1.8 $ $Date: 2008-10-14 13:25:19 $
  */
 public abstract class CEOSImageFile {
 
@@ -66,7 +66,6 @@ public abstract class CEOSImageFile {
                                                                                             IllegalCeosFormatException
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
-        //ImageRecord imageRecord;
 
         int x = sourceOffsetX * 2;
 
@@ -80,7 +79,6 @@ public abstract class CEOSImageFile {
                 }
 
                 // Read source line
-                //imageRecord = getImageRecord(y);
                 _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
                 _ceosReader.readB2(srcLine);
 
@@ -103,7 +101,7 @@ public abstract class CEOSImageFile {
         }
     }
 
-    public void readBandRasterDataSLC(final int sourceOffsetX, final int sourceOffsetY,
+    public synchronized void readBandRasterDataSLC(final int sourceOffsetX, final int sourceOffsetY,
                                    final int sourceWidth, final int sourceHeight,
                                    final int sourceStepX, final int sourceStepY,
                                    final int destOffsetX, final int destOffsetY,
@@ -113,7 +111,7 @@ public abstract class CEOSImageFile {
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
 
-        int x = sourceOffsetX * 2;
+        int x = sourceOffsetX * 4;
 
         pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceOffsetY);
         try {
@@ -132,11 +130,10 @@ public abstract class CEOSImageFile {
 
                 // Copy source line into destination buffer
                 final int currentLineIndex = (y - sourceOffsetY) * destWidth;
-                copyLine(srcLine, destLine, sourceStepX);
-                //if (oneOf2)
-                //    copyLine1Of2(srcLine, destLine, sourceStepX);
-                //else
-                //    copyLine2Of2(srcLine, destLine, sourceStepX);
+                if (oneOf2)
+                    copyLine1Of2(srcLine, destLine, sourceStepX);
+                else
+                    copyLine2Of2(srcLine, destLine, sourceStepX);
 
                 System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
 
@@ -165,28 +162,28 @@ public abstract class CEOSImageFile {
     protected static void copyLine1Of2(final short[] srcLine, final short[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; x++, i += sourceStepX) {
-            destLine[x] = srcLine[2 * i];
+            destLine[x] = srcLine[i << 1];
         }
     }
 
     protected static void copyLine1Of2(final byte[] srcLine, final byte[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; x++, i += sourceStepX) {
-            destLine[x] = srcLine[2 * i];
+            destLine[x] = srcLine[i << 1];
         }
     }
 
     protected static void copyLine2Of2(final short[] srcLine, final short[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length-1; x++, i += sourceStepX) {
-            destLine[x] = srcLine[2 * i + 1];
+            destLine[x] = srcLine[(i << 1) + 1];
         }
     }
 
     protected static void copyLine2Of2(final byte[] srcLine, final byte[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length-1; x++, i += sourceStepX) {
-            destLine[x] = srcLine[2 * i + 1];
+            destLine[x] = srcLine[(i << 1) + 1];
         }
     }
 

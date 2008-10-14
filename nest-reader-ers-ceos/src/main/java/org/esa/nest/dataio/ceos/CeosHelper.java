@@ -69,8 +69,8 @@ public class CeosHelper {
     }
 
     public static String getProductName(final BaseRecord textRecord) {
-        String name = textRecord.getAttributeString("Scene identification").trim() + '-' +
-                textRecord.getAttributeString("Product type specifier").trim().replace("PRODUCT:", "");
+        String name = textRecord.getAttributeString("Product type specifier").trim().replace("PRODUCT:", "")
+                + '-' + textRecord.getAttributeString("Scene identification").trim();
         return StringUtils.createValidName(name, new char[]{'_', '-', '.'}, '_');
     }
 

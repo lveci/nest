@@ -66,7 +66,7 @@ public class TestVirtualToRealBandAction extends TestCase {
     private static Product createTestProduct(int w, int h) {
         Product testProduct = new Product("p", "t", w, h);
         Band band1 = testProduct.addBand("band1", ProductData.TYPE_INT32);
-        //band1.setSynthetic(true);
+        band1.setSynthetic(true);
         int[] intValues = new int[w * h];
         Arrays.fill(intValues, 2);
         band1.setData(ProductData.createInstance(intValues));
