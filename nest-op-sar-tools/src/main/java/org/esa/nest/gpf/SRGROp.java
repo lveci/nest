@@ -171,6 +171,9 @@ public class SRGROp extends Operator {
         Rectangle sourceTileRectangle = new Rectangle(x0, y0, sourceImageWidth, h);
         Tile sourceRaster = getSourceTile(sourceBand, sourceTileRectangle, pm);
 
+        ProductData trgData = targetTile.getDataBuffer();
+        ProductData srcData = sourceRaster.getDataBuffer();
+
         for (int x = x0; x < x0 + w; x++) {
 
             double srpp = getSlantRangePixelPosition(x);
@@ -183,14 +186,16 @@ public class SRGROp extends Operator {
                 x1 = x0 + sourceImageWidth - 2;
                 x2 = x0 + sourceImageWidth - 1;
             }
+            double a = x2 - srpp;
+            double b = srpp - x1;
 
             for (int y = y0; y < y0 + h; y++) {
 
-                double v1 = sourceRaster.getSampleDouble(x1, y);
-                double v2 = sourceRaster.getSampleDouble(x2, y);
-                double v = (x2 - srpp)*v1 + (srpp - x1)*v2;
+                double v1 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x1, y));
+                double v2 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x2, y));
+                double v = a*v1 + b*v2;
 
-                targetTile.setSample(x, y, v);
+                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), v);
             }
         }
     }

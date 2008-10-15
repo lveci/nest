@@ -240,7 +240,7 @@ public class GCPSelectionOperator extends Operator {
      * @param h The height of the tile.
      * @return flag Return true if the GCP is within the given tile, false otherwise.
      */
-    boolean checkGCPValidity(PixelPos pixelPos, int x0, int y0, int w, int h) {
+    static boolean checkGCPValidity(PixelPos pixelPos, int x0, int y0, int w, int h) {
 
         return (pixelPos.x >= x0 && pixelPos.x < x0 + w &&
                 pixelPos.y >= y0 && pixelPos.y < y0 + h);
@@ -297,13 +297,13 @@ public class GCPSelectionOperator extends Operator {
             throw new OperatorException(e);
         }
 
+        ProductData masterData = masterImagetteRaster.getDataBuffer();
+
         int k = 0;
         for (int j = 0; j < height; j++) {
             for (int i = 0; i < width; i++) {
-                int x = xul + i;
-                int y = yul + j;
-                mI[k] = masterImagetteRaster.getSampleDouble(x, y);
-                k++;
+
+                mI[k++] = masterData.getElemDoubleAt(masterImagetteRaster.getDataBufferIndex(xul + i, yul + j));
             }
         }
     }
@@ -324,27 +324,28 @@ public class GCPSelectionOperator extends Operator {
             throw new OperatorException(e);
         }
 
+        ProductData slaveData = slaveImagetteRaster.getDataBuffer();
+
         int k = 0;
         for (int j = 0; j < height; j++) {
             for (int i = 0; i < width; i++) {
                 float x = x0 - halfWidth + i + 1;
                 float y = y0 - halfHeight + j + 1;
-                sI[k] = getInterpolatedSampleValue(x, y);
-                k++;
+                sI[k++] = getInterpolatedSampleValue(slaveData, x, y);
             }
         }
     }
 
-    double getInterpolatedSampleValue(float x, float y) {
+    double getInterpolatedSampleValue(ProductData slaveData, float x, float y) {
 
         int x0 = (int)x;
         int x1 = x0 + 1;
         int y0 = (int)y;
         int y1 = y0 + 1;
-        double v00 = slaveImagetteRaster.getSampleDouble(x0, y0);
-        double v01 = slaveImagetteRaster.getSampleDouble(x0, y1);
-        double v10 = slaveImagetteRaster.getSampleDouble(x1, y0);
-        double v11 = slaveImagetteRaster.getSampleDouble(x1, y1);
+        double v00 = slaveData.getElemDoubleAt(slaveImagetteRaster.getDataBufferIndex(x0, y0));
+        double v01 = slaveData.getElemDoubleAt(slaveImagetteRaster.getDataBufferIndex(x0, y1));
+        double v10 = slaveData.getElemDoubleAt(slaveImagetteRaster.getDataBufferIndex(x1, y0));
+        double v11 = slaveData.getElemDoubleAt(slaveImagetteRaster.getDataBufferIndex(x1, y1));
         double wy = (double)(y - y0);
         double wx = (double)(x - x0);
 
@@ -453,9 +454,8 @@ public class GCPSelectionOperator extends Operator {
         ColorModel colourModel = PlanarImage.createColorModel(sampleModel);
         DataBufferDouble dataBuffer = new DataBufferDouble(array, array.length);
         WritableRaster raster = RasterFactory.createWritableRaster(sampleModel, dataBuffer, new Point(0,0));
-        BufferedImage image = new BufferedImage(colourModel, raster, false, new Hashtable());
 
-        return image;
+        return new BufferedImage(colourModel, raster, false, new Hashtable());
     }
 
     PlanarImage dft(RenderedImage image) {

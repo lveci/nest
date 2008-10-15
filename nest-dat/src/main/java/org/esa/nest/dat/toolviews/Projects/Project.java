@@ -356,6 +356,8 @@ public class Project extends Observable {
                     deleteDir(dataDir);
                     file.delete();
                 }
+            } else {
+                file.delete();
             }
         }
         notifyEvent(SAVE_PROJECT);
