@@ -19,7 +19,7 @@ public class MultilookOpAction extends AbstractVisatAction {
         VisatApp.getApp().showWarningDialog("Currently with simple multilooking, the detection for complex data is performed without any resampling");
         if (dialog == null) {
             dialog = new DefaultSingleTargetProductDialog("Multilook", getAppContext(), "Multilook", getHelpId());
-            dialog.setTargetProductNameSuffix("_multilooked");
+            dialog.setTargetProductNameSuffix("_ML");
         }
         dialog.show();
 

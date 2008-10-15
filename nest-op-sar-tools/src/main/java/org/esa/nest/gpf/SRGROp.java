@@ -478,10 +478,12 @@ public class SRGROp extends Operator {
         Matrix x = A.solve(b);
         warpPolynomialCoef = x.getColumnPackedCopy();
 
+        /*
         for (double c : warpPolynomialCoef) {
             System.out.print(c + ", ");
         }
         System.out.println();
+        */
     }
 
     /**
