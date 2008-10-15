@@ -1,5 +1,5 @@
 /*
- * $Id: MergeBandsOp.java,v 1.3 2008-09-26 04:14:01 lveci Exp $
+ * $Id: MergeBandsOp.java,v 1.4 2008-10-15 18:30:48 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -70,6 +70,7 @@ public class MergeBandsOp extends Operator {
         targetProduct = new Product(productName, srcProduct.getProductType(),
                 sceneRasterWidth, sceneRasterHeight);
 
+        ProductUtils.copyMetadata(srcProduct, targetProduct);
         copyGeoCoding(srcProduct, targetProduct);
 
         if(selectedBandNames == null || selectedBandNames.length == 0) {

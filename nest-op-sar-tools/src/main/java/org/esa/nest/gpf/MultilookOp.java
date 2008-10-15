@@ -162,7 +162,7 @@ public final class MultilookOp extends Operator {
         if (srcBandNames.length == 1) {
             sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
             sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
-            if (sourceBand1.getUnit().contains("intensity")) {
+            if (sourceBand1.getUnit() != null && sourceBand1.getUnit().contains("intensity")) {
                 dataIndicator = 0;
             } else {
                 dataIndicator = 1;
@@ -385,10 +385,12 @@ public final class MultilookOp extends Operator {
 
         addSelectedBands();
 
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
+        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+        targetProduct.setStartTime(sourceProduct.getStartTime());
+        targetProduct.setEndTime(sourceProduct.getEndTime());
 
         updateTargetProductMetadata();
     }

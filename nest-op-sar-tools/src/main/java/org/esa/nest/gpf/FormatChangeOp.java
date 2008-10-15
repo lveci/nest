@@ -89,10 +89,12 @@ public class FormatChangeOp extends Operator {
 
         targetProduct.setPreferredTileSize(JAI.getDefaultTileSize());
 
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
+        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+        targetProduct.setStartTime(sourceProduct.getStartTime());
+        targetProduct.setEndTime(sourceProduct.getEndTime());
 
         dataType = ProductData.getType(targetDataType);
 

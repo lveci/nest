@@ -420,19 +420,17 @@ public class WARPOperator extends Operator {
                                     slaveProduct.getProductType(),
                                     masterProduct.getSceneRasterWidth(),
                                     masterProduct.getSceneRasterHeight());
-        /*
-        targetProduct = new Product(slaveProduct.getName(),
-                                    slaveProduct.getProductType(),
-                                    slaveProduct.getSceneRasterWidth(),
-                                    slaveProduct.getSceneRasterHeight());
-        */
-        targetProduct.addBand(slaveBand.getName(), ProductData.TYPE_FLOAT32);
+
+        Band targetBand = targetProduct.addBand(slaveBand.getName(), ProductData.TYPE_FLOAT32);
+        targetBand.setUnit(slaveBand.getUnit());
 
         // coregistrated image should have the same geo-coding as the master image
-        ProductUtils.copyGeoCoding(masterProduct, targetProduct);
         ProductUtils.copyMetadata(masterProduct, targetProduct);
         ProductUtils.copyTiePointGrids(masterProduct, targetProduct);
         ProductUtils.copyFlagCodings(masterProduct, targetProduct);
+        ProductUtils.copyGeoCoding(masterProduct, targetProduct);
+        targetProduct.setStartTime(masterProduct.getStartTime());
+        targetProduct.setEndTime(masterProduct.getEndTime());
 
         setTargetGCPs(); // copy slave GCPs to target product
         updateTargetMetadata();

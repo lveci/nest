@@ -78,10 +78,12 @@ public class ComplexToIntensityOp extends Operator {
 
         targetProduct.setPreferredTileSize(JAI.getDefaultTileSize());
 
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
+        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+        targetProduct.setStartTime(sourceProduct.getStartTime());
+        targetProduct.setEndTime(sourceProduct.getEndTime());
     }
 
     private void addSelectedBands() {

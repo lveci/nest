@@ -129,7 +129,8 @@ public class GCPSelectionOperator extends Operator {
 
         masterBand = masterProduct.getBandAt(0);
         slaveBand = slaveProduct.getBandAt(0);
-        targetProduct.addBand(slaveBand.getName(), slaveBand.getDataType());
+        Band targetBand = targetProduct.addBand(slaveBand.getName(), slaveBand.getDataType());
+        targetBand.setUnit(slaveBand.getUnit());
 
         masterGcpGroup = masterProduct.getGcpGroup();
         if (masterGcpGroup.getNodeCount() <= 0) {
@@ -139,10 +140,12 @@ public class GCPSelectionOperator extends Operator {
         targetGcpGroup = targetProduct.getGcpGroup();
         targetGcpGroup.removeAll();
 
-        ProductUtils.copyGeoCoding(slaveProduct, targetProduct);
         ProductUtils.copyMetadata(slaveProduct, targetProduct);
         ProductUtils.copyTiePointGrids(slaveProduct, targetProduct);
         ProductUtils.copyFlagCodings(slaveProduct, targetProduct);
+        ProductUtils.copyGeoCoding(slaveProduct, targetProduct);
+        targetProduct.setStartTime(slaveProduct.getStartTime());
+        targetProduct.setEndTime(slaveProduct.getEndTime());
 
         width = Integer.parseInt(coarseRegistrationWindowWidth);
         height = Integer.parseInt(coarseRegistrationWindowHeight);

@@ -96,12 +96,14 @@ public class CollocateOp extends Operator {
 
         ProductUtils.copyMetadata(masterProduct, targetProduct);
         ProductUtils.copyTiePointGrids(masterProduct, targetProduct);
+        ProductUtils.copyFlagCodings(masterProduct, targetProduct);
         ProductUtils.copyGeoCoding(masterProduct, targetProduct);
+        targetProduct.setStartTime(masterProduct.getStartTime());
+        targetProduct.setEndTime(masterProduct.getEndTime());
 
         for (final Band sourceBand : slaveProduct.getBands()) {
-            String targetBandName = sourceBand.getName();
-            //final Band targetBand = targetProduct.addBand(targetBandName, sourceBand.getDataType());
-            final Band targetBand = targetProduct.addBand(targetBandName, ProductData.TYPE_FLOAT32);
+            final Band targetBand = targetProduct.addBand(sourceBand.getName(), ProductData.TYPE_FLOAT32);
+            targetBand.setUnit(sourceBand.getUnit());
             ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
             sourceRasterMap.put(targetBand, sourceBand);
         }
