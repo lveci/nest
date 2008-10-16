@@ -7,6 +7,7 @@ import org.esa.beam.visat.VisatApp;
 import org.esa.beam.util.Debug;
 
 import javax.swing.*;
+import javax.media.jai.JAI;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.swing.progress.DialogProgressMonitor;
@@ -41,6 +42,9 @@ public class VirtualToRealBandAction extends ExecCommand {
 
     protected static void convertVirtualToRealBand(final Product targetProduct, final Band srcBand,
                                                    final VisatApp visatApp) {
+
+        JAI.getDefaultInstance().getTileCache().flush();
+        System.gc();
 
         final Band targetBand = new Band("new_"+srcBand.getName(), srcBand.getDataType(),
                 srcBand.getSceneRasterWidth(), srcBand.getSceneRasterHeight());

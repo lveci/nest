@@ -429,7 +429,7 @@
             <helpId>selectTool</helpId>
         </action>
 
-        <action>
+        <!--action>
             <id>virtualToRealBand</id>
             <class>org.esa.nest.dat.actions.VirtualToRealBandAction</class>
             <parent>tools</parent>
@@ -437,7 +437,7 @@
             <shortDescr>Convert a virtual band to a real band</shortDescr>
             <context>band</context>
             <helpId>virtualToRealBand</helpId>
-        </action>
+        </action-->
 
     </extension>
 
