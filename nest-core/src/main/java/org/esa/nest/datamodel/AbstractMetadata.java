@@ -51,7 +51,6 @@ public class AbstractMetadata {
     public static final String mds1_tx_rx_polar = "mds1_tx_rx_polar";
     public static final String mds2_tx_rx_polar = "mds2_tx_rx_polar";
     public static final String algorithm = "algorithm";
-    public static final String compression = "compression";
     public static final String azimuth_looks = "azimuth_looks";
     public static final String range_looks = "range_looks";
     public static final String range_spacing = "range_spacing";
@@ -117,7 +116,6 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, mds1_tx_rx_polar, ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, mds2_tx_rx_polar, ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, algorithm, ProductData.TYPE_ASCII, "", "Processing algorithm");
-        addAbstractedAttribute(absRoot, compression, ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, azimuth_looks, ProductData.TYPE_INT32, "", "");
         addAbstractedAttribute(absRoot, range_looks, ProductData.TYPE_INT32, "", "");
         addAbstractedAttribute(absRoot, range_spacing, ProductData.TYPE_FLOAT64, "m", "Range sample spacing");

@@ -260,8 +260,6 @@ class ERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
                 sceneRec.getAttributeString("Processing algorithm identifier"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.compression,
-                sceneRec.getAttributeString("Processor range compression designator"));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
                 getPolarization(_leaderFile.getSceneRecord().getAttributeString("Sensor ID and mode of operation for this channel")));

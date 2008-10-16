@@ -1,16 +1,13 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
+<html><head>
 
 
     
     
   
   
-  <title>NEST Help - Speckle Filter</title>
-  <link rel="stylesheet" href="../style.css">
-</head>
-
+  
+  <title>NEST Help - Speckle Filter</title><link rel="stylesheet" href="../style.css"></head>
 
 <body>
 
@@ -45,9 +42,8 @@
 
 
 
-<br>
+<br>Coregistration is achieved in NEST using two graphs, one for GCP Selection and the other to apply the Warp.<br><br><h4>GCP Selection</h4><br>1. Create a new project for your coregistered data products.<br>2. Open a product as the master and produce a subset of it for the desired area of interest.<br>3. Open the master product and from the GCP Manager enter a grid of evenly spaced GCPs.<br>4. Open a list of slave products which overlap the master area of interest.<br>5. From the Graph menu open the GCP Selection graph.<br>6. Drag and drop the master product from the project tree to the source entry of the Reader<br>7. Drag and drop the slave products from the project tree to the ProductSet Reader<br>8. Press Process to begin the GCP Selection graph<br>9. You may open the resulting GCP selected slave images and view/modify the GCPs that have been shifted in the slaves.<br><h4>Warp Application</h4><br>1. From the Graph menu open the Warp graph<br>2. Drag and drop the master product from the project tree to the source entry of the Reader<br>3. Drag and drop the gcp selected slave products from the project tree to the ProductSet Reader<br>4. Press Process to begin the Warp graph<br><br><br><br>
 
 
 <hr>
-</body>
-</html>
+</body></html>
