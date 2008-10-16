@@ -1,5 +1,5 @@
 /*
- * $Id: MergeBandsOp.java,v 1.5 2008-10-16 17:07:03 lveci Exp $
+ * $Id: MergeBandsOp.java,v 1.6 2008-10-16 17:49:15 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -36,6 +36,8 @@ import org.esa.beam.util.StringUtils;
 import java.awt.image.RenderedImage;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,9 +55,12 @@ public class MergeBandsOp extends Operator {
 
     @Parameter(defaultValue = "none")
     private String[] selectedBandNames;
+    private transient Map<Band, Band> bandMap;
 
     @Override
     public void initialize() throws OperatorException {
+
+        bandMap = new HashMap<Band, Band>(5);
 
         Product srcProduct = sourceProducts[0];
         final int sceneRasterWidth = srcProduct.getSceneRasterWidth();
@@ -124,7 +129,9 @@ public class MergeBandsOp extends Operator {
 
         Band destBand = ProductUtils.copyBand(bandName, srcProduct, newBandName, outputProduct);
         Band srcBand = srcProduct.getBand(bandName);
-        destBand.setSourceImage(srcBand.getSourceImage());
+        bandMap.put(destBand, srcBand);
+        //destBand.setSourceImage(srcBand.getSourceImage());
+
         if (srcBand.getFlagCoding() != null) {
             FlagCoding srcFlagCoding = srcBand.getFlagCoding();
             if (!outputProduct.getFlagCodingGroup().contains(srcFlagCoding.getName())) {
@@ -155,7 +162,8 @@ public class MergeBandsOp extends Operator {
 
     @Override
     public void computeTile(Band band, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-        getLogger().warning("Wrongly configured ProductMerger operator. Tiles should not be requested.");
+
+        targetTile.setRawSamples(getSourceTile(bandMap.get(band), targetTile.getRectangle(), pm).getRawSamples());
     }
 
 
