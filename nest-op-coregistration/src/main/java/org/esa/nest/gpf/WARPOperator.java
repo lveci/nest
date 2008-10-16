@@ -148,11 +148,11 @@ public class WARPOperator extends Operator {
             interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC_2);
         }
 
-        computeWARPPolynomial(); // compute initial warp polynomial
+        computeWARPPolynomial(false); // compute initial warp polynomial
 
         eliminateGCPsBasedOnRMS();
 
-        computeWARPPolynomial(); // compute final warp polynomial
+        computeWARPPolynomial(true); // compute final warp polynomial
 
         createTargetProduct();
     }
@@ -218,7 +218,7 @@ public class WARPOperator extends Operator {
     /**
      * Compute WARP polynomial function using master and slave GCP pairs.
      */
-    void computeWARPPolynomial() {
+    void computeWARPPolynomial(boolean appendFlag) {
 
         getNumOfValidGCPs();
 
@@ -228,14 +228,16 @@ public class WARPOperator extends Operator {
 
         computeRMS();
 
-        outputCoRegistrationInfo();
+        outputCoRegistrationInfo(appendFlag);
     }
 
     void getNumOfValidGCPs() {
 
         numValidGCPs = slaveGCPGroup.getNodeCount();
-        if (numValidGCPs < (warpPolynomialOrder + 2)*(warpPolynomialOrder + 1) / 2) {
-            throw new OperatorException("Not enough GCPs for creating WARP polynomial of order " + warpPolynomialOrder);
+        int requiredGCPs = (warpPolynomialOrder + 2)*(warpPolynomialOrder + 1) / 2;
+        if (numValidGCPs < requiredGCPs) {
+            throw new OperatorException("Order " + warpPolynomialOrder + " requires " + requiredGCPs +
+                    " GCPs, valid GCPs are " + numValidGCPs + ", try a larger RMS threshold.");
         }
     }
 
@@ -351,7 +353,7 @@ public class WARPOperator extends Operator {
         }
     }
 
-    void outputCoRegistrationInfo() {
+    void outputCoRegistrationInfo(boolean appendFlag) {
 
         System.out.println("WARP coefficients:");
         float[] xCoeffs = warp.getXCoeffs();
@@ -378,9 +380,12 @@ public class WARPOperator extends Operator {
 
         FileWriter fw;
         String str;
-        DecimalFormat myformat = new DecimalFormat("###########.000");
+        String fileName = slaveProduct.getName() + "_residual.txt";
+        DecimalFormat myformat = new DecimalFormat("##########0.000");
         try {
-            fw = new FileWriter("residual.txt");
+            fw = new FileWriter(fileName, appendFlag);
+            str = " " + "\r\n";
+            fw.write(str);
             str = "WARP coefficients:" + "\r\n";
             fw.write(str);
             for (int i = 0; i < xCoeffs.length; i++) {
@@ -394,6 +399,12 @@ public class WARPOperator extends Operator {
                 fw.write(str);
             }
             str = "\r\n";
+            fw.write(str);
+            if (appendFlag) {
+                str = "Final Valid GCPs: \r\n";
+            } else {
+                str = "Initial Valid GCPs: \r\n";
+            }
             fw.write(str);
             str = "No. |  Master GCP x   |  Master GCP y   |   Slave GCP x   |   Slave GCP y   |        RMS      |" + "\r\n";
             fw.write(str);
