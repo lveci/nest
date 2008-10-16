@@ -1,5 +1,5 @@
 /*
- * $Id: MergeBandsOp.java,v 1.4 2008-10-15 18:30:48 lveci Exp $
+ * $Id: MergeBandsOp.java,v 1.5 2008-10-16 17:07:03 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -93,6 +93,8 @@ public class MergeBandsOp extends Operator {
                 }
             }
         }
+
+        targetProduct.setPreferredTileSize(sceneRasterWidth, 128);
     }
 
     private Product findSourceProduct(String name) {

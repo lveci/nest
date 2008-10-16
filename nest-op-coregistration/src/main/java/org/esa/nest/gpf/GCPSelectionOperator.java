@@ -334,21 +334,21 @@ public class GCPSelectionOperator extends Operator {
             for (int i = 0; i < width; i++) {
                 float x = x0 - halfWidth + i + 1;
                 float y = y0 - halfHeight + j + 1;
-                sI[k++] = getInterpolatedSampleValue(slaveData, x, y);
+                sI[k++] = getInterpolatedSampleValue(slaveImagetteRaster, slaveData, x, y);
             }
         }
     }
 
-    double getInterpolatedSampleValue(ProductData slaveData, float x, float y) {
+    static double getInterpolatedSampleValue(Tile slaveRaster, ProductData slaveData, float x, float y) {
 
         int x0 = (int)x;
         int x1 = x0 + 1;
         int y0 = (int)y;
         int y1 = y0 + 1;
-        double v00 = slaveData.getElemDoubleAt(slaveImagetteRaster.getDataBufferIndex(x0, y0));
-        double v01 = slaveData.getElemDoubleAt(slaveImagetteRaster.getDataBufferIndex(x0, y1));
-        double v10 = slaveData.getElemDoubleAt(slaveImagetteRaster.getDataBufferIndex(x1, y0));
-        double v11 = slaveData.getElemDoubleAt(slaveImagetteRaster.getDataBufferIndex(x1, y1));
+        double v00 = slaveData.getElemDoubleAt(slaveRaster.getDataBufferIndex(x0, y0));
+        double v01 = slaveData.getElemDoubleAt(slaveRaster.getDataBufferIndex(x0, y1));
+        double v10 = slaveData.getElemDoubleAt(slaveRaster.getDataBufferIndex(x1, y0));
+        double v11 = slaveData.getElemDoubleAt(slaveRaster.getDataBufferIndex(x1, y1));
         double wy = (double)(y - y0);
         double wx = (double)(x - x0);
 
@@ -417,13 +417,13 @@ public class GCPSelectionOperator extends Operator {
     PlanarImage computeCrossCorrelatedImage() {
 
         // get master imagette spectrum
-        RenderedImage masterImage = createRenderedImage(mI);
+        RenderedImage masterImage = createRenderedImage(mI, width, height);
         PlanarImage masterSpectrum = dft(masterImage);
         //System.out.println("Master spectrum:");
         //outputComplexImage(masterSpectrum);
 
         // get slave imagette spectrum
-        RenderedImage slaveImage = createRenderedImage(sI);
+        RenderedImage slaveImage = createRenderedImage(sI, width, height);
         PlanarImage slaveSpectrum = dft(slaveImage);
         //System.out.println("Slave spectrum:");
         //outputComplexImage(slaveSpectrum);
@@ -450,10 +450,10 @@ public class GCPSelectionOperator extends Operator {
         return magnitude(correlatedImage);
     }
 
-    RenderedImage createRenderedImage(double[] array) {
+    static RenderedImage createRenderedImage(double[] array, int w, int h) {
 
         // create rendered image with demension being width by height
-        SampleModel sampleModel = RasterFactory.createBandedSampleModel(DataBuffer.TYPE_DOUBLE, width, height, 1);
+        SampleModel sampleModel = RasterFactory.createBandedSampleModel(DataBuffer.TYPE_DOUBLE, w, h, 1);
         ColorModel colourModel = PlanarImage.createColorModel(sampleModel);
         DataBufferDouble dataBuffer = new DataBufferDouble(array, array.length);
         WritableRaster raster = RasterFactory.createWritableRaster(sampleModel, dataBuffer, new Point(0,0));
@@ -461,7 +461,7 @@ public class GCPSelectionOperator extends Operator {
         return new BufferedImage(colourModel, raster, false, new Hashtable());
     }
 
-    PlanarImage dft(RenderedImage image) {
+    static PlanarImage dft(RenderedImage image) {
 
         ParameterBlock pb = new ParameterBlock();
         pb.addSource(image);
@@ -470,7 +470,7 @@ public class GCPSelectionOperator extends Operator {
         return JAI.create("dft", pb, null);
     }
 
-    PlanarImage idft(RenderedImage image) {
+    static PlanarImage idft(RenderedImage image) {
 
         ParameterBlock pb = new ParameterBlock();
         pb.addSource(image);
@@ -479,14 +479,14 @@ public class GCPSelectionOperator extends Operator {
         return JAI.create("idft", pb, null);
     }
 
-    PlanarImage conjugate(PlanarImage image) {
+    static PlanarImage conjugate(PlanarImage image) {
 
         ParameterBlock pb = new ParameterBlock();
         pb.addSource(image);
         return JAI.create("conjugate", pb, null);
     }
 
-    PlanarImage multiplyComplex(PlanarImage image1, PlanarImage image2){
+    static PlanarImage multiplyComplex(PlanarImage image1, PlanarImage image2){
 
         ParameterBlock pb = new ParameterBlock();
         pb.addSource(image1);
@@ -547,14 +547,14 @@ public class GCPSelectionOperator extends Operator {
         return shiftedZeroPaddedImage;
     }
 
-    PlanarImage magnitude(PlanarImage image) {
+    static PlanarImage magnitude(PlanarImage image) {
 
         ParameterBlock pb = new ParameterBlock();
         pb.addSource(image);
         return JAI.create("magnitude", pb, null);
     }
 
-    double getMean(RenderedImage image) {
+    static double getMean(RenderedImage image) {
 
         ParameterBlock pb = new ParameterBlock();
         pb.addSource(image);
@@ -569,7 +569,7 @@ public class GCPSelectionOperator extends Operator {
         return mean[0];
     }
 
-    double getMax(RenderedImage image) {
+    static double getMax(RenderedImage image) {
 
         ParameterBlock pb = new ParameterBlock();
         pb.addSource(image);
@@ -581,12 +581,11 @@ public class GCPSelectionOperator extends Operator {
         RenderedOp op = JAI.create("extrema", pb);
         // Retrieve both the maximum and minimum pixel value
         double[][] extrema = (double[][]) op.getProperty("extrema");
-        double max = extrema[1][0];
-        return max;
+        return extrema[1][0];
     }
 
     // This function is for debugging only.
-    void outputRealImage(double[] I) {
+    static void outputRealImage(double[] I) {
 
         for (double v:I) {
             System.out.print(v + ",");
@@ -595,7 +594,7 @@ public class GCPSelectionOperator extends Operator {
     }
 
     // This function is for debugging only.
-    void outputComplexImage(PlanarImage image) {
+    static void outputComplexImage(PlanarImage image) {
 
         int w = image.getWidth();
         int h = image.getHeight();
