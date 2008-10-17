@@ -2,11 +2,9 @@ package org.esa.nest.dat;
 
 import junit.framework.TestCase;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.nest.util.TestOperator;
+import org.esa.nest.gpf.TestOperator;
 
 import java.util.Arrays;
-
-import com.bc.ceres.core.ProgressMonitor;
 
 /**
  * Unit test for LinearTodB.

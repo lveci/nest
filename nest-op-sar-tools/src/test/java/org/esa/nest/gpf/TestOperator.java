@@ -1,14 +1,28 @@
-package org.esa.nest.util;
+package org.esa.nest.gpf;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.nest.datamodel.AbstractMetadata;
+import junit.framework.TestCase;
 
 /**
  * Utilities for Operator unit tests
  */
-public class TestOperator {
+public class TestOperator extends TestCase {
 
+    public TestOperator(String name) {
+        super(name);
+    }
+
+    public void setUp() throws Exception {
+    }
+
+    public void tearDown() throws Exception {
+    }
+
+    public void testOp() {
+        
+    }
 
     public static Product createProduct(String type, int w, int h) {
         Product product = new Product("name", type, w, h);

@@ -5,7 +5,7 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.util.TestOperator;
+import org.esa.nest.gpf.TestOperator;
 
 import java.util.Arrays;
 
