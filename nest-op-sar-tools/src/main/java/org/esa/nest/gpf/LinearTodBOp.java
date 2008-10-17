@@ -33,7 +33,8 @@ import java.util.ArrayList;
  * Convert-Linear-dB
  */
 
-@OperatorMetadata(alias="Convert-Linear-dB", description="Converts Linear to dB or dB to Linear")
+@OperatorMetadata(alias="Convert-Linear-dB", description="Converts Linear to dB or dB to Linear",
+                    internal=true)
 public class LinearTodBOp extends Operator {
 
     @SourceProduct(alias="source")

@@ -118,14 +118,14 @@
             <helpId>AmplitudeToIntensityOp</helpId>
         </action>
 
-        <action>
+        <!--action>
             <id>ComplexToIntensityOp</id>
             <class>org.esa.nest.dat.ComplexToIntensityOpAction</class>
             <text>Complex to Intensity</text>
             <shortDescr>Change the data from Complex to Intensity</shortDescr>
             <parent>DatasetConversion</parent>
             <helpId>ComplexToIntensityOp</helpId>
-        </action>
+        </action-->
 
         <action>
             <id>LinearTodBOp</id>
@@ -133,6 +133,7 @@
             <text>Linear to/from dB</text>
             <shortDescr>Change the data Linear to/from dB</shortDescr>
             <parent>DatasetConversion</parent>
+            <context>band</context>
             <helpId>LinearTodBOp</helpId>
         </action>
 

@@ -1,9 +1,6 @@
 package org.esa.nest.util;
 
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.TiePointGrid;
-import org.esa.beam.framework.datamodel.TiePointGeoCoding;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.nest.datamodel.AbstractMetadata;
 
@@ -58,6 +55,10 @@ public class TestOperator {
         if(product.getStartTime() == null)
             throwErr("startTime is null");
 
+        for(Band b : product.getBands()) {
+            if(b.getUnit() == null || b.getUnit().isEmpty())
+                throwErr("band " + b.getName() + " has null unit");    
+        }
     }
 
     public static void attributeEquals(MetadataElement elem, String name, double trueValue) throws Exception {

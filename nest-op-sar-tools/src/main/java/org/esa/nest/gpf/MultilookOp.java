@@ -516,7 +516,8 @@ public final class MultilookOp extends Operator {
                                        ProductData.TYPE_FLOAT32,
                                        targetImageWidth,
                                        targetImageHeight);
-
+            targetBand.setUnit("intensity");
+            
             targetProduct.addBand(targetBand);
         }
     }
