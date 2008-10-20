@@ -17,7 +17,7 @@
 
     <extension point="beam-ui:helpSets">
         <helpSet>
-            <id>nest-help</id>
+            <id>beam-help</id>
             <path>doc/help/nest.hs</path>
         </helpSet>
     </extension>

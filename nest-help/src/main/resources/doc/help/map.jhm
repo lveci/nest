@@ -42,6 +42,7 @@
 	<mapID target="ImportAlosPalsar" url="visat/ImportAlosPalsar.html"/>
 	<mapID target="ImportAlosAVNIR2" url="visat/ImportAVNIR2.html"/>
 	<mapID target="ImportAlosPRISM" url="visat/ImportPRISM.html"/>
+	<mapID target="ImportGeoTIFF" url="visat/ImportGeoTIFF.html"/>
 	<mapID target="ImportImageIO" url="visat/ImportImageIO.html"/>
     <mapID target="importGETASSE30" url="visat/GETASSE30ElevationModel.html"/>
 	<mapID target="importACE" url="visat/ImportACE.html"/>
