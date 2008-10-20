@@ -109,14 +109,14 @@
             <helpId>FormatChangeOp</helpId>
         </action>
 
-        <action>
+        <!--action>
             <id>AmplitudeToIntensityOp</id>
             <class>org.esa.nest.dat.AmplitudeToIntensityOpAction</class>
             <text>Amplitude to/from Intensity</text>
             <shortDescr>Change the data Amplitude to/from Intensity</shortDescr>
             <parent>DatasetConversion</parent>
             <helpId>AmplitudeToIntensityOp</helpId>
-        </action>
+        </action-->
 
         <!--action>
             <id>ComplexToIntensityOp</id>

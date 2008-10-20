@@ -33,7 +33,7 @@ import java.util.ArrayList;
  * Convert-Amplitude-Intensity
  */
 
-@OperatorMetadata(alias="Convert-Amplitude-Intensity",
+@OperatorMetadata(alias="Convert-Amplitude-Intensity", internal=true,
                 description="Converts Amplitude to Intensity or Intensity to Amplitude")
 public class AmplitudeToIntensityOp extends Operator {
 
