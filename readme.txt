@@ -1,4 +1,4 @@
-About NEST Version 1A
+About NEST Version 1C
 
 The Next ESA SAR Toolbox (NEST) will be used for reading, post-processing, analyzing and visualizing the large archive of data from present and planned ESA SAR missions including Sentinel-1, as well as third party SAR-data from JERS SAR, ALOS PALSAR, TerraSAR-X and Radarsat-2. NEST will help the remote sensing community by handling ESA SAR products and complimenting existing commercial packages.
 
@@ -27,31 +27,39 @@ Building NEST from the source
 * Install JAI Image I/O JDK & JRE 
 2. Add $JAVA_HOME/bin, $MAVEN_HOME/bin and $SVN_HOME/bin to your PATH.
 
-3. Download nest-1B-maven-dep.zip, the 3rd-party JARs required by NEST.
-4. Copy 3rd-party JARs into your Maven repository, which is by default ~/.m2/repository.
-5. Download the NEST source code and unpack into $MY_PROJECTS/nest.
-6. Cd into $MY_PROJECTS/nest
+3. Download the NEST source code and unpack into $MY_PROJECTS/nest.
+4. Copy 3rd-party folder found in nest-developer-tools\maven-dependencies into your Maven repository, which is by default ~/.m2/repository.
+5. Cd into $MY_PROJECTS/nest
 6. Build NEST from source: Type mvn compile or mvn package
 7. Open project in the your IDE. IntelliJ IDEA users:
-* Build IDEA project files for NEST: Type mvn idea:idea 
-* In IDEA, go to the IDEA Main Menu/File/Open Project and simply open the created project file $MY_PROJECTS/nest/nest.ipr 
+
+    * Build IDEA project files for NEST: Type mvn idea:idea
+    * In IDEA, go to the IDEA Main Menu/File/Open Project and simply open the created project file $MY_PROJECTS/nest/nest.ipr
+
 8. Open project in the your IDE. Eclipse users:
-* Build IDEA project files for NEST: Type mvn eclipse:eclipse 
-* Make sure that M2_REPO classpath variable is set: 
+
+    * Build IDEA project files for NEST: Type mvn eclipse:eclipse
+    * Make sure that M2_REPO classpath variable is set:
+
         1. Open Window/Preferences..., then select Java/Build Path/Classpath Variables
         2. Select New... and add variable M2_REPO
         3. Select Folder... and choose the location of your Maven local repository, e.g ~/.m2/repository
 
-* Click Main Menu/File/Import 
-* Select General/Existing Project into Workspace 
-* Select Root Directory $MY_PROJECTS/nest 
-* Click Finish 
+
+    * Click Main Menu/File/Import
+    * Select General/Existing Project into Workspace
+    * Select Root Directory $MY_PROJECTS/nest
+    * Click Finish
+
 
 9. Use the following configuration to run DAT:
-* Main class: com.bc.ceres.launcher.Launcher 
-* VM parameters: -Xmx1024M -Dceres.context=nest 
-* Program parameters: none 
-* Working directory: $MY_PROJECTS/nest/beam 
-* Use classpath of module (project in Eclipse): nest-bootstrap 
+
+    * Main class: com.bc.ceres.launcher.Launcher
+    * VM parameters: -Xmx1024M -Dceres.context=nest
+    * Program parameters: none
+    * Working directory: $MY_PROJECTS/nest/beam
+    * Use classpath of module (project in Eclipse): nest-bootstrap
+
+
 Enjoy!
 
