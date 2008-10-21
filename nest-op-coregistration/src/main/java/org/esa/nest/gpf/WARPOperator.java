@@ -23,6 +23,7 @@ import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.*;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
+import org.esa.nest.util.DatUtils;
 
 import javax.media.jai.*;
 import javax.media.jai.operator.DFTDescriptor;
@@ -283,9 +284,10 @@ public class WARPOperator extends Operator {
         rms = new float[numValidGCPs];
         PixelPos slavePos = new PixelPos(0.0f,0.0f);
         for (int i = 0; i < rms.length; i++) {
-            getWarpedCoords(masterGCPCoords[2*i], masterGCPCoords[2*i+1], slavePos);
-            float dX = slavePos.x - slaveGCPCoords[2*i];
-            float dY = slavePos.y - slaveGCPCoords[2*i+1];
+            int i2=2*i;
+            getWarpedCoords(masterGCPCoords[i2], masterGCPCoords[i2+1], slavePos);
+            float dX = slavePos.x - slaveGCPCoords[i2];
+            float dY = slavePos.y - slaveGCPCoords[i2+1];
             rms[i] = (float)Math.sqrt(dX*dX + dY*dY);
         }
     }
@@ -300,8 +302,8 @@ public class WARPOperator extends Operator {
             }
         }
 
-        for (int i = 0; i < pinList.size(); i++) {
-            slaveGCPGroup.remove((Pin)pinList.get(i));
+        for (Object aPinList : pinList) {
+            slaveGCPGroup.remove((Pin) aPinList);
         }
     }
 
@@ -383,19 +385,23 @@ public class WARPOperator extends Operator {
         String fileName = slaveProduct.getName() + "_residual.txt";
         DecimalFormat myformat = new DecimalFormat("##########0.000");
         try {
+            File appUserDir = new File(DatUtils.getApplicationUserDir(false).getAbsolutePath() + File.separator + "log");
+            if(appUserDir.exists())
+                fileName = appUserDir.toString() + File.separator + fileName;
+
             fw = new FileWriter(fileName, appendFlag);
             str = " " + "\r\n";
             fw.write(str);
             str = "WARP coefficients:" + "\r\n";
             fw.write(str);
-            for (int i = 0; i < xCoeffs.length; i++) {
-                str = xCoeffs[i] + ", ";
+            for (float xCoeff : xCoeffs) {
+                str = xCoeff + ", ";
                 fw.write(str);
             }
             str = " " + "\r\n";
             fw.write(str);
-            for (int j = 0; j < yCoeffs.length; j++) {
-                str = yCoeffs[j] + ", ";
+            for (float yCoeff : yCoeffs) {
+                str = yCoeff + ", ";
                 fw.write(str);
             }
             str = "\r\n";
