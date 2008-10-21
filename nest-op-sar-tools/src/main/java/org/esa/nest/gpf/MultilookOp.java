@@ -66,11 +66,10 @@ public final class MultilookOp extends Operator {
             sourceProductId="source", label="Source Bands")
     String[] sourceBandNames;
 
-    @Parameter(description = "The user defined multi-look factor", interval = "[2, *)", defaultValue = "2")
+    @Parameter(description = "The user defined multi-look factor", interval = "[2, *)", defaultValue = "2",
+                label="Multi-look Factor")
     private int multiLookFactor;
 
-    private Band sourceBand1;
-    private Band sourceBand2;
     private Band targetBand;
 
     private MetadataElement absRoot;
@@ -159,6 +158,7 @@ public final class MultilookOp extends Operator {
         Tile sourceRaster1;
         Tile sourceRaster2 = null;
         String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
+        Band sourceBand1;
         if (srcBandNames.length == 1) {
             sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
             sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
@@ -169,7 +169,7 @@ public final class MultilookOp extends Operator {
             }
         } else {
             sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
-            sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
+            Band sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
             sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
             sourceRaster2 = getSourceTile(sourceBand2, sourceTileRectangle, pm);
             dataIndicator = 2;

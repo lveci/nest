@@ -31,6 +31,8 @@ import java.awt.image.*;
 import java.awt.image.DataBufferDouble;
 import java.awt.image.renderable.ParameterBlock;
 import java.util.Hashtable;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Image co-registration is fundamental for Interferometry SAR (InSAR) imaging and its applications, such as
@@ -58,6 +60,10 @@ public class GCPSelectionOperator extends Operator {
     private Product[] sourceProduct;
     @TargetProduct
     private Product targetProduct;
+
+    @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
+            sourceProductId="sourceProduct", label="Source Bands")
+    String[] sourceBandNames;
 
     @Parameter(valueSet = {"32","64","128","256","512","1024"}, defaultValue = "64", label="Window Width")
     private String coarseRegistrationWindowWidth;
@@ -127,10 +133,7 @@ public class GCPSelectionOperator extends Operator {
                                     slaveProduct.getSceneRasterWidth(),
                                     slaveProduct.getSceneRasterHeight());
 
-        masterBand = masterProduct.getBandAt(0);
-        slaveBand = slaveProduct.getBandAt(0);
-        Band targetBand = targetProduct.addBand(slaveBand.getName(), slaveBand.getDataType());
-        targetBand.setUnit(slaveBand.getUnit());
+        addSelectedBands();
 
         masterGcpGroup = masterProduct.getGcpGroup();
         if (masterGcpGroup.getNodeCount() <= 0) {
@@ -152,7 +155,37 @@ public class GCPSelectionOperator extends Operator {
         rowUpSamplingFactor = Integer.parseInt(rowInterpFactor);
         colUpSamplingFactor = Integer.parseInt(columnInterpFactor);
 
-        targetProduct.setPreferredTileSize(slaveProduct.getSceneRasterWidth(), 256);
+        targetProduct.setPreferredTileSize(slaveProduct.getSceneRasterWidth(), 50);  // 256
+    }
+
+    private void addSelectedBands() throws OperatorException {
+
+        if (sourceBandNames == null || sourceBandNames.length == 0) {
+            masterBand = masterProduct.getBandAt(0);
+            slaveBand = slaveProduct.getBandAt(0);
+        } else {
+            int masterBandCnt = 0;
+            int slaveBandCnt = 0;
+            for(String name : sourceBandNames) {
+                if(name.contains("::")) {
+                    int index = name.indexOf("::");
+                    String bandName = name.substring(0, index);
+                    String productName = name.substring(index+2, name.length());
+                    if(productName.equals(masterProduct.getName())) {
+                        masterBand = masterProduct.getBand(bandName);
+                        masterBandCnt++;
+                    } else if(productName.equals(slaveProduct.getName())) {
+                        slaveBand = slaveProduct.getBand(bandName);
+                        slaveBandCnt++;
+                    }
+                }
+            }
+            if(slaveBandCnt != 1 && masterBandCnt != 1)
+                throw new OperatorException("GCP Selection: Please select one master band and one slave band");
+        }
+
+        Band targetBand = targetProduct.addBand(slaveBand.getName(), slaveBand.getDataType());
+        targetBand.setUnit(slaveBand.getUnit());
     }
 
     /**

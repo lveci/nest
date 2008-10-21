@@ -85,15 +85,6 @@ public class CollocateOp extends Operator {
                                     masterProduct.getSceneRasterWidth(),
                                     masterProduct.getSceneRasterHeight());
 
-        final ProductData.UTC utc1 = masterProduct.getStartTime();
-        if (utc1 != null) {
-            targetProduct.setStartTime(new ProductData.UTC(utc1.getMJD()));
-        }
-        final ProductData.UTC utc2 = masterProduct.getEndTime();
-        if (utc2 != null) {
-            targetProduct.setEndTime(new ProductData.UTC(utc2.getMJD()));
-        }
-
         ProductUtils.copyMetadata(masterProduct, targetProduct);
         ProductUtils.copyTiePointGrids(masterProduct, targetProduct);
         ProductUtils.copyFlagCodings(masterProduct, targetProduct);
@@ -140,6 +131,8 @@ public class CollocateOp extends Operator {
 
             for (final Band targetBand : targetProduct.getBands()) {
                 checkForCancelation(pm);
+                //System.out.println("collocatingTileStack band "+ targetBand.getName());
+
                 final RasterDataNode sourceRaster = sourceRasterMap.get(targetBand);
                 final Tile targetTile = targetTileMap.get(targetBand);
 
@@ -159,6 +152,7 @@ public class CollocateOp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         final RasterDataNode sourceRaster = sourceRasterMap.get(targetBand);
+        //System.out.println("collocatingTile band "+ targetBand.getName());
 
         if (sourceRaster.getProduct() == slaveProduct) {
             final PixelPos[] sourcePixelPositions = ProductUtils.computeSourcePixelCoordinates(
