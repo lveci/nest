@@ -84,7 +84,7 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, PRODUCT_TYPE, ProductData.TYPE_ASCII, "", "Product Type");
         addAbstractedAttribute(absRoot, SPH_DESCRIPTOR, ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, MISSION, ProductData.TYPE_ASCII, "", "");
-        addAbstractedAttribute(absRoot, PROC_TIME, ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, PROC_TIME, ProductData.TYPE_UTC, "", "");
         addAbstractedAttribute(absRoot, ProcessingSystemIdentifier, ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, CYCLE, ProductData.TYPE_INT32, "", "");
         addAbstractedAttribute(absRoot, REL_ORBIT, ProductData.TYPE_INT32, "", "");

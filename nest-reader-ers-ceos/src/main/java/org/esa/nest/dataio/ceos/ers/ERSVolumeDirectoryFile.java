@@ -40,6 +40,10 @@ class ERSVolumeDirectoryFile {
         return _textRecord;
     }
 
+    public BaseRecord getVolumeDescriptorRecord() {
+        return _volumeDescriptorRecord;
+    }
+
     public static String getLeaderFileName() {
         return "LEA_01.001";
     }
