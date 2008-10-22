@@ -174,8 +174,18 @@ public class GCPSelectionOperator extends Operator {
                     if(productName.equals(masterProduct.getName())) {
                         masterBand = masterProduct.getBand(bandName);
                         masterBandCnt++;
-                    } else if(productName.equals(slaveProduct.getName())) {
+                    } else {
                         slaveBand = slaveProduct.getBand(bandName);
+                        if(slaveBand == null && masterBand != null) {
+                            // didn't find same band name so look for same unit
+                            for(Band b : slaveProduct.getBands()) {
+                                if(b.getUnit().equals(masterBand.getUnit())) {
+                                    slaveBand = b;
+                                    break;
+                                }
+                            }
+
+                        }
                         slaveBandCnt++;
                     }
                 }

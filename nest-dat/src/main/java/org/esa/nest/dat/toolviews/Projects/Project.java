@@ -8,8 +8,10 @@ import org.esa.nest.dat.DatContext;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.dialogs.PromptDialog;
 import org.esa.beam.framework.ui.product.ProductTreeListener;
+import org.esa.beam.framework.ui.product.ProductSubsetDialog;
 import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.framework.ui.ModelessDialog;
+import org.esa.beam.framework.ui.NewProductDialog;
 import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataio.ProductReader;
@@ -277,6 +279,63 @@ public class Project extends Observable {
         }
     }
 
+    public static void openSubset(ProjectSubFolder parentFolder, File prodFile) {
+        ProductReader reader = ProductIO.getProductReaderForFile(prodFile);
+        if (reader != null) {
+
+                try {
+                    final Product product = reader.readProductNodes(prodFile, null);
+
+                    Product subsetProduct = getProductSubset(product);
+                    if(subsetProduct != null)
+                        VisatApp.getApp().getProductManager().addProduct(subsetProduct);
+                } catch(Exception e) {
+                    VisatApp.getApp().showErrorDialog(e.getMessage());
+                }
+        }
+    }
+
+    public void importSubset(ProjectSubFolder parentFolder, File prodFile) {
+        ProductReader reader = ProductIO.getProductReaderForFile(prodFile);
+        if (reader != null) {
+                ProjectSubFolder importedFolder = projectSubFolders.findFolder("Imported Products");
+                try {
+                    final Product product = reader.readProductNodes(prodFile, null);
+
+                    Product subsetProduct = getProductSubset(product);
+                    if(subsetProduct != null) {
+                        final File destFile = new File(importedFolder.getPath(), subsetProduct.getName());
+                        writeProduct(subsetProduct, destFile);
+                    }
+                } catch(Exception e) {
+                    VisatApp.getApp().showErrorDialog(e.getMessage());
+                }
+        }
+    }
+
+    private static Product getProductSubset(Product product) {
+        if (product != null) {
+            JFrame mainFrame = VisatApp.getApp().getMainFrame();
+            ProductSubsetDialog productSubsetDialog = new ProductSubsetDialog(mainFrame, product);
+            if (productSubsetDialog.show() == ProductSubsetDialog.ID_OK) {
+                ProductNodeList<Product> products = new ProductNodeList<Product>();
+                products.add(product);
+                NewProductDialog newProductDialog = new NewProductDialog(mainFrame, products, 0, true);
+                newProductDialog.setSubsetDef(productSubsetDialog.getProductSubsetDef());
+                if (newProductDialog.show() == NewProductDialog.ID_OK) {
+                    Product subsetProduct = newProductDialog.getResultProduct();
+                    if (subsetProduct == null || newProductDialog.getException() != null) {
+                        VisatApp.getApp().showErrorDialog("The product subset could not be created:\n" +
+                                newProductDialog.getException().getMessage());
+                    } else {
+                        return subsetProduct;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public void importFile(ProjectSubFolder parentFolder, File prodFile) {
         if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.PRODUCT) {
 
@@ -287,30 +346,33 @@ public class Project extends Observable {
                 try {
                     final Product product = reader.readProductNodes(prodFile, null);
                     if(product != null) {
-
                         final File destFile = new File(importedFolder.getPath(), product.getName());
-                        final SwingWorker worker = new SwingWorker() {
-
-                            @Override
-                            protected Object doInBackground() throws Exception {
-                                VisatApp.getApp().writeProduct(product, destFile, "BEAM-DIMAP");
-                                return null;
-                            }
-
-                            @Override
-                            public void done() {
-                                refreshProjectTree();
-                                notifyEvent(SAVE_PROJECT);
-                            }
-                        };
-                        worker.execute();
-
+                        writeProduct(product, destFile);
                     }
                 } catch(Exception e) {
                     VisatApp.getApp().showErrorDialog(e.getMessage());
                 }
             }
         }
+    }
+
+    private void writeProduct(final Product product, final File destFile) {
+
+        final SwingWorker worker = new SwingWorker() {
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                VisatApp.getApp().writeProduct(product, destFile, "BEAM-DIMAP");
+                return null;
+            }
+
+            @Override
+            public void done() {
+                refreshProjectTree();
+                notifyEvent(SAVE_PROJECT);
+            }
+        };
+        worker.execute();
     }
 
     public void ImportFileList(File[] productFilesToOpen) {

@@ -130,17 +130,22 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                 createMenuItem(popup, "New Graph...");
             } else if(folder.getFolderType() == ProjectSubFolder.FolderType.PRODUCT) {
                 addSeparator(popup);
-                createMenuItem(popup, "Import Dataset");
+                createMenuItem(popup, "Import Datasets");
             }
         } else if (context instanceof ProjectFile) {
             createMenuItem(popup, "Open");
-            createMenuItem(popup, "Remove");
 
             DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
             ProjectSubFolder folder = (ProjectSubFolder)parentNode.getUserObject();
+            if(folder.getFolderType() == ProjectSubFolder.FolderType.PRODUCT) {
+                createMenuItem(popup, "Open Subset");    
+            }
             if(!folder.isPhysical()) {
                 createMenuItem(popup, "Import as DIMAP");
+                createMenuItem(popup, "Import Subset as DIMAP");
             }
+
+            createMenuItem(popup, "Remove");
         } 
 
         return popup;
@@ -200,11 +205,19 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
             ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
             ProjectFile file = (ProjectFile) menuContext;
             Project.openFile(parentFolder, file.getFile());
+        } else if(e.getActionCommand().equals("Open Subset")) {
+            ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
+            ProjectFile file = (ProjectFile) menuContext;
+            Project.openSubset(parentFolder, file.getFile());
         } else if(e.getActionCommand().equals("Import as DIMAP")) {
             ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
             ProjectFile file = (ProjectFile) menuContext;
             project.importFile(parentFolder, file.getFile());
-        } else if(e.getActionCommand().equals("Import Dataset")) {
+        } else if(e.getActionCommand().equals("Import Subset as DIMAP")) {
+            ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
+            ProjectFile file = (ProjectFile) menuContext;
+            project.importSubset(parentFolder, file.getFile());
+        } else if(e.getActionCommand().equals("Import Datasets")) {
             ImportBrowserVPI.getInstance().ShowImportBrowser();
         } else if(e.getActionCommand().equals("Clear")) {
             ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
