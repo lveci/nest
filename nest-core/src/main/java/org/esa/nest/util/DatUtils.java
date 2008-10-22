@@ -66,6 +66,24 @@ public class DatUtils {
         return new FileInputStream(filename);
     }
 
+    public static InputStream getResourceAsStream(final String filename, Class theClass) throws IOException {
+        // Try to load resource from jar
+        InputStream stream = ClassLoader.getSystemResourceAsStream(filename);
+        if (stream != null) return stream;
+
+        // If not found in jar, then load from disk
+        java.net.URL resURL = theClass.getClassLoader().getResource(filename);
+        if (resURL != null) {
+            try {
+                return new FileInputStream(resURL.toURI().getPath());
+            } catch(URISyntaxException e) {
+                //
+            }
+        }
+
+        return new FileInputStream(filename);
+    }
+
     public static File getResourceAsFile(final String filename, Class theClass) throws IOException {
 
         try {

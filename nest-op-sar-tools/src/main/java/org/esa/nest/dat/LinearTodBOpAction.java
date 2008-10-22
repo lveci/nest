@@ -25,7 +25,7 @@ public class LinearTodBOpAction extends AbstractVisatAction {
             String bandName = band.getName();
             String unit = band.getUnit();
 
-            if(!unit.contains("dB")) {
+            if(!unit.toLowerCase().contains("db")) {
                 bandName += "_dB";
                 if(product.getBand(bandName) != null) {
                     visatApp.showWarningDialog(product.getName() + " already contains a dB "
