@@ -41,6 +41,10 @@ class AlosPalsarVolumeDirectoryFile {
         return _textRecord;
     }
 
+    public BaseRecord getVolumeDescriptorRecord() {
+        return _volumeDescriptorRecord;
+    }
+
     public void close() throws IOException {
         _ceosReader.close();
         _ceosReader = null;

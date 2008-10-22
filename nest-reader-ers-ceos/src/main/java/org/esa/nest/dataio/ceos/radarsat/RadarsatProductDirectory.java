@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
+import java.text.ParseException;
 
 /**
  * This class represents a product directory.
@@ -231,12 +232,15 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                 _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-line distance in output scene"));
     }
 
-    private String getProcTime() {
-        String procTime = _volumeDirectoryFile.getTextRecord().getAttributeString("Location and datetime of product creation").trim();
-        int i = procTime.indexOf("  ");
-        if(i >= 0)
-            return procTime.substring(i+1, procTime.length()).trim();
-        return procTime;
+    private ProductData.UTC getProcTime() {
+        try {
+            String procTime = _volumeDirectoryFile.getVolumeDescriptorRecord().getAttributeString("Logical volume preparation date").trim();
+
+            return ProductData.UTC.parse(procTime, "yyyyMMDD");
+        } catch(ParseException e) {
+            System.out.println(e.toString());
+            return new ProductData.UTC(0);
+        }
     }
 
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {
