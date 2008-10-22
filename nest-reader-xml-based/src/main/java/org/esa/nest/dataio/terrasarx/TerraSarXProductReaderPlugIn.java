@@ -30,27 +30,11 @@ public class TerraSarXProductReaderPlugIn implements ProductReaderPlugIn {
             return DecodeQualification.UNABLE;
         }
         final String filename = FileUtils.getFilenameWithoutExtension(file).toUpperCase();
-        if (!filename.startsWith(TerraSarXConstants.PRODUCT_HEADER_PREFIX)) {
-            return DecodeQualification.UNABLE; // not the volume file
-        }
-
-        final File parentDir = file.getParentFile();
-        if (file.isFile() && parentDir.isDirectory()) {
-            final FilenameFilter filter = new FilenameFilter() {
-                public boolean accept(final File dir, final String name) {
-                    return name.contains(TerraSarXConstants.getIndicationKey());
-                }
-            };
-            final File[] files = parentDir.listFiles(filter);
-            if (files != null) {
-                return checkProductQualification(file);
-            }
+        if (filename.startsWith(TerraSarXConstants.PRODUCT_HEADER_PREFIX) &&
+                file.toString().endsWith(TerraSarXConstants.getIndicationKey())) {
+            return DecodeQualification.INTENDED;
         }
         return DecodeQualification.UNABLE;
-    }
-
-    protected DecodeQualification checkProductQualification(File file) {
-        return DecodeQualification.SUITABLE;
     }
 
     /**

@@ -64,8 +64,8 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, attrib.getData().getElemString());
 
         attrib = generalHeaderElem.getAttribute("generationTime");
-        if(attrib != null)
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, attrib.getData().getElemString());
+        //if(attrib != null)
+        //    AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, attrib.getData().getElemString());
 
        /* AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT,
                 Integer.parseInt(_leaderFile.getSceneRecord().getAttributeString("Orbit number").trim()));
