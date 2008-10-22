@@ -89,7 +89,7 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, CYCLE, ProductData.TYPE_INT32, "", "");
         addAbstractedAttribute(absRoot, REL_ORBIT, ProductData.TYPE_INT32, "", "");
         addAbstractedAttribute(absRoot, ABS_ORBIT, ProductData.TYPE_INT32, "", "");
-        addAbstractedAttribute(absRoot, STATE_VECTOR_TIME, ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, STATE_VECTOR_TIME, ProductData.TYPE_UTC, "", "");
         addAbstractedAttribute(absRoot, VECTOR_SOURCE, ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, TOT_SIZE, ProductData.TYPE_UINT32, "bytes", "");
 

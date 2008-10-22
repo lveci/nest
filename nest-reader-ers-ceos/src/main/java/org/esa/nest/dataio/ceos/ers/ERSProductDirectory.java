@@ -245,7 +245,8 @@ class ERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
                 Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
-                _leaderFile.getFacilityRecord().getAttributeString("Time of input state vector used to processed the image"));
+                AbstractMetadata.parseUTC(_leaderFile.getFacilityRecord().getAttributeString(
+                        "Time of input state vector used to processed the image")));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getUTCScanStartTime());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, getUTCScanStopTime());
@@ -302,7 +303,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         try {
             String procTime = _volumeDirectoryFile.getVolumeDescriptorRecord().getAttributeString("Logical volume preparation date").trim();
 
-            return ProductData.UTC.parse(procTime, "yyyyMMDD");
+            return ProductData.UTC.parse(procTime, "yyyyMMdd");
         } catch(ParseException e) {
             System.out.println(e.toString());
             return new ProductData.UTC(0);

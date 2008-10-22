@@ -71,7 +71,12 @@ public class CeosHelper {
     public static String getProductName(final BaseRecord textRecord) {
         String name = textRecord.getAttributeString("Product type specifier").trim().replace("PRODUCT:", "")
                 + '-' + textRecord.getAttributeString("Scene identification").trim();
-        return StringUtils.createValidName(name, new char[]{'_', '-', '.'}, '_');
+        return StringUtils.createValidName(name.trim(), new char[]{'_', '-', '.'}, '_');
+    }
+
+    public static String getProductType(final BaseRecord textRecord) {
+        String type = textRecord.getAttributeString("Product type specifier").trim();
+        return type.replace("PRODUCT:", "").trim();
     }
 
     public static ProductData.UTC createUTCDate(final int year, final int dayOfYear, final int millisInDay) {

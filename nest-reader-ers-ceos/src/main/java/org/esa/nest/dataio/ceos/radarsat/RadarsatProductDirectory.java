@@ -6,6 +6,7 @@ import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
+import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.imageio.stream.FileImageInputStream;
@@ -122,6 +123,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         product.setDescription(getProductDescription());
 
         addGeoCoding(product);
+        addTiePointGrids(product);
         addMetaData(product);
 
         return product;
@@ -148,6 +150,20 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
         product.setGeoCoding(tpGeoCoding);
+    }
+
+    private void addTiePointGrids(final Product product) throws IllegalCeosFormatException, IOException {
+      /*  BaseRecord facility = _leaderFile.getFacilityRecord();
+
+        double angle1 = facility.getAttributeDouble("Incidence angle at first range pixel");
+        double angle2 = facility.getAttributeDouble("Incidence angle at centre range pixel");
+        double angle3 = facility.getAttributeDouble("Incidence angle at last valid range pixel");
+
+        TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", 3, 2, 0, 0,
+                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
+                new float[]{(float)angle1, (float)angle2, (float)angle3,   (float)angle1, (float)angle2, (float)angle3});
+
+        product.addTiePointGrid(incidentAngleGrid);  */
     }
 
     public CEOSImageFile getImageFile(final Band band) throws IOException,
@@ -236,7 +252,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         try {
             String procTime = _volumeDirectoryFile.getVolumeDescriptorRecord().getAttributeString("Logical volume preparation date").trim();
 
-            return ProductData.UTC.parse(procTime, "yyyyMMDD");
+            return ProductData.UTC.parse(procTime, "yyyyMMdd");
         } catch(ParseException e) {
             System.out.println(e.toString());
             return new ProductData.UTC(0);

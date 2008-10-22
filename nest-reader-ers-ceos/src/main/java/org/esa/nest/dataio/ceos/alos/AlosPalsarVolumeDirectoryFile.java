@@ -61,8 +61,7 @@ class AlosPalsarVolumeDirectoryFile {
     }
 
     public String getProductType() {
-        String type = _textRecord.getAttributeString("Product type specifier").trim();
-        return type.replace("PRODUCT:", "");
+        return CeosHelper.getProductType(_textRecord);
     }
 
     public void assignMetadataTo(final MetadataElement rootElem) {

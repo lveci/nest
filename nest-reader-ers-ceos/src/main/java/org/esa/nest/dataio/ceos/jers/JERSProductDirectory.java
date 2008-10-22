@@ -107,6 +107,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
         product.setDescription(getProductDescription());
 
         addGeoCoding(product);
+        addTiePointGrids(product);
         addMetaData(product);
 
         return product;
@@ -133,7 +134,20 @@ class JERSProductDirectory extends CEOSProductDirectory {
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
         product.setGeoCoding(tpGeoCoding);
+    }
 
+    private void addTiePointGrids(final Product product) throws IllegalCeosFormatException, IOException {
+        BaseRecord facility = _leaderFile.getFacilityRecord();
+
+        double angle1 = facility.getAttributeDouble("Incidence angle at first range pixel");
+        double angle2 = facility.getAttributeDouble("Incidence angle at centre range pixel");
+        double angle3 = facility.getAttributeDouble("Incidence angle at last valid range pixel");
+
+        TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", 3, 2, 0, 0,
+                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
+                new float[]{(float)angle1, (float)angle2, (float)angle3,   (float)angle1, (float)angle2, (float)angle3});
+
+        product.addTiePointGrid(incidentAngleGrid);
     }
 
     public CEOSImageFile getImageFile(final Band band) throws IOException,
@@ -225,7 +239,8 @@ class JERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
                 Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
-                _leaderFile.getFacilityRecord().getAttributeString("Time of input state vector used to processed the image"));
+                AbstractMetadata.parseUTC(_leaderFile.getFacilityRecord().getAttributeString(
+                        "Time of input state vector used to processed the image")));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getUTCScanStartTime());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, getUTCScanStopTime());
@@ -282,7 +297,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
         try {
             String procTime = _volumeDirectoryFile.getVolumeDescriptorRecord().getAttributeString("Logical volume preparation date").trim();
 
-            return ProductData.UTC.parse(procTime, "yyyyMMDD");
+            return ProductData.UTC.parse(procTime, "yyyyMMdd");
         } catch(ParseException e) {
             System.out.println(e.toString());
             return new ProductData.UTC(0);
