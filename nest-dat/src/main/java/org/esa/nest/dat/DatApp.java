@@ -92,6 +92,7 @@ public final class DatApp extends VisatApp {
         addCommandsToToolBar(toolBar, new String[]{
                 "newProject",
                 "loadProject",
+                "openProductGrabber",
                 null,
                 "openRaster",
                 "openVector",

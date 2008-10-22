@@ -67,7 +67,7 @@
             <mnemonic>P</mnemonic>
             <accelerator>ctrl alt P</accelerator>
             <smallIcon>/org/esa/nest/icons/project_sm.png</smallIcon>
-            <largeIcon>/org/esa/nest/icons/project.png</largeIcon>
+            <largeIcon>/org/esa/nest/icons/project_view.png</largeIcon>
             <!--<helpId>TODO</helpId>-->
             <description>Project View.</description>
             <initState>DOCKED</initState>
