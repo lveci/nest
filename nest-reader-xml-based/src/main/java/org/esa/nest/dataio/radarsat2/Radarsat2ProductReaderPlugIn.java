@@ -7,7 +7,6 @@ import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.Locale;
 
 /**
@@ -30,27 +29,11 @@ public class Radarsat2ProductReaderPlugIn implements ProductReaderPlugIn {
             return DecodeQualification.UNABLE;
         }
         final String filename = FileUtils.getFilenameWithoutExtension(file).toUpperCase();
-        if (!filename.startsWith(Radarsat2Constants.PRODUCT_HEADER_PREFIX)) {
-            return DecodeQualification.UNABLE; // not the volume file
-        }
-
-        final File parentDir = file.getParentFile();
-        if (file.isFile() && parentDir.isDirectory()) {
-            final FilenameFilter filter = new FilenameFilter() {
-                public boolean accept(final File dir, final String name) {
-                    return name.contains(Radarsat2Constants.getIndicationKey());
-                }
-            };
-            final File[] files = parentDir.listFiles(filter);
-            if (files != null) {
-                return checkProductQualification(file);
-            }
+        if (filename.startsWith(Radarsat2Constants.PRODUCT_HEADER_PREFIX)  &&
+                file.toString().toUpperCase().endsWith(Radarsat2Constants.getIndicationKey())) {
+            return DecodeQualification.INTENDED;
         }
         return DecodeQualification.UNABLE;
-    }
-
-    protected DecodeQualification checkProductQualification(File file) {
-        return DecodeQualification.SUITABLE;
     }
 
     /**

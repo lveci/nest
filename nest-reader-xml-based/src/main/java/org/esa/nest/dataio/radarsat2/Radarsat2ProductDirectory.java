@@ -14,6 +14,10 @@ import java.io.IOException;
  */
 public class Radarsat2ProductDirectory extends XMLProductDirectory {
 
+    private String productName = "Radarsat2";
+    private String productType = "Radarsat2";
+    private String productDescription = "";
+
     public Radarsat2ProductDirectory(final File headerFile, final File imageFolder) {
         super(headerFile, imageFolder);
     }
@@ -66,16 +70,16 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
 
     @Override
     protected String getProductName() {
-        return "TerraSarX";
+        return productName;
     }
 
     @Override
     protected String getProductDescription() {
-        return "TerraSarX";
+        return productDescription;
     }
 
     @Override
     protected String getProductType() {
-        return "TerraSarX";
+        return productType;
     }
 }

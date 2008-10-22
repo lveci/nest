@@ -8,7 +8,6 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.Debug;
 import org.esa.nest.dataio.ImageIOFile;
-import org.esa.nest.dataio.XMLProductDirectory;
 
 import java.io.File;
 import java.io.IOException;

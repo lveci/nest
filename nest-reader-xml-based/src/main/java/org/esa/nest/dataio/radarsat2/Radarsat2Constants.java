@@ -15,7 +15,7 @@ public class Radarsat2Constants {
 
     final static String PRODUCT_DESCRIPTION_PREFIX = "Radarsat2 product ";
 
-    private final static String INDICATION_KEY = "xml";
+    private final static String INDICATION_KEY = "XML";
 
     final static Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
 

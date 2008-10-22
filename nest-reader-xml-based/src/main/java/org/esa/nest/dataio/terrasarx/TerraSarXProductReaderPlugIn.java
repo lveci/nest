@@ -7,7 +7,6 @@ import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.Locale;
 
 /**
@@ -31,7 +30,7 @@ public class TerraSarXProductReaderPlugIn implements ProductReaderPlugIn {
         }
         final String filename = FileUtils.getFilenameWithoutExtension(file).toUpperCase();
         if (filename.startsWith(TerraSarXConstants.PRODUCT_HEADER_PREFIX) &&
-                file.toString().endsWith(TerraSarXConstants.getIndicationKey())) {
+                file.toString().toUpperCase().endsWith(TerraSarXConstants.getIndicationKey())) {
             return DecodeQualification.INTENDED;
         }
         return DecodeQualification.UNABLE;

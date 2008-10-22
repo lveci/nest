@@ -29,7 +29,7 @@ public class XMLProductDirectory {
     private int _sceneHeight;
 
     private transient Map<String, ImageIOFile> bandImageFileMap = new HashMap<String, ImageIOFile>(1);
-   private transient Map<Band, ImageIOFile.BandInfo> bandMap = new HashMap<Band, ImageIOFile.BandInfo>(3);
+    private transient Map<Band, ImageIOFile.BandInfo> bandMap = new HashMap<Band, ImageIOFile.BandInfo>(3);
 
     public XMLProductDirectory(final File headerFile, final File imageFolder) {
         Guardian.assertNotNull("headerFile", headerFile);
@@ -56,8 +56,8 @@ public class XMLProductDirectory {
     }
 
     public Product createProduct() throws IOException {
-        final Product product = new Product(_xmlHeader.getName(),
-                                            "productType",
+        final Product product = new Product(getProductName(),
+                                            getProductType(),
                                             _sceneWidth, _sceneHeight);
 
         int bandCnt = 1;
