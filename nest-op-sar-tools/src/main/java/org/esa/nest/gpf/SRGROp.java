@@ -297,7 +297,7 @@ public class SRGROp extends Operator {
         if (facility == null) {
             throw new OperatorException("Facility Related not found");
         }
-
+        /*
         String incidenceAngle;
         if (pass.contains("DESCENDING")) {
             incidenceAngle = "Incidence angle at last valid range pixel";
@@ -311,6 +311,23 @@ public class SRGROp extends Operator {
         }
 
         return attr.getData().getElemFloat();
+        */
+
+        MetadataAttribute attrFirst = facility.getAttribute("Incidence angle at first range pixel");
+        if (attrFirst == null) {
+            throw new OperatorException("Incidence angle at first range pixel not found");
+        }
+
+        double alphaFirst = attrFirst.getData().getElemFloat();
+
+        MetadataAttribute attrLast = facility.getAttribute("Incidence angle at last valid range pixel");
+        if (attrLast == null) {
+            throw new OperatorException("Incidence angle at last valid range pixel not found");
+        }
+
+        double alphaLast = attrLast.getData().getElemFloat();
+
+        return Math.min(alphaFirst, alphaLast);
     }
 
     /**
@@ -322,7 +339,7 @@ public class SRGROp extends Operator {
     double getIncidenceAngleForASARProduct(String pass) {
 
         TiePointGrid incidenceAngle = getIncidenceAngle();
-
+/*
         double alpha;
         if (pass.contains("DESCENDING")) {
             alpha = incidenceAngle.getPixelFloat(sourceImageWidth - 0.5f, 0.5f);
@@ -330,6 +347,11 @@ public class SRGROp extends Operator {
             alpha = incidenceAngle.getPixelFloat(0.5f, 0.5f);
         }
         return alpha;
+*/
+
+        double alphaFirst = incidenceAngle.getPixelFloat(0.5f, 0.5f);
+        double alphaLast = incidenceAngle.getPixelFloat(sourceImageWidth - 0.5f, 0.5f);
+        return Math.min(alphaFirst, alphaLast);
     }
 
     /**
