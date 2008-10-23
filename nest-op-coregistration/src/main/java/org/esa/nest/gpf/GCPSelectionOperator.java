@@ -76,9 +76,6 @@ public class GCPSelectionOperator extends Operator {
     @Parameter(description = "The maximum number of iterations", interval = "(1, 10]", defaultValue = "2",
                 label="Max Iterations")
     private int maxIteration;
-//    @Parameter(description = "Threshold for quality parameter Q = max/mean", interval = "[1, *)", defaultValue = "1.1",
-//                label="Quality Threshold")
-//    private double qualityThreshold;
     @Parameter(description = "Tolerance in slave GCP validation check", interval = "(0, *)", defaultValue = "0.1",
                 label="GCP Tolerance")
     private double gcpTolerance;
@@ -249,11 +246,11 @@ public class GCPSelectionOperator extends Operator {
 
                 if (sGCPPixelPos.x < 0.0f || sGCPPixelPos.x >= slaveProduct.getSceneRasterWidth() ||
                     sGCPPixelPos.y < 0.0f || sGCPPixelPos.y >= slaveProduct.getSceneRasterHeight()) {
-                    System.out.println("GCP(" + i + ") is invalid.");
+                    System.out.println("GCP(" + i + ") is outside slave image.");
                     continue;
                 }
-                //System.out.println("master gcp[" + i + "] = " + "(" + mGCPPixelPos.x + "," + mGCPPixelPos.y + ")");
-                //System.out.println("init slave gcp[" + i + "] = " + "(" + sGCPPixelPos.x + "," + sGCPPixelPos.y + ")");
+//                System.out.println(i + ", (" + mGCPPixelPos.x + "," + mGCPPixelPos.y + "), (" +
+//                                              sGCPPixelPos.x + "," + sGCPPixelPos.y + ")");
 
                 if (getSlaveGCPPosition(mGCPPixelPos, sGCPPixelPos)) {
 
