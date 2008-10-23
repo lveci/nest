@@ -33,9 +33,7 @@ import java.awt.image.renderable.ParameterBlock;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.util.ArrayList;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.DecimalFormat;
 
 /**
@@ -97,6 +95,8 @@ public class WARPOperator extends Operator {
     private float[] masterGCPCoords;
     private float[] slaveGCPCoords;
     private float[] rms;
+    private float[] rowResiduals;
+    private float[] colResiduals;
 
     private WarpPolynomial warp;
     private Interpolation interp;
@@ -282,12 +282,16 @@ public class WARPOperator extends Operator {
     void computeRMS() {
 
         rms = new float[numValidGCPs];
+        colResiduals = new float[numValidGCPs];
+        rowResiduals = new float[numValidGCPs];
         PixelPos slavePos = new PixelPos(0.0f,0.0f);
         for (int i = 0; i < rms.length; i++) {
             int i2=2*i;
             getWarpedCoords(masterGCPCoords[i2], masterGCPCoords[i2+1], slavePos);
-            float dX = slavePos.x - slaveGCPCoords[i2];
-            float dY = slavePos.y - slaveGCPCoords[i2+1];
+            double dX = slavePos.x - slaveGCPCoords[i2];
+            double dY = slavePos.y - slaveGCPCoords[i2+1];
+            colResiduals[i] = (float)dX;
+            rowResiduals[i] = (float)dY;
             rms[i] = (float)Math.sqrt(dX*dX + dY*dY);
         }
     }
@@ -357,75 +361,103 @@ public class WARPOperator extends Operator {
 
     void outputCoRegistrationInfo(boolean appendFlag) {
 
-        System.out.println("WARP coefficients:");
-        float[] xCoeffs = warp.getXCoeffs();
-        for (float xCoeff : xCoeffs) {
-            System.out.print(xCoeff);
-            System.out.print(", ");
-        }
-        System.out.println();
-        float[] yCoeffs = warp.getYCoeffs();
-        for (float yCoeff : yCoeffs) {
-            System.out.print(yCoeff);
-            System.out.print(", ");
-        }
-        System.out.println();
-        System.out.println();
+        double rmsMean = 0.0;
+        double rms2Mean = 0.0;
+        double rowResidualMean = 0.0;
+        double rowResidual2Mean = 0.0;
+        double colResidualMean = 0.0;
+        double colResidual2Mean = 0.0;
 
-        System.out.println("No. |  Master GCP x   |  Master GCP y   |   Slave GCP x   |   Slave GCP y   |        RMS      |");
-        System.out.println("-----------------------------------------------------------------------------------------------");
         for (int i = 0; i < rms.length; i++) {
-            System.out.format("%3d | %15.3f | %15.3f | %15.3f | %15.3f | %15.3f |\n",
-                              i+1, masterGCPCoords[2*i], masterGCPCoords[2*i+1],
-                              slaveGCPCoords[2*i], slaveGCPCoords[2*i+1], rms[i]);
+            rmsMean += rms[i];
+            rms2Mean += rms[i]*rms[i];
+            rowResidualMean += rowResiduals[i];
+            rowResidual2Mean += rowResiduals[i]*rowResiduals[i];
+            colResidualMean += colResiduals[i];
+            colResidual2Mean += colResiduals[i]*colResiduals[i];
         }
+        rmsMean /= rms.length;
+        rms2Mean /= rms.length;
+        rowResidualMean /= rms.length;
+        rowResidual2Mean /= rms.length;
+        colResidualMean /= rms.length;
+        colResidual2Mean /= rms.length;
 
-        FileWriter fw;
-        String str;
+        double rmsStd = Math.sqrt(rms2Mean - rmsMean*rmsMean);
+        double rowResidualStd = Math.sqrt(rowResidual2Mean - rowResidualMean*rowResidualMean);
+        double colResidualStd = Math.sqrt(colResidual2Mean - colResidualMean*colResidualMean);
+
+        float[] xCoeffs = warp.getXCoeffs();
+        float[] yCoeffs = warp.getYCoeffs();
+
+        FileOutputStream out; // declare a file output object
+        PrintStream p; // declare a print stream object
         String fileName = slaveProduct.getName() + "_residual.txt";
-        DecimalFormat myformat = new DecimalFormat("##########0.000");
         try {
             File appUserDir = new File(DatUtils.getApplicationUserDir(false).getAbsolutePath() + File.separator + "log");
-            if(appUserDir.exists())
+            if(appUserDir.exists()) {
                 fileName = appUserDir.toString() + File.separator + fileName;
+            }
+            out = new FileOutputStream(fileName);
 
-            fw = new FileWriter(fileName, appendFlag);
-            str = " " + "\r\n";
-            fw.write(str);
-            str = "WARP coefficients:" + "\r\n";
-            fw.write(str);
+            // Connect print stream to the output stream
+            p = new PrintStream(out);
+
+            p.println();
+            p.format("Transformation degree = %d", warpPolynomialOrder);
+            p.println();
+
+            p.println();
+            p.println("WARP coefficients:");
             for (float xCoeff : xCoeffs) {
-                str = xCoeff + ", ";
-                fw.write(str);
+                p.format("%10.5f, ", xCoeff);
             }
-            str = " " + "\r\n";
-            fw.write(str);
+
+            p.println();
             for (float yCoeff : yCoeffs) {
-                str = yCoeff + ", ";
-                fw.write(str);
+                p.format("%10.5f, ", yCoeff);
             }
-            str = "\r\n";
-            fw.write(str);
+            p.println();
+
+            p.println();
             if (appendFlag) {
-                str = "Final Valid GCPs: \r\n";
+                p.print("Final Valid GCPs:");
             } else {
-                str = "Initial Valid GCPs: \r\n";
+                p.print("Initial Valid GCPs:");
             }
-            fw.write(str);
-            str = "No. |  Master GCP x   |  Master GCP y   |   Slave GCP x   |   Slave GCP y   |        RMS      |" + "\r\n";
-            fw.write(str);
-            str = "-----------------------------------------------------------------------------------------------" + "\r\n";
-            fw.write(str);
+            p.println();
+
+            p.println();
+            p.println("No. | Master GCP x | Master GCP y | Slave GCP x |" +
+                      " Slave GCP y | Row Residual | Col Residual |    RMS    |");
+            p.println("-------------------------------------------------" +
+                      "--------------------------------------------------------");
             for (int i = 0; i < rms.length; i++) {
-                str = i + " | " +
-                      myformat.format(masterGCPCoords[2*i]) + " | " +
-                      myformat.format(masterGCPCoords[2*i+1]) + " | " +
-                      myformat.format(slaveGCPCoords[2*i]) + " | " +
-                      myformat.format(slaveGCPCoords[2*i+1]) + " | " +
-                      myformat.format(rms[i]) + " | " + "\r\n";
-                fw.write(str);
+                p.format("%2d  |%13.3f |%13.3f |%12.3f |%12.3f |%13.3f |%13.3f |%10.3f |",
+                        i, masterGCPCoords[2*i], masterGCPCoords[2*i+1], slaveGCPCoords[2*i], slaveGCPCoords[2*i+1],
+                        rowResiduals[i], colResiduals[i], rms[i]);
+                p.println();
             }
-            fw.close();
+
+            p.println();
+            p.format("Row residual mean = %8.3f", rowResidualMean);
+            p.println();
+            p.format("Row residual std = %8.3f", rowResidualStd);
+            p.println();
+
+            p.println();
+            p.format("Col residual mean = %8.3f", colResidualMean);
+            p.println();
+            p.format("Col residual std = %8.3f", colResidualStd);
+            p.println();
+
+            p.println();
+            p.format("RMS mean = %8.3f", rmsMean);
+            p.println();
+            p.format("RMS std = %8.3f", rmsStd);
+
+            p.close();
+
         } catch(IOException exc) {
             throw new OperatorException(exc);
         }
