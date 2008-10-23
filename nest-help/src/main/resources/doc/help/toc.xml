@@ -122,15 +122,16 @@
 		
 		<tocitem text="Operators">
 			<tocitem text="ASAR Calibration" target="ASARCalibrationOp"/>
+			<tocitem text="ASAR Retro-Calibration" target="ASARRetroCalibrationOp"/>
 			<tocitem text="Collocate" target="CollocateOp"/>
 			<tocitem text="Data Analysis" target="DataAnalysisOp"/>
 			<tocitem text="ERS Calibration" target="ERSCalibrationOp"/>
 			<tocitem text="GCP Selection" target="GCPSelectionOp"/>
 			<tocitem text="Multilook" target="MultilookOp"/>
-			<tocitem text="Over Sample" target="OverSampleOp"/>	
+			<!--tocitem text="Over Sample" target="OverSampleOp"/-->	
 	        <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>
 			<tocitem text="Slant Range to Ground Range" target="SRGROp"/>
-			<tocitem text="Under Sample" target="UnderSampleOp"/>
+			<!--tocitem text="Under Sample" target="UnderSampleOp"/-->
 			<tocitem text="Warp" target="WarpOp"/>
 			<tocitem text="WSS Deburst" target="WSSDeburstOp"/>
 			<tocitem text="WSS Mosaic" target="WSSMosaicOp"/>

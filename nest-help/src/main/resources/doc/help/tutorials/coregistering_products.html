@@ -1,8 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head><title>NEST Help - Coregistration</title>
 
-<link rel="stylesheet" href="../style.css">
-</head>
+<link rel="stylesheet" href="../style.css"></head>
 <body>
 <table class="header">
 <tbody>
@@ -19,14 +18,18 @@ This allows pixel-by-pixel comparisons of&nbsp;multiple datasets
 that cover the same region.<br><br>Images
 may be fully or only partly overlapping and may be from acquisitions
 taken at different times using multiple sensors or from multiple
-passages of the<br>same satellite.<br>
+passages of the<br>same satellite. &nbsp;The
+slave and master images should be in the same projection.&nbsp; If not, the slave image(s) should be
+reprojected into the same projection system as that of the master image.
+<br>
 <br>
 Image co-registration is fundamental for Interferometry SAR (InSAR)
 imaging and its applications, such as DEM map generation and analysis.
 To obtain a high quality InSAR image, the individual complex images
 need to be co-registered to sub-pixel accuracy. <br><br>
 Coregistration is achieved in NEST using two graphs, one for GCP
-Selection and the other to apply the Warp.<br>
+Selection and the other to apply the Warp. The Warp graph requires that
+all slave GCPs have been determined before evaluating the warp function.<br>
 <br>
 <h4>GCP Selection</h4>
 The GCP Selection graph uses the <a href="../operators/CollocateOp.html">Collocate</a> and <a href="../operators/GCPSelectionOp.html">GCP Selection</a> operators.<br><br><div style="text-align: left;">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <img style="width: 421px; height: 144px;" alt="gcp selection graph" src="images/gcp_selection_graph.jpg"><br></div><br>
