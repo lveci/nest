@@ -208,9 +208,6 @@ public class GCPSelectionOperator extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException
     {
-        if(targetBand.isSynthetic())
-            return;
-
         Rectangle targetTileRectangle = targetTile.getRectangle();
         int x0 = targetTileRectangle.x;
         int y0 = targetTileRectangle.y;

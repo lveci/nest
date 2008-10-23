@@ -136,9 +136,6 @@ public final class MultilookOp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
-        if(targetBand.isSynthetic())
-            return;
-
         Rectangle targetTileRectangle = targetTile.getRectangle();
         int tx0 = targetTileRectangle.x;
         int ty0 = targetTileRectangle.y;
