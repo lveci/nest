@@ -394,7 +394,7 @@ public class WARPOperator extends Operator {
             if(appUserDir.exists()) {
                 fileName = appUserDir.toString() + File.separator + fileName;
             }
-            out = new FileOutputStream(fileName);
+            out = new FileOutputStream(fileName, appendFlag);
 
             // Connect print stream to the output stream
             p = new PrintStream(out);
