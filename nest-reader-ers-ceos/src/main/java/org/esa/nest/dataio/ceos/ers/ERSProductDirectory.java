@@ -227,6 +227,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
         BaseRecord sceneRec = _leaderFile.getSceneRecord();
         BaseRecord mapProjRec = _leaderFile.getMapProjRecord();
+        BaseRecord facilityRec = _leaderFile.getFacilityRecord();
 
         //mph
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, getProductName());
@@ -245,7 +246,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
                 Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
-                AbstractMetadata.parseUTC(_leaderFile.getFacilityRecord().getAttributeString(
+                AbstractMetadata.parseUTC(facilityRec.getAttributeString(
                         "Time of input state vector used to processed the image")));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getUTCScanStartTime());
@@ -278,7 +279,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeString("Processing algorithm identifier"));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
-                getPolarization(_leaderFile.getSceneRecord().getAttributeString("Sensor ID and mode of operation for this channel")));
+                getPolarization(sceneRec.getAttributeString("Sensor ID and mode of operation for this channel")));
         
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
                 mapProjRec.getAttributeDouble("Nominal inter-pixel distance in output scene"));
@@ -297,6 +298,10 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag,
                 isGroundRange());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag,
+                facilityRec.getAttributeInt("Antenna pattern correction flag"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag,
+                facilityRec.getAttributeInt("Range spreading loss compensation flag"));
     }
 
     private ProductData.UTC getProcTime() {
