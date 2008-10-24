@@ -350,6 +350,10 @@ public class Project extends Observable {
                         try {
                             final Product product = reader.readProductNodes(prodFile, null);
                             if(product != null) {
+                                // special case for WSS products
+                                if(product.getProductType().equals("ASA_WSS_1P")) {
+                                    throw new Exception("WSS products need to be debursted before saving as DIMAP");
+                                }
                                 final File destFile = new File(importedFolder.getPath(), product.getName());
 
                                 VisatApp.getApp().writeProduct(product, destFile, "BEAM-DIMAP");
