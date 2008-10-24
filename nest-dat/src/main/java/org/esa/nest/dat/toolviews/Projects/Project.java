@@ -336,22 +336,38 @@ public class Project extends Observable {
         return null;
     }
 
-    public void importFile(ProjectSubFolder parentFolder, File prodFile) {
+    public void importFile(final ProjectSubFolder parentFolder, final File prodFile) {
         if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.PRODUCT) {
 
-            ProductReader reader = ProductIO.getProductReaderForFile(prodFile);
+            final ProductReader reader = ProductIO.getProductReaderForFile(prodFile);
             if (reader != null) {
-                ProjectSubFolder importedFolder = projectSubFolders.findFolder("Imported Products");
+                final ProjectSubFolder importedFolder = projectSubFolders.findFolder("Imported Products");
 
-                try {
-                    final Product product = reader.readProductNodes(prodFile, null);
-                    if(product != null) {
-                        final File destFile = new File(importedFolder.getPath(), product.getName());
-                        writeProduct(product, destFile);
+                final SwingWorker worker = new SwingWorker() {
+
+                    @Override
+                    protected Object doInBackground() throws Exception {
+                        try {
+                            final Product product = reader.readProductNodes(prodFile, null);
+                            if(product != null) {
+                                final File destFile = new File(importedFolder.getPath(), product.getName());
+
+                                VisatApp.getApp().writeProduct(product, destFile, "BEAM-DIMAP");
+                            }
+                        } catch(Exception e) {
+                            VisatApp.getApp().showErrorDialog(e.getMessage());
+                        }                                   
+                        return null;
                     }
-                } catch(Exception e) {
-                    VisatApp.getApp().showErrorDialog(e.getMessage());
-                }
+
+                    @Override
+                    public void done() {
+                        refreshProjectTree();
+                        notifyEvent(SAVE_PROJECT);
+                    }
+                };
+                worker.execute();
+
             }
         }
     }

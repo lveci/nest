@@ -58,28 +58,27 @@ public class CeosDB {
 
     public void readRecord(CeosFileReader reader) throws IOException, IllegalCeosFormatException
     {
-        Element root = xmlDoc.getRootElement();
+        final Element root = xmlDoc.getRootElement();
         //System.out.println(definitionFile);
         
-        List children = root.getContent();
+        final List children = root.getContent();
         for (Object aChild : children) {
             if (aChild instanceof Element) {
-                Element child = (Element) aChild;
+                final Element child = (Element) aChild;
 
                 if(child.getName().equals("struct")) {
-                    Attribute loopAttrib = child.getAttribute("loop");
-                    String loopName = loopAttrib.getValue();
-                    int loop = getAttributeInt(loopName);
+                    final Attribute loopAttrib = child.getAttribute("loop");
+                    final String loopName = loopAttrib.getValue();
+                    final int loop = getAttributeInt(loopName);
 
-                    List structChildren = child.getChildren();
+                    final List structChildren = child.getChildren();
                     for(int l=1; l <= loop; ++l) {
 
-                        String suffix = " " + l;
+                        final String suffix = " " + l;
                         for (Object aStructChild : structChildren) {
                             if (aStructChild instanceof Element) {
-                                Element structChild = (Element) aStructChild;
 
-                                DecodeElement(reader, metaMap, structChild, suffix);
+                                DecodeElement(reader, metaMap, (Element) aStructChild, suffix);
                             }
                         }
                     }
@@ -96,16 +95,16 @@ public class CeosDB {
 
         String name="";
         try {
-            Attribute nameAttrib = child.getAttribute("name");
-            Attribute typeAttrib = child.getAttribute("type");
-            Attribute numAttrib = child.getAttribute("num");
+            final Attribute nameAttrib = child.getAttribute("name");
+            final Attribute typeAttrib = child.getAttribute("type");
+            final Attribute numAttrib = child.getAttribute("num");
             if(nameAttrib != null && typeAttrib != null && numAttrib != null) {
 
                 name = nameAttrib.getValue();
                 if(suffix != null)
                     name += suffix;
-                int type = Integer.parseInt(typeAttrib.getValue());
-                int num = Integer.parseInt(numAttrib.getValue());
+                final int type = Integer.parseInt(typeAttrib.getValue());
+                final int num = Integer.parseInt(numAttrib.getValue());
 
                 //System.out.print(" " + reader.getCurrentPos() + ' ' + name + ' ' + type + ' ' + num);
 
@@ -150,7 +149,7 @@ public class CeosDB {
                 } else if(type == CeosDBTypes.Debug.value()) {
 
                     for(int i=0; i < num; ++i) {
-                        String tmp = reader.readAn(1);
+                        final String tmp = reader.readAn(1);
                         if(!tmp.isEmpty() && !tmp.equals(" "))
                             System.out.print(tmp);
                     }
@@ -170,7 +169,7 @@ public class CeosDB {
     }
 
     private Object get(String name) {
-        Object obj = metaMap.get(name);
+        final Object obj = metaMap.get(name);
         if(obj == null) {
             System.out.println("metadata "+name+" is null");
         }

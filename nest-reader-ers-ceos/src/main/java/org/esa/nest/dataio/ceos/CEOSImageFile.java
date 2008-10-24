@@ -15,7 +15,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.8 $ $Date: 2008-10-14 13:25:19 $
+ * @version $Revision: 1.9 $ $Date: 2008-10-23 22:21:57 $
  */
 public abstract class CEOSImageFile {
 
@@ -48,7 +48,7 @@ public abstract class CEOSImageFile {
 
     public static String[] getImageFileNames(File baseDir, String prefix) {
         final ArrayList<String> list = new ArrayList<String>(2);
-        File[] fileList = baseDir.listFiles();
+        final File[] fileList = baseDir.listFiles();
         for (File file : fileList) {
             if (file.getName().toUpperCase().startsWith(prefix)) {
                 list.add(file.getName());
@@ -67,7 +67,7 @@ public abstract class CEOSImageFile {
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
 
-        int x = sourceOffsetX * 2;
+        final int x = sourceOffsetX * 2;
 
         pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceOffsetY);
         try {
@@ -111,7 +111,7 @@ public abstract class CEOSImageFile {
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
 
-        int x = sourceOffsetX * 4;
+        final int x = sourceOffsetX * 4;
 
         pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceOffsetY);
         try {

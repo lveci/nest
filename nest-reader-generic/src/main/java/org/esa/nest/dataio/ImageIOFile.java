@@ -107,25 +107,25 @@ public class ImageIOFile {
                                             ProductData destBuffer, ProgressMonitor pm,
                                             int imageID, int sampleOffset)
                                                                                                 throws IOException {
-        Rectangle srcRect = new Rectangle(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight);
+        final Rectangle srcRect = new Rectangle(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight);
 
         param.setSourceRegion(srcRect);
         param.setSourceBands(new int[]{imageID});
         param.setDestinationBands(new int[]{0});
 
         final RenderedImage image = reader.read(0, param);
-        java.awt.image.Raster data = image.getData();
+        final java.awt.image.Raster data = image.getData();
 
-        int size = destBuffer.getNumElems();
-        int elemSize = data.getNumDataElements();
+        final int size = destBuffer.getNumElems();
+        final int elemSize = data.getNumDataElements();
 
-        int[] b = new int[size * elemSize];
+        final int[] b = new int[size * elemSize];
         data.getPixels(0, 0, sourceWidth, sourceHeight, b);
 
         //if(elemSize == 1) {
         //    System.arraycopy(b, 0, destBuffer.getElems(), 0, destWidth);
         //} else {
-            int length = b.length;
+            final int length = b.length;
             for(int i=0, j=sampleOffset; i < size && j < length; ++i, j+=elemSize) {
                 destBuffer.setElemIntAt(i, b[j]);
             }

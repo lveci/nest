@@ -537,13 +537,12 @@ public final class MultilookOp extends Operator {
         ProductData trgData = targetTile.getDataBuffer();
 
         double meanValue;
-        int maxy = ty0 + th;
-        int maxx = tx0 + tw;
+        final int maxy = ty0 + th;
+        final int maxx = tx0 + tw;
         for (int ty = ty0; ty < maxy; ty++) {
             for (int tx = tx0; tx < maxx; tx++) {
-                int index = targetTile.getDataBufferIndex(tx, ty);
                 meanValue = getMeanValue(tx, ty, sourceRaster1, sourceRaster2, dataIndicator);
-                trgData.setElemDoubleAt(index, meanValue);
+                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(tx, ty), meanValue);
             }
         }
     }
@@ -560,12 +559,12 @@ public final class MultilookOp extends Operator {
      */
     double getMeanValue(int tx, int ty, Tile sourceRaster1, Tile sourceRaster2, int dataIndicator) {
 
-        int xStart = tx * rangeFactor;
-        int yStart = ty * azimuthFactor;
-        int xEnd = xStart + rangeFactor;
-        int yEnd = yStart + azimuthFactor;
+        final int xStart = tx * rangeFactor;
+        final int yStart = ty * azimuthFactor;
+        final int xEnd = xStart + rangeFactor;
+        final int yEnd = yStart + azimuthFactor;
 
-        ProductData srcData1 = sourceRaster1.getDataBuffer();
+        final ProductData srcData1 = sourceRaster1.getDataBuffer();
         ProductData srcData2 = null;
         if(sourceRaster2 != null)
             srcData2 = sourceRaster2.getDataBuffer();
@@ -574,16 +573,16 @@ public final class MultilookOp extends Operator {
         for (int y = yStart; y < yEnd; y++) {
             for (int x = xStart; x < xEnd; x++) {
 
-                int index = sourceRaster1.getDataBufferIndex(x, y);
+                final int index = sourceRaster1.getDataBufferIndex(x, y);
 
                 if (dataIndicator == 0) { // intensity
                     meanValue += srcData1.getElemDoubleAt(index);
                 } else if (dataIndicator == 1) { // amplitude
-                    double dn = srcData1.getElemDoubleAt(index);
+                    final double dn = srcData1.getElemDoubleAt(index);
                     meanValue += dn*dn;
                 } else {
-                    double i = srcData1.getElemDoubleAt(index);
-                    double q = srcData2.getElemDoubleAt(index);
+                    final double i = srcData1.getElemDoubleAt(index);
+                    final double q = srcData2.getElemDoubleAt(index);
                     meanValue += i*i + q*q;
                 }
             }
