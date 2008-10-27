@@ -25,9 +25,6 @@ import java.util.Map;
                   description = "Collocates two products based on their geo-codings.")
 public class CollocateOp extends Operator {
 
-    public static final String SOURCE_NAME_REFERENCE = "${ORIGINAL_NAME}";
-    public static final String DEFAULT_MASTER_COMPONENT_PATTERN = "${ORIGINAL_NAME}_M";
-    public static final String DEFAULT_SLAVE_COMPONENT_PATTERN = "${ORIGINAL_NAME}_S";
     private static final String NEAREST_NEIGHBOUR = "NEAREST_NEIGHBOUR";
     private static final String BILINEAR_INTERPOLATION = "BILINEAR_INTERPOLATION";
     private static final String CUBIC_CONVOLUTION = "CUBIC_CONVOLUTION";
