@@ -15,7 +15,7 @@ import java.util.Map;
  * Date: May 13, 2008
  * To change this template use File | Settings | File Templates.
  */
-public class CeosDB {
+public final class CeosDB {
 
     public enum CeosDBTypes {
          Skip(0),
@@ -176,15 +176,15 @@ public class CeosDB {
         return obj;
     }
 
-    public String getAttributeString(String name) {
+    public final String getAttributeString(String name) {
         return (String) get(name);
     }
     
-    public int getAttributeInt(String name) {
+    public final int getAttributeInt(String name) {
         return (Integer) get(name);
     }
 
-    public Double getAttributeDouble(String name) {
+    public final Double getAttributeDouble(String name) {
         return (Double) get(name);
     }
 }

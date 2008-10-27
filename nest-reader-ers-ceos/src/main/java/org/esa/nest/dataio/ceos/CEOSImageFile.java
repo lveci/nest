@@ -15,7 +15,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.9 $ $Date: 2008-10-23 22:21:57 $
+ * @version $Revision: 1.10 $ $Date: 2008-10-27 21:23:25 $
  */
 public abstract class CEOSImageFile {
 
@@ -147,42 +147,44 @@ public abstract class CEOSImageFile {
 
     protected static void copyLine(final short[] srcLine, final short[] destLine,
                           final int sourceStepX) {
-        for (int x = 0, i = 0; x < destLine.length; x++, i += sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[i];
         }
     }
 
     protected static void copyLine(final byte[] srcLine, final byte[] destLine,
                           final int sourceStepX) {
-        for (int x = 0, i = 0; x < destLine.length; x++, i += sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[i];
         }
     }
 
     protected static void copyLine1Of2(final short[] srcLine, final short[] destLine,
                           final int sourceStepX) {
-        for (int x = 0, i = 0; x < destLine.length; x++, i += sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[i << 1];
         }
     }
 
     protected static void copyLine1Of2(final byte[] srcLine, final byte[] destLine,
                           final int sourceStepX) {
-        for (int x = 0, i = 0; x < destLine.length; x++, i += sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[i << 1];
         }
     }
 
     protected static void copyLine2Of2(final short[] srcLine, final short[] destLine,
                           final int sourceStepX) {
-        for (int x = 0, i = 0; x < destLine.length-1; x++, i += sourceStepX) {
+        final int length = destLine.length-1;
+        for (int x = 0, i = 0; x < length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[(i << 1) + 1];
         }
     }
 
     protected static void copyLine2Of2(final byte[] srcLine, final byte[] destLine,
                           final int sourceStepX) {
-        for (int x = 0, i = 0; x < destLine.length-1; x++, i += sourceStepX) {
+        final int length = destLine.length-1;
+        for (int x = 0, i = 0; x < length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[(i << 1) + 1];
         }
     }

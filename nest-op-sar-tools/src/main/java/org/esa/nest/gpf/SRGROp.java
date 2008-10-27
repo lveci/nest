@@ -153,11 +153,11 @@ public class SRGROp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
-        Rectangle targetTileRectangle = targetTile.getRectangle();
-        int x0 = targetTileRectangle.x;
-        int y0 = targetTileRectangle.y;
-        int w = targetTileRectangle.width;
-        int h = targetTileRectangle.height;
+        final Rectangle targetTileRectangle = targetTile.getRectangle();
+        final int x0 = targetTileRectangle.x;
+        final int y0 = targetTileRectangle.y;
+        final int w = targetTileRectangle.width;
+        final int h = targetTileRectangle.height;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         // compute WARP polynomial coefficients
@@ -167,16 +167,16 @@ public class SRGROp extends Operator {
         }
 
         // compute ground range image pixel values
-        Band sourceBand = sourceProduct.getBand(targetBand.getName());
-        Rectangle sourceTileRectangle = new Rectangle(x0, y0, sourceImageWidth, h);
-        Tile sourceRaster = getSourceTile(sourceBand, sourceTileRectangle, pm);
+        final Band sourceBand = sourceProduct.getBand(targetBand.getName());
+        final Rectangle sourceTileRectangle = new Rectangle(x0, y0, sourceImageWidth, h);
+        final Tile sourceRaster = getSourceTile(sourceBand, sourceTileRectangle, pm);
 
-        ProductData trgData = targetTile.getDataBuffer();
-        ProductData srcData = sourceRaster.getDataBuffer();
+        final ProductData trgData = targetTile.getDataBuffer();
+        final ProductData srcData = sourceRaster.getDataBuffer();
 
         for (int x = x0; x < x0 + w; x++) {
 
-            double srpp = getSlantRangePixelPosition(x);
+            final double srpp = getSlantRangePixelPosition(x);
 
             int x1, x2;
             if (srpp < x0 + sourceImageWidth - 1) {
@@ -186,14 +186,14 @@ public class SRGROp extends Operator {
                 x1 = x0 + sourceImageWidth - 2;
                 x2 = x0 + sourceImageWidth - 1;
             }
-            double a = x2 - srpp;
-            double b = srpp - x1;
+            final double a = x2 - srpp;
+            final double b = srpp - x1;
 
             for (int y = y0; y < y0 + h; y++) {
 
-                double v1 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x1, y));
-                double v2 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x2, y));
-                double v = a*v1 + b*v2;
+                final double v1 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x1, y));
+                final double v2 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x2, y));
+                final double v = a*v1 + b*v2;
 
                 trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), v);
             }
@@ -206,13 +206,13 @@ public class SRGROp extends Operator {
      * @param x The pixel index in the ground range image.
      * @return The pixel index in the slant range image
      */
-    double getSlantRangePixelPosition(int x) {
+    private double getSlantRangePixelPosition(int x) {
 
         if (x == 0) {
             return 0.0;
         }
 
-        double dg = groundRangeSpacing * x;
+        final double dg = groundRangeSpacing * x;
         double ds = 0.0;
         for (int j = 0; j < warpPolynomialOrder + 1; j++) {
             ds += Math.pow(dg, (double)j) * warpPolynomialCoef[j];
@@ -223,9 +223,9 @@ public class SRGROp extends Operator {
     /**
      * Get srgr_flag from metadata.
      */
-    void getSRGRFlag() {
+    private void getSRGRFlag() {
 
-        MetadataAttribute srgrFlagAttr = absRoot.getAttribute(AbstractMetadata.srgr_flag);
+        final MetadataAttribute srgrFlagAttr = absRoot.getAttribute(AbstractMetadata.srgr_flag);
         if (srgrFlagAttr == null) {
             throw new OperatorException(AbstractMetadata.srgr_flag + " not found");
         }
@@ -235,9 +235,9 @@ public class SRGROp extends Operator {
     /**
      * Get slant range spacing from metadata.
      */
-    void getSlantRangeSpacing() {
+    private void getSlantRangeSpacing() {
         
-        MetadataAttribute rangeSpacingAttr = absRoot.getAttribute(AbstractMetadata.range_spacing);
+        final MetadataAttribute rangeSpacingAttr = absRoot.getAttribute(AbstractMetadata.range_spacing);
         if (rangeSpacingAttr == null) {
             throw new OperatorException(AbstractMetadata.range_spacing + " not found");
         }
@@ -251,11 +251,11 @@ public class SRGROp extends Operator {
     /**
      * Compute slant range distance from each selected range point to the 1st one.
      */
-    void computeSlantRangeDistanceArray() {
+    private void computeSlantRangeDistanceArray() {
 
         slantRangeDistanceArray = new double[numRangePoints - 1];
-        int pixelsBetweenPoints = sourceImageWidth / numRangePoints;
-        double slantDistanceBetweenPoints = slantRangeSpacing * pixelsBetweenPoints;
+        final int pixelsBetweenPoints = sourceImageWidth / numRangePoints;
+        final double slantDistanceBetweenPoints = slantRangeSpacing * pixelsBetweenPoints;
         for (int i = 0; i < numRangePoints - 1; i++) {
             slantRangeDistanceArray[i] = slantDistanceBetweenPoints * (i+1);
         }
@@ -264,13 +264,13 @@ public class SRGROp extends Operator {
     /**
      * Get near range incidence angle (in degree).
      */
-    void getNearRangeIncidenceAngle() {
+    private void getNearRangeIncidenceAngle() {
 
-        MetadataAttribute passAttr = absRoot.getAttribute(AbstractMetadata.PASS);
+        final MetadataAttribute passAttr = absRoot.getAttribute(AbstractMetadata.PASS);
         if (passAttr == null) {
             throw new OperatorException(AbstractMetadata.PASS + " not found");
         }
-        String pass = passAttr.getData().getElemString();
+        final String pass = passAttr.getData().getElemString();
         //System.out.println("pass is " + pass);
 
         getMissionType();
@@ -291,9 +291,9 @@ public class SRGROp extends Operator {
      * @param pass Satellite pass (ascending or descending)
      * @return The incidence angle.
      */
-    double getIncidenceAngleForERSProduct(String pass) {
+    private double getIncidenceAngleForERSProduct(String pass) {
         // Field 56 or 58 in PRI Facility Related Data Record (in degree)
-        MetadataElement facility = sourceProduct.getMetadataRoot().getElement("Leader").getElement("Facility Related");
+        final MetadataElement facility = sourceProduct.getMetadataRoot().getElement("Leader").getElement("Facility Related");
         if (facility == null) {
             throw new OperatorException("Facility Related not found");
         }
@@ -313,19 +313,19 @@ public class SRGROp extends Operator {
         return attr.getData().getElemFloat();
         */
 
-        MetadataAttribute attrFirst = facility.getAttribute("Incidence angle at first range pixel");
+        final MetadataAttribute attrFirst = facility.getAttribute("Incidence angle at first range pixel");
         if (attrFirst == null) {
             throw new OperatorException("Incidence angle at first range pixel not found");
         }
 
-        double alphaFirst = attrFirst.getData().getElemFloat();
+        final double alphaFirst = attrFirst.getData().getElemFloat();
 
-        MetadataAttribute attrLast = facility.getAttribute("Incidence angle at last valid range pixel");
+        final MetadataAttribute attrLast = facility.getAttribute("Incidence angle at last valid range pixel");
         if (attrLast == null) {
             throw new OperatorException("Incidence angle at last valid range pixel not found");
         }
 
-        double alphaLast = attrLast.getData().getElemFloat();
+        final double alphaLast = attrLast.getData().getElemFloat();
 
         return Math.min(alphaFirst, alphaLast);
     }
@@ -336,9 +336,9 @@ public class SRGROp extends Operator {
      * @param pass Satellite pass (ascending or descending)
      * @return The incidence angle.
      */
-    double getIncidenceAngleForASARProduct(String pass) {
+    private double getIncidenceAngleForASARProduct(String pass) {
 
-        TiePointGrid incidenceAngle = getIncidenceAngle();
+        final TiePointGrid incidenceAngle = getIncidenceAngle();
 /*
         double alpha;
         if (pass.contains("DESCENDING")) {
@@ -349,8 +349,8 @@ public class SRGROp extends Operator {
         return alpha;
 */
 
-        double alphaFirst = incidenceAngle.getPixelFloat(0.5f, 0.5f);
-        double alphaLast = incidenceAngle.getPixelFloat(sourceImageWidth - 0.5f, 0.5f);
+        final double alphaFirst = incidenceAngle.getPixelFloat(0.5f, 0.5f);
+        final double alphaLast = incidenceAngle.getPixelFloat(sourceImageWidth - 0.5f, 0.5f);
         return Math.min(alphaFirst, alphaLast);
     }
 
@@ -359,10 +359,10 @@ public class SRGROp extends Operator {
      *
      * @return srcTPG The incidence angle tie point grid.
      */
-    TiePointGrid getIncidenceAngle() {
+    private TiePointGrid getIncidenceAngle() {
 
         for (int i = 0; i < sourceProduct.getNumTiePointGrids(); i++) {
-            TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
+            final TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
             if (srcTPG.getName().equals("incident_angle")) {
                 return srcTPG;
             }
@@ -373,9 +373,9 @@ public class SRGROp extends Operator {
     /**
      * Get the mission type.
      */
-    void getMissionType() {
+    private void getMissionType() {
 
-        MetadataAttribute missionTypeAttr = absRoot.getAttribute(AbstractMetadata.MISSION);
+        final MetadataAttribute missionTypeAttr = absRoot.getAttribute(AbstractMetadata.MISSION);
         if (missionTypeAttr == null) {
             throw new OperatorException(AbstractMetadata.MISSION + " not found");
         }
@@ -387,7 +387,7 @@ public class SRGROp extends Operator {
     /**
      * Create target product.
      */
-    void createTargetProduct() {
+    private void createTargetProduct() {
 
         computeTargetImageWidth();
 
@@ -410,9 +410,9 @@ public class SRGROp extends Operator {
         updateTargetProductMetadata();
     }
 
-    void computeTargetImageWidth() {
+    private void computeTargetImageWidth() {
 
-        double[] xyz = new double[3];
+        final double[] xyz = new double[3];
         GeoPos geoPos = geoCoding.getGeoPos(new PixelPos(0, 0), null);
         geo2xyz(geoPos, xyz);
         double xP0 = xyz[0];
@@ -439,15 +439,15 @@ public class SRGROp extends Operator {
     /**
      * Update metadata in the target product.
      */
-    void updateTargetProductMetadata() {
+    private void updateTargetProductMetadata() {
 
-        MetadataElement abs = targetProduct.getMetadataRoot().getElement("Abstracted Metadata");
+        final MetadataElement abs = targetProduct.getMetadataRoot().getElement("Abstracted Metadata");
         if (abs == null) {
             throw new OperatorException("Abstracted Metadata not found");
         }
         abs.getAttribute(AbstractMetadata.srgr_flag).getData().setElemBoolean(true);
 
-        MetadataAttribute rangeSpacingAttr = abs.getAttribute(AbstractMetadata.range_spacing);
+        final MetadataAttribute rangeSpacingAttr = abs.getAttribute(AbstractMetadata.range_spacing);
         if (rangeSpacingAttr == null) {
             throw new OperatorException(AbstractMetadata.range_spacing + " not found");
         }
@@ -457,7 +457,7 @@ public class SRGROp extends Operator {
     private void addSelectedBands() {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) {
-            Band[] bands = sourceProduct.getBands();
+            final Band[] bands = sourceProduct.getBands();
             ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
                 bandNameList.add(band.getName());
@@ -465,10 +465,10 @@ public class SRGROp extends Operator {
             sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
         }
 
-        Band[] sourceBands = new Band[sourceBandNames.length];
+        final Band[] sourceBands = new Band[sourceBandNames.length];
         for (int i = 0; i < sourceBandNames.length; i++) {
-            String sourceBandName = sourceBandNames[i];
-            Band sourceBand = sourceProduct.getBand(sourceBandName);
+            final String sourceBandName = sourceBandNames[i];
+            final Band sourceBand = sourceProduct.getBand(sourceBandName);
             if (sourceBand == null) {
                 throw new OperatorException("Source band not found: " + sourceBandName);
             }
@@ -479,7 +479,7 @@ public class SRGROp extends Operator {
             if (srcBand.getUnit() != null && srcBand.getUnit().contains("phase")) {
                 continue;
             }
-            Band targetBand = new Band(srcBand.getName(),
+            final Band targetBand = new Band(srcBand.getName(),
                                        ProductData.TYPE_FLOAT32,
                                        targetImageWidth,
                                        sourceImageHeight);
@@ -492,12 +492,12 @@ public class SRGROp extends Operator {
      *
      * @param y0 The y coordinate of the upper left pixel in the current tile.
      */
-    void computeWarpPolynomial(int y0) {
+    private void computeWarpPolynomial(int y0) {
 
         computeGroundRangeDistanceArray(y0);
-        Matrix A = createVandermondeMatrix(groundRangeDistanceArray);
-        Matrix b = new Matrix(slantRangeDistanceArray, numRangePoints - 1);
-        Matrix x = A.solve(b);
+        final Matrix A = createVandermondeMatrix(groundRangeDistanceArray);
+        final Matrix b = new Matrix(slantRangeDistanceArray, numRangePoints - 1);
+        final Matrix x = A.solve(b);
         warpPolynomialCoef = x.getColumnPackedCopy();
 
         /*
@@ -513,11 +513,11 @@ public class SRGROp extends Operator {
      *
      * @param y0 The y coordinate of the upper left pixel in the current tile.
      */
-    void computeGroundRangeDistanceArray(int y0) {
+    private void computeGroundRangeDistanceArray(int y0) {
 
         groundRangeDistanceArray = new double[numRangePoints - 1];
-        double[] xyz = new double[3];
-        int pixelsBetweenPoints = sourceImageWidth / numRangePoints;
+        final double[] xyz = new double[3];
+        final int pixelsBetweenPoints = sourceImageWidth / numRangePoints;
 
         // geomatic geo = new geomatic();
         // MxVector3 xyz1 = new MxVector3();
@@ -533,7 +533,7 @@ public class SRGROp extends Operator {
 
             geoPos = geoCoding.getGeoPos(new PixelPos(pixelsBetweenPoints*(i+1), y0), null);
             geo2xyz(geoPos, xyz);
-            double pointToPointDistance = Math.sqrt(Math.pow(xP0 - xyz[0], 2) +
+            final double pointToPointDistance = Math.sqrt(Math.pow(xP0 - xyz[0], 2) +
                                                     Math.pow(yP0 - xyz[1], 2) +
                                                     Math.pow(zP0 - xyz[2], 2));
 
@@ -557,12 +557,12 @@ public class SRGROp extends Operator {
      */
     private static void geo2xyz(GeoPos geoPos, double xyz[]) {
 
-        double lat = ((double)geoPos.lat) * MathUtils.DTOR;
-        double lon = ((double)geoPos.lon) * MathUtils.DTOR;
+        final double lat = ((double)geoPos.lat) * MathUtils.DTOR;
+        final double lon = ((double)geoPos.lon) * MathUtils.DTOR;
 
-        double sinLat = Math.sin(lat);
-        double cosLat = Math.cos(lat);
-        double N = a / Math.sqrt(1 - Math.pow(e*sinLat, 2));
+        final double sinLat = Math.sin(lat);
+        final double cosLat = Math.cos(lat);
+        final double N = a / Math.sqrt(1 - Math.pow(e*sinLat, 2));
 
         xyz[0] = N * cosLat * Math.cos(lon); // in m
         xyz[1] = N * cosLat * Math.sin(lon); // in m
@@ -575,10 +575,10 @@ public class SRGROp extends Operator {
      * @param d The given range distance array.
      * @return the matrix
      */
-    Matrix createVandermondeMatrix(double[] d) {
+    private Matrix createVandermondeMatrix(double[] d) {
 
-        int n = d.length;
-        double[][] array = new double[n][warpPolynomialOrder + 1];
+        final int n = d.length;
+        final double[][] array = new double[n][warpPolynomialOrder + 1];
 
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < warpPolynomialOrder + 1; j++) {
@@ -603,6 +603,7 @@ public class SRGROp extends Operator {
         sourceBandNames = new String[1];
         sourceBandNames[0] = name;
     }
+
     /**
      * The SPI is used to register this operator in the graph processing framework
      * via the SPI configuration file
