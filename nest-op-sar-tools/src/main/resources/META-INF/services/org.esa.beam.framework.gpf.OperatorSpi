@@ -4,7 +4,4 @@ org.esa.nest.gpf.MultilookOp$Spi
 org.esa.nest.gpf.OversamplingOp$Spi
 org.esa.nest.gpf.UndersamplingOp$Spi
 org.esa.nest.gpf.FormatChangeOp$Spi
-org.esa.nest.gpf.ComplexToIntensityOp$Spi
-org.esa.nest.gpf.AmplitudeToIntensityOp$Spi
-org.esa.nest.gpf.LinearTodBOp$Spi
 org.esa.nest.gpf.MergeBandsOp$Spi

@@ -109,23 +109,15 @@
             <helpId>FormatChangeOp</helpId>
         </action>
 
-        <!--action>
+        <action>
             <id>AmplitudeToIntensityOp</id>
             <class>org.esa.nest.dat.AmplitudeToIntensityOpAction</class>
             <text>Amplitude to/from Intensity</text>
             <shortDescr>Change the data Amplitude to/from Intensity</shortDescr>
             <parent>DatasetConversion</parent>
+            <context>band</context>
             <helpId>AmplitudeToIntensityOp</helpId>
-        </action-->
-
-        <!--action>
-            <id>ComplexToIntensityOp</id>
-            <class>org.esa.nest.dat.ComplexToIntensityOpAction</class>
-            <text>Complex to Intensity</text>
-            <shortDescr>Change the data from Complex to Intensity</shortDescr>
-            <parent>DatasetConversion</parent>
-            <helpId>ComplexToIntensityOp</helpId>
-        </action-->
+        </action>
 
         <action>
             <id>LinearTodBOp</id>

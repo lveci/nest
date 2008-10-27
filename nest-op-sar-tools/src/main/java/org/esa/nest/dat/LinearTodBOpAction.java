@@ -1,11 +1,9 @@
 package org.esa.nest.dat;
 
-import org.esa.beam.framework.ui.ModelessDialog;
-import org.esa.beam.framework.ui.command.CommandEvent;
-import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.visat.actions.AbstractVisatAction;
+import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.visat.VisatApp;
+import org.esa.beam.visat.actions.AbstractVisatAction;
 
 /**
  * LinearTodB action.
@@ -20,8 +18,8 @@ public class LinearTodBOpAction extends AbstractVisatAction {
 
         final ProductNode node = visatApp.getSelectedProductNode();
         if(node instanceof Band) {
-            Product product = visatApp.getSelectedProduct();
-            Band band = (Band) node;
+            final Product product = visatApp.getSelectedProduct();
+            final Band band = (Band) node;
             String bandName = band.getName();
             String unit = band.getUnit();
 
@@ -57,8 +55,8 @@ public class LinearTodBOpAction extends AbstractVisatAction {
     public void updateState(CommandEvent event) {
         final ProductNode node = VisatApp.getApp().getSelectedProductNode();
         if(node instanceof Band) {
-            Band band = (Band) node;
-            String unit = band.getUnit();
+            final Band band = (Band) node;
+            final String unit = band.getUnit();
             if(unit != null && !unit.contains("phase")) {
                 event.getCommand().setEnabled(true);
                 return;
@@ -83,8 +81,8 @@ public class LinearTodBOpAction extends AbstractVisatAction {
             unit = unit.substring(0, unit.indexOf(dBStr));
         }
 
-        VirtualBand virtBand = new VirtualBand(bandName,
-                ProductData.TYPE_FLOAT32,
+        final VirtualBand virtBand = new VirtualBand(bandName,
+                ProductData.TYPE_FLOAT64,
                 product.getSceneRasterWidth(),
                 product.getSceneRasterHeight(),
                 expression);
