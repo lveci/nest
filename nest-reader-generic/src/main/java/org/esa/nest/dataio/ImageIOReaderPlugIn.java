@@ -21,16 +21,14 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
 
 	final static String[] FORMAT_NAMES = ImageIO.getReaderFormatNames();
 	final static String[] FORMAT_FILE_EXTENSIONS = getFormatFileExtensions();
-    final static String[] IMAGEIO_FILE_EXTENSIONS = ImageIO.getReaderFileSuffixes();
+    final static String[] IMAGEIO_FILE_EXTENSIONS = getPrunedImageIOExtensions();
     final static String PLUGIN_DESCRIPTION = "ImageIO Products";
     Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
 
     private static String[] getFormatFileExtensions() {
 
         ArrayList<String> extList = new ArrayList<String>();
-        String[] ioExt = ImageIO.getReaderFileSuffixes();
-
-        extList.addAll(Arrays.asList(ioExt));
+        extList.addAll(Arrays.asList(ImageIO.getReaderFileSuffixes()));
 
         // BEST extensions
         addBESTExt(extList, "XT");
@@ -47,6 +45,20 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
     private static void addBESTExt(ArrayList<String> extList, String ext) {
         extList.add(ext+"i"); extList.add(ext+"f"); extList.add(ext+"c");
         extList.add(ext+"s"); extList.add(ext+"t"); extList.add(ext+"r");
+    }
+
+    private static String[] getPrunedImageIOExtensions() {
+        ArrayList<String> extList = new ArrayList<String>();
+        extList.addAll(Arrays.asList(ImageIO.getReaderFileSuffixes()));
+
+        extList.remove("jpeg");
+        extList.remove("jls");
+        extList.remove("jfif");
+        extList.remove("wbmp");
+        extList.remove("pgm");
+        extList.remove("ppm");
+
+        return extList.toArray(new String[extList.size()]);
     }
 
     /**
@@ -161,9 +173,8 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
 
     public static class FileFilter extends BeamFileFilter {
 
-        public FileFilter() {
+        public FileFilter() {      
             super(FORMAT_NAMES[0], IMAGEIO_FILE_EXTENSIONS, PLUGIN_DESCRIPTION);
-
         }
 
         /**
