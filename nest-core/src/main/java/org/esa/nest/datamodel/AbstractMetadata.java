@@ -151,7 +151,7 @@ public class AbstractMetadata {
      */
     private static void addAbstractedAttribute(MetadataElement dest, String tag, int dataType,
                                                String unit, String desc) {
-        MetadataAttribute attribute = new MetadataAttribute(tag, dataType, 1);
+        final MetadataAttribute attribute = new MetadataAttribute(tag, dataType, 1);
         if(dataType == ProductData.TYPE_ASCII)
             attribute.getData().setElems(" ");
         attribute.setUnit(unit);
@@ -167,14 +167,16 @@ public class AbstractMetadata {
      * @param value the string value
      */
     public static void setAttribute(MetadataElement dest, String tag, String value) {
-        MetadataAttribute attrib = dest.getAttribute(tag);
-        if(attrib == null)
-            System.out.println(tag + " not found in metadata");
-        if(value == null)
-            System.out.println(tag + " metadata value is null");
+        final MetadataAttribute attrib = dest.getAttribute(tag);
         if(attrib != null && value != null) {
             attrib.getData().setElems(value);
+        } else {
+            if(attrib == null)
+                System.out.println(tag + " not found in metadata");
+            if(value == null)
+                System.out.println(tag + " metadata value is null");
         }
+
     }
 
     /**
@@ -184,13 +186,15 @@ public class AbstractMetadata {
      * @param value the UTC value
      */
     public static void setAttribute(MetadataElement dest, String tag, ProductData.UTC value) {
-        MetadataAttribute attrib = dest.getAttribute(tag);
-        if(attrib == null)
-            System.out.println(tag + " not found in metadata");
-        if(value == null)
-            System.out.println(tag + " metadata value is null");
-        if(attrib != null && value != null)
+        final MetadataAttribute attrib = dest.getAttribute(tag);
+        if(attrib != null && value != null) {
             attrib.getData().setElems(value.getArray());
+        } else {
+            if(attrib == null)
+                System.out.println(tag + " not found in metadata");
+            if(value == null)
+                System.out.println(tag + " metadata value is null");
+        }
     }
 
     /**
@@ -200,10 +204,10 @@ public class AbstractMetadata {
      * @param value the string value
      */
     public static void setAttribute(MetadataElement dest, String tag, int value) {
-        MetadataAttribute attrib = dest.getAttribute(tag);
+        final MetadataAttribute attrib = dest.getAttribute(tag);
         if(attrib == null)
             System.out.println(tag + " not found in metadata");
-        if(attrib != null)
+        else
             attrib.getData().setElemInt(value);
     }
 
@@ -214,10 +218,10 @@ public class AbstractMetadata {
      * @param value the string value
      */
     public static void setAttribute(MetadataElement dest, String tag, double value) {
-        MetadataAttribute attrib = dest.getAttribute(tag);
+        final MetadataAttribute attrib = dest.getAttribute(tag);
         if(attrib == null)
             System.out.println(tag + " not found in metadata");
-        if(attrib != null)
+        else
             attrib.getData().setElemDouble(value);
     }
 

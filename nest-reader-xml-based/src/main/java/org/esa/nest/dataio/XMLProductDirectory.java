@@ -46,7 +46,7 @@ public class XMLProductDirectory {
         File[] fileList = imgFolder.listFiles();
         for (File file : fileList) {
             if (file.getName().toUpperCase().endsWith("TIF") && !file.getName().toLowerCase().contains("browse")) {
-                ImageIOFile img = new ImageIOFile(file);
+                final ImageIOFile img = new ImageIOFile(file);
                 bandImageFileMap.put(img.getName(), img);
 
                 _sceneWidth = img.getSceneWidth();
@@ -108,7 +108,7 @@ public class XMLProductDirectory {
         final MetadataElement root = product.getMetadataRoot();
         root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
 
-        Element rootElement = xmlDoc.getRootElement();
+        final Element rootElement = xmlDoc.getRootElement();
         AddXMLMetadata(rootElement, root);
 
         addAbstractedMetadataHeader(root);
@@ -121,32 +121,31 @@ public class XMLProductDirectory {
                 addAttribute(metadataRoot, xmlRoot.getName(), xmlRoot.getValue());
             }
         } else if(xmlRoot.getChildren().isEmpty()) {
-            MetadataElement metaElem = new MetadataElement(xmlRoot.getName());
+            final MetadataElement metaElem = new MetadataElement(xmlRoot.getName());
 
             addAttribute(metaElem, xmlRoot.getName(), xmlRoot.getValue());
 
-            List<Attribute> xmlAttribs = xmlRoot.getAttributes();
+            final List<Attribute> xmlAttribs = xmlRoot.getAttributes();
             for (Attribute aChild : xmlAttribs) {
                 addAttribute(metaElem, aChild.getName(), aChild.getValue());
             }
 
             metadataRoot.addElement(metaElem);
         } else {
-            MetadataElement metaElem = new MetadataElement(xmlRoot.getName());
+            final MetadataElement metaElem = new MetadataElement(xmlRoot.getName());
             xmlRoot.getAttributes();
 
-            List children = xmlRoot.getContent();
+            final List children = xmlRoot.getContent();
             for (Object aChild : children) {
                 if (aChild instanceof Element) {
-                    Element childElem = (Element) aChild;
-                    AddXMLMetadata(childElem, metaElem);
+                    AddXMLMetadata((Element) aChild, metaElem);
                 } else if(aChild instanceof Attribute) {
-                    Attribute childAtrrib = (Attribute) aChild;
+                    final Attribute childAtrrib = (Attribute) aChild;
                     addAttribute(metaElem, childAtrrib.getName(), childAtrrib.getValue());
                 }
             }
 
-            List<Attribute> xmlAttribs = xmlRoot.getAttributes();
+            final List<Attribute> xmlAttribs = xmlRoot.getAttributes();
             for (Attribute aChild : xmlAttribs) {
                 addAttribute(metaElem, aChild.getName(), aChild.getValue());
             }
@@ -156,7 +155,7 @@ public class XMLProductDirectory {
     }
 
     private static void addAttribute(MetadataElement meta, String name, String value) {
-        MetadataAttribute attribute = new MetadataAttribute(name, ProductData.TYPE_ASCII, 1);
+        final MetadataAttribute attribute = new MetadataAttribute(name, ProductData.TYPE_ASCII, 1);
         attribute.getData().setElems(value);
         meta.addAttributeFast(attribute);
     }
@@ -165,7 +164,7 @@ public class XMLProductDirectory {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
-        MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
 
     }
 
