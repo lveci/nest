@@ -368,7 +368,7 @@
             </plugin>
 			<plugin>
                 <artifactId>maven-eclipse-plugin</artifactId>
-                <version>2.4</version>
+                <version>2.3-bc</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -410,12 +410,14 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
+					<aggregate>true</aggregate>
                     <destDir>../target/site/apidocs/${artifactId}-${version}/apidoc</destDir>
                     <!-- Creates an HTML version of each source file and adds links documentation -->
                     <linksource>true</linksource>
                     <excludePackageNames>
                         *.internal;org.esa.beam.visat.toolviews.*;org.esa.beam.visat.actions.*;org.esa.beam.visat.plugins.*;org.esa.beam.visat.dialogs.*;org.esa.beam.examples.*;org.esa.beam.dataio.*;org.esa.beam.processor.*;com.bc.beam.processor.*;org.esa.beam.pconvert
                     </excludePackageNames>
+					<maxmemory>512m</maxmemory>
                     <!-- Shuts off non-error and non-warning messages-->
                     <quiet>true</quiet>
                 </configuration>
