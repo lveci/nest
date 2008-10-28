@@ -1,8 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head><title>NEST Help - Develop Operator</title>
 
-<link rel="stylesheet" href="../style.css">
-</head>
+<link rel="stylesheet" href="../style.css"></head>
 <body>
 <table class="header">
 <tbody>
@@ -29,7 +28,7 @@ other cannot. </p>
 <p>The GPF selects the method which best fits to the application requirements:</p>
 <ul><li>In order to display an image of a band, the GPF is asked to
 compute tiles of single bands. The GPF therefore will prefer calling
-the <tt>computeTile</tt> method, if implemented. Otherwise it has to call <tt>computeTiles</tt>, which might not be the best choise in this case.</li><li>In
+the <tt>computeTile</tt> method, if implemented. Otherwise it has to call <tt>computeTiles</tt>, which might not be the best choice in this case.</li><li>In
 order to process in batch-mode or to save a product to disk within
 VISAT, the GPF is asked to compute the tiles of all bands of a product.
 The GPF therefore will prefer calling the <tt>computeTiles</tt> method, if implemented. Otherwise it will consecutively call the <tt>computeTile</tt> for each output band</li></ul>
@@ -44,7 +43,7 @@ easily and get started adding your code to the module.<br>
 <br>
 A GPF Archetype will generate a single tile and a multi tile Operator
 within the same package.<br>
-Before begining, make sure that you have built the NEST source code and
+Before beginning, make sure that you have built the NEST source code and
 do a <span style="font-weight: bold;">maven install</span>
 to ensure that all dependencies are in the repository.<br>
 <br>
