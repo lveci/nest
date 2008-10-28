@@ -11,14 +11,19 @@
 </tr>
 </tbody>
 </table>
-<h3>Coregistering&nbsp;Products</h3>
-NEST performs coregistration automatically by maximizing correlation in
-windows around&nbsp;Ground Control Points (GCPs).<br>
-This allows pixel-by-pixel comparisons of&nbsp;multiple datasets
+<h3>Coregistering&nbsp;Products</h3>Images obtained from different
+measurements may be co-registered such that the data is transformed
+into one coordinate system. The toolbox will accurately co-register two
+or more input images by spatial registration and resampling to correct
+translational, rotational and scale differences. One of the images is
+selected as the master image while the others are slave images.
+Correlation metrics are used to automatically relate the slave images
+to the master image. The input images need to have a minimum overlap.<br><br>NEST performs coregistration automatically by maximizing correlation in
+windows around&nbsp;Ground Control Points (GCPs). This allows pixel-by-pixel comparisons of&nbsp;multiple datasets
 that cover the same region.<br><br>Images
 may be fully or only partly overlapping and may be from acquisitions
 taken at different times using multiple sensors or from multiple
-passages of the<br>same satellite. &nbsp;The
+passages of the same satellite. &nbsp;The
 slave and master images should be in the same projection.&nbsp; If not, the slave image(s) should be
 reprojected into the same projection system as that of the master image.
 <br>
@@ -26,7 +31,10 @@ reprojected into the same projection system as that of the master image.
 Image co-registration is fundamental for Interferometry SAR (InSAR)
 imaging and its applications, such as DEM map generation and analysis.
 To obtain a high quality InSAR image, the individual complex images
-need to be co-registered to sub-pixel accuracy. <br><br>
+need to be co-registered to sub-pixel accuracy. &nbsp;The achievable
+co-registration accuracy for images in the same acquisition geometry
+and over flat areas will be better than 0.2 pixels for two real images
+and better than 0.05 pixels for two complex images.<br><br>
 Coregistration is achieved in NEST using two graphs, one for GCP
 Selection and the other to apply the Warp. The Warp graph requires that
 all slave GCPs have been determined before evaluating the warp function.<br>
