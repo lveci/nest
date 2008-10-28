@@ -32,7 +32,8 @@
             <shortDescr>Import an ERS CEOS data product or product subset.</shortDescr>
             <description>Import an ERS CEOS data product or product subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
-            <helpId>importPalsarProduct</helpId>
+            <helpId>importERSProduct</helpId>
+            <placeAfter>importErsProduct</placeAfter>
         </action>
         <action>
             <id>importJERSCEOSProduct</id>
