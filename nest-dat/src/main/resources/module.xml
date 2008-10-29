@@ -257,6 +257,36 @@
         </action>
 
         <action>
+            <id>import</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <parent>file</parent>
+            <text>Product Readers</text>
+            <placeAfter>saveAs</placeAfter>
+            <mnemonic>I</mnemonic>
+            <separatorBefore>true</separatorBefore>
+            <shortDescr>Product Readers</shortDescr>
+            <description>Open Products with a Specific Reader</description>
+            <smallIcon>icons/Import16.gif</smallIcon>
+            <largeIcon>icons/Import24.gif</largeIcon>
+            <helpId>import</helpId>
+        </action>
+
+        <action>
+            <id>export</id>
+            <class>org.esa.beam.visat.actions.ExportActionGroup</class>
+            <parent>file</parent>
+            <text>Product Writers</text>
+            <mnemonic>I</mnemonic>
+            <placeAfter>import</placeAfter>
+            <separatorAfter>true</separatorAfter>
+            <shortDescr>Product Writers</shortDescr>
+            <description>Export to a Specific Format</description>
+            <smallIcon>icons/Export16.gif</smallIcon>
+            <largeIcon>icons/Export24.gif</largeIcon>
+            <helpId>export</helpId>
+        </action>
+
+        <action>
             <id>loadTabbedLayout</id>
             <class>org.esa.nest.dat.actions.LoadTabbedLayoutAction</class>
             <parent>layout</parent>

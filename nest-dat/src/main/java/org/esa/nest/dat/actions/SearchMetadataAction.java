@@ -14,7 +14,7 @@ import org.esa.beam.visat.dialogs.PromptDialog;
  * This action to searches the Metadata
  *
  * @author lveci
- * @version $Revision: 1.1 $ $Date: 2008-08-07 17:25:27 $
+ * @version $Revision: 1.2 $ $Date: 2008-10-29 20:51:41 $
  */
 public class SearchMetadataAction extends ExecCommand {
 
@@ -27,20 +27,20 @@ public class SearchMetadataAction extends ExecCommand {
                 String tag = dlg.getValue().toUpperCase();
                 MetadataElement resultElem = new MetadataElement("Search result ("+dlg.getValue()+')');
 
-                ProductMetadataView metadataView = VisatApp.getApp().getSelectedProductMetadataView();
+               /* ProductMetadataView metadataView = VisatApp.getApp().getSelectedProductMetadataView();
                 if(metadataView != null) {
                     MetadataElement elem = metadataView.getMetadataElement();
                     resultElem.setOwner(elem.getProduct());
                     
                     searchMetadata(resultElem, elem, tag);
 
-                } else {
+                } else {  */
                     Product product = VisatApp.getApp().getSelectedProduct();
                     MetadataElement root = product.getMetadataRoot();
                     resultElem.setOwner(product);
 
                     searchMetadata(resultElem, root, tag);
-                }
+                //}
 
                 if(resultElem.getNumElements() > 0 || resultElem.getNumAttributes() > 0) {
                     VisatApp.getApp().createProductMetadataView(resultElem);
