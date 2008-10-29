@@ -38,37 +38,48 @@
     <ROW Directory="res_DIR" Directory_Parent="nest_1C_bin.dir_DIR" DefaultDir="res"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCompsComponent">
-    <ROW Component="CHANGELOG.txt" ComponentId="{68629D59-0D68-4D5F-A067-3DB9A87CE2BF}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="CHANGELOG.txt" Type="0"/>
-    <ROW Component="Create_Stack.xml" ComponentId="{C9EE0D57-2929-41FE-924B-13464F6D2E62}" Directory_="Coregistration_DIR" Attributes="0" KeyPath="Create_Stack.xml" Type="0"/>
-    <ROW Component="bc_jnn_1.5.jar" ComponentId="{66BD3DAF-4A56-4835-8F83-3F64D6AD3539}" Directory_="lib_DIR" Attributes="0" KeyPath="bc_jnn_1.5.jar" Type="0"/>
-    <ROW Component="beam.config" ComponentId="{F0B6BA0D-35D6-46E7-A228-3220D139B4CC}" Directory_="config_DIR" Attributes="0" KeyPath="beam.config" Type="0"/>
-    <ROW Component="beam_alos_reader_1.1_SNAPSHOT.jar" ComponentId="{011492DB-141C-40CC-865A-B2CF7BB68A57}" Directory_="modules_DIR" Attributes="0" KeyPath="beam_alos_reader_1.1_SNAPSHOT.jar" Type="0"/>
-    <ROW Component="ceres_launcher.jar" ComponentId="{2BF5489D-07C9-48CA-B52A-033EF9BFF452}" Directory_="bin_DIR" Attributes="0" KeyPath="ceres_launcher.jar" Type="0"/>
-    <ROW Component="clib_jiio.dll" ComponentId="{3FA83624-4D77-48F3-8387-FEC2C18B8A20}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="clib_jiio.dll"/>
-    <ROW Component="clib_jiio_sse2.dll" ComponentId="{788ADB72-2544-4A43-95AF-9C71FE27ED52}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="clib_jiio_sse2.dll"/>
-    <ROW Component="clib_jiio_util.dll" ComponentId="{42EB4B34-6EA2-45CF-B1FF-00A5443D49AD}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="clib_jiio_util.dll"/>
-    <ROW Component="dat.png" ComponentId="{9DC0A047-173C-454B-96B7-6197405CEA0C}" Directory_="res_DIR" Attributes="0" KeyPath="dat.png" Type="0"/>
-    <ROW Component="gdal_license.txt" ComponentId="{5E0DD3FC-4BF7-4184-97EB-C4820691E11F}" Directory_="licenses_DIR" Attributes="0" KeyPath="gdal_license.txt" Type="0"/>
-    <ROW Component="jogl.dll" ComponentId="{3462472F-E0B7-45CC-A47B-31BB3321CC5D}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="jogl.dll"/>
-    <ROW Component="jogl_awt.dll" ComponentId="{15173453-DD79-4831-8913-D6CFE3BB7A1E}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="jogl_awt.dll"/>
-    <ROW Component="jogl_cg.dll" ComponentId="{C536D62D-1366-4334-B307-CADBA0AF84E0}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="jogl_cg.dll"/>
-    <ROW Component="mlib_jai.dll" ComponentId="{6F9B93BC-3241-4857-953B-49E835FB467B}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="mlib_jai.dll"/>
-    <ROW Component="mlib_jai_mmx.dll" ComponentId="{97F275F2-6FFB-451E-B9C4-4DD5F472EAC2}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="mlib_jai_mmx.dll"/>
-    <ROW Component="mlib_jai_util.dll" ComponentId="{26C83954-7F7B-4012-B15A-736DB302A2D6}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="mlib_jai_util.dll"/>
-    <ROW Component="nest_dat.exe" ComponentId="{2F695212-CF60-42F8-8D65-B6495D58DE64}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="nest_dat.exe"/>
+    <ROW Component="Appendix_F1.txt" ComponentId="{81657C7E-A8D0-4B9C-B4D9-4E5DFB34A031}" Directory_="res_DIR" Attributes="0" KeyPath="Appendix_F1.txt" Type="0"/>
+    <ROW Component="CHANGELOG.txt" ComponentId="{BF7643CB-623B-4B45-9389-6611750AB90F}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="CHANGELOG.txt" Type="0"/>
+    <ROW Component="Create_Stack.xml" ComponentId="{E97E8BD1-6244-463A-B672-B49B70458B27}" Directory_="Coregistration_DIR" Attributes="0" KeyPath="Create_Stack.xml" Type="0"/>
+    <ROW Component="bc_jnn_1.5.jar" ComponentId="{EA5830D6-CEFA-4A03-9B17-4289A033B540}" Directory_="lib_DIR" Attributes="0" KeyPath="bc_jnn_1.5.jar" Type="0"/>
+    <ROW Component="beam.config" ComponentId="{264A2BE5-194D-46AC-8D07-A303CC163031}" Directory_="config_DIR" Attributes="0" KeyPath="beam.config" Type="0"/>
+    <ROW Component="beam_alos_reader_1.1_SNAPSHOT.jar" ComponentId="{334953ED-62C3-4DAF-8C78-874F290F0062}" Directory_="modules_DIR" Attributes="0" KeyPath="beam_alos_reader_1.1_SNAPSHOT.jar" Type="0"/>
+    <ROW Component="ceres_launcher.jar" ComponentId="{FA3FB565-39FB-4106-8A75-3668AC14E448}" Directory_="bin_DIR" Attributes="0" KeyPath="ceres_launcher.jar" Type="0"/>
+    <ROW Component="clib_jiio.dll" ComponentId="{398B8DBD-F2B4-427E-B19C-B02EAAFD72BF}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="clib_jiio.dll"/>
+    <ROW Component="clib_jiio_sse2.dll" ComponentId="{67709DB4-5C35-46C0-BEBB-13BD71D55840}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="clib_jiio_sse2.dll"/>
+    <ROW Component="clib_jiio_util.dll" ComponentId="{D4C77873-AF61-4036-A3E5-509C2F3DA473}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="clib_jiio_util.dll"/>
+    <ROW Component="gdal_license.txt" ComponentId="{E691630D-A186-44CE-840D-B518007F1249}" Directory_="licenses_DIR" Attributes="0" KeyPath="gdal_license.txt" Type="0"/>
+    <ROW Component="jogl.dll" ComponentId="{91DBED28-F39F-4E2E-A66B-5B4A63A09AD5}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="jogl.dll"/>
+    <ROW Component="jogl_awt.dll" ComponentId="{464A632E-9D88-4428-8FE7-58625010D9A3}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="jogl_awt.dll"/>
+    <ROW Component="jogl_cg.dll" ComponentId="{0CF4B994-E476-4CAD-A05D-2F654AC598AC}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="jogl_cg.dll"/>
+    <ROW Component="mlib_jai.dll" ComponentId="{377889C5-293D-46F4-A6BF-D690F71D3DD3}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="mlib_jai.dll"/>
+    <ROW Component="mlib_jai_mmx.dll" ComponentId="{53FFE326-964F-4E82-80D2-D3D36D32C994}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="mlib_jai_mmx.dll"/>
+    <ROW Component="mlib_jai_util.dll" ComponentId="{BEE04FFE-DE7B-408F-9638-76AAA8667D66}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="mlib_jai_util.dll"/>
+    <ROW Component="nest_dat.exe" ComponentId="{F5B379E9-A621-42D1-9B6F-2A8F5E196905}" Directory_="nest_1C_bin.dir_DIR" Attributes="0" KeyPath="nest_dat.exe"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatsComponent">
-    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0" Components="ceres_launcher.jar CHANGELOG.txt clib_jiio.dll clib_jiio_sse2.dll clib_jiio_util.dll beam.config Create_Stack.xml jogl.dll jogl_awt.dll jogl_cg.dll bc_jnn_1.5.jar gdal_license.txt mlib_jai.dll mlib_jai_mmx.dll mlib_jai_util.dll beam_alos_reader_1.1_SNAPSHOT.jar nest_dat.exe dat.png"/>
+    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0" Components="ceres_launcher.jar CHANGELOG.txt clib_jiio.dll clib_jiio_sse2.dll clib_jiio_util.dll beam.config Create_Stack.xml jogl.dll jogl_awt.dll jogl_cg.dll bc_jnn_1.5.jar gdal_license.txt mlib_jai.dll mlib_jai_mmx.dll mlib_jai_util.dll beam_alos_reader_1.1_SNAPSHOT.jar nest_dat.exe Appendix_F1.txt"/>
     <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
+    <ROW File="Appendix_F1.txt" Component_="Appendix_F1.txt" FileName="Append~1.txt|Appendix_F1.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\Appendix_F1.txt" SelfReg="false" Sequence="108"/>
+    <ROW File="Appendix_F2.txt" Component_="Appendix_F1.txt" FileName="Append~2.txt|Appendix_F2.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\Appendix_F2.txt" SelfReg="false" Sequence="109"/>
+    <ROW File="Appendix_G1.txt" Component_="Appendix_F1.txt" FileName="Append~3.txt|Appendix_G1.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\Appendix_G1.txt" SelfReg="false" Sequence="110"/>
+    <ROW File="Appendix_G2_a.txt" Component_="Appendix_F1.txt" FileName="Append~4.txt|Appendix_G2_a.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\Appendix_G2_a.txt" SelfReg="false" Sequence="111"/>
+    <ROW File="Appendix_G2_b.txt" Component_="Appendix_F1.txt" FileName="Append~5.txt|Appendix_G2_b.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\Appendix_G2_b.txt" SelfReg="false" Sequence="112"/>
+    <ROW File="Appendix_G2_c.txt" Component_="Appendix_F1.txt" FileName="Append~6.txt|Appendix_G2_c.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\Appendix_G2_c.txt" SelfReg="false" Sequence="113"/>
+    <ROW File="Appendix_G3_a.txt" Component_="Appendix_F1.txt" FileName="Append~7.txt|Appendix_G3_a.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\Appendix_G3_a.txt" SelfReg="false" Sequence="114"/>
+    <ROW File="Appendix_G3_b.txt" Component_="Appendix_F1.txt" FileName="Append~8.txt|Appendix_G3_b.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\Appendix_G3_b.txt" SelfReg="false" Sequence="115"/>
+    <ROW File="Appendix_G3_c.txt" Component_="Appendix_F1.txt" FileName="Append~9.txt|Appendix_G3_c.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\Appendix_G3_c.txt" SelfReg="false" Sequence="116"/>
+    <ROW File="Appendix_H_1.txt" Component_="Appendix_F1.txt" FileName="Appen~10.txt|Appendix_H_1.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\Appendix_H_1.txt" SelfReg="false" Sequence="117"/>
+    <ROW File="Appendix_H_2.txt" Component_="Appendix_F1.txt" FileName="Appen~11.txt|Appendix_H_2.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\Appendix_H_2.txt" SelfReg="false" Sequence="118"/>
     <ROW File="CHANGELOG.txt" Component_="CHANGELOG.txt" FileName="CHANGE~1.txt|CHANGELOG.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\CHANGELOG.txt" SelfReg="false" Sequence="2"/>
     <ROW File="Create_Stack.xml" Component_="Create_Stack.xml" FileName="Create~1.xml|Create Stack.xml" Attributes="0" SourcePath="target\nest-1C-bin.dir\graphs\Coregistration\Create Stack.xml" SelfReg="false" Sequence="15"/>
     <ROW File="GCP_Selection.xml" Component_="Create_Stack.xml" FileName="GCP_Se~1.xml|GCP_Selection.xml" Attributes="0" SourcePath="target\nest-1C-bin.dir\graphs\Coregistration\GCP_Selection.xml" SelfReg="false" Sequence="16"/>
     <ROW File="Jama_1.0.2.jar" Component_="bc_jnn_1.5.jar" FileName="Jama-1~1.jar|Jama-1.0.2.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\Jama-1.0.2.jar" SelfReg="false" Sequence="30"/>
     <ROW File="LICENSE.txt" Component_="CHANGELOG.txt" FileName="LICENSE.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\LICENSE.txt" SelfReg="false" Sequence="54"/>
     <ROW File="MrSID_decoderSDK_license.txt" Component_="gdal_license.txt" FileName="MrSID_~1.txt|MrSID_decoderSDK_license.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\licenses\MrSID_decoderSDK_license.txt" SelfReg="false" Sequence="61"/>
-    <ROW File="NEST_Splashscreen080901.png" Component_="dat.png" FileName="NEST_S~1.png|NEST_Splashscreen080901.png" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\NEST_Splashscreen080901.png" SelfReg="false" Sequence="110"/>
+    <ROW File="NEST_Splashscreen080901.png" Component_="Appendix_F1.txt" FileName="NEST_S~1.png|NEST_Splashscreen080901.png" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\NEST_Splashscreen080901.png" SelfReg="false" Sequence="121"/>
     <ROW File="Warp.xml" Component_="Create_Stack.xml" FileName="Warp.xml" Attributes="0" SourcePath="target\nest-1C-bin.dir\graphs\Coregistration\Warp.xml" SelfReg="false" Sequence="17"/>
     <ROW File="bc_jnn_1.5.jar" Component_="bc_jnn_1.5.jar" FileName="bc-jnn~1.jar|bc-jnn-1.5.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\bc-jnn-1.5.jar" SelfReg="false" Sequence="21"/>
     <ROW File="beam.config" Component_="beam.config" FileName="beam~1.con|beam.config" Attributes="0" SourcePath="target\nest-1C-bin.dir\config\beam.config" SelfReg="false" Sequence="6"/>
@@ -107,9 +118,9 @@
     <ROW File="clibwrapper_jiio_1.1.jar" Component_="bc_jnn_1.5.jar" FileName="clibwr~1.jar|clibwrapper-jiio-1.1.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\clibwrapper-jiio-1.1.jar" SelfReg="false" Sequence="26"/>
     <ROW File="dat.bat" Component_="CHANGELOG.txt" FileName="dat.bat" Attributes="0" SourcePath="target\nest-1C-bin.dir\dat.bat" SelfReg="false" Sequence="9"/>
     <ROW File="dat.command" Component_="CHANGELOG.txt" FileName="dat~1.com|dat.command" Attributes="0" SourcePath="target\nest-1C-bin.dir\dat.command" SelfReg="false" Sequence="10"/>
-    <ROW File="dat.png" Component_="dat.png" FileName="dat.png" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\dat.png" SelfReg="false" Sequence="108"/>
+    <ROW File="dat.png" Component_="Appendix_F1.txt" FileName="dat.png" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\dat.png" SelfReg="false" Sequence="119"/>
     <ROW File="dat.sh" Component_="CHANGELOG.txt" FileName="dat.sh" Attributes="0" SourcePath="target\nest-1C-bin.dir\dat.sh" SelfReg="false" Sequence="11"/>
-    <ROW File="earth_bathy_1024.bmp" Component_="dat.png" FileName="earth_~1.bmp|earth_bathy_1024.bmp" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\earth_bathy_1024.bmp" SelfReg="false" Sequence="109"/>
+    <ROW File="earth_bathy_1024.bmp" Component_="Appendix_F1.txt" FileName="earth_~1.bmp|earth_bathy_1024.bmp" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\earth_bathy_1024.bmp" SelfReg="false" Sequence="120"/>
     <ROW File="gdal_license.txt" Component_="gdal_license.txt" FileName="gdal_l~1.txt|gdal_license.txt" Attributes="0" SourcePath="target\nest-1C-bin.dir\licenses\gdal_license.txt" SelfReg="false" Sequence="55"/>
     <ROW File="gpt.bat" Component_="CHANGELOG.txt" FileName="gpt.bat" Attributes="0" SourcePath="target\nest-1C-bin.dir\gpt.bat" SelfReg="false" Sequence="12"/>
     <ROW File="gpt.command" Component_="CHANGELOG.txt" FileName="gpt~1.com|gpt.command" Attributes="0" SourcePath="target\nest-1C-bin.dir\gpt.command" SelfReg="false" Sequence="13"/>
@@ -170,9 +181,9 @@
     <ROW File="nest_reader_xml_based_1C.jar" Component_="beam_alos_reader_1.1_SNAPSHOT.jar" FileName="nest-r~4.jar|nest-reader-xml-based-1C.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\modules\nest-reader-xml-based-1C.jar" SelfReg="false" Sequence="105"/>
     <ROW File="readme.html" Component_="CHANGELOG.txt" FileName="readme~1.htm|readme.html" Attributes="0" SourcePath="target\nest-1C-bin.dir\readme.html" SelfReg="false" Sequence="107"/>
     <ROW File="settings.xml" Component_="beam.config" FileName="settings.xml" Attributes="0" SourcePath="target\nest-1C-bin.dir\config\settings.xml" SelfReg="false" Sequence="8"/>
-    <ROW File="sidebyside.layout" Component_="dat.png" FileName="sideby~1.lay|sidebyside.layout" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\sidebyside.layout" SelfReg="false" Sequence="111"/>
-    <ROW File="splash.png" Component_="dat.png" FileName="splash.png" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\splash.png" SelfReg="false" Sequence="112"/>
-    <ROW File="tabbed.layout" Component_="dat.png" FileName="tabbed~1.lay|tabbed.layout" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\tabbed.layout" SelfReg="false" Sequence="113"/>
+    <ROW File="sidebyside.layout" Component_="Appendix_F1.txt" FileName="sideby~1.lay|sidebyside.layout" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\sidebyside.layout" SelfReg="false" Sequence="122"/>
+    <ROW File="splash.png" Component_="Appendix_F1.txt" FileName="splash.png" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\splash.png" SelfReg="false" Sequence="123"/>
+    <ROW File="tabbed.layout" Component_="Appendix_F1.txt" FileName="tabbed~1.lay|tabbed.layout" Attributes="0" SourcePath="target\nest-1C-bin.dir\res\tabbed.layout" SelfReg="false" Sequence="124"/>
     <ROW File="xpp3_1.1.3.3.jar" Component_="bc_jnn_1.5.jar" FileName="xpp3-1~1.jar|xpp3-1.1.3.3.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\xpp3-1.1.3.3.jar" SelfReg="false" Sequence="43"/>
     <ROW File="xstream_1.3.jar" Component_="bc_jnn_1.5.jar" FileName="xstrea~1.jar|xstream-1.3.jar" Attributes="0" SourcePath="target\nest-1C-bin.dir\lib\xstream-1.3.jar" SelfReg="false" Sequence="44"/>
   </COMPONENT>
@@ -221,12 +232,15 @@
     <ROW Action="SET_SHORTCUTDIR" Type="307" Source="SHORTCUTDIR" Target="[ProgramMenuFolder][ProductName]"/>
     <ROW Action="SET_TARGETDIR_TO_APPDIR" Type="51" Source="TARGETDIR" Target="[APPDIR]"/>
   </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiEnvComponent">
+    <ROW Environment="NEST_HOME" Name="=-NEST_HOME" Value="[nest_1C_bin.dir_DIR]" Component_="clib_jiio_util.dll"/>
+  </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
     <ROW Name="controlPanelIcon.exe" SourcePath="src\main\assembly\dat.ico" Index="0"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiIniFileComponent">
-    <ROW IniFile="URL" FileName="ESANES~1.url|ESA NEST.url" DirProperty="FavoritesFolder" Section="InternetShortcut" Key="URL" Value="http://www.array.ca/nest" Action="0" Component_="dat.png"/>
-    <ROW IniFile="WorkingDirectory" FileName="ESANES~1.url|ESA NEST.url" DirProperty="FavoritesFolder" Section="InternetShortcut" Key="WorkingDirectory" Value="[FavoritesFolder]" Action="0" Component_="dat.png"/>
+    <ROW IniFile="URL" FileName="ESANES~1.url|ESA NEST.url" DirProperty="FavoritesFolder" Section="InternetShortcut" Key="URL" Value="http://www.array.ca/nest" Action="0" Component_="clib_jiio_util.dll"/>
+    <ROW IniFile="WorkingDirectory" FileName="ESANES~1.url|ESA NEST.url" DirProperty="FavoritesFolder" Section="InternetShortcut" Key="WorkingDirectory" Value="[FavoritesFolder]" Action="0" Component_="clib_jiio_util.dll"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiInstExSeqComponent">
     <ROW Action="AI_DOWNGRADE" Condition="AI_NEWERPRODUCTFOUND AND (UILevel &lt;&gt; 5)" Sequence="210"/>
@@ -246,7 +260,7 @@
     <ROW Condition="VersionNT" Description="[ProductName] cannot be installed on [WindowsFamily9X]" DescriptionLocId="AI.LaunchCondition.No9X" IsPredefined="true" Builds="DefaultBuild"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiShortsComponent">
-    <ROW Shortcut="NEST_DAT" Directory_="DesktopFolder" Name="NESTDA~1|NEST DAT" Component_="nest_dat.exe" Target="[#nest_dat.exe]" Description="Display and Analysis Tool" Hotkey="0" IconIndex="0" ShowCmd="1" WkDir="nest_1C_bin.dir_DIR"/>
+    <ROW Shortcut="NEST_DAT" Directory_="DesktopFolder" Name="NESTDA~1|NEST DAT" Component_="nest_dat.exe" Target="[#nest_dat.exe]" Hotkey="0" IconIndex="0" ShowCmd="1" WkDir="nest_1C_bin.dir_DIR"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiUpgradeComponent">
     <ROW UpgradeCode="[|UpgradeCode]" VersionMax="[|ProductVersion]" Attributes="1025" ActionProperty="OLDPRODUCTS"/>
