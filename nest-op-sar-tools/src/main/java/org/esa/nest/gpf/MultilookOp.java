@@ -75,7 +75,9 @@ public final class MultilookOp extends Operator {
     private MetadataElement absRoot;
     private String sampleType;
     private String missionType;
+    private String productType;
     private boolean srgrFlag;
+    private boolean isCEOSFormat;
     private int numAzimuthLooks;
     private int numRangeLooks;
     private int azimuthFactor;
@@ -112,6 +114,7 @@ public final class MultilookOp extends Operator {
 
         getSampleType();
         getMissionType();
+        getProductType();
         getSRGRFlag();
         getRangeAzimuthSpacing();
         getRangeAzimuthLooks();
@@ -204,6 +207,20 @@ public final class MultilookOp extends Operator {
     }
 
     /**
+     * Get Product type.
+     */
+    void getProductType() {
+
+        MetadataAttribute productTypeAttr = absRoot.getAttribute(AbstractMetadata.PRODUCT_TYPE);
+        if (productTypeAttr == null) {
+            throw new OperatorException(AbstractMetadata.PRODUCT_TYPE + " not found");
+        }
+
+        productType = productTypeAttr.getData().getElemString();
+        //System.out.println("product type is " + productType);
+    }
+
+    /**
      * Get srgr flag.
      */
     void getSRGRFlag() {
@@ -274,12 +291,28 @@ public final class MultilookOp extends Operator {
      */
     void getIncidenceAngleAtCentreRangePixel() {
 
-        if (missionType.contains("ERS")) {
-            incidenceAngleAtCentreRangePixel = getIncidenceAngleForERSProduct();
-        } else if (missionType.contains("ENVISAT")) {
-            incidenceAngleAtCentreRangePixel = getIncidenceAngleForASARProduct();
+        if (missionType.contains("ENVISAT")) {
+
+            isCEOSFormat = false;
+
+        } else if (missionType.contains("ERS")) {
+
+            if (productType.contains("ERS")) {
+                isCEOSFormat = true;
+            } else if (productType.contains("SAR")) {
+                isCEOSFormat = false;
+            } else {
+                throw new OperatorException("Invalid product type: " + productType);
+            }
+
         } else {
             throw new OperatorException("Invalid mission type");
+        }
+
+        if (isCEOSFormat) {
+            incidenceAngleAtCentreRangePixel = getIncidenceAngleForCEOSProduct();
+        } else { // ENVISAT
+            incidenceAngleAtCentreRangePixel = getIncidenceAngleForENVISATProduct();
         }
         System.out.println("Incidence angle at centre range pixel is " + incidenceAngleAtCentreRangePixel);
     }
@@ -289,7 +322,7 @@ public final class MultilookOp extends Operator {
      *
      * @return The incidence angle.
      */
-    double getIncidenceAngleForERSProduct() {
+    double getIncidenceAngleForCEOSProduct() {
         // Field 57 in PRI Facility Related Data Record (in degree)
         MetadataElement facility = sourceProduct.getMetadataRoot().getElement("Leader").getElement("Facility Related");
         if (facility == null) {
@@ -309,7 +342,7 @@ public final class MultilookOp extends Operator {
      *
      * @return The incidence angle.
      */
-    double getIncidenceAngleForASARProduct() {
+    double getIncidenceAngleForENVISATProduct() {
 
         int x = sourceImageWidth / 2;
         int y = sourceImageHeight / 2;
