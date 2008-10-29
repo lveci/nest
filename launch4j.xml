@@ -19,7 +19,7 @@
     <maxVersion></maxVersion>
     <jdkPreference>preferJre</jdkPreference>
     <initialHeapSize>256</initialHeapSize>
-    <maxHeapSize>1200</maxHeapSize>
+    <maxHeapSize>1024</maxHeapSize>
     <opt>-Dceres.context=nest</opt>
     <opt>-Xverify:none -XX:+UseParallelGC -XX:CompileThreshold=100</opt>
   </jre>
