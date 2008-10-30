@@ -82,6 +82,7 @@ public class GCPSelectionOperator extends Operator {
 
     private Product masterProduct;
     private Product slaveProduct;
+
     private Band masterBand;
     private Band slaveBand;
 
@@ -122,8 +123,33 @@ public class GCPSelectionOperator extends Operator {
     @Override
     public void initialize() throws OperatorException
     {
+        width = Integer.parseInt(coarseRegistrationWindowWidth);
+        height = Integer.parseInt(coarseRegistrationWindowHeight);
+
+        rowUpSamplingFactor = Integer.parseInt(rowInterpFactor);
+        colUpSamplingFactor = Integer.parseInt(columnInterpFactor);
+
+        double achievableAccuracy = 1.0 / (double)Math.max(rowUpSamplingFactor, colUpSamplingFactor);
+        if (gcpTolerance < achievableAccuracy) {
+            throw new OperatorException("The achievable accuracy with current interpolation factors is " +
+                    achievableAccuracy + ", GCP Tolerance is below it.");
+        }
+
         masterProduct = sourceProduct[0];
         slaveProduct = sourceProduct[1];
+
+        masterGcpGroup = masterProduct.getGcpGroup();
+        if (masterGcpGroup.getNodeCount() <= 0) {
+            throw new OperatorException("No master GCPs have been found.");
+        }
+
+        createTargetProduct();
+    }
+
+    /**
+     * Create target product.
+     */
+    void createTargetProduct() {
 
         targetProduct = new Product(slaveProduct.getName(),
                                     slaveProduct.getProductType(),
@@ -131,11 +157,6 @@ public class GCPSelectionOperator extends Operator {
                                     slaveProduct.getSceneRasterHeight());
 
         addSelectedBands();
-
-        masterGcpGroup = masterProduct.getGcpGroup();
-        if (masterGcpGroup.getNodeCount() <= 0) {
-            throw new OperatorException("No master GCPs have been found.");
-        }
 
         targetGcpGroup = targetProduct.getGcpGroup();
         targetGcpGroup.removeAll();
@@ -147,14 +168,12 @@ public class GCPSelectionOperator extends Operator {
         targetProduct.setStartTime(slaveProduct.getStartTime());
         targetProduct.setEndTime(slaveProduct.getEndTime());
 
-        width = Integer.parseInt(coarseRegistrationWindowWidth);
-        height = Integer.parseInt(coarseRegistrationWindowHeight);
-        rowUpSamplingFactor = Integer.parseInt(rowInterpFactor);
-        colUpSamplingFactor = Integer.parseInt(columnInterpFactor);
-
         targetProduct.setPreferredTileSize(slaveProduct.getSceneRasterWidth(), 50);  // 256
     }
 
+    /**
+     * Add user selected bands to the target product.
+     */
     private void addSelectedBands() throws OperatorException {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) {
