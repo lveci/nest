@@ -76,7 +76,7 @@ public class GCPSelectionOperator extends Operator {
     @Parameter(description = "The maximum number of iterations", interval = "(1, 10]", defaultValue = "2",
                 label="Max Iterations")
     private int maxIteration;
-    @Parameter(description = "Tolerance in slave GCP validation check", interval = "(0, *)", defaultValue = "0.1",
+    @Parameter(description = "Tolerance in slave GCP validation check", interval = "(0, *)", defaultValue = "0.5",
                 label="GCP Tolerance")
     private double gcpTolerance;
 
