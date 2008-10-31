@@ -4,7 +4,7 @@ import com.jidesoft.icons.IconsFactory;
 import com.jidesoft.swing.JideScrollPane;
 import com.jidesoft.swing.JideSplitPane;
 import org.esa.beam.framework.ui.application.support.AbstractToolView;
-import org.esa.beam.visat.toolviews.lm.LayersToolView;
+import org.esa.beam.framework.ui.BasicApp;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -51,9 +51,9 @@ public class ProjectsToolView extends AbstractToolView implements Observer {
         projectTree.setRootVisible(false);
         projectTree.setShowsRootHandles(true);
         DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) projectTree.getCellRenderer();
-        renderer.setLeafIcon(IconsFactory.getImageIcon(LayersToolView.class, "/org/esa/beam/resources/images/icons/RsBandAsSwath16.gif"));
-        renderer.setClosedIcon(IconsFactory.getImageIcon(LayersToolView.class, "/org/esa/beam/resources/images/icons/RsGroupClosed16.gif"));
-        renderer.setOpenIcon(IconsFactory.getImageIcon(LayersToolView.class, "/org/esa/beam/resources/images/icons/RsGroupOpen16.gif"));
+        renderer.setLeafIcon(IconsFactory.getImageIcon(BasicApp.class, "/org/esa/beam/resources/images/icons/RsBandAsSwath16.gif"));
+        renderer.setClosedIcon(IconsFactory.getImageIcon(BasicApp.class, "/org/esa/beam/resources/images/icons/RsGroupClosed16.gif"));
+        renderer.setOpenIcon(IconsFactory.getImageIcon(BasicApp.class, "/org/esa/beam/resources/images/icons/RsGroupOpen16.gif"));
         return projectTree;
     }
 

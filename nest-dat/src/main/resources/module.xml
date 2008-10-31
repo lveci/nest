@@ -51,8 +51,7 @@
                 <excludedToolViews>
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
                     <id>org.esa.beam.scripting.visat.ScriptConsoleToolView</id>
-                    <id>org.esa.beam.visat.toolviews.diag.JaiMonitorToolView</id>
-                    <id>org.esa.beam.visat.toolviews.lm.LayersToolView</id>
+                    <id>org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView</id>
                     <id>org.esa.beam.visat.toolviews.bitmask.BitmaskOverlayToolView</id>
                 </excludedToolViews>
             </applicationDescriptor>
