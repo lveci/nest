@@ -315,7 +315,7 @@ public class GCPSelectionOperator extends Operator {
         double colShift = gcpTolerance + 1;
         int numIter = 0;
 
-        while (Math.abs(rowShift) > gcpTolerance || Math.abs(colShift) > gcpTolerance) {
+        while (Math.abs(rowShift) >= gcpTolerance || Math.abs(colShift) >= gcpTolerance) {
 
             if (numIter >= maxIteration) {
                 return false;
