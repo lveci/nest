@@ -43,7 +43,7 @@ public abstract class CEOSProductDirectory {
         String expression = "atan2("+bandQ.getName()+","+bandI.getName()+")";
 
         VirtualBand virtBand = new VirtualBand("Phase" + countStr,
-                ProductData.TYPE_FLOAT32,
+                ProductData.TYPE_FLOAT64,
                 product.getSceneRasterWidth(),
                 product.getSceneRasterHeight(),
                 expression);
@@ -58,7 +58,7 @@ public abstract class CEOSProductDirectory {
                 bandQ.getName() + " * " + bandQ.getName();
 
         VirtualBand virtBand = new VirtualBand("Intensity" + countStr,
-                ProductData.TYPE_FLOAT32,
+                ProductData.TYPE_FLOAT64,
                 product.getSceneRasterWidth(),
                 product.getSceneRasterHeight(),
                 expression);
@@ -75,7 +75,7 @@ public abstract class CEOSProductDirectory {
         String expression = band.getName() + " * " + band.getName();
 
         VirtualBand virtBand = new VirtualBand("Intensity" + countStr,
-                ProductData.TYPE_FLOAT32,
+                ProductData.TYPE_FLOAT64,
                 product.getSceneRasterWidth(),
                 product.getSceneRasterHeight(),
                 expression);

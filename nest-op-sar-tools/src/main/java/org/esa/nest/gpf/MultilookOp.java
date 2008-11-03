@@ -543,7 +543,7 @@ public final class MultilookOp extends Operator {
             }
 
             Band targetBand = new Band(targetBandName,
-                                       ProductData.TYPE_FLOAT32,
+                                       ProductData.TYPE_FLOAT64,
                                        targetImageWidth,
                                        targetImageHeight);
             targetBand.setUnit("intensity");
