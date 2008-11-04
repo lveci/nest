@@ -291,64 +291,11 @@ public final class MultilookOp extends Operator {
      */
     void getIncidenceAngleAtCentreRangePixel() {
 
-        if (missionType.contains("ENVISAT")) {
-
-            isCEOSFormat = false;
-
-        } else if (missionType.contains("ERS")) {
-
-            if (productType.contains("ERS")) {
-                isCEOSFormat = true;
-            } else if (productType.contains("SAR")) {
-                isCEOSFormat = false;
-            } else {
-                throw new OperatorException("Invalid product type: " + productType);
-            }
-
-        } else {
-            throw new OperatorException("Invalid mission type");
-        }
-
-        if (isCEOSFormat) {
-            incidenceAngleAtCentreRangePixel = getIncidenceAngleForCEOSProduct();
-        } else { // ENVISAT
-            incidenceAngleAtCentreRangePixel = getIncidenceAngleForENVISATProduct();
-        }
-        System.out.println("Incidence angle at centre range pixel is " + incidenceAngleAtCentreRangePixel);
-    }
-
-    /**
-     * Get the incidence angle at the centre range pixel for ERS product(in degree).
-     *
-     * @return The incidence angle.
-     */
-    double getIncidenceAngleForCEOSProduct() {
-        // Field 57 in PRI Facility Related Data Record (in degree)
-        MetadataElement facility = sourceProduct.getMetadataRoot().getElement("Leader").getElement("Facility Related");
-        if (facility == null) {
-            throw new OperatorException("Facility Related not found");
-        }
-
-        MetadataAttribute attr = facility.getAttribute("Incidence angle at centre range pixel");
-        if (attr == null) {
-            throw new OperatorException("Incidence angle at centre range pixel not found");
-        }
-
-        return attr.getData().getElemFloat();
-    }
-
-    /**
-     * Get the incidence angle at the centre range pixel for ASAR product(in degree).
-     *
-     * @return The incidence angle.
-     */
-    double getIncidenceAngleForENVISATProduct() {
-
         int x = sourceImageWidth / 2;
         int y = sourceImageHeight / 2;
         TiePointGrid incidenceAngle = getIncidenceAngle();
 
-        return incidenceAngle.getPixelFloat(x + 0.5f, y + 0.5f);
+        incidenceAngleAtCentreRangePixel = incidenceAngle.getPixelFloat(x + 0.5f, y + 0.5f);
     }
 
     /**
