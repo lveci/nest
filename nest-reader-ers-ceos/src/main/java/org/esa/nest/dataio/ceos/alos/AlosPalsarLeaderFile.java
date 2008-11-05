@@ -24,7 +24,10 @@ class AlosPalsarLeaderFile {
     public final BaseSceneHeaderRecord _sceneHeaderRecord;
     public final BaseRecord _mapProjRecord;
     public final BaseRecord _platformPositionRecord;
-    public final BaseRecord _facilityRecord=null;
+    public final BaseRecord _attitudeRecord;
+    public final BaseRecord _radiometricRecord;
+    public final BaseRecord _dataQualityRecord;
+    public final BaseRecord _facilityRecord;
     public CeosFileReader _reader;
 
     private static String mission = "alos";
@@ -32,6 +35,9 @@ class AlosPalsarLeaderFile {
     private static String scene_recordDefinitionFile = "scene_record.xml";
     private static String mapproj_recordDefinitionFile = "map_proj_record.xml";
     private static String platform_recordDefinitionFile = "platform_position_record.xml";
+    private static String attitude_recordDefinitionFile = "attitude_record.xml";
+    private static String radiometric_recordDefinitionFile = "radiometric_record.xml";
+    private static String dataQuality_recordDefinitionFile = "data_quality_summary_record.xml";
     private static String facility_recordDefinitionFile = "facility_record.xml";
 
     private int productLevel = -1;
@@ -43,15 +49,30 @@ class AlosPalsarLeaderFile {
         _reader.seek(_leaderFDR.getAbsolutPosition(_leaderFDR.getRecordLength()));
         _sceneHeaderRecord = new BaseSceneHeaderRecord(_reader, -1, mission, scene_recordDefinitionFile);
         _reader.seek(_sceneHeaderRecord.getAbsolutPosition(_sceneHeaderRecord.getRecordLength()));
-        if(getProductLevel() == AlosPalsarConstants.LEVEL1_5) {
+
+        if(getProductLevel() != AlosPalsarConstants.LEVEL1_1 && getProductLevel() != AlosPalsarConstants.LEVEL1_0) {
             _mapProjRecord = new BaseRecord(_reader, -1, mission, mapproj_recordDefinitionFile);
             _reader.seek(_mapProjRecord.getAbsolutPosition(_mapProjRecord.getRecordLength()));
-        } else {
-            _mapProjRecord = null;
-        }
+        } else _mapProjRecord = null;
+
         _platformPositionRecord = new BaseRecord(_reader, -1, mission, platform_recordDefinitionFile);
         _reader.seek(_platformPositionRecord.getAbsolutPosition(_platformPositionRecord.getRecordLength()));
-        //_facilityRecord = new BaseRecord(_reader, -1, mission, facility_recordDefinitionFile);
+        _attitudeRecord = new BaseRecord(_reader, -1, mission, attitude_recordDefinitionFile);
+        _reader.seek(_attitudeRecord.getAbsolutPosition(_attitudeRecord.getRecordLength()));
+
+        if(getProductLevel() != AlosPalsarConstants.LEVEL1_0) {
+            _radiometricRecord = new BaseRecord(_reader, -1, mission, radiometric_recordDefinitionFile);
+            _reader.seek(_radiometricRecord.getAbsolutPosition(_radiometricRecord.getRecordLength()));
+            _dataQualityRecord = new BaseRecord(_reader, -1, mission, dataQuality_recordDefinitionFile);
+            _reader.seek(_dataQualityRecord.getAbsolutPosition(_dataQualityRecord.getRecordLength()));
+        } else {
+            _radiometricRecord = null;
+            _dataQualityRecord = null;
+        }
+
+        _facilityRecord = null;
+       // _facilityRecord = new BaseRecord(_reader, -1, mission, facility_recordDefinitionFile);
+       // _reader.seek(_facilityRecord.getAbsolutPosition(_facilityRecord.getRecordLength()));
     }
 
     public int getProductLevel() {
@@ -61,8 +82,12 @@ class AlosPalsarLeaderFile {
                 productLevel = AlosPalsarConstants.LEVEL1_5;
             else if(level.contains("1.1"))
                 productLevel = AlosPalsarConstants.LEVEL1_1;
-            else
+            else if(level.contains("1.0"))
                 productLevel = AlosPalsarConstants.LEVEL1_0;
+            else if(level.contains("4.1"))
+                productLevel = AlosPalsarConstants.LEVEL4_1;
+            else if(level.contains("4.2"))
+                productLevel = AlosPalsarConstants.LEVEL4_2;
         }
         return productLevel;
     }
@@ -83,9 +108,9 @@ class AlosPalsarLeaderFile {
         return _mapProjRecord;
     }
 
-    //public BaseRecord getFacilityRecord() {
-    //    return _facilityRecord;
-    //}
+    public BaseRecord getFacilityRecord() {
+        return _facilityRecord;
+    }
 
     public float[] getLatCorners() throws IOException,
                                            IllegalCeosFormatException {
@@ -129,13 +154,35 @@ class AlosPalsarLeaderFile {
             sphElem.addElement(metadata);
         }
 
-        metadata = new MetadataElement("Platform Position");
-        _platformPositionRecord.assignMetadataTo(metadata);
-        sphElem.addElement(metadata);
+        if(_platformPositionRecord != null) {
+            metadata = new MetadataElement("Platform Position");
+            _platformPositionRecord.assignMetadataTo(metadata);
+            sphElem.addElement(metadata);
+        }
 
-        //metadata = new MetadataElement("Facility Related");
-        //_facilityRecord.assignMetadataTo(metadata);
-        //sphElem.addElement(metadata);
+        if(_attitudeRecord != null) {
+            metadata = new MetadataElement("Attitude");
+            _attitudeRecord.assignMetadataTo(metadata);
+            sphElem.addElement(metadata);
+        }
+
+        if(_radiometricRecord != null) {
+            metadata = new MetadataElement("Radiometric");
+            _radiometricRecord.assignMetadataTo(metadata);
+            sphElem.addElement(metadata);
+        }
+
+        if(_dataQualityRecord != null) {
+            metadata = new MetadataElement("Data Quality");
+            _dataQualityRecord.assignMetadataTo(metadata);
+            sphElem.addElement(metadata);
+        }
+
+        if(_facilityRecord != null) {
+            metadata = new MetadataElement("Facility Related");
+            _facilityRecord.assignMetadataTo(metadata);
+            sphElem.addElement(metadata);
+        }
     }
 
     public MetadataElement getMapProjectionMetadata() throws IOException,

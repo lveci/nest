@@ -18,6 +18,7 @@ public class BaseRecord {
 
     private CeosDB db;
     private static String ceosDBPath = "org/esa/nest/ceosFormatDB";
+    private final int recordLength;
 
     public BaseRecord(final CeosFileReader reader, final long startPos,
                       final String mission, final String recordDefinitionFileName) throws
@@ -36,6 +37,8 @@ public class BaseRecord {
 
         db = new CeosDB(resPath);
         db.readRecord(reader);
+
+        recordLength = getAttributeInt("Record Length");
     }
 
     /*
@@ -54,25 +57,27 @@ public class BaseRecord {
         }
 
         db.readRecord(reader);
+
+        recordLength = getAttributeInt("Record Length");
     }
 
-    public String getAttributeString(String name) {
+    public final String getAttributeString(final String name) {
         return db.getAttributeString(name);
     }
 
-    public int getAttributeInt(String name) {
+    public final int getAttributeInt(final String name) {
         return db.getAttributeInt(name);
     }
 
-    public Double getAttributeDouble(String name) {
+    public final Double getAttributeDouble(final String name) {
         return db.getAttributeDouble(name);
     }
 
-    public int getRecordLength() {
-        return getAttributeInt("Record Length");
+    public final int getRecordLength() {
+        return recordLength;
     }
 
-    public long getStartPos() {
+    public final long getStartPos() {
         return _startPos;
     }
 
@@ -80,7 +85,7 @@ public class BaseRecord {
         return _reader;
     }
 
-    public CeosDB getCeosDatabase() {
+    public final CeosDB getCeosDatabase() {
         return db; 
     }
 
@@ -92,30 +97,7 @@ public class BaseRecord {
         db.assignMetadataTo(elem);
     }
 
-    protected final long[] readLongs(final int numLongs, final int relativePosition) throws
-                                                                                     IOException,
-                                                                                     IllegalCeosFormatException {
-        _reader.seek(getAbsolutPosition(relativePosition));
-        final long[] coeffs = new long[numLongs];
-        _reader.readB8(coeffs);
-        return coeffs;
-    }
-
-    protected final long[][] readLongs(final int numArrays, final int numLongs,
-                                       final int relativePosition) throws
-                                                                         IOException,
-                                                                         IllegalCeosFormatException {
-        final long[][] longs = new long[numArrays][];
-        _reader.seek(getAbsolutPosition(relativePosition));
-        for (int i = 0; i < longs.length; i++) {
-            final long[] coeffs = new long[numLongs];
-            _reader.readB8(coeffs);
-            longs[i] = coeffs;
-        }
-        return longs;
-    }
-
-    protected static MetadataElement createMetadataElement(String name, String suffix) {
+    protected static MetadataElement createMetadataElement(final String name, final String suffix) {
         final MetadataElement elem;
         if (suffix != null && suffix.trim().length() > 0) {
             elem = new MetadataElement(name + ' ' + suffix.trim());

@@ -24,6 +24,8 @@ public class AlosPalsarConstants implements CEOSConstants {
     final static int LEVEL1_0 = 0;
     final static int LEVEL1_1 = 1;
     final static int LEVEL1_5 = 3;
+    final static int LEVEL4_1 = 4;
+    final static int LEVEL4_2 = 5;
 
     /**
      * Taken from <a href="http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm">http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm</a>

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.11 $ $Date: 2008-11-04 22:18:32 $
+ * @version $Revision: 1.12 $ $Date: 2008-11-05 17:44:17 $
  */
 public abstract class CEOSImageFile {
 
@@ -33,7 +33,10 @@ public abstract class CEOSImageFile {
     }
 
     public int getRasterWidth() {
-        return _imageFDR.getAttributeInt("Number of pixels per line per SAR channel");
+        int width = _imageFDR.getAttributeInt("Number of pixels per line per SAR channel");
+        if(width==0)
+            width = _imageFDR.getAttributeInt("SAR DATA record length");
+        return width;
     }
 
     public int getRasterHeight() {

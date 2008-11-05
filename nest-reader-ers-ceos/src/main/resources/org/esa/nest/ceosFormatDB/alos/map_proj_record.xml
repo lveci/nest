@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ceos version="1.0" mission="alos">
-	<rec name="Record Number" type="4" num="1"/>
+	<rec name="skipBytes" type="0" num="8"/> <!-- skip header -->
+	<!--rec name="Record Number" type="4" num="1"/>
 	<rec name="First Record Subtype" type="3" num="1"/>
 	<rec name="Record Type Code" type="3" num="1"/>
 	<rec name="Second Record Subtype" type="3" num="1"/>
-	<rec name="Third Record Subtype" type="3" num="1"/>
+	<rec name="Third Record Subtype" type="3" num="1"/-->
 	<rec name="Record Length" type="4" num="1"/>
 	<rec name="skipBytes" type="0" num="16"/>
 	
@@ -25,7 +26,7 @@
 	<rec name="Semiminor axis of ref.ellipsoid" type="5" num="16"/>
 	<rec name="skipBytes" type="0" num="580"/>
 	<rec name="skipBytes" type="0" num="64"/>
-	<!-- RDINATES OF FOUR CORNER POINTS -->
+	<!-- COORDINATES OF FOUR CORNER POINTS -->
 	<rec name="skipBytes" type="0" num="128"/>
 	<rec name="1st line 1st pixel geodetic latitude" type="5" num="16"/>
 	<rec name="1st line 1st pixel geodetic longitude" type="5" num="16"/>
