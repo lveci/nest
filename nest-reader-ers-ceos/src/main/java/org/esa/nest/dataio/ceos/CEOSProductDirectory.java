@@ -1,9 +1,7 @@
 package org.esa.nest.dataio.ceos;
 
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.VirtualBand;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
@@ -106,45 +104,70 @@ public abstract class CEOSProductDirectory {
                                           float[] coarseTiePoints,
                                           float[] fineTiePoints) {
 
-        if (coarseTiePoints.length != coarseGridWidth*coarseGridHeight) {
+        if (coarseTiePoints == null || coarseTiePoints.length != coarseGridWidth*coarseGridHeight) {
             throw new IllegalArgumentException(
                     "coarse tie point array size does not match 'coarseGridWidth' x 'coarseGridHeight'");
         }
 
-        if (fineTiePoints.length != fineGridWidth*fineGridHeight) {
+        if (fineTiePoints == null || fineTiePoints.length != fineGridWidth*fineGridHeight) {
             throw new IllegalArgumentException(
                     "fine tie point array size does not match 'fineGridWidth' x 'fineGridHeight'");
         }
 
         int k = 0;
         for (int r = 0; r < fineGridHeight; r++) {
+
+            final float lambdaR = (float)(r) / (float)(fineGridHeight - 1);
+            final float betaR = lambdaR*(coarseGridHeight - 1);
+            final int j0 = (int)(betaR);
+            final int j1 = Math.min(j0 + 1, coarseGridHeight - 1);
+            final float wj = betaR - j0;
+
             for (int c = 0; c < fineGridWidth; c++) {
 
-                float lambdaC = (float)(c) / (float)(fineGridWidth - 1);
-                float lambdaR = (float)(r) / (float)(fineGridHeight - 1);
+                final float lambdaC = (float)(c) / (float)(fineGridWidth - 1);
+                final float betaC = lambdaC*(coarseGridWidth - 1);
+                final int i0 = (int)(betaC);
+                final int i1 = Math.min(i0 + 1, coarseGridWidth - 1);
+                final float wi = betaC - i0;
 
-                float betaC = lambdaC*(coarseGridWidth - 1);
-                float betaR = lambdaR*(coarseGridHeight - 1);
-
-                int i0 = (int)(betaC);
-                int j0 = (int)(betaR);
-
-                int i1 = Math.min(i0 + 1, coarseGridWidth - 1);
-                int j1 = Math.min(j0 + 1, coarseGridHeight - 1);
-
-                float wi = betaC - i0;
-                float wj = betaR - j0;
-
-                fineTiePoints[k] = MathUtils.interpolate2D(wi,
-                                                           wj,
+                fineTiePoints[k++] = MathUtils.interpolate2D(wi, wj,
                                                            coarseTiePoints[i0 + j0 * coarseGridWidth],
                                                            coarseTiePoints[i1 + j0 * coarseGridWidth],
                                                            coarseTiePoints[i0 + j1 * coarseGridWidth],
                                                            coarseTiePoints[i1 + j1 * coarseGridWidth]);
-
-                k++;
             }
         }
     }
 
+    protected void addGeoCoding(final Product product, final float[] latCorners, final float[] lonCorners)
+            throws IllegalCeosFormatException, IOException {
+
+        if(latCorners == null || lonCorners == null) return;
+        
+        final float[] fineLatTiePoints = new float[10*10];
+        createFineTiePointGrid(2, 2, 10, 10,
+                               latCorners,
+                               fineLatTiePoints);
+
+        final TiePointGrid latGrid = new TiePointGrid("lat", 10, 10, 0.5f, 0.5f,
+                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
+                fineLatTiePoints);
+
+        final float[] fineLonTiePoints = new float[10*10];
+        createFineTiePointGrid(2, 2, 10, 10,
+                               lonCorners,
+                               fineLonTiePoints);
+
+        final TiePointGrid lonGrid = new TiePointGrid("lon", 10, 10, 0.5f, 0.5f,
+                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
+                fineLonTiePoints,
+                TiePointGrid.DISCONT_AT_360);
+
+        final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
+
+        product.addTiePointGrid(latGrid);
+        product.addTiePointGrid(lonGrid);
+        product.setGeoCoding(tpGeoCoding);
+    }
 }

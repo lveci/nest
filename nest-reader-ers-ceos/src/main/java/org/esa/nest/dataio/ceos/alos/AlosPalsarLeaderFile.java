@@ -24,7 +24,7 @@ class AlosPalsarLeaderFile {
     public final BaseSceneHeaderRecord _sceneHeaderRecord;
     public final BaseRecord _mapProjRecord;
     public final BaseRecord _platformPositionRecord;
-    public final BaseRecord _facilityRecord = null;
+    public final BaseRecord _facilityRecord=null;
     public CeosFileReader _reader;
 
     private static String mission = "alos";
@@ -34,6 +34,8 @@ class AlosPalsarLeaderFile {
     private static String platform_recordDefinitionFile = "platform_position_record.xml";
     private static String facility_recordDefinitionFile = "facility_record.xml";
 
+    private int productLevel = -1;
+
     public AlosPalsarLeaderFile(final ImageInputStream leaderStream) throws IOException,
                                                                         IllegalCeosFormatException {
         _reader = new CeosFileReader(leaderStream);
@@ -41,15 +43,28 @@ class AlosPalsarLeaderFile {
         _reader.seek(_leaderFDR.getAbsolutPosition(_leaderFDR.getRecordLength()));
         _sceneHeaderRecord = new BaseSceneHeaderRecord(_reader, -1, mission, scene_recordDefinitionFile);
         _reader.seek(_sceneHeaderRecord.getAbsolutPosition(_sceneHeaderRecord.getRecordLength()));
-        _mapProjRecord = new BaseRecord(_reader, -1, mission, mapproj_recordDefinitionFile);
-        _reader.seek(_mapProjRecord.getAbsolutPosition(_mapProjRecord.getRecordLength()));
+        if(getProductLevel() == AlosPalsarConstants.LEVEL1_5) {
+            _mapProjRecord = new BaseRecord(_reader, -1, mission, mapproj_recordDefinitionFile);
+            _reader.seek(_mapProjRecord.getAbsolutPosition(_mapProjRecord.getRecordLength()));
+        } else {
+            _mapProjRecord = null;
+        }
         _platformPositionRecord = new BaseRecord(_reader, -1, mission, platform_recordDefinitionFile);
         _reader.seek(_platformPositionRecord.getAbsolutPosition(_platformPositionRecord.getRecordLength()));
         //_facilityRecord = new BaseRecord(_reader, -1, mission, facility_recordDefinitionFile);
     }
 
-    public String getProductLevel() {
-        return _sceneHeaderRecord.getAttributeString("Scene reference number").trim();
+    public int getProductLevel() {
+        if(productLevel < 0) {
+            String level = _sceneHeaderRecord.getAttributeString("Product level code").trim();
+            if(level.contains("1.5"))
+                productLevel = AlosPalsarConstants.LEVEL1_5;
+            else if(level.contains("1.1"))
+                productLevel = AlosPalsarConstants.LEVEL1_1;
+            else
+                productLevel = AlosPalsarConstants.LEVEL1_0;
+        }
+        return productLevel;
     }
 
     public Calendar getDateImageWasTaken() {
@@ -74,6 +89,8 @@ class AlosPalsarLeaderFile {
 
     public float[] getLatCorners() throws IOException,
                                            IllegalCeosFormatException {
+        if(_mapProjRecord == null) return null;
+
         final double latUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic latitude");
         final double latUR = _mapProjRecord.getAttributeDouble("1st line last valid pixel geodetic latitude");
         final double latLL = _mapProjRecord.getAttributeDouble("Last line 1st pixel geodetic latitude");
@@ -83,6 +100,8 @@ class AlosPalsarLeaderFile {
 
     public float[] getLonCorners() throws IOException,
                                            IllegalCeosFormatException {
+        if(_mapProjRecord == null) return null;
+        
         final double lonUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic longitude");
         final double lonUR = _mapProjRecord.getAttributeDouble("1st line last valid pixel geodetic longitude");
         final double lonLL = _mapProjRecord.getAttributeDouble("Last line 1st pixel geodetic longitude");
@@ -104,9 +123,11 @@ class AlosPalsarLeaderFile {
         _sceneHeaderRecord.assignMetadataTo(metadata);
         sphElem.addElement(metadata);
 
-        metadata = new MetadataElement("Map Projection");
-        _mapProjRecord.assignMetadataTo(metadata);
-        sphElem.addElement(metadata);
+        if(_mapProjRecord != null) {
+            metadata = new MetadataElement("Map Projection");
+            _mapProjRecord.assignMetadataTo(metadata);
+            sphElem.addElement(metadata);
+        }
 
         metadata = new MetadataElement("Platform Position");
         _platformPositionRecord.assignMetadataTo(metadata);

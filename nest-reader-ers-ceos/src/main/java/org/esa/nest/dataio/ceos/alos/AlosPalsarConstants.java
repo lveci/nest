@@ -21,6 +21,10 @@ public class AlosPalsarConstants implements CEOSConstants {
 
     final static String SUMMARY_FILE_NAME = "summary.txt";
 
+    final static int LEVEL1_0 = 0;
+    final static int LEVEL1_1 = 1;
+    final static int LEVEL1_5 = 3;
+
     /**
      * Taken from <a href="http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm">http://www.eorc.jaxa.jp/ALOS/about/avnir2.htm</a>
      */

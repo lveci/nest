@@ -81,6 +81,8 @@ class ERSLeaderFile {
 
     public float[] getLatCorners() throws IOException,
                                            IllegalCeosFormatException {
+        if(_mapProjRecord == null) return null;
+
         final double latUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic latitude");
         final double latUR = _mapProjRecord.getAttributeDouble("1st line last valid pixel geodetic latitude");
         final double latLL = _mapProjRecord.getAttributeDouble("Last line 1st pixel geodetic latitude");
@@ -90,6 +92,8 @@ class ERSLeaderFile {
 
     public float[] getLonCorners() throws IOException,
                                            IllegalCeosFormatException {
+        if(_mapProjRecord == null) return null;
+
         final double lonUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic longitude");
         final double lonUR = _mapProjRecord.getAttributeDouble("1st line last valid pixel geodetic longitude");
         final double lonLL = _mapProjRecord.getAttributeDouble("Last line 1st pixel geodetic longitude");

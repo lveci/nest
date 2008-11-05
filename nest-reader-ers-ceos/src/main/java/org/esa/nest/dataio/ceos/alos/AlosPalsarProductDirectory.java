@@ -52,7 +52,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         _leaderFile = new AlosPalsarLeaderFile(new FileImageInputStream(CeosHelper.getCEOSFile(_baseDir, "LED")));
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, "IMG-");
-        int numImageFiles = imageFileNames.length;
+        final int numImageFiles = imageFileNames.length;
         _imageFiles = new AlosPalsarImageFile[numImageFiles];
         for (int i = 0; i < numImageFiles; i++) {
             _imageFiles[i] = new AlosPalsarImageFile(createInputStream(imageFileNames[i]));
@@ -61,6 +61,11 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         _sceneWidth = _imageFiles[0].getRasterWidth();
         _sceneHeight = _imageFiles[0].getRasterHeight();
         assertSameWidthAndHeightForAllImages();
+
+        if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1 ||
+           _leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1) {
+            isProductSLC = true;
+        }
     }
 
     private void readVolumeDirectoryFile() throws IOException, IllegalCeosFormatException {
@@ -68,7 +73,6 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             _volumeDirectoryFile = new AlosPalsarVolumeDirectoryFile(_baseDir);
 
         productType = _volumeDirectoryFile.getProductType();
-        isProductSLC = productType.contains("SLC") || productType.contains("COMPLEX");
     }
 
     public boolean isALOS() throws IOException, IllegalCeosFormatException {
@@ -79,6 +83,10 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
     public String getMission() {
         return "ALOS";
+    }
+
+    public int getProductLevel() {
+        return _leaderFile.getProductLevel();
     }
 
     public Product createProduct() throws IOException,
@@ -93,11 +101,11 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
                 if(isProductSLC) {
                     String bandName = "i_" + index;
-                    Band bandI = createBand(bandName);
+                    final Band bandI = createBand(bandName);
                     product.addBand(bandI);
                     bandImageFileMap.put(bandName, imageFile);
                     bandName = "q_" + index;
-                    Band bandQ = createBand(bandName);
+                    final Band bandQ = createBand(bandName);
                     product.addBand(bandQ);
                     bandImageFileMap.put(bandName, imageFile);
 
@@ -105,7 +113,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                     ++index;
                 } else {
                     String bandName = "Amplitude_" + index;
-                    Band band = createBand(bandName);
+                    final Band band = createBand(bandName);
                     product.addBand(band);
                     bandImageFileMap.put(bandName, imageFile);
                     createVirtualIntensityBand(product, band, "_"+index);
@@ -113,17 +121,17 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 }
             }
         } else {
-            AlosPalsarImageFile imageFile = _imageFiles[0];
+            final AlosPalsarImageFile imageFile = _imageFiles[0];
             if(isProductSLC) {
-                Band bandI = createBand("i");
+                final Band bandI = createBand("i");
                 product.addBand(bandI);
                 bandImageFileMap.put("i", imageFile);
-                Band bandQ = createBand("q");
+                final Band bandQ = createBand("q");
                 product.addBand(bandQ);
                 bandImageFileMap.put("q", imageFile);
                 createVirtualIntensityBand(product, bandI, bandQ, "");
             } else {
-                Band band = createBand("Amplitude");
+                final Band band = createBand("Amplitude");
                 product.addBand(band);
                 bandImageFileMap.put("Amplitude", imageFile);
                 createVirtualIntensityBand(product, band, "");
@@ -134,28 +142,11 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         //product.setEndTime(getUTCScanStopTime());
         product.setDescription(getProductDescription());
 
-        addGeoCoding(product);
+        addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
         addTiePointGrids(product);
         addMetaData(product);
 
         return product;
-    }
-
-    private void addGeoCoding(final Product product) throws IllegalCeosFormatException,
-                                                            IOException {
-
-        TiePointGrid latGrid = new TiePointGrid("lat", 2, 2, 0.5f, 0.5f,
-                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                                                _leaderFile.getLatCorners());
-        TiePointGrid lonGrid = new TiePointGrid("lon", 2, 2, 0.5f, 0.5f,
-                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                                                _leaderFile.getLonCorners(),
-                                                TiePointGrid.DISCONT_AT_360);
-        TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
-
-        product.addTiePointGrid(latGrid);
-        product.addTiePointGrid(lonGrid);
-        product.setGeoCoding(tpGeoCoding);
     }
 
     private void addTiePointGrids(final Product product) throws IllegalCeosFormatException, IOException {
@@ -190,8 +181,13 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     }
 
     private Band createBand(String name) {
-        final Band band = new Band(name, ProductData.TYPE_INT16,
-                                   _sceneWidth, _sceneHeight);
+        int dataType = ProductData.TYPE_INT16;
+        if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1)
+            dataType = ProductData.TYPE_FLOAT32;
+        else if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_0)
+            dataType = ProductData.TYPE_INT8;
+
+        final Band band = new Band(name, dataType, _sceneWidth, _sceneHeight);
 
         band.setUnit(AlosPalsarImageFile.getGeophysicalUnit());
 
@@ -263,24 +259,26 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getUTCScanStartTime());
         //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, getUTCScanStopTime());
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
-                mapProjRec.getAttributeDouble("1st line 1st pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_long,
-                mapProjRec.getAttributeDouble("1st line 1st pixel geodetic longitude"));
+        if(mapProjRec != null) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
+                    mapProjRec.getAttributeDouble("1st line 1st pixel geodetic latitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_long,
+                    mapProjRec.getAttributeDouble("1st line 1st pixel geodetic longitude"));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_lat,
-                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_long,
-                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic longitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_lat,
+                    mapProjRec.getAttributeDouble("1st line last valid pixel geodetic latitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_long,
+                    mapProjRec.getAttributeDouble("1st line last valid pixel geodetic longitude"));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_lat,
-                mapProjRec.getAttributeDouble("Last line 1st pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_long,
-                mapProjRec.getAttributeDouble("Last line 1st pixel geodetic longitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_lat,
-                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long,
-                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_lat,
+                    mapProjRec.getAttributeDouble("Last line 1st pixel geodetic latitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_long,
+                    mapProjRec.getAttributeDouble("Last line 1st pixel geodetic longitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_lat,
+                    mapProjRec.getAttributeDouble("Last line last valid pixel geodetic latitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long,
+                    mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));
+        }
 
         //sph
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass());
@@ -290,10 +288,12 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
                 getPolarization(_leaderFile.getSceneRecord().getAttributeString("Sensor ID and mode of operation for this channel")));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
+        if(mapProjRec != null) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
                 _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-pixel distance in output scene"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
                 _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-line distance in output scene"));
+        }
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
                 sceneRec.getAttributeDouble("Nominal number of looks processed in azimuth"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks,
@@ -317,6 +317,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     }
 
     private String getPass() {
+        if(_leaderFile.getMapProjRecord() == null) return " ";
         double heading = _leaderFile.getMapProjRecord().getAttributeDouble("Platform heading at nadir corresponding to scene centre");
         if(heading > 90) return "DESCENDING";
         else return "ASCENDING";

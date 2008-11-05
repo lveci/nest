@@ -47,7 +47,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         _leaderFile = new ERSLeaderFile(createInputStream(ERSVolumeDirectoryFile.getLeaderFileName()));
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, "DAT_");
-        int numImageFiles = imageFileNames.length;
+        final int numImageFiles = imageFileNames.length;
         _imageFiles = new ERSImageFile[numImageFiles];
         for (int i = 0; i < numImageFiles; i++) {
             _imageFiles[i] = new ERSImageFile(createInputStream(imageFileNames[i]));
@@ -93,8 +93,8 @@ class ERSProductDirectory extends CEOSProductDirectory {
             for (final ERSImageFile imageFile : _imageFiles) {
 
                 if(isProductSLC) {
-                    Band bandI = createBand(product, "i_" + index, "real", imageFile);
-                    Band bandQ = createBand(product, "q_" + index, "real", imageFile);
+                    final Band bandI = createBand(product, "i_" + index, "real", imageFile);
+                    final Band bandQ = createBand(product, "q_" + index, "real", imageFile);
                     createVirtualIntensityBand(product, bandI, bandQ, "_"+index);
                     createVirtualPhaseBand(product, bandI, bandQ, "_"+index);
                 } else {
@@ -104,10 +104,10 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 ++index;
             }
         } else {
-            ERSImageFile imageFile = _imageFiles[0];
+            final ERSImageFile imageFile = _imageFiles[0];
             if(isProductSLC) {
-                Band bandI = createBand(product, "i", "real", imageFile);
-                Band bandQ = createBand(product, "q", "imaginary", imageFile);
+                final Band bandI = createBand(product, "i", "real", imageFile);
+                final Band bandQ = createBand(product, "q", "imaginary", imageFile);
                 createVirtualIntensityBand(product, bandI, bandQ, "");
                 createVirtualPhaseBand(product, bandI, bandQ, "");
             } else {
@@ -120,39 +120,28 @@ class ERSProductDirectory extends CEOSProductDirectory {
         product.setEndTime(getUTCScanStopTime());
         product.setDescription(getProductDescription());
 
-        addGeoCoding(product);
+        addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
         addTiePointGrids(product);
         addMetaData(product);
 
         return product;
     }
 
-    private void addGeoCoding(final Product product) throws IllegalCeosFormatException, IOException {
-
-        TiePointGrid latGrid = new TiePointGrid("lat", 2, 2, 0.5f, 0.5f, 
-                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                                                _leaderFile.getLatCorners());
-        TiePointGrid lonGrid = new TiePointGrid("lon", 2, 2, 0.5f, 0.5f,
-                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                                                _leaderFile.getLonCorners(),
-                                                TiePointGrid.DISCONT_AT_360);
-        TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
-
-        product.addTiePointGrid(latGrid);
-        product.addTiePointGrid(lonGrid);
-        product.setGeoCoding(tpGeoCoding);
-    }
-
     private void addTiePointGrids(final Product product) throws IllegalCeosFormatException, IOException {
-        BaseRecord facility = _leaderFile.getFacilityRecord();
+        final BaseRecord facility = _leaderFile.getFacilityRecord();
 
-        double angle1 = facility.getAttributeDouble("Incidence angle at first range pixel");
-        double angle2 = facility.getAttributeDouble("Incidence angle at centre range pixel");
-        double angle3 = facility.getAttributeDouble("Incidence angle at last valid range pixel");
+        final double angle1 = facility.getAttributeDouble("Incidence angle at first range pixel");
+        final double angle2 = facility.getAttributeDouble("Incidence angle at centre range pixel");
+        final double angle3 = facility.getAttributeDouble("Incidence angle at last valid range pixel");
 
-        TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", 3, 2, 0, 0,
+        final float[] angles = new float[]{(float)angle1, (float)angle2, (float)angle3};
+        final float[] fineAngles = new float[6*6];
+
+        createFineTiePointGrid(3, 1, 6, 6, angles, fineAngles);
+
+        TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", 6, 6, 0, 0,
                 product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                new float[]{(float)angle1, (float)angle2, (float)angle3,   (float)angle1, (float)angle2, (float)angle3});
+                fineAngles);
 
         product.addTiePointGrid(incidentAngleGrid);
     }
@@ -295,9 +284,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type,
                 ProductData.getTypeString(ProductData.TYPE_INT16));
 
-
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag,
-                isGroundRange());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag,
                 facilityRec.getAttributeInt("Antenna pattern correction flag"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag,

@@ -89,25 +89,7 @@ public class BaseRecord {
     }
 
     public void assignMetadataTo(final MetadataElement elem) {
-
-        Map metadata = db.getMetadataElement();
-        Set keys = metadata.keySet();                           // The set of keys in the map.
-        for (Object key : keys) {
-            Object value = metadata.get(key);                   // Get the value for that key.
-            if (value == null) continue;
-
-            if(value instanceof String) {
-                elem.setAttributeString((String)key, value.toString());
-            } else if(value instanceof Integer) {
-                elem.setAttributeInt((String)key, (Integer)value);
-            } else if(value instanceof Double) {
-                MetadataAttribute attrib = new MetadataAttribute((String)key, ProductData.TYPE_FLOAT64, 1);
-                attrib.getData().setElemDouble((Double)value);
-                elem.addAttribute(attrib);
-            } else {
-                elem.setAttributeString((String)key, String.valueOf(value));
-            }
-        }
+        db.assignMetadataTo(elem);
     }
 
     protected final long[] readLongs(final int numLongs, final int relativePosition) throws

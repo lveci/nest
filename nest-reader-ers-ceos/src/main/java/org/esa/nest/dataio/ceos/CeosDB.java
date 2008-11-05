@@ -1,13 +1,14 @@
 package org.esa.nest.dataio.ceos;
 
 import org.esa.nest.util.XMLSupport;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.MetadataAttribute;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -52,8 +53,25 @@ public final class CeosDB {
         metaMap = new HashMap(100);
     }
 
-    public Map getMetadataElement() {
-        return metaMap;
+    public void assignMetadataTo(final MetadataElement elem) {
+
+        final Set keys = metaMap.keySet();                           // The set of keys in the map.
+        for (Object key : keys) {
+            final Object value = metaMap.get(key);                   // Get the value for that key.
+            if (value == null) continue;
+
+            if(value instanceof String) {
+                elem.setAttributeString((String)key, value.toString());
+            } else if(value instanceof Integer) {
+                elem.setAttributeInt((String)key, (Integer)value);
+            } else if(value instanceof Double) {
+                MetadataAttribute attrib = new MetadataAttribute((String)key, ProductData.TYPE_FLOAT64, 1);
+                attrib.getData().setElemDouble((Double)value);
+                elem.addAttribute(attrib);
+            } else {
+                elem.setAttributeString((String)key, String.valueOf(value));
+            }
+        }
     }
 
     public void readRecord(CeosFileReader reader) throws IOException, IllegalCeosFormatException
@@ -112,31 +130,31 @@ public final class CeosDB {
                     reader.skipBytes(num); // blank
                 } else if(type == CeosDBTypes.An.value()) {
 
-                    //String tmp = reader.readAn(num);
+                    //final String tmp = reader.readAn(num);
                     //System.out.print(" = " + tmp);
                     //metaMap.put(name , tmp);
                     metaMap.put(name , reader.readAn(num));
                 } else if(type == CeosDBTypes.In.value()) {
 
-                    //int tmp = (int)reader.readIn(num);
+                    //final int tmp = (int)reader.readIn(num);
                     //System.out.print(" = " + tmp);
                     //metaMap.put(name , tmp);
                     metaMap.put(name , (int)reader.readIn(num));
                 } else if(type == CeosDBTypes.B1.value()) {
 
-                    //int tmp = reader.readB1();
+                    //final int tmp = reader.readB1();
                     //System.out.print(" = " + tmp);
                     //metaMap.put(name , tmp);
                     metaMap.put(name , reader.readB1());
                 } else if(type == CeosDBTypes.B2.value()) {
 
-                    //int tmp = reader.readB2();
+                    //final int tmp = reader.readB2();
                     //System.out.print(" = " + tmp);
                     //metaMap.put(name , tmp);
                     metaMap.put(name , reader.readB2());
                 } else if(type == CeosDBTypes.B4.value()) {
 
-                    //int tmp = reader.readB4();
+                    //final int tmp = reader.readB4();
                     //System.out.print(" = " + tmp);
                     //metaMap.put(name , tmp);
                     metaMap.put(name , reader.readB4());

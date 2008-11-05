@@ -15,7 +15,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.10 $ $Date: 2008-10-27 21:23:25 $
+ * @version $Revision: 1.11 $ $Date: 2008-11-04 22:18:32 $
  */
 public abstract class CEOSImageFile {
 
@@ -145,6 +145,50 @@ public abstract class CEOSImageFile {
         }
     }
 
+    public synchronized void readBandRasterDataSLC2(final int sourceOffsetX, final int sourceOffsetY,
+                                   final int sourceWidth, final int sourceHeight,
+                                   final int sourceStepX, final int sourceStepY,
+                                   final int destOffsetX, final int destOffsetY,
+                                   final int destWidth, final int destHeight,
+                                   final ProductData destBuffer, boolean oneOf2,
+                                   ProgressMonitor pm) throws IOException, IllegalCeosFormatException
+    {
+        final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
+
+        final int x = sourceOffsetX * 4;
+
+        pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceOffsetY);
+        try {
+            final float[] srcLine = new float[sourceWidth * 2];
+            final float[] destLine = new float[destWidth];
+            for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
+                if (pm.isCanceled()) {
+                    break;
+                }
+
+                // Read source line
+                //ImageRecord imageRecord = getImageRecord(y);
+                //_ceosReader.seek(imageRecord.getImageDataStart() + x);
+                _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
+                _ceosReader.readF(srcLine);
+
+                // Copy source line into destination buffer
+                final int currentLineIndex = (y - sourceOffsetY) * destWidth;
+                if (oneOf2)
+                    copyLine1Of2(srcLine, destLine, sourceStepX);
+                else
+                    copyLine2Of2(srcLine, destLine, sourceStepX);
+
+                System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+
+                pm.worked(1);
+            }
+
+        } finally {
+            pm.done();
+        }
+    }
+
     protected static void copyLine(final short[] srcLine, final short[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
@@ -173,6 +217,13 @@ public abstract class CEOSImageFile {
         }
     }
 
+    protected static void copyLine1Of2(final float[] srcLine, final float[] destLine,
+                          final int sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
+            destLine[x] = (int)srcLine[i << 1];
+        }
+    }
+
     protected static void copyLine2Of2(final short[] srcLine, final short[] destLine,
                           final int sourceStepX) {
         final int length = destLine.length-1;
@@ -186,6 +237,14 @@ public abstract class CEOSImageFile {
         final int length = destLine.length-1;
         for (int x = 0, i = 0; x < length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[(i << 1) + 1];
+        }
+    }
+
+    protected static void copyLine2Of2(final float[] srcLine, final float[] destLine,
+                          final int sourceStepX) {
+        final int length = destLine.length-1;
+        for (int x = 0, i = 0; x < length; ++x, i += sourceStepX) {
+            destLine[x] = (int)srcLine[(i << 1) + 1];
         }
     }
 

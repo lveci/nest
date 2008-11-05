@@ -81,11 +81,11 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
                 if(isProductSLC) {
                     String bandName = "i_" + index;
-                    Band bandI = createBand(bandName);
+                    final Band bandI = createBand(bandName);
                     product.addBand(bandI);
                     bandImageFileMap.put(bandName, imageFile);
                     bandName = "q_" + index;
-                    Band bandQ = createBand(bandName);
+                    final Band bandQ = createBand(bandName);
                     product.addBand(bandQ);
                     bandImageFileMap.put(bandName, imageFile);
 
@@ -101,17 +101,17 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                 }
             }
         } else {
-            RadarsatImageFile imageFile = _imageFiles[0];
+            final RadarsatImageFile imageFile = _imageFiles[0];
             if(isProductSLC) {
-                Band bandI = createBand("i");
+                final Band bandI = createBand("i");
                 product.addBand(bandI);
                 bandImageFileMap.put("i", imageFile);
-                Band bandQ = createBand("q");
+                final Band bandQ = createBand("q");
                 product.addBand(bandQ);
                 bandImageFileMap.put("q", imageFile);
                 createVirtualIntensityBand(product, bandI, bandQ, "");
             } else {
-                Band band = createBand("Amplitude");
+                final Band band = createBand("Amplitude");
                 product.addBand(band);
                 bandImageFileMap.put("Amplitude", imageFile);
                 createVirtualIntensityBand(product, band, "");
@@ -122,7 +122,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         //product.setEndTime(getUTCScanStopTime());
         product.setDescription(getProductDescription());
 
-        addGeoCoding(product);
+        addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
         addTiePointGrids(product);
         addMetaData(product);
 
@@ -133,23 +133,6 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         if(productType == null || _volumeDirectoryFile == null)
             readVolumeDirectoryFile();
         return (productType.contains("RSAT") || productType.contains("RADARSAT"));
-    }
-
-    private void addGeoCoding(final Product product) throws IllegalCeosFormatException,
-                                                            IOException {
-
-        TiePointGrid latGrid = new TiePointGrid("lat", 2, 2, 0.5f, 0.5f, 
-                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                                                _leaderFile.getLatCorners());
-        TiePointGrid lonGrid = new TiePointGrid("lon", 2, 2, 0.5f, 0.5f,
-                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                                                _leaderFile.getLonCorners(),
-                                                TiePointGrid.DISCONT_AT_360);
-        TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
-
-        product.addTiePointGrid(latGrid);
-        product.addTiePointGrid(lonGrid);
-        product.setGeoCoding(tpGeoCoding);
     }
 
     private void addTiePointGrids(final Product product) throws IllegalCeosFormatException, IOException {

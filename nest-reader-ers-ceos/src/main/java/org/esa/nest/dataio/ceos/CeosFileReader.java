@@ -95,6 +95,10 @@ public final class CeosFileReader {
             _stream.readFully(array, 0, array.length);
     }
 
+    public void readF(final float[] array) throws IOException {
+            _stream.readFully(array, 0, array.length);
+    }
+
     public long readIn(final int n) throws IOException,
                                            IllegalCeosFormatException {
         final long streamPosition = _stream.getStreamPosition();
