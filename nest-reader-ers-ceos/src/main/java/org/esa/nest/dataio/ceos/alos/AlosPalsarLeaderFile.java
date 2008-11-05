@@ -70,9 +70,9 @@ class AlosPalsarLeaderFile {
             _dataQualityRecord = null;
         }
 
-        _facilityRecord = null;
-       // _facilityRecord = new BaseRecord(_reader, -1, mission, facility_recordDefinitionFile);
-       // _reader.seek(_facilityRecord.getAbsolutPosition(_facilityRecord.getRecordLength()));
+        //_facilityRecord = null;
+        _facilityRecord = new BaseRecord(_reader, -1, mission, facility_recordDefinitionFile);
+        _reader.seek(_facilityRecord.getAbsolutPosition(_facilityRecord.getRecordLength()));
     }
 
     public int getProductLevel() {

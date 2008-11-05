@@ -83,6 +83,10 @@ public final class CeosFileReader {
             _stream.readFully(array, 0, array.length);
     }
 
+    public void readC1(final char[] array) throws IOException {
+            _stream.readFully(array, 0, array.length);
+    }
+
     public void readB2(final short[] array) throws IOException {
             _stream.readFully(array, 0, array.length);
     }

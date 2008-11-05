@@ -52,7 +52,7 @@ public class AlosPalsarProductReader extends CEOSProductReader {
      * {@inheritDoc}
      */
     @Override
-    protected synchronized void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight,
+    protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight,
                                           int sourceStepX, int sourceStepY, Band destBand, int destOffsetX,
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
@@ -63,7 +63,7 @@ public class AlosPalsarProductReader extends CEOSProductReader {
                 boolean oneOf2 = !destBand.getName().startsWith("q");
 
                 if(dataDir.getProductLevel() == AlosPalsarConstants.LEVEL1_0) {
-                    imageFile.readBandRasterDataSLC(sourceOffsetX, sourceOffsetY,
+                    imageFile.readBandRasterDataSLCByte(sourceOffsetX, sourceOffsetY,
                                          sourceWidth, sourceHeight,
                                          sourceStepX, sourceStepY,
                                          destOffsetX, destOffsetY,

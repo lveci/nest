@@ -13,7 +13,7 @@ import java.io.IOException;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.14 $ $Date: 2008-09-19 16:51:03 $
+ * @version $Revision: 1.15 $ $Date: 2008-11-05 21:00:03 $
  */
 class ERSImageFile extends CEOSImageFile {
 
@@ -33,15 +33,4 @@ class ERSImageFile extends CEOSImageFile {
         _startPosImageRecords = _imageRecords[0].getStartPos();
     }
 
-    public String getBandName() {
-        return ERSConstants.BANDNAME_PREFIX;
-    }
-
-    public String getBandDescription() {
-        return "";
-    }
-
-    public static String getGeophysicalUnit() {
-        return ERSConstants.GEOPHYSICAL_UNIT;
-    }
 }

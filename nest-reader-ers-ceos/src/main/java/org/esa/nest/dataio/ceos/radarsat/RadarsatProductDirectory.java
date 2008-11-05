@@ -170,7 +170,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         final Band band = new Band(name, ProductData.TYPE_INT8,
                                    _sceneWidth, _sceneHeight);
 
-        band.setUnit(RadarsatImageFile.getGeophysicalUnit());
+        //band.setUnit(RadarsatImageFile.getGeophysicalUnit());
 
       /*
         final int bandIndex = index;

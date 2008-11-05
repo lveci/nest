@@ -15,18 +15,16 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.13 $ $Date: 2008-11-05 18:07:17 $
+ * @version $Revision: 1.14 $ $Date: 2008-11-05 21:00:03 $
  */
 public abstract class CEOSImageFile {
 
     protected BaseRecord _imageFDR = null;
-    protected CeosFileReader _ceosReader;
+    protected CeosFileReader _ceosReader = null;
     protected ImageRecord[] _imageRecords = null;
 
     protected int _imageRecordLength = 0;
     protected long _startPosImageRecords = 0;
-
-    public abstract String getBandName();
 
     public BaseRecord getImageFileDescriptor() {
         return _imageFDR;
@@ -60,7 +58,7 @@ public abstract class CEOSImageFile {
         return list.toArray(new String[list.size()]);
     }
 
-    public void readBandRasterData(final int sourceOffsetX, final int sourceOffsetY,
+    public synchronized void readBandRasterData(final int sourceOffsetX, final int sourceOffsetY,
                                    final int sourceWidth, final int sourceHeight,
                                    final int sourceStepX, final int sourceStepY,
                                    final int destOffsetX, final int destOffsetY,
@@ -69,10 +67,9 @@ public abstract class CEOSImageFile {
                                                                                             IllegalCeosFormatException
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
-
         final int x = sourceOffsetX * 2;
 
-        pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceOffsetY);
+        pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
             final short[] srcLine = new short[sourceWidth];
             final short[] destLine = new short[destWidth];
@@ -82,8 +79,55 @@ public abstract class CEOSImageFile {
                 }
 
                 // Read source line
-                _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
-                _ceosReader.readB2(srcLine);
+                //synchronized (_ceosReader) {
+                    _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
+                    _ceosReader.readB2(srcLine);
+                //}
+
+                // Copy source line into destination buffer
+                final int currentLineIndex = (y - sourceOffsetY) * destWidth;
+                if (sourceStepX == 1) {
+
+                    System.arraycopy(srcLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+                } else {
+                    copyLine(srcLine, destLine, sourceStepX);
+
+                    System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+                }
+
+                pm.worked(1);
+            }
+
+        } finally {
+            pm.done();
+        }
+    }
+
+    public synchronized void readBandRasterDataByte(final int sourceOffsetX, final int sourceOffsetY,
+                                   final int sourceWidth, final int sourceHeight,
+                                   final int sourceStepX, final int sourceStepY,
+                                   final int destOffsetX, final int destOffsetY,
+                                   final int destWidth, final int destHeight,
+                                   final ProductData destBuffer, ProgressMonitor pm) throws IOException,
+                                                                                            IllegalCeosFormatException
+    {
+        final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
+        final int x = sourceOffsetX * 2;
+
+        pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
+        try {
+            final byte[] srcLine = new byte[sourceWidth];
+            final byte[] destLine = new byte[destWidth];
+            for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
+                if (pm.isCanceled()) {
+                    break;
+                }
+
+                // Read source line
+                //synchronized (_ceosReader) {
+                    _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
+                    _ceosReader.readB1(srcLine);
+                //}
 
                 // Copy source line into destination buffer
                 final int currentLineIndex = (y - sourceOffsetY) * destWidth;
@@ -113,10 +157,9 @@ public abstract class CEOSImageFile {
                                    ProgressMonitor pm) throws IOException, IllegalCeosFormatException
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
-
         final int x = sourceOffsetX * 4;
 
-        pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceOffsetY);
+        pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
             final short[] srcLine = new short[sourceWidth * 2];
             final short[] destLine = new short[destWidth];
@@ -126,10 +169,10 @@ public abstract class CEOSImageFile {
                 }
 
                 // Read source line
-                //ImageRecord imageRecord = getImageRecord(y);
-                //_ceosReader.seek(imageRecord.getImageDataStart() + x);
-                _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
-                _ceosReader.readB2(srcLine);
+                //synchronized (_ceosReader) {
+                    _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
+                    _ceosReader.readB2(srcLine);
+                //}
 
                 // Copy source line into destination buffer
                 final int currentLineIndex = (y - sourceOffsetY) * destWidth;
@@ -157,10 +200,9 @@ public abstract class CEOSImageFile {
                                    ProgressMonitor pm) throws IOException, IllegalCeosFormatException
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
-
         final int x = sourceOffsetX * 4;
 
-        pm.beginTask("Reading band '" + getBandName() + "'...", sourceMaxY - sourceOffsetY);
+        pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
             final float[] srcLine = new float[sourceWidth * 2];
             final float[] destLine = new float[destWidth];
@@ -170,10 +212,53 @@ public abstract class CEOSImageFile {
                 }
 
                 // Read source line
-                //ImageRecord imageRecord = getImageRecord(y);
-                //_ceosReader.seek(imageRecord.getImageDataStart() + x);
-                _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
-                _ceosReader.readF(srcLine);
+                //synchronized (_ceosReader) {
+                    _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
+                    _ceosReader.readF(srcLine);
+                //}
+
+                // Copy source line into destination buffer
+                final int currentLineIndex = (y - sourceOffsetY) * destWidth;
+                if (oneOf2)
+                    copyLine1Of2(srcLine, destLine, sourceStepX);
+                else
+                    copyLine2Of2(srcLine, destLine, sourceStepX);
+
+                System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+
+                pm.worked(1);
+            }
+
+        } finally {
+            pm.done();
+        }
+    }
+
+    public synchronized void readBandRasterDataSLCByte(final int sourceOffsetX, final int sourceOffsetY,
+                                   final int sourceWidth, final int sourceHeight,
+                                   final int sourceStepX, final int sourceStepY,
+                                   final int destOffsetX, final int destOffsetY,
+                                   final int destWidth, final int destHeight,
+                                   final ProductData destBuffer, boolean oneOf2,
+                                   ProgressMonitor pm) throws IOException, IllegalCeosFormatException
+    {
+        final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
+        final int x = sourceOffsetX * 4;
+
+        pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
+        try {
+            final byte[] srcLine = new byte[sourceWidth * 2];
+            final byte[] destLine = new byte[destWidth];
+            for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
+                if (pm.isCanceled()) {
+                    break;
+                }
+
+                // Read source line
+                synchronized (_ceosReader) {
+                    _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
+                    _ceosReader.readB1(srcLine);
+                }
 
                 // Copy source line into destination buffer
                 final int currentLineIndex = (y - sourceOffsetY) * destWidth;

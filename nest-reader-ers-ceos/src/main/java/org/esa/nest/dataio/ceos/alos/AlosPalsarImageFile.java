@@ -16,8 +16,6 @@ import com.bc.ceres.core.ProgressMonitor;
 
 class AlosPalsarImageFile extends CEOSImageFile {
 
-    private final int _imageNumber;
-
     private static String mission = "alos";
     private static String image_DefinitionFile = "image_file.xml";
     private static String image_recordDefinition = "image_record.xml";
@@ -31,19 +29,6 @@ class AlosPalsarImageFile extends CEOSImageFile {
         _imageRecords[0] = new ImageRecord(_ceosReader, -1, mission, image_recordDefinition);
         _imageRecordLength = _imageRecords[0].getRecordLength();
         _startPosImageRecords = _imageRecords[0].getStartPos();
-        _imageNumber = 1;
-    }
-
-    public String getBandName() {
-        return AlosPalsarConstants.BANDNAME_PREFIX + _imageNumber;
-    }
-
-    public String getBandDescription() {
-        return "";
-    }
-
-    public int getBandIndex() {
-        return _imageNumber;
     }
 
     public static String getGeophysicalUnit() {
