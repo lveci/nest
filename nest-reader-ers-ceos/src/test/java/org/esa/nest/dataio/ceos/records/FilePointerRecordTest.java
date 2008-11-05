@@ -57,7 +57,7 @@ public class FilePointerRecordTest extends TestCase {
         assertNotNull(recordRoot);
         assertMetadata(recordRoot);
         assertEquals(0, recordRoot.getNumElements());
-        assertEquals(22, recordRoot.getNumAttributes());
+        assertEquals(17, recordRoot.getNumAttributes());
     }
 
     public static void assertMetadata(final MetadataElement elem) {

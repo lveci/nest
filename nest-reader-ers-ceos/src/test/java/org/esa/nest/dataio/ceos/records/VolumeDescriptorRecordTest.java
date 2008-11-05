@@ -52,7 +52,7 @@ public class VolumeDescriptorRecordTest extends TestCase {
 
         record.assignMetadataTo(volumeMetadata);
 
-        assertEquals(26, volumeMetadata.getNumAttributes());
+        assertEquals(21, volumeMetadata.getNumAttributes());
         assertEquals(0, volumeMetadata.getNumElements());
         assertMetadata(volumeMetadata);
     }

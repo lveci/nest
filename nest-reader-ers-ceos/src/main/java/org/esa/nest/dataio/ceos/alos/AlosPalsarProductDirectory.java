@@ -62,7 +62,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         _sceneHeight = _imageFiles[0].getRasterHeight();
         assertSameWidthAndHeightForAllImages();
 
-        if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1 ||
+        if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_0 ||
            _leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1) {
             isProductSLC = true;
         }
@@ -185,7 +185,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1)
             dataType = ProductData.TYPE_FLOAT32;
         else if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_0)
-            dataType = ProductData.TYPE_INT8;
+            dataType = ProductData.TYPE_INT16;
 
         final Band band = new Band(name, dataType, _sceneWidth, _sceneHeight);
 

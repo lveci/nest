@@ -79,11 +79,11 @@ public class BaseRecordTest extends TestCase {
     
     public static void assertRecord(final BaseRecord record) {
         assertNotNull(record);
-        assertEquals(1, record.getAttributeInt("Record Number"));
+   /*     assertEquals(1, record.getAttributeInt("Record Number"));
         assertEquals(077, record.getAttributeInt("First Record Subtype"));
         assertEquals(0300, record.getAttributeInt("Record Type Code"));
         assertEquals(022, record.getAttributeInt("Second Record Subtype"));
-        assertEquals(021, record.getAttributeInt("Third Record Subtype"));
+        assertEquals(021, record.getAttributeInt("Third Record Subtype"));   */
         assertEquals(RECORD_LENGTH, record.getRecordLength());
     }
      

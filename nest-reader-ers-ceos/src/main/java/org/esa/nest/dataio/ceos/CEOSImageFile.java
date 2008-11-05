@@ -15,7 +15,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.12 $ $Date: 2008-11-05 17:44:17 $
+ * @version $Revision: 1.13 $ $Date: 2008-11-05 18:07:17 $
  */
 public abstract class CEOSImageFile {
 
@@ -148,7 +148,7 @@ public abstract class CEOSImageFile {
         }
     }
 
-    public synchronized void readBandRasterDataSLC2(final int sourceOffsetX, final int sourceOffsetY,
+    public synchronized void readBandRasterDataSLCFloat(final int sourceOffsetX, final int sourceOffsetY,
                                    final int sourceWidth, final int sourceHeight,
                                    final int sourceStepX, final int sourceStepY,
                                    final int destOffsetX, final int destOffsetY,

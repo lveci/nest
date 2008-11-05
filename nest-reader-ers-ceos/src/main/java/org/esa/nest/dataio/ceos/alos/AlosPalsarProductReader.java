@@ -7,7 +7,6 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.CEOSProductReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
-import org.esa.nest.dataio.ceos.CEOSImageFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,13 +62,21 @@ public class AlosPalsarProductReader extends CEOSProductReader {
             if(dataDir.isSLC()) {
                 boolean oneOf2 = !destBand.getName().startsWith("q");
 
-                imageFile.readBandRasterDataSLC2(sourceOffsetX, sourceOffsetY,
+                if(dataDir.getProductLevel() == AlosPalsarConstants.LEVEL1_0) {
+                    imageFile.readBandRasterDataSLC(sourceOffsetX, sourceOffsetY,
                                          sourceWidth, sourceHeight,
                                          sourceStepX, sourceStepY,
                                          destOffsetX, destOffsetY,
                                          destWidth, destHeight,
                                          destBuffer, oneOf2, pm);
-
+                } else {
+                    imageFile.readBandRasterDataSLCFloat(sourceOffsetX, sourceOffsetY,
+                                         sourceWidth, sourceHeight,
+                                         sourceStepX, sourceStepY,
+                                         destOffsetX, destOffsetY,
+                                         destWidth, destHeight,
+                                         destBuffer, oneOf2, pm);
+                }
             } else {
                 imageFile.readBandRasterData(sourceOffsetX, sourceOffsetY,
                                          sourceWidth, sourceHeight,
