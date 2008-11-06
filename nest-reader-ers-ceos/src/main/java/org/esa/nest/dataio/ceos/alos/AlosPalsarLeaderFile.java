@@ -27,6 +27,7 @@ class AlosPalsarLeaderFile {
     public final BaseRecord _attitudeRecord;
     public final BaseRecord _radiometricRecord;
     public final BaseRecord _dataQualityRecord;
+    public final BaseRecord _level0CalibrationRecord;
     public final BaseRecord _facilityRecord;
     public CeosFileReader _reader;
 
@@ -38,6 +39,7 @@ class AlosPalsarLeaderFile {
     private static String attitude_recordDefinitionFile = "attitude_record.xml";
     private static String radiometric_recordDefinitionFile = "radiometric_record.xml";
     private static String dataQuality_recordDefinitionFile = "data_quality_summary_record.xml";
+    private static String calibration_recordDefinitionFile = "calibration_record.xml";
     private static String facility_recordDefinitionFile = "facility_record.xml";
 
     private int productLevel = -1;
@@ -65,9 +67,12 @@ class AlosPalsarLeaderFile {
             _reader.seek(_radiometricRecord.getAbsolutPosition(_radiometricRecord.getRecordLength()));
             _dataQualityRecord = new BaseRecord(_reader, -1, mission, dataQuality_recordDefinitionFile);
             _reader.seek(_dataQualityRecord.getAbsolutPosition(_dataQualityRecord.getRecordLength()));
+            _level0CalibrationRecord = null;
         } else {
             _radiometricRecord = null;
             _dataQualityRecord = null;
+            _level0CalibrationRecord = new BaseRecord(_reader, -1, mission, calibration_recordDefinitionFile);
+            _reader.seek(_level0CalibrationRecord.getAbsolutPosition(_level0CalibrationRecord.getRecordLength()));
         }
 
         //_facilityRecord = null;
@@ -175,6 +180,12 @@ class AlosPalsarLeaderFile {
         if(_dataQualityRecord != null) {
             metadata = new MetadataElement("Data Quality");
             _dataQualityRecord.assignMetadataTo(metadata);
+            sphElem.addElement(metadata);
+        }
+
+        if(_level0CalibrationRecord != null) {
+            metadata = new MetadataElement("Calibration");
+            _level0CalibrationRecord.assignMetadataTo(metadata);
             sphElem.addElement(metadata);
         }
 
