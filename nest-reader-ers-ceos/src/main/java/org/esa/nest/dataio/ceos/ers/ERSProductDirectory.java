@@ -123,7 +123,17 @@ class ERSProductDirectory extends CEOSProductDirectory {
         addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
         addTiePointGrids(product);
         addMetaData(product);
-
+        /*
+        float[] coarseTiePoints = {44.625f, 44.813f, 43.725f, 43.911f};
+        float[] fineTiePoints = new float[121];
+        createFineTiePointGrid(2, 2, 11, 11, coarseTiePoints, fineTiePoints);
+        for (int i = 0; i < 11; i++) {
+            System.out.println();
+            for (int j = 0; j < 11; j++) {
+                System.out.print(fineTiePoints[i*11+j] + ", ");
+            }
+        }
+        */
         return product;
     }
 
@@ -134,14 +144,19 @@ class ERSProductDirectory extends CEOSProductDirectory {
         final double angle2 = facility.getAttributeDouble("Incidence angle at centre range pixel");
         final double angle3 = facility.getAttributeDouble("Incidence angle at last valid range pixel");
 
+        int gridWidth = 6;
+        int gridHeight = 6;
+
+        float subSamplingX = (float)product.getSceneRasterWidth() / (gridWidth - 1);
+        float subSamplingY = (float)product.getSceneRasterHeight() / (gridHeight - 1);
+
         final float[] angles = new float[]{(float)angle1, (float)angle2, (float)angle3};
-        final float[] fineAngles = new float[6*6];
+        final float[] fineAngles = new float[gridWidth*gridHeight];
 
-        createFineTiePointGrid(3, 1, 6, 6, angles, fineAngles);
+        createFineTiePointGrid(3, 1, gridWidth, gridHeight, angles, fineAngles);
 
-        TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", 6, 6, 0, 0,
-                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                fineAngles);
+        TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
+                subSamplingX, subSamplingY, fineAngles);
 
         product.addTiePointGrid(incidentAngleGrid);
     }
