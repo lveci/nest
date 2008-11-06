@@ -144,25 +144,24 @@ public abstract class CEOSProductDirectory {
             throws IllegalCeosFormatException, IOException {
 
         if(latCorners == null || lonCorners == null) return;
-        
-        final float[] fineLatTiePoints = new float[10*10];
-        createFineTiePointGrid(2, 2, 10, 10,
-                               latCorners,
-                               fineLatTiePoints);
 
-        final TiePointGrid latGrid = new TiePointGrid("lat", 10, 10, 0.5f, 0.5f,
-                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                fineLatTiePoints);
+        int gridWidth = 10;
+        int gridHeight = 10;
 
-        final float[] fineLonTiePoints = new float[10*10];
-        createFineTiePointGrid(2, 2, 10, 10,
-                               lonCorners,
-                               fineLonTiePoints);
+        final float[] fineLatTiePoints = new float[gridWidth*gridHeight];
+        createFineTiePointGrid(2, 2, gridWidth, gridHeight, latCorners, fineLatTiePoints);
 
-        final TiePointGrid lonGrid = new TiePointGrid("lon", 10, 10, 0.5f, 0.5f,
-                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                fineLonTiePoints,
-                TiePointGrid.DISCONT_AT_360);
+        float subSamplingX = (float)product.getSceneRasterWidth() / (gridWidth - 1);
+        float subSamplingY = (float)product.getSceneRasterHeight() / (gridHeight - 1);
+
+        final TiePointGrid latGrid = new TiePointGrid("lat", gridWidth, gridHeight, 0.5f, 0.5f,
+                subSamplingX, subSamplingY, fineLatTiePoints);
+
+        final float[] fineLonTiePoints = new float[gridWidth*gridHeight];
+        createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonCorners, fineLonTiePoints);
+
+        final TiePointGrid lonGrid = new TiePointGrid("lon", gridWidth, gridHeight, 0.5f, 0.5f,
+                subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
 
         final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
 
