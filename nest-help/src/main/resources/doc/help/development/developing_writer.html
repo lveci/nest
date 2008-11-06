@@ -13,7 +13,7 @@
 </table>
 <h3>Writers</h3>
 To create a writer plugin implement the ProductWriterPlugIn interface.<br><br><div style="margin-left: 40px;">public interface ProductWriterPlugIn extends ProductIOPlugIn {<br><br>&nbsp;&nbsp;&nbsp; /**<br>&nbsp;&nbsp;&nbsp;&nbsp; * Returns an array containing the classes that represent valid output types for this writer.<br>&nbsp;&nbsp;&nbsp;&nbsp; * &lt;p/&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;
-* &lt;p&gt; Intances of the classes returned in this array are valid
+* &lt;p&gt; Instances of the classes returned in this array are valid
 objects for the &lt;code&gt;setOutput&lt;/code&gt; method of the<br>&nbsp;&nbsp;&nbsp;&nbsp;
 * &lt;code&gt;ProductWriter&lt;/code&gt; interface (the method will not
 throw an &lt;code&gt;InvalidArgumentException&lt;/code&gt; in this<br>&nbsp;&nbsp;&nbsp;&nbsp; * case).<br>&nbsp;&nbsp;&nbsp;&nbsp; *<br>&nbsp;&nbsp;&nbsp;&nbsp; * @return an array containing valid output types, never &lt;code&gt;null&lt;/code&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp; *<br>&nbsp;&nbsp;&nbsp;&nbsp; * @see ProductWriter#writeProductNodes<br>&nbsp;&nbsp;&nbsp;&nbsp; */<br>&nbsp;&nbsp;&nbsp; Class[] getOutputTypes();<br><br>&nbsp;&nbsp;&nbsp; /**<br>&nbsp;&nbsp;&nbsp;&nbsp;
@@ -67,8 +67,7 @@ provider interface (SPI). A JAR publishes its writers in the resource
 file <tt>META-INF/services/</tt>org.esa.beam.framework.dataio.ProductWriterPlugIn.
 In this file add your writer SPI eg: org.esa.beam.dataio.geotiff.GeoTiffProductWriterPlugIn<br><h3>Adding Menu Item Actions</h3>
 In the modules.xml file found in the resources folder of the package,
-add an Action to create a menu item in the DAT<br>
-State the class of the Action to be called and the text to show in the
+add an Action to create a menu item in the DAT. State the class of the Action to be called and the text to show in the
 menu item. &nbsp; <br>
 <br>
 &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&lt;action&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;id&gt;exportGeoTIFFProduct&lt;/id&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

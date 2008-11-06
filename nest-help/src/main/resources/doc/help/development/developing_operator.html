@@ -12,12 +12,12 @@
 </tbody>
 </table>
 <h3>Operators</h3>
-The Operator interface is simple to extend. An operator basically takes
+The Operator interface is simple to extend. An Operator basically takes
 a source product as input and creates a new target product within
 initialize(). The algorithm implementation for what your operator does
-will go inside computTile() or computeTiles(). Operator work on the
-data tile by tile. The size of the tile may be depended on the requests
-of other operators in the graph.<br>
+will go inside computTile() or computeTiles(). Operators work on the
+data tile by tile. The size of the tile may be dependent on the requests
+of other Operators in the graph.<br>
 <pre class="code-java"><span class="code-keyword">public</span> <span class="code-keyword">interface</span> Operator {<br>   OperatorSpi getSpi();<br>   Product initialize(OperatorContext context);<br>   void computeTile(Tile targetTile, ProgressMonitor pm);<br>   void computeTiles(Rectangle targetTileRectangle, ProgressMonitor pm);<br>   void dispose();<br>}</pre>
 <p>The <tt>computeTile</tt> and <tt>computeTiles</tt> methods express different application requirements. Clients may either implement <tt>computeTile</tt> or <tt>computeTiles</tt>
 or both. In general, the algorithm dictates which of the methods will
@@ -25,7 +25,7 @@ be implemented. Some algorithms can compute their output bands
 independently (band-arithmetic, radiance to reflectance conversion),
 other cannot. </p>
 
-<p>The GPF selects the method which best fits to the application requirements:</p>
+<p>The GPF selects the method which best fits&nbsp;the application requirements:</p>
 <ul><li>In order to display an image of a band, the GPF is asked to
 compute tiles of single bands. The GPF therefore will prefer calling
 the <tt>computeTile</tt> method, if implemented. Otherwise it has to call <tt>computeTiles</tt>, which might not be the best choice in this case.</li><li>In
@@ -85,8 +85,7 @@ file <tt>META-INF/services/org.esa.beam.framework.gpf.OperatorSpi</tt>. In this 
 your Operator package add a class to extend the OperatorSpi interface.
 This class may also serve as a factory for new operator instances.<br><br>&nbsp;&nbsp;&nbsp; public static class Spi extends OperatorSpi {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public Spi() {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; super(MultilookOp.class);<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>&nbsp;&nbsp;&nbsp; }<h3>Adding Menu Item Actions</h3>
 In the modules.xml file found in the resources folder of the package,
-add an Action to create a menu item in the DAT<br>
-State the class of the Action to be called and the text to show in the
+add an Action to create a menu item in the DAT. State the class of the Action to be called and the text to show in the
 menu item. &nbsp; <br>
 <br>
 &nbsp;&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;

@@ -51,19 +51,17 @@ writers. </p>
 <p class="Paranum" style="">All
 modules are centered on the Generic Product Model (GPM) of the BEAM-NEST
 Core.&nbsp; The GPM is a common, unified data
-model designed such&nbsp;<br>
-that all data readers convert data into this data model and
+model designed so that all data readers convert data into this data model and
 all analysis and processing tools use this data model exclusively.</p>
-<p class="Paranum" style="">Data product reader modules know how to
-ingest all the data of a particular product including metadata and
+<p class="Paranum" style="">Data product reader modules&nbsp;ingest all the data of a particular product, including metadata and
 transform it into the GPM data structure. The GPM is abstract enough to
 handle all types of data products without losing any information. The
-NEST tools&nbsp;only have one interface to the GPM in order to work
+NEST tools&nbsp;have only one interface to the GPM in order to work
 with the data. Data product writers are able to take the data from the
 GPM and produce an external file format. With a GPM, file conversions
 from one file format to another are easily achieved with the
 appropriate reader and writer modules. Furthermore, the DAT, tools and
-future plug-ins become independent of which data products are supported
+future plug-ins are not&nbsp;dependent on which data products are supported
 or any specific complexities of the file formats. </p>
 
 
@@ -94,7 +92,7 @@ file formats used by other 3rd party SAR software.</p>
 <p class="Paranum" style="">The NEST
 architecture is built upon the proven and extensible architecture of BEAM.
 &nbsp;BEAM features an Application Programming
-Interface (API) that has been
+Interface (API) that was
 designed and developed from the beginning to be used by 3rd parties
 to extend BEAM or re-use it in their own applications.</p>
 
