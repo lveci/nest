@@ -278,7 +278,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         //sph
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass());
-        AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, getSampleType());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
                 sceneRec.getAttributeString("Processing algorithm identifier"));
 

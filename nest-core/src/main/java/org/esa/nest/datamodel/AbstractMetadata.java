@@ -232,4 +232,12 @@ public class AbstractMetadata {
             return new ProductData.UTC(0);
         }
     }
+
+    public static ProductData.UTC parseUTC(String timeStr, String format) {
+        try {
+            return ProductData.UTC.parse(timeStr, format);
+        } catch(ParseException e) {
+            return new ProductData.UTC(0);
+        }
+    }
 }

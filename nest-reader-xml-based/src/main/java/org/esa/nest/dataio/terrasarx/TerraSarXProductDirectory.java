@@ -3,6 +3,7 @@ package org.esa.nest.dataio.terrasarx;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.XMLProductDirectory;
 import org.esa.nest.datamodel.AbstractMetadata;
 
@@ -45,39 +46,50 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
-        MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
-        MetadataElement level1Elem = root.getElementAt(1);
-        MetadataElement generalHeaderElem = level1Elem.getElement("generalHeader");
-        MetadataElement productInfoElem = level1Elem.getElement("productInfo");
+        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        final MetadataElement level1Elem = root.getElementAt(1);
+        final MetadataElement generalHeader = level1Elem.getElement("generalHeader");
+        final MetadataElement productInfo = level1Elem.getElement("productInfo");
+        final MetadataElement missionInfo = productInfo.getElement("missionInfo");
+        final MetadataElement productVariantInfo = productInfo.getElement("productVariantInfo");
+        final MetadataElement imageDataInfo = productInfo.getElement("imageDataInfo");
 
-        MetadataAttribute attrib = generalHeaderElem.getAttribute("fileName");
+        MetadataAttribute attrib = generalHeader.getAttribute("fileName");
         if(attrib != null)
             productName = attrib.getData().getElemString();
 
         //mph
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, productName);
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, getProductType());
+        productType = productVariantInfo.getAttributeString("productType", " ");
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
         //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
         //        _leaderFile.getSceneRecord().getAttributeString("Product type descriptor"));
-        attrib = generalHeaderElem.getAttribute("mission");
-        if(attrib != null)
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, attrib.getData().getElemString());
 
-        attrib = generalHeaderElem.getAttribute("generationTime");
-        //if(attrib != null)
-        //    AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, attrib.getData().getElemString());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, generalHeader.getAttributeString("mission", " "));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, getTime(generalHeader, "generationTime"));
 
-       /* AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT,
-                Integer.parseInt(_leaderFile.getSceneRecord().getAttributeString("Orbit number").trim()));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
-                Integer.parseInt(_leaderFile.getSceneRecord().getAttributeString("Orbit number").trim()));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
-                _leaderFile.getFacilityRecord().getAttributeString("Time of input state vector used to processed the image"));
+        MetadataElement elem = generalHeader.getElement("generationSystem");
+        if(elem != null) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier,
+                elem.getAttributeString("generationSystem", " "));
+        }
 
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.CYCLE, missionInfo.getAttributeInt("orbitCycle", 0));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT, missionInfo.getAttributeInt("relOrbit", 0));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT, missionInfo.getAttributeInt("absOrbit", 0));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, missionInfo.getAttributeString("orbitDirection", " "));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, imageDataInfo.getAttributeString("imageDataType", " "));
 
-        //sph
+        int srgr = 0;
+        if(productVariantInfo.getAttributeString("projection", " ").equalsIgnoreCase("GROUNDRANGE"))
+            srgr = 1;
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, srgr);
 
-        AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());    */
+    }
+
+    private ProductData.UTC getTime(MetadataElement elem, String tag) {
+        final String timeStr = elem.getAttributeString(tag, " ").replace("T", " ");
+        return AbstractMetadata.parseUTC(timeStr, "yyyy-mm-dd HH:mm:ss");
     }
 
     @Override
