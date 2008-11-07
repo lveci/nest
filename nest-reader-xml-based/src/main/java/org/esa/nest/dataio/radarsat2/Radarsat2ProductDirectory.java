@@ -23,7 +23,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
     }
 
     @Override
-    protected void addGeoCoding(final Product product) throws IOException {
+    protected void addGeoCoding(final Product product) {
 
    /*     TiePointGrid latGrid = new TiePointGrid("lat", 2, 2, 0.5f, 0.5f,
                 product.getSceneRasterWidth(), product.getSceneRasterHeight(),
@@ -40,11 +40,11 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
     }
 
     @Override
-    protected void addAbstractedMetadataHeader(MetadataElement root) {
+    protected void addAbstractedMetadataHeader(Product product, MetadataElement root) {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
-        MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
 
         //mph
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, getProductName());

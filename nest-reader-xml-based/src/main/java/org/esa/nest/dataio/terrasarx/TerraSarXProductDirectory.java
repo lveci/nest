@@ -1,9 +1,6 @@
 package org.esa.nest.dataio.terrasarx;
 
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.MetadataAttribute;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.XMLProductDirectory;
 import org.esa.nest.datamodel.AbstractMetadata;
@@ -11,6 +8,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.ArrayList;
 
 /**
  * This class represents a product directory.
@@ -22,29 +20,17 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
     private String productType = "TerraSar-X";
     private String productDescription = "";
 
+    private final float[] latCorners = new float[4];
+    private final float[] lonCorners = new float[4];
+    private final float[] slantRangeCorners = new float[4];
+    private final float[] incidenceCorners = new float[4];
+
     public TerraSarXProductDirectory(final File headerFile, final File imageFolder) {
         super(headerFile, imageFolder);
     }
 
     @Override
-    protected void addGeoCoding(final Product product) throws IOException {
-
-   /*     TiePointGrid latGrid = new TiePointGrid("lat", 2, 2, 0.5f, 0.5f,
-                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                                                _leaderFile.getLatCorners());
-        TiePointGrid lonGrid = new TiePointGrid("lon", 2, 2, 0.5f, 0.5f,
-                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                                                _leaderFile.getLonCorners(),
-                                                TiePointGrid.DISCONT_AT_360);
-        TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
-
-        product.addTiePointGrid(latGrid);
-        product.addTiePointGrid(lonGrid);
-        product.setGeoCoding(tpGeoCoding);  */
-    }
-
-    @Override
-    protected void addAbstractedMetadataHeader(MetadataElement root) {
+    protected void addAbstractedMetadataHeader(Product product, MetadataElement root) {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
@@ -65,8 +51,8 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, productName);
         productType = productVariantInfo.getAttributeString("productType", " ");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
-        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
-        //        _leaderFile.getSceneRecord().getAttributeString("Product type descriptor"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
+                generalHeader.getAttributeString("itemName", " "));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, generalHeader.getAttributeString("mission", " "));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, getTime(generalHeader, "generationTime"));
@@ -83,12 +69,32 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, missionInfo.getAttributeString("orbitDirection", " "));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, imageDataInfo.getAttributeString("imageDataType", " "));
 
-        final MetadataElement start = sceneInfo.getElement("start");
-        final MetadataElement stop = sceneInfo.getElement("stop");
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getTime(start, "timeUTC"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, getTime(stop, "timeUTC"));
+        final ProductData.UTC startTime = getTime(sceneInfo.getElement("start"), "timeUTC");
+        final ProductData.UTC stopTime = getTime(sceneInfo.getElement("stop"), "timeUTC");
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, stopTime);
+        product.setStartTime(startTime);
+        product.setEndTime(stopTime);
 
         getCornerCoords(sceneInfo);
+   /*     AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
+                mapProjRec.getAttributeDouble("1st line 1st pixel geodetic latitude"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_long,
+                mapProjRec.getAttributeDouble("1st line 1st pixel geodetic longitude"));
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_lat,
+                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic latitude"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_long,
+                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic longitude"));
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_lat,
+                mapProjRec.getAttributeDouble("Last line 1st pixel geodetic latitude"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_long,
+                mapProjRec.getAttributeDouble("Last line 1st pixel geodetic longitude"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_lat,
+                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic latitude"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long,
+                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));  */
 
         int srgr = 0;
         if(productVariantInfo.getAttributeString("projection", " ").equalsIgnoreCase("GROUNDRANGE"))
@@ -127,37 +133,83 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
     }
 
     private void getCornerCoords(MetadataElement sceneInfo) {
-        MetadataElement[] children = sceneInfo.getElements();
+
+        int maxRow = 0, maxCol = 0;
+        int minRow = Integer.MAX_VALUE, minCol = Integer.MAX_VALUE;
+        ArrayList<CornerCoord> coordList = new ArrayList<CornerCoord>();
+
+        final MetadataElement[] children = sceneInfo.getElements();
         for(MetadataElement child : children) {
             if(child.getName().equals("sceneCornerCoord")) {
                 final int refRow = child.getAttributeInt("refRow", 0);
                 final int refCol = child.getAttributeInt("refColumn", 0);
-                final double lat = child.getAttributeDouble("lat", 0);
-                final double lon = child.getAttributeDouble("lon", 0);
-                final double rangeTime = child.getAttributeDouble("rangeTime", 0);
-                final double incidenceAngle = child.getAttributeDouble("incidenceAngle", 0);
 
-                
+                coordList.add( new CornerCoord(refRow, refCol,
+                                                (float)child.getAttributeDouble("lat", 0),
+                                                (float)child.getAttributeDouble("lon", 0),
+                                                (float)child.getAttributeDouble("rangeTime", 0),
+                                                (float)child.getAttributeDouble("incidenceAngle", 0)) );
+
+                if(refRow > maxRow) maxRow = refRow;
+                if(refCol > maxCol) maxCol = refCol;
+                if(refRow < minRow) minRow = refRow;
+                if(refCol < minCol) minCol = refCol;
             }
         }
-   /*     AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
-                mapProjRec.getAttributeDouble("1st line 1st pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_long,
-                mapProjRec.getAttributeDouble("1st line 1st pixel geodetic longitude"));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_lat,
-                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_long,
-                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic longitude"));
+        for(CornerCoord coord : coordList) {
+            int index = -1;
+            if(coord.refRow == minRow) {
+                if(coord.refCol == minCol) {            // UL
+                    index = 0;
+                } else if(coord.refCol == maxCol) {     // UR
+                    index = 1;
+                }
+            } else if(coord.refRow == maxRow) {
+                if(coord.refCol == minCol) {            // LL
+                    index = 2;
+                } else if(coord.refCol == maxCol) {     // LR
+                    index = 3;
+                }
+            }
+            if(index >= 0) {
+                latCorners[index] = coord.lat;
+                lonCorners[index] = coord.lon;
+                slantRangeCorners[index] = coord.rangeTime;
+                incidenceCorners[index] = coord.incidenceAngle;
+            }
+        }
+    }
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_lat,
-                mapProjRec.getAttributeDouble("Last line 1st pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_long,
-                mapProjRec.getAttributeDouble("Last line 1st pixel geodetic longitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_lat,
-                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long,
-                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));  */
+    protected void addGeoCoding(final Product product) {
+
+        addGeoCoding(product, latCorners, lonCorners);
+    }
+
+    protected void addTiePointGrids(final Product product) {
+
+        final int gridWidth = 4;
+        final int gridHeight = 4;
+        final float subSamplingX = (float)product.getSceneRasterWidth() / (float)(gridWidth - 1);
+        final float subSamplingY = (float)product.getSceneRasterHeight() / (float)(gridHeight - 1);
+
+        final float[] fineAngles = new float[gridWidth*gridHeight];
+
+        createFineTiePointGrid(2, 2, gridWidth, gridHeight, incidenceCorners, fineAngles);
+
+        final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
+                subSamplingX, subSamplingY, fineAngles);
+
+        product.addTiePointGrid(incidentAngleGrid);
+
+        final float[] fineSlantRange = new float[gridWidth*gridHeight];
+
+        createFineTiePointGrid(2, 2, gridWidth, gridHeight, slantRangeCorners, fineSlantRange);
+
+        final TiePointGrid slantRangeGrid = new TiePointGrid("slant_range", gridWidth, gridHeight, 0, 0,
+                subSamplingX, subSamplingY, fineSlantRange);
+
+        product.addTiePointGrid(slantRangeGrid);
     }
 
     @Override
@@ -173,5 +225,17 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
     @Override
     protected String getProductType() {
         return productType;
+    }
+
+    private static class CornerCoord {
+        final int refRow, refCol;
+        final float lat, lon;
+        final float rangeTime, incidenceAngle;
+
+        CornerCoord(int row, int col, float lt, float ln, float range, float angle) {
+            refRow = row; refCol = col;
+            lat = lt; lon = ln;
+            rangeTime = range; incidenceAngle = angle;
+        }
     }
 }

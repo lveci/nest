@@ -140,8 +140,7 @@ public abstract class CEOSProductDirectory {
         }
     }
 
-    protected void addGeoCoding(final Product product, final float[] latCorners, final float[] lonCorners)
-            throws IllegalCeosFormatException, IOException {
+    protected void addGeoCoding(final Product product, final float[] latCorners, final float[] lonCorners) {
 
         if(latCorners == null || lonCorners == null) return;
 

@@ -1,7 +1,9 @@
 package org.esa.nest.dataio;
 
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
+import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.util.XMLSupport;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.jdom.Element;
@@ -76,8 +78,9 @@ public class XMLProductDirectory {
             }
         }
 
-        addGeoCoding(product);
         addMetaData(product);
+        addGeoCoding(product);
+        addTiePointGrids(product);
 
         product.setName(getProductName());
         product.setProductType(getProductType());
@@ -98,8 +101,84 @@ public class XMLProductDirectory {
         }
     }
 
-    protected void addGeoCoding(final Product product) throws IOException {
+    protected void addGeoCoding(final Product product) {
 
+    }
+
+    protected void addGeoCoding(final Product product, final float[] latCorners, final float[] lonCorners) {
+
+        if(latCorners == null || lonCorners == null) return;
+
+        int gridWidth = 10;
+        int gridHeight = 10;
+
+        final float[] fineLatTiePoints = new float[gridWidth*gridHeight];
+        createFineTiePointGrid(2, 2, gridWidth, gridHeight, latCorners, fineLatTiePoints);
+
+        float subSamplingX = (float)product.getSceneRasterWidth() / (gridWidth - 1);
+        float subSamplingY = (float)product.getSceneRasterHeight() / (gridHeight - 1);
+
+        final TiePointGrid latGrid = new TiePointGrid("lat", gridWidth, gridHeight, 0.5f, 0.5f,
+                subSamplingX, subSamplingY, fineLatTiePoints);
+
+        final float[] fineLonTiePoints = new float[gridWidth*gridHeight];
+        createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonCorners, fineLonTiePoints);
+
+        final TiePointGrid lonGrid = new TiePointGrid("lon", gridWidth, gridHeight, 0.5f, 0.5f,
+                subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
+
+        final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
+
+        product.addTiePointGrid(latGrid);
+        product.addTiePointGrid(lonGrid);
+        product.setGeoCoding(tpGeoCoding);
+    }
+
+    protected void addTiePointGrids(final Product product) {
+
+    }
+
+    protected void createFineTiePointGrid(int coarseGridWidth,
+                                          int coarseGridHeight,
+                                          int fineGridWidth,
+                                          int fineGridHeight,
+                                          float[] coarseTiePoints,
+                                          float[] fineTiePoints) {
+
+        if (coarseTiePoints == null || coarseTiePoints.length != coarseGridWidth*coarseGridHeight) {
+            throw new IllegalArgumentException(
+                    "coarse tie point array size does not match 'coarseGridWidth' x 'coarseGridHeight'");
+        }
+
+        if (fineTiePoints == null || fineTiePoints.length != fineGridWidth*fineGridHeight) {
+            throw new IllegalArgumentException(
+                    "fine tie point array size does not match 'fineGridWidth' x 'fineGridHeight'");
+        }
+
+        int k = 0;
+        for (int r = 0; r < fineGridHeight; r++) {
+
+            final float lambdaR = (float)(r) / (float)(fineGridHeight - 1);
+            final float betaR = lambdaR*(coarseGridHeight - 1);
+            final int j0 = (int)(betaR);
+            final int j1 = Math.min(j0 + 1, coarseGridHeight - 1);
+            final float wj = betaR - j0;
+
+            for (int c = 0; c < fineGridWidth; c++) {
+
+                final float lambdaC = (float)(c) / (float)(fineGridWidth - 1);
+                final float betaC = lambdaC*(coarseGridWidth - 1);
+                final int i0 = (int)(betaC);
+                final int i1 = Math.min(i0 + 1, coarseGridWidth - 1);
+                final float wi = betaC - i0;
+
+                fineTiePoints[k++] = MathUtils.interpolate2D(wi, wj,
+                                                           coarseTiePoints[i0 + j0 * coarseGridWidth],
+                                                           coarseTiePoints[i1 + j0 * coarseGridWidth],
+                                                           coarseTiePoints[i0 + j1 * coarseGridWidth],
+                                                           coarseTiePoints[i1 + j1 * coarseGridWidth]);
+            }
+        }
     }
 
     private void addMetaData(final Product product) throws IOException {
@@ -109,11 +188,7 @@ public class XMLProductDirectory {
         final Element rootElement = xmlDoc.getRootElement();
         AddXMLMetadata(rootElement, root);
 
-        addAbstractedMetadataHeader(root);
-
-        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
-        product.setStartTime(absRoot.getAttributeUTC(AbstractMetadata.first_line_time));
-        product.setEndTime(absRoot.getAttributeUTC(AbstractMetadata.last_line_time));
+        addAbstractedMetadataHeader(product, root);
     }
 
     private static void AddXMLMetadata(Element xmlRoot, MetadataElement metadataRoot) {
@@ -162,12 +237,9 @@ public class XMLProductDirectory {
         meta.addAttributeFast(attribute);
     }
 
-    protected void addAbstractedMetadataHeader(MetadataElement root) {
+    protected void addAbstractedMetadataHeader(Product product, MetadataElement root) {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
-
-        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
-
     }
 
     protected String getProductName() {
