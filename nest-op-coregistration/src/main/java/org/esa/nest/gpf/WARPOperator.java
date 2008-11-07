@@ -98,6 +98,13 @@ public class WARPOperator extends Operator {
     private float[] rowResiduals;
     private float[] colResiduals;
 
+    private double rmsStd;
+    private double rmsMean;
+    private double rowResidualStd;
+    private double rowResidualMean;
+    private double colResidualStd;
+    private double colResidualMean;
+
     private WarpPolynomial warp;
     private Interpolation interp;
 
@@ -149,11 +156,27 @@ public class WARPOperator extends Operator {
             interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC_2);
         }
 
-        computeWARPPolynomial(false); // compute initial warp polynomial
+        int parseIdex = 0;
+        computeWARPPolynomial(); // compute initial warp polynomial
+        outputCoRegistrationInfo(false, 0.0f, parseIdex);
 
-        eliminateGCPsBasedOnRMS();
+        //============
+        if (rmsMean > rmsThreshold && eliminateGCPsBasedOnRMS((float)rmsMean)) {
+            float threshold = (float)rmsMean;
+            computeWARPPolynomial(); // compute 2nd warp polynomial
+            outputCoRegistrationInfo(true, threshold, ++parseIdex);
+        }
 
-        computeWARPPolynomial(true); // compute final warp polynomial
+        if (rmsMean > rmsThreshold && eliminateGCPsBasedOnRMS((float)rmsMean)) {
+            float threshold = (float)rmsMean;
+            computeWARPPolynomial(); // compute 3rd warp polynomial
+            outputCoRegistrationInfo(true, threshold, ++parseIdex);
+        }
+        //============
+
+        eliminateGCPsBasedOnRMS(rmsThreshold);
+        computeWARPPolynomial(); // compute final warp polynomial
+        outputCoRegistrationInfo(true, rmsThreshold, ++parseIdex);
 
         createTargetProduct();
     }
@@ -215,7 +238,7 @@ public class WARPOperator extends Operator {
     /**
      * Compute WARP polynomial function using master and slave GCP pairs.
      */
-    void computeWARPPolynomial(boolean appendFlag) {
+    void computeWARPPolynomial() {
 
         getNumOfValidGCPs();
 
@@ -224,8 +247,6 @@ public class WARPOperator extends Operator {
         computeWARP();
 
         computeRMS();
-
-        outputCoRegistrationInfo(appendFlag);
     }
 
     void getNumOfValidGCPs() {
@@ -277,12 +298,13 @@ public class WARPOperator extends Operator {
 
     void computeRMS() {
 
+        // compute RMS for all valid GCPs
         rms = new float[numValidGCPs];
         colResiduals = new float[numValidGCPs];
         rowResiduals = new float[numValidGCPs];
         PixelPos slavePos = new PixelPos(0.0f,0.0f);
         for (int i = 0; i < rms.length; i++) {
-            int i2=2*i;
+            int i2 = 2*i;
             getWarpedCoords(masterGCPCoords[i2], masterGCPCoords[i2+1], slavePos);
             double dX = slavePos.x - slaveGCPCoords[i2];
             double dY = slavePos.y - slaveGCPCoords[i2+1];
@@ -290,13 +312,40 @@ public class WARPOperator extends Operator {
             rowResiduals[i] = (float)dY;
             rms[i] = (float)Math.sqrt(dX*dX + dY*dY);
         }
+
+        // compute some statistics
+        rmsMean = 0.0;
+        rowResidualMean = 0.0;
+        colResidualMean = 0.0;
+        double rms2Mean = 0.0;
+        double rowResidual2Mean = 0.0;
+        double colResidual2Mean = 0.0;
+
+        for (int i = 0; i < rms.length; i++) {
+            rmsMean += rms[i];
+            rms2Mean += rms[i]*rms[i];
+            rowResidualMean += rowResiduals[i];
+            rowResidual2Mean += rowResiduals[i]*rowResiduals[i];
+            colResidualMean += colResiduals[i];
+            colResidual2Mean += colResiduals[i]*colResiduals[i];
+        }
+        rmsMean /= rms.length;
+        rms2Mean /= rms.length;
+        rowResidualMean /= rms.length;
+        rowResidual2Mean /= rms.length;
+        colResidualMean /= rms.length;
+        colResidual2Mean /= rms.length;
+
+        rmsStd = Math.sqrt(rms2Mean - rmsMean*rmsMean);
+        rowResidualStd = Math.sqrt(rowResidual2Mean - rowResidualMean*rowResidualMean);
+        colResidualStd = Math.sqrt(colResidual2Mean - colResidualMean*colResidualMean);
     }
 
-    void eliminateGCPsBasedOnRMS() {
+    boolean eliminateGCPsBasedOnRMS(float threshold) {
 
         ArrayList pinList = new ArrayList();
         for (int i = 0; i < rms.length; i++) {
-            if (rms[i] >= rmsThreshold) {
+            if (rms[i] >= threshold) {
                 pinList.add(slaveGCPGroup.get(i));
                 //System.out.println("WARP: slave gcp[" + i + "] is eliminated");
             }
@@ -305,6 +354,8 @@ public class WARPOperator extends Operator {
         for (Object aPinList : pinList) {
             slaveGCPGroup.remove((Pin) aPinList);
         }
+
+        return !pinList.isEmpty();
     }
 
     void getWarpedCoords(float mX, float mY, PixelPos slavePos) {
@@ -355,33 +406,7 @@ public class WARPOperator extends Operator {
         }
     }
 
-    void outputCoRegistrationInfo(boolean appendFlag) {
-
-        double rmsMean = 0.0;
-        double rms2Mean = 0.0;
-        double rowResidualMean = 0.0;
-        double rowResidual2Mean = 0.0;
-        double colResidualMean = 0.0;
-        double colResidual2Mean = 0.0;
-
-        for (int i = 0; i < rms.length; i++) {
-            rmsMean += rms[i];
-            rms2Mean += rms[i]*rms[i];
-            rowResidualMean += rowResiduals[i];
-            rowResidual2Mean += rowResiduals[i]*rowResiduals[i];
-            colResidualMean += colResiduals[i];
-            colResidual2Mean += colResiduals[i]*colResiduals[i];
-        }
-        rmsMean /= rms.length;
-        rms2Mean /= rms.length;
-        rowResidualMean /= rms.length;
-        rowResidual2Mean /= rms.length;
-        colResidualMean /= rms.length;
-        colResidual2Mean /= rms.length;
-
-        double rmsStd = Math.sqrt(rms2Mean - rmsMean*rmsMean);
-        double rowResidualStd = Math.sqrt(rowResidual2Mean - rowResidualMean*rowResidualMean);
-        double colResidualStd = Math.sqrt(colResidual2Mean - colResidualMean*colResidualMean);
+    void outputCoRegistrationInfo(boolean appendFlag, float threshold, int parseIndex) {
 
         float[] xCoeffs = warp.getXCoeffs();
         float[] yCoeffs = warp.getYCoeffs();
@@ -400,9 +425,18 @@ public class WARPOperator extends Operator {
             p = new PrintStream(out);
 
             p.println();
-            p.format("Transformation degree = %d", warpPolynomialOrder);
-            p.println();
 
+            if (!appendFlag) {
+                p.println();
+                p.format("Transformation degree = %d", warpPolynomialOrder);
+                p.println();
+            }
+
+            p.println();
+            p.print("------------------------------------------------ Parse " + parseIndex +
+                    " ------------------------------------------------");
+            p.println();
+            
             p.println();
             p.println("WARP coefficients:");
             for (float xCoeff : xCoeffs) {
@@ -415,9 +449,15 @@ public class WARPOperator extends Operator {
             }
             p.println();
 
+            if (appendFlag) {
+                p.println();
+                p.format("RMS Threshold: %5.2f", threshold);
+                p.println();
+            }
+
             p.println();
             if (appendFlag) {
-                p.print("Final Valid GCPs:");
+                p.print("Valid GCPs after parse " + parseIndex + " :");
             } else {
                 p.print("Initial Valid GCPs:");
             }
