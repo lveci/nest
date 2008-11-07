@@ -123,17 +123,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
         addTiePointGrids(product);
         addMetaData(product);
-        /*
-        float[] coarseTiePoints = {44.625f, 44.813f, 43.725f, 43.911f};
-        float[] fineTiePoints = new float[121];
-        createFineTiePointGrid(2, 2, 11, 11, coarseTiePoints, fineTiePoints);
-        for (int i = 0; i < 11; i++) {
-            System.out.println();
-            for (int j = 0; j < 11; j++) {
-                System.out.print(fineTiePoints[i*11+j] + ", ");
-            }
-        }
-        */
+        
         return product;
     }
 
@@ -144,18 +134,18 @@ class ERSProductDirectory extends CEOSProductDirectory {
         final double angle2 = facility.getAttributeDouble("Incidence angle at centre range pixel");
         final double angle3 = facility.getAttributeDouble("Incidence angle at last valid range pixel");
 
-        int gridWidth = 6;
-        int gridHeight = 6;
+        final int gridWidth = 6;
+        final int gridHeight = 6;
 
-        float subSamplingX = (float)product.getSceneRasterWidth() / (gridWidth - 1);
-        float subSamplingY = (float)product.getSceneRasterHeight() / (gridHeight - 1);
+        final float subSamplingX = (float)product.getSceneRasterWidth() / (float)(gridWidth - 1);
+        final float subSamplingY = (float)product.getSceneRasterHeight() / (float)(gridHeight - 1);
 
         final float[] angles = new float[]{(float)angle1, (float)angle2, (float)angle3};
         final float[] fineAngles = new float[gridWidth*gridHeight];
 
         createFineTiePointGrid(3, 1, gridWidth, gridHeight, angles, fineAngles);
 
-        TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
+        final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineAngles);
 
         product.addTiePointGrid(incidentAngleGrid);
@@ -221,10 +211,10 @@ class ERSProductDirectory extends CEOSProductDirectory {
         }
 
         addSummaryMetadata(root);
-        addAbstractedMetadataHeader(root);
+        addAbstractedMetadataHeader(product, root);
     }
 
-    private void addAbstractedMetadataHeader(MetadataElement root) {
+    private void addAbstractedMetadataHeader(Product product, MetadataElement root) {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
@@ -297,13 +287,21 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type,
-                ProductData.getTypeString(ProductData.TYPE_INT16));
+                ProductData.getTypeString(ProductData.TYPE_INT16));      
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
+                product.getSceneRasterHeight());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
+                product.getSceneRasterWidth());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE,
+                product.getRawStorageSize());
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag,
                 facilityRec.getAttributeInt("Antenna pattern correction flag"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag,
                 facilityRec.getAttributeInt("Range spreading loss compensation flag"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
+                facilityRec.getAttributeDouble("Absolute calibration constant K"));
     }
 
     private ProductData.UTC getProcTime() {

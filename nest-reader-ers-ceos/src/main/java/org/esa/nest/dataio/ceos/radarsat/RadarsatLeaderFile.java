@@ -1,12 +1,9 @@
 package org.esa.nest.dataio.ceos.radarsat;
 
-import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
-import org.esa.nest.dataio.ceos.records.BaseSceneHeaderRecord;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
@@ -14,17 +11,6 @@ import java.util.Calendar;
 
 
 class RadarsatLeaderFile {
-
-    private static final String UNIT_METER = "meter";
-    private static final String UNIT_KILOMETER = "kilometer";
-    private static final String UNIT_DEGREE = "degree";
-    private static final String UNIT_SECOND = "second";
-    private static final String UNIT_METER_PER_SECOND = "m/sec";
-    private static final String UNIT_DEGREE_PER_SECOND = "deg/sec";
-
-    private static final String PROJECTION_KEY_RAW = "NNNNN";
-    private static final String PROJECTION_KEY_UTM = "YNNNN";
-    private static final String PROJECTION_KEY_PS = "NNNNY";
 
     public final BaseRecord _leaderFDR;
     public final BaseRecord _mapProjRecord;
@@ -54,14 +40,11 @@ class RadarsatLeaderFile {
         _reader.seek(_radiometricCompRecord.getAbsolutPosition(_radiometricCompRecord.getRecordLength()));
         //_sceneHeaderRecord = new BaseSceneHeaderRecord(_reader, -1, mission, scene_recordDefinitionFile);
 
-
     }
 
     public BaseRecord getMapProjRecord() {
         return _mapProjRecord;
     }
-
-
 
     public String getProductLevel() {
         return "ref num";//_sceneHeaderRecord.getAttributeString("Scene reference number");
@@ -115,25 +98,5 @@ class RadarsatLeaderFile {
     public void close() throws IOException {
         _reader.close();
         _reader = null;
-    }
-
-    private MetadataAttribute createAttribute(final String name, final ProductData data) {
-        return new MetadataAttribute(name.toUpperCase(), data, true);
-    }
-
-    private MetadataAttribute addAttribute(final MetadataElement platformMetadata, final String name,
-                                           final ProductData data) {
-        return addAttribute(platformMetadata, name, data, null);
-    }
-
-    private MetadataAttribute addAttribute(final MetadataElement platformMetadata, final String name,
-                                           final ProductData data, final String unit) {
-        final MetadataAttribute attribute = createAttribute(name, data);
-        if (unit != null) {
-            attribute.setUnit(unit);
-        }
-
-        platformMetadata.addAttribute(attribute);
-        return attribute;
     }
 }

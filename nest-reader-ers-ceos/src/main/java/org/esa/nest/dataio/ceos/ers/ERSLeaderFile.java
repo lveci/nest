@@ -1,8 +1,6 @@
 package org.esa.nest.dataio.ceos.ers;
 
-import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
@@ -17,8 +15,6 @@ import java.util.Calendar;
  *
  */
 class ERSLeaderFile {
-
-    private static final String UNIT_DEGREE = "degree";
 
     public final BaseRecord _leaderFDR;
     public final BaseSceneHeaderRecord _sceneHeaderRecord;
@@ -101,11 +97,6 @@ class ERSLeaderFile {
         return new float[]{(float)lonUL, (float)lonUR, (float)lonLL, (float)lonLR};
     }
 
-    public String getUsedProjection() throws IOException,
-                                             IllegalCeosFormatException {
-        return _mapProjRecord.getAttributeString("Map projection descriptor");
-    }
-
     public void addLeaderMetadata(MetadataElement sphElem) {
         MetadataElement metadata = new MetadataElement("Leader File Descriptor");
          _leaderFDR.assignMetadataTo(metadata);
@@ -134,57 +125,9 @@ class ERSLeaderFile {
         }
     }
 
-    public MetadataElement getMapProjectionMetadata() throws IOException,
-                                                             IllegalCeosFormatException {
-        final MetadataElement projMetadata = new MetadataElement("Map Projection");
-
-        addGeneralProjectionMetadata(projMetadata);
-
-        return projMetadata;
-    }
-
     public void close() throws IOException {
         _reader.close();
         _reader = null;
     }
 
-    private void addGeneralProjectionMetadata(final MetadataElement projMeta) throws
-                                                                              IOException,
-                                                                              IllegalCeosFormatException {
-
-        final float[] latCorners = getLatCorners();
-        final float[] lonCorners = getLonCorners();
-
-        addAttribute(projMeta, "SCENE_UPPER_LEFT_LATITUDE", ProductData.createInstance(new float[]{latCorners[0]}),
-                     UNIT_DEGREE);
-        addAttribute(projMeta, "SCENE_UPPER_LEFT_LONGITUDE", ProductData.createInstance(new float[]{lonCorners[0]}),
-                     UNIT_DEGREE);
-        addAttribute(projMeta, "SCENE_UPPER_RIGHT_LATITUDE", ProductData.createInstance(new float[]{latCorners[1]}),
-                     UNIT_DEGREE);
-        addAttribute(projMeta, "SCENE_UPPER_RIGHT_LONGITUDE", ProductData.createInstance(new float[]{lonCorners[1]}),
-                     UNIT_DEGREE);
-        addAttribute(projMeta, "SCENE_LOWER_LEFT_LATITUDE", ProductData.createInstance(new float[]{latCorners[2]}),
-                     UNIT_DEGREE);
-        addAttribute(projMeta, "SCENE_LOWER_LEFT_LONGITUDE", ProductData.createInstance(new float[]{lonCorners[2]}),
-                     UNIT_DEGREE);
-        addAttribute(projMeta, "SCENE_LOWER_RIGHT_LATITUDE", ProductData.createInstance(new float[]{latCorners[3]}),
-                     UNIT_DEGREE);
-        addAttribute(projMeta, "SCENE_LOWER_RIGHT_LONGITUDE", ProductData.createInstance(new float[]{lonCorners[3]}),
-                     UNIT_DEGREE);
-    }
-
-    private static MetadataAttribute createAttribute(final String name, final ProductData data) {
-        return new MetadataAttribute(name.toUpperCase(), data, true);
-    }
-
-    private static MetadataAttribute addAttribute(final MetadataElement platformMetadata, final String name,
-                                           final ProductData data, final String unit) {
-        final MetadataAttribute attribute = createAttribute(name, data);
-        if (unit != null) {
-            attribute.setUnit(unit);
-        }
-
-        platformMetadata.addAttribute(attribute);
-        return attribute;
-    }
 }

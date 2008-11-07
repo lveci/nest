@@ -204,10 +204,10 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         root.addElement(volMetadata);
 
         addSummaryMetadata(root);
-        addAbstractedMetadataHeader(root);
+        addAbstractedMetadataHeader(product, root);
     }
 
-    private void addAbstractedMetadataHeader(MetadataElement root) {
+    private void addAbstractedMetadataHeader(Product product, MetadataElement root) {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
@@ -225,10 +225,18 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         //sph
         AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());
 
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
+                product.getSceneRasterHeight());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
+                product.getSceneRasterWidth());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE,
+                product.getRawStorageSize());
+
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
                 _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-pixel distance in output scene"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
                 _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-line distance in output scene"));
+
     }
 
     private ProductData.UTC getProcTime() {

@@ -79,8 +79,6 @@ public class XMLProductDirectory {
         addGeoCoding(product);
         addMetaData(product);
 
-        //product.setStartTime(getUTCScanStartTime());
-        //product.setEndTime(getUTCScanStopTime());
         product.setName(getProductName());
         product.setProductType(getProductType());
         product.setDescription(getProductDescription());
@@ -112,6 +110,10 @@ public class XMLProductDirectory {
         AddXMLMetadata(rootElement, root);
 
         addAbstractedMetadataHeader(root);
+
+        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        product.setStartTime(absRoot.getAttributeUTC(AbstractMetadata.first_line_time));
+        product.setEndTime(absRoot.getAttributeUTC(AbstractMetadata.last_line_time));
     }
 
     private static void AddXMLMetadata(Element xmlRoot, MetadataElement metadataRoot) {

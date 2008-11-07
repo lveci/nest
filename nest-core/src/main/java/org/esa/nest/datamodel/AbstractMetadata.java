@@ -68,8 +68,10 @@ public class AbstractMetadata {
     public static final String ant_elev_corr_flag = "ant_elev_corr_flag";
     public static final String range_spread_comp_flag = "range_spread_comp_flag";
     public static final String abs_calibration_flag = "abs_calibration_flag";
+    public static final String calibration_factor = "calibration_factor";
     public static final String replica_power_corr_flag = "replica_power_corr_flag";
     public static final String external_calibration_file = "external_calibration_file";
+    public static final String orbit_state_vector_file = "orbit_state_vector_file";
 
     /**
      * Abstract common metadata from products to be used uniformly by all operators
@@ -138,7 +140,9 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, range_spread_comp_flag, ProductData.TYPE_UINT8, "flag", "range spread compensation applied");
         addAbstractedAttribute(absRoot, replica_power_corr_flag, ProductData.TYPE_UINT8, "flag", "Replica pulse power correction applied");
         addAbstractedAttribute(absRoot, abs_calibration_flag, ProductData.TYPE_UINT8, "flag", "Product calibrated");
+        addAbstractedAttribute(absRoot, calibration_factor, ProductData.TYPE_FLOAT64, "", "Calibration constant");
         addAbstractedAttribute(absRoot, external_calibration_file, ProductData.TYPE_ASCII, "", "External calibration file used");
+        addAbstractedAttribute(absRoot, orbit_state_vector_file, ProductData.TYPE_ASCII, "", "Orbit file");
     }
 
     /**
@@ -237,6 +241,7 @@ public class AbstractMetadata {
         try {
             return ProductData.UTC.parse(timeStr, format);
         } catch(ParseException e) {
+            System.out.println("UTC parse error:"+ e.toString());
             return new ProductData.UTC(0);
         }
     }

@@ -226,10 +226,10 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         }
 
         addSummaryMetadata(root);
-        addAbstractedMetadataHeader(root);
+        addAbstractedMetadataHeader(product, root);
     }
 
-    private void addAbstractedMetadataHeader(MetadataElement root) {
+    private void addAbstractedMetadataHeader(Product product, MetadataElement root) {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
@@ -303,6 +303,15 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type,
                 "UInt"+_imageFiles[0].getImageFileDescriptor().getAttributeInt("Number of bits per sample"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
+                product.getSceneRasterHeight());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
+                product.getSceneRasterWidth());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE,
+                product.getRawStorageSize());
+
+
+
     }
 
     private ProductData.UTC getProcTime() {

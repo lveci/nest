@@ -126,14 +126,19 @@ class JERSProductDirectory extends CEOSProductDirectory {
         final double angle2 = facility.getAttributeDouble("Incidence angle at centre range pixel");
         final double angle3 = facility.getAttributeDouble("Incidence angle at last valid range pixel");
 
+        final int gridWidth = 6;
+        final int gridHeight = 6;
+
+        final float subSamplingX = (float)product.getSceneRasterWidth() / (float)(gridWidth - 1);
+        final float subSamplingY = (float)product.getSceneRasterHeight() / (float)(gridHeight - 1);
+
         final float[] angles = new float[]{(float)angle1, (float)angle2, (float)angle3};
-        final float[] fineAngles = new float[6*6];
+        final float[] fineAngles = new float[gridWidth*gridHeight];
 
-        createFineTiePointGrid(3, 1, 6, 6, angles, fineAngles);
+        createFineTiePointGrid(3, 1, gridWidth, gridHeight, angles, fineAngles);
 
-        TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", 6, 6, 0, 0,
-                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                fineAngles);
+        final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
+                subSamplingX, subSamplingY, fineAngles);
 
         product.addTiePointGrid(incidentAngleGrid);
     }
@@ -199,10 +204,11 @@ class JERSProductDirectory extends CEOSProductDirectory {
         }
 
         addSummaryMetadata(root);
-        addAbstractedMetadataHeader(root);
+        addAbstractedMetadataHeader(product, root);
+
     }
 
-    private void addAbstractedMetadataHeader(MetadataElement root) {
+    private void addAbstractedMetadataHeader(Product product, MetadataElement root) {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
@@ -276,13 +282,20 @@ class JERSProductDirectory extends CEOSProductDirectory {
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type,
                 ProductData.getTypeString(ProductData.TYPE_INT16));
-
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
+                product.getSceneRasterHeight());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
+                product.getSceneRasterWidth());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE,
+                product.getRawStorageSize());
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag,
                 facilityRec.getAttributeInt("Antenna pattern correction flag"));
         //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag,
         //        facilityRec.getAttributeInt("Range spreading loss compensation flag"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
+                facilityRec.getAttributeDouble("Absolute calibration constant K"));
     }
 
     private ProductData.UTC getProcTime() {
