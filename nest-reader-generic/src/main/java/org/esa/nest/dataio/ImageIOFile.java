@@ -103,7 +103,7 @@ public class ImageIOFile {
         return numBands;
     }
 
-    public void readImageIORasterBand(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight,
+    public synchronized void readImageIORasterBand(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight,
                                             ProductData destBuffer, ProgressMonitor pm,
                                             int imageID, int sampleOffset)
                                                                                                 throws IOException {
