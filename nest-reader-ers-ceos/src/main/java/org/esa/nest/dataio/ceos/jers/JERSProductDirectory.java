@@ -292,8 +292,8 @@ class JERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag,
                 facilityRec.getAttributeInt("Antenna pattern correction flag"));
-        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag,
-        //        facilityRec.getAttributeInt("Range spreading loss compensation flag"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag,
+                facilityRec.getAttributeInt("Range spreading loss compensation flag"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
                 facilityRec.getAttributeDouble("Absolute calibration constant K"));
     }
