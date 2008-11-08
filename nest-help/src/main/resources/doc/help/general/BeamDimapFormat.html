@@ -1,15 +1,13 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
+<html><head>
 
     
     
-  <title>BEAM Help - BEAM-DIMAP Product Format</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  
+  <title>BEAM Help - BEAM-DIMAP Product Format</title><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 
     
-  <link rel="stylesheet" href="../style.css">
-</head>
+  <link rel="stylesheet" href="../style.css"></head>
 
 <body>
 
@@ -51,7 +49,7 @@
     <li>a single product header file with the suffix <code>.dim</code> in XML format containing the product meta-data
         and</li>
 
-    <li>an additional directory with the same name plus the suffix <code>.data</code> containing ENVI<sup>&reg;</sup>
+    <li>an additional directory with the same name plus the suffix <code>.data</code> containing ENVI<sup>®</sup>
         -compatible images for each band.</li>
 
 </ul>
@@ -66,14 +64,13 @@
 <p align="center"><img src="images/XMLAndRaw.jpg" border="0" height="420" width="510">
 
 </p>
-<p>The geo-coding of data products in satellite co-ordinates is stored in so called tie-point grid datasets.
+<p>The geo-coding of data products in satellite co-ordinates is stored in tie-point grid datasets.
     Tie-point datasets are stored in the data directory and have exactly the same format as the geophysical
     bands of a product.</p>
 
 
 <p>Because of its simplicity, the product components can be accessed with nearly every
-    image processing system or programming language. The product's metadata can directly
-    be viewed in a text editor or an XML viewer. The following contains a closer look at the
+    image processing system or programming language. The product's metadata can&nbsp;be viewed directly in a text editor or an XML viewer. The following contains a closer look at the
     components of the product format.</p>
 
 
@@ -90,7 +87,7 @@
     information, XML is about describing information. XML can be stored in plain
     text files and provides a data structuring scheme composed of elements and
     attributes. An element is enclosed by tags, but the tags are not predefined
-    in XML. In order to use XML as a data storage, an application or standard
+    in XML. In order to use XML for data storage, an application or standard
     must define its own tags. In this case, XML is very similar to HDF because
     the interpretation of the content is left to the application or, respectively,
     to the user.</p>
@@ -110,11 +107,7 @@
 </ul>
 
 
-<p>The reason why the image data is not directly stored in XML
-    is simple: The product header is plain text, and an image stored in text format
-    requires about 4 to 10 times more space than the simplest binary format and
-    therefore requires considerable processing overhead when reading to and writing
-    from such files.</p>
+
 
 
 <h3>Image Data Format</h3>
@@ -267,5 +260,4 @@
 
 <hr>
 
-</body>
-</html>
+</body></html>
