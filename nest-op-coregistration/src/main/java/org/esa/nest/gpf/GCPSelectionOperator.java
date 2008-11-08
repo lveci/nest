@@ -672,6 +672,31 @@ public class GCPSelectionOperator extends Operator {
     }
 
     /**
+     * The function is for unit test only.
+     *
+     * @param windowWidth The window width for cross-correlation
+     * @param windowHeight The window height for cross-correlation
+     * @param rowUpSamplingFactor The row up sampling rate
+     * @param colUpSamplingFactor The column up sampling rate
+     * @param maxIter The maximum number of iterations in computing slave GCP shift
+     * @param tolerance The stopping criterion for slave GCP shift calculation
+     */
+    public void setTestParameters(String windowWidth,
+                                  String windowHeight,
+                                  String rowUpSamplingFactor,
+                                  String colUpSamplingFactor,
+                                  int maxIter,
+                                  double tolerance) {
+
+        coarseRegistrationWindowWidth = windowWidth;
+        coarseRegistrationWindowHeight = windowHeight;
+        rowInterpFactor = rowUpSamplingFactor;
+        columnInterpFactor = colUpSamplingFactor;
+        maxIteration = maxIter;
+        gcpTolerance = tolerance;
+
+    }
+    /**
      * The SPI is used to register this operator in the graph processing framework
      * via the SPI configuration file
      * {@code META-INF/services/org.esa.beam.framework.gpf.OperatorSpi}.
