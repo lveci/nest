@@ -158,7 +158,7 @@ public class DatUtils {
 
     public static File findHomeFolder()
     {
-        File homePath = SystemUtils.getBeamHomeDir();
+        File homePath = new File(System.getProperty("nest.home"));
         String homePathStr = homePath.getAbsolutePath();
         if(homePathStr.endsWith(".") && homePathStr.length() > 1)
             homePathStr = homePathStr.substring(0, homePathStr.lastIndexOf(File.separator));
@@ -167,27 +167,29 @@ public class DatUtils {
 
     public static File findInHomeFolder(String filename)
     {
-        File homePath = SystemUtils.getBeamHomeDir();
+        File homePath = findHomeFolder();
         String homePathStr = homePath.getAbsolutePath();
         if(homePathStr.endsWith(".") && homePathStr.length() > 1)
             homePathStr = homePathStr.substring(0, homePathStr.lastIndexOf(File.separator));
-        String settingsfilePath = homePathStr + filename;
+        String filePath = homePathStr + filename;
 
-        File outFile4 = new File(settingsfilePath);
-        if(outFile4.exists())
-            return outFile4;
+        File outFile = new File(filePath);
+        if(outFile.exists())
+            return outFile;
 
-        settingsfilePath = homePathStr.substring(0, homePathStr.lastIndexOf(File.separator)) + filename;
+        filePath = homePathStr.substring(0, homePathStr.lastIndexOf(File.separator)) + filename;
 
-        File outFile5 = new File(settingsfilePath);
-        if(outFile5.exists())
-            return outFile5;
+        File outFile2 = new File(filePath);
+        if(outFile2.exists())
+            return outFile2;
 
-        settingsfilePath = homePathStr.substring(0, homePathStr.lastIndexOf(File.separator)) + File.separator + "beam" + filename;
+        filePath = homePathStr.substring(0, homePathStr.lastIndexOf(File.separator)) + File.separator + "beam" + filename;
 
-        File outFile6 = new File(settingsfilePath);
-        if(outFile6.exists())
-            return outFile6;
+        File outFile3 = new File(filePath);
+        if(outFile3.exists())
+            return outFile3;
+
+        System.out.println("findInHomeFolder "+filename+ " not found in " + homePath);
 
         return null;
     }
