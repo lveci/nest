@@ -158,7 +158,12 @@ public class DatUtils {
 
     public static File findHomeFolder()
     {
-        File homePath = new File(System.getProperty("nest.home"));
+        final String nestHome = System.getProperty("nest.home");
+        File homePath;
+        if(nestHome == null)
+            homePath = SystemUtils.getBeamHomeDir();
+        else
+            homePath = new File(nestHome);
         String homePathStr = homePath.getAbsolutePath();
         if(homePathStr.endsWith(".") && homePathStr.length() > 1)
             homePathStr = homePathStr.substring(0, homePathStr.lastIndexOf(File.separator));
