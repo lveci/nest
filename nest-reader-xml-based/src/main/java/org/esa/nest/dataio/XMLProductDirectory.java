@@ -25,10 +25,10 @@ public class XMLProductDirectory {
     private final File _xmlHeader;
     private final File _baseDir;
     private final File imgFolder;
-    private org.jdom.Document xmlDoc;
+    private org.jdom.Document xmlDoc = null;
 
-    private int _sceneWidth;
-    private int _sceneHeight;
+    private int _sceneWidth = 0;
+    private int _sceneHeight = 0;
 
     private transient Map<String, ImageIOFile> bandImageFileMap = new HashMap<String, ImageIOFile>(1);
     private transient Map<Band, ImageIOFile.BandInfo> bandMap = new HashMap<Band, ImageIOFile.BandInfo>(3);
@@ -138,7 +138,7 @@ public class XMLProductDirectory {
 
     }
 
-    protected void createFineTiePointGrid(int coarseGridWidth,
+    protected static void createFineTiePointGrid(int coarseGridWidth,
                                           int coarseGridHeight,
                                           int fineGridWidth,
                                           int fineGridHeight,

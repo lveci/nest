@@ -2,7 +2,6 @@ package org.esa.nest.gpf;
 
 import junit.framework.TestCase;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.GPF;
 import com.bc.ceres.core.ProgressMonitor;
@@ -149,7 +148,7 @@ public class TestGCPSelectionOperator extends TestCase {
         return slaveProduct;
     }
 
-    private float sinc(float x) {
+    private static float sinc(float x) {
 
         if (Float.compare(x, 0.0f) == 0) {
             return 0.0f;

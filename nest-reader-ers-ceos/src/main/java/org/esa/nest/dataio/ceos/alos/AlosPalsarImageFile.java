@@ -5,13 +5,9 @@ import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.nest.dataio.ceos.records.ImageRecord;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.ProductData;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
-
-import com.bc.ceres.core.ProgressMonitor;
 
 
 class AlosPalsarImageFile extends CEOSImageFile {

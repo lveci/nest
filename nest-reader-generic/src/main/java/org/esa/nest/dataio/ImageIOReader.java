@@ -3,22 +3,14 @@ package org.esa.nest.dataio;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.AbstractProductReader;
 import org.esa.beam.framework.dataio.DecodeQualification;
-import org.esa.beam.framework.dataio.IllegalFileFormatException;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Collection;
-import java.awt.*;
-import java.awt.image.RenderedImage;
-import javax.imageio.*;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.stream.ImageOutputStream;
 
 /**
  * The product reader for ImageIO products.
@@ -26,8 +18,8 @@ import javax.imageio.stream.ImageOutputStream;
  */
 public class ImageIOReader extends AbstractProductReader {
 
-    ImageIOFile imgIOFile;
-    String productType;
+    ImageIOFile imgIOFile = null;
+    String productType = "productType";
 
     private transient Map<Band, ImageIOFile.BandInfo> bandMap = new HashMap<Band, ImageIOFile.BandInfo>(3);
 
@@ -108,7 +100,7 @@ public class ImageIOReader extends AbstractProductReader {
         imgIOFile.close();
     }
 
-    DecodeQualification checkProductQualification(File file) {
+    static DecodeQualification checkProductQualification(File file) {
        /* try {
             _dataDir = new ERSProductDirectory(file.getParentFile());
         } catch (Exception e) {

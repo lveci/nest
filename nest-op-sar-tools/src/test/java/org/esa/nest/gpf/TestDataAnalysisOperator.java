@@ -64,7 +64,7 @@ public class TestDataAnalysisOperator extends TestCase {
         assertTrue(Double.compare(op.getENL(0), 1.3453237410071943) == 0);
     }
 
-    private Product createTestProduct(int w, int h) {
+    private static Product createTestProduct(int w, int h) {
 
         Product testProduct = new Product("p", "t", w, h);
 

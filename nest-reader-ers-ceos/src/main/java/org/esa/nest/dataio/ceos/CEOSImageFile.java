@@ -8,14 +8,13 @@ import org.esa.nest.dataio.ceos.records.BaseRecord;
 
 import java.io.IOException;
 import java.io.File;
-import java.util.Arrays;
 import java.util.ArrayList;
 
 
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.15 $ $Date: 2008-11-06 16:23:38 $
+ * @version $Revision: 1.16 $ $Date: 2008-11-09 23:40:53 $
  */
 public abstract class CEOSImageFile {
 

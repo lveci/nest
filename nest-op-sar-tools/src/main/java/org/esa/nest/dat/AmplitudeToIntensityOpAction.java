@@ -1,8 +1,6 @@
 package org.esa.nest.dat;
 
-import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.command.CommandEvent;
-import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.visat.actions.AbstractVisatAction;
 import org.esa.beam.visat.VisatApp;
@@ -78,7 +76,7 @@ public class AmplitudeToIntensityOpAction extends AbstractVisatAction {
 
         String expression;
         if(toAmplitude) {
-            expression = "sqrt(" + bandName + ")";
+            expression = "sqrt(" + bandName + ')';
             bandName = bandName.replace("Intensity", "Amplitude");
             unit = "amplitude";
         } else {

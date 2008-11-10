@@ -6,7 +6,6 @@ import org.esa.nest.dataio.XMLProductDirectory;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.ArrayList;
 
@@ -103,7 +102,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
     }
 
-    private ProductData.UTC getTime(MetadataElement elem, String tag) {
+    private static ProductData.UTC getTime(MetadataElement elem, String tag) {
         final String timeStr = createValidUTCString(elem.getAttributeString(tag, " ").toUpperCase(), 
                 new char[]{':','.','-'}, ' ').trim();
         return AbstractMetadata.parseUTC(timeStr, "yyyy-mm-dd HH:mm:ss");
@@ -118,7 +117,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
             sortedValidChars = (char[]) validChars.clone();
         }
         Arrays.sort(sortedValidChars);
-        StringBuffer validName = new StringBuffer(name.length());
+        StringBuilder validName = new StringBuilder(name.length());
         for (int i = 0; i < name.length(); i++) {
             final char ch = name.charAt(i);
             if (Character.isDigit(ch)) {

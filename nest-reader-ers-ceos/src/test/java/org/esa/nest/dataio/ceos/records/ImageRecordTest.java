@@ -37,7 +37,7 @@ public class ImageRecordTest extends TestCase {
         final ImageRecord record = new ImageRecord(_reader, mission, image_recordDefinition);
     }
 
-    private void writeRecordData(final ImageOutputStream ios) throws IOException {
+    private static void writeRecordData(final ImageOutputStream ios) throws IOException {
         BaseRecordTest.writeRecordData(ios);
 
        // ios.writeInt(1234); // prefixDataLineNumber // B4

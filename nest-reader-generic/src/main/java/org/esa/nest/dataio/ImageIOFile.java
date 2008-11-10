@@ -1,21 +1,11 @@
 package org.esa.nest.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.dataio.AbstractProductReader;
-import org.esa.beam.framework.dataio.DecodeQualification;
-import org.esa.beam.framework.dataio.IllegalFileFormatException;
-import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.ImageInfo;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Collection;
 import java.awt.*;
 import java.awt.image.RenderedImage;
 import javax.imageio.*;

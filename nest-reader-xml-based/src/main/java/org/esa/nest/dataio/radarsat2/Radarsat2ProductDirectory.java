@@ -6,7 +6,6 @@ import org.esa.nest.dataio.XMLProductDirectory;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * This class represents a product directory.
@@ -47,8 +46,8 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
 
         //mph
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, getProductName());
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, getProductType());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, productName);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
        /* AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
                 _leaderFile.getSceneRecord().getAttributeString("Product type descriptor"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, getMission());

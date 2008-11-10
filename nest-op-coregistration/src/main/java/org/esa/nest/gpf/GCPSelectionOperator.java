@@ -31,8 +31,6 @@ import java.awt.image.*;
 import java.awt.image.DataBufferDouble;
 import java.awt.image.renderable.ParameterBlock;
 import java.util.Hashtable;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Image co-registration is fundamental for Interferometry SAR (InSAR) imaging and its applications, such as

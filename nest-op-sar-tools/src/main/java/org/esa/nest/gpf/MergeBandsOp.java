@@ -1,5 +1,5 @@
 /*
- * $Id: MergeBandsOp.java,v 1.7 2008-10-20 15:33:09 lveci Exp $
+ * $Id: MergeBandsOp.java,v 1.8 2008-11-09 23:40:53 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -25,21 +25,14 @@ import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
-import org.esa.beam.framework.gpf.operators.common.MergeOp;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.StringUtils;
 
-import java.awt.image.RenderedImage;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @OperatorMetadata(alias = "Merge-Bands",
         description = "Merges an arbitrary number of source bands into the target product.")
@@ -149,10 +142,10 @@ public class MergeBandsOp extends Operator {
         return destBand;
     }
 
-    private String renameDuplicateBand(Product outputProduct, String bandName, int count) {
+    private static String renameDuplicateBand(Product outputProduct, String bandName, int count) {
         if(outputProduct.getBand(bandName) != null) {        
-            if(bandName.endsWith(""+count))
-                bandName = bandName.substring(0, bandName.lastIndexOf(""+count));
+            if(bandName.endsWith(String.valueOf(count)))
+                bandName = bandName.substring(0, bandName.lastIndexOf(String.valueOf(count)));
             ++count;
             bandName += count;
             bandName = renameDuplicateBand(outputProduct, bandName, count);

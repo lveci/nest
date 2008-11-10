@@ -1,7 +1,6 @@
 package org.esa.nest.dataio.ceos.alos;
 
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
@@ -75,13 +74,13 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         productType = _volumeDirectoryFile.getProductType();
     }
 
-    public boolean isALOS() throws IOException, IllegalCeosFormatException {
+    public static boolean isALOS() throws IOException, IllegalCeosFormatException {
         //if(productType == null || _volumeDirectoryFile == null)
         //    readVolumeDirectoryFile();
         return true;
     }
 
-    public String getMission() {
+    public static String getMission() {
         return "ALOS";
     }
 

@@ -1,15 +1,11 @@
 package org.esa.nest.dataio.ceos.records;
 
-import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.ceos.CeosDB;
 import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
 
 public class BaseRecord {
 

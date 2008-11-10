@@ -11,12 +11,11 @@ import org.esa.beam.visat.VisatApp;
  */
 public class MultilookOpAction extends AbstractVisatAction {
 
-    private DefaultSingleTargetProductDialog dialog;
+    private DefaultSingleTargetProductDialog dialog = null;
 
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        VisatApp.getApp().showWarningDialog("Currently with simple multilooking, the detection for complex data is performed without any resampling");
         if (dialog == null) {
             dialog = new DefaultSingleTargetProductDialog("Multilook", getAppContext(), "Multilook", getHelpId());
             dialog.setTargetProductNameSuffix("_ML");

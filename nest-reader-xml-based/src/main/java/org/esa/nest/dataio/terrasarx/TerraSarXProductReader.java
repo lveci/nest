@@ -18,7 +18,7 @@ import java.io.IOException;
  */
 public class TerraSarXProductReader extends AbstractProductReader {
 
-    private TerraSarXProductDirectory _dataDir;
+    private TerraSarXProductDirectory _dataDir = null;
 
     /**
      * Constructs a new abstract product reader.

@@ -1,6 +1,5 @@
 package org.esa.nest.dataio.ceos.ers;
 
-import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CeosFileReader;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
@@ -13,7 +12,7 @@ import java.io.IOException;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.15 $ $Date: 2008-11-05 21:00:03 $
+ * @version $Revision: 1.16 $ $Date: 2008-11-09 23:40:53 $
  */
 class ERSImageFile extends CEOSImageFile {
 

@@ -22,19 +22,14 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.*;
 import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.util.DatUtils;
 
 import javax.media.jai.*;
-import javax.media.jai.operator.DFTDescriptor;
 import java.awt.*;
 import java.awt.image.*;
 import java.awt.image.renderable.ParameterBlock;
-import java.util.Hashtable;
-import java.util.Vector;
 import java.util.ArrayList;
 import java.io.*;
-import java.text.DecimalFormat;
 
 /**
  * Image co-registration is fundamental for Interferometry SAR (InSAR) imaging and its applications, such as

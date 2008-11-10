@@ -2,19 +2,12 @@ package org.esa.nest.gpf;
 
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
-import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.GridBagUtils;
-import org.esa.beam.framework.datamodel.Band;
 
 import javax.swing.*;
-import javax.swing.tree.TreeSelectionModel;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.DefaultTreeCellRenderer;
 
 import java.util.Map;
-import java.util.Enumeration;
 import java.util.ArrayList;
 import java.awt.*;
 

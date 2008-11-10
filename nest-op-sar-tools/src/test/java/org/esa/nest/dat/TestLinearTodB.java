@@ -54,7 +54,7 @@ public class TestLinearTodB extends TestCase {
      * @param h height
      * @return the created product
      */
-    private Product createTestProduct(int w, int h) {
+    private static Product createTestProduct(int w, int h) {
 
         Product testProduct = TestOperator.createProduct("ASA_APG_1P", w, h);
 

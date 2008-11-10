@@ -7,7 +7,6 @@ import org.esa.nest.dataio.ceos.records.BaseRecord;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
-import java.util.Calendar;
 
 
 class RadarsatLeaderFile {
@@ -46,12 +45,8 @@ class RadarsatLeaderFile {
         return _mapProjRecord;
     }
 
-    public String getProductLevel() {
+    public static String getProductLevel() {
         return "ref num";//_sceneHeaderRecord.getAttributeString("Scene reference number");
-    }
-
-    public Calendar getDateImageWasTaken() {
-        return null;//_sceneHeaderRecord.getDateImageWasTaken();
     }
 
     public float[] getLatCorners() throws IOException,

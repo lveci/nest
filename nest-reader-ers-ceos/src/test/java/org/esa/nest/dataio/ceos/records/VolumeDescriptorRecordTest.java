@@ -57,7 +57,7 @@ public class VolumeDescriptorRecordTest extends TestCase {
         assertMetadata(volumeMetadata);
     }
 
-    private void assertMetadata(final MetadataElement elem) {
+    private static void assertMetadata(final MetadataElement elem) {
         BaseRecordTest.assertMetadata(elem);
 
         BaseRecordTest.assertStringAttribute(elem, "Ascii code character", "AB");
@@ -79,7 +79,7 @@ public class VolumeDescriptorRecordTest extends TestCase {
         BaseRecordTest.assertIntAttribute(elem, "Number of records", 5678);
     }
 
-    private void writeRecordData(final MemoryCacheImageOutputStream ios) throws IOException {
+    private static void writeRecordData(final MemoryCacheImageOutputStream ios) throws IOException {
         BaseRecordTest.writeRecordData(ios);
 
         ios.writeBytes("AB"); // asciiCodeCharacter // A2

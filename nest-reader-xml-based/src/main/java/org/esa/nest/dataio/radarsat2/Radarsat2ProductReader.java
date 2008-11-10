@@ -18,7 +18,7 @@ import java.io.IOException;
  */
 public class Radarsat2ProductReader extends AbstractProductReader {
 
-    private Radarsat2ProductDirectory _dataDir;
+    private Radarsat2ProductDirectory _dataDir = null;
 
     /**
      * Constructs a new abstract product reader.

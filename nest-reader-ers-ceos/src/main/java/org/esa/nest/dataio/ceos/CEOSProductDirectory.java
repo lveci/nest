@@ -3,7 +3,6 @@ package org.esa.nest.dataio.ceos;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.math.MathUtils;
-import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.IOException;
 
@@ -39,7 +38,7 @@ public abstract class CEOSProductDirectory {
     }
 
     protected static void createVirtualPhaseBand(Product product, Band bandI, Band bandQ, String countStr) {
-        String expression = "atan2("+bandQ.getName()+","+bandI.getName()+")";
+        String expression = "atan2("+bandQ.getName()+ ',' +bandI.getName()+ ')';
 
         VirtualBand virtBand = new VirtualBand("Phase" + countStr,
                 ProductData.TYPE_FLOAT64,
@@ -84,7 +83,7 @@ public abstract class CEOSProductDirectory {
         product.addBand(virtBand);
     }
 
-    protected String getPolarization(String id) {
+    protected static String getPolarization(String id) {
         id = id.toUpperCase();
         if(id.contains("HH") || id.contains("H/H") || id.contains("H-H"))
             return "HH";
@@ -97,7 +96,7 @@ public abstract class CEOSProductDirectory {
         return id;
     }
 
-    protected void createFineTiePointGrid(int coarseGridWidth,
+    protected static void createFineTiePointGrid(int coarseGridWidth,
                                           int coarseGridHeight,
                                           int fineGridWidth,
                                           int fineGridHeight,

@@ -1,7 +1,6 @@
 package org.esa.nest.dataio.ceos.jers;
 
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
@@ -353,7 +352,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
         parent.addElement(summaryMetadata);
     }
 
-    private int getMinSampleValue(final int[] histogram) {
+    private static int getMinSampleValue(final int[] histogram) {
         // search for first non zero value
         for (int i = 0; i < histogram.length; i++) {
             if (histogram[i] != 0) {
@@ -363,7 +362,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
         return 0;
     }
 
-    private int getMaxSampleValue(final int[] histogram) {
+    private static int getMaxSampleValue(final int[] histogram) {
         // search for first non zero value backwards
         for (int i = histogram.length - 1; i >= 0; i--) {
             if (histogram[i] != 0) {

@@ -28,10 +28,7 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
-import javax.media.jai.JAI;
-import javax.media.jai.InterpolationNearest;
 import java.awt.*;
-import java.awt.image.renderable.ParameterBlock;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -69,6 +66,9 @@ public final class MultilookOp extends Operator {
     @Parameter(description = "The user defined multi-look factor", interval = "[2, *)", defaultValue = "2",
                 label="Multi-look Factor")
     private int multiLookFactor;
+
+    @Parameter(defaultValue="Currently, detection for complex data is performed without any resampling", label="Note")
+    String note;
 
     private Band targetBand;
 
@@ -418,11 +418,11 @@ public final class MultilookOp extends Operator {
             throw new OperatorException(AbstractMetadata.first_line_time + " not found");
         }
         String oldFirstLineTime = firstLineTimeAttr.getData().getElemString();
-        int idx = oldFirstLineTime.lastIndexOf(":") + 1;
+        int idx = oldFirstLineTime.lastIndexOf(':') + 1;
         String oldSecondsStr = oldFirstLineTime.substring(idx);
         double oldSeconds = Double.parseDouble(oldSecondsStr);
         double newSeconds = oldSeconds + oldLineTimeInterval*((azimuthFactor - 1)/2.0);
-        String newFirstLineTime = oldFirstLineTime.subSequence(0,idx) + "" + newSeconds + "000000";
+        String newFirstLineTime = String.valueOf(oldFirstLineTime.subSequence(0, idx)) + newSeconds + "000000";
         abs.removeAttribute(firstLineTimeAttr);
         abs.addAttribute(new MetadataAttribute(
                 AbstractMetadata.first_line_time, ProductData.createInstance(newFirstLineTime.substring(0,27)), false));        

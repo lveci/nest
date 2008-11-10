@@ -10,7 +10,6 @@ import org.esa.nest.dataio.ceos.records.FilePointerRecord;
 import javax.imageio.stream.FileImageInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * This class represents a volume directory file of ERS product.

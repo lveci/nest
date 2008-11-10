@@ -92,7 +92,7 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
         return DecodeQualification.UNABLE;
     }
 
-    protected DecodeQualification checkProductQualification(File file) {
+    protected static DecodeQualification checkProductQualification(File file) {
         for(String ext : FORMAT_FILE_EXTENSIONS) {
             if(!ext.isEmpty() && file.getName().toLowerCase().endsWith(ext.toLowerCase()))
                 return DecodeQualification.INTENDED;
