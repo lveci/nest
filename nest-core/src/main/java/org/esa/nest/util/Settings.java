@@ -114,7 +114,7 @@ public class Settings {
             }
         }
 
-        if(keyWord.equalsIgnoreCase("nest.home")) {
+        if(keyWord.equalsIgnoreCase("nest.home") || keyWord.equalsIgnoreCase("NEST_HOME")) {
             File file = DatUtils.findInHomeFolder(out);
             if(file != null)
                 return file.getAbsolutePath();
