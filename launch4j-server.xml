@@ -14,13 +14,13 @@
   <manifest></manifest>
   <icon>C:\build\nest\src\main\assembly\dat.ico</icon>
   <jre>
-    <path></path>
+    <path>jre</path>
     <minVersion>1.5.0</minVersion>
     <maxVersion></maxVersion>
-    <jdkPreference>preferJre</jdkPreference>
+    <jdkPreference>jdkOnly</jdkPreference>
     <initialHeapSize>256</initialHeapSize>
     <maxHeapSize>1280</maxHeapSize>
-    <opt>-Dceres.context=nest</opt>
+    <opt>-server -Dceres.context=nest</opt>
     <opt>-Xverify:none -XX:+UseParallelGC -XX:CompileThreshold=100</opt>
     <opt>-XX:+AggressiveOpts -XX:+UseFastAccessorMethods -Xconcurrentio</opt>
   </jre>

@@ -8,7 +8,7 @@
     <url>http://www.brockmann-consult.de/beam-wiki</url>
     <groupId>org.esa.beam</groupId>
     <artifactId>beam</artifactId>
-    <version>4.5-SNAPSHOT</version>
+    <version>4.6-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -136,37 +136,37 @@
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-launcher</artifactId>
-                <version>0.8-SNAPSHOT</version>
+                <version>0.9-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-core</artifactId>
-                <version>0.8-SNAPSHOT</version>
+                <version>0.9-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-binding</artifactId>
-                <version>0.8-SNAPSHOT</version>
+                <version>0.9-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-ui</artifactId>
-                <version>0.8-SNAPSHOT</version>
+                <version>0.9-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-binio</artifactId>
-                <version>0.5-SNAPSHOT</version>
+                <version>0.9-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-glayer</artifactId>
-                <version>0.5-SNAPSHOT</version>
+                <version>0.9-SNAPSHOT</version>
             </dependency>
 
             <!-- BEAM System Level Modules ############################################# -->
@@ -174,32 +174,32 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-core</artifactId>
-                <version>4.5-SNAPSHOT</version>
+                <version>4.6-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-gpf</artifactId>
-                <version>4.5-SNAPSHOT</version>
+                <version>4.6-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-ui</artifactId>
-                <version>4.5-SNAPSHOT</version>
+                <version>4.6-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-processing</artifactId>
-                <version>4.5-SNAPSHOT</version>
+                <version>4.6-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-visat-rcp</artifactId>
-                <version>4.5-SNAPSHOT</version>
+                <version>4.6-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-visat</artifactId>
-                <version>4.5-SNAPSHOT</version>
+                <version>4.6-SNAPSHOT</version>
             </dependency>
 
             <!-- BEAM Modules ############################################# -->
@@ -207,7 +207,7 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-envisat-reader</artifactId>
-                <version>1.2</version>
+                <version>1.2.1</version>
             </dependency>
 
             <dependency>
@@ -380,7 +380,6 @@
                     <encoding>ISO-8859-1</encoding>
                 </configuration>
             </plugin>
-
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.2-beta-1</version>
@@ -388,7 +387,6 @@
                     <descriptors>
                         <!-- <descriptor>src/main/assembly/beam-web-help.xml</descriptor> -->
                         <descriptor>src/main/assembly/bin.xml</descriptor>
-                        <!--<descriptor>src/main/assembly/installer-files.xml</descriptor>-->
                         <descriptor>src/main/assembly/src.xml</descriptor>
                     </descriptors>
                     <finalName>beam</finalName>
@@ -494,6 +492,9 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludeResources>true</excludeResources>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -503,16 +504,20 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.5</version>
                 <configuration>
+                    <links>
+                        <link>http://java.sun.com/javase/6/docs/api/</link>
+                    </links>
                     <aggregate>true</aggregate>
                     <subpackages>
-                        org.esa.beam.framework:org.esa.beam.util:org.esa.beam.visat:com.bc.jexp
+                        com.bc.ceres:org.esa.beam.framework:org.esa.beam.util:org.esa.beam.visat:com.bc.jexp
                     </subpackages>
                     <excludePackageNames>
-                        *.internal:org.esa.beam.visat.toolviews:org.esa.beam.visat.actions:org.esa.beam.visat.dialogs:org.esa.beam.visat.plugins
+                        *.internal:com.bc.ceres.site:org.esa.beam.visat.toolviews:org.esa.beam.visat.actions:org.esa.beam.visat.dialogs:org.esa.beam.visat.plugins
                     </excludePackageNames>
                     <maxmemory>256m</maxmemory>
-                    <quiet>true</quiet>
+                    <quiet>false</quiet>
                 </configuration>
             </plugin>
         </plugins>
