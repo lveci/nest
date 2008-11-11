@@ -32,6 +32,7 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 
 import java.awt.*;
 import java.io.IOException;
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -50,15 +51,54 @@ public class UndersamplingOp extends Operator {
             sourceProductId="source", label="Source Bands")
     String[] sourceBandNames;
 
+    @Parameter(valueSet = {SUB_SAMPLING, MULTI_LOOKING, KERNEL}, defaultValue = SUB_SAMPLING, label="Under-Sampling Methods")
+    private String method;
+
+    @Parameter(description = "The row dimension of the output image", defaultValue = "1000", label="Output Image Rows")
+    private int numRows;
+    @Parameter(description = "The col dimension of the output image", defaultValue = "1000", label="Output Image Columns")
+    private int numCols;
+
+    @Parameter(description = "The row ratio of the output/input images", defaultValue = "0.5", label="Row Ratio")
+    private float rowRatio;
+    @Parameter(description = "The col dimension of the output image", defaultValue = "0.5", label="Column Ratio")
+    private float colRatio;
+
     @Parameter(defaultValue = "2", label=" Sub-Sampling in X")
-    private int subSamplingX = 2;
+    private int subSamplingX;
     @Parameter(defaultValue = "2", label=" Sub-Sampling in Y")
-    private int subSamplingY = 2;
+    private int subSamplingY;
+
+    @Parameter(description = "The filter row size", defaultValue = "3", label="Filter Row Size")
+    private int filterRowSize;
+    @Parameter(description = "The filter col size", defaultValue = "3", label="Filter Col Size")
+    private int filterColSize;
+
+    @Parameter(description = "The kernel file", label="Kernel File")
+    private File kernelFile;
 
     private ProductReader subsetReader;
 
+    private static final String SUB_SAMPLING = "Sub-sampling";
+    private static final String MULTI_LOOKING = "Multi-looking";
+    private static final String KERNEL = "2D-kernel";
+
+    
     @Override
     public void initialize() throws OperatorException {
+
+        if (method.contains(SUB_SAMPLING)) {
+            initializeForSubSampling();
+        } else if (method.contains(MULTI_LOOKING)) {
+            initializeForMultiLooking();
+        } else if (method.contains(KERNEL)) {
+            initializeForKernelFiltering();
+        } else {
+            throw new OperatorException("Unknown undersampling method: " + method);
+        }
+    }
+
+    private void initializeForSubSampling() {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) {
             Band[] bands = sourceProduct.getBands();
@@ -84,8 +124,32 @@ public class UndersamplingOp extends Operator {
         }
     }
 
+    private void initializeForMultiLooking() {
+
+    }
+
+    private void initializeForKernelFiltering() {
+
+        if (kernelFile == null) {
+            throw new OperatorException("Please provide kernel file");
+        }
+    }
+
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+
+        if (method.contains(SUB_SAMPLING)) {
+            computeTileUsingSubSampling(targetBand, targetTile, pm);
+        } else if (method.contains(MULTI_LOOKING)) {
+            computeTileUsingMultiLooking(targetBand, targetTile, pm);
+        } else if (method.contains(KERNEL)) {
+            computeTileUsingKernelFiltering(targetBand, targetTile, pm);
+        } else {
+            throw new OperatorException("Unknown undersampling method: " + method);
+        }
+    }
+
+    private void computeTileUsingSubSampling(Band targetBand, Tile targetTile, ProgressMonitor pm) {
 
         ProductData destBuffer = targetTile.getRawSamples();
         Rectangle rectangle = targetTile.getRectangle();
@@ -100,6 +164,14 @@ public class UndersamplingOp extends Operator {
         } catch (IOException e) {
             throw new OperatorException(e);
         }
+    }
+
+    private void computeTileUsingMultiLooking(Band targetBand, Tile targetTile, ProgressMonitor pm) {
+
+    }
+
+    private void computeTileUsingKernelFiltering(Band targetBand, Tile targetTile, ProgressMonitor pm) {
+
     }
 
     /**
