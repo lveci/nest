@@ -51,7 +51,8 @@ import java.util.HashMap;
  * As a result, image with equal pixel spacing is produced.
  */
 
-@OperatorMetadata(alias="Multilook")
+@OperatorMetadata(alias="Multilook",
+        description="Produces Multilooked image averaging the power across a number of lines in both the azimuth and range directions")
 public final class MultilookOp extends Operator {
 
     @SourceProduct(alias="source")
