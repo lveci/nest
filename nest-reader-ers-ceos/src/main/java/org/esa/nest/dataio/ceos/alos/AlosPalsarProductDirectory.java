@@ -2,6 +2,7 @@ package org.esa.nest.dataio.ceos.alos;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
+import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
@@ -149,17 +150,60 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     }
 
     private void addTiePointGrids(final Product product) throws IllegalCeosFormatException, IOException {
-     /*   BaseRecord facility = _leaderFile.getFacilityRecord();
 
-        double angle1 = facility.getAttributeDouble("Incidence angle at first range pixel");
-        double angle2 = facility.getAttributeDouble("Incidence angle at centre range pixel");
-        double angle3 = facility.getAttributeDouble("Incidence angle at last valid range pixel");
+        // slant range
+        final BaseRecord sceneRec = _leaderFile.getSceneRecord();
+        final int slantRangeToFirstSample = _imageFiles[0].getSlantRangeToFirstSample() / 1000;
+        final double samplingRate = sceneRec.getAttributeDouble("Range sampling rate") * 1000000.0;
+        final double halfSpeedOfLight = 299792458 / 2.0;
 
-        TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", 3, 2, 0, 0,
-                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                new float[]{(float)angle1, (float)angle2, (float)angle3,   (float)angle1, (float)angle2, (float)angle3});
+        final int gridWidth = 6, gridHeight = 6;
+        final float subSamplingX = (float)product.getSceneRasterWidth() / (float)(gridWidth - 1);
+        final float subSamplingY = (float)product.getSceneRasterHeight() / (float)(gridHeight - 1);
 
-        product.addTiePointGrid(incidentAngleGrid);   */
+        final float[] range = new float[gridWidth];
+        if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1) {
+
+            for(int j = 0; j < gridWidth; ++j) {
+                range[j] = (float)(slantRangeToFirstSample + (halfSpeedOfLight * ((j*subSamplingX)) / samplingRate));
+            }
+        }
+
+        final float[] fineRanges = new float[gridWidth*gridHeight];
+        createFineTiePointGrid(6, 1, gridWidth, gridHeight, range, fineRanges);
+
+        final TiePointGrid slantRangeGrid = new TiePointGrid("slant_range_time", gridWidth, gridHeight, 0, 0,
+                subSamplingX, subSamplingY, fineRanges);
+
+        product.addTiePointGrid(slantRangeGrid);
+        slantRangeGrid.setUnit("ns");
+
+        // incidence angle
+        final double a0 = sceneRec.getAttributeDouble("Incidence angle constant term");
+        final double a1 = sceneRec.getAttributeDouble("Incidence angle linear term");
+        final double a2 = sceneRec.getAttributeDouble("Incidence angle quadratic term");
+        final double a3 = sceneRec.getAttributeDouble("Incidence angle cubic term");
+        final double a4 = sceneRec.getAttributeDouble("Incidence angle fourth term");
+        final double a5 = sceneRec.getAttributeDouble("Incidence angle fifth term");
+
+        final float[] angles = new float[gridWidth];
+        for(int j = 0; j < gridWidth; ++j) {
+            angles[j] = (float)((a0 + a1*range[j] +
+                                a2*Math.pow(range[j]/1000.0,2) +
+                                a3*Math.pow(range[j]/1000.0,3) +
+                                a4*Math.pow(range[j]/1000.0,4) +
+                                a5*Math.pow(range[j]/1000.0,5) ) * MathUtils.RTOD);
+        }
+
+        final float[] fineAngles = new float[gridWidth*gridHeight];
+        createFineTiePointGrid(6, 1, gridWidth, gridHeight, angles, fineAngles);
+
+        final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
+                subSamplingX, subSamplingY, fineAngles);
+        incidentAngleGrid.setUnit("deg");
+
+        product.addTiePointGrid(incidentAngleGrid);
+
     }
 
     public CEOSImageFile getImageFile(final Band band) throws IOException,

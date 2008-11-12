@@ -1,7 +1,10 @@
 package org.esa.nest.dataio.ceos;
 
+import org.esa.beam.util.Guardian;
+
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * A reader for reading files in the CEOS format
@@ -112,13 +115,20 @@ public final class CeosFileReader {
     }
 
     private static long parseLong(String integerStr, long streamPosition) throws IllegalCeosFormatException {
-        final long number;
+        long number;
         try {
             number = Long .parseLong(integerStr);
         } catch (NumberFormatException e) {
-            final String message = String.format(CeosFileReader.EM_NOT_PARSABLE_X_STRING + " \"" + integerStr + '"',
+
+            final String newStr = createIntegerString(integerStr,
+                new char[]{'.'}, ' ').trim();
+            try {
+                number = Long .parseLong(newStr);
+            } catch (NumberFormatException e2) {
+                final String message = String.format(CeosFileReader.EM_NOT_PARSABLE_X_STRING + " \"" + integerStr + '"',
                                                                     new Object[]{"integer"});
-            throw new IllegalCeosFormatException(message, streamPosition, e);
+                throw new IllegalCeosFormatException(message, streamPosition, e);
+            }
         }
         return number;
     }
@@ -195,5 +205,29 @@ public final class CeosFileReader {
 
     public long getLength() throws IOException {
         return _stream.length();
+    }
+
+    private static String createIntegerString(String name, char[] validChars, char replaceChar) {
+        char[] sortedValidChars = null;
+        if (validChars == null) {
+            sortedValidChars = new char[0];
+        } else {
+            sortedValidChars = validChars.clone();
+        }
+        Arrays.sort(sortedValidChars);
+        StringBuilder validName = new StringBuilder(name.length());
+        boolean pad = false;
+        for (int i = 0; i < name.length(); i++) {
+            final char ch = name.charAt(i);
+            if (!pad && Character.isDigit(ch)) {
+                validName.append(ch);
+            } else if (!pad && Arrays.binarySearch(sortedValidChars, ch) >= 0) {
+                validName.append(ch);
+            } else {
+                pad = true;
+                validName.append(replaceChar);
+            }
+        }
+        return validName.toString();
     }
 }

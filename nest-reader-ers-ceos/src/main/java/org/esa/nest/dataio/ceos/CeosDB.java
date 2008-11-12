@@ -166,6 +166,7 @@ public final class CeosDB {
                     metaMap.put(name , reader.readFn(num));
                 } else if(type == CeosDBTypes.Debug.value()) {
 
+                    System.out.print(" = ");
                     for(int i=0; i < num; ++i) {
                         final String tmp = reader.readAn(1);
                         if(!tmp.isEmpty() && !tmp.equals(" "))
