@@ -295,7 +295,9 @@ public final class MultilookOp extends Operator {
         int x = sourceImageWidth / 2;
         int y = sourceImageHeight / 2;
         TiePointGrid incidenceAngle = getIncidenceAngle();
-
+        if(incidenceAngle == null)
+            throw new OperatorException("incidence_angle tie point grid not found in product");
+        
         incidenceAngleAtCentreRangePixel = incidenceAngle.getPixelFloat(x + 0.5f, y + 0.5f);
     }
 
