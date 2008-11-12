@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ceos version="1.0" mission="alos">
+	<!--rec name="skipBytes" type="0" num="8"/--> 
+	<rec name="Record Number" type="4" num="1"/>
+	<rec name="First Record Subtype" type="3" num="1"/>
+	<rec name="Record Type Code" type="3" num="1"/>
+	<rec name="Second Record Subtype" type="3" num="1"/>
+	<rec name="Third Record Subtype" type="3" num="1"/>
+	<rec name="Record Length" type="4" num="1"/>
+	
+	<rec name="SAR image data line number" type="4" num="1"/>
+    <rec name="SAR image data record index" type="4" num="1"/>
+    <rec name="Actual count of left-fill pixels" type="4" num="1"/>
+	
+	<!-- ... -->
+</ceos>
