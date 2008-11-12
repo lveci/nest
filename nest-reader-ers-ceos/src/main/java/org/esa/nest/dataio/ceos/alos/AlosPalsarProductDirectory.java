@@ -54,7 +54,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         final int numImageFiles = imageFileNames.length;
         _imageFiles = new AlosPalsarImageFile[numImageFiles];
         for (int i = 0; i < numImageFiles; i++) {
-            _imageFiles[i] = new AlosPalsarImageFile(createInputStream(imageFileNames[i]));
+            _imageFiles[i] = new AlosPalsarImageFile(createInputStream(imageFileNames[i]), getProductLevel());
         }
 
         _sceneWidth = _imageFiles[0].getRasterWidth();
@@ -188,7 +188,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
         final Band band = new Band(name, dataType, _sceneWidth, _sceneHeight);
 
-        band.setUnit(AlosPalsarImageFile.getGeophysicalUnit());
+
 
       /*
         final int bandIndex = index;

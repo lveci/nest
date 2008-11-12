@@ -40,7 +40,7 @@ public class BaseRecord {
     /*
     Quick read using exiting ceosDB for ImageRecord
      */
-    public BaseRecord(final CeosFileReader reader, final long startPos, CeosDB db) throws
+    public BaseRecord(final CeosFileReader reader, final long startPos, CeosDB theDB) throws
                                                                         IOException,
                                                                         IllegalCeosFormatException {
         _reader = reader;
@@ -51,7 +51,8 @@ public class BaseRecord {
         } else {
             _startPos = reader.getCurrentPos();
         }
-
+        
+        db = theDB;
         db.readRecord(reader);
 
         recordLength = getAttributeInt("Record Length");

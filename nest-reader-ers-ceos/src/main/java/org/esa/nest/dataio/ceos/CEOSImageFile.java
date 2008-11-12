@@ -14,7 +14,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.16 $ $Date: 2008-11-09 23:40:53 $
+ * @version $Revision: 1.17 $ $Date: 2008-11-12 17:24:05 $
  */
 public abstract class CEOSImageFile {
 
@@ -24,6 +24,7 @@ public abstract class CEOSImageFile {
 
     protected int _imageRecordLength = 0;
     protected long _startPosImageRecords = 0;
+    protected int _imageHeaderLength = 0;
 
     public BaseRecord getImageFileDescriptor() {
         return _imageFDR;
@@ -67,6 +68,7 @@ public abstract class CEOSImageFile {
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 2;
+        final long xpos = _startPosImageRecords +_imageHeaderLength + x;
 
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
@@ -79,7 +81,7 @@ public abstract class CEOSImageFile {
 
                 // Read source line
                 synchronized (_ceosReader) {
-                    _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
+                    _ceosReader.seek(_imageRecordLength * y + xpos);
                     _ceosReader.readB2(srcLine);
                 }
 
@@ -112,6 +114,7 @@ public abstract class CEOSImageFile {
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 1;
+        final long xpos = _startPosImageRecords +_imageHeaderLength + x;
 
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
@@ -124,7 +127,7 @@ public abstract class CEOSImageFile {
 
                 // Read source line
                 synchronized (_ceosReader) {
-                    _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
+                    _ceosReader.seek(_imageRecordLength * y + xpos);
                     _ceosReader.readB1(srcLine);
                 }
 
@@ -157,6 +160,7 @@ public abstract class CEOSImageFile {
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 4;
+        final long xpos = _startPosImageRecords +_imageHeaderLength + x;
 
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
@@ -169,7 +173,7 @@ public abstract class CEOSImageFile {
 
                 // Read source line
                 synchronized (_ceosReader) {
-                    _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
+                    _ceosReader.seek(_imageRecordLength * y + xpos);
                     _ceosReader.readB2(srcLine);
                 }
 
@@ -200,6 +204,7 @@ public abstract class CEOSImageFile {
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 8;
+        final long xpos = _startPosImageRecords +_imageHeaderLength + x;
 
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
@@ -212,7 +217,7 @@ public abstract class CEOSImageFile {
 
                 // Read source line
                 synchronized (_ceosReader) {
-                    _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
+                    _ceosReader.seek(_imageRecordLength * y + xpos);
                     _ceosReader.readF(srcLine);
                 }
 
@@ -243,6 +248,7 @@ public abstract class CEOSImageFile {
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 2;
+        final long xpos = _startPosImageRecords +_imageHeaderLength + x;
 
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
@@ -255,7 +261,7 @@ public abstract class CEOSImageFile {
 
                 // Read source line
                 synchronized (_ceosReader) {
-                    _ceosReader.seek(_imageRecordLength * y + _startPosImageRecords+12 + x);
+                    _ceosReader.seek(_imageRecordLength * y + xpos);
                     _ceosReader.readB1(srcLine);
                 }
 
@@ -333,15 +339,6 @@ public abstract class CEOSImageFile {
         for (int x = 0, i = 0; x < length; ++x, i += sourceStepX) {
             destLine[x] = (int)srcLine[(i << 1) + 1];
         }
-    }
-
-    protected final ImageRecord getImageRecord(final int line) throws IOException,
-                                                              IllegalCeosFormatException {
-        if (_imageRecords[line] == null) {
-            _ceosReader.seek(_imageRecordLength * line + _startPosImageRecords);
-            _imageRecords[line] = new ImageRecord(_ceosReader, _ceosReader.getCurrentPos(), _imageRecords[0].getCeosDatabase());
-        }
-        return _imageRecords[line];
     }
 
     public void close() throws IOException {

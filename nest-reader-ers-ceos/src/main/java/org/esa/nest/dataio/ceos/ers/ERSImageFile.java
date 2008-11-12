@@ -12,7 +12,7 @@ import java.io.IOException;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.16 $ $Date: 2008-11-09 23:40:53 $
+ * @version $Revision: 1.17 $ $Date: 2008-11-12 17:24:05 $
  */
 class ERSImageFile extends CEOSImageFile {
 
@@ -30,6 +30,7 @@ class ERSImageFile extends CEOSImageFile {
 
         _imageRecordLength = _imageRecords[0].getRecordLength();
         _startPosImageRecords = _imageRecords[0].getStartPos();
+        _imageHeaderLength = 12;
     }
 
 }
