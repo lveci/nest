@@ -265,92 +265,25 @@ public class SRGROp extends Operator {
      */
     private void getNearRangeIncidenceAngle() {
 
+        final TiePointGrid incidenceAngle = getIncidenceAngle();
+
+        final double alphaFirst = incidenceAngle.getPixelFloat(0.5f, 0.5f);
+        final double alphaLast = incidenceAngle.getPixelFloat(sourceImageWidth - 0.5f, 0.5f);
+        nearRangeIncidenceAngle = Math.min(alphaFirst, alphaLast);
+
+        /*
         final MetadataAttribute passAttr = absRoot.getAttribute(AbstractMetadata.PASS);
         if (passAttr == null) {
             throw new OperatorException(AbstractMetadata.PASS + " not found");
         }
         final String pass = passAttr.getData().getElemString();
-        //System.out.println("pass is " + pass);
 
-        getMissionType();
-
-        if (missionType.contains("ERS")) {
-            nearRangeIncidenceAngle = getIncidenceAngleForERSProduct(pass);
-        } else if (missionType.contains("ENVISAT")) {
-            nearRangeIncidenceAngle = getIncidenceAngleForASARProduct(pass);
-        } else {
-            throw new OperatorException("Invalid mission type");
-        }
-        //sysSystem.out.println("Near range incidence angle is " + nearRangeIncidenceAngle);
-    }
-
-    /**
-     * Get the near range incidence angle for ERS product(in degree).
-     *
-     * @param pass Satellite pass (ascending or descending)
-     * @return The incidence angle.
-     */
-    private double getIncidenceAngleForERSProduct(String pass) {
-        // Field 56 or 58 in PRI Facility Related Data Record (in degree)
-        final MetadataElement facility = sourceProduct.getMetadataRoot().getElement("Leader").getElement("Facility Related");
-        if (facility == null) {
-            throw new OperatorException("Facility Related not found");
-        }
-        /*
-        String incidenceAngle;
         if (pass.contains("DESCENDING")) {
-            incidenceAngle = "Incidence angle at last valid range pixel";
+            nearRangeIncidenceAngle = incidenceAngle.getPixelFloat(sourceImageWidth - 0.5f, 0.5f);
         } else {
-            incidenceAngle = "Incidence angle at first range pixel";
+            nearRangeIncidenceAngle = incidenceAngle.getPixelFloat(0.5f, 0.5f);
         }
-
-        MetadataAttribute attr = facility.getAttribute(incidenceAngle);
-        if (attr == null) {
-            throw new OperatorException(incidenceAngle + " not found");
-        }
-
-        return attr.getData().getElemFloat();
         */
-
-        final MetadataAttribute attrFirst = facility.getAttribute("Incidence angle at first range pixel");
-        if (attrFirst == null) {
-            throw new OperatorException("Incidence angle at first range pixel not found");
-        }
-
-        final double alphaFirst = attrFirst.getData().getElemFloat();
-
-        final MetadataAttribute attrLast = facility.getAttribute("Incidence angle at last valid range pixel");
-        if (attrLast == null) {
-            throw new OperatorException("Incidence angle at last valid range pixel not found");
-        }
-
-        final double alphaLast = attrLast.getData().getElemFloat();
-
-        return Math.min(alphaFirst, alphaLast);
-    }
-
-    /**
-     * Get the near range incidence angle for ASAR product(in degree).
-     *
-     * @param pass Satellite pass (ascending or descending)
-     * @return The incidence angle.
-     */
-    private double getIncidenceAngleForASARProduct(String pass) {
-
-        final TiePointGrid incidenceAngle = getIncidenceAngle();
-/*
-        double alpha;
-        if (pass.contains("DESCENDING")) {
-            alpha = incidenceAngle.getPixelFloat(sourceImageWidth - 0.5f, 0.5f);
-        } else {
-            alpha = incidenceAngle.getPixelFloat(0.5f, 0.5f);
-        }
-        return alpha;
-*/
-
-        final double alphaFirst = incidenceAngle.getPixelFloat(0.5f, 0.5f);
-        final double alphaLast = incidenceAngle.getPixelFloat(sourceImageWidth - 0.5f, 0.5f);
-        return Math.min(alphaFirst, alphaLast);
     }
 
     /**
