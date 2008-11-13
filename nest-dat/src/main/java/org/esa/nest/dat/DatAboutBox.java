@@ -135,8 +135,7 @@ public class DatAboutBox extends ModalDialog {
                 "&nbsp;&nbsp;<b>Rajesh Jha</b> (project manager)<br>" +
                 "&nbsp;&nbsp;<b>Shengli Dai</b> (project scientist)<br>" +
                 "&nbsp;&nbsp;<b>Luis Veci</b> (software lead)<br>" +
-                "&nbsp;&nbsp;<b>Jun Lu</b> (developer)<br>" +
-                "&nbsp;&nbsp;<b>Steven Truelove</b> (developer)<br>" +
+                "&nbsp;&nbsp;<b>Jun Lu</b> (developer)<br><br>" +
                 "</td><td>" +
                 "&nbsp;&nbsp;<b>Andrew Taylor</b> (IT support)<br>" +
                 "&nbsp;&nbsp;<b>Iris Buchan</b> (quality assurance)<br>" +

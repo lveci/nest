@@ -47,6 +47,11 @@
                     <id>selectionTool</id>
                     <id>convertROIToShape</id>
                     <id>deleteShape</id>
+                    <id>showHomePage</id>
+                    <id>about</id>
+                    <id>projection</id>
+                    <id>attachPixelGeoCoding</id>
+                    <id>detachPixelGeoCoding</id>
                 </excludedActions>
                 <excludedToolViews>
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
@@ -318,7 +323,7 @@
         </action>
 
         <action>
-            <id>showHomePage</id>
+            <id>showNestHomePage</id>
             <parent>help</parent>
             <class>org.esa.nest.dat.actions.ShowHomePageAction</class>
             <text>NEST Home Page</text>
@@ -330,7 +335,7 @@
         </action>
 
         <action>
-            <id>about</id>
+            <id>aboutDAT</id>
             <parent>help</parent>
             <class>org.esa.beam.visat.actions.AboutAction</class>
             <text>About DAT</text>
@@ -341,7 +346,7 @@
             <smallIcon>icons/About16.gif</smallIcon>
             <largeIcon>icons/About24.gif</largeIcon>
             <helpId>about</helpId>
-            <placeAfter>showUpdateDialog</placeAfter>
+            <placeAfter>showNestHomePage</placeAfter>
             <separatorBefore>true</separatorBefore>
         </action>
 
@@ -360,7 +365,7 @@
         </action>
 
         <action>
-            <id>projection</id>
+            <id>nestProjection</id>
             <class>org.esa.beam.visat.actions.ProjectionAction</class>
             <parent>geometry</parent>
             <text>Map Projection...</text>
@@ -369,7 +374,7 @@
         </action>
 
         <action>
-            <id>attachPixelGeoCoding</id>
+            <id>attachNestPixelGeoCoding</id>
             <class>org.esa.beam.visat.actions.AttachPixelGeoCodingAction</class>
             <text>Attach Pixel Geo-Coding...</text>
             <shortDescr>Attaches a pixel based geo-coding</shortDescr>
@@ -377,21 +382,20 @@
             <context>attachPixelGeoCoding</context>
             <helpId>attachPixelGeoCoding</helpId>
             <parent>geometry</parent>
-            <placeAfter>projection</placeAfter>
-            <placeBefore>detachPixelGeoCoding</placeBefore>
+            <placeAfter>nestProjection</placeAfter>
             <separatorBefore>true</separatorBefore>
         </action>
 
         <action>
-            <id>detachPixelGeoCoding</id>
+            <id>detachNestPixelGeoCoding</id>
             <class>org.esa.beam.visat.actions.DetachPixelGeoCodingAction</class>
             <text>Detach Pixel Geo-Coding...</text>
             <shortDescr>Detaches a pixel based geo-coding</shortDescr>
             <description>Detaches a pixel based geo-coding from the selected product</description>
             <context>detachPixelGeoCoding</context>
             <helpId>detachPixelGeoCoding</helpId>
+            <placeAfter>attachNestPixelGeoCoding</placeAfter>
             <parent>geometry</parent>
-            <placeAfter>attachPixelGeoCoding</placeAfter>
             <separatorAfter>true</separatorAfter>
         </action>
 
@@ -459,16 +463,6 @@
             <selected>true</selected>
             <helpId>selectTool</helpId>
         </action>
-
-        <!--action>
-            <id>virtualToRealBand</id>
-            <class>org.esa.nest.dat.actions.VirtualToRealBandAction</class>
-            <parent>tools</parent>
-            <text>Virtual To Real Band</text>
-            <shortDescr>Convert a virtual band to a real band</shortDescr>
-            <context>band</context>
-            <helpId>virtualToRealBand</helpId>
-        </action-->
 
     </extension>
 

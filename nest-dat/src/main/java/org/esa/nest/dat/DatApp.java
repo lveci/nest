@@ -194,7 +194,7 @@ public final class DatApp extends VisatApp {
 
         addCommandsToToolBar(toolBar, new String[]{
                 // These IDs are defined in the module.xml
-                //"selectTool",
+                "selectTool",
                 "crossHairTool",
                 "rangeFinder",
                 "zoomTool",
