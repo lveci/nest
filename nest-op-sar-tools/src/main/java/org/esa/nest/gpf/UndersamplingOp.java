@@ -168,7 +168,7 @@ public class UndersamplingOp extends Operator {
 
         sourceImageWidth = sourceProduct.getSceneRasterWidth();
         sourceImageHeight = sourceProduct.getSceneRasterHeight();
-        System.out.println("sourceImageWidth = " + sourceImageWidth + ", sourceImageHeight = " + sourceImageHeight);
+        //System.out.println("sourceImageWidth = " + sourceImageWidth + ", sourceImageHeight = " + sourceImageHeight);
 
         getFilterDimension();
         
@@ -551,7 +551,7 @@ public class UndersamplingOp extends Operator {
         int idx = oldFirstLineTime.lastIndexOf(':') + 1;
         String oldSecondsStr = oldFirstLineTime.substring(idx);
         double oldSeconds = Double.parseDouble(oldSecondsStr);
-        double newSeconds = oldSeconds + oldLineTimeInterval*((filterHeight + stepAzimuth)/2.0);
+        double newSeconds = oldSeconds + oldLineTimeInterval*(filterHeight - 1)/2.0;
         String newFirstLineTime = String.valueOf(oldFirstLineTime.subSequence(0, idx)) + newSeconds + "000000";
         abs.removeAttribute(firstLineTimeAttr);
         abs.addAttribute(new MetadataAttribute(
@@ -595,14 +595,14 @@ public class UndersamplingOp extends Operator {
         final int ty0 = targetTileRectangle.y;
         final int tw  = targetTileRectangle.width;
         final int th  = targetTileRectangle.height;
-        System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
+        //System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
 
         final int x0 = (int)(tx0 * stepRange + 0.5f);
         final int y0 = (int)(ty0 * stepAzimuth + 0.5f);
         final int w = (int)((tx0 + tw - 1)*stepRange + 0.5f) + filterWidth - (int)(tx0*stepRange + 0.5f) + 1;
         final int h = (int)((ty0 + th - 1)*stepAzimuth + 0.5f) + filterHeight - (int)(ty0*stepAzimuth + 0.5f) + 1;
         Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
-        System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+        //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         Tile sourceRaster1 = null;
         Tile sourceRaster2 = null;
@@ -679,6 +679,32 @@ public class UndersamplingOp extends Operator {
             filteredValue = 10.0*Math.log10(filteredValue); // linear to dB
         }
         return filteredValue;
+    }
+
+    /**
+     * Set undersampling method. The function is for unit test only.
+     * @param samplingMethod The undersampling method.
+     */
+    public void setUndersamplingMethod(String samplingMethod) {
+        method = samplingMethod;
+    }
+
+    /**
+     * Set filter type. The function is for unit test only.
+     * @param type The filter type.
+     */
+    public void setFilterType(String type) {
+        filterType = type;
+    }
+
+    /**
+     * Set the output image dimension. The function is for unit test only.
+     * @param numRows The number of rows.
+     * @param numCols The number of columns.
+     */
+    public void setOutputImageSaize(int numRows, int numCols) {
+        targetImageHeight = numRows;
+        targetImageWidth = numCols;
     }
 
     /**
