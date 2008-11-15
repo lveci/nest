@@ -167,6 +167,7 @@ public class UndersamplingOp extends Operator {
 
         sourceImageWidth = sourceProduct.getSceneRasterWidth();
         sourceImageHeight = sourceProduct.getSceneRasterHeight();
+        System.out.println("sourceImageWidth = " + sourceImageWidth + ", sourceImageHeight = " + sourceImageHeight);
 
         getFilterDimension();
         
@@ -588,41 +589,26 @@ public class UndersamplingOp extends Operator {
 
     private void computeTileUsingKernelFiltering(Band targetBand, Tile targetTile, ProgressMonitor pm) {
 
-        ProductData trgData = targetTile.getDataBuffer();
         Rectangle targetTileRectangle = targetTile.getRectangle();
-        String bandName = targetBand.getName();
-
         final int tx0 = targetTileRectangle.x;
         final int ty0 = targetTileRectangle.y;
         final int tw  = targetTileRectangle.width;
         final int th  = targetTileRectangle.height;
+        System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
 
-        double filteredValue;
-        final int maxy = ty0 + th;
-        final int maxx = tx0 + tw;
-        for (int ty = ty0; ty < maxy; ty++) {
-            for (int tx = tx0; tx < maxx; tx++) {
-                filteredValue = getFilteredValue(tx, ty, bandName, pm);
-                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(tx, ty), filteredValue);
-            }
-        }
-    }
-
-    private double getFilteredValue(int tx, int ty, String bandName, ProgressMonitor pm) {
-
-        final int x0 = (int)(tx * stepRange + 0.5);
-        final int y0 = (int)(ty * stepAzimuth + 0.5);
-        final int maxY = y0 + filterHeight;
-        final int maxX = x0 + filterWidth;
-
-        Rectangle sourceTileRectangle = new Rectangle(x0, y0, filterWidth, filterHeight);
+        final int x0 = (int)(tx0 * stepRange + 0.5f);
+        final int y0 = (int)(ty0 * stepAzimuth + 0.5f);
+        final int w = (int)((tx0 + tw - 1)*stepRange + 0.5f) + filterWidth - (int)(tx0*stepRange + 0.5f) + 1;
+        final int h = (int)((ty0 + th - 1)*stepAzimuth + 0.5f) + filterHeight - (int)(ty0*stepAzimuth + 0.5f) + 1;
+        Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
+        System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         Tile sourceRaster1 = null;
         Tile sourceRaster2 = null;
         ProductData srcData1 = null;
         ProductData srcData2 = null;
 
-        final String[] srcBandNames = targetBandNameToSourceBandName.get(bandName);
+        final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
         if (srcBandNames.length == 1) {
             sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
             sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
@@ -638,6 +624,31 @@ public class UndersamplingOp extends Operator {
 
         final int bandUnit = MultilookOp.getSourceBandUnit(sourceBand1);
 
+        ProductData trgData = targetTile.getDataBuffer();
+
+        double filteredValue;
+        final int maxy = ty0 + th;
+        final int maxx = tx0 + tw;
+        for (int ty = ty0; ty < maxy; ty++) {
+            for (int tx = tx0; tx < maxx; tx++) {
+                filteredValue = getFilteredValue(tx, ty, sourceRaster1, sourceRaster2, bandUnit);
+                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(tx, ty), filteredValue);
+            }
+        }
+    }
+
+    private double getFilteredValue(int tx, int ty, Tile sourceRaster1, Tile sourceRaster2, int bandUnit) {
+
+        final int x0 = (int)(tx * stepRange + 0.5);
+        final int y0 = (int)(ty * stepAzimuth + 0.5);
+        final int maxY = y0 + filterHeight;
+        final int maxX = x0 + filterWidth;
+
+        final ProductData srcData1 = sourceRaster1.getDataBuffer();
+        ProductData srcData2 = null;
+        if(sourceRaster2 != null)
+            srcData2 = sourceRaster2.getDataBuffer();
+        
         double filteredValue = 0.0;
         for (int y = y0; y < maxY; y++) {
             for (int x = x0; x < maxX; x++) {
