@@ -245,7 +245,7 @@ public class UndersamplingOp extends Operator {
 
         } else if (Float.compare(widthRatio, 0.0f) != 0 && Float.compare(heightRatio, 0.0f) != 0) {
 
-            if (widthRatio <= 0 || widthRatio >= 1 || heightRatio <= 0 || heightRatio > 1) {
+            if (widthRatio <= 0 || widthRatio >= 1 || heightRatio <= 0 || heightRatio >= 1) {
                 throw new OperatorException("The width or height ratio must be within range (0, 1)");
             }
 
@@ -257,9 +257,8 @@ public class UndersamplingOp extends Operator {
 
         } else if (Float.compare(rangeSpacing, 0.0f) != 0 && Float.compare(azimuthSpacing, 0.0f) != 0) {
 
-            if (rangeSpacing <= 0.0f || rangeSpacing >= srcRangeSpacing ||
-                azimuthSpacing <= 0.0f || azimuthSpacing >= srcAzimuthSpacing) {
-                throw new OperatorException("The azimuth or range spacing must be positive and smaller than the source spscing");
+            if (rangeSpacing <= srcRangeSpacing || azimuthSpacing <= srcAzimuthSpacing) {
+                throw new OperatorException("The azimuth or range spacing must be greater than the source spacing");
             }
 
             targetImageHeight = (int)(rangeSpacing / srcRangeSpacing * sourceImageHeight + 0.5);
