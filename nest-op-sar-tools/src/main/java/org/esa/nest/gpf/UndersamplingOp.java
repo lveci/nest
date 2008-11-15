@@ -95,8 +95,9 @@ public class UndersamplingOp extends Operator {
     private int sourceImageWidth;
     private int sourceImageHeight;
 
-    private float stepRange; // step size in range direction for moving window filtering
-    private float stepAzimuth; // step size in azimuth direction for moving window filtering
+    private double stepRange; // step size in range direction for moving window filtering
+    private double stepAzimuth; // step size in azimuth direction for moving window filtering
+
     private float srcRangeSpacing; // range pixel spacing of source image
     private float srcAzimuthSpacing; // azimuth pixel spacing of source image
     private float[][] kernel; // kernel for filtering
@@ -274,8 +275,8 @@ public class UndersamplingOp extends Operator {
      */
     private void computeRangeAzimuthStepSizes() {
 
-        stepAzimuth = (float)(sourceImageHeight - filterHeight) / (float)(targetImageHeight - 1);
-        stepRange = (float)(sourceImageWidth - filterWidth) / (float)(targetImageWidth - 1);
+        stepAzimuth = (double)(sourceImageHeight - filterHeight) / (double)(targetImageHeight - 1);
+        stepRange = (double)(sourceImageWidth - filterWidth) / (double)(targetImageWidth - 1);
     }
 
     /**
@@ -540,7 +541,7 @@ public class UndersamplingOp extends Operator {
             throw new OperatorException(AbstractMetadata.line_time_interval + " not found");
         }
         float oldLineTimeInterval = lineTimeIntervalAttr.getData().getElemFloat();
-        lineTimeIntervalAttr.getData().setElemFloat(oldLineTimeInterval*stepAzimuth);
+        lineTimeIntervalAttr.getData().setElemFloat(oldLineTimeInterval*(float)stepAzimuth);
 
         MetadataAttribute firstLineTimeAttr = abs.getAttribute(AbstractMetadata.first_line_time);
         if (firstLineTimeAttr == null) {
