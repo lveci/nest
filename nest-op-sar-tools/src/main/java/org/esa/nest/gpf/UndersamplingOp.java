@@ -115,12 +115,6 @@ public class UndersamplingOp extends Operator {
     private static final String FILTER_SIZE_5x5 = "5x5";
     private static final String FILTER_SIZE_7x7 = "7x7";
 
-    static final int AMPLITUDE = 0;
-    static final int INTENSITY = 1;
-    static final int COMPLEX = 2;
-    static final int PHASE = 3;
-    static final int INTENSITY_DB = 4;
-
     @Override
     public void initialize() throws OperatorException {
 
@@ -456,16 +450,21 @@ public class UndersamplingOp extends Operator {
 
             final Band srcBand = sourceBands[i];
             final String unit = srcBand.getUnit();
+            if(unit == null) {
+                throw new OperatorException("band "+srcBand.getName()+" requires a unit");
+            }
 
-            if (unit != null && unit.contains("phase")) {
+            String targetUnit = "";
+
+            if (unit.contains("phase")) {
 
                 continue;
 
-            } else if (unit != null && unit.contains("imaginary")) {
+            } else if (unit.contains("imaginary")) {
 
                 throw new OperatorException("Real and imaginary bands should be selected in pairs");
 
-            } else if (unit != null && unit.contains("real")) {
+            } else if (unit.contains("real")) {
 
                 if (i == sourceBands.length - 1) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
@@ -477,22 +476,26 @@ public class UndersamplingOp extends Operator {
                 final String[] srcBandNames = new String[2];
                 srcBandNames[0] = srcBand.getName();
                 srcBandNames[1] = sourceBands[i+1].getName();
-                final String pol = getPolarizationFromBandName(srcBandNames[0]);
+                final String pol = MultilookOp.getPolarizationFromBandName(srcBandNames[0]);
                 if (pol != null) {
                     targetBandName = "Amplitude_" + pol.toUpperCase();
                 } else {
                     targetBandName = "Amplitude";
                 }
+                ++i;
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                    targetUnit = "amplitude";
                 }
-                i++;
 
             } else {
 
                 final String[] srcBandNames = {srcBand.getName()};
                 targetBandName = srcBand.getName();
-                targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                if(targetProduct.getBand(targetBandName) == null) {
+                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                    targetUnit = unit;
+                }
             }
 
             if(targetProduct.getBand(targetBandName) == null) {
@@ -501,33 +504,12 @@ public class UndersamplingOp extends Operator {
                                            ProductData.TYPE_FLOAT64,
                                            targetImageWidth,
                                            targetImageHeight);
-                targetBand.setUnit(unit);
 
+                targetBand.setUnit(targetUnit);
                 targetProduct.addBand(targetBand);
             }
         }
 
-    }
-
-    /**
-     * Get polarization from the band name.
-     *
-     * @param bandName The band name.
-     * @return The polarization string if it exists, otherwise null.
-     */
-    private static String getPolarizationFromBandName(String bandName) {
-
-        final int idx = bandName.lastIndexOf('_');
-        if (idx != -1) {
-            final String pol = bandName.substring(idx+1).toLowerCase();
-            if (!pol.contains("hh") && !pol.contains("vv") && !pol.contains("hv") && !pol.contains("vh")) {
-                return null;
-            } else {
-                return pol;
-            }
-        } else {
-            return null;
-        }
     }
 
     /**
@@ -654,7 +636,7 @@ public class UndersamplingOp extends Operator {
             srcData2 = sourceRaster2.getDataBuffer();
         }
 
-        final int bandUnit = getSourceBandUnit(sourceBand1);
+        final int bandUnit = MultilookOp.getSourceBandUnit(sourceBand1);
 
         double filteredValue = 0.0;
         for (int y = y0; y < maxY; y++) {
@@ -663,12 +645,12 @@ public class UndersamplingOp extends Operator {
                 final int index = sourceRaster1.getDataBufferIndex(x, y);
                 final float weight = kernel[maxY - 1 - y][maxX - 1 - x];
 
-                if (bandUnit == INTENSITY_DB) {
+                if (bandUnit == MultilookOp.INTENSITY_DB) {
 
                     final double dn = srcData1.getElemDoubleAt(index);
                     filteredValue += Math.pow(10, dn / 10.0)*weight; // dB to linear
 
-                } else if (bandUnit == AMPLITUDE || bandUnit == INTENSITY) {
+                } else if (bandUnit == MultilookOp.AMPLITUDE || bandUnit == MultilookOp.INTENSITY) {
 
                     filteredValue += srcData1.getElemDoubleAt(index)*weight;
 
@@ -681,28 +663,11 @@ public class UndersamplingOp extends Operator {
             }
         }
 
-        if (bandUnit == INTENSITY_DB) {
+        if (bandUnit == MultilookOp.INTENSITY_DB) {
             filteredValue = 10.0*Math.log10(filteredValue); // linear to dB
         }
         return filteredValue;
     }
-
-    public static int getSourceBandUnit(Band sourceBand) {
-
-        String  unit =  sourceBand.getUnit();
-        if (unit.contains("amplitude")) {
-            return AMPLITUDE;
-        } else if (unit.contains("intensity")) {
-            return INTENSITY;
-        } else if (unit.contains("phase")) {
-            return PHASE;
-        } else if (unit.equals("intensity_db")) {
-            return INTENSITY_DB;
-        } else {
-            return COMPLEX;
-        }
-    }
-
 
     /**
      * The SPI is used to register this operator in the graph processing framework
