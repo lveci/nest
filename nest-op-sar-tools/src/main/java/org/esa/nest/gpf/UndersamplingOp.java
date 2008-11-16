@@ -88,7 +88,9 @@ public class UndersamplingOp extends Operator {
 
     private Band sourceBand1;
     private Band sourceBand2;
+
     private ProductReader subsetReader;
+    private MetadataElement abs;
 
     private int filterWidth;
     private int filterHeight;
@@ -168,7 +170,8 @@ public class UndersamplingOp extends Operator {
 
         sourceImageWidth = sourceProduct.getSceneRasterWidth();
         sourceImageHeight = sourceProduct.getSceneRasterHeight();
-        //System.out.println("sourceImageWidth = " + sourceImageWidth + ", sourceImageHeight = " + sourceImageHeight);
+
+        abs = MultilookOp.getAbstractedMetadata(sourceProduct);
 
         getFilterDimension();
         
@@ -203,11 +206,6 @@ public class UndersamplingOp extends Operator {
      * Get the range and azimuth spacings (in meter).
      */
     void getSrcImagePixelSpacings() {
-
-        MetadataElement abs = sourceProduct.getMetadataRoot().getElement("Abstracted Metadata");
-        if (abs == null) {
-            throw new OperatorException("Abstracted Metadata not found");
-        }
 
         MetadataAttribute rangeSpacingAttr = abs.getAttribute(AbstractMetadata.range_spacing);
         if (rangeSpacingAttr == null) {
