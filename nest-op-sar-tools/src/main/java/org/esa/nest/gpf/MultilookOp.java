@@ -71,9 +71,12 @@ public final class MultilookOp extends Operator {
     private Band targetBand;
 
     private MetadataElement absRoot;
+
     private String sampleType;
     private String missionType;
+
     private boolean srgrFlag;
+
     private int numAzimuthLooks;
     private int numRangeLooks;
     private int azimuthFactor;
@@ -82,9 +85,11 @@ public final class MultilookOp extends Operator {
     private int sourceImageHeight;
     private int targetImageWidth;
     private int targetImageHeight;
+
     private double rangeSpacing;
     private double azimuthSpacing;
     private double incidenceAngleAtCentreRangePixel; // in degree
+
     private HashMap<String, String[]> targetBandNameToSourceBandName;
 
     static final int AMPLITUDE = 0;
@@ -109,21 +114,26 @@ public final class MultilookOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        absRoot = sourceProduct.getMetadataRoot().getElement("Abstracted Metadata");
-        if (absRoot == null) {
-            throw new OperatorException("Abstracted Metadata not found");
-        }
+        absRoot = getAbstractedMetadata(sourceProduct);
 
         getSampleType();
+
         getMissionType();
+
         getSRGRFlag();
+
         getRangeAzimuthSpacing();
+
         getRangeAzimuthLooks();
+
         getSourceImageDimension();
+
         if (!srgrFlag) {
             getIncidenceAngleAtCentreRangePixel();
         }
+
         computeRangeAzimuthMultiLookFactors();
+
         createTargetProduct();
     }
 
@@ -172,6 +182,18 @@ public final class MultilookOp extends Operator {
         final int bandUnit = getSourceBandUnit(sourceBand1);
 
         computeMultiLookImageUsingTimeDomainMethod(tx0, ty0, tw, th, sourceRaster1, sourceRaster2, targetTile, bandUnit);
+    }
+
+    /**
+     * Get abstracted metadata.
+     */
+    public static MetadataElement getAbstractedMetadata(Product sourceProduct) {
+
+        final MetadataElement abstractedMetadata = sourceProduct.getMetadataRoot().getElement("Abstracted Metadata");
+        if (abstractedMetadata == null) {
+            throw new OperatorException("Abstracted Metadata not found");
+        }
+        return abstractedMetadata;
     }
 
     /**
