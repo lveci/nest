@@ -125,8 +125,8 @@
 	<rec name="skipBytes" type="0" num="32"/>
 	<!-- SENSOR SPECIFIC LOCAL USE SEGMENT -->
 	<rec name="Zero-doppler range time of first range pixel" type="5" num="16"/>
-	<rec name="Zero-doppler range time of first centre pixel" type="5" num="16"/>
-	<rec name="Zero-doppler range time of first last range pixel" type="5" num="16"/>
+	<rec name="Zero-doppler range time of centre range pixel" type="5" num="16"/>
+	<rec name="Zero-doppler range time of last range pixel" type="5" num="16"/>
 	<rec name="Zero-doppler azimuth time of first azimuth pixel" type="1" num="24"/>
 	<rec name="Zero-doppler azimuth time of centre azimuth pixel" type="1" num="24"/>
 	<rec name="Zero-doppler azimuth time of last azimuth pixel" type="1" num="24"/>	
