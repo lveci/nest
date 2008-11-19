@@ -15,6 +15,12 @@ import java.text.ParseException;
  */
 public class AbstractMetadata {
 
+    public static int NO_METADATA = 99999;
+    //public static short NO_METADATA_BYTE = 99;
+    //public static int NO_METADATA = 0;
+    public static short NO_METADATA_BYTE = 0;
+    public static String NO_METADATA_STRING = " ";
+
     public static final String PRODUCT = "PRODUCT";
     public static final String PRODUCT_TYPE = "PRODUCT_TYPE";
     public static final String SPH_DESCRIPTOR = "SPH_DESCRIPTOR";
@@ -91,19 +97,19 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, PRODUCT_TYPE, ProductData.TYPE_ASCII, "", "Product Type");
         addAbstractedAttribute(absRoot, SPH_DESCRIPTOR, ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, MISSION, ProductData.TYPE_ASCII, "", "");
-        addAbstractedAttribute(absRoot, PROC_TIME, ProductData.TYPE_UTC, "", "");
+        addAbstractedAttribute(absRoot, PROC_TIME, ProductData.TYPE_UTC, "utc", "");
         addAbstractedAttribute(absRoot, ProcessingSystemIdentifier, ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, CYCLE, ProductData.TYPE_INT32, "", "");
         addAbstractedAttribute(absRoot, REL_ORBIT, ProductData.TYPE_INT32, "", "");
         addAbstractedAttribute(absRoot, ABS_ORBIT, ProductData.TYPE_INT32, "", "");
-        addAbstractedAttribute(absRoot, STATE_VECTOR_TIME, ProductData.TYPE_UTC, "", "");
+        addAbstractedAttribute(absRoot, STATE_VECTOR_TIME, ProductData.TYPE_UTC, "utc", "");
         addAbstractedAttribute(absRoot, VECTOR_SOURCE, ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, TOT_SIZE, ProductData.TYPE_UINT32, "bytes", "");
 
         // SPH
         addAbstractedAttribute(absRoot, NUM_SLICES, ProductData.TYPE_INT32, "", "");
-        addAbstractedAttribute(absRoot, first_line_time, ProductData.TYPE_UTC, "", "");
-        addAbstractedAttribute(absRoot, last_line_time, ProductData.TYPE_UTC, "", "");
+        addAbstractedAttribute(absRoot, first_line_time, ProductData.TYPE_UTC, "utc", "");
+        addAbstractedAttribute(absRoot, last_line_time, ProductData.TYPE_UTC, "utc", "");
         addAbstractedAttribute(absRoot, first_near_lat, ProductData.TYPE_FLOAT64, "deg", "");
         addAbstractedAttribute(absRoot, first_near_long, ProductData.TYPE_FLOAT64, "deg", "");
         addAbstractedAttribute(absRoot, first_mid_lat, ProductData.TYPE_FLOAT64, "deg", "");
@@ -127,7 +133,7 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, range_looks, ProductData.TYPE_INT32, "", "");
         addAbstractedAttribute(absRoot, range_spacing, ProductData.TYPE_FLOAT64, "m", "Range sample spacing");
         addAbstractedAttribute(absRoot, azimuth_spacing, ProductData.TYPE_FLOAT64, "m", "");
-        addAbstractedAttribute(absRoot, pulse_repetition_frequency, ProductData.TYPE_INT32, "", "");
+        addAbstractedAttribute(absRoot, pulse_repetition_frequency, ProductData.TYPE_FLOAT64, "Hz", "");
         addAbstractedAttribute(absRoot, line_time_interval, ProductData.TYPE_FLOAT64, "s", "");
         addAbstractedAttribute(absRoot, data_type, ProductData.TYPE_ASCII, "", "");
 
@@ -161,8 +167,13 @@ public class AbstractMetadata {
     private static void addAbstractedAttribute(MetadataElement dest, String tag, int dataType,
                                                String unit, String desc) {
         final MetadataAttribute attribute = new MetadataAttribute(tag, dataType, 1);
-        if(dataType == ProductData.TYPE_ASCII)
-            attribute.getData().setElems(" ");
+        if(dataType == ProductData.TYPE_ASCII) {
+            attribute.getData().setElems(NO_METADATA_STRING);
+        } else if(dataType == ProductData.TYPE_INT8 || dataType == ProductData.TYPE_UINT8) {
+            attribute.getData().setElems( new String[] {String.valueOf(NO_METADATA_BYTE)} );
+        } else if(dataType != ProductData.TYPE_UTC) {
+            attribute.getData().setElems( new String[] {String.valueOf(NO_METADATA)} );
+        }
         attribute.setUnit(unit);
         attribute.setDescription(desc);
         attribute.setReadOnly(false);

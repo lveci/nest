@@ -292,8 +292,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeString("Processing system identifier").trim() );
         // cycle n/a?
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT,
-                Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
+        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT,
+        //        Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
                 Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
         //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
@@ -353,6 +353,9 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE,
                 product.getRawStorageSize());
 
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.replica_power_corr_flag, 0);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
+        
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
                 sceneRec.getAttributeDouble("Range sampling rate"));
 

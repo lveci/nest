@@ -235,6 +235,8 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
                 _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-line distance in output scene"));
 
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.replica_power_corr_flag, 0);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
     }
 
     private ProductData.UTC getProcTime() {

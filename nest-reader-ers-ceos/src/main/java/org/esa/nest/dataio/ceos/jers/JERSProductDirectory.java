@@ -228,8 +228,8 @@ class JERSProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeString("Processing system identifier").trim() );
         // cycle n/a?
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT,
-                Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
+        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT,
+        //       Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
                 Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
@@ -293,6 +293,8 @@ class JERSProductDirectory extends CEOSProductDirectory {
                 facilityRec.getAttributeInt("Antenna pattern correction flag"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag,
                 facilityRec.getAttributeInt("Range spreading loss compensation flag"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.replica_power_corr_flag, 0);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
                 facilityRec.getAttributeDouble("Absolute calibration constant K"));
 
