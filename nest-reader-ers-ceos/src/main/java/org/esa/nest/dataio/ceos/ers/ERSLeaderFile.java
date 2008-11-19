@@ -75,6 +75,10 @@ class ERSLeaderFile {
         return _mapProjRecord;
     }
 
+    public final BaseRecord getPlatformPositionRecord() {
+        return _platformPositionRecord;
+    }
+
     public float[] getLatCorners() throws IOException,
                                            IllegalCeosFormatException {
         if(_mapProjRecord == null) return null;

@@ -285,6 +285,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
                 sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
 
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval, getLineTimeInterval());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type,
                 ProductData.getTypeString(ProductData.TYPE_INT16));      
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
@@ -330,6 +331,15 @@ class ERSProductDirectory extends CEOSProductDirectory {
         if(projDesc.contains("slant"))
             return 0;
         return 1;
+    }
+
+    private double getLineTimeInterval() {
+         double timeIntervalBetweenPoints = _leaderFile.getPlatformPositionRecord().
+                 getAttributeDouble("Time interval between DATA points");
+         int numDataPoints = _leaderFile.getPlatformPositionRecord().
+                 getAttributeInt("Number of data points");
+         //return timeIntervalBetweenPoints / numDataPoints;
+        return 0;
     }
 
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {
