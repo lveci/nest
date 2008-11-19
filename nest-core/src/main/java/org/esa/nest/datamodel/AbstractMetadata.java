@@ -73,6 +73,8 @@ public class AbstractMetadata {
     public static final String external_calibration_file = "external_calibration_file";
     public static final String orbit_state_vector_file = "orbit_state_vector_file";
 
+    public static final String range_sampling_rate = "range_sampling_rate";
+
     /**
      * Abstract common metadata from products to be used uniformly by all operators
      * @param root the product metadata root
@@ -141,6 +143,9 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, replica_power_corr_flag, ProductData.TYPE_UINT8, "flag", "Replica pulse power correction applied");
         addAbstractedAttribute(absRoot, abs_calibration_flag, ProductData.TYPE_UINT8, "flag", "Product calibrated");
         addAbstractedAttribute(absRoot, calibration_factor, ProductData.TYPE_FLOAT64, "", "Calibration constant");
+
+        addAbstractedAttribute(absRoot, range_sampling_rate, ProductData.TYPE_FLOAT64, "Hz", "Range Sampling Rate");
+
         addAbstractedAttribute(absRoot, external_calibration_file, ProductData.TYPE_ASCII, "", "External calibration file used");
         addAbstractedAttribute(absRoot, orbit_state_vector_file, ProductData.TYPE_ASCII, "", "Orbit file");
     }

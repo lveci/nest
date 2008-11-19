@@ -295,6 +295,9 @@ class JERSProductDirectory extends CEOSProductDirectory {
                 facilityRec.getAttributeInt("Range spreading loss compensation flag"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
                 facilityRec.getAttributeDouble("Absolute calibration constant K"));
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
+                sceneRec.getAttributeDouble("Range sampling rate"));
     }
 
     private ProductData.UTC getProcTime() {

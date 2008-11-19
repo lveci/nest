@@ -353,7 +353,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE,
                 product.getRawStorageSize());
 
-
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
+                sceneRec.getAttributeDouble("Range sampling rate"));
 
     }
 
