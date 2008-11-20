@@ -499,6 +499,9 @@ public final class MultilookOp extends Operator {
                     targetUnit = "amplitude";
                 }
 
+            } else if (unit.contains("db")) {
+                throw new OperatorException("Please convert dB band " + srcBand.getName() +
+                        " to linear before applying Multi-looking operator");
             } else {
 
                 String[] srcBandNames = {srcBand.getName()};
