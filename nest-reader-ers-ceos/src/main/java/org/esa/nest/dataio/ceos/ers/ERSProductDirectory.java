@@ -334,12 +334,9 @@ class ERSProductDirectory extends CEOSProductDirectory {
     }
 
     private double getLineTimeInterval() {
-         double timeIntervalBetweenPoints = _leaderFile.getPlatformPositionRecord().
-                 getAttributeDouble("Time interval between DATA points");
-         int numDataPoints = _leaderFile.getPlatformPositionRecord().
-                 getAttributeInt("Number of data points");
-         //return timeIntervalBetweenPoints / numDataPoints;
-        return 0;
+        double startTime = getUTCScanStartTime().getMJD() * 24 * 3600;
+        double stopTime = getUTCScanStopTime().getMJD() * 24 * 3600;
+        return (stopTime-startTime) / (_sceneHeight-1);
     }
 
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {
