@@ -14,7 +14,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.17 $ $Date: 2008-11-12 17:24:05 $
+ * @version $Revision: 1.18 $ $Date: 2008-11-20 17:41:45 $
  */
 public abstract class CEOSImageFile {
 
@@ -319,7 +319,7 @@ public abstract class CEOSImageFile {
 
     protected static void copyLine2Of2(final short[] srcLine, final short[] destLine,
                           final int sourceStepX) {
-        final int length = destLine.length-1;
+        final int length = destLine.length;
         for (int x = 0, i = 0; x < length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[(i << 1) + 1];
         }
@@ -327,7 +327,7 @@ public abstract class CEOSImageFile {
 
     protected static void copyLine2Of2(final byte[] srcLine, final byte[] destLine,
                           final int sourceStepX) {
-        final int length = destLine.length-1;
+        final int length = destLine.length;
         for (int x = 0, i = 0; x < length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[(i << 1) + 1];
         }
@@ -335,7 +335,7 @@ public abstract class CEOSImageFile {
 
     protected static void copyLine2Of2(final float[] srcLine, final float[] destLine,
                           final int sourceStepX) {
-        final int length = destLine.length-1;
+        final int length = destLine.length;
         for (int x = 0, i = 0; x < length; ++x, i += sourceStepX) {
             destLine[x] = (int)srcLine[(i << 1) + 1];
         }
