@@ -127,14 +127,16 @@ class ERSProductDirectory extends CEOSProductDirectory {
     }
 
     private void addTiePointGrids(final Product product) throws IllegalCeosFormatException, IOException {
+
+        // add incidence angle tie point grid
         final BaseRecord facility = _leaderFile.getFacilityRecord();
 
         final double angle1 = facility.getAttributeDouble("Incidence angle at first range pixel");
         final double angle2 = facility.getAttributeDouble("Incidence angle at centre range pixel");
         final double angle3 = facility.getAttributeDouble("Incidence angle at last valid range pixel");
 
-        final int gridWidth = 6;
-        final int gridHeight = 6;
+        final int gridWidth = 11;
+        final int gridHeight = 11;
 
         final float subSamplingX = (float)product.getSceneRasterWidth() / (float)(gridWidth - 1);
         final float subSamplingY = (float)product.getSceneRasterHeight() / (float)(gridHeight - 1);
@@ -148,6 +150,23 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 subSamplingX, subSamplingY, fineAngles);
 
         product.addTiePointGrid(incidentAngleGrid);
+
+        // add slant range time tie point grid
+        final BaseRecord scene = _leaderFile.getSceneRecord();
+
+        final double time1 = scene.getAttributeDouble("Zero-doppler range time of first range pixel")*1000000; // ms to ns
+        final double time2 = scene.getAttributeDouble("Zero-doppler range time of centre range pixel")*1000000; // ms to ns
+        final double time3 = scene.getAttributeDouble("Zero-doppler range time of last range pixel")*1000000; // ms to ns
+
+        final float[] times = new float[]{(float)time1, (float)time2, (float)time3};
+        final float[] fineTimes = new float[gridWidth*gridHeight];
+
+        createFineTiePointGrid(3, 1, gridWidth, gridHeight, times, fineTimes);
+
+        final TiePointGrid slantRangeTimeGrid = new TiePointGrid("slant_range_time", gridWidth, gridHeight, 0, 0,
+                subSamplingX, subSamplingY, fineTimes);
+
+        product.addTiePointGrid(slantRangeTimeGrid);        
     }
 
     public CEOSImageFile getImageFile(final Band band) throws IOException,
