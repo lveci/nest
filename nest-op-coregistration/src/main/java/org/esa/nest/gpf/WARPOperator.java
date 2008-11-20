@@ -410,10 +410,11 @@ public class WARPOperator extends Operator {
         PrintStream p; // declare a print stream object
         String fileName = slaveProduct.getName() + "_residual.txt";
         try {
-            File appUserDir = new File(DatUtils.getApplicationUserDir(false).getAbsolutePath() + File.separator + "log");
-            if(appUserDir.exists()) {
-                fileName = appUserDir.toString() + File.separator + fileName;
+            File appUserDir = new File(DatUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
+            if(!appUserDir.exists()) {
+                appUserDir.mkdirs();
             }
+            fileName = appUserDir.toString() + File.separator + fileName;
             out = new FileOutputStream(fileName, appendFlag);
 
             // Connect print stream to the output stream
