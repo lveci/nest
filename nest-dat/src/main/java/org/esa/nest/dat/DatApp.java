@@ -7,6 +7,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.ui.*;
 import org.esa.beam.framework.ui.application.ApplicationDescriptor;
 import org.esa.beam.framework.ui.application.ToolViewDescriptor;
+import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.visat.*;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 
@@ -40,6 +41,16 @@ public final class DatApp extends VisatApp {
         super.initClientUI(pm);
 
         updateGraphMenu();
+    }
+
+    @Override
+    protected void postInit() {
+        String getStarted = VisatApp.getApp().getPreferences().getPropertyString("visat.showGettingStarted", "true");
+        if(getStarted == null || getStarted.equals("true")) {
+            HelpSys.showTheme("using_dat");
+            VisatApp.getApp().getPreferences().setPropertyString("visat.showGettingStarted", "false");
+            
+        }
     }
 
     protected CommandBar createViewsToolBar() {
