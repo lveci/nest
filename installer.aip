@@ -1163,6 +1163,12 @@
   <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
     <ROW Name="controlPanelIcon.exe" SourcePath="src\main\assembly\dat.ico" Index="0"/>
   </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiIniFileComponent">
+    <ROW IniFile="URL" FileName="NESTHO~1.url|NEST HOME PAGE.url" DirProperty="DesktopFolder" Section="InternetShortcut" Key="URL" Value="www.array.ca/nest" Action="0" Component_="Apia"/>
+    <ROW IniFile="URL_1" FileName="NESTOn~1.url|NEST Online Help.url" DirProperty="DesktopFolder" Section="InternetShortcut" Key="URL" Value="https://www.array.ca/nest2/devel-upload/web/help/index.html" Action="0" Component_="Apia"/>
+    <ROW IniFile="WorkingDirectory" FileName="NESTHO~1.url|NEST HOME PAGE.url" DirProperty="DesktopFolder" Section="InternetShortcut" Key="WorkingDirectory" Value="[DesktopFolder]" Action="0" Component_="Apia"/>
+    <ROW IniFile="WorkingDirectory_1" FileName="NESTOn~1.url|NEST Online Help.url" DirProperty="DesktopFolder" Section="InternetShortcut" Key="WorkingDirectory" Value="[DesktopFolder]" Action="0" Component_="Apia"/>
+  </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiInstExSeqComponent">
     <ROW Action="AI_DOWNGRADE" Condition="AI_NEWERPRODUCTFOUND AND (UILevel &lt;&gt; 5)" Sequence="210"/>
     <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="740"/>
