@@ -259,8 +259,8 @@ public class UndersamplingOp extends Operator {
                 throw new OperatorException("The azimuth or range spacing must be greater than the source spacing");
             }
 
-            targetImageHeight = (int)(rangeSpacing / srcRangeSpacing * sourceImageHeight + 0.5);
-            targetImageWidth = (int)(azimuthSpacing / srcAzimuthSpacing * sourceImageWidth + 0.5);
+            targetImageHeight = (int)(srcRangeSpacing / rangeSpacing * sourceImageHeight + 0.5);
+            targetImageWidth = (int)(srcAzimuthSpacing / azimuthSpacing * sourceImageWidth + 0.5);
 
         } else {
             throw new OperatorException("Please specify output image size, or row and column ratios, or pixel spacings");
