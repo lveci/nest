@@ -97,6 +97,7 @@ public final class MultilookOp extends Operator {
     static final int COMPLEX = 2;
     static final int PHASE = 3;
     static final int INTENSITY_DB = 4;
+    static final int AMPLITUDE_DB = 5;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -207,7 +208,7 @@ public final class MultilookOp extends Operator {
         }
 
         sampleType = sampleTypeAttr.getData().getElemString();
-        System.out.println("Sample type is " + sampleType);
+        //System.out.println("Sample type is " + sampleType);
     }
 
     /**
@@ -221,7 +222,7 @@ public final class MultilookOp extends Operator {
         }
 
         missionType = missionTypeAttr.getData().getElemString();
-        System.out.println("Mission is " + missionType);
+        //System.out.println("Mission is " + missionType);
     }
 
     /**
@@ -235,7 +236,7 @@ public final class MultilookOp extends Operator {
         }
 
         srgrFlag = attr.getData().getElemBoolean();
-        System.out.println("SRGR flag is " + srgrFlag);
+        //System.out.println("SRGR flag is " + srgrFlag);
     }
 
     /**
@@ -255,8 +256,8 @@ public final class MultilookOp extends Operator {
 
         rangeSpacing = rangeSpacingAttr.getData().getElemFloat();
         azimuthSpacing = azimuthSpacingAttr.getData().getElemFloat();
-        System.out.println("Range spacing is " + rangeSpacing);
-        System.out.println("Azimuth spacing is " + azimuthSpacing);
+        //System.out.println("Range spacing is " + rangeSpacing);
+        //System.out.println("Azimuth spacing is " + azimuthSpacing);
     }
 
     /**
@@ -276,8 +277,8 @@ public final class MultilookOp extends Operator {
 
         numAzimuthLooks = azimuthLooksAttr.getData().getElemInt();
         numRangeLooks = rangeLooksAttr.getData().getElemInt();
-        System.out.println("Azimuth looks is " + numAzimuthLooks);
-        System.out.println("Range looks is " + numRangeLooks);
+        //System.out.println("Azimuth looks is " + numAzimuthLooks);
+        //System.out.println("Range looks is " + numRangeLooks);
     }
 
     /**
@@ -286,8 +287,8 @@ public final class MultilookOp extends Operator {
     void getSourceImageDimension() {
         sourceImageWidth = sourceProduct.getSceneRasterWidth();
         sourceImageHeight = sourceProduct.getSceneRasterHeight();
-        System.out.println("Source image width = " + sourceImageWidth);
-        System.out.println("Source image height = " + sourceImageHeight);
+        //System.out.println("Source image width = " + sourceImageWidth);
+        //System.out.println("Source image height = " + sourceImageHeight);
     }
 
     /**
@@ -298,9 +299,9 @@ public final class MultilookOp extends Operator {
         int x = sourceImageWidth / 2;
         int y = sourceImageHeight / 2;
         TiePointGrid incidenceAngle = getIncidenceAngle();
-        if(incidenceAngle == null)
+        if(incidenceAngle == null) {
             throw new OperatorException("incidence_angle tie point grid not found in product");
-        
+        }
         incidenceAngleAtCentreRangePixel = incidenceAngle.getPixelFloat(x + 0.5f, y + 0.5f);
     }
 
@@ -349,8 +350,8 @@ public final class MultilookOp extends Operator {
             rangeFactor = multiLookFactor;
         }
 
-        System.out.println("Range factor = " + rangeFactor);
-        System.out.println("Azimuth factor = " + azimuthFactor);
+        //System.out.println("Range factor = " + rangeFactor);
+        //System.out.println("Azimuth factor = " + azimuthFactor);
     }
 
     /**
@@ -392,32 +393,52 @@ public final class MultilookOp extends Operator {
         if (azimuthLooksAttr == null) {
             throw new OperatorException(AbstractMetadata.azimuth_looks + " not found");
         }
-        azimuthLooksAttr.getData().setElemFloat(numAzimuthLooks*azimuthFactor);
+        azimuthLooksAttr.getData().setElemInt(numAzimuthLooks*azimuthFactor);
 
         MetadataAttribute rangeLooksAttr = abs.getAttribute(AbstractMetadata.range_looks);
         if (rangeLooksAttr == null) {
             throw new OperatorException(AbstractMetadata.range_looks + " not found");
         }
-        rangeLooksAttr.getData().setElemFloat(numRangeLooks*rangeFactor);
+        rangeLooksAttr.getData().setElemInt(numRangeLooks*rangeFactor);
 
         MetadataAttribute azimuthSpacingAttr = abs.getAttribute(AbstractMetadata.azimuth_spacing);
         if (azimuthSpacingAttr == null) {
             throw new OperatorException(AbstractMetadata.azimuth_spacing + " not found");
         }
-        azimuthSpacingAttr.getData().setElemFloat((float)(azimuthSpacing*azimuthFactor));
+        azimuthSpacingAttr.getData().setElemDouble(azimuthSpacing*azimuthFactor);
 
         MetadataAttribute rangeSpacingAttr = abs.getAttribute(AbstractMetadata.range_spacing);
         if (rangeSpacingAttr == null) {
             throw new OperatorException(AbstractMetadata.range_spacing + " not found");
         }
-        rangeSpacingAttr.getData().setElemFloat((float)(rangeSpacing*rangeFactor));
+        rangeSpacingAttr.getData().setElemDouble(rangeSpacing*rangeFactor);
+
+        MetadataAttribute numOutputLinesAttr = abs.getAttribute(AbstractMetadata.num_output_lines);
+        if (numOutputLinesAttr == null) {
+            throw new OperatorException(AbstractMetadata.num_output_lines + " not found");
+        }
+        numOutputLinesAttr.getData().setElemInt(targetImageHeight);
+
+        MetadataAttribute numSamplesPerLinesAttr = abs.getAttribute(AbstractMetadata.num_samples_per_line);
+        if (numSamplesPerLinesAttr == null) {
+            throw new OperatorException(AbstractMetadata.num_samples_per_line + " not found");
+        }
+        numSamplesPerLinesAttr.getData().setElemInt(targetImageWidth);
+
+        if (!srgrFlag) {
+            MetadataAttribute srgeFlagAttr = abs.getAttribute(AbstractMetadata.srgr_flag);
+            if (srgeFlagAttr == null) {
+                throw new OperatorException(AbstractMetadata.srgr_flag + " not found");
+            }
+            srgeFlagAttr.getData().setElemBoolean(true);
+        }
 
         MetadataAttribute lineTimeIntervalAttr = abs.getAttribute(AbstractMetadata.line_time_interval);
         if (lineTimeIntervalAttr == null) {
             throw new OperatorException(AbstractMetadata.line_time_interval + " not found");
         }
         float oldLineTimeInterval = lineTimeIntervalAttr.getData().getElemFloat();
-        lineTimeIntervalAttr.getData().setElemFloat(oldLineTimeInterval*azimuthFactor);
+        lineTimeIntervalAttr.getData().setElemDouble(oldLineTimeInterval*azimuthFactor);
 
         MetadataAttribute firstLineTimeAttr = abs.getAttribute(AbstractMetadata.first_line_time);
         if (firstLineTimeAttr == null) {
@@ -489,19 +510,16 @@ public final class MultilookOp extends Operator {
                 srcBandNames[1] = sourceBands[i+1].getName();
                 final String pol = getPolarizationFromBandName(srcBandNames[0]);
                 if (pol != null) {
-                    targetBandName = "Amplitude_" + pol.toUpperCase();
+                    targetBandName = "Intensity_" + pol.toUpperCase();
                 } else {
-                    targetBandName = "Amplitude";
+                    targetBandName = "Intensity";
                 }
                 ++i;
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
-                    targetUnit = "amplitude";
+                    targetUnit = "intensity";
                 }
 
-            } else if (unit.contains("db")) {
-                throw new OperatorException("Please convert dB band " + srcBand.getName() +
-                        " to linear before applying Multi-looking operator");
             } else {
 
                 String[] srcBandNames = {srcBand.getName()};
@@ -596,7 +614,7 @@ public final class MultilookOp extends Operator {
 
                 final int index = sourceRaster1.getDataBufferIndex(x, y);
 
-                if (bandUnit == INTENSITY_DB) {
+                if (bandUnit == INTENSITY_DB || bandUnit == AMPLITUDE_DB) {
 
                     final double dn = srcData1.getElemDoubleAt(index);
                     meanValue += Math.pow(10, dn / 10.0); // dB to linear
@@ -609,12 +627,12 @@ public final class MultilookOp extends Operator {
 
                     final double i = srcData1.getElemDoubleAt(index);
                     final double q = srcData2.getElemDoubleAt(index);
-                    meanValue += Math.sqrt(i*i + q*q);
+                    meanValue += i*i + q*q;
                 }
             }
         }
         meanValue /= rangeFactor * azimuthFactor;
-        if (bandUnit == INTENSITY_DB) {
+        if (bandUnit == INTENSITY_DB || bandUnit == AMPLITUDE_DB) {
             meanValue = 10.0*Math.log10(meanValue); // linear to dB
         }
 
@@ -630,8 +648,10 @@ public final class MultilookOp extends Operator {
             return INTENSITY;
         } else if (unit.contains("phase")) {
             return PHASE;
-        } else if (unit.equals("intensity_db")) {
+        } else if (unit.contains("intensity_db")) {
             return INTENSITY_DB;
+        } else if (unit.contains("amplitude_db")) {
+            return AMPLITUDE_DB;
         } else {
             return COMPLEX;
         }
