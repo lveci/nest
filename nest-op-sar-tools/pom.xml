@@ -37,6 +37,21 @@
       <groupId>org.esa.beam</groupId>
       <artifactId>beam-visat-rcp</artifactId>
     </dependency>
+	<dependency>
+      <groupId>org.sst</groupId>
+      <artifactId>shared</artifactId>
+	  <version>1.04</version>
+    </dependency>
+	<dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+	  <version>1.5.5</version>
+    </dependency>
+	<dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-jdk14</artifactId>
+	  <version>1.5.5</version>
+    </dependency>
   </dependencies>
   
 </project>
