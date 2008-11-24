@@ -88,6 +88,7 @@ public final class MultilookOp extends Operator {
 
     private double rangeSpacing;
     private double azimuthSpacing;
+    private double groundRangeSpacing;
     private double incidenceAngleAtCentreRangePixel; // in degree
 
     private HashMap<String, String[]> targetBandNameToSourceBandName;
@@ -327,7 +328,6 @@ public final class MultilookOp extends Operator {
      */
     void computeRangeAzimuthMultiLookFactors() {
 
-        double groundRangeSpacing;
         if (srgrFlag) {
             groundRangeSpacing = rangeSpacing;
         } else {
@@ -411,7 +411,7 @@ public final class MultilookOp extends Operator {
         if (rangeSpacingAttr == null) {
             throw new OperatorException(AbstractMetadata.range_spacing + " not found");
         }
-        rangeSpacingAttr.getData().setElemDouble(rangeSpacing*rangeFactor);
+        rangeSpacingAttr.getData().setElemDouble(groundRangeSpacing*rangeFactor);
 
         MetadataAttribute numOutputLinesAttr = abs.getAttribute(AbstractMetadata.num_output_lines);
         if (numOutputLinesAttr == null) {
