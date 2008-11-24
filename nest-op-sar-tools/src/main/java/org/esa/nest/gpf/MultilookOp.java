@@ -61,7 +61,7 @@ public final class MultilookOp extends Operator {
             sourceProductId="source", label="Source Bands")
     String[] sourceBandNames;
 
-    @Parameter(description = "The user defined multi-look factor", interval = "[2, *)", defaultValue = "2",
+    @Parameter(description = "The user defined multi-look factor", interval = "[1, *)", defaultValue = "1",
                 label="Multi-look Factor")
     private int multiLookFactor;
 
