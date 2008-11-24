@@ -1623,7 +1623,7 @@
     <ROW Action="SET_APPDIR" Type="307" Source="APPDIR" Target="[ProgramFilesFolder][Manufacturer]\[ProductName]" MultiBuildTarget="DefaultBuild:[ProgramFilesFolder]ESA\[ProductName]"/>
     <ROW Action="SET_SHORTCUTDIR" Type="307" Source="SHORTCUTDIR" Target="[ProgramMenuFolder][ProductName]"/>
     <ROW Action="SET_TARGETDIR_TO_APPDIR" Type="51" Source="TARGETDIR" Target="[APPDIR]"/>
-    <ROW Action="uninstall.bat" Type="850" Source="uninstall.bat" ExtendedType="32768"/>
+    <ROW Action="uninstall.bat" Type="82" Source="uninstall.bat" ExtendedType="32768"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiEnvComponent">
     <ROW Environment="NEST_HOME" Name="=NEST_HOME" Value="[APPDIR]" Component_="AI_ExePath"/>
