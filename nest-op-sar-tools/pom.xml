@@ -39,7 +39,7 @@
     </dependency>
 	<dependency>
       <groupId>org.sst</groupId>
-      <artifactId>shared</artifactId>
+      <artifactId>sharedx</artifactId>
 	  <version>1.04</version>
     </dependency>
 	<dependency>
