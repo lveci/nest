@@ -78,7 +78,7 @@ public class TestSSTx extends TestCase {
                 }
 
                 //AbstractArray.OpKernel.useNative();
-                //AbstractArray.FFTService.setHint("mode", modeStr);
+                AbstractArray.FFTService.setHint("mode", modeStr);
 
                 ComplexArray tmp = new ComplexArray(SIZE, SIZE, 2);
 
