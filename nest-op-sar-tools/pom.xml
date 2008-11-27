@@ -2,14 +2,14 @@
   <parent>
     <artifactId>nest</artifactId>
     <groupId>org.esa.nest</groupId>
-    <version>1C</version>
+    <version>2A</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   
   <groupId>org.esa.nest</groupId>
   <artifactId>nest-op-sar-tools</artifactId>
   <name>NEST SAR Tools</name>
-  <version>1C</version>
+  <version>2A</version>
   <description>Provides various operators for processing on SAR data</description>
   
   <dependencies>

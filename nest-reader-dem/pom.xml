@@ -6,13 +6,13 @@
     <parent>
         <artifactId>nest</artifactId>
         <groupId>org.esa.nest</groupId>
-        <version>1C</version>
+        <version>2A</version>
     </parent>
 
     <groupId>org.esa.nest</groupId>
     <artifactId>nest-reader-dem</artifactId>
     <name>NEST DEM Reader</name>
-    <version>1C</version>
+    <version>2A</version>
 	
     <packaging>jar</packaging>
 

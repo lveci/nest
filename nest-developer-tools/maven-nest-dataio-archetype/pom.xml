@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.esa.nest.maven</groupId>
     <artifactId>maven-nest-dataio-archetype</artifactId>
-    <version>1C</version>
+    <version>2A</version>
     <name>Maven 2 NEST Data I/O Archetype Plugin</name>
     <description>A Maven 2 archetype for projects using NEST Data I/O framework.</description>
     <packaging>maven-plugin</packaging>

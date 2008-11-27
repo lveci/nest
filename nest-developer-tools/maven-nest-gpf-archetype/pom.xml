@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.esa.nest.maven</groupId>
     <artifactId>maven-nest-gpf-archetype</artifactId>
-    <version>1C</version>
+    <version>2A</version>
     <name>Maven 2 Archetype Plugin for NEST GPF Operators</name>
     <description>A Maven 2 archetype for projects using NEST Graph Processing Framework (GPF).</description>
     <packaging>maven-plugin</packaging>
