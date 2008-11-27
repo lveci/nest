@@ -61,9 +61,9 @@ public final class MultilookOp extends Operator {
             sourceProductId="source", label="Source Bands")
     String[] sourceBandNames;
 
-    @Parameter(description = "The user defined multi-look factor", interval = "[1, *)", defaultValue = "1",
-                label="Multi-look Factor")
-    private int multiLookFactor;
+    @Parameter(description = "The user defined number of range looks", interval = "[1, *)", defaultValue = "1",
+                label="Number of Range Looks")
+    private int nRgLooks;
 
     @Parameter(defaultValue="Currently, detection for complex data is performed without any resampling", label="Note")
     String note;
@@ -72,15 +72,11 @@ public final class MultilookOp extends Operator {
 
     private MetadataElement absRoot;
 
-    private String sampleType;
-    private String missionType;
-
     private boolean srgrFlag;
 
-    private int numAzimuthLooks;
-    private int numRangeLooks;
-    private int azimuthFactor;
-    private int rangeFactor;
+    private int nAzLooks;     // current azimuth looks
+    private int azimuthLooks; // original azimuth_looks from metadata
+    private int rangeLooks;   // original range_looks from metadata
     private int sourceImageWidth;
     private int sourceImageHeight;
     private int targetImageWidth;
@@ -117,10 +113,6 @@ public final class MultilookOp extends Operator {
 
         absRoot = getAbstractedMetadata(sourceProduct);
 
-        getSampleType();
-
-        getMissionType();
-
         getSRGRFlag();
 
         getRangeAzimuthSpacing();
@@ -133,7 +125,7 @@ public final class MultilookOp extends Operator {
             getIncidenceAngleAtCentreRangePixel();
         }
 
-        computeRangeAzimuthMultiLookFactors();
+        computeAzimuthLooks();
 
         createTargetProduct();
     }
@@ -157,10 +149,10 @@ public final class MultilookOp extends Operator {
         int tw  = targetTileRectangle.width;
         int th  = targetTileRectangle.height;
 
-        int x0 = tx0 * rangeFactor;
-        int y0 = ty0 * azimuthFactor;
-        int w  = tw * rangeFactor;
-        int h  = th * azimuthFactor;
+        int x0 = tx0 * nRgLooks;
+        int y0 = ty0 * nAzLooks;
+        int w  = tw * nRgLooks;
+        int h  = th * nAzLooks;
         Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
 
         //System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
@@ -195,34 +187,6 @@ public final class MultilookOp extends Operator {
             throw new OperatorException("Abstracted Metadata not found");
         }
         return abstractedMetadata;
-    }
-
-    /**
-     * Get the sample type.
-     */
-    void getSampleType() {
-
-        MetadataAttribute sampleTypeAttr = absRoot.getAttribute(AbstractMetadata.SAMPLE_TYPE);
-        if (sampleTypeAttr == null) {
-            throw new OperatorException(AbstractMetadata.SAMPLE_TYPE + " not found");
-        }
-
-        sampleType = sampleTypeAttr.getData().getElemString();
-        //System.out.println("Sample type is " + sampleType);
-    }
-
-    /**
-     * Get the mission type.
-     */
-    void getMissionType() {
-
-        MetadataAttribute missionTypeAttr = absRoot.getAttribute(AbstractMetadata.MISSION);
-        if (missionTypeAttr == null) {
-            throw new OperatorException(AbstractMetadata.MISSION + " not found");
-        }
-
-        missionType = missionTypeAttr.getData().getElemString();
-        //System.out.println("Mission is " + missionType);
     }
 
     /**
@@ -275,10 +239,10 @@ public final class MultilookOp extends Operator {
             throw new OperatorException(AbstractMetadata.range_looks + " not found");
         }
 
-        numAzimuthLooks = azimuthLooksAttr.getData().getElemInt();
-        numRangeLooks = rangeLooksAttr.getData().getElemInt();
-        //System.out.println("Azimuth looks is " + numAzimuthLooks);
-        //System.out.println("Range looks is " + numRangeLooks);
+        azimuthLooks = azimuthLooksAttr.getData().getElemInt();
+        rangeLooks = rangeLooksAttr.getData().getElemInt();
+        //System.out.println("Azimuth looks is " + azimuthLooks);
+        //System.out.println("Range looks is " + rangeLooks);
     }
 
     /**
@@ -323,9 +287,9 @@ public final class MultilookOp extends Operator {
     }
 
     /**
-     * Compute range and azimuth multi-look factors.
+     * Compute azimuth looks.
      */
-    void computeRangeAzimuthMultiLookFactors() {
+    void computeAzimuthLooks() {
 
         double groundRangeSpacing;
         if (srgrFlag) {
@@ -334,24 +298,8 @@ public final class MultilookOp extends Operator {
             groundRangeSpacing = rangeSpacing / Math.sin(incidenceAngleAtCentreRangePixel*MathUtils.DTOR);
         }
 
-        if (groundRangeSpacing < azimuthSpacing) {
-
-            azimuthFactor = multiLookFactor;
-            rangeFactor = ((int)(azimuthSpacing / groundRangeSpacing + 0.5))*azimuthFactor;
-
-        } else if (groundRangeSpacing > azimuthSpacing) {
-
-            rangeFactor = multiLookFactor;
-            azimuthFactor = ((int)(groundRangeSpacing / azimuthSpacing + 0.5))*rangeFactor;
-
-        } else {
-
-            azimuthFactor = multiLookFactor;
-            rangeFactor = multiLookFactor;
-        }
-
-        //System.out.println("Range factor = " + rangeFactor);
-        //System.out.println("Azimuth factor = " + azimuthFactor);
+        nAzLooks = Math.max(1, nRgLooks * (int)(groundRangeSpacing / azimuthSpacing + 0.5));
+        System.out.println("nAzLooks = " + nAzLooks);
     }
 
     /**
@@ -359,8 +307,8 @@ public final class MultilookOp extends Operator {
      */
     void createTargetProduct() {
 
-        targetImageWidth = sourceImageWidth / rangeFactor;
-        targetImageHeight = sourceImageHeight / azimuthFactor;
+        targetImageWidth = sourceImageWidth / nRgLooks;
+        targetImageHeight = sourceImageHeight / nAzLooks;
 
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),
@@ -393,25 +341,25 @@ public final class MultilookOp extends Operator {
         if (azimuthLooksAttr == null) {
             throw new OperatorException(AbstractMetadata.azimuth_looks + " not found");
         }
-        azimuthLooksAttr.getData().setElemInt(numAzimuthLooks*azimuthFactor);
+        azimuthLooksAttr.getData().setElemInt(azimuthLooks*nAzLooks);
 
         MetadataAttribute rangeLooksAttr = abs.getAttribute(AbstractMetadata.range_looks);
         if (rangeLooksAttr == null) {
             throw new OperatorException(AbstractMetadata.range_looks + " not found");
         }
-        rangeLooksAttr.getData().setElemInt(numRangeLooks*rangeFactor);
+        rangeLooksAttr.getData().setElemInt(rangeLooks*nRgLooks);
 
         MetadataAttribute azimuthSpacingAttr = abs.getAttribute(AbstractMetadata.azimuth_spacing);
         if (azimuthSpacingAttr == null) {
             throw new OperatorException(AbstractMetadata.azimuth_spacing + " not found");
         }
-        azimuthSpacingAttr.getData().setElemDouble(azimuthSpacing*azimuthFactor);
+        azimuthSpacingAttr.getData().setElemDouble(azimuthSpacing*nAzLooks);
 
         MetadataAttribute rangeSpacingAttr = abs.getAttribute(AbstractMetadata.range_spacing);
         if (rangeSpacingAttr == null) {
             throw new OperatorException(AbstractMetadata.range_spacing + " not found");
         }
-        rangeSpacingAttr.getData().setElemDouble(rangeSpacing*rangeFactor);
+        rangeSpacingAttr.getData().setElemDouble(rangeSpacing*nRgLooks);
 
         MetadataAttribute numOutputLinesAttr = abs.getAttribute(AbstractMetadata.num_output_lines);
         if (numOutputLinesAttr == null) {
@@ -438,7 +386,7 @@ public final class MultilookOp extends Operator {
             throw new OperatorException(AbstractMetadata.line_time_interval + " not found");
         }
         float oldLineTimeInterval = lineTimeIntervalAttr.getData().getElemFloat();
-        lineTimeIntervalAttr.getData().setElemDouble(oldLineTimeInterval*azimuthFactor);
+        lineTimeIntervalAttr.getData().setElemDouble(oldLineTimeInterval*nAzLooks);
 
         MetadataAttribute firstLineTimeAttr = abs.getAttribute(AbstractMetadata.first_line_time);
         if (firstLineTimeAttr == null) {
@@ -448,7 +396,7 @@ public final class MultilookOp extends Operator {
         int idx = oldFirstLineTime.lastIndexOf(':') + 1;
         String oldSecondsStr = oldFirstLineTime.substring(idx);
         double oldSeconds = Double.parseDouble(oldSecondsStr);
-        double newSeconds = oldSeconds + oldLineTimeInterval*((azimuthFactor - 1)/2.0);
+        double newSeconds = oldSeconds + oldLineTimeInterval*((nAzLooks - 1)/2.0);
         String newFirstLineTime = String.valueOf(oldFirstLineTime.subSequence(0, idx)) + newSeconds + "000000";
         abs.removeAttribute(firstLineTimeAttr);
         abs.addAttribute(new MetadataAttribute(
@@ -598,10 +546,10 @@ public final class MultilookOp extends Operator {
      */
     double getMeanValue(int tx, int ty, Tile sourceRaster1, Tile sourceRaster2, int bandUnit) {
 
-        final int xStart = tx * rangeFactor;
-        final int yStart = ty * azimuthFactor;
-        final int xEnd = xStart + rangeFactor;
-        final int yEnd = yStart + azimuthFactor;
+        final int xStart = tx * nRgLooks;
+        final int yStart = ty * nAzLooks;
+        final int xEnd = xStart + nRgLooks;
+        final int yEnd = yStart + nAzLooks;
 
         final ProductData srcData1 = sourceRaster1.getDataBuffer();
         ProductData srcData2 = null;
@@ -631,7 +579,7 @@ public final class MultilookOp extends Operator {
                 }
             }
         }
-        meanValue /= rangeFactor * azimuthFactor;
+        meanValue /= nRgLooks * nAzLooks;
         if (bandUnit == INTENSITY_DB || bandUnit == AMPLITUDE_DB) {
             meanValue = 10.0*Math.log10(meanValue); // linear to dB
         }
