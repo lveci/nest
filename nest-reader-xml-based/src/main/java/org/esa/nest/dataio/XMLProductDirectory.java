@@ -30,8 +30,8 @@ public class XMLProductDirectory {
     private int _sceneWidth = 0;
     private int _sceneHeight = 0;
 
-    private transient Map<String, ImageIOFile> bandImageFileMap = new HashMap<String, ImageIOFile>(1);
-    private transient Map<Band, ImageIOFile.BandInfo> bandMap = new HashMap<Band, ImageIOFile.BandInfo>(3);
+    protected transient Map<String, ImageIOFile> bandImageFileMap = new HashMap<String, ImageIOFile>(1);
+    protected transient Map<Band, ImageIOFile.BandInfo> bandMap = new HashMap<Band, ImageIOFile.BandInfo>(3);
 
     public XMLProductDirectory(final File headerFile, final File imageFolder) {
         Guardian.assertNotNull("headerFile", headerFile);
@@ -62,25 +62,11 @@ public class XMLProductDirectory {
                                             getProductType(),
                                             _sceneWidth, _sceneHeight);
 
-        int bandCnt = 1;
-        Set keys = bandImageFileMap.keySet();                           // The set of keys in the map.
-        for (Object key : keys) {
-            ImageIOFile img = bandImageFileMap.get(key);
-
-            for(int i=0; i < img.getNumImages(); ++i) {
-
-                for(int b=0; b < img.getNumBands(); ++b) {
-                    final Band band = new Band(img.getName()+bandCnt++, img.getDataType(),
-                                       img.getSceneWidth(), img.getSceneHeight());
-                    product.addBand(band);
-                    bandMap.put(band, new ImageIOFile.BandInfo(img, i, b));
-                }
-            }
-        }
-
         addMetaData(product);
         addGeoCoding(product);
         addTiePointGrids(product);
+
+        addBands(product);
 
         product.setName(getProductName());
         product.setProductType(getProductType());
@@ -98,6 +84,24 @@ public class XMLProductDirectory {
         for (Object key : keys) {
             ImageIOFile img = bandImageFileMap.get(key);
             img.close();
+        }
+    }
+
+    protected void addBands(Product product) {
+        int bandCnt = 1;
+        Set keys = bandImageFileMap.keySet();                           // The set of keys in the map.
+        for (Object key : keys) {
+            ImageIOFile img = bandImageFileMap.get(key);
+
+            for(int i=0; i < img.getNumImages(); ++i) {
+
+                for(int b=0; b < img.getNumBands(); ++b) {
+                    final Band band = new Band(img.getName()+bandCnt++, img.getDataType(),
+                                       img.getSceneWidth(), img.getSceneHeight());
+                    product.addBand(band);
+                    bandMap.put(band, new ImageIOFile.BandInfo(img, i, b));
+                }
+            }
         }
     }
 

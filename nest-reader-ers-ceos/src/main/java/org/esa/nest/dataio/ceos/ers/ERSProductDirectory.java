@@ -6,6 +6,7 @@ import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
+import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.imageio.stream.FileImageInputStream;
@@ -94,11 +95,11 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 if(isProductSLC) {
                     final Band bandI = createBand(product, "i_" + index, "real", imageFile);
                     final Band bandQ = createBand(product, "q_" + index, "real", imageFile);
-                    createVirtualIntensityBand(product, bandI, bandQ, "_"+index);
-                    createVirtualPhaseBand(product, bandI, bandQ, "_"+index);
+                    ReaderUtils.createVirtualIntensityBand(product, bandI, bandQ, "_"+index);
+                    ReaderUtils.createVirtualPhaseBand(product, bandI, bandQ, "_"+index);
                 } else {
                     Band band = createBand(product, "Amplitude_" + index, "amplitude", imageFile);
-                    createVirtualIntensityBand(product, band, "_"+index);
+                    ReaderUtils.createVirtualIntensityBand(product, band, "_"+index);
                 }
                 ++index;
             }
@@ -107,11 +108,11 @@ class ERSProductDirectory extends CEOSProductDirectory {
             if(isProductSLC) {
                 final Band bandI = createBand(product, "i", "real", imageFile);
                 final Band bandQ = createBand(product, "q", "imaginary", imageFile);
-                createVirtualIntensityBand(product, bandI, bandQ, "");
-                createVirtualPhaseBand(product, bandI, bandQ, "");
+                ReaderUtils.createVirtualIntensityBand(product, bandI, bandQ, "");
+                ReaderUtils.createVirtualPhaseBand(product, bandI, bandQ, "");
             } else {
                 Band band = createBand(product, "Amplitude", "amplitude", imageFile);
-                createVirtualIntensityBand(product, band, "");
+                ReaderUtils.createVirtualIntensityBand(product, band, "");
             }
         }
 

@@ -4,11 +4,13 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.XMLProductDirectory;
+import org.esa.nest.dataio.ImageIOFile;
+import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * This class represents a product directory.
@@ -20,8 +22,73 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
     private String productType = "Radarsat2";
     private String productDescription = "";
 
+    private boolean isSLC = false;
+    private transient Map<String, String> polarizationMap = new HashMap<String, String>(4);
+
     public Radarsat2ProductDirectory(final File headerFile, final File imageFolder) {
         super(headerFile, imageFolder);
+    }
+
+    @Override
+    protected void addBands(Product product) {
+
+        if(productType.contains("SLC"))
+            isSLC = true;
+
+        String bandName;
+        boolean real = true;
+        Band lastRealBand = null;
+        String unit;
+
+        Set keys = bandImageFileMap.keySet();                           // The set of keys in the map.
+        for (Object key : keys) {
+            ImageIOFile img = bandImageFileMap.get(key);
+
+            for(int i=0; i < img.getNumImages(); ++i) {
+
+                if(isSLC) {
+                    for(int b=0; b < img.getNumBands(); ++b) {
+                        if(real) {
+                            bandName = "i_" + polarizationMap.get(img.getName());
+                            unit = Unit.REAL;
+                        } else {
+                            bandName = "q_" + polarizationMap.get(img.getName());
+                            unit = Unit.IMAGINARY;
+                        }
+
+                        final Band band = new Band(bandName, img.getDataType(),
+                                           img.getSceneWidth(), img.getSceneHeight());
+                        band.setUnit(unit);
+
+                        product.addBand(band);
+                        bandMap.put(band, new ImageIOFile.BandInfo(img, i, b));
+
+                        if(real)
+                            lastRealBand = band;
+                        else {
+                            ReaderUtils.createVirtualIntensityBand(product, lastRealBand, band,
+                                    '_'+polarizationMap.get(img.getName()));
+                            ReaderUtils.createVirtualPhaseBand(product, lastRealBand, band,
+                                    '_'+polarizationMap.get(img.getName()));
+                        }
+                        real = !real;
+                    }
+                } else {
+                    for(int b=0; b < img.getNumBands(); ++b) {
+                        bandName = "Amplitude_" + polarizationMap.get(img.getName());
+                        final Band band = new Band(bandName, img.getDataType(),
+                                           img.getSceneWidth(), img.getSceneHeight());
+                        band.setUnit(Unit.AMPLITUDE);
+
+                        product.addBand(band);
+                        bandMap.put(band, new ImageIOFile.BandInfo(img, i, b));
+
+                        ReaderUtils.createVirtualIntensityBand(product, band,
+                                    '_'+polarizationMap.get(img.getName()));
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -38,30 +105,31 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         // sourceAttributes
         final MetadataElement sourceAttributes = productElem.getElement("sourceAttributes");
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, productName);
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, "RADARSAT-2");
-
         final MetadataElement radarParameters = sourceAttributes.getElement("radarParameters");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
-                radarParameters.getAttributeString("acquisitionType", " "));
+                radarParameters.getAttributeString("acquisitionType", defStr));
         
         final MetadataElement pulseRepetitionFrequency = radarParameters.getElement("pulseRepetitionFrequency");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
-                pulseRepetitionFrequency.getAttributeDouble("pulseRepetitionFrequency", 0));
+                pulseRepetitionFrequency.getAttributeDouble("pulseRepetitionFrequency", defInt));
 
         final MetadataElement orbitAndAttitude = sourceAttributes.getElement("orbitAndAttitude");
         final MetadataElement orbitInformation = orbitAndAttitude.getElement("orbitInformation");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS,
-                orbitInformation.getAttributeString("passDirection", " ").toUpperCase());
+                orbitInformation.getAttributeString("passDirection", defStr).toUpperCase());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.orbit_state_vector_file,
-                orbitInformation.getAttributeString("orbitDataFile", " "));
+                orbitInformation.getAttributeString("orbitDataFile", defStr));
 
         // imageGenerationParameters
         final MetadataElement imageGenerationParameters = productElem.getElement("imageGenerationParameters");
         final MetadataElement generalProcessingInformation = imageGenerationParameters.getElement("generalProcessingInformation");
 
-        productType = generalProcessingInformation.getAttributeString("productType", " ");
+        productType = generalProcessingInformation.getAttributeString("productType", defStr);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
+        productName = "RSAT2-" + productType + '-' + productElem.getAttributeString("productId", defStr);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, productName);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, "RADARSAT-2");
+
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, getTime(generalProcessingInformation, "processingTime"));
 
         final MetadataElement sarProcessingInformation = imageGenerationParameters.getElement("sarProcessingInformation");
@@ -78,9 +146,9 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                 getTime(sarProcessingInformation, "zeroDopplerTimeLastLine"));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks,
-                sarProcessingInformation.getAttributeInt("numberOfRangeLooks", 0));
+                sarProcessingInformation.getAttributeInt("numberOfRangeLooks", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
-                sarProcessingInformation.getAttributeInt("numberOfAzimuthLooks", 0));
+                sarProcessingInformation.getAttributeInt("numberOfAzimuthLooks", defInt));
 
         // imageAttributes
         final MetadataElement imageAttributes = productElem.getElement("imageAttributes");
@@ -100,8 +168,8 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
                 sampledLineSpacing.getAttributeDouble("sampledLineSpacing", defInt));
 
-
-
+        // polarizations
+        getPolarizations(imageAttributes);
 
         
     }
@@ -144,6 +212,17 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         return validName.toString();
     }
 
+    private void getPolarizations(MetadataElement imageAttributes) {
+        MetadataElement[] imageAttribElems = imageAttributes.getElements();
+        for(MetadataElement elem : imageAttribElems) {
+            if(elem.getName().equals("fullResolutionImageData")) {
+
+                polarizationMap.put(elem.getAttributeString("fullResolutionImageData", ""),
+                                    elem.getAttributeString("pole", ""));
+            }
+        }
+    }
+
     @Override
     protected void addGeoCoding(final Product product) {
 
@@ -157,6 +236,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
 
         float[] latList = new float[geoGrid.length];
         float[] lngList = new float[geoGrid.length];
+
         int gridWidth = 0, gridHeight = 0;
         int i=0;
         for(MetadataElement imageTiePoint : geoGrid) {
@@ -191,6 +271,35 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
         product.setGeoCoding(tpGeoCoding);    
+    }
+
+    @Override
+    protected void addTiePointGrids(final Product product) {
+        final MetadataElement root = product.getMetadataRoot();
+        final MetadataElement productElem = root.getElement("product");
+        final MetadataElement imageGenerationParameters = productElem.getElement("imageGenerationParameters");
+        final MetadataElement sarProcessingInformation = imageGenerationParameters.getElement("sarProcessingInformation");
+
+        final MetadataElement incidenceAngleNearRange = sarProcessingInformation.getElement("incidenceAngleNearRange");
+        final float nearRange = (float)incidenceAngleNearRange.getAttributeDouble("incidenceAngleNearRange", 0);
+        final MetadataElement incidenceAngleFarRange = sarProcessingInformation.getElement("incidenceAngleFarRange");
+        final float farRange = (float)incidenceAngleFarRange.getAttributeDouble("incidenceAngleFarRange", 0);
+
+        float[] incidenceCorners = new float[] { nearRange, farRange, nearRange, farRange };
+
+        final int gridWidth = 4;
+        final int gridHeight = 4;
+        final float subSamplingX = (float)product.getSceneRasterWidth() / (float)(gridWidth - 1);
+        final float subSamplingY = (float)product.getSceneRasterHeight() / (float)(gridHeight - 1);
+
+        final float[] fineAngles = new float[gridWidth*gridHeight];
+
+        createFineTiePointGrid(2, 2, gridWidth, gridHeight, incidenceCorners, fineAngles);
+
+        final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
+                subSamplingX, subSamplingY, fineAngles);
+
+        product.addTiePointGrid(incidentAngleGrid);
     }
 
     @Override

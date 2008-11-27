@@ -5,6 +5,7 @@ import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
+import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.imageio.stream.FileImageInputStream;
@@ -87,14 +88,14 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                     product.addBand(bandQ);
                     bandImageFileMap.put(bandName, imageFile);
 
-                    createVirtualIntensityBand(product, bandI, bandQ, "_"+index);
+                    ReaderUtils.createVirtualIntensityBand(product, bandI, bandQ, "_"+index);
                     ++index;
                 } else {
                     String bandName = "Amplitude_" + index;
                     Band band = createBand(bandName);
                     product.addBand(band);
                     bandImageFileMap.put(bandName, imageFile);
-                    createVirtualIntensityBand(product, band, "_"+index);
+                    ReaderUtils.createVirtualIntensityBand(product, band, "_"+index);
                     ++index;
                 }
             }
@@ -107,12 +108,12 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                 final Band bandQ = createBand("q");
                 product.addBand(bandQ);
                 bandImageFileMap.put("q", imageFile);
-                createVirtualIntensityBand(product, bandI, bandQ, "");
+                ReaderUtils.createVirtualIntensityBand(product, bandI, bandQ, "");
             } else {
                 final Band band = createBand("Amplitude");
                 product.addBand(band);
                 bandImageFileMap.put("Amplitude", imageFile);
-                createVirtualIntensityBand(product, band, "");
+                ReaderUtils.createVirtualIntensityBand(product, band, "");
             }
         }
 
