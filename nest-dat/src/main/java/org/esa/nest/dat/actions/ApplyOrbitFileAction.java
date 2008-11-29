@@ -6,15 +6,13 @@ import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.dat.toolviews.Projects.Project;
 import org.esa.nest.dat.dialogs.OrbitFileDialog;
-import org.esa.nest.dataio.ApplyOrbitFile;
 
 /**
  * This action to apply orbit file
  *
  * @author lveci
- * @version $Revision: 1.5 $ $Date: 2008-09-22 19:54:28 $
+ * @version $Revision: 1.6 $ $Date: 2008-11-28 22:01:49 $
  */
 public class ApplyOrbitFileAction extends ExecCommand {
 
@@ -28,17 +26,20 @@ public class ApplyOrbitFileAction extends ExecCommand {
             if (product != null) {
                 VisatApp.getApp().addProduct(product);
             } else if (dialog.getException() != null) {
-                VisatApp.getApp().showErrorDialog("The flipped product could not be created:\n" +
+                VisatApp.getApp().showErrorDialog("The orbit file could not be applied:\n" +
                                          dialog.getException().getMessage());
             }
+        } else if (dialog.getException() != null) {
+
+            VisatApp.getApp().showErrorDialog("The orbit file could not be applied:\n" +
+                    dialog.getException().getMessage());
         }
     }
 
     @Override
     public void updateState(final CommandEvent event) {
         final Product product = VisatApp.getApp().getSelectedProduct();
-        //setEnabled(product != null && product.getNumBands() + product.getNumTiePointGrids() > 0);
-        setEnabled(false);
+        setEnabled(product != null && product.getNumBands() + product.getNumTiePointGrids() > 0);
     }
 
 }

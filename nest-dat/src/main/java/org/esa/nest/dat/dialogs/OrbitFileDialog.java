@@ -1,7 +1,6 @@
 
 package org.esa.nest.dat.dialogs;
 
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.Window;
 import javax.swing.ButtonGroup;
@@ -9,17 +8,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.ui.GridBagUtils;
 import org.esa.beam.framework.ui.ModalDialog;
-import org.esa.beam.framework.ui.UIUtils;
-import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.util.Guardian;
+import org.esa.nest.dataio.OrbitFileUpdater;
 
-public class OrbitFileDialog extends ModelessDialog {
+public class OrbitFileDialog extends ModalDialog {
 
     private final Product _sourceProduct;
     private Product _resultProduct;
@@ -60,12 +55,21 @@ public class OrbitFileDialog extends ModelessDialog {
     protected void onOK() {
         super.onOK();
 
-        _resultProduct = null;
-        //try {
-        //    _resultProduct = getSourceProduct().createFlippedProduct(flipType, prodName, prodDesc);
-        //} catch (IOException e) {
-        //    _exception = e;
-        //}
+        try {
+            OrbitFileUpdater.OrbitType orbitType = OrbitFileUpdater.OrbitType.DORIS_VOR ;
+            if(_buttonVOR.isSelected())
+                orbitType = OrbitFileUpdater.OrbitType.DORIS_VOR;
+            else if(_buttonPOR.isSelected())
+                orbitType = OrbitFileUpdater.OrbitType.DORIS_POR;
+
+            OrbitFileUpdater orbitUpdater = new OrbitFileUpdater(_sourceProduct, orbitType);
+            orbitUpdater.updateStateVector();
+
+            _resultProduct = null;
+
+        } catch (Exception e) {
+            _exception = e;
+        }
     }
 
     protected boolean verifyUserInput() {

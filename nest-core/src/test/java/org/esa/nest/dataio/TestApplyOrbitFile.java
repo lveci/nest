@@ -4,7 +4,6 @@ import junit.framework.TestCase;
 import org.esa.beam.dataio.envisat.EnvisatOrbitReader;
 
 import java.io.File;
-import java.util.Date;
 
 /**
  * Created by IntelliJ IDEA.
@@ -33,6 +32,6 @@ public class TestApplyOrbitFile  extends TestCase {
         EnvisatOrbitReader reader = new EnvisatOrbitReader();
 
         //Date productDate = new Date(12345678);
-        //ApplyOrbitFile.FindOrbitFile(reader, vorPath, productDate);
+        //OrbitFileUpdater.FindOrbitFile(reader, vorPath, productDate);
     }
 }
