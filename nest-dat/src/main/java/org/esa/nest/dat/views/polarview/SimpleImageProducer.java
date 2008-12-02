@@ -5,7 +5,7 @@ import java.awt.image.*;
 import java.util.*;
 
 public abstract class SimpleImageProducer
-    implements ImageProducer, Colored
+    implements ImageProducer
 {
 
     protected SimpleImageProducer(int width, int height, int hints)

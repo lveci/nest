@@ -145,7 +145,7 @@ public abstract class ColorScale
         return cm;
     }
 
-    public synchronized void addColoredObject(Colored ip)
+    public synchronized void addColoredObject(SimpleImageProducer ip)
     {
         if(coloredClients.contains(ip))
         {
@@ -157,7 +157,7 @@ public abstract class ColorScale
         }
     }
 
-    public synchronized void removeColoredObject(Colored ip)
+    public synchronized void removeColoredObject(SimpleImageProducer ip)
     {
         coloredClients.removeElement(ip);
     }
@@ -257,20 +257,20 @@ public abstract class ColorScale
 
     protected synchronized void notifyMapChange()
     {
-        Colored ip;
+        SimpleImageProducer ip;
         for(Enumeration elem = coloredClients.elements(); elem.hasMoreElements(); ip.updatedColorMap())
         {
-            ip = (Colored)elem.nextElement();
+            ip = (SimpleImageProducer)elem.nextElement();
         }
 
     }
 
     protected synchronized void notifyRangeChange()
     {
-        Colored ip;
+        SimpleImageProducer ip;
         for(Enumeration elem = coloredClients.elements(); elem.hasMoreElements(); ip.updatedColorScale())
         {
-            ip = (Colored)elem.nextElement();
+            ip = (SimpleImageProducer)elem.nextElement();
         }
 
     }

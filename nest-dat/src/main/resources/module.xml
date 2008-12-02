@@ -464,6 +464,16 @@
             <helpId>selectTool</helpId>
         </action>
 
+        <action>
+            <id>showPolarWaveView</id>
+            <class>org.esa.nest.dat.actions.ShowCrossSpectraViewAction</class>
+            <text>Open Polar Wave View</text>
+            <shortDescr>Open Polar Wave View</shortDescr>
+            <parent>sartools</parent>
+            <context>band</context>
+            <helpId>showPolarWaveView</helpId>
+        </action>
+
     </extension>
 
 
