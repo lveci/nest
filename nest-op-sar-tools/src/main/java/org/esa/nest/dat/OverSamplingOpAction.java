@@ -23,8 +23,4 @@ public class OverSamplingOpAction extends AbstractVisatAction {
 
     }
 
-    @Override
-    public void updateState(final CommandEvent event) {
-        setEnabled(false);
-    }
 }

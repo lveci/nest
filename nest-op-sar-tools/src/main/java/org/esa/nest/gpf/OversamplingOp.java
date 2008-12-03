@@ -26,17 +26,10 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.dataio.OperatorUtils;
 
-import javax.media.jai.JAI;
-import javax.media.jai.PlanarImage;
-import javax.media.jai.BorderExtender;
-import javax.media.jai.RasterFactory;
-import javax.media.jai.operator.DFTDescriptor;
 import java.awt.*;
-import java.awt.image.*;
-import java.awt.image.renderable.ParameterBlock;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Arrays;
 
@@ -116,7 +109,7 @@ public class OversamplingOp extends Operator {
         sourceImageWidth = sourceProduct.getSceneRasterWidth();
         sourceImageHeight = sourceProduct.getSceneRasterHeight();
 
-        abs = MultilookOp.getAbstractedMetadata(sourceProduct);
+        abs = OperatorUtils.getAbstractedMetadata(sourceProduct);
 
         getSrcImagePixelSpacings();
 

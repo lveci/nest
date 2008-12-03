@@ -1,5 +1,7 @@
 package org.esa.nest.datamodel;
 
+import org.esa.beam.framework.datamodel.Band;
+
 /**
  * Created by IntelliJ IDEA.
  * User: lveci
@@ -18,4 +20,25 @@ public class Unit {
 
     public static final String DB = "db";
 
+    public enum UnitType { AMPLITUDE, INTENSITY, COMPLEX, PHASE, INTENSITY_DB, AMPLITUDE_DB };
+
+    public static UnitType getUnitType(Band sourceBand) {
+
+        String  unit =  sourceBand.getUnit();
+        if (unit.contains(AMPLITUDE)) {
+            if (unit.contains(DB))
+                return UnitType.AMPLITUDE_DB;
+            else
+                return UnitType.AMPLITUDE;
+        } else if (unit.contains(INTENSITY)) {
+            if (unit.contains(DB))
+                return UnitType.INTENSITY_DB;
+            else
+                return UnitType.INTENSITY;
+        } else if (unit.contains(PHASE)) {
+            return UnitType.PHASE;
+        } else {
+            return UnitType.COMPLEX;
+        }
+    }
 }

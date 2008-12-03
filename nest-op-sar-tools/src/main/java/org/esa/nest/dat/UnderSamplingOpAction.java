@@ -1,8 +1,8 @@
 package org.esa.nest.dat;
 
 import org.esa.beam.framework.ui.command.CommandEvent;
-import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.beam.visat.actions.AbstractVisatAction;
+import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
 
 /**
  * UnderSamplingOp action.
@@ -10,21 +10,17 @@ import org.esa.beam.visat.actions.AbstractVisatAction;
  */
 public class UnderSamplingOpAction extends AbstractVisatAction {
 
-    private DefaultSingleTargetProductDialog dialog;
+    private NestSingleTargetProductDialog dialog;
 
     @Override
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("Undersample", getAppContext(), "Undersample", getHelpId());
+            dialog = new NestSingleTargetProductDialog("Undersample", getAppContext(), "Undersample", getHelpId());
             dialog.setTargetProductNameSuffix("_UndS");
         }
         dialog.show();
 
     }
 
-    @Override
-    public void updateState(final CommandEvent event) {
-        setEnabled(false);
-    }
 }

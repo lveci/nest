@@ -20,10 +20,10 @@ import java.awt.*;
  */
 public class MergeBandsOpUI extends BaseOperatorUI {
 
-    String productName = "";
-    JTextField nameField = new JTextField("");
-    String[] name = { "" };
-    JList bandList = new JList(name);
+    private String productName = "";
+    private final JTextField nameField = new JTextField("");
+    private String[] name = { "" };
+    private final JList bandList = new JList(name);
 
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 

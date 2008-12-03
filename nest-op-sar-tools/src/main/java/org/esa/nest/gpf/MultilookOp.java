@@ -27,6 +27,8 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
+import org.esa.nest.dataio.OperatorUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -88,13 +90,6 @@ public final class MultilookOp extends Operator {
 
     private HashMap<String, String[]> targetBandNameToSourceBandName;
 
-    static final int AMPLITUDE = 0;
-    static final int INTENSITY = 1;
-    static final int COMPLEX = 2;
-    static final int PHASE = 3;
-    static final int INTENSITY_DB = 4;
-    static final int AMPLITUDE_DB = 5;
-
     /**
      * Initializes this operator and sets the one and only target product.
      * <p>The target product can be either defined by a field of type {@link org.esa.beam.framework.datamodel.Product} annotated with the
@@ -111,7 +106,7 @@ public final class MultilookOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        absRoot = getAbstractedMetadata(sourceProduct);
+        absRoot = OperatorUtils.getAbstractedMetadata(sourceProduct);
 
         getSRGRFlag();
 
@@ -172,21 +167,9 @@ public final class MultilookOp extends Operator {
             sourceRaster2 = getSourceTile(sourceBand2, sourceTileRectangle, pm);
         }
 
-        final int bandUnit = getSourceBandUnit(sourceBand1);
+        final Unit.UnitType bandUnitType = Unit.getUnitType(sourceBand1);
 
-        computeMultiLookImageUsingTimeDomainMethod(tx0, ty0, tw, th, sourceRaster1, sourceRaster2, targetTile, bandUnit);
-    }
-
-    /**
-     * Get abstracted metadata.
-     */
-    public static MetadataElement getAbstractedMetadata(Product sourceProduct) {
-
-        final MetadataElement abstractedMetadata = sourceProduct.getMetadataRoot().getElement("Abstracted Metadata");
-        if (abstractedMetadata == null) {
-            throw new OperatorException("Abstracted Metadata not found");
-        }
-        return abstractedMetadata;
+        computeMultiLookImageUsingTimeDomainMethod(tx0, ty0, tw, th, sourceRaster1, sourceRaster2, targetTile, bandUnitType);
     }
 
     /**
@@ -519,7 +502,7 @@ public final class MultilookOp extends Operator {
      * @param bandUnit Integer indicating the unit of source data.
      */
     void computeMultiLookImageUsingTimeDomainMethod(
-            int tx0, int ty0, int tw, int th, Tile sourceRaster1, Tile sourceRaster2, Tile targetTile, int bandUnit) {
+            int tx0, int ty0, int tw, int th, Tile sourceRaster1, Tile sourceRaster2, Tile targetTile, Unit.UnitType bandUnit) {
 
         ProductData trgData = targetTile.getDataBuffer();
 
@@ -544,7 +527,7 @@ public final class MultilookOp extends Operator {
      * @param bandUnit Integer indicating the unit of source data.
      * @return The mean value.
      */
-    double getMeanValue(int tx, int ty, Tile sourceRaster1, Tile sourceRaster2, int bandUnit) {
+    double getMeanValue(int tx, int ty, Tile sourceRaster1, Tile sourceRaster2, Unit.UnitType bandUnit) {
 
         final int xStart = tx * nRgLooks;
         final int yStart = ty * nAzLooks;
@@ -562,12 +545,12 @@ public final class MultilookOp extends Operator {
 
                 final int index = sourceRaster1.getDataBufferIndex(x, y);
 
-                if (bandUnit == INTENSITY_DB || bandUnit == AMPLITUDE_DB) {
+                if (bandUnit == Unit.UnitType.INTENSITY_DB || bandUnit == Unit.UnitType.AMPLITUDE_DB) {
 
                     final double dn = srcData1.getElemDoubleAt(index);
                     meanValue += Math.pow(10, dn / 10.0); // dB to linear
 
-                } else if (bandUnit == AMPLITUDE || bandUnit == INTENSITY) {
+                } else if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY) {
 
                     meanValue += srcData1.getElemDoubleAt(index);
 
@@ -580,29 +563,11 @@ public final class MultilookOp extends Operator {
             }
         }
         meanValue /= nRgLooks * nAzLooks;
-        if (bandUnit == INTENSITY_DB || bandUnit == AMPLITUDE_DB) {
+        if (bandUnit == Unit.UnitType.INTENSITY_DB || bandUnit == Unit.UnitType.AMPLITUDE_DB) {
             meanValue = 10.0*Math.log10(meanValue); // linear to dB
         }
 
         return meanValue;
-    }
-
-    public static int getSourceBandUnit(Band sourceBand) {
-
-        String  unit =  sourceBand.getUnit();
-        if (unit.contains("amplitude")) {
-            return AMPLITUDE;
-        } else if (unit.contains("intensity")) {
-            return INTENSITY;
-        } else if (unit.contains("phase")) {
-            return PHASE;
-        } else if (unit.contains("intensity_db")) {
-            return INTENSITY_DB;
-        } else if (unit.contains("amplitude_db")) {
-            return AMPLITUDE_DB;
-        } else {
-            return COMPLEX;
-        }
     }
 
     /**

@@ -29,6 +29,8 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
+import org.esa.nest.dataio.OperatorUtils;
 
 import java.awt.*;
 import java.io.*;
@@ -40,7 +42,7 @@ import java.util.HashMap;
  * Undersample
  */
 
-@OperatorMetadata(alias="Undersample")
+@OperatorMetadata(alias="Undersample", description="Undersample the datset")
 public class UndersamplingOp extends Operator {
 
     @SourceProduct(alias="source")
@@ -52,39 +54,42 @@ public class UndersamplingOp extends Operator {
             sourceProductId="source", label="Source Bands")
     String[] sourceBandNames;
 
-    @Parameter(valueSet = {SUB_SAMPLING, KERNEL_FILTERING}, defaultValue = SUB_SAMPLING, label="Under-Sampling Methods")
-    private String method;
+    @Parameter(valueSet = {SUB_SAMPLING, KERNEL_FILTERING}, defaultValue = KERNEL_FILTERING, label="Under-Sampling Method")
+    private String method = KERNEL_FILTERING;
 
-    @Parameter(valueSet = {SUMMARY, EDGE_DETECT, EDGE_ENHANCEMENT, LOSS_PASS, HIGH_PASS, HORIZONTAL, VERTICAL},
+    @Parameter(valueSet = {SUMMARY, EDGE_DETECT, EDGE_ENHANCEMENT, LOSS_PASS, HIGH_PASS, HORIZONTAL, VERTICAL, USER_DEFINED},
                defaultValue = SUMMARY, label="Filter Type")
-    private String filterType;
+    private String filterType = SUMMARY;
 
     @Parameter(valueSet = {FILTER_SIZE_3x3, FILTER_SIZE_5x5, FILTER_SIZE_7x7},
                defaultValue = FILTER_SIZE_3x3, label="Filter Size")
-    private String filterSize;
+    private String filterSize = FILTER_SIZE_3x3;
 
     @Parameter(description = "The kernel file", label="Kernel File")
-    private File kernelFile;
+    private File kernelFile = null;
 
-    @Parameter(defaultValue = "2", label=" Sub-Sampling in X")
-    private int subSamplingX;
-    @Parameter(defaultValue = "2", label=" Sub-Sampling in Y")
-    private int subSamplingY;
+    @Parameter(defaultValue = "2", label="Sub-Sampling in X")
+    private int subSamplingX = 2;
+    @Parameter(defaultValue = "2", label="Sub-Sampling in Y")
+    private int subSamplingY = 2;
+
+    @Parameter(valueSet = {IMAGE_SIZE, RATIO, PIXEL_SPACING}, defaultValue = IMAGE_SIZE, label="Output Image By:")
+    private String outputImageBy = IMAGE_SIZE;
 
     @Parameter(description = "The row dimension of the output image", defaultValue = "0", label="Output Image Rows")
-    private int targetImageHeight;
+    private int targetImageHeight = 0;
     @Parameter(description = "The col dimension of the output image", defaultValue = "0", label="Output Image Columns")
-    private int targetImageWidth;
+    private int targetImageWidth = 0;
 
     @Parameter(description = "The width ratio of the output/input images", defaultValue = "0.0", label="Width Ratio")
-    private float widthRatio;
+    private float widthRatio = 0;
     @Parameter(description = "The height ratio of the output/input images", defaultValue = "0.0", label="Height Ratio")
-    private float heightRatio;
+    private float heightRatio = 0;
 
     @Parameter(description = "The range pixel spacing", defaultValue = "0.0", label="Range Spacing")
-    private float rangeSpacing;
+    private float rangeSpacing = 0;
     @Parameter(description = "The azimuth pixel spacing", defaultValue = "0.0", label="Azimuth Spacing")
-    private float azimuthSpacing;
+    private float azimuthSpacing = 0;
 
     private Band sourceBand1;
     private Band sourceBand2;
@@ -105,25 +110,31 @@ public class UndersamplingOp extends Operator {
     private float[][] kernel; // kernel for filtering
     private HashMap<String, String[]> targetBandNameToSourceBandName;
 
-    private static final String SUB_SAMPLING = "Sub-Sampling";
-    private static final String KERNEL_FILTERING = "Kernel Filtering";
-    private static final String SUMMARY = "Summary";
-    private static final String EDGE_DETECT = "Edge Detect";
-    private static final String EDGE_ENHANCEMENT = "Edge Enhancement";
-    private static final String LOSS_PASS = "Loss Pass";
-    private static final String HIGH_PASS = "High Pass";
-    private static final String HORIZONTAL = "Horizontal";
-    private static final String VERTICAL = "Vertical";
-    private static final String FILTER_SIZE_3x3 = "3x3";
-    private static final String FILTER_SIZE_5x5 = "5x5";
-    private static final String FILTER_SIZE_7x7 = "7x7";
+    public static final String SUB_SAMPLING = "Sub-Sampling";
+    public static final String KERNEL_FILTERING = "Kernel Filtering";
+    public static final String SUMMARY = "Summary";
+    public static final String EDGE_DETECT = "Edge Detect";
+    public static final String EDGE_ENHANCEMENT = "Edge Enhancement";
+    public static final String LOSS_PASS = "Loss Pass";
+    public static final String HIGH_PASS = "High Pass";
+    public static final String HORIZONTAL = "Horizontal";
+    public static final String VERTICAL = "Vertical";
+    public static final String USER_DEFINED = "User Defined";
+
+    public static final String IMAGE_SIZE = "Image Size";
+    public static final String RATIO = "Ratio";
+    public static final String PIXEL_SPACING = "Pixel Spacing";
+
+    public static final String FILTER_SIZE_3x3 = "3x3";
+    public static final String FILTER_SIZE_5x5 = "5x5";
+    public static final String FILTER_SIZE_7x7 = "7x7";
 
     @Override
     public void initialize() throws OperatorException {
 
-        if (method.contains(SUB_SAMPLING)) {
+        if (method.equals(SUB_SAMPLING)) {
             initializeForSubSampling();
-        } else if (method.contains(KERNEL_FILTERING)) {
+        } else if (method.equals(KERNEL_FILTERING)) {
             initializeForKernelFiltering();
         } else {
             throw new OperatorException("Unknown undersampling method: " + method);
@@ -159,6 +170,8 @@ public class UndersamplingOp extends Operator {
         } catch (Throwable t) {
             throw new OperatorException(t);
         }
+
+        //todo change metadata on targetProduct
     }
 
     /**
@@ -167,34 +180,37 @@ public class UndersamplingOp extends Operator {
      * @throws OperatorException The exceptions.
      */
     private void initializeForKernelFiltering() throws OperatorException {
+        try {
+            sourceImageWidth = sourceProduct.getSceneRasterWidth();
+            sourceImageHeight = sourceProduct.getSceneRasterHeight();
 
-        sourceImageWidth = sourceProduct.getSceneRasterWidth();
-        sourceImageHeight = sourceProduct.getSceneRasterHeight();
+            abs = OperatorUtils.getAbstractedMetadata(sourceProduct);
 
-        abs = MultilookOp.getAbstractedMetadata(sourceProduct);
+            getFilterDimension();
 
-        getFilterDimension();
-        
-        getSrcImagePixelSpacings();
+            getSrcImagePixelSpacings();
 
-        computeTargetImageSizeAndPixelSpacings();
+            computeTargetImageSizeAndPixelSpacings();
 
-        computeRangeAzimuthStepSizes();
+            computeRangeAzimuthStepSizes();
 
-        getKernelFile();
+            getKernelFile();
 
-        createTargetProduct();
+            createTargetProduct();
+        } catch(Exception e) {
+            throw new OperatorException(e.getMessage());
+        }
     }
 
     private void getFilterDimension() {
 
-        if (filterSize.contains("3x3")) {
+        if (filterSize.equals(FILTER_SIZE_3x3)) {
             filterWidth = 3;
             filterHeight = 3;
-        } else if (filterSize.contains("5x5")) {
+        } else if (filterSize.equals(FILTER_SIZE_5x5)) {
             filterWidth = 5;
             filterHeight = 5;
-        } else if (filterSize.contains("7x7")) {
+        } else if (filterSize.equals(FILTER_SIZE_7x7)) {
             filterWidth = 7;
             filterHeight = 7;
         } else {
@@ -204,23 +220,14 @@ public class UndersamplingOp extends Operator {
 
     /**
      * Get the range and azimuth spacings (in meter).
+     * @throws Exception when metadata is missing
      */
-    void getSrcImagePixelSpacings() {
+    void getSrcImagePixelSpacings() throws Exception {
 
-        MetadataAttribute rangeSpacingAttr = abs.getAttribute(AbstractMetadata.range_spacing);
-        if (rangeSpacingAttr == null) {
-            throw new OperatorException(AbstractMetadata.range_spacing + " not found");
-        }
-
-        srcRangeSpacing = rangeSpacingAttr.getData().getElemFloat();
+        srcRangeSpacing = (float)abs.getAttributeDouble(AbstractMetadata.range_spacing);
         //System.out.println("Range spacing is " + srcRangeSpacing);
 
-        MetadataAttribute azimuthSpacingAttr = abs.getAttribute(AbstractMetadata.azimuth_spacing);
-        if (azimuthSpacingAttr == null) {
-            throw new OperatorException(AbstractMetadata.azimuth_spacing + " not found");
-        }
-
-        srcAzimuthSpacing = azimuthSpacingAttr.getData().getElemFloat();
+        srcAzimuthSpacing = (float)abs.getAttributeDouble(AbstractMetadata.azimuth_spacing);
         //System.out.println("Azimuth spacing is " + srcAzimuthSpacing);
     }
 
@@ -231,7 +238,7 @@ public class UndersamplingOp extends Operator {
      */
     private void computeTargetImageSizeAndPixelSpacings() throws OperatorException {
 
-        if (targetImageWidth != 0 && targetImageHeight != 0) {
+        if (outputImageBy.equals(IMAGE_SIZE)) {
 
             if (targetImageHeight <= 0 || targetImageHeight >= sourceImageHeight ||
                 targetImageWidth <= 0 || targetImageWidth >= sourceImageWidth) {
@@ -241,7 +248,7 @@ public class UndersamplingOp extends Operator {
             rangeSpacing = srcRangeSpacing * sourceImageWidth / targetImageWidth;
             azimuthSpacing = srcAzimuthSpacing * sourceImageHeight / targetImageHeight;
 
-        } else if (Float.compare(widthRatio, 0.0f) != 0 && Float.compare(heightRatio, 0.0f) != 0) {
+        } else if (outputImageBy.equals(RATIO)) {
 
             if (widthRatio <= 0 || widthRatio >= 1 || heightRatio <= 0 || heightRatio >= 1) {
                 throw new OperatorException("The width or height ratio must be within range (0, 1)");
@@ -253,7 +260,7 @@ public class UndersamplingOp extends Operator {
             rangeSpacing = srcRangeSpacing / widthRatio;
             azimuthSpacing = srcAzimuthSpacing / heightRatio;
 
-        } else if (Float.compare(rangeSpacing, 0.0f) != 0 && Float.compare(azimuthSpacing, 0.0f) != 0) {
+        } else if (outputImageBy.equals(PIXEL_SPACING)) {
 
             if (rangeSpacing <= srcRangeSpacing || azimuthSpacing <= srcAzimuthSpacing) {
                 throw new OperatorException("The azimuth or range spacing must be greater than the source spacing");
@@ -284,36 +291,36 @@ public class UndersamplingOp extends Operator {
         String fileName = "";
         boolean isPreDefinedKernel;
 
-        if (kernelFile != null) { // user defined kernel file
+        if (filterType.equals(USER_DEFINED)) { // user defined kernel file
 
             isPreDefinedKernel = false;
-            fileName = kernelFile.getName();
             
         } else { // pre-defined kernel file with user specified filter diemnsion
 
             isPreDefinedKernel = true;
 
-            if(filterType.contains(SUMMARY)) {
+            if(filterType.equals(SUMMARY)) {
                 fileName = "sum_" + filterHeight + "_" + filterWidth + ".ker";
-            } else if (filterType.contains(EDGE_DETECT)) {
+            } else if (filterType.equals(EDGE_DETECT)) {
                 fileName = "edd_" + filterHeight + "_" + filterWidth + ".ker";
-            } else if (filterType.contains(EDGE_ENHANCEMENT)) {
+            } else if (filterType.equals(EDGE_ENHANCEMENT)) {
                 fileName = "ede_" + filterHeight + "_" + filterWidth + ".ker";
-            } else if (filterType.contains(LOSS_PASS)) {
+            } else if (filterType.equals(LOSS_PASS)) {
                 fileName = "lop_" + filterHeight + "_" + filterWidth + ".ker";
-            } else if (filterType.contains(HIGH_PASS)) {
+            } else if (filterType.equals(HIGH_PASS)) {
                 fileName = "hip_" + filterHeight + "_" + filterWidth + ".ker";
-            } else if (filterType.contains(HORIZONTAL)) {
+            } else if (filterType.equals(HORIZONTAL)) {
                 fileName = "hor_" + filterHeight + "_" + filterWidth + ".ker";
-            } else if (filterType.contains(VERTICAL)) {
+            } else if (filterType.equals(VERTICAL)) {
                 fileName = "ver_" + filterHeight + "_" + filterWidth + ".ker";
             } else {
                 throw new OperatorException("Incorrect filter type: " + filterType);
             }
+
+            kernelFile = getResFile(fileName);
         }
 
-        final File file = getResFile(fileName);
-        kernel = readFile(file.getAbsolutePath(), isPreDefinedKernel);
+        kernel = readFile(kernelFile.getAbsolutePath(), isPreDefinedKernel);
     }
 
     private static File getResFile(String fileName) {
@@ -400,7 +407,7 @@ public class UndersamplingOp extends Operator {
     /**
      * Create target product.
      */
-    private void createTargetProduct() {
+    private void createTargetProduct() throws Exception {
 
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),
@@ -425,18 +432,18 @@ public class UndersamplingOp extends Operator {
     private void addSelectedBands() {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) {
-            Band[] bands = sourceProduct.getBands();
-            ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            final Band[] bands = sourceProduct.getBands();
+            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
                 bandNameList.add(band.getName());
             }
             sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
         }
 
-        Band[] sourceBands = new Band[sourceBandNames.length];
+        final Band[] sourceBands = new Band[sourceBandNames.length];
         for (int i = 0; i < sourceBandNames.length; i++) {
-            String sourceBandName = sourceBandNames[i];
-            Band sourceBand = sourceProduct.getBand(sourceBandName);
+            final String sourceBandName = sourceBandNames[i];
+            final Band sourceBand = sourceProduct.getBand(sourceBandName);
             if (sourceBand == null) {
                 throw new OperatorException("Source band not found: " + sourceBandName);
             }
@@ -455,21 +462,21 @@ public class UndersamplingOp extends Operator {
 
             String targetUnit = "";
 
-            if (unit.contains("phase")) {
+            if (unit.contains(Unit.PHASE)) {
 
                 continue;
 
-            } else if (unit.contains("imaginary")) {
+            } else if (unit.contains(Unit.IMAGINARY)) {
 
                 throw new OperatorException("Real and imaginary bands should be selected in pairs");
 
-            } else if (unit.contains("real")) {
+            } else if (unit.contains(Unit.REAL)) {
 
                 if (i == sourceBands.length - 1) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
                 }
                 final String nextUnit = sourceBands[i+1].getUnit();
-                if (nextUnit == null || !nextUnit.contains("imaginary")) {
+                if (nextUnit == null || !nextUnit.contains(Unit.IMAGINARY)) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
                 }
                 final String[] srcBandNames = new String[2];
@@ -484,7 +491,7 @@ public class UndersamplingOp extends Operator {
                 ++i;
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
-                    targetUnit = "amplitude";
+                    targetUnit = Unit.AMPLITUDE;
                 }
 
             } else {
@@ -514,54 +521,30 @@ public class UndersamplingOp extends Operator {
     /**
      * Update metadata in the target product.
      */
-    private void updateTargetProductMetadata() {
+    private void updateTargetProductMetadata() throws Exception {
 
-        MetadataElement abs = targetProduct.getMetadataRoot().getElement("Abstracted Metadata");
-        if (abs == null) {
-            throw new OperatorException("Abstracted Metadata not found");
-        }
+        AbstractMetadata.setAttribute(abs, AbstractMetadata.azimuth_spacing, azimuthSpacing);
+        AbstractMetadata.setAttribute(abs, AbstractMetadata.range_spacing, rangeSpacing);
 
-        MetadataAttribute azimuthSpacingAttr = abs.getAttribute(AbstractMetadata.azimuth_spacing);
-        if (azimuthSpacingAttr == null) {
-            throw new OperatorException(AbstractMetadata.azimuth_spacing + " not found");
-        }
-        azimuthSpacingAttr.getData().setElemFloat((float)(azimuthSpacing));
+        final float oldLineTimeInterval = (float)abs.getAttributeDouble(AbstractMetadata.line_time_interval);
+        AbstractMetadata.setAttribute(abs, AbstractMetadata.line_time_interval, oldLineTimeInterval*(float)stepAzimuth);
 
-        MetadataAttribute rangeSpacingAttr = abs.getAttribute(AbstractMetadata.range_spacing);
-        if (rangeSpacingAttr == null) {
-            throw new OperatorException(AbstractMetadata.range_spacing + " not found");
-        }
-        rangeSpacingAttr.getData().setElemFloat((float)(rangeSpacing));
-
-        MetadataAttribute lineTimeIntervalAttr = abs.getAttribute(AbstractMetadata.line_time_interval);
-        if (lineTimeIntervalAttr == null) {
-            throw new OperatorException(AbstractMetadata.line_time_interval + " not found");
-        }
-        float oldLineTimeInterval = lineTimeIntervalAttr.getData().getElemFloat();
-        lineTimeIntervalAttr.getData().setElemFloat(oldLineTimeInterval*(float)stepAzimuth);
-
-        MetadataAttribute firstLineTimeAttr = abs.getAttribute(AbstractMetadata.first_line_time);
-        if (firstLineTimeAttr == null) {
-            throw new OperatorException(AbstractMetadata.first_line_time + " not found");
-        }
-        String oldFirstLineTime = firstLineTimeAttr.getData().getElemString();
-        int idx = oldFirstLineTime.lastIndexOf(':') + 1;
-        String oldSecondsStr = oldFirstLineTime.substring(idx);
-        double oldSeconds = Double.parseDouble(oldSecondsStr);
-        double newSeconds = oldSeconds + oldLineTimeInterval*(filterHeight - 1)/2.0;
-        String newFirstLineTime = String.valueOf(oldFirstLineTime.subSequence(0, idx)) + newSeconds + "000000";
-        abs.removeAttribute(firstLineTimeAttr);
-        abs.addAttribute(new MetadataAttribute(
-                AbstractMetadata.first_line_time, ProductData.createInstance(newFirstLineTime.substring(0,27)), false));
+        final String oldFirstLineTime = abs.getAttributeString(AbstractMetadata.first_line_time);
+        final int idx = oldFirstLineTime.lastIndexOf(':') + 1;
+        final String oldSecondsStr = oldFirstLineTime.substring(idx);
+        final double oldSeconds = Double.parseDouble(oldSecondsStr);
+        final double newSeconds = oldSeconds + oldLineTimeInterval*(filterHeight - 1)/2.0;
+        final String newFirstLineTime = String.valueOf(oldFirstLineTime.subSequence(0, idx)) + newSeconds + "000000";
+        AbstractMetadata.setAttribute(abs, AbstractMetadata.first_line_time,
+            AbstractMetadata.parseUTC(newFirstLineTime.substring(0,27)));
     }
-
 
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
-        if (method.contains(SUB_SAMPLING)) {
+        if (method.equals(SUB_SAMPLING)) {
             computeTileUsingSubSampling(targetBand, targetTile, pm);
-        } else if (method.contains(KERNEL_FILTERING)) {
+        } else if (method.equals(KERNEL_FILTERING)) {
             computeTileUsingKernelFiltering(targetBand, targetTile, pm);
         } else {
             throw new OperatorException("Unknown undersampling method: " + method);
@@ -570,8 +553,8 @@ public class UndersamplingOp extends Operator {
 
     private void computeTileUsingSubSampling(Band targetBand, Tile targetTile, ProgressMonitor pm) {
 
-        ProductData destBuffer = targetTile.getRawSamples();
-        Rectangle rectangle = targetTile.getRectangle();
+        final ProductData destBuffer = targetTile.getRawSamples();
+        final Rectangle rectangle = targetTile.getRectangle();
         try {
             subsetReader.readBandRasterData(targetBand,
                                             rectangle.x,
@@ -587,7 +570,7 @@ public class UndersamplingOp extends Operator {
 
     private void computeTileUsingKernelFiltering(Band targetBand, Tile targetTile, ProgressMonitor pm) {
 
-        Rectangle targetTileRectangle = targetTile.getRectangle();
+        final Rectangle targetTileRectangle = targetTile.getRectangle();
         final int tx0 = targetTileRectangle.x;
         final int ty0 = targetTileRectangle.y;
         final int tw  = targetTileRectangle.width;
@@ -598,7 +581,7 @@ public class UndersamplingOp extends Operator {
         final int y0 = (int)(ty0 * stepAzimuth + 0.5f);
         final int w = (int)((tx0 + tw - 1)*stepRange + 0.5f) + filterWidth - (int)(tx0*stepRange + 0.5f) + 1;
         final int h = (int)((ty0 + th - 1)*stepAzimuth + 0.5f) + filterHeight - (int)(ty0*stepAzimuth + 0.5f) + 1;
-        Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
+        final Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         Tile sourceRaster1 = null;
@@ -620,22 +603,22 @@ public class UndersamplingOp extends Operator {
             srcData2 = sourceRaster2.getDataBuffer();
         }
 
-        final int bandUnit = MultilookOp.getSourceBandUnit(sourceBand1);
+        final Unit.UnitType bandUnitType = Unit.getUnitType(sourceBand1);
 
-        ProductData trgData = targetTile.getDataBuffer();
+        final ProductData trgData = targetTile.getDataBuffer();
 
         double filteredValue;
         final int maxy = ty0 + th;
         final int maxx = tx0 + tw;
         for (int ty = ty0; ty < maxy; ty++) {
             for (int tx = tx0; tx < maxx; tx++) {
-                filteredValue = getFilteredValue(tx, ty, sourceRaster1, sourceRaster2, bandUnit);
+                filteredValue = getFilteredValue(tx, ty, sourceRaster1, sourceRaster2, bandUnitType);
                 trgData.setElemDoubleAt(targetTile.getDataBufferIndex(tx, ty), filteredValue);
             }
         }
     }
 
-    private double getFilteredValue(int tx, int ty, Tile sourceRaster1, Tile sourceRaster2, int bandUnit) {
+    private double getFilteredValue(int tx, int ty, Tile sourceRaster1, Tile sourceRaster2, Unit.UnitType bandUnitType) {
 
         final int x0 = (int)(tx * stepRange + 0.5);
         final int y0 = (int)(ty * stepAzimuth + 0.5);
@@ -654,12 +637,12 @@ public class UndersamplingOp extends Operator {
                 final int index = sourceRaster1.getDataBufferIndex(x, y);
                 final float weight = kernel[maxY - 1 - y][maxX - 1 - x];
 
-                if (bandUnit == MultilookOp.INTENSITY_DB) {
+                if (bandUnitType == Unit.UnitType.INTENSITY_DB) {
 
                     final double dn = srcData1.getElemDoubleAt(index);
                     filteredValue += Math.pow(10, dn / 10.0)*weight; // dB to linear
 
-                } else if (bandUnit == MultilookOp.AMPLITUDE || bandUnit == MultilookOp.INTENSITY) {
+                } else if (bandUnitType == Unit.UnitType.AMPLITUDE || bandUnitType == Unit.UnitType.INTENSITY) {
 
                     filteredValue += srcData1.getElemDoubleAt(index)*weight;
 
@@ -672,7 +655,7 @@ public class UndersamplingOp extends Operator {
             }
         }
 
-        if (bandUnit == MultilookOp.INTENSITY_DB) {
+        if (bandUnitType == Unit.UnitType.INTENSITY_DB) {
             filteredValue = 10.0*Math.log10(filteredValue); // linear to dB
         }
         return filteredValue;
@@ -715,6 +698,7 @@ public class UndersamplingOp extends Operator {
     public static class Spi extends OperatorSpi {
         public Spi() {
             super(UndersamplingOp.class);
+            setOperatorUI(UndersamplingOpUI.class);
         }
     }
 }
