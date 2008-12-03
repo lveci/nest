@@ -2,7 +2,7 @@ package org.esa.nest.dat.dialogs;
 
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.ModelessDialog;
-import org.esa.beam.framework.gpf.ui.ProductSetReaderOpUI;
+import org.esa.nest.gpf.ProductSetReaderOpUI;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.toolviews.Projects.ProductSet;
 

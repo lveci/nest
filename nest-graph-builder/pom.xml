@@ -10,9 +10,9 @@
         <version>2A</version>
     </parent>
 
-    <name>NEST Core</name>
+    <name>NEST Graph Builder</name>
     <groupId>org.esa.nest</groupId>
-    <artifactId>nest-core</artifactId>
+    <artifactId>nest-graph-builder</artifactId>
     <version>2A</version>
 
     <packaging>jar</packaging>
@@ -24,28 +24,15 @@
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>
-            <artifactId>beam-ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.beam</groupId>
             <artifactId>beam-gpf</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-visat-rcp</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.esa.beam</groupId>
-            <artifactId>beam-envisat-reader</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>jdom</groupId>
-            <artifactId>jdom</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>compile</scope>
+		<dependency>
+            <groupId>org.esa.nest</groupId>
+            <artifactId>nest-core</artifactId>
         </dependency>
     </dependencies>
 
