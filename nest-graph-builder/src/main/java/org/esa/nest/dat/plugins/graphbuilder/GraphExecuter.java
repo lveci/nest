@@ -24,6 +24,7 @@ public class GraphExecuter extends Observable {
     private Graph graph;
     private GraphContext graphContext;
     private final GraphProcessor processor;
+    private String graphDescription = "";
 
     private int idCount = 0;
     private final Vector nodeList = new Vector(30);
@@ -133,6 +134,11 @@ public class GraphExecuter extends Observable {
 
         Xpp3Dom presentationXML = new Xpp3Dom("Presentation");
 
+        // save graph description
+        Xpp3Dom descXML = new Xpp3Dom("Description");
+        descXML.setValue(graphDescription);
+        presentationXML.addChild(descXML);
+
         for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
         {
             GraphNode n = (GraphNode) e.nextElement();
@@ -230,17 +236,20 @@ public class GraphExecuter extends Observable {
                 graph = graphFromFile;
                 nodeList.clear();
 
-                Xpp3Dom presentationXML;
-                Xpp3Dom xml = graph.getApplicationData("Presentation");
-                if(xml != null)
-                    presentationXML = xml;
-                else
-                    presentationXML = new Xpp3Dom("Presentation");
+                Xpp3Dom presentationXML = graph.getApplicationData("Presentation");
+                if(presentationXML != null) {
+                    // get graph description
+                    Xpp3Dom descXML = presentationXML.getChild("Description");
+                    if(descXML != null && descXML.getValue() != null) {
+                        graphDescription = descXML.getValue();
+                    }
+                }
 
                 Node[] nodes = graph.getNodes();
                 for (Node n : nodes) {
                     GraphNode newGraphNode = new GraphNode(n);
-                    newGraphNode.setDisplayParameters(presentationXML.getChild(n.getId()));
+                    if(presentationXML != null)
+                        newGraphNode.setDisplayParameters(presentationXML.getChild(n.getId()));
                     nodeList.add(newGraphNode);
                     
                     setChanged();
@@ -252,6 +261,14 @@ public class GraphExecuter extends Observable {
         } catch(IOException e) {
             throw new GraphException("Unable to load graph " + filePath);
         }
+    }
+
+    public String getGraphDescription() {
+        return graphDescription;
+    }
+
+    public void setGraphDescription(String text) {
+        graphDescription = text;
     }
 
     Graph getGraph() {

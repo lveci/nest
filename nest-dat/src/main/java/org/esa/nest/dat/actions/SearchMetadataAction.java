@@ -14,14 +14,14 @@ import org.esa.beam.visat.dialogs.PromptDialog;
  * This action to searches the Metadata
  *
  * @author lveci
- * @version $Revision: 1.2 $ $Date: 2008-10-29 20:51:41 $
+ * @version $Revision: 1.3 $ $Date: 2008-12-04 21:37:31 $
  */
 public class SearchMetadataAction extends ExecCommand {
 
     @Override
     public void actionPerformed(final CommandEvent event) {
 
-        PromptDialog dlg = new PromptDialog("Search Metadata", "tag", "");
+        PromptDialog dlg = new PromptDialog("Search Metadata", "tag", "", false);
         dlg.show();
         if(dlg.IsOK()) {
                 String tag = dlg.getValue().toUpperCase();

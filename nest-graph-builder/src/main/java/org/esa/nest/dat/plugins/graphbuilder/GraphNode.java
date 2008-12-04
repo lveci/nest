@@ -54,21 +54,34 @@ public class GraphNode {
         final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(node.getOperatorName());
         if(operatorSpi == null) return;
 
-        ParameterDescriptorFactory parameterDescriptorFactory = new ParameterDescriptorFactory();
-        ValueContainer valueContainer = ValueContainer.createMapBacked(parameterMap, operatorSpi.getOperatorClass(), parameterDescriptorFactory);
+        final ParameterDescriptorFactory parameterDescriptorFactory = new ParameterDescriptorFactory();
+        final ValueContainer valueContainer = ValueContainer.createMapBacked(parameterMap, operatorSpi.getOperatorClass(), parameterDescriptorFactory);
 
-        Xpp3Dom config = node.getConfiguration();
-        int count = config.getChildCount();
+        final Xpp3Dom config = node.getConfiguration();
+        final int count = config.getChildCount();
         for (int i = 0; i < count; ++i) {
-            Xpp3Dom child = config.getChild(i);
-            String name = child.getName();
-            String value = child.getValue();
+            final Xpp3Dom child = config.getChild(i);
+            final String name = child.getName();
+            final String value = child.getValue();
             if(name == null || value == null)
                 continue;
 
             try {
-                Converter converter = getConverter(valueContainer, name);
-                parameterMap.put(name, converter.parse(value));
+                if(child.getChildCount() == 0) {
+                    final Converter converter = getConverter(valueContainer, name);
+                    parameterMap.put(name, converter.parse(value));
+                } else {
+                    final Converter converter = getConverter(valueContainer, name);
+                    Object[] objArray = new Object[child.getChildCount()];
+                    int c = 0;
+                    for(Xpp3Dom ch : child.getChildren()) {
+                        final String v = ch.getValue();
+
+                        objArray[c++] = converter.parse(v);
+                    }
+                    parameterMap.put(name, objArray);
+                }
+
             } catch(ConversionException e) {
                 throw new IllegalArgumentException(name);
             }

@@ -240,7 +240,7 @@ public class Project extends Observable {
     }
 
     public void createNewFolder(ProjectSubFolder subFolder) {
-        PromptDialog dlg = new PromptDialog("New Folder", "Name", "");
+        PromptDialog dlg = new PromptDialog("New Folder", "Name", "", false);
         dlg.show();
         if(dlg.IsOK()) {
             ProjectSubFolder newFolder = subFolder.addSubFolder(dlg.getValue());
@@ -417,7 +417,7 @@ public class Project extends Observable {
     }
 
     public void renameFolder(ProjectSubFolder subFolder) {
-        PromptDialog dlg = new PromptDialog("Rename Folder", "Name", "");
+        PromptDialog dlg = new PromptDialog("Rename Folder", "Name", "", false);
         dlg.show();
         if(dlg.IsOK()) {
             subFolder.renameTo(dlg.getValue());

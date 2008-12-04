@@ -11,6 +11,7 @@ import org.esa.beam.framework.gpf.graph.Graph;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.visat.dialogs.PromptDialog;
 import org.esa.nest.util.DatUtils;
 import org.esa.nest.dat.plugins.graphbuilder.GraphPanel;
 import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
@@ -36,6 +37,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private static final ImageIcon loadIcon = DatUtils.LoadIcon("org/esa/nest/icons/open.png");
     private static final ImageIcon clearIcon = DatUtils.LoadIcon("org/esa/nest/icons/edit-clear.png");
     private static final ImageIcon helpIcon = DatUtils.LoadIcon("org/esa/nest/icons/help-browser.png");
+    private static final ImageIcon infoIcon = DatUtils.LoadIcon("org/esa/nest/icons/info22.png");
 
     private AppContext appContext;
     private JPanel mainPanel;
@@ -63,7 +65,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         graphEx.addObserver(this);
 
         initUI();
-        super.getJDialog().setMinimumSize(new Dimension(500, 700));
+        super.getJDialog().setMinimumSize(new Dimension(600, 700));
     }
 
     /**
@@ -171,6 +173,14 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
             }
         });
 
+        JButton infoButton = CreateButton("infoButton", "Info", infoIcon, panel);
+        infoButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(final ActionEvent e) {
+                OnInfo();
+            }
+        });
+
         JButton helpButton = CreateButton("helpButton", "Help", helpIcon, panel);
         helpButton.addActionListener(new ActionListener() {
 
@@ -183,6 +193,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         panel.add(loadButton, gbc);
         panel.add(saveButton, gbc);
         panel.add(clearButton, gbc);
+        panel.add(infoButton, gbc);
         panel.add(helpButton, gbc);
         panel.add(processButton, gbc);
     }
@@ -341,6 +352,17 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     }
 
     /**
+     * Call decription dialog
+     */
+    private void OnInfo() {
+        PromptDialog dlg = new PromptDialog("Graph Description", "Description", graphEx.getGraphDescription(), true);
+        dlg.show();
+        if(dlg.IsOK()) {
+            graphEx.setGraphDescription(dlg.getValue());
+        }
+    }
+
+    /**
      * lets all operatorUIs validate their parameters
      * If parameter validation fails then a list of the failures is presented to the user
      * @return true if validation passes
@@ -348,20 +370,21 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     boolean ValidateAllNodes() {
 
         if(isProcessing) return false;
-        
-        UIValidation validation = null;
-        StringBuilder msg = new StringBuilder(100);
-        Vector nodeList = graphEx.GetGraphNodes();
+
+        boolean isValid = true;
+        final StringBuilder msg = new StringBuilder(100);
+        final Vector nodeList = graphEx.GetGraphNodes();
         for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
         {
-            GraphNode n = (GraphNode) e.nextElement();
-            validation = n.validateParameterMap();
+            final GraphNode n = (GraphNode) e.nextElement();
+            final UIValidation validation = n.validateParameterMap();
             if(!validation.getState()) {
+                isValid = false;
                 msg.append(validation.getMsg()).append('\n');
             }
         }
 
-        if(validation != null && !validation.getState()) {
+        if(!isValid) {
 
             statusLabel.setText(msg.toString());
             return false;
@@ -382,9 +405,9 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     public void update(java.util.Observable subject, java.lang.Object data) {
 
         try {
-            GraphExecuter.GraphEvent event = (GraphExecuter.GraphEvent)data;
-            GraphNode node = (GraphNode)event.data;
-            String opID = node.getID();
+            final GraphExecuter.GraphEvent event = (GraphExecuter.GraphEvent)data;
+            final GraphNode node = (GraphNode)event.data;
+            final String opID = node.getID();
             if(event.eventType == GraphExecuter.events.ADD_EVENT) {
 
                 tabbedPanel.addTab(opID, null, CreateOperatorTab(node), opID + " Operator");
