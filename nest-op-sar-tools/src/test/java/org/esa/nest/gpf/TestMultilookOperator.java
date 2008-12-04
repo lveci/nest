@@ -39,6 +39,7 @@ public class TestMultilookOperator extends TestCase {
         MultilookOp op = (MultilookOp)spi.createOperator();
         assertNotNull(op);
         op.setSourceProduct(sourceProduct);
+        op.setNumRangeLooks(4);
 
         // get targetProduct: execute initialize()
         Product targetProduct = op.getTargetProduct();
