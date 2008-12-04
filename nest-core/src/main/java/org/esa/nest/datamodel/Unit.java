@@ -20,7 +20,10 @@ public class Unit {
 
     public static final String DB = "db";
 
-    public enum UnitType { AMPLITUDE, INTENSITY, COMPLEX, PHASE, INTENSITY_DB, AMPLITUDE_DB };
+    public static final String AMPLITUDE_DB = AMPLITUDE+'_'+DB;
+    public static final String INTENSITY_DB = INTENSITY+'_'+DB;
+
+    public enum UnitType { AMPLITUDE, INTENSITY, REAL, IMAGINARY, PHASE, INTENSITY_DB, AMPLITUDE_DB, UNKNOWN }
 
     public static UnitType getUnitType(Band sourceBand) {
 
@@ -37,8 +40,12 @@ public class Unit {
                 return UnitType.INTENSITY;
         } else if (unit.contains(PHASE)) {
             return UnitType.PHASE;
+        } else if (unit.contains(REAL)) {
+             return UnitType.REAL;
+        } else if (unit.contains(IMAGINARY)) {
+             return UnitType.IMAGINARY;
         } else {
-            return UnitType.COMPLEX;
+            return UnitType.UNKNOWN;
         }
     }
 }

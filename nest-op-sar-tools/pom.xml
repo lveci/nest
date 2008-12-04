@@ -18,10 +18,6 @@
       <artifactId>junit</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.bc.ceres</groupId>
-      <artifactId>ceres-core</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.esa.beam</groupId>
       <artifactId>beam-core</artifactId>
     </dependency>
