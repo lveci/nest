@@ -24,10 +24,15 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.nest.util.DatUtils;
 
 import javax.media.jai.JAI;
 import java.awt.*;
 import java.util.HashMap;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * The operator evaluates the following local statistics for the user selected area of the image, and produces
@@ -241,7 +246,7 @@ public class DataAnalysisOp extends Operator {
         if (!statsCalculated) {
             return;
         }
-        
+        /*
         for (String bandName : statisticsBandIndex.keySet())  {
 
             int bandIdx = statisticsBandIndex.get(bandName);
@@ -265,6 +270,59 @@ public class DataAnalysisOp extends Operator {
             System.out.println("coefVar[" + bandIdx + "] = " + coefVar[bandIdx]);
             System.out.println("enl[" + bandIdx + "] = " + enl[bandIdx]);
             System.out.println();
+        }
+        */
+        FileOutputStream out; // declare a file output object
+        PrintStream p; // declare a print stream object
+        String fileName = sourceProduct.getName() + "_statistics.txt";
+        try {
+            File appUserDir = new File(DatUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
+            if(!appUserDir.exists()) {
+                appUserDir.mkdirs();
+            }
+            fileName = appUserDir.toString() + File.separator + fileName;
+            out = new FileOutputStream(fileName);
+
+            // Connect print stream to the output stream
+            p = new PrintStream(out);
+
+            p.println();
+            for (String bandName : statisticsBandIndex.keySet())  {
+
+                int bandIdx = statisticsBandIndex.get(bandName);
+                double m = sum[bandIdx] / numOfPixels;
+                double m2 = sum2[bandIdx] / numOfPixels;
+                double m4 = sum4[bandIdx] / numOfPixels;
+
+                mean[bandIdx] = m;
+                std[bandIdx] = Math.sqrt(m2 - m*m);
+                coefVar[bandIdx] = Math.sqrt(m4 - m2*m2) / m2;
+                enl[bandIdx] = m2*m2 / (m4 - m2*m2);
+
+                p.println();
+                p.println("Band: " + bandName);
+                p.format("Total pixels = %d", numOfPixels);
+                p.println();
+                p.format("Min = %8.3f", min[bandIdx]);
+                p.println();
+                p.format("Max = %15.3f", max[bandIdx]);
+                p.println();
+                //p.format("Sum = %15.3f", sum[bandIdx]);
+                //p.println();
+                p.format("Mean = %8.3f", mean[bandIdx]);
+                p.println();
+                p.format("Standard deviation = %8.3f", std[bandIdx]);
+                p.println();
+                p.format("Coefficient of variation = %8.3f", coefVar[bandIdx]);
+                p.println();
+                p.format("Equivalent number of looks = %8.3f", enl[bandIdx]);
+                p.println();
+            }
+
+            p.close();
+
+        } catch(IOException exc) {
+            throw new OperatorException(exc);
         }
     }
 
