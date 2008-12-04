@@ -331,10 +331,30 @@
             <class>org.esa.nest.dat.actions.ShowHomePageAction</class>
             <text>NEST Home Page</text>
             <mnemonic>B</mnemonic>
+            <separatorAfter>true</separatorAfter>
             <shortDescr>Opens the NEST home page.</shortDescr>
             <description>Opens the NEST home page with the default web browser.</description>
-            <helpId>helpTopics</helpId>
             <placeAfter>helpTopics</placeAfter>
+        </action>
+
+        <action>
+            <id>ReportABug</id>
+            <parent>help</parent>
+            <class>org.esa.nest.dat.actions.ReportABugAction</class>
+            <text>Report A Bug</text>
+            <shortDescr>Email a bug to Array</shortDescr>
+            <description>Email a problem with NEST to Array</description>
+            <placeAfter>helpTopics</placeAfter>
+        </action>
+
+        <action>
+            <id>RequestFeature</id>
+            <parent>help</parent>
+            <class>org.esa.nest.dat.actions.RequestFeatureAction</class>
+            <text>Request a Feature</text>
+            <shortDescr>Email a request for a new feature</shortDescr>
+            <description>Email a new feature request to Array</description>
+            <placeAfter>ReportABug</placeAfter>
         </action>
 
         <action>
@@ -349,7 +369,7 @@
             <smallIcon>icons/About16.gif</smallIcon>
             <largeIcon>icons/About24.gif</largeIcon>
             <helpId>about</helpId>
-            <placeAfter>showNestHomePage</placeAfter>
+            <placeAfter>RequestFeature</placeAfter>
             <separatorBefore>true</separatorBefore>
         </action>
 
@@ -458,7 +478,7 @@
             <class>org.esa.nest.dat.actions.ShowCrossSpectraViewAction</class>
             <text>Open Polar Wave View</text>
             <shortDescr>Open Polar Wave View</shortDescr>
-            <parent>sartools</parent>
+            <parent>view</parent>
             <context>band</context>
             <helpId>showPolarWaveView</helpId>
         </action>

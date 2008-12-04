@@ -21,6 +21,9 @@
         <module>beam-visat-rcp</module>
     </dependency>
     <dependency>
+        <module>beam-gpf</module>
+    </dependency>
+    <dependency>
         <module>beam-envisat-reader</module>
     </dependency>
     
