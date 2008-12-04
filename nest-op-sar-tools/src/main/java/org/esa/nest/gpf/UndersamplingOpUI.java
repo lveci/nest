@@ -23,7 +23,7 @@ import java.io.File;
  */
 public class UndersamplingOpUI extends BaseOperatorUI {
 
-    private JList bandList = new JList();
+    private final JList bandList = new JList();
     private final JComboBox method = new JComboBox(new String[] {       UndersamplingOp.SUB_SAMPLING,
                                                                         UndersamplingOp.KERNEL_FILTERING });
 
@@ -80,32 +80,7 @@ public class UndersamplingOpUI extends BaseOperatorUI {
 
     public void initParameters() {
 
-        final Object selectedValues[] = bandList.getSelectedValues();
-
-        final String[] names = getBandNames();
-        bandList.removeAll();
-        bandList.setListData(names);
-
-        final int size = bandList.getModel().getSize();
-        final ArrayList<Integer> indeces = new ArrayList<Integer>(size);
-
-        for (Object selectedValue : selectedValues) {
-            final String selValue = (String) selectedValue;
-            //System.out.println("initParams: selected=" + selValue);
-
-            for (int j = 0; j < size; ++j) {
-                final String val = (String) bandList.getModel().getElementAt(j);
-                if (val.equals(selValue)) {
-                    indeces.add(j);
-                    break;
-                }
-            }
-        }
-        final int[] selIndex = new int[indeces.size()];
-        for(int i=0; i < indeces.size(); ++i) {
-            selIndex[i] = indeces.get(i);
-        }
-        bandList.setSelectedIndices(selIndex);
+        OperatorUIUtils.initBandList(bandList, getBandNames());
 
         method.setSelectedItem(paramMap.get("method"));
         subSamplingX.setText(String.valueOf(paramMap.get("subSamplingX")));
@@ -133,14 +108,7 @@ public class UndersamplingOpUI extends BaseOperatorUI {
 
     public void updateParameters() {
 
-        final Object selectedValues[] = bandList.getSelectedValues();
-        final String bandNames[] = new String[selectedValues.length];
-        for(int i=0; i<selectedValues.length; ++i) {
-            bandNames[i] = (String)selectedValues[i];
-            //System.out.println("updateParams: bandName="+ bandNames[i]);
-        }
-
-        paramMap.put("sourceBandNames", bandNames);
+        OperatorUIUtils.updateBandList(bandList, paramMap);
 
         paramMap.put("method", method.getSelectedItem());
         paramMap.put("subSamplingX", Integer.parseInt(subSamplingX.getText()));
@@ -197,9 +165,9 @@ public class UndersamplingOpUI extends BaseOperatorUI {
         });
 
         int savedY = ++_gbc.gridy;
-        addTextField(contentPane, _gbc, subSamplingXLabel, subSamplingX);
+        OperatorUIUtils.addTextField(contentPane, _gbc, subSamplingXLabel, subSamplingX);
         _gbc.gridy++;
-        addTextField(contentPane, _gbc, subSamplingYLabel, subSamplingY);
+        OperatorUIUtils.addTextField(contentPane, _gbc, subSamplingYLabel, subSamplingY);
 
         _gbc.gridy = savedY;
         _gbc.gridx = 0;
@@ -210,10 +178,10 @@ public class UndersamplingOpUI extends BaseOperatorUI {
             public void itemStateChanged(ItemEvent event) {
                 String item = (String)filterType.getSelectedItem();
                 if(item.equals(UndersamplingOp.USER_DEFINED)) {
-                    enableTextField(kernelFileLabel, kernelFile, true);
+                    OperatorUIUtils.enableTextField(kernelFileLabel, kernelFile, true);
                     filterSize.setVisible(false);
                 } else {
-                    enableTextField(kernelFileLabel, kernelFile, false);
+                    OperatorUIUtils.enableTextField(kernelFileLabel, kernelFile, false);
                     filterSize.setVisible(true);
                 }
             }
@@ -227,8 +195,8 @@ public class UndersamplingOpUI extends BaseOperatorUI {
         enableKernelFiltering(false);
 
         _gbc.gridy = savedY;
-        addTextField(contentPane, _gbc, kernelFileLabel, kernelFile);
-        enableTextField(kernelFileLabel, kernelFile, false);
+        OperatorUIUtils.addTextField(contentPane, _gbc, kernelFileLabel, kernelFile);
+        OperatorUIUtils.enableTextField(kernelFileLabel, kernelFile, false);
 
         _gbc.gridy++;
         _gbc.gridx = 0;
@@ -242,19 +210,19 @@ public class UndersamplingOpUI extends BaseOperatorUI {
         });
 
         savedY = ++_gbc.gridy;
-        addTextField(contentPane, _gbc, targetImageHeightLabel, targetImageHeight);
+        OperatorUIUtils.addTextField(contentPane, _gbc, targetImageHeightLabel, targetImageHeight);
         _gbc.gridy++;
-        addTextField(contentPane, _gbc, targetImageWidthLabel, targetImageWidth);
+        OperatorUIUtils.addTextField(contentPane, _gbc, targetImageWidthLabel, targetImageWidth);
         
         _gbc.gridy = savedY;
-        addTextField(contentPane, _gbc, widthRatioLabel, widthRatio);
+        OperatorUIUtils.addTextField(contentPane, _gbc, widthRatioLabel, widthRatio);
         _gbc.gridy++;
-        addTextField(contentPane, _gbc, heightRatioLabel, heightRatio);
+        OperatorUIUtils.addTextField(contentPane, _gbc, heightRatioLabel, heightRatio);
 
         _gbc.gridy = savedY;
-        addTextField(contentPane, _gbc, rangeSpacingLabel, rangeSpacing);
+        OperatorUIUtils.addTextField(contentPane, _gbc, rangeSpacingLabel, rangeSpacing);
         _gbc.gridy++;
-        addTextField(contentPane, _gbc, azimuthSpacingLabel, azimuthSpacing);
+        OperatorUIUtils.addTextField(contentPane, _gbc, azimuthSpacingLabel, azimuthSpacing);
 
         updateOutputImageBy(false);
 
@@ -262,28 +230,28 @@ public class UndersamplingOpUI extends BaseOperatorUI {
     }
 
     private void enableSubSampling(boolean flag) {
-        enableTextField(subSamplingXLabel, subSamplingX, flag);
-        enableTextField(subSamplingYLabel, subSamplingY, flag);
+        OperatorUIUtils.enableTextField(subSamplingXLabel, subSamplingX, flag);
+        OperatorUIUtils.enableTextField(subSamplingYLabel, subSamplingY, flag);
     }
 
     private void enableKernelFiltering(boolean flag) {
-        enableTextField(filterTypeLabel, filterType, flag);
-        enableTextField(filterSizeLabel, filterSize, flag);
+        OperatorUIUtils.enableTextField(filterTypeLabel, filterType, flag);
+        OperatorUIUtils.enableTextField(filterSizeLabel, filterSize, flag);
     }
 
     private void enableRowColumn(boolean flag) {
-        enableTextField(targetImageWidthLabel, targetImageWidth, flag);
-        enableTextField(targetImageHeightLabel, targetImageHeight, flag);
+        OperatorUIUtils.enableTextField(targetImageWidthLabel, targetImageWidth, flag);
+        OperatorUIUtils.enableTextField(targetImageHeightLabel, targetImageHeight, flag);
     }
 
     private void enableRatio(boolean flag) {
-        enableTextField(widthRatioLabel, widthRatio, flag);
-        enableTextField(heightRatioLabel, heightRatio, flag);
+        OperatorUIUtils.enableTextField(widthRatioLabel, widthRatio, flag);
+        OperatorUIUtils.enableTextField(heightRatioLabel, heightRatio, flag);
     }
 
     private void enablePixelSpacing(boolean flag) {
-        enableTextField(rangeSpacingLabel, rangeSpacing, flag);
-        enableTextField(azimuthSpacingLabel, azimuthSpacing, flag);
+        OperatorUIUtils.enableTextField(rangeSpacingLabel, rangeSpacing, flag);
+        OperatorUIUtils.enableTextField(azimuthSpacingLabel, azimuthSpacing, flag);
     }
 
     private void updateOutputImageBy(boolean show) {
@@ -313,17 +281,4 @@ public class UndersamplingOpUI extends BaseOperatorUI {
             enablePixelSpacing(false);
         }             
     }
-
-    private void enableTextField(JComponent label, JComponent field, boolean flag) {
-        label.setVisible(flag);
-        field.setVisible(flag);
-    }
-
-    private void addTextField(JPanel contentPane, GridBagConstraints gbc, JLabel label, JComponent component) {
-        gbc.gridx = 0;
-        contentPane.add(label, gbc);
-        gbc.gridx = 1;
-        contentPane.add(component, gbc);
-    }
-
 }

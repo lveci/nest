@@ -103,8 +103,6 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
 
             JComponent paremetersPanel = opUI.CreateOpTab(operatorName, parameterMap, appContext);
 
-
-
             //BindingContext context = new BindingContext(valueContainer);
             //ParametersPane parametersPane = new ParametersPane(context);
             // JPanel paremetersPanel = parametersPane.createPanel();

@@ -26,7 +26,7 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.dataio.OperatorUtils;
+import org.esa.nest.gpf.OperatorUtils;
 
 import java.awt.*;
 import java.util.ArrayList;

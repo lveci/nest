@@ -28,7 +28,7 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.dataio.OperatorUtils;
+import org.esa.nest.gpf.OperatorUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
