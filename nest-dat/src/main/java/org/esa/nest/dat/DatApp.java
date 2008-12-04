@@ -3,6 +3,11 @@ package org.esa.nest.dat;
 
 import com.jidesoft.action.CommandBar;
 import com.jidesoft.action.CommandMenuBar;
+import com.jidesoft.status.LabelStatusBarItem;
+import com.jidesoft.status.TimeStatusBarItem;
+import com.jidesoft.status.MemoryStatusBarItem;
+import com.jidesoft.status.ResizeStatusBarItem;
+import com.jidesoft.swing.JideBoxLayout;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.ui.*;
 import org.esa.beam.framework.ui.application.ApplicationDescriptor;
@@ -51,6 +56,23 @@ public final class DatApp extends VisatApp {
             VisatApp.getApp().getPreferences().setPropertyString("visat.showGettingStarted", "false");
             
         }
+    }
+
+    /**
+     * Creates a standard status bar for this application.
+     */
+    @Override
+    protected com.jidesoft.status.StatusBar createStatusBar() {
+        final com.jidesoft.status.StatusBar statusBar = super.createStatusBar();
+
+        final LabelStatusBarItem dimensions = new LabelStatusBarItem("STATUS_BAR_DIMENSIONS_ITEM");
+        dimensions.setText("");
+        dimensions.setPreferredWidth(50);
+        dimensions.setAlignment(JLabel.CENTER);
+        dimensions.setToolTip("Displays image dimensions");
+        statusBar.add(dimensions, 3);
+
+        return statusBar;
     }
 
     protected CommandBar createViewsToolBar() {
