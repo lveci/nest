@@ -106,23 +106,28 @@ public final class MultilookOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        absRoot = OperatorUtils.getAbstractedMetadata(sourceProduct);
+        try {
+            absRoot = OperatorUtils.getAbstractedMetadata(sourceProduct);
 
-        getSRGRFlag();
+            getSRGRFlag();
 
-        getRangeAzimuthSpacing();
+            getRangeAzimuthSpacing();
 
-        getRangeAzimuthLooks();
+            getRangeAzimuthLooks();
 
-        getSourceImageDimension();
+            getSourceImageDimension();
 
-        if (!srgrFlag) {
-            getIncidenceAngleAtCentreRangePixel();
+            if (!srgrFlag) {
+                getIncidenceAngleAtCentreRangePixel();
+            }
+
+            computeAzimuthLooks();
+
+            createTargetProduct();
+
+        } catch(Exception e) {
+            throw new OperatorException(e.getMessage());
         }
-
-        computeAzimuthLooks();
-
-        createTargetProduct();
     }
 
     /**
@@ -281,14 +286,14 @@ public final class MultilookOp extends Operator {
             groundRangeSpacing = rangeSpacing / Math.sin(incidenceAngleAtCentreRangePixel*MathUtils.DTOR);
         }
 
-        nAzLooks = Math.max(1, nRgLooks * (int)(groundRangeSpacing / azimuthSpacing + 0.5));
-        System.out.println("nAzLooks = " + nAzLooks);
+        nAzLooks = Math.max(1, (int)((double)nRgLooks * groundRangeSpacing / azimuthSpacing + 0.5));
+        //System.out.println("nAzLooks = " + nAzLooks);
     }
 
     /**
      * Create target product.
      */
-    void createTargetProduct() {
+    void createTargetProduct() throws Exception {
 
         targetImageWidth = sourceImageWidth / nRgLooks;
         targetImageHeight = sourceImageHeight / nAzLooks;
@@ -312,78 +317,29 @@ public final class MultilookOp extends Operator {
 
     /**
      * Update metadata in the target product.
+     * @throws Exception The exceptions.
      */
-    void updateTargetProductMetadata() {
+    void updateTargetProductMetadata() throws Exception {
 
-        MetadataElement abs = targetProduct.getMetadataRoot().getElement("Abstracted Metadata");
-        if (abs == null) {
-            throw new OperatorException("Abstracted Metadata not found");
-        }
+        MetadataElement absTgt = OperatorUtils.getAbstractedMetadata(targetProduct);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_looks, azimuthLooks*nAzLooks);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_looks, rangeLooks*nRgLooks);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_spacing, azimuthSpacing*nAzLooks);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_spacing, rangeSpacing*nRgLooks);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetImageHeight);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);
 
-        MetadataAttribute azimuthLooksAttr = abs.getAttribute(AbstractMetadata.azimuth_looks);
-        if (azimuthLooksAttr == null) {
-            throw new OperatorException(AbstractMetadata.azimuth_looks + " not found");
-        }
-        azimuthLooksAttr.getData().setElemInt(azimuthLooks*nAzLooks);
+        final float oldLineTimeInterval = (float)absTgt.getAttributeDouble(AbstractMetadata.line_time_interval);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.line_time_interval, oldLineTimeInterval*nAzLooks);
 
-        MetadataAttribute rangeLooksAttr = abs.getAttribute(AbstractMetadata.range_looks);
-        if (rangeLooksAttr == null) {
-            throw new OperatorException(AbstractMetadata.range_looks + " not found");
-        }
-        rangeLooksAttr.getData().setElemInt(rangeLooks*nRgLooks);
-
-        MetadataAttribute azimuthSpacingAttr = abs.getAttribute(AbstractMetadata.azimuth_spacing);
-        if (azimuthSpacingAttr == null) {
-            throw new OperatorException(AbstractMetadata.azimuth_spacing + " not found");
-        }
-        azimuthSpacingAttr.getData().setElemDouble(azimuthSpacing*nAzLooks);
-
-        MetadataAttribute rangeSpacingAttr = abs.getAttribute(AbstractMetadata.range_spacing);
-        if (rangeSpacingAttr == null) {
-            throw new OperatorException(AbstractMetadata.range_spacing + " not found");
-        }
-        rangeSpacingAttr.getData().setElemDouble(rangeSpacing*nRgLooks);
-
-        MetadataAttribute numOutputLinesAttr = abs.getAttribute(AbstractMetadata.num_output_lines);
-        if (numOutputLinesAttr == null) {
-            throw new OperatorException(AbstractMetadata.num_output_lines + " not found");
-        }
-        numOutputLinesAttr.getData().setElemInt(targetImageHeight);
-
-        MetadataAttribute numSamplesPerLinesAttr = abs.getAttribute(AbstractMetadata.num_samples_per_line);
-        if (numSamplesPerLinesAttr == null) {
-            throw new OperatorException(AbstractMetadata.num_samples_per_line + " not found");
-        }
-        numSamplesPerLinesAttr.getData().setElemInt(targetImageWidth);
-
-        if (!srgrFlag) {
-            MetadataAttribute srgeFlagAttr = abs.getAttribute(AbstractMetadata.srgr_flag);
-            if (srgeFlagAttr == null) {
-                throw new OperatorException(AbstractMetadata.srgr_flag + " not found");
-            }
-            srgeFlagAttr.getData().setElemBoolean(true);
-        }
-
-        MetadataAttribute lineTimeIntervalAttr = abs.getAttribute(AbstractMetadata.line_time_interval);
-        if (lineTimeIntervalAttr == null) {
-            throw new OperatorException(AbstractMetadata.line_time_interval + " not found");
-        }
-        float oldLineTimeInterval = lineTimeIntervalAttr.getData().getElemFloat();
-        lineTimeIntervalAttr.getData().setElemDouble(oldLineTimeInterval*nAzLooks);
-
-        MetadataAttribute firstLineTimeAttr = abs.getAttribute(AbstractMetadata.first_line_time);
-        if (firstLineTimeAttr == null) {
-            throw new OperatorException(AbstractMetadata.first_line_time + " not found");
-        }
-        String oldFirstLineTime = firstLineTimeAttr.getData().getElemString();
+        final String oldFirstLineTime = absTgt.getAttributeString(AbstractMetadata.first_line_time);
         int idx = oldFirstLineTime.lastIndexOf(':') + 1;
         String oldSecondsStr = oldFirstLineTime.substring(idx);
         double oldSeconds = Double.parseDouble(oldSecondsStr);
         double newSeconds = oldSeconds + oldLineTimeInterval*((nAzLooks - 1)/2.0);
         String newFirstLineTime = String.valueOf(oldFirstLineTime.subSequence(0, idx)) + newSeconds + "000000";
-        abs.removeAttribute(firstLineTimeAttr);
-        abs.addAttribute(new MetadataAttribute(
-                AbstractMetadata.first_line_time, ProductData.createInstance(newFirstLineTime.substring(0,27)), false));        
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_line_time,
+            AbstractMetadata.parseUTC(newFirstLineTime.substring(0,27)));
     }
 
     private void addSelectedBands() {
@@ -570,6 +526,13 @@ public final class MultilookOp extends Operator {
         return meanValue;
     }
 
+    /**
+     * Set the number of range looks. This method is for unit test only.
+     * @param numRangelooks The number of range looks.
+     */
+    public void setNumRangeLooks(int numRangelooks) {
+        nRgLooks = numRangelooks;
+    }
     /**
      * The SPI is used to register this operator in the graph processing framework
      * via the SPI configuration file
