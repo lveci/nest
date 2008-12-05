@@ -74,7 +74,7 @@ public class UndersamplingOpUI extends BaseOperatorUI {
         final JComponent panel = createPanel();
         initParameters();
 
-        return panel;
+        return new JScrollPane(panel);
     }
 
     public void initParameters() {
@@ -236,6 +236,8 @@ public class UndersamplingOpUI extends BaseOperatorUI {
     private void enableKernelFiltering(boolean flag) {
         OperatorUIUtils.enableComponents(filterTypeLabel, filterType, flag);
         OperatorUIUtils.enableComponents(filterSizeLabel, filterSize, flag);
+        if(!flag)
+            OperatorUIUtils.enableComponents(kernelFileLabel, kernelFile, flag);
     }
 
     private void enableRowColumn(boolean flag) {

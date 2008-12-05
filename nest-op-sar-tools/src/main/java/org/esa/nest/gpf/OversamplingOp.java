@@ -39,7 +39,7 @@ import shared.array.ComplexArray;
  * Oversample
  */
 
-@OperatorMetadata(alias="Oversample", internal=true)
+@OperatorMetadata(alias="Oversample", description="Oversample the datset")
 public class OversamplingOp extends Operator {
 
     @SourceProduct(alias="source")

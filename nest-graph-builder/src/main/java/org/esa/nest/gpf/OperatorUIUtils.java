@@ -25,6 +25,7 @@ public class OperatorUIUtils {
         bandList.removeAll();
         bandList.setListData(bandNames);
         bandList.setFixedCellWidth(200);
+        bandList.setMinimumSize(new Dimension(50, 4));
         
         final int size = bandList.getModel().getSize();
         final ArrayList<Integer> indeces = new ArrayList<Integer>(size);

@@ -41,7 +41,7 @@ public class OversamplingOpUI extends BaseOperatorUI {
     private final JLabel heightRatioLabel = new JLabel("Height Ratio:");
     private final JLabel rangeSpacingLabel = new JLabel("Range Spacing (m):");
     private final JLabel azimuthSpacingLabel = new JLabel("Azimuth Spacing (m):");
-    private final JLabel outputImageByLabel = new JLabel("Output Image By:    ");
+    private final JLabel outputImageByLabel = new JLabel("Output Image By:     ");
 
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
