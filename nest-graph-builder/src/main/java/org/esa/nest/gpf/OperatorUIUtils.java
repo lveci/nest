@@ -57,7 +57,7 @@ public class OperatorUIUtils {
         paramMap.put("sourceBandNames", bandNames);
     }
 
-    public static void enableTextField(JComponent label, JComponent field, boolean flag) {
+    public static void enableComponents(JComponent label, JComponent field, boolean flag) {
         label.setVisible(flag);
         field.setVisible(flag);
     }
