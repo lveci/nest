@@ -23,7 +23,7 @@ public class RequestFeatureAction extends ExecCommand {
     public void actionPerformed(CommandEvent event) {
 
         final Desktop desktop = Desktop.getDesktop();
-        final String mail = PR_EMAIL + "?subject=NEST-Feature-Request";
+        final String mail = PR_EMAIL + "?subject=NEST-Feature-Request&body=Description:%0A%0A%0A%0A";
 
         try {
             desktop.mail(URI.create(mail));
