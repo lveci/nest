@@ -106,26 +106,31 @@ public class OversamplingOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        sourceImageWidth = sourceProduct.getSceneRasterWidth();
-        sourceImageHeight = sourceProduct.getSceneRasterHeight();
+        try {
+            sourceImageWidth = sourceProduct.getSceneRasterWidth();
+            sourceImageHeight = sourceProduct.getSceneRasterHeight();
 
-        abs = OperatorUtils.getAbstractedMetadata(sourceProduct);
+            abs = OperatorUtils.getAbstractedMetadata(sourceProduct);
 
-        getSrcImagePixelSpacings();
+            getSrcImagePixelSpacings();
 
-        getSampleType();
+            getSampleType();
 
-        getProductType();
+            getProductType();
 
-        if (!isDetectedSampleType) {
-            getPulseRepetitionFrequency();
-            getRangeSamplingRate();
-            computeDopplerCentroidFrequencies();
+            if (!isDetectedSampleType) {
+                getPulseRepetitionFrequency();
+                getRangeSamplingRate();
+                computeDopplerCentroidFrequencies();
+            }
+
+            computeTargetImageSizeAndPixelSpacings();
+
+            createTargetProduct();
+
+        } catch(Exception e) {
+            throw new OperatorException(e.getMessage());
         }
-
-        computeTargetImageSizeAndPixelSpacings();
-
-        createTargetProduct();
     }
 
     /**
@@ -379,7 +384,7 @@ public class OversamplingOp extends Operator {
         }
     }
 
-    private void createTargetProduct() {
+    private void createTargetProduct() throws Exception {
 
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),
@@ -455,8 +460,16 @@ public class OversamplingOp extends Operator {
         }
     }
 
-    private void updateTargetProductMetadata() {
+    private void updateTargetProductMetadata() throws Exception {
 
+        MetadataElement absTgt = OperatorUtils.getAbstractedMetadata(targetProduct);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_spacing, azimuthSpacing);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_spacing, rangeSpacing);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetImageHeight);
+
+        final float oldLineTimeInterval = (float)absTgt.getAttributeDouble(AbstractMetadata.line_time_interval);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.line_time_interval, oldLineTimeInterval/heightRatio);
     }
 
     /**
