@@ -1,22 +1,20 @@
 package org.esa.nest.dat.views.polarview;
 
+import org.esa.beam.visat.VisatApp;
+
 import java.awt.*;
 
-abstract class AxisGraphics
-{
+abstract class AxisGraphics {
 
-    AxisGraphics()
-    {
-        backgroundColor = Color.white;
+    AxisGraphics() {
+        backgroundColor = VisatApp.getApp().getDesktopPane().getBackground();
     }
 
-    public Color getBackground()
-    {
+    public Color getBackground() {
         return backgroundColor;
     }
 
-    public void setBackground(Color backgroundColor)
-    {
+    public void setBackground(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
     }
 
@@ -30,33 +28,28 @@ abstract class AxisGraphics
 
     abstract int maxTickSize();
 
-    void setGraphics(Graphics g)
-    {
+    void setGraphics(Graphics g) {
         this.g = g;
     }
 
-    void drawTick(int tickPixel, int tickLength)
-    {
+    void drawTick(int tickPixel, int tickLength) {
         drawLine(tickPixel, 0, tickPixel, tickLength);
     }
 
-    void drawMultiLineTickName(String name, int tickPixel, int tickLength, FontMetrics fm)
-    {
+    void drawMultiLineTickName(String name, int tickPixel, int tickLength, FontMetrics fm) {
         int height = fm.getAscent();
         int leading = Math.max(fm.getLeading(), 3);
         int lineCount = 0;
         int p = 0;
-        do
-        {
+        do {
             p = name.indexOf('\n', p);
             lineCount++;
-        } while(++p > 0);
+        } while (++p > 0);
         p = 0;
         int f = 0;
-        for(int i = 1; i <= lineCount; i++)
-        {
+        for (int i = 1; i <= lineCount; i++) {
             p = name.indexOf('\n', f);
-            if(p < 0)
+            if (p < 0)
                 p = name.length();
             String text = name.substring(f, p);
             Rectangle bb = getTickNameBB(text, tickPixel, tickLength, i, lineCount, fm);
@@ -70,18 +63,16 @@ abstract class AxisGraphics
 
     }
 
-    Dimension getTickLabelBounds(String name, Font font)
-    {
+    Dimension getTickLabelBounds(String name, Font font) {
         FontMetrics fm = g.getFontMetrics(font);
         int maxWidth = 0;
         int height = 0;
         int p = 0;
         int f = 0;
-        do
-        {
+        do {
             p = name.indexOf('\n', f);
             int n;
-            if(p < 0)
+            if (p < 0)
                 n = name.length();
             else
                 n = p;
@@ -89,23 +80,18 @@ abstract class AxisGraphics
             maxWidth = Math.max(fm.stringWidth(text), maxWidth);
             height += fm.getAscent();
             f = p + 1;
-        } while(f > 0);
+        } while (f > 0);
         return new Dimension(maxWidth, height);
     }
 
-    void drawPolyline(int x[], int y[], int points)
-    {
-        if(points == 1)
+    void drawPolyline(int x[], int y[], int points) {
+        if (points == 1)
             g.drawLine(x[0], y[0], x[0], y[0]);
-        else
-        if(points <= 16380)
-        {
+        else if (points <= 16380) {
             g.drawPolyline(x, y, points);
-        } else
-        {
+        } else {
             int o = 0;
-            for(int N = 16380; points > 1; N = Math.min(points, 16380))
-            {
+            for (int N = 16380; points > 1; N = Math.min(points, 16380)) {
                 System.arraycopy(x, o, pointBuffer[0], 0, N);
                 System.arraycopy(y, o, pointBuffer[1], 0, N);
                 g.drawPolyline(pointBuffer[0], pointBuffer[1], N);
@@ -117,28 +103,26 @@ abstract class AxisGraphics
         }
     }
 
-    void drawPolygon(int x[], int y[], int points)
-    {
-        if(points == 1)
+    void drawPolygon(int x[], int y[], int points) {
+        if (points == 1)
             g.drawLine(x[0], y[0], x[0], y[0]);
         else
             g.drawPolygon(x, y, points);
     }
 
-    void fillPolygon(int x[], int y[], int points)
-    {
-        if(points == 1)
+    void fillPolygon(int x[], int y[], int points) {
+        if (points == 1)
             g.drawLine(x[0], y[0], x[0], y[0]);
         else
             g.fillPolygon(x, y, points);
     }
 
-    protected Graphics g;
-    protected Color backgroundColor;
+    Graphics g;
+    private Color backgroundColor;
 
     public static final int MAX_POINTS = 16380;
     private static final int pointBuffer[][] = {
-        new int[16380], new int[16380]
+            new int[16380], new int[16380]
     };
 
 }
