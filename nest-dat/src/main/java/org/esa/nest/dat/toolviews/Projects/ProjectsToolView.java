@@ -61,19 +61,19 @@ public class ProjectsToolView extends AbstractToolView implements Observer {
 
         for (Enumeration e = subFolders.elements(); e.hasMoreElements();)
         {
-            ProjectSubFolder folder = (ProjectSubFolder)e.nextElement();
+            final ProjectSubFolder folder = (ProjectSubFolder)e.nextElement();
 
             final DefaultMutableTreeNode folderNode = new DefaultMutableTreeNode(folder);
             treeNode.add(folderNode);
 
-            Vector<ProjectFile> fileList = folder.getFileList();
+            final Vector<ProjectFile> fileList = folder.getFileList();
             for (Enumeration file = fileList.elements(); file.hasMoreElements();)
             {
                 final DefaultMutableTreeNode fileNode = new DefaultMutableTreeNode(file.nextElement());
                 folderNode.add(fileNode);
             }
 
-            Vector<ProjectSubFolder> moreFolders = folder.getSubFolders();
+            final Vector<ProjectSubFolder> moreFolders = folder.getSubFolders();
             if(!moreFolders.isEmpty())
                 PopulateNode(moreFolders, folderNode);
         }
@@ -92,7 +92,7 @@ public class ProjectsToolView extends AbstractToolView implements Observer {
 
         rootNode.removeAllChildren();
 
-        ProjectSubFolder projectFolders = project.getProjectSubFolders();
+        final ProjectSubFolder projectFolders = project.getProjectSubFolders();
         if(projectFolders == null) {
             projectTree.setRootVisible(false);
             projectTree.populateTree(rootNode);
@@ -100,7 +100,7 @@ public class ProjectsToolView extends AbstractToolView implements Observer {
             rootNode.setUserObject(project.getProjectSubFolders());
             projectTree.setRootVisible(true);
 
-            Vector<ProjectSubFolder> subFolders = project.getProjectSubFolders().getSubFolders();
+            final Vector<ProjectSubFolder> subFolders = project.getProjectSubFolders().getSubFolders();
             PopulateNode(subFolders, rootNode);
             projectTree.populateTree(rootNode);
         }

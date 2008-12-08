@@ -86,11 +86,11 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
 
     public JPopupMenu createPopup(final Object context) {
 
-        JPopupMenu popup = new JPopupMenu();
+        final JPopupMenu popup = new JPopupMenu();
         menuContext = context;
 
         if (context instanceof ProjectSubFolder) {
-            ProjectSubFolder folder = (ProjectSubFolder) context;
+            final ProjectSubFolder folder = (ProjectSubFolder) context;
 
             if(isExpanded(selectedPath))
                 createMenuItem(popup, "Collapse");
@@ -110,8 +110,8 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
             } else {
                 addSeparator(popup);
                 createMenuItem(popup, "Create Folder");
-                JMenuItem menuItemRename = createMenuItem(popup, "Rename Folder");
-                JMenuItem menuItemRemove = createMenuItem(popup, "Remove Folder");
+                final JMenuItem menuItemRename = createMenuItem(popup, "Rename Folder");
+                final JMenuItem menuItemRemove = createMenuItem(popup, "Remove Folder");
 
                 if (!folder.canBeRemoved()) {
                     menuItemRename.setEnabled(false);
@@ -135,8 +135,8 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
         } else if (context instanceof ProjectFile) {
             createMenuItem(popup, "Open");
 
-            DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
-            ProjectSubFolder folder = (ProjectSubFolder)parentNode.getUserObject();
+            final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
+            final ProjectSubFolder folder = (ProjectSubFolder)parentNode.getUserObject();
             if(folder.getFolderType() == ProjectSubFolder.FolderType.PRODUCT) {
                 createMenuItem(popup, "Open Subset");    
             }
@@ -152,7 +152,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
     }
 
     private JMenuItem createMenuItem(final JPopupMenu popup, final String text) {
-        JMenuItem menuItem;
+        final JMenuItem menuItem;
         menuItem = new JMenuItem(text);
         menuItem.addActionListener(this);
         popup.add(menuItem);
@@ -170,57 +170,57 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
      */
     public void actionPerformed(ActionEvent e) {
 
-        DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
+        final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
 
         if (e.getActionCommand().equals("Create Folder")) {
-            ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
+            final ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
             project.createNewFolder(subFolder);
         } else if(e.getActionCommand().equals("Remove Folder")) {
             if (parentNode != null) {
-                Object context = parentNode.getUserObject();
+                final Object context = parentNode.getUserObject();
                 if (context != null) {
-                    ProjectSubFolder parentFolder = (ProjectSubFolder) context;
-                    ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
+                    final ProjectSubFolder parentFolder = (ProjectSubFolder) context;
+                    final ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
                     project.deleteFolder(parentFolder, subFolder);
                 }
             }
         } else if(e.getActionCommand().equals("Rename Folder")) {
             if (parentNode != null) {
-                Object context = parentNode.getUserObject();
+                final Object context = parentNode.getUserObject();
                 if (context != null) {
-                    ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
+                    final ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
                     project.renameFolder(subFolder);
                 }
             }
         } else if(e.getActionCommand().equals("Remove")) {
-            ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
+            final ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
             if (parentNode != null && parentFolder != null) {
-                ProjectFile file = (ProjectFile) menuContext;
+                final ProjectFile file = (ProjectFile) menuContext;
                 final int status = VisatApp.getApp().showQuestionDialog("Are you sure you want to delete "
                         + file.getFile().toString(), "");
                 if (status == JOptionPane.YES_OPTION)
                     project.removeFile(parentFolder, file.getFile());
             }
         } else if(e.getActionCommand().equals("Open")) {
-            ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
-            ProjectFile file = (ProjectFile) menuContext;
+            final ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
+            final ProjectFile file = (ProjectFile) menuContext;
             Project.openFile(parentFolder, file.getFile());
         } else if(e.getActionCommand().equals("Open Subset")) {
-            ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
-            ProjectFile file = (ProjectFile) menuContext;
+            final ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
+            final ProjectFile file = (ProjectFile) menuContext;
             Project.openSubset(parentFolder, file.getFile());
         } else if(e.getActionCommand().equals("Import as DIMAP")) {
-            ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
-            ProjectFile file = (ProjectFile) menuContext;
+            final ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
+            final ProjectFile file = (ProjectFile) menuContext;
             project.importFile(parentFolder, file.getFile());
         } else if(e.getActionCommand().equals("Import Subset as DIMAP")) {
-            ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
-            ProjectFile file = (ProjectFile) menuContext;
+            final ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
+            final ProjectFile file = (ProjectFile) menuContext;
             project.importSubset(parentFolder, file.getFile());
         } else if(e.getActionCommand().equals("Import Datasets")) {
             ImportBrowserVPI.getInstance().ShowImportBrowser();
         } else if(e.getActionCommand().equals("Clear")) {
-            ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
+            final ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
             project.clearFolder(subFolder);
         } else if(e.getActionCommand().equals("Expand All")) {
             expandAll();
@@ -240,16 +240,16 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
             project.refreshProjectTree();
             project.notifyEvent(true);
         } else if(e.getActionCommand().equals("New ProductSet...")) {
-            ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
+            final ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
             project.createNewProductSet(subFolder);
         } else if(e.getActionCommand().equals("New Graph...")) {
-            ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
+            final ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
             Project.createNewGraph(subFolder);
         }
     }
 
     public void expandAll() {
-        TreeNode root = (TreeNode) getModel().getRoot();
+        final TreeNode root = (TreeNode) getModel().getRoot();
         expandAll(this, new TreePath(root), true);
     }
 
@@ -263,11 +263,11 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
      */
     private static void expandAll(JTree tree, TreePath parent, boolean expand) {
         // Traverse children
-        TreeNode node = (TreeNode) parent.getLastPathComponent();
+        final TreeNode node = (TreeNode) parent.getLastPathComponent();
         if (node.getChildCount() >= 0) {
             for (Enumeration e = node.children(); e.hasMoreElements();) {
-                TreeNode n = (TreeNode) e.nextElement();
-                TreePath path = parent.pathByAddingChild(n);
+                final TreeNode n = (TreeNode) e.nextElement();
+                final TreePath path = parent.pathByAddingChild(n);
                 expandAll(tree, path, expand);
             }
         }
@@ -307,15 +307,15 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
             if (selRow >= 0) {
                 int clickCount = event.getClickCount();
                 if (clickCount > 1) {
-                    TreePath selPath = getPathForLocation(event.getX(), event.getY());
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
-                    DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) node.getParent();
+                    final TreePath selPath = getPathForLocation(event.getX(), event.getY());
+                    final DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
+                    final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) node.getParent();
 
-                    Object o = node.getUserObject();
+                    final Object o = node.getUserObject();
                     if (o instanceof ProjectFile) {
-                        ProjectFile file = (ProjectFile) o;
+                        final ProjectFile file = (ProjectFile) o;
 
-                        ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
+                        final ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
                         Project.openFile(parentFolder, file.getFile());
                     }
                 }
@@ -337,9 +337,9 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
 
     private static class PTCellRenderer extends DefaultTreeCellRenderer {
 
-        ImageIcon productIcon;
-        ImageIcon groupOpenIcon;
-        ImageIcon projectIcon;
+        private final ImageIcon productIcon;
+        private final ImageIcon groupOpenIcon;
+        private final ImageIcon projectIcon;
 
         public PTCellRenderer() {
             productIcon = UIUtils.loadImageIcon("icons/RsProduct16.gif");
@@ -358,17 +358,19 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                                                       boolean hasFocus) {
             super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
-            DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) value;
+            final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) value;
             value = treeNode.getUserObject();
-
+            
             if (value instanceof ProjectFile) {
-                ProjectFile file = (ProjectFile) value;
+                final ProjectFile file = (ProjectFile) value;
                 this.setText(file.getDisplayName());
                 this.setIcon(productIcon);
+                this.setToolTipText(leaf ? file.getToolTipText() : null);
             } else if (value instanceof ProjectSubFolder) {
-                ProjectSubFolder subFolder = (ProjectSubFolder) value;
+                final ProjectSubFolder subFolder = (ProjectSubFolder) value;
                 this.setText(subFolder.getName());
                 this.setIcon(projectIcon);
+                this.setToolTipText(null);
             }
 
             return this;
@@ -390,17 +392,17 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
          * Each line is separated by a newline.
          */
         protected Transferable createTransferable(JComponent c) {
-            JTree tree = (JTree)c;
-            TreePath path = tree.getSelectionPath();
+            final JTree tree = (JTree)c;
+            final TreePath path = tree.getSelectionPath();
 
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-            DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) node.getParent();
+            final DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+            final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) node.getParent();
 
-            Object context = node.getUserObject();
+            final Object context = node.getUserObject();
             if (context != null) {
                 if(context instanceof ProjectFile) {
-                    ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
-                    ProjectFile file = (ProjectFile)context;
+                    final ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
+                    final ProjectFile file = (ProjectFile)context;
 
                     if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.PRODUCTSET) {
                         return new StringSelection(ProductSet.GetListAsString(file.getFile()));    
@@ -408,7 +410,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                         return new StringSelection(file.getFile().getAbsolutePath());
                     }
                 } else if(context instanceof ProjectSubFolder) {
-                    ProjectSubFolder parentFolder = (ProjectSubFolder) context;
+                    final ProjectSubFolder parentFolder = (ProjectSubFolder) context;
 
                     return new StringSelection(parentFolder.getPath().getAbsolutePath());
                 }
@@ -424,11 +426,11 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                 return false;
             }
 
-            JTree tree = (JTree) info.getComponent();
-            DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+            final JTree tree = (JTree) info.getComponent();
+            final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
 
             // Get the string that is being dropped.
-            Transferable t = info.getTransferable();
+            final Transferable t = info.getTransferable();
             String data;
             try {
                 data = (String) t.getTransferData(DataFlavor.stringFlavor);
@@ -439,18 +441,18 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
 
             // Wherever there is a newline in the incoming data,
             // break it into a separate item in the list.
-            String[] values = data.split("\n");
+            final String[] values = data.split("\n");
 
             // Perform the actual import.
             for (String value : values) {
-                TreePath dropPath = tree.getDropLocation().getPath();
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode) dropPath.getLastPathComponent();
-                DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) node.getParent();
+                final TreePath dropPath = tree.getDropLocation().getPath();
+                final DefaultMutableTreeNode node = (DefaultMutableTreeNode) dropPath.getLastPathComponent();
+                final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) node.getParent();
 
-                Object o = node.getUserObject();
+                final Object o = node.getUserObject();
                 if (o instanceof ProjectFile) {
-                    ProjectFile projFile = (ProjectFile)o;
-                    ProjectSubFolder projSubFolder = (ProjectSubFolder)parentNode.getUserObject();
+                    final ProjectFile projFile = (ProjectFile)o;
+                    final ProjectSubFolder projSubFolder = (ProjectSubFolder)parentNode.getUserObject();
                     if(projSubFolder.getFolderType() == ProjectSubFolder.FolderType.PRODUCTSET) {
                         ProductSet.AddProduct(projFile.getFile(), new File(value));
                     }
