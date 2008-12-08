@@ -39,7 +39,41 @@ import java.util.StringTokenizer;
 import java.util.HashMap;
 
 /**
- * Undersample
+ * This operator down samples a real or complex image using sub-sampling method or kernel filtering method.
+ *
+ * With sub-sampling method, the image is down sampled with user specified sub-sampling rates in both range
+ * and azimuth directions. For complex image, the i and q bands in the image are down sampled separately,
+ * and the down sampled image is still a complex image.
+ *
+ * With kernel filtering method, the image is down sampled with a kernel moving across the image with a
+ * step-size determined by the size of the required output image. The kernel can be selected from pre-
+ * defined shapes or defined by the user. For complex image, intensity image is computed from the i and
+ * q bands before kernel filtering is applied. The down sampled image is always real image. The user can
+ * determine the output image size by specifying the output image size, or the pixel spacings, or the
+ * down sampling ratios.
+ *
+ * The parameters used by the operator are as the follows:
+ *
+ * Source Band: All bands (real or virtual) of the source product.
+ * Under-Sampling Method: Sub-Sampling method or Kernel Filtering method
+ *
+ * For Sub-Sampling method, the following parameters are used:
+ *
+ * Sub-Sampling in X: User provided sub-sampling rate in range.
+ * Sub-Sampling in Y: User provided sub-sampling rate in azimuth.
+ *
+ * For Kernel Filtering method, the following parameters are used:
+ *
+ * Filter Type: The kernel filter type.
+ * Filter Size: The kernel filter size.
+ * Kernel File: The user defined kernel.
+ * Output Image Rows: The row size of the down sampled image.
+ * Output Image Columns: The column size of the down sampled image.
+ * Width Ratio: The ratio of the down sampled image width and the source image width.
+ * Height Ratio: The ratio of the down sampled image height and the source image height.
+ * Range Spacing: The range pixel spacing of the down sampled image.
+ * Azimuth Spacing: The azimuth pixel spacing of the down sampled image.
+ *
  */
 
 @OperatorMetadata(alias="Undersample", description="Undersample the datset")
@@ -160,6 +194,17 @@ public class UndersamplingOp extends Operator {
                 bandNameList.add(band.getName());
             }
             sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
+        }
+
+        for (int i = 0; i < sourceBandNames.length; i++) {
+            if (sourceProduct.getBand(sourceBandNames[i]).getUnit().contains(Unit.REAL)) {
+                if (i+1 < sourceBandNames.length &&
+                    sourceProduct.getBand(sourceBandNames[i+1]).getUnit().contains(Unit.IMAGINARY)) {
+                    i++;
+                } else {
+                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
+                }
+            }
         }
 
         subsetReader = new ProductSubsetBuilder();
