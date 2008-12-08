@@ -67,7 +67,7 @@ public final class DatApp extends VisatApp {
 
         final LabelStatusBarItem dimensions = new LabelStatusBarItem("STATUS_BAR_DIMENSIONS_ITEM");
         dimensions.setText("");
-        dimensions.setPreferredWidth(50);
+        dimensions.setPreferredWidth(70);
         dimensions.setAlignment(JLabel.CENTER);
         dimensions.setToolTip("Displays image dimensions");
         statusBar.add(dimensions, 3);
