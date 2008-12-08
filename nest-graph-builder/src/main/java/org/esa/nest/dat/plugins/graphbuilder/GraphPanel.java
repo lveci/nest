@@ -297,7 +297,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
         }
         if(selectedNode != null) {
             Point sourcePoint = new Point(n.getPos().x, n.getPos().y + selectedNode.getHotSpotOffset());
-            if(isWithinRect(sourcePoint, selectedNode.getHotSpotSize(), selectedNode.getHotSpotSize(), e.getPoint())) {
+            if(isWithinRect(sourcePoint, GraphNode.getHotSpotSize(), GraphNode.getHotSpotSize(), e.getPoint())) {
                  showSourceHotSpot = true;
                  connectSourceTargetNode = selectedNode;
                  repaint();
