@@ -6,6 +6,7 @@ import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.gpf.TestOperator;
+import org.esa.nest.util.DatUtils;
 
 import java.util.Arrays;
 import java.io.File;
@@ -46,7 +47,7 @@ public class TestUndersamplingOperator extends TestCase {
         op.setFilterType("Loss Pass");
         op.setOutputImageSaize(2, 4);
 
-        String home = "C:" + File.separator + "NEST" + File.separator + "nest" + File.separator + "beam";
+        String home = DatUtils.findHomeFolder().getAbsolutePath() + File.separator + "beam";
         System.setProperty("nest.home", home);
 
         // get targetProduct: execute initialize()
