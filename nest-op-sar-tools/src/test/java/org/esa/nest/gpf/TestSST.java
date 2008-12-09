@@ -5,8 +5,10 @@ import org.junit.Test;
 
 import shared.array.ComplexArray;
 import shared.array.RealArray;
+import shared.array.AbstractArray;
 import shared.fft.JavaFFTService;
 import shared.util.Arithmetic;
+import shared.util.Control;
 import shared.test.Tests;
 import java.util.Arrays;
 
@@ -15,14 +17,19 @@ public class TestSST extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-       
+        System.loadLibrary("sharedx");   
     }
 
     @Override
     protected void tearDown() throws Exception {
     }
 
+    public void testNative() throws Exception {
 
+        Control.checkTrue(AbstractArray.OpKernel.useNative() && AbstractArray.FFTService.useProvider(),
+                                "Could not link native layer");
+    }
+    
         /**
          * Tests {@link ComplexArray#fft()} and {@link RealArray#rfft()} in one dimension.
          */

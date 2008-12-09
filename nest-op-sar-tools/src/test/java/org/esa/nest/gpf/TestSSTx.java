@@ -46,8 +46,8 @@ public class TestSSTx extends TestCase {
 
     public void testNative() throws Exception {  
 
-       // Control.checkTrue(AbstractArray.OpKernel.useNative() && AbstractArray.FFTService.useProvider(),
-       //                         "Could not link native layer");
+        Control.checkTrue(AbstractArray.OpKernel.useNative() && AbstractArray.FFTService.useProvider(),
+                                "Could not link native layer");
     }
 
     @BeforeClass
