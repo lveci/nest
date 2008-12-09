@@ -91,9 +91,9 @@ public class UndersamplingOp extends Operator {
     @Parameter(valueSet = {SUB_SAMPLING, KERNEL_FILTERING}, defaultValue = KERNEL_FILTERING, label="Under-Sampling Method")
     private String method = KERNEL_FILTERING;
 
-    @Parameter(valueSet = {SUMMARY, EDGE_DETECT, EDGE_ENHANCEMENT, LOSS_PASS, HIGH_PASS, HORIZONTAL, VERTICAL, USER_DEFINED},
-               defaultValue = LOSS_PASS, label="Filter Type")
-    private String filterType = LOSS_PASS;
+    @Parameter(valueSet = {SUMMARY, EDGE_DETECT, EDGE_ENHANCEMENT, LOW_PASS, HIGH_PASS, HORIZONTAL, VERTICAL, USER_DEFINED},
+               defaultValue = LOW_PASS, label="Filter Type")
+    private String filterType = LOW_PASS;
 
     @Parameter(valueSet = {FILTER_SIZE_3x3, FILTER_SIZE_5x5, FILTER_SIZE_7x7},
                defaultValue = FILTER_SIZE_3x3, label="Filter Size")
@@ -149,7 +149,7 @@ public class UndersamplingOp extends Operator {
     public static final String SUMMARY = "Summary";
     public static final String EDGE_DETECT = "Edge Detect";
     public static final String EDGE_ENHANCEMENT = "Edge Enhancement";
-    public static final String LOSS_PASS = "Loss Pass";
+    public static final String LOW_PASS = "Low Pass";
     public static final String HIGH_PASS = "High Pass";
     public static final String HORIZONTAL = "Horizontal";
     public static final String VERTICAL = "Vertical";
@@ -379,7 +379,7 @@ public class UndersamplingOp extends Operator {
                 fileName = "edd_" + filterHeight + "_" + filterWidth + ".ker";
             } else if (filterType.equals(EDGE_ENHANCEMENT)) {
                 fileName = "ede_" + filterHeight + "_" + filterWidth + ".ker";
-            } else if (filterType.equals(LOSS_PASS)) {
+            } else if (filterType.equals(LOW_PASS)) {
                 fileName = "lop_" + filterHeight + "_" + filterWidth + ".ker";
             } else if (filterType.equals(HIGH_PASS)) {
                 fileName = "hip_" + filterHeight + "_" + filterWidth + ".ker";
@@ -747,11 +747,30 @@ public class UndersamplingOp extends Operator {
     }
 
     /**
+     * Set sub-sampling rate for both x and y. The function is for unit test only.
+     * @param subSamplingRateX The sub-sampling rate for x.
+     * @param subSamplingRateY The sub-sampling rate for y.
+     */
+    public void setSubSamplingRate(int subSamplingRateX, int subSamplingRateY) {
+
+        subSamplingX = subSamplingRateX;
+        subSamplingY = subSamplingRateY;
+    }
+
+    /**
      * Set filter type. The function is for unit test only.
      * @param type The filter type.
      */
     public void setFilterType(String type) {
         filterType = type;
+    }
+
+    /**
+     * Set filter size. The function is for unit test only.
+     * @param size The filter size.
+     */
+    public void setFilterSize(String size) {
+        filterSize = size;
     }
 
     /**
