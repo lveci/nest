@@ -32,10 +32,10 @@ public class TestUndersamplingOperator extends TestCase {
     }
 
     /**
-     * Tests undersampling operator with a 6x12 "DETECTED" test product.
+     * Tests sub-sampling method in undersampling operator with a 6x12 "DETECTED" test product.
      * @throws Exception general exception
      */
-    public void testUndersampling() throws Exception {
+    public void testUndersamplingWithSubSampling() throws Exception {
 
         Product sourceProduct = createTestProduct(12, 6);
 
@@ -43,10 +43,50 @@ public class TestUndersamplingOperator extends TestCase {
         assertNotNull(op);
         op.setSourceProduct(sourceProduct);
 
-        op.setUndersamplingMethod("Kernel Filtering");
-        op.setFilterType("Loss Pass");
+        op.setUndersamplingMethod(op.SUB_SAMPLING);
+        op.setSubSamplingRate(3, 3);
+
+        // get targetProduct: execute initialize()
+        Product targetProduct = op.getTargetProduct();
+        TestOperator.verifyProduct(targetProduct);
+
+        Band band = targetProduct.getBandAt(0);
+        assertNotNull(band);
+
+        // readPixels: execute computeTiles()
+        float[] floatValues = new float[8];
+        band.readPixels(0, 0, 4, 2, floatValues, ProgressMonitor.NULL);
+
+        // compare with expected outputs:
+        float[] expectedValues = {1.0f, 4.0f, 7.0f, 10.0f, 37.0f, 40.0f, 43.0f, 46.0f};
+        assertTrue(Arrays.equals(expectedValues, floatValues));
+
+        // compare updated metadata
+        MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
+        TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
+        TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
+        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.885684");
+    }
+
+    /**
+     * Tests low pass kernel filtering in undersampling operator with a 6x12 "DETECTED" test product.
+     * @throws Exception general exception
+     */
+    public void testUndersamplingWithLowPassKernel() throws Exception {
+
+        Product sourceProduct = createTestProduct(12, 6);
+
+        UndersamplingOp op = (UndersamplingOp)spi.createOperator();
+        assertNotNull(op);
+        op.setSourceProduct(sourceProduct);
+
+        op.setUndersamplingMethod(op.KERNEL_FILTERING);
+        op.setFilterType(op.LOW_PASS);
+        op.setFilterSize(op.FILTER_SIZE_3x3);
         op.setOutputImageSaize(2, 4);
 
+        // need only to set once
         String home = DatUtils.findHomeFolder().getAbsolutePath() + File.separator + "beam";
         System.setProperty("nest.home", home);
 
@@ -66,13 +106,251 @@ public class TestUndersamplingOperator extends TestCase {
         assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
-
         MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
-
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
         TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.895683");        
+    }
+
+    /**
+     * Tests high pass kernel filtering in undersampling operator with a 6x12 "DETECTED" test product.
+     * @throws Exception general exception
+     */
+    public void testUndersamplingWithHighPassKernel() throws Exception {
+
+        Product sourceProduct = createTestProduct(12, 6);
+
+        UndersamplingOp op = (UndersamplingOp)spi.createOperator();
+        assertNotNull(op);
+        op.setSourceProduct(sourceProduct);
+
+        op.setUndersamplingMethod(op.KERNEL_FILTERING);
+        op.setFilterType(op.HIGH_PASS);
+        op.setFilterSize(op.FILTER_SIZE_3x3);
+        op.setOutputImageSaize(2, 4);
+
+        // get targetProduct: execute initialize()
+        Product targetProduct = op.getTargetProduct();
+        TestOperator.verifyProduct(targetProduct);
+
+        Band band = targetProduct.getBandAt(0);
+        assertNotNull(band);
+
+        // readPixels: execute computeTiles()
+        float[] floatValues = new float[8];
+        band.readPixels(0, 0, 4, 2, floatValues, ProgressMonitor.NULL);
+
+        // compare with expected outputs:
+        float[] expectedValues = {14.0f, 17.0f, 20.0f, 23.0f, 50.0f, 53.0f, 56.0f, 59.0f};
+        assertTrue(Arrays.equals(expectedValues, floatValues));
+
+        // compare updated metadata
+        MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
+        TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
+        TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
+        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.895683");
+    }
+
+    /**
+     * Tests edge detect kernel filtering in undersampling operator with a 6x12 "DETECTED" test product.
+     * @throws Exception general exception
+     */
+    public void testUndersamplingWithEdgeDetectKernel() throws Exception {
+
+        Product sourceProduct = createTestProduct(12, 6);
+
+        UndersamplingOp op = (UndersamplingOp)spi.createOperator();
+        assertNotNull(op);
+        op.setSourceProduct(sourceProduct);
+
+        op.setUndersamplingMethod(op.KERNEL_FILTERING);
+        op.setFilterType(op.EDGE_DETECT);
+        op.setFilterSize(op.FILTER_SIZE_3x3);
+        op.setOutputImageSaize(2, 4);
+
+        // get targetProduct: execute initialize()
+        Product targetProduct = op.getTargetProduct();
+        TestOperator.verifyProduct(targetProduct);
+
+        Band band = targetProduct.getBandAt(0);
+        assertNotNull(band);
+
+        // readPixels: execute computeTiles()
+        float[] floatValues = new float[8];
+        band.readPixels(0, 0, 4, 2, floatValues, ProgressMonitor.NULL);
+
+        // compare with expected outputs:
+        float[] expectedValues = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+        assertTrue(Arrays.equals(expectedValues, floatValues));
+
+        // compare updated metadata
+        MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
+        TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
+        TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
+        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.895683");
+    }
+
+    /**
+     * Tests edge enhance kernel filtering in undersampling operator with a 6x12 "DETECTED" test product.
+     * @throws Exception general exception
+     */
+    public void testUndersamplingWithEdgeEnhanceKernel() throws Exception {
+
+        Product sourceProduct = createTestProduct(12, 6);
+
+        UndersamplingOp op = (UndersamplingOp)spi.createOperator();
+        assertNotNull(op);
+        op.setSourceProduct(sourceProduct);
+
+        op.setUndersamplingMethod(op.KERNEL_FILTERING);
+        op.setFilterType(op.EDGE_ENHANCEMENT);
+        op.setFilterSize(op.FILTER_SIZE_3x3);
+        op.setOutputImageSaize(2, 4);
+
+        // get targetProduct: execute initialize()
+        Product targetProduct = op.getTargetProduct();
+        TestOperator.verifyProduct(targetProduct);
+
+        Band band = targetProduct.getBandAt(0);
+        assertNotNull(band);
+
+        // readPixels: execute computeTiles()
+        float[] floatValues = new float[8];
+        band.readPixels(0, 0, 4, 2, floatValues, ProgressMonitor.NULL);
+
+        // compare with expected outputs:
+        float[] expectedValues = {126.0f, 153.0f, 180.0f, 207.0f, 450.0f, 477.0f, 504.0f, 531.0f};
+        assertTrue(Arrays.equals(expectedValues, floatValues));
+
+        // compare updated metadata
+        MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
+        TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
+        TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
+        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.895683");
+    }
+
+    /**
+     * Tests horizontal kernel filtering in undersampling operator with a 6x12 "DETECTED" test product.
+     * @throws Exception general exception
+     */
+    public void testUndersamplingWithHorizontalKernel() throws Exception {
+
+        Product sourceProduct = createTestProduct(12, 6);
+
+        UndersamplingOp op = (UndersamplingOp)spi.createOperator();
+        assertNotNull(op);
+        op.setSourceProduct(sourceProduct);
+
+        op.setUndersamplingMethod(op.KERNEL_FILTERING);
+        op.setFilterType(op.HORIZONTAL);
+        op.setFilterSize(op.FILTER_SIZE_3x3);
+        op.setOutputImageSaize(2, 4);
+
+        // get targetProduct: execute initialize()
+        Product targetProduct = op.getTargetProduct();
+        TestOperator.verifyProduct(targetProduct);
+
+        Band band = targetProduct.getBandAt(0);
+        assertNotNull(band);
+
+        // readPixels: execute computeTiles()
+        float[] floatValues = new float[8];
+        band.readPixels(0, 0, 4, 2, floatValues, ProgressMonitor.NULL);
+
+        // compare with expected outputs:
+        float[] expectedValues = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+        assertTrue(Arrays.equals(expectedValues, floatValues));
+
+        // compare updated metadata
+        MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
+        TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
+        TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
+        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.895683");
+    }
+
+    /**
+     * Tests vertical kernel filtering in undersampling operator with a 6x12 "DETECTED" test product.
+     * @throws Exception general exception
+     */
+    public void testUndersamplingWithVerticalKernel() throws Exception {
+
+        Product sourceProduct = createTestProduct(12, 6);
+
+        UndersamplingOp op = (UndersamplingOp)spi.createOperator();
+        assertNotNull(op);
+        op.setSourceProduct(sourceProduct);
+
+        op.setUndersamplingMethod(op.KERNEL_FILTERING);
+        op.setFilterType(op.VERTICAL);
+        op.setFilterSize(op.FILTER_SIZE_3x3);
+        op.setOutputImageSaize(2, 4);
+
+        // get targetProduct: execute initialize()
+        Product targetProduct = op.getTargetProduct();
+        TestOperator.verifyProduct(targetProduct);
+
+        Band band = targetProduct.getBandAt(0);
+        assertNotNull(band);
+
+        // readPixels: execute computeTiles()
+        float[] floatValues = new float[8];
+        band.readPixels(0, 0, 4, 2, floatValues, ProgressMonitor.NULL);
+
+        // compare with expected outputs:
+        float[] expectedValues = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+        assertTrue(Arrays.equals(expectedValues, floatValues));
+
+        // compare updated metadata
+        MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
+        TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
+        TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
+        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.895683");
+    }
+
+    /**
+     * Tests summary kernel filtering in undersampling operator with a 6x12 "DETECTED" test product.
+     * @throws Exception general exception
+     */
+    public void testUndersamplingWithSummaryKernel() throws Exception {
+
+        Product sourceProduct = createTestProduct(12, 6);
+
+        UndersamplingOp op = (UndersamplingOp)spi.createOperator();
+        assertNotNull(op);
+        op.setSourceProduct(sourceProduct);
+
+        op.setUndersamplingMethod(op.KERNEL_FILTERING);
+        op.setFilterType(op.SUMMARY);
+        op.setFilterSize(op.FILTER_SIZE_3x3);
+        op.setOutputImageSaize(2, 4);
+
+        // get targetProduct: execute initialize()
+        Product targetProduct = op.getTargetProduct();
+        TestOperator.verifyProduct(targetProduct);
+
+        Band band = targetProduct.getBandAt(0);
+        assertNotNull(band);
+
+        // readPixels: execute computeTiles()
+        float[] floatValues = new float[8];
+        band.readPixels(0, 0, 4, 2, floatValues, ProgressMonitor.NULL);
+
+        // compare with expected outputs:
+        float[] expectedValues = {28.0f, 34.0f, 40.0f, 46.0f, 100.0f, 106.0f, 112.0f, 118.0f};
+        assertTrue(Arrays.equals(expectedValues, floatValues));
+
+        // compare updated metadata
+        MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
+        TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
+        TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
+        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.895683");
     }
 
 
