@@ -32,7 +32,7 @@ public class UndersamplingOpUI extends BaseOperatorUI {
     private final JComboBox filterType = new JComboBox(new String[] {   UndersamplingOp.SUMMARY,
                                                                         UndersamplingOp.EDGE_DETECT,
                                                                         UndersamplingOp.EDGE_ENHANCEMENT,
-                                                                        UndersamplingOp.LOSS_PASS,
+                                                                        UndersamplingOp.LOW_PASS,
                                                                         UndersamplingOp.HIGH_PASS,
                                                                         UndersamplingOp.HORIZONTAL,
                                                                         UndersamplingOp.VERTICAL,
