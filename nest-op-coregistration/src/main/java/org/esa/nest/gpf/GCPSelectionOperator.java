@@ -260,7 +260,7 @@ public class GCPSelectionOperator extends Operator {
 
                 if (sGCPPixelPos.x < 0.0f || sGCPPixelPos.x >= slaveProduct.getSceneRasterWidth() ||
                     sGCPPixelPos.y < 0.0f || sGCPPixelPos.y >= slaveProduct.getSceneRasterHeight()) {
-                    System.out.println("GCP(" + i + ") is outside slave image.");
+                    //System.out.println("GCP(" + i + ") is outside slave image.");
                     continue;
                 }
 //                System.out.println(i + ", (" + mGCPPixelPos.x + "," + mGCPPixelPos.y + "), (" +
@@ -281,7 +281,7 @@ public class GCPSelectionOperator extends Operator {
 
                 } else {
 
-                    System.out.println("GCP(" + i + ") is invalid.");
+                    //System.out.println("GCP(" + i + ") is invalid.");
                 }
             }
         }        
