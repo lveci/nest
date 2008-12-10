@@ -6,6 +6,7 @@ import org.esa.beam.util.Guardian;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.util.XMLSupport;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
 import org.jdom.Element;
 import org.jdom.Attribute;
 
@@ -29,6 +30,7 @@ public class XMLProductDirectory {
 
     private int _sceneWidth = 0;
     private int _sceneHeight = 0;
+    private boolean cosarFormat = false;
 
     protected transient Map<String, ImageIOFile> bandImageFileMap = new HashMap<String, ImageIOFile>(1);
     protected transient Map<Band, ImageIOFile.BandInfo> bandMap = new HashMap<Band, ImageIOFile.BandInfo>(3);
@@ -53,6 +55,10 @@ public class XMLProductDirectory {
 
                 _sceneWidth = img.getSceneWidth();
                 _sceneHeight = img.getSceneHeight();
+            } else if (file.getName().toUpperCase().endsWith("COS")) {
+                cosarFormat = true;
+
+                throw new IOException("Cosar format is not yet supported");
             }
         }   
     }
@@ -98,6 +104,7 @@ public class XMLProductDirectory {
                 for(int b=0; b < img.getNumBands(); ++b) {
                     final Band band = new Band(img.getName()+bandCnt++, img.getDataType(),
                                        img.getSceneWidth(), img.getSceneHeight());
+                    band.setUnit(Unit.AMPLITUDE);
                     product.addBand(band);
                     bandMap.put(band, new ImageIOFile.BandInfo(img, i, b));
                 }

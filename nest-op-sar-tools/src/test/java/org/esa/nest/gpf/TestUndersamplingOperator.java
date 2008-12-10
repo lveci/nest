@@ -86,10 +86,6 @@ public class TestUndersamplingOperator extends TestCase {
         op.setFilterSize(op.FILTER_SIZE_3x3);
         op.setOutputImageSaize(2, 4);
 
-        // need only to set once
-        String home = DatUtils.findHomeFolder().getAbsolutePath() + File.separator + "beam";
-        System.setProperty("nest.home", home);
-
         // get targetProduct: execute initialize()
         Product targetProduct = op.getTargetProduct();
         TestOperator.verifyProduct(targetProduct);
