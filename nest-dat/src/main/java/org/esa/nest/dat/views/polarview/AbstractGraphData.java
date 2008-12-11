@@ -3,52 +3,20 @@ package org.esa.nest.dat.views.polarview;
 import java.awt.*;
 
 public abstract class AbstractGraphData {
-    protected static final class AxisData {
 
-        final void setAxis(GraphAxis axis) {
-            this.axis = axis;
-            touched = true;
-        }
-
-        final void setArrayType(Object oPoints[]) {
-            type = AbstractGraphData.getArrayType(oPoints);
-            touched = true;
-        }
-
-        final void touch() {
-            touched = true;
-        }
-
-        final void untouch() {
-            touched = false;
-        }
-
-        final void checkTouchedAxis() {
-            int id = axis.getTouchId();
-            if (touchId != id) {
-                touched = true;
-                touchId = id;
-            }
-        }
-
-        GraphAxis axis;
-        boolean touched;
-        int touchId;
-        int type;
-
-        AxisData() {
-            axis = null;
-            touched = true;
-            touchId = -1;
-            type = -1;
-        }
-    }
-
+    int[][] xScreenPoints;
+    int[][] yScreenPoints;
+    Color[][] colors;
+    Color lineColor;
+    boolean connectPoints;
+    AxisInfo cData;
+    private ColorScale cScale;
+    int plotCount;
 
     AbstractGraphData() {
         lineColor = Color.black;
         connectPoints = true;
-        cData = new AxisData();
+        cData = new AxisInfo();
         cScale = null;
     }
 
@@ -96,13 +64,10 @@ public abstract class AbstractGraphData {
                 cData.touchId = TouchId;
             }
         }
-        if (!cData.touched) {
-            return;
-        } else {
+        if (cData.touched) {
             cData.touched = false;
             cScale.setRange(cData.axis.getRange());
             computeColors(cValues, cData.type, colors, cScale);
-            return;
         }
     }
 
@@ -154,7 +119,7 @@ public abstract class AbstractGraphData {
         }
     }
 
-    protected static final double getValue(Object oPoints, int oType, int index) {
+    protected static double getValue(Object oPoints, int oType, int index) {
         switch (oType) {
             case 0: // '\0'
                 return (double) ((int[]) oPoints)[index];
@@ -174,7 +139,7 @@ public abstract class AbstractGraphData {
         }
     }
 
-    private static final void computeScreenPoints(int values[][], double scaleFactor, int points[][], GraphAxis axis) {
+    private static void computeScreenPoints(int values[][], double scaleFactor, int points[][], GraphAxis axis) {
         if (axis == null)
             return;
         int np = values.length;
@@ -198,7 +163,7 @@ public abstract class AbstractGraphData {
 
     }
 
-    private static final void computeScreenPoints(short values[][], double scaleFactor, int points[][], GraphAxis axis) {
+    private static void computeScreenPoints(short values[][], double scaleFactor, int points[][], GraphAxis axis) {
         if (axis == null)
             return;
         int np = values.length;
@@ -222,7 +187,7 @@ public abstract class AbstractGraphData {
 
     }
 
-    private static final void computeScreenPoints(float values[][], double scaleFactor, int points[][], GraphAxis axis) {
+    private static void computeScreenPoints(float values[][], double scaleFactor, int points[][], GraphAxis axis) {
         if (axis == null)
             return;
         int np = values.length;
@@ -316,7 +281,7 @@ public abstract class AbstractGraphData {
         if (cScale == null)
             return;
         int np = values.length;
-        for (int i = 0; i < np; i++)
+        for (int i = 0; i < np; i++) {
             if (values[i] == null) {
                 colors[i] = null;
             } else {
@@ -325,27 +290,26 @@ public abstract class AbstractGraphData {
                     colors[i] = new Color[n];
                 for (int j = 0; j < n; j++)
                     colors[i][j] = cScale.getColor(values[i][j]);
-
             }
-
+        }
     }
 
     private static void computeColors(float values[][], Color colors[][], ColorScale cScale) {
         if (cScale == null)
             return;
-        int np = values.length;
-        for (int i = 0; i < np; i++)
+        final int np = values.length;
+        for (int i = 0; i < np; i++) {
             if (values[i] == null) {
                 colors[i] = null;
             } else {
-                int n = values[i].length;
+                final int n = values[i].length;
                 if (colors[i] == null || colors[i].length != n)
                     colors[i] = new Color[n];
-                for (int j = 0; j < n; j++)
+                for (int j = 0; j < n; j++) {
                     colors[i][j] = cScale.getColor(values[i][j]);
-
+                }
             }
-
+        }
     }
 
     private static void computeColors(double values[][], Color colors[][], ColorScale cScale) {
@@ -367,21 +331,20 @@ public abstract class AbstractGraphData {
     }
 
     private static void computeColors(long values[][], Color colors[][], ColorScale cScale) {
-        if (cScale == null)
-            return;
-        int np = values.length;
-        for (int i = 0; i < np; i++)
+        if (cScale == null) return;
+        final int np = values.length;
+        for (int i = 0; i < np; i++) {
             if (values[i] == null) {
                 colors[i] = null;
             } else {
-                int n = values[i].length;
+                final int n = values[i].length;
                 if (colors[i] == null || colors[i].length != n)
                     colors[i] = new Color[n];
-                for (int j = 0; j < n; j++)
+                for (int j = 0; j < n; j++) {
                     colors[i][j] = cScale.getColor(values[i][j]);
-
+                }
             }
-
+        }
     }
 
     private static int getArrayType(Object oPoints[]) {
@@ -398,18 +361,44 @@ public abstract class AbstractGraphData {
         return !(oPoints instanceof long[][]) ? -1 : 4;
     }
 
-    int[][] xScreenPoints;
-    int[][] yScreenPoints;
-    Color[][] colors;
-    Color lineColor;
-    boolean connectPoints;
-    AxisData cData;
-    private ColorScale cScale;
-    int plotCount;
-    private static final int NONE = -1;
-    private static final int INT = 0;
-    private static final int SHORT = 1;
-    private static final int FLOAT = 2;
-    private static final int DOUBLE = 3;
-    private static final int LONG = 4;
+    protected static final class AxisInfo {
+
+        protected GraphAxis axis;
+        protected boolean touched;
+        protected int touchId;
+        protected int type;
+
+        AxisInfo() {
+            axis = null;
+            touched = true;
+            touchId = -1;
+            type = -1;
+        }
+
+        final void setAxis(GraphAxis axis) {
+            this.axis = axis;
+            touched = true;
+        }
+
+        final void setArrayType(Object oPoints[]) {
+            type = AbstractGraphData.getArrayType(oPoints);
+            touched = true;
+        }
+
+        final void touch() {
+            touched = true;
+        }
+
+        final void untouch() {
+            touched = false;
+        }
+
+        final void checkTouchedAxis() {
+            int id = axis.getTouchId();
+            if (touchId != id) {
+                touched = true;
+                touchId = id;
+            }
+        }
+    }
 }

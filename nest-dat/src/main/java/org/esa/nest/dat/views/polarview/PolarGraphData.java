@@ -6,12 +6,19 @@ import java.awt.*;
 
 public class PolarGraphData extends AbstractGraphData {
 
+    private Object[] rPoints;
+    private Object[] tPoints;
+    Object[] cValues;
+    float dirOffset;
+    final AxisInfo rData;
+    private final AxisInfo tData;
+
     PolarGraphData(Object rPoints[], Object tPoints[], Object cValues[]) {
         this.rPoints = null;
         this.tPoints = null;
         this.cValues = null;
-        rData = new AbstractGraphData.AxisData();
-        tData = new AbstractGraphData.AxisData();
+        rData = new AxisInfo();
+        tData = new AxisInfo();
         setRPoints(rPoints);
         setTPoints(tPoints);
         setColorValues(cValues);
@@ -127,10 +134,4 @@ public class PolarGraphData extends AbstractGraphData {
 
     }
 
-    private Object[] rPoints;
-    private Object[] tPoints;
-    Object[] cValues;
-    float dirOffset;
-    final AbstractGraphData.AxisData rData;
-    private final AbstractGraphData.AxisData tData;
 }

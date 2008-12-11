@@ -6,6 +6,13 @@ import java.awt.*;
 
 public class GriddedPolarGraphData extends PolarGraphData {
 
+    private float firstDir;
+    private float dirStep;
+    private float radii[];
+    private int rScreenPoints[];
+    private int Nr;
+    private int Nth;
+
     public GriddedPolarGraphData(float cValues[][], float firstDir, float dirStep, float radii[]) {
         super(null, null, cValues);
         this.firstDir = firstDir;
@@ -147,7 +154,7 @@ public class GriddedPolarGraphData extends PolarGraphData {
         return (double) radii[Nr];
     }
 
-    private static final void computeScreenPoints(float values[][], int points[][], GraphAxis axis) {
+    private static void computeScreenPoints(float values[][], int points[][], GraphAxis axis) {
         if (axis == null)
             return;
         int np = values.length;
@@ -164,11 +171,4 @@ public class GriddedPolarGraphData extends PolarGraphData {
             }
 
     }
-
-    private float firstDir;
-    private float dirStep;
-    private float radii[];
-    private int rScreenPoints[];
-    private int Nr;
-    private int Nth;
 }
