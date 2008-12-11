@@ -17,7 +17,11 @@ public class TestSST extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        System.loadLibrary("sharedx");   
+        try {
+            System.loadLibrary("sharedx");
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     @Override
@@ -54,7 +58,7 @@ public class TestSST extends TestCase {
                                 } //
                 );
 
-                assertTrue(Tests.equals( //
+                assertTrue(equals( //
                                 a.fft().eMul(b.fft()).ifft().values(), expected.values()));
 
                 RealArray aReal = new RealArray(new double[] {
@@ -81,7 +85,7 @@ public class TestSST extends TestCase {
                                 } //
                 );
 
-                assertTrue(Tests.equals( //
+                assertTrue(equals( //
                                 aReal.rfft().eMul(bReal.rfft()).rifft().values(), expectedReal.values()));
         }
 
@@ -130,10 +134,10 @@ public class TestSST extends TestCase {
                                 7, 7 //
                 );
 
-                assertTrue(Tests.equals( //
+                assertTrue(equals( //
                                 ((a.rfft()).eMul(b.rfft().uConj())).rifft().values(), expected.values()));
 
-                assertTrue(Tests.equals( //
+                assertTrue(equals( //
                                 ((a.tocRe().fft()).eMul(b.tocRe().fft().uConj())).ifft().torRe().values(), //
                                 expected.values()));
         }
@@ -195,10 +199,10 @@ public class TestSST extends TestCase {
                                 3, 3, 3 //
                 );
 
-                assertTrue(Tests.equals( //
+                assertTrue(equals( //
                                 a.tocRe().fft().eMul(b.tocRe().fft()).ifft().torRe().values(), expected.values()));
 
-                assertTrue(Tests.equals( //
+                assertTrue(equals( //
                                 a.rfft().eMul(b.rfft()).rifft().values(), expected.values()));
         }
 
@@ -291,9 +295,25 @@ public class TestSST extends TestCase {
                                 values[j] = Arithmetic.nextInt(2);
                         }
 
-                        Tests.equals( //
+                        equals( //
                                         arr.tocRe().fft().values(), //
                                         jfs.reducedToFull(arr.rfft(), dims).values());
                 }
+        }
+
+
+     public static boolean equals(double[] aVal, double[] bVal) {
+
+                final int len = Control.checkEquals(aVal.length, bVal.length, //
+                                "Array length mismatch");
+
+                for (int i = 0; i < len; i++) {
+
+                        if (Math.abs(aVal[i] - bVal[i]) > 1e-8) {
+                                return false;
+                        }
+                }
+
+                return true;
         }
 }

@@ -40,7 +40,7 @@
 	<dependency>
       <groupId>org.sst</groupId>
       <artifactId>sharedx</artifactId>
-	  <version>1.04</version>
+	  <version>1.05</version>
     </dependency>
 	<dependency>
       <groupId>org.slf4j</groupId>

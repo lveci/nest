@@ -34,6 +34,8 @@ import java.util.Arrays;
 
 import shared.array.RealArray;
 import shared.array.ComplexArray;
+import shared.array.AbstractArray;
+import shared.util.Control;
 
 /**
  * Oversample
@@ -53,7 +55,7 @@ public class OversamplingOp extends Operator {
 
     @Parameter(valueSet = {UndersamplingOp.IMAGE_SIZE, UndersamplingOp.RATIO, UndersamplingOp.PIXEL_SPACING},
             defaultValue = UndersamplingOp.IMAGE_SIZE, label="Output Image By:")
-    private String outputImageBy = UndersamplingOp.IMAGE_SIZE;
+    private String outputImageBy = UndersamplingOp.RATIO;
 
     @Parameter(description = "The row dimension of the output image", defaultValue = "1000", label="Output Image Rows")
     private int targetImageHeight = 1000;
@@ -112,6 +114,13 @@ public class OversamplingOp extends Operator {
         try {
             sourceImageWidth = sourceProduct.getSceneRasterWidth();
             sourceImageHeight = sourceProduct.getSceneRasterHeight();
+
+            //System.loadLibrary("sharedx");
+            
+            //Control.checkTrue(AbstractArray.OpKernel.useNative() && AbstractArray.FFTService.useProvider(),
+            //                    "Could not link native layer");
+
+            //AbstractArray.FFTService.setHint("mode", "estimate");
 
             abs = OperatorUtils.getAbstractedMetadata(sourceProduct);
 
@@ -453,7 +462,7 @@ public class OversamplingOp extends Operator {
                 }
             }
 
-        } catch (OperatorException e){
+        } catch (Exception e){
             throw new OperatorException(e);
         } finally {
             pm.done();
@@ -461,7 +470,7 @@ public class OversamplingOp extends Operator {
     }
 
     private void computeOverSampledTileForRealImage(String targetBandName, Tile targetTile, ProgressMonitor pm)
-                 throws OperatorException {
+                 throws Exception {
 
         final Rectangle targetTileRectangle = targetTile.getRectangle();
 
@@ -476,6 +485,7 @@ public class OversamplingOp extends Operator {
 
         final RealArray srcImageArray = new RealArray(srcImage, sourceTileHeight, sourceTileWidth);
 
+        
         final double[] spectrum = srcImageArray.tocRe().fft().values();
 
         final double[] zeroPaddedSpec = new double[targetTileWidth*targetTileHeight*2];
@@ -518,7 +528,6 @@ public class OversamplingOp extends Operator {
         final Tile sourceRaster = getSourceTile(sourceBand, sourceTileRectangle, pm);
         final ProductData srcData = sourceRaster.getDataBuffer();
 
-        int index;
         int k = 0;
         final int maxY = sy0 + sh;
         final int maxX = sx0 + sw;
@@ -526,10 +535,10 @@ public class OversamplingOp extends Operator {
 
         for (int y = sy0; y < maxY; ++y) {
             for (int x = sx0; x < maxX; ++x) {
-                index = sourceRaster.getDataBufferIndex(x, y);
-                array[k++] = srcData.getElemDoubleAt(index);
+                array[k++] = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x, y));
             }
         }
+
         return array;
     }
 
@@ -549,6 +558,12 @@ public class OversamplingOp extends Operator {
         final int firstHalfSourceTileHeight = (int)(sourceTileHeight*0.5 + 0.5);
         final int secondHalfSourceTileWidth = sourceTileWidth - firstHalfSourceTileWidth;
 
+        final int sourceTileWidth2 = sourceTileWidth*2;
+        final int firstHalfSourceTileWidth2 = firstHalfSourceTileWidth*2;
+        final int targetTileWidth2 = targetTileWidth*2;
+        final int secondHalfSourceTileWidth2 = secondHalfSourceTileWidth*2;
+        final int a = 2*(targetTileWidth - secondHalfSourceTileWidth);
+
         Arrays.fill(zeroPaddedSpectrum, 0.0);
 
         int R; // row index in zeroPaddedSpectrum
@@ -560,13 +575,13 @@ public class OversamplingOp extends Operator {
                 R = r + targetTileHeight - sourceTileHeight;
             }
 
-            final int s1 = r*sourceTileWidth*2; // multiply by 2 because the data is complex
-            final int s2 = s1 + firstHalfSourceTileWidth*2;
-            final int S1 = R*targetTileWidth*2;
-            final int S2 = S1 + 2*(targetTileWidth - secondHalfSourceTileWidth);
+            final int s1 = r*sourceTileWidth2;              // multiply by 2 because the data is complex
+            final int s2 = s1 + firstHalfSourceTileWidth2;
+            final int S1 = R*targetTileWidth2;
+            final int S2 = S1 + a;
 
-            System.arraycopy(spectrum, s1, zeroPaddedSpectrum, S1, firstHalfSourceTileWidth*2);
-            System.arraycopy(spectrum, s2, zeroPaddedSpectrum, S2, secondHalfSourceTileWidth*2);
+            System.arraycopy(spectrum, s1, zeroPaddedSpectrum, S1, firstHalfSourceTileWidth2);
+            System.arraycopy(spectrum, s2, zeroPaddedSpectrum, S2, secondHalfSourceTileWidth2);
         }
     }
 
@@ -591,7 +606,7 @@ public class OversamplingOp extends Operator {
 
     private void computeOverSampledTileForComplexImage(
             String iBandName, String qBandName, Tile iTargetTile, Tile qTargetTile, ProgressMonitor pm)
-        throws OperatorException {
+        throws Exception {
 
         final Rectangle targetTileRectangle = iTargetTile.getRectangle();
 
@@ -665,11 +680,15 @@ public class OversamplingOp extends Operator {
         Arrays.fill(paddedSpec, 0.0);
 
         final int firstHalfSourceTileWidth = (int)(sourceTileWidth*0.5 + 0.5);
-
+        final int sourceTileHeight2 = sourceTileHeight*2;
+        final int targetTileHeight2 = targetTileHeight*2;
+        final int a = targetTileHeight - sourceTileHeight;
+        
         int C; // col index in zeroPaddedSpectrum
         for (int c = 0; c < sourceTileWidth; c++) {
 
             final int d = computeDopplerCentroidFreqIndex(c + sx0, sourceTileHeight);
+            final int d2 = d * 2;
 
             if (c < firstHalfSourceTileWidth) {
                 C = c;
@@ -677,12 +696,12 @@ public class OversamplingOp extends Operator {
                 C = c + targetTileWidth - sourceTileWidth;
             }
 
-            final int s1 = c*sourceTileHeight*2; // multiply by 2 because the data is complex
-            final int s2 = s1 + d*2;
-            final int S1 = C*targetTileHeight*2;
-            final int S2 = S1 + 2*(targetTileHeight - sourceTileHeight + d);
+            final int s1 = c*sourceTileHeight2; // multiply by 2 because the data is complex
+            final int s2 = s1 + d2;
+            final int S1 = C*targetTileHeight2;
+            final int S2 = S1 + 2*(a + d);
 
-            System.arraycopy(tranSpec, s1, paddedSpec, S1, d*2);
+            System.arraycopy(tranSpec, s1, paddedSpec, S1, d2);
             System.arraycopy(tranSpec, s2, paddedSpec, S2, (sourceTileHeight - d)*2);
         }
 
