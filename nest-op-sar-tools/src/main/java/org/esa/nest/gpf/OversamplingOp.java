@@ -81,9 +81,15 @@ public class OversamplingOp extends Operator {
 
     private boolean isDetectedSampleType = false;
     private boolean isCEOSFormat = false;
+    private boolean overlapTop = false;
+    private boolean overlapBottom = false;
+    private boolean overlapLeft = false;
+    private boolean overlapRight = false;
 
     private int sourceImageWidth;
     private int sourceImageHeight;
+    private int overlapX = 50;
+    private int overlapY = 50;
 
     private float srcRangeSpacing; // range pixel spacing of source image
     private float srcAzimuthSpacing; // azimuth pixel spacing of source image
@@ -356,8 +362,8 @@ public class OversamplingOp extends Operator {
             sourceImageTileWidth = 256;
             sourceImageTileHeight = 256;
         } else {
-            sourceImageTileWidth = 256;//sourceImageWidth;
-            sourceImageTileHeight = (int)(prf+0.5);
+            sourceImageTileWidth = 256; //sourceImageWidth;
+            sourceImageTileHeight = 256; //(int)(prf+0.5);
         }
         
         int targetImageTileWidth = (int)(sourceImageTileWidth * widthRatio + 0.5f);
@@ -473,13 +479,12 @@ public class OversamplingOp extends Operator {
                  throws Exception {
 
         final Rectangle targetTileRectangle = targetTile.getRectangle();
-
-        final Rectangle sourceTileRectangle = getSourceTileRectangle(targetTileRectangle);
-
-        final int sourceTileWidth = sourceTileRectangle.width;
-        final int sourceTileHeight = sourceTileRectangle.height;
         final int targetTileWidth = targetTileRectangle.width;
         final int targetTileHeight = targetTileRectangle.height;
+
+        final Rectangle sourceTileRectangle = getSourceTileRectangle(targetTileRectangle);
+        final int sourceTileWidth = sourceTileRectangle.width;
+        final int sourceTileHeight = sourceTileRectangle.height;
 
         final double[] srcImage = getRealImageSourceTileArray(sourceTileRectangle, targetBandName, pm);
 
@@ -488,28 +493,60 @@ public class OversamplingOp extends Operator {
         
         final double[] spectrum = srcImageArray.tocRe().fft().values();
 
-        final double[] zeroPaddedSpec = new double[targetTileWidth*targetTileHeight*2];
+        int overlapedTargetTileWidth = (int)(sourceTileWidth*widthRatio + 0.5);
+        int overlapedTargetTileHeight = (int)(sourceTileHeight*heightRatio + 0.5);
+
+        final double[] zeroPaddedSpec = new double[overlapedTargetTileWidth*overlapedTargetTileHeight*2];
 
         zeroPaddingRealImageSpectrum(sourceTileHeight,
                                      sourceTileWidth,
-                                     targetTileHeight,
-                                     targetTileWidth,
+                                     overlapedTargetTileHeight,
+                                     overlapedTargetTileWidth,
                                      spectrum,
                                      zeroPaddedSpec);
 
-        final ComplexArray zeroPaddedSpecArray = new ComplexArray(zeroPaddedSpec, targetTileHeight, targetTileWidth, 2);
+        final ComplexArray zeroPaddedSpecArray = new ComplexArray(
+                zeroPaddedSpec, overlapedTargetTileHeight, overlapedTargetTileWidth, 2);
 
         final double[] overSampledImage = zeroPaddedSpecArray.ifft().torAbs().values();
 
-        saveOverSampledRealImage(targetTile, overSampledImage);
+        saveOverSampledRealImage(targetTile, overSampledImage, overlapedTargetTileHeight, overlapedTargetTileWidth);
     }
 
     private Rectangle getSourceTileRectangle(Rectangle targetTileRectangle) {
 
-        final int sx0 = (int)(targetTileRectangle.x / widthRatio + 0.5f);
-        final int sy0 = (int)(targetTileRectangle.y / heightRatio + 0.5f);
-        final int sw  = (int)(targetTileRectangle.width / widthRatio + 0.5f);
-        final int sh  = (int)(targetTileRectangle.height / heightRatio + 0.5f);
+        int sx0 = (int)(targetTileRectangle.x / widthRatio + 0.5f);
+        int sy0 = (int)(targetTileRectangle.y / heightRatio + 0.5f);
+        int sw  = (int)(targetTileRectangle.width / widthRatio + 0.5f);
+        int sh  = (int)(targetTileRectangle.height / heightRatio + 0.5f);
+
+        overlapTop = false;
+        overlapBottom = false;
+        overlapLeft = false;
+        overlapRight = false;
+
+        if (sx0 >= overlapX) {
+            sx0 -= overlapX;
+            sw += overlapX;
+            overlapLeft = true;
+        }
+
+        if (sx0 + sw + overlapX <= sourceImageWidth) {
+            sw += overlapX;
+            overlapRight = true;
+        }
+
+        if (sy0 >= overlapY) {
+            sy0 -= overlapY;
+            sh += overlapY;
+            overlapTop = true;
+        }
+
+        if (sy0 + sh + overlapY <= sourceImageHeight) {
+            sh += overlapY;
+            overlapBottom = true;
+        }
+
         System.out.println("x0 = " + targetTileRectangle.x + ", y0 = " + targetTileRectangle.y +
                 ", w = " + targetTileRectangle.width + ", h = " + targetTileRectangle.height);
 
@@ -585,7 +622,8 @@ public class OversamplingOp extends Operator {
         }
     }
 
-    private void saveOverSampledRealImage(Tile targetTile, double[] image) {
+    private void saveOverSampledRealImage(
+            Tile targetTile, double[] image, int overlapedTargetTileHeight, int overlapedTargetTileWidth) {
 
         final ProductData trgData = targetTile.getDataBuffer();
         final Rectangle targetTileRectangle = targetTile.getRectangle();
@@ -594,11 +632,24 @@ public class OversamplingOp extends Operator {
         final int tw = targetTileRectangle.width;
         final int th = targetTileRectangle.height;
 
+        int y0 = ty0;
+        if (overlapTop) {
+            y0 = ty0 - (int)(overlapY*heightRatio + 0.5);
+        }
+
+        int x0 = tx0;
+        if (overlapLeft) {
+            x0 = tx0 - (int)(overlapX*widthRatio + 0.5);
+        }
+
         int k = 0;
         final double c = widthRatio*heightRatio;
-        for (int ty = ty0; ty < ty0 + th; ty++) {
-            for (int tx = tx0; tx < tx0 + tw; tx++) {
-                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(tx, ty), c*image[k]);
+        for (int ty = y0; ty < y0 + overlapedTargetTileHeight; ty++) {
+            for (int tx = x0; tx < x0 + overlapedTargetTileWidth; tx++) {
+
+                if (tx >= tx0 && tx < tx0 + tw && ty >= ty0 && ty < ty0 + th) {
+                    trgData.setElemDoubleAt(targetTile.getDataBufferIndex(tx, ty), c*image[k]);
+                }
                 k++;
             }
         }
@@ -609,15 +660,14 @@ public class OversamplingOp extends Operator {
         throws Exception {
 
         final Rectangle targetTileRectangle = iTargetTile.getRectangle();
+        final int targetTileWidth = targetTileRectangle.width;
+        final int targetTileHeight = targetTileRectangle.height;
 
         final Rectangle sourceTileRectangle = getSourceTileRectangle(targetTileRectangle);
-
         final int sx0 = sourceTileRectangle.x;
         final int sy0 = sourceTileRectangle.y;
         final int sourceTileWidth = sourceTileRectangle.width;
         final int sourceTileHeight = sourceTileRectangle.height;
-        final int targetTileWidth = targetTileRectangle.width;
-        final int targetTileHeight = targetTileRectangle.height;
 
         final double[] srcImage = getComplexImageSourceTileArray(sourceTileRectangle, iBandName, qBandName, pm);
 
@@ -625,12 +675,24 @@ public class OversamplingOp extends Operator {
 
         final ComplexArray spectrum = srcImageArray.fft();
 
-        final ComplexArray zeroPaddedSpecArray = zeroPaddingComplexImageSpectrum(
-                sx0, sy0, sourceTileHeight, sourceTileWidth, targetTileHeight, targetTileWidth, spectrum);
+        int overlapedTargetTileWidth = (int)(sourceTileWidth*widthRatio + 0.5);
+        int overlapedTargetTileHeight = (int)(sourceTileHeight*heightRatio + 0.5);
+
+        final ComplexArray zeroPaddedSpecArray = zeroPaddingComplexImageSpectrum(sx0,
+                                                                                 sy0,
+                                                                                 sourceTileHeight,
+                                                                                 sourceTileWidth,
+                                                                                 overlapedTargetTileHeight,
+                                                                                 overlapedTargetTileWidth,
+                                                                                 spectrum);
 
         final double[] overSampledImage = zeroPaddedSpecArray.ifft().values();
         
-        saveOverSampledComplexImage(iTargetTile, qTargetTile, overSampledImage);
+        saveOverSampledComplexImage(iTargetTile,
+                                    qTargetTile,
+                                    overSampledImage,
+                                    overlapedTargetTileHeight,
+                                    overlapedTargetTileWidth);
     }
 
     private double[] getComplexImageSourceTileArray(
@@ -670,19 +732,19 @@ public class OversamplingOp extends Operator {
                                                          int sy0,
                                                          int sourceTileHeight,
                                                          int sourceTileWidth,
-                                                         int targetTileHeight,
-                                                         int targetTileWidth,
+                                                         int overlapedTargetTileHeight,
+                                                         int overlapedTargetTileWidth,
                                                          ComplexArray spectrum) {
 
         // Both spectrum and zeroPaddedSpectrum are complex
         final double[] tranSpec = spectrum.transpose(1, 0, 2).values();
-        final double[] paddedSpec = new double[2*targetTileHeight*targetTileWidth];
+        final double[] paddedSpec = new double[2*overlapedTargetTileHeight*overlapedTargetTileWidth];
         Arrays.fill(paddedSpec, 0.0);
 
         final int firstHalfSourceTileWidth = (int)(sourceTileWidth*0.5 + 0.5);
         final int sourceTileHeight2 = sourceTileHeight*2;
-        final int targetTileHeight2 = targetTileHeight*2;
-        final int a = targetTileHeight - sourceTileHeight;
+        final int overlapedTargetTileHeight2 = overlapedTargetTileHeight*2;
+        final int a = overlapedTargetTileHeight - sourceTileHeight;
         
         int C; // col index in zeroPaddedSpectrum
         for (int c = 0; c < sourceTileWidth; c++) {
@@ -693,23 +755,30 @@ public class OversamplingOp extends Operator {
             if (c < firstHalfSourceTileWidth) {
                 C = c;
             } else {
-                C = c + targetTileWidth - sourceTileWidth;
+                C = c + overlapedTargetTileWidth - sourceTileWidth;
             }
 
             final int s1 = c*sourceTileHeight2; // multiply by 2 because the data is complex
             final int s2 = s1 + d2;
-            final int S1 = C*targetTileHeight2;
-            final int S2 = S1 + 2*(a + d);
+            final int S1 = C*overlapedTargetTileHeight2;
+            final int S2 = S1 + 2*a + d2;
 
             System.arraycopy(tranSpec, s1, paddedSpec, S1, d2);
             System.arraycopy(tranSpec, s2, paddedSpec, S2, (sourceTileHeight - d)*2);
         }
 
-        ComplexArray zeroPaddedSpectrum = new ComplexArray(paddedSpec, targetTileWidth, targetTileHeight, 2);
+        ComplexArray zeroPaddedSpectrum = new ComplexArray(paddedSpec,
+                                                           overlapedTargetTileWidth,
+                                                           overlapedTargetTileHeight,
+                                                           2);
         return zeroPaddedSpectrum.transpose(1, 0, 2);
     }
 
-    private void saveOverSampledComplexImage(Tile iTargetTile, Tile qTargetTile, double[] image) {
+    private void saveOverSampledComplexImage(Tile iTargetTile,
+                                             Tile qTargetTile,
+                                             double[] image,
+                                             int overlapedTargetTileHeight,
+                                             int overlapedTargetTileWidth) {
 
         final ProductData iData = iTargetTile.getDataBuffer();
         final ProductData qData = qTargetTile.getDataBuffer();
@@ -720,13 +789,26 @@ public class OversamplingOp extends Operator {
         final int tw = targetTileRectangle.width;
         final int th = targetTileRectangle.height;
 
+        int y0 = ty0;
+        if (overlapTop) {
+            y0 = ty0 - (int)(overlapY*heightRatio + 0.5);
+        }
+
+        int x0 = tx0;
+        if (overlapLeft) {
+            x0 = tx0 - (int)(overlapX*widthRatio + 0.5);
+        }
+
         int k = 0;
         final double c = widthRatio*heightRatio;
-        for (int ty = ty0; ty < ty0 + th; ty++) {
-            for (int tx = tx0; tx < tx0 + tw; tx++) {
-                final int index = iTargetTile.getDataBufferIndex(tx, ty);
-                iData.setElemDoubleAt(index, c*image[k++]);
-                qData.setElemDoubleAt(index, c*image[k++]);
+        for (int ty = y0; ty < y0 + overlapedTargetTileHeight; ty++) {
+            for (int tx = x0; tx < x0 + overlapedTargetTileWidth; tx++) {
+                if (tx >= tx0 && tx < tx0 + tw && ty >= ty0 && ty < ty0 + th) {
+                    final int index = iTargetTile.getDataBufferIndex(tx, ty);
+                    iData.setElemDoubleAt(index, c*image[k]);
+                    qData.setElemDoubleAt(index, c*image[k+1]);
+                }
+                k += 2;
             }
         }
     }
