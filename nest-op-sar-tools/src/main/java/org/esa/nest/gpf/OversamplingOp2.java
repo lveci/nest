@@ -525,17 +525,17 @@ public class OversamplingOp2 extends Operator {
         final ProductData iTgtData = iTargetTile.getDataBuffer();
         final ProductData qTgtData = qTargetTile.getDataBuffer();
 
-        Rectangle targetTileRectangle = iTargetTile.getRectangle();
-        int tx0 = targetTileRectangle.x;
-        int ty0 = targetTileRectangle.y;
-        int targetTileWidth = targetTileRectangle.width;
-        int targetTileHeight = targetTileRectangle.height;
+        final Rectangle targetTileRectangle = iTargetTile.getRectangle();
+        final int tx0 = targetTileRectangle.x;
+        final int ty0 = targetTileRectangle.y;
+        final int targetTileWidth = targetTileRectangle.width;
+        final int targetTileHeight = targetTileRectangle.height;
 
-        Rectangle sourceTileRectangle = getSourceTileRectangle(targetTileRectangle);
-        int sx0 = sourceTileRectangle.x;
-        int sy0 = sourceTileRectangle.y;
-        int sourceTileWidth = sourceTileRectangle.width;
-        int sourceTileHeight = sourceTileRectangle.height;
+        final Rectangle sourceTileRectangle = getSourceTileRectangle(targetTileRectangle);
+        final int sx0 = sourceTileRectangle.x;
+        final int sy0 = sourceTileRectangle.y;
+        final int sourceTileWidth = sourceTileRectangle.width;
+        final int sourceTileHeight = sourceTileRectangle.height;
 
         tmpI = new float[targetTileHeight][sourceTileWidth];
         tmpQ = new float[targetTileHeight][sourceTileWidth];
@@ -550,34 +550,34 @@ public class OversamplingOp2 extends Operator {
         final ProductData qSrcData = qRaster.getDataBuffer();
 
         // perform 1-D FFT on each row
-        DoubleFFT_1D src_row_fft = new DoubleFFT_1D(sourceTileWidth);
+        final DoubleFFT_1D src_row_fft = new DoubleFFT_1D(sourceTileWidth);
         for (int y = 0; y < sourceTileHeight; y++) {
-            double[] row = getRowData(sy0 + y, sx0, sourceTileWidth, iSrcData, qSrcData, iRaster);
+            final double[] row = getRowData(sy0 + y, sx0, sourceTileWidth, iSrcData, qSrcData, iRaster);
             src_row_fft.complexForward(row);
             saveRowSpec(row, y, sourceTileWidth);
         }
 
         // perform 1-D FFT, zero padding and IFFT on each column
-        DoubleFFT_1D src_col_fft = new DoubleFFT_1D(sourceTileHeight);
-        DoubleFFT_1D tgt_col_fft = new DoubleFFT_1D(targetTileHeight);
+        final DoubleFFT_1D src_col_fft = new DoubleFFT_1D(sourceTileHeight);
+        final DoubleFFT_1D tgt_col_fft = new DoubleFFT_1D(targetTileHeight);
         for (int x = 0; x < sourceTileWidth; x++) {
-            double[] col = getColData(x, sourceTileHeight);
+            final double[] col = getColData(x, sourceTileHeight);
             src_col_fft.complexForward(col);
-            double[] zeroPaddedColSpec = paddingZeros(col, sx0 + x, sourceTileHeight, targetTileHeight);
+            final double[] zeroPaddedColSpec = paddingZeros(col, sx0 + x, sourceTileHeight, targetTileHeight);
             tgt_col_fft.complexInverse(zeroPaddedColSpec, true);
             saveOverSampledCol(zeroPaddedColSpec, x, targetTileHeight);
         }
 
         // perform 1-D IFFT on each row
-        DoubleFFT_1D tgt_row_fft = new DoubleFFT_1D(targetTileWidth);
+        final DoubleFFT_1D tgt_row_fft = new DoubleFFT_1D(targetTileWidth);
         for (int y = 0; y < targetTileHeight; y++) {
-            double[] row = getRowData(y, sourceTileWidth, targetTileWidth);
+            final double[] row = getRowData(y, sourceTileWidth, targetTileWidth);
             tgt_row_fft.complexInverse(row, true);
             saveOverSampledComplexImage(row, ty0 + y, tx0, targetTileWidth, iTgtData, qTgtData, iTargetTile);
         }
     }
 
-    private double[] getRowData(int sy, int sx0, int sw, ProductData srcData, Tile srcRaster) {
+    private static double[] getRowData(int sy, int sx0, int sw, ProductData srcData, Tile srcRaster) {
 
         int index;
         int k = 0;
@@ -591,7 +591,7 @@ public class OversamplingOp2 extends Operator {
         return array;
     }
 
-    private double[] getRowData(
+    private static double[] getRowData(
             int sy, int sx0, int sw, ProductData iData, ProductData qData, Tile iRaster) {
 
         int index;
@@ -616,7 +616,7 @@ public class OversamplingOp2 extends Operator {
 
     private double[] getColData(int x, int sourceTileHeight) {
 
-        double[] array = new double[2*sourceTileHeight];
+        final double[] array = new double[2*sourceTileHeight];
         int k = 0;
         for (int y = 0; y < sourceTileHeight; y++) {
             array[k++] = (double)tmpI[y][x];
@@ -625,15 +625,15 @@ public class OversamplingOp2 extends Operator {
         return array;
     }
 
-    private double[] paddingZeros(double[] colSpec, int sourceTileHeight, int targetTileHeight) {
+    private static double[] paddingZeros(double[] colSpec, int sourceTileHeight, int targetTileHeight) {
 
-        double[] array = new double[2*targetTileHeight];
+        final double[] array = new double[2*targetTileHeight];
         Arrays.fill(array, 0.0);
-        int d = (int)(sourceTileHeight/2 + 0.5);
-        int s1 = 0;
-        int s2 = d*2;
-        int S1 = 0;
-        int S2 = 2*(targetTileHeight - sourceTileHeight + d);
+        final int d = (int)(sourceTileHeight/2 + 0.5);
+        final int s1 = 0;
+        final int s2 = d*2;
+        final int S1 = 0;
+        final int S2 = 2*(targetTileHeight - sourceTileHeight + d);
         System.arraycopy(colSpec, s1, array, S1, d*2);
         System.arraycopy(colSpec, s2, array, S2, (sourceTileHeight - d)*2);
 
@@ -642,13 +642,13 @@ public class OversamplingOp2 extends Operator {
 
     private double[] paddingZeros(double[] colSpec, int x, int sourceTileHeight, int targetTileHeight) {
 
-        double[] array = new double[2*targetTileHeight];
+        final double[] array = new double[2*targetTileHeight];
         Arrays.fill(array, 0.0);
-        int d = computeDopplerCentroidFreqIndex(x, sourceTileHeight);
-        int s1 = 0;
-        int s2 = d*2;
-        int S1 = 0;
-        int S2 = 2*(targetTileHeight - sourceTileHeight + d);
+        final int d = computeDopplerCentroidFreqIndex(x, sourceTileHeight);
+        final int s1 = 0;
+        final int s2 = d*2;
+        final int S1 = 0;
+        final int S2 = 2*(targetTileHeight - sourceTileHeight + d);
         System.arraycopy(colSpec, s1, array, S1, d*2);
         System.arraycopy(colSpec, s2, array, S2, (sourceTileHeight - d)*2);
 
@@ -666,17 +666,17 @@ public class OversamplingOp2 extends Operator {
 
     private double[] getRowData(int y, int sourceTileWidth, int targetTileWidth) {
 
-        double[] array = new double[targetTileWidth*2];
+        final double[] array = new double[targetTileWidth*2];
         Arrays.fill(array, 0.0);
 
-        int firstHalfSourceTileWidth = (int)(sourceTileWidth/2 + 0.5);
+        final int firstHalfSourceTileWidth = (int)(sourceTileWidth/2 + 0.5);
         int k = 0;
         for (int x = 0; x < firstHalfSourceTileWidth; x++) {
             array[k++] = tmpI[y][x];
             array[k++] = tmpQ[y][x];
         }
 
-        int secondHalfSourceTileWidth = sourceTileWidth - firstHalfSourceTileWidth;
+        final int secondHalfSourceTileWidth = sourceTileWidth - firstHalfSourceTileWidth;
         k = 2*(targetTileWidth - secondHalfSourceTileWidth);
         for (int x = firstHalfSourceTileWidth; x < sourceTileWidth; x++) {
             array[k++] = tmpI[y][x];
@@ -690,11 +690,11 @@ public class OversamplingOp2 extends Operator {
         double[] overSampledRow, int ty, int tx0, int tw, ProductData tgtData, Tile targetTile) {
 
         int k = 0;
-        double c = widthRatio*heightRatio;
+        final double c = widthRatio*heightRatio;
         for (int tx = tx0; tx < tx0 + tw; tx++) {
-            int index = targetTile.getDataBufferIndex(tx, ty);
-            double i = overSampledRow[k++];
-            double q = overSampledRow[k++];
+            final int index = targetTile.getDataBufferIndex(tx, ty);
+            final double i = overSampledRow[k++];
+            final double q = overSampledRow[k++];
             tgtData.setElemDoubleAt(index, c*Math.sqrt(i*i + q*q));
         }
     }
@@ -703,9 +703,9 @@ public class OversamplingOp2 extends Operator {
         double[] overSampledRow, int ty, int tx0, int tw, ProductData iData, ProductData qData, Tile iTargetTile) {
 
         int k = 0;
-        double c = widthRatio*heightRatio;
+        final double c = widthRatio*heightRatio;
         for (int tx = tx0; tx < tx0 + tw; tx++) {
-            int index = iTargetTile.getDataBufferIndex(tx, ty);
+            final int index = iTargetTile.getDataBufferIndex(tx, ty);
             iData.setElemDoubleAt(index, c*overSampledRow[k++]);
             qData.setElemDoubleAt(index, c*overSampledRow[k++]);
         }
