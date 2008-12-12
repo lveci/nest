@@ -118,10 +118,30 @@
             <scope>compile</scope>
         </dependency>
 		<dependency>
+            <groupId>gov.nasa</groupId>
+            <artifactId>worldwind</artifactId>
+			<version>0.5</version>
+        </dependency>
+		<dependency>
+            <groupId>javax.media</groupId>
+            <artifactId>jogl</artifactId>
+		    <version>1.1.1</version>
+        </dependency>
+		<dependency>
+            <groupId>javax.media</groupId>
+            <artifactId>gluegen-rt</artifactId>
+			<version>1.1.1</version>
+        </dependency>
+		<dependency>
 	      <groupId>org.sst</groupId>
 	      <artifactId>sharedx</artifactId>
 		  <version>1.05</version>
 	    </dependency>
+		<dependency>
+			<groupId>edu.emory.mathcs</groupId>
+			<artifactId>jtransforms</artifactId>
+			<version>2.0</version>
+		</dependency>
     </dependencies>
 
 </project>
