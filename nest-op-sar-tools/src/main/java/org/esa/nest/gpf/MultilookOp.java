@@ -76,9 +76,9 @@ public final class MultilookOp extends Operator {
 
     private boolean srgrFlag;
 
-    private int nAzLooks;     // current azimuth looks
-    private int azimuthLooks; // original azimuth_looks from metadata
-    private int rangeLooks;   // original range_looks from metadata
+    private double nAzLooks;     // current azimuth looks
+    private double azimuthLooks; // original azimuth_looks from metadata
+    private double rangeLooks;   // original range_looks from metadata
     private int sourceImageWidth;
     private int sourceImageHeight;
     private int targetImageWidth;
@@ -109,7 +109,7 @@ public final class MultilookOp extends Operator {
         try {
             absRoot = OperatorUtils.getAbstractedMetadata(sourceProduct);
 
-            getSRGRFlag();
+            srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
 
             getRangeAzimuthSpacing();
 
@@ -143,24 +143,24 @@ public final class MultilookOp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
-        Rectangle targetTileRectangle = targetTile.getRectangle();
-        int tx0 = targetTileRectangle.x;
-        int ty0 = targetTileRectangle.y;
-        int tw  = targetTileRectangle.width;
-        int th  = targetTileRectangle.height;
+        final Rectangle targetTileRectangle = targetTile.getRectangle();
+        final int tx0 = targetTileRectangle.x;
+        final int ty0 = targetTileRectangle.y;
+        final int tw  = targetTileRectangle.width;
+        final int th  = targetTileRectangle.height;
 
-        int x0 = tx0 * nRgLooks;
-        int y0 = ty0 * nAzLooks;
-        int w  = tw * nRgLooks;
-        int h  = th * nAzLooks;
-        Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
+        final int x0 = tx0 * nRgLooks;
+        final int y0 = (int)(ty0 * nAzLooks);
+        final int w  = tw * nRgLooks;
+        final int h  = (int)(th * nAzLooks);
+        final Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
 
         //System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         Tile sourceRaster1;
         Tile sourceRaster2 = null;
-        String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
+        final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
         Band sourceBand1;
         if (srcBandNames.length == 1) {
             sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
@@ -178,57 +178,25 @@ public final class MultilookOp extends Operator {
     }
 
     /**
-     * Get srgr flag.
-     */
-    void getSRGRFlag() {
-
-        MetadataAttribute attr = absRoot.getAttribute(AbstractMetadata.srgr_flag);
-        if (attr == null) {
-            throw new OperatorException(AbstractMetadata.srgr_flag + " not found");
-        }
-
-        srgrFlag = attr.getData().getElemBoolean();
-        //System.out.println("SRGR flag is " + srgrFlag);
-    }
-
-    /**
      * Get the range and azimuth spacings (in meter).
+     * @throws Exception when metadata is missing or equal to default no data value
      */
-    void getRangeAzimuthSpacing() {
+    void getRangeAzimuthSpacing() throws Exception {
 
-        MetadataAttribute rangeSpacingAttr = absRoot.getAttribute(AbstractMetadata.range_spacing);
-        if (rangeSpacingAttr == null) {
-            throw new OperatorException(AbstractMetadata.range_spacing + " not found");
-        }
-
-        MetadataAttribute azimuthSpacingAttr = absRoot.getAttribute(AbstractMetadata.azimuth_spacing);
-        if (azimuthSpacingAttr == null) {
-            throw new OperatorException(AbstractMetadata.azimuth_spacing + " not found");
-        }
-
-        rangeSpacing = rangeSpacingAttr.getData().getElemFloat();
-        azimuthSpacing = azimuthSpacingAttr.getData().getElemFloat();
+        rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
+        azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
         //System.out.println("Range spacing is " + rangeSpacing);
         //System.out.println("Azimuth spacing is " + azimuthSpacing);
     }
 
     /**
      * Get azimuth and range looks.
+     * @throws Exception when metadata is missing or equal to default no data value
      */
-    void getRangeAzimuthLooks() {
+    void getRangeAzimuthLooks() throws Exception {
 
-        MetadataAttribute azimuthLooksAttr = absRoot.getAttribute(AbstractMetadata.azimuth_looks);
-        if (azimuthLooksAttr == null) {
-            throw new OperatorException(AbstractMetadata.azimuth_looks + " not found");
-        }
-
-        MetadataAttribute rangeLooksAttr = absRoot.getAttribute(AbstractMetadata.range_looks);
-        if (rangeLooksAttr == null) {
-            throw new OperatorException(AbstractMetadata.range_looks + " not found");
-        }
-
-        azimuthLooks = azimuthLooksAttr.getData().getElemInt();
-        rangeLooks = rangeLooksAttr.getData().getElemInt();
+        azimuthLooks = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_looks);
+        rangeLooks = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_looks);
         //System.out.println("Azimuth looks is " + azimuthLooks);
         //System.out.println("Range looks is " + rangeLooks);
     }
@@ -248,30 +216,13 @@ public final class MultilookOp extends Operator {
      */
     void getIncidenceAngleAtCentreRangePixel() {
 
-        int x = sourceImageWidth / 2;
-        int y = sourceImageHeight / 2;
-        TiePointGrid incidenceAngle = getIncidenceAngle();
+        final int x = sourceImageWidth / 2;
+        final int y = sourceImageHeight / 2;
+        final TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
         if(incidenceAngle == null) {
             throw new OperatorException("incidence_angle tie point grid not found in product");
         }
         incidenceAngleAtCentreRangePixel = incidenceAngle.getPixelFloat(x + 0.5f, y + 0.5f);
-    }
-
-    /**
-     * Get incidence angle tie point grid.
-     *
-     * @return srcTPG The incidence angle tie point grid.
-     */
-    TiePointGrid getIncidenceAngle() {
-
-        for (int i = 0; i < sourceProduct.getNumTiePointGrids(); i++) {
-            TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
-            if (srcTPG.getName().equals("incident_angle")) {
-                return srcTPG;
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -292,11 +243,12 @@ public final class MultilookOp extends Operator {
 
     /**
      * Create target product.
+     * @throws Exception
      */
     void createTargetProduct() throws Exception {
 
-        targetImageWidth = sourceImageWidth / nRgLooks;
-        targetImageHeight = sourceImageHeight / nAzLooks;
+        targetImageWidth = (int)(sourceImageWidth / nRgLooks);
+        targetImageHeight = (int)(sourceImageHeight / nAzLooks);
 
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),
@@ -321,7 +273,7 @@ public final class MultilookOp extends Operator {
      */
     void updateTargetProductMetadata() throws Exception {
 
-        MetadataElement absTgt = OperatorUtils.getAbstractedMetadata(targetProduct);
+        final MetadataElement absTgt = OperatorUtils.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_looks, azimuthLooks*nAzLooks);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_looks, rangeLooks*nRgLooks);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_spacing, azimuthSpacing*nAzLooks);
@@ -333,11 +285,11 @@ public final class MultilookOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.line_time_interval, oldLineTimeInterval*nAzLooks);
 
         final String oldFirstLineTime = absTgt.getAttributeString(AbstractMetadata.first_line_time);
-        int idx = oldFirstLineTime.lastIndexOf(':') + 1;
-        String oldSecondsStr = oldFirstLineTime.substring(idx);
-        double oldSeconds = Double.parseDouble(oldSecondsStr);
-        double newSeconds = oldSeconds + oldLineTimeInterval*((nAzLooks - 1)/2.0);
-        String newFirstLineTime = String.valueOf(oldFirstLineTime.subSequence(0, idx)) + newSeconds + "000000";
+        final int idx = oldFirstLineTime.lastIndexOf(':') + 1;
+        final String oldSecondsStr = oldFirstLineTime.substring(idx);
+        final double oldSeconds = Double.parseDouble(oldSecondsStr);
+        final double newSeconds = oldSeconds + oldLineTimeInterval*((nAzLooks - 1)/2.0);
+        final String newFirstLineTime = String.valueOf(oldFirstLineTime.subSequence(0, idx)) + newSeconds + "000000";
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_line_time,
             AbstractMetadata.parseUTC(newFirstLineTime.substring(0,27)));
     }
@@ -345,18 +297,18 @@ public final class MultilookOp extends Operator {
     private void addSelectedBands() {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) {
-            Band[] bands = sourceProduct.getBands();
-            ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            final Band[] bands = sourceProduct.getBands();
+            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
                 bandNameList.add(band.getName());
             }
             sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
         }
 
-        Band[] sourceBands = new Band[sourceBandNames.length];
+        final Band[] sourceBands = new Band[sourceBandNames.length];
         for (int i = 0; i < sourceBandNames.length; i++) {
-            String sourceBandName = sourceBandNames[i];
-            Band sourceBand = sourceProduct.getBand(sourceBandName);
+            final String sourceBandName = sourceBandNames[i];
+            final Band sourceBand = sourceProduct.getBand(sourceBandName);
             if (sourceBand == null) {
                 throw new OperatorException("Source band not found: " + sourceBandName);
             }
@@ -367,8 +319,8 @@ public final class MultilookOp extends Operator {
         targetBandNameToSourceBandName = new HashMap<String, String[]>();
         for (int i = 0; i < sourceBands.length; i++) {
 
-            Band srcBand = sourceBands[i];
-            String unit = srcBand.getUnit();
+            final Band srcBand = sourceBands[i];
+            final String unit = srcBand.getUnit();
             if(unit == null) {
                 throw new OperatorException("band "+srcBand.getName()+" requires a unit");
             }
@@ -388,14 +340,14 @@ public final class MultilookOp extends Operator {
                 if (i == sourceBands.length - 1) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
                 }
-                String nextUnit = sourceBands[i+1].getUnit();
+                final String nextUnit = sourceBands[i+1].getUnit();
                 if (nextUnit == null || !nextUnit.contains("imaginary")) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
                 }
-                String[] srcBandNames = new String[2];
+                final String[] srcBandNames = new String[2];
                 srcBandNames[0] = srcBand.getName();
                 srcBandNames[1] = sourceBands[i+1].getName();
-                final String pol = getPolarizationFromBandName(srcBandNames[0]);
+                final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
                 if (pol != null) {
                     targetBandName = "Intensity_" + pol.toUpperCase();
                 } else {
@@ -409,7 +361,7 @@ public final class MultilookOp extends Operator {
 
             } else {
 
-                String[] srcBandNames = {srcBand.getName()};
+                final String[] srcBandNames = {srcBand.getName()};
                 targetBandName = srcBand.getName();
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
@@ -419,7 +371,7 @@ public final class MultilookOp extends Operator {
 
             if(targetProduct.getBand(targetBandName) == null) {
 
-                Band targetBand = new Band(targetBandName,
+                final Band targetBand = new Band(targetBandName,
                                            ProductData.TYPE_FLOAT32,
                                            targetImageWidth,
                                            targetImageHeight);
@@ -427,21 +379,6 @@ public final class MultilookOp extends Operator {
                 targetBand.setUnit(targetUnit);
                 targetProduct.addBand(targetBand);
             }
-        }
-    }
-
-    static String getPolarizationFromBandName(String bandName) {
-
-        final int idx = bandName.lastIndexOf('_');
-        if (idx != -1) {
-            final String pol = bandName.substring(idx+1).toLowerCase();
-            if (!pol.contains("hh") && !pol.contains("vv") && !pol.contains("hv") && !pol.contains("vh")) {
-                return null;
-            } else {
-                return pol;
-            }
-        } else {
-            return null;
         }
     }
 
@@ -460,7 +397,7 @@ public final class MultilookOp extends Operator {
     void computeMultiLookImageUsingTimeDomainMethod(
             int tx0, int ty0, int tw, int th, Tile sourceRaster1, Tile sourceRaster2, Tile targetTile, Unit.UnitType bandUnit) {
 
-        ProductData trgData = targetTile.getDataBuffer();
+        final ProductData trgData = targetTile.getDataBuffer();
 
         double meanValue;
         final int maxy = ty0 + th;
@@ -486,9 +423,9 @@ public final class MultilookOp extends Operator {
     double getMeanValue(int tx, int ty, Tile sourceRaster1, Tile sourceRaster2, Unit.UnitType bandUnit) {
 
         final int xStart = tx * nRgLooks;
-        final int yStart = ty * nAzLooks;
+        final int yStart = (int)(ty * nAzLooks);
         final int xEnd = xStart + nRgLooks;
-        final int yEnd = yStart + nAzLooks;
+        final int yEnd = (int)(yStart + nAzLooks);
 
         final ProductData srcData1 = sourceRaster1.getDataBuffer();
         ProductData srcData2 = null;

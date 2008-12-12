@@ -17,6 +17,7 @@ public class OperatorUtils {
 
     /**
      * Get abstracted metadata.
+     * @return MetadataElement
      */
     public static MetadataElement getAbstractedMetadata(Product sourceProduct) {
 

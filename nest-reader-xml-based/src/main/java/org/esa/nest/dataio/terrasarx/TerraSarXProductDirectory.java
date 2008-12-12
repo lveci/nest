@@ -33,6 +33,9 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
+        final String defStr = AbstractMetadata.NO_METADATA_STRING;
+        final int defInt = AbstractMetadata.NO_METADATA;
+
         final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
         final MetadataElement level1Elem = root.getElementAt(1);
         final MetadataElement generalHeader = level1Elem.getElement("generalHeader");
@@ -41,32 +44,43 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         final MetadataElement productVariantInfo = productInfo.getElement("productVariantInfo");
         final MetadataElement imageDataInfo = productInfo.getElement("imageDataInfo");
         final MetadataElement sceneInfo = productInfo.getElement("sceneInfo");
-
+        final MetadataElement processing = level1Elem.getElement("processing");
+        final MetadataElement instrument = level1Elem.getElement("instrument");
+        
         MetadataAttribute attrib = generalHeader.getAttribute("fileName");
         if(attrib != null)
             productName = attrib.getData().getElemString();
 
         //mph
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, productName);
-        productType = productVariantInfo.getAttributeString("productType", " ");
+        productType = productVariantInfo.getAttributeString("productType", defStr);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
-                generalHeader.getAttributeString("itemName", " "));
+                generalHeader.getAttributeString("itemName", defStr));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, generalHeader.getAttributeString("mission", " "));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, generalHeader.getAttributeString("mission", defStr));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, getTime(generalHeader, "generationTime"));
 
         MetadataElement elem = generalHeader.getElement("generationSystem");
         if(elem != null) {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier,
-                elem.getAttributeString("generationSystem", " "));
+                elem.getAttributeString("generationSystem", defStr));
         }
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.CYCLE, missionInfo.getAttributeInt("orbitCycle", 0));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT, missionInfo.getAttributeInt("relOrbit", 0));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT, missionInfo.getAttributeInt("absOrbit", 0));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, missionInfo.getAttributeString("orbitDirection", " "));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, imageDataInfo.getAttributeString("imageDataType", " "));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.CYCLE, missionInfo.getAttributeInt("orbitCycle", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT, missionInfo.getAttributeInt("relOrbit", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT, missionInfo.getAttributeInt("absOrbit", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, missionInfo.getAttributeString("orbitDirection", defStr));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, imageDataInfo.getAttributeString("imageDataType", defStr));
+
+        final MetadataElement acquisitionInfo = productInfo.getElement("acquisitionInfo");
+        final MetadataElement polarisationList = acquisitionInfo.getElement("polarisationList");
+        MetadataAttribute[] polList = polarisationList.getAttributes();
+        if(polList.length > 0) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar, polList[0].getData().getElemString());
+        } if(polList.length > 1) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds2_tx_rx_polar, polList[1].getData().getElemString());
+        }
 
         final ProductData.UTC startTime = getTime(sceneInfo.getElement("start"), "timeUTC");
         final ProductData.UTC stopTime = getTime(sceneInfo.getElement("stop"), "timeUTC");
@@ -95,11 +109,43 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long,
                 mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));  */
 
-        int srgr = 0;
-        if(productVariantInfo.getAttributeString("projection", " ").equalsIgnoreCase("GROUNDRANGE"))
-            srgr = 1;
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, srgr);
+        final MetadataElement imageRaster = imageDataInfo.getElement("imageRaster");
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks, imageRaster.getAttributeDouble("azimuthLooks", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks, imageRaster.getAttributeDouble("rangeLooks", defInt));
 
+        final MetadataElement rowSpacing = imageRaster.getElement("rowSpacing");
+        final MetadataElement columnSpacing = imageRaster.getElement("columnSpacing");
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing, columnSpacing.getAttributeDouble("columnSpacing", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing, rowSpacing.getAttributeDouble("rowSpacing", defInt));
+
+        final MetadataElement settings = instrument.getElement("settings");
+        final MetadataElement settingRecord = settings.getElement("settingRecord");
+        final MetadataElement PRF = settingRecord.getElement("PRF");
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
+                PRF.getAttributeDouble("PRF", defInt));
+
+
+        setFlag(productVariantInfo, "projection", "GROUNDRANGE", absRoot, AbstractMetadata.srgr_flag);
+        setFlag(productVariantInfo, "radiometricCorrection", "CALIBRATED", absRoot, AbstractMetadata.abs_calibration_flag);
+        
+        final MetadataElement processingFlags = processing.getElement("processingFlags");
+        setFlag(processingFlags, "rangeSpreadingLossCorrectedFlag", "true", absRoot, AbstractMetadata.range_spread_comp_flag);
+        setFlag(processingFlags, "elevationPatternCorrectedFlag", "true", absRoot, AbstractMetadata.ant_elev_corr_flag);
+
+        final MetadataElement calibration = productInfo.getElement("calibration");
+        if(calibration != null) {
+            final MetadataElement calibrationConstant = calibration.getElement("calibrationConstant");
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
+                    calibrationConstant.getAttributeDouble("calFactor", defInt));
+        }
+    }
+
+    private static void setFlag(MetadataElement elem, String attribTag, String trueValue,
+                                MetadataElement absRoot, String absTag) {
+        int val = 0;
+        if(elem.getAttributeString(attribTag, " ").equalsIgnoreCase(trueValue))
+            val = 1;
+        AbstractMetadata.setAttribute(absRoot, absTag, val);
     }
 
     private static ProductData.UTC getTime(MetadataElement elem, String tag) {
@@ -135,7 +181,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
         int maxRow = 0, maxCol = 0;
         int minRow = Integer.MAX_VALUE, minCol = Integer.MAX_VALUE;
-        ArrayList<CornerCoord> coordList = new ArrayList<CornerCoord>();
+        final ArrayList<CornerCoord> coordList = new ArrayList<CornerCoord>();
 
         final MetadataElement[] children = sceneInfo.getElements();
         for(MetadataElement child : children) {

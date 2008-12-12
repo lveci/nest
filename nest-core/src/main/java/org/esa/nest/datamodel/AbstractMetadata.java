@@ -17,7 +17,6 @@ public class AbstractMetadata {
 
     public static int NO_METADATA = 99999;
     //public static short NO_METADATA_BYTE = 99;
-    //public static int NO_METADATA = 0;
     public static short NO_METADATA_BYTE = 0;
     public static String NO_METADATA_STRING = " ";
 
@@ -129,8 +128,8 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, mds1_tx_rx_polar, ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, mds2_tx_rx_polar, ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, algorithm, ProductData.TYPE_ASCII, "", "Processing algorithm");
-        addAbstractedAttribute(absRoot, azimuth_looks, ProductData.TYPE_INT32, "", "");
-        addAbstractedAttribute(absRoot, range_looks, ProductData.TYPE_INT32, "", "");
+        addAbstractedAttribute(absRoot, azimuth_looks, ProductData.TYPE_FLOAT64, "", "");
+        addAbstractedAttribute(absRoot, range_looks, ProductData.TYPE_FLOAT64, "", "");
         addAbstractedAttribute(absRoot, range_spacing, ProductData.TYPE_FLOAT64, "m", "Range sample spacing");
         addAbstractedAttribute(absRoot, azimuth_spacing, ProductData.TYPE_FLOAT64, "m", "");
         addAbstractedAttribute(absRoot, pulse_repetition_frequency, ProductData.TYPE_FLOAT64, "Hz", "");
@@ -260,5 +259,27 @@ public class AbstractMetadata {
             System.out.println("UTC parse error:"+ e.toString());
             return new ProductData.UTC(0);
         }
+    }
+
+
+    public static boolean getAttributeBoolean(final MetadataElement elem, final String tag) throws Exception {
+        final int val = elem.getAttributeInt(tag);
+        if(val == NO_METADATA)
+            throw new Exception("Metadata "+tag+" has not been set");
+        return val != 0;
+    }
+
+    public static double getAttributeDouble(final MetadataElement elem, final String tag) throws Exception {       
+        final double val = elem.getAttributeDouble(tag);
+        if(val == NO_METADATA)
+            throw new Exception("Metadata "+tag+" has not been set");
+        return val;
+    }
+
+    public static int getAttributeInt(final MetadataElement elem, final String tag) throws Exception {
+        final int val = elem.getAttributeInt(tag);
+        if(val == NO_METADATA)
+            throw new Exception("Metadata "+tag+" has not been set");
+        return val;
     }
 }

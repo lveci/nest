@@ -108,35 +108,36 @@ public class SRGROp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        if (numRangePoints < warpPolynomialOrder + 2) {
-            throw new OperatorException("numRangePoints must be greater than warpPolynomialOrder");
+        try {
+            if (numRangePoints < warpPolynomialOrder + 2) {
+                throw new OperatorException("numRangePoints must be greater than warpPolynomialOrder");
+            }
+
+            absRoot = OperatorUtils.getAbstractedMetadata(sourceProduct);
+
+            srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
+
+            if (srgrFlag) {
+                throw new OperatorException("Slant range to ground range conversion has already been applied");
+            }
+
+            slantRangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
+
+            sourceImageWidth = sourceProduct.getSceneRasterWidth();
+            sourceImageHeight = sourceProduct.getSceneRasterHeight();
+            geoCoding = sourceProduct.getGeoCoding();
+
+            computeSlantRangeDistanceArray();
+            getNearRangeIncidenceAngle();
+
+            groundRangeSpacing = slantRangeSpacing / Math.sin(nearRangeIncidenceAngle*MathUtils.DTOR);
+
+            createTargetProduct();
+
+            tileIdx = -1;
+        } catch(Exception e) {
+            throw new OperatorException(e.getMessage());
         }
-
-        absRoot = sourceProduct.getMetadataRoot().getElement("Abstracted Metadata");
-        if (absRoot == null) {
-            throw new OperatorException("Abstracted Metadata not found");
-        }
-
-        getSRGRFlag();
-
-        if (srgrFlag) {
-            throw new OperatorException("Slant range to ground range conversion has already been applied");
-        }
-
-        getSlantRangeSpacing();
-
-        sourceImageWidth = sourceProduct.getSceneRasterWidth();
-        sourceImageHeight = sourceProduct.getSceneRasterHeight();
-        geoCoding = sourceProduct.getGeoCoding();
-
-        computeSlantRangeDistanceArray();
-        getNearRangeIncidenceAngle();
-
-        groundRangeSpacing = slantRangeSpacing / Math.sin(nearRangeIncidenceAngle*MathUtils.DTOR);
-
-        createTargetProduct();
-
-        tileIdx = -1;
     }
 
     /**
@@ -220,34 +221,6 @@ public class SRGROp extends Operator {
     }
 
     /**
-     * Get srgr_flag from metadata.
-     */
-    private void getSRGRFlag() {
-
-        final MetadataAttribute srgrFlagAttr = absRoot.getAttribute(AbstractMetadata.srgr_flag);
-        if (srgrFlagAttr == null) {
-            throw new OperatorException(AbstractMetadata.srgr_flag + " not found");
-        }
-        srgrFlag = srgrFlagAttr.getData().getElemBoolean();
-    }
-
-    /**
-     * Get slant range spacing from metadata.
-     */
-    private void getSlantRangeSpacing() {
-        
-        final MetadataAttribute rangeSpacingAttr = absRoot.getAttribute(AbstractMetadata.range_spacing);
-        if (rangeSpacingAttr == null) {
-            throw new OperatorException(AbstractMetadata.range_spacing + " not found");
-        }
-
-        slantRangeSpacing = (double)rangeSpacingAttr.getData().getElemFloat();
-        if(slantRangeSpacing == 0) {
-            throw new OperatorException(AbstractMetadata.range_spacing + " is zero");
-        }
-    }
-
-    /**
      * Compute slant range distance from each selected range point to the 1st one.
      */
     private void computeSlantRangeDistanceArray() {
@@ -265,7 +238,7 @@ public class SRGROp extends Operator {
      */
     private void getNearRangeIncidenceAngle() {
 
-        final TiePointGrid incidenceAngle = getIncidenceAngle();
+        final TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
 
         final double alphaFirst = incidenceAngle.getPixelFloat(0.5f, 0.5f);
         final double alphaLast = incidenceAngle.getPixelFloat(sourceImageWidth - 0.5f, 0.5f);
@@ -284,36 +257,6 @@ public class SRGROp extends Operator {
             nearRangeIncidenceAngle = incidenceAngle.getPixelFloat(0.5f, 0.5f);
         }
         */
-    }
-
-    /**
-     * Get incidence angle tie point grid.
-     *
-     * @return srcTPG The incidence angle tie point grid.
-     */
-    private TiePointGrid getIncidenceAngle() {
-
-        for (int i = 0; i < sourceProduct.getNumTiePointGrids(); i++) {
-            final TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
-            if (srcTPG.getName().equals("incident_angle")) {
-                return srcTPG;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Get the mission type.
-     */
-    private void getMissionType() {
-
-        final MetadataAttribute missionTypeAttr = absRoot.getAttribute(AbstractMetadata.MISSION);
-        if (missionTypeAttr == null) {
-            throw new OperatorException(AbstractMetadata.MISSION + " not found");
-        }
-
-        missionType = missionTypeAttr.getData().getElemString();
-        //System.out.println("Mission is " + missionType);
     }
     
     /**
@@ -373,24 +316,16 @@ public class SRGROp extends Operator {
      */
     private void updateTargetProductMetadata() {
 
-        final MetadataElement abs = targetProduct.getMetadataRoot().getElement("Abstracted Metadata");
-        if (abs == null) {
-            throw new OperatorException("Abstracted Metadata not found");
-        }
-        abs.getAttribute(AbstractMetadata.srgr_flag).getData().setElemBoolean(true);
-
-        final MetadataAttribute rangeSpacingAttr = abs.getAttribute(AbstractMetadata.range_spacing);
-        if (rangeSpacingAttr == null) {
-            throw new OperatorException(AbstractMetadata.range_spacing + " not found");
-        }
-        rangeSpacingAttr.getData().setElemFloat((float)(groundRangeSpacing));
+        final MetadataElement absTgt = OperatorUtils.getAbstractedMetadata(targetProduct);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.srgr_flag, 1);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_spacing, groundRangeSpacing);
     }
 
     private void addSelectedBands() {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) {
             final Band[] bands = sourceProduct.getBands();
-            ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
                 bandNameList.add(band.getName());
             }
