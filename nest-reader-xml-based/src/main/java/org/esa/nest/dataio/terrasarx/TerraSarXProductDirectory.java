@@ -90,28 +90,22 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         product.setEndTime(stopTime);
 
         getCornerCoords(sceneInfo);
-   /*     AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
-                mapProjRec.getAttributeDouble("1st line 1st pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_long,
-                mapProjRec.getAttributeDouble("1st line 1st pixel geodetic longitude"));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_lat,
-                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_long,
-                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic longitude"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat, latCorners[0]);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_long, lonCorners[0]);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_lat, latCorners[1]);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_long, lonCorners[1]);
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_lat,
-                mapProjRec.getAttributeDouble("Last line 1st pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_long,
-                mapProjRec.getAttributeDouble("Last line 1st pixel geodetic longitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_lat,
-                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long,
-                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));  */
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_lat, latCorners[2]);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_long, lonCorners[2]);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_lat, latCorners[3]);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long, lonCorners[3]);  
 
         final MetadataElement imageRaster = imageDataInfo.getElement("imageRaster");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks, imageRaster.getAttributeDouble("azimuthLooks", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks, imageRaster.getAttributeDouble("rangeLooks", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines, imageRaster.getAttributeDouble("numberOfRows", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line, imageRaster.getAttributeDouble("numberOfColumns", defInt));
 
         final MetadataElement rowSpacing = imageRaster.getElement("rowSpacing");
         final MetadataElement columnSpacing = imageRaster.getElement("columnSpacing");
@@ -132,7 +126,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         setFlag(processingFlags, "rangeSpreadingLossCorrectedFlag", "true", absRoot, AbstractMetadata.range_spread_comp_flag);
         setFlag(processingFlags, "elevationPatternCorrectedFlag", "true", absRoot, AbstractMetadata.ant_elev_corr_flag);
 
-        final MetadataElement calibration = productInfo.getElement("calibration");
+        final MetadataElement calibration = level1Elem.getElement("calibration");
         if(calibration != null) {
             final MetadataElement calibrationConstant = calibration.getElement("calibrationConstant");
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
@@ -205,15 +199,15 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         for(CornerCoord coord : coordList) {
             int index = -1;
             if(coord.refRow == minRow) {
-                if(coord.refCol == minCol) {            // UL
+                if(Math.abs(coord.refCol - minCol) < Math.abs(coord.refCol - maxCol)) {            // UL
                     index = 0;
-                } else if(coord.refCol == maxCol) {     // UR
+                } else {     // UR
                     index = 1;
                 }
             } else if(coord.refRow == maxRow) {
-                if(coord.refCol == minCol) {            // LL
+                if(Math.abs(coord.refCol - minCol) < Math.abs(coord.refCol - maxCol)) {            // LL
                     index = 2;
-                } else if(coord.refCol == maxCol) {     // LR
+                } else {     // LR
                     index = 3;
                 }
             }
