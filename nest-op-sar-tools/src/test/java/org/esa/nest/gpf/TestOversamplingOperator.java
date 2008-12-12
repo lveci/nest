@@ -24,7 +24,7 @@ public class TestOversamplingOperator extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        spi = new OversamplingOp.Spi();
+        spi = new OversamplingOp2.Spi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(spi);
     }
 
@@ -39,13 +39,14 @@ public class TestOversamplingOperator extends TestCase {
      */
     public void testOversampling() throws Exception {
 
-        final File file = new File("C:\\Data\\ASA_IMS_1PNUPA20040419_031056_000000162026_00089_11165_6099.N1");
+        final File file = new File("C:\\Data\\ASAR\\ASA_IMS_1PNUPA20040419_031056_000000162026_00089_11165_6099.N1");
+        if(!file.exists()) return;
         
         Product sourceProduct = ProductIO.readProduct(file, null);
 
         //Product sourceProduct = createTestProduct(500, 500);
 
-        OversamplingOp op = (OversamplingOp)spi.createOperator();
+        OversamplingOp2 op = (OversamplingOp2)spi.createOperator();
         assertNotNull(op);
         op.setSourceProduct(sourceProduct);
 

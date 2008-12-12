@@ -15,7 +15,7 @@ public class ReaderUtils {
         String expression = "atan2("+bandQ.getName()+ ',' +bandI.getName()+ ')';
 
         VirtualBand virtBand = new VirtualBand("Phase" + countStr,
-                ProductData.TYPE_FLOAT64,
+                ProductData.TYPE_FLOAT32,
                 product.getSceneRasterWidth(),
                 product.getSceneRasterHeight(),
                 expression);
@@ -30,7 +30,7 @@ public class ReaderUtils {
                 bandQ.getName() + " * " + bandQ.getName();
 
         VirtualBand virtBand = new VirtualBand("Intensity" + countStr,
-                ProductData.TYPE_FLOAT64,
+                ProductData.TYPE_FLOAT32,
                 product.getSceneRasterWidth(),
                 product.getSceneRasterHeight(),
                 expression);
@@ -47,7 +47,7 @@ public class ReaderUtils {
         String expression = band.getName() + " * " + band.getName();
 
         VirtualBand virtBand = new VirtualBand("Intensity" + countStr,
-                ProductData.TYPE_FLOAT64,
+                ProductData.TYPE_FLOAT32,
                 product.getSceneRasterWidth(),
                 product.getSceneRasterHeight(),
                 expression);
