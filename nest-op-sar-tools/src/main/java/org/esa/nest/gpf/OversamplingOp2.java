@@ -84,8 +84,8 @@ public class OversamplingOp2 extends Operator {
 
     private float srcRangeSpacing; // range pixel spacing of source image
     private float srcAzimuthSpacing; // azimuth pixel spacing of source image
-    private float[][] tmpI;
-    private float[][] tmpQ;
+    private double[][] tmpI;
+    private double[][] tmpQ;
 
     private double prf; // pulse repetition frequency in Hz
     private double samplingRate; // range sampling rate in Hz
@@ -472,8 +472,8 @@ public class OversamplingOp2 extends Operator {
         final int sourceTileWidth = sourceTileRectangle.width;
         final int sourceTileHeight = sourceTileRectangle.height;
 
-        tmpI = new float[targetTileHeight][sourceTileWidth];
-        tmpQ = new float[targetTileHeight][sourceTileWidth];
+        tmpI = new double[targetTileHeight][sourceTileWidth];
+        tmpQ = new double[targetTileHeight][sourceTileWidth];
 
         final Band srcBand = sourceProduct.getBand(targetBandName);
         final Tile srcRaster = getSourceTile(srcBand, sourceTileRectangle, pm);
@@ -485,8 +485,8 @@ public class OversamplingOp2 extends Operator {
             final double[] row = getRowData(sy0 + y, sx0, sourceTileWidth, srcData, srcRaster);
             src_row_fft.complexForward(row);
             for (int x = 0; x < sourceTileWidth; x++) {
-                tmpI[y][x] = (float)row[2*x];
-                tmpQ[y][x] = (float)row[2*x+1];
+                tmpI[y][x] = row[2*x];
+                tmpQ[y][x] = row[2*x+1];
             }
         }
 
@@ -545,8 +545,8 @@ public class OversamplingOp2 extends Operator {
         final int sourceTileWidth = sourceTileRectangle.width;
         final int sourceTileHeight = sourceTileRectangle.height;
 
-        tmpI = new float[targetTileHeight][sourceTileWidth];
-        tmpQ = new float[targetTileHeight][sourceTileWidth];
+        tmpI = new double[targetTileHeight][sourceTileWidth];
+        tmpQ = new double[targetTileHeight][sourceTileWidth];
 
         final Band iBand = sourceProduct.getBand(iBandName);
         final Band qBand = sourceProduct.getBand(qBandName);
@@ -563,8 +563,8 @@ public class OversamplingOp2 extends Operator {
             final double[] row = getRowData(sy0 + y, sx0, sourceTileWidth, iSrcData, qSrcData, iRaster);
             src_row_fft.complexForward(row);
             for (int x = 0; x < sourceTileWidth; x++) {
-                tmpI[y][x] = (float)row[2*x];
-                tmpQ[y][x] = (float)row[2*x+1];
+                tmpI[y][x] = row[2*x];
+                tmpQ[y][x] = row[2*x+1];
             }
         }
 
@@ -623,8 +623,8 @@ public class OversamplingOp2 extends Operator {
         final double[] array = new double[2*sourceTileHeight];
         int k = 0;
         for (int y = 0; y < sourceTileHeight; y++) {
-            array[k++] = (double)tmpI[y][x];
-            array[k++] = (double)tmpQ[y][x];
+            array[k++] = tmpI[y][x];
+            array[k++] = tmpQ[y][x];
         }
         return array;
     }
@@ -647,8 +647,8 @@ public class OversamplingOp2 extends Operator {
 
         int k = 0;
         for (int y = 0; y < targetTileHeight; y++) {
-            tmpI[y][x] = (float)overSampledCol[k++];
-            tmpQ[y][x] = (float)overSampledCol[k++];
+            tmpI[y][x] = overSampledCol[k++];
+            tmpQ[y][x] = overSampledCol[k++];
         }
     }
 
