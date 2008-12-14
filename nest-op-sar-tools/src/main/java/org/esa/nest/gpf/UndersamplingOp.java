@@ -566,7 +566,7 @@ public class UndersamplingOp extends Operator {
                 ++i;
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
-                    targetUnit = Unit.AMPLITUDE;
+                    targetUnit = Unit.INTENSITY;
                 }
 
             } else {
