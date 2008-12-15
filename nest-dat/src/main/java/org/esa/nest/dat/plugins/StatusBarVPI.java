@@ -12,6 +12,7 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.ui.PixelPositionListener;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.util.PropertyMap;
@@ -25,29 +26,11 @@ public class StatusBarVPI extends AbstractVisatPlugIn {
 
     private VisatApp _visatApp;
     private LabelStatusBarItem _dimensionStatusBarItem;
+    private LabelStatusBarItem _valueStatusBarItem;
     private HashMap<Product, PixelPositionListener> _pixelPosListeners;
-    private float _pixelOffsetX;
-    private float _pixelOffsetY;
-    private boolean _showPixelOffsetDecimals;
 
     public void start(final VisatApp visatApp) {
         _visatApp = visatApp;
-        final PropertyMap preferences = visatApp.getPreferences();
-        preferences.addPropertyChangeListener(new PropertyChangeListener() {
-            public void propertyChange(PropertyChangeEvent evt) {
-                final String propertyName = evt.getPropertyName();
-                if (VisatApp.PROPERTY_KEY_PIXEL_OFFSET_FOR_DISPLAY_X.equals(propertyName)) {
-                    setPixelOffsetX(preferences);
-                } else if (VisatApp.PROPERTY_KEY_PIXEL_OFFSET_FOR_DISPLAY_Y.equals(propertyName)) {
-                    setPixelOffsetY(preferences);
-                } else if (VisatApp.PROPERTY_KEY_PIXEL_OFFSET_FOR_DISPLAY_SHOW_DECIMALS.equals(propertyName)) {
-                    setShowPixelOffsetDecimals(preferences);
-                }
-            }
-        });
-        setPixelOffsetX(preferences);
-        setPixelOffsetY(preferences);
-        setShowPixelOffsetDecimals(preferences);
 
         visatApp.addInternalFrameListener(new InternalFrameAdapter() {
 
@@ -69,22 +52,6 @@ public class StatusBarVPI extends AbstractVisatPlugIn {
                 }
             }
         });
-    }
-
-    private void setPixelOffsetY(final PropertyMap preferences) {
-        _pixelOffsetY = (float) preferences.getPropertyDouble(VisatApp.PROPERTY_KEY_PIXEL_OFFSET_FOR_DISPLAY_Y,
-                                                              VisatApp.PROPERTY_DEFAULT_PIXEL_OFFSET_FOR_DISPLAY);
-    }
-
-    private void setPixelOffsetX(final PropertyMap preferences) {
-        _pixelOffsetX = (float) preferences.getPropertyDouble(VisatApp.PROPERTY_KEY_PIXEL_OFFSET_FOR_DISPLAY_X,
-                                                              VisatApp.PROPERTY_DEFAULT_PIXEL_OFFSET_FOR_DISPLAY);
-    }
-
-    private void setShowPixelOffsetDecimals(final PropertyMap preferences) {
-        _showPixelOffsetDecimals = preferences.getPropertyBool(
-                VisatApp.PROPERTY_KEY_PIXEL_OFFSET_FOR_DISPLAY_SHOW_DECIMALS,
-                VisatApp.PROPERTY_DEFAULT_PIXEL_OFFSET_FOR_DISPLAY_SHOW_DECIMALS);
     }
 
     private PixelPositionListener registerPixelPositionListener(Product product) {
@@ -110,14 +77,19 @@ public class StatusBarVPI extends AbstractVisatPlugIn {
         return _dimensionStatusBarItem;
     }
 
+    private LabelStatusBarItem getValueStatusBarItem() {
+        if (_valueStatusBarItem == null) {
+            _valueStatusBarItem = (LabelStatusBarItem) _visatApp.getStatusBar().getItemByName("STATUS_BAR_VALUE_ITEM");
+        }
+        return _valueStatusBarItem;
+    }
+
     private class PixelPosHandler implements PixelPositionListener {
 
-        private final String _refString;
         private StringBuilder _text;
         private final String _EMPTYSTR = "";
 
         public PixelPosHandler(String refString) {
-            _refString = refString;
             _text = new StringBuilder(64);
         }
 
@@ -127,28 +99,40 @@ public class StatusBarVPI extends AbstractVisatPlugIn {
                                     int currentLevel,
                                     boolean pixelPosValid,
                                     MouseEvent e) {
-            LabelStatusBarItem dimensionStatusBarItem = getDimensionsStatusBarItem();
-            if (dimensionStatusBarItem == null || !dimensionStatusBarItem.isVisible()) {
+            final LabelStatusBarItem dimensionStatusBarItem = getDimensionsStatusBarItem();
+            final LabelStatusBarItem valueStatusBarItem = getValueStatusBarItem();
+            if (dimensionStatusBarItem == null || valueStatusBarItem == null) {
                 return;
             }
             if (pixelPosValid) {
                 _text.setLength(0);
 
-                Product prod = _visatApp.getSelectedProductSceneView().getProduct();
-                int width = prod.getSceneRasterWidth();
-                int height = prod.getSceneRasterHeight();
+                final Product prod = _visatApp.getSelectedProductSceneView().getProduct();
+                final int width = prod.getSceneRasterWidth();
+                final int height = prod.getSceneRasterHeight();
                 _text.append(width).append(" x ").append(height);
 
                 dimensionStatusBarItem.setText(_text.toString());
+
+                final String selectedNodeName = _visatApp.getSelectedProductNode().getName();
+                final Band band = prod.getBand(selectedNodeName);
+
+                valueStatusBarItem.setText(band.getPixelString(pixelX, pixelY));
+
             } else {
                 dimensionStatusBarItem.setText(_EMPTYSTR);
+                valueStatusBarItem.setText(_EMPTYSTR);
             }
         }
 
         public void pixelPosNotAvailable() {
-            LabelStatusBarItem positionStatusBarItem = getDimensionsStatusBarItem();
-            if (positionStatusBarItem != null) {
-                positionStatusBarItem.setText(_EMPTYSTR);
+            final LabelStatusBarItem dimensionStatusBarItem = getDimensionsStatusBarItem();
+            if (dimensionStatusBarItem != null) {
+                dimensionStatusBarItem.setText(_EMPTYSTR);
+            }
+            final LabelStatusBarItem valueStatusBarItem = getValueStatusBarItem();
+            if (valueStatusBarItem != null) {
+                valueStatusBarItem.setText(_EMPTYSTR);
             }
         }
     }

@@ -107,10 +107,10 @@
 	<mapID target="ERSCalibrationOp" url="operators/ERSCalibrationOp.html"/>
 	<mapID target="GCPSelectionOp" url="operators/GCPSelectionOp.html"/>
 	<mapID target="MultilookOp" url="operators/MultilookOp.html"/>
-	<!--mapID target="OverSampleOp" url="operators/OverSampleOp.html"/-->
+	<mapID target="OverSampleOp" url="operators/OverSampleOp.html"/>
 	<mapID target="SpeckleFilterOp" url="operators/SpeckleFilterOp.html"/>
 	<mapID target="SRGROp" url="operators/SRGROp.html"/>
-	<!--mapID target="UnderSampleOp" url="operators/UnderSampleOp.html"/-->
+	<mapID target="UnderSampleOp" url="operators/UnderSampleOp.html"/>
 	<mapID target="WarpOp" url="operators/WarpOp.html"/>	
 	<mapID target="WSSDeburstOp" url="operators/WSSDeburstOp.html"/>
 	<mapID target="WSSMosaicOp" url="operators/WSSMosaicOp.html"/>

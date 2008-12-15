@@ -65,12 +65,19 @@ public final class DatApp extends VisatApp {
     protected com.jidesoft.status.StatusBar createStatusBar() {
         final com.jidesoft.status.StatusBar statusBar = super.createStatusBar();
 
+        final LabelStatusBarItem valueItem = new LabelStatusBarItem("STATUS_BAR_VALUE_ITEM");
+        valueItem.setText("");
+        valueItem.setPreferredWidth(50);
+        valueItem.setAlignment(JLabel.CENTER);
+        valueItem.setToolTip("Displays pixel value");
+        statusBar.add(valueItem, 3);
+
         final LabelStatusBarItem dimensions = new LabelStatusBarItem("STATUS_BAR_DIMENSIONS_ITEM");
         dimensions.setText("");
         dimensions.setPreferredWidth(70);
         dimensions.setAlignment(JLabel.CENTER);
         dimensions.setToolTip("Displays image dimensions");
-        statusBar.add(dimensions, 3);
+        statusBar.add(dimensions, 4);
 
         return statusBar;
     }

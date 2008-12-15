@@ -128,10 +128,10 @@
 			<tocitem text="ERS Calibration" target="ERSCalibrationOp"/>
 			<tocitem text="GCP Selection" target="GCPSelectionOp"/>
 			<tocitem text="Multilook" target="MultilookOp"/>
-			<!--tocitem text="Over Sample" target="OverSampleOp"/-->	
+			<tocitem text="Over Sample" target="OverSampleOp"/>	
 	        <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>
 			<tocitem text="Slant Range to Ground Range" target="SRGROp"/>
-			<!--tocitem text="Under Sample" target="UnderSampleOp"/-->
+			<tocitem text="Under Sample" target="UnderSampleOp"/>
 			<tocitem text="Warp" target="WarpOp"/>
 			<tocitem text="WSS Deburst" target="WSSDeburstOp"/>
 			<tocitem text="WSS Mosaic" target="WSSMosaicOp"/>
