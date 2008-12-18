@@ -347,9 +347,10 @@ public class SRGROp extends Operator {
                 continue;
             }
             final Band targetBand = new Band(srcBand.getName(),
-                                       ProductData.TYPE_FLOAT32,
+                                       srcBand.getDataType(),
                                        targetImageWidth,
                                        sourceImageHeight);
+            targetBand.setUnit(srcBand.getUnit());
             targetProduct.addBand(targetBand);
         }
     }

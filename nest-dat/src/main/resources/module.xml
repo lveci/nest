@@ -55,6 +55,7 @@
                     <id>projection</id>
                     <id>attachPixelGeoCoding</id>
                     <id>detachPixelGeoCoding</id>
+                    <id>exportLegendImageFile</id>
                 </excludedActions>
                 <excludedToolViews>
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>

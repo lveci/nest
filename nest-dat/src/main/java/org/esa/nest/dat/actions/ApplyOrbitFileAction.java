@@ -12,7 +12,7 @@ import org.esa.nest.dat.dialogs.OrbitFileDialog;
  * This action to apply orbit file
  *
  * @author lveci
- * @version $Revision: 1.6 $ $Date: 2008-11-28 22:01:49 $
+ * @version $Revision: 1.7 $ $Date: 2008-12-18 19:48:35 $
  */
 public class ApplyOrbitFileAction extends ExecCommand {
 
@@ -39,7 +39,9 @@ public class ApplyOrbitFileAction extends ExecCommand {
     @Override
     public void updateState(final CommandEvent event) {
         final Product product = VisatApp.getApp().getSelectedProduct();
-        setEnabled(product != null && product.getNumBands() + product.getNumTiePointGrids() > 0);
+        //setEnabled(product != null && product.getNumBands() + product.getNumTiePointGrids() > 0);
+
+        setEnabled(false);
     }
 
 }

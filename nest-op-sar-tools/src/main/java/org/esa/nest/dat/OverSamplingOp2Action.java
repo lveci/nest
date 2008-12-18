@@ -17,7 +17,7 @@ public class OverSamplingOp2Action extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new NestSingleTargetProductDialog("Oversample2", getAppContext(), "Oversample2", getHelpId());
+            dialog = new NestSingleTargetProductDialog("Oversample2", getAppContext(), "Oversample", getHelpId());
             dialog.setTargetProductNameSuffix("_OvrS");
         }
         dialog.show();

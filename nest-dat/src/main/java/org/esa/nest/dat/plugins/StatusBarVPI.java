@@ -116,8 +116,8 @@ public class StatusBarVPI extends AbstractVisatPlugIn {
 
                 final String selectedNodeName = _visatApp.getSelectedProductNode().getName();
                 final Band band = prod.getBand(selectedNodeName);
-
-                valueStatusBarItem.setText(band.getPixelString(pixelX, pixelY));
+                if(band != null)
+                    valueStatusBarItem.setText(band.getPixelString(pixelX, pixelY));
 
             } else {
                 dimensionStatusBarItem.setText(_EMPTYSTR);

@@ -76,19 +76,10 @@
         </action>
 
         <action>
-            <id>OverSamplingOp</id>
-            <class>org.esa.nest.dat.OverSamplingOpAction</class>
-            <text>Oversampling</text>
-            <shortDescr>Over sample an image</shortDescr>
-            <parent>Resampling</parent>
-            <helpId>OverSampleOp</helpId>
-        </action>
-
-        <action>
             <id>OverSamplingOp2</id>
             <class>org.esa.nest.dat.OverSamplingOp2Action</class>
-            <text>Oversampling2</text>
-            <shortDescr>Over sample an image</shortDescr>
+            <text>OverSample</text>
+            <shortDescr>Oversample an image</shortDescr>
             <parent>Resampling</parent>
             <helpId>OverSampleOp</helpId>
         </action>
@@ -96,8 +87,8 @@
         <action>
             <id>UnderSamplingOp</id>
             <class>org.esa.nest.dat.UnderSamplingOpAction</class>
-            <text>Undersampling</text>
-            <shortDescr>Under sample an image</shortDescr>
+            <text>Undersample</text>
+            <shortDescr>Undersample an image</shortDescr>
             <parent>Resampling</parent>
             <helpId>UnderSampleOp</helpId>
         </action>

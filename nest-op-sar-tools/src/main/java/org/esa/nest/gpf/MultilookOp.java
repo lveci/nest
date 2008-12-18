@@ -77,6 +77,7 @@ public final class MultilookOp extends Operator {
     private boolean srgrFlag;
 
     private double nAzLooks;     // current azimuth looks
+    private double nAzRgLooks;
     private double azimuthLooks; // original azimuth_looks from metadata
     private double rangeLooks;   // original range_looks from metadata
     private int sourceImageWidth;
@@ -372,7 +373,7 @@ public final class MultilookOp extends Operator {
             if(targetProduct.getBand(targetBandName) == null) {
 
                 final Band targetBand = new Band(targetBandName,
-                                           ProductData.TYPE_FLOAT32,
+                                           ProductData.TYPE_INT16,
                                            targetImageWidth,
                                            targetImageHeight);
 
@@ -394,17 +395,24 @@ public final class MultilookOp extends Operator {
      * @param targetTile The current target tile associated with the target band to be computed.
      * @param bandUnit Integer indicating the unit of source data.
      */
-    void computeMultiLookImageUsingTimeDomainMethod(
+    private void computeMultiLookImageUsingTimeDomainMethod(
             int tx0, int ty0, int tw, int th, Tile sourceRaster1, Tile sourceRaster2, Tile targetTile, Unit.UnitType bandUnit) {
 
         final ProductData trgData = targetTile.getDataBuffer();
+
+        final ProductData srcData1 = sourceRaster1.getDataBuffer();
+        ProductData srcData2 = null;
+        if(sourceRaster2 != null)
+            srcData2 = sourceRaster2.getDataBuffer();
+
+        nAzRgLooks = nRgLooks * nAzLooks;
 
         double meanValue;
         final int maxy = ty0 + th;
         final int maxx = tx0 + tw;
         for (int ty = ty0; ty < maxy; ty++) {
             for (int tx = tx0; tx < maxx; tx++) {
-                meanValue = getMeanValue(tx, ty, sourceRaster1, sourceRaster2, bandUnit);
+                meanValue = getMeanValue(tx, ty, sourceRaster1, srcData1, srcData2, bandUnit);
                 trgData.setElemDoubleAt(targetTile.getDataBufferIndex(tx, ty), meanValue);
             }
         }
@@ -416,46 +424,46 @@ public final class MultilookOp extends Operator {
      * @param tx The x coordinate of a pixel in the current target tile.
      * @param ty The y coordinate of a pixel in the current target tile.
      * @param sourceRaster1 The source raster for the 1st band.
-     * @param sourceRaster2 The source raster for the 2nd band.
+
      * @param bandUnit Integer indicating the unit of source data.
      * @return The mean value.
      */
-    double getMeanValue(int tx, int ty, Tile sourceRaster1, Tile sourceRaster2, Unit.UnitType bandUnit) {
+    double getMeanValue(int tx, int ty, Tile sourceRaster1, ProductData srcData1, ProductData srcData2,
+                        Unit.UnitType bandUnit) {
 
         final int xStart = tx * nRgLooks;
         final int yStart = (int)(ty * nAzLooks);
         final int xEnd = xStart + nRgLooks;
         final int yEnd = (int)(yStart + nAzLooks);
 
-        final ProductData srcData1 = sourceRaster1.getDataBuffer();
-        ProductData srcData2 = null;
-        if(sourceRaster2 != null)
-            srcData2 = sourceRaster2.getDataBuffer();
-
         double meanValue = 0.0;
-        for (int y = yStart; y < yEnd; y++) {
-            for (int x = xStart; x < xEnd; x++) {
+        int index;
 
-                final int index = sourceRaster1.getDataBufferIndex(x, y);
-
-                if (bandUnit == Unit.UnitType.INTENSITY_DB || bandUnit == Unit.UnitType.AMPLITUDE_DB) {
-
-                    final double dn = srcData1.getElemDoubleAt(index);
-                    meanValue += Math.pow(10, dn / 10.0); // dB to linear
-
-                } else if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY) {
-
-                    meanValue += srcData1.getElemDoubleAt(index);
-
-                } else { // COMPLEX
-
+        if (bandUnit == Unit.UnitType.INTENSITY_DB || bandUnit == Unit.UnitType.AMPLITUDE_DB) {
+            for (int y = yStart; y < yEnd; y++) {
+                for (int x = xStart; x < xEnd; x++) {
+                    index = sourceRaster1.getDataBufferIndex(x, y);
+                    meanValue += Math.pow(10, srcData1.getElemDoubleAt(index) / 10.0); // dB to linear
+                }
+            }
+        } else if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY) {
+            for (int y = yStart; y < yEnd; y++) {
+                for (int x = xStart; x < xEnd; x++) {
+                    meanValue += srcData1.getElemDoubleAt(sourceRaster1.getDataBufferIndex(x, y));
+                }
+            }
+        } else { // COMPLEX
+            for (int y = yStart; y < yEnd; y++) {
+                for (int x = xStart; x < xEnd; x++) {
+                    index = sourceRaster1.getDataBufferIndex(x, y);
                     final double i = srcData1.getElemDoubleAt(index);
                     final double q = srcData2.getElemDoubleAt(index);
                     meanValue += i*i + q*q;
                 }
             }
         }
-        meanValue /= nRgLooks * nAzLooks;
+
+        meanValue /= nAzRgLooks;
         if (bandUnit == Unit.UnitType.INTENSITY_DB || bandUnit == Unit.UnitType.AMPLITUDE_DB) {
             meanValue = 10.0*Math.log10(meanValue); // linear to dB
         }
