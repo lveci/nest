@@ -95,6 +95,7 @@ public class Project extends Observable {
     private static boolean findSubFolders(File currentFolder, ProjectSubFolder projSubFolder) {
         final File[] files = currentFolder.listFiles();
         boolean hasProducts = false;
+        if(files == null) return false;
 
         for(File f : files) {
             if(f.isDirectory()) {
