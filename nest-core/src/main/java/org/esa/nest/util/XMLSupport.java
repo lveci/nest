@@ -4,10 +4,16 @@ import org.jdom.input.DOMBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.Attribute;
 import org.xml.sax.SAXException;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.MetadataAttribute;
+import org.esa.beam.framework.datamodel.ProductData;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 
@@ -63,4 +69,63 @@ public class XMLSupport {
         return null;
     }
 
+
+    public static void metadataElementToDOMElement(final MetadataElement metadataElem, final Element domElem) {
+
+        final MetadataElement[] metaElements = metadataElem.getElements();
+        for(MetadataElement childMetaElem : metaElements) {
+            final Element childDomElem = new Element(childMetaElem.getName());
+            metadataElementToDOMElement(childMetaElem, childDomElem);
+            domElem.addContent(childDomElem);
+        }
+
+        final MetadataAttribute[] metaAttributes = metadataElem.getAttributes();
+        for(MetadataAttribute childMetaAttrib : metaAttributes) {
+            final Element childDomElem = new Element("attrib");
+            childDomElem.setAttribute("name", childMetaAttrib.getName());
+            childDomElem.setAttribute("value", childMetaAttrib.getData().getElemString());
+            childDomElem.setAttribute("type", String.valueOf(childMetaAttrib.getDataType()));
+            childDomElem.setAttribute("unit", childMetaAttrib.getUnit());
+            childDomElem.setAttribute("desc", childMetaAttrib.getDescription());
+            domElem.addContent(childDomElem);
+        }
+    }
+
+    public static void domElementToMetadataElement(final Element domElem, final MetadataElement metadataElem) {
+
+        final List children = domElem.getContent();
+        for (Object aChild : children) {
+            if (aChild instanceof Element) {
+                final Element child = (Element) aChild;
+                final List grandChildren = child.getContent();
+                if(!grandChildren.isEmpty()) {
+                    final MetadataElement newElem = new MetadataElement(child.getName());
+                    domElementToMetadataElement(child, newElem);
+                    metadataElem.addElement(newElem);
+                }
+
+                if(child.getName().equals("attrib")) {
+                    addAttribute(metadataElem, child);
+                }
+            }
+        }
+    }
+
+    // todo incomplete
+    private static void addAttribute(MetadataElement root, Element domElem) {
+
+        final Attribute nameAttrib = domElem.getAttribute("name");
+        final Attribute valueAttrib = domElem.getAttribute("value");
+        final Attribute typeAttrib = domElem.getAttribute("type");
+        final Attribute unitAttrib = domElem.getAttribute("unit");
+        final Attribute descAttrib = domElem.getAttribute("desc");
+
+        if(nameAttrib == null || valueAttrib == null)
+            return;
+
+        final MetadataAttribute attribute = new MetadataAttribute(nameAttrib.getName(), ProductData.TYPE_ASCII, 1);
+        attribute.getData().setElems(valueAttrib.getValue());
+        
+        root.addAttributeFast(attribute);
+    }
 }

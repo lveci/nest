@@ -124,6 +124,7 @@
         <module>lib-hdf</module>
         <module>lib-netcdf</module>
 
+		<module>beam-envi-reader</module>
         <!--<module>nest-dat</module>-->
 
     </modules>

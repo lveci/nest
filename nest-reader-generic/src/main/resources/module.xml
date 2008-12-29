@@ -14,6 +14,9 @@
     <dependency>
         <module>nest-core</module>
     </dependency>
+    <dependency>
+        <module>beam-envi-reader</module>
+    </dependency>
 
     <categories>Reader</categories>
 
@@ -29,7 +32,13 @@
             <largeIcon>icons/Import24.gif</largeIcon>
             <helpId>importImageIO</helpId>
         </action>
-
+        <action>
+            <text>Import ENVI Product</text>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <formatName>ENVI</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <shortDescr>Import an ENVI data product.</shortDescr>
+        </action>
     </extension>
 
 </module>

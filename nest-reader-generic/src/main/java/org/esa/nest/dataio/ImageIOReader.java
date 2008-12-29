@@ -85,7 +85,7 @@ public class ImageIOReader extends AbstractProductReader {
         //product.setDescription(getProductDescription());
 
         //addGeoCoding(product);
-        addMetaData(product);
+        addMetaData(product, inputFile);
 
         product.setProductReader(this);
         product.setModified(false);
@@ -111,16 +111,27 @@ public class ImageIOReader extends AbstractProductReader {
         return DecodeQualification.SUITABLE;
     }
 
-    private void addMetaData(Product product) {
+    private void addMetaData(final Product product, final File inputFile) {
         final MetadataElement root = product.getMetadataRoot();
         root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
-        MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, imgIOFile.getName());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
+
+        loadExternalMetadata(absRoot, inputFile);
+    }
+
+    private static void loadExternalMetadata(final MetadataElement absRoot, final File inputFile) {
+         // load metadata xml file if found
+        final String inputStr = inputFile.getAbsolutePath();
+        final String metadataStr = inputStr.substring(0, inputStr.lastIndexOf('.')) + ".xml";
+        final File metadataFile = new File(metadataStr);
+        if(metadataFile.exists())
+            AbstractMetadata.Load(absRoot, metadataFile);
     }
 
     /**
