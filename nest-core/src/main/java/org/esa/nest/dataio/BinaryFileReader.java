@@ -1,14 +1,14 @@
-package org.esa.nest.dataio.ceos;
+package org.esa.nest.dataio;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
 /**
- * A reader for reading files in the CEOS format
+ * A reader for reading binary files 
  *
  */
-public final class CeosFileReader {
+public final class BinaryFileReader {
 
     private static final String EM_EXPECTED_X_FOUND_Y_BYTES = "Expected bytes to read %d, but only found %d";
     private static final String EM_READING_X_TYPE = "Reading '%s'-Type";
@@ -16,7 +16,7 @@ public final class CeosFileReader {
 
     private final ImageInputStream _stream;
 
-    public CeosFileReader(final ImageInputStream stream) {
+    public BinaryFileReader(final ImageInputStream stream) {
         _stream = stream;
     }
 
@@ -33,50 +33,50 @@ public final class CeosFileReader {
     }
 
     public int readB1() throws IOException,
-                               IllegalCeosFormatException {
+                               IllegalFormatException {
         final long streamPosition = _stream.getStreamPosition();
         try {
             return _stream.readByte() & 0xFF;
         } catch (IOException e) {
-            final String message = String.format(CeosFileReader.EM_READING_X_TYPE,
+            final String message = String.format(EM_READING_X_TYPE,
                                                  new Object[]{"B1"});
-            throw new IllegalCeosFormatException(message, streamPosition, e);
+            throw new IllegalFormatException(message, streamPosition, e);
         }
     }
 
     public short readB2() throws IOException,
-                                 IllegalCeosFormatException {
+                                 IllegalFormatException {
         final long streamPosition = _stream.getStreamPosition();
         try {
             return _stream.readShort();
         } catch (IOException e) {
-            final String message = String.format(CeosFileReader.EM_READING_X_TYPE,
+            final String message = String.format(EM_READING_X_TYPE,
                                                  new Object[]{"B2"});
-            throw new IllegalCeosFormatException(message, streamPosition, e);
+            throw new IllegalFormatException(message, streamPosition, e);
         }
     }
 
     public int readB4() throws IOException,
-                               IllegalCeosFormatException {
+                               IllegalFormatException {
         final long streamPosition = _stream.getStreamPosition();
         try {
             return _stream.readInt();
         } catch (IOException e) {
-            final String message = String.format(CeosFileReader.EM_READING_X_TYPE,
+            final String message = String.format(EM_READING_X_TYPE,
                                                  new Object[]{"B4"});
-            throw new IllegalCeosFormatException(message, streamPosition, e);
+            throw new IllegalFormatException(message, streamPosition, e);
         }
     }
 
     public long readB8() throws IOException,
-                                IllegalCeosFormatException {
+                                IllegalFormatException {
         final long streamPosition = _stream.getStreamPosition();
         try {
             return _stream.readLong();
         } catch (IOException e) {
-            final String message = String.format(CeosFileReader.EM_READING_X_TYPE,
+            final String message = String.format(EM_READING_X_TYPE,
                                                  new Object[]{"B8"});
-            throw new IllegalCeosFormatException(message, streamPosition, e);
+            throw new IllegalFormatException(message, streamPosition, e);
         }
     }
 
@@ -96,7 +96,7 @@ public final class CeosFileReader {
             _stream.readFully(array, 0, array.length);
     }
 
-    public void readB8(final long[] array) throws IOException, IllegalCeosFormatException {
+    public void readB8(final long[] array) throws IOException, IllegalFormatException {
             _stream.readFully(array, 0, array.length);
     }
 
@@ -105,14 +105,14 @@ public final class CeosFileReader {
     }
 
     public long readIn(final int n) throws IOException,
-                                           IllegalCeosFormatException {
+                                           IllegalFormatException {
         final long streamPosition = _stream.getStreamPosition();
         final String longStr = readAn(n).trim();
         if(longStr.isEmpty()) return 0;
         return parseLong(longStr, streamPosition);
     }
 
-    private static long parseLong(String integerStr, long streamPosition) throws IllegalCeosFormatException {
+    private static long parseLong(String integerStr, long streamPosition) throws IllegalFormatException {
         long number;
         try {
             number = Long .parseLong(integerStr);
@@ -123,58 +123,58 @@ public final class CeosFileReader {
             try {
                 number = Long .parseLong(newStr);
             } catch (NumberFormatException e2) {
-                final String message = String.format(CeosFileReader.EM_NOT_PARSABLE_X_STRING + " \"" + integerStr + '"',
+                final String message = String.format(EM_NOT_PARSABLE_X_STRING + " \"" + integerStr + '"',
                                                                     new Object[]{"integer"});
-                throw new IllegalCeosFormatException(message, streamPosition, e);
+                throw new IllegalFormatException(message, streamPosition, e);
             }
         }
         return number;
     }
 
     public double readFn(final int n) throws IOException,
-                                             IllegalCeosFormatException {
+                                             IllegalFormatException {
         final long streamPosition = _stream.getStreamPosition();
         final String doubleString = readAn(n).trim();
         if(doubleString.isEmpty()) return 0;
         try {
             return Double.parseDouble(doubleString);
         } catch (NumberFormatException e) {
-            final String message = String.format(CeosFileReader.EM_NOT_PARSABLE_X_STRING,
+            final String message = String.format(EM_NOT_PARSABLE_X_STRING,
                                                  new Object[]{"double"});
-            throw new IllegalCeosFormatException(message, streamPosition, e);
+            throw new IllegalFormatException(message, streamPosition, e);
         }
     }
 
     public void readFn(final int n, final double[] numbers) throws IOException,
-                                                                   IllegalCeosFormatException {
+                                                                   IllegalFormatException {
         final long streamPosition = _stream.getStreamPosition();
         for (int i = 0; i < numbers.length; i++) {
             try {
                 numbers[i] = Double.parseDouble(readAn(n).trim());
-            } catch (IllegalCeosFormatException e) {
-                final String message = String.format(CeosFileReader.EM_READING_X_TYPE,
+            } catch (IllegalFormatException e) {
+                final String message = String.format(EM_READING_X_TYPE,
                                                      new Object[]{"Gn[]"});
-                throw new IllegalCeosFormatException(message, streamPosition, e);
+                throw new IllegalFormatException(message, streamPosition, e);
             }
         }
     }
 
     public String readAn(final int n) throws IOException,
-                                             IllegalCeosFormatException {
+                                             IllegalFormatException {
         final long streamPosition = _stream.getStreamPosition();
         final byte[] bytes = new byte[n];
         final int bytesRead;
         try {
             bytesRead = _stream.read(bytes);
         } catch (IOException e) {
-            final String message = String.format(CeosFileReader.EM_READING_X_TYPE,
+            final String message = String.format(EM_READING_X_TYPE,
                                                  new Object[]{"An"});
-            throw new IllegalCeosFormatException(message, streamPosition, e);
+            throw new IllegalFormatException(message, streamPosition, e);
         }
         if (bytesRead != n) {
-            final String message = String.format(CeosFileReader.EM_EXPECTED_X_FOUND_Y_BYTES,
+            final String message = String.format(EM_EXPECTED_X_FOUND_Y_BYTES,
                                                  n, bytesRead);
-            throw new IllegalCeosFormatException(message, streamPosition);
+            throw new IllegalFormatException(message, streamPosition);
         }
         String str = new String(bytes);
         if(str.contains("\0"))
@@ -185,7 +185,7 @@ public final class CeosFileReader {
 
     public int[] readInArray(final int arraySize, final int intValLength) throws
                                                                           IOException,
-                                                                          IllegalCeosFormatException {
+                                                                          IllegalFormatException {
         final long streamPosition = _stream.getStreamPosition();
         final int[] ints = new int[arraySize];
         for (int i = 0; i < ints.length; i++) {

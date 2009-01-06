@@ -14,53 +14,15 @@ import java.util.Arrays;
 import java.util.ArrayList;
 
 /**
- * The ReaderPlugIn for ImageIO products.
+ * The ReaderPlugIn for generic binary images.
  *
  */
-public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
+public class GenericReaderPlugIn implements ProductReaderPlugIn {
 
-	final static String[] FORMAT_NAMES = ImageIO.getReaderFormatNames();
-	final static String[] FORMAT_FILE_EXTENSIONS = getFormatFileExtensions();
-    final static String[] IMAGEIO_FILE_EXTENSIONS = getPrunedImageIOExtensions();
-    final static String PLUGIN_DESCRIPTION = "ImageIO Products";
+	final static String[] FORMAT_NAMES = { "Generic Binary" };
+	final static String[] FORMAT_FILE_EXTENSIONS = { "*" };
+    final static String PLUGIN_DESCRIPTION = "Generic Binary";
     Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
-
-    private static String[] getFormatFileExtensions() {
-
-        ArrayList<String> extList = new ArrayList<String>();
-        extList.addAll(Arrays.asList(ImageIO.getReaderFileSuffixes()));
-
-        // BEST extensions
-        addBESTExt(extList, "XT");
-        addBESTExt(extList, "AP"); addBESTExt(extList, "PA");
-        addBESTExt(extList, "CA"); addBESTExt(extList, "IF"); addBESTExt(extList, "FI");
-        addBESTExt(extList, "DB"); addBESTExt(extList, "SG"); addBESTExt(extList, "OP");
-        addBESTExt(extList, "GC"); addBESTExt(extList, "OV"); addBESTExt(extList, "UN");
-        addBESTExt(extList, "CR"); addBESTExt(extList, "SF");
-        addBESTExt(extList, "BS"); addBESTExt(extList, "GA"); addBESTExt(extList, "AD");
-
-        return extList.toArray(new String[extList.size()]);
-    }
-
-    private static void addBESTExt(ArrayList<String> extList, String ext) {
-        extList.add(ext+"i"); extList.add(ext+"f"); extList.add(ext+"c");
-        extList.add(ext+"s"); extList.add(ext+"t"); extList.add(ext+"r");
-    }
-
-    private static String[] getPrunedImageIOExtensions() {
-        ArrayList<String> extList = new ArrayList<String>();
-        extList.addAll(Arrays.asList(ImageIO.getReaderFileSuffixes()));
-
-        extList.remove("jpeg");
-        extList.remove("jls");
-        extList.remove("jfif");
-        extList.remove("wbmp");
-        extList.remove("pgm");
-        extList.remove("ppm");
-        extList.remove("tiff");
-
-        return extList.toArray(new String[extList.size()]);
-    }
 
     /**
      * Checks whether the given object is an acceptable input for this product reader and if so, the method checks if it
@@ -82,7 +44,7 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
         if (file.isFile() && parentDir.isDirectory()) {
             final FilenameFilter filter = new FilenameFilter() {
                 public boolean accept(final File dir, final String name) {
-                    return true;//name.contains(constants.getIndicationKey());
+                    return true;
                 }
             };
             final File[] files = parentDir.listFiles(filter);
@@ -94,12 +56,7 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
     }
 
     protected static DecodeQualification checkProductQualification(File file) {
-        for(String ext : FORMAT_FILE_EXTENSIONS) {
-            if(!ext.isEmpty() && file.getName().toLowerCase().endsWith(ext.toLowerCase()))
-                return DecodeQualification.INTENDED;
-        }
-
-        return DecodeQualification.UNABLE;
+        return DecodeQualification.SUITABLE;
     }
 
     /**
@@ -121,7 +78,7 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
      * @return a new reader instance, never <code>null</code>
      */
     public ProductReader createReaderInstance() {
-        return new ImageIOReader(this);
+        return new GenericReader(this);
     }
 
     public BeamFileFilter getProductFileFilter() {
@@ -165,8 +122,8 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
 
     public static class FileFilter extends BeamFileFilter {
 
-        public FileFilter() {      
-            super(FORMAT_NAMES[0], IMAGEIO_FILE_EXTENSIONS, PLUGIN_DESCRIPTION);
+        public FileFilter() {
+            super(FORMAT_NAMES[0], FORMAT_FILE_EXTENSIONS, PLUGIN_DESCRIPTION);
         }
 
         /**

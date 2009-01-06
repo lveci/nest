@@ -24,15 +24,6 @@ public class NestEnviProductReader extends EnviProductReader {
 
         final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
 
-        loadExternalMetadata(absRoot, inputFile);
-    }
-
-    private static void loadExternalMetadata(final MetadataElement absRoot, final File inputFile) {
-         // load metadata xml file if found
-        final String inputStr = inputFile.getAbsolutePath();
-        final String metadataStr = inputStr.substring(0, inputStr.lastIndexOf('.')) + ".xml";
-        final File metadataFile = new File(metadataStr);
-        if(metadataFile.exists())
-            AbstractMetadata.Load(absRoot, metadataFile);
+        AbstractMetadata.loadExternalMetadata(absRoot, inputFile);
     }
 }

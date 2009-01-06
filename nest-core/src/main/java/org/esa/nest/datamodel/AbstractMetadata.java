@@ -375,4 +375,13 @@ public class AbstractMetadata {
         if(unitAttrib != null)
             metaAttrib.setUnit(unitAttrib.getValue());
     }
+
+    public static void loadExternalMetadata(final MetadataElement absRoot, final File inputFile) {
+         // load metadata xml file if found
+        final String inputStr = inputFile.getAbsolutePath();
+        final String metadataStr = inputStr.substring(0, inputStr.lastIndexOf('.')) + ".xml";
+        final File metadataFile = new File(metadataStr);
+        if(metadataFile.exists())
+            AbstractMetadata.Load(absRoot, metadataFile);
+    }
 }
