@@ -24,7 +24,7 @@ public class TestOversamplingOperator extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        spi = new OversamplingOp2.Spi();
+        spi = new OversamplingOp.Spi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(spi);
     }
 
@@ -46,7 +46,7 @@ public class TestOversamplingOperator extends TestCase {
 
         //Product sourceProduct = createTestProduct(500, 500);
 
-        OversamplingOp2 op = (OversamplingOp2)spi.createOperator();
+        OversamplingOp op = (OversamplingOp)spi.createOperator();
         assertNotNull(op);
         op.setSourceProduct(sourceProduct);
 
