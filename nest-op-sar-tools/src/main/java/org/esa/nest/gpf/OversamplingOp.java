@@ -38,8 +38,8 @@ import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
  * Oversample
  */
 
-@OperatorMetadata(alias="Oversample2", description="Oversample the datset")
-public class OversamplingOp2 extends Operator {
+@OperatorMetadata(alias="Oversample", description="Oversample the datset")
+public class OversamplingOp extends Operator {
 
     @SourceProduct(alias="source")
     private Product sourceProduct;
@@ -721,7 +721,7 @@ public class OversamplingOp2 extends Operator {
      */
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(OversamplingOp2.class);
+            super(OversamplingOp.class);
             setOperatorUI(OversamplingOpUI.class);
         }
     }

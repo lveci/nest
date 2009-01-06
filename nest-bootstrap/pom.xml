@@ -133,14 +133,14 @@
 			<version>1.1.1</version>
         </dependency>
 		<dependency>
-	      <groupId>org.sst</groupId>
-	      <artifactId>sharedx</artifactId>
-		  <version>1.05</version>
-	    </dependency>
-		<dependency>
 			<groupId>edu.emory.mathcs</groupId>
 			<artifactId>jtransforms</artifactId>
 			<version>2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>ucar.netcdf</groupId>
+			<artifactId>netcdf-java</artifactId>
+			<version>4.0</version>
 		</dependency>
     </dependencies>
 

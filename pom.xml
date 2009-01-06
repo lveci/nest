@@ -40,11 +40,13 @@
 		<module>nest-core</module>
 		<module>nest-dat</module>
 		<module>nest-graph-builder</module>
-		<!--module>nest-world-wind-view</module-->
+		<module>nest-world-wind-view</module>
 		<module>nest-reader-dem</module>
 		<module>nest-reader-ers-ceos</module>
 		<module>nest-reader-xml-based</module>
 		<module>nest-reader-generic</module>
+		<module>nest-writer-gdal</module>
+		<module>nest-writer-netcdf</module>
 		<module>nest-op-filter</module>
 	    <module>nest-op-speckle-filter</module>
 	    <module>nest-op-asar-calibration</module>

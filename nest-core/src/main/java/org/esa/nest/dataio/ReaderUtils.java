@@ -5,6 +5,8 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.framework.datamodel.ProductData;
 
+import java.io.File;
+
 /**
  * Common functions for readers
  */
@@ -55,5 +57,22 @@ public class ReaderUtils {
         virtBand.setUnit("intensity");
         virtBand.setDescription("Intensity from complex data");
         product.addBand(virtBand);
+    }
+
+    /**
+     * Returns a <code>File</code> if the given input is a <code>String</code> or <code>File</code>,
+     * otherwise it returns null;
+     *
+     * @param input an input object of unknown type
+     *
+     * @return a <code>File</code> or <code>null</code> it the input can not be resolved to a <code>File</code>.
+     */
+    public static File getFileFromInput(final Object input) {
+        if (input instanceof String) {
+            return new File((String) input);
+        } else if (input instanceof File) {
+            return (File) input;
+        }
+        return null;
     }
 }

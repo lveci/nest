@@ -37,7 +37,7 @@ import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 /**
  * The window displaying the world map.
  *
- * @version $Revision: 1.1 $ $Date: 2008-11-28 20:16:50 $
+ * @version $Revision: 1.2 $ $Date: 2009-01-06 15:03:38 $
  */
 public class NestWWToolView extends AbstractToolView {
 
@@ -93,7 +93,7 @@ public class NestWWToolView extends AbstractToolView {
         setSelectedProduct(VisatApp.getApp().getSelectedProduct());
         
         // world wind canvas
-        initialize(mainPane, true, true, true);
+        initialize(mainPane, true, true, false);
 
         surfaceLayer = new SurfaceImageLayer();
         surfaceLayer.setOpacity(0.7);
