@@ -76,8 +76,8 @@
         </action>
 
         <action>
-            <id>OverSamplingOp2</id>
-            <class>org.esa.nest.dat.OverSamplingOp2Action</class>
+            <id>OverSamplingOp</id>
+            <class>org.esa.nest.dat.OverSamplingOpAction</class>
             <text>OverSample</text>
             <shortDescr>Oversample an image</shortDescr>
             <parent>Resampling</parent>

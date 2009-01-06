@@ -2,7 +2,6 @@ org.esa.nest.gpf.DataAnalysisOp$Spi
 org.esa.nest.gpf.SRGROp$Spi
 org.esa.nest.gpf.MultilookOp$Spi
 org.esa.nest.gpf.OversamplingOp$Spi
-org.esa.nest.gpf.OversamplingOp2$Spi
 org.esa.nest.gpf.UndersamplingOp$Spi
 org.esa.nest.gpf.FormatChangeOp$Spi
 org.esa.nest.gpf.MergeBandsOp$Spi
