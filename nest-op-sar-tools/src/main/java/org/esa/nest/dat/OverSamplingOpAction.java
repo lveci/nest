@@ -9,7 +9,7 @@ import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
  * OverSamplingOp action.
  *
  */
-public class OverSamplingOpAction extends AbstractVisatAction {
+public class OverSamplingOp2Action extends AbstractVisatAction {
 
     private NestSingleTargetProductDialog dialog;
 
@@ -17,7 +17,7 @@ public class OverSamplingOpAction extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new NestSingleTargetProductDialog("Oversample", getAppContext(), "Oversample", getHelpId());
+            dialog = new NestSingleTargetProductDialog("Oversample2", getAppContext(), "Oversample", getHelpId());
             dialog.setTargetProductNameSuffix("_OvrS");
         }
         dialog.show();
