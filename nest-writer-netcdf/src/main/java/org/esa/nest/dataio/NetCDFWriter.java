@@ -64,16 +64,18 @@ public class NetCDFWriter extends AbstractProductWriter {
 
         netCDFWriteable = NetcdfFileWriteable.createNew(_outputFile.getAbsolutePath(), true);
 
+
+
            // define dimensions, including unlimited
-        latDim = netCDFWriteable.addDimension("lat", tempProduct.getSceneRasterWidth());
-        lonDim = netCDFWriteable.addDimension("lon", tempProduct.getSceneRasterHeight());
-        Dimension timeDim = netCDFWriteable.addUnlimitedDimension("time");
+        latDim = netCDFWriteable.addDimension("lat", 3);
+        lonDim = netCDFWriteable.addDimension("lon", 4);
+        final Dimension timeDim = netCDFWriteable.addUnlimitedDimension("time");
 
         // define Variables
-        Dimension[] dim2 = new Dimension[3];
-        dim2[0] = timeDim;
-        dim2[1] = lonDim;
-        dim2[2] = latDim;
+        final Dimension[] dim3 = new Dimension[3];
+        dim3[0] = timeDim;
+        dim3[1] = lonDim;
+        dim3[2] = latDim;
 
         netCDFWriteable.addVariable("lat", DataType.FLOAT, new Dimension[] {latDim});
         netCDFWriteable.addVariableAttribute("lat", "units", "degrees_north");
@@ -81,33 +83,34 @@ public class NetCDFWriter extends AbstractProductWriter {
         netCDFWriteable.addVariable("lon", DataType.FLOAT, new Dimension[] {lonDim});
         netCDFWriteable.addVariableAttribute("lon", "units", "degrees_east");
 
+        netCDFWriteable.addVariable("time", DataType.INT, new Dimension[] {timeDim});
+        netCDFWriteable.addVariableAttribute("time", "units", "hours");
+
         for(Band band : tempProduct.getBands()) {
             final String name = band.getName();
-            netCDFWriteable.addVariable(name, DataType.DOUBLE, dim2);
+            netCDFWriteable.addVariable(name, DataType.DOUBLE, dim3);
             netCDFWriteable.addVariableAttribute(name, "description", band.getDescription());
             netCDFWriteable.addVariableAttribute(name, "unit", band.getUnit());
         }
 
         netCDFWriteable.create();
 
-
         try {
-            double[] lt = new double[latDim.getLength()];
-            Arrays.fill(lt, 123);
-            double[] lg = new double[lonDim.getLength()];
-            Arrays.fill(lg, 123);
+            double[][][] tData = {
+                {{ 1, 2, 3, 4}, {2, 4, 6, 8}, { 3, 6, 9, 12}}
+                };
 
-            double[] d = new double[latDim.getLength() * lonDim.getLength()];
-            Arrays.fill(d, 123);
+            netCDFWriteable.write("Amplitude", ArrayDouble.factory(tData));
 
-            netCDFWriteable.write("lat", Array.factory(lt));
-            netCDFWriteable.write("lon", Array.factory(lg));
+            // Store the rest of variable values
+            netCDFWriteable.write("lat", Array.factory(new float[] {41, 40, 39}));
+            netCDFWriteable.write("lon", Array.factory(new float[] {-109, -107, -105, -103}));
 
-            netCDFWriteable.write("Amplitude", Array.factory(d));
-          
-        } catch(InvalidRangeException e) {
-
+            netCDFWriteable.write("time", Array.factory(new int[] {6}));
+        } catch (InvalidRangeException e) {
+            System.err.println("ERROR writing file");
         }
+
     }
 
     private Product createWritableProduct() throws IOException {
@@ -152,6 +155,44 @@ public class NetCDFWriter extends AbstractProductWriter {
         //} catch(InvalidRangeException e) {
 
         //}
+
+
+        // write the RH data one value at a time to an Array
+    /*    int[][][] rhData = {{{ 1, 2, 3, 4}, { 5, 6, 7, 8}, { 9, 10, 11, 12}},
+                            {{21, 22, 23, 24}, {25, 26, 27, 28}, {29, 30, 31, 32}}};
+
+        ArrayInt rhA = new ArrayInt.D3(2, latDim.getLength(), lonDim.getLength());
+        int i,j,k;
+        Index ima = rhA.getIndex();
+
+        // write
+        for (i=0; i<2; i++)
+            for (j=0; j<latDim.getLength(); j++)
+                for (k=0; k<lonDim.getLength(); k++)
+                    rhA.setInt(ima.set(i,j,k), rhData[i][j][k]);
+
+        // write rhData out to disk
+        try {
+            netCDFWriteable.write(sourceBand.getName(), rhA);
+        } catch (InvalidRangeException e) {
+            System.err.println("ERROR writing file");
+        }     */
+        
+        // Here's an ArrayAbstract approach to set the values of T all at once. 
+    /*        double[][][] tData = {
+                {{ 1, 2, 3, 4}, {2, 4, 6, 8}, { 3, 6, 9, 12}}
+                };
+
+            netCDFWriteable.write(sourceBand.getName(), ArrayDouble.factory(tData));
+
+            // Store the rest of variable values
+            netCDFWriteable.write("lat", Array.factory(new float[] {41, 40, 39}));
+            netCDFWriteable.write("lon", Array.factory(new float[] {-109, -107, -105, -103}));
+
+            netCDFWriteable.write("time", Array.factory(new int[] {6}));
+        } catch (InvalidRangeException e) {
+            System.err.println("ERROR writing file");
+        } */
     }
 
     /**
