@@ -1,0 +1,50 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>nest-writer-netcdf</symbolicName>
+    <version>2A</version>
+    <name>NEST NetCDF Writer</name>
+
+    <description>Enables writing to NetCDF supported formats</description>
+
+    <dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>beam-ui</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat-rcp</module>
+        <optional>true</optional>
+    </dependency>
+    <dependency>
+        <module>nest-core</module>
+    </dependency>
+
+    <categories>Writer</categories>
+
+    <extension point="beam-ui:actions">
+
+        <action>
+            <id>exportNetCDF</id>
+            <class>org.esa.beam.visat.actions.ProductExportAction</class>
+            <formatName>NetCDF</formatName>
+            <shortDescr>Export product to NetCDF format.</shortDescr>
+            <description>Export the selected product to NetCDF format.</description>
+            <helpId>exportNetCDF</helpId>
+        </action>
+
+		<action>
+            <id>importHDF</id>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <formatName>HDF</formatName>
+            <readerPlugin>org.esa.nest.dataio.NetCDFReaderPlugIn</readerPlugin>
+            <useAllFileFilter>true</useAllFileFilter>
+            <shortDescr>Import a HDF file format</shortDescr>
+            <description>Import a HDF file format</description>
+            <largeIcon>icons/Import24.gif</largeIcon>
+            <helpId>importHDF</helpId>
+        </action>
+		
+    </extension>
+    
+</module>

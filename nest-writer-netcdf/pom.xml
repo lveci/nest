@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.esa.nest</groupId>
+        <artifactId>nest</artifactId>
+        <version>2A</version>
+    </parent>
+
+    <groupId>org.esa.nest</groupId>
+    <artifactId>nest-writer-netcdf</artifactId>
+    <name>NEST NetCDF Writer</name>
+    <version>2A</version>
+    <url>http://www.array.ca/nest</url>
+
+	<packaging>jar</packaging>
+	
+    <dependencies>
+        <dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-visat-rcp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.nest</groupId>
+            <artifactId>nest-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ucar.netcdf</groupId>
+            <artifactId>netcdf-java</artifactId>
+            <version>4.0</version>
+        </dependency>
+    </dependencies>
+</project>
