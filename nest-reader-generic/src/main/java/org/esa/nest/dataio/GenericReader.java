@@ -11,8 +11,6 @@ import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-import java.util.HashMap;
 
 /**
  * The product reader for ImageIO products.
@@ -111,7 +109,7 @@ public class GenericReader extends AbstractProductReader {
                                           ProgressMonitor pm) throws IOException {
 
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
-        final int x = sourceOffsetX * 2;
+        final int x = sourceOffsetX;// * 2;
         final long xpos = _startPosImageRecords +_imageHeaderLength + x;
 
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);

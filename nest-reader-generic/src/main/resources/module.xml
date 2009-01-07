@@ -46,6 +46,13 @@
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import Generic Binary</shortDescr>
         </action>
+        <action>
+            <text>Export Generic Binary</text>
+            <class>org.esa.beam.visat.actions.ProductExportAction</class>
+            <formatName>Generic Binary</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <shortDescr>Export Generic Binary</shortDescr>
+        </action>
     </extension>
 
 </module>
