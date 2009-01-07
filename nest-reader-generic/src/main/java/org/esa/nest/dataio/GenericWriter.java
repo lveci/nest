@@ -25,6 +25,14 @@ public class GenericWriter extends AbstractProductWriter {
     private File _outputFile;
     private ImageOutputStream _outputStream;
 
+    private int rasterWidth = 1012;
+    private int rasterHeight = 3168;
+    private int numBands = 1;
+    private int dataType = ProductData.TYPE_INT16;
+
+    private int _imageRecordLength = rasterWidth;
+    private int _startPosImageRecords = 0;
+    private int _imageHeaderLength = 0;
 
     /**
      * Construct a new instance of a product writer for the given GeoTIFF product writer plug-in.
@@ -56,9 +64,7 @@ public class GenericWriter extends AbstractProductWriter {
             file = (File) getOutput();
         }
 
-        //_outputFile = FileUtils.ensureExtension(file, GDALWriterPlugIn.GEOTIFF_FILE_EXTENSION);
-        deleteOutput();
-        _outputStream = new FileImageOutputStream(_outputFile);
+        _outputStream = new FileImageOutputStream(file);
 
         final Product tempProduct = createWritableProduct();
        // final TiffHeader tiffHeader = new TiffHeader(new Product[]{tempProduct});
@@ -98,10 +104,31 @@ public class GenericWriter extends AbstractProductWriter {
                                     final ProductData sourceBuffer,
                                     ProgressMonitor pm) throws IOException {
 
-        //_bandWriter.writeBandRasterData(sourceBand,
-        //                                sourceOffsetX, sourceOffsetY,
-       //                                 sourceWidth, sourceHeight,
-       //                                 sourceBuffer, pm);
+        final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
+        final int x = sourceOffsetX;// * 2;
+
+        sourceBuffer.writeTo(_outputStream);
+
+      /*  pm.beginTask("Writing band...", sourceMaxY - sourceOffsetY);
+        try {
+            final short[] srcLine = new short[sourceWidth];
+            for (int y = sourceOffsetY; y <= sourceMaxY; ++y) {
+                if (pm.isCanceled()) {
+                    break;
+                }
+
+                // Write source line
+                synchronized (_outputStream) {
+                    _outputStream.seek(_imageRecordLength * y + x);
+                    sourceBuffer.writeTo(_outputStream);
+                }
+
+                pm.worked(1);
+            }
+
+        } finally {
+            pm.done();
+        }   */
     }
 
     /**

@@ -7,6 +7,7 @@ import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.File;
+import java.io.IOException;
 
 public class NestEnviProductReader extends EnviProductReader {
 
@@ -15,7 +16,7 @@ public class NestEnviProductReader extends EnviProductReader {
     }
 
     @Override
-    protected void initMetadata(final Product product, final File inputFile) {
+    protected void initMetadata(final Product product, final File inputFile) throws IOException {
 
         final MetadataElement root = product.getMetadataRoot();
         root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
@@ -24,6 +25,6 @@ public class NestEnviProductReader extends EnviProductReader {
 
         final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
 
-        AbstractMetadata.loadExternalMetadata(absRoot, inputFile);
+        AbstractMetadata.loadExternalMetadata(product, absRoot, inputFile);
     }
 }

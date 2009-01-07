@@ -1,10 +1,9 @@
 package org.esa.nest.datamodel;
 
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.MetadataAttribute;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.nest.util.XMLSupport;
+import org.esa.nest.dataio.ReaderUtils;
 import org.jdom.Element;
 import org.jdom.Document;
 import org.jdom.Attribute;
@@ -13,6 +12,8 @@ import java.text.ParseException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.StringTokenizer;
+import java.util.ArrayList;
 
 /**
  * Created by IntelliJ IDEA.
@@ -170,8 +171,8 @@ public class AbstractMetadata {
      * @param unit The unit
      * @param desc The description
      */
-    private static void addAbstractedAttribute(MetadataElement dest, String tag, int dataType,
-                                               String unit, String desc) {
+    private static void addAbstractedAttribute(final MetadataElement dest, final String tag, final int dataType,
+                                               final String unit, final String desc) {
         final MetadataAttribute attribute = new MetadataAttribute(tag, dataType, 1);
         if(dataType == ProductData.TYPE_ASCII) {
             attribute.getData().setElems(NO_METADATA_STRING);
@@ -192,7 +193,7 @@ public class AbstractMetadata {
      * @param tag the name of the attribute
      * @param value the string value
      */
-    public static void setAttribute(MetadataElement dest, String tag, String value) {
+    public static void setAttribute(final MetadataElement dest, final String tag, final String value) {
         final MetadataAttribute attrib = dest.getAttribute(tag);
         if(attrib != null && value != null) {
             attrib.getData().setElems(value);
@@ -211,7 +212,7 @@ public class AbstractMetadata {
      * @param tag the name of the attribute
      * @param value the UTC value
      */
-    public static void setAttribute(MetadataElement dest, String tag, ProductData.UTC value) {
+    public static void setAttribute(final MetadataElement dest, final String tag, final ProductData.UTC value) {
         final MetadataAttribute attrib = dest.getAttribute(tag);
         if(attrib != null && value != null) {
             attrib.getData().setElems(value.getArray());
@@ -229,7 +230,7 @@ public class AbstractMetadata {
      * @param tag the name of the attribute
      * @param value the string value
      */
-    public static void setAttribute(MetadataElement dest, String tag, int value) {
+    public static void setAttribute(final MetadataElement dest, final String tag, final int value) {
         final MetadataAttribute attrib = dest.getAttribute(tag);
         if(attrib == null)
             System.out.println(tag + " not found in metadata");
@@ -243,7 +244,7 @@ public class AbstractMetadata {
      * @param tag the name of the attribute
      * @param value the string value
      */
-    public static void setAttribute(MetadataElement dest, String tag, double value) {
+    public static void setAttribute(final MetadataElement dest, final String tag, final double value) {
         final MetadataAttribute attrib = dest.getAttribute(tag);
         if(attrib == null)
             System.out.println(tag + " not found in metadata");
@@ -251,7 +252,7 @@ public class AbstractMetadata {
             attrib.getData().setElemDouble(value);
     }
 
-    public static ProductData.UTC parseUTC(String timeStr) {
+    public static ProductData.UTC parseUTC(final String timeStr) {
         try {
             return ProductData.UTC.parse(timeStr);
         } catch(ParseException e) {
@@ -259,7 +260,7 @@ public class AbstractMetadata {
         }
     }
 
-    public static ProductData.UTC parseUTC(String timeStr, String format) {
+    public static ProductData.UTC parseUTC(final String timeStr, final String format) {
         try {
             return ProductData.UTC.parse(timeStr, format);
         } catch(ParseException e) {
@@ -302,25 +303,34 @@ public class AbstractMetadata {
          XMLSupport.SaveXML(doc, metadataFile.getAbsoluteFile().toString());
     }
 
-    public static void Load(final MetadataElement metadataElem, final File metadataFile) {
+    public static void Load(final Product product, final MetadataElement metadataElem, final File metadataFile)
+        throws IOException {
 
         org.jdom.Document doc;
         try {
             doc = XMLSupport.LoadXML(metadataFile.getAbsolutePath());
         } catch(IOException e) {
+            System.out.println(e.getMessage());
             return;
         }
 
         Element root = doc.getRootElement();
-        if(root.getName().equals("AbstractedMetadata"))
-            findMetadata(metadataElem, root);
+        final List elements = root.getContent();
+        for(Object o : elements) {
+            if(o instanceof Element) {
+                final Element elem = (Element) o;
+                if(elem.getName().equals("AbstractedMetadata"))
+                    findAbstractedMetadata(metadataElem, elem);
+                if(elem.getName().equals("tie-point-grids"))
+                    parseTiePointGrids(product, elem);
+            }
+        }
     }
 
-
-    public static void findMetadata(final MetadataElement metadataElem, Element root) {
+    public static void findAbstractedMetadata(final MetadataElement metadataElem, final Element root) {
         final MetadataElement[] metaElements = metadataElem.getElements();
         for(MetadataElement childMetaElem : metaElements) {
-            findMetadata(childMetaElem, root);
+            findAbstractedMetadata(childMetaElem, root);
         }
 
         final MetadataAttribute[] metaAttributes = metadataElem.getAttributes();
@@ -346,7 +356,7 @@ public class AbstractMetadata {
         }
     }
 
-    private static void loadAttribute(MetadataAttribute metaAttrib, Element domElem) {
+    private static void loadAttribute(final MetadataAttribute metaAttrib, final Element domElem) {
 
         final Attribute nameAttrib = domElem.getAttribute("name");
         if(nameAttrib == null) return;
@@ -376,12 +386,90 @@ public class AbstractMetadata {
             metaAttrib.setUnit(unitAttrib.getValue());
     }
 
-    public static void loadExternalMetadata(final MetadataElement absRoot, final File inputFile) {
+    private static void parseTiePointGrids(final Product product, final Element tpgElem) throws IOException {
+        final List tpgElements = tpgElem.getContent();
+        for(Object o : tpgElements) {
+            if(!(o instanceof Element)) continue;
+
+            final Element elem = (Element) o;
+            final String name = elem.getName();
+            final List content = elem.getContent();
+            final ArrayList<Float> valueList = new ArrayList<Float>();
+            int columnCount = 0;
+            int rowCount = 0;
+            for(Object row : content) {
+                if(!(row instanceof Element)) continue;
+                final Element rowElem = (Element) row;
+                final Attribute value = rowElem.getAttribute("value");
+
+                int columns = parseTiePointGirdRow(value.getValue(), valueList);
+                if(columnCount == 0)
+                    columnCount = columns;
+                else if(columnCount != columns)
+                    throw new IOException("Metadata for tie-point-grid "+name+" has incorrect number of columns");
+                ++rowCount;
+            }
+
+            addTiePointGrid(product, name, valueList, columnCount, rowCount);
+        }
+
+        // set GeoCoding
+        TiePointGrid[] grids = product.getTiePointGrids();
+        TiePointGrid latGrid = null;
+        TiePointGrid lonGrid = null;
+        for(TiePointGrid g : grids) {
+            if(g.getName().toLowerCase().contains("lat"))
+                latGrid = g;
+            else if(g.getName().toLowerCase().contains("lon"))
+                lonGrid = g;
+        }
+        if(latGrid != null && lonGrid != null) {
+            final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
+
+            product.setGeoCoding(tpGeoCoding);    
+        }
+    }
+
+    private static int parseTiePointGirdRow(final String line, final ArrayList<Float> valueList) {
+        final StringTokenizer tokenizer = new StringTokenizer(line, ",");
+        int tokenCount = 0;
+        while(tokenizer.hasMoreTokens()) {
+            valueList.add(Float.parseFloat(tokenizer.nextToken()));
+            ++tokenCount;
+        }
+        return tokenCount;
+    }
+
+    private static void addTiePointGrid(final Product product, final String name, final ArrayList<Float> valueList,
+                                        final int inputWidth, final int inputHeight) {
+        final int gridWidth = inputWidth * 5;
+        final int gridHeight = inputHeight * 5;
+
+        final float subSamplingX = (float)product.getSceneRasterWidth() / (float)(gridWidth - 1);
+        final float subSamplingY = (float)product.getSceneRasterHeight() / (float)(gridHeight - 1);
+
+        final float[] inPoints = new float[valueList.size()];
+        final float[] outPoints = new float[gridWidth*gridHeight];
+        int i = 0;
+        for(Float val : valueList) {
+            inPoints[i++] = val;
+        }
+
+        ReaderUtils.createFineTiePointGrid(inputWidth, inputHeight, gridWidth, gridHeight, inPoints, outPoints);
+
+        final TiePointGrid incidentAngleGrid = new TiePointGrid(name, gridWidth, gridHeight, 0, 0,
+                subSamplingX, subSamplingY, outPoints);
+
+        product.addTiePointGrid(incidentAngleGrid);
+    }
+
+    public static void loadExternalMetadata(final Product product, final MetadataElement absRoot, final File inputFile)
+        throws IOException {
          // load metadata xml file if found
         final String inputStr = inputFile.getAbsolutePath();
         final String metadataStr = inputStr.substring(0, inputStr.lastIndexOf('.')) + ".xml";
         final File metadataFile = new File(metadataStr);
         if(metadataFile.exists())
-            AbstractMetadata.Load(absRoot, metadataFile);
+            AbstractMetadata.Load(product, absRoot, metadataFile);
     }
 }

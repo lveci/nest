@@ -145,7 +145,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         final float[] angles = new float[]{(float)angle1, (float)angle2, (float)angle3};
         final float[] fineAngles = new float[gridWidth*gridHeight];
 
-        createFineTiePointGrid(3, 1, gridWidth, gridHeight, angles, fineAngles);
+        ReaderUtils.createFineTiePointGrid(3, 1, gridWidth, gridHeight, angles, fineAngles);
 
         final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineAngles);
@@ -162,7 +162,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         final float[] times = new float[]{(float)time1, (float)time2, (float)time3};
         final float[] fineTimes = new float[gridWidth*gridHeight];
 
-        createFineTiePointGrid(3, 1, gridWidth, gridHeight, times, fineTimes);
+        ReaderUtils.createFineTiePointGrid(3, 1, gridWidth, gridHeight, times, fineTimes);
 
         final TiePointGrid slantRangeTimeGrid = new TiePointGrid("slant_range_time", gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineTimes);

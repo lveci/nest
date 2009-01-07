@@ -85,7 +85,7 @@ public class GenericReader extends AbstractProductReader {
         return DecodeQualification.SUITABLE;
     }
 
-    private void addMetaData(final Product product, final File inputFile) {
+    private void addMetaData(final Product product, final File inputFile) throws IOException {
         final MetadataElement root = product.getMetadataRoot();
         root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
 
@@ -96,7 +96,7 @@ public class GenericReader extends AbstractProductReader {
         //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, imgIOFile.getName());
         //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
 
-        AbstractMetadata.loadExternalMetadata(absRoot, inputFile);
+        AbstractMetadata.loadExternalMetadata(product, absRoot, inputFile);
     }
 
     /**

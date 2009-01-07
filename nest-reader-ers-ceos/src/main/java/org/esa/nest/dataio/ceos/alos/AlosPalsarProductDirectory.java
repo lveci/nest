@@ -171,7 +171,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         }
 
         final float[] fineRanges = new float[gridWidth*gridHeight];
-        createFineTiePointGrid(6, 1, gridWidth, gridHeight, range, fineRanges);
+        ReaderUtils.createFineTiePointGrid(6, 1, gridWidth, gridHeight, range, fineRanges);
 
         final TiePointGrid slantRangeGrid = new TiePointGrid("slant_range_time", gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineRanges);
@@ -197,7 +197,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         }
 
         final float[] fineAngles = new float[gridWidth*gridHeight];
-        createFineTiePointGrid(6, 1, gridWidth, gridHeight, angles, fineAngles);
+        ReaderUtils.createFineTiePointGrid(6, 1, gridWidth, gridHeight, angles, fineAngles);
 
         final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineAngles);
