@@ -109,8 +109,9 @@ public class Radarsat2ProductReader extends AbstractProductReader {
 
         ImageIOFile.BandInfo bandInfo = _dataDir.getBandInfo(destBand);
         if(bandInfo != null && bandInfo.img != null) {
-            bandInfo.img.readImageIORasterBand(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
-                                        destBuffer, pm, bandInfo.imageID, bandInfo.bandSampleOffset);
+            bandInfo.img.readImageIORasterBand(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceStepX, sourceStepY,
+                                                destBuffer, destOffsetX, destOffsetY, destWidth, destHeight,
+                                                pm, bandInfo.imageID);
         }
     }
 }

@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.awt.*;
 import java.awt.image.RenderedImage;
+import java.awt.image.Raster;
+import java.awt.image.DataBuffer;
+import java.awt.image.SampleModel;
 import javax.imageio.*;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageOutputStream;
@@ -25,11 +28,9 @@ public class ImageIOFile {
     private int numBands;
     private String name;
 
-    ImageOutputStream stream;
+    private ImageOutputStream stream;
     ImageReader reader;
-    ImageReadParam param;
-    final IIOMetadata iioMetadata;
-
+    
     /**
      *
      */
@@ -39,12 +40,11 @@ public class ImageIOFile {
         if(stream == null)
             throw new IOException("Unable to open " + inputFile.toString());
 
-        Iterator iter = ImageIO.getImageReaders(stream);
+        final Iterator iter = ImageIO.getImageReaders(stream);
         reader = (ImageReader) iter.next();
-        param = reader.getDefaultReadParam();
         reader.setInput(stream);
 
-        iioMetadata = reader.getImageMetadata(0);
+        IIOMetadata iioMetadata = reader.getImageMetadata(0);
 
         name = inputFile.getName();
         numImages = reader.getNumImages(true);
@@ -54,7 +54,7 @@ public class ImageIOFile {
         sceneHeight = reader.getHeight(0);
 
         dataType = ProductData.TYPE_INT32;
-        ImageTypeSpecifier its = reader.getRawImageType(0);
+        final ImageTypeSpecifier its = reader.getRawImageType(0);
         if(its != null) {
             numBands = reader.getRawImageType(0).getNumBands();
             int type = its.getBufferedImageType();
@@ -93,33 +93,32 @@ public class ImageIOFile {
         return numBands;
     }
 
-    public synchronized void readImageIORasterBand(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight,
-                                            ProductData destBuffer, ProgressMonitor pm,
-                                            int imageID, int sampleOffset)
-                                                                                                throws IOException {
-        final Rectangle srcRect = new Rectangle(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight);
+    public synchronized void readImageIORasterBand(final int sourceOffsetX, final int sourceOffsetY,
+                                                   final int sourceWidth, final int sourceHeight,
+                                                   final int sourceStepX, final int sourceStepY,
+                                                   final ProductData destBuffer,
+                                                   final int destOffsetX, final int destOffsetY,
+                                                   final int destWidth, final int destHeight,
+                                                   final ProgressMonitor pm, final int imageID) throws IOException {
 
-        param.setSourceRegion(srcRect);
-        param.setSourceBands(new int[]{imageID});
-        param.setDestinationBands(new int[]{0});
+        final ImageReadParam param = reader.getDefaultReadParam();
+        param.setSourceSubsampling(sourceStepX, sourceStepY,
+                                   sourceOffsetX % sourceStepX,
+                                   sourceOffsetY % sourceStepY);
 
-        final RenderedImage image = reader.read(0, param);
-        final java.awt.image.Raster data = image.getData();
+        final RenderedImage image = reader.readAsRenderedImage(0, param);
+        final Raster data = image.getData(new Rectangle(destOffsetX, destOffsetY, destWidth, destHeight));
 
-        final int size = destBuffer.getNumElems();
-        final int elemSize = data.getNumDataElements();
+        final double[] dArray = new double[destWidth * destHeight];
+        final DataBuffer dataBuffer = data.getDataBuffer();
+        final SampleModel sampleModel = data.getSampleModel();
+        sampleModel.getSamples(0, 0, destWidth, destHeight, imageID, dArray, dataBuffer);
+        pm.worked(1);
 
-        final int[] b = new int[size * elemSize];
-        data.getPixels(0, 0, sourceWidth, sourceHeight, b);
-
-        //if(elemSize == 1) {
-        //    System.arraycopy(b, 0, destBuffer.getElems(), 0, destWidth);
-        //} else {
-            final int length = b.length;
-            for(int i=0, j=sampleOffset; i < size && j < length; ++i, j+=elemSize) {
-                destBuffer.setElemIntAt(i, b[j]);
-            }
-        //}
+        for (int i = 0; i < dArray.length; i++) {
+            destBuffer.setElemDoubleAt(i, dArray[i]);
+        }
+        pm.worked(1);
     }
 
     public static class BandInfo {

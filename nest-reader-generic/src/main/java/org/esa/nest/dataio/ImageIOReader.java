@@ -105,14 +105,15 @@ public class ImageIOReader extends AbstractProductReader {
      */
     @Override
     protected synchronized void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight,
-                                          int sourceStepX, int sourceStepY, Band destBand, int destOffsetX,
-                                          int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
-                                          ProgressMonitor pm) throws IOException {
+                                          int sourceStepX, int sourceStepY, Band destBand,
+                                          int destOffsetX, int destOffsetY, int destWidth, int destHeight,
+                                          ProductData destBuffer, ProgressMonitor pm) throws IOException {
 
         ImageIOFile.BandInfo bandInfo = bandMap.get(destBand);
 
-        imgIOFile.readImageIORasterBand(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
-                              destBuffer, pm, bandInfo.imageID, bandInfo.bandSampleOffset);
+        imgIOFile.readImageIORasterBand(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceStepX, sourceStepY,
+                                        destBuffer, destOffsetX, destOffsetY, destWidth, destHeight, 
+                                        pm, bandInfo.imageID);
     }
 
 }
