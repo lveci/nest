@@ -3,41 +3,24 @@ package org.esa.nest.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.AbstractProductWriter;
-import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.ProductNode;
-import org.esa.beam.framework.datamodel.TiePointGeoCoding;
-import org.esa.beam.framework.datamodel.VirtualBand;
+import org.esa.beam.framework.datamodel.*;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 
 public class GenericWriter extends AbstractProductWriter {
 
-    private File _outputFile;
     private ImageOutputStream _outputStream;
 
-    private int rasterWidth = 1012;
-    private int rasterHeight = 3168;
-    private int numBands = 1;
-    private int dataType = ProductData.TYPE_INT16;
-
-    private int _imageRecordLength = rasterWidth;
-    private int _startPosImageRecords = 0;
-    private int _imageHeaderLength = 0;
-
     /**
-     * Construct a new instance of a product writer for the given GeoTIFF product writer plug-in.
+     * Construct a new instance of a product writer for the given product writer plug-in.
      *
-     * @param writerPlugIn the given GeoTIFF product writer plug-in, must not be <code>null</code>
+     * @param writerPlugIn the given product writer plug-in, must not be <code>null</code>
      */
     public GenericWriter(final ProductWriterPlugIn writerPlugIn) {
         super(writerPlugIn);
@@ -53,9 +36,7 @@ public class GenericWriter extends AbstractProductWriter {
      */
     @Override
     protected void writeProductNodesImpl() throws IOException {
-        _outputFile = null;
         _outputStream = null;
-       // _bandWriter = null;
 
         final File file;
         if (getOutput() instanceof String) {
@@ -66,31 +47,8 @@ public class GenericWriter extends AbstractProductWriter {
 
         _outputStream = new FileImageOutputStream(file);
 
-        final Product tempProduct = createWritableProduct();
-       // final TiffHeader tiffHeader = new TiffHeader(new Product[]{tempProduct});
-       // tiffHeader.write(_outputStream);
-       // _bandWriter = new GeoTiffBandWriter(tiffHeader.getIfdAt(0), _outputStream, tempProduct);
-    }
-
-    private Product createWritableProduct() throws IOException {
-        final Product sourceProduct = getSourceProduct();
-        final ArrayList<String> nodeNames = new ArrayList<String>();
-        for (int i = 0; i < sourceProduct.getNumBands(); i++) {
-            final Band band = sourceProduct.getBandAt(i);
-            if (shouldWrite(band)) {
-                nodeNames.add(band.getName());
-            }
-        }
-        final GeoCoding sourceGeoCoding = sourceProduct.getGeoCoding();
-        if (sourceGeoCoding instanceof TiePointGeoCoding) {
-            final TiePointGeoCoding geoCoding = (TiePointGeoCoding) sourceGeoCoding;
-            nodeNames.add(geoCoding.getLatGrid().getName());
-            nodeNames.add(geoCoding.getLonGrid().getName());
-        }
-        final ProductSubsetDef subsetDef = new ProductSubsetDef();
-        subsetDef.setNodeNames(nodeNames.toArray(new String[nodeNames.size()]));
-        subsetDef.setIgnoreMetadata(false);
-        return sourceProduct.createSubset(subsetDef, "temp", "");
+        final MetadataElement absRoot = getSourceProduct().getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        AbstractMetadata.saveExternalMetadata(getSourceProduct(), absRoot, file);
     }
 
     /**
@@ -104,40 +62,14 @@ public class GenericWriter extends AbstractProductWriter {
                                     final ProductData sourceBuffer,
                                     ProgressMonitor pm) throws IOException {
 
-        final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
-        final int x = sourceOffsetX;// * 2;
-
         sourceBuffer.writeTo(_outputStream);
-
-      /*  pm.beginTask("Writing band...", sourceMaxY - sourceOffsetY);
-        try {
-            final short[] srcLine = new short[sourceWidth];
-            for (int y = sourceOffsetY; y <= sourceMaxY; ++y) {
-                if (pm.isCanceled()) {
-                    break;
-                }
-
-                // Write source line
-                synchronized (_outputStream) {
-                    _outputStream.seek(_imageRecordLength * y + x);
-                    sourceBuffer.writeTo(_outputStream);
-                }
-
-                pm.worked(1);
-            }
-
-        } finally {
-            pm.done();
-        }   */
     }
 
     /**
      * Deletes the physically representation of the given product from the hard disk.
      */
     public void deleteOutput() {
-        if (_outputFile != null && _outputFile.isFile()) {
-            _outputFile.delete();
-        }
+
     }
 
     /**
@@ -157,10 +89,6 @@ public class GenericWriter extends AbstractProductWriter {
      * @throws java.io.IOException on failure
      */
     public void close() throws IOException {
-        //if (_bandWriter != null) {
-        //    _bandWriter.dispose();
-       //     _bandWriter = null;
-        //}
         if (_outputStream != null) {
             _outputStream.flush();
             _outputStream.close();

@@ -59,7 +59,7 @@ public class GenericWriterPlugIn implements ProductWriterPlugIn {
      * @return a textual description of this product reader/writer
      */
     public String getDescription(Locale name) {
-        return "Generic Binary writer";
+        return "Generic flat binary writer";
     }
 
     /**

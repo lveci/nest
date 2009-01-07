@@ -282,13 +282,21 @@ public class AbstractMetadata {
         return val;
     }
 
-    public static void loadExternalMetadata(final Product product, final MetadataElement absRoot, final File inputFile)
+    public static void loadExternalMetadata(final Product product, final MetadataElement absRoot, final File productFile)
         throws IOException {
          // load metadata xml file if found
-        final String inputStr = inputFile.getAbsolutePath();
+        final String inputStr = productFile.getAbsolutePath();
         final String metadataStr = inputStr.substring(0, inputStr.lastIndexOf('.')) + ".xml";
         final File metadataFile = new File(metadataStr);
         if(metadataFile.exists())
             AbstractMetadataIO.Load(product, absRoot, metadataFile);
+    }
+
+    public static void saveExternalMetadata(final Product product, final MetadataElement absRoot, final File productFile) {
+         // load metadata xml file if found
+        final String inputStr = productFile.getAbsolutePath();
+        final String metadataStr = inputStr.substring(0, inputStr.lastIndexOf('.')) + ".xml";
+        final File metadataFile = new File(metadataStr);
+        AbstractMetadataIO.Save(product, absRoot, metadataFile);
     }
 }

@@ -61,7 +61,6 @@ public class GenericReader extends AbstractProductReader {
             product.addBand(band);
         }
 
-        //addGeoCoding(product);
         addMetaData(product, inputFile);
 
         product.setProductReader(this);

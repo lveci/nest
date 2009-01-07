@@ -22,12 +22,21 @@ import java.util.ArrayList;
  */
 public class AbstractMetadataIO {
 
-     static void Save(final MetadataElement metadataElem, final File metadataFile) {
+     static void Save(final Product product, final MetadataElement metadataElem, final File metadataFile) {
 
-         Element root = new Element("AbstractedMetadata");
+         Element root = new Element("Metadata");
          Document doc = new Document(root);
 
-         XMLSupport.metadataElementToDOMElement(metadataElem, root);
+         if(metadataElem != null) {
+             Element AbstractedMetadataElem = new Element("AbstractedMetadata");
+             root.addContent(AbstractedMetadataElem);
+             XMLSupport.metadataElementToDOMElement(metadataElem, AbstractedMetadataElem);
+         }
+         if(product.getTiePointGrids().length > 0) {
+             Element tiePointGridsElem = new Element("tie-point-grids");
+             root.addContent(tiePointGridsElem);
+             writeTiePointGrids(product, tiePointGridsElem);
+         }
 
          XMLSupport.SaveXML(doc, metadataFile.getAbsoluteFile().toString());
     }
@@ -50,7 +59,7 @@ public class AbstractMetadataIO {
                 final Element elem = (Element) o;
                 if(elem.getName().equals("AbstractedMetadata"))
                     findAbstractedMetadata(metadataElem, elem);
-                if(elem.getName().equals("tie-point-grids"))
+                else if(elem.getName().equals("tie-point-grids"))
                     parseTiePointGrids(product, elem);
             }
         }
@@ -142,8 +151,12 @@ public class AbstractMetadataIO {
             addTiePointGrid(product, name, valueList, columnCount, rowCount);
         }
 
-        // set GeoCoding
-        TiePointGrid[] grids = product.getTiePointGrids();
+        // update GeoCoding
+        setGeoCoding(product);
+    }
+
+    private static void setGeoCoding(final Product product) {
+        final TiePointGrid[] grids = product.getTiePointGrids();
         TiePointGrid latGrid = null;
         TiePointGrid lonGrid = null;
         for(TiePointGrid g : grids) {
@@ -171,8 +184,12 @@ public class AbstractMetadataIO {
 
     private static void addTiePointGrid(final Product product, final String name, final ArrayList<Float> valueList,
                                         final int inputWidth, final int inputHeight) {
-        final int gridWidth = inputWidth * 5;
-        final int gridHeight = inputHeight * 5;
+        int gridWidth = inputWidth;
+        int gridHeight = inputHeight;
+        if(gridWidth < 5)
+            gridWidth *= 5;
+        if(gridHeight < 5)
+            gridHeight *= 5;
 
         final float subSamplingX = (float)product.getSceneRasterWidth() / (float)(gridWidth - 1);
         final float subSamplingY = (float)product.getSceneRasterHeight() / (float)(gridHeight - 1);
@@ -192,4 +209,33 @@ public class AbstractMetadataIO {
         product.addTiePointGrid(incidentAngleGrid);
     }
 
+    private static void writeTiePointGrids(final Product product, final Element root) {
+        final TiePointGrid[] grids = product.getTiePointGrids();
+
+        for(TiePointGrid g : grids) {
+            final Element gridElem = new Element(g.getName());
+            root.addContent(gridElem);
+
+            gridElem.setAttribute("unit", g.getUnit());
+            gridElem.setAttribute("desc", g.getDescription());
+
+            final int width = g.getRasterWidth();
+            final int height = g.getRasterHeight();
+            final float[] tiePoints = g.getTiePoints();
+            int index = 0;
+            for(int r = 0; r < height; ++r) {
+                final Element rowElem = new Element("row");
+                gridElem.addContent(rowElem);
+
+                final StringBuilder valueStrBld = new StringBuilder();
+                for(int c = 0; c < width; ++c) {
+                    valueStrBld.append(tiePoints[index++]);
+                    if(c < width-1)
+                        valueStrBld.append(',');
+                }
+
+                rowElem.setAttribute("value", valueStrBld.toString());
+            }
+        }
+    }
 }

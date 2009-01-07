@@ -26,13 +26,13 @@ import com.sun.org.apache.xerces.internal.parsers.DOMParser;
  */
 public class XMLSupport {
 
-    public static void SaveXML(Document doc, String filePath) {
+    public static void SaveXML(final Document doc, final String filePath) {
 
         try {
-            Format xmlFormat = Format.getRawFormat().setIndent(" ").setLineSeparator("\n");
-            XMLOutputter outputter = new XMLOutputter(xmlFormat);
+            final Format xmlFormat = Format.getRawFormat().setIndent(" ").setLineSeparator("\n");
+            final XMLOutputter outputter = new XMLOutputter(xmlFormat);
 
-            FileWriter writer = new FileWriter(filePath);
+            final FileWriter writer = new FileWriter(filePath);
             outputter.output(doc, writer);
             //outputter.output(doc, System.out);
             writer.close();
@@ -41,16 +41,16 @@ public class XMLSupport {
         }
     }
 
-    public static org.jdom.Document LoadXML(String filePath) throws IOException {
+    public static org.jdom.Document LoadXML(final String filePath) throws IOException {
 
-        DOMBuilder builder = new DOMBuilder();
+        final DOMBuilder builder = new DOMBuilder();
 
-        DOMParser parser = new DOMParser();
+        final DOMParser parser = new DOMParser();
         try {
             // handle spaces in the path
-            String path = filePath.replaceAll(" ", "%20");
+            final String path = filePath.replaceAll(" ", "%20");
             parser.parse(path);
-            org.w3c.dom.Document domDoc = parser.getDocument();
+            final org.w3c.dom.Document domDoc = parser.getDocument();
             return builder.build(domDoc);
         } catch (IOException e) {
             System.out.println("Path to xml is not valid: " + e.getMessage());
@@ -61,9 +61,9 @@ public class XMLSupport {
         }
     }
 
-    public static org.jdom.Document LoadXMLFromResource(String filePath, Class theClass) throws IOException {
+    public static org.jdom.Document LoadXMLFromResource(final String filePath, final Class theClass) throws IOException {
        
-        java.net.URL resURL = theClass.getClassLoader().getResource(filePath);
+        final java.net.URL resURL = theClass.getClassLoader().getResource(filePath);
         if (resURL != null)
             return LoadXML(resURL.toString());
         return null;
@@ -82,13 +82,18 @@ public class XMLSupport {
         final MetadataAttribute[] metaAttributes = metadataElem.getAttributes();
         for(MetadataAttribute childMetaAttrib : metaAttributes) {
             final Element childDomElem = new Element("attrib");
-            childDomElem.setAttribute("name", childMetaAttrib.getName());
-            childDomElem.setAttribute("value", childMetaAttrib.getData().getElemString());
-            childDomElem.setAttribute("type", String.valueOf(childMetaAttrib.getDataType()));
-            childDomElem.setAttribute("unit", childMetaAttrib.getUnit());
-            childDomElem.setAttribute("desc", childMetaAttrib.getDescription());
+            setAttribute(childDomElem, "name", childMetaAttrib.getName());
+            setAttribute(childDomElem, "value", childMetaAttrib.getData().getElemString());
+            setAttribute(childDomElem, "type", String.valueOf(childMetaAttrib.getDataType()));
+            setAttribute(childDomElem, "unit", childMetaAttrib.getUnit());
+            setAttribute(childDomElem, "desc", childMetaAttrib.getDescription());
             domElem.addContent(childDomElem);
         }
+    }
+
+    private static void setAttribute(final Element childDomElem, final String tag, final String val) {
+        if(val != null)
+            childDomElem.setAttribute(tag, val);
     }
 
     public static void domElementToMetadataElement(final Element domElem, final MetadataElement metadataElem) {
@@ -112,7 +117,7 @@ public class XMLSupport {
     }
 
     // todo incomplete
-    private static void addAttribute(MetadataElement root, Element domElem) {
+    private static void addAttribute(final MetadataElement root, final Element domElem) {
 
         final Attribute nameAttrib = domElem.getAttribute("name");
         final Attribute valueAttrib = domElem.getAttribute("value");
@@ -125,7 +130,12 @@ public class XMLSupport {
 
         final MetadataAttribute attribute = new MetadataAttribute(nameAttrib.getName(), ProductData.TYPE_ASCII, 1);
         attribute.getData().setElems(valueAttrib.getValue());
-        
+
+        if(unitAttrib != null)
+            attribute.setUnit(unitAttrib.getValue());
+        if(descAttrib != null)
+            attribute.setDescription(descAttrib.getValue());
+
         root.addAttributeFast(attribute);
     }
 }
