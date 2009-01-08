@@ -31,6 +31,7 @@
             <description>Import an ImageIO supported file format</description>
             <largeIcon>icons/Import24.gif</largeIcon>
             <helpId>importImageIO</helpId>
+            <placeAfter>importTerraSarXProduct</placeAfter>
         </action>
         <action>
             <id>importNestEnvi</id>
@@ -40,14 +41,18 @@
             <formatName>ENVI</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import an ENVI data product.</shortDescr>
+            <placeAfter>importImageIO</placeAfter>
         </action>
         <action>
             <id>importGenericBinary</id>
             <text>Import Generic Binary</text>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <readerPlugin>org.esa.nest.dataio.GenericReaderPlugIn</readerPlugin>
             <formatName>Generic Binary</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import Generic Binary</shortDescr>
+            <placeAfter>importNestEnvi</placeAfter>
+            <helpId>importGenericBinary</helpId>
         </action>
         <action>
             <id>exportGenericBinary</id>

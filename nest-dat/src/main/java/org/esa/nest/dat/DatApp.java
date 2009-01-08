@@ -103,8 +103,8 @@ public final class DatApp extends VisatApp {
         for (ToolViewDescriptor toolViewDescriptor : toolViewDescriptors) {
             String id = toolViewDescriptor.getId();
             if (id.equals("org.esa.beam.visat.toolviews.stat.StatisticsToolView") ||
-                id.equals("org.esa.beam.visat.toolviews.pin.PinManagerToolView") ||
-                id.equals("org.esa.beam.visat.toolviews.pin.GcpManagerToolView") ||
+                id.equals("org.esa.beam.visat.toolviews.placemark.pin.PinManagerToolView") ||
+                id.equals("org.esa.beam.visat.toolviews.placemark.gcp.GcpManagerToolView") ||
                 id.equals("org.esa.beam.visat.toolviews.roi.RoiManagerToolView") ||
                 id.equals("org.esa.beam.visat.toolviews.bitmask.BitmaskOverlayToolView") ) {
                     continue;

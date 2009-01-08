@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class GenericReaderPlugIn implements ProductReaderPlugIn {
 
 	final static String[] FORMAT_NAMES = { "Generic Binary" };
-	final static String[] FORMAT_FILE_EXTENSIONS = { "*" };
+	final static String[] FORMAT_FILE_EXTENSIONS = null;
     final static String PLUGIN_DESCRIPTION = "Generic Binary";
     Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
 
@@ -137,9 +137,7 @@ public class GenericReaderPlugIn implements ProductReaderPlugIn {
          */
         public boolean accept(final File file) {
             if (super.accept(file)) {
-                if (file.isDirectory() || checkExtension(file)) {
-                    return true;
-                }
+                return true;
             }
             return false;
         }

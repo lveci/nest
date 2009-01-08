@@ -5,7 +5,10 @@ import org.esa.beam.framework.dataio.AbstractProductReader;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.ui.ModalDialog;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.dat.dialogs.GenericBinaryDialog;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
@@ -18,8 +21,8 @@ import java.io.IOException;
  */
 public class GenericReader extends AbstractProductReader {
 
-    private int rasterWidth = 1012;
-    private int rasterHeight = 3168;
+    private int rasterWidth = 100;
+    private int rasterHeight = 100;
     private int numBands = 1;
     private int dataType = ProductData.TYPE_INT16;
 
@@ -49,6 +52,17 @@ public class GenericReader extends AbstractProductReader {
      */
     @Override
     protected Product readProductNodesImpl() throws IOException {
+        if(VisatApp.getApp() != null) {
+            //if in DAT then open options dialog
+            final GenericBinaryDialog dialog = new GenericBinaryDialog(VisatApp.getApp().getMainFrame(), "importGenericBinary");
+            if (dialog.show() == ModalDialog.ID_OK) {
+                
+            } else {
+                throw new IOException("Import Canceled");
+            }
+        }
+
+
         final File inputFile = ReaderUtils.getFileFromInput(getInput());
 
         final Product product = new Product(inputFile.getName(),
