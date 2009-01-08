@@ -38,7 +38,7 @@ public class PolarView extends JPanel {
     public static final int POWER = 3;
     public static final int INTENSITY = 4;
     public static final int MULTIPLIED = 5;
-    private PolarGraphCanvas graphView;
+    private PolarCanvas graphView;
     private int graphType = 0;
     private float spectrum[][];
 
@@ -70,7 +70,7 @@ public class PolarView extends JPanel {
         recordLength = rasterNode.getRasterWidth();
         dataset = new float[recordLength];
 
-        graphView = new PolarGraphCanvas();
+        graphView = new PolarCanvas();
         graphView.setCompassNames("Range", "Azimuth");
 
         createPlot(rasterNode, currentRecord);
@@ -140,14 +140,14 @@ public class PolarView extends JPanel {
             logr += rStep;
         }
 
-        GriddedPolarGraphData data = new GriddedPolarGraphData(spectrum, 90F + thFirst, dirBinStep, radii);
+        PolarData data = new PolarData(spectrum, 90F + thFirst, dirBinStep, radii);
 
         graphView.getCAxis().setDataRange(cRange);
         graphView.getRAxis().setAutoRange(false);
         graphView.getRAxis().setDataRange(rRange);
         graphView.getRAxis().setRange(rRange[0], rRange[1], 2);
         //graphView.setRings(rings, ringText);
-        data.setColorScale(ColorScale.newCustomScale(cRange));
+        data.setColorScale(ColourScale.newCustomScale(cRange));
         graphView.setData(data);
     }
 

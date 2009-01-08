@@ -1,9 +1,9 @@
 package org.esa.nest.dat.views.polarview;
 
 
-class PolarGraphAxis extends GraphAxis {
+class AxisPolar extends Axis {
 
-    PolarGraphAxis() {
+    AxisPolar() {
         super(5);
     }
 
@@ -16,7 +16,7 @@ class PolarGraphAxis extends GraphAxis {
         }
         name = "R";
         isBottomLeft = false;
-        gr = new GraphAxis.XAxisGraphics();
+        gr = new Axis.XAxisGraphics();
     }
 
     public static final int RADIAL = 5;

@@ -4,7 +4,7 @@ import org.esa.beam.util.Debug;
 
 import java.awt.*;
 
-public class GriddedPolarGraphData extends PolarGraphData {
+public class PolarData extends AbstractData {
 
     private float firstDir;
     private float dirStep;
@@ -13,13 +13,58 @@ public class GriddedPolarGraphData extends PolarGraphData {
     private int Nr;
     private int Nth;
 
-    public GriddedPolarGraphData(float cValues[][], float firstDir, float dirStep, float radii[]) {
-        super(null, null, cValues);
+    private Object[] rPoints;
+    private Object[] tPoints;
+    Object[] cValues;
+    float dirOffset;
+    final AxisInfo rData;
+    private final AxisInfo tData;
+
+    public PolarData(float cValues[][], float firstDir, float dirStep, float radii[]) {
+        this.rPoints = null;
+        this.tPoints = null;
+        this.cValues = null;
+        rData = new AxisInfo();
+        tData = new AxisInfo();
+        setRPoints(rPoints);
+        setTPoints(tPoints);
+        setColorValues(cValues);
+
         this.firstDir = firstDir;
         this.dirStep = dirStep;
         this.radii = radii;
         Nth = cValues.length;
         Nr = cValues[0].length;
+    }
+
+    public void setRAxis(Axis rAxis) {
+        rData.setAxis(rAxis);
+    }
+
+    void setRPoints(Object rPoints[]) {
+        this.rPoints = rPoints;
+        rData.setArrayType(rPoints);
+    }
+
+    void setTPoints(Object tPoints[]) {
+        this.tPoints = tPoints;
+        tData.setArrayType(tPoints);
+    }
+
+    void setColorValues(Object cValues[]) {
+        this.cValues = cValues;
+        connectPoints = cValues == null;
+        cData.setArrayType(cValues);
+        colors = null;
+    }
+
+    public void setColor(Color c) {
+        setColorValues(null);
+        super.setColor(c);
+    }
+
+    public void setDirOffset(float dirOffset) {
+        this.dirOffset = dirOffset;
     }
 
     public void preparePlot() {
@@ -34,8 +79,6 @@ public class GriddedPolarGraphData extends PolarGraphData {
         try {
             rData.axis.getAxisGraphics(g);
             preparePlot();
-            int length = rData.axis.getLength();
-            int i = 0;
             int lastRad = 0x7fffffff;
             int arcAngle = (int) dirStep;
             if (rScreenPoints[0] < rScreenPoints[Nr]) {
@@ -58,9 +101,7 @@ public class GriddedPolarGraphData extends PolarGraphData {
                         g.fillArc(-rad, -rad, rad2, rad2, angle, arcAngle);
                         th += dirStep;
                         thi++;
-                        i++;
                     }
-
                 }
 
                 rad = rScreenPoints[0];
@@ -87,9 +128,7 @@ public class GriddedPolarGraphData extends PolarGraphData {
                         g.fillArc(-rad, -rad, rad2, rad2, angle, arcAngle);
                         th += dirStep;
                         thi++;
-                        i++;
                     }
-
                 }
 
                 rad = rScreenPoints[Nr];
@@ -154,7 +193,7 @@ public class GriddedPolarGraphData extends PolarGraphData {
         return (double) radii[Nr];
     }
 
-    private static void computeScreenPoints(float values[][], int points[][], GraphAxis axis) {
+    private static void computeScreenPoints(float values[][], int points[][], Axis axis) {
         if (axis == null)
             return;
         int np = values.length;

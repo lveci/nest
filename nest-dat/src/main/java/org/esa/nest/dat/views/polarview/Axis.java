@@ -4,7 +4,7 @@ import org.esa.beam.util.Debug;
 
 import java.awt.*;
 
-public class GraphAxis {
+public class Axis {
     private static double warmNumbers[] = {
             0.10000000000000001D, 1.0D, 2D, 3D, 5D, 10D
     };
@@ -171,7 +171,7 @@ public class GraphAxis {
     }
 
 
-    public GraphAxis(int orientation) {
+    public Axis(int orientation) {
         isX = true;
         isBottomLeft = true;
         ticksInside = false;
