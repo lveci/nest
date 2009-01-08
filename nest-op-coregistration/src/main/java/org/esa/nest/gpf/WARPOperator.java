@@ -82,9 +82,9 @@ public class WARPOperator extends Operator {
     private Band masterBand;
     private Band slaveBand;
 
-    private ProductNodeGroup<Pin> masterGCPGroup;
-    private ProductNodeGroup<Pin> slaveGCPGroup;
-    private ProductNodeGroup<Pin> targetGCPGroup;
+    private ProductNodeGroup<Placemark> masterGCPGroup;
+    private ProductNodeGroup<Placemark> slaveGCPGroup;
+    private ProductNodeGroup<Placemark> targetGCPGroup;
 
     private int numValidGCPs;
     private float[] masterGCPCoords;
@@ -218,8 +218,8 @@ public class WARPOperator extends Operator {
         targetGCPGroup.removeAll();
 
         for(int i = 0; i < slaveGCPGroup.getNodeCount(); ++i) {
-            Pin sPin = slaveGCPGroup.get(i);
-            Pin tPin = new Pin(sPin.getName(),
+            Placemark sPin = slaveGCPGroup.get(i);
+            Placemark tPin = new Placemark(sPin.getName(),
                                sPin.getLabel(),
                                sPin.getDescription(),
                                sPin.getPixelPos(),
@@ -261,7 +261,7 @@ public class WARPOperator extends Operator {
 
         for(int i = 0; i < numValidGCPs; ++i) {
 
-            Pin sPin = slaveGCPGroup.get(i);
+            Placemark sPin = slaveGCPGroup.get(i);
             PixelPos sGCPPos = sPin.getPixelPos();
             //System.out.println("WARP: slave gcp[" + i + "] = " + "(" + sGCPPos.x + "," + sGCPPos.y + ")");
 
@@ -347,7 +347,7 @@ public class WARPOperator extends Operator {
         }
 
         for (Object aPinList : pinList) {
-            slaveGCPGroup.remove((Pin) aPinList);
+            slaveGCPGroup.remove((Placemark) aPinList);
         }
 
         return !pinList.isEmpty();

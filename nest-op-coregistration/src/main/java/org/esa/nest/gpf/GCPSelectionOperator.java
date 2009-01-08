@@ -84,8 +84,8 @@ public class GCPSelectionOperator extends Operator {
     private Band masterBand;
     private Band slaveBand;
 
-    private ProductNodeGroup<Pin> masterGcpGroup;
-    private ProductNodeGroup<Pin> targetGcpGroup;
+    private ProductNodeGroup<Placemark> masterGcpGroup;
+    private ProductNodeGroup<Placemark> targetGcpGroup;
 
     private Tile masterImagetteRaster;
     private Tile slaveImagetteRaster;
@@ -250,7 +250,7 @@ public class GCPSelectionOperator extends Operator {
 
         for(int i = 0; i < masterGcpGroup.getNodeCount(); i++) {
 
-            Pin mPin = masterGcpGroup.get(i);
+            Placemark mPin = masterGcpGroup.get(i);
             PixelPos mGCPPixelPos = mPin.getPixelPos();
 
             if (checkGCPValidity(mGCPPixelPos, x0, y0, w, h)) {
@@ -268,7 +268,7 @@ public class GCPSelectionOperator extends Operator {
 
                 if (getSlaveGCPPosition(mGCPPixelPos, sGCPPixelPos)) {
 
-                    Pin sPin = new Pin(mPin.getName(),
+                    Placemark sPin = new Placemark(mPin.getName(),
                                        mPin.getLabel(),
                                        mPin.getDescription(),
                                        sGCPPixelPos,
