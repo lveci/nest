@@ -77,21 +77,24 @@ public class GenericBinaryDialog extends ModalDialog {
     private void createUI() {
 
         final JPanel contentPane = new JPanel();
+        final GridLayout grid = new GridLayout(0,1);
+        grid.setVgap(5);
+
         //Lay out the labels in a panel.
-        final JPanel labelPane = new JPanel(new GridLayout(0,1));
+        final JPanel labelPane = new JPanel(grid);
         labelPane.add(rasterWidthLabel);
         labelPane.add(rasterHeightLabel);
         labelPane.add(numBandsLabel);
-        labelPane.add(dataTypeLabel);
         labelPane.add(headerBytesLabel);
+        labelPane.add(dataTypeLabel);
 
         //Layout the text fields in a panel.
         final JPanel fieldPane = new JPanel(new GridLayout(0,1));
         fieldPane.add(rasterWidthField);
         fieldPane.add(rasterHeightField);
         fieldPane.add(numBandsField);
-        fieldPane.add(dataTypeBox);
         fieldPane.add(headerBytesField);
+        fieldPane.add(dataTypeBox);
 
         //Put the panels in this panel, labels on left, text fields on right.
         //contentPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));

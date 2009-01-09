@@ -95,7 +95,7 @@ public class GenericReader extends AbstractProductReader {
     public void close() throws IOException {
         super.close();
 
-
+        binaryReader.close();
     }
 
     static DecodeQualification checkProductQualification(File file) {
@@ -126,7 +126,7 @@ public class GenericReader extends AbstractProductReader {
                                           ProgressMonitor pm) throws IOException {
 
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
-        final int x = sourceOffsetX;// * 2;
+        final int x = sourceOffsetX * 2;
         final long xpos = _startPosImageRecords +_imageHeaderLength + x;
 
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
