@@ -56,7 +56,11 @@ public class GenericReader extends AbstractProductReader {
             //if in DAT then open options dialog
             final GenericBinaryDialog dialog = new GenericBinaryDialog(VisatApp.getApp().getMainFrame(), "importGenericBinary");
             if (dialog.show() == ModalDialog.ID_OK) {
-                
+                rasterWidth = dialog.getRasterWidth();
+                rasterHeight = dialog.getRasterHeight();
+                numBands = dialog.getNumBands();
+                dataType = dialog.getDataType();
+                _imageHeaderLength = dialog.getHeaderBytes();
             } else {
                 throw new IOException("Import Canceled");
             }

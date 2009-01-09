@@ -58,15 +58,4 @@ public class OperatorUIUtils {
         paramMap.put("sourceBandNames", bandNames);
     }
 
-    public static void enableComponents(JComponent label, JComponent field, boolean flag) {
-        label.setVisible(flag);
-        field.setVisible(flag);
-    }
-
-    public static void addTextField(JPanel contentPane, GridBagConstraints gbc, JLabel label, JComponent component) {
-        gbc.gridx = 0;
-        contentPane.add(label, gbc);
-        gbc.gridx = 1;
-        contentPane.add(component, gbc);
-    }
 }

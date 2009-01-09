@@ -4,6 +4,7 @@ import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.GridBagUtils;
+import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
 
@@ -11,7 +12,6 @@ import java.util.Map;
 import java.awt.*;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
-import java.io.File;
 
 /**
  * Created by IntelliJ IDEA.
@@ -113,19 +113,19 @@ public class OversamplingOpUI extends BaseOperatorUI {
         });
 
         int savedY = ++_gbc.gridy;
-        OperatorUIUtils.addTextField(contentPane, _gbc, targetImageHeightLabel, targetImageHeight);
+        DialogUtils.addTextField(contentPane, _gbc, targetImageHeightLabel, targetImageHeight);
         _gbc.gridy++;
-        OperatorUIUtils.addTextField(contentPane, _gbc, targetImageWidthLabel, targetImageWidth);
+        DialogUtils.addTextField(contentPane, _gbc, targetImageWidthLabel, targetImageWidth);
 
         _gbc.gridy = savedY;
-        OperatorUIUtils.addTextField(contentPane, _gbc, widthRatioLabel, widthRatio);
+        DialogUtils.addTextField(contentPane, _gbc, widthRatioLabel, widthRatio);
         _gbc.gridy++;
-        OperatorUIUtils.addTextField(contentPane, _gbc, heightRatioLabel, heightRatio);
+        DialogUtils.addTextField(contentPane, _gbc, heightRatioLabel, heightRatio);
 
         _gbc.gridy = savedY;
-        OperatorUIUtils.addTextField(contentPane, _gbc, rangeSpacingLabel, rangeSpacing);
+        DialogUtils.addTextField(contentPane, _gbc, rangeSpacingLabel, rangeSpacing);
         _gbc.gridy++;
-        OperatorUIUtils.addTextField(contentPane, _gbc, azimuthSpacingLabel, azimuthSpacing);
+        DialogUtils.addTextField(contentPane, _gbc, azimuthSpacingLabel, azimuthSpacing);
 
         updateOutputImageBy(true);
 
@@ -133,18 +133,18 @@ public class OversamplingOpUI extends BaseOperatorUI {
     }
 
     private void enableRowColumn(boolean flag) {
-        OperatorUIUtils.enableComponents(targetImageWidthLabel, targetImageWidth, flag);
-        OperatorUIUtils.enableComponents(targetImageHeightLabel, targetImageHeight, flag);
+        DialogUtils.enableComponents(targetImageWidthLabel, targetImageWidth, flag);
+        DialogUtils.enableComponents(targetImageHeightLabel, targetImageHeight, flag);
     }
 
     private void enableRatio(boolean flag) {
-        OperatorUIUtils.enableComponents(widthRatioLabel, widthRatio, flag);
-        OperatorUIUtils.enableComponents(heightRatioLabel, heightRatio, flag);
+        DialogUtils.enableComponents(widthRatioLabel, widthRatio, flag);
+        DialogUtils.enableComponents(heightRatioLabel, heightRatio, flag);
     }
 
     private void enablePixelSpacing(boolean flag) {
-        OperatorUIUtils.enableComponents(rangeSpacingLabel, rangeSpacing, flag);
-        OperatorUIUtils.enableComponents(azimuthSpacingLabel, azimuthSpacing, flag);
+        DialogUtils.enableComponents(rangeSpacingLabel, rangeSpacing, flag);
+        DialogUtils.enableComponents(azimuthSpacingLabel, azimuthSpacing, flag);
     }
 
     private void updateOutputImageBy(boolean show) {

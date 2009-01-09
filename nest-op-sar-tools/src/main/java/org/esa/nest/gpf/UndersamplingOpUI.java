@@ -4,6 +4,7 @@ import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.GridBagUtils;
+import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
 
@@ -164,9 +165,9 @@ public class UndersamplingOpUI extends BaseOperatorUI {
         });
 
         int savedY = ++_gbc.gridy;
-        OperatorUIUtils.addTextField(contentPane, _gbc, subSamplingXLabel, subSamplingX);
+        DialogUtils.addTextField(contentPane, _gbc, subSamplingXLabel, subSamplingX);
         _gbc.gridy++;
-        OperatorUIUtils.addTextField(contentPane, _gbc, subSamplingYLabel, subSamplingY);
+        DialogUtils.addTextField(contentPane, _gbc, subSamplingYLabel, subSamplingY);
 
         _gbc.gridy = savedY;
         _gbc.gridx = 0;
@@ -177,11 +178,11 @@ public class UndersamplingOpUI extends BaseOperatorUI {
             public void itemStateChanged(ItemEvent event) {
                 String item = (String)filterType.getSelectedItem();
                 if(item.equals(UndersamplingOp.USER_DEFINED)) {
-                    OperatorUIUtils.enableComponents(kernelFileLabel, kernelFile, true);
-                    OperatorUIUtils.enableComponents(filterSizeLabel, filterSize, false);
+                    DialogUtils.enableComponents(kernelFileLabel, kernelFile, true);
+                    DialogUtils.enableComponents(filterSizeLabel, filterSize, false);
                 } else {
-                    OperatorUIUtils.enableComponents(kernelFileLabel, kernelFile, false);
-                    OperatorUIUtils.enableComponents(filterSizeLabel, filterSize, true);
+                    DialogUtils.enableComponents(kernelFileLabel, kernelFile, false);
+                    DialogUtils.enableComponents(filterSizeLabel, filterSize, true);
                 }
             }
         });
@@ -194,8 +195,8 @@ public class UndersamplingOpUI extends BaseOperatorUI {
         enableKernelFiltering(false);
 
         _gbc.gridy = savedY;
-        OperatorUIUtils.addTextField(contentPane, _gbc, kernelFileLabel, kernelFile);
-        OperatorUIUtils.enableComponents(kernelFileLabel, kernelFile, false);
+        DialogUtils.addTextField(contentPane, _gbc, kernelFileLabel, kernelFile);
+        DialogUtils.enableComponents(kernelFileLabel, kernelFile, false);
 
         _gbc.gridy++;
         _gbc.gridx = 0;
@@ -209,19 +210,19 @@ public class UndersamplingOpUI extends BaseOperatorUI {
         });
 
         savedY = ++_gbc.gridy;
-        OperatorUIUtils.addTextField(contentPane, _gbc, targetImageHeightLabel, targetImageHeight);
+        DialogUtils.addTextField(contentPane, _gbc, targetImageHeightLabel, targetImageHeight);
         _gbc.gridy++;
-        OperatorUIUtils.addTextField(contentPane, _gbc, targetImageWidthLabel, targetImageWidth);
+        DialogUtils.addTextField(contentPane, _gbc, targetImageWidthLabel, targetImageWidth);
         
         _gbc.gridy = savedY;
-        OperatorUIUtils.addTextField(contentPane, _gbc, widthRatioLabel, widthRatio);
+        DialogUtils.addTextField(contentPane, _gbc, widthRatioLabel, widthRatio);
         _gbc.gridy++;
-        OperatorUIUtils.addTextField(contentPane, _gbc, heightRatioLabel, heightRatio);
+        DialogUtils.addTextField(contentPane, _gbc, heightRatioLabel, heightRatio);
 
         _gbc.gridy = savedY;
-        OperatorUIUtils.addTextField(contentPane, _gbc, rangeSpacingLabel, rangeSpacing);
+        DialogUtils.addTextField(contentPane, _gbc, rangeSpacingLabel, rangeSpacing);
         _gbc.gridy++;
-        OperatorUIUtils.addTextField(contentPane, _gbc, azimuthSpacingLabel, azimuthSpacing);
+        DialogUtils.addTextField(contentPane, _gbc, azimuthSpacingLabel, azimuthSpacing);
 
         updateOutputImageBy(false);
 
@@ -229,30 +230,30 @@ public class UndersamplingOpUI extends BaseOperatorUI {
     }
 
     private void enableSubSampling(boolean flag) {
-        OperatorUIUtils.enableComponents(subSamplingXLabel, subSamplingX, flag);
-        OperatorUIUtils.enableComponents(subSamplingYLabel, subSamplingY, flag);
+        DialogUtils.enableComponents(subSamplingXLabel, subSamplingX, flag);
+        DialogUtils.enableComponents(subSamplingYLabel, subSamplingY, flag);
     }
 
     private void enableKernelFiltering(boolean flag) {
-        OperatorUIUtils.enableComponents(filterTypeLabel, filterType, flag);
-        OperatorUIUtils.enableComponents(filterSizeLabel, filterSize, flag);
+        DialogUtils.enableComponents(filterTypeLabel, filterType, flag);
+        DialogUtils.enableComponents(filterSizeLabel, filterSize, flag);
         if(!flag)
-            OperatorUIUtils.enableComponents(kernelFileLabel, kernelFile, flag);
+            DialogUtils.enableComponents(kernelFileLabel, kernelFile, flag);
     }
 
     private void enableRowColumn(boolean flag) {
-        OperatorUIUtils.enableComponents(targetImageWidthLabel, targetImageWidth, flag);
-        OperatorUIUtils.enableComponents(targetImageHeightLabel, targetImageHeight, flag);
+        DialogUtils.enableComponents(targetImageWidthLabel, targetImageWidth, flag);
+        DialogUtils.enableComponents(targetImageHeightLabel, targetImageHeight, flag);
     }
 
     private void enableRatio(boolean flag) {
-        OperatorUIUtils.enableComponents(widthRatioLabel, widthRatio, flag);
-        OperatorUIUtils.enableComponents(heightRatioLabel, heightRatio, flag);
+        DialogUtils.enableComponents(widthRatioLabel, widthRatio, flag);
+        DialogUtils.enableComponents(heightRatioLabel, heightRatio, flag);
     }
 
     private void enablePixelSpacing(boolean flag) {
-        OperatorUIUtils.enableComponents(rangeSpacingLabel, rangeSpacing, flag);
-        OperatorUIUtils.enableComponents(azimuthSpacingLabel, azimuthSpacing, flag);
+        DialogUtils.enableComponents(rangeSpacingLabel, rangeSpacing, flag);
+        DialogUtils.enableComponents(azimuthSpacingLabel, azimuthSpacing, flag);
     }
 
     private void updateOutputImageBy(boolean show) {
