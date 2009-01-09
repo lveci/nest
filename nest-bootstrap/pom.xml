@@ -115,7 +115,6 @@
         <dependency>
             <groupId>ncsa.hdf</groupId>
             <artifactId>lib-hdf</artifactId>
-            <scope>compile</scope>
         </dependency>
 		<dependency>
             <groupId>gov.nasa</groupId>
