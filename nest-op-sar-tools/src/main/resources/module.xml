@@ -110,6 +110,15 @@
         </action>
 
         <action>
+            <id>SLCtoPRIOp</id>
+            <class>org.esa.nest.dat.SLCtoPRIOpAction</class>
+            <text>SLC to PRI</text>
+            <shortDescr>Change the SLC product to a PRI-like product</shortDescr>
+            <parent>DatasetConversion</parent>
+            <helpId>SLCtoPRIOp</helpId>
+        </action>
+
+        <action>
             <id>AmplitudeToIntensityOp</id>
             <class>org.esa.nest.dat.AmplitudeToIntensityOpAction</class>
             <text>Amplitude to/from Intensity</text>

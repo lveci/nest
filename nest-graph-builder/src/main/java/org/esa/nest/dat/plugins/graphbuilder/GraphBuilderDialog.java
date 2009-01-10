@@ -13,9 +13,6 @@ import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.visat.dialogs.PromptDialog;
 import org.esa.nest.util.DatUtils;
-import org.esa.nest.dat.plugins.graphbuilder.GraphPanel;
-import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
-import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
@@ -39,7 +36,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private static final ImageIcon helpIcon = DatUtils.LoadIcon("org/esa/nest/icons/help-browser.png");
     private static final ImageIcon infoIcon = DatUtils.LoadIcon("org/esa/nest/icons/info22.png");
 
-    private AppContext appContext;
+    private final AppContext appContext;
     private JPanel mainPanel;
     private GraphPanel graphPanel;
     private JLabel statusLabel;
@@ -52,12 +49,13 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private final GraphExecuter graphEx;
     private int graphCount;
     private boolean isProcessing = false;
+    private boolean allowGraphBuilding = true;
 
     //TabbedPanel
     private JTabbedPane tabbedPanel;
     private static final ImageIcon OpIcon = UIUtils.loadImageIcon("icons/cog_add.png");
 
-    public GraphBuilderDialog(AppContext theAppContext, String title, String helpID) {
+    public GraphBuilderDialog(final AppContext theAppContext, final String title, final String helpID) {
         super(theAppContext.getApplicationWindow(), title, 0, helpID);
 
         appContext = theAppContext;
@@ -66,6 +64,18 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
         initUI();
         super.getJDialog().setMinimumSize(new Dimension(600, 700));
+    }
+
+    public GraphBuilderDialog(final AppContext theAppContext, final String title, final String helpID, final boolean allowGraphBuilding) {
+        super(theAppContext.getApplicationWindow(), title, 0, helpID);
+
+        this.allowGraphBuilding = allowGraphBuilding;
+        appContext = theAppContext;
+        graphEx = new GraphExecuter();
+        graphEx.addObserver(this);
+
+        initUI();
+        super.getJDialog().setMinimumSize(new Dimension(600, 400));
     }
 
     /**
@@ -77,14 +87,16 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         // north panel
         final JPanel northPanel = new JPanel(new BorderLayout(4, 4));
 
-        graphPanel = new GraphPanel(graphEx);
-        graphPanel.setBackground(Color.WHITE);
-        graphPanel.setPreferredSize(new Dimension(500,500));
-        JScrollPane scrollPane = new JScrollPane(graphPanel);
-        scrollPane.setPreferredSize(new Dimension(300,300));
-        northPanel.add(scrollPane, BorderLayout.CENTER);
+        if(allowGraphBuilding) {
+            graphPanel = new GraphPanel(graphEx);
+            graphPanel.setBackground(Color.WHITE);
+            graphPanel.setPreferredSize(new Dimension(500,500));
+            final JScrollPane scrollPane = new JScrollPane(graphPanel);
+            scrollPane.setPreferredSize(new Dimension(300,300));
+            northPanel.add(scrollPane, BorderLayout.CENTER);
 
-        mainPanel.add(northPanel, BorderLayout.NORTH);
+            mainPanel.add(northPanel, BorderLayout.NORTH);
+        }
 
         // mid panel
         final JPanel midPanel = new JPanel(new BorderLayout(4, 4));
@@ -141,7 +153,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.NORTHWEST;
 
-        JButton processButton = CreateButton("processButton", "Process", processIcon, panel);
+        final JButton processButton = CreateButton("processButton", "Process", processIcon, panel);
         processButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
@@ -149,7 +161,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
             }
         });
 
-        JButton saveButton = CreateButton("saveButton", "Save", saveIcon, panel);
+        final JButton saveButton = CreateButton("saveButton", "Save", saveIcon, panel);
         saveButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
@@ -157,7 +169,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
             }
         });
 
-        JButton loadButton = CreateButton("loadButton", "Load", loadIcon, panel);
+        final JButton loadButton = CreateButton("loadButton", "Load", loadIcon, panel);
         loadButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
@@ -165,7 +177,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
             }
         });
 
-        JButton clearButton = CreateButton("clearButton", "Clear", clearIcon, panel);
+        final JButton clearButton = CreateButton("clearButton", "Clear", clearIcon, panel);
         clearButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
@@ -173,7 +185,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
             }
         });
 
-        JButton infoButton = CreateButton("infoButton", "Info", infoIcon, panel);
+        final JButton infoButton = CreateButton("infoButton", "Info", infoIcon, panel);
         infoButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
@@ -181,7 +193,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
             }
         });
 
-        JButton helpButton = CreateButton("helpButton", "Help", helpIcon, panel);
+        final JButton helpButton = CreateButton("helpButton", "Help", helpIcon, panel);
         helpButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
@@ -198,7 +210,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         panel.add(processButton, gbc);
     }
 
-    JButton CreateButton(String name, String text, ImageIcon icon, JPanel panel) {
+    private JButton CreateButton(final String name, final String text, final ImageIcon icon, final JPanel panel) {
         JButton button = new JButton();
         button.setName(getClass().getName() + name);
         button = new JButton();
@@ -219,7 +231,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
             JAI.getDefaultInstance().getTileCache().flush();
             System.gc();
 
-            Stack productSetStack = graphEx.FindProductSets();
+            final Stack productSetStack = graphEx.FindProductSets();
 
             if(!productSetStack.isEmpty()) {
                 progressBar.setValue(0);
@@ -238,8 +250,8 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         }
     }
 
-    private synchronized void ReplaceAllProductSets(Graph graph, Stack productSetStack) throws GraphException {
-        GraphExecuter.ProductSetNode stackNode = (GraphExecuter.ProductSetNode)productSetStack.pop();
+    private synchronized void ReplaceAllProductSets(final Graph graph, final Stack productSetStack) throws GraphException {
+        final GraphExecuter.ProductSetNode stackNode = (GraphExecuter.ProductSetNode)productSetStack.pop();
 
         for (Enumeration e = stackNode.fileList.elements(); e.hasMoreElements();)
         {
@@ -309,7 +321,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
      * Loads a new graph from a file
      */
     private void LoadGraph() {
-        File file = DatUtils.GetFilePath("Load Graph", "XML", "xml", "GraphFile", false);
+        final File file = DatUtils.GetFilePath("Load Graph", "XML", "xml", "GraphFile", false);
         if(file == null) return;
 
         LoadGraph(file);
@@ -319,12 +331,13 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
      * Loads a new graph from a file
      * @param file the graph file to load
      */
-    public void LoadGraph(File file) {
+    public void LoadGraph(final File file) {
         try {
             initGraphEnabled = false;
             tabbedPanel.removeAll();
             graphEx.loadGraph(file);
-            graphPanel.repaint();
+            if(allowGraphBuilding)
+                graphPanel.repaint();
             initGraphEnabled = true;
         } catch(GraphException e) {
             showErrorDialog(e.getMessage());
@@ -355,7 +368,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
      * Call decription dialog
      */
     private void OnInfo() {
-        PromptDialog dlg = new PromptDialog("Graph Description", "Description", graphEx.getGraphDescription(), true);
+        final PromptDialog dlg = new PromptDialog("Graph Description", "Description", graphEx.getGraphDescription(), true);
         dlg.show();
         if(dlg.IsOK()) {
             graphEx.setGraphDescription(dlg.getValue());
@@ -425,7 +438,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         }
     }
 
-    private JComponent CreateOperatorTab(GraphNode node) {
+    private JComponent CreateOperatorTab(final GraphNode node) {
 
         return node.GetOperatorUI().CreateOpTab(node.getOperatorName(), node.getParameterMap(), appContext);
     }
@@ -459,27 +472,26 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
         @Override
         public void done() {
-            Date now = Calendar.getInstance().getTime();
-            long diff = (now.getTime() - executeStartTime.getTime()) / 1000;
+            final Date now = Calendar.getInstance().getTime();
+            final long diff = (now.getTime() - executeStartTime.getTime()) / 1000;
             if(diff > 120) {
-                float minutes = diff / 60f;
+                final float minutes = diff / 60f;
                 statusLabel.setText("Processing completed in " + minutes + " minutes");
             } else {
                 statusLabel.setText("Processing completed in " + diff + " seconds");
             }
 
-            Vector<File> fileList = graphEx.getProductsToOpenInDAT();
-            openTargetProducts(fileList);
+            openTargetProducts(graphEx.getProductsToOpenInDAT());
         }
 
     }
 
-    private void openTargetProducts(Vector<File> fileList) {
+    private void openTargetProducts(final Vector<File> fileList) {
         if(!fileList.isEmpty()) {
             for(File file : fileList) {
                 try {
 
-                    Product product = ProductIO.readProduct(file, null);
+                    final Product product = ProductIO.readProduct(file, null);
                     if (product != null) {
                         appContext.getProductManager().addProduct(product);
                     }
@@ -493,7 +505,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private class ProcessProductSetThread extends SwingWorker<GraphExecuter, Object> {
 
         private final ProgressMonitor pm;
-        private Stack productSetStack;
+        private final Stack productSetStack;
         private Date executeStartTime;
 
         public ProcessProductSetThread(final Stack productSetStack, final ProgressMonitor pm) {
@@ -515,10 +527,10 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
             } catch(Exception e) {
                 statusLabel.setText(e.getMessage());
             } finally {
-                Date now = Calendar.getInstance().getTime();
-                long diff = (now.getTime() - executeStartTime.getTime()) / 1000;
+                final Date now = Calendar.getInstance().getTime();
+                final long diff = (now.getTime() - executeStartTime.getTime()) / 1000;
                 if(diff > 120) {
-                    float minutes = diff / 60f;
+                    final float minutes = diff / 60f;
                     statusLabel.setText("Processing completed in " + minutes + " minutes");
                 } else {
                     statusLabel.setText("Processing completed in " + diff + " seconds");
@@ -553,7 +565,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         private int lastWorkUI;
         private boolean cancelRequested;
 
-        public ProgressBarProgressMonitor(JProgressBar progressBar, JLabel messageLabel) {
+        public ProgressBarProgressMonitor(final JProgressBar progressBar, final JLabel messageLabel) {
             this.progressBar = progressBar;
             this.messageLabel = messageLabel;
         }
