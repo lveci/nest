@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import ucar.nc2.NetcdfFileWriteable;
 import ucar.nc2.Dimension;
 import ucar.nc2.Group;
+import ucar.nc2.Variable;
 import ucar.ma2.*;
 
 
@@ -131,8 +132,6 @@ public class NetCDFWriter extends AbstractProductWriter {
             rangeE.printStackTrace();
             throw new RuntimeException(rangeE);
         }
-        netCDFWriteable.close();
-
 
     }
 
@@ -147,16 +146,30 @@ public class NetCDFWriter extends AbstractProductWriter {
                                     final ProductData regionData,
                                     ProgressMonitor pm) throws IOException {
 
+        final Variable variable = netCDFWriteable.findVariable(sourceBand.getName());
+        final int rank = variable.getRank();
+        final int[] origin = new int[rank];
+        for (int i = 0; i < rank; i++) {
+            origin[i] = 0;
+        }
+        origin[rank - 1] = regionX;
+
         try {
 
-            double[][] data = {{1, 2, 3, 4},
-                {2, 4, 6, 8},
-                {3, 6, 9, 12}};
+            final double[][] data = new double[regionWidth][1];
+            for(int x=0; x < regionWidth; ++x) {
+                data[x][0] = regionData.getElemDoubleAt(x);
+            }
+            Array dataArray = Array.factory(data);
 
-            netCDFWriteable.write(sourceBand.getName(), Array.factory(data));
+            //for (int y = 0; y < regionHeight; y++) {
+                origin[rank - 2] = regionY;// + y;
+               
+                netCDFWriteable.write(sourceBand.getName(), origin, dataArray);
+                pm.worked(1);
+            //}
 
-
-        } catch(InvalidRangeException e) {
+        } catch(Exception e) {
             System.out.println(e.getMessage());
         }
     }
