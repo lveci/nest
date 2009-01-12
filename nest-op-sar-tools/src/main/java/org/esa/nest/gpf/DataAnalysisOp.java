@@ -15,6 +15,7 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.swing.progress.DialogProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -23,10 +24,18 @@ import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.util.PropertyMap;
+import org.esa.beam.util.Debug;
+import org.esa.beam.dataio.dimap.DimapProductReader;
+import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.nest.util.DatUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.media.jai.JAI;
+import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.io.FileOutputStream;
@@ -58,6 +67,8 @@ public class DataAnalysisOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
+    private boolean writeToFile = false;
+
     private boolean statsCalculated = false;
     private boolean sampleTypeIsComplex;
     private int numOfBands;
@@ -72,6 +83,8 @@ public class DataAnalysisOp extends Operator {
     private double[] std;    // standard deviation for each band
     private double[] enl;    // equivalent number of looks for each band
     private HashMap<String, Integer> statisticsBandIndex;
+
+    private MetadataElement abs;
 
     /**
      * Default constructor. The graph processing framework
@@ -95,32 +108,19 @@ public class DataAnalysisOp extends Operator {
      */
     @Override
     public void initialize() throws OperatorException {
-
-        getSampleType();
+        try {
+        abs = OperatorUtils.getAbstractedMetadata(sourceProduct);
+        sampleTypeIsComplex = abs.getAttributeString("sample_type").contains("COMPLEX");
 
         getNumOfBandsForStatistics();
 
         setInitialValues();
 
         createTargetProduct();
-    }
 
-    /**
-     * Get sample type from metadata.
-     */
-    void getSampleType() {
-
-        MetadataElement sph = sourceProduct.getMetadataRoot().getElement("SPH");
-        if (sph == null) {
-            throw new OperatorException("SPH not found");
+        } catch(Exception e) {
+            throw new OperatorException(e.getMessage());
         }
-
-        MetadataAttribute sampleTypeAttr = sph.getAttribute("sample_type");
-        if (sampleTypeAttr == null) {
-            throw new OperatorException("sample_type not found");
-        }
-
-        sampleTypeIsComplex = sampleTypeAttr.getData().getElemString().equals("COMPLEX ");
     }
 
     /**
@@ -198,10 +198,7 @@ public class DataAnalysisOp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
-        Rectangle targetTileRectangle = targetTile.getRectangle();
-
-        computeStatistics(targetBand, targetTile, targetTileRectangle, pm);
-
+        computeStatistics(targetBand, targetTile, targetTile.getRectangle(), pm);
     }
 
     /**
@@ -209,17 +206,18 @@ public class DataAnalysisOp extends Operator {
      */
     void computeStatistics(Band targetBand, Tile targetTile, Rectangle targetTileRectangle, ProgressMonitor pm) {
 
-        Band sourceBand1;
-        Tile sourceRaster1;
+        final Band sourceBand1 = sourceProduct.getBand(targetBand.getName());
+        final Tile sourceRaster1 = getSourceTile(sourceBand1, targetTileRectangle, pm);
+        final ProductData rawSamples1 = sourceRaster1.getRawSamples();
 
-        sourceBand1 = sourceProduct.getBand(targetBand.getName());
-        sourceRaster1 = getSourceTile(sourceBand1, targetTileRectangle, pm);
-        ProductData rawSamples1 = sourceRaster1.getRawSamples();
-
-        int idx = statisticsBandIndex.get(targetBand.getName());
-        int n = rawSamples1.getNumElems();
+        final int idx = statisticsBandIndex.get(targetBand.getName());
+        final int n = rawSamples1.getNumElems();
         double v, v2;
         for (int i = 0; i < n; i++) {
+
+            if(sampleTypeIsComplex) {
+                // todo
+            }
             v = rawSamples1.getElemDoubleAt(i);
             if(v > max[idx])
                 max[idx] = v;
@@ -246,58 +244,66 @@ public class DataAnalysisOp extends Operator {
         if (!statsCalculated) {
             return;
         }
-        /*
+
+        completeStatistics();
+
+        writeStatsToMetadata();
+
+        if(writeToFile)
+            writeStatsToFile();
+    }
+
+    private void completeStatistics() {
         for (String bandName : statisticsBandIndex.keySet())  {
 
-            int bandIdx = statisticsBandIndex.get(bandName);
-            double m = sum[bandIdx] / numOfPixels;
-            double m2 = sum2[bandIdx] / numOfPixels;
-            double m4 = sum4[bandIdx] / numOfPixels;
-
-            mean[bandIdx] = m;
-            std[bandIdx] = Math.sqrt(m2 - m*m);
-            coefVar[bandIdx] = Math.sqrt(m4 - m2*m2) / m2;
-            enl[bandIdx] = m2*m2 / (m4 - m2*m2);
-
-            System.out.println();
-            System.out.println("Band: " + bandName);
-            System.out.println("Total pixels = " + numOfPixels);
-            System.out.println("min[" + bandIdx + "] = " + min[bandIdx]);
-            System.out.println("max[" + bandIdx + "] = " + max[bandIdx]);
-            System.out.println("sum[" + bandIdx + "] = " + sum[bandIdx]);
-            System.out.println("mean[" + bandIdx + "] = " + mean[bandIdx]);
-            System.out.println("std[" + bandIdx + "] = " + std[bandIdx]);
-            System.out.println("coefVar[" + bandIdx + "] = " + coefVar[bandIdx]);
-            System.out.println("enl[" + bandIdx + "] = " + enl[bandIdx]);
-            System.out.println();
-        }
-        */
-        FileOutputStream out; // declare a file output object
-        PrintStream p; // declare a print stream object
-        String fileName = sourceProduct.getName() + "_statistics.txt";
-        try {
-            File appUserDir = new File(DatUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
-            if(!appUserDir.exists()) {
-                appUserDir.mkdirs();
-            }
-            fileName = appUserDir.toString() + File.separator + fileName;
-            out = new FileOutputStream(fileName);
-
-            // Connect print stream to the output stream
-            p = new PrintStream(out);
-
-            p.println();
-            for (String bandName : statisticsBandIndex.keySet())  {
-
-                int bandIdx = statisticsBandIndex.get(bandName);
-                double m = sum[bandIdx] / numOfPixels;
-                double m2 = sum2[bandIdx] / numOfPixels;
-                double m4 = sum4[bandIdx] / numOfPixels;
+                final int bandIdx = statisticsBandIndex.get(bandName);
+                final double m = sum[bandIdx] / numOfPixels;
+                final double m2 = sum2[bandIdx] / numOfPixels;
+                final double m4 = sum4[bandIdx] / numOfPixels;
 
                 mean[bandIdx] = m;
                 std[bandIdx] = Math.sqrt(m2 - m*m);
                 coefVar[bandIdx] = Math.sqrt(m4 - m2*m2) / m2;
                 enl[bandIdx] = m2*m2 / (m4 - m2*m2);
+        }
+    }
+
+    private void writeStatsToMetadata() {
+
+        MetadataAttribute attrib = abs.getAttribute("Stat");
+        if(attrib == null) {
+            attrib = new MetadataAttribute("Stat", ProductData.TYPE_ASCII, 1);
+            abs.addAttributeFast(attrib);
+        }
+        
+        AbstractMetadata.setAttribute(abs, "Stat", "written");
+
+        try {
+            ProductIO.writeProduct(sourceProduct, sourceProduct.getFileLocation(),
+                                   DimapProductConstants.DIMAP_FORMAT_NAME,
+                                   true, ProgressMonitor.NULL);
+        } catch(Exception e) {
+            throw new OperatorException(e.getMessage());
+        }
+    }
+
+    private void writeStatsToFile() {
+        String fileName = sourceProduct.getName() + "_statistics.txt";
+        try {
+            final File appUserDir = new File(DatUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
+            if(!appUserDir.exists()) {
+                appUserDir.mkdirs();
+            }
+            fileName = appUserDir.toString() + File.separator + fileName;
+            final FileOutputStream out = new FileOutputStream(fileName);
+
+            // Connect print stream to the output stream
+            final PrintStream p = new PrintStream(out);
+
+            p.println();
+            for (String bandName : statisticsBandIndex.keySet())  {
+
+                int bandIdx = statisticsBandIndex.get(bandName);
 
                 p.println();
                 p.println("Band: " + bandName);
@@ -325,6 +331,28 @@ public class DataAnalysisOp extends Operator {
             throw new OperatorException(exc);
         }
     }
+
+    private void writeStatsToStdOut() {
+        /*
+        for (String bandName : statisticsBandIndex.keySet())  {
+
+            int bandIdx = statisticsBandIndex.get(bandName);
+
+            System.out.println();
+            System.out.println("Band: " + bandName);
+            System.out.println("Total pixels = " + numOfPixels);
+            System.out.println("min[" + bandIdx + "] = " + min[bandIdx]);
+            System.out.println("max[" + bandIdx + "] = " + max[bandIdx]);
+            System.out.println("sum[" + bandIdx + "] = " + sum[bandIdx]);
+            System.out.println("mean[" + bandIdx + "] = " + mean[bandIdx]);
+            System.out.println("std[" + bandIdx + "] = " + std[bandIdx]);
+            System.out.println("coefVar[" + bandIdx + "] = " + coefVar[bandIdx]);
+            System.out.println("enl[" + bandIdx + "] = " + enl[bandIdx]);
+            System.out.println();
+        }
+        */
+    }
+
 
     // The following functions are for unit test only.
     public int getNumOfBands() {

@@ -72,7 +72,7 @@ public class GraphNode {
                     parameterMap.put(name, converter.parse(value));
                 } else {
                     final Converter converter = getConverter(valueContainer, name);
-                    Object[] objArray = new Object[child.getChildCount()];
+                    final Object[] objArray = new Object[child.getChildCount()];
                     int c = 0;
                     for(Xpp3Dom ch : child.getChildren()) {
                         final String v = ch.getValue();
@@ -106,7 +106,7 @@ public class GraphNode {
     void setDisplayParameters(Xpp3Dom params) {
         if(params != null) {
             displayParameters = params;
-            Xpp3Dom dpElem = displayParameters.getChild("displayPosition");
+            final Xpp3Dom dpElem = displayParameters.getChild("displayPosition");
             if(dpElem != null) {
                 displayPosition.x = (int)Float.parseFloat(dpElem.getAttribute("x"));
                 displayPosition.y = (int)Float.parseFloat(dpElem.getAttribute("y"));
@@ -116,7 +116,7 @@ public class GraphNode {
 
     void AssignParameters(Xpp3Dom presentationXML) {
 
-        Xpp3DomElement config = Xpp3DomElement.createDomElement("parameters");
+        final Xpp3DomElement config = Xpp3DomElement.createDomElement("parameters");
         updateParameterMap(config);
         node.setConfiguration(config.getXpp3Dom());
 
@@ -124,7 +124,7 @@ public class GraphNode {
     }
 
     void AssignDisplayParameters(Xpp3Dom presentationXML) {
-        Xpp3Dom nodeElem = presentationXML.getChild(node.getId());
+        final Xpp3Dom nodeElem = presentationXML.getChild(node.getId());
         if(nodeElem == null) {
             presentationXML.addChild(displayParameters);
         }
@@ -221,7 +221,7 @@ public class GraphNode {
 
     void disconnectOperatorSources(GraphNode source) {
 
-        NodeSource[] sources = node.getSources();
+        final NodeSource[] sources = node.getSources();
         for (NodeSource ns : sources) {
             if (ns.getSourceNodeId().equals(source.getID())) {
                 node.removeSource(ns);
@@ -231,7 +231,7 @@ public class GraphNode {
 
     boolean FindSource(GraphNode source) {
 
-        NodeSource[] sources = node.getSources();
+        final NodeSource[] sources = node.getSources();
         for (NodeSource ns : sources) {
             if (ns.getSourceNodeId().equals(source.getID())) {
                 return true;
@@ -266,7 +266,7 @@ public class GraphNode {
     }
 
     private OperatorUI CreateOperatorUI() {
-        String operatorName = getOperatorName();
+        final String operatorName = getOperatorName();
         final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
         if (operatorSpi == null) {
             return null;
@@ -281,13 +281,13 @@ public class GraphNode {
      * @param col The color to draw
      */
     void drawNode(Graphics g, Color col) {
-        int x = displayPosition.x;
-        int y = displayPosition.y;
+        final int x = displayPosition.x;
+        final int y = displayPosition.y;
 
-        FontMetrics metrics = g.getFontMetrics();
-        String name = getOperatorName();
-        Rectangle2D rect = metrics.getStringBounds(name, g);
-        int stringWidth = (int) rect.getWidth();
+        final FontMetrics metrics = g.getFontMetrics();
+        final String name = getOperatorName();
+        final Rectangle2D rect = metrics.getStringBounds(name, g);
+        final int stringWidth = (int) rect.getWidth();
         setSize(Math.max(stringWidth, 50) + 10, 30);
 
         g.setColor(col);
@@ -305,7 +305,7 @@ public class GraphNode {
      * @param col The color to draw
      */
     void drawHotspot(Graphics g, Color col) {
-        Point p = displayPosition;
+        final Point p = displayPosition;
         g.setColor(col);
         g.drawOval(p.x - hotSpotSize / 2, p.y + hotSpotOffset, hotSpotSize, hotSpotSize);
     }
@@ -317,8 +317,8 @@ public class GraphNode {
      */
     public void drawConnectionLine(Graphics g, GraphNode src) {
 
-        Point tail = displayPosition;
-        Point head = src.displayPosition;
+        final Point tail = displayPosition;
+        final Point head = src.displayPosition;
         if (tail.x + nodeWidth < head.x) {
             drawArrow(g, tail.x + nodeWidth, tail.y + halfNodeHeight,
                     head.x, head.y + src.getHalfNodeHeight());
@@ -344,8 +344,8 @@ public class GraphNode {
      */
     static private void drawArrow(Graphics g, int tailX, int tailY, int headX, int headY) {
 
-        double t1 = Math.abs(headY - tailY);
-        double t2 = Math.abs(headX - tailX);
+        final double t1 = Math.abs(headY - tailY);
+        final double t2 = Math.abs(headX - tailX);
         double theta = Math.atan(t1 / t2);
         if (headX > tailX) {
             if (headY > tailY)
@@ -354,11 +354,11 @@ public class GraphNode {
                 theta = -(Math.PI + theta);
         } else if (headX < tailX && headY > tailY)
             theta = 2 * Math.PI - theta;
-        double cosTheta = Math.cos(theta);
-        double sinTheta = Math.sin(theta);
+        final double cosTheta = Math.cos(theta);
+        final double sinTheta = Math.sin(theta);
 
-        Point p2 = new Point(-8, -3);
-        Point p3 = new Point(-8, +3);
+        final Point p2 = new Point(-8, -3);
+        final Point p3 = new Point(-8, +3);
 
         int x = (int)Math.round((cosTheta * p2.x) - (sinTheta * p2.y));
         p2.y = (int)Math.round((sinTheta * p2.x) + (cosTheta * p2.y));

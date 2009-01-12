@@ -54,7 +54,7 @@ public class GraphExecuter extends Observable {
     GraphNode findGraphNode(String id) {    
         for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
         {
-            GraphNode n = (GraphNode) e.nextElement();
+            final GraphNode n = (GraphNode) e.nextElement();
             if(n.getID().equals(id)) {
                 return n;
             }
@@ -86,15 +86,15 @@ public class GraphExecuter extends Observable {
 
     GraphNode addOperator(String opName) {
 
-        String id = opName + ++idCount;
-        Node newNode = new Node(id, opName);
+        final String id = "" + ++idCount + '-' + opName;
+        final Node newNode = new Node(id, opName);
 
-        Xpp3Dom parameters = new Xpp3Dom("parameters");
+        final Xpp3Dom parameters = new Xpp3Dom("parameters");
         newNode.setConfiguration(parameters);
 
         graph.addNode(newNode);
 
-        GraphNode newGraphNode = new GraphNode(newNode);
+        final GraphNode newGraphNode = new GraphNode(newNode);
         nodeList.add(newGraphNode);
 
         setChanged();
@@ -113,7 +113,7 @@ public class GraphExecuter extends Observable {
         // remove as a source from all nodes
         for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
         {
-            GraphNode n = (GraphNode) e.nextElement();
+            final GraphNode n = (GraphNode) e.nextElement();
             n.disconnectOperatorSources(node);
         }
 
@@ -123,25 +123,25 @@ public class GraphExecuter extends Observable {
 
     void setOperatorParam(String id, String paramName, String value) {
 
-        Xpp3Dom xml = new Xpp3Dom(paramName);
+        final Xpp3Dom xml = new Xpp3Dom(paramName);
         xml.setValue(value);
 
-        Node node = graph.getNode(id);
+        final Node node = graph.getNode(id);
         node.getConfiguration().addChild(xml);
     }
 
     void AssignAllParameters() {
 
-        Xpp3Dom presentationXML = new Xpp3Dom("Presentation");
+        final Xpp3Dom presentationXML = new Xpp3Dom("Presentation");
 
         // save graph description
-        Xpp3Dom descXML = new Xpp3Dom("Description");
+        final Xpp3Dom descXML = new Xpp3Dom("Description");
         descXML.setValue(graphDescription);
         presentationXML.addChild(descXML);
 
         for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
         {
-            GraphNode n = (GraphNode) e.nextElement();
+            final GraphNode n = (GraphNode) e.nextElement();
             n.AssignParameters(presentationXML);
         }
 
@@ -151,7 +151,7 @@ public class GraphExecuter extends Observable {
     boolean IsGraphComplete() {
         for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
         {
-            GraphNode n = (GraphNode) e.nextElement();
+            final GraphNode n = (GraphNode) e.nextElement();
             if(!n.HasSources() && !IsNodeASource(n)) {
                 return false;
             }
@@ -162,7 +162,7 @@ public class GraphExecuter extends Observable {
     boolean IsNodeASource(GraphNode node) {
         for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
         {
-            GraphNode n = (GraphNode) e.nextElement();
+            final GraphNode n = (GraphNode) e.nextElement();
             if(n.FindSource(node))
                 return true;
         }
@@ -176,7 +176,7 @@ public class GraphExecuter extends Observable {
 
             for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
             {
-                GraphNode n = (GraphNode) e.nextElement();
+                final GraphNode n = (GraphNode) e.nextElement();
                 n.setSourceProducts(graphContext.getNodeContext(n.getNode()).getSourceProducts());
             }
         }
@@ -187,6 +187,10 @@ public class GraphExecuter extends Observable {
             GraphProcessor.disposeGraphContext(graphContext);
 
         graphContext = processor.createGraphContext(graph, ProgressMonitor.NULL);
+    }
+
+    void disposeGraphContext() {
+        GraphProcessor.disposeGraphContext(graphContext);
     }
 
     /**
@@ -200,7 +204,7 @@ public class GraphExecuter extends Observable {
 
     void saveGraph() throws GraphException {
 
-        File filePath = DatUtils.GetFilePath("Save Graph", "XML", "xml", "GraphFile", true);
+        final File filePath = DatUtils.GetFilePath("Save Graph", "XML", "xml", "GraphFile", true);
         if(filePath != null)
             writeGraph(filePath.getAbsolutePath());
     }
@@ -208,7 +212,7 @@ public class GraphExecuter extends Observable {
     void writeGraph(String filePath) throws GraphException {
 
         try {
-            FileWriter fileWriter = new FileWriter(filePath);
+            final FileWriter fileWriter = new FileWriter(filePath);
 
             try {
                 GraphIO.write(graph, fileWriter);
@@ -224,7 +228,7 @@ public class GraphExecuter extends Observable {
 
         try {
             if(filePath == null) return;
-            FileReader fileReader = new FileReader(filePath.getAbsolutePath());
+            final FileReader fileReader = new FileReader(filePath.getAbsolutePath());
             Graph graphFromFile;
             try {
                 graphFromFile = GraphIO.read(fileReader, null);
@@ -236,18 +240,18 @@ public class GraphExecuter extends Observable {
                 graph = graphFromFile;
                 nodeList.clear();
 
-                Xpp3Dom presentationXML = graph.getApplicationData("Presentation");
+                final Xpp3Dom presentationXML = graph.getApplicationData("Presentation");
                 if(presentationXML != null) {
                     // get graph description
-                    Xpp3Dom descXML = presentationXML.getChild("Description");
+                    final Xpp3Dom descXML = presentationXML.getChild("Description");
                     if(descXML != null && descXML.getValue() != null) {
                         graphDescription = descXML.getValue();
                     }
                 }
 
-                Node[] nodes = graph.getNodes();
+                final Node[] nodes = graph.getNodes();
                 for (Node n : nodes) {
-                    GraphNode newGraphNode = new GraphNode(n);
+                    final GraphNode newGraphNode = new GraphNode(n);
                     if(presentationXML != null)
                         newGraphNode.setDisplayParameters(presentationXML.getChild(n.getId()));
                     nodeList.add(newGraphNode);
@@ -278,23 +282,23 @@ public class GraphExecuter extends Observable {
     Stack<ProductSetNode> FindProductSets() {
         final String SEPARATOR = ",";
         final String SEPARATOR_ESC = "\\u002C"; // Unicode escape repr. of ','
-        Stack<ProductSetNode> theReaderStack = new Stack<ProductSetNode>();
+        final Stack<ProductSetNode> theReaderStack = new Stack<ProductSetNode>();
 
-        Node[] nodes = graph.getNodes();
+        final Node[] nodes = graph.getNodes();
         for(Node n : nodes) {
             if(n.getOperatorName().equalsIgnoreCase("ProductSet-Reader")) {
-                ProductSetNode productSetNode = new ProductSetNode();
+                final ProductSetNode productSetNode = new ProductSetNode();
                 productSetNode.nodeID = n.getId();
 
-                Xpp3Dom config = n.getConfiguration();
-                Xpp3Dom[] params = config.getChildren();
+                final Xpp3Dom config = n.getConfiguration();
+                final Xpp3Dom[] params = config.getChildren();
                 for(Xpp3Dom p : params) {
                     if(p.getName().equals("fileList")) {
 
-                        StringTokenizer st = new StringTokenizer(p.getValue(), SEPARATOR);
+                        final StringTokenizer st = new StringTokenizer(p.getValue(), SEPARATOR);
                         int length = st.countTokens();
                         for (int i = 0; i < length; i++) {
-                            String str = st.nextToken().replace(SEPARATOR_ESC, SEPARATOR);
+                            final String str = st.nextToken().replace(SEPARATOR_ESC, SEPARATOR);
                             productSetNode.fileList.add(str);
                         }
                         break;
@@ -308,9 +312,9 @@ public class GraphExecuter extends Observable {
 
     static void ReplaceProductSetWithReader(Graph graph, String id, String value) {
 
-        Node newNode = new Node(id, OperatorSpi.getOperatorAlias(ReadOp.class));
-        Xpp3Dom config = new Xpp3Dom("parameters");
-        Xpp3Dom fileParam = new Xpp3Dom("file");
+        final Node newNode = new Node(id, OperatorSpi.getOperatorAlias(ReadOp.class));
+        final Xpp3Dom config = new Xpp3Dom("parameters");
+        final Xpp3Dom fileParam = new Xpp3Dom("file");
         fileParam.setValue(value);
         config.addChild(fileParam);
         newNode.setConfiguration(config);
@@ -320,16 +324,16 @@ public class GraphExecuter extends Observable {
     }
 
     static void IncrementWriterFiles(Graph graph, int count) {
-        String countTag = "-" + count;
-        Node[] nodes = graph.getNodes();
+        final String countTag = "-" + count;
+        final Node[] nodes = graph.getNodes();
         for(Node n : nodes) {
             if(n.getOperatorName().equalsIgnoreCase(OperatorSpi.getOperatorAlias(WriteOp.class))) {
-                Xpp3Dom config = n.getConfiguration();
-                Xpp3Dom fileParam = config.getChild("file");
-                String filePath = fileParam.getValue();
+                final Xpp3Dom config = n.getConfiguration();
+                final Xpp3Dom fileParam = config.getChild("file");
+                final String filePath = fileParam.getValue();
                 String newPath;
                 if(filePath.contains(".")) {
-                    int idx = filePath.indexOf('.');
+                    final int idx = filePath.indexOf('.');
                     newPath = filePath.substring(0, idx) + countTag + filePath.substring(idx, filePath.length());
                 } else {
                     newPath = filePath + countTag;
@@ -341,16 +345,16 @@ public class GraphExecuter extends Observable {
     }
 
     static void RestoreWriterFiles(Graph graph, int count) {
-        String countTag = "-" + count;
-        Node[] nodes = graph.getNodes();
+        final String countTag = "-" + count;
+        final Node[] nodes = graph.getNodes();
         for(Node n : nodes) {
             if(n.getOperatorName().equalsIgnoreCase(OperatorSpi.getOperatorAlias(WriteOp.class))) {
-                Xpp3Dom config = n.getConfiguration();
-                Xpp3Dom fileParam = config.getChild("file");
-                String filePath = fileParam.getValue();
+                final Xpp3Dom config = n.getConfiguration();
+                final Xpp3Dom fileParam = config.getChild("file");
+                final String filePath = fileParam.getValue();
                 if(filePath.contains(countTag)) {
-                    int idx = filePath.indexOf(countTag);
-                    String newPath = filePath.substring(0, idx) + filePath.substring(idx+countTag.length(), filePath.length());
+                    final int idx = filePath.indexOf(countTag);
+                    final String newPath = filePath.substring(0, idx) + filePath.substring(idx+countTag.length(), filePath.length());
                     fileParam.setValue(newPath);
                 }
             }
@@ -358,15 +362,15 @@ public class GraphExecuter extends Observable {
     }
 
     public Vector<File> getProductsToOpenInDAT() {
-        Vector<File> fileList = new Vector<File>(2);
-        Node[] nodes = graph.getNodes();
+        final Vector<File> fileList = new Vector<File>(2);
+        final Node[] nodes = graph.getNodes();
         for(Node n : nodes) {
             if(n.getOperatorName().equalsIgnoreCase(OperatorSpi.getOperatorAlias(WriteOp.class))) {
-                Xpp3Dom config = n.getConfiguration();
-                Xpp3Dom fileParam = config.getChild("file");
-                String filePath = fileParam.getValue();
+                final Xpp3Dom config = n.getConfiguration();
+                final Xpp3Dom fileParam = config.getChild("file");
+                final String filePath = fileParam.getValue();
                 if(filePath != null && !filePath.isEmpty()) {
-                    File file = new File(filePath);
+                    final File file = new File(filePath);
                     if(file.exists())
                         fileList.add(file);
                 }

@@ -481,6 +481,8 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
                 statusLabel.setText("Processing completed in " + diff + " seconds");
             }
 
+            graphEx.disposeGraphContext();
+
             openTargetProducts(graphEx.getProductsToOpenInDAT());
         }
 
@@ -537,6 +539,8 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
                 }
                 isProcessing = false;
                 pm.done();
+
+                graphEx.disposeGraphContext();
             }
             return graphEx;
         }

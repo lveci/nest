@@ -51,19 +51,19 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
      * Creates a menu containing the list of operators to the addMenu
      */
     private void CreateAddOpMenu() {
-        ImageIcon opIcon = DatUtils.LoadIcon("org/esa/nest/icons/cog_add.png");
+        final ImageIcon opIcon = DatUtils.LoadIcon("org/esa/nest/icons/cog_add.png");
         addMenu = new JMenu("Add");
 
         // get operator list from graph executor
-        Set<String> gpfOperatorSet = graphEx.GetOperatorList();
-        String[] aliasList = new String[gpfOperatorSet.size()];
+        final Set<String> gpfOperatorSet = graphEx.GetOperatorList();
+        final String[] aliasList = new String[gpfOperatorSet.size()];
         gpfOperatorSet.toArray(aliasList);
         Arrays.sort(aliasList);
 
         // add operators
         for (String anAlias : aliasList) {
             if(!graphEx.isOperatorInternal(anAlias)) {
-                JMenuItem item = new JMenuItem(anAlias, opIcon);
+                final JMenuItem item = new JMenuItem(anAlias, opIcon);
                 item.setHorizontalTextPosition(JMenuItem.RIGHT);
                 item.addActionListener(addListener);
                 addMenu.add(item);
@@ -73,7 +73,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
 
     void AddOperatorAction(String name)
     {
-        GraphNode newGraphNode = graphEx.addOperator(name);
+        final GraphNode newGraphNode = graphEx.addOperator(name);
         newGraphNode.setPos(lastMousePos);
         repaint();
     }
@@ -81,7 +81,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
     void RemoveSourceAction(String id)
     {
         if(selectedNode != null) {
-            GraphNode source = graphEx.findGraphNode(id);
+            final GraphNode source = graphEx.findGraphNode(id);
             selectedNode.disconnectOperatorSources(source);
             repaint();
         }
@@ -93,7 +93,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
      */
     public void actionPerformed(ActionEvent event) {
 
-        String name = event.getActionCommand();
+        final String name = event.getActionCommand();
         if(name.equals("Delete")) {
 
             graphEx.removeOperator(selectedNode);
@@ -104,20 +104,20 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
     private void checkPopup(MouseEvent e) {
         if (e.isPopupTrigger()) {
 
-            JPopupMenu popup = new JPopupMenu();
+            final JPopupMenu popup = new JPopupMenu();
             popup.add(addMenu);
 
             if(selectedNode != null) {
-                JMenuItem item = new JMenuItem("Delete");
+                final JMenuItem item = new JMenuItem("Delete");
                 popup.add(item);
                 item.setHorizontalTextPosition(JMenuItem.RIGHT);
                 item.addActionListener(this);
 
-                NodeSource[] sources = selectedNode.getNode().getSources();
+                final NodeSource[] sources = selectedNode.getNode().getSources();
                 if(sources.length > 0) {
-                    JMenu removeSourcedMenu = new JMenu("Remove Source");
+                    final JMenu removeSourcedMenu = new JMenu("Remove Source");
                     for (NodeSource ns : sources) {
-                        JMenuItem nsItem = new JMenuItem(ns.getSourceNodeId());
+                        final JMenuItem nsItem = new JMenuItem(ns.getSourceNodeId());
                         removeSourcedMenu.add(nsItem);
                         nsItem.setHorizontalTextPosition(JMenuItem.RIGHT);
                         nsItem.addActionListener(removeSourceListener);
@@ -163,11 +163,11 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
      */
     private void DrawGraph(Graphics g, Vector nodes) {
 
-        Font font = new Font("Ariel", 10, 10);
+        final Font font = new Font("Ariel", 10, 10);
         g.setFont(font);
         for (Enumeration e = nodes.elements(); e.hasMoreElements();)
         {
-            GraphNode n = (GraphNode) e.nextElement();
+            final GraphNode n = (GraphNode) e.nextElement();
             
             if(n == selectedNode)
                 n.drawNode(g, selColor);
@@ -178,12 +178,12 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
         // first pass sets the Size in drawNode according to string length
         for (Enumeration e = nodes.elements(); e.hasMoreElements();)
         {
-            GraphNode n = (GraphNode) e.nextElement();
+            final GraphNode n = (GraphNode) e.nextElement();
             // connect source nodes
             g.setColor(Color.red);
-            NodeSource[] nSources = n.getNode().getSources();
+            final NodeSource[] nSources = n.getNode().getSources();
             for (NodeSource nSource : nSources) {
-                GraphNode srcNode = graphEx.findGraphNode(nSource.getSourceNodeId());
+                final GraphNode srcNode = graphEx.findGraphNode(nSource.getSourceNodeId());
                 if(srcNode != null)
                     n.drawConnectionLine(g, srcNode);
             }
@@ -193,8 +193,8 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
             selectedNode.drawHotspot(g, Color.red);
         }
         if(connectingSource && connectSourceTargetNode != null) {
-            Point p1 = connectSourceTargetNode.getPos();
-            Point p2 = connectingSourcePos;
+            final Point p1 = connectSourceTargetNode.getPos();
+            final Point p2 = connectingSourcePos;
             if(p1 != null && p2 != null) {
                 g.setColor(Color.red);
                 g.drawLine(p1.x, p1.y + connectSourceTargetNode.getHalfNodeHeight(), p2.x, p2.y);
@@ -238,7 +238,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
         checkPopup(e);
 
         if(connectingSource) {
-            GraphNode n = findNode(e.getPoint());
+            final GraphNode n = findNode(e.getPoint());
             if(n != null && selectedNode != n) {
 
               /*  Field[] declaredFields = graphEx.graphContext.getNodeContext(n.getNode()).getOperator().getClass().getDeclaredFields();
@@ -269,7 +269,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
     public void mouseDragged(MouseEvent e) {
 
         if(selectedNode != null && !connectingSource) {
-            Point p = new Point(e.getX() - (lastMousePos.x - selectedNode.getPos().x),
+            final Point p = new Point(e.getX() - (lastMousePos.x - selectedNode.getPos().x),
                                 e.getY() - (lastMousePos.y - selectedNode.getPos().y));
             selectedNode.setPos(p);
             lastMousePos = e.getPoint();
@@ -287,7 +287,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
      */
     public void mouseMoved(MouseEvent e) {
   
-        GraphNode n = findNode(e.getPoint());
+        final GraphNode n = findNode(e.getPoint());
         if(selectedNode != n) {
             showSourceHotSpot = false;
             selectedNode = n;
@@ -310,10 +310,10 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
 
     private GraphNode findNode(Point p) {
 
-       Vector nodes = graphEx.GetGraphNodes();
+       final Vector nodes = graphEx.GetGraphNodes();
        for (Enumeration e = nodes.elements(); e.hasMoreElements();)
         {
-            GraphNode n = (GraphNode) e.nextElement();
+            final GraphNode n = (GraphNode) e.nextElement();
 
             if(isWithinRect(n.getPos(), n.getWidth(), n.getHeight(), p))
                 return n;
