@@ -14,6 +14,7 @@ import java.awt.image.SampleModel;
 import javax.imageio.*;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageOutputStream;
+import javax.imageio.stream.ImageInputStream;
 
 /**
  * Reader for ImageIO File
@@ -28,7 +29,7 @@ public class ImageIOFile {
     private int numBands;
     private String name;
 
-    private ImageOutputStream stream;
+    private ImageInputStream stream;
     ImageReader reader;
     
     /**
@@ -36,7 +37,7 @@ public class ImageIOFile {
      */
     public ImageIOFile(final File inputFile) throws IOException {
 
-        stream = ImageIO.createImageOutputStream(inputFile);
+        stream = ImageIO.createImageInputStream(inputFile);
         if(stream == null)
             throw new IOException("Unable to open " + inputFile.toString());
 

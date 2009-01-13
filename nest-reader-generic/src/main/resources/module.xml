@@ -34,6 +34,22 @@
             <placeAfter>importTerraSarXProduct</placeAfter>
         </action>
         <action>
+            <id>exportImageIO</id>
+            <text>Export ImageIO</text>
+            <class>org.esa.beam.visat.actions.ProductExportAction</class>
+            <formatName>ImageIO</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <shortDescr>Export ImageIO</shortDescr>
+        </action>
+        <action>
+            <id>exportJPEG2000</id>
+            <text>Export JPEG2000</text>
+            <class>org.esa.beam.visat.actions.ProductExportAction</class>
+            <writerPlugin>org.esa.nest.dataio.ImageIOWriterPlugIn</writerPlugin>
+            <formatName>JPEG2000</formatName>
+            <shortDescr>Export to JPEG2000</shortDescr>
+        </action>
+        <action>
             <id>importNestEnvi</id>
             <text>Import ENVI Product</text>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>

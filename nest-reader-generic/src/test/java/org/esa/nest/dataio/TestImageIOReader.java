@@ -42,8 +42,18 @@ public class TestImageIOReader extends TestCase {
     public void testImageIO() throws IOException
     {
         String[] readerFormats = ImageIO.getReaderFormatNames();
-        String[] suffixes = ImageIO.getReaderFileSuffixes();
+        String[] readerSuffixes = ImageIO.getReaderFileSuffixes();
         String[] writerFormats = ImageIO.getWriterFormatNames();
+        String[] writerSuffixes = ImageIO.getWriterFileSuffixes();
+
+        for(String s : readerFormats)
+            System.out.println("ImageIOreader: " + s);
+        for(String s : readerSuffixes)
+            System.out.println("ImageIOreaderSuffix: " + s);
+        for(String s : writerFormats)
+            System.out.println("ImageIOwriter: " + s);
+        for(String s : writerSuffixes)
+            System.out.println("ImageIOwriterSuffix: " + s);
     }
 
     public void testOpen() throws IOException
