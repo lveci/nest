@@ -62,8 +62,6 @@ public class PCAStatisticsOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    private boolean writeToFile = false;
-
     private boolean statsCalculated = false;
     private boolean sampleTypeIsComplex;
     private int numOfBands;
@@ -225,7 +223,7 @@ public class PCAStatisticsOp extends Operator {
         }
 
         // copy source data to target
-        targetTile.setRawSamples(rawSamples1);
+        //targetTile.setRawSamples(rawSamples1);
 
         statsCalculated = true;
     }
@@ -243,9 +241,6 @@ public class PCAStatisticsOp extends Operator {
         completeStatistics();
 
         writeStatsToMetadata();
-
-        if(writeToFile)
-            writeStatsToFile();
     }
 
     private void completeStatistics() {
@@ -280,72 +275,6 @@ public class PCAStatisticsOp extends Operator {
         } catch(Exception e) {
             throw new OperatorException(e.getMessage());
         }
-    }
-
-    private void writeStatsToFile() {
-        String fileName = sourceProduct.getName() + "_statistics.txt";
-        try {
-            final File appUserDir = new File(DatUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
-            if(!appUserDir.exists()) {
-                appUserDir.mkdirs();
-            }
-            fileName = appUserDir.toString() + File.separator + fileName;
-            final FileOutputStream out = new FileOutputStream(fileName);
-
-            // Connect print stream to the output stream
-            final PrintStream p = new PrintStream(out);
-
-            p.println();
-            for (String bandName : statisticsBandIndex.keySet())  {
-
-                int bandIdx = statisticsBandIndex.get(bandName);
-
-                p.println();
-                p.println("Band: " + bandName);
-                p.format("Total pixels = %d", numOfPixels);
-                p.println();
-                p.format("Min = %8.3f", min[bandIdx]);
-                p.println();
-                p.format("Max = %15.3f", max[bandIdx]);
-                p.println();
-                //p.format("Sum = %15.3f", sum[bandIdx]);
-                //p.println();
-                p.format("Mean = %8.3f", mean[bandIdx]);
-                p.println();
-                p.format("Standard deviation = %8.3f", std[bandIdx]);
-                p.println();
-                p.format("Coefficient of variation = %8.3f", coefVar[bandIdx]);
-                p.println();
-                p.format("Equivalent number of looks = %8.3f", enl[bandIdx]);
-                p.println();
-            }
-
-            p.close();
-
-        } catch(IOException exc) {
-            throw new OperatorException(exc);
-        }
-    }
-
-    private void writeStatsToStdOut() {
-        /*
-        for (String bandName : statisticsBandIndex.keySet())  {
-
-            int bandIdx = statisticsBandIndex.get(bandName);
-
-            System.out.println();
-            System.out.println("Band: " + bandName);
-            System.out.println("Total pixels = " + numOfPixels);
-            System.out.println("min[" + bandIdx + "] = " + min[bandIdx]);
-            System.out.println("max[" + bandIdx + "] = " + max[bandIdx]);
-            System.out.println("sum[" + bandIdx + "] = " + sum[bandIdx]);
-            System.out.println("mean[" + bandIdx + "] = " + mean[bandIdx]);
-            System.out.println("std[" + bandIdx + "] = " + std[bandIdx]);
-            System.out.println("coefVar[" + bandIdx + "] = " + coefVar[bandIdx]);
-            System.out.println("enl[" + bandIdx + "] = " + enl[bandIdx]);
-            System.out.println();
-        }
-        */
     }
 
 

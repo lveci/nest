@@ -261,9 +261,13 @@ public abstract class MultiGraphDialog extends ModelessDialog {
                 final GraphExecuter graphEx = graphExecuterList.get(graphExecuterList.size()-1);
                 openTargetProducts(graphEx.getProductsToOpenInDAT());
             }
+
+            cleanUpTempFiles();
         }
 
     }
+
+    protected abstract void cleanUpTempFiles();
 
     private void openTargetProducts(final Vector<File> fileList) {
         if(!fileList.isEmpty()) {
