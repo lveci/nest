@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * Provides some NetCDF related utility methods.
  */
-public class NetcdfReaderUtils {
+public class NetCDFUtils {
 
     public static Band createBand(final Variable variable, final int rasterWidth, final int rasterHeight) {
         final NcAttributeMap attMap = NcAttributeMap.create(variable);
@@ -50,7 +50,7 @@ public class NetcdfReaderUtils {
         return band;
     }
 
-    private static double getScalingFactor(NcAttributeMap attMap) {
+    private static double getScalingFactor(final NcAttributeMap attMap) {
         Number numValue = attMap.getNumericValue(NetcdfConstants.SCALE_FACTOR_ATT_NAME);
         if (numValue == null) {
             numValue = attMap.getNumericValue(NetcdfConstants.SLOPE_ATT_NAME);
@@ -58,7 +58,7 @@ public class NetcdfReaderUtils {
         return numValue != null ? numValue.doubleValue() : 1.0;
     }
 
-    private static double getAddOffset(NcAttributeMap attMap) {
+    private static double getAddOffset(final NcAttributeMap attMap) {
         Number numValue = attMap.getNumericValue(NetcdfConstants.ADD_OFFSET_ATT_NAME);
         if (numValue == null) {
             numValue = attMap.getNumericValue(NetcdfConstants.INTERCEPT_ATT_NAME);
@@ -66,7 +66,7 @@ public class NetcdfReaderUtils {
         return numValue != null ? numValue.doubleValue() : 0.0;
     }
 
-    private static Number getNoDataValue(NcAttributeMap attMap) {
+    private static Number getNoDataValue(final NcAttributeMap attMap) {
         Number noDataValue = attMap.getNumericValue(NetcdfConstants.FILL_VALUE_ATT_NAME);
         if (noDataValue == null) {
             noDataValue = attMap.getNumericValue(NetcdfConstants.MISSING_VALUE_ATT_NAME);
@@ -76,7 +76,7 @@ public class NetcdfReaderUtils {
 
     public static MapInfoX createMapInfoX(final Variable lonVar,
                                           final Variable latVar,
-                                          int sceneRasterWidth,
+                                          final int sceneRasterWidth,
                                           final int sceneRasterHeight) throws IOException {
         float pixelX;
         float pixelY;
@@ -115,7 +115,7 @@ public class NetcdfReaderUtils {
             pixelSizeX = lonData.getFloat(i1) - lonData.getFloat(i0);
             easting = lonData.getFloat(i0);
 
-            int latSize = (int) latVar.getSize();
+            final int latSize = (int) latVar.getSize();
             final Index j0 = latData.getIndex().set(0);
             final Index j1 = latData.getIndex().set(1);
             pixelSizeY = latData.getFloat(j1) - latData.getFloat(j0);
@@ -149,7 +149,7 @@ public class NetcdfReaderUtils {
         return new MapInfoX(mapInfo, yFlipped);
     }
 
-    public static int getRasterDataType(Variable variable) {
+    public static int getRasterDataType(final Variable variable) {
         //NetcdfDataTypeWorkarounds workarounds = NetcdfDataTypeWorkarounds.getInstance();
         //if (workarounds.hasWorkaroud(variable.getName(), variable.getDataType())) {
         //    return workarounds.getRasterDataType(variable.getName(), variable.getDataType());
@@ -161,11 +161,11 @@ public class NetcdfReaderUtils {
         return getRasterDataType(dataType, false) != -1;
     }
 
-    public static int getRasterDataType(final DataType dataType, boolean unsigned) {
+    public static int getRasterDataType(final DataType dataType, final boolean unsigned) {
         return getProductDataType(dataType, unsigned, true);
     }
 
-    public static int getProductDataType(DataType dataType, boolean unsigned, boolean rasterDataOnly) {
+    public static int getProductDataType(final DataType dataType, final boolean unsigned, final boolean rasterDataOnly) {
         if (dataType == DataType.BYTE) {
             return unsigned ? ProductData.TYPE_UINT8 : ProductData.TYPE_INT8;
         } else if (dataType == DataType.SHORT) {
@@ -186,56 +186,43 @@ public class NetcdfReaderUtils {
         return -1;
     }
 
-    public static void transferMetadata(NetcdfFile netcdfFile, MetadataElement root) {
-        root.addElement(createMetadataElementFromAttributeList(netcdfFile.getGlobalAttributes(), "MPH"));
-        root.addElement(createMetadataElementFromVariableList(netcdfFile.getVariables(), "DSD"));
-    }
-
-    public static MetadataElement createMetadataElement(NetcdfFile netcdfFile) {
-        return createMetadataElementFromAttributeList(netcdfFile.getGlobalAttributes(),
-                                                      NetcdfConstants.GLOBAL_ATTRIBUTES_NAME);
-    }
-
-    public static MetadataElement createMetadataElement(Group group) {
-        return createMetadataElementFromAttributeList(group.getAttributes(), group.getName());
-    }
-
-    public static MetadataElement createMetadataElement(Variable variable) {
-        return createMetadataElementFromAttributeList(variable.getAttributes(), variable.getName());
-    }
-
-    private static MetadataElement createMetadataElementFromVariableList(final List<Variable> variableList, String elementName) {
-        MetadataElement metadataElement = new MetadataElement(elementName);
-        for (Variable variable : variableList) {
-            metadataElement.addElement(createMetadataElement(variable));
+    public static void addGroups(final MetadataElement parentElem, final Group parentGroup) {
+        final List<Group> groupList = parentGroup.getGroups();
+        for(Group grp : groupList) {
+            final MetadataElement newElem = new MetadataElement(grp.getName());
+            parentElem.addElement(newElem);
+            // recurse
+            addGroups(newElem, grp);
         }
-        return metadataElement;
+
+        addAttributes(parentElem, parentGroup);
     }
 
-    private static MetadataElement createMetadataElementFromAttributeList(final List<Attribute> attributeList,
-                                                                          String elementName) {
+    public static void addAttributes(final MetadataElement parentElem, final Group parentGroup) {
+        final List<Attribute> attribList = parentGroup.getAttributes();
+        for(Attribute at : attribList) {
+            createMetadataAttributes(parentElem, at);
+        }
+    }
+
+    public static void createMetadataAttributes(final MetadataElement parentElem, final Attribute attribute) {
         // todo - note that we still do not support NetCDF data type 'char' here!
-        MetadataElement metadataElement = new MetadataElement(elementName);
-        for (Attribute attribute : attributeList) {
-            final int productDataType = getProductDataType(attribute.getDataType(), false, false);
-            if (productDataType != -1) {
-                ProductData productData;
-                if (attribute.isString()) {
-                    productData = ProductData.createInstance(attribute.getStringValue());
-                } else if (attribute.isArray()) {
-                    productData = ProductData.createInstance(productDataType, attribute.getLength());
-                    productData.setElems(attribute.getValues().getStorage());
-                } else {
-                    productData = ProductData.createInstance(productDataType, 1);
-                    productData.setElems(attribute.getValues().getStorage());
-                }
-                MetadataAttribute metadataAttribute = new MetadataAttribute(attribute.getName(),
-                        productData,
-                        true);
-                metadataElement.addAttribute(metadataAttribute);
+
+        final int productDataType = getProductDataType(attribute.getDataType(), false, false);
+        if (productDataType != -1) {
+            ProductData productData;
+            if (attribute.isString()) {
+                productData = ProductData.createInstance(attribute.getStringValue());
+            } else if (attribute.isArray()) {
+                productData = ProductData.createInstance(productDataType, attribute.getLength());
+                productData.setElems(attribute.getValues().getStorage());
+            } else {
+                productData = ProductData.createInstance(productDataType, 1);
+                productData.setElems(attribute.getValues().getStorage());
             }
+            final MetadataAttribute metadataAttribute = new MetadataAttribute(attribute.getName(), productData, true);
+            parentElem.addAttribute(metadataAttribute);
         }
-        return metadataElement;
     }
 
     public static String getProductType(final NcAttributeMap attMap) {
@@ -314,7 +301,7 @@ public class NetcdfReaderUtils {
         return ProductData.UTC.parse(dateTimeStr, NetcdfConstants.DATE_TIME_PATTERN);
     }
 
-    private NetcdfReaderUtils() {
+    private NetCDFUtils() {
     }
 
     static Variable[] getRasterVariables(Map<NcRasterDim, List<Variable>> variableLists,
@@ -395,7 +382,7 @@ public class NetcdfReaderUtils {
 
 
     /**
-     * Return type of the {@link NetcdfReaderUtils#createMapInfoX}()
+     * Return type of the {@link NetCDFUtils#createMapInfoX}()
      * method. Comprises a {@link org.esa.beam.framework.dataop.maptransf.MapInfo} and a boolean indicating that the reader
      * should flip data along the Y-axis.
      */

@@ -7,7 +7,6 @@ import org.esa.beam.framework.dataio.IllegalFileFormatException;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.logging.BeamLogManager;
 import org.esa.beam.util.Guardian;
-//import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +15,8 @@ import java.util.Map;
 
 import ucar.nc2.Variable;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.Group;
+import ucar.nc2.Attribute;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 
@@ -66,14 +67,14 @@ public class NetCDFReader extends AbstractProductReader {
                     " Could not be interpretted by the NetCDF reader.");
         }
 
-        Map<NcRasterDim, List<Variable>> variableListMap = NetcdfReaderUtils.getVariableListMap(netcdfFile.getRootGroup());
+        Map<NcRasterDim, List<Variable>> variableListMap = NetCDFUtils.getVariableListMap(netcdfFile.getRootGroup());
         if (variableListMap.isEmpty()) {
             close();
             throw new IllegalFileFormatException("No netCDF variables found which could\n" +
                     "be interpreted as remote sensing bands.");  /*I18N*/
         }
-        final NcRasterDim rasterDim = NetcdfReaderUtils.getBestRasterDim(variableListMap);
-        final Variable[] rasterVariables = NetcdfReaderUtils.getRasterVariables(variableListMap, rasterDim);
+        final NcRasterDim rasterDim = NetCDFUtils.getBestRasterDim(variableListMap);
+        final Variable[] rasterVariables = NetCDFUtils.getRasterVariables(variableListMap, rasterDim);
 
         _netcdfFile = netcdfFile;
         _variableMap = new NcVariableMap(rasterVariables);
@@ -82,14 +83,14 @@ public class NetCDFReader extends AbstractProductReader {
         final NcAttributeMap globalAttributes = NcAttributeMap.create(_netcdfFile);
 
         _product = new Product(inputFile.getName(),
-                               NetcdfReaderUtils.getProductType(globalAttributes),
+                               NetCDFUtils.getProductType(globalAttributes),
                                rasterDim.getDimX().getLength(),
                                rasterDim.getDimY().getLength(),
                                this);
         _product.setFileLocation(inputFile);
-        _product.setDescription(NetcdfReaderUtils.getProductDescription(globalAttributes));
-        _product.setStartTime(NetcdfReaderUtils.getSceneRasterStartTime(globalAttributes));
-        _product.setEndTime(NetcdfReaderUtils.getSceneRasterStopTime(globalAttributes));
+        _product.setDescription(NetCDFUtils.getProductDescription(globalAttributes));
+        _product.setStartTime(NetCDFUtils.getSceneRasterStartTime(globalAttributes));
+        _product.setEndTime(NetCDFUtils.getSceneRasterStopTime(globalAttributes));
 
         addMetadataToProduct();
         addBandsToProduct(rasterVariables);
@@ -111,7 +112,14 @@ public class NetCDFReader extends AbstractProductReader {
     }
 
     private void addMetadataToProduct() {
-        NetcdfReaderUtils.transferMetadata(_netcdfFile, _product.getMetadataRoot());
+
+        final Group rootGroup = _netcdfFile.getRootGroup();
+        NetCDFUtils.addGroups(_product.getMetadataRoot(), rootGroup);
+        
+        final List<Attribute> globalAttribList = _netcdfFile.getGlobalAttributes();
+        for(Attribute at : globalAttribList) {
+            NetCDFUtils.createMetadataAttributes(_product.getMetadataRoot(), at);
+        }
     }
 
     private void addBandsToProduct(final Variable[] variables) {
@@ -119,15 +127,14 @@ public class NetCDFReader extends AbstractProductReader {
             final int rank = variable.getRank();
             final int width = variable.getDimension(rank - 1).getLength();
             final int height = variable.getDimension(rank - 2).getLength();
-            final Band band = NetcdfReaderUtils.createBand(variable, width, height);
+            final Band band = NetCDFUtils.createBand(variable, width, height);
 
             _product.addBand(band);
         }
     }
 
 
-    private void addGeoCodingToProduct(final NcRasterDim rasterDim) throws
-                                                                    IOException {
+    private void addGeoCodingToProduct(final NcRasterDim rasterDim) throws IOException {
         setMapGeoCoding(rasterDim);
         if (_product.getGeoCoding() == null) {
             setPixelGeoCoding(rasterDim);
@@ -150,9 +157,9 @@ public class NetCDFReader extends AbstractProductReader {
         }
         if (lonVar != null && latVar != null && rasterDim.fitsTo(lonVar, latVar)) {
             try {
-                final NetcdfReaderUtils.MapInfoX mapInfoX = NetcdfReaderUtils.createMapInfoX(lonVar, latVar,
-                                                                                             _product.getSceneRasterWidth(),
-                                                                                             _product.getSceneRasterHeight());
+                final NetCDFUtils.MapInfoX mapInfoX = NetCDFUtils.createMapInfoX(lonVar, latVar,
+                                                                                 _product.getSceneRasterWidth(),
+                                                                                 _product.getSceneRasterHeight());
                 if (mapInfoX != null) {
                     _yFlipped = mapInfoX.isYFlipped();
                     _product.setGeoCoding(new MapGeoCoding(mapInfoX.getMapInfo()));
@@ -179,29 +186,6 @@ public class NetCDFReader extends AbstractProductReader {
                                                      latBand.getValidPixelExpression(),
                                                      5, ProgressMonitor.NULL));
         }
-    }
-
-    private static void addMetaData(final Product product, final File inputFile) {
-        final MetadataElement root = product.getMetadataRoot();
-        root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
-
-        //AbstractMetadata.addAbstractedMetadataHeader(root);
-
-        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
-
-        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, imgIOFile.getName());
-        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
-
-        loadExternalMetadata(absRoot, inputFile);
-    }
-
-    private static void loadExternalMetadata(final MetadataElement absRoot, final File inputFile) {
-         // load metadata xml file if found
-        final String inputStr = inputFile.getAbsolutePath();
-        final String metadataStr = inputStr.substring(0, inputStr.lastIndexOf('.')) + ".xml";
-        final File metadataFile = new File(metadataStr);
-        //if(metadataFile.exists())
-        //    AbstractMetadata.Load(absRoot, metadataFile);
     }
 
     /**

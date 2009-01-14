@@ -12,10 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import ucar.nc2.NetcdfFileWriteable;
-import ucar.nc2.Dimension;
-import ucar.nc2.Group;
-import ucar.nc2.Variable;
+import ucar.nc2.*;
 import ucar.ma2.*;
 
 
@@ -113,6 +110,8 @@ public class NetCDFWriter extends AbstractProductWriter {
             netCDFWriteable.addVariableAttribute(name, "unit", band.getUnit());
         }
 
+        addMetadata(product);
+
         netCDFWriteable.create();
 
 
@@ -200,5 +199,40 @@ public class NetCDFWriter extends AbstractProductWriter {
             return false;
         }
         return super.shouldWrite(node);
+    }
+
+    private void addMetadata(final Product product) {
+
+        final MetadataElement rootElem = product.getMetadataRoot();
+        final Group rootGroup = netCDFWriteable.getRootGroup();
+
+        addElements(rootElem, rootGroup);
+        addAttributes(rootElem, rootGroup);
+    }
+
+    private void addElements(final MetadataElement parentElem, final Group parentGroup) {
+        final MetadataElement[] elemList = parentElem.getElements();
+        for(MetadataElement child : elemList) {
+            final Group newGroup = new Group(netCDFWriteable, parentGroup, child.getName());
+            addAttributes(child, newGroup);
+            // recurse
+            addElements(child, newGroup);
+
+            netCDFWriteable.addGroup(parentGroup, newGroup);
+        }
+    }
+
+    private void addAttributes(final MetadataElement elem, final Group newGroup) {
+        final MetadataAttribute[] attributes = elem.getAttributes();
+            for(MetadataAttribute attrib : attributes) {
+                final int dataType = attrib.getDataType();
+                if(dataType == ProductData.TYPE_FLOAT32 || dataType == ProductData.TYPE_FLOAT64) {
+                    newGroup.addAttribute(new Attribute(attrib.getName(), elem.getAttributeDouble(attrib.getName(), 0)));
+                } else if(dataType > ProductData.TYPE_INT8 && dataType < ProductData.TYPE_FLOAT32) {
+                    newGroup.addAttribute(new Attribute(attrib.getName(), elem.getAttributeInt(attrib.getName(), 0)));
+                } else {
+                    newGroup.addAttribute(new Attribute(attrib.getName(), elem.getAttributeString(attrib.getName(), " ")));
+                }
+            }
     }
 }
