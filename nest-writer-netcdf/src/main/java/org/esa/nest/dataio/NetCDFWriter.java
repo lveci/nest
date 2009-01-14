@@ -89,7 +89,6 @@ public class NetCDFWriter extends AbstractProductWriter {
         _outputFile = FileUtils.ensureExtension(file, NetcdfConstants.FILE_EXTENSIONS[0]);
         deleteOutput();
 
-        //final Product tempProduct = createWritableProduct();
         final Product product = getSourceProduct();
 
         netCDFWriteable = NetcdfFileWriteable.createNew(_outputFile.getAbsolutePath(), true);
@@ -116,23 +115,17 @@ public class NetCDFWriter extends AbstractProductWriter {
 
         netCDFWriteable.create();
 
-        //double[][] tData = {{1, 2, 3, 4},
-        //        {2, 4, 6, 8},
-        //        {3, 6, 9, 12}};
 
-        Array latNcArray = Array.factory(getLatData(product));
-        Array lonNcArray = Array.factory(getLonData(product));
+        final Array latNcArray = Array.factory(getLatData(product));
+        final Array lonNcArray = Array.factory(getLonData(product));
 
-        //Array gridArray = Array.factory(tData);
         try {
             netCDFWriteable.write("latitude", latNcArray);
             netCDFWriteable.write("longitude", lonNcArray);
-            //netCDFWriteable.write("data", gridArray);
         } catch (InvalidRangeException rangeE) {
             rangeE.printStackTrace();
             throw new RuntimeException(rangeE);
         }
-
     }
 
     /**
@@ -146,28 +139,18 @@ public class NetCDFWriter extends AbstractProductWriter {
                                     final ProductData regionData,
                                     ProgressMonitor pm) throws IOException {
 
-        final Variable variable = netCDFWriteable.findVariable(sourceBand.getName());
-        final int rank = variable.getRank();
-        final int[] origin = new int[rank];
-        for (int i = 0; i < rank; i++) {
-            origin[i] = 0;
-        }
-        origin[rank - 1] = regionX;
-
+        final int[] origin = new int[2];
+        origin[1] = regionX;
+        origin[0] = regionY;
         try {
 
-            final double[][] data = new double[regionWidth][1];
+            final double[][] data = new double[1][regionWidth];
             for(int x=0; x < regionWidth; ++x) {
-                data[x][0] = regionData.getElemDoubleAt(x);
+                data[0][x] = regionData.getElemDoubleAt(x);
             }
-            Array dataArray = Array.factory(data);
-
-            //for (int y = 0; y < regionHeight; y++) {
-                origin[rank - 2] = regionY;// + y;
                
-                netCDFWriteable.write(sourceBand.getName(), origin, dataArray);
-                pm.worked(1);
-            //}
+            netCDFWriteable.write(sourceBand.getName(), origin, Array.factory(data));
+            pm.worked(1);
 
         } catch(Exception e) {
             System.out.println(e.getMessage());
@@ -201,7 +184,7 @@ public class NetCDFWriter extends AbstractProductWriter {
         if (netCDFWriteable == null) {
             return;
         }
-
+        netCDFWriteable.flush();
     }
 
     /**
