@@ -37,7 +37,6 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private static final ImageIcon infoIcon = DatUtils.LoadIcon("org/esa/nest/icons/info22.png");
 
     private final AppContext appContext;
-    private JPanel mainPanel;
     private GraphPanel graphPanel;
     private JLabel statusLabel;
 
@@ -82,7 +81,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
      * Initializes the dialog components
      */
     private void initUI() {
-        mainPanel = new JPanel(new BorderLayout(4, 4));
+        JPanel mainPanel = new JPanel(new BorderLayout(4, 4));
 
         // north panel
         final JPanel northPanel = new JPanel(new BorderLayout(4, 4));
@@ -202,10 +201,12 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         });
 
         gbc.weightx = 0;
-        panel.add(loadButton, gbc);
-        panel.add(saveButton, gbc);
-        panel.add(clearButton, gbc);
-        panel.add(infoButton, gbc);
+        if(allowGraphBuilding) {
+            panel.add(loadButton, gbc);
+            panel.add(saveButton, gbc);
+            panel.add(clearButton, gbc);
+            panel.add(infoButton, gbc);
+        }
         panel.add(helpButton, gbc);
         panel.add(processButton, gbc);
     }
@@ -335,7 +336,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         try {
             initGraphEnabled = false;
             tabbedPanel.removeAll();
-            graphEx.loadGraph(file);
+            graphEx.loadGraph(file, true);
             if(allowGraphBuilding)
                 graphPanel.repaint();
             initGraphEnabled = true;
@@ -419,16 +420,16 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
         try {
             final GraphExecuter.GraphEvent event = (GraphExecuter.GraphEvent)data;
-            final GraphNode node = (GraphNode)event.data;
+            final GraphNode node = (GraphNode)event.getData();
             final String opID = node.getID();
-            if(event.eventType == GraphExecuter.events.ADD_EVENT) {
+            if(event.getEventType() == GraphExecuter.events.ADD_EVENT) {
 
                 tabbedPanel.addTab(opID, null, CreateOperatorTab(node), opID + " Operator");
-            } else if(event.eventType == GraphExecuter.events.REMOVE_EVENT) {
+            } else if(event.getEventType() == GraphExecuter.events.REMOVE_EVENT) {
 
                 int index = tabbedPanel.indexOfTab(opID);
                 tabbedPanel.remove(index);
-            } else if(event.eventType == GraphExecuter.events.SELECT_EVENT) {
+            } else if(event.getEventType() == GraphExecuter.events.SELECT_EVENT) {
 
                 int index = tabbedPanel.indexOfTab(opID);
                 tabbedPanel.setSelectedIndex(index);

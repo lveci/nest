@@ -11,9 +11,9 @@ public class OpenGraphBuilderDialogAction extends AbstractVisatAction {
 
     @Override
     public void actionPerformed(final CommandEvent event) {
-        if (dialog == null) {
+        //if (dialog == null) {
             dialog = new GraphBuilderDialog(getAppContext(), "Graph Builder", null);
-        }
+        //}
         dialog.show();
     }
 

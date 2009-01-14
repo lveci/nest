@@ -115,13 +115,13 @@ public class TestGraphExecuter extends TestCase implements Observer {
     public void update(java.util.Observable subject, java.lang.Object data) {
 
         GraphExecuter.GraphEvent event = (GraphExecuter.GraphEvent)data;
-        GraphNode node = (GraphNode)event.data;
+        GraphNode node = (GraphNode)event.getData();
         String opID = node.getNode().getId();
-        if(event.eventType == GraphExecuter.events.ADD_EVENT) {
+        if(event.getEventType() == GraphExecuter.events.ADD_EVENT) {
             updateValue = "Add";
-        } else if(event.eventType == GraphExecuter.events.REMOVE_EVENT) {
+        } else if(event.getEventType() == GraphExecuter.events.REMOVE_EVENT) {
             updateValue = "Remove";
-        } else if(event.eventType == GraphExecuter.events.SELECT_EVENT) {
+        } else if(event.getEventType() == GraphExecuter.events.SELECT_EVENT) {
             updateValue = "Selected";
         }
     }

@@ -10,7 +10,7 @@ import java.awt.*;
 * A {@link com.bc.ceres.core.ProgressMonitor} which uses a
 * Swing's {@link javax.swing.ProgressMonitor} to display progress.
 */
-class ProgressBarProgressMonitor implements ProgressMonitor {
+public class ProgressBarProgressMonitor implements ProgressMonitor {
 
         private final JProgressBar progressBar;
         private final JLabel messageLabel;

@@ -5,6 +5,7 @@ import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.OperatorUI;
 import org.esa.beam.framework.gpf.operators.common.ReadOp;
 import org.esa.beam.framework.gpf.operators.common.WriteOp;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
@@ -27,9 +28,9 @@ public class GraphExecuter extends Observable {
     private String graphDescription = "";
 
     private int idCount = 0;
-    private final Vector nodeList = new Vector(30);
+    private final Vector<GraphNode> nodeList = new Vector<GraphNode>(10);
 
-    enum events { ADD_EVENT, REMOVE_EVENT, SELECT_EVENT }
+    public enum events { ADD_EVENT, REMOVE_EVENT, SELECT_EVENT }
 
     public GraphExecuter() {
 
@@ -40,18 +41,18 @@ public class GraphExecuter extends Observable {
         processor = new GraphProcessor();
     }
 
-    Vector GetGraphNodes() {
+    public Vector GetGraphNodes() {
         return nodeList;
     }
 
-    void ClearGraph() {
+    public void ClearGraph() {
         graph = null;
         graph = new Graph("Graph");
         nodeList.clear();
         idCount = 0;
     }
 
-    GraphNode findGraphNode(String id) {    
+    public GraphNode findGraphNode(String id) {
         for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
         {
             final GraphNode n = (GraphNode) e.nextElement();
@@ -84,7 +85,7 @@ public class GraphExecuter extends Observable {
         return !(operatorMetadata != null && !operatorMetadata.internal());
     }
 
-    GraphNode addOperator(String opName) {
+    public GraphNode addOperator(final String opName) {
 
         final String id = "" + ++idCount + '-' + opName;
         final Node newNode = new Node(id, opName);
@@ -97,11 +98,22 @@ public class GraphExecuter extends Observable {
         final GraphNode newGraphNode = new GraphNode(newNode);
         nodeList.add(newGraphNode);
 
+        newGraphNode.setOperatorUI(CreateOperatorUI(newGraphNode.getOperatorName()));
+
         setChanged();
         notifyObservers(new GraphEvent(events.ADD_EVENT, newGraphNode));
         clearChanged();
 
         return newGraphNode;
+    }
+
+    private OperatorUI CreateOperatorUI(final String operatorName) {
+        final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
+        if (operatorSpi == null) {
+            return null;
+        }
+
+        return operatorSpi.createOperatorUI();
     }
 
     void removeOperator(GraphNode node) {
@@ -121,7 +133,7 @@ public class GraphExecuter extends Observable {
         nodeList.remove(node);
     }
 
-    void setOperatorParam(String id, String paramName, String value) {
+    public void setOperatorParam(String id, String paramName, String value) {
 
         final Xpp3Dom xml = new Xpp3Dom(paramName);
         xml.setValue(value);
@@ -169,36 +181,35 @@ public class GraphExecuter extends Observable {
         return false;
     }
 
-    void InitGraph() throws GraphException {
+    public void InitGraph() throws GraphException {
         if(IsGraphComplete()) {
             AssignAllParameters();
             recreateGraphContext();
-
-            for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
-            {
-                final GraphNode n = (GraphNode) e.nextElement();
-                n.setSourceProducts(graphContext.getNodeContext(n.getNode()).getSourceProducts());
-            }
         }
     }
 
-    void recreateGraphContext() throws GraphException {
+    public void recreateGraphContext() throws GraphException {
         if(graphContext != null)
             GraphProcessor.disposeGraphContext(graphContext);
 
         graphContext = processor.createGraphContext(graph, ProgressMonitor.NULL);
+
+        for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
+        {
+            final GraphNode n = (GraphNode) e.nextElement();
+            n.setSourceProducts(graphContext.getNodeContext(n.getNode()).getSourceProducts());
+        }
     }
 
-    void disposeGraphContext() {
+    public void disposeGraphContext() {
         GraphProcessor.disposeGraphContext(graphContext);
     }
 
     /**
      * Begins graph processing
      * @param pm The ProgressMonitor
-     * @throws GraphException if cannot process graph
      */
-    void executeGraph(ProgressMonitor pm) throws GraphException {
+    public void executeGraph(ProgressMonitor pm) {
         processor.executeGraphContext(graphContext, pm);
     }
 
@@ -224,7 +235,7 @@ public class GraphExecuter extends Observable {
         }
     }
 
-    void loadGraph(File filePath) throws GraphException {
+    public void loadGraph(final File filePath, final boolean addUI) throws GraphException {
 
         try {
             if(filePath == null) return;
@@ -253,9 +264,12 @@ public class GraphExecuter extends Observable {
                 for (Node n : nodes) {
                     final GraphNode newGraphNode = new GraphNode(n);
                     if(presentationXML != null)
-                        newGraphNode.setDisplayParameters(presentationXML.getChild(n.getId()));
+                        newGraphNode.setDisplayParameters(presentationXML);
                     nodeList.add(newGraphNode);
-                    
+
+                    if(addUI)
+                        newGraphNode.setOperatorUI(CreateOperatorUI(newGraphNode.getOperatorName()));
+
                     setChanged();
                     notifyObservers(new GraphEvent(events.ADD_EVENT, newGraphNode));
                     clearChanged();
@@ -381,17 +395,25 @@ public class GraphExecuter extends Observable {
 
     static class ProductSetNode {
         String nodeID;
-        Vector<String> fileList = new Vector<String>(10);
+        final Vector<String> fileList = new Vector<String>(10);
     }
 
-    static class GraphEvent {
+    public static class GraphEvent {
 
-        final events  eventType;
-        final Object  data;
+        private final events  eventType;
+        private final Object  data;
 
         GraphEvent(events type, Object d) {
             eventType = type;
             data = d;
+        }
+
+        public Object getData() {
+            return data;
+        }
+
+        public events getEventType() {
+            return eventType;
         }
     }
 }

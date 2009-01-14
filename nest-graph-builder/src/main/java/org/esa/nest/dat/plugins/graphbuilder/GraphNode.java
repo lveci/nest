@@ -27,7 +27,7 @@ public class GraphNode {
 
     private final Node node;
     private final Map<String, Object> parameterMap = new HashMap<String, Object>(10);
-    private final OperatorUI operatorUI;
+    private OperatorUI operatorUI = null;
 
     private int nodeWidth = 60;
     private int nodeHeight = 30;
@@ -40,13 +40,20 @@ public class GraphNode {
 
     private Xpp3Dom displayParameters;
 
-    GraphNode(Node n) {
+    GraphNode(final Node n) {
         node = n;
-        operatorUI = CreateOperatorUI();
-
-        displayParameters = new Xpp3Dom(node.getId());
+        displayParameters = new Xpp3Dom("node");
+        displayParameters.setAttribute("id", node.getId());
 
         initParameters();
+    }
+
+    void setOperatorUI(final OperatorUI ui) {
+        operatorUI = ui;
+    }
+
+    OperatorUI GetOperatorUI() {
+        return operatorUI;
     }
 
     void initParameters() {
@@ -89,7 +96,7 @@ public class GraphNode {
     }
 
 
-    private static Converter getConverter(ValueContainer valueContainer, String name) {
+    private static Converter getConverter(final ValueContainer valueContainer, final String name) {
         final ValueModel[] models = valueContainer.getModels();
 
         for (ValueModel model : models) {
@@ -103,18 +110,22 @@ public class GraphNode {
         return null;
     }
 
-    void setDisplayParameters(Xpp3Dom params) {
-        if(params != null) {
-            displayParameters = params;
-            final Xpp3Dom dpElem = displayParameters.getChild("displayPosition");
-            if(dpElem != null) {
-                displayPosition.x = (int)Float.parseFloat(dpElem.getAttribute("x"));
-                displayPosition.y = (int)Float.parseFloat(dpElem.getAttribute("y"));
+    void setDisplayParameters(final Xpp3Dom presentationXML) {
+        for(Xpp3Dom params : presentationXML.getChildren()) {
+            final String id = params.getAttribute("id");
+            if(id != null && id.equals(node.getId())) {
+                displayParameters = params;
+                final Xpp3Dom dpElem = displayParameters.getChild("displayPosition");
+                if(dpElem != null) {
+                    displayPosition.x = (int)Float.parseFloat(dpElem.getAttribute("x"));
+                    displayPosition.y = (int)Float.parseFloat(dpElem.getAttribute("y"));
+                }
+                return;
             }
         }
     }
 
-    void AssignParameters(Xpp3Dom presentationXML) {
+    void AssignParameters(final Xpp3Dom presentationXML) {
 
         final Xpp3DomElement config = Xpp3DomElement.createDomElement("parameters");
         updateParameterMap(config);
@@ -123,8 +134,15 @@ public class GraphNode {
         AssignDisplayParameters(presentationXML);
     }
 
-    void AssignDisplayParameters(Xpp3Dom presentationXML) {
-        final Xpp3Dom nodeElem = presentationXML.getChild(node.getId());
+    void AssignDisplayParameters(final Xpp3Dom presentationXML) {
+        Xpp3Dom nodeElem = null;
+        for(Xpp3Dom elem : presentationXML.getChildren()) {
+            final String id = elem.getAttribute("id");
+            if(id != null && id.equals(node.getId())) {
+                nodeElem = elem;
+                break;
+            }
+        }
         if(nodeElem == null) {
             presentationXML.addChild(displayParameters);
         }
@@ -179,7 +197,7 @@ public class GraphNode {
         return halfNodeHeight;
     }
 
-    private void setSize(int width, int height) {
+    private void setSize(final int width, final int height) {
         nodeWidth = width;
         nodeHeight = height;
         halfNodeHeight = nodeHeight / 2;
@@ -195,7 +213,7 @@ public class GraphNode {
      * Gets the uniqe node identifier.
      * @return the identifier
      */
-    String getID() {
+    public String getID() {
         return node.getId();
     }
 
@@ -211,15 +229,15 @@ public class GraphNode {
         return parameterMap;
     }
 
-    void connectOperatorSource(GraphNode source) {
+    public void connectOperatorSource(final GraphNode source) {
         // check if already a source for this node
         disconnectOperatorSources(source);
 
-        NodeSource ns = new NodeSource("sourceProduct", source.getID());
+        final NodeSource ns = new NodeSource("sourceProduct", source.getID());
         node.addSource(ns);
     }
 
-    void disconnectOperatorSources(GraphNode source) {
+    void disconnectOperatorSources(final GraphNode source) {
 
         final NodeSource[] sources = node.getSources();
         for (NodeSource ns : sources) {
@@ -229,7 +247,7 @@ public class GraphNode {
         }
     }
 
-    boolean FindSource(GraphNode source) {
+    boolean FindSource(final GraphNode source) {
 
         final NodeSource[] sources = node.getSources();
         for (NodeSource ns : sources) {
@@ -244,35 +262,23 @@ public class GraphNode {
         return node.getSources().length > 0;
     }
 
-    UIValidation validateParameterMap() {
-        return operatorUI.validateParameters();
+    public UIValidation validateParameterMap() {
+        if(operatorUI != null)
+            return operatorUI.validateParameters();
+        return new UIValidation(true,"");
     }
 
-    void setSourceProducts(Product[] products) {
+    void setSourceProducts(final Product[] products) {
         if(operatorUI != null) {
             operatorUI.setSourceProducts(products);
         }
     }
 
-    void updateParameterMap(Xpp3DomElement parentElement) {
+    void updateParameterMap(final Xpp3DomElement parentElement) {
         if(operatorUI != null) {
             operatorUI.updateParameters();
             operatorUI.convertToDOM(parentElement);
         }
-    }
-
-    OperatorUI GetOperatorUI() {
-        return operatorUI;
-    }
-
-    private OperatorUI CreateOperatorUI() {
-        final String operatorName = getOperatorName();
-        final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
-        if (operatorSpi == null) {
-            return null;
-        }
-
-        return operatorSpi.createOperatorUI();
     }
 
     /**
@@ -280,7 +286,7 @@ public class GraphNode {
      * @param g The Java2D Graphics
      * @param col The color to draw
      */
-    void drawNode(Graphics g, Color col) {
+    void drawNode(final Graphics g, final Color col) {
         final int x = displayPosition.x;
         final int y = displayPosition.y;
 
@@ -304,7 +310,7 @@ public class GraphNode {
      * @param g The Java2D Graphics
      * @param col The color to draw
      */
-    void drawHotspot(Graphics g, Color col) {
+    void drawHotspot(final Graphics g, final Color col) {
         final Point p = displayPosition;
         g.setColor(col);
         g.drawOval(p.x - hotSpotSize / 2, p.y + hotSpotOffset, hotSpotSize, hotSpotSize);
@@ -315,7 +321,7 @@ public class GraphNode {
      * @param g The Java2D Graphics
      * @param src the source GraphNode
      */
-    public void drawConnectionLine(Graphics g, GraphNode src) {
+    public void drawConnectionLine(final Graphics g, final GraphNode src) {
 
         final Point tail = displayPosition;
         final Point head = src.displayPosition;
@@ -342,7 +348,7 @@ public class GraphNode {
      * @param headX position X on source node
      * @param headY position Y on source node
      */
-    static private void drawArrow(Graphics g, int tailX, int tailY, int headX, int headY) {
+    static private void drawArrow(final Graphics g, final int tailX, final int tailY, final int headX, final int headY) {
 
         final double t1 = Math.abs(headY - tailY);
         final double t2 = Math.abs(headX - tailX);

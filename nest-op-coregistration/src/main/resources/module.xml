@@ -24,4 +24,19 @@
 	<dependency>
         <module>nest-graph-builder</module>
     </dependency>
+
+
+    <extension point="beam-ui:actions">
+
+        <action>
+            <id>openPCADialog</id>
+            <class>org.esa.nest.dat.PCAAction</class>
+            <parent>sartools</parent>
+            <text>Principle Component Analysis</text>
+            <shortDescr>Perform Principle Component Analysis</shortDescr>
+            <helpId>PCA</helpId>
+        </action>
+
+    </extension>
+
 </module>
