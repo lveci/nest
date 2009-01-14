@@ -29,7 +29,7 @@ public class PCADialog extends MultiGraphDialog {
 
         // first Graph - PCA-Statistics
         final File graphFile1 =  new File(graphPath, "MultilookGraph.xml");
-        final File tmpFile1 = new File(tmpFolder, "tmp1");
+        final File tmpFile1 = new File(tmpFolder, "tmp1.dim");
         addGraph(graphFile1,
                 "1-Read", getSelectedSourceProduct().getFileLocation().getAbsolutePath(),
                 "3-Write", tmpFile1.getAbsolutePath(), internalFormat);
@@ -55,7 +55,7 @@ public class PCADialog extends MultiGraphDialog {
         graphEx.setOperatorParam(writeNode.getID(), "formatName", format);
         graphEx.setOperatorParam(writeNode.getID(), "file", writePath);
 
-        graphEx.recreateGraphContext();
+        //graphEx.recreateGraphContext();
         graphExecuterList.add(graphEx);
     }
 }
