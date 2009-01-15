@@ -23,9 +23,4 @@ public class MultilookOpAction extends AbstractVisatAction {
         dialog.show();
 
     }
-
-    @Override
-    public void updateState(final CommandEvent event) {
-        setEnabled(true);
-    }
 }
