@@ -266,7 +266,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
                 progressBar.setValue(0);
                 progBarMonitor = new ProgressBarProgressMonitor(progressBar, null, progressPanel);
-                graphEx.recreateGraphContext();
+                graphEx.recreateGraphContext(false);
 
                 progBarMonitor.beginTask("Processing Graph...", 10);
                 isProcessing = true;

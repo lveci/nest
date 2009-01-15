@@ -327,7 +327,7 @@ public class GraphExecuter extends Observable {
         return theReaderStack;
     }
 
-    void ReplaceProductSetWithReader(Graph graph, String id, String value) {
+    static void ReplaceProductSetWithReader(Graph graph, String id, String value) {
 
         final Node newNode = new Node(id, OperatorSpi.getOperatorAlias(ReadOp.class));
         final Xpp3Dom config = new Xpp3Dom("parameters");
