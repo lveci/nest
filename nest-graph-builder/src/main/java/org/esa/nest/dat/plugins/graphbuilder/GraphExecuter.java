@@ -184,20 +184,23 @@ public class GraphExecuter extends Observable {
     public void InitGraph() throws GraphException {
         if(IsGraphComplete()) {
             AssignAllParameters();
-            recreateGraphContext();
+            recreateGraphContext(true);
         }
     }
 
-    public void recreateGraphContext() throws GraphException {
+    public void recreateGraphContext(boolean updateGraphNodes) throws GraphException {
         if(graphContext != null)
             GraphProcessor.disposeGraphContext(graphContext);
 
         graphContext = processor.createGraphContext(graph, ProgressMonitor.NULL);
 
-        for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
-        {
-            final GraphNode n = (GraphNode) e.nextElement();
-            n.setSourceProducts(graphContext.getNodeContext(n.getNode()).getSourceProducts());
+        if(updateGraphNodes) {
+            for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
+            {
+                final GraphNode n = (GraphNode) e.nextElement();
+                final NodeContext context = graphContext.getNodeContext(n.getNode());
+                n.setSourceProducts(context.getSourceProducts());
+            }
         }
     }
 
@@ -324,7 +327,7 @@ public class GraphExecuter extends Observable {
         return theReaderStack;
     }
 
-    static void ReplaceProductSetWithReader(Graph graph, String id, String value) {
+    void ReplaceProductSetWithReader(Graph graph, String id, String value) {
 
         final Node newNode = new Node(id, OperatorSpi.getOperatorAlias(ReadOp.class));
         final Xpp3Dom config = new Xpp3Dom("parameters");
