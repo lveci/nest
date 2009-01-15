@@ -39,7 +39,7 @@ public class CollocateOp extends Operator {
     private Product targetProduct;
 
     @Parameter(valueSet = {NEAREST_NEIGHBOUR, BILINEAR_INTERPOLATION, CUBIC_CONVOLUTION},
-               defaultValue = BILINEAR_INTERPOLATION, description = "The method to be used when resampling the slave grid onto the master grid.",
+               defaultValue = NEAREST_NEIGHBOUR, description = "The method to be used when resampling the slave grid onto the master grid.",
                label="Resampling Type")
     private String resamplingType;
 
