@@ -92,7 +92,7 @@ public class Project extends Observable {
         }
     }
 
-    private static boolean findSubFolders(File currentFolder, ProjectSubFolder projSubFolder) {
+    private static boolean findSubFolders(final File currentFolder, final ProjectSubFolder projSubFolder) {
         final File[] files = currentFolder.listFiles();
         boolean hasProducts = false;
         if(files == null) return false;
@@ -101,7 +101,7 @@ public class Project extends Observable {
             if(f.isDirectory()) {
                 final ProjectSubFolder newProjFolder = projSubFolder.addSubFolder(f.getName());
 
-                if(findSubFolders(f, newProjFolder))
+                if(!f.getName().endsWith(".data") && findSubFolders(f, newProjFolder))
                     hasProducts = true;
                 else if(!newProjFolder.isCreatedByUser())
                     projSubFolder.removeSubFolder(newProjFolder);
@@ -141,7 +141,7 @@ public class Project extends Observable {
         return name;
     }
 
-    protected void initProject(File file) {
+    protected void initProject(final File file) {
         if(productTreeListener == null && VisatApp.getApp() != null) {
             productTreeListener = new Project.ProjectPTL();
             VisatApp.getApp().addProductTreeListener(productTreeListener);
@@ -212,7 +212,7 @@ public class Project extends Observable {
             }, 5000, 1000*30);
     }
 
-    private void addProductLink(Product product) {
+    private void addProductLink(final Product product) {
         final File productFile = product.getFileLocation();
         if(productFile == null)
             return;
@@ -245,7 +245,7 @@ public class Project extends Observable {
         findSubFolders(processedFolder.getPath(), processedFolder);
     }
 
-    public void createNewFolder(ProjectSubFolder subFolder) {
+    public void createNewFolder(final ProjectSubFolder subFolder) {
         final PromptDialog dlg = new PromptDialog("New Folder", "Name", "", false);
         dlg.show();
         if(dlg.IsOK()) {
@@ -257,7 +257,7 @@ public class Project extends Observable {
         }
     }
 
-    public void createNewProductSet(ProjectSubFolder subFolder) {
+    public void createNewProductSet(final ProjectSubFolder subFolder) {
         final String name = "ProductSet"+(subFolder.getFileList().size()+1);
         final ProductSet prodSet = new ProductSet(new File(subFolder.getPath(), name));
         final ProductSetDialog dlg = new ProductSetDialog("New ProductSet", prodSet);
@@ -270,12 +270,12 @@ public class Project extends Observable {
         }
     }
 
-    public static void createNewGraph(ProjectSubFolder subFolder) {
+    public static void createNewGraph(final ProjectSubFolder subFolder) {
         final ModelessDialog dialog = new GraphBuilderDialog(new DatContext(""), "Graph Builder", "graph_builder");
         dialog.show();
     }
 
-    public static void openFile(ProjectSubFolder parentFolder, File file) {
+    public static void openFile(final ProjectSubFolder parentFolder, final File file) {
         if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.PRODUCTSET) {
             ProductSet.OpenProductSet(file);
         } else if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.GRAPH) {
@@ -287,7 +287,7 @@ public class Project extends Observable {
         }
     }
 
-    public static void openSubset(ProjectSubFolder parentFolder, File prodFile) {
+    public static void openSubset(final ProjectSubFolder parentFolder, final File prodFile) {
         final ProductReader reader = ProductIO.getProductReaderForFile(prodFile);
         if (reader != null) {
 
@@ -303,7 +303,7 @@ public class Project extends Observable {
         }
     }
 
-    public void importSubset(ProjectSubFolder parentFolder, File prodFile) {
+    public void importSubset(final ProjectSubFolder parentFolder, final File prodFile) {
         final ProductReader reader = ProductIO.getProductReaderForFile(prodFile);
         if (reader != null) {
                 final ProjectSubFolder importedFolder = projectSubFolders.findFolder("Imported Products");
@@ -321,7 +321,7 @@ public class Project extends Observable {
         }
     }
 
-    private static Product getProductSubset(Product product) {
+    private static Product getProductSubset(final Product product) {
         if (product != null) {
             final JFrame mainFrame = VisatApp.getApp().getMainFrame();
             final ProductSubsetDialog productSubsetDialog = new ProductSubsetDialog(mainFrame, product);
@@ -403,7 +403,7 @@ public class Project extends Observable {
         worker.execute();
     }
 
-    public void ImportFileList(File[] productFilesToOpen) {
+    public void ImportFileList(final File[] productFilesToOpen) {
         if(!IsProjectOpen()) {
             CreateNewProject();
         }
@@ -414,17 +414,17 @@ public class Project extends Observable {
         }
     }
 
-    public void deleteFolder(ProjectSubFolder parentFolder, ProjectSubFolder subFolder) {
+    public void deleteFolder(final ProjectSubFolder parentFolder, final ProjectSubFolder subFolder) {
         parentFolder.removeSubFolder(subFolder);
         notifyEvent(SAVE_PROJECT);
     }
 
-    public void clearFolder(ProjectSubFolder subFolder) {
+    public void clearFolder(final ProjectSubFolder subFolder) {
         subFolder.clear();
         notifyEvent(SAVE_PROJECT);
     }
 
-    public void renameFolder(ProjectSubFolder subFolder) {
+    public void renameFolder(final ProjectSubFolder subFolder) {
         final PromptDialog dlg = new PromptDialog("Rename Folder", "Name", "", false);
         dlg.show();
         if(dlg.IsOK()) {
@@ -433,7 +433,7 @@ public class Project extends Observable {
         }
     }
 
-    public void removeFile(ProjectSubFolder parentFolder, File file) {
+    public void removeFile(final ProjectSubFolder parentFolder, final File file) {
         parentFolder.removeFile(file);
         if(parentFolder.getFolderType() == ProjectSubFolder.FolderType.PRODUCTSET ||
            parentFolder.getFolderType() == ProjectSubFolder.FolderType.GRAPH)
@@ -453,7 +453,7 @@ public class Project extends Observable {
         notifyEvent(SAVE_PROJECT);
     }
 
-    private static void deleteDir(File dir) {
+    private static void deleteDir(final File dir) {
         if (dir.isDirectory()) {
             final String[] children = dir.list();
             for (String aChild : children) {
