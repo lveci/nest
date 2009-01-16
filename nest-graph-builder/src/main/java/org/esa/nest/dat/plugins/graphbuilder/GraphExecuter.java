@@ -3,21 +3,20 @@ package org.esa.nest.dat.plugins.graphbuilder;
 import com.bc.ceres.core.ProgressMonitor;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.beam.framework.gpf.OperatorUI;
-import org.esa.beam.framework.gpf.operators.common.ReadOp;
-import org.esa.beam.framework.gpf.operators.common.WriteOp;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.graph.*;
+import org.esa.beam.framework.gpf.operators.common.ReadOp;
+import org.esa.beam.framework.gpf.operators.common.WriteOp;
 import org.esa.nest.util.DatUtils;
-import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
 
-import java.util.*;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.File;
+import java.util.*;
 
 public class GraphExecuter extends Observable {
 
@@ -28,7 +27,7 @@ public class GraphExecuter extends Observable {
     private String graphDescription = "";
 
     private int idCount = 0;
-    private final Vector<GraphNode> nodeList = new Vector<GraphNode>(10);
+    private final ArrayList<GraphNode> nodeList = new ArrayList<GraphNode>();
 
     public enum events { ADD_EVENT, REMOVE_EVENT, SELECT_EVENT }
 
@@ -41,7 +40,7 @@ public class GraphExecuter extends Observable {
         processor = new GraphProcessor();
     }
 
-    public Vector GetGraphNodes() {
+    public ArrayList<GraphNode> GetGraphNodes() {
         return nodeList;
     }
 
@@ -53,9 +52,7 @@ public class GraphExecuter extends Observable {
     }
 
     public GraphNode findGraphNode(String id) {
-        for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
-        {
-            final GraphNode n = (GraphNode) e.nextElement();
+        for(GraphNode n : nodeList) {
             if(n.getID().equals(id)) {
                 return n;
             }
@@ -123,9 +120,7 @@ public class GraphExecuter extends Observable {
         clearChanged();
 
         // remove as a source from all nodes
-        for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
-        {
-            final GraphNode n = (GraphNode) e.nextElement();
+        for(GraphNode n : nodeList) {
             n.disconnectOperatorSources(node);
         }
 
@@ -151,19 +146,16 @@ public class GraphExecuter extends Observable {
         descXML.setValue(graphDescription);
         presentationXML.addChild(descXML);
 
-        for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
-        {
-            final GraphNode n = (GraphNode) e.nextElement();
-            n.AssignParameters(presentationXML);
+        for(GraphNode n : nodeList) {
+            if(n.GetOperatorUI() != null)
+                n.AssignParameters(presentationXML);
         }
 
         graph.setAppData("Presentation", presentationXML);
     }
 
     boolean IsGraphComplete() {
-        for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
-        {
-            final GraphNode n = (GraphNode) e.nextElement();
+        for(GraphNode n : nodeList) {
             if(!n.HasSources() && !IsNodeASource(n)) {
                 return false;
             }
@@ -172,9 +164,7 @@ public class GraphExecuter extends Observable {
     }
 
     boolean IsNodeASource(GraphNode node) {
-        for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
-        {
-            final GraphNode n = (GraphNode) e.nextElement();
+        for(GraphNode n : nodeList) {
             if(n.FindSource(node))
                 return true;
         }
@@ -195,9 +185,7 @@ public class GraphExecuter extends Observable {
         graphContext = processor.createGraphContext(graph, ProgressMonitor.NULL);
 
         if(updateGraphNodes) {
-            for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
-            {
-                final GraphNode n = (GraphNode) e.nextElement();
+            for(GraphNode n : nodeList) {
                 final NodeContext context = graphContext.getNodeContext(n.getNode());
                 n.setSourceProducts(context.getSourceProducts());
             }

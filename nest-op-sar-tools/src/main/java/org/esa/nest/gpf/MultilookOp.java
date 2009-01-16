@@ -70,8 +70,6 @@ public final class MultilookOp extends Operator {
     @Parameter(defaultValue="Currently, detection for complex data is performed without any resampling", label="Note")
     String note;
 
-    private Band targetBand;
-
     private MetadataElement absRoot;
 
     private boolean srgrFlag;

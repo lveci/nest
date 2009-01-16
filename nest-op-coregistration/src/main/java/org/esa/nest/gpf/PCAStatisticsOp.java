@@ -15,33 +15,24 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.swing.progress.DialogProgressMonitor;
+import org.esa.beam.dataio.dimap.DimapProductConstants;
+import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
+import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.PropertyMap;
-import org.esa.beam.util.Debug;
-import org.esa.beam.dataio.dimap.DimapProductReader;
-import org.esa.beam.dataio.dimap.DimapProductConstants;
-import org.esa.nest.util.DatUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.media.jai.JAI;
-import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.io.File;
-import java.io.IOException;
 
 /**
  * The operator evaluates the following local statistics for the user selected area of the image, and produces
@@ -57,10 +48,18 @@ import java.io.IOException;
 @OperatorMetadata(alias="PCA-Statistic", description="Computes statistics for PCA", internal=true)
 public class PCAStatisticsOp extends Operator {
 
-    @SourceProduct
+    @SourceProduct(alias="source")
     private Product sourceProduct;
     @TargetProduct
     private Product targetProduct;
+
+    @Parameter(description = "The list of source bands.", alias = "masterBand", itemAlias = "band",
+            sourceProductId="source", label="Master Band")
+    private String masterBandName;
+
+    @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
+            sourceProductId="source", label="Slave Bands")
+    private String[] sourceBandNames;
 
     private boolean statsCalculated = false;
     private boolean sampleTypeIsComplex;
@@ -78,6 +77,7 @@ public class PCAStatisticsOp extends Operator {
     private HashMap<String, Integer> statisticsBandIndex;
 
     private MetadataElement abs;
+    private HashMap<String, String[]> targetBandNameToSourceBandName;
 
     /**
      * Default constructor. The graph processing framework
@@ -175,6 +175,94 @@ public class PCAStatisticsOp extends Operator {
 
         for(Band band : sourceProduct.getBands()) {
             ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct);
+        }
+    }
+
+    private void addSelectedBands() {
+
+        if (sourceBandNames == null || sourceBandNames.length == 0) {
+            final Band[] bands = sourceProduct.getBands();
+            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            for (Band band : bands) {
+                bandNameList.add(band.getName());
+            }
+            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
+        }
+
+        final Band[] sourceBands = new Band[sourceBandNames.length];
+        for (int i = 0; i < sourceBandNames.length; i++) {
+            final String sourceBandName = sourceBandNames[i];
+            final Band sourceBand = sourceProduct.getBand(sourceBandName);
+            if (sourceBand == null) {
+                throw new OperatorException("Source band not found: " + sourceBandName);
+            }
+            sourceBands[i] = sourceBand;
+        }
+
+        String targetBandName;
+        targetBandNameToSourceBandName = new HashMap<String, String[]>();
+        for (int i = 0; i < sourceBands.length; i++) {
+
+            final Band srcBand = sourceBands[i];
+            final String unit = srcBand.getUnit();
+            if(unit == null) {
+                throw new OperatorException("band "+srcBand.getName()+" requires a unit");
+            }
+
+            String targetUnit = "";
+
+            if (unit.contains("phase")) {
+
+                continue;
+
+            } else if (unit.contains("imaginary")) {
+
+                throw new OperatorException("Real and imaginary bands should be selected in pairs");
+
+            } else if (unit.contains("real")) {
+
+                if (i == sourceBands.length - 1) {
+                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
+                }
+                final String nextUnit = sourceBands[i+1].getUnit();
+                if (nextUnit == null || !nextUnit.contains("imaginary")) {
+                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
+                }
+                final String[] srcBandNames = new String[2];
+                srcBandNames[0] = srcBand.getName();
+                srcBandNames[1] = sourceBands[i+1].getName();
+                final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
+                if (pol != null) {
+                    targetBandName = "Intensity_" + pol.toUpperCase();
+                } else {
+                    targetBandName = "Intensity";
+                }
+                ++i;
+                if(targetProduct.getBand(targetBandName) == null) {
+                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                    targetUnit = "intensity";
+                }
+
+            } else {
+
+                final String[] srcBandNames = {srcBand.getName()};
+                targetBandName = srcBand.getName();
+                if(targetProduct.getBand(targetBandName) == null) {
+                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                    targetUnit = unit;
+                }
+            }
+
+            if(targetProduct.getBand(targetBandName) == null) {
+
+                final Band targetBand = new Band(targetBandName,
+                                           srcBand.getDataType(),
+                                           srcBand.getRasterWidth(),
+                                           srcBand.getRasterHeight());
+
+                targetBand.setUnit(targetUnit);
+                targetProduct.addBand(targetBand);
+            }
         }
     }
 

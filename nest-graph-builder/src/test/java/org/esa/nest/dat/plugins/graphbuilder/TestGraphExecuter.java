@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 import java.util.Vector;
 import java.util.Set;
 import java.util.Observer;
+import java.util.ArrayList;
 
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
@@ -45,7 +46,7 @@ public class TestGraphExecuter extends TestCase implements Observer {
         updateValue = "";
         graphEx.addOperator("testOp");
 
-        Vector nodeList = graphEx.GetGraphNodes();
+        ArrayList<GraphNode> nodeList = graphEx.GetGraphNodes();
         assertEquals(1, nodeList.size());
         assertEquals(updateValue, "Add");
     }
@@ -53,7 +54,7 @@ public class TestGraphExecuter extends TestCase implements Observer {
     public void testClear() {
         graphEx.addOperator("testOp");
 
-        Vector nodeList = graphEx.GetGraphNodes();
+        ArrayList<GraphNode> nodeList = graphEx.GetGraphNodes();
         assertEquals(1, nodeList.size());
 
         graphEx.ClearGraph();
@@ -63,7 +64,7 @@ public class TestGraphExecuter extends TestCase implements Observer {
     public void testRemoveOperator() {
         GraphNode node = graphEx.addOperator("testOp");
 
-        Vector nodeList = graphEx.GetGraphNodes();
+        ArrayList<GraphNode> nodeList = graphEx.GetGraphNodes();
         assertEquals(1, nodeList.size());
 
         updateValue = "";

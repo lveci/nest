@@ -19,7 +19,7 @@ public class OperatorUtils {
      * Get abstracted metadata.
      * @return MetadataElement
      */
-    public static MetadataElement getAbstractedMetadata(Product sourceProduct) {
+    public static MetadataElement getAbstractedMetadata(final Product sourceProduct) {
 
         final MetadataElement abstractedMetadata = sourceProduct.getMetadataRoot().getElement("Abstracted Metadata");
         if (abstractedMetadata == null) {
@@ -33,7 +33,7 @@ public class OperatorUtils {
      * @param sourceProduct the source
      * @return srcTPG The incidence angle tie point grid.
      */
-    public static TiePointGrid getIncidenceAngle(Product sourceProduct) {
+    public static TiePointGrid getIncidenceAngle(final Product sourceProduct) {
 
         for (int i = 0; i < sourceProduct.getNumTiePointGrids(); i++) {
             final TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
@@ -50,7 +50,7 @@ public class OperatorUtils {
      * @param sourceProduct the source
      * @return srcTPG The slant range time tie point grid.
      */
-    public static TiePointGrid getSlantRangeTime(Product sourceProduct) {
+    public static TiePointGrid getSlantRangeTime(final Product sourceProduct) {
 
         for (int i = 0; i < sourceProduct.getNumTiePointGrids(); i++) {
             final TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
@@ -62,7 +62,7 @@ public class OperatorUtils {
         return null;
     }
 
-    public static String getPolarizationFromBandName(String bandName) {
+    public static String getPolarizationFromBandName(final String bandName) {
 
         final int idx = bandName.lastIndexOf('_');
         if (idx != -1) {

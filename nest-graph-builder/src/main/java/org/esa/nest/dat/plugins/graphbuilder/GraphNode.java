@@ -1,16 +1,16 @@
 package org.esa.nest.dat.plugins.graphbuilder;
 
-import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import com.bc.ceres.binding.*;
+import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.OperatorUI;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
-import org.esa.beam.framework.gpf.internal.Xpp3DomElement;
 import org.esa.beam.framework.gpf.graph.Node;
 import org.esa.beam.framework.gpf.graph.NodeSource;
-import org.esa.beam.framework.gpf.OperatorUI;
+import org.esa.beam.framework.gpf.internal.Xpp3DomElement;
 import org.esa.beam.framework.gpf.ui.UIValidation;
-import org.esa.beam.framework.datamodel.Product;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -48,11 +48,11 @@ public class GraphNode {
         initParameters();
     }
 
-    void setOperatorUI(final OperatorUI ui) {
+    public void setOperatorUI(final OperatorUI ui) {
         operatorUI = ui;
     }
 
-    OperatorUI GetOperatorUI() {
+    public OperatorUI GetOperatorUI() {
         return operatorUI;
     }
 
@@ -173,7 +173,7 @@ public class GraphNode {
         displayPosition = p;
     }
 
-    Node getNode() {
+    public Node getNode() {
         return node;
     }
 
@@ -221,11 +221,11 @@ public class GraphNode {
      * Gets the name of the operator.
      * @return the name of the operator.
      */
-    String getOperatorName() {
+    public String getOperatorName() {
         return node.getOperatorName();
     }
 
-    Map<String, Object> getParameterMap() {
+    public Map<String, Object> getParameterMap() {
         return parameterMap;
     }
 

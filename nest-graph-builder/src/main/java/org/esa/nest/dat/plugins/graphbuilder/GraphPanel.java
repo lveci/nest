@@ -2,8 +2,6 @@ package org.esa.nest.dat.plugins.graphbuilder;
 
 import org.esa.beam.framework.gpf.graph.NodeSource;
 import org.esa.nest.util.DatUtils;
-import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
-import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
@@ -11,10 +9,9 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Set;
-import java.util.Vector;
-import java.util.Enumeration;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
 
 /**
  * Draws and Edits the graph graphically
@@ -159,15 +156,13 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
     /**
      * Draw the graphical representation of the Graph
      * @param g the Graphics
-     * @param nodes the list of graphNodes
+     * @param nodeList the list of graphNodes
      */
-    private void DrawGraph(Graphics g, Vector nodes) {
+    private void DrawGraph(Graphics g, ArrayList<GraphNode> nodeList) {
 
         final Font font = new Font("Ariel", 10, 10);
         g.setFont(font);
-        for (Enumeration e = nodes.elements(); e.hasMoreElements();)
-        {
-            final GraphNode n = (GraphNode) e.nextElement();
+        for(GraphNode n : nodeList) {
             
             if(n == selectedNode)
                 n.drawNode(g, selColor);
@@ -176,9 +171,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
         }
 
         // first pass sets the Size in drawNode according to string length
-        for (Enumeration e = nodes.elements(); e.hasMoreElements();)
-        {
-            final GraphNode n = (GraphNode) e.nextElement();
+        for(GraphNode n : nodeList) {
             // connect source nodes
             g.setColor(Color.red);
             final NodeSource[] nSources = n.getNode().getSources();
@@ -310,11 +303,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
 
     private GraphNode findNode(Point p) {
 
-       final Vector nodes = graphEx.GetGraphNodes();
-       for (Enumeration e = nodes.elements(); e.hasMoreElements();)
-        {
-            final GraphNode n = (GraphNode) e.nextElement();
-
+       for(GraphNode n : graphEx.GetGraphNodes()) {
             if(isWithinRect(n.getPos(), n.getWidth(), n.getHeight(), p))
                 return n;
         }

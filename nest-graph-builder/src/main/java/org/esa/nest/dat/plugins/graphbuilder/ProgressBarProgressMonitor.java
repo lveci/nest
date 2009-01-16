@@ -1,10 +1,9 @@
 package org.esa.nest.dat.plugins.graphbuilder;
 
-import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.Assert;
+import com.bc.ceres.core.ProgressMonitor;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
 * A {@link com.bc.ceres.core.ProgressMonitor} which uses a

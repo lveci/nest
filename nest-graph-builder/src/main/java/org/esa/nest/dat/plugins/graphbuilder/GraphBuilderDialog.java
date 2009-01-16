@@ -1,28 +1,28 @@
 package org.esa.nest.dat.plugins.graphbuilder;
 
-import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.ui.UIUtils;
-import org.esa.beam.framework.ui.ModelessDialog;
-import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.gpf.ui.UIValidation;
-import org.esa.beam.framework.gpf.graph.GraphException;
-import org.esa.beam.framework.gpf.graph.Graph;
-import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.gpf.graph.Graph;
+import org.esa.beam.framework.gpf.graph.GraphException;
+import org.esa.beam.framework.gpf.ui.UIValidation;
+import org.esa.beam.framework.help.HelpSys;
+import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.framework.ui.ModelessDialog;
+import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.visat.dialogs.PromptDialog;
 import org.esa.nest.util.DatUtils;
 
-import javax.swing.*;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 import javax.media.jai.JAI;
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.*;
 
 /**
  *  Provides the User Interface for creating, loading and saving Graphs
@@ -387,10 +387,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
         boolean isValid = true;
         final StringBuilder msg = new StringBuilder(100);
-        final Vector nodeList = graphEx.GetGraphNodes();
-        for (Enumeration e = nodeList.elements(); e.hasMoreElements();)
-        {
-            final GraphNode n = (GraphNode) e.nextElement();
+        for(GraphNode n : graphEx.GetGraphNodes()) {
             final UIValidation validation = n.validateParameterMap();
             if(!validation.getState()) {
                 isValid = false;

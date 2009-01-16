@@ -19,7 +19,8 @@ import org.esa.nest.dat.plugins.graphbuilder.ProgressBarProgressMonitor;
 
 import javax.media.jai.JAI;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -32,10 +33,11 @@ import java.util.*;
  */
 public abstract class MultiGraphDialog extends ModelessDialog {
 
-    private final AppContext appContext;
+    protected final AppContext appContext;
     protected final ArrayList<GraphExecuter> graphExecuterList = new ArrayList<GraphExecuter>(3);
 
     private final JPanel mainPanel;
+    protected final JTabbedPane tabbedPane;
     private final JLabel statusLabel;
     private final JPanel progressPanel;
     private final JProgressBar progressBar;
@@ -83,14 +85,16 @@ public abstract class MultiGraphDialog extends ModelessDialog {
 
         mainPanel = new JPanel(new BorderLayout(4, 4));
 
-        JTabbedPane form = new JTabbedPane();
-        form.add("I/O Parameters", ioParametersPanel);
+        tabbedPane = new JTabbedPane();
+        tabbedPane.add("I/O Parameters", ioParametersPanel);
+        tabbedPane.addChangeListener(new ChangeListener() {
 
-        final JPanel paremetersPanel = new JPanel();
-        paremetersPanel.setBorder(new EmptyBorder(4, 4, 4, 4));
-        form.add("Processing Parameters", new JScrollPane(paremetersPanel));
+            public void stateChanged(final ChangeEvent e) {
+                ValidateAllNodes();
+            }
+        });
 
-        mainPanel.add(form, BorderLayout.CENTER);
+        mainPanel.add(tabbedPane, BorderLayout.CENTER);
 
         // status
         statusLabel = new JLabel("");
@@ -132,6 +136,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
             sourceProductSelector.initProducts();
         }
         setContent(mainPanel);
+        initGraphs();
         return super.show();
     }
 
@@ -152,10 +157,19 @@ public abstract class MultiGraphDialog extends ModelessDialog {
         appContext.getPreferences().setPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, productDir);
 
         try {
-            deleteGraphs();
-            createGraphs();
+            //initGraphs()
+            assignParameters();
 
             DoProcessing();
+        } catch(Exception e) {
+            statusLabel.setText(e.getMessage());
+        }
+    }
+
+    void initGraphs() {
+        try {
+            deleteGraphs();
+            createGraphs();
         } catch(Exception e) {
             statusLabel.setText(e.getMessage());
         }
@@ -201,7 +215,8 @@ public abstract class MultiGraphDialog extends ModelessDialog {
      */
     public void LoadGraph(final GraphExecuter executer, final File file) {
         try {
-            executer.loadGraph(file, false);
+            executer.loadGraph(file, true);
+
         } catch(GraphException e) {
             showErrorDialog(e.getMessage());
         }
@@ -209,8 +224,22 @@ public abstract class MultiGraphDialog extends ModelessDialog {
 
     protected abstract void createGraphs() throws GraphException;
 
+    protected abstract void assignParameters() throws GraphException;
+
+    protected abstract void cleanUpTempFiles();
+
     private boolean ValidateAllNodes() {
-        return true;
+        boolean result=true;
+        try {
+            assignParameters();
+            for(GraphExecuter graphEx : graphExecuterList) {
+                graphEx.InitGraph();
+            }
+        } catch(GraphException e) {
+            statusLabel.setText(e.getMessage());
+            result = false;
+        }
+        return result;
     }
 
     private class ProcessThread extends SwingWorker<Boolean, Object> {
@@ -231,7 +260,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
                 isProcessing = true;
 
                 for(GraphExecuter graphEx : graphExecuterList) {
-                    graphEx.recreateGraphContext(true);
+                    //graphEx.recreateGraphContext(true);
                     graphEx.executeGraph(pm);
 
                     graphEx.disposeGraphContext();
@@ -266,8 +295,6 @@ public abstract class MultiGraphDialog extends ModelessDialog {
         }
 
     }
-
-    protected abstract void cleanUpTempFiles();
 
     private void openTargetProducts(final Vector<File> fileList) {
         if(!fileList.isEmpty()) {
