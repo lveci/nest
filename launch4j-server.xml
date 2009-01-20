@@ -1,8 +1,8 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>C:\build\nest\target\nest-2A-bin.dir\bin\ceres-launcher.jar</jar>
-  <outfile>C:\build\nest\target\nest-2A-bin.dir\nest-dat.exe</outfile>
+  <jar>C:\build\nest\target\nest-2B-bin.dir\bin\ceres-launcher.jar</jar>
+  <outfile>C:\build\nest\target\nest-2B-bin.dir\nest-dat.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir></chdir>

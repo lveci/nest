@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.esa.nest.maven</groupId>
     <artifactId>maven-nest-gpf-archetype</artifactId>
-    <version>2A</version>
+    <version>2B</version>
     <name>Maven 2 Archetype Plugin for NEST GPF Operators</name>
     <description>A Maven 2 archetype for projects using NEST Graph Processing Framework (GPF).</description>
     <packaging>maven-plugin</packaging>
@@ -20,19 +20,19 @@
         <dependency>
             <groupId>com.bc.ceres</groupId>
             <artifactId>ceres-core</artifactId>
-            <version>0.8-SNAPSHOT</version>
+            <version>0.9-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-core</artifactId>
-            <version>4.5-SNAPSHOT</version>
+            <version>4.6-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-gpf</artifactId>
-            <version>4.5-SNAPSHOT</version>
+            <version>4.6-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

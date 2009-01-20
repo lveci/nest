@@ -8,7 +8,7 @@
     <url>http://www.array.ca/nest</url>
     <groupId>org.esa.nest</groupId>
     <artifactId>nest-developer-tools</artifactId>
-    <version>2A</version>
+    <version>2B</version>
 
     <packaging>pom</packaging>
 

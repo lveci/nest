@@ -7,7 +7,7 @@
     <url>http://www.array.ca/nest</url>
     <groupId>org.esa.nest</groupId>
     <artifactId>nest</artifactId>
-    <version>2A</version>
+    <version>2B</version>
 
     <packaging>pom</packaging>
 
@@ -161,13 +161,13 @@
             <dependency>
                 <groupId>org.esa.nest</groupId>
                 <artifactId>nest-core</artifactId>
-                <version>2A</version>
+                <version>2B</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.nest</groupId>
                 <artifactId>nest-graph-builder</artifactId>
-			    <version>2A</version>
+			    <version>2B</version>
             </dependency>
 
             <!-- JAI Libraries ############################################# -->

@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.esa.nest</groupId>
         <artifactId>nest</artifactId>
-        <version>2A</version>
+        <version>2B</version>
     </parent>
 
     <groupId>org.esa.nest</groupId>
     <artifactId>nest-writer-netcdf</artifactId>
     <name>NEST NetCDF Writer</name>
-    <version>2A</version>
+    <version>2B</version>
     <url>http://www.array.ca/nest</url>
 
 	<packaging>jar</packaging>
