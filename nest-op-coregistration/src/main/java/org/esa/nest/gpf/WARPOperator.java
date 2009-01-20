@@ -79,9 +79,6 @@ public class WARPOperator extends Operator {
     private Product masterProduct;
     private Product slaveProduct;
 
-    private Band masterBand;
-    private Band slaveBand;
-
     private ProductNodeGroup<Placemark> masterGCPGroup;
     private ProductNodeGroup<Placemark> slaveGCPGroup;
     private ProductNodeGroup<Placemark> targetGCPGroup;
@@ -133,9 +130,6 @@ public class WARPOperator extends Operator {
     {
         masterProduct = sourceProduct[0];
         slaveProduct = sourceProduct[1];
-
-        masterBand = masterProduct.getBandAt(0);
-        slaveBand = slaveProduct.getBandAt(0);
 
         masterGCPGroup = masterProduct.getGcpGroup();
         slaveGCPGroup = slaveProduct.getGcpGroup();
@@ -197,7 +191,7 @@ public class WARPOperator extends Operator {
         //System.out.println("WARPOperator: x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         // create source image
-        Tile sourceRaster = getSourceTile(slaveBand, targetTileRectangle, pm);
+        Tile sourceRaster = getSourceTile(slaveProduct.getBand(targetBand.getName()), targetTileRectangle, pm);
         RenderedImage srcImage = sourceRaster.getRasterDataNode().getSourceImage();
 
         // get warped image
@@ -502,8 +496,10 @@ public class WARPOperator extends Operator {
                                     masterProduct.getSceneRasterWidth(),
                                     masterProduct.getSceneRasterHeight());
 
-        Band targetBand = targetProduct.addBand(slaveBand.getName(), ProductData.TYPE_FLOAT32);
-        targetBand.setUnit(slaveBand.getUnit());
+        for(Band band : slaveProduct.getBands()) {
+            Band targetBand = targetProduct.addBand(band.getName(), ProductData.TYPE_FLOAT32);
+            targetBand.setUnit(band.getUnit());
+        }
 
         // coregistrated image should have the same geo-coding as the master image
         ProductUtils.copyMetadata(masterProduct, targetProduct);
