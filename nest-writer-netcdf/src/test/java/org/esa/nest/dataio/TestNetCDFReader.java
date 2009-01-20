@@ -34,28 +34,28 @@ public class TestNetCDFReader extends TestCase {
     }
 
     public void testOpenNetCDF() throws IOException {
-        NetcdfDataset ds = NetcdfDataset.openDataset(netCDFFile);
+/*        NetcdfDataset ds = NetcdfDataset.openDataset(netCDFFile);
 
         List<Variable> varList = ds.getVariables();
 
         List<Group> groupList = ds.getRootGroup().getGroups();
-
+         */
 
     }
 
     public void testOpenHDF() throws IOException {
-        NetcdfDataset ds = NetcdfDataset.openDataset(hdfFile);
+  /*      NetcdfDataset ds = NetcdfDataset.openDataset(hdfFile);
 
         List<Variable> varList = ds.getVariables();
 
         List<Group> groupList = ds.getRootGroup().getGroups();
 
-
+        */
     }
 
     public void testWriteHDF() throws IOException {
 
-        NetcdfFileWriteable netCDFWriteable = NetcdfFileWriteable.createNew("ha");
+       //NetcdfFileWriteable netCDFWriteable = NetcdfFileWriteable.createNew("ha");
 
 
 

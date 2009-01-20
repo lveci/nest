@@ -14,11 +14,15 @@ import org.esa.beam.framework.ui.application.ApplicationDescriptor;
 import org.esa.beam.framework.ui.application.ToolViewDescriptor;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.visat.*;
+import org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView;
+import org.esa.beam.visat.toolviews.stat.StatisticsToolView;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 
 import javax.swing.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -37,6 +41,7 @@ public final class DatApp extends VisatApp {
     // You can now override numerous createXXX() methods
     // to customize the application GUI
 
+    @Override
     protected ModalDialog createAboutBox() {
         return new DatAboutBox();
     }
@@ -82,41 +87,32 @@ public final class DatApp extends VisatApp {
         return statusBar;
     }
 
-    protected CommandBar createViewsToolBar() {
-        // context of action in module.xml used as key
-        final CommandBar toolBar = new CommandBar("viewsToolBar");
-        toolBar.setTitle("Views");
-        toolBar.addDockableBarListener(new ToolBarListener());
+    @Override
+    protected HashSet<String> getExcludedToolbars() {
+        final HashSet<String> excludedIds = new HashSet<String>(8);
+        // todo - remove bad forward dependencies to tool views (nf - 30.10.2008)
+        excludedIds.add(TileCacheDiagnosisToolView.ID);
+        excludedIds.add(StatisticsToolView.ID);
+        excludedIds.add("org.esa.beam.scripting.visat.ScriptConsoleToolView");
+        excludedIds.add("org.esa.beam.visat.toolviews.placemark.pin.PinManagerToolView");
+        excludedIds.add("org.esa.beam.visat.toolviews.placemark.gcp.GcpManagerToolView");
+        excludedIds.add("org.esa.beam.visat.toolviews.roi.RoiManagerToolView");
+        excludedIds.add("org.esa.beam.visat.toolviews.bitmask.BitmaskOverlayToolView");
 
-        ToolViewDescriptor[] toolViewDescriptors = VisatActivator.getInstance().getToolViewDescriptors();
-        List<String> viewCommandIdList = new ArrayList<String>(10);
+        return excludedIds;
+    }
 
+    @Override
+    protected void addDefaultToolViewCommands(final List<String> commandIds) {
         // add default views grouped
-        viewCommandIdList.add("org.esa.nest.dat.toolviews.Projects.ProjectsToolView.showCmd");
-        viewCommandIdList.add("org.esa.beam.visat.ProductsToolView.showCmd");
-        viewCommandIdList.add("org.esa.beam.visat.toolviews.pixelinfo.PixelInfoToolView.showCmd");
-        viewCommandIdList.add(null);
-        viewCommandIdList.add("org.esa.beam.visat.toolviews.nav.NavigationToolView.showCmd");
-        viewCommandIdList.add("org.esa.beam.visat.toolviews.imageinfo.ColorManipulationToolView.showCmd");
-        viewCommandIdList.add(null);
-
-        for (ToolViewDescriptor toolViewDescriptor : toolViewDescriptors) {
-            String id = toolViewDescriptor.getId();
-            if (id.equals("org.esa.beam.visat.toolviews.stat.StatisticsToolView") ||
-                id.equals("org.esa.beam.visat.toolviews.placemark.pin.PinManagerToolView") ||
-                id.equals("org.esa.beam.visat.toolviews.placemark.gcp.GcpManagerToolView") ||
-                id.equals("org.esa.beam.visat.toolviews.roi.RoiManagerToolView") ||
-                id.equals("org.esa.beam.visat.toolviews.bitmask.BitmaskOverlayToolView") ) {
-                    continue;
-            }
-            if(!viewCommandIdList.contains(id+".showCmd")) {
-                viewCommandIdList.add(toolViewDescriptor.getId() + ".showCmd");
-            }
-        }
-
-        addCommandsToToolBar(toolBar, viewCommandIdList.toArray(new String[viewCommandIdList.size()]));
-
-        return toolBar;
+        commandIds.add("org.esa.nest.dat.toolviews.Projects.ProjectsToolView.showCmd");
+        commandIds.add("org.esa.beam.visat.ProductsToolView.showCmd");
+        commandIds.add("org.esa.beam.visat.toolviews.pixelinfo.PixelInfoToolView.showCmd");
+        commandIds.add(null);
+        commandIds.add("org.esa.beam.visat.toolviews.nav.NavigationToolView.showCmd");
+        commandIds.add("org.esa.beam.visat.toolviews.imageinfo.ColorManipulationToolView.showCmd");
+        commandIds.add("org.esa.beam.visat.toolviews.layermanager.LayerManagerToolView.showCmd");
+        commandIds.add(null);
     }
 
     /**
@@ -178,19 +174,19 @@ public final class DatApp extends VisatApp {
         }
 
         final String homeUrl = System.getProperty("nest.home", ".");
-        File graphPath = new File(homeUrl, File.separator + "graphs");
+        final File graphPath = new File(homeUrl, File.separator + "graphs");
         if(!graphPath.exists()) return;
 
         createGraphMenu(menu, graphPath);
     }
 
-    private static void createGraphMenu(JMenu menu, File path) {
-        File[] filesList = path.listFiles();
+    private static void createGraphMenu(final JMenu menu, final File path) {
+        final File[] filesList = path.listFiles();
         if(filesList == null || filesList.length == 0) return;
 
         for (final File file : filesList) {
-            if(file.isDirectory() && !file.isHidden()) {
-                JMenu subMenu = new JMenu(file.getName());
+            if(file.isDirectory() && !file.isHidden() && !file.getName().equalsIgnoreCase("internal")) {
+                final JMenu subMenu = new JMenu(file.getName());
                 menu.add(subMenu);
                 createGraphMenu(subMenu, file);
             } else if(file.getName().toLowerCase().endsWith(".xml")) {
@@ -198,7 +194,8 @@ public final class DatApp extends VisatApp {
                 item.addActionListener(new ActionListener() {
 
                     public void actionPerformed(final ActionEvent e) {
-                        GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "Graph Builder", "graph_builder");
+                        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""),
+                            "Graph Builder", "graph_builder");
                         dialog.show();
                         dialog.LoadGraph(file);
                     }
@@ -207,7 +204,6 @@ public final class DatApp extends VisatApp {
             }
         }
     }
-
 
     @Override
     protected CommandBar createAnalysisToolBar() {
@@ -226,12 +222,8 @@ public final class DatApp extends VisatApp {
     }
 
     @Override
-    protected CommandBar createToolsToolBar() {
-        // context of action in module.xml used as key
-        final CommandBar toolBar = new CommandBar("toolsToolBar");
-        toolBar.setTitle("Tools");
-        toolBar.addDockableBarListener(new ToolBarListener());
-
+    protected CommandBar createInteractionsToolBar() {
+        final CommandBar toolBar = createToolBar(INTERACTIONS_TOOL_BAR_ID, "Interactions");
         addCommandsToToolBar(toolBar, new String[]{
                 // These IDs are defined in the module.xml
                 "selectTool",
@@ -254,8 +246,6 @@ public final class DatApp extends VisatApp {
                 //"magicStickTool",
                 null,
                 "convertShapeToROI",
-                //"org.esa.beam.visat.toolviews.roi.RoiManagerToolView.showCmd",
-                //"org.esa.beam.visat.toolviews.bitmask.BitmaskOverlayToolView.showCmd",
                 //"convertROIToShape",
         });
 
