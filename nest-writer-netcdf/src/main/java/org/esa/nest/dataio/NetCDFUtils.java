@@ -201,27 +201,40 @@ public class NetCDFUtils {
     public static void addAttributes(final MetadataElement parentElem, final Group parentGroup) {
         final List<Attribute> attribList = parentGroup.getAttributes();
         for(Attribute at : attribList) {
-            createMetadataAttributes(parentElem, at);
+            createMetadataAttributes(parentElem, at, at.getName());
         }
     }
 
-    public static void createMetadataAttributes(final MetadataElement parentElem, final Attribute attribute) {
+    public static void createMetadataAttributes(final MetadataElement parentElem, final Attribute attribute,
+                                                final String name) {
         // todo - note that we still do not support NetCDF data type 'char' here!
 
-        final int productDataType = getProductDataType(attribute.getDataType(), false, false);
-        if (productDataType != -1) {
-            ProductData productData;
-            if (attribute.isString()) {
-                productData = ProductData.createInstance(attribute.getStringValue());
-            } else if (attribute.isArray()) {
-                productData = ProductData.createInstance(productDataType, attribute.getLength());
-                productData.setElems(attribute.getValues().getStorage());
-            } else {
-                productData = ProductData.createInstance(productDataType, 1);
-                productData.setElems(attribute.getValues().getStorage());
+        final int i = name.indexOf('/');
+        if(i > 0) {
+            final String elemName = name.substring(0, i);
+            final String attName = name.substring(i+1, name.length());
+            MetadataElement newElem = parentElem.getElement(elemName);
+            if(newElem == null) {
+                newElem = new MetadataElement(elemName);
+                parentElem.addElement(newElem);
             }
-            final MetadataAttribute metadataAttribute = new MetadataAttribute(attribute.getName(), productData, true);
-            parentElem.addAttribute(metadataAttribute);
+            createMetadataAttributes(newElem, attribute, attName);
+        } else {
+            final int productDataType = getProductDataType(attribute.getDataType(), false, false);
+            if (productDataType != -1) {
+                ProductData productData;
+                if (attribute.isString()) {
+                    productData = ProductData.createInstance(attribute.getStringValue());
+                } else if (attribute.isArray()) {
+                    productData = ProductData.createInstance(productDataType, attribute.getLength());
+                    productData.setElems(attribute.getValues().getStorage());
+                } else {
+                    productData = ProductData.createInstance(productDataType, 1);
+                    productData.setElems(attribute.getValues().getStorage());
+                }
+                final MetadataAttribute metadataAttribute = new MetadataAttribute(name, productData, true);
+                parentElem.addAttribute(metadataAttribute);
+            }
         }
     }
 

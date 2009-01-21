@@ -25,6 +25,17 @@
     <extension point="beam-ui:actions">
 
         <action>
+            <id>importNetCDF</id>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <text>Import NetCDF Product...</text>
+            <formatName>NetCDF</formatName>
+            <readerPlugin>org.esa.nest.dataio.NetCDFReaderPlugIn</readerPlugin>
+            <useAllFileFilter>true</useAllFileFilter>
+            <shortDescr>Import a NetCDF file or file subset.</shortDescr>
+            <description>Import a NetCDF file or file subset.</description>
+        </action>
+
+        <action>
             <id>exportNetCDF</id>
             <class>org.esa.beam.visat.actions.ProductExportAction</class>
             <formatName>NetCDF</formatName>
@@ -37,7 +48,7 @@
             <id>importHDF</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>HDF</formatName>
-            <readerPlugin>org.esa.nest.dataio.NetCDFReaderPlugIn</readerPlugin>
+            <readerPlugin>org.esa.nest.dataio.HDFReaderPlugIn</readerPlugin>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import a HDF file format</shortDescr>
             <description>Import a HDF file format</description>

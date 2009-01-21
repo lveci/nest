@@ -1,1 +1,2 @@
 org.esa.nest.dataio.NetCDFReaderPlugIn
+org.esa.nest.dataio.HDFReaderPlugIn

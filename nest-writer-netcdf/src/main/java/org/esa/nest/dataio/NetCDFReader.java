@@ -67,7 +67,7 @@ public class NetCDFReader extends AbstractProductReader {
                     " Could not be interpretted by the NetCDF reader.");
         }
 
-        Map<NcRasterDim, List<Variable>> variableListMap = NetCDFUtils.getVariableListMap(netcdfFile.getRootGroup());
+        final Map<NcRasterDim, List<Variable>> variableListMap = NetCDFUtils.getVariableListMap(netcdfFile.getRootGroup());
         if (variableListMap.isEmpty()) {
             close();
             throw new IllegalFileFormatException("No netCDF variables found which could\n" +
@@ -116,10 +116,10 @@ public class NetCDFReader extends AbstractProductReader {
         final Group rootGroup = _netcdfFile.getRootGroup();
         NetCDFUtils.addGroups(_product.getMetadataRoot(), rootGroup);
         
-        final List<Attribute> globalAttribList = _netcdfFile.getGlobalAttributes();
+       /* final List<Attribute> globalAttribList = _netcdfFile.getGlobalAttributes();
         for(Attribute at : globalAttribList) {
-            NetCDFUtils.createMetadataAttributes(_product.getMetadataRoot(), at);
-        }
+            NetCDFUtils.createMetadataAttributes(_product.getMetadataRoot(), at, at.getName());
+        }  */
     }
 
     private void addBandsToProduct(final Variable[] variables) {

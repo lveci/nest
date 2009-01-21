@@ -10,10 +10,6 @@ public interface NetcdfConstants {
     String NETCDF_FORMAT_NAME = "NetCDF";
     String NETCDF_FORMAT_DESCRIPTION = "NetCDF Data Product";
     String[] FILE_EXTENSIONS = new String[]{".nc"};
-    Class[] READER_INPUT_TYPES = new Class[]{
-            String.class,
-            File.class,
-    };
 
     String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
 

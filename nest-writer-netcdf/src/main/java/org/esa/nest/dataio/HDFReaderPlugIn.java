@@ -17,11 +17,11 @@ import java.util.ArrayList;
  * The ReaderPlugIn for NetCDF products.
  *
  */
-public class NetCDFReaderPlugIn implements ProductReaderPlugIn {
+public class HDFReaderPlugIn implements ProductReaderPlugIn {
 
-	final static String[] FORMAT_NAMES = { "NetCDF" };
-	final static String[] FORMAT_FILE_EXTENSIONS = { "nc", "nc3" };
-    final static String PLUGIN_DESCRIPTION = "NetCDF Products";
+	final static String[] FORMAT_NAMES = { "HDF" };
+	final static String[] FORMAT_FILE_EXTENSIONS = { "hdf", "h5", "h4", "h5eos" };
+    final static String PLUGIN_DESCRIPTION = "HDF Products";
     final Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
 
     /**

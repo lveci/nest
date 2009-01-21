@@ -23,15 +23,21 @@
 
     <extension point="beam-ui:actions">
         <action>
+            <id>importDEM</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>DEM</text>
+            <parent>import</parent>
+        </action>
+
+        <action>
             <id>importACEDEMProduct</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>ACE</formatName>
             <text>Import ACE DEM Tile...</text>
-            <mnemonic>A</mnemonic>
+            <parent>importDEM</parent>
             <shortDescr>Import a ACE DEM tile or tile subset.</shortDescr>
             <description>Import a ACE DEM tile or tile subset.</description>
             <helpId>importACEProduct</helpId>
-            <placeAfter>importGETASSE30Product</placeAfter>
         </action>
     </extension>
 

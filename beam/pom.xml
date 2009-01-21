@@ -108,7 +108,7 @@
         <!--module>beam-avhrr-reader</module-->
         <!--module>beam-atsr-reader</module-->
         <module>beam-alos-reader</module>
-        <module>beam-netcdf-reader</module>
+        <!--module>beam-netcdf-reader</module-->
         <!--module>beam-merisl3-reader</module-->
         <module>beam-getasse30-reader</module>
         <module>beam-envisat-reader</module>
@@ -122,7 +122,7 @@
         <!--module>beam-smos-reader</module-->
 
         <module>lib-hdf</module>
-        <module>lib-netcdf</module>
+        <!--module>lib-netcdf</module-->
 
 		<module>beam-envi-reader</module>
         <!--<module>nest-dat</module>-->
@@ -217,11 +217,11 @@
                 <version>2.3</version>
             </dependency>
 
-            <dependency>
+            <!--dependency>
                 <groupId>ucar.netcdf</groupId>
                 <artifactId>lib-netcdf</artifactId>
                 <version>2.2.16</version>
-            </dependency>
+            </dependency-->
 
             <!-- JAI Libraries ############################################# -->
 
