@@ -17,9 +17,10 @@ rmdir /S /Q beam-meris-smac
 rmdir /S /Q beam-meris-smile
 rmdir /S /Q beam-merisl3-reader
 rmdir /S /Q beam-modis-reader
+rmdir /S /Q beam-netcdf-reader
 rmdir /S /Q beam-obpg-reader
 rmdir /S /Q beam-pconvert
 rmdir /S /Q beam-pview
 rmdir /S /Q beam-smos-reader
 rmdir /S /Q beam-unmix
-
+rmdir /S /Q lib-netcdf
