@@ -18,11 +18,11 @@ public class NetCDFWriterPlugIn implements ProductWriterPlugIn {
     }
 
     public String[] getFormatNames() {
-        return new String[]{NetcdfConstants.NETCDF_FORMAT_NAME};
+        return NetcdfConstants.NETCDF_FORMAT_NAMES;
     }
 
     public String[] getDefaultFileExtensions() {
-        return NetcdfConstants.FILE_EXTENSIONS;
+        return NetcdfConstants.NETCDF_FORMAT_FILE_EXTENSIONS;
     }
 
     /**

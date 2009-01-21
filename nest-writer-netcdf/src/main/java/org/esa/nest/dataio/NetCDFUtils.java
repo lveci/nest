@@ -4,11 +4,7 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.dataop.maptransf.Datum;
-import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
-import org.esa.beam.framework.dataop.maptransf.MapInfo;
-import org.esa.beam.framework.dataop.maptransf.MapProjection;
-import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
+import org.esa.beam.framework.dataop.maptransf.*;
 import org.esa.beam.util.logging.BeamLogManager;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
@@ -16,7 +12,6 @@ import ucar.ma2.Index;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.Group;
-import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
 import java.io.IOException;
@@ -238,10 +233,10 @@ public class NetCDFUtils {
         }
     }
 
-    public static String getProductType(final NcAttributeMap attMap) {
+    public static String getProductType(final NcAttributeMap attMap, final String defaultType) {
         String productType = attMap.getStringValue("Conventions");
         if (productType == null) {
-            productType = NetcdfConstants.NETCDF_FORMAT_NAME;
+            productType = defaultType;
         }
         return productType;
     }
@@ -252,9 +247,6 @@ public class NetCDFUtils {
             description = attMap.getStringValue("title");
             if (description == null) {
                 description = attMap.getStringValue("comment");
-                if (description == null) {
-                    description = NetcdfConstants.NETCDF_FORMAT_DESCRIPTION;
-                }
             }
         }
         return description;

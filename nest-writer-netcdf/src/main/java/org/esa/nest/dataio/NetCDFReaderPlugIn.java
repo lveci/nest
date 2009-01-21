@@ -1,17 +1,13 @@
 package org.esa.nest.dataio;
 
+import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.util.io.BeamFileFilter;
-import org.esa.beam.util.io.FileUtils;
 
-import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Locale;
-import java.util.Arrays;
-import java.util.ArrayList;
 
 /**
  * The ReaderPlugIn for NetCDF products.
@@ -19,10 +15,10 @@ import java.util.ArrayList;
  */
 public class NetCDFReaderPlugIn implements ProductReaderPlugIn {
 
-	final static String[] FORMAT_NAMES = { "NetCDF" };
-	final static String[] FORMAT_FILE_EXTENSIONS = { "nc", "nc3" };
-    final static String PLUGIN_DESCRIPTION = "NetCDF Products";
-    final Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
+    String[] FORMAT_NAMES = NetcdfConstants.NETCDF_FORMAT_NAMES;
+	String[] FORMAT_FILE_EXTENSIONS = NetcdfConstants.NETCDF_FORMAT_FILE_EXTENSIONS;
+    String PLUGIN_DESCRIPTION = NetcdfConstants.NETCDF_PLUGIN_DESCRIPTION;
+    Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
 
     /**
      * Checks whether the given object is an acceptable input for this product reader and if so, the method checks if it
@@ -53,7 +49,7 @@ public class NetCDFReaderPlugIn implements ProductReaderPlugIn {
         return DecodeQualification.UNABLE;
     }
 
-    protected static DecodeQualification checkProductQualification(final File file) {
+    DecodeQualification checkProductQualification(final File file) {
         for(String ext : FORMAT_FILE_EXTENSIONS) {
             if(!ext.isEmpty() && file.getName().toLowerCase().endsWith(ext.toLowerCase()))
                 return DecodeQualification.INTENDED;
@@ -94,7 +90,7 @@ public class NetCDFReaderPlugIn implements ProductReaderPlugIn {
     }
 
     public BeamFileFilter getProductFileFilter() {
-        return new FileFilter();
+        return new FileFilter(FORMAT_NAMES[0], FORMAT_FILE_EXTENSIONS, PLUGIN_DESCRIPTION);
     }
 
     /**
@@ -134,8 +130,8 @@ public class NetCDFReaderPlugIn implements ProductReaderPlugIn {
 
     public static class FileFilter extends BeamFileFilter {
 
-        public FileFilter() {
-            super(FORMAT_NAMES[0], FORMAT_FILE_EXTENSIONS, PLUGIN_DESCRIPTION);
+        public FileFilter(final String formatName, final String[] fileExts, final String description) {
+            super(formatName, fileExts, description);
         }
 
         /**

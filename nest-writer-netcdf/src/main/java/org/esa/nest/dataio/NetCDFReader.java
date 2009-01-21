@@ -2,23 +2,21 @@ package org.esa.nest.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.AbstractProductReader;
-import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.dataio.IllegalFileFormatException;
+import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.util.logging.BeamLogManager;
 import org.esa.beam.util.Guardian;
+import org.esa.beam.util.logging.BeamLogManager;
+import ucar.ma2.Array;
+import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Group;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-
-import ucar.nc2.Variable;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.Group;
-import ucar.nc2.Attribute;
-import ucar.ma2.Array;
-import ucar.ma2.InvalidRangeException;
 
 /**
  * The product reader for NetCDF products.
@@ -30,6 +28,7 @@ public class NetCDFReader extends AbstractProductReader {
     private Product _product = null;
     private NcVariableMap _variableMap = null;
     private boolean _yFlipped = false;
+    private final ProductReaderPlugIn _readerPlugIn;
 
     /**
      * Constructs a new abstract product reader.
@@ -38,7 +37,8 @@ public class NetCDFReader extends AbstractProductReader {
      *                     implementations
      */
     public NetCDFReader(final ProductReaderPlugIn readerPlugIn) {
-       super(readerPlugIn);
+        super(readerPlugIn);
+        this._readerPlugIn = readerPlugIn;
     }
 
     private void initReader() {
@@ -64,7 +64,7 @@ public class NetCDFReader extends AbstractProductReader {
         if (netcdfFile == null) {
             close();
             throw new IllegalFileFormatException(inputFile.getName() +
-                    " Could not be interpretted by the NetCDF reader.");
+                    " Could not be interpretted by the reader.");
         }
 
         final Map<NcRasterDim, List<Variable>> variableListMap = NetCDFUtils.getVariableListMap(netcdfFile.getRootGroup());
@@ -83,7 +83,7 @@ public class NetCDFReader extends AbstractProductReader {
         final NcAttributeMap globalAttributes = NcAttributeMap.create(_netcdfFile);
 
         _product = new Product(inputFile.getName(),
-                               NetCDFUtils.getProductType(globalAttributes),
+                               NetCDFUtils.getProductType(globalAttributes, _readerPlugIn.getFormatNames()[0]),
                                rasterDim.getDimX().getLength(),
                                rasterDim.getDimY().getLength(),
                                this);

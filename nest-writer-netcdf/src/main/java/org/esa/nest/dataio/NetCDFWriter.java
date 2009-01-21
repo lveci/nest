@@ -7,13 +7,17 @@ import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.io.FileUtils;
+import ucar.ma2.Array;
+import ucar.ma2.DataType;
+import ucar.ma2.InvalidRangeException;
+import ucar.nc2.Attribute;
+import ucar.nc2.Dimension;
+import ucar.nc2.Group;
+import ucar.nc2.NetcdfFileWriteable;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-
-import ucar.nc2.*;
-import ucar.ma2.*;
 
 
 public class NetCDFWriter extends AbstractProductWriter {
@@ -83,7 +87,7 @@ public class NetCDFWriter extends AbstractProductWriter {
             file = (File) getOutput();
         }
 
-        _outputFile = FileUtils.ensureExtension(file, NetcdfConstants.FILE_EXTENSIONS[0]);
+        _outputFile = FileUtils.ensureExtension(file, NetcdfConstants.NETCDF_FORMAT_FILE_EXTENSIONS[0]);
         deleteOutput();
 
         final Product product = getSourceProduct();

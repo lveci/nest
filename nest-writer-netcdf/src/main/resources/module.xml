@@ -55,6 +55,20 @@
             <largeIcon>icons/Import24.gif</largeIcon>
             <helpId>importHDF</helpId>
         </action>
+
+        <action>
+            <id>importGTOPO30</id>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <formatName>GTOPO30</formatName>
+            <parent>importDEM</parent>
+            <readerPlugin>org.esa.nest.dataio.GTOPO30ReaderPlugIn</readerPlugin>
+            <useAllFileFilter>true</useAllFileFilter>
+            <text>Import GTOPO30 DEM Tile...</text>
+            <shortDescr>Import a GTOPO30 tile</shortDescr>
+            <description>Import a GTOPO30 tile</description>
+            <largeIcon>icons/Import24.gif</largeIcon>
+            <helpId>importGTOPO30</helpId>
+        </action>
 		
     </extension>
     
