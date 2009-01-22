@@ -8,6 +8,7 @@ import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
@@ -93,12 +94,12 @@ class ERSProductDirectory extends CEOSProductDirectory {
             for (final ERSImageFile imageFile : _imageFiles) {
 
                 if(isProductSLC) {
-                    final Band bandI = createBand(product, "i_" + index, "real", imageFile);
-                    final Band bandQ = createBand(product, "q_" + index, "real", imageFile);
+                    final Band bandI = createBand(product, "i_" + index, Unit.REAL, imageFile);
+                    final Band bandQ = createBand(product, "q_" + index, Unit.IMAGINARY, imageFile);
                     ReaderUtils.createVirtualIntensityBand(product, bandI, bandQ, "_"+index);
                     ReaderUtils.createVirtualPhaseBand(product, bandI, bandQ, "_"+index);
                 } else {
-                    Band band = createBand(product, "Amplitude_" + index, "amplitude", imageFile);
+                    Band band = createBand(product, "Amplitude_" + index, Unit.AMPLITUDE, imageFile);
                     ReaderUtils.createVirtualIntensityBand(product, band, "_"+index);
                 }
                 ++index;
@@ -106,12 +107,12 @@ class ERSProductDirectory extends CEOSProductDirectory {
         } else {
             final ERSImageFile imageFile = _imageFiles[0];
             if(isProductSLC) {
-                final Band bandI = createBand(product, "i", "real", imageFile);
-                final Band bandQ = createBand(product, "q", "imaginary", imageFile);
+                final Band bandI = createBand(product, "i", Unit.REAL, imageFile);
+                final Band bandQ = createBand(product, "q", Unit.IMAGINARY, imageFile);
                 ReaderUtils.createVirtualIntensityBand(product, bandI, bandQ, "");
                 ReaderUtils.createVirtualPhaseBand(product, bandI, bandQ, "");
             } else {
-                Band band = createBand(product, "Amplitude", "amplitude", imageFile);
+                Band band = createBand(product, "Amplitude", Unit.AMPLITUDE, imageFile);
                 ReaderUtils.createVirtualIntensityBand(product, band, "");
             }
         }
@@ -187,10 +188,10 @@ class ERSProductDirectory extends CEOSProductDirectory {
         _leaderFile = null;
     }
 
-    private Band createBand(Product product, String name, String unit, ERSImageFile imageFile) {
+    private Band createBand(final Product product, final String name, final String unit, final ERSImageFile imageFile) {
         final Band band = new Band(name, ProductData.TYPE_INT16,
                                    _sceneWidth, _sceneHeight);
-
+        band.setDescription(name);
         band.setUnit(unit);
         product.addBand(band);
         bandImageFileMap.put(name, imageFile);

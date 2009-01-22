@@ -55,16 +55,16 @@ public class NetCDFWriter extends AbstractProductWriter {
         return sourceProduct.createSubset(subsetDef, "temp", "");
     }
 
-    private static float[] getLonData(final Product product) {
+    private static float[] getLonData(final Product product, final String lonGridName) {
         final int size = product.getSceneRasterWidth();
-        final TiePointGrid lonGrid = product.getTiePointGrid("longitude");
+        final TiePointGrid lonGrid = product.getTiePointGrid(lonGridName);
 
         return lonGrid.getPixels(0, 0, size, 1, (float[])null);
     }
 
-    private static float[] getLatData(final Product product) {
+    private static float[] getLatData(final Product product, final String latGridName) {
         final int size = product.getSceneRasterHeight();
-        final TiePointGrid latGrid = product.getTiePointGrid("latitude");
+        final TiePointGrid latGrid = product.getTiePointGrid(latGridName);
 
         return latGrid.getPixels(0, 0, 1, size, (float[])null);
     }
@@ -95,23 +95,37 @@ public class NetCDFWriter extends AbstractProductWriter {
         netCDFWriteable = NetcdfFileWriteable.createNew(_outputFile.getAbsolutePath(), true);
 
 
-        netCDFWriteable.addDimension("longitude", product.getSceneRasterWidth());
-        netCDFWriteable.addDimension("latitude", product.getSceneRasterHeight());
+        netCDFWriteable.addDimension(NetcdfConstants.LON_VAR_NAME, product.getSceneRasterWidth());
+        netCDFWriteable.addDimension(NetcdfConstants.LAT_VAR_NAME, product.getSceneRasterHeight());
 
         final Group rootGroup = netCDFWriteable.getRootGroup();
-        netCDFWriteable.addVariable("latitude", DataType.DOUBLE,
-                new Dimension[]{rootGroup.findDimension("latitude")});
-        netCDFWriteable.addVariableAttribute("latitude", "units", "degrees_north (+N/-S)");
-        netCDFWriteable.addVariable("longitude", DataType.DOUBLE,
-                new Dimension[]{rootGroup.findDimension("longitude")});
-        netCDFWriteable.addVariableAttribute("longitude", "units", "degrees_east (+E/-W)");
+        netCDFWriteable.addVariable(NetcdfConstants.LAT_VAR_NAME, DataType.FLOAT,
+                new Dimension[]{rootGroup.findDimension(NetcdfConstants.LAT_VAR_NAME)});
+        netCDFWriteable.addVariableAttribute(NetcdfConstants.LAT_VAR_NAME, "units", "degrees_north (+N/-S)");
+        netCDFWriteable.addVariable(NetcdfConstants.LON_VAR_NAME, DataType.FLOAT,
+                new Dimension[]{rootGroup.findDimension(NetcdfConstants.LON_VAR_NAME)});
+        netCDFWriteable.addVariableAttribute(NetcdfConstants.LON_VAR_NAME, "units", "degrees_east (+E/-W)");
 
         for(Band band : product.getBands()) {
             final String name = band.getName();
             netCDFWriteable.addVariable(name, DataType.DOUBLE,
-                    new Dimension[]{rootGroup.findDimension("latitude"), rootGroup.findDimension("longitude")});
-            netCDFWriteable.addVariableAttribute(name, "description", band.getDescription());
+                    new Dimension[]{rootGroup.findDimension(NetcdfConstants.LAT_VAR_NAME),
+                                    rootGroup.findDimension(NetcdfConstants.LON_VAR_NAME)});
+            if(band.getDescription() != null)
+                netCDFWriteable.addVariableAttribute(name, "description", band.getDescription());
             netCDFWriteable.addVariableAttribute(name, "unit", band.getUnit());
+        }
+
+        for(TiePointGrid tpg : product.getTiePointGrids()) {
+            final String name = tpg.getName();
+            netCDFWriteable.addDimension(name+'x', tpg.getRasterWidth());
+            netCDFWriteable.addDimension(name+'y', tpg.getRasterHeight());
+            netCDFWriteable.addVariable(name, DataType.FLOAT,
+                    new Dimension[]{rootGroup.findDimension(name+'x'), rootGroup.findDimension(name+'y')});
+            if(tpg.getDescription() != null)
+                netCDFWriteable.addVariableAttribute(name, "description", tpg.getDescription());
+            if(tpg.getUnit() != null)
+                netCDFWriteable.addVariableAttribute(name, "unit", tpg.getUnit());
         }
 
         addMetadata(product);
@@ -119,12 +133,21 @@ public class NetCDFWriter extends AbstractProductWriter {
         netCDFWriteable.create();
 
 
-        final Array latNcArray = Array.factory(getLatData(product));
-        final Array lonNcArray = Array.factory(getLonData(product));
+        final GeoCoding sourceGeoCoding = product.getGeoCoding();
+        String latGridName = "latitude";
+        String lonGridName = "longitude";
+        if (sourceGeoCoding instanceof TiePointGeoCoding) {
+            final TiePointGeoCoding geoCoding = (TiePointGeoCoding) sourceGeoCoding;
+            latGridName = geoCoding.getLatGrid().getName();
+            lonGridName = geoCoding.getLonGrid().getName();
+        }
+
+        final Array latNcArray = Array.factory(getLatData(product, latGridName));
+        final Array lonNcArray = Array.factory(getLonData(product, lonGridName));
 
         try {
-            netCDFWriteable.write("latitude", latNcArray);
-            netCDFWriteable.write("longitude", lonNcArray);
+            netCDFWriteable.write(NetcdfConstants.LAT_VAR_NAME, latNcArray);
+            netCDFWriteable.write(NetcdfConstants.LON_VAR_NAME, lonNcArray);
         } catch (InvalidRangeException rangeE) {
             rangeE.printStackTrace();
             throw new RuntimeException(rangeE);

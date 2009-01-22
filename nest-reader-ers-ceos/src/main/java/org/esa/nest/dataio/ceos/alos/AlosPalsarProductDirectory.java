@@ -10,6 +10,7 @@ import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
@@ -102,11 +103,11 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
                 if(isProductSLC) {
                     String bandName = "i_" + index;
-                    final Band bandI = createBand(bandName);
+                    final Band bandI = createBand(bandName, Unit.REAL);
                     product.addBand(bandI);
                     bandImageFileMap.put(bandName, imageFile);
                     bandName = "q_" + index;
-                    final Band bandQ = createBand(bandName);
+                    final Band bandQ = createBand(bandName, Unit.IMAGINARY);
                     product.addBand(bandQ);
                     bandImageFileMap.put(bandName, imageFile);
 
@@ -114,7 +115,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                     ++index;
                 } else {
                     String bandName = "Amplitude_" + index;
-                    final Band band = createBand(bandName);
+                    final Band band = createBand(bandName, Unit.AMPLITUDE);
                     product.addBand(band);
                     bandImageFileMap.put(bandName, imageFile);
                     ReaderUtils.createVirtualIntensityBand(product, band, "_"+index);
@@ -124,15 +125,15 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         } else {
             final AlosPalsarImageFile imageFile = _imageFiles[0];
             if(isProductSLC) {
-                final Band bandI = createBand("i");
+                final Band bandI = createBand("i", Unit.REAL);
                 product.addBand(bandI);
                 bandImageFileMap.put("i", imageFile);
-                final Band bandQ = createBand("q");
+                final Band bandQ = createBand("q", Unit.IMAGINARY);
                 product.addBand(bandQ);
                 bandImageFileMap.put("q", imageFile);
                 ReaderUtils.createVirtualIntensityBand(product, bandI, bandQ, "");
             } else {
-                final Band band = createBand("Amplitude");
+                final Band band = createBand("Amplitude", Unit.AMPLITUDE);
                 product.addBand(band);
                 bandImageFileMap.put("Amplitude", imageFile);
                 ReaderUtils.createVirtualIntensityBand(product, band, "");
@@ -224,7 +225,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         _leaderFile = null;
     }
 
-    private Band createBand(String name) {
+    private Band createBand(final String name, final String unit) {
         int dataType = ProductData.TYPE_INT16;
         if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1)
             dataType = ProductData.TYPE_FLOAT32;
@@ -232,7 +233,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             dataType = ProductData.TYPE_INT8;
 
         final Band band = new Band(name, dataType, _sceneWidth, _sceneHeight);
-
+        band.setDescription(name);
+        band.setUnit(unit);
 
 
       /*
@@ -432,7 +434,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     }
 
     private String getProductName() {
-        return _volumeDirectoryFile.getProductName();
+        return getMission() + '-' + _volumeDirectoryFile.getProductName();
     }
 
     private String getProductDescription() {

@@ -37,7 +37,7 @@ public class CeosHelper {
         return files[0];
     }
 
-    public static FilePointerRecord[] readFilePointers(final BaseRecord vdr, String mission) throws
+    public static FilePointerRecord[] readFilePointers(final BaseRecord vdr, final String mission) throws
                                                                                          IllegalCeosFormatException,
                                                                                          IOException {
         final int numFilePointers = vdr.getAttributeInt("Number of filepointer records");
@@ -50,8 +50,8 @@ public class CeosHelper {
         return filePointers;
     }
 
-    public static File getCEOSFile(File baseDir, String prefix) throws IOException {
-        File[] fileList = baseDir.listFiles();
+    public static File getCEOSFile(final File baseDir, final String prefix) throws IOException {
+        final File[] fileList = baseDir.listFiles();
         for (File file : fileList) {
             if (file.getName().toUpperCase().startsWith(prefix))
                 return file;
@@ -68,13 +68,13 @@ public class CeosHelper {
     }
 
     public static String getProductName(final BaseRecord textRecord) {
-        String name = textRecord.getAttributeString("Product type specifier").trim().replace("PRODUCT:", "")
+        final String name = textRecord.getAttributeString("Product type specifier").trim().replace("PRODUCT:", "")
                 + '-' + textRecord.getAttributeString("Scene identification").trim();
         return StringUtils.createValidName(name.trim(), new char[]{'_', '-', '.'}, '_');
     }
 
     public static String getProductType(final BaseRecord textRecord) {
-        String type = textRecord.getAttributeString("Product type specifier").trim();
+        final String type = textRecord.getAttributeString("Product type specifier").trim();
         return type.replace("PRODUCT:", "").trim();
     }
 
@@ -88,27 +88,4 @@ public class CeosHelper {
         return ProductData.UTC.create(calendar.getTime(), 0);
     }
 
-    public static double[] sortToFXYSumOrder(final double[] coeffs) {
-        final double[] newOrder = new double[coeffs.length];
-        newOrder[0] = coeffs[0];
-        newOrder[1] = coeffs[1];
-        newOrder[2] = coeffs[2];
-        newOrder[3] = coeffs[4];
-        newOrder[4] = coeffs[3];
-        newOrder[5] = coeffs[5];
-        newOrder[6] = coeffs[8];
-        newOrder[7] = coeffs[6];
-        newOrder[8] = coeffs[7];
-        newOrder[9] = coeffs[9];
-
-        return newOrder;
-    }
-
-    public static double[] convertLongToDouble(final long[] longs) {
-        final double[] doubles = new double[longs.length];
-        for (int i = 0; i < longs.length; i++) {
-            doubles[i] = Double.longBitsToDouble(longs[i]);
-        }
-        return doubles;
-    }
 }

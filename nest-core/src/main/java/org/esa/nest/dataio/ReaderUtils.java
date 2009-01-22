@@ -5,6 +5,7 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.math.MathUtils;
+import org.esa.nest.datamodel.Unit;
 
 import java.io.File;
 
@@ -23,7 +24,7 @@ public class ReaderUtils {
                 product.getSceneRasterHeight(),
                 expression);
         virtBand.setSynthetic(true);
-        virtBand.setUnit("phase");
+        virtBand.setUnit(Unit.PHASE);
         virtBand.setDescription("Phase from complex data");
         product.addBand(virtBand);
     }
@@ -38,7 +39,7 @@ public class ReaderUtils {
                 product.getSceneRasterHeight(),
                 expression);
         virtBand.setSynthetic(true);
-        virtBand.setUnit("intensity");
+        virtBand.setUnit(Unit.INTENSITY);
         virtBand.setDescription("Intensity from complex data");
         product.addBand(virtBand);
 
@@ -55,7 +56,7 @@ public class ReaderUtils {
                 product.getSceneRasterHeight(),
                 expression);
         virtBand.setSynthetic(true);
-        virtBand.setUnit("intensity");
+        virtBand.setUnit(Unit.INTENSITY);
         virtBand.setDescription("Intensity from complex data");
         product.addBand(virtBand);
     }
