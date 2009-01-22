@@ -41,7 +41,7 @@ public class CollocateOp extends Operator {
     @Parameter(valueSet = {NEAREST_NEIGHBOUR, BILINEAR_INTERPOLATION, CUBIC_CONVOLUTION},
                defaultValue = NEAREST_NEIGHBOUR, description = "The method to be used when resampling the slave grid onto the master grid.",
                label="Resampling Type")
-    private String resamplingType;
+    private String resamplingType = NEAREST_NEIGHBOUR;
 
     private transient Map<Band, RasterDataNode> sourceRasterMap;
 
@@ -49,7 +49,7 @@ public class CollocateOp extends Operator {
         return masterProduct;
     }
 
-    public void setMasterProduct(Product masterProduct) {
+    public void setMasterProduct(final Product masterProduct) {
         this.masterProduct = masterProduct;
     }
 
@@ -57,7 +57,7 @@ public class CollocateOp extends Operator {
         return slaveProduct;
     }
 
-    public void setSlaveProduct(Product slaveProduct) {
+    public void setSlaveProduct(final Product slaveProduct) {
         this.slaveProduct = slaveProduct;
     }
 
@@ -66,13 +66,11 @@ public class CollocateOp extends Operator {
         masterProduct = sourceProduct[0];
         slaveProduct = sourceProduct[1];
 
-        if (masterProduct.getGeoCoding() == null) {
-            throw new OperatorException(
-                    MessageFormat.format("Product ''{0}'' has no geo-coding.", masterProduct.getName()));
-        }
-        if (slaveProduct.getGeoCoding() == null) {
-            throw new OperatorException(
-                    MessageFormat.format("Product ''{0}'' has no geo-coding.", slaveProduct.getName()));
+        for(Product prod : sourceProduct) {
+            if (prod.getGeoCoding() == null) {
+                throw new OperatorException(
+                        MessageFormat.format("Product ''{0}'' has no geo-coding.", prod.getName()));
+            }
         }
 
         sourceRasterMap = new HashMap<Band, RasterDataNode>(31);
@@ -276,11 +274,11 @@ public class CollocateOp extends Operator {
         return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
     }
 
-    private static boolean isFlagBand(RasterDataNode sourceRaster) {
+    private static boolean isFlagBand(final RasterDataNode sourceRaster) {
         return (sourceRaster instanceof Band && ((Band) sourceRaster).isFlagBand());
     }
 
-    private static boolean isValidPixelExpressionUsed(RasterDataNode sourceRaster) {
+    private static boolean isValidPixelExpressionUsed(final RasterDataNode sourceRaster) {
         final String validPixelExpression = sourceRaster.getValidPixelExpression();
         return validPixelExpression != null && !validPixelExpression.trim().isEmpty();
     }
@@ -289,11 +287,11 @@ public class CollocateOp extends Operator {
 
         private final Tile tile;
         private final boolean usesNoData;
+        private final RasterDataNode rasterDataNode;
 
-        public ResamplingRaster(Tile tile) {
+        public ResamplingRaster(final Tile tile) {
             this.tile = tile;
-
-            final RasterDataNode rasterDataNode = tile.getRasterDataNode();
+            this.rasterDataNode = tile.getRasterDataNode();
             usesNoData = rasterDataNode.isNoDataValueUsed();
         }
 
@@ -305,28 +303,20 @@ public class CollocateOp extends Operator {
             return tile.getHeight();
         }
 
-        public final float getSample(int x, int y) throws Exception {
+        public final float getSample(final int x, final int y) throws Exception {
             final double sample = tile.getSampleDouble(x, y);
 
-            if (usesNoData && isNoDataValue(sample)) {
+            if (usesNoData && isNoDataValue(rasterDataNode, sample)) {
                 return Float.NaN;
             }
 
             return (float) sample;
         }
 
-        private boolean isNoDataValue(double sample) {
-            final RasterDataNode rasterDataNode = tile.getRasterDataNode();
-
-            if (rasterDataNode.isNoDataValueUsed()) {
-                if (rasterDataNode.isScalingApplied()) {
-                    return rasterDataNode.getGeophysicalNoDataValue() == sample;
-                } else {
-                    return rasterDataNode.getNoDataValue() == sample;
-                }
-            }
-
-            return false;
+        private static boolean isNoDataValue(final RasterDataNode rasterDataNode, final double sample) {
+            if (rasterDataNode.isScalingApplied())
+                return rasterDataNode.getGeophysicalNoDataValue() == sample;
+            return rasterDataNode.getNoDataValue() == sample;
         }
     }
 

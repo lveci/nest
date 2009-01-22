@@ -66,15 +66,15 @@ public class WARPOperator extends Operator {
 
     @Parameter(description = "The RMS threshold for eliminating invalid GCPs", interval = "(0, *)", defaultValue = "1.0",
                 label="RMS Threshold")
-    private float rmsThreshold;
+    private float rmsThreshold = 1.0f;
 
     @Parameter(description = "The order of WARP polynomial function", interval = "[1, 3]", defaultValue = "2",
                 label="Warp Polynomial Order")
-    private int warpPolynomialOrder;
+    private int warpPolynomialOrder = 2;
 
     @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR, BICUBIC, BICUBIC2}, defaultValue = BILINEAR,
                 label="Interpolation Method")
-    private String interpolationMethod;
+    private String interpolationMethod = BILINEAR;
 
     private Product masterProduct;
     private Product slaveProduct;
@@ -151,13 +151,13 @@ public class WARPOperator extends Operator {
 
         //============
         if (rmsMean > rmsThreshold && eliminateGCPsBasedOnRMS((float)rmsMean)) {
-            float threshold = (float)rmsMean;
+            final float threshold = (float)rmsMean;
             computeWARPPolynomial(); // compute 2nd warp polynomial
             outputCoRegistrationInfo(true, threshold, ++parseIdex);
         }
 
         if (rmsMean > rmsThreshold && eliminateGCPsBasedOnRMS((float)rmsMean)) {
-            float threshold = (float)rmsMean;
+            final float threshold = (float)rmsMean;
             computeWARPPolynomial(); // compute 3rd warp polynomial
             outputCoRegistrationInfo(true, threshold, ++parseIdex);
         }
@@ -183,37 +183,37 @@ public class WARPOperator extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException
     {
-        Rectangle targetTileRectangle = targetTile.getRectangle();
-        int x0 = targetTileRectangle.x;
-        int y0 = targetTileRectangle.y;
-        int w = targetTileRectangle.width;
-        int h = targetTileRectangle.height;
+        final Rectangle targetTileRectangle = targetTile.getRectangle();
+        final int x0 = targetTileRectangle.x;
+        final int y0 = targetTileRectangle.y;
+        final int w = targetTileRectangle.width;
+        final int h = targetTileRectangle.height;
         //System.out.println("WARPOperator: x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         // create source image
-        Tile sourceRaster = getSourceTile(slaveProduct.getBand(targetBand.getName()), targetTileRectangle, pm);
-        RenderedImage srcImage = sourceRaster.getRasterDataNode().getSourceImage();
+        final Tile sourceRaster = getSourceTile(slaveProduct.getBand(targetBand.getName()), targetTileRectangle, pm);
+        final RenderedImage srcImage = sourceRaster.getRasterDataNode().getSourceImage();
 
         // get warped image
-        RenderedOp warpedImage = createWarpImage(srcImage);
+        final RenderedOp warpedImage = createWarpImage(srcImage);
 
         // copy warped image data to target
-        float[] dataArray = warpedImage.getData(targetTileRectangle).getSamples(x0, y0, w, h, 0, (float[])null);
-        ProductData rawTargetData = ProductData.createInstance(dataArray);
+        final float[] dataArray = warpedImage.getData(targetTileRectangle).getSamples(x0, y0, w, h, 0, (float[])null);
+        final ProductData rawTargetData = ProductData.createInstance(dataArray);
         targetTile.setRawSamples(rawTargetData);
     }
 
     /**
      * Copy slave GCPs to target product.
      */
-    void setTargetGCPs() {
+    private void setTargetGCPs() {
 
         targetGCPGroup = targetProduct.getGcpGroup();
         targetGCPGroup.removeAll();
 
         for(int i = 0; i < slaveGCPGroup.getNodeCount(); ++i) {
-            Placemark sPin = slaveGCPGroup.get(i);
-            Placemark tPin = new Placemark(sPin.getName(),
+            final Placemark sPin = slaveGCPGroup.get(i);
+            final Placemark tPin = new Placemark(sPin.getName(),
                                sPin.getLabel(),
                                sPin.getDescription(),
                                sPin.getPixelPos(),
@@ -227,7 +227,7 @@ public class WARPOperator extends Operator {
     /**
      * Compute WARP polynomial function using master and slave GCP pairs.
      */
-    void computeWARPPolynomial() {
+    private void computeWARPPolynomial() {
 
         getNumOfValidGCPs();
 
@@ -238,31 +238,31 @@ public class WARPOperator extends Operator {
         computeRMS();
     }
 
-    void getNumOfValidGCPs() {
+    private void getNumOfValidGCPs() {
 
         numValidGCPs = slaveGCPGroup.getNodeCount();
-        int requiredGCPs = (warpPolynomialOrder + 2)*(warpPolynomialOrder + 1) / 2;
+        final int requiredGCPs = (warpPolynomialOrder + 2)*(warpPolynomialOrder + 1) / 2;
         if (numValidGCPs < requiredGCPs) {
             throw new OperatorException("Order " + warpPolynomialOrder + " requires " + requiredGCPs +
                     " GCPs, valid GCPs are " + numValidGCPs + ", try a larger RMS threshold.");
         }
     }
 
-    void getMasterAndSlaveGCPCoordinates() {
+    private void getMasterAndSlaveGCPCoordinates() {
 
         masterGCPCoords = new float[2*numValidGCPs];
         slaveGCPCoords = new float[2*numValidGCPs];
 
         for(int i = 0; i < numValidGCPs; ++i) {
 
-            Placemark sPin = slaveGCPGroup.get(i);
-            PixelPos sGCPPos = sPin.getPixelPos();
+            final Placemark sPin = slaveGCPGroup.get(i);
+            final PixelPos sGCPPos = sPin.getPixelPos();
             //System.out.println("WARP: slave gcp[" + i + "] = " + "(" + sGCPPos.x + "," + sGCPPos.y + ")");
 
-            PixelPos mGCPPos = masterGCPGroup.get(sPin.getName()).getPixelPos();
+            final PixelPos mGCPPos = masterGCPGroup.get(sPin.getName()).getPixelPos();
             //System.out.println("WARP: master gcp[" + i + "] = " + "(" + mGCPPos.x + "," + mGCPPos.y + ")");
 
-            int j = 2 * i;
+            final int j = 2 * i;
             masterGCPCoords[j] = mGCPPos.x;
             masterGCPCoords[j+1] = mGCPPos.y;
             slaveGCPCoords[j] = sGCPPos.x;
@@ -271,7 +271,7 @@ public class WARPOperator extends Operator {
         }
     }
 
-    void computeWARP() {
+    private void computeWARP() {
 
         warp = WarpPolynomial.createWarp(slaveGCPCoords, //source
                                          0,
@@ -285,18 +285,18 @@ public class WARPOperator extends Operator {
                                          warpPolynomialOrder);
     }
 
-    void computeRMS() {
+    private void computeRMS() {
 
         // compute RMS for all valid GCPs
         rms = new float[numValidGCPs];
         colResiduals = new float[numValidGCPs];
         rowResiduals = new float[numValidGCPs];
-        PixelPos slavePos = new PixelPos(0.0f,0.0f);
+        final PixelPos slavePos = new PixelPos(0.0f,0.0f);
         for (int i = 0; i < rms.length; i++) {
-            int i2 = 2*i;
+            final int i2 = 2*i;
             getWarpedCoords(masterGCPCoords[i2], masterGCPCoords[i2+1], slavePos);
-            double dX = slavePos.x - slaveGCPCoords[i2];
-            double dY = slavePos.y - slaveGCPCoords[i2+1];
+            final double dX = slavePos.x - slaveGCPCoords[i2];
+            final double dY = slavePos.y - slaveGCPCoords[i2+1];
             colResiduals[i] = (float)dX;
             rowResiduals[i] = (float)dY;
             rms[i] = (float)Math.sqrt(dX*dX + dY*dY);
@@ -330,9 +330,9 @@ public class WARPOperator extends Operator {
         colResidualStd = Math.sqrt(colResidual2Mean - colResidualMean*colResidualMean);
     }
 
-    boolean eliminateGCPsBasedOnRMS(float threshold) {
+    private boolean eliminateGCPsBasedOnRMS(final float threshold) {
 
-        ArrayList pinList = new ArrayList();
+        final ArrayList pinList = new ArrayList();
         for (int i = 0; i < rms.length; i++) {
             if (rms[i] >= threshold) {
                 pinList.add(slaveGCPGroup.get(i));
@@ -347,15 +347,15 @@ public class WARPOperator extends Operator {
         return !pinList.isEmpty();
     }
 
-    void getWarpedCoords(float mX, float mY, PixelPos slavePos) {
+    private void getWarpedCoords(final float mX, final float mY, final PixelPos slavePos) {
 
-        float[] xCoeffs = warp.getXCoeffs();
-        float[] yCoeffs = warp.getYCoeffs();
+        final float[] xCoeffs = warp.getXCoeffs();
+        final float[] yCoeffs = warp.getYCoeffs();
         if (xCoeffs.length != yCoeffs.length) {
             throw new OperatorException("WARP has different number of coefficients for X and Y");
         }
 
-        int numOfCoeffs = xCoeffs.length;
+        final int numOfCoeffs = xCoeffs.length;
         switch (warpPolynomialOrder) {
             case 1:
                 if (numOfCoeffs != 3) {
@@ -395,16 +395,16 @@ public class WARPOperator extends Operator {
         }
     }
 
-    void outputCoRegistrationInfo(boolean appendFlag, float threshold, int parseIndex) {
+    private void outputCoRegistrationInfo(final boolean appendFlag, final float threshold, final int parseIndex) {
 
-        float[] xCoeffs = warp.getXCoeffs();
-        float[] yCoeffs = warp.getYCoeffs();
+        final float[] xCoeffs = warp.getXCoeffs();
+        final float[] yCoeffs = warp.getYCoeffs();
 
         FileOutputStream out; // declare a file output object
         PrintStream p; // declare a print stream object
         String fileName = slaveProduct.getName() + "_residual.txt";
         try {
-            File appUserDir = new File(DatUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
+            final File appUserDir = new File(DatUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
             if(!appUserDir.exists()) {
                 appUserDir.mkdirs();
             }
@@ -489,7 +489,7 @@ public class WARPOperator extends Operator {
         }
     }
 
-    void createTargetProduct() {
+    private void createTargetProduct() {
 
         targetProduct = new Product(slaveProduct.getName(),
                                     slaveProduct.getProductType(),
@@ -497,7 +497,7 @@ public class WARPOperator extends Operator {
                                     masterProduct.getSceneRasterHeight());
 
         for(Band band : slaveProduct.getBands()) {
-            Band targetBand = targetProduct.addBand(band.getName(), ProductData.TYPE_FLOAT32);
+            final Band targetBand = targetProduct.addBand(band.getName(), band.getDataType());
             targetBand.setUnit(band.getUnit());
         }
 
@@ -515,7 +515,7 @@ public class WARPOperator extends Operator {
         targetProduct.setPreferredTileSize(slaveProduct.getSceneRasterWidth(), 256);
     }
 
-    void updateTargetMetadata() {
+    private void updateTargetMetadata() {
 
         // output RMS to Metadata
         /*
@@ -528,16 +528,16 @@ public class WARPOperator extends Operator {
         */
     }
 
-    RenderedOp createWarpImage(RenderedImage srcImage) {
+    private RenderedOp createWarpImage(final RenderedImage srcImage) {
 
         // reformat source image by casting pixel values from ushort to float
-        ParameterBlock pb1 = new ParameterBlock();
+        final ParameterBlock pb1 = new ParameterBlock();
         pb1.addSource(srcImage);
         pb1.add(DataBuffer.TYPE_FLOAT);
-        RenderedImage srcImageFloat = JAI.create("format", pb1);
+        final RenderedImage srcImageFloat = JAI.create("format", pb1);
 
         // get warped image
-        ParameterBlock pb2 = new ParameterBlock();
+        final ParameterBlock pb2 = new ParameterBlock();
         pb2.addSource(srcImageFloat);
         pb2.add(warp);
         pb2.add(interp);
