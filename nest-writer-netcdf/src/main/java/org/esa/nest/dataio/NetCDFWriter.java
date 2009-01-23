@@ -69,6 +69,19 @@ public class NetCDFWriter extends AbstractProductWriter {
         return latGrid.getPixels(0, 0, 1, size, (float[])null);
     }
 
+    private static float[][] getTiePointGridData(final TiePointGrid tpg) {
+        final float[][] data = new float[tpg.getRasterHeight()][tpg.getRasterWidth()];
+        final ProductData productData = tpg.getData();
+        for(int y=0; y < tpg.getRasterHeight(); ++y) {
+            final int stride = y * tpg.getRasterWidth();
+            for(int x=0; x < tpg.getRasterWidth(); ++x) {
+                final int index = stride + x;
+                data[y][x] = (float)productData.getElemFloatAt(index);
+            }
+        }
+        return data;
+    }
+
     /**
      * Writes the in-memory representation of a data product. This method was called by <code>writeProductNodes(product,
      * output)</code> of the AbstractProductWriter.
@@ -121,7 +134,7 @@ public class NetCDFWriter extends AbstractProductWriter {
             netCDFWriteable.addDimension(name+'x', tpg.getRasterWidth());
             netCDFWriteable.addDimension(name+'y', tpg.getRasterHeight());
             netCDFWriteable.addVariable(name, DataType.FLOAT,
-                    new Dimension[]{rootGroup.findDimension(name+'x'), rootGroup.findDimension(name+'y')});
+                    new Dimension[]{rootGroup.findDimension(name+'y'), rootGroup.findDimension(name+'x')});
             if(tpg.getDescription() != null)
                 netCDFWriteable.addVariableAttribute(name, "description", tpg.getDescription());
             if(tpg.getUnit() != null)
@@ -148,6 +161,11 @@ public class NetCDFWriter extends AbstractProductWriter {
         try {
             netCDFWriteable.write(NetcdfConstants.LAT_VAR_NAME, latNcArray);
             netCDFWriteable.write(NetcdfConstants.LON_VAR_NAME, lonNcArray);
+
+            for(TiePointGrid tpg : product.getTiePointGrids()) {
+                final Array tpgArray = Array.factory(getTiePointGridData(tpg));
+                netCDFWriteable.write(tpg.getName(), tpgArray);
+            }
         } catch (InvalidRangeException rangeE) {
             rangeE.printStackTrace();
             throw new RuntimeException(rangeE);
