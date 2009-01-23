@@ -38,14 +38,21 @@ import javax.media.jai.JAI;
 import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
+import java.util.Map;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.File;
 import java.io.IOException;
 
 /**
-
+ * The operator performs the following perations for all master/slave pairs that user selected:
+ *
+ * 1. For both PCA images read in the min values computed in the previous step by PCAMinOp;
+ * 2. Read also the eigendevector matrix saved in the temporary metadata;
+ * 3. Compute the PCA images again and substract the min value from each;
+ * 4. Output the final PCA images to target product.
  */
+
 @OperatorMetadata(alias="PCA-Image", description="Computes PCA Images", internal=true)
 public class PCAImageOp extends Operator {
 
@@ -54,24 +61,15 @@ public class PCAImageOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    private boolean writeToFile = false;
+    private boolean pcaImageComputed = false;
+    private int numOfSlaveBands; // total number of user selected slave bands
 
-    private boolean statsCalculated = false;
-    private boolean sampleTypeIsComplex;
-    private int numOfBands;
-    private int numOfPixels; // total number of pixel values
-    private double[] min;    // min of all pixel values for each band
-    private double[] max;    // max of all pixel values for each band
-    private double[] sum;    // summation of all pixel values for each band
-    private double[] sum2;   // summation of all pixel value squares for each band
-    private double[] sum4;   // summation of all pixel value to the power of 4 for each band
-    private double[] mean;   // mean for each band
-    private double[] coefVar;// coefficient of variation for each band
-    private double[] std;    // standard deviation for each band
-    private double[] enl;    // equivalent number of looks for each band
-    private HashMap<String, Integer> statisticsBandIndex;
+    private String masterBandName; // master band name
+    private String[] slaveBandNames; // band names user selected slave bands
 
-    private MetadataElement abs;
+    private double[][] eigenVectorMatrices; // eigenvector matrices for all slave bands
+    private double[][] minPCA; // min value for first and second PCA images for all master/slave band pairs
+    private HashMap<String, Integer> slaveBandIndex;
 
     /**
      * Default constructor. The graph processing framework
@@ -95,15 +93,12 @@ public class PCAImageOp extends Operator {
      */
     @Override
     public void initialize() throws OperatorException {
+
         try {
-        abs = OperatorUtils.getAbstractedMetadata(sourceProduct);
-        sampleTypeIsComplex = abs.getAttributeString("sample_type").contains("COMPLEX");
 
-        getNumOfBandsForStatistics();
+            getStatistics();
 
-        setInitialValues();
-
-        createTargetProduct();
+            createTargetProduct();
 
         } catch(Exception e) {
             throw new OperatorException(e.getMessage());
@@ -111,41 +106,48 @@ public class PCAImageOp extends Operator {
     }
 
     /**
-     * Get the number of bands for which statistics are computed.
+     * Get some statistics from the temporary metadata.
      */
-    void getNumOfBandsForStatistics() {
+    private void getStatistics() {
 
-        numOfBands = 0;
-        statisticsBandIndex = new HashMap<String, Integer>();
-        for(Band band : sourceProduct.getBands()) {
-            statisticsBandIndex.put(band.getName(), numOfBands);
-            numOfBands++;
+        try {
+
+            MetadataElement root = sourceProduct.getMetadataRoot();
+            MetadataElement tempElemRoot = root.getElement("temporary metadata");
+            if (tempElemRoot == null) {
+                throw new OperatorException("Cannot find temporary metadata");
+            }
+
+            masterBandName = tempElemRoot.getAttributeString("master band name");
+            numOfSlaveBands = tempElemRoot.getNumElements() - 1;
+            if (numOfSlaveBands <= 0) {
+                throw new OperatorException("There is no slave band");
+            }
+
+            slaveBandNames = new String[numOfSlaveBands];
+            eigenVectorMatrices = new double[numOfSlaveBands][4];
+            minPCA = new double[numOfSlaveBands][2];
+            slaveBandIndex = new HashMap<String, Integer>();
+
+            int k = 0;
+            for (MetadataElement subElemRoot : tempElemRoot.getElements()) {
+                String bandName = subElemRoot.getName();
+                if (!bandName.equals(masterBandName)) {
+                    slaveBandNames[k] = bandName;
+                    minPCA[k][0] = subElemRoot.getAttributeDouble("min1");
+                    minPCA[k][1] = subElemRoot.getAttributeDouble("min2");
+                    eigenVectorMatrices[k][0] = subElemRoot.getAttributeDouble("eigen vector matrix 0");
+                    eigenVectorMatrices[k][1] = subElemRoot.getAttributeDouble("eigen vector matrix 1");
+                    eigenVectorMatrices[k][2] = subElemRoot.getAttributeDouble("eigen vector matrix 2");
+                    eigenVectorMatrices[k][3] = subElemRoot.getAttributeDouble("eigen vector matrix 3");
+                    slaveBandIndex.put(bandName, k);
+                    k++;
+                }
+            }
+
+        } catch (Exception e) {
+            throw new OperatorException(e.getMessage());
         }
-    }
-
-    /**
-     * Set initial values to some internal variables.
-     */
-    void setInitialValues() {
-
-        min = new double[numOfBands];
-        max = new double[numOfBands];
-        mean = new double[numOfBands];
-        coefVar = new double[numOfBands];
-        std = new double[numOfBands];
-        enl = new double[numOfBands];
-        sum = new double[numOfBands];
-        sum2 = new double[numOfBands];
-        sum4 = new double[numOfBands];
-        for (int i = 0; i < numOfBands; i++) {
-            min[i] = Double.MAX_VALUE;
-            max[i] = 0.0;
-            sum[i] = 0.0;
-            sum2[i] = 0.0;
-            sum4[i] = 0.0;
-        }
-
-        numOfPixels = sourceProduct.getSceneRasterWidth() * sourceProduct.getSceneRasterHeight();
     }
 
     /**
@@ -158,7 +160,8 @@ public class PCAImageOp extends Operator {
                                     sourceProduct.getSceneRasterWidth(),
                                     sourceProduct.getSceneRasterHeight());
 
-        targetProduct.setPreferredTileSize(JAI.getDefaultTileSize());
+        //targetProduct.setPreferredTileSize(JAI.getDefaultTileSize());
+        targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 10);
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
@@ -167,8 +170,36 @@ public class PCAImageOp extends Operator {
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
 
-        for(Band band : sourceProduct.getBands()) {
-            ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct);
+        addSelectedBands();
+    }
+
+    /**
+     * Add user selected slave bands to target product.
+     */
+    private void addSelectedBands() {
+
+        // add PCA bands in target product
+        final Band masterBand = sourceProduct.getBand(masterBandName);
+        if (masterBand == null) {
+            throw new OperatorException("Source band not found: " + masterBand);
+        }
+
+        int imageWidth = masterBand.getRasterWidth();
+        int imageHeight = masterBand.getRasterHeight();
+        String unit = masterBand.getUnit();
+
+        for (String slaveBandName : slaveBandNames) {
+
+            String targetBandName1 = "PC1_" + masterBandName + "_" + slaveBandName;
+            String targetBandName2 = "PC2_" + masterBandName + "_" + slaveBandName;
+
+            Band targetBand = new Band(targetBandName1, ProductData.TYPE_FLOAT32, imageWidth, imageHeight);
+            targetBand.setUnit(unit);
+            targetProduct.addBand(targetBand);
+
+            targetBand = new Band(targetBandName2, ProductData.TYPE_FLOAT32, imageWidth, imageHeight);
+            targetBand.setUnit(unit);
+            targetProduct.addBand(targetBand);
         }
     }
 
@@ -176,50 +207,126 @@ public class PCAImageOp extends Operator {
      * Called by the framework in order to compute a tile for the given target band.
      * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
      *
-     * @param targetBand The target band.
-     * @param targetTile The current tile associated with the target band to be computed.
-     * @param pm         A progress monitor which should be used to determine computation cancelation requests.
+     * @param targetTileMap The target tiles associated with all target bands to be computed.
+     * @param targetRectangle The rectangle of target tile.
+     * @param pm A progress monitor which should be used to determine computation cancelation requests.
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs during computation of the target raster.
      */
     @Override
-    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+    public void computeTileStack(Map<Band, Tile> targetTileMap, Rectangle targetRectangle, ProgressMonitor pm)
+            throws OperatorException {
 
-        computeStatistics(targetBand, targetTile, targetTile.getRectangle(), pm);
+        try {
+
+            for (String slaveBandName : slaveBandNames) {
+
+                checkForCancelation(pm);
+
+                String targetBandName1 = "PC1_" + masterBandName + "_" + slaveBandName;
+                String targetBandName2 = "PC2_" + masterBandName + "_" + slaveBandName;
+
+                final Band targetBand1 = targetProduct.getBand(targetBandName1);
+                final Band targetBand2 = targetProduct.getBand(targetBandName2);
+
+                final Tile targetTile1 = targetTileMap.get(targetBand1);
+                final Tile targetTile2 = targetTileMap.get(targetBand2);
+
+                computePCAImages(slaveBandName, targetTile1, targetTile2, pm);
+            }
+
+        } catch (Exception e){
+            throw new OperatorException(e);
+        } finally {
+            pm.done();
+        }
+
+        pcaImageComputed = true;
     }
 
     /**
-     * Compute statistics for given source tile.
+     * Compute PCA images for given master/slave pair and output them to target.
+     *
+     * @param slaveBandName The slave band name.
+     * @param targetTile1 The target tile for the first target band.
+     * @param targetTile2 The target tile for the second target band.
+     * @param pm A progress monitor which should be used to determine computation cancelation requests.
      */
-    void computeStatistics(Band targetBand, Tile targetTile, Rectangle targetTileRectangle, ProgressMonitor pm) {
+    private void computePCAImages(
+            String slaveBandName, Tile targetTile1, Tile targetTile2, ProgressMonitor pm) {
 
-        final Band sourceBand1 = sourceProduct.getBand(targetBand.getName());
-        final Tile sourceRaster1 = getSourceTile(sourceBand1, targetTileRectangle, pm);
-        final ProductData rawSamples1 = sourceRaster1.getRawSamples();
+        // method 1
+        final ProductData trgData1 = targetTile1.getDataBuffer();
+        final ProductData trgData2 = targetTile2.getDataBuffer();
 
-        final int idx = statisticsBandIndex.get(targetBand.getName());
-        final int n = rawSamples1.getNumElems();
-        double v, v2;
+        final Rectangle targetTileRectangle = targetTile1.getRectangle();
+
+        final Band masterBand = sourceProduct.getBand(masterBandName);
+        final Band slaveBand = sourceProduct.getBand(slaveBandName);
+
+        final Tile masterRaster = getSourceTile(masterBand, targetTileRectangle, pm);
+        final ProductData masterRawSamples = masterRaster.getRawSamples();
+
+        final Tile slaveRaster = getSourceTile(slaveBand, targetTileRectangle, pm);
+        final ProductData slaveRawSamples = slaveRaster.getRawSamples();
+
+        final int idx = slaveBandIndex.get(slaveBandName);
+        final int n = masterRawSamples.getNumElems();
+
         for (int i = 0; i < n; i++) {
 
-            if(sampleTypeIsComplex) {
-                // todo
-            }
-            v = rawSamples1.getElemDoubleAt(i);
-            if(v > max[idx])
-                max[idx] = v;
-            if(v < min[idx])
-                min[idx] = v;
-            v2 = v*v;
-            sum[idx] += v;
-            sum2[idx] += v2;
-            sum4[idx] += v2*v2;
+            final double vm = masterRawSamples.getElemDoubleAt(i);
+            final double vs = slaveRawSamples.getElemDoubleAt(i);
+
+            final double vPCA1 = eigenVectorMatrices[idx][0]*vm + eigenVectorMatrices[idx][1]*vs - minPCA[idx][0];
+            final double vPCA2 = eigenVectorMatrices[idx][2]*vm + eigenVectorMatrices[idx][3]*vs - minPCA[idx][1];
+
+            trgData1.setElemDoubleAt(i, vPCA1);
+            trgData2.setElemDoubleAt(i, vPCA2);
         }
 
-        // copy source data to target
-        targetTile.setRawSamples(rawSamples1);
+        // method 2
+        /*
+        final Rectangle targetTileRectangle = targetTile1.getRectangle();
+        final int tx0 = targetTileRectangle.x;
+        final int ty0 = targetTileRectangle.y;
+        final int tw  = targetTileRectangle.width;
+        final int th  = targetTileRectangle.height;
+        //System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
 
-        statsCalculated = true;
+        final Band masterBand = sourceProduct.getBand(masterBandName);
+        final Band slaveBand = sourceProduct.getBand(slaveBandName);
+
+        final Tile masterRaster = getSourceTile(masterBand, targetTileRectangle, pm);
+        final Tile slaveRaster = getSourceTile(slaveBand, targetTileRectangle, pm);
+
+        final ProductData masterData = masterRaster.getDataBuffer();
+        final ProductData slaveData = slaveRaster.getDataBuffer();
+
+        final ProductData trgData1 = targetTile1.getDataBuffer();
+        final ProductData trgData2 = targetTile2.getDataBuffer();
+
+        final int bandIdx = slaveBandIndex.get(slaveBandName);
+
+        for (int ty = ty0; ty < ty0 + th; ty++) {
+            for (int tx = tx0; tx < tx0 + tw; tx++) {
+
+                //int index = targetTile1.getDataBufferIndex(tx, ty);
+                int index = (ty - ty0)*tw + tx - tx0;
+
+                final double vm = masterData.getElemDoubleAt(index);
+                final double vs = slaveData.getElemDoubleAt(index);
+
+                final double vPCA1 =
+                        eigenVectorMatrices[bandIdx][0]*vm + eigenVectorMatrices[bandIdx][1]*vs - minPCA[bandIdx][0];
+                final double vPCA2 =
+                        eigenVectorMatrices[bandIdx][2]*vm + eigenVectorMatrices[bandIdx][3]*vs - minPCA[bandIdx][1];
+
+                trgData1.setElemDoubleAt(index, vPCA1);
+                trgData2.setElemDoubleAt(index, vPCA2);                
+            }
+        }
+        */
     }
 
     /**
@@ -228,42 +335,18 @@ public class PCAImageOp extends Operator {
     @Override
     public void dispose() {
 
-        if (!statsCalculated) {
+        if (!pcaImageComputed) {
             return;
         }
 
-        completeStatistics();
-
-        writeStatsToMetadata();
-
-        if(writeToFile)
-            writeStatsToFile();
+        removeTemporaryMetadata();
     }
 
-    private void completeStatistics() {
-        for (String bandName : statisticsBandIndex.keySet())  {
+    private void removeTemporaryMetadata() {
 
-                final int bandIdx = statisticsBandIndex.get(bandName);
-                final double m = sum[bandIdx] / numOfPixels;
-                final double m2 = sum2[bandIdx] / numOfPixels;
-                final double m4 = sum4[bandIdx] / numOfPixels;
-
-                mean[bandIdx] = m;
-                std[bandIdx] = Math.sqrt(m2 - m*m);
-                coefVar[bandIdx] = Math.sqrt(m4 - m2*m2) / m2;
-                enl[bandIdx] = m2*m2 / (m4 - m2*m2);
-        }
-    }
-
-    private void writeStatsToMetadata() {
-
-        MetadataAttribute attrib = abs.getAttribute("Stat");
-        if(attrib == null) {
-            attrib = new MetadataAttribute("Stat", ProductData.TYPE_ASCII, 1);
-            abs.addAttributeFast(attrib);
-        }
-
-        AbstractMetadata.setAttribute(abs, "Stat", "written");
+        MetadataElement root = sourceProduct.getMetadataRoot();
+        MetadataElement tempElemRoot = root.getElement("temporary metadata");
+        root.removeElement(tempElemRoot);
 
         try {
             ProductIO.writeProduct(sourceProduct, sourceProduct.getFileLocation(),
@@ -272,102 +355,6 @@ public class PCAImageOp extends Operator {
         } catch(Exception e) {
             throw new OperatorException(e.getMessage());
         }
-    }
-
-    private void writeStatsToFile() {
-        String fileName = sourceProduct.getName() + "_statistics.txt";
-        try {
-            final File appUserDir = new File(DatUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
-            if(!appUserDir.exists()) {
-                appUserDir.mkdirs();
-            }
-            fileName = appUserDir.toString() + File.separator + fileName;
-            final FileOutputStream out = new FileOutputStream(fileName);
-
-            // Connect print stream to the output stream
-            final PrintStream p = new PrintStream(out);
-
-            p.println();
-            for (String bandName : statisticsBandIndex.keySet())  {
-
-                int bandIdx = statisticsBandIndex.get(bandName);
-
-                p.println();
-                p.println("Band: " + bandName);
-                p.format("Total pixels = %d", numOfPixels);
-                p.println();
-                p.format("Min = %8.3f", min[bandIdx]);
-                p.println();
-                p.format("Max = %15.3f", max[bandIdx]);
-                p.println();
-                //p.format("Sum = %15.3f", sum[bandIdx]);
-                //p.println();
-                p.format("Mean = %8.3f", mean[bandIdx]);
-                p.println();
-                p.format("Standard deviation = %8.3f", std[bandIdx]);
-                p.println();
-                p.format("Coefficient of variation = %8.3f", coefVar[bandIdx]);
-                p.println();
-                p.format("Equivalent number of looks = %8.3f", enl[bandIdx]);
-                p.println();
-            }
-
-            p.close();
-
-        } catch(IOException exc) {
-            throw new OperatorException(exc);
-        }
-    }
-
-    private void writeStatsToStdOut() {
-        /*
-        for (String bandName : statisticsBandIndex.keySet())  {
-
-            int bandIdx = statisticsBandIndex.get(bandName);
-
-            System.out.println();
-            System.out.println("Band: " + bandName);
-            System.out.println("Total pixels = " + numOfPixels);
-            System.out.println("min[" + bandIdx + "] = " + min[bandIdx]);
-            System.out.println("max[" + bandIdx + "] = " + max[bandIdx]);
-            System.out.println("sum[" + bandIdx + "] = " + sum[bandIdx]);
-            System.out.println("mean[" + bandIdx + "] = " + mean[bandIdx]);
-            System.out.println("std[" + bandIdx + "] = " + std[bandIdx]);
-            System.out.println("coefVar[" + bandIdx + "] = " + coefVar[bandIdx]);
-            System.out.println("enl[" + bandIdx + "] = " + enl[bandIdx]);
-            System.out.println();
-        }
-        */
-    }
-
-
-    // The following functions are for unit test only.
-    public int getNumOfBands() {
-        return numOfBands;
-    }
-
-    public double getMin(int bandIdx) {
-        return min[bandIdx];
-    }
-
-    public double getMax(int bandIdx) {
-        return max[bandIdx];
-    }
-
-    public double getMean(int bandIdx) {
-        return mean[bandIdx];
-    }
-
-    public double getStd(int bandIdx) {
-        return std[bandIdx];
-    }
-
-    public double getVarCoef(int bandIdx) {
-        return coefVar[bandIdx];
-    }
-
-    public double getENL(int bandIdx) {
-        return enl[bandIdx];
     }
 
     /**
