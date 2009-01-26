@@ -77,11 +77,11 @@ public class PCADialog extends MultiGraphDialog {
                     "3-Write", getTargetFile().getAbsolutePath(), getTargetFormat());
     }
 
-    private void setIO(final GraphExecuter graphEx, final String readID, final String readPath) throws GraphException {
+    private static void setIO(final GraphExecuter graphEx, final String readID, final String readPath) throws GraphException {
         setIO(graphEx, readID, readPath, null, null, null);
      }
 
-    private void setIO(final GraphExecuter graphEx,
+    private static void setIO(final GraphExecuter graphEx,
                        final String readID, final String readPath,
                        final String writeID, final String writePath,
                        final String format) {

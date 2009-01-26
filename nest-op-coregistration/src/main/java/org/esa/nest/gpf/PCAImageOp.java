@@ -15,8 +15,12 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.swing.progress.DialogProgressMonitor;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.dataio.dimap.DimapProductConstants;
+import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -24,25 +28,11 @@ import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.PropertyMap;
-import org.esa.beam.util.Debug;
-import org.esa.beam.dataio.dimap.DimapProductReader;
-import org.esa.beam.dataio.dimap.DimapProductConstants;
-import org.esa.nest.util.DatUtils;
-import org.esa.nest.datamodel.AbstractMetadata;
 
-import javax.media.jai.JAI;
-import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.io.File;
-import java.io.IOException;
 
 /**
  * The operator performs the following perations for all master/slave pairs that user selected:
@@ -62,14 +52,16 @@ public class PCAImageOp extends Operator {
     private Product targetProduct;
 
     private boolean pcaImageComputed = false;
-    private int numOfSlaveBands; // total number of user selected slave bands
+    private int numOfSlaveBands = 0; // total number of user selected slave bands
 
     private String masterBandName; // master band name
     private String[] slaveBandNames; // band names user selected slave bands
 
     private double[][] eigenVectorMatrices; // eigenvector matrices for all slave bands
     private double[][] minPCA; // min value for first and second PCA images for all master/slave band pairs
-    private HashMap<String, Integer> slaveBandIndex;
+    private boolean reloadStats = true;
+
+    private final HashMap<String, Integer> slaveBandIndex = new HashMap<String, Integer>(5);
 
     /**
      * Default constructor. The graph processing framework
@@ -95,11 +87,12 @@ public class PCAImageOp extends Operator {
     public void initialize() throws OperatorException {
 
         try {
-
-            getStatistics();
-
             createTargetProduct();
 
+            if(getStatistics()) {
+
+                addSelectedBands();
+            }
         } catch(Exception e) {
             throw new OperatorException(e.getMessage());
         }
@@ -107,15 +100,17 @@ public class PCAImageOp extends Operator {
 
     /**
      * Get some statistics from the temporary metadata.
+     * @return true if statistics are ok
      */
-    private void getStatistics() {
+    private boolean getStatistics() {
 
         try {
 
-            MetadataElement root = sourceProduct.getMetadataRoot();
-            MetadataElement tempElemRoot = root.getElement("temporary metadata");
+            final MetadataElement root = sourceProduct.getMetadataRoot();
+            final MetadataElement tempElemRoot = root.getElement("temporary metadata");
             if (tempElemRoot == null) {
-                throw new OperatorException("Cannot find temporary metadata");
+                //throw new OperatorException("Cannot find temporary metadata");
+                return false;
             }
 
             masterBandName = tempElemRoot.getAttributeString("master band name");
@@ -127,19 +122,18 @@ public class PCAImageOp extends Operator {
             slaveBandNames = new String[numOfSlaveBands];
             eigenVectorMatrices = new double[numOfSlaveBands][4];
             minPCA = new double[numOfSlaveBands][2];
-            slaveBandIndex = new HashMap<String, Integer>();
 
             int k = 0;
             for (MetadataElement subElemRoot : tempElemRoot.getElements()) {
-                String bandName = subElemRoot.getName();
+                final String bandName = subElemRoot.getName();
                 if (!bandName.equals(masterBandName)) {
                     slaveBandNames[k] = bandName;
-                    minPCA[k][0] = subElemRoot.getAttributeDouble("min1");
-                    minPCA[k][1] = subElemRoot.getAttributeDouble("min2");
-                    eigenVectorMatrices[k][0] = subElemRoot.getAttributeDouble("eigen vector matrix 0");
-                    eigenVectorMatrices[k][1] = subElemRoot.getAttributeDouble("eigen vector matrix 1");
-                    eigenVectorMatrices[k][2] = subElemRoot.getAttributeDouble("eigen vector matrix 2");
-                    eigenVectorMatrices[k][3] = subElemRoot.getAttributeDouble("eigen vector matrix 3");
+                    minPCA[k][0] = subElemRoot.getAttributeDouble("min1", 0);
+                    minPCA[k][1] = subElemRoot.getAttributeDouble("min2", 0);
+                    eigenVectorMatrices[k][0] = subElemRoot.getAttributeDouble("eigen vector matrix 0", 0);
+                    eigenVectorMatrices[k][1] = subElemRoot.getAttributeDouble("eigen vector matrix 1", 0);
+                    eigenVectorMatrices[k][2] = subElemRoot.getAttributeDouble("eigen vector matrix 2", 0);
+                    eigenVectorMatrices[k][3] = subElemRoot.getAttributeDouble("eigen vector matrix 3", 0);
                     slaveBandIndex.put(bandName, k);
                     k++;
                 }
@@ -148,6 +142,7 @@ public class PCAImageOp extends Operator {
         } catch (Exception e) {
             throw new OperatorException(e.getMessage());
         }
+        return true;
     }
 
     /**
@@ -169,8 +164,6 @@ public class PCAImageOp extends Operator {
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
-
-        addSelectedBands();
     }
 
     /**
@@ -184,14 +177,14 @@ public class PCAImageOp extends Operator {
             throw new OperatorException("Source band not found: " + masterBand);
         }
 
-        int imageWidth = masterBand.getRasterWidth();
-        int imageHeight = masterBand.getRasterHeight();
-        String unit = masterBand.getUnit();
+        final int imageWidth = masterBand.getRasterWidth();
+        final int imageHeight = masterBand.getRasterHeight();
+        final String unit = masterBand.getUnit();
 
         for (String slaveBandName : slaveBandNames) {
 
-            String targetBandName1 = "PC1_" + masterBandName + "_" + slaveBandName;
-            String targetBandName2 = "PC2_" + masterBandName + "_" + slaveBandName;
+            final String targetBandName1 = "PC1_" + masterBandName + '_' + slaveBandName;
+            final String targetBandName2 = "PC2_" + masterBandName + '_' + slaveBandName;
 
             Band targetBand = new Band(targetBandName1, ProductData.TYPE_FLOAT32, imageWidth, imageHeight);
             targetBand.setUnit(unit);
@@ -215,7 +208,12 @@ public class PCAImageOp extends Operator {
      */
     @Override
     public void computeTileStack(Map<Band, Tile> targetTileMap, Rectangle targetRectangle, ProgressMonitor pm)
-            throws OperatorException {
+                                throws OperatorException {
+        if(reloadStats) {
+            if(getStatistics()) {
+                reloadStats = false;
+            }
+        }
 
         try {
 
@@ -223,8 +221,8 @@ public class PCAImageOp extends Operator {
 
                 checkForCancelation(pm);
 
-                String targetBandName1 = "PC1_" + masterBandName + "_" + slaveBandName;
-                String targetBandName2 = "PC2_" + masterBandName + "_" + slaveBandName;
+                final String targetBandName1 = "PC1_" + masterBandName + '_' + slaveBandName;
+                final String targetBandName2 = "PC2_" + masterBandName + '_' + slaveBandName;
 
                 final Band targetBand1 = targetProduct.getBand(targetBandName1);
                 final Band targetBand2 = targetProduct.getBand(targetBandName2);
@@ -252,8 +250,8 @@ public class PCAImageOp extends Operator {
      * @param targetTile2 The target tile for the second target band.
      * @param pm A progress monitor which should be used to determine computation cancelation requests.
      */
-    private void computePCAImages(
-            String slaveBandName, Tile targetTile1, Tile targetTile2, ProgressMonitor pm) {
+    private void computePCAImages(final String slaveBandName, final Tile targetTile1, final Tile targetTile2,
+                                  final ProgressMonitor pm) {
 
         // method 1
         final ProductData trgData1 = targetTile1.getDataBuffer();
@@ -339,13 +337,13 @@ public class PCAImageOp extends Operator {
             return;
         }
 
-        removeTemporaryMetadata();
+       // removeTemporaryMetadata();
     }
 
     private void removeTemporaryMetadata() {
 
-        MetadataElement root = sourceProduct.getMetadataRoot();
-        MetadataElement tempElemRoot = root.getElement("temporary metadata");
+        final MetadataElement root = sourceProduct.getMetadataRoot();
+        final MetadataElement tempElemRoot = root.getElement("temporary metadata");
         root.removeElement(tempElemRoot);
 
         try {

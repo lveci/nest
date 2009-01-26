@@ -14,9 +14,15 @@
  */
 package org.esa.nest.gpf;
 
+import Jama.EigenvalueDecomposition;
+import Jama.Matrix;
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.swing.progress.DialogProgressMonitor;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.dataio.dimap.DimapProductConstants;
+import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -24,27 +30,11 @@ import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.PropertyMap;
-import org.esa.beam.util.Debug;
-import org.esa.beam.dataio.dimap.DimapProductReader;
-import org.esa.beam.dataio.dimap.DimapProductConstants;
-import org.esa.nest.util.DatUtils;
-import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.media.jai.JAI;
-import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.io.File;
-import java.io.IOException;
-
-import Jama.Matrix;
-import Jama.EigenvalueDecomposition;
 
 /**
  * The operator performs the following perations for all master/slave pairs that user selected:
@@ -64,7 +54,7 @@ public class PCAMinOp extends Operator {
     private Product targetProduct;
 
     private boolean statsCalculated = false;
-    private int numOfSlaveBands; // total number of user selected slave bands
+    private int numOfSlaveBands = 0; // total number of user selected slave bands
 
     private String masterBandName; // master band name
     private double masterMean; // mean of mater band
@@ -77,7 +67,9 @@ public class PCAMinOp extends Operator {
 
     private double[][] eigenVectorMatrices; // eigenvector matrices for all slave bands
     private double[][] minPCA; // min value for first and second PCA images for all master/slave band pairs
-    private HashMap<String, Integer> slaveBandIndex;
+    private boolean reloadStats = true;
+
+    private final HashMap<String, Integer> slaveBandIndex = new HashMap<String, Integer>(5);
 
     /**
      * Default constructor. The graph processing framework
@@ -104,14 +96,11 @@ public class PCAMinOp extends Operator {
 
         try {
 
-            getStatistics();
-
-            setInitialValues();
-
-            computeEigenDecompositionOfCovarianceMatrix();
-
             createTargetProduct();
-
+            
+            if(getStatistics()) {
+                addSelectedBands();
+            }
         } catch(Exception e) {
             throw new OperatorException(e.getMessage());
         }
@@ -119,15 +108,17 @@ public class PCAMinOp extends Operator {
 
     /**
      * Get some statistics from the temporary metadata.
+     * @return true if all stats found ok
      */
-    private void getStatistics() {
+    private boolean getStatistics() {
 
         try {
 
-            MetadataElement root = sourceProduct.getMetadataRoot();
-            MetadataElement tempElemRoot = root.getElement("temporary metadata");
+            final MetadataElement root = sourceProduct.getMetadataRoot();
+            final MetadataElement tempElemRoot = root.getElement("temporary metadata");
             if (tempElemRoot == null) {
-                throw new OperatorException("Cannot find temporary metadata");
+                //throw new OperatorException("Cannot find temporary metadata");
+                return false;
             }
 
             masterBandName = tempElemRoot.getAttributeString("master band name");
@@ -140,11 +131,10 @@ public class PCAMinOp extends Operator {
             slaveMean = new double[numOfSlaveBands];
             slaveMean2 = new double[numOfSlaveBands];
             slaveMeanCross = new double[numOfSlaveBands];
-            slaveBandIndex = new HashMap<String, Integer>();
 
             int k = 0;
             for (MetadataElement subElemRoot : tempElemRoot.getElements()) {
-                String bandName = subElemRoot.getName();
+                final String bandName = subElemRoot.getName();
                 if (bandName.equals(masterBandName)) {
                     masterMean = subElemRoot.getAttributeDouble("mean");
                     masterMean2 = subElemRoot.getAttributeDouble("square mean");
@@ -161,6 +151,7 @@ public class PCAMinOp extends Operator {
         } catch (Exception e) {
             throw new OperatorException(e.getMessage());
         }
+        return true;
     }
 
     /**
@@ -173,6 +164,8 @@ public class PCAMinOp extends Operator {
             minPCA[i][0] = Double.MAX_VALUE;
             minPCA[i][1] = Double.MAX_VALUE;
         }
+
+        computeEigenDecompositionOfCovarianceMatrix();
     }
 
     /**
@@ -182,7 +175,7 @@ public class PCAMinOp extends Operator {
 
         eigenVectorMatrices = new double[numOfSlaveBands][4];
 
-        double[][] cov = new double[2][2];
+        final double[][] cov = new double[2][2];
         for (int i = 0; i < numOfSlaveBands; i++) {
 
             cov[0][0] = masterMean2 - masterMean*masterMean;
@@ -190,10 +183,10 @@ public class PCAMinOp extends Operator {
             cov[1][0] = cov[0][1];
             cov[1][1] = slaveMean2[i] - slaveMean[i]*slaveMean[i];
 
-            Matrix Cov = new Matrix(cov);
-            EigenvalueDecomposition Eig = Cov.eig();
-            Matrix D = Eig.getD();
-            Matrix V = Eig.getV();
+            final Matrix Cov = new Matrix(cov);
+            final EigenvalueDecomposition Eig = Cov.eig();
+            final Matrix D = Eig.getD();
+            final Matrix V = Eig.getV();
 
             // eigenVectorMatrices saves V' in row, i.e. {v00, v10, v01, v11}
             if (D.get(0,0) >= D.get(1,1)) {
@@ -228,8 +221,6 @@ public class PCAMinOp extends Operator {
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
-
-        addSelectedBands();
     }
 
     /**
@@ -270,6 +261,13 @@ public class PCAMinOp extends Operator {
      */
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+
+        if(reloadStats) {
+            if(getStatistics()) {
+                setInitialValues();
+                reloadStats = false;
+            }
+        }
 
         Rectangle targetTileRectangle = targetTile.getRectangle();
 
@@ -318,12 +316,12 @@ public class PCAMinOp extends Operator {
 
     private void writeMinsToMetadata() {
 
-        MetadataElement root = sourceProduct.getMetadataRoot();
-        MetadataElement tempElemRoot = root.getElement("temporary metadata");
+        final MetadataElement root = sourceProduct.getMetadataRoot();
+        final MetadataElement tempElemRoot = root.getElement("temporary metadata");
 
         for (String bandName : slaveBandIndex.keySet())  {
             final int bandIdx = slaveBandIndex.get(bandName);
-            MetadataElement subElemRoot = tempElemRoot.getElement(bandName);
+            final MetadataElement subElemRoot = tempElemRoot.getElement(bandName);
             PCAStatisticsOp.setAttribute(subElemRoot, "min1", minPCA[bandIdx][0]);
             PCAStatisticsOp.setAttribute(subElemRoot, "min2", minPCA[bandIdx][1]);
             PCAStatisticsOp.setAttribute(subElemRoot, "eigen vector matrix 0", eigenVectorMatrices[bandIdx][0]);
@@ -342,7 +340,7 @@ public class PCAMinOp extends Operator {
     }
 
     // The following function is for unit test only.
-    public double getMinM(int bandIdx, int pcaImageIdx) {
+    public double getMinM(final int bandIdx, final int pcaImageIdx) {
         return minPCA[bandIdx][pcaImageIdx];
     }
 

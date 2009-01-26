@@ -56,22 +56,23 @@ public class PCAStatisticsOp extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "masterBand", itemAlias = "band",
             sourceProductId="source", label="Master Band")
-    private String masterBandName;
+    private String masterBandName = null;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Slave Bands")
-    private String[] sourceBandNames;
+    private String[] sourceBandNames = null;
 
     private boolean statsCalculated = false;
-    private int numOfBands;     // total number of bands (master and slave) for statistics
-    private int numOfPixels;    // total number of pixel values
+    private int numOfBands = 0;     // total number of bands (master and slave) for statistics
+    private int numOfPixels = 0;    // total number of pixel values
     private double[] sum;       // summation of pixel values for each band
     private double[] sum2;      // summation of pixel value squares for each band
     private double[] sumCross;  // summation of the dot product of each band and the master band
     private double[] mean;      // mean of pixel values for each band
     private double[] mean2;     // mean of pixel value squares for each band
     private double[] meanCross; // mean of the dot product of each band and the master band
-    private HashMap<String, Integer> statisticsBandIndex;
+
+    private final HashMap<String, Integer> statisticsBandIndex = new HashMap<String, Integer>();
 
     /**
      * Default constructor. The graph processing framework
@@ -100,8 +101,14 @@ public class PCAStatisticsOp extends Operator {
 
             createTargetProduct();
 
-            setInitialValues();
+            if(masterBandName != null) {
+                addSelectedBands();
 
+                setInitialValues();
+
+                // write initial temporary metadata
+                writeStatsToMetadata();
+            }
         } catch(Exception e) {
             throw new OperatorException(e.getMessage());
         }
@@ -125,19 +132,12 @@ public class PCAStatisticsOp extends Operator {
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
-
-        addSelectedBands();
     }
 
     /**
      * Add user selected master and slave bands to target product.
      */
     private void addSelectedBands() {
-
-        if (masterBandName == null) {
-            masterBandName = sourceProduct.getBandAt(0).getName(); // remove if default masterBandName is available
-            //throw new OperatorException("No default value for Master band");
-        }
 
         // if no slave band is selected by user, then select all bands
         if (sourceBandNames == null || sourceBandNames.length == 0) {
@@ -149,12 +149,8 @@ public class PCAStatisticsOp extends Operator {
             sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
         }
 
-        if (sourceBandNames.length == 1) {
-            throw new OperatorException("Slave band list contains only one band");
-        }
-
         // add master band in target product
-        Band masterBand = sourceProduct.getBand(masterBandName);
+        final Band masterBand = sourceProduct.getBand(masterBandName);
         if (masterBand == null) {
             throw new OperatorException("Source band not found: " + masterBandName);
         }
@@ -166,7 +162,6 @@ public class PCAStatisticsOp extends Operator {
         targetBand.setUnit(masterBand.getUnit());
         targetProduct.addBand(targetBand);
 
-        statisticsBandIndex = new HashMap<String, Integer>();
         numOfBands = 0;
         statisticsBandIndex.put(masterBandName, numOfBands);
         numOfBands++;
@@ -228,7 +223,7 @@ public class PCAStatisticsOp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
-        Rectangle targetTileRectangle = targetTile.getRectangle();
+        final Rectangle targetTileRectangle = targetTile.getRectangle();
 
         final Band masterBand = sourceProduct.getBand(masterBandName);
         final Band sourceBand = sourceProduct.getBand(targetBand.getName());
@@ -283,17 +278,18 @@ public class PCAStatisticsOp extends Operator {
 
     /**
      * Output statistics to source product metadata.
+     * @throws OperatorException when can't save metadata
      */
-    private void writeStatsToMetadata() {
+    private void writeStatsToMetadata() throws OperatorException {
 
         // create temporary metadata
-        MetadataElement root = sourceProduct.getMetadataRoot();
-        MetadataElement tempElemRoot = createElement(root, "temporary metadata");
+        final MetadataElement root = sourceProduct.getMetadataRoot();
+        final MetadataElement tempElemRoot = createElement(root, "temporary metadata");
         setAttribute(tempElemRoot, "master band name", masterBandName);
 
         for (String bandName : statisticsBandIndex.keySet())  {
             final int bandIdx = statisticsBandIndex.get(bandName);
-            MetadataElement subElemRoot = createElement(tempElemRoot, bandName);
+            final MetadataElement subElemRoot = createElement(tempElemRoot, bandName);
             setAttribute(subElemRoot, "mean", mean[bandIdx]);
             setAttribute(subElemRoot, "square mean", mean2[bandIdx]);
             setAttribute(subElemRoot, "cross mean", meanCross[bandIdx]);
@@ -314,7 +310,7 @@ public class PCAStatisticsOp extends Operator {
      * @param tag The sub-metadata element name.
      * @return The sub-metadata element.
      */
-    private MetadataElement createElement(MetadataElement root, String tag) {
+    private static MetadataElement createElement(MetadataElement root, String tag) {
 
         MetadataElement subElemRoot = root.getElement(tag);
         if(subElemRoot == null) {
@@ -330,7 +326,7 @@ public class PCAStatisticsOp extends Operator {
      * @param tag The attribute name.
      * @param value The value for the attribute.
      */
-    private void setAttribute(MetadataElement root, String tag, String value) {
+    private static void setAttribute(MetadataElement root, String tag, String value) {
 
         MetadataAttribute attr = root.getAttribute(tag);
         if(attr == null) {
