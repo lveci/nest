@@ -164,6 +164,10 @@ public class PCAImageOp extends Operator {
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
+
+        final MetadataElement root = targetProduct.getMetadataRoot();
+        final MetadataElement tempElemRoot = root.getElement("temporary metadata");
+        root.removeElement(tempElemRoot);
     }
 
     /**
@@ -209,6 +213,7 @@ public class PCAImageOp extends Operator {
     @Override
     public void computeTileStack(Map<Band, Tile> targetTileMap, Rectangle targetRectangle, ProgressMonitor pm)
                                 throws OperatorException {
+
         if(reloadStats) {
             if(getStatistics()) {
                 reloadStats = false;
@@ -337,7 +342,7 @@ public class PCAImageOp extends Operator {
             return;
         }
 
-       // removeTemporaryMetadata();
+       removeTemporaryMetadata();
     }
 
     private void removeTemporaryMetadata() {
