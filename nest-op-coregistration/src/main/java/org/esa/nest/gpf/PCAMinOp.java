@@ -35,6 +35,7 @@ import org.esa.beam.util.ProductUtils;
 import javax.media.jai.JAI;
 import java.awt.*;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The operator performs the following perations for all master/slave pairs that user selected:
@@ -253,14 +254,15 @@ public class PCAMinOp extends Operator {
      * Called by the framework in order to compute a tile for the given target band.
      * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
      *
-     * @param targetBand The target band.
-     * @param targetTile The current tile associated with the target band to be computed.
-     * @param pm         A progress monitor which should be used to determine computation cancelation requests.
+     * @param targetTileMap The target tiles associated with all target bands to be computed.
+     * @param targetRectangle The rectangle of target tile.
+     * @param pm A progress monitor which should be used to determine computation cancelation requests.
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs during computation of the target raster.
      */
     @Override
-    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+    public void computeTileStack(Map<Band, Tile> targetTileMap, Rectangle targetRectangle, ProgressMonitor pm)
+                                throws OperatorException {
 
         if(reloadStats) {
             if(getStatistics()) {
@@ -269,33 +271,41 @@ public class PCAMinOp extends Operator {
             }
         }
 
-        Rectangle targetTileRectangle = targetTile.getRectangle();
+        try {
+            final Band masterBand = sourceProduct.getBand(masterBandName);
+            final Tile masterRaster = getSourceTile(masterBand, targetRectangle, pm);
+            final ProductData masterRawSamples = masterRaster.getRawSamples();
+            final int n = masterRawSamples.getNumElems();
 
-        final Band masterBand = sourceProduct.getBand(masterBandName);
-        final Band slaveBand = sourceProduct.getBand(targetBand.getName());
+            for (String slaveBandName : slaveBandNames) {
 
-        final Tile masterRaster = getSourceTile(masterBand, targetTileRectangle, pm);
-        final ProductData masterRawSamples = masterRaster.getRawSamples();
+                checkForCancelation(pm);
 
-        final Tile slaveRaster = getSourceTile(slaveBand, targetTileRectangle, pm);
-        final ProductData slaveRawSamples = slaveRaster.getRawSamples();
+                final int bandIdx = slaveBandIndex.get(slaveBandName);
+                final Band slaveBand = sourceProduct.getBand(slaveBandName);
+                final Tile slaveRaster = getSourceTile(slaveBand, targetRectangle, pm);
+                final ProductData slaveRawSamples = slaveRaster.getRawSamples();
 
-        final int idx = slaveBandIndex.get(targetBand.getName());
-        final int n = masterRawSamples.getNumElems();
+                for (int i = 0; i < n; i++) {
 
-        for (int i = 0; i < n; i++) {
+                    final double vm = masterRawSamples.getElemDoubleAt(i);
+                    final double vs = slaveRawSamples.getElemDoubleAt(i);
 
-            final double vm = masterRawSamples.getElemDoubleAt(i);
-            final double vs = slaveRawSamples.getElemDoubleAt(i);
+                    final double vPCA1 = eigenVectorMatrices[bandIdx][0]*vm + eigenVectorMatrices[bandIdx][1]*vs;
+                    final double vPCA2 = eigenVectorMatrices[bandIdx][2]*vm + eigenVectorMatrices[bandIdx][3]*vs;
 
-            final double vPCA1 = eigenVectorMatrices[idx][0]*vm + eigenVectorMatrices[idx][1]*vs;
-            final double vPCA2 = eigenVectorMatrices[idx][2]*vm + eigenVectorMatrices[idx][3]*vs;
+                    if(vPCA1 < minPCA[bandIdx][0])
+                        minPCA[bandIdx][0] = vPCA1;
 
-            if(vPCA1 < minPCA[idx][0])
-                minPCA[idx][0] = vPCA1;
+                    if(vPCA2 < minPCA[bandIdx][1])
+                        minPCA[bandIdx][1] = vPCA2;
+                }
+            }
 
-            if(vPCA2 < minPCA[idx][1])
-                minPCA[idx][1] = vPCA2;
+        } catch (Exception e){
+            throw new OperatorException(e);
+        } finally {
+            pm.done();
         }
 
         statsCalculated = true;

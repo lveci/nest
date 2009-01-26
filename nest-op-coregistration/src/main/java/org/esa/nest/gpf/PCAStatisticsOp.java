@@ -33,6 +33,7 @@ import javax.media.jai.JAI;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The operator evaluates some local statistics for every pair of user selected master/slave bands of the image.
@@ -214,35 +215,44 @@ public class PCAStatisticsOp extends Operator {
      * Called by the framework in order to compute a tile for the given target band.
      * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
      *
-     * @param targetBand The target band.
-     * @param targetTile The current tile associated with the target band to be computed.
-     * @param pm         A progress monitor which should be used to determine computation cancelation requests.
+     * @param targetTileMap The target tiles associated with all target bands to be computed.
+     * @param targetRectangle The rectangle of target tile.
+     * @param pm A progress monitor which should be used to determine computation cancelation requests.
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs during computation of the target raster.
      */
     @Override
-    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+    public void computeTileStack(Map<Band, Tile> targetTileMap, Rectangle targetRectangle, ProgressMonitor pm)
+                                throws OperatorException {
 
-        final Rectangle targetTileRectangle = targetTile.getRectangle();
+        try {
+            final Band masterBand = sourceProduct.getBand(masterBandName);
+            final Tile masterRaster = getSourceTile(masterBand, targetRectangle, pm);
+            final ProductData masterRawSamples = masterRaster.getRawSamples();
+            final int n = masterRawSamples.getNumElems();
 
-        final Band masterBand = sourceProduct.getBand(masterBandName);
-        final Band sourceBand = sourceProduct.getBand(targetBand.getName());
+            for (String bandName : statisticsBandIndex.keySet())  {
 
-        final Tile masterRaster = getSourceTile(masterBand, targetTileRectangle, pm);
-        final ProductData masterRawSamples = masterRaster.getRawSamples();
+                checkForCancelation(pm);
 
-        final Tile sourceRaster = getSourceTile(sourceBand, targetTileRectangle, pm);
-        final ProductData sourceRawSamples = sourceRaster.getRawSamples();
+                final int bandIdx = statisticsBandIndex.get(bandName);
+                final Band sourceBand = sourceProduct.getBand(bandName);
+                final Tile sourceRaster = getSourceTile(sourceBand, targetRectangle, pm);
+                final ProductData sourceRawSamples = sourceRaster.getRawSamples();
 
-        final int idx = statisticsBandIndex.get(targetBand.getName());
-        final int n = masterRawSamples.getNumElems();
+                for (int i = 0; i < n; i++) {
+                    final double vm = masterRawSamples.getElemDoubleAt(i);
+                    final double vs = sourceRawSamples.getElemDoubleAt(i);
+                    sum[bandIdx] += vs;
+                    sum2[bandIdx] += vs*vs;
+                    sumCross[bandIdx] += vs*vm;
+                }
+            }
 
-        for (int i = 0; i < n; i++) {
-            final double vm = masterRawSamples.getElemDoubleAt(i);
-            final double vs = sourceRawSamples.getElemDoubleAt(i);
-            sum[idx] += vs;
-            sum2[idx] += vs*vs;
-            sumCross[idx] += vs*vm;
+        } catch (Exception e){
+            throw new OperatorException(e);
+        } finally {
+            pm.done();
         }
 
         statsCalculated = true;
