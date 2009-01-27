@@ -56,6 +56,7 @@
                     <id>attachPixelGeoCoding</id>
                     <id>detachPixelGeoCoding</id>
                     <id>exportLegendImageFile</id>
+                    <id>createXYDisplacementBandsAction</id>
                 </excludedActions>
                 <excludedToolViews>
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>

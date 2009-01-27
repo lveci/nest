@@ -110,8 +110,8 @@ public class GCPSelectionOperator extends Operator {
 
     private boolean complexCoregistration = false;
 
-    private ProductNodeGroup<Placemark> masterGcpGroup;
-    private ProductNodeGroup<Placemark> targetGcpGroup;
+    private ProductNodeGroup<Pin> masterGcpGroup;
+    private ProductNodeGroup<Pin> targetGcpGroup;
 
     private Tile masterImagetteRaster1;
     private Tile masterImagetteRaster2;
@@ -371,7 +371,7 @@ public class GCPSelectionOperator extends Operator {
 
         for(int i = 0; i < masterGcpGroup.getNodeCount(); i++) {
 
-            final Placemark mPin = masterGcpGroup.get(i);
+            final Pin mPin = masterGcpGroup.get(i);
             final PixelPos mGCPPixelPos = mPin.getPixelPos();
 
             if (checkGCPValidity(mGCPPixelPos, x0, y0, w, h)) {
@@ -395,7 +395,7 @@ public class GCPSelectionOperator extends Operator {
 
                 if (getSlaveGCP) {
 
-                    final Placemark sPin = new Placemark(mPin.getName(),
+                    final Pin sPin = new Pin(mPin.getName(),
                                        mPin.getLabel(),
                                        mPin.getDescription(),
                                        sGCPPixelPos,

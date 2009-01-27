@@ -67,7 +67,7 @@ public class DataAnalysisOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    private boolean writeToFile = false;
+    private boolean writeToFile = true;
 
     private boolean statsCalculated = false;
     private boolean sampleTypeIsComplex;
@@ -82,9 +82,9 @@ public class DataAnalysisOp extends Operator {
     private double[] coefVar;// coefficient of variation for each band
     private double[] std;    // standard deviation for each band
     private double[] enl;    // equivalent number of looks for each band
-    private HashMap<String, Integer> statisticsBandIndex;
 
-    private MetadataElement abs;
+    private final HashMap<String, Integer> statisticsBandIndex = new HashMap<String, Integer>();
+
 
     /**
      * Default constructor. The graph processing framework
@@ -109,8 +109,8 @@ public class DataAnalysisOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         try {
-        abs = OperatorUtils.getAbstractedMetadata(sourceProduct);
-        sampleTypeIsComplex = abs.getAttributeString("sample_type").contains("COMPLEX");
+        //final MetadataElement abs = OperatorUtils.getAbstractedMetadata(sourceProduct);
+        //sampleTypeIsComplex = abs.getAttributeString("sample_type").contains("COMPLEX");
 
         getNumOfBandsForStatistics();
 
@@ -129,7 +129,6 @@ public class DataAnalysisOp extends Operator {
     void getNumOfBandsForStatistics() {
 
         numOfBands = 0;
-        statisticsBandIndex = new HashMap<String, Integer>();
         for(Band band : sourceProduct.getBands()) {
             statisticsBandIndex.put(band.getName(), numOfBands);
             numOfBands++;
@@ -247,8 +246,6 @@ public class DataAnalysisOp extends Operator {
 
         completeStatistics();
 
-        writeStatsToMetadata();
-
         if(writeToFile)
             writeStatsToFile();
     }
@@ -265,25 +262,6 @@ public class DataAnalysisOp extends Operator {
                 std[bandIdx] = Math.sqrt(m2 - m*m);
                 coefVar[bandIdx] = Math.sqrt(m4 - m2*m2) / m2;
                 enl[bandIdx] = m2*m2 / (m4 - m2*m2);
-        }
-    }
-
-    private void writeStatsToMetadata() {
-
-        MetadataAttribute attrib = abs.getAttribute("Stat");
-        if(attrib == null) {
-            attrib = new MetadataAttribute("Stat", ProductData.TYPE_ASCII, 1);
-            abs.addAttributeFast(attrib);
-        }
-        
-        AbstractMetadata.setAttribute(abs, "Stat", "written");
-
-        try {
-            ProductIO.writeProduct(sourceProduct, sourceProduct.getFileLocation(),
-                                   DimapProductConstants.DIMAP_FORMAT_NAME,
-                                   true, ProgressMonitor.NULL);
-        } catch(Exception e) {
-            throw new OperatorException(e.getMessage());
         }
     }
 

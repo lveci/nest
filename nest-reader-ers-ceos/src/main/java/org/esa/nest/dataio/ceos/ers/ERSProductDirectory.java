@@ -2,6 +2,7 @@ package org.esa.nest.dataio.ceos.ers;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
+import org.esa.beam.dataio.dimap.FileImageInputStreamExtImpl;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
@@ -440,7 +441,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
     }
 
     private ImageInputStream createInputStream(final String fileName) throws IOException {
-        return new FileImageInputStream(new File(_baseDir, fileName));
+        return FileImageInputStreamExtImpl.createInputStream(new File(_baseDir, fileName));
     }
 
 }

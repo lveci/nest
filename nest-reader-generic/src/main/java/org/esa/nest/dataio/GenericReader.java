@@ -7,6 +7,7 @@ import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.visat.VisatApp;
+import org.esa.beam.dataio.dimap.FileImageInputStreamExtImpl;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.dat.dialogs.GenericBinaryDialog;
 
@@ -85,8 +86,7 @@ public class GenericReader extends AbstractProductReader {
         product.setModified(false);
         product.setFileLocation(inputFile);
 
-
-        ImageInputStream imageStream = new FileImageInputStream(inputFile);
+        final ImageInputStream imageStream = FileImageInputStreamExtImpl.createInputStream(inputFile);
         binaryReader = new BinaryFileReader(imageStream);
 
         return product;
