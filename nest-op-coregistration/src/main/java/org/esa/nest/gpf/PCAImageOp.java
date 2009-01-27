@@ -29,10 +29,15 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.nest.util.DatUtils;
 
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.io.IOException;
 
 /**
  * The operator performs the following perations for all master/slave pairs that user selected:
@@ -58,6 +63,7 @@ public class PCAImageOp extends Operator {
     private String[] slaveBandNames; // band names user selected slave bands
 
     private double[][] eigenVectorMatrices; // eigenvector matrices for all slave bands
+    private double[][] eigenValues; // eigenvalues for all slave bands
     private double[][] minPCA; // min value for first and second PCA images for all master/slave band pairs
     private boolean reloadStats = true;
 
@@ -121,6 +127,7 @@ public class PCAImageOp extends Operator {
 
             slaveBandNames = new String[numOfSlaveBands];
             eigenVectorMatrices = new double[numOfSlaveBands][4];
+            eigenValues = new double[numOfSlaveBands][2];
             minPCA = new double[numOfSlaveBands][2];
 
             int k = 0;
@@ -134,6 +141,8 @@ public class PCAImageOp extends Operator {
                     eigenVectorMatrices[k][1] = subElemRoot.getAttributeDouble("eigen vector matrix 1", 0);
                     eigenVectorMatrices[k][2] = subElemRoot.getAttributeDouble("eigen vector matrix 2", 0);
                     eigenVectorMatrices[k][3] = subElemRoot.getAttributeDouble("eigen vector matrix 3", 0);
+                    eigenValues[k][0] = subElemRoot.getAttributeDouble("eigen value 0", 0);
+                    eigenValues[k][1] = subElemRoot.getAttributeDouble("eigen value 1", 0);
                     slaveBandIndex.put(bandName, k);
                     k++;
                 }
@@ -342,7 +351,8 @@ public class PCAImageOp extends Operator {
             return;
         }
 
-       removeTemporaryMetadata();
+        createReportFile();
+        removeTemporaryMetadata();
     }
 
     private void removeTemporaryMetadata() {
@@ -357,6 +367,49 @@ public class PCAImageOp extends Operator {
                                    true, ProgressMonitor.NULL);
         } catch(Exception e) {
             throw new OperatorException(e.getMessage());
+        }
+    }
+
+
+    private void createReportFile() {
+
+        String fileName = sourceProduct.getName() + "_pca_report.txt";
+        try {
+            final File appUserDir = new File(DatUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
+            if(!appUserDir.exists()) {
+                appUserDir.mkdirs();
+            }
+            fileName = appUserDir.toString() + File.separator + fileName;
+            final FileOutputStream out = new FileOutputStream(fileName);
+
+            // Connect print stream to the output stream
+            final PrintStream p = new PrintStream(out);
+
+            p.println();
+            p.println("Master Band: " + masterBandName);
+            p.println();
+            for (String bandName : slaveBandIndex.keySet())  {
+                final int bandIdx = slaveBandIndex.get(bandName);
+
+                p.println();
+                p.println("Slave Band " + bandIdx + ": " + bandName);
+                p.println();
+                p.format("Eigen Vector Matrix = [%8.3f, %8.3f",
+                         eigenVectorMatrices[bandIdx][0], eigenVectorMatrices[bandIdx][2]);
+                p.println();
+                p.format("                       %8.3f, %8.3f]",
+                         eigenVectorMatrices[bandIdx][1], eigenVectorMatrices[bandIdx][3]);
+                p.println();
+                p.println();
+                p.format("Eigen Values = [%8.3f, %8.3f]", eigenValues[bandIdx][0], eigenValues[bandIdx][1]);
+                p.println();
+                p.println();
+            }
+
+            p.close();
+
+        } catch(IOException exc) {
+            throw new OperatorException(exc);
         }
     }
 
