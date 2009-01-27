@@ -67,6 +67,7 @@ public class PCAMinOp extends Operator {
     private double[] slaveMeanCross; // cross mean of slave bands
 
     private double[][] eigenVectorMatrices; // eigenvector matrices for all slave bands
+    private double[][] eigenValues; // eigenvalues for all slave bands
     private double[][] minPCA; // min value for first and second PCA images for all master/slave band pairs
     private boolean reloadStats = true;
 
@@ -175,6 +176,7 @@ public class PCAMinOp extends Operator {
     void computeEigenDecompositionOfCovarianceMatrix() {
 
         eigenVectorMatrices = new double[numOfSlaveBands][4];
+        eigenValues = new double[numOfSlaveBands][2];
 
         final double[][] cov = new double[2][2];
         for (int i = 0; i < numOfSlaveBands; i++) {
@@ -195,11 +197,15 @@ public class PCAMinOp extends Operator {
                 eigenVectorMatrices[i][1] = V.get(1,0);
                 eigenVectorMatrices[i][2] = V.get(0,1);
                 eigenVectorMatrices[i][3] = V.get(1,1);
+                eigenValues[i][0] = D.get(0,0);
+                eigenValues[i][1] = D.get(1,1);
             } else {
                 eigenVectorMatrices[i][0] = V.get(0,1);
                 eigenVectorMatrices[i][1] = V.get(1,1);
                 eigenVectorMatrices[i][2] = V.get(0,0);
                 eigenVectorMatrices[i][3] = V.get(1,0);
+                eigenValues[i][0] = D.get(1,1);
+                eigenValues[i][1] = D.get(0,0);
             }
         }
     }
@@ -338,6 +344,8 @@ public class PCAMinOp extends Operator {
             PCAStatisticsOp.setAttribute(subElemRoot, "eigen vector matrix 1", eigenVectorMatrices[bandIdx][1]);
             PCAStatisticsOp.setAttribute(subElemRoot, "eigen vector matrix 2", eigenVectorMatrices[bandIdx][2]);
             PCAStatisticsOp.setAttribute(subElemRoot, "eigen vector matrix 3", eigenVectorMatrices[bandIdx][3]);
+            PCAStatisticsOp.setAttribute(subElemRoot, "eigen value 0", eigenValues[bandIdx][0]);
+            PCAStatisticsOp.setAttribute(subElemRoot, "eigen value 1", eigenValues[bandIdx][1]);
         }
 
         try {
