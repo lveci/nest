@@ -1,9 +1,6 @@
 package org.esa.nest.dataio;
 
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.MetadataAttribute;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.*;
 import org.esa.beam.util.logging.BeamLogManager;
 import ucar.ma2.Array;
@@ -16,10 +13,7 @@ import ucar.nc2.Variable;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Provides some NetCDF related utility methods.
@@ -43,6 +37,32 @@ public class NetCDFUtils {
             band.setNoDataValueUsed(true);
         }
         return band;
+    }
+
+    public static TiePointGrid createTiePointGrid(final Variable variable, final int gridWidth, final int gridHeight,
+                                                  final int sceneWidth, final int sceneHeight) throws IOException {
+        final NcAttributeMap attMap = NcAttributeMap.create(variable);
+
+        final float subSamplingX = (float)sceneWidth / (float)(gridWidth - 1);
+        final float subSamplingY = (float)sceneHeight / (float)(gridHeight - 1);
+
+        final Array data = variable.read();
+        final float[] dataArray = (float[])data.copyTo1DJavaArray();
+
+        final TiePointGrid tpg = new TiePointGrid(NcVariableMap.getAbsoluteName(variable), gridWidth, gridHeight, 0, 0,
+                subSamplingX, subSamplingY, dataArray);
+
+        tpg.setDescription(variable.getDescription());
+        tpg.setUnit(variable.getUnitsString());
+        tpg.setScalingFactor(getScalingFactor(attMap));
+        tpg.setScalingOffset(getAddOffset(attMap));
+
+        final Number noDataValue = getNoDataValue(attMap);
+        if (noDataValue != null) {
+            tpg.setNoDataValue(noDataValue.doubleValue());
+            tpg.setNoDataValueUsed(true);
+        }
+        return tpg;
     }
 
     private static double getScalingFactor(final NcAttributeMap attMap) {
@@ -315,13 +335,35 @@ public class NetCDFUtils {
         return list.toArray(new Variable[list.size()]);
     }
 
+    static Variable[] getTiePointGridVariables(Map<NcRasterDim, List<Variable>> variableLists,
+                                               Variable[] rasterVariables) {
+        final ArrayList<Variable> tpgList = new ArrayList<Variable>();
+        final Set keySet = variableLists.keySet();
+        for(Object o : keySet) {
+            List<Variable> varList = variableLists.get(o);
+            for(Variable var : varList) {
+                boolean found = false;
+                for(Variable raster : rasterVariables) {
+                    if(var == raster) {
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found) {
+                    tpgList.add(var);
+                }
+            }
+        }
+        return tpgList.toArray(new Variable[tpgList.size()]);
+    }
+
     static NcRasterDim getBestRasterDim(Map<NcRasterDim, List<Variable>> variableListMap) {
 
         final NcRasterDim[] keys = variableListMap.keySet().toArray(new NcRasterDim[variableListMap.keySet().size()]);
         if (keys.length == 0) {
             return null;
         }
-        final String[] bandNames = { "amplitude", "intensity", "band", "proc_data" };
+        final String[] bandNames = { "amplitude", "intensity", "phase", "band", "proc_data" };
 
 
         NcRasterDim bestRasterDim = null;
@@ -334,6 +376,13 @@ public class NetCDFUtils {
             final List<Variable> varList = variableListMap.get(rasterDim);
             if(contains(varList, bandNames)) {
                 return rasterDim;
+            }
+            for(Variable v : varList) {
+                for(String unit : bandNames) {
+                    final String vUnit = v.getUnitsString();
+                    if(vUnit != null && vUnit.equalsIgnoreCase(unit))
+                        return rasterDim;
+                }
             }
             // Otherwise, the best is the one which holds the most variables
             if (bestVarList == null || varList.size() > bestVarList.size()) {
@@ -356,7 +405,7 @@ public class NetCDFUtils {
     }
 
     static Map<NcRasterDim, List<Variable>> getVariableListMap(final Group group) {
-        Map<NcRasterDim, List<Variable>> variableLists = new HashMap<NcRasterDim, List<Variable>>(31);
+        final Map<NcRasterDim, List<Variable>> variableLists = new HashMap<NcRasterDim, List<Variable>>(31);
         collectVariableLists(group, variableLists);
         return variableLists;
     }

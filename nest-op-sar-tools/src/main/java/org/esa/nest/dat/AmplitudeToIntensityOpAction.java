@@ -86,7 +86,7 @@ public class AmplitudeToIntensityOpAction extends AbstractVisatAction {
         }
 
         final VirtualBand virtBand = new VirtualBand(bandName,
-                ProductData.TYPE_FLOAT64,
+                ProductData.TYPE_FLOAT32,
                 product.getSceneRasterWidth(),
                 product.getSceneRasterHeight(),
                 expression);

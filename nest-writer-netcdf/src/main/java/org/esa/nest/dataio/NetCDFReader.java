@@ -75,6 +75,7 @@ public class NetCDFReader extends AbstractProductReader {
         }
         final NcRasterDim rasterDim = NetCDFUtils.getBestRasterDim(variableListMap);
         final Variable[] rasterVariables = NetCDFUtils.getRasterVariables(variableListMap, rasterDim);
+        final Variable[] tiePointGridVariables = NetCDFUtils.getTiePointGridVariables(variableListMap, rasterVariables);
 
         _netcdfFile = netcdfFile;
         _variableMap = new NcVariableMap(rasterVariables);
@@ -94,6 +95,7 @@ public class NetCDFReader extends AbstractProductReader {
 
         addMetadataToProduct();
         addBandsToProduct(rasterVariables);
+        addTiePointGridsToProduct(tiePointGridVariables);
         addGeoCodingToProduct(rasterDim);
         _product.setModified(false);
 
@@ -133,6 +135,17 @@ public class NetCDFReader extends AbstractProductReader {
         }
     }
 
+    private void addTiePointGridsToProduct(final Variable[] variables) throws IOException {
+        for (Variable variable : variables) {
+            final int rank = variable.getRank();
+            final int gridWidth = variable.getDimension(rank - 1).getLength();
+            final int gridHeight = variable.getDimension(rank - 2).getLength();
+            final TiePointGrid tpg = NetCDFUtils.createTiePointGrid(variable, gridWidth, gridHeight,
+                        _product.getSceneRasterWidth(), _product.getSceneRasterHeight());
+
+            _product.addTiePointGrid(tpg);
+        }
+    }
 
     private void addGeoCodingToProduct(final NcRasterDim rasterDim) throws IOException {
         setMapGeoCoding(rasterDim);

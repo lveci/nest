@@ -34,27 +34,6 @@ public class NetCDFWriter extends AbstractProductWriter {
         super(writerPlugIn);
     }
 
-    private Product createWritableProduct() throws IOException {
-        final Product sourceProduct = getSourceProduct();
-        final ArrayList<String> nodeNames = new ArrayList<String>();
-        for (int i = 0; i < sourceProduct.getNumBands(); i++) {
-            final Band band = sourceProduct.getBandAt(i);
-            if (shouldWrite(band)) {
-                nodeNames.add(band.getName());
-            }
-        }
-        final GeoCoding sourceGeoCoding = sourceProduct.getGeoCoding();
-        if (sourceGeoCoding instanceof TiePointGeoCoding) {
-            final TiePointGeoCoding geoCoding = (TiePointGeoCoding) sourceGeoCoding;
-            nodeNames.add(geoCoding.getLatGrid().getName());
-            nodeNames.add(geoCoding.getLonGrid().getName());
-        }
-        final ProductSubsetDef subsetDef = new ProductSubsetDef();
-        subsetDef.setNodeNames(nodeNames.toArray(new String[nodeNames.size()]));
-        subsetDef.setIgnoreMetadata(false);
-        return sourceProduct.createSubset(subsetDef, "temp", "");
-    }
-
     private static float[] getLonData(final Product product, final String lonGridName) {
         final int size = product.getSceneRasterWidth();
         final TiePointGrid lonGrid = product.getTiePointGrid(lonGridName);
@@ -75,8 +54,7 @@ public class NetCDFWriter extends AbstractProductWriter {
         for(int y=0; y < tpg.getRasterHeight(); ++y) {
             final int stride = y * tpg.getRasterWidth();
             for(int x=0; x < tpg.getRasterWidth(); ++x) {
-                final int index = stride + x;
-                data[y][x] = (float)productData.getElemFloatAt(index);
+                data[y][x] = productData.getElemFloatAt(stride + x);
             }
         }
         return data;
@@ -185,7 +163,7 @@ public class NetCDFWriter extends AbstractProductWriter {
 
         final int[] origin = new int[2];
         origin[1] = regionX;
-        origin[0] = regionY;
+        origin[0] = (sourceBand.getRasterHeight() - 1) - regionY;
         try {
 
             final double[][] data = new double[1][regionWidth];
