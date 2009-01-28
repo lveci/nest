@@ -1,6 +1,7 @@
 package org.esa.nest.dat.dialogs;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.graph.GraphException;
@@ -116,7 +117,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
             }
         });
         progressPanel.add(progressCancelBtn, BorderLayout.EAST);
-        progressPanel.setVisible(true);
+        progressPanel.setVisible(false);
         mainPanel.add(progressPanel, BorderLayout.SOUTH);
 
         AbstractButton button = getButton(ID_APPLY);
@@ -164,6 +165,13 @@ public abstract class MultiGraphDialog extends ModelessDialog {
         } catch(Exception e) {
             statusLabel.setText(e.getMessage());
         }
+    }
+
+    @Override
+    protected void onClose() {
+        CancelProcessing();
+        
+        super.onClose();
     }
 
     void initGraphs() {
@@ -229,6 +237,8 @@ public abstract class MultiGraphDialog extends ModelessDialog {
     protected abstract void cleanUpTempFiles();
 
     private boolean ValidateAllNodes() {
+        if(isProcessing) return false;
+
         boolean result=true;
         try {
             assignParameters();
@@ -254,14 +264,14 @@ public abstract class MultiGraphDialog extends ModelessDialog {
         @Override
         protected Boolean doInBackground() throws Exception {
 
-            pm.beginTask("Processing Graph...", 10);
+            pm.beginTask("Processing Graph...", 100*graphExecuterList.size());
             try {
                 executeStartTime = Calendar.getInstance().getTime();
                 isProcessing = true;
 
                 for(GraphExecuter graphEx : graphExecuterList) {
                     graphEx.recreateGraphContext(true);
-                    graphEx.executeGraph(pm);
+                    graphEx.executeGraph(new SubProgressMonitor(pm, 100));
 
                     graphEx.disposeGraphContext();
                 }
