@@ -333,9 +333,10 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
     private ProductData.UTC getProcTime() {
         try {
-            String procTime = _volumeDirectoryFile.getVolumeDescriptorRecord().getAttributeString("Logical volume preparation date").trim();
+            final String procDate = _volumeDirectoryFile.getVolumeDescriptorRecord().getAttributeString("Logical volume preparation date").trim();
+            final String procTime = _volumeDirectoryFile.getVolumeDescriptorRecord().getAttributeString("Logical volume preparation time").trim();
 
-            return ProductData.UTC.parse(procTime, "yyyyMMdd");
+            return ProductData.UTC.parse(procDate + procTime, "yyyyMMddHHmmss");
         } catch(ParseException e) {
             System.out.println(e.toString());
             return new ProductData.UTC(0);
@@ -343,21 +344,21 @@ class ERSProductDirectory extends CEOSProductDirectory {
     }
 
     private String getPass() {
-        double heading = _leaderFile.getMapProjRecord().getAttributeDouble("Platform heading at nadir corresponding to scene centre");
+        final double heading = _leaderFile.getMapProjRecord().getAttributeDouble("Platform heading at nadir corresponding to scene centre");
         if(heading > 90) return "DESCENDING";
         else return "ASCENDING";
     }
 
     private int isGroundRange() {
-        String projDesc = _leaderFile.getMapProjRecord().getAttributeString("Map projection descriptor").toLowerCase();
+        final String projDesc = _leaderFile.getMapProjRecord().getAttributeString("Map projection descriptor").toLowerCase();
         if(projDesc.contains("slant"))
             return 0;
         return 1;
     }
 
     private double getLineTimeInterval() {
-        double startTime = getUTCScanStartTime().getMJD() * 24 * 3600;
-        double stopTime = getUTCScanStopTime().getMJD() * 24 * 3600;
+        final double startTime = getUTCScanStartTime().getMJD() * 24 * 3600;
+        final double stopTime = getUTCScanStopTime().getMJD() * 24 * 3600;
         return (stopTime-startTime) / (_sceneHeight-1);
     }
 
