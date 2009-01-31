@@ -274,7 +274,7 @@ public class ConvertDataTypeOp extends Operator {
 
     private static double logScale(final double origValue, final double origMin, final double newMin,
                                 final double origRange, final double newRange) {
-        return 10*Math.log10(Math.abs(((origValue - origMin) / origRange) * newRange + newMin));
+        return 10*Math.log10(((origValue - origMin) / origRange) * newRange + newMin);
     }
 
     // for unit tests
