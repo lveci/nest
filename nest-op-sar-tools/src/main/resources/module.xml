@@ -101,12 +101,12 @@
         </action>
 
         <action>
-            <id>FormatChangeOp</id>
+            <id>ConvertDatatypeOp</id>
             <class>org.esa.nest.dat.FormatChangeOpAction</class>
-            <text>Datatype Format Change</text>
+            <text>Convert Datatype</text>
             <shortDescr>Change the datatype of the product</shortDescr>
             <parent>DatasetConversion</parent>
-            <helpId>FormatChangeOp</helpId>
+            <helpId>ConvertDatatypeOp</helpId>
         </action>
 
         <action>

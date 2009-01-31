@@ -1,0 +1,197 @@
+package org.esa.nest.gpf;
+
+import junit.framework.TestCase;
+import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.datamodel.*;
+
+import com.bc.ceres.core.ProgressMonitor;
+
+import java.util.Arrays;
+
+/**
+ * Unit test for ConvertDatatypeOperator.
+ */
+public class TestConvertDataTypeOperator extends TestCase {
+
+    private OperatorSpi spi;
+    private final int width = 4;
+    private final int height = 2;
+
+    @Override
+    protected void setUp() throws Exception {
+        spi = new ConvertDataTypeOp.Spi();
+        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(spi);
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(spi);
+    }
+
+    /**
+     * @throws Exception general exception
+     */
+    public void testDoubleToInt32Linear() throws Exception {
+
+        final double[] values = convert(ProductData.TYPESTRING_INT32, ConvertDataTypeOp.SCALING_LINEAR);
+
+        final double[] expectedValues = {100000.0, 150000.0, 200000.0, 250000.0, 300000.0, 350000.0, 400000.0, 450000.0};
+        assertTrue(Arrays.equals(expectedValues, values));
+    }
+
+    public void testDoubleToInt16Linear() throws Exception {
+
+        final double[] values = convert(ProductData.TYPESTRING_INT16, ConvertDataTypeOp.SCALING_LINEAR);
+
+        final double[] expectedValues = {-32768.0, -23406.0, -14044.0, -4682.0, 4681.0, 14043.0, 23405.0, 32767.0};
+        assertTrue(Arrays.equals(expectedValues, values));
+    }
+
+    public void testDoubleToInt8Linear() throws Exception {
+
+        final double[] values = convert(ProductData.TYPESTRING_INT8, ConvertDataTypeOp.SCALING_LINEAR);
+
+        final double[] expectedValues = {-128.0, -92.0, -55.0, -19.0, 18.0, 54.0, 91.0, 127.0};
+        assertTrue(Arrays.equals(expectedValues, values));
+    }
+
+    public void testDoubleToUInt32Linear() throws Exception {
+
+        final double[] values = convert(ProductData.TYPESTRING_UINT32, ConvertDataTypeOp.SCALING_LINEAR);
+
+        final double[] expectedValues = {100000.0, 150000.0, 200000.0, 250000.0, 300000.0, 350000.0, 400000.0, 450000.0};
+        assertTrue(Arrays.equals(expectedValues, values));
+    }
+
+    public void testDoubleToUInt16Linear() throws Exception {
+
+        final double[] values = convert(ProductData.TYPESTRING_UINT16, ConvertDataTypeOp.SCALING_LINEAR);
+
+        final double[] expectedValues = {0.0, 9362.0, 18724.0, 28086.0, 37449.0, 46811.0, 56173.0, 65535.0};
+        assertTrue(Arrays.equals(expectedValues, values));
+    }
+
+    public void testDoubleToUInt8Linear() throws Exception {
+
+        final double[] values = convert(ProductData.TYPESTRING_UINT8, ConvertDataTypeOp.SCALING_LINEAR);
+
+        final double[] expectedValues = {0.0, 36.0, 73.0, 109.0, 146.0, 182.0, 219.0, 255.0};
+        assertTrue(Arrays.equals(expectedValues, values));
+    }
+
+
+    public void testDoubleToInt32Truncate() throws Exception {
+
+        final double[] values = convert(ProductData.TYPESTRING_INT32, ConvertDataTypeOp.SCALING_TRUNCATE);
+
+        final double[] expectedValues = {100000.0, 150000.0, 200000.0, 250000.0, 300000.0, 350000.0, 400000.0, 450000.0};
+        assertTrue(Arrays.equals(expectedValues, values));
+    }
+
+    public void testDoubleToInt16Truncate() throws Exception {
+
+        final double[] values = convert(ProductData.TYPESTRING_INT16, ConvertDataTypeOp.SCALING_TRUNCATE);
+
+        final double[] expectedValues = {32767.0, 32767.0, 32767.0, 32767.0, 32767.0, 32767.0, 32767.0, 32767.0};
+        assertTrue(Arrays.equals(expectedValues, values));
+    }
+
+    public void testDoubleToInt8Truncate() throws Exception {
+
+        final double[] values = convert(ProductData.TYPESTRING_INT8, ConvertDataTypeOp.SCALING_TRUNCATE);
+
+        final double[] expectedValues = {127.0, 127.0, 127.0, 127.0, 127.0, 127.0, 127.0, 127.0};
+        assertTrue(Arrays.equals(expectedValues, values));
+    }
+
+    public void testDoubleToInt32LogScale() throws Exception {
+
+        final double[] values = convert(ProductData.TYPESTRING_INT32, ConvertDataTypeOp.SCALING_LOGARITHMIC);
+
+        final double[] expectedValues = {100000.0, 150000.0, 200000.0, 250000.0, 300000.0, 350000.0, 400000.0, 450000.0};
+        assertTrue(Arrays.equals(expectedValues, values));
+    }
+
+    public void testDoubleToInt16LogScale() throws Exception {
+
+        final double[] values = convert(ProductData.TYPESTRING_INT16, ConvertDataTypeOp.SCALING_LOGARITHMIC);
+
+        final double[] expectedValues = {32767.0, 32767.0, 32767.0, 32767.0, 32767.0, 32767.0, 32767.0, 32767.0};
+        assertTrue(Arrays.equals(expectedValues, values));
+    }
+
+    public void testDoubleToInt8LogScale() throws Exception {
+
+        final double[] values = convert(ProductData.TYPESTRING_INT8, ConvertDataTypeOp.SCALING_LOGARITHMIC);
+
+        final double[] expectedValues = {127.0, 127.0, 127.0, 127.0, 127.0, 127.0, 127.0, 127.0};
+        assertTrue(Arrays.equals(expectedValues, values));
+    }
+
+
+    private double[] convert(final String targetType, final String scaling) throws Exception {
+        final Product sourceProduct = createTestProduct(width, height, 100000, 500000);
+
+        final ConvertDataTypeOp op = (ConvertDataTypeOp)spi.createOperator();
+        assertNotNull(op);
+        op.setSourceProduct(sourceProduct);
+        op.setTargetDataType(targetType);
+        op.setScaling(scaling);
+
+        // get targetProduct: execute initialize()
+        final Product targetProduct = op.getTargetProduct();
+        TestOperator.verifyProduct(targetProduct);
+
+        final Band band = targetProduct.getBandAt(0);
+        assertNotNull(band);
+
+        // readPixels: execute computeTiles()
+        final double[] values = new double[width*height];
+        band.readPixels(0, 0, width, height, values, ProgressMonitor.NULL);
+
+        outputValues(band.getName() + " op values:", values);
+
+        return values;
+    }
+
+    private static void outputValues(final String title, final double[] values) {
+        System.out.println(title);
+        for(double v : values) {
+            System.out.print(v + ", ");
+        }
+        System.out.println();
+    }
+
+    /**
+     * Creates a new product
+     * @param w width
+     * @param h height
+     * @param min minimum value
+     * @param max maximum value
+     * @return the created product
+     */
+    private static Product createTestProduct(final int w, final int h, final int min, final int max) {
+
+        final Product testProduct = TestOperator.createProduct("ASA_IMM_1P", w, h);
+
+        // create a Band: band1
+        final Band band1 = testProduct.addBand("band1", ProductData.TYPE_FLOAT64);
+        band1.setUnit("amplitude");
+        band1.setSynthetic(true);
+        final int range = w*h;
+        final double[] values = new double[range];
+        final double slope = (max-min) / range;
+        for (int i = 0; i < range; i++) {
+            values[i] = i * slope + min;
+        }
+        band1.setData(ProductData.createInstance(values));
+
+        outputValues(band1.getName() + " values:", values);
+
+        // create abstracted metadata
+        MetadataElement abs = testProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+
+        return testProduct;
+    }
+}

@@ -34,30 +34,30 @@ public class TestMultilookOperator extends TestCase {
      */
     public void testMultilookOfRealImage() throws Exception {
 
-        Product sourceProduct = createTestProduct(16, 4);
+        final Product sourceProduct = createTestProduct(16, 4);
 
-        MultilookOp op = (MultilookOp)spi.createOperator();
+        final MultilookOp op = (MultilookOp)spi.createOperator();
         assertNotNull(op);
         op.setSourceProduct(sourceProduct);
         op.setNumRangeLooks(4);
 
         // get targetProduct: execute initialize()
-        Product targetProduct = op.getTargetProduct();
+        final Product targetProduct = op.getTargetProduct();
         TestOperator.verifyProduct(targetProduct);
 
-        Band band = targetProduct.getBandAt(0);
+        final Band band = targetProduct.getBandAt(0);
         assertNotNull(band);
 
         // readPixels: execute computeTiles()
-        float[] floatValues = new float[8];
+        final float[] floatValues = new float[8];
         band.readPixels(0, 0, 4, 2, floatValues, ProgressMonitor.NULL);
 
         // compare with expected outputs:
-        float[] expectedValues = {10.5f, 14.5f, 18.5f, 22.5f, 42.5f, 46.5f, 50.5f, 54.5f};
-        //assertTrue(Arrays.equals(expectedValues, floatValues));
+        final float[] expectedValues = {11.0f, 15.0f, 19.0f, 23.0f, 43.0f, 47.0f, 51.0f, 55.0f};
+        assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
-        MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        final MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
 
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_looks, 2.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_looks, 4.0);
@@ -78,22 +78,22 @@ public class TestMultilookOperator extends TestCase {
      * @param h height
      * @return the created product
      */
-    private static Product createTestProduct(int w, int h) {
+    private static Product createTestProduct(final int w, final int h) {
 
-        Product testProduct = TestOperator.createProduct("ASA_APG_1P", w, h);
+        final Product testProduct = TestOperator.createProduct("ASA_APG_1P", w, h);
 
         // create a Band: band1
-        Band band1 = testProduct.addBand("band1", ProductData.TYPE_INT32);
+        final Band band1 = testProduct.addBand("band1", ProductData.TYPE_INT32);
         band1.setUnit("amplitude");
         band1.setSynthetic(true);
-        int[] intValues = new int[w * h];
+        final int[] intValues = new int[w * h];
         for (int i = 0; i < w * h; i++) {
             intValues[i] = i + 1;
         }
         band1.setData(ProductData.createInstance(intValues));
 
         // create abstracted metadata
-        MetadataElement abs = testProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        final MetadataElement abs = testProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
 
         AbstractMetadata.setAttribute(abs, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
         AbstractMetadata.setAttribute(abs, AbstractMetadata.MISSION, "ENVISAT");
@@ -106,7 +106,7 @@ public class TestMultilookOperator extends TestCase {
         AbstractMetadata.setAttribute(abs, AbstractMetadata.first_line_time,
                 AbstractMetadata.parseUTC("10-MAY-2008 20:32:46.885684"));
 
-        float[] incidence_angle = new float[64];
+        final float[] incidence_angle = new float[64];
         Arrays.fill(incidence_angle, 30.0f);
         testProduct.addTiePointGrid(new TiePointGrid("incident_angle", 16, 4, 0, 0, 1, 1, incidence_angle));
 

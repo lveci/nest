@@ -10,7 +10,7 @@ import org.esa.beam.visat.actions.AbstractVisatAction;
  */
 public class FormatChangeOpAction extends AbstractVisatAction {
 
-    private DefaultSingleTargetProductDialog dialog;
+    private DefaultSingleTargetProductDialog dialog = null;
 
     @Override
     public void actionPerformed(CommandEvent event) {

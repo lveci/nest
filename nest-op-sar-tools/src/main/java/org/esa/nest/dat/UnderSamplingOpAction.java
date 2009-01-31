@@ -10,7 +10,7 @@ import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
  */
 public class UnderSamplingOpAction extends AbstractVisatAction {
 
-    private NestSingleTargetProductDialog dialog;
+    private NestSingleTargetProductDialog dialog = null;
 
     @Override
     public void actionPerformed(CommandEvent event) {
