@@ -270,7 +270,8 @@ public abstract class MultiGraphDialog extends ModelessDialog {
                 isProcessing = true;
 
                 for(GraphExecuter graphEx : graphExecuterList) {
-                    graphEx.recreateGraphContext(true);
+                    graphEx.recreateGraphContext();
+                    graphEx.updateGraphNodes();
                     graphEx.executeGraph(new SubProgressMonitor(pm, 100));
 
                     graphEx.disposeGraphContext();

@@ -15,8 +15,8 @@ import java.util.Arrays;
 public class TestConvertDataTypeOperator extends TestCase {
 
     private OperatorSpi spi;
-    private final int width = 4;
-    private final int height = 2;
+    private final static int width = 4;
+    private final static int height = 2;
 
     @Override
     protected void setUp() throws Exception {
@@ -150,7 +150,7 @@ public class TestConvertDataTypeOperator extends TestCase {
         final double[] values = new double[width*height];
         band.readPixels(0, 0, width, height, values, ProgressMonitor.NULL);
 
-        outputValues(band.getName() + " op values:", values);
+        //outputValues(band.getName() + " op values:", values);
 
         return values;
     }
@@ -187,7 +187,7 @@ public class TestConvertDataTypeOperator extends TestCase {
         }
         band1.setData(ProductData.createInstance(values));
 
-        outputValues(band1.getName() + " values:", values);
+        //outputValues(band1.getName() + " values:", values);
 
         // create abstracted metadata
         MetadataElement abs = testProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);

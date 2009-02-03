@@ -99,6 +99,8 @@ public class PCAStatisticsOp extends Operator {
     public void initialize() throws OperatorException {
 
         try {
+            if(!OperatorUtils.isDIMAP(sourceProduct))
+                throw new OperatorException("Source Product should be in BEAM-DIMAP format");
 
             createTargetProduct();
 

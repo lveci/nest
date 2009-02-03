@@ -4,19 +4,19 @@ import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.dataio.dimap.DimapProductConstants;
+import org.esa.beam.util.StringUtils;
+import org.esa.beam.util.ProductUtils;
 
 /**
- * Created by IntelliJ IDEA.
- * User: lveci
- * Date: Dec 3, 2008
- * Time: 1:05:18 PM
- * To change this template use File | Settings | File Templates.
+ * Helper methods for working with Operators
  */
 public class OperatorUtils {
 
 
     /**
      * Get abstracted metadata.
+     * @param sourceProduct the product
      * @return MetadataElement
      */
     public static MetadataElement getAbstractedMetadata(final Product sourceProduct) {
@@ -75,5 +75,19 @@ public class OperatorUtils {
         } else {
             return null;
         }
+    }
+
+    public static void copyProductNodes(final Product sourceProduct, final Product targetProduct) {
+        ProductUtils.copyMetadata(sourceProduct, targetProduct);
+        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
+        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
+        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+        targetProduct.setStartTime(sourceProduct.getStartTime());
+        targetProduct.setEndTime(sourceProduct.getEndTime());
+    }
+
+    public static boolean isDIMAP(Product prod) {
+        return StringUtils.contains(prod.getProductReader().getReaderPlugIn().getFormatNames(),
+                                    DimapProductConstants.DIMAP_FORMAT_NAME);
     }
 }

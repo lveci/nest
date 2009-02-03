@@ -55,8 +55,9 @@ import java.io.*;
  * 4. Bicubic2 interpolation 
  */
 
-@OperatorMetadata(alias="WARP-Creation",
-                  description = "Create WARP Function And Get Co-registrated Images")
+@OperatorMetadata(alias="WARP-Creation-old",
+                  description = "Create WARP Function And Get Co-registrated Images",
+                  internal=true)
 public class WARPOperator extends Operator {
 
     @SourceProducts(count = 2)

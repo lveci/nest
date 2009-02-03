@@ -22,7 +22,7 @@ public class GraphExecuter extends Observable {
 
     private final GPF gpf;
     private Graph graph;
-    private GraphContext graphContext;
+    private GraphContext graphContext = null;
     private final GraphProcessor processor;
     private String graphDescription = "";
 
@@ -104,7 +104,7 @@ public class GraphExecuter extends Observable {
         return newGraphNode;
     }
 
-    private OperatorUI CreateOperatorUI(final String operatorName) {
+    private static OperatorUI CreateOperatorUI(final String operatorName) {
         final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
         if (operatorSpi == null) {
             return null;
@@ -174,17 +174,20 @@ public class GraphExecuter extends Observable {
     public void InitGraph() throws GraphException {
         if(IsGraphComplete()) {
             AssignAllParameters();
-            recreateGraphContext(true);
+            recreateGraphContext();
+            updateGraphNodes();
         }
     }
 
-    public void recreateGraphContext(boolean updateGraphNodes) throws GraphException {
+    public void recreateGraphContext() throws GraphException {
         if(graphContext != null)
             GraphProcessor.disposeGraphContext(graphContext);
 
         graphContext = processor.createGraphContext(graph, ProgressMonitor.NULL);
+    }
 
-        if(updateGraphNodes) {
+    public void updateGraphNodes() {
+        if(graphContext != null) {
             for(GraphNode n : nodeList) {
                 final NodeContext context = graphContext.getNodeContext(n.getNode());
                 n.setSourceProducts(context.getSourceProducts());
