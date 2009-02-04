@@ -8,6 +8,7 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.util.io.FileChooserFactory;
+import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
 import javax.swing.tree.TreePath;
@@ -34,22 +35,24 @@ import java.util.Vector;
  */
 public class ProductSetReaderOpUI extends BaseOperatorUI {
 
-    FileModel fileModel = new FileModel();
-    JTable productSetTable;
+    private final FileModel fileModel = new FileModel();
+    private final JTable productSetTable = new JTable(fileModel);
 
+    @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
         initializeOperatorUI(operatorName, parameterMap);
 
-        JComponent comp =  createComponent(productSetTable, fileModel);
+        final JComponent comp = createComponent(productSetTable, fileModel);
         initParameters();
         return comp;
     }
 
+    @Override
     public void initParameters() {
         convertFromDOM();
 
-        String[] fList = (String[])paramMap.get("fileList");
+        final String[] fList = (String[])paramMap.get("fileList");
         if(fList != null) {
             fileModel.clear();
             for (String str : fList) {
@@ -58,35 +61,36 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         }
     }
 
+    @Override
     public UIValidation validateParameters() {
 
         return new UIValidation(true, "");
     }
 
+    @Override
     public void updateParameters() {
 
-        Vector<File> fileList = fileModel.getFileList();
+        final Vector<File> fileList = fileModel.getFileList();
         if(fileList.isEmpty()) return;
 
         paramMap.put("defaultFile", fileList.get(0));
-        String[] fList = new String[fileList.size()];
+        final String[] fList = new String[fileList.size()];
         for(int i=0; i < fileList.size(); ++i) {
             fList[i] = fileList.get(i).getAbsolutePath();
         }
         paramMap.put("fileList", fList);
     }
 
-    public static JComponent createComponent(JTable table, FileModel fileModel) {
+    public static JComponent createComponent(final JTable table, final FileModel fileModel) {
 
         final JPanel fileListPanel = new JPanel(new BorderLayout(4, 4));
 
-        table = new JTable(fileModel);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         table.setColumnSelectionAllowed(true);
         table.setDropMode(DropMode.ON);
         table.setTransferHandler(new ProductSetTransferHandler(fileModel));
 
-        JScrollPane scrollPane = new JScrollPane(table);
+        final JScrollPane scrollPane = new JScrollPane(table);
         fileListPanel.add(scrollPane, BorderLayout.CENTER);
 
         final JPanel buttonPanel = new JPanel();
@@ -99,13 +103,13 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
     private static void initButtonPanel(final JPanel panel, final JTable table, final FileModel fileModel) {
         panel.setLayout(new GridLayout(10, 1));
 
-        final JButton addButton = CreateButton("addButton", "Add", panel);
+        final JButton addButton = DialogUtils.CreateButton("addButton", "Add", null, panel);
         addButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
-                File file = GetFilePath(addButton, "Add Product");
+                final File file = GetFilePath(addButton, "Add Product");
                 if(file != null) {
-                    ProductReader reader = ProductIO.getProductReaderForFile(file);
+                    final ProductReader reader = ProductIO.getProductReaderForFile(file);
                     if (reader != null) {
                         fileModel.addFile(file);
                     }
@@ -113,11 +117,11 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
             }
         });
 
-        final JButton removeButton = CreateButton("removeButton", "Remove", panel);
+        final JButton removeButton = DialogUtils.CreateButton("removeButton", "Remove", null, panel);
         removeButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
-                int selRow = table.getSelectedRow();
+                final int selRow = table.getSelectedRow();
                 if(selRow >= 0) {
                     fileModel.removeFile(selRow);
                 }
@@ -125,7 +129,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
 
         });
 
-        JButton clearButton = CreateButton("clearButton", "Clear", panel);
+        final JButton clearButton = DialogUtils.CreateButton("clearButton", "Clear", null, panel);
         clearButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
@@ -138,23 +142,12 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         panel.add(clearButton);
     }
 
-    private static JButton CreateButton(String name, String text, JPanel panel) {
-        JButton button = new JButton();
-        button.setName(name);
-        button = new JButton();
-        button.setBackground(panel.getBackground());
-        button.setText(text);
-        button.setActionCommand(name);
-        return button;
-    }
-
     public static File GetFilePath(Component component, String title) {
 
         File file = null;
         final JFileChooser chooser = FileChooserFactory.getInstance().createFileChooser(new File("."));
         chooser.setDialogTitle(title);
         if (chooser.showDialog(component, "ok") == JFileChooser.APPROVE_OPTION) {
-
             file = chooser.getSelectedFile();
         }
 
@@ -164,16 +157,16 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
 
     public static class FileModel extends AbstractTableModel {
 
-        String titles[] = new String[]{
+        private final String titles[] = new String[]{
                 "File Name", "Size", "Last Modified"
         };
 
-        Class types[] = new Class[]{
+        private final Class types[] = new Class[]{
                 String.class, Number.class, Date.class
         };
 
-        Object data[][] = new Object[0][titles.length];
-        Vector<File> fileList = new Vector<File>(10);
+        private Object data[][] = new Object[0][titles.length];
+        private final Vector<File> fileList = new Vector<File>(10);
 
         public FileModel() {
             addBlankFile();
@@ -183,13 +176,13 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
             return fileList;
         }
 
-        public void addFile(File file) {
+        public void addFile(final File file) {
             fileList.add(file);
             clearBlankFile();
             setFileStats();
         }
 
-        public void removeFile(int index) {
+        public void removeFile(final int index) {
             fileList.remove(index);
             setFileStats();
         }
@@ -223,10 +216,12 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
             return titles.length;
         }
 
+        @Override
         public String getColumnName(int c) {
             return titles[c];
         }
 
+        @Override
         public Class getColumnClass(int c) {
             return types[c];
         }
@@ -244,7 +239,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
             data = new Object[fileList.size()][titles.length];
 
             for (int i = 0; i < fileList.size(); i++) {
-                File file = fileList.get(i);
+                final File file = fileList.get(i);
 
                 if(!file.getName().isEmpty()) {
                     data[i][0] = file.getName();

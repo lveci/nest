@@ -1,5 +1,5 @@
 /*
- * $Id: MergeBandsOp.java,v 1.8 2008-11-09 23:40:53 lveci Exp $
+ * $Id: MergeBandsOp.java,v 1.9 2009-02-03 22:41:28 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -35,7 +35,8 @@ import java.util.Map;
 import java.util.HashMap;
 
 @OperatorMetadata(alias = "Merge-Bands",
-        description = "Merges an arbitrary number of source bands into the target product.")
+        description = "Merges an arbitrary number of source bands into the target product.",
+        internal=true)
 public class MergeBandsOp extends Operator {
 
     @SourceProducts

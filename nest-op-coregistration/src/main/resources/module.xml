@@ -36,6 +36,16 @@
             <shortDescr>Perform Principle Component Analysis</shortDescr>
             <helpId>PCA</helpId>
         </action>
+        
+        <action>
+            <id>openCoregistrationDialog</id>
+            <class>org.esa.nest.dat.CoregistrationAction</class>
+            <parent>sartools</parent>
+            <text>Coregistration</text>
+            <shortDescr>Perform Coregistration</shortDescr>
+            <placeAfter>openPCADialog</placeAfter>
+            <helpId>Coregistration</helpId>
+        </action>
 
     </extension>
 

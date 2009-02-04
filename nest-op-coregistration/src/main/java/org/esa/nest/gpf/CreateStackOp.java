@@ -89,12 +89,16 @@ public class CreateStackOp extends Operator {
         OperatorUtils.copyProductNodes(masterProduct, targetProduct);
 
         int cnt = 1;
-        String suffix;
+        String suffix = "_slv";
         for (final Band slaveBand : slaveBandList) {
             if(slaveBand == masterBands[0] || (masterBands.length > 1 && slaveBand == masterBands[1]))
                 suffix = "_mst";
-            else
-                suffix = "_slv" + cnt++;
+            else {
+                if(slaveBand.getUnit() != null && slaveBand.getUnit().equals(Unit.IMAGINARY)) {
+                } else {
+                    suffix = "_slv" + cnt++;
+                }        
+            }
             final Band targetBand = targetProduct.addBand(slaveBand.getName() + suffix, slaveBand.getDataType());
             ProductUtils.copyRasterDataNodeProperties(slaveBand, targetBand);
             sourceRasterMap.put(targetBand, slaveBand);

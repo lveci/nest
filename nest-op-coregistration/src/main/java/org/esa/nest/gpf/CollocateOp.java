@@ -22,7 +22,8 @@ import java.util.Map;
  *
  */
 @OperatorMetadata(alias = "Collocator",
-                  description = "Collocates two products based on their geo-codings.")
+                  description = "Collocates two products based on their geo-codings.",
+                  internal=true)
 public class CollocateOp extends Operator {
 
     private static final String NEAREST_NEIGHBOUR = "NEAREST_NEIGHBOUR";

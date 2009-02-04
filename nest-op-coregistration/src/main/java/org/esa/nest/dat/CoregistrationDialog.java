@@ -10,19 +10,19 @@ import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
 import java.io.File;
 
 /**
- *  Provides the User Interface for PCA
+ *  Provides the User Interface for Coregistration
  */
-public class PCADialog extends MultiGraphDialog {
+public class CoregistrationDialog extends MultiGraphDialog {
 
     private final static String homeUrl = System.getProperty("nest.home", ".");
     private final static File graphPath = new File(homeUrl, File.separator + "graphs" + File.separator + "internal");
     private final static String internalFormat = DimapProductConstants.DIMAP_FORMAT_NAME;
 
     private final static File tmpFolder = new File("c:\\data");
-    //private final static File tmpFile1 = new File(tmpFolder, "tmp1.dim");
-    //private final static File tmpDataFile1 = new File(tmpFolder, "tmp1.dim.data");
+    private final static File tmpFile1 = new File(tmpFolder, "tmp1.dim");
+    private final static File tmpDataFile1 = new File(tmpFolder, "tmp1.dim.data");
 
-    public PCADialog(final AppContext theAppContext, final String title, final String helpID) {
+    public CoregistrationDialog(final AppContext theAppContext, final String title, final String helpID) {
         super(theAppContext, title, helpID);
 
     }
@@ -30,9 +30,8 @@ public class PCADialog extends MultiGraphDialog {
     @Override
     protected void createGraphs() throws GraphException {
         try {
-            addGraph(new File(graphPath, "PCAStatsGraph.xml"), "PCA", true);
-            addGraph(new File(graphPath, "PCAMinGraph.xml"), "", false);
-            addGraph(new File(graphPath, "PCAImageGraph.xml"), "", false);
+            addGraph(new File(graphPath, "GCPSelectionGraph.xml"), "", true);
+            addGraph(new File(graphPath, "WarpGraph.xml"), "", true);
 
         } catch(Exception e) {
             throw new GraphException(e.getMessage());
@@ -53,7 +52,10 @@ public class PCADialog extends MultiGraphDialog {
             }
 
             if(addUI) {
-                tabbedPane.addTab(title, null,
+                String tabTitle = title;
+                if(tabTitle.isEmpty())
+                    tabTitle = n.getOperatorName();
+                tabbedPane.addTab(tabTitle, null,
                         n.GetOperatorUI().CreateOpTab(n.getOperatorName(), n.getParameterMap(), appContext),
                         n.getID() + " Operator");
             }
@@ -64,23 +66,16 @@ public class PCADialog extends MultiGraphDialog {
 
     @Override
     protected void assignParameters() throws GraphException {
-            // first Graph - PCA-Statistics
+            // first Graph - GCP Selection
             setIO(graphExecuterList.get(0),
-                    "1-Read", getSelectedSourceProduct().getFileLocation());
-
-            // second Graph - PCA-Min
-            setIO(graphExecuterList.get(1),
-                    "1-Read", getSelectedSourceProduct().getFileLocation());
-
-            // third Graph - PCA-Image
-            setIO(graphExecuterList.get(2),
                     "1-Read", getSelectedSourceProduct().getFileLocation(),
+                    "4-Write", tmpFile1, getTargetFormat());
+
+            // second Graph - Warp
+            setIO(graphExecuterList.get(1),
+                    "1-Read", tmpFile1,
                     "3-Write", getTargetFile(), getTargetFormat());
     }
-
-    private static void setIO(final GraphExecuter graphEx, final String readID, final File readPath) throws GraphException {
-        setIO(graphEx, readID, readPath, null, null, null);
-     }
 
     private static void setIO(final GraphExecuter graphEx,
                        final String readID, final File readPath,

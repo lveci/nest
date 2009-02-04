@@ -388,7 +388,7 @@ public class GraphExecuter extends Observable {
     }
 
     static class ProductSetNode {
-        String nodeID;
+        String nodeID = null;
         final Vector<String> fileList = new Vector<String>(10);
     }
 

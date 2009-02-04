@@ -24,6 +24,7 @@ import org.esa.beam.framework.gpf.annotations.*;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.util.DatUtils;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.dataio.ReaderUtils;
 
 import javax.media.jai.*;
 import java.awt.*;
@@ -184,24 +185,35 @@ public class WarpOp extends Operator {
                                     sourceProduct.getSceneRasterHeight());
 
         final int numSrcBands = sourceProduct.getNumBands();
-        for(int i=0; i < numSrcBands; ++i) {
+        int cnt = 1;
+        int inc = 1;
+        if(complexCoregistration)
+            inc = 2;
+        for(int i=0; i < numSrcBands; i+=inc) {
             final Band srcBand = sourceProduct.getBandAt(i);
             final Band targetBand = targetProduct.addBand(srcBand.getName(), ProductData.TYPE_FLOAT32);
             ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
             sourceRasterMap.put(targetBand, srcBand);
 
-             if(complexCoregistration) {
-                if(srcBand.getUnit() != null && srcBand.getUnit().equals(Unit.REAL)) {
-                    if(i + 1 < numSrcBands)
-                        complexSrcMap.put(sourceProduct.getBandAt(i+1), srcBand);
-                }
+            if(complexCoregistration) {
+                final Band srcBandQ = sourceProduct.getBandAt(i+1);
+                final Band targetBandQ = targetProduct.addBand(srcBandQ.getName(), ProductData.TYPE_FLOAT32);
+                ProductUtils.copyRasterDataNodeProperties(srcBandQ, targetBandQ);
+                sourceRasterMap.put(targetBandQ, srcBandQ);
+
+                complexSrcMap.put(srcBandQ, srcBand);
+                String suffix = "_mst";
+                if(srcBand != masterBand)
+                    suffix = "_slv" + cnt++;
+                ReaderUtils.createVirtualIntensityBand(targetProduct, targetBand, targetBandQ, suffix);
+                ReaderUtils.createVirtualPhaseBand(targetProduct, targetBand, targetBandQ, suffix);
             }
         }
 
         // coregistrated image should have the same geo-coding as the master image
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
-        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 256);
+        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 50);
     }
 
     /**
@@ -217,41 +229,45 @@ public class WarpOp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException
     {
-        final Rectangle targetTileRectangle = targetTile.getRectangle();
-        final Band srcBand = sourceRasterMap.get(targetBand);
-        if(srcBand == masterBand || srcBand == masterBand2) {
+        try {
+            final Rectangle targetTileRectangle = targetTile.getRectangle();
+            final Band srcBand = sourceRasterMap.get(targetBand);
+            if(srcBand == masterBand || srcBand == masterBand2) {
 
-            final Tile masterRaster = getSourceTile(masterBand, targetTileRectangle, pm);
-            final ProductData masterData = masterRaster.getRawSamples();
-            final ProductData targetData = targetTile.getRawSamples();
-            final int n = masterData.getNumElems();
+                final Tile masterRaster = getSourceTile(masterBand, targetTileRectangle, pm);
+                final ProductData masterData = masterRaster.getRawSamples();
+                final ProductData targetData = targetTile.getRawSamples();
+                final int n = masterData.getNumElems();
 
-            for (int i = 0; i < n; ++i) {
-                targetData.setElemFloatAt(i, masterData.getElemFloatAt(i));
+                for (int i = 0; i < n; ++i) {
+                    targetData.setElemFloatAt(i, masterData.getElemFloatAt(i));
+                }
+            } else {
+
+                Band realSrcBand = complexSrcMap.get(srcBand);
+                if(realSrcBand == null)
+                    realSrcBand = srcBand;
+
+                final int x0 = targetTileRectangle.x;
+                final int y0 = targetTileRectangle.y;
+                final int w = targetTileRectangle.width;
+                final int h = targetTileRectangle.height;
+                //System.out.println("WARPOperator: x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+
+                // create source image
+                final Tile sourceRaster = getSourceTile(srcBand, targetTileRectangle, pm);
+                final RenderedImage srcImage = sourceRaster.getRasterDataNode().getSourceImage();
+
+                // get warped image
+                final RenderedOp warpedImage = createWarpImage(warpDataMap.get(realSrcBand).warp, srcImage);
+
+                // copy warped image data to target
+                final float[] dataArray = warpedImage.getData(targetTileRectangle).getSamples(x0, y0, w, h, 0, (float[])null);
+                final ProductData rawTargetData = ProductData.createInstance(dataArray);
+                targetTile.setRawSamples(rawTargetData);
             }
-        } else {
-
-            Band realSrcBand = complexSrcMap.get(srcBand);
-            if(realSrcBand == null)
-                realSrcBand = srcBand;
-
-            final int x0 = targetTileRectangle.x;
-            final int y0 = targetTileRectangle.y;
-            final int w = targetTileRectangle.width;
-            final int h = targetTileRectangle.height;
-            //System.out.println("WARPOperator: x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
-
-            // create source image
-            final Tile sourceRaster = getSourceTile(srcBand, targetTileRectangle, pm);
-            final RenderedImage srcImage = sourceRaster.getRasterDataNode().getSourceImage();
-
-            // get warped image
-            final RenderedOp warpedImage = createWarpImage(warpDataMap.get(realSrcBand).warp, srcImage);
-
-            // copy warped image data to target
-            final float[] dataArray = warpedImage.getData(targetTileRectangle).getSamples(x0, y0, w, h, 0, (float[])null);
-            final ProductData rawTargetData = ProductData.createInstance(dataArray);
-            targetTile.setRawSamples(rawTargetData);
+        } catch(Exception e) {
+            throw new OperatorException(e);
         }
     }
 

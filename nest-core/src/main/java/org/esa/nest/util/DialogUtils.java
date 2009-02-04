@@ -35,4 +35,15 @@ public class DialogUtils {
 
         return field;
     }
+
+    public static JButton CreateButton(final String name, final String text, final ImageIcon icon, final JPanel panel) {
+        JButton button = new JButton();
+        button.setName(name);
+        button = new JButton();
+        button.setIcon(icon);
+        button.setBackground(panel.getBackground());
+        button.setText(text);
+        button.setActionCommand(name);
+        return button;
+    }
 }
