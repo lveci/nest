@@ -2,14 +2,14 @@ package org.esa.nest.dat.dialogs;
 
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.ModelessDialog;
-import org.esa.nest.gpf.ProductSetReaderOpUI;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.toolviews.Projects.ProductSet;
+import org.esa.nest.gpf.ProductSetReaderOpUI;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,28 +19,26 @@ import java.util.Vector;
  */
 public class ProductSetDialog extends ModelessDialog {
 
-    private ProductSetReaderOpUI.FileModel fileModel;
-    private JTextField nameField;
-    ProductSet productSet;
-    JTable productSetTable;
+    private final ProductSetReaderOpUI.FileModel fileModel = new ProductSetReaderOpUI.FileModel();
+    private final JTable productSetTable = new JTable(fileModel);
+    private final JTextField nameField;
+    private final ProductSet productSet;
+
     private boolean ok = false;
 
     public ProductSetDialog(String title, ProductSet prodSet) {
         super(VisatApp.getApp().getMainFrame(), title, ModalDialog.ID_OK_CANCEL, null);
-
         productSet = prodSet;
-        fileModel = new ProductSetReaderOpUI.FileModel();
 
-        Vector<File> fileList = productSet.getFileList();
-        for(int i=0; i < fileList.size(); ++i) {
-            File file = fileList.elementAt(i);
+        final ArrayList<File> fileList = productSet.getFileList();
+        for(File file : fileList) {
             fileModel.addFile(file);
         }
 
-        JComponent content =  ProductSetReaderOpUI.createComponent(productSetTable, fileModel);
+        final JComponent content =  ProductSetReaderOpUI.createComponent(productSetTable, fileModel);
 
         final JPanel topPanel = new JPanel(new BorderLayout(4, 4));
-        JLabel nameLabel = new JLabel("Name:");
+        final JLabel nameLabel = new JLabel("Name:");
         topPanel.add(nameLabel, BorderLayout.WEST);
         nameField = new JTextField(productSet.getName());
         topPanel.add(nameField, BorderLayout.CENTER);
@@ -50,6 +48,7 @@ public class ProductSetDialog extends ModelessDialog {
         setContent(content);
     }
 
+    @Override
     protected void onOK() {
         productSet.setName(nameField.getText());
         productSet.setFileList(fileModel.getFileList());

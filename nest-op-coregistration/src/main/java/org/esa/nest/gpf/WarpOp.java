@@ -213,7 +213,7 @@ public class WarpOp extends Operator {
         // coregistrated image should have the same geo-coding as the master image
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
-        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 50);
+        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 20);
     }
 
     /**

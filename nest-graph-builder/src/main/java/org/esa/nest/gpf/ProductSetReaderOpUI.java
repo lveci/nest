@@ -2,12 +2,14 @@ package org.esa.nest.gpf;
 
 import com.bc.ceres.binding.swing.BindingContext;
 import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.util.io.FileChooserFactory;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
@@ -27,6 +29,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * Stack Reader Operator User Interface
@@ -70,7 +73,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
     @Override
     public void updateParameters() {
 
-        final Vector<File> fileList = fileModel.getFileList();
+        final ArrayList<File> fileList = fileModel.getFileList();
         if(fileList.isEmpty()) return;
 
         paramMap.put("defaultFile", fileList.get(0));
@@ -145,7 +148,9 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
     public static File GetFilePath(Component component, String title) {
 
         File file = null;
-        final JFileChooser chooser = FileChooserFactory.getInstance().createFileChooser(new File("."));
+        final File openDir = new File(VisatApp.getApp().getPreferences().
+                getPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_OPEN_DIR, "."));
+        final JFileChooser chooser = FileChooserFactory.getInstance().createFileChooser(openDir);
         chooser.setDialogTitle(title);
         if (chooser.showDialog(component, "ok") == JFileChooser.APPROVE_OPTION) {
             file = chooser.getSelectedFile();
@@ -166,13 +171,13 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         };
 
         private Object data[][] = new Object[0][titles.length];
-        private final Vector<File> fileList = new Vector<File>(10);
+        private final ArrayList<File> fileList = new ArrayList<File>(10);
 
         public FileModel() {
             addBlankFile();
         }
 
-        public Vector<File> getFileList() {
+        public ArrayList<File> getFileList() {
             return fileList;
         }
 

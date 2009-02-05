@@ -141,12 +141,13 @@ public class GraphExecuter extends Observable {
     }
 
     public void setOperatorParam(final String id, final String paramName, final String value) {
-
-        final Xpp3Dom xml = new Xpp3Dom(paramName);
-        xml.setValue(value);
-
         final Node node = graph.getNode(id);
-        node.getConfiguration().addChild(xml);
+        Xpp3Dom xml = node.getConfiguration().getChild(paramName);
+        if(xml == null) {
+            xml = new Xpp3Dom(paramName);
+            node.getConfiguration().addChild(xml);
+        }
+        xml.setValue(value);
     }
 
     private void AssignAllParameters() {
@@ -211,14 +212,14 @@ public class GraphExecuter extends Observable {
         return false;
     }
 
-    public void recreateGraphContext() throws GraphException {
+    private void recreateGraphContext() throws GraphException {
         if(graphContext != null)
             GraphProcessor.disposeGraphContext(graphContext);
 
         graphContext = processor.createGraphContext(graph, ProgressMonitor.NULL);
     }
 
-    public void updateGraphNodes() {
+    private void updateGraphNodes() {
         if(graphContext != null) {
             for(GraphNode n : nodeList) {
                 final NodeContext context = graphContext.getNodeContext(n.getNode());

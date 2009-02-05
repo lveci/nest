@@ -13,30 +13,31 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Defines a list of Products
  * User: lveci
  * Date: Aug 20, 2008
  */
-public class ProductSet {
+public final class ProductSet {
 
-    Vector<File> fileList = new Vector<File>(10);
-    File productSetFile;
-    File productSetFolder;
-    String name;
+    private ArrayList<File> fileList = new ArrayList<File>(10);
+    private File productSetFile = null;
+    private final File productSetFolder;
+    private String name = null;
 
-    ProductSet(File path) {
+    ProductSet(final File path) {
 
         productSetFolder = path.getParentFile();
         setName(path.getName());
     }
 
-    public Vector<File> getFileList() {
+    public ArrayList<File> getFileList() {
         return fileList;
     }
 
-    public void setFileList(Vector<File> inFileList) {
+    public void setFileList(final ArrayList<File> inFileList) {
         fileList = inFileList;
     }
 
@@ -44,8 +45,8 @@ public class ProductSet {
         return productSetFile;
     }
 
-    public boolean addProduct(File file) {
-        ProductReader reader = ProductIO.getProductReaderForFile(file);
+    public boolean addProduct(final File file) {
+        final ProductReader reader = ProductIO.getProductReaderForFile(file);
         if (reader != null) {
             fileList.add(file);
             return true;
@@ -70,12 +71,11 @@ public class ProductSet {
 
     public void Save() {
 
-        Element root = new Element("ProjectSet");
-        Document doc = new Document(root);
+        final Element root = new Element("ProjectSet");
+        final Document doc = new Document(root);
 
-        for(int i=0; i < fileList.size(); ++i) {
-            File file = fileList.elementAt(i);
-            Element fileElem = new Element("product");
+        for(File file : fileList) {
+            final Element fileElem = new Element("product");
             fileElem.setAttribute("path", file.getAbsolutePath());
             root.addContent(fileElem);
         }
@@ -83,7 +83,7 @@ public class ProductSet {
         XMLSupport.SaveXML(doc, productSetFile.getAbsolutePath());
     }
 
-    public boolean Load(File file) {
+    public boolean Load(final File file) {
 
         if(!file.exists())
             return false;
@@ -95,15 +95,15 @@ public class ProductSet {
             return false;
         }
 
-        fileList = new Vector<File>(10);
+        fileList = new ArrayList<File>(10);
         Element root = doc.getRootElement();
 
-        List children = root.getContent();
+        final List children = root.getContent();
         for (Object aChild : children) {
             if (aChild instanceof Element) {
-                Element child = (Element) aChild;
+                final Element child = (Element) aChild;
                 if(child.getName().equals("product")) {
-                    Attribute attrib = child.getAttribute("path");
+                    final Attribute attrib = child.getAttribute("path");
                     fileList.add(new File(attrib.getValue()));
                 }
             }
@@ -112,29 +112,28 @@ public class ProductSet {
     }
 
     public static void OpenProductSet(File file) {
-        ProductSet prodSet = new ProductSet(file);
+        final ProductSet prodSet = new ProductSet(file);
         prodSet.Load(file);
-        ProductSetDialog dlg = new ProductSetDialog("ProductSet", prodSet);
+        final ProductSetDialog dlg = new ProductSetDialog("ProductSet", prodSet);
         dlg.show();
     }
 
     public static void AddProduct(File productSetFile, File inputFile) {
-        ProductSet prodSet = new ProductSet(productSetFile);
+        final ProductSet prodSet = new ProductSet(productSetFile);
         prodSet.Load(productSetFile);
         if(prodSet.addProduct(inputFile)) {
-            ProductSetDialog dlg = new ProductSetDialog("ProductSet", prodSet);
+            final ProductSetDialog dlg = new ProductSetDialog("ProductSet", prodSet);
             dlg.show();
         }
     }
 
     public static String GetListAsString(File productSetFile) {
-        ProductSet prodSet = new ProductSet(productSetFile);
+        final ProductSet prodSet = new ProductSet(productSetFile);
         prodSet.Load(productSetFile);
 
-        StringBuilder listStr = new StringBuilder(256);
-        Vector<File> fileList = prodSet.getFileList();
-        for(int i=0; i < fileList.size(); ++i) {
-            File file = fileList.elementAt(i);
+        final StringBuilder listStr = new StringBuilder(256);
+        final ArrayList<File> fileList = prodSet.getFileList();
+        for(File file : fileList) {
             listStr.append(file.getAbsolutePath());
             listStr.append('\n');
         }

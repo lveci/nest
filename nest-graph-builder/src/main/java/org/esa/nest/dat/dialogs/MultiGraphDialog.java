@@ -5,29 +5,23 @@ import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.graph.GraphException;
-import org.esa.beam.framework.gpf.ui.SourceProductSelector;
-import org.esa.beam.framework.gpf.ui.TargetProductSelector;
-import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.framework.ui.ModelessDialog;
-import org.esa.beam.framework.ui.TableLayout;
-import org.esa.beam.framework.ui.application.SelectionChangeEvent;
-import org.esa.beam.framework.ui.application.SelectionChangeListener;
-import org.esa.beam.util.SystemUtils;
 import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
 import org.esa.nest.dat.plugins.graphbuilder.ProgressBarProgressMonitor;
 
 import javax.media.jai.JAI;
 import javax.swing.*;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  *  Provides the dialog for excuting multiple graph from one user interface
@@ -35,6 +29,7 @@ import java.util.*;
 public abstract class MultiGraphDialog extends ModelessDialog {
 
     protected final AppContext appContext;
+    protected final IOPanel ioPanel;
     protected final ArrayList<GraphExecuter> graphExecuterList = new ArrayList<GraphExecuter>(3);
 
     private final JPanel mainPanel;
@@ -46,56 +41,25 @@ public abstract class MultiGraphDialog extends ModelessDialog {
 
     private boolean isProcessing = false;
 
-    private final TargetProductSelector targetProductSelector;
-    private java.util.List<SourceProductSelector> sourceProductSelectorList;
-    private String targetProductNameSuffix = "";
+    protected static final String TMP_FILENAME = "tmp_intermediate";
 
-    public MultiGraphDialog(final AppContext theAppContext, final String title, final String helpID) {
+    public MultiGraphDialog(final AppContext theAppContext, final String title, final String helpID,
+                            final boolean useSourceSelector) {
         super(theAppContext.getApplicationWindow(), title, ID_APPLY_CLOSE_HELP, helpID);
-
         appContext = theAppContext;
-
-        targetProductSelector = new TargetProductSelector();
-        final String homeDirPath = SystemUtils.getUserHomeDir().getPath();
-        final String saveDir = appContext.getPreferences().getPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, homeDirPath);
-        targetProductSelector.getModel().setProductDir(new File(saveDir));
-        targetProductSelector.getOpenInAppCheckBox().setText("Open in " + appContext.getApplicationName());
-
-        // Fetch source products
-        initSourceProductSelectors();
-
-        final TableLayout tableLayout = new TableLayout(1);
-        tableLayout.setTableAnchor(TableLayout.Anchor.WEST);
-        tableLayout.setTableWeightX(1.0);
-        tableLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
-        tableLayout.setTablePadding(3, 3);
-
-        final JPanel ioParametersPanel = new JPanel(tableLayout);
-        for (SourceProductSelector selector : sourceProductSelectorList) {
-            ioParametersPanel.add(selector.createDefaultPanel());
-        }
-        ioParametersPanel.add(targetProductSelector.createDefaultPanel());
-        ioParametersPanel.add(tableLayout.createVerticalSpacer());
-        sourceProductSelectorList.get(0).addSelectionChangeListener(new SelectionChangeListener() {
-            public void selectionChanged(SelectionChangeEvent event) {
-                final Product selectedProduct = (Product) event.getSelection().getFirstElement();
-                final TargetProductSelectorModel targetProductSelectorModel = targetProductSelector.getModel();
-                targetProductSelectorModel.setProductName(selectedProduct.getName() + getTargetProductNameSuffix());
-            }
-        });
 
         mainPanel = new JPanel(new BorderLayout(4, 4));
 
         tabbedPane = new JTabbedPane();
-        tabbedPane.add("I/O Parameters", ioParametersPanel);
         tabbedPane.addChangeListener(new ChangeListener() {
 
             public void stateChanged(final ChangeEvent e) {
                 ValidateAllNodes();
             }
         });
-
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
+
+        ioPanel = new IOPanel(appContext, tabbedPane, useSourceSelector);
 
         // status
         statusLabel = new JLabel("");
@@ -120,22 +84,14 @@ public abstract class MultiGraphDialog extends ModelessDialog {
         progressPanel.setVisible(false);
         mainPanel.add(progressPanel, BorderLayout.SOUTH);
 
-        AbstractButton button = getButton(ID_APPLY);
-        button.setText("Run");
+        getButton(ID_APPLY).setText("Run");
 
         super.getJDialog().setMinimumSize(new Dimension(400, 300));
     }
 
-    private void initSourceProductSelectors() {
-        sourceProductSelectorList = new ArrayList<SourceProductSelector>(3);
-        sourceProductSelectorList.add(new SourceProductSelector(appContext));
-    }
-
     @Override
     public int show() {
-        for (SourceProductSelector sourceProductSelector : sourceProductSelectorList) {
-            sourceProductSelector.initProducts();
-        }
+        ioPanel.initProducts();
         setContent(mainPanel);
         initGraphs();
         return super.show();
@@ -143,9 +99,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
 
     @Override
     public void hide() {
-        for (SourceProductSelector sourceProductSelector : sourceProductSelectorList) {
-            sourceProductSelector.releaseProducts();
-        }
+        ioPanel.releaseProducts();
         super.hide();
     }
 
@@ -154,13 +108,9 @@ public abstract class MultiGraphDialog extends ModelessDialog {
 
         if(isProcessing) return;
 
-        final String productDir = targetProductSelector.getModel().getProductDir().getAbsolutePath();
-        appContext.getPreferences().setPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, productDir);
+        ioPanel.onApply();
 
         try {
-            //initGraphs()
-            assignParameters();
-
             DoProcessing();
         } catch(Exception e) {
             statusLabel.setText(e.getMessage());
@@ -185,8 +135,9 @@ public abstract class MultiGraphDialog extends ModelessDialog {
 
     /**
      * Validates the input and then call the GPF to execute the graph
+     * @throws GraphException on assignParameters
      */
-    private void DoProcessing() {
+    private void DoProcessing() throws GraphException {
 
         if(ValidateAllNodes()) {
 
@@ -238,20 +189,48 @@ public abstract class MultiGraphDialog extends ModelessDialog {
 
     private boolean ValidateAllNodes() {
         if(isProcessing) return false;
+        if(ioPanel == null || graphExecuterList.isEmpty())
+            return false;
 
-        boolean result=true;
-        try {
+        boolean result;
+        statusLabel.setText("");
+        try { 
             assignParameters();
-            for(GraphExecuter graphEx : graphExecuterList) {
-                if(!graphEx.InitGraph())
-                    result = false;
-            }
+            // first graph must pass
+            result = graphExecuterList.get(0).InitGraph();
+
         } catch(GraphException e) {
             statusLabel.setText(e.getMessage());
             result = false;
         }
         return result;
     }
+
+    private void openTargetProducts(final ArrayList<File> fileList) {
+        if(!fileList.isEmpty()) {
+            for(File file : fileList) {
+                try {
+
+                    final Product product = ProductIO.readProduct(file, null);
+                    if (product != null) {
+                        appContext.getProductManager().addProduct(product);
+                    }
+                } catch(IOException e) {
+                    showErrorDialog(e.getMessage());
+                }
+            }
+        }
+    }
+
+    protected IOPanel getIOPanel() {
+        return ioPanel;
+    }
+
+    public void setTargetProductNameSuffix(final String suffix) {
+        ioPanel.setTargetProductNameSuffix(suffix);
+    }
+
+    /////
 
     private class ProcessThread extends SwingWorker<Boolean, Object> {
 
@@ -271,10 +250,9 @@ public abstract class MultiGraphDialog extends ModelessDialog {
                 isProcessing = true;
 
                 for(GraphExecuter graphEx : graphExecuterList) {
-                    graphEx.recreateGraphContext();
-                    graphEx.updateGraphNodes();
-                    graphEx.executeGraph(new SubProgressMonitor(pm, 100));
+                    graphEx.InitGraph();
 
+                    graphEx.executeGraph(new SubProgressMonitor(pm, 100));
                     graphEx.disposeGraphContext();
                 }
 
@@ -298,7 +276,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
                 statusLabel.setText("Processing completed in " + diff + " seconds");
             }
 
-            if(targetProductSelector.getModel().isOpenInAppSelected()) {
+            if(ioPanel.isOpenInAppSelected()) {
                 final GraphExecuter graphEx = graphExecuterList.get(graphExecuterList.size()-1);
                 openTargetProducts(graphEx.getProductsToOpenInDAT());
             }
@@ -308,39 +286,4 @@ public abstract class MultiGraphDialog extends ModelessDialog {
 
     }
 
-    private void openTargetProducts(final ArrayList<File> fileList) {
-        if(!fileList.isEmpty()) {
-            for(File file : fileList) {
-                try {
-
-                    final Product product = ProductIO.readProduct(file, null);
-                    if (product != null) {
-                        appContext.getProductManager().addProduct(product);
-                    }
-                } catch(IOException e) {
-                    showErrorDialog(e.getMessage());
-                }
-            }
-        }
-    }
-
-    public Product getSelectedSourceProduct() {
-        return sourceProductSelectorList.get(0).getSelectedProduct();
-    }
-
-    public File getTargetFile() {
-        return targetProductSelector.getModel().getProductFile();
-    }
-
-    public String getTargetFormat() {
-        return targetProductSelector.getModel().getFormatName();
-    }
-
-    String getTargetProductNameSuffix() {
-        return targetProductNameSuffix;
-    }
-
-    public void setTargetProductNameSuffix(final String suffix) {
-        targetProductNameSuffix = suffix;
-    }
 }

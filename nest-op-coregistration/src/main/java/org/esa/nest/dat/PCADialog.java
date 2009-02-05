@@ -4,6 +4,7 @@ import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.nest.dat.dialogs.MultiGraphDialog;
+import org.esa.nest.dat.dialogs.IOPanel;
 import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
 import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
 
@@ -23,7 +24,7 @@ public class PCADialog extends MultiGraphDialog {
     //private final static File tmpDataFile1 = new File(tmpFolder, "tmp1.dim.data");
 
     public PCADialog(final AppContext theAppContext, final String title, final String helpID) {
-        super(theAppContext, title, helpID);
+        super(theAppContext, title, helpID, true);
 
     }
 
@@ -64,23 +65,24 @@ public class PCADialog extends MultiGraphDialog {
 
     @Override
     protected void assignParameters() throws GraphException {
-            // first Graph - PCA-Statistics
-            setIO(graphExecuterList.get(0),
-                    "1-Read", getSelectedSourceProduct().getFileLocation());
 
-            // second Graph - PCA-Min
-            setIO(graphExecuterList.get(1),
-                    "1-Read", getSelectedSourceProduct().getFileLocation());
+        // first Graph - PCA-Statistics
+        setIO(graphExecuterList.get(0),
+                "1-Read", ioPanel.getSelectedSourceProduct().getFileLocation());
 
-            // third Graph - PCA-Image
-            setIO(graphExecuterList.get(2),
-                    "1-Read", getSelectedSourceProduct().getFileLocation(),
-                    "3-Write", getTargetFile(), getTargetFormat());
+        // second Graph - PCA-Min
+        setIO(graphExecuterList.get(1),
+                "1-Read", ioPanel.getSelectedSourceProduct().getFileLocation());
+
+        // third Graph - PCA-Image
+        setIO(graphExecuterList.get(2),
+                "1-Read", ioPanel.getSelectedSourceProduct().getFileLocation(),
+                "3-Write", ioPanel.getTargetFile(), ioPanel.getTargetFormat());
     }
 
     private static void setIO(final GraphExecuter graphEx, final String readID, final File readPath) throws GraphException {
         setIO(graphEx, readID, readPath, null, null, null);
-     }
+    }
 
     private static void setIO(final GraphExecuter graphEx,
                        final String readID, final File readPath,
