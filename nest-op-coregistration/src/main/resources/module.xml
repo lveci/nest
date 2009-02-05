@@ -29,22 +29,23 @@
     <extension point="beam-ui:actions">
 
         <action>
+            <id>openCoregistrationDialog</id>
+            <class>org.esa.nest.dat.CoregistrationAction</class>
+            <parent>sartools</parent>
+            <text>Coregistration</text>
+            <shortDescr>Perform Coregistration</shortDescr>
+            <placeAfter>Calibration</placeAfter>
+            <placeBefore>openPCADialog</placeBefore>
+            <helpId>Coregistration</helpId>
+        </action>
+        
+        <action>
             <id>openPCADialog</id>
             <class>org.esa.nest.dat.PCAAction</class>
             <parent>sartools</parent>
             <text>Principle Component Analysis</text>
             <shortDescr>Perform Principle Component Analysis</shortDescr>
             <helpId>PCA</helpId>
-        </action>
-        
-        <action>
-            <id>openCoregistrationDialog</id>
-            <class>org.esa.nest.dat.CoregistrationAction</class>
-            <parent>sartools</parent>
-            <text>Coregistration</text>
-            <shortDescr>Perform Coregistration</shortDescr>
-            <placeAfter>openPCADialog</placeAfter>
-            <helpId>Coregistration</helpId>
         </action>
 
     </extension>

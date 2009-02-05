@@ -417,8 +417,8 @@
             <shortDescr>Edit product metadata</shortDescr>
             <description>Edit product metadata</description>
             <helpId>editMetadata</helpId>
-            <placeBefore>Calibration</placeBefore>
             <parent>sartools</parent>
+            <placeBefore>searchMetadata</placeBefore>
             <context>metadata</context>
             <largeIcon>/org/esa/nest/icons/metadata_edit.png</largeIcon>
         </action>
@@ -430,7 +430,7 @@
             <shortDescr>Search product metadata</shortDescr>
             <description>Search product metadata</description>
             <helpId>searchMetadata</helpId>
-            <placeAfter>editMetadata</placeAfter>
+            <placeBefore>applyOrbitFile</placeBefore>
             <parent>sartools</parent>
             <context>metadata</context>
         </action>
@@ -443,7 +443,7 @@
             <description>Update product metadata with orbit file</description>
             <helpId>applyOrbitFile</helpId>
             <parent>sartools</parent>
-            <placeAfter>editMetadata</placeAfter>
+            <placeBefore>Calibration</placeBefore>
             <separatorAfter>true</separatorAfter>
         </action>
 

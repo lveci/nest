@@ -273,7 +273,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
      * Loads a new graph from a file
      */
     private void LoadGraph() {
-        final File file = DatUtils.GetFilePath("Load Graph", "XML", "xml", "GraphFile", false);
+        final File file = DatUtils.GetFilePath("Load Graph", "XML", "xml", "Graph", false);
         if(file == null) return;
 
         LoadGraph(file);

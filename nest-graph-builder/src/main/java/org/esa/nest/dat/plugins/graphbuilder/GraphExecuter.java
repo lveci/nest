@@ -241,7 +241,7 @@ public class GraphExecuter extends Observable {
 
     void saveGraph() throws GraphException {
 
-        final File filePath = DatUtils.GetFilePath("Save Graph", "XML", "xml", "GraphFile", true);
+        final File filePath = DatUtils.GetFilePath("Save Graph", "XML", "xml", "Graph", true);
         if(filePath != null)
             writeGraph(filePath.getAbsolutePath());
     }
