@@ -97,7 +97,7 @@ public class TestGraphExecuter extends TestCase implements Observer {
         GraphNode nodeA = graphEx.addOperator("testOp");
         GraphNode nodeB = graphEx.addOperator("testOp");
 
-        nodeB.connectOperatorSource(nodeA);
+        nodeB.connectOperatorSource(nodeA.getID());
 
         //graphEx.writeGraph("D:\\data\\testGraph.xml");
 

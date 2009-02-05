@@ -243,7 +243,8 @@ public abstract class MultiGraphDialog extends ModelessDialog {
         try {
             assignParameters();
             for(GraphExecuter graphEx : graphExecuterList) {
-                graphEx.InitGraph();
+                if(!graphEx.InitGraph())
+                    result = false;
             }
         } catch(GraphException e) {
             statusLabel.setText(e.getMessage());
@@ -255,7 +256,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
     private class ProcessThread extends SwingWorker<Boolean, Object> {
 
         private final ProgressMonitor pm;
-        private Date executeStartTime;
+        private Date executeStartTime = null;
 
         public ProcessThread(final ProgressMonitor pm) {
             this.pm = pm;
@@ -307,7 +308,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
 
     }
 
-    private void openTargetProducts(final Vector<File> fileList) {
+    private void openTargetProducts(final ArrayList<File> fileList) {
         if(!fileList.isEmpty()) {
             for(File file : fileList) {
                 try {

@@ -73,13 +73,14 @@ public class CreateStackOp extends Operator {
         }
 
         masterProduct = getMasterProduct(masterBandNames[0]);
-        if(masterProduct == null) {
+
+        final Band[] slaveBandList = getSlaveBands();
+        if(masterProduct == null || slaveBandList.length == 0 || slaveBandList[0] == null) {
             targetProduct = new Product("tmp", "tmp", 1, 1);
             targetProduct.addBand(new Band("tmp", ProductData.TYPE_INT8, 1, 1));
             return;
         }
 
-        final Band[] slaveBandList = getSlaveBands();
 
         targetProduct = new Product(masterProduct.getName(),
                                     masterProduct.getProductType(),
@@ -165,11 +166,15 @@ public class CreateStackOp extends Operator {
     }
 
     private static String getBandName(final String name) {
-        return name.substring(0, name.indexOf("::"));
+        if(name.contains("::"))
+            return name.substring(0, name.indexOf("::"));
+        return name;
     }
 
-    private static String getProductName(final String name) {
-        return name.substring(name.indexOf("::")+2, name.length());
+    private String getProductName(final String name) {
+        if(name.contains("::"))
+            return name.substring(name.indexOf("::")+2, name.length());
+        return sourceProduct[0].getName();
     }
 
     @Override

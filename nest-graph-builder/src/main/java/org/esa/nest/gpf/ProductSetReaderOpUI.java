@@ -256,16 +256,18 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
 
     public static class ProductSetTransferHandler extends TransferHandler {
 
-        FileModel fileModel;
+        private final FileModel fileModel;
 
         public ProductSetTransferHandler(FileModel model) {
             fileModel = model;
         }
 
+        @Override
         public boolean canImport(TransferHandler.TransferSupport info) {
             return info.isDataFlavorSupported(DataFlavor.stringFlavor);
         }
 
+        @Override
         public int getSourceActions(JComponent c) {
             return TransferHandler.COPY;
         }
@@ -273,13 +275,14 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         /**
          * Perform the actual import 
          */
+        @Override
         public boolean importData(TransferHandler.TransferSupport info) {
             if (!info.isDrop()) {
                 return false;
             }
 
             // Get the string that is being dropped.
-            Transferable t = info.getTransferable();
+            final Transferable t = info.getTransferable();
             String data;
             try {
                 data = (String) t.getTransferData(DataFlavor.stringFlavor);
@@ -290,14 +293,14 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
 
             // Wherever there is a newline in the incoming data,
             // break it into a separate item in the list.
-            String[] values = data.split("\n");
+            final String[] values = data.split("\n");
 
             // Perform the actual import.
             for (String value : values) {
 
-                File file = new File(value);
+                final File file = new File(value);
                 if(file.exists()) {
-                    ProductReader reader = ProductIO.getProductReaderForFile(file);
+                    final ProductReader reader = ProductIO.getProductReaderForFile(file);
                     if (reader != null) {
                         fileModel.addFile(file);
                     }

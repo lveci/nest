@@ -61,7 +61,7 @@ public class TestGraphNode extends TestCase {
         GraphNode sourceGraphNode = new GraphNode(sourceNode);
 
         // test connect
-        graphNode.connectOperatorSource(sourceGraphNode);
+        graphNode.connectOperatorSource(sourceGraphNode.getID());
 
         NodeSource ns = node.getSource(0);
         assertNotNull(ns);
@@ -69,7 +69,7 @@ public class TestGraphNode extends TestCase {
         assertEquals(ns.getSourceNodeId(), sourceNode.getId());
 
         // test disconnect
-        graphNode.disconnectOperatorSources(sourceGraphNode);
+        graphNode.disconnectOperatorSources(sourceGraphNode.getID());
 
         NodeSource [] nsList = node.getSources();
         assertEquals(nsList.length, 0);

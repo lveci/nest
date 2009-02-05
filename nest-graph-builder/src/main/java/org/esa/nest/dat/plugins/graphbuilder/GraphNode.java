@@ -31,10 +31,10 @@ public class GraphNode {
 
     private int nodeWidth = 60;
     private int nodeHeight = 30;
-    private int halfNodeHeight;
-    private int halfNodeWidth;
+    private int halfNodeHeight = 0;
+    private int halfNodeWidth = 0;
     static final private int hotSpotSize = 10;
-    private int hotSpotOffset;
+    private int hotSpotOffset = 0;
 
     private Point displayPosition = new Point(0,0);
 
@@ -56,7 +56,7 @@ public class GraphNode {
         return operatorUI;
     }
 
-    void initParameters() {
+    private void initParameters() {
 
         final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(node.getOperatorName());
         if(operatorSpi == null) return;
@@ -94,7 +94,6 @@ public class GraphNode {
             }
         }
     }
-
 
     private static Converter getConverter(final ValueContainer valueContainer, final String name) {
         final ValueModel[] models = valueContainer.getModels();
@@ -161,7 +160,7 @@ public class GraphNode {
      * Gets the display position of a node
      * @return Point The position of the node
      */
-    Point getPos() {
+    public Point getPos() {
         return displayPosition;
     }
 
@@ -169,7 +168,7 @@ public class GraphNode {
      * Sets the display position of a node and writes it to the xml
      * @param p The position of the node
      */
-    void setPos(Point p) {
+    public void setPos(Point p) {
         displayPosition = p;
     }
 
@@ -177,23 +176,23 @@ public class GraphNode {
         return node;
     }
 
-    int getWidth() {
+    public int getWidth() {
         return nodeWidth;
     }
 
-    int getHeight() {
+    public int getHeight() {
         return nodeHeight;
     }
 
-    static int getHotSpotSize() {
+    public static int getHotSpotSize() {
         return hotSpotSize;
     }
 
-    int getHalfNodeWidth() {
+    public int getHalfNodeWidth() {
         return halfNodeWidth;
     }
 
-    int getHalfNodeHeight() {
+    public int getHalfNodeHeight() {
         return halfNodeHeight;
     }
 
@@ -205,7 +204,7 @@ public class GraphNode {
         hotSpotOffset = halfNodeHeight - (hotSpotSize / 2);
     }
 
-    int getHotSpotOffset() {
+    public int getHotSpotOffset() {
         return hotSpotOffset;
     }
 
@@ -229,28 +228,26 @@ public class GraphNode {
         return parameterMap;
     }
 
-    public void connectOperatorSource(final GraphNode source) {
+    public void connectOperatorSource(final String id) {
         // check if already a source for this node
-        disconnectOperatorSources(source);
+        disconnectOperatorSources(id);
 
-        final NodeSource ns = new NodeSource("sourceProduct", source.getID());
+        final NodeSource ns = new NodeSource("sourceProduct", id);
         node.addSource(ns);
     }
 
-    void disconnectOperatorSources(final GraphNode source) {
+    void disconnectOperatorSources(final String id) {
 
-        final NodeSource[] sources = node.getSources();
-        for (NodeSource ns : sources) {
-            if (ns.getSourceNodeId().equals(source.getID())) {
+        for (NodeSource ns : node.getSources()) {
+            if (ns.getSourceNodeId().equals(id)) {
                 node.removeSource(ns);
             }
         }
     }
 
-    boolean FindSource(final GraphNode source) {
-
-        final NodeSource[] sources = node.getSources();
-        for (NodeSource ns : sources) {
+    boolean isNodeSource(final GraphNode source) {
+            
+        for (NodeSource ns : node.getSources()) {
             if (ns.getSourceNodeId().equals(source.getID())) {
                 return true;
             }
@@ -286,7 +283,7 @@ public class GraphNode {
      * @param g The Java2D Graphics
      * @param col The color to draw
      */
-    void drawNode(final Graphics g, final Color col) {
+    public void drawNode(final Graphics g, final Color col) {
         final int x = displayPosition.x;
         final int y = displayPosition.y;
 
@@ -310,7 +307,7 @@ public class GraphNode {
      * @param g The Java2D Graphics
      * @param col The color to draw
      */
-    void drawHotspot(final Graphics g, final Color col) {
+    public void drawHotspot(final Graphics g, final Color col) {
         final Point p = displayPosition;
         g.setColor(col);
         g.drawOval(p.x - hotSpotSize / 2, p.y + hotSpotOffset, hotSpotSize, hotSpotSize);
@@ -348,7 +345,7 @@ public class GraphNode {
      * @param headX position X on source node
      * @param headY position Y on source node
      */
-    static private void drawArrow(final Graphics g, final int tailX, final int tailY, final int headX, final int headY) {
+    private static void drawArrow(final Graphics g, final int tailX, final int tailY, final int headX, final int headY) {
 
         final double t1 = Math.abs(headY - tailY);
         final double t2 = Math.abs(headX - tailX);

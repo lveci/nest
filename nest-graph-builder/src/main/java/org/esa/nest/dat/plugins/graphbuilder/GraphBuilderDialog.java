@@ -222,56 +222,13 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
             JAI.getDefaultInstance().getTileCache().flush();
             System.gc();
 
-            final Stack productSetStack = graphEx.FindProductSets();
-
-            if(!productSetStack.isEmpty()) {
-                progressBar.setValue(0);
-                progBarMonitor = new ProgressBarProgressMonitor(progressBar, null, progressPanel);
-                final SwingWorker processThread = new ProcessProductSetThread(productSetStack, progBarMonitor);
-                processThread.execute();
-            } else {
-                progressBar.setValue(0);
-                progBarMonitor = new ProgressBarProgressMonitor(progressBar, null, progressPanel);
-                final SwingWorker processThread = new ProcessThread(progBarMonitor);
-                processThread.execute();
-            }
+            progressBar.setValue(0);
+            progBarMonitor = new ProgressBarProgressMonitor(progressBar, null, progressPanel);
+            final SwingWorker processThread = new ProcessThread(progBarMonitor);
+            processThread.execute();
 
         } else {
             showErrorDialog(statusLabel.getText());
-        }
-    }
-
-    private synchronized void ReplaceAllProductSets(final Graph graph, final Stack productSetStack) throws GraphException {
-        final GraphExecuter.ProductSetNode stackNode = (GraphExecuter.ProductSetNode)productSetStack.pop();
-
-        for (Enumeration e = stackNode.fileList.elements(); e.hasMoreElements();)
-        {
-            GraphExecuter.ReplaceProductSetWithReader(graph, stackNode.nodeID, (String)e.nextElement());
-
-            if(productSetStack.isEmpty()) {
-
-                statusLabel.setText("executing graph " + graphCount);
-                
-                GraphExecuter.IncrementWriterFiles(graph, graphCount);
-
-                progressBar.setValue(0);
-                progBarMonitor = new ProgressBarProgressMonitor(progressBar, null, progressPanel);
-                graphEx.recreateGraphContext();
-
-                progBarMonitor.beginTask("Processing Graph...", 10);
-                isProcessing = true;
-
-                graphEx.executeGraph(progBarMonitor);
-                
-                isProcessing = false;
-                progBarMonitor.done();
-                progressBar.setValue(0);
-
-                GraphExecuter.RestoreWriterFiles(graph, graphCount);
-                graphCount++;
-            } else {
-                ReplaceAllProductSets(graph, productSetStack);
-            }
         }
     }
 
@@ -281,15 +238,19 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     }
 
     private boolean InitGraph() {
+        boolean result = true;
         try {
-            if(initGraphEnabled)
-                graphEx.InitGraph();
             statusLabel.setText("");
-            return true;
+            if(initGraphEnabled) {
+                result = graphEx.InitGraph();
+            }
+            if(!result)
+                statusLabel.setText("Graph is incomplete");
         } catch(GraphException e) {
             statusLabel.setText(e.getMessage());
+            result = false ;
         }
-        return false;
+        return result;
     }
 
     /**
@@ -476,7 +437,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
     }
 
-    private void openTargetProducts(final Vector<File> fileList) {
+    private void openTargetProducts(final ArrayList<File> fileList) {
         if(!fileList.isEmpty()) {
             for(File file : fileList) {
                 try {
@@ -491,55 +452,5 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
             }
         }
     }
-
-    private class ProcessProductSetThread extends SwingWorker<GraphExecuter, Object> {
-
-        private final ProgressMonitor pm;
-        private final Stack productSetStack;
-        private Date executeStartTime = null;
-
-        public ProcessProductSetThread(final Stack productSetStack, final ProgressMonitor pm) {
-            this.pm = pm;
-            this.productSetStack = productSetStack;
-        }
-
-        @Override
-        protected GraphExecuter doInBackground() throws Exception {
-
-            pm.beginTask("Processing Graph...", 10);
-            try {
-                executeStartTime = Calendar.getInstance().getTime();
-                isProcessing = true;
-
-                graphCount = 0;
-                ReplaceAllProductSets(graphEx.getGraph(), productSetStack);
-
-            } catch(Exception e) {
-                statusLabel.setText(e.getMessage());
-            } finally {
-                final Date now = Calendar.getInstance().getTime();
-                final long diff = (now.getTime() - executeStartTime.getTime()) / 1000;
-                if(diff > 120) {
-                    final float minutes = diff / 60f;
-                    statusLabel.setText("Processing completed in " + minutes + " minutes");
-                } else {
-                    statusLabel.setText("Processing completed in " + diff + " seconds");
-                }
-                isProcessing = false;
-                pm.done();
-
-                graphEx.disposeGraphContext();
-            }
-            return graphEx;
-        }
-
-        @Override
-        public void done() {
-
-        }
-
-    }
-
-
 
 }

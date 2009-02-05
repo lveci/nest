@@ -79,7 +79,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
     {
         if(selectedNode != null) {
             final GraphNode source = graphEx.findGraphNode(id);
-            selectedNode.disconnectOperatorSources(source);
+            selectedNode.disconnectOperatorSources(source.getID());
             repaint();
         }
     }
@@ -247,7 +247,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
                 }   */
 
 
-                connectSourceTargetNode.connectOperatorSource(n);
+                connectSourceTargetNode.connectOperatorSource(n.getID());
             }
         }
         connectingSource = false;
