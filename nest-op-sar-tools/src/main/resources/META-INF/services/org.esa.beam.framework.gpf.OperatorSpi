@@ -4,3 +4,5 @@ org.esa.nest.gpf.MultilookOp$Spi
 org.esa.nest.gpf.OversamplingOp$Spi
 org.esa.nest.gpf.UndersamplingOp$Spi
 org.esa.nest.gpf.ConvertDataTypeOp$Spi
+org.esa.nest.gpf.WSSDeBurstOp$Spi
+org.esa.nest.gpf.WSSMosaicOp$Spi

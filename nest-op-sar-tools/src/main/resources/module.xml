@@ -161,6 +161,32 @@
             <parent>TerrainCorrectionGroup</parent>
         </action>
 
+        <action>
+            <id>ASARWSS</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>ASAR WSS</text>
+            <parent>sartools</parent>
+        </action>
+
+        <action>
+            <id>WSSDeBurstOp</id>
+            <class>org.esa.nest.dat.WSSDeBurstOpAction</class>
+            <text>WSS Deburst</text>
+            <shortDescr>Invoke the ASAR WSS DeBurst operator.</shortDescr>
+            <parent>ASARWSS</parent>
+            <helpId>WSSDeburstOp</helpId>
+        </action>
+
+        <action>
+            <id>WSSMosaicOp</id>
+            <class>org.esa.nest.dat.WSSMosaicOpAction</class>
+            <text>WSS Mosaic</text>
+            <shortDescr>Invoke the ASAR WSS Mosaic operator.</shortDescr>
+            <parent>ASARWSS</parent>
+            <placeAfter>WSSDeBurstOp</placeAfter>
+            <helpId>WSSMosiacOp</helpId>
+        </action>
+
     </extension>
 
 </module>

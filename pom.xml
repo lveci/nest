@@ -54,7 +54,6 @@
 	    <module>nest-op-coregistration</module>
 	    <module>nest-op-sar-tools</module>
 		<module>nest-op-ocean-tools</module>
-		<module>nest-op-wss-deburst</module>
   </modules>
 
     <dependencyManagement>
