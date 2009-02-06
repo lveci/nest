@@ -1,0 +1,114 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>nest-op-calibration</symbolicName>
+    <version>2B</version>
+    <name>NEST Calibration Operator</name>
+    <description>NEST Calibration Operator</description>
+	
+	<vendor>Array Systems Computing Inc</vendor>
+    <contactAddress>1120 Finch Ave W. Toronto (Canada)</contactAddress>
+    <copyright>(C) 2007 by Array Systems Computing Inc</copyright>
+    <url>http://www.array.ca/nest</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat-rcp</module>
+        <optional>true</optional>
+    </dependency>
+    <dependency>
+        <module>beam-gpf</module>
+    </dependency>
+    <dependency>
+        <module>beam-envisat-reader</module>
+    </dependency>
+    <dependency>
+        <module>nest-core</module>
+    </dependency>
+    <dependency>
+        <module>nest-graph-builder</module>
+    </dependency>
+
+    <categories>VISAT,Processing</categories>
+
+    <extension point="beam-ui:actions">
+        <action>
+            <id>Calibration</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Radiometric Correction</text>
+            <parent>sartools</parent>
+        </action>
+        <action>
+            <id>ASARCalibrationGroup</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>ENVISAT ASAR</text>
+            <parent>Calibration</parent>
+        </action>
+
+        <action>
+            <id>ASARCalibrationOp</id>
+            <class>org.esa.nest.dat.ASARCalibrationOpAction</class>
+            <text>ASAR Calibration</text>
+            <shortDescr>Invoke the ASAR Calibration operator.</shortDescr>
+            <parent>ASARCalibrationGroup</parent>
+            <helpId>ASARCalibrationOp</helpId>
+        </action>
+
+        <action>
+            <id>ASARRetroCalibrationOpTool</id>
+            <class>org.esa.nest.dat.ASARRetroCalibrationOpAction</class>
+            <text>ASAR Retro-Calibration</text>
+            <shortDescr>Invoke the ASAR Retro-Calibration operator.</shortDescr>
+            <parent>ASARCalibrationGroup</parent>
+            <helpId>ASARRetroCalibrationOp</helpId>
+            <placeAfter>ASARCalibrationOp</placeAfter>
+        </action>
+
+        <action>
+            <id>importXCAProduct</id>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <formatName>ENVISAT</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <text>View ASAR XCA Product</text>
+            <shortDescr>Import an ENVISAT External Calibration.</shortDescr>
+            <description>Import an ENVISAT External Calibration.</description>
+            <parent>ASARCalibrationGroup</parent>
+            <largeIcon>icons/Import24.gif</largeIcon>
+            <separatorBefore>true</separatorBefore>
+            <placeAfter>ASARRetroCalibrationOpTool</placeAfter>
+        </action>
+
+        <action>
+            <id>ERSCalibration</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>ERS 1/2</text>
+            <parent>Calibration</parent>
+        </action>
+        <action>
+            <id>ERSCalibrationOpTool</id>
+            <class>org.esa.nest.dat.ERSCalibrationOpAction</class>
+            <text>ERS Calibration</text>
+            <shortDescr>Invoke the ERS Calibration operator.</shortDescr>
+            <parent>ERSCalibration</parent>
+            <helpId>ERSCalibrationOp</helpId>
+        </action>
+
+        <action>
+            <id>ALOSPALSARCalibrationGroup</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>ALOS PALSAR</text>
+            <parent>Calibration</parent>
+        </action>
+        <action>
+            <id>ALOSPALSARCalibrationOp</id>
+            <class>org.esa.nest.dat.ALOSPALSARCalibrationOpAction</class>
+            <text>ALOS PALSAR Calibration</text>
+            <shortDescr>Invoke the ALOS PALSAR Calibration operator.</shortDescr>
+            <parent>ALOSPALSARCalibrationGroup</parent>
+            <helpId>ALOSPALSARCalibrationOp</helpId>
+        </action>
+
+    </extension>
+</module>
