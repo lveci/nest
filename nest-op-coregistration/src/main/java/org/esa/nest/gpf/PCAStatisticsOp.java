@@ -32,13 +32,11 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import javax.media.jai.JAI;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The operator evaluates some local statistics for every pair of user selected master/slave bands of the image.
- * Let the user selected bands be masterBand and slaveBand, and the pixel value for the two bands be x and y
- * respectively, then the following statistics are computed:
+ * The operator evaluates some local statistics for every pair of user selected source bands.
+ * Let the user selected bands be x and y, then the following statistics are computed:
  *
  * 1. Mean of x
  * 2. Mean of x*x
@@ -55,25 +53,23 @@ public class PCAStatisticsOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(description = "The list of source bands.", alias = "masterBand", itemAlias = "band",
-            sourceProductId="source", label="Master Band")
-    private String masterBandName = null;
-
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            sourceProductId="source", label="Slave Bands")
+            sourceProductId="source", label="Source Bands")
     private String[] sourceBandNames = null;
 
-    private boolean statsCalculated = false;
-    private int numOfBands = 0;     // total number of bands (master and slave) for statistics
-    private int numOfPixels = 0;    // total number of pixel values
-    private double[] sum;       // summation of pixel values for each band
-    private double[] sum2;      // summation of pixel value squares for each band
-    private double[] sumCross;  // summation of the dot product of each band and the master band
-    private double[] mean;      // mean of pixel values for each band
-    private double[] mean2;     // mean of pixel value squares for each band
-    private double[] meanCross; // mean of the dot product of each band and the master band
+    @Parameter(description = "The threshold for selecting eigenvalues", interval = "(0, 1]", defaultValue = "1.0",
+                label="Eigenvalue Threshold")
+    private double eigenvalueThreshold = 1.0;
 
-    private final HashMap<String, Integer> statisticsBandIndex = new HashMap<String, Integer>();
+    private boolean statsCalculated = false;
+    private int numOfPixels = 0;    // total number of pixel values
+    private int numOfSourceBands;   // number of user selected bands
+    private double[] sum;           // summation of pixel values for each band
+    private double[][] sumCross;    // summation of the dot product of each band and the master band
+    private double[] mean;          // mean of pixel values for each band
+    private double[][] meanCross;   // mean of the dot product of each band and the master band
+
+//    private final HashMap<String, Integer> statisticsBandIndex = new HashMap<String, Integer>();
 
     /**
      * Default constructor. The graph processing framework
@@ -99,12 +95,13 @@ public class PCAStatisticsOp extends Operator {
     public void initialize() throws OperatorException {
 
         try {
-            if(!OperatorUtils.isDIMAP(sourceProduct))
+            if(!OperatorUtils.isDIMAP(sourceProduct)) {
                 throw new OperatorException("Source Product should be in BEAM-DIMAP format");
+            }
 
             createTargetProduct();
 
-            if(masterBandName != null) {
+            if(sourceBandNames != null) {
                 addSelectedBands();
 
                 setInitialValues();
@@ -127,7 +124,8 @@ public class PCAStatisticsOp extends Operator {
                                     sourceProduct.getSceneRasterWidth(),
                                     sourceProduct.getSceneRasterHeight());
 
-        targetProduct.setPreferredTileSize(JAI.getDefaultTileSize());
+        //targetProduct.setPreferredTileSize(JAI.getDefaultTileSize());
+        targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 10);
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
@@ -138,11 +136,11 @@ public class PCAStatisticsOp extends Operator {
     }
 
     /**
-     * Add user selected master and slave bands to target product.
+     * Add user selected master and source bands to target product.
      */
     private void addSelectedBands() {
 
-        // if no slave band is selected by user, then select all bands
+        // if no source band is selected by user, then select all bands
         if (sourceBandNames == null || sourceBandNames.length == 0) {
             final Band[] bands = sourceProduct.getBands();
             final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
@@ -152,44 +150,23 @@ public class PCAStatisticsOp extends Operator {
             sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
         }
 
-        // add master band in target product
-        final Band masterBand = sourceProduct.getBand(masterBandName);
-        if (masterBand == null) {
-            throw new OperatorException("Source band not found: " + masterBandName);
-        }
-        Band targetBand = new Band(masterBandName,
-                                   masterBand.getDataType(),
-                                   masterBand.getRasterWidth(),
-                                   masterBand.getRasterHeight());
+        numOfSourceBands = sourceBandNames.length;
 
-        targetBand.setUnit(masterBand.getUnit());
-        targetProduct.addBand(targetBand);
+        // add selected source bands in target product
+        for (String bandName : sourceBandNames) {
 
-        numOfBands = 0;
-        statisticsBandIndex.put(masterBandName, numOfBands);
-        numOfBands++;
-
-        // add slave bands in target product
-        for (String slaveBandName : sourceBandNames) {
-
-            if (targetProduct.getBand(slaveBandName) == null) {
-
-                final Band slaveBand = sourceProduct.getBand(slaveBandName);
-                if (slaveBand == null) {
-                    throw new OperatorException("Source band not found: " + slaveBandName);
-                }
-
-                targetBand = new Band(slaveBandName,
-                                      slaveBand.getDataType(),
-                                      slaveBand.getRasterWidth(),
-                                      slaveBand.getRasterHeight());
-
-                targetBand.setUnit(slaveBand.getUnit());
-                targetProduct.addBand(targetBand);
-
-                statisticsBandIndex.put(slaveBandName, numOfBands);
-                numOfBands++;
+            final Band sourceBand = sourceProduct.getBand(bandName);
+            if (sourceBand == null) {
+                throw new OperatorException("Source band not found: " + bandName);
             }
+
+            Band targetBand = new Band(bandName,
+                                       sourceBand.getDataType(),
+                                       sourceBand.getRasterWidth(),
+                                       sourceBand.getRasterHeight());
+
+            targetBand.setUnit(sourceBand.getUnit());
+            targetProduct.addBand(targetBand);
         }
     }
 
@@ -198,16 +175,17 @@ public class PCAStatisticsOp extends Operator {
      */
     private void setInitialValues() {
 
-        mean = new double[numOfBands];
-        mean2 = new double[numOfBands];
-        meanCross = new double[numOfBands];
-        sum = new double[numOfBands];
-        sum2 = new double[numOfBands];
-        sumCross = new double[numOfBands];
-        for (int i = 0; i < numOfBands; i++) {
+        mean = new double[numOfSourceBands];
+        meanCross = new double[numOfSourceBands][numOfSourceBands];
+        sum = new double[numOfSourceBands];
+        sumCross = new double[numOfSourceBands][numOfSourceBands];
+        for (int i = 0; i < numOfSourceBands; i++) {
             sum[i] = 0.0;
-            sum2[i] = 0.0;
-            sumCross[i] = 0.0;
+            mean[i] = 0.0;
+            for (int j = 0; j < numOfSourceBands; j++) {
+                sumCross[i][j] = 0.0;
+                meanCross[i][j] = 0.0;
+            }
         }
 
         numOfPixels = sourceProduct.getSceneRasterWidth() * sourceProduct.getSceneRasterHeight();
@@ -228,26 +206,43 @@ public class PCAStatisticsOp extends Operator {
                                 throws OperatorException {
 
         try {
-            final Band masterBand = sourceProduct.getBand(masterBandName);
-            final Tile masterRaster = getSourceTile(masterBand, targetRectangle, pm);
-            final ProductData masterRawSamples = masterRaster.getRawSamples();
-            final int n = masterRawSamples.getNumElems();
+            /*
+            int x0 = targetRectangle.x;
+            int y0 = targetRectangle.y;
+            int w = targetRectangle.width;
+            int h = targetRectangle.height;
+            System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+            */
+            ProductData[] bandsRawSamples = new ProductData[numOfSourceBands];
+            for (int i = 0; i < numOfSourceBands; i++) {
+                bandsRawSamples[i] =
+                        getSourceTile(sourceProduct.getBand(sourceBandNames[i]), targetRectangle, pm).getRawSamples();
+            }
 
-            for (String bandName : statisticsBandIndex.keySet())  {
+            final int n = bandsRawSamples[0].getNumElems();
 
+            double vi, vj;
+            for (int i = 0; i < numOfSourceBands; i++)  {
                 checkForCancelation(pm);
+                for (int j = 0; j <= i; j++) {
 
-                final int bandIdx = statisticsBandIndex.get(bandName);
-                final Band sourceBand = sourceProduct.getBand(bandName);
-                final Tile sourceRaster = getSourceTile(sourceBand, targetRectangle, pm);
-                final ProductData sourceRawSamples = sourceRaster.getRawSamples();
+                    //System.out.println("i = " + i + ", j = " + j);
+                    if (j < i) {
 
-                for (int i = 0; i < n; i++) {
-                    final double vm = masterRawSamples.getElemDoubleAt(i);
-                    final double vs = sourceRawSamples.getElemDoubleAt(i);
-                    sum[bandIdx] += vs;
-                    sum2[bandIdx] += vs*vs;
-                    sumCross[bandIdx] += vs*vm;
+                        for (int k = 0; k < n; k++) {
+                            vi = bandsRawSamples[i].getElemDoubleAt(k);
+                            vj = bandsRawSamples[j].getElemDoubleAt(k);
+                            sumCross[i][j] += vi*vj;
+                        }
+
+                    } else { // j == i
+
+                        for (int k = 0; k < n; k++) {
+                            vi = bandsRawSamples[i].getElemDoubleAt(k);
+                            sum[i] += vi;
+                            sumCross[i][j] += vi*vi;
+                        }
+                    }
                 }
             }
 
@@ -280,11 +275,14 @@ public class PCAStatisticsOp extends Operator {
      */
     private void completeStatistics() {
 
-        for (String bandName : statisticsBandIndex.keySet())  {
-            final int bandIdx = statisticsBandIndex.get(bandName);
-            mean[bandIdx] = sum[bandIdx] / numOfPixels;
-            mean2[bandIdx] = sum2[bandIdx] / numOfPixels;
-            meanCross[bandIdx] = sumCross[bandIdx] / numOfPixels;
+        for (int i = 0; i < numOfSourceBands; i++)  {
+            mean[i] = sum[i] / numOfPixels;
+            for (int j = 0; j <= i; j++) {
+                meanCross[i][j] = sumCross[i][j] / numOfPixels;
+                if (j != i) {
+                    meanCross[j][i] = meanCross[i][j];
+                }
+            }
         }
     }
 
@@ -297,14 +295,16 @@ public class PCAStatisticsOp extends Operator {
         // create temporary metadata
         final MetadataElement root = sourceProduct.getMetadataRoot();
         final MetadataElement tempElemRoot = createElement(root, "temporary metadata");
-        setAttribute(tempElemRoot, "master band name", masterBandName);
+        setAttribute(tempElemRoot, "eigenvalue threshold", eigenvalueThreshold);
 
-        for (String bandName : statisticsBandIndex.keySet())  {
-            final int bandIdx = statisticsBandIndex.get(bandName);
-            final MetadataElement subElemRoot = createElement(tempElemRoot, bandName);
-            setAttribute(subElemRoot, "mean", mean[bandIdx]);
-            setAttribute(subElemRoot, "square mean", mean2[bandIdx]);
-            setAttribute(subElemRoot, "cross mean", meanCross[bandIdx]);
+        final MetadataElement staSubElemRoot = createElement(tempElemRoot, "statistics");
+        for (int i = 0; i < numOfSourceBands; i++)  {
+            String bandName = sourceBandNames[i];
+            final MetadataElement subElemRoot = createElement(staSubElemRoot, bandName);
+            setAttribute(subElemRoot, "mean", mean[i]);
+            for (int j = 0; j < numOfSourceBands; j++) {
+                setAttribute(subElemRoot, "cross mean " + j, meanCross[i][j]);
+            }
         }
         
         try {
@@ -322,7 +322,7 @@ public class PCAStatisticsOp extends Operator {
      * @param tag The sub-metadata element name.
      * @return The sub-metadata element.
      */
-    private static MetadataElement createElement(MetadataElement root, String tag) {
+    public static MetadataElement createElement(MetadataElement root, String tag) {
 
         MetadataElement subElemRoot = root.getElement(tag);
         if(subElemRoot == null) {
@@ -364,21 +364,33 @@ public class PCAStatisticsOp extends Operator {
         AbstractMetadata.setAttribute(root, tag, value);
     }
 
+    /**
+     * Set attribute value.
+     * @param root The root metadata element.
+     * @param tag The attribute name.
+     * @param value The value for the attribute.
+     */
+    static void setAttribute(MetadataElement root, String tag, int value) {
+
+        MetadataAttribute attr = root.getAttribute(tag);
+        if(attr == null) {
+            attr = new MetadataAttribute(tag, ProductData.TYPE_INT32, 1);
+            root.addAttributeFast(attr);
+        }
+        AbstractMetadata.setAttribute(root, tag, value);
+    }
+
     // The following functions are for unit test only.
     public int getNumOfBands() {
-        return numOfBands;
+        return numOfSourceBands;
     }
 
     public double getMean(int bandIdx) {
         return mean[bandIdx];
     }
 
-    public double getMean2(int bandIdx) {
-        return mean2[bandIdx];
-    }
-
-    public double getMeanCross(int bandIdx) {
-        return meanCross[bandIdx];
+    public double getMeanCross(int i, int j) {
+        return meanCross[i][j];
     }
 
     /**

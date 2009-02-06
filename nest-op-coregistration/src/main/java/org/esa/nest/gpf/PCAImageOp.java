@@ -57,17 +57,14 @@ public class PCAImageOp extends Operator {
     private Product targetProduct;
 
     private boolean pcaImageComputed = false;
-    private int numOfSlaveBands = 0; // total number of user selected slave bands
-
-    private String masterBandName; // master band name
-    private String[] slaveBandNames; // band names user selected slave bands
-
+    private int numOfSourceBands = 0; // total number of user selected slave bands
+    private int numPCA; // number of PCA images output
+    private String[] sourceBandNames; // band names user selected slave bands
+    private double eigenvalueThreshold; // threshold for selecting eigenvalues
     private double[][] eigenVectorMatrices; // eigenvector matrices for all slave bands
-    private double[][] eigenValues; // eigenvalues for all slave bands
-    private double[][] minPCA; // min value for first and second PCA images for all master/slave band pairs
+    private double[] eigenValues; // eigenvalues for all slave bands
+    private double[] minPCA; // min value for first and second PCA images for all master/slave band pairs
     private boolean reloadStats = true;
-
-    private final HashMap<String, Integer> slaveBandIndex = new HashMap<String, Integer>(5);
 
     /**
      * Default constructor. The graph processing framework
@@ -118,33 +115,35 @@ public class PCAImageOp extends Operator {
                 //throw new OperatorException("Cannot find temporary metadata");
                 return false;
             }
+            eigenvalueThreshold = tempElemRoot.getAttributeDouble("eigenvalue threshold");
+            numPCA = tempElemRoot.getAttributeInt("number of PCA images");
 
-            masterBandName = tempElemRoot.getAttributeString("master band name");
-            numOfSlaveBands = tempElemRoot.getNumElements() - 1;
-            if (numOfSlaveBands <= 0) {
-                throw new OperatorException("There is no slave band");
+            MetadataElement staSubElemRoot = tempElemRoot.getElement("statistics");
+            numOfSourceBands = staSubElemRoot.getNumElements();
+            sourceBandNames = new String[numOfSourceBands];
+            for (int i = 0; i < numOfSourceBands; i++) {
+                MetadataElement subElemRoot = staSubElemRoot.getElementAt(i);
+                sourceBandNames[i] = subElemRoot.getName();
             }
 
-            slaveBandNames = new String[numOfSlaveBands];
-            eigenVectorMatrices = new double[numOfSlaveBands][4];
-            eigenValues = new double[numOfSlaveBands][2];
-            minPCA = new double[numOfSlaveBands][2];
+            minPCA = new double[numPCA];
+            MetadataElement minSubElemRoot = tempElemRoot.getElement("PCA min");
+            for (int i = 0; i < numPCA; i++)  {
+                minPCA[i] = minSubElemRoot.getAttributeDouble("min " + i);
+            }
 
-            int k = 0;
-            for (MetadataElement subElemRoot : tempElemRoot.getElements()) {
-                final String bandName = subElemRoot.getName();
-                if (!bandName.equals(masterBandName)) {
-                    slaveBandNames[k] = bandName;
-                    minPCA[k][0] = subElemRoot.getAttributeDouble("min1", 0);
-                    minPCA[k][1] = subElemRoot.getAttributeDouble("min2", 0);
-                    eigenVectorMatrices[k][0] = subElemRoot.getAttributeDouble("eigen vector matrix 0", 0);
-                    eigenVectorMatrices[k][1] = subElemRoot.getAttributeDouble("eigen vector matrix 1", 0);
-                    eigenVectorMatrices[k][2] = subElemRoot.getAttributeDouble("eigen vector matrix 2", 0);
-                    eigenVectorMatrices[k][3] = subElemRoot.getAttributeDouble("eigen vector matrix 3", 0);
-                    eigenValues[k][0] = subElemRoot.getAttributeDouble("eigen value 0", 0);
-                    eigenValues[k][1] = subElemRoot.getAttributeDouble("eigen value 1", 0);
-                    slaveBandIndex.put(bandName, k);
-                    k++;
+            eigenValues = new double[numOfSourceBands];
+            MetadataElement eigenvalueSubElemRoot = tempElemRoot.getElement("eigenvalues");
+            for (int i = 0; i < numOfSourceBands; i++)  {
+                eigenValues[i] = eigenvalueSubElemRoot.getAttributeDouble("element " + i);
+            }
+
+            eigenVectorMatrices = new double[numOfSourceBands][numOfSourceBands];
+            MetadataElement eigenvectorSubElemRoot = tempElemRoot.getElement("eigenvectors");
+            for (int j = 0; j < numOfSourceBands; j++)  {
+                MetadataElement colSubElemRoot = eigenvectorSubElemRoot.getElement("vector " + j);
+                for (int i = 0; i < numOfSourceBands; i++) {
+                    eigenVectorMatrices[i][j] = colSubElemRoot.getAttributeDouble("element " + i);
                 }
             }
 
@@ -185,25 +184,18 @@ public class PCAImageOp extends Operator {
     private void addSelectedBands() {
 
         // add PCA bands in target product
-        final Band masterBand = sourceProduct.getBand(masterBandName);
-        if (masterBand == null) {
-            throw new OperatorException("Source band not found: " + masterBand);
+        final Band sourcerBand = sourceProduct.getBand(sourceBandNames[0]);
+        if (sourcerBand == null) {
+            throw new OperatorException("Source band not found: " + sourcerBand);
         }
 
-        final int imageWidth = masterBand.getRasterWidth();
-        final int imageHeight = masterBand.getRasterHeight();
-        final String unit = masterBand.getUnit();
+        final int imageWidth = sourcerBand.getRasterWidth();
+        final int imageHeight = sourcerBand.getRasterHeight();
+        final String unit = sourcerBand.getUnit();
 
-        for (String slaveBandName : slaveBandNames) {
-
-            final String targetBandName1 = "PC1_" + masterBandName + '_' + slaveBandName;
-            final String targetBandName2 = "PC2_" + masterBandName + '_' + slaveBandName;
-
-            Band targetBand = new Band(targetBandName1, ProductData.TYPE_FLOAT32, imageWidth, imageHeight);
-            targetBand.setUnit(unit);
-            targetProduct.addBand(targetBand);
-
-            targetBand = new Band(targetBandName2, ProductData.TYPE_FLOAT32, imageWidth, imageHeight);
+        for (int i = 0; i < numPCA; i++) {
+            final String targetBandName = "PC" + i;
+            Band targetBand = new Band(targetBandName, ProductData.TYPE_FLOAT32, imageWidth, imageHeight);
             targetBand.setUnit(unit);
             targetProduct.addBand(targetBand);
         }
@@ -230,21 +222,27 @@ public class PCAImageOp extends Operator {
         }
 
         try {
+            ProductData[] bandsRawSamples = new ProductData[numOfSourceBands];
+            for (int i = 0; i < numOfSourceBands; i++) {
+                bandsRawSamples[i] =
+                        getSourceTile(sourceProduct.getBand(sourceBandNames[i]), targetRectangle, pm).getRawSamples();
+            }
+            final int n = bandsRawSamples[0].getNumElems();
 
-            for (String slaveBandName : slaveBandNames) {
-
+            for (int i = 0; i < numPCA; i++) {
                 checkForCancelation(pm);
 
-                final String targetBandName1 = "PC1_" + masterBandName + '_' + slaveBandName;
-                final String targetBandName2 = "PC2_" + masterBandName + '_' + slaveBandName;
+                final Band targetBand = targetProduct.getBand("PC" + i);
+                final Tile targetTile = targetTileMap.get(targetBand);
+                final ProductData trgData = targetTile.getDataBuffer();
 
-                final Band targetBand1 = targetProduct.getBand(targetBandName1);
-                final Band targetBand2 = targetProduct.getBand(targetBandName2);
-
-                final Tile targetTile1 = targetTileMap.get(targetBand1);
-                final Tile targetTile2 = targetTileMap.get(targetBand2);
-
-                computePCAImages(slaveBandName, targetTile1, targetTile2, pm);
+                for (int k = 0; k < n; k++) {
+                    double vPCA = 0.0;
+                    for (int j = 0; j < numOfSourceBands; j++) {
+                        vPCA += bandsRawSamples[j].getElemDoubleAt(k)*eigenVectorMatrices[j][i];
+                    }
+                    trgData.setElemDoubleAt(k, vPCA - minPCA[i]);
+                }
             }
 
         } catch (Exception e){
@@ -254,91 +252,6 @@ public class PCAImageOp extends Operator {
         }
 
         pcaImageComputed = true;
-    }
-
-    /**
-     * Compute PCA images for given master/slave pair and output them to target.
-     *
-     * @param slaveBandName The slave band name.
-     * @param targetTile1 The target tile for the first target band.
-     * @param targetTile2 The target tile for the second target band.
-     * @param pm A progress monitor which should be used to determine computation cancelation requests.
-     */
-    private void computePCAImages(final String slaveBandName, final Tile targetTile1, final Tile targetTile2,
-                                  final ProgressMonitor pm) {
-
-        // method 1
-        final ProductData trgData1 = targetTile1.getDataBuffer();
-        final ProductData trgData2 = targetTile2.getDataBuffer();
-
-        final Rectangle targetTileRectangle = targetTile1.getRectangle();
-
-        final Band masterBand = sourceProduct.getBand(masterBandName);
-        final Band slaveBand = sourceProduct.getBand(slaveBandName);
-
-        final Tile masterRaster = getSourceTile(masterBand, targetTileRectangle, pm);
-        final ProductData masterRawSamples = masterRaster.getRawSamples();
-
-        final Tile slaveRaster = getSourceTile(slaveBand, targetTileRectangle, pm);
-        final ProductData slaveRawSamples = slaveRaster.getRawSamples();
-
-        final int idx = slaveBandIndex.get(slaveBandName);
-        final int n = masterRawSamples.getNumElems();
-
-        for (int i = 0; i < n; i++) {
-
-            final double vm = masterRawSamples.getElemDoubleAt(i);
-            final double vs = slaveRawSamples.getElemDoubleAt(i);
-
-            final double vPCA1 = eigenVectorMatrices[idx][0]*vm + eigenVectorMatrices[idx][1]*vs - minPCA[idx][0];
-            final double vPCA2 = eigenVectorMatrices[idx][2]*vm + eigenVectorMatrices[idx][3]*vs - minPCA[idx][1];
-
-            trgData1.setElemDoubleAt(i, vPCA1);
-            trgData2.setElemDoubleAt(i, vPCA2);
-        }
-
-        // method 2
-        /*
-        final Rectangle targetTileRectangle = targetTile1.getRectangle();
-        final int tx0 = targetTileRectangle.x;
-        final int ty0 = targetTileRectangle.y;
-        final int tw  = targetTileRectangle.width;
-        final int th  = targetTileRectangle.height;
-        //System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
-
-        final Band masterBand = sourceProduct.getBand(masterBandName);
-        final Band slaveBand = sourceProduct.getBand(slaveBandName);
-
-        final Tile masterRaster = getSourceTile(masterBand, targetTileRectangle, pm);
-        final Tile slaveRaster = getSourceTile(slaveBand, targetTileRectangle, pm);
-
-        final ProductData masterData = masterRaster.getDataBuffer();
-        final ProductData slaveData = slaveRaster.getDataBuffer();
-
-        final ProductData trgData1 = targetTile1.getDataBuffer();
-        final ProductData trgData2 = targetTile2.getDataBuffer();
-
-        final int bandIdx = slaveBandIndex.get(slaveBandName);
-
-        for (int ty = ty0; ty < ty0 + th; ty++) {
-            for (int tx = tx0; tx < tx0 + tw; tx++) {
-
-                //int index = targetTile1.getDataBufferIndex(tx, ty);
-                int index = (ty - ty0)*tw + tx - tx0;
-
-                final double vm = masterData.getElemDoubleAt(index);
-                final double vs = slaveData.getElemDoubleAt(index);
-
-                final double vPCA1 =
-                        eigenVectorMatrices[bandIdx][0]*vm + eigenVectorMatrices[bandIdx][1]*vs - minPCA[bandIdx][0];
-                final double vPCA2 =
-                        eigenVectorMatrices[bandIdx][2]*vm + eigenVectorMatrices[bandIdx][3]*vs - minPCA[bandIdx][1];
-
-                trgData1.setElemDoubleAt(index, vPCA1);
-                trgData2.setElemDoubleAt(index, vPCA2);                
-            }
-        }
-        */
     }
 
     /**
@@ -386,26 +299,20 @@ public class PCAImageOp extends Operator {
             final PrintStream p = new PrintStream(out);
 
             p.println();
-            p.println("Master Band: " + masterBandName);
-            p.println();
-            for (String bandName : slaveBandIndex.keySet())  {
-                final int bandIdx = slaveBandIndex.get(bandName);
-
-                p.println();
-                p.println("Slave Band " + bandIdx + ": " + bandName);
-                p.println();
-                p.format("Eigen Vector Matrix = [%8.3f, %8.3f",
-                         eigenVectorMatrices[bandIdx][0], eigenVectorMatrices[bandIdx][2]);
-                p.println();
-                p.format("                       %8.3f, %8.3f]",
-                         eigenVectorMatrices[bandIdx][1], eigenVectorMatrices[bandIdx][3]);
-                p.println();
-                p.println();
-                p.format("Eigen Values = [%8.3f, %8.3f]", eigenValues[bandIdx][0], eigenValues[bandIdx][1]);
-                p.println();
-                p.println();
+            p.println("User Selected Bands: ");
+            for (int i = 0; i < numOfSourceBands; i++) {
+                p.println("    " + sourceBandNames[i]);
             }
-
+            p.println();
+            p.println("User Input Eigenvalue Threshold: " + eigenvalueThreshold);
+            p.println();
+            p.println("Number of PCA Images Output: " + numPCA);
+            p.println();
+            p.println("Eigenvalues: ");
+            for (int i = 0; i < numOfSourceBands; i++)  {
+                p.println("    " + eigenValues[i]);
+            }
+            p.println();
             p.close();
 
         } catch(IOException exc) {
