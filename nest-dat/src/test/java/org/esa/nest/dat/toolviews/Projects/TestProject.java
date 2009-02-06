@@ -17,18 +17,21 @@ import org.esa.beam.util.SystemUtils;
 public class TestProject extends TestCase {
 
     private Project project = Project.instance();
-    private File projectFolder = new File(DatUtils.findHomeFolder().getAbsolutePath()
+    private final static File projectFolder = new File(DatUtils.findHomeFolder().getAbsolutePath()
             + File.separator + "testProject");
-    private File projectFile = new File(projectFolder.getAbsolutePath()
+    private final static File projectFile = new File(projectFolder.getAbsolutePath()
             + File.separator + "TestProjectFile.xml");
 
+    @Override
     public void setUp() throws Exception {
         if(!projectFolder.exists())
             projectFolder.mkdir();
     }
 
+    @Override
     public void tearDown() throws Exception {
         SystemUtils.deleteFileTree(projectFolder);
+        project = null;
     }
 
     public void testInitProject() {

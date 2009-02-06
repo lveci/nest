@@ -34,21 +34,18 @@ import java.util.Timer;
  */
 public class Project extends Observable {
 
-    static private Project _instance = null;
+    private final static Project _instance = new Project();
 
-    private File projectFolder;
-    private File projectFile;
-    private ProjectPTL productTreeListener;
-    private ProjectSubFolder projectSubFolders;
+    private File projectFolder = null;
+    private File projectFile = null;
+    private ProjectPTL productTreeListener = null;
+    private ProjectSubFolder projectSubFolders = null;
     private final static boolean SAVE_PROJECT = true;
 
     /**
     * @return The unique instance of this class.
     */
-    static public Project instance() {
-        if(null == _instance) {
-            _instance = new Project();
-        }
+    public static Project instance() {
         return _instance;
     }
 
@@ -60,7 +57,7 @@ public class Project extends Observable {
             SaveProject();
     }
 
-    public void showProjectsView() {
+    public static void showProjectsView() {
         final ExecCommand command = VisatApp.getApp().getCommandManager().
                 getExecCommand("org.esa.nest.dat.toolviews.Projects.ProjectsToolView.showCmd");
         command.execute();

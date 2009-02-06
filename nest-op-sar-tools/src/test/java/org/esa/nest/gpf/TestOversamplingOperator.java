@@ -39,12 +39,12 @@ public class TestOversamplingOperator extends TestCase {
      */
     public void testOversampling() throws Exception {
 
-        final File file = new File("C:\\Data\\ASAR\\ASA_IMS_1PNUPA20040419_031056_000000162026_00089_11165_6099.N1");
-        if(!file.exists()) return;
+        //final File file = new File("C:\\Data\\ASAR\\ASA_IMM_1P_0739.N1");
+        //if(!file.exists()) return;
         
-        Product sourceProduct = ProductIO.readProduct(file, null);
+        //Product sourceProduct = ProductIO.readProduct(file, null);
 
-        //Product sourceProduct = createTestProduct(500, 500);
+        Product sourceProduct = createTestProduct(6, 12);
 
         OversamplingOp op = (OversamplingOp)spi.createOperator();
         assertNotNull(op);
@@ -63,8 +63,8 @@ public class TestOversamplingOperator extends TestCase {
         band.readPixels(0, 0, 4, 2, floatValues, ProgressMonitor.NULL);
 
         // compare with expected outputs:
-        //float[] expectedValues = {126.0f, 153.0f,   180.0f, 207.0f, 450.0f, 477.0f, 504.0f, 531.0f};
-        //assertTrue(Arrays.equals(expectedValues, floatValues));
+        float[] expectedValues = {126.0f, 153.0f,   180.0f, 207.0f, 450.0f, 477.0f, 504.0f, 531.0f};
+        assertTrue(Arrays.equals(expectedValues, floatValues));
 
 
     }
