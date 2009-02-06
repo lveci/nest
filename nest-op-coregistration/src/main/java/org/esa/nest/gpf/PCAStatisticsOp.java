@@ -101,7 +101,7 @@ public class PCAStatisticsOp extends Operator {
 
             createTargetProduct();
 
-            if(sourceBandNames != null) {
+            if(sourceBandNames != null && sourceBandNames.length > 0) {
                 addSelectedBands();
 
                 setInitialValues();
