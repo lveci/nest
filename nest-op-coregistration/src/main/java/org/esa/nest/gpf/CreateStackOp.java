@@ -31,6 +31,7 @@ public class CreateStackOp extends Operator {
     private static final String NEAREST_NEIGHBOUR = "NEAREST_NEIGHBOUR";
     private static final String BILINEAR_INTERPOLATION = "BILINEAR_INTERPOLATION";
     private static final String CUBIC_CONVOLUTION = "CUBIC_CONVOLUTION";
+    private static final String NONE = "NONE";
 
     @SourceProducts
     private Product[] sourceProduct;
@@ -105,10 +106,29 @@ public class CreateStackOp extends Operator {
             sourceRasterMap.put(targetBand, slaveBand);
         }
 
+        // copy slave abstracted metadata
+        copySlaveMetadata();
+
         // copy GCPs if found to master band
         final ProductNodeGroup<Pin> masterGCPgroup = masterProduct.getGcpGroup();
         if (masterGCPgroup.getNodeCount() > 0) {
             OperatorUtils.copyGCPsToTarget(masterGCPgroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
+        }
+    }
+
+    private void copySlaveMetadata() {
+        final MetadataElement targetRoot = targetProduct.getMetadataRoot();
+        MetadataElement targetSlaveMetadataRoot = targetRoot.getElement("Slave Metadata");
+        if(targetSlaveMetadataRoot == null) {
+            targetSlaveMetadataRoot = new MetadataElement("Slave Metadata");
+            targetRoot.addElement(targetSlaveMetadataRoot);
+        }
+        for(Product prod : sourceProduct) {
+            if(prod != masterProduct) {
+                final MetadataElement targetSlaveMetadata = new MetadataElement(prod.getName());
+                targetSlaveMetadataRoot.addElement(targetSlaveMetadata);
+                ProductUtils.copyMetadata(OperatorUtils.getAbstractedMetadata(prod), targetSlaveMetadata);
+            }
         }
     }
 

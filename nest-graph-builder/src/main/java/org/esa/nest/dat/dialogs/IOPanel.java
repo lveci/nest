@@ -39,10 +39,10 @@ public class IOPanel {
         targetProductSelector.getOpenInAppCheckBox().setText("Open in " + appContext.getApplicationName());
 
         final TableLayout tableLayout = new TableLayout(1);
-        tableLayout.setTableAnchor(TableLayout.Anchor.WEST);
+        tableLayout.setTableAnchor(TableLayout.Anchor.NORTHWEST);
         tableLayout.setTableWeightX(1.0);
-        tableLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
-        tableLayout.setTablePadding(3, 3);
+        tableLayout.setTableFill(TableLayout.Fill.BOTH);
+        tableLayout.setTablePadding(1, 1);
 
         final JPanel ioParametersPanel = new JPanel(tableLayout);
 
