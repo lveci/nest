@@ -29,8 +29,8 @@
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>ERS CEOS</formatName>
             <useAllFileFilter>true</useAllFileFilter>
-            <shortDescr>Import an ERS CEOS data product or product subset.</shortDescr>
-            <description>Import an ERS CEOS data product or product subset.</description>
+            <shortDescr>Open ERS 1/2 CEOS (VMP and PGS) data product or subset.</shortDescr>
+            <description>Open ERS 1/2 CEOS (VMP and PGS) data product or subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
             <helpId>importERSProduct</helpId>
             <placeAfter>importErsProduct</placeAfter>
@@ -40,8 +40,8 @@
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>JERS CEOS</formatName>
             <useAllFileFilter>true</useAllFileFilter>
-            <shortDescr>Import a JERS CEOS data product or product subset.</shortDescr>
-            <description>Import a JERS CEOS data product or product subset.</description>
+            <shortDescr>Import a JERS CEOS data product or subset.</shortDescr>
+            <description>Import a JERS CEOS data product or subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
             <helpId>importJERSProduct</helpId>
             <placeAfter>importERSCEOSProduct</placeAfter>
@@ -51,8 +51,8 @@
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>ALOS PALSAR</formatName>
             <useAllFileFilter>true</useAllFileFilter>
-            <shortDescr>Import an ALOS PALSAR CEOS data product or product subset.</shortDescr>
-            <description>Import an ALOS PALSAR CEOS data product or product subset.</description>
+            <shortDescr>Import an ALOS PALSAR CEOS data product or subset.</shortDescr>
+            <description>Import an ALOS PALSAR CEOS data product or subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
             <helpId>importAlosPalsarProduct</helpId>
             <placeAfter>importJERSCEOSProduct</placeAfter>
@@ -62,8 +62,8 @@
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>Radarsat 1 CEOS</formatName>
             <useAllFileFilter>true</useAllFileFilter>
-            <shortDescr>Import a Radarsat 1 CEOS data product or product subset.</shortDescr>
-            <description>Import a Radarsat 1 CEOS data product or product subset.</description>
+            <shortDescr>Import a Radarsat 1 CEOS data product or subset.</shortDescr>
+            <description>Import a Radarsat 1 CEOS data product or subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
             <helpId>importRadarsatProduct</helpId>
             <placeAfter>importAlosPalsarProduct</placeAfter>
