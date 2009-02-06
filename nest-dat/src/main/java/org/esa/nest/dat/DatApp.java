@@ -97,7 +97,6 @@ public final class DatApp extends VisatApp {
         excludedIds.add("org.esa.beam.visat.toolviews.placemark.pin.PinManagerToolView");
         excludedIds.add("org.esa.beam.visat.toolviews.placemark.gcp.GcpManagerToolView");
         excludedIds.add("org.esa.beam.visat.toolviews.roi.RoiManagerToolView");
-        excludedIds.add("org.esa.beam.visat.toolviews.bitmask.BitmaskOverlayToolView");
 
         return excludedIds;
     }
@@ -112,6 +111,7 @@ public final class DatApp extends VisatApp {
         commandIds.add("org.esa.beam.visat.toolviews.nav.NavigationToolView.showCmd");
         commandIds.add("org.esa.beam.visat.toolviews.imageinfo.ColorManipulationToolView.showCmd");
         commandIds.add("org.esa.beam.visat.toolviews.layermanager.LayerManagerToolView.showCmd");
+        commandIds.add("org.esa.beam.visat.toolviews.bitmask.BitmaskOverlayToolView.showCmd");
         commandIds.add(null);
     }
 

@@ -45,7 +45,7 @@
 		<module>nest-reader-ers-ceos</module>
 		<module>nest-reader-xml-based</module>
 		<module>nest-reader-generic</module>
-		<module>nest-writer-gdal</module>
+		<!--module>nest-writer-gdal</module-->
 		<module>nest-writer-netcdf</module>
 		<module>nest-op-filter</module>
 	    <module>nest-op-speckle-filter</module>
