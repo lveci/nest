@@ -60,19 +60,16 @@ public class ASARCalibrationOperator extends Operator {
     //private double extCalibrationFactor;
 
     @Parameter(description = "The antenne elevation pattern gain auxiliary data file.", label="External Aux File")
-    private File externalAuxFile;
+    private File externalAuxFile = null;
 
     @Parameter(description = "Output image scale", defaultValue = "false", label="Scale in dB")
-    private boolean outputImageScaleInDb;
+    private boolean outputImageScaleInDb = false;
 
-    @Parameter(description = "Create gamma band", defaultValue = "false", label="Create gamma virtual band")
-    private boolean createGammaBand;
+    @Parameter(description = "Create gamma0 virtual band", defaultValue = "false", label="Create gamma0 virtual band")
+    private boolean createGammaBand = false;
 
-    @Parameter(description = "Create beta band", defaultValue = "false", label="Create beta virtual band")
-    private boolean createBetaBand;
-
-    private Band sourceBand1;
-    private Band sourceBand2;
+    @Parameter(description = "Create beta0 virtual band", defaultValue = "false", label="Create beta0 virtual band")
+    private boolean createBetaBand = false;
 
     protected MetadataElement abstractedMetadata;
 
@@ -102,7 +99,7 @@ public class ASARCalibrationOperator extends Operator {
     protected static final double lightSpeed = 299792458.0; //  m / s
     protected static final double halfLightSpeed = lightSpeed / 2.0;
     protected static final double underFlowFloat = 1.0e-30;
-    private HashMap<String, String[]> targetBandNameToSourceBandName;
+    private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();;
 
     /**
      * Default constructor. The graph processing framework
@@ -126,38 +123,41 @@ public class ASARCalibrationOperator extends Operator {
      */
     @Override
     public void initialize() throws OperatorException {
+        try {
+            setExternalAuxFileAvailableFlag();
+            abstractedMetadata = OperatorUtils.getAbstractedMetadata(sourceProduct);
+            getProductType();
+            sampleType = abstractedMetadata.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
+            swath = getSwath(abstractedMetadata);
+            getPolarization();
+            getCalibrationFlags();
+            numMPPRecords = getNumOfRecordsInMainProcParam(sourceProduct);
+            getTiePointGridData(sourceProduct);
+            getCalibrationFactor();
 
-        setExternalAuxFileAvailableFlag();
-        abstractedMetadata = OperatorUtils.getAbstractedMetadata(sourceProduct);
-        getProductType();
-        getSampleType();
-        swath = getSwath(abstractedMetadata);
-        getPolarization();
-        getCalibrationFlags();
-        numMPPRecords = getNumOfRecordsInMainProcParam(sourceProduct);
-        getTiePointGridData(sourceProduct);
-        getCalibrationFactor();
+            if (!antElevCorrFlag) {
+                getAntennaPatternGain();
+                getSatelliteToEarthCenterDistance(sourceProduct);
+            }
 
-        if (!antElevCorrFlag) {
-            getAntennaPatternGain();
-            getSatelliteToEarthCenterDistance(sourceProduct);
+            if (sampleType.contains("COMPLEX")) {
+                setPowerInRangeSpreadingLossComp();
+            }
+
+            createTargetProduct();
+
+            if(createGammaBand) {
+                createGammaVirtualBand(targetProduct, outputImageScaleInDb);
+            }
+
+            if(createBetaBand) {
+                createBetaVirtualBand(targetProduct, outputImageScaleInDb);
+            }
+
+            targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 10);
+        } catch(Exception e) {
+            throw new OperatorException(e);
         }
-
-        if (sampleType.contains("COMPLEX")) {
-            setPowerInRangeSpreadingLossComp();
-        }
-
-        createTargetProduct();
-
-        if(createGammaBand) {
-            createGammaVirtualBand(targetProduct, outputImageScaleInDb);
-        }
-
-        if(createBetaBand) {
-            createBetaVirtualBand(targetProduct, outputImageScaleInDb);
-        }
-
-        targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 10);
     }
 
     /**
@@ -197,21 +197,9 @@ public class ASARCalibrationOperator extends Operator {
     }
 
     /**
-     * Get product sample type.
-     */
-    private void getSampleType() {
-
-        final MetadataAttribute sampleTypeAttr = abstractedMetadata.getAttribute(AbstractMetadata.SAMPLE_TYPE);
-        if (sampleTypeAttr == null) {
-            throw new OperatorException(AbstractMetadata.SAMPLE_TYPE + " not found");
-        }
-
-        sampleType = sampleTypeAttr.getData().getElemString();
-        //System.out.println("Sample type is " + sampleType);
-    }
-
-    /**
      * Get product swath.
+     * @param absMetadata
+     * @return
      */
     static int getSwath(MetadataElement absMetadata) {
 
@@ -352,6 +340,7 @@ public class ASARCalibrationOperator extends Operator {
      * pattern gains for the swath and the polarization of the product.
      *
      * @param fileName The auxiliary data file name.
+     * @throws OperatorException
      */
     private void getAntennaPatternGainFromAuxData(String fileName) throws OperatorException {
 
@@ -801,8 +790,8 @@ public class ASARCalibrationOperator extends Operator {
     private void addSelectedBands() {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) {
-            Band[] bands = sourceProduct.getBands();
-            ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            final Band[] bands = sourceProduct.getBands();
+            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
                 bandNameList.add(band.getName());
             }
@@ -820,8 +809,6 @@ public class ASARCalibrationOperator extends Operator {
         }
 
         String targetBandName;
-
-        targetBandNameToSourceBandName = new HashMap<String, String[]>();
         for (int i = 0; i < sourceBands.length; i++) {
 
             final Band srcBand = sourceBands[i];
@@ -944,15 +931,15 @@ public class ASARCalibrationOperator extends Operator {
 
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
-        Rectangle targetTileRectangle = targetTile.getRectangle();
+        final Rectangle targetTileRectangle = targetTile.getRectangle();
         final int x0 = targetTileRectangle.x;
         final int y0 = targetTileRectangle.y;
         final int w = targetTileRectangle.width;
         final int h = targetTileRectangle.height;
 
-        Tile sourceRaster1 = null;
-        Tile sourceRaster2 = null;
-        ProductData srcData1 = null;
+        Band sourceBand1;
+        Tile sourceRaster1;
+        ProductData srcData1;
         ProductData srcData2 = null;
 
         final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
@@ -962,9 +949,9 @@ public class ASARCalibrationOperator extends Operator {
             srcData1 = sourceRaster1.getDataBuffer();
         } else {
             sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
-            sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
+            final Band sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
             sourceRaster1 = getSourceTile(sourceBand1, targetTileRectangle, pm);
-            sourceRaster2 = getSourceTile(sourceBand2, targetTileRectangle, pm);
+            final Tile sourceRaster2 = getSourceTile(sourceBand2, targetTileRectangle, pm);
             srcData1 = sourceRaster1.getDataBuffer();
             srcData2 = sourceRaster2.getDataBuffer();
         }

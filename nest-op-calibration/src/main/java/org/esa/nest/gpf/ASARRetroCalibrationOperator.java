@@ -55,13 +55,10 @@ public class ASARRetroCalibrationOperator extends Operator {
     String[] sourceBandNames;
 
     @Parameter(description = "The antenne elevation pattern gain auxiliary data file.")
-    private File externalAntennaPatternFile;
+    private File externalAntennaPatternFile = null;
 
     @Parameter(description = "Output image scale", defaultValue = "false")
-    private boolean outputImageScaleInDb;
-
-    private Band sourceBand;
-    private Band targetBand;
+    private boolean outputImageScaleInDb = false;
 
     private MetadataElement abstractedMetadata;
     private TiePointGrid incidenceAngle;
@@ -150,7 +147,7 @@ public class ASARRetroCalibrationOperator extends Operator {
         final int w = targetTileRectangle.width;
         final int h = targetTileRectangle.height;
 
-        sourceBand = sourceProduct.getBand(targetBand.getName());
+        final Band sourceBand = sourceProduct.getBand(targetBand.getName());
         final Tile sourceRaster = getSourceTile(sourceBand, targetTileRectangle, pm);
 
         final Unit.UnitType bandUnit = Unit.getUnitType(sourceBand);

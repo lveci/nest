@@ -81,10 +81,10 @@ public final class ERSCalibrationOperator extends Operator {
                 label = "Output image scale in dB")
     private boolean outputImageScaleInDb = false;
 
-    @Parameter(description = "Create gamma band", defaultValue = "false", label="Create gamma virtual band")
+    @Parameter(description = "Create gamma0 band", defaultValue = "false", label="Create gamma0 virtual band")
     private boolean createGammaBand = false;
 
-    @Parameter(description = "Create beta band", defaultValue = "false", label="Create beta virtual band")
+    @Parameter(description = "Create beta0 band", defaultValue = "false", label="Create beta0 virtual band")
     private boolean createBetaBand = false;
 
     private Band sourceBand1;
@@ -162,7 +162,7 @@ public final class ERSCalibrationOperator extends Operator {
 
     // parameters used for PGS-ENVISAT calibration
     private int numMPPRecords;
-    private HashMap<String, String[]> targetBandNameToSourceBandName;
+    private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>(4);
 
     private static final double referenceIncidenceAngle = 23.0 * MathUtils.DTOR; //  radian
     private static final double relativeLookAngle = 20.355; //  degree
@@ -1408,7 +1408,6 @@ public final class ERSCalibrationOperator extends Operator {
         String targetBandName;
         String targetUnit = "intensity";
 
-        targetBandNameToSourceBandName = new HashMap<String, String[]>(4);
         for (int i = 0; i < sourceBands.length; i++) {
 
             final Band srcBand = sourceBands[i];
