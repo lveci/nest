@@ -440,7 +440,7 @@ public class Project extends Observable {
                 final String pathStr = file.getAbsolutePath();
                 final File dataDir = new File(pathStr.substring(0, pathStr.length()-4) + ".data");
                 if(dataDir.exists()) {
-                    deleteDir(dataDir);
+                    DatUtils.deleteDir(dataDir);
                     file.delete();
                 }
             } else {
@@ -449,16 +449,6 @@ public class Project extends Observable {
         }
         notifyEvent(SAVE_PROJECT);
     }
-
-    private static void deleteDir(final File dir) {
-        if (dir.isDirectory()) {
-            final String[] children = dir.list();
-            for (String aChild : children) {
-                deleteDir(new File(dir, aChild));
-            }
-        }
-        dir.delete();
-	}
 
     public ProjectSubFolder getProjectSubFolders() {
         return projectSubFolders;

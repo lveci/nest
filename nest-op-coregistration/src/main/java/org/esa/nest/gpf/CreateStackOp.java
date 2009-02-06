@@ -92,9 +92,9 @@ public class CreateStackOp extends Operator {
         int cnt = 1;
         String suffix = "_slv";
         for (final Band slaveBand : slaveBandList) {
-            if(slaveBand == masterBands[0] || (masterBands.length > 1 && slaveBand == masterBands[1]))
+            if(slaveBand == masterBands[0] || (masterBands.length > 1 && slaveBand == masterBands[1])) {
                 suffix = "_mst";
-            else {
+            } else {
                 if(slaveBand.getUnit() != null && slaveBand.getUnit().equals(Unit.IMAGINARY)) {
                 } else {
                     suffix = "_slv" + cnt++;
@@ -103,6 +103,12 @@ public class CreateStackOp extends Operator {
             final Band targetBand = targetProduct.addBand(slaveBand.getName() + suffix, slaveBand.getDataType());
             ProductUtils.copyRasterDataNodeProperties(slaveBand, targetBand);
             sourceRasterMap.put(targetBand, slaveBand);
+        }
+
+        // copy GCPs if found to master band
+        final ProductNodeGroup<Pin> masterGCPgroup = masterProduct.getGcpGroup();
+        if (masterGCPgroup.getNodeCount() > 0) {
+            OperatorUtils.copyGCPsToTarget(masterGCPgroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
         }
     }
 

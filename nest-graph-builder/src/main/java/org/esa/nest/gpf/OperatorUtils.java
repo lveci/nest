@@ -1,8 +1,6 @@
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.TiePointGrid;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.util.StringUtils;
@@ -89,5 +87,26 @@ public class OperatorUtils {
     public static boolean isDIMAP(Product prod) {
         return StringUtils.contains(prod.getProductReader().getReaderPlugIn().getFormatNames(),
                                     DimapProductConstants.DIMAP_FORMAT_NAME);
+    }
+
+        /**
+     * Copy master GCPs to target product.
+     * @param group input master GCP group
+     * @param targetGCPGroup output master GCP group
+     */
+    public static void copyGCPsToTarget(final ProductNodeGroup<Pin> group, final ProductNodeGroup<Pin> targetGCPGroup) {
+        targetGCPGroup.removeAll();
+
+        for(int i = 0; i < group.getNodeCount(); ++i) {
+            final Pin sPin = group.get(i);
+            final Pin tPin = new Pin(sPin.getName(),
+                               sPin.getLabel(),
+                               sPin.getDescription(),
+                               sPin.getPixelPos(),
+                               sPin.getGeoPos(),
+                               sPin.getSymbol());
+
+            targetGCPGroup.add(tPin);
+        }
     }
 }

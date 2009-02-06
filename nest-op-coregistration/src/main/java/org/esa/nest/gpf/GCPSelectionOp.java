@@ -65,6 +65,10 @@ public class GCPSelectionOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
+     @Parameter(description = "The number of GCPs to use in a grid", interval = "(10, 10000]", defaultValue = "200",
+                label="Number of GCPs")
+    private int numGCPtoGenerate = 200;
+
     @Parameter(valueSet = {"32","64","128","256","512","1024"}, defaultValue = "128", label="Coarse Registration Window Width")
     private String coarseRegistrationWindowWidth = "128";
     @Parameter(valueSet = {"32","64","128","256","512","1024"}, defaultValue = "128", label="Coarse Registration Window Height")
@@ -171,10 +175,10 @@ public class GCPSelectionOp extends Operator {
 
         masterGcpGroup = sourceProduct.getGcpGroup(masterBand1);
         if (masterGcpGroup.getNodeCount() <= 0) {
-            addGCPGrid(sourceProduct, 100, masterGcpGroup);
+            addGCPGrid(sourceProduct, numGCPtoGenerate, masterGcpGroup);
         }
 
-        copyGCPsToTarget(masterGcpGroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
+        OperatorUtils.copyGCPsToTarget(masterGcpGroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
         
         if (complexCoregistration) {
             fWindowWidth = Integer.parseInt(fineRegistrationWindowWidth);
@@ -205,27 +209,6 @@ public class GCPSelectionOp extends Operator {
                              GcpDescriptor.INSTANCE.createDefaultSymbol());
                 group.add(newPin);
             }
-        }
-    }
-
-    /**
-     * Copy master GCPs to target product.
-     * @param group input master GCP group
-     * @param targetGCPGroup output master GCP group
-     */
-    private static void copyGCPsToTarget(final ProductNodeGroup<Pin> group, final ProductNodeGroup<Pin> targetGCPGroup) {
-        targetGCPGroup.removeAll();
-
-        for(int i = 0; i < group.getNodeCount(); ++i) {
-            final Pin sPin = group.get(i);
-            final Pin tPin = new Pin(sPin.getName(),
-                               sPin.getLabel(),
-                               sPin.getDescription(),
-                               sPin.getPixelPos(),
-                               sPin.getGeoPos(),
-                               sPin.getSymbol());
-
-            targetGCPGroup.add(tPin);
         }
     }
 

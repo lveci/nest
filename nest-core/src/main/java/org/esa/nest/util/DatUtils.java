@@ -30,6 +30,15 @@ public class DatUtils {
         return new ImageIcon(imageURL);
     }
 
+    public static void deleteDir(final File dir) {
+        if (dir.isDirectory()) {
+            for (String aChild : dir.list()) {
+                deleteDir(new File(dir, aChild));
+            }
+        }
+        dir.delete();
+	}
+
     public static File GetFilePath(String title, String formatName, String extension, String description,
                                      boolean isSave) {
         BeamFileFilter fileFilter = null;
@@ -102,10 +111,10 @@ public class DatUtils {
     /**
      * Optionally creates and returns the current user's application data directory.
      *
-     * @param force if true, the directory will be created if it didn't exist before
+     * @param forceCreate if true, the directory will be created if it didn't exist before
      * @return the current user's application data directory
      */
-    public static File getApplicationUserDir(boolean force) {
+    public static File getApplicationUserDir(boolean forceCreate) {
         String contextId = null;
         if (RuntimeActivator.getInstance() != null
                 && RuntimeActivator.getInstance().getModuleContext() != null) {
@@ -115,12 +124,22 @@ public class DatUtils {
             contextId = System.getProperty("ceres.context", "nest");
         }
         final File dir = new File(SystemUtils.getUserHomeDir(), '.' + contextId);
-        if (force && !dir.exists()) {
+        if (forceCreate && !dir.exists()) {
             dir.mkdirs();
         }
         return dir;
     }
 
+    /**
+     * get the temporary data folder in the user's application data directory
+     * @return the temp folder
+     */
+    public static File getApplicationUserTempDataDir() {
+        final File tmpDir = new File(DatUtils.getApplicationUserDir(true), "temp");
+        if(!tmpDir.exists())
+            tmpDir.mkdirs();
+        return tmpDir;
+    }
 
     public static File findSystemFile(String filename)
     {
