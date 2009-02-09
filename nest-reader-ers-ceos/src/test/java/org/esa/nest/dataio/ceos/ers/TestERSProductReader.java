@@ -1,7 +1,6 @@
 package org.esa.nest.dataio.ceos.ers;
 
 import junit.framework.TestCase;
-
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
 

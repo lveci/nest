@@ -1,7 +1,11 @@
 package org.esa.nest.dataio.ceos;
 
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.TiePointGeoCoding;
+import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.framework.dataop.maptransf.Datum;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ReaderUtils;
 
 import java.io.IOException;
@@ -12,13 +16,13 @@ import java.io.IOException;
 public abstract class CEOSProductDirectory {
 
     protected boolean isProductSLC = false;
-    protected String productType;
+    protected String productType = null;
 
-    protected abstract void readProductDirectory() throws IOException, IllegalCeosFormatException;
+    protected abstract void readProductDirectory() throws IOException, IllegalBinaryFormatException;
 
-    public abstract Product createProduct() throws IOException, IllegalCeosFormatException;
+    public abstract Product createProduct() throws IOException, IllegalBinaryFormatException;
 
-    public abstract CEOSImageFile getImageFile(final Band band) throws IOException, IllegalCeosFormatException;
+    public abstract CEOSImageFile getImageFile(final Band band) throws IOException, IllegalBinaryFormatException;
 
     public abstract void close() throws IOException;
 
@@ -50,7 +54,7 @@ public abstract class CEOSProductDirectory {
         return id;
     }
 
-    protected void addGeoCoding(final Product product, final float[] latCorners, final float[] lonCorners) {
+    protected static void addGeoCoding(final Product product, final float[] latCorners, final float[] lonCorners) {
 
         if(latCorners == null || lonCorners == null) return;
 

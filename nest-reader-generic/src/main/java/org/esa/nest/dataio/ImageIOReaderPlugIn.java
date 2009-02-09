@@ -58,6 +58,7 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
         extList.remove("pgm");
         extList.remove("ppm");
         extList.remove("tiff");
+        extList.remove("tif");
 
         return extList.toArray(new String[extList.size()]);
     }

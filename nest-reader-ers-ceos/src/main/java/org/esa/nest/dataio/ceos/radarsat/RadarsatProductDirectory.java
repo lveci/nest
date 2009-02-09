@@ -2,10 +2,10 @@ package org.esa.nest.dataio.ceos.radarsat;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
+import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
-import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
-import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.imageio.stream.FileImageInputStream;
@@ -13,8 +13,8 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
 import java.text.ParseException;
+import java.util.*;
 
 /**
  * This class represents a product directory.
@@ -35,15 +35,15 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
     private transient Map<String, RadarsatImageFile> bandImageFileMap = new HashMap<String, RadarsatImageFile>(1);
 
-    public RadarsatProductDirectory(final File dir) throws IOException,
-                                                         IllegalCeosFormatException {
+    public RadarsatProductDirectory(final File dir) throws IOException, IllegalBinaryFormatException {
         Guardian.assertNotNull("dir", dir);
 
         _baseDir = dir;
 
     }
 
-    protected void readProductDirectory() throws IOException, IllegalCeosFormatException {
+    @Override
+    protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         _volumeDirectoryFile = new RadarsatVolumeDirectoryFile(_baseDir);
         _leaderFile = new RadarsatLeaderFile(createInputStream(RadarsatVolumeDirectoryFile.getLeaderFileName()));
 
@@ -59,7 +59,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         assertSameWidthAndHeightForAllImages();
     }
 
-    private void readVolumeDirectoryFile() throws IOException, IllegalCeosFormatException {
+    private void readVolumeDirectoryFile() throws IOException, IllegalBinaryFormatException {
         if(_volumeDirectoryFile == null)
             _volumeDirectoryFile = new RadarsatVolumeDirectoryFile(_baseDir);
 
@@ -67,8 +67,8 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         isProductSLC = productType.contains("SLC") || productType.contains("COMPLEX");
     }
 
-    public Product createProduct() throws IOException,
-                                          IllegalCeosFormatException {
+    @Override
+    public Product createProduct() throws IOException, IllegalBinaryFormatException {
         assert(productType != null);
         final Product product = new Product(getProductName(),
                                             productType,
@@ -128,13 +128,13 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         return product;
     }
 
-    public boolean isRadarsat() throws IOException, IllegalCeosFormatException {
+    public boolean isRadarsat() throws IOException, IllegalBinaryFormatException {
         if(productType == null || _volumeDirectoryFile == null)
             readVolumeDirectoryFile();
         return (productType.contains("RSAT") || productType.contains("RADARSAT"));
     }
 
-    private void addTiePointGrids(final Product product) throws IllegalCeosFormatException, IOException {
+    private void addTiePointGrids(final Product product) throws IllegalBinaryFormatException, IOException {
       /*  BaseRecord facility = _leaderFile.getFacilityRecord();
 
         double angle1 = facility.getAttributeDouble("Incidence angle at first range pixel");
@@ -148,11 +148,12 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         product.addTiePointGrid(incidentAngleGrid);  */
     }
 
-    public CEOSImageFile getImageFile(final Band band) throws IOException,
-                                                                IllegalCeosFormatException {
+    @Override
+    public CEOSImageFile getImageFile(final Band band) throws IOException, IllegalBinaryFormatException {
         return bandImageFileMap.get(band.getName());
     }
 
+    @Override
     public void close() throws IOException {
         for (int i = 0; i < _imageFiles.length; i++) {
             _imageFiles[i].close();
@@ -188,8 +189,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         return band;
     }
 
-    private void addMetaData(final Product product) throws IOException,
-                                                           IllegalCeosFormatException {
+    private void addMetaData(final Product product) throws IOException, IllegalBinaryFormatException {
 
         final MetadataElement root = product.getMetadataRoot();
         root.addElement(new MetadataElement("Abstracted Metadata"));
@@ -306,13 +306,11 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         return _volumeDirectoryFile.getProductName();
     }
 
-    private String getProductDescription() throws IOException,
-                                                  IllegalCeosFormatException {
+    private String getProductDescription() throws IOException, IllegalBinaryFormatException {
         return RadarsatConstants.PRODUCT_DESCRIPTION_PREFIX + _leaderFile.getProductLevel();
     }
 
-    private void assertSameWidthAndHeightForAllImages() throws IOException,
-                                                               IllegalCeosFormatException {
+    private void assertSameWidthAndHeightForAllImages() throws IOException, IllegalBinaryFormatException {
         for (int i = 0; i < _imageFiles.length; i++) {
             final RadarsatImageFile imageFile = _imageFiles[i];
             Guardian.assertTrue("_sceneWidth == imageFile[" + i + "].getRasterWidth()",

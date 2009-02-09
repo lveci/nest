@@ -1,9 +1,9 @@
 package org.esa.nest.dataio.ceos.alos;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.nest.dataio.ceos.CeosFileReader;
+import org.esa.nest.dataio.BinaryFileReader;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CeosHelper;
-import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.FilePointerRecord;
 
@@ -18,22 +18,22 @@ import java.io.IOException;
  */
 class AlosPalsarVolumeDirectoryFile {
 
-    private CeosFileReader _ceosReader;
+    private BinaryFileReader _binaryReader;
     private BaseRecord _volumeDescriptorRecord;
     private FilePointerRecord[] _filePointerRecords;
     private BaseRecord _textRecord;
 
-    private static String mission = "alos";
-    private static String volume_desc_recordDefinitionFile = "volume_descriptor.xml";
-    private static String text_recordDefinitionFile = "text_record.xml";
+    private final static String mission = "alos";
+    private final static String volume_desc_recordDefinitionFile = "volume_descriptor.xml";
+    private final static String text_recordDefinitionFile = "text_record.xml";
 
-    public AlosPalsarVolumeDirectoryFile(final File baseDir) throws IOException,
-                                                                IllegalCeosFormatException {
+    public AlosPalsarVolumeDirectoryFile(final File baseDir)
+            throws IOException, IllegalBinaryFormatException {
         final File volumeFile = CeosHelper.getVolumeFile(baseDir);
-        _ceosReader = new CeosFileReader(new FileImageInputStream(volumeFile));
-        _volumeDescriptorRecord = new BaseRecord(_ceosReader, -1, mission, volume_desc_recordDefinitionFile);
+        _binaryReader = new BinaryFileReader(new FileImageInputStream(volumeFile));
+        _volumeDescriptorRecord = new BaseRecord(_binaryReader, -1, mission, volume_desc_recordDefinitionFile);
         _filePointerRecords = CeosHelper.readFilePointers(_volumeDescriptorRecord, mission);
-        _textRecord = new BaseRecord(_ceosReader, -1, mission, text_recordDefinitionFile);
+        _textRecord = new BaseRecord(_binaryReader, -1, mission, text_recordDefinitionFile);
     }
 
     public BaseRecord getTextRecord() {
@@ -45,8 +45,8 @@ class AlosPalsarVolumeDirectoryFile {
     }
 
     public void close() throws IOException {
-        _ceosReader.close();
-        _ceosReader = null;
+        _binaryReader.close();
+        _binaryReader = null;
         for (int i = 0; i < _filePointerRecords.length; i++) {
             _filePointerRecords[i] = null;
         }

@@ -2,9 +2,9 @@
 package org.esa.nest.dataio.ceos.records;
 
 import junit.framework.TestCase;
-import org.esa.nest.dataio.ceos.CeosFileReader;
-import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.nest.dataio.BinaryFileReader;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
 
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
@@ -15,7 +15,7 @@ public class FilePointerRecordTest extends TestCase {
 
     private ImageOutputStream _ios;
     private String _prefix;
-    private CeosFileReader _reader;
+    private BinaryFileReader _reader;
 
     protected void setUp() throws Exception {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(24);
@@ -24,10 +24,10 @@ public class FilePointerRecordTest extends TestCase {
         _ios.writeBytes(_prefix);
         writeRecordData(_ios);
         _ios.writeBytes("nq3tf9ß8nvnvpdi er 0 324p3f"); // as suffix
-        _reader = new CeosFileReader(_ios);
+        _reader = new BinaryFileReader(_ios);
     }
 
-    public void testInit_SimpleConstructor() throws IOException, IllegalCeosFormatException {
+    public void testInit_SimpleConstructor() throws IOException, IllegalBinaryFormatException {
         _ios.seek(_prefix.length());
         final FilePointerRecord record = new FilePointerRecord(_reader, "ers");
 
@@ -36,7 +36,7 @@ public class FilePointerRecordTest extends TestCase {
         assertEquals(_prefix.length() + 360, _ios.getStreamPosition());
     }
 
-    public void testInit() throws IOException, IllegalCeosFormatException {
+    public void testInit() throws IOException, IllegalBinaryFormatException {
         final FilePointerRecord record = new FilePointerRecord(_reader, "ers", _prefix.length());
 
         assertRecord(record);
@@ -44,8 +44,7 @@ public class FilePointerRecordTest extends TestCase {
         assertEquals(_prefix.length() + 360, _ios.getStreamPosition());
     }
 
-    public void testAssignMetadataTo() throws IOException,
-                                              IllegalCeosFormatException {
+    public void testAssignMetadataTo() throws IOException, IllegalBinaryFormatException {
         final FilePointerRecord record = new FilePointerRecord(_reader, "ers", _prefix.length());
         final MetadataElement elem = new MetadataElement("elem");
 

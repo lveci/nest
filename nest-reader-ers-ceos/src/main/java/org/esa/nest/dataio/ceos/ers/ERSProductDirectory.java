@@ -1,23 +1,22 @@
 package org.esa.nest.dataio.ceos.ers;
 
+import org.esa.beam.dataio.dimap.FileImageInputStreamExtImpl;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
-import org.esa.beam.dataio.dimap.FileImageInputStreamExtImpl;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
+import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
-import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
-import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
 import java.text.ParseException;
+import java.util.*;
 
 /**
  * This class represents a product directory.
@@ -44,7 +43,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         _baseDir = dir;
     }
 
-    protected void readProductDirectory() throws IOException, IllegalCeosFormatException {
+    protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         readVolumeDirectoryFile();
         _leaderFile = new ERSLeaderFile(createInputStream(ERSVolumeDirectoryFile.getLeaderFileName()));
 
@@ -60,7 +59,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         assertSameWidthAndHeightForAllImages();
     }
 
-    private void readVolumeDirectoryFile() throws IOException, IllegalCeosFormatException {
+    private void readVolumeDirectoryFile() throws IOException, IllegalBinaryFormatException {
         if(_volumeDirectoryFile == null)
             _volumeDirectoryFile = new ERSVolumeDirectoryFile(_baseDir);
 
@@ -68,7 +67,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         isProductSLC = productType.contains("SLC") || productType.contains("COMPLEX");
     }
 
-    public boolean isERS() throws IOException, IllegalCeosFormatException {
+    public boolean isERS() throws IOException, IllegalBinaryFormatException {
         if(productType == null || _volumeDirectoryFile == null)
             readVolumeDirectoryFile();
         return (productType.contains(ERS1_MISSION) || productType.contains(ERS2_MISSION) ||
@@ -84,8 +83,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
             return "";
     }
 
-    public Product createProduct() throws IOException,
-                                          IllegalCeosFormatException {
+    public Product createProduct() throws IOException, IllegalBinaryFormatException {
         final Product product = new Product(getProductName(),
                                             productType,
                                             _sceneWidth, _sceneHeight);
@@ -129,7 +127,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         return product;
     }
 
-    private void addTiePointGrids(final Product product) throws IllegalCeosFormatException, IOException {
+    private void addTiePointGrids(final Product product) throws IllegalBinaryFormatException, IOException {
 
         // add incidence angle tie point grid
         final BaseRecord facility = _leaderFile.getFacilityRecord();
@@ -172,8 +170,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         product.addTiePointGrid(slantRangeTimeGrid);        
     }
 
-    public CEOSImageFile getImageFile(final Band band) throws IOException,
-                                                                IllegalCeosFormatException {
+    public CEOSImageFile getImageFile(final Band band) throws IOException, IllegalBinaryFormatException {
         return bandImageFileMap.get(band.getName());
     }
 

@@ -2,11 +2,11 @@
 package org.esa.nest.dataio.ceos.records;
 
 import junit.framework.TestCase;
-import org.esa.nest.dataio.ceos.CeosFileReader;
-import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.nest.dataio.BinaryFileReader;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
 
 import javax.imageio.stream.ImageOutputStream;
 import java.io.IOException;
@@ -16,7 +16,7 @@ public class BaseRecordTest extends TestCase {
     public static final int RECORD_LENGTH = 4680;
     private ImageOutputStream _ios;
     private String _prefix;
-    private CeosFileReader _reader;
+    private BinaryFileReader _reader;
 
     private static String format = "ers";
     private static String recordDefinitionFile = "volume_descriptor.xml";
@@ -28,11 +28,10 @@ public class BaseRecordTest extends TestCase {
         _ios.writeBytes(_prefix);
         writeRecordData(_ios);
         _ios.writeBytes("BaseRecordTest_suffix"); // as suffix
-        _reader = new CeosFileReader(_ios); */
+        _reader = new BinaryFileReader(_ios); */
     }
 
-    public void testInitBaseRecord() throws IOException,
-                                            IllegalCeosFormatException {
+    public void testInitBaseRecord() throws IOException, IllegalBinaryFormatException {
    /*     final BaseRecord record = new BaseRecord(_reader, _prefix.length(), format, recordDefinitionFile);
 
         assertRecord(record);
@@ -42,7 +41,7 @@ public class BaseRecordTest extends TestCase {
     }
     /*
     public void testAssignMetadataTo() throws IOException,
-                                              IllegalCeosFormatException {
+                                              IllegalBinaryFormatException {
         final BaseRecord record = new BaseRecord(_reader, _prefix.length(), format, recordDefinitionFile);
         final MetadataElement elem = new MetadataElement("elem");
 

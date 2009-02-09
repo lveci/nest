@@ -1,45 +1,47 @@
-package org.esa.nest.dataio.ceos;
+package org.esa.nest.dataio;
 
 
 import junit.framework.TestCase;
+import junit.framework.Assert;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class CeosFileReaderTest extends TestCase {
+public class BinaryFileReaderTest extends TestCase {
 
     private MemoryCacheImageOutputStream _ios;
 
+    @Override
     protected void setUp() throws Exception {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(24);
         _ios = new MemoryCacheImageOutputStream(os);
     }
 
     public void testSeek() throws IOException,
-                                  IllegalCeosFormatException {
+            IllegalBinaryFormatException {
         final byte[] bytes = new byte[]{
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
                 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
         };
         _ios.write(bytes);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
         ceosReader.seek(1);
-        assertEquals(1, ceosReader.readB1());
+        Assert.assertEquals(1, ceosReader.readB1());
         ceosReader.seek(3);
-        assertEquals(3, ceosReader.readB1());
+        Assert.assertEquals(3, ceosReader.readB1());
         ceosReader.seek(9);
-        assertEquals(9, ceosReader.readB1());
+        Assert.assertEquals(9, ceosReader.readB1());
         ceosReader.seek(4);
-        assertEquals(4, ceosReader.readB1());
+        Assert.assertEquals(4, ceosReader.readB1());
         ceosReader.seek(14);
-        assertEquals(14, ceosReader.readB1());
+        Assert.assertEquals(14, ceosReader.readB1());
     }
 
     public void testSkipBytes() throws IOException,
-                                       IllegalCeosFormatException {
+            IllegalBinaryFormatException {
         final byte[] bytes = new byte[]{
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
                 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
@@ -47,33 +49,33 @@ public class CeosFileReaderTest extends TestCase {
         _ios.write(bytes);
         _ios.seek(0);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
         ceosReader.skipBytes(1);
-        assertEquals(1, ceosReader.readB1());
+        Assert.assertEquals(1, ceosReader.readB1());
         ceosReader.skipBytes(3);
-        assertEquals(5, ceosReader.readB1());
+        Assert.assertEquals(5, ceosReader.readB1());
         ceosReader.skipBytes(5);
-        assertEquals(11, ceosReader.readB1());
+        Assert.assertEquals(11, ceosReader.readB1());
     }
 
-    public void testReadB1() throws IOException, IllegalCeosFormatException {
+    public void testReadB1() throws IOException, IllegalBinaryFormatException {
         _ios.writeByte(122);
         _ios.seek(0);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        assertEquals(122, ceosReader.readB1());
+        Assert.assertEquals(122, ceosReader.readB1());
     }
 
     public void testReadB1GreatValue() throws IOException,
-                                              IllegalCeosFormatException {
+            IllegalBinaryFormatException {
         _ios.writeByte(245);
         _ios.seek(0);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        assertEquals(245, ceosReader.readB1());
+        Assert.assertEquals(245, ceosReader.readB1());
     }
 
     public void testReadB1ThrowsException() throws IOException {
@@ -81,18 +83,18 @@ public class CeosFileReaderTest extends TestCase {
         _ios.writeBytes(prefix);
         _ios.seek(0);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
         ceosReader.seek(prefix.length());
         try {
             ceosReader.readB1();
-            fail("IllegalCeosFormatException expected");
-        } catch (IllegalCeosFormatException e) {
-            assertEquals(prefix.length(), e.getStreamPos());
+            fail("IllegalBinaryFormatException expected");
+        } catch (IllegalBinaryFormatException e) {
+            Assert.assertEquals(prefix.length(), e.getStreamPos());
         }
     }
 
-    public void testReadB2() throws IOException, IllegalCeosFormatException {
+    public void testReadB2() throws IOException, IllegalBinaryFormatException {
         final String prefix = "ß3534aß0uawemqw34mfavsdpvhaweföldv:";
         final String suffix = "lfjldfkjvg45";
         final short expected = -12354;
@@ -100,26 +102,26 @@ public class CeosFileReaderTest extends TestCase {
         _ios.writeShort(expected);
         _ios.writeBytes(suffix);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
         ceosReader.seek(prefix.length());
-        assertEquals(expected, ceosReader.readB2());
+        Assert.assertEquals(expected, ceosReader.readB2());
     }
 
-    public void testReadB4() throws IOException, IllegalCeosFormatException {
+    public void testReadB4() throws IOException, IllegalBinaryFormatException {
         final String prefix = "ß3534aß0uawemqw34mfavsdpvhaweföldv:";
         final String suffix = "lfjldfkjvg45";
         _ios.writeBytes(prefix);
         _ios.writeInt(7100);
         _ios.writeBytes(suffix);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
         ceosReader.seek(prefix.length());
-        assertEquals(7100, ceosReader.readB4());
+        Assert.assertEquals(7100, ceosReader.readB4());
     }
 
-    public void testReadB4Array() throws IOException, IllegalCeosFormatException {
+    public void testReadB4Array() throws IOException, IllegalBinaryFormatException {
         final String prefix = "gf654hdf4f46514s:";
         final String suffix = "lfjldfkjvg45";
         final int expected1 = 7100;
@@ -129,44 +131,44 @@ public class CeosFileReaderTest extends TestCase {
         _ios.writeInt(expected2);
         _ios.writeBytes(suffix);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
         ceosReader.seek(prefix.length());
         final int[] intsToRead = new int[2];
-        ceosReader.readB4(intsToRead);
+        ceosReader.read(intsToRead);
         assertEquals(expected1, intsToRead[0]);
         assertEquals(expected2, intsToRead[1]);
     }
 
     public void testReadB8() throws IOException,
-                                    IllegalCeosFormatException {
+            IllegalBinaryFormatException {
         final byte[] bytes = new byte[]{0x00, 0x01, 0x00, 0x11, 0x00, 0x00, 0x1B, (byte) 0xBC};
         _ios.write(bytes);
         _ios.seek(0);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        assertEquals(281547991161788L, ceosReader.readB8());
+        Assert.assertEquals(281547991161788L, ceosReader.readB8());
     }
 
     public void testReadB8Array() throws IOException,
-                                         IllegalCeosFormatException {
+            IllegalBinaryFormatException {
         final long expected1 = 281547991161788L;
         final long expected2 = 1L;
         _ios.writeLong(expected1);
         _ios.writeLong(expected2);
         _ios.seek(0);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
         final long[] values = new long[2];
-        ceosReader.readB8(values);
+        ceosReader.read(values);
         assertEquals(expected1, values[0]);
         assertEquals(expected2, values[1]);
     }
 
     public void testReadB1Array() throws IOException,
-                                         IllegalCeosFormatException {
+            IllegalBinaryFormatException {
         final byte expected1 = 0x01;
         final byte expected2 = 0x02;
         final byte expected3 = 0x03;
@@ -185,10 +187,10 @@ public class CeosFileReaderTest extends TestCase {
         _ios.write(expected8);
         _ios.seek(0);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
         final byte[] values = new byte[8];
-        ceosReader.readB1(values);
+        ceosReader.read(values);
         assertEquals(expected1, values[0]);
         assertEquals(expected2, values[1]);
         assertEquals(expected3, values[2]);
@@ -199,80 +201,80 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(expected8, values[7]);
     }
 
-    public void testReadI4() throws IllegalCeosFormatException, IOException {
+    public void testReadI4() throws IllegalBinaryFormatException, IOException {
         _ios.writeBytes("19730060");
         _ios.seek(0);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        assertEquals(1973, ceosReader.readIn(4));
-        assertEquals(60, ceosReader.readIn(4));
+        Assert.assertEquals(1973, ceosReader.readIn(4));
+        Assert.assertEquals(60, ceosReader.readIn(4));
     }
 
-    public void testReadIn() throws IllegalCeosFormatException, IOException {
+    public void testReadIn() throws IllegalBinaryFormatException, IOException {
         _ios.writeBytes("  7358");
         _ios.seek(0);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        assertEquals(7358, ceosReader.readIn(6));
+        Assert.assertEquals(7358, ceosReader.readIn(6));
     }
 
-    public void testReadFnWithNegative() throws IllegalCeosFormatException, IOException {
+    public void testReadFnWithNegative() throws IllegalBinaryFormatException, IOException {
         _ios.writeBytes("     -89.0060123");
         _ios.seek(0);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        assertEquals(-89.0060123, ceosReader.readFn(16), 1E-10);
+        Assert.assertEquals(-89.0060123, ceosReader.readFn(16), 1E-10);
     }
 
-    public void testReadFnWithPositive() throws IllegalCeosFormatException, IOException {
+    public void testReadFnWithPositive() throws IllegalBinaryFormatException, IOException {
         _ios.writeBytes("      19.0060123");
         _ios.seek(0);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        assertEquals(19.0060123, ceosReader.readFn(16), 1E-10);
+        Assert.assertEquals(19.0060123, ceosReader.readFn(16), 1E-10);
     }
 
-    public void testReadFnWithLeadingZero() throws IllegalCeosFormatException, IOException {
+    public void testReadFnWithLeadingZero() throws IllegalBinaryFormatException, IOException {
         _ios.writeBytes("       9.0060123");
         _ios.seek(0);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        assertEquals(9.0060123, ceosReader.readFn(16), 1E-10);
+        Assert.assertEquals(9.0060123, ceosReader.readFn(16), 1E-10);
     }
 
-    public void testReadFnWithTrailingZero() throws IllegalCeosFormatException, IOException {
+    public void testReadFnWithTrailingZero() throws IllegalBinaryFormatException, IOException {
         _ios.writeBytes("       9.0060000");
         _ios.seek(0);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        assertEquals(9.006, ceosReader.readFn(16), 1E-6);
+        Assert.assertEquals(9.006, ceosReader.readFn(16), 1E-6);
     }
 
-    public void testReadEn() throws IllegalCeosFormatException, IOException {
+    public void testReadEn() throws IllegalBinaryFormatException, IOException {
         _ios.writeBytes(" 1.782000000000000E+04");
         _ios.seek(0);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        assertEquals(17820, ceosReader.readFn(22), 1E-6);
+        Assert.assertEquals(17820, ceosReader.readFn(22), 1E-6);
     }
 
-    public void testReadGn() throws IllegalCeosFormatException, IOException {
+    public void testReadGn() throws IllegalBinaryFormatException, IOException {
         _ios.writeBytes("-1.06962770630708111E+01");
         _ios.seek(0);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        assertEquals(-1.06962770630708111E+01, ceosReader.readFn(24), 1E-25);
+        Assert.assertEquals(-1.06962770630708111E+01, ceosReader.readFn(24), 1E-25);
     }
 
-    public void testReadGnArray() throws IllegalCeosFormatException,
+    public void testReadGnArray() throws IllegalBinaryFormatException,
                                          IOException {
         _ios.writeBytes("-1.06962770630708111E+01");
         _ios.writeBytes(" 1.28993192035406507E-05");
@@ -280,7 +282,7 @@ public class CeosFileReaderTest extends TestCase {
         _ios.writeBytes(" 6.75271499535523411E-13");
         _ios.seek(0);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
         final double[] values = new double[4];
         ceosReader.readFn(24, values);
@@ -290,14 +292,14 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(6.75271499535523411E-13, values[3], 1e-25);
     }
 
-    public void testReadAn() throws IllegalCeosFormatException, IOException {
+    public void testReadAn() throws IllegalBinaryFormatException, IOException {
         final String expected = "Kinkerlitzchen";
         _ios.writeBytes(expected);
         _ios.seek(0);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
-        assertEquals(expected, ceosReader.readAn(expected.length()));
+        Assert.assertEquals(expected, ceosReader.readAn(expected.length()));
     }
 
     public void testReadAnThrowsExceptionBecauseStreamIsToShort() throws IOException {
@@ -306,14 +308,14 @@ public class CeosFileReaderTest extends TestCase {
         _ios.writeBytes(prefix);
         _ios.writeBytes(charsToRead);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
         ceosReader.seek(prefix.length());
         try {
             ceosReader.readAn(7); // try to read 7 bytes from stream position
-            fail("IllegalCeosFormatException expected");
-        } catch (IllegalCeosFormatException e) {
-            assertEquals(prefix.length(), e.getStreamPos());
+            fail("IllegalBinaryFormatException expected");
+        } catch (IllegalBinaryFormatException e) {
+            Assert.assertEquals(prefix.length(), e.getStreamPos());
         }
     }
 
@@ -323,14 +325,14 @@ public class CeosFileReaderTest extends TestCase {
         _ios.writeBytes(prefix);
         _ios.writeBytes(only15Characters);
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
         ceosReader.seek(prefix.length());
         try {
             ceosReader.readFn(16);
-            fail("IllegalCeosFormatException expected");
-        } catch (IllegalCeosFormatException e) {
-            assertEquals(prefix.length(), e.getStreamPos());
+            fail("IllegalBinaryFormatException expected");
+        } catch (IllegalBinaryFormatException e) {
+            Assert.assertEquals(prefix.length(), e.getStreamPos());
         }
     }
 
@@ -341,18 +343,18 @@ public class CeosFileReaderTest extends TestCase {
         _ios.writeBytes(notParsable16Double);
         _ios.writeBytes("suffix letters");
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
         ceosReader.seek(prefix.length());
         try {
             ceosReader.readFn(16);
-            fail("IllegalCeosFormatException expected");
-        } catch (IllegalCeosFormatException e) {
-            assertEquals(prefix.length(), e.getStreamPos());
+            fail("IllegalBinaryFormatException expected");
+        } catch (IllegalBinaryFormatException e) {
+            Assert.assertEquals(prefix.length(), e.getStreamPos());
         }
     }
 
-    public void testReadInArray() throws IOException, IllegalCeosFormatException {
+    public void testReadInArray() throws IOException, IllegalBinaryFormatException {
         final String prefix = "vspdfoperilfdkposnsern";
         _ios.writeBytes(prefix);
         _ios.writeBytes("123"); // 0
@@ -363,7 +365,7 @@ public class CeosFileReaderTest extends TestCase {
         _ios.writeBytes("234"); // 5
         _ios.writeBytes("suffix");
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
         ceosReader.seek(prefix.length());
         final int[] ints = ceosReader.readInArray(6, 3);
 
@@ -378,13 +380,13 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(prefix.length() + 6 * 3, _ios.getStreamPosition());
     }
 
-    public void testReadInArrayWithBlanks() throws IOException, IllegalCeosFormatException {
+    public void testReadInArrayWithBlanks() throws IOException, IllegalBinaryFormatException {
         final String prefix = "vspdfoperilfdkposnsern";
         _ios.writeBytes(prefix);
         _ios.writeBytes("123 45 67"); // 9 ints with length 1
         _ios.writeBytes("suffix");
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
         ceosReader.seek(prefix.length());
         final int[] ints = ceosReader.readInArray(9, 1);
 
@@ -408,14 +410,14 @@ public class CeosFileReaderTest extends TestCase {
         _ios.writeBytes("123a45"); // 6 ints with length 1
         _ios.writeBytes("suffix");
 
-        final CeosFileReader ceosReader = new CeosFileReader(_ios);
+        final BinaryFileReader ceosReader = new BinaryFileReader(_ios);
 
         ceosReader.seek(prefix.length());
         try {
             ceosReader.readInArray(6, 1);
-            fail("IllegalCeosFormatException expected");
-        } catch (IllegalCeosFormatException e) {
-            assertEquals(prefix.length() + 3, e.getStreamPos());
+            fail("IllegalBinaryFormatException expected");
+        } catch (IllegalBinaryFormatException e) {
+            Assert.assertEquals(prefix.length() + 3, e.getStreamPos());
         }
     }
 }

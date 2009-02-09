@@ -1,10 +1,4 @@
-package org.esa.nest.dataio.ceos;
-/**
- * Created by IntelliJ IDEA.
- * User: marco
- * Date: 07.12.2005
- * Time: 15:46:33
- */
+package org.esa.nest.dataio;
 
 /**
  * Description of IllegalCeosFormatException
@@ -14,7 +8,7 @@ package org.esa.nest.dataio.ceos;
  *
  * @author Marco Peters
  */
-public class IllegalCeosFormatException extends Exception {
+public class IllegalBinaryFormatException extends Exception {
 
     private long _streamPos;
 
@@ -26,7 +20,7 @@ public class IllegalCeosFormatException extends Exception {
      * @param message the detail message. The detail message is saved for
      *                later retrieval by the {@link #getMessage()} method.
      */
-    public IllegalCeosFormatException(final String message, final long streamPos) {
+    public IllegalBinaryFormatException(final String message, final long streamPos) {
         super(message);
         _streamPos = streamPos;
     }
@@ -43,10 +37,8 @@ public class IllegalCeosFormatException extends Exception {
      *                {@link #getCause()} method).  (A <tt>null</tt> value is
      *                permitted, and indicates that the cause is nonexistent or
      *                unknown.)
-     *
-     * @since 1.4
      */
-    public IllegalCeosFormatException(final String message, final long streamPos, final Throwable cause) {
+    public IllegalBinaryFormatException(final String message, final long streamPos, final Throwable cause) {
         super(message, cause);
         _streamPos = streamPos;
     }
@@ -61,6 +53,7 @@ public class IllegalCeosFormatException extends Exception {
      * @return the detail message string of this <tt>Throwable</tt> instance
      *         (which may be <tt>null</tt>).
      */
+    @Override
     public String getMessage() {
         return super.getMessage() + "; at stream position=" + _streamPos;
     }

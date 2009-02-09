@@ -2,11 +2,11 @@ package org.esa.nest.dataio.ceos.jers;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
+import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
-import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
-import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 
@@ -15,8 +15,8 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
 import java.text.ParseException;
+import java.util.*;
 
 /**
  * This class represents a product directory.
@@ -28,24 +28,23 @@ import java.text.ParseException;
 class JERSProductDirectory extends CEOSProductDirectory {
 
     private final File _baseDir;
-    private JERSVolumeDirectoryFile _volumeDirectoryFile;
-    private JERSImageFile[] _imageFiles;
-    private JERSLeaderFile _leaderFile;
+    private JERSVolumeDirectoryFile _volumeDirectoryFile = null;
+    private JERSImageFile[] _imageFiles = null;
+    private JERSLeaderFile _leaderFile = null;
 
-    private int _sceneWidth;
-    private int _sceneHeight;
+    private int _sceneWidth = 0;
+    private int _sceneHeight = 0;
 
     private transient Map<String, JERSImageFile> bandImageFileMap = new HashMap<String, JERSImageFile>(1);
 
-    public JERSProductDirectory(final File dir) throws IOException,
-                                                         IllegalCeosFormatException {
+    public JERSProductDirectory(final File dir) throws IOException, IllegalBinaryFormatException {
         Guardian.assertNotNull("dir", dir);
 
         _baseDir = dir;
 
     }
 
-    protected void readProductDirectory() throws IOException, IllegalCeosFormatException {
+    protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         readVolumeDirectoryFile();
         _leaderFile = new JERSLeaderFile(createInputStream(JERSVolumeDirectoryFile.getLeaderFileName()));
 
@@ -61,7 +60,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
         assertSameWidthAndHeightForAllImages();
     }
 
-    private void readVolumeDirectoryFile() throws IOException, IllegalCeosFormatException {
+    private void readVolumeDirectoryFile() throws IOException, IllegalBinaryFormatException {
         if(_volumeDirectoryFile == null)
             _volumeDirectoryFile = new JERSVolumeDirectoryFile(_baseDir);
 
@@ -69,8 +68,8 @@ class JERSProductDirectory extends CEOSProductDirectory {
         isProductSLC = productType.contains("SLC") || productType.contains("COMPLEX");
     }
 
-    public Product createProduct() throws IOException,
-                                          IllegalCeosFormatException {
+    @Override
+    public Product createProduct() throws IOException, IllegalBinaryFormatException {
         final Product product = new Product(getProductName(),
                                             productType,
                                             _sceneWidth, _sceneHeight);
@@ -114,13 +113,13 @@ class JERSProductDirectory extends CEOSProductDirectory {
         return product;
     }
 
-    public boolean isJERS() throws IOException, IllegalCeosFormatException {
+    public boolean isJERS() throws IOException, IllegalBinaryFormatException {
         if(productType == null || _volumeDirectoryFile == null)
             readVolumeDirectoryFile();
         return (productType.contains("JERS"));
     }
 
-    private void addTiePointGrids(final Product product) throws IllegalCeosFormatException, IOException {
+    private void addTiePointGrids(final Product product) throws IllegalBinaryFormatException, IOException {
 
         // add incidence angle tie point grid
         final BaseRecord facility = _leaderFile.getFacilityRecord();
@@ -163,8 +162,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
         product.addTiePointGrid(slantRangeTimeGrid);
     }
 
-    public CEOSImageFile getImageFile(final Band band) throws IOException,
-                                                                IllegalCeosFormatException {
+    public CEOSImageFile getImageFile(final Band band) throws IOException, IllegalBinaryFormatException {
         return bandImageFileMap.get(band.getName());
     }
 
@@ -205,8 +203,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
         return band;
     }
 
-    private void addMetaData(final Product product) throws IOException,
-                                                           IllegalCeosFormatException {
+    private void addMetaData(final Product product) throws IOException, IllegalBinaryFormatException {
         final MetadataElement root = product.getMetadataRoot();
         root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
 
@@ -402,13 +399,11 @@ class JERSProductDirectory extends CEOSProductDirectory {
         return _volumeDirectoryFile.getProductName();
     }
 
-    private String getProductDescription() throws IOException,
-                                                  IllegalCeosFormatException {
+    private String getProductDescription() throws IOException, IllegalBinaryFormatException {
         return JERSConstants.PRODUCT_DESCRIPTION_PREFIX + _leaderFile.getProductLevel();
     }
 
-    private void assertSameWidthAndHeightForAllImages() throws IOException,
-                                                               IllegalCeosFormatException {
+    private void assertSameWidthAndHeightForAllImages() throws IOException, IllegalBinaryFormatException {
         for (int i = 0; i < _imageFiles.length; i++) {
             final JERSImageFile imageFile = _imageFiles[i];
             Guardian.assertTrue("_sceneWidth == imageFile[" + i + "].getRasterWidth()",

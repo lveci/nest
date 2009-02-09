@@ -7,6 +7,7 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.Debug;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +18,7 @@ import java.io.IOException;
  */
 public abstract class CEOSProductReader extends AbstractProductReader {
 
-    protected CEOSProductDirectory _dataDir;
+    protected CEOSProductDirectory _dataDir = null;
 
     /**
      * Constructs a new abstract product reader.
@@ -29,7 +30,8 @@ public abstract class CEOSProductReader extends AbstractProductReader {
        super(readerPlugIn);
     }
  
-    protected abstract CEOSProductDirectory createProductDirectory(File inputFile) throws IOException, IllegalCeosFormatException;
+    protected abstract CEOSProductDirectory createProductDirectory(File inputFile)
+            throws IOException, IllegalBinaryFormatException;
 
     /**
      * Closes the access to all currently opened resources such as file input streams and all resources of this children
@@ -88,7 +90,7 @@ public abstract class CEOSProductReader extends AbstractProductReader {
             _dataDir.readProductDirectory();
             product = _dataDir.createProduct();
             product.setFileLocation(fileFromInput);
-        } catch (IllegalCeosFormatException e) {
+        } catch (Exception e) {
             Debug.trace(e.toString());
             final IOException ioException = new IOException(e.getMessage());
             ioException.initCause(e);
@@ -114,22 +116,20 @@ public abstract class CEOSProductReader extends AbstractProductReader {
                 boolean oneOf2 = !destBand.getName().startsWith("q");
 
                 imageFile.readBandRasterDataSLC(sourceOffsetX, sourceOffsetY,
-                                         sourceWidth, sourceHeight,
-                                         sourceStepX, sourceStepY,
-                                         destOffsetX, destOffsetY,
-                                         destWidth, destHeight,
-                                         destBuffer, oneOf2, pm);
+                                                sourceWidth, sourceHeight,
+                                                sourceStepX, sourceStepY,
+                                                destWidth,
+                                                destBuffer, oneOf2, pm);
 
             } else {
-                imageFile.readBandRasterData(sourceOffsetX, sourceOffsetY,
-                                         sourceWidth, sourceHeight,
-                                         sourceStepX, sourceStepY,
-                                         destOffsetX, destOffsetY,
-                                         destWidth, destHeight,
-                                         destBuffer, pm);
+                imageFile.readBandRasterDataShort(sourceOffsetX, sourceOffsetY,
+                                                sourceWidth, sourceHeight,
+                                                sourceStepX, sourceStepY,
+                                                destWidth,
+                                                destBuffer, pm);
             }
 
-        } catch (IllegalCeosFormatException e) {
+        } catch (Exception e) {
             final IOException ioException = new IOException(e.getMessage());
             ioException.initCause(e);
             throw ioException;

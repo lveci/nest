@@ -2,9 +2,9 @@
 package org.esa.nest.dataio.ceos.records;
 
 import junit.framework.TestCase;
-import org.esa.nest.dataio.ceos.CeosFileReader;
+import org.esa.nest.dataio.BinaryFileReader;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CeosTestHelper;
-import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
@@ -18,11 +18,12 @@ public class TextRecordTest extends TestCase {
 
     private MemoryCacheImageOutputStream _ios;
     private String _prefix;
-    private CeosFileReader _reader;
+    private BinaryFileReader _reader;
 
-    private static String format = "ers";
-    private static String text_recordDefinitionFile = "text_record.xml";
+    private final static String format = "ers";
+    private final static String text_recordDefinitionFile = "text_record.xml";
 
+    @Override
     protected void setUp() throws Exception {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(24);
         _ios = new MemoryCacheImageOutputStream(os);
@@ -30,17 +31,17 @@ public class TextRecordTest extends TestCase {
         _ios.writeBytes(_prefix);
         writeRecordData(_ios);
         _ios.writeBytes("TextRecordTest_suffix"); // as suffix
-        _reader = new CeosFileReader(_ios);
+        _reader = new BinaryFileReader(_ios);
     }
 
-    public void testInit_SimpleConstructor() throws IOException, IllegalCeosFormatException {
+    public void testInit_SimpleConstructor() throws IOException, IllegalBinaryFormatException {
         _reader.seek(_prefix.length());
         final BaseRecord textRecord = new BaseRecord(_reader, -1, format, text_recordDefinitionFile);
 
         assertRecord(textRecord);
     }
 
-    public void testInit() throws IOException, IllegalCeosFormatException {
+    public void testInit() throws IOException, IllegalBinaryFormatException {
         final BaseRecord textRecord = new BaseRecord(_reader, _prefix.length(), format, text_recordDefinitionFile);
 
         assertRecord(textRecord);

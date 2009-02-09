@@ -3,12 +3,12 @@ package org.esa.nest.dataio.ceos.alos;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.math.MathUtils;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
+import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
-import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
-import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 
@@ -17,8 +17,8 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
 import java.text.ParseException;
+import java.util.*;
 
 /**
  * This class represents a product directory.
@@ -49,7 +49,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         _baseDir = dir;
     }
 
-    protected void readProductDirectory() throws IOException, IllegalCeosFormatException {
+    protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         readVolumeDirectoryFile();
         _leaderFile = new AlosPalsarLeaderFile(new FileImageInputStream(CeosHelper.getCEOSFile(_baseDir, "LED")));
 
@@ -70,14 +70,14 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         }
     }
 
-    private void readVolumeDirectoryFile() throws IOException, IllegalCeosFormatException {
+    private void readVolumeDirectoryFile() throws IOException, IllegalBinaryFormatException {
         if(_volumeDirectoryFile == null)
             _volumeDirectoryFile = new AlosPalsarVolumeDirectoryFile(_baseDir);
 
         productType = _volumeDirectoryFile.getProductType();
     }
 
-    public static boolean isALOS() throws IOException, IllegalCeosFormatException {
+    public static boolean isALOS() {
         //if(productType == null || _volumeDirectoryFile == null)
         //    readVolumeDirectoryFile();
         return true;
@@ -91,8 +91,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         return _leaderFile.getProductLevel();
     }
 
-    public Product createProduct() throws IOException,
-                                          IllegalCeosFormatException {
+    @Override
+    public Product createProduct() throws IOException, IllegalBinaryFormatException {
         final Product product = new Product(getProductName(),
                                             productType,
                                             _sceneWidth, _sceneHeight);
@@ -151,7 +151,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         return product;
     }
 
-    private void addTiePointGrids(final Product product) throws IllegalCeosFormatException, IOException {
+    private void addTiePointGrids(final Product product) throws IllegalBinaryFormatException, IOException {
 
         // slant range
         final BaseRecord sceneRec = _leaderFile.getSceneRecord();
@@ -208,8 +208,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
     }
 
-    public CEOSImageFile getImageFile(final Band band) throws IOException,
-                                                                IllegalCeosFormatException {
+    public CEOSImageFile getImageFile(final Band band) throws IOException, IllegalBinaryFormatException {
         return bandImageFileMap.get(band.getName());
     }
 

@@ -16,10 +16,10 @@ public class GenericBinaryDialog extends ModalDialog {
     private final NumberFormat numFormat = NumberFormat.getNumberInstance();
     private final ProteryListener propListener = new ProteryListener();
 
-    private int rasterWidth = 0;
-    private int rasterHeight = 0;
+    private int rasterWidth = 1000;
+    private int rasterHeight = 1000;
     private int numBands = 1;
-    private int dataType = ProductData.TYPE_INT16;
+    private int dataType = ProductData.TYPE_INT8;
     private int headerBytes = 0;
 
     private final JFormattedTextField rasterWidthField = DialogUtils.createFormattedTextField(numFormat, rasterWidth, propListener);
@@ -46,6 +46,7 @@ public class GenericBinaryDialog extends ModalDialog {
         super(parent, "Generic Binary", ModalDialog.ID_OK_CANCEL_HELP, helpID); /* I18N */
     }
 
+    @Override
     public int show() {
         dataTypeBox.addPropertyChangeListener("value", propListener);
         dataTypeBox.setSelectedItem(ProductData.TYPESTRING_INT16);
@@ -104,16 +105,19 @@ public class GenericBinaryDialog extends ModalDialog {
         setContent(contentPane);
     }
 
+    @Override
     protected void onCancel() {
         super.onCancel();
     }
 
+    @Override
     protected void onOK() {
         super.onOK();
 
         dataType = ProductData.getType((String)dataTypeBox.getSelectedItem());
     }
 
+    @Override
     protected boolean verifyUserInput() {
         boolean b = super.verifyUserInput();
 

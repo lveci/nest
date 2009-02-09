@@ -61,6 +61,12 @@ public class ImageIOReader extends AbstractProductReader {
                                    imgIOFile.getSceneWidth(), imgIOFile.getSceneHeight());
                 product.addBand(band);
                 bandMap.put(band, new ImageIOFile.BandInfo(imgIOFile, i, b));
+
+                if(imgIOFile.isIndexed()) {
+                    band.setImageInfo(imgIOFile.getImageInfo());
+                    band.setSampleCoding(imgIOFile.getIndexCoding());
+                    product.getIndexCodingGroup().add(imgIOFile.getIndexCoding());
+                }
             }
         }
 

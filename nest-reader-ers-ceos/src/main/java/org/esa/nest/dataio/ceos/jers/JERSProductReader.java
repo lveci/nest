@@ -2,9 +2,9 @@ package org.esa.nest.dataio.ceos.jers;
 
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.CEOSProductReader;
-import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +25,7 @@ public class JERSProductReader extends CEOSProductReader {
        super(readerPlugIn);
     }
 
-    protected CEOSProductDirectory createProductDirectory(File inputFile) throws IOException, IllegalCeosFormatException {
+    protected CEOSProductDirectory createProductDirectory(File inputFile) throws IOException, IllegalBinaryFormatException {
         return new JERSProductDirectory(inputFile.getParentFile());
     }
 

@@ -1,8 +1,8 @@
 package org.esa.nest.dataio.ceos.radarsat;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.nest.dataio.ceos.CeosFileReader;
-import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
+import org.esa.nest.dataio.BinaryFileReader;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 
 import javax.imageio.stream.ImageInputStream;
@@ -17,18 +17,17 @@ class RadarsatLeaderFile {
     public final BaseRecord _radiometricCompRecord;
     //public final BaseSceneHeaderRecord _sceneHeaderRecord;
 
-    public CeosFileReader _reader;
+    public BinaryFileReader _reader;
 
-    private static String mission = "radarsat";
-    private static String leader_recordDefinitionFile = "leader_file.xml";
-    private static String mapproj_recordDefinitionFile = "map_proj_record.xml";
-    private static String radiometric_recordDefinitionFile = "radiometric_record.xml";
-    private static String radiometric_comp_recordDefinitionFile = "radiometric_compensation_record.xml";
-    private static String scene_recordDefinitionFile = "scene_record.xml";
+    private final static String mission = "radarsat";
+    private final static String leader_recordDefinitionFile = "leader_file.xml";
+    private final static String mapproj_recordDefinitionFile = "map_proj_record.xml";
+    private final static String radiometric_recordDefinitionFile = "radiometric_record.xml";
+    private final static String radiometric_comp_recordDefinitionFile = "radiometric_compensation_record.xml";
+    private final static String scene_recordDefinitionFile = "scene_record.xml";
 
-    public RadarsatLeaderFile(final ImageInputStream leaderStream) throws IOException,
-                                                                        IllegalCeosFormatException {
-        _reader = new CeosFileReader(leaderStream);
+    public RadarsatLeaderFile(final ImageInputStream leaderStream) throws IOException, IllegalBinaryFormatException {
+        _reader = new BinaryFileReader(leaderStream);
         _leaderFDR = new BaseRecord(_reader, -1, mission, leader_recordDefinitionFile);
         _reader.seek(_leaderFDR.getAbsolutPosition(_leaderFDR.getRecordLength()));
         _mapProjRecord = new BaseRecord(_reader, -1, mission, mapproj_recordDefinitionFile);
@@ -49,8 +48,7 @@ class RadarsatLeaderFile {
         return "ref num";//_sceneHeaderRecord.getAttributeString("Scene reference number");
     }
 
-    public float[] getLatCorners() throws IOException,
-                                           IllegalCeosFormatException {
+    public float[] getLatCorners() throws IOException, IllegalBinaryFormatException {
         if(_mapProjRecord == null) return null;
 
         final double latUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic latitude");
@@ -60,8 +58,7 @@ class RadarsatLeaderFile {
         return new float[]{(float)latUL, (float)latUR, (float)latLL, (float)latLR};
     }
 
-    public float[] getLonCorners() throws IOException,
-                                           IllegalCeosFormatException {
+    public float[] getLonCorners() throws IOException, IllegalBinaryFormatException {
         if(_mapProjRecord == null) return null;
 
         final double lonUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic longitude");

@@ -1,14 +1,19 @@
 package org.esa.nest.dataio.ceos;
 
-import org.esa.nest.util.XMLSupport;
-import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.nest.dataio.BinaryFileReader;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
+import org.esa.nest.util.XMLSupport;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -37,7 +42,7 @@ public final class CeosDB {
      }
 
     private Map metaMap;
-    private org.jdom.Document xmlDoc;
+    private org.jdom.Document xmlDoc = null;
     private final String definitionFile;
 
     public CeosDB(String defFile) throws IOException {
@@ -74,7 +79,7 @@ public final class CeosDB {
         }
     }
 
-    public void readRecord(CeosFileReader reader) throws IOException, IllegalCeosFormatException
+    public void readRecord(BinaryFileReader reader) throws IOException, IllegalBinaryFormatException
     {
         final Element root = xmlDoc.getRootElement();
         //System.out.println(definitionFile);
@@ -108,8 +113,8 @@ public final class CeosDB {
 
     }
 
-    private static void DecodeElement(CeosFileReader reader, Map metaMap, Element child, String suffix)
-            throws IOException, IllegalCeosFormatException {
+    private static void DecodeElement(BinaryFileReader reader, Map metaMap, Element child, String suffix)
+            throws IOException, IllegalBinaryFormatException {
 
         String name="";
         try {
@@ -174,15 +179,15 @@ public final class CeosDB {
                     }
                     System.out.println();
                 } else {
-                    throw new IllegalCeosFormatException("Unknown type " + type, reader.getCurrentPos());
+                    throw new IllegalBinaryFormatException("Unknown type " + type, reader.getCurrentPos());
                 }
                 //System.out.println();
             }
 
-        } catch(IllegalCeosFormatException e) {
+        } catch(Exception e) {
             System.out.println(e.toString() + " for "+ name);
 
-            throw e;
+            throw new IllegalBinaryFormatException(e.toString(), reader.getCurrentPos());
         }
 
     }

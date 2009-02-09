@@ -2,10 +2,10 @@
 package org.esa.nest.dataio.ceos.records;
 
 import junit.framework.TestCase;
-import org.esa.nest.dataio.ceos.CeosFileReader;
-import org.esa.nest.dataio.ceos.CeosTestHelper;
-import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.nest.dataio.BinaryFileReader;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
+import org.esa.nest.dataio.ceos.CeosTestHelper;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,7 +15,7 @@ public class VolumeDescriptorRecordTest extends TestCase {
 
     private MemoryCacheImageOutputStream _ios;
     private String _prefix;
-    private CeosFileReader _reader;
+    private BinaryFileReader _reader;
 
     private static String format = "ers";
     private static String volume_desc_recordDefinitionFile = "volume_descriptor.xml";
@@ -27,26 +27,23 @@ public class VolumeDescriptorRecordTest extends TestCase {
         _ios.writeBytes(_prefix);
         writeRecordData(_ios);
         _ios.writeBytes("VolumeDescriptorRecordTest_suffix"); // suffix
-        _reader = new CeosFileReader(_ios);
+        _reader = new BinaryFileReader(_ios);
     }
 
-    public void testInit_SimpleConstructor() throws IOException,
-                                                    IllegalCeosFormatException {
+    public void testInit_SimpleConstructor() throws IOException, IllegalBinaryFormatException {
         _reader.seek(_prefix.length());
         final BaseRecord record = new BaseRecord(_reader, -1, format, volume_desc_recordDefinitionFile);
 
         assertRecord(record);
     }
 
-    public void testInit() throws IOException,
-                                  IllegalCeosFormatException {
+    public void testInit() throws IOException, IllegalBinaryFormatException {
         final BaseRecord record = new BaseRecord(_reader, _prefix.length(), format, volume_desc_recordDefinitionFile);
 
         assertRecord(record);
     }
 
-    public void testAssignMetadata() throws IOException,
-                                            IllegalCeosFormatException {
+    public void testAssignMetadata() throws IOException, IllegalBinaryFormatException {
         final BaseRecord record = new BaseRecord(_reader, _prefix.length(), format, volume_desc_recordDefinitionFile);
         final MetadataElement volumeMetadata = new MetadataElement("VOLUME_DESCRIPTOR");
 

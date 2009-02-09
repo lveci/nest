@@ -1,8 +1,8 @@
 package org.esa.nest.dataio.ceos.ers;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.nest.dataio.ceos.CeosFileReader;
-import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
+import org.esa.nest.dataio.BinaryFileReader;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.BaseSceneHeaderRecord;
 
@@ -22,19 +22,20 @@ class ERSLeaderFile {
     public final BaseRecord _platformPositionRecord;
     public final BaseRecord _facilityRecord;
     public final BaseRecord _facilityRelatedPCSRecord;
-    public CeosFileReader _reader;
+    public BinaryFileReader _reader;
 
-    private static String mission = "ers";
-    private static String leader_recordDefinitionFile = "leader_file.xml";
-    private static String scene_recordDefinitionFile = "scene_record.xml";
-    private static String mapproj_recordDefinitionFile = "map_proj_record.xml";
-    private static String platform_recordDefinitionFile = "platform_position_record.xml";
-    private static String facility_recordDefinitionFile = "facility_record.xml";
-    private static String facilityRelatedPCS_recordDefinitionFile = "facility_related_pcs_record.xml";
+    private final static String mission = "ers";
+    private final static String leader_recordDefinitionFile = "leader_file.xml";
+    private final static String scene_recordDefinitionFile = "scene_record.xml";
+    private final static String mapproj_recordDefinitionFile = "map_proj_record.xml";
+    private final static String platform_recordDefinitionFile = "platform_position_record.xml";
+    private final static String facility_recordDefinitionFile = "facility_record.xml";
+    private final static String facilityRelatedPCS_recordDefinitionFile = "facility_related_pcs_record.xml";
 
-    public ERSLeaderFile(final ImageInputStream leaderStream) throws IOException,
-                                                                        IllegalCeosFormatException {
-        _reader = new CeosFileReader(leaderStream);
+    public ERSLeaderFile(final ImageInputStream leaderStream)
+            throws IOException, IllegalBinaryFormatException {
+
+        _reader = new BinaryFileReader(leaderStream);
         _leaderFDR = new BaseRecord(_reader, -1, mission, leader_recordDefinitionFile);
         _reader.seek(_leaderFDR.getAbsolutPosition(_leaderFDR.getRecordLength()));
         _sceneHeaderRecord = new BaseSceneHeaderRecord(_reader, -1, mission, scene_recordDefinitionFile);
@@ -79,8 +80,7 @@ class ERSLeaderFile {
         return _platformPositionRecord;
     }
 
-    public float[] getLatCorners() throws IOException,
-                                           IllegalCeosFormatException {
+    public float[] getLatCorners() throws IOException, IllegalBinaryFormatException {
         if(_mapProjRecord == null) return null;
 
         final double latUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic latitude");
@@ -90,8 +90,7 @@ class ERSLeaderFile {
         return new float[]{(float)latUL, (float)latUR, (float)latLL, (float)latLR};
     }
 
-    public float[] getLonCorners() throws IOException,
-                                           IllegalCeosFormatException {
+    public float[] getLonCorners() throws IOException, IllegalBinaryFormatException {
         if(_mapProjRecord == null) return null;
 
         final double lonUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic longitude");

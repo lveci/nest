@@ -1,25 +1,25 @@
 package org.esa.nest.dataio.ceos.records;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.nest.dataio.BinaryFileReader;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CeosDB;
-import org.esa.nest.dataio.ceos.CeosFileReader;
-import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 
+import java.io.File;
 import java.io.IOException;
 
 public class BaseRecord {
 
     private final long _startPos;
-    private final CeosFileReader _reader;
+    private final BinaryFileReader _reader;
 
     private CeosDB db;
-    private static String ceosDBPath = "org/esa/nest/ceosFormatDB";
+    private final static String ceosDBPath = "org/esa/nest/ceosFormatDB";
     private final int recordLength;
 
-    public BaseRecord(final CeosFileReader reader, final long startPos,
-                      final String mission, final String recordDefinitionFileName) throws
-                                                                        IOException,
-                                                                        IllegalCeosFormatException {
+    public BaseRecord(final BinaryFileReader reader, final long startPos,
+                      final String mission, final String recordDefinitionFileName)
+            throws IOException, IllegalBinaryFormatException {
         _reader = reader;
         // reposition start if needed
         if (startPos != -1) {
@@ -29,7 +29,7 @@ public class BaseRecord {
             _startPos = reader.getCurrentPos();
         }
 
-        String resPath = ceosDBPath + '/' + mission + '/' + recordDefinitionFileName;
+        String resPath = ceosDBPath + File.separator + mission + File.separator + recordDefinitionFileName;
 
         db = new CeosDB(resPath);
         db.readRecord(reader);
@@ -40,9 +40,8 @@ public class BaseRecord {
     /*
     Quick read using exiting ceosDB for ImageRecord
      */
-    public BaseRecord(final CeosFileReader reader, final long startPos, CeosDB theDB) throws
-                                                                        IOException,
-                                                                        IllegalCeosFormatException {
+    public BaseRecord(final BinaryFileReader reader, final long startPos, CeosDB theDB)
+            throws IOException, IllegalBinaryFormatException {
         _reader = reader;
         // reposition start if needed
         if (startPos != -1) {
@@ -78,7 +77,7 @@ public class BaseRecord {
         return _startPos;
     }
 
-    public CeosFileReader getReader() {
+    public BinaryFileReader getReader() {
         return _reader;
     }
 

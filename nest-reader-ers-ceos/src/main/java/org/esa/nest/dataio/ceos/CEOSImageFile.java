@@ -1,25 +1,27 @@
 package org.esa.nest.dataio.ceos;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.nest.dataio.ceos.records.ImageRecord;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.nest.dataio.BinaryFileReader;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
+import org.esa.nest.dataio.ceos.records.ImageRecord;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.18 $ $Date: 2008-11-20 17:41:45 $
+ * @version $Revision: 1.19 $ $Date: 2009-02-09 21:02:59 $
  */
 public abstract class CEOSImageFile {
 
     protected BaseRecord _imageFDR = null;
-    protected CeosFileReader _ceosReader = null;
+    protected BinaryFileReader binaryReader = null;
     protected ImageRecord[] _imageRecords = null;
 
     protected int _imageRecordLength = 0;
@@ -58,13 +60,11 @@ public abstract class CEOSImageFile {
         return list.toArray(new String[list.size()]);
     }
 
-    public void readBandRasterData(final int sourceOffsetX, final int sourceOffsetY,
-                                   final int sourceWidth, final int sourceHeight,
-                                   final int sourceStepX, final int sourceStepY,
-                                   final int destOffsetX, final int destOffsetY,
-                                   final int destWidth, final int destHeight,
-                                   final ProductData destBuffer, ProgressMonitor pm) throws IOException,
-                                                                                            IllegalCeosFormatException
+    public void readBandRasterDataShort(final int sourceOffsetX, final int sourceOffsetY,
+                                        final int sourceWidth, final int sourceHeight,
+                                        final int sourceStepX, final int sourceStepY,
+                                        final int destWidth, final ProductData destBuffer, ProgressMonitor pm)
+                                        throws IOException, IllegalBinaryFormatException
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 2;
@@ -73,16 +73,18 @@ public abstract class CEOSImageFile {
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
             final short[] srcLine = new short[sourceWidth];
-            final short[] destLine = new short[destWidth];
+            short[] destLine = null;
+            if (sourceStepX != 1)
+                destLine = new short[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
                 }
 
                 // Read source line
-                synchronized (_ceosReader) {
-                    _ceosReader.seek(_imageRecordLength * y + xpos);
-                    _ceosReader.readB2(srcLine);
+                synchronized (binaryReader) {
+                    binaryReader.seek(_imageRecordLength * y + xpos);
+                    binaryReader.read(srcLine);
                 }
 
                 // Copy source line into destination buffer
@@ -105,12 +107,10 @@ public abstract class CEOSImageFile {
     }
 
     public void readBandRasterDataByte(final int sourceOffsetX, final int sourceOffsetY,
-                                   final int sourceWidth, final int sourceHeight,
-                                   final int sourceStepX, final int sourceStepY,
-                                   final int destOffsetX, final int destOffsetY,
-                                   final int destWidth, final int destHeight,
-                                   final ProductData destBuffer, ProgressMonitor pm) throws IOException,
-                                                                                            IllegalCeosFormatException
+                                       final int sourceWidth, final int sourceHeight,
+                                       final int sourceStepX, final int sourceStepY,
+                                       final int destWidth, final ProductData destBuffer, ProgressMonitor pm)
+                                        throws IOException, IllegalBinaryFormatException
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 1;
@@ -119,16 +119,18 @@ public abstract class CEOSImageFile {
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
             final byte[] srcLine = new byte[sourceWidth];
-            final byte[] destLine = new byte[destWidth];
+            byte[] destLine = null;
+            if (sourceStepX != 1)
+                destLine = new byte[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
                 }
 
                 // Read source line
-                synchronized (_ceosReader) {
-                    _ceosReader.seek(_imageRecordLength * y + xpos);
-                    _ceosReader.readB1(srcLine);
+                synchronized (binaryReader) {
+                    binaryReader.seek(_imageRecordLength * y + xpos);
+                    binaryReader.read(srcLine);
                 }
 
                 // Copy source line into destination buffer
@@ -151,12 +153,10 @@ public abstract class CEOSImageFile {
     }
 
     public void readBandRasterDataSLC(final int sourceOffsetX, final int sourceOffsetY,
-                                   final int sourceWidth, final int sourceHeight,
-                                   final int sourceStepX, final int sourceStepY,
-                                   final int destOffsetX, final int destOffsetY,
-                                   final int destWidth, final int destHeight,
-                                   final ProductData destBuffer, boolean oneOf2,
-                                   ProgressMonitor pm) throws IOException, IllegalCeosFormatException
+                                      final int sourceWidth, final int sourceHeight,
+                                      final int sourceStepX, final int sourceStepY,
+                                      final int destWidth, final ProductData destBuffer, boolean oneOf2,
+                                      ProgressMonitor pm) throws IOException, IllegalBinaryFormatException
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 4;
@@ -165,16 +165,18 @@ public abstract class CEOSImageFile {
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
             final short[] srcLine = new short[sourceWidth * 2];
-            final short[] destLine = new short[destWidth];
+            short[] destLine = null;
+            if (sourceStepX != 1)
+                destLine = new short[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
                 }
 
                 // Read source line
-                synchronized (_ceosReader) {
-                    _ceosReader.seek(_imageRecordLength * y + xpos);
-                    _ceosReader.readB2(srcLine);
+                synchronized (binaryReader) {
+                    binaryReader.seek(_imageRecordLength * y + xpos);
+                    binaryReader.read(srcLine);
                 }
 
                 // Copy source line into destination buffer
@@ -195,12 +197,10 @@ public abstract class CEOSImageFile {
     }
 
     public void readBandRasterDataSLCFloat(final int sourceOffsetX, final int sourceOffsetY,
-                                   final int sourceWidth, final int sourceHeight,
-                                   final int sourceStepX, final int sourceStepY,
-                                   final int destOffsetX, final int destOffsetY,
-                                   final int destWidth, final int destHeight,
-                                   final ProductData destBuffer, boolean oneOf2,
-                                   ProgressMonitor pm) throws IOException, IllegalCeosFormatException
+                                           final int sourceWidth, final int sourceHeight,
+                                           final int sourceStepX, final int sourceStepY,
+                                           final int destWidth, final ProductData destBuffer, boolean oneOf2,
+                                           ProgressMonitor pm) throws IOException, IllegalBinaryFormatException
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 8;
@@ -209,16 +209,18 @@ public abstract class CEOSImageFile {
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
             final float[] srcLine = new float[sourceWidth * 2];
-            final float[] destLine = new float[destWidth];
+            float[] destLine = null;
+            if (sourceStepX != 1)
+                destLine = new float[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
                 }
 
                 // Read source line
-                synchronized (_ceosReader) {
-                    _ceosReader.seek(_imageRecordLength * y + xpos);
-                    _ceosReader.readF(srcLine);
+                synchronized (binaryReader) {
+                    binaryReader.seek(_imageRecordLength * y + xpos);
+                    binaryReader.read(srcLine);
                 }
 
                 // Copy source line into destination buffer
@@ -239,12 +241,10 @@ public abstract class CEOSImageFile {
     }
 
     public void readBandRasterDataSLCByte(final int sourceOffsetX, final int sourceOffsetY,
-                                   final int sourceWidth, final int sourceHeight,
-                                   final int sourceStepX, final int sourceStepY,
-                                   final int destOffsetX, final int destOffsetY,
-                                   final int destWidth, final int destHeight,
-                                   final ProductData destBuffer, boolean oneOf2,
-                                   ProgressMonitor pm) throws IOException, IllegalCeosFormatException
+                                          final int sourceWidth, final int sourceHeight,
+                                          final int sourceStepX, final int sourceStepY,
+                                          final int destWidth, final ProductData destBuffer, boolean oneOf2,
+                                          ProgressMonitor pm) throws IOException, IllegalBinaryFormatException
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 2;
@@ -253,16 +253,18 @@ public abstract class CEOSImageFile {
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
             final byte[] srcLine = new byte[sourceWidth * 2];
-            final byte[] destLine = new byte[destWidth];
+            byte[] destLine = null;
+            if (sourceStepX != 1)
+                destLine = new byte[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
                 }
 
                 // Read source line
-                synchronized (_ceosReader) {
-                    _ceosReader.seek(_imageRecordLength * y + xpos);
-                    _ceosReader.readB1(srcLine);
+                synchronized (binaryReader) {
+                    binaryReader.seek(_imageRecordLength * y + xpos);
+                    binaryReader.read(srcLine);
                 }
 
                 // Copy source line into destination buffer
@@ -342,7 +344,7 @@ public abstract class CEOSImageFile {
     }
 
     public void close() throws IOException {
-        _ceosReader.close();
-        _ceosReader = null;
+        binaryReader.close();
+        binaryReader = null;
     }
 }

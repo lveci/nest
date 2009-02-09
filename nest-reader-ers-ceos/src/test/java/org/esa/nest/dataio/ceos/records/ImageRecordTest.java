@@ -2,9 +2,9 @@
 package org.esa.nest.dataio.ceos.records;
 
 import junit.framework.TestCase;
-import org.esa.nest.dataio.ceos.CeosFileReader;
+import org.esa.nest.dataio.BinaryFileReader;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CeosTestHelper;
-import org.esa.nest.dataio.ceos.IllegalCeosFormatException;
 
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
@@ -13,13 +13,14 @@ import java.io.IOException;
 
 public class ImageRecordTest extends TestCase {
 
-    private MemoryCacheImageOutputStream _ios;
+    private MemoryCacheImageOutputStream _ios = null;
     private String _prefix;
-    private CeosFileReader _reader;
+    private BinaryFileReader _reader;
 
-    private static String mission = "ers";
-    private static String image_recordDefinition = "image_record.xml";
+    private final static String mission = "ers";
+    private final static String image_recordDefinition = "image_record.xml";
 
+    @Override
     protected void setUp() throws Exception {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(24);
         _ios = new MemoryCacheImageOutputStream(os);
@@ -27,11 +28,10 @@ public class ImageRecordTest extends TestCase {
         _ios.writeBytes(_prefix);
         writeRecordData(_ios);
         _ios.writeBytes("ImageRecordTest_suffix"); // as suffix
-        _reader = new CeosFileReader(_ios);
+        _reader = new BinaryFileReader(_ios);
     }
 
-    public void testInit_SimpleConstructor() throws IOException,
-                                                    IllegalCeosFormatException {
+    public void testInit_SimpleConstructor() throws IOException, IllegalBinaryFormatException {
         _reader.seek(_prefix.length());
 
         final ImageRecord record = new ImageRecord(_reader, mission, image_recordDefinition);

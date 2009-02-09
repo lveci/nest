@@ -32,87 +32,82 @@ public final class BinaryFileReader {
         _stream.skipBytes(numBytes);
     }
 
-    public int readB1() throws IOException,
-                               IllegalFormatException {
+    public int readB1() throws IOException, IllegalBinaryFormatException {
         final long streamPosition = _stream.getStreamPosition();
         try {
             return _stream.readByte() & 0xFF;
         } catch (IOException e) {
-            final String message = String.format(EM_READING_X_TYPE,
-                                                 new Object[]{"B1"});
-            throw new IllegalFormatException(message, streamPosition, e);
+            final String message = String.format(EM_READING_X_TYPE, new Object[]{"B1"});
+            throw new IllegalBinaryFormatException(message, streamPosition, e);
         }
     }
 
-    public short readB2() throws IOException,
-                                 IllegalFormatException {
+    public short readB2() throws IOException, IllegalBinaryFormatException {
         final long streamPosition = _stream.getStreamPosition();
         try {
             return _stream.readShort();
         } catch (IOException e) {
-            final String message = String.format(EM_READING_X_TYPE,
-                                                 new Object[]{"B2"});
-            throw new IllegalFormatException(message, streamPosition, e);
+            final String message = String.format(EM_READING_X_TYPE, new Object[]{"B2"});
+            throw new IllegalBinaryFormatException(message, streamPosition, e);
         }
     }
 
-    public int readB4() throws IOException,
-                               IllegalFormatException {
+    public int readB4() throws IOException, IllegalBinaryFormatException {
         final long streamPosition = _stream.getStreamPosition();
         try {
             return _stream.readInt();
         } catch (IOException e) {
-            final String message = String.format(EM_READING_X_TYPE,
-                                                 new Object[]{"B4"});
-            throw new IllegalFormatException(message, streamPosition, e);
+            final String message = String.format(EM_READING_X_TYPE, new Object[]{"B4"});
+            throw new IllegalBinaryFormatException(message, streamPosition, e);
         }
     }
 
-    public long readB8() throws IOException,
-                                IllegalFormatException {
+    public long readB8() throws IOException, IllegalBinaryFormatException {
         final long streamPosition = _stream.getStreamPosition();
         try {
             return _stream.readLong();
         } catch (IOException e) {
-            final String message = String.format(EM_READING_X_TYPE,
-                                                 new Object[]{"B8"});
-            throw new IllegalFormatException(message, streamPosition, e);
+            final String message = String.format(EM_READING_X_TYPE, new Object[]{"B8"});
+            throw new IllegalBinaryFormatException(message, streamPosition, e);
         }
     }
 
-    public void readB1(final byte[] array) throws IOException {
+    public void read(final byte[] array) throws IOException {
             _stream.readFully(array, 0, array.length);
     }
 
-    public void readC1(final char[] array) throws IOException {
+    public void read(final char[] array) throws IOException {
             _stream.readFully(array, 0, array.length);
     }
 
-    public void readB2(final short[] array) throws IOException {
+    public void read(final short[] array) throws IOException {
             _stream.readFully(array, 0, array.length);
     }
 
-    public void readB4(final int[] array) throws IOException {
+    public void read(final int[] array) throws IOException {
             _stream.readFully(array, 0, array.length);
     }
 
-    public void readB8(final long[] array) throws IOException, IllegalFormatException {
+    public void read(final long[] array) throws IOException, IllegalBinaryFormatException {
             _stream.readFully(array, 0, array.length);
     }
 
-    public void readF(final float[] array) throws IOException {
+    public void read(final float[] array) throws IOException {
             _stream.readFully(array, 0, array.length);
     }
 
-    public long readIn(final int n) throws IOException,
-                                           IllegalFormatException {
+    public void read(final double[] array) throws IOException {
+            _stream.readFully(array, 0, array.length);
+    }
+
+    public long readIn(final int n) throws IOException, IllegalBinaryFormatException {
         final long streamPosition = _stream.getStreamPosition();
         final String longStr = readAn(n).trim();
         if(longStr.isEmpty()) return 0;
         return parseLong(longStr, streamPosition);
     }
 
-    private static long parseLong(String integerStr, long streamPosition) throws IllegalFormatException {
+    private static long parseLong(String integerStr, long streamPosition) throws IllegalBinaryFormatException {
         long number;
         try {
             number = Long .parseLong(integerStr);
@@ -125,56 +120,50 @@ public final class BinaryFileReader {
             } catch (NumberFormatException e2) {
                 final String message = String.format(EM_NOT_PARSABLE_X_STRING + " \"" + integerStr + '"',
                                                                     new Object[]{"integer"});
-                throw new IllegalFormatException(message, streamPosition, e);
+                throw new IllegalBinaryFormatException(message, streamPosition, e);
             }
         }
         return number;
     }
 
-    public double readFn(final int n) throws IOException,
-                                             IllegalFormatException {
+    public double readFn(final int n) throws IOException, IllegalBinaryFormatException {
         final long streamPosition = _stream.getStreamPosition();
         final String doubleString = readAn(n).trim();
         if(doubleString.isEmpty()) return 0;
         try {
             return Double.parseDouble(doubleString);
         } catch (NumberFormatException e) {
-            final String message = String.format(EM_NOT_PARSABLE_X_STRING,
-                                                 new Object[]{"double"});
-            throw new IllegalFormatException(message, streamPosition, e);
+            final String message = String.format(EM_NOT_PARSABLE_X_STRING, new Object[]{"double"});
+            throw new IllegalBinaryFormatException(message, streamPosition, e);
         }
     }
 
-    public void readFn(final int n, final double[] numbers) throws IOException,
-                                                                   IllegalFormatException {
+    public void readFn(final int n, final double[] numbers) throws IOException, IllegalBinaryFormatException {
         final long streamPosition = _stream.getStreamPosition();
         for (int i = 0; i < numbers.length; i++) {
             try {
                 numbers[i] = Double.parseDouble(readAn(n).trim());
-            } catch (IllegalFormatException e) {
-                final String message = String.format(EM_READING_X_TYPE,
-                                                     new Object[]{"Gn[]"});
-                throw new IllegalFormatException(message, streamPosition, e);
+            } catch (IllegalBinaryFormatException e) {
+                final String message = String.format(EM_READING_X_TYPE, new Object[]{"Gn[]"});
+                throw new IllegalBinaryFormatException(message, streamPosition, e);
             }
         }
     }
 
-    public String readAn(final int n) throws IOException,
-                                             IllegalFormatException {
+    public String readAn(final int n) throws IOException, IllegalBinaryFormatException {
         final long streamPosition = _stream.getStreamPosition();
         final byte[] bytes = new byte[n];
         final int bytesRead;
         try {
             bytesRead = _stream.read(bytes);
         } catch (IOException e) {
-            final String message = String.format(EM_READING_X_TYPE,
-                                                 new Object[]{"An"});
-            throw new IllegalFormatException(message, streamPosition, e);
+            final String message = String.format(EM_READING_X_TYPE, new Object[]{"An"});
+            throw new IllegalBinaryFormatException(message, streamPosition, e);
         }
         if (bytesRead != n) {
             final String message = String.format(EM_EXPECTED_X_FOUND_Y_BYTES,
                                                  n, bytesRead);
-            throw new IllegalFormatException(message, streamPosition);
+            throw new IllegalBinaryFormatException(message, streamPosition);
         }
         String str = new String(bytes);
         if(str.contains("\0"))
@@ -183,9 +172,8 @@ public final class BinaryFileReader {
         return str;
     }
 
-    public int[] readInArray(final int arraySize, final int intValLength) throws
-                                                                          IOException,
-                                                                          IllegalFormatException {
+    public int[] readInArray(final int arraySize, final int intValLength)
+            throws IOException, IllegalBinaryFormatException {
         final long streamPosition = _stream.getStreamPosition();
         final int[] ints = new int[arraySize];
         for (int i = 0; i < ints.length; i++) {
