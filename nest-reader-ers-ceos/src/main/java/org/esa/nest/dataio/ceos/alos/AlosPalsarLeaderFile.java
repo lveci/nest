@@ -113,6 +113,10 @@ class AlosPalsarLeaderFile {
         return _facilityRecord;
     }
 
+    public BaseRecord getRadiometricRecord() {
+        return _radiometricRecord;
+    }
+
     public float[] getLatCorners() throws IOException,
                                            IllegalCeosFormatException {
         if(_mapProjRecord == null) return null;
