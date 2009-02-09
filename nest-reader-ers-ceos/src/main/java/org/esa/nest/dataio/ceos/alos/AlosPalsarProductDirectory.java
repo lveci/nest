@@ -282,6 +282,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
         BaseRecord sceneRec = _leaderFile.getSceneRecord();
         BaseRecord mapProjRec = _leaderFile.getMapProjRecord();
+        BaseRecord radiometricRec = _leaderFile.getRadiometricRecord();
 
         //mph
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, getProductName());
@@ -358,7 +359,9 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.replica_power_corr_flag, 0);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
-        
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
+                radiometricRec.getAttributeDouble("Calibration factor"));
+        absRoot.getAttribute(AbstractMetadata.calibration_factor).setUnit("dB");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
                 sceneRec.getAttributeDouble("Range sampling rate"));
 
