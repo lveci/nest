@@ -27,6 +27,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.util.GeoUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -90,7 +91,7 @@ public class SRGROp extends Operator {
 
     private static double a = 6378137; // m
     private static double earthFlatCoef = 298.257223563;
-    private static double e = 2 / earthFlatCoef - 1 / (earthFlatCoef * earthFlatCoef);
+    private static double e2 = 2 / earthFlatCoef - 1 / (earthFlatCoef * earthFlatCoef);
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -289,7 +290,7 @@ public class SRGROp extends Operator {
 
         final double[] xyz = new double[3];
         GeoPos geoPos = geoCoding.getGeoPos(new PixelPos(0, 0), null);
-        geo2xyz(geoPos, xyz);
+        GeoUtils.geo2xyz(geoPos, xyz);
         double xP0 = xyz[0];
         double yP0 = xyz[1];
         double zP0 = xyz[2];
@@ -298,7 +299,7 @@ public class SRGROp extends Operator {
         for (int i = 1; i < sourceImageWidth; i++) {
 
             geoPos = geoCoding.getGeoPos(new PixelPos(i, 0), null);
-            geo2xyz(geoPos, xyz);
+            GeoUtils.geo2xyz(geoPos, xyz);
             totalDistance += Math.sqrt(Math.pow(xP0 - xyz[0], 2) +
                                        Math.pow(yP0 - xyz[1], 2) +
                                        Math.pow(zP0 - xyz[2], 2));
@@ -392,7 +393,7 @@ public class SRGROp extends Operator {
         // xyz1 = geo.GeoCordToXYZ( xyz1, t1*geo.R2D, -t3*geo.R2D+180, 0);
 
         GeoPos geoPos = geoCoding.getGeoPos(new PixelPos(0, y0), null);
-        geo2xyz(geoPos, xyz);
+        GeoUtils.geo2xyz(geoPos, xyz);
         double xP0 = xyz[0];
         double yP0 = xyz[1];
         double zP0 = xyz[2];
@@ -400,10 +401,10 @@ public class SRGROp extends Operator {
         for (int i = 0; i < numRangePoints - 1; i++) {
 
             geoPos = geoCoding.getGeoPos(new PixelPos(pixelsBetweenPoints*(i+1), y0), null);
-            geo2xyz(geoPos, xyz);
+            GeoUtils.geo2xyz(geoPos, xyz);
             final double pointToPointDistance = Math.sqrt(Math.pow(xP0 - xyz[0], 2) +
-                                                    Math.pow(yP0 - xyz[1], 2) +
-                                                    Math.pow(zP0 - xyz[2], 2));
+                                                          Math.pow(yP0 - xyz[1], 2) +
+                                                          Math.pow(zP0 - xyz[2], 2));
 
             if (i == 0) {
                 groundRangeDistanceArray[i] = pointToPointDistance;
@@ -415,26 +416,6 @@ public class SRGROp extends Operator {
             yP0 = xyz[1];
             zP0 = xyz[2];
         }
-    }
-
-    /**
-     * Compute XYZ coordinates for a given pixel from its geo position.
-     *
-     * @param geoPos The geo position of a given pixel.
-     * @param xyz The xyz coordinates of the given pixel.
-     */
-    private static void geo2xyz(GeoPos geoPos, double xyz[]) {
-
-        final double lat = ((double)geoPos.lat) * MathUtils.DTOR;
-        final double lon = ((double)geoPos.lon) * MathUtils.DTOR;
-
-        final double sinLat = Math.sin(lat);
-        final double cosLat = Math.cos(lat);
-        final double N = a / Math.sqrt(1 - Math.pow(e*sinLat, 2));
-
-        xyz[0] = N * cosLat * Math.cos(lon); // in m
-        xyz[1] = N * cosLat * Math.sin(lon); // in m
-        xyz[2] = (1 - e * e) * N * sinLat;   // in m
     }
 
     /**
