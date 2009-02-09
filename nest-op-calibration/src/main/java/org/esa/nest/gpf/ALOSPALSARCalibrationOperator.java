@@ -95,9 +95,7 @@ public class ALOSPALSARCalibrationOperator extends Operator {
         try {
             abstractedMetadata = OperatorUtils.getAbstractedMetadata(sourceProduct);
 
-            boolean absCalibrationFlag =
-                    abstractedMetadata.getAttribute(AbstractMetadata.abs_calibration_flag).getData().getElemBoolean();
-            if (absCalibrationFlag) {
+            if (abstractedMetadata.getAttribute(AbstractMetadata.abs_calibration_flag).getData().getElemBoolean()) {
                 throw new OperatorException("Absolute radiometric calibration has already applied to the product");
             }
 
@@ -116,6 +114,7 @@ public class ALOSPALSARCalibrationOperator extends Operator {
             }
 
             targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 10);
+
         } catch(Exception e) {
             throw new OperatorException(e);
         }
@@ -127,21 +126,12 @@ public class ALOSPALSARCalibrationOperator extends Operator {
      */
     private void getCalibrationFactor() throws Exception {
 
-        final MetadataElement leader = sourceProduct.getMetadataRoot().getElement("Leader");
-        if (leader == null) {
-            throw new OperatorException("Leader not found");
-        }
-
-        final MetadataElement radiometric = leader.getElement("Radiometric");
-        if (radiometric == null) {
-            throw new OperatorException("Radiometric not found");
-        }
-
-        calibrationFactor = radiometric.getAttributeDouble("Calibration factor");
+        calibrationFactor = abstractedMetadata.getAttributeDouble(AbstractMetadata.calibration_factor);
 
         if (sampleType.contains("COMPLEX")) {
             calibrationFactor -= 32.0; // calibration factor offset is 32 dB
         }
+
         calibrationFactor = Math.pow(10.0, calibrationFactor/10.0); // dB to linear scale
         //System.out.println("Calibration factor is " + calibrationFactor);
     }
@@ -272,9 +262,7 @@ public class ALOSPALSARCalibrationOperator extends Operator {
         final MetadataElement abs = OperatorUtils.getAbstractedMetadata(targetProduct);
 
         if (sampleType.contains("COMPLEX")) {
-            final MetadataAttribute sampleTypeAttr = abs.getAttribute(AbstractMetadata.SAMPLE_TYPE);
-            abs.removeAttribute(sampleTypeAttr);
-            abs.addAttribute(new MetadataAttribute(AbstractMetadata.SAMPLE_TYPE, ProductData.createInstance("DETECTED"), false));
+            abs.setAttributeString(AbstractMetadata.SAMPLE_TYPE, "DETECTED");
         }
 
         abs.getAttribute(AbstractMetadata.abs_calibration_flag).getData().setElemBoolean(true);
