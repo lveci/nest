@@ -16,7 +16,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.19 $ $Date: 2009-02-09 21:02:59 $
+ * @version $Revision: 1.20 $ $Date: 2009-02-09 21:12:33 $
  */
 public abstract class CEOSImageFile {
 
@@ -165,9 +165,7 @@ public abstract class CEOSImageFile {
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
             final short[] srcLine = new short[sourceWidth * 2];
-            short[] destLine = null;
-            if (sourceStepX != 1)
-                destLine = new short[destWidth];
+            final short[] destLine = new short[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
@@ -209,9 +207,7 @@ public abstract class CEOSImageFile {
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
             final float[] srcLine = new float[sourceWidth * 2];
-            float[] destLine = null;
-            if (sourceStepX != 1)
-                destLine = new float[destWidth];
+            final float[] destLine = new float[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
@@ -253,9 +249,7 @@ public abstract class CEOSImageFile {
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
             final byte[] srcLine = new byte[sourceWidth * 2];
-            byte[] destLine = null;
-            if (sourceStepX != 1)
-                destLine = new byte[destWidth];
+            final byte[] destLine = new byte[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;

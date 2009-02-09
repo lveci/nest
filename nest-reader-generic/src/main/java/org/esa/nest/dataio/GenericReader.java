@@ -473,9 +473,7 @@ public class GenericReader extends AbstractProductReader {
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
             final short[] srcLine = new short[sourceWidth * 2];
-            short[] destLine = null;
-            if (sourceStepX != 1)
-                destLine = new short[destWidth];
+            final short[] destLine = new short[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
@@ -519,9 +517,7 @@ public class GenericReader extends AbstractProductReader {
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
             final float[] srcLine = new float[sourceWidth * 2];
-            float[] destLine = null;
-            if (sourceStepX != 1)
-                destLine = new float[destWidth];
+            final float[] destLine = new float[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
@@ -565,9 +561,7 @@ public class GenericReader extends AbstractProductReader {
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
             final byte[] srcLine = new byte[sourceWidth * 2];
-            byte[] destLine = null;
-            if (sourceStepX != 1)
-                destLine = new byte[destWidth];
+            final byte[] destLine = new byte[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
