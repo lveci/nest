@@ -376,7 +376,7 @@
 
         <action>
             <id>nestProjection</id>
-            <class>org.esa.beam.visat.actions.ProjectionAction</class>
+            <class>org.esa.nest.dat.actions.ProjectionAction</class>
             <parent>geometry</parent>
             <text>Map Projection...</text>
             <shortDescr>Apply Map Projection</shortDescr>
