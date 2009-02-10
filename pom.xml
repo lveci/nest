@@ -40,7 +40,7 @@
 		<module>nest-core</module>
 		<module>nest-dat</module>
 		<module>nest-graph-builder</module>
-		<module>nest-world-wind-view</module>
+		<!--module>nest-world-wind-view</module-->
 		<module>nest-reader-dem</module>
 		<module>nest-reader-ers-ceos</module>
 		<module>nest-reader-xml-based</module>

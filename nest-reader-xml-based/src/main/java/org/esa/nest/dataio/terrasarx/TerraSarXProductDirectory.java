@@ -3,6 +3,7 @@ package org.esa.nest.dataio.terrasarx;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.XMLProductDirectory;
+import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.File;
@@ -220,11 +221,13 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         }
     }
 
+    @Override
     protected void addGeoCoding(final Product product) {
 
         addGeoCoding(product, latCorners, lonCorners);
     }
 
+    @Override
     protected void addTiePointGrids(final Product product) {
 
         final int gridWidth = 4;
@@ -234,7 +237,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
         final float[] fineAngles = new float[gridWidth*gridHeight];
 
-        createFineTiePointGrid(2, 2, gridWidth, gridHeight, incidenceCorners, fineAngles);
+        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, incidenceCorners, fineAngles);
 
         final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineAngles);
@@ -243,7 +246,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
         final float[] fineSlantRange = new float[gridWidth*gridHeight];
 
-        createFineTiePointGrid(2, 2, gridWidth, gridHeight, slantRangeCorners, fineSlantRange);
+        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, slantRangeCorners, fineSlantRange);
 
         final TiePointGrid slantRangeGrid = new TiePointGrid("slant_range", gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineSlantRange);

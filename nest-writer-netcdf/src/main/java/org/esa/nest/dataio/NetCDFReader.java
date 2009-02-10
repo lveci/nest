@@ -155,12 +155,12 @@ public class NetCDFReader extends AbstractProductReader {
     }
 
     private void addGeoCodingToProduct(final NcRasterDim rasterDim) throws IOException {
-        setMapGeoCoding(rasterDim);
-        if (_product.getGeoCoding() == null) {
-            setTiePointGeoCoding();
-        }
+        setTiePointGeoCoding();
         if (_product.getGeoCoding() == null) {
             setPixelGeoCoding();
+        }
+        if (_product.getGeoCoding() == null) {
+            setMapGeoCoding(rasterDim);
         }
     }
 

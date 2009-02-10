@@ -294,7 +294,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
 
         final float[] fineAngles = new float[gridWidth*gridHeight];
 
-        createFineTiePointGrid(2, 2, gridWidth, gridHeight, incidenceCorners, fineAngles);
+        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, incidenceCorners, fineAngles);
 
         final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineAngles);

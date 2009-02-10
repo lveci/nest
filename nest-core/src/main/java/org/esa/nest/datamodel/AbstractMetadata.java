@@ -87,7 +87,7 @@ public class AbstractMetadata {
         MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
         if(absRoot == null) {
             absRoot = new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
-            root.addElement(absRoot);
+            root.addElementAt(absRoot, 0);
         }
 
         // MPH

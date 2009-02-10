@@ -116,7 +116,7 @@ public class XMLProductDirectory {
 
     }
 
-    protected void addGeoCoding(final Product product, final float[] latCorners, final float[] lonCorners) {
+    protected static void addGeoCoding(final Product product, final float[] latCorners, final float[] lonCorners) {
 
         if(latCorners == null || lonCorners == null) return;
 
@@ -124,7 +124,7 @@ public class XMLProductDirectory {
         int gridHeight = 10;
 
         final float[] fineLatTiePoints = new float[gridWidth*gridHeight];
-        createFineTiePointGrid(2, 2, gridWidth, gridHeight, latCorners, fineLatTiePoints);
+        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latCorners, fineLatTiePoints);
 
         float subSamplingX = (float)product.getSceneRasterWidth() / (gridWidth - 1);
         float subSamplingY = (float)product.getSceneRasterHeight() / (gridHeight - 1);
@@ -133,7 +133,7 @@ public class XMLProductDirectory {
                 subSamplingX, subSamplingY, fineLatTiePoints);
 
         final float[] fineLonTiePoints = new float[gridWidth*gridHeight];
-        createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonCorners, fineLonTiePoints);
+        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonCorners, fineLonTiePoints);
 
         final TiePointGrid lonGrid = new TiePointGrid("lon", gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
@@ -149,53 +149,8 @@ public class XMLProductDirectory {
 
     }
 
-    protected static void createFineTiePointGrid(int coarseGridWidth,
-                                          int coarseGridHeight,
-                                          int fineGridWidth,
-                                          int fineGridHeight,
-                                          float[] coarseTiePoints,
-                                          float[] fineTiePoints) {
-
-        if (coarseTiePoints == null || coarseTiePoints.length != coarseGridWidth*coarseGridHeight) {
-            throw new IllegalArgumentException(
-                    "coarse tie point array size does not match 'coarseGridWidth' x 'coarseGridHeight'");
-        }
-
-        if (fineTiePoints == null || fineTiePoints.length != fineGridWidth*fineGridHeight) {
-            throw new IllegalArgumentException(
-                    "fine tie point array size does not match 'fineGridWidth' x 'fineGridHeight'");
-        }
-
-        int k = 0;
-        for (int r = 0; r < fineGridHeight; r++) {
-
-            final float lambdaR = (float)(r) / (float)(fineGridHeight - 1);
-            final float betaR = lambdaR*(coarseGridHeight - 1);
-            final int j0 = (int)(betaR);
-            final int j1 = Math.min(j0 + 1, coarseGridHeight - 1);
-            final float wj = betaR - j0;
-
-            for (int c = 0; c < fineGridWidth; c++) {
-
-                final float lambdaC = (float)(c) / (float)(fineGridWidth - 1);
-                final float betaC = lambdaC*(coarseGridWidth - 1);
-                final int i0 = (int)(betaC);
-                final int i1 = Math.min(i0 + 1, coarseGridWidth - 1);
-                final float wi = betaC - i0;
-
-                fineTiePoints[k++] = MathUtils.interpolate2D(wi, wj,
-                                                           coarseTiePoints[i0 + j0 * coarseGridWidth],
-                                                           coarseTiePoints[i1 + j0 * coarseGridWidth],
-                                                           coarseTiePoints[i0 + j1 * coarseGridWidth],
-                                                           coarseTiePoints[i1 + j1 * coarseGridWidth]);
-            }
-        }
-    }
-
     private void addMetaData(final Product product) throws IOException {
         final MetadataElement root = product.getMetadataRoot();
-        root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
-
         final Element rootElement = xmlDoc.getRootElement();
         AddXMLMetadata(rootElement, root);
 
