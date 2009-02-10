@@ -5,8 +5,10 @@ import org.esa.beam.framework.dataio.AbstractProductReader;
 import org.esa.beam.framework.dataio.IllegalFileFormatException;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.logging.BeamLogManager;
+import org.esa.nest.datamodel.AbstractMetadata;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Group;
@@ -102,6 +104,7 @@ public class NetCDFReader extends AbstractProductReader {
         return _product;
     }
 
+    @Override
     public void close() throws IOException {
         if (_product != null) {
             _product = null;
@@ -118,10 +121,12 @@ public class NetCDFReader extends AbstractProductReader {
         final Group rootGroup = _netcdfFile.getRootGroup();
         NetCDFUtils.addGroups(_product.getMetadataRoot(), rootGroup);
         
-       /* final List<Attribute> globalAttribList = _netcdfFile.getGlobalAttributes();
-        for(Attribute at : globalAttribList) {
-            NetCDFUtils.createMetadataAttributes(_product.getMetadataRoot(), at, at.getName());
-        }  */
+        final MetadataElement root = _product.getMetadataRoot();
+        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        if(absRoot == null) {
+            root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
+            AbstractMetadata.addAbstractedMetadataHeader(root);
+        }
     }
 
     private void addBandsToProduct(final Variable[] variables) {
@@ -139,7 +144,9 @@ public class NetCDFReader extends AbstractProductReader {
         for (Variable variable : variables) {
             final int rank = variable.getRank();
             final int gridWidth = variable.getDimension(rank - 1).getLength();
-            final int gridHeight = variable.getDimension(rank - 2).getLength();
+            int gridHeight = variable.getDimension(rank - 2).getLength();
+            if(rank >= 3 && gridHeight <= 1)
+                gridHeight = variable.getDimension(rank - 3).getLength();
             final TiePointGrid tpg = NetCDFUtils.createTiePointGrid(variable, gridWidth, gridHeight,
                         _product.getSceneRasterWidth(), _product.getSceneRasterHeight());
 
@@ -150,23 +157,26 @@ public class NetCDFReader extends AbstractProductReader {
     private void addGeoCodingToProduct(final NcRasterDim rasterDim) throws IOException {
         setMapGeoCoding(rasterDim);
         if (_product.getGeoCoding() == null) {
-            setPixelGeoCoding(rasterDim);
+            setTiePointGeoCoding();
+        }
+        if (_product.getGeoCoding() == null) {
+            setPixelGeoCoding();
         }
     }
 
     private void setMapGeoCoding(final NcRasterDim rasterDim) {
         final NcVariableMap varMap = NcVariableMap.create(_netcdfFile);
-        // CF convention
-        Variable lonVar = varMap.get(NetcdfConstants.LON_VAR_NAME);
-        if (lonVar == null) {
-            // COARDS convention
-            lonVar = varMap.get(NetcdfConstants.LONGITUDE_VAR_NAME);
+
+        Variable lonVar=null, latVar=null;
+        for(String lonStr : NetcdfConstants.LON_VAR_NAMES) {
+            lonVar = varMap.get(lonStr);
+            if(lonVar != null)
+                break;
         }
-        // CF convention
-        Variable latVar = varMap.get(NetcdfConstants.LAT_VAR_NAME);
-        if (latVar == null) {
-            // COARDS convention
-            latVar = varMap.get(NetcdfConstants.LATITUDE_VAR_NAME);
+        for(String latStr : NetcdfConstants.LAT_VAR_NAMES) {
+            latVar = varMap.get(latStr);
+            if(latVar != null)
+                break;
         }
         if (lonVar != null && latVar != null && rasterDim.fitsTo(lonVar, latVar)) {
             try {
@@ -183,19 +193,38 @@ public class NetCDFReader extends AbstractProductReader {
         }
     }
 
-    private void setPixelGeoCoding(final NcRasterDim rasterDim) throws
-                                                                IOException {
-        Band lonBand = _product.getBand(NetcdfConstants.LON_VAR_NAME);
-        if (lonBand == null) {
-            lonBand = _product.getBand(NetcdfConstants.LONGITUDE_VAR_NAME);
+    private void setTiePointGeoCoding() {
+        TiePointGrid lonGrid=null, latGrid=null;
+        for(String lonStr : NetcdfConstants.LON_VAR_NAMES) {
+            lonGrid = _product.getTiePointGrid(lonStr);
+            if(lonGrid != null)
+                break;
         }
-        Band latBand = _product.getBand(NetcdfConstants.LAT_VAR_NAME);
-        if (latBand == null) {
-            latBand = _product.getBand(NetcdfConstants.LATITUDE_VAR_NAME);
+        for(String latStr : NetcdfConstants.LAT_VAR_NAMES) {
+            latGrid = _product.getTiePointGrid(latStr);
+            if(latGrid != null)
+                break;
+        }
+        if (latGrid != null && lonGrid != null) {       
+            final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
+            _product.setGeoCoding(tpGeoCoding);
+        }
+    }
+
+    private void setPixelGeoCoding() throws IOException {
+        Band lonBand=null, latBand=null;
+        for(String lonStr : NetcdfConstants.LON_VAR_NAMES) {
+            lonBand = _product.getBand(lonStr);
+            if(lonBand != null)
+                break;
+        }
+        for(String latStr : NetcdfConstants.LAT_VAR_NAMES) {
+            latBand = _product.getBand(latStr);
+            if(latBand != null)
+                break;
         }
         if (latBand != null && lonBand != null) {
-            _product.setGeoCoding(new PixelGeoCoding(latBand,
-                                                     lonBand,
+            _product.setGeoCoding(new PixelGeoCoding(latBand, lonBand,
                                                      latBand.getValidPixelExpression(),
                                                      5, ProgressMonitor.NULL));
         }
@@ -237,11 +266,10 @@ public class NetCDFReader extends AbstractProductReader {
                 synchronized (_netcdfFile) {
                     array = variable.read(origin, shape);
                 }
-                final Object storage = array.getStorage();
-                System.arraycopy(storage, 0, destBuffer.getElems(), y * destWidth, destWidth);
+                System.arraycopy(array.getStorage(), 0, destBuffer.getElems(), y * destWidth, destWidth);
                 pm.worked(1);
                 if (pm.isCanceled()) {
-                    new IOException("Process terminated by user."); /*I18N*/
+                    throw new IOException("Process terminated by user."); /*I18N*/
                 }
             }
         } catch (InvalidRangeException e) {

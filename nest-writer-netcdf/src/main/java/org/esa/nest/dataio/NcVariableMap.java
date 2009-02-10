@@ -57,7 +57,7 @@ public class NcVariableMap {
      * @param variable The variable.
      */
     public void put(Variable variable) {
-        _map.put(getAbsoluteName(variable), variable);
+        _map.put(variable.getShortName(), variable);
     }
 
     /**

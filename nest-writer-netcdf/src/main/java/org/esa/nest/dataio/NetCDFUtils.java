@@ -22,7 +22,7 @@ public class NetCDFUtils {
 
     public static Band createBand(final Variable variable, final int rasterWidth, final int rasterHeight) {
         final NcAttributeMap attMap = NcAttributeMap.create(variable);
-        final Band band = new Band(NcVariableMap.getAbsoluteName(variable),
+        final Band band = new Band(variable.getShortName(),
                                    getRasterDataType(variable),
                                    rasterWidth,
                                    rasterHeight);
@@ -47,9 +47,12 @@ public class NetCDFUtils {
         final float subSamplingY = (float)sceneHeight / (float)(gridHeight - 1);
 
         final Array data = variable.read();
-        final float[] dataArray = (float[])data.copyTo1DJavaArray();
-
-        final TiePointGrid tpg = new TiePointGrid(NcVariableMap.getAbsoluteName(variable), gridWidth, gridHeight, 0, 0,
+        final float[] dataArray = new float[(int)data.getSize()]; //(float[])data.copyTo1DJavaArray();
+        for(int i = 0; i < data.getSize(); ++i) {
+            dataArray[i] = data.getFloat(i);
+        }
+        
+        final TiePointGrid tpg = new TiePointGrid(variable.getShortName(), gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, dataArray);
 
         tpg.setDescription(variable.getDescription());
@@ -416,7 +419,10 @@ public class NetCDFUtils {
             final int rank = variable.getRank();
             if (rank >= 2 && isValidRasterDataType(variable.getDataType())) {
                 final Dimension dimX = variable.getDimension(rank - 1);
-                final Dimension dimY = variable.getDimension(rank - 2);
+                Dimension dimY = variable.getDimension(rank - 2);
+                if(rank >= 3 && dimY.getLength() <= 1) {
+                    dimY = variable.getDimension(rank - 3);    
+                }
                 if (dimX.getLength() > 1 && dimY.getLength() > 1) {
                     NcRasterDim rasterDim = new NcRasterDim(dimX, dimY);
                     List<Variable> list = variableLists.get(rasterDim);

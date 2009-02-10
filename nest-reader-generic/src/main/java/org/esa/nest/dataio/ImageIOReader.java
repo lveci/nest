@@ -82,6 +82,7 @@ public class ImageIOReader extends AbstractProductReader {
         return product;
     }
 
+    @Override
     public void close() throws IOException {
         super.close();
 

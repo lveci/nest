@@ -27,8 +27,9 @@ public interface NetcdfConstants {
     final static String STOP_DATE_ATT_NAME = "stop_date";
     final static String STOP_TIME_ATT_NAME = "stop_time";
 
-    final static String LON_VAR_NAME = "lon";
-    final static String LAT_VAR_NAME = "lat";
-    final static String LONGITUDE_VAR_NAME = "longitude";
-    final static String LATITUDE_VAR_NAME = "latitude";
+    // CF convention lon
+    // COARDS convention longitude
+    // Enviview longs first_line_tie_points.longs
+    final static String[] LON_VAR_NAMES = { "lon", "longitude", "longs", "first_line_tie_points.longs" };
+    final static String[] LAT_VAR_NAMES = { "lat", "latitude", "lats", "first_line_tie_points.lats" };
 }
