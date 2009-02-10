@@ -187,6 +187,18 @@
             <helpId>WSSMosiacOp</helpId>
         </action>
 
+        <action>
+            <id>applyOrbitFile</id>
+            <class>org.esa.nest.dat.ApplyOrbitFileOpAction</class>
+            <text>Apply Orbit File</text>
+            <shortDescr>Apply Orbit File to Product</shortDescr>
+            <description>Update product metadata with orbit file</description>
+            <helpId>applyOrbitFile</helpId>
+            <parent>sartools</parent>
+            <placeAfter>editMetadata</placeAfter>
+            <separatorAfter>true</separatorAfter>
+        </action>
+
     </extension>
 
 </module>
