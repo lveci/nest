@@ -84,7 +84,7 @@ public class OrbitFileUpdater {
         final Date startDate = product.getStartTime().getAsDate();
 
         reader.readOrbitData();
-        EnvisatOrbitReader.OrbitVector orb = reader.getOrbitVector(startDate);
+        EnvisatOrbitReader.OrbitVector orb = reader.getOrbitVector(0);//startDate);
 
         System.out.println("absOrbit " + orb.absOrbit);
     }
