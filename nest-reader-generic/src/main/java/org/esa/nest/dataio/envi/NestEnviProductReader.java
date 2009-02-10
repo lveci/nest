@@ -19,12 +19,9 @@ public class NestEnviProductReader extends EnviProductReader {
     protected void initMetadata(final Product product, final File inputFile) throws IOException {
 
         final MetadataElement root = product.getMetadataRoot();
-        root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
-
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
         final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
-
         AbstractMetadata.loadExternalMetadata(product, absRoot, inputFile);
     }
 }

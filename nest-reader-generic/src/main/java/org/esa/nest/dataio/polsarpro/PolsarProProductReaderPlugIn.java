@@ -1,12 +1,12 @@
-package org.esa.nest.dataio.envi;
+package org.esa.nest.dataio.polsarpro;
 
 import org.esa.beam.dataio.envi.EnviProductReaderPlugIn;
 import org.esa.beam.framework.dataio.ProductReader;
 
-public class NestEnviProductReaderPlugIn extends EnviProductReaderPlugIn {
+public class PolsarProProductReaderPlugIn extends EnviProductReaderPlugIn {
 
     @Override
     public ProductReader createReaderInstance() {
-        return new NestEnviProductReader(this);
+        return new PolsarProProductReader(this);
     }
 }
