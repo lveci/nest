@@ -28,14 +28,15 @@ public class OperatorUtils {
 
     /**
      * Get incidence angle tie point grid.
-     * @param sourceProduct the source
+     * @param sourceProduct The source product.
+     * @param tiePointGridName The tie point grid name.
      * @return srcTPG The incidence angle tie point grid.
      */
-    public static TiePointGrid getIncidenceAngle(final Product sourceProduct) {
+    private static TiePointGrid getTiePointGrid(final Product sourceProduct, String tiePointGridName) {
 
         for (int i = 0; i < sourceProduct.getNumTiePointGrids(); i++) {
             final TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
-            if (srcTPG.getName().equals("incident_angle")) {
+            if (srcTPG.getName().equals(tiePointGridName)) {
                 return srcTPG;
             }
         }
@@ -44,20 +45,43 @@ public class OperatorUtils {
     }
 
     /**
+     * Get incidence angle tie point grid.
+     * @param sourceProduct The source product.
+     * @return srcTPG The incidence angle tie point grid.
+     */
+    public static TiePointGrid getIncidenceAngle(final Product sourceProduct) {
+
+        return getTiePointGrid(sourceProduct, "incident_angle");
+    }
+
+    /**
      * Get slant range time tie point grid.
-     * @param sourceProduct the source
+     * @param sourceProduct The source product.
      * @return srcTPG The slant range time tie point grid.
      */
     public static TiePointGrid getSlantRangeTime(final Product sourceProduct) {
 
-        for (int i = 0; i < sourceProduct.getNumTiePointGrids(); i++) {
-            final TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
-            if (srcTPG.getName().equals("slant_range_time")) {
-                return srcTPG;
-            }
-        }
+        return getTiePointGrid(sourceProduct, "slant_range_time");
+    }
 
-        return null;
+    /**
+     * Get latitude tie point grid.
+     * @param sourceProduct The source product.
+     * @return srcTPG The latitude tie point grid.
+     */
+    public static TiePointGrid getLatitude(final Product sourceProduct) {
+
+        return getTiePointGrid(sourceProduct, "latitude");
+    }
+
+    /**
+     * Get longitude tie point grid.
+     * @param sourceProduct The source product.
+     * @return srcTPG The longitude tie point grid.
+     */
+    public static TiePointGrid getLongitude(final Product sourceProduct) {
+
+        return getTiePointGrid(sourceProduct, "longitude");
     }
 
     public static String getPolarizationFromBandName(final String bandName) {
