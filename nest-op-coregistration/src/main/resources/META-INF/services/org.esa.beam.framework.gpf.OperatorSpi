@@ -1,8 +1,5 @@
-org.esa.nest.gpf.GCPSelectionOperator$Spi
-org.esa.nest.gpf.CollocateOp$Spi
 org.esa.nest.gpf.CreateStackOp$Spi
 org.esa.nest.gpf.GCPSelectionOp$Spi
-org.esa.nest.gpf.WARPOperator$Spi
 org.esa.nest.gpf.WarpOp$Spi
 org.esa.nest.gpf.PCAStatisticsOp$Spi
 org.esa.nest.gpf.PCAMinOp$Spi
