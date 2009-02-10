@@ -6,3 +6,4 @@ org.esa.nest.gpf.UndersamplingOp$Spi
 org.esa.nest.gpf.ConvertDataTypeOp$Spi
 org.esa.nest.gpf.WSSDeBurstOp$Spi
 org.esa.nest.gpf.WSSMosaicOp$Spi
+org.esa.nest.gpf.ApplyOrbitFileOp$Spi
