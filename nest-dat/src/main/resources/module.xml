@@ -429,21 +429,9 @@
             <shortDescr>Search product metadata</shortDescr>
             <description>Search product metadata</description>
             <helpId>searchMetadata</helpId>
-            <placeBefore>applyOrbitFile</placeBefore>
+            <placeBefore>Calibration</placeBefore>
             <parent>sartools</parent>
             <context>metadata</context>
-        </action>
-
-        <action>
-            <id>applyOrbitFile</id>
-            <class>org.esa.nest.dat.actions.ApplyOrbitFileAction</class>
-            <text>Apply Orbit File</text>
-            <shortDescr>Apply Orbit File to Product</shortDescr>
-            <description>Update product metadata with orbit file</description>
-            <helpId>applyOrbitFile</helpId>
-            <parent>sartools</parent>
-            <placeBefore>Calibration</placeBefore>
-            <separatorAfter>true</separatorAfter>
         </action>
 
         <action>
