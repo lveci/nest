@@ -102,6 +102,7 @@
     <mapID target="dataFlip" url="visat/DataFlip.html"/>
     <mapID target="flipDialog" url="visat/DataFlip.html"/>
     <mapID target="pixelGeoCodingSetup" url="visat/PixelGeoCoding.html"/>
+	<mapID target="SLCtoPRI" url="visat/SLCtoPRI.html"/>
 
 	<!--Graph Processing-->
 	<mapID target="introduction" url="operators/introduction.html"/>
@@ -115,6 +116,7 @@
 	<mapID target="ASARCalibrationOp" url="operators/ASARCalibrationOp.html"/>
 	<mapID target="ASARRetroCalibrationOp" url="operators/ASARRetroCalibrationOp.html"/>
 	<mapID target="CollocateOp" url="operators/CollocateOp.html"/>
+	<mapID target="ConvertDatatypeOp" url="operators/ConvertDatatypeOp.html"/>
 	<mapID target="DataAnalysisOp" url="operators/DataAnalysisOp.html"/>
 	<mapID target="ERSCalibrationOp" url="operators/ERSCalibrationOp.html"/>
 	<mapID target="GCPSelectionOp" url="operators/GCPSelectionOp.html"/>

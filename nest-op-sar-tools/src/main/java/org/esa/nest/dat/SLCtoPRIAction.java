@@ -10,12 +10,12 @@ import java.io.File;
  * SLC to PRI action.
  *
  */
-public class SLCtoPRIOpAction extends AbstractVisatAction {
+public class SLCtoPRIAction extends AbstractVisatAction {
 
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "SLC to PRI", "graph_builder", false);
+        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "SLC to PRI", "SLCtoPRI", false);
         dialog.show();
 
         final String homeUrl = System.getProperty("nest.home", ".");

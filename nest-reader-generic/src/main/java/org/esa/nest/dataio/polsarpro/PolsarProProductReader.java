@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class PolsarProProductReader extends EnviProductReader {
 
@@ -28,6 +29,7 @@ public class PolsarProProductReader extends EnviProductReader {
         final File inputFolder = inputFile.getParentFile();
 
         final ArrayList<Header> headerList = new ArrayList<Header>();
+        final HashMap<Header, File> headerFileMap = new HashMap<Header, File>();
         Header mainHeader = null;
         File mainHeaderFile = null;
 
@@ -41,6 +43,7 @@ public class PolsarProProductReader extends EnviProductReader {
                     synchronized (headerReader) {
                         final Header header = new Header(headerReader);
                         headerList.add(header);
+                        headerFileMap.put(header, file);
 
                         if(header.getNumBands() > 0 && header.getBandNames() != null) {
                             mainHeader = header;
@@ -69,14 +72,14 @@ public class PolsarProProductReader extends EnviProductReader {
         product.setDescription(mainHeader.getDescription());
 
         initGeocoding(product, mainHeader);
-        initBands(product, mainHeader);
+
+        for(Header header : headerList) {
+            initBands(product, headerFileMap.get(header), header);
+        }
 
         applyBeamProperties(product, mainHeader.getBeamProperties());
 
         initMetadata(product, mainHeaderFile);
-
-        // imageInputStream must be initialized last
-        initializeInputStreamForBandData(mainHeaderFile, mainHeader);
 
         return product;
     }

@@ -32,37 +32,40 @@
             <id>importImageIO</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>ImageIO</formatName>
+            <text>Import ImageIO (bmp, jpg, png) Products...</text>
             <readerPlugin>org.esa.nest.dataio.ImageIOReaderPlugIn</readerPlugin>
             <useAllFileFilter>true</useAllFileFilter>
-            <shortDescr>Import an ImageIO supported file format</shortDescr>
-            <description>Import an ImageIO supported file format</description>
+            <shortDescr>Import an ImageIO supported file formats</shortDescr>
+            <description>Import an ImageIO supported file formats</description>
             <largeIcon>icons/Import24.gif</largeIcon>
-            <helpId>importImageIO</helpId>
             <placeAfter>importTerraSarXProduct</placeAfter>
+            <helpId>importImageIO</helpId>
         </action>
         <action>
             <id>importNestEnvi</id>
-            <text>Import ENVI Product</text>
+            <text>Import ENVI Product...</text>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <readerPlugin>org.esa.nest.dataio.envi.NestEnviProductReaderPlugIn</readerPlugin>
             <formatName>ENVI</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import an ENVI data product.</shortDescr>
             <placeAfter>importImageIO</placeAfter>
+            <helpId>importEnvi</helpId>
         </action>
         <action>
             <id>importPolsarPro</id>
-            <text>Import PolsarPro Product</text>
+            <text>Import PolsarPro Product...</text>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <readerPlugin>org.esa.nest.dataio.polsarpro.PolsarProProductReaderPlugIn</readerPlugin>
             <formatName>PolsarPro</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import a PolsarPro data product.</shortDescr>
             <placeAfter>importNestEnvi</placeAfter>
+            <helpId>importPolsarPro</helpId>
         </action>
         <action>
             <id>importGenericBinary</id>
-            <text>Import Generic Binary</text>
+            <text>Import Generic Binary...</text>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <readerPlugin>org.esa.nest.dataio.GenericReaderPlugIn</readerPlugin>
             <formatName>Generic Binary</formatName>
@@ -79,6 +82,7 @@
             <formatName>Generic Binary</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Export Generic Binary</shortDescr>
+            <helpId>exportGenericBinary</helpId>
         </action>
         <!--action>
             <id>exportImageIO</id>
@@ -88,14 +92,14 @@
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Export ImageIO</shortDescr>
         </action-->
-        <action>
+        <!--action>
             <id>exportJPEG2000</id>
             <text>Export JPEG2000</text>
             <class>org.esa.beam.visat.actions.ProductExportAction</class>
             <writerPlugin>org.esa.nest.dataio.ImageIOWriterPlugIn</writerPlugin>
             <formatName>JPEG2000</formatName>
             <shortDescr>Export to JPEG2000</shortDescr>
-        </action>
+        </action-->
     </extension>
 
 </module>

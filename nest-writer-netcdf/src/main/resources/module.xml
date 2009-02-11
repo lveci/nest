@@ -33,6 +33,7 @@
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import a NetCDF file or file subset.</shortDescr>
             <description>Import a NetCDF file or file subset.</description>
+            <helpId>importNetCDF</helpId>
         </action>
 
         <action>

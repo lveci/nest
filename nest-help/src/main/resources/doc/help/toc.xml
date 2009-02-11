@@ -112,6 +112,7 @@
             <tocitem text="Attach Pixel-based Geo-Coding" target="pixelGeoCodingSetup"/>
             <tocitem text="Create Elevation Band" target="createElevationBand"/>
             <tocitem text="Create Filtered Band" target="createFilteredBand"/>
+			<tocitem text="SLC to PRI" target="SLCtoPRI"/>
         </tocitem>
 
     </tocitem>
@@ -133,6 +134,7 @@
 			<tocitem text="ASAR Calibration" target="ASARCalibrationOp"/>
 			<tocitem text="ASAR Retro-Calibration" target="ASARRetroCalibrationOp"/>
 			<tocitem text="Collocate" target="CollocateOp"/>
+			<tocitem text="Convert Datatype" target="ConvertDatatypeOp"/>
 			<tocitem text="Data Analysis" target="DataAnalysisOp"/>
 			<tocitem text="ERS Calibration" target="ERSCalibrationOp"/>
 			<tocitem text="GCP Selection" target="GCPSelectionOp"/>

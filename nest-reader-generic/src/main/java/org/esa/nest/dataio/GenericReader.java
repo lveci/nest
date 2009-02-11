@@ -458,7 +458,7 @@ public class GenericReader extends AbstractProductReader {
         }
     }
 
-    public static void readBandRasterDataSLC(final int sourceOffsetX, final int sourceOffsetY,
+    public static void readBandRasterDataSLCShort(final int sourceOffsetX, final int sourceOffsetY,
                                       final int sourceWidth, final int sourceHeight,
                                       final int sourceStepX, final int sourceStepY,
                                       final int imageStartOffset, int imageRecordLength,

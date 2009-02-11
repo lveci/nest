@@ -110,12 +110,12 @@
         </action>
 
         <action>
-            <id>SLCtoPRIOp</id>
-            <class>org.esa.nest.dat.SLCtoPRIOpAction</class>
+            <id>SLCtoPRI</id>
+            <class>org.esa.nest.dat.SLCtoPRIAction</class>
             <text>SLC to PRI</text>
             <shortDescr>Change the SLC product to a PRI-like product</shortDescr>
             <parent>DatasetConversion</parent>
-            <helpId>SLCtoPRIOp</helpId>
+            <helpId>SLCtoPRI</helpId>
         </action>
 
         <action>
@@ -193,7 +193,7 @@
             <text>Apply Orbit File</text>
             <shortDescr>Apply Orbit File to Product</shortDescr>
             <description>Update product metadata with orbit file</description>
-            <helpId>applyOrbitFile</helpId>
+            <helpId>ApplyOrbitFileOp</helpId>
             <parent>sartools</parent>
             <placeAfter>editMetadata</placeAfter>
             <separatorAfter>true</separatorAfter>

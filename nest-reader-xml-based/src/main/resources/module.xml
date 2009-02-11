@@ -35,7 +35,7 @@
             <description>Import a Radarsat2 data product or subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
             <placeAfter>importRadarsatProduct</placeAfter>
-            <helpId>importRadarsat2Product</helpId>
+            <helpId>importRadarsat2</helpId>
         </action>
         <action>
             <id>importTerraSarXProduct</id>
@@ -45,7 +45,7 @@
             <description>Import a TerraSarX data product or subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
             <placeAfter>importRadarsat2Product</placeAfter>
-            <helpId>importTerraSarXProduct</helpId>
+            <helpId>importTerraSarX</helpId>
         </action>
 
     </extension>
