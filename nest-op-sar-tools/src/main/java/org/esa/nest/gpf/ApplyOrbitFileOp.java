@@ -186,9 +186,9 @@ public final class ApplyOrbitFileOp extends Operator {
         incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
 
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
-        System.out.println((new ProductData.UTC(firstLineUTC)).toString());
+        //System.out.println((new ProductData.UTC(firstLineUTC)).toString());
         lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD();
-        System.out.println((new ProductData.UTC(lastLineUTC)).toString());
+        //System.out.println((new ProductData.UTC(lastLineUTC)).toString());
         lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
         numLines = absRoot.getAttributeInt(AbstractMetadata.num_output_lines);
         numSamplesPerLine = absRoot.getAttributeInt(AbstractMetadata.num_samples_per_line);
@@ -200,12 +200,12 @@ public final class ApplyOrbitFileOp extends Operator {
         int k = 0;
         for (int r = 0; r < targetTiePointGridHeight; r++) {
 
-            // - get the zero Doppler time for the line
+            // get the zero Doppler time for the line
             int y = getLineIndex(r);
             double curLineUTC = computeCurrentLineUTC(y);
             System.out.println((new ProductData.UTC(curLineUTC)).toString());
 
-            // - compute the satellite position and velocity for the zero Doppler time using cubic interpolation
+            // compute the satellite position and velocity for the zero Doppler time using cubic interpolation
             OrbitData data = getOrbitData(curLineUTC);
 
             for (int c = 0; c < targetTiePointGridWidth; c++) {
@@ -383,12 +383,11 @@ public final class ApplyOrbitFileOp extends Operator {
 
     /**
      * Find DORIS orbit file.
-     *
-     * @param dorisReader The
-     * @param path The
-     * @param productDate The
-     * @param absOrbit The
-     * @return The
+     * @param dorisReader The ENVISAT oribit reader.
+     * @param path The path to the orbit file.
+     * @param productDate The start date of the product.
+     * @param absOrbit The absolute orbit number.
+     * @return The orbit file.
      */
     private static File FindDorisOrbitFile(EnvisatOrbitReader dorisReader, File path, Date productDate, int absOrbit)
             throws IOException {
@@ -416,7 +415,7 @@ public final class ApplyOrbitFileOp extends Operator {
 
                 // get the absolute orbit code and compare it against the orbit code in the product
                 dorisReader.readOrbitData();
-                //EnvisatOrbitReader.OrbitVector orb = dorisReader.getOrbitVector(startDate);
+                //EnvisatOrbitReader.OrbitVector orb = dorisReader.getOrbitVector(0);
                 //if (absOrbit == orb.absOrbit) {
                     return f;
                 //}
@@ -431,72 +430,6 @@ public final class ApplyOrbitFileOp extends Operator {
 
     }
 
-    // ============================== UPDATE GEOCODING FOR ENVISAT FORMAT PRODUCT ===================================
-
-    /**
-     * Get tie point record for ENVISAT format product for given Geolocation grid ADSR record and given line.
-     * @param recordIdx The Geolocation grid ADSR record index
-     * @param line Indicator of the first or last line in the record
-     * @param pointIdx The tie point index
-     * @return The tie point record
-     * @throws Exception
-     */
-    private ENVISATTiePointRecord getENVISATTiePointRecord(int recordIdx, String line, int pointIdx) throws Exception {
-
-        ENVISATTiePointRecord record = new ENVISATTiePointRecord();
-
-        MetadataElement geoAds = sourceProduct.getMetadataRoot().getElement("GEOLOCATION_GRID_ADS");
-        if (geoAds == null) {
-            throw new OperatorException("GEOLOCATION_GRID_ADS not found");
-        }
-
-        MetadataElement recordAds= geoAds.getElement("GEOLOCATION_GRID_ADS." + recordIdx);
-        if (recordAds == null) {
-            throw new OperatorException("GEOLOCATION_GRID_ADS." + recordIdx + " not found");
-        }
-
-        String tag = "ASAR_Geo_Grid_ADSR.sd/" + line + "_tie_points.samp_numbers";
-        MetadataAttribute sampNumAttr = recordAds.getAttribute(tag);
-        if (sampNumAttr == null) {
-            throw new OperatorException(tag + " not found");
-        }
-        record.sampleNumber = sampNumAttr.getData().getElemIntAt(pointIdx);
-        System.out.println("Sample number is " + record.sampleNumber);
-
-        tag = "ASAR_Geo_Grid_ADSR.sd/" + line + "_tie_points.slant_range_times";
-        MetadataAttribute slantRgTimeAttr = recordAds.getAttribute(tag);
-        if (slantRgTimeAttr == null) {
-            throw new OperatorException(tag + " not found");
-        }
-        record.slantRangeTime = slantRgTimeAttr.getData().getElemDoubleAt(pointIdx) / 1000000000.0; // ns to s
-        System.out.println("Slant range time is " + record.slantRangeTime);
-
-        tag = "ASAR_Geo_Grid_ADSR.sd/" + line + "_tie_points.angles";
-        MetadataAttribute angleAttr = recordAds.getAttribute(tag);
-        if (angleAttr == null) {
-            throw new OperatorException(tag + " not found");
-        }
-        record.incidenceAngle = angleAttr.getData().getElemDoubleAt(pointIdx);
-        System.out.println("Incidence angle is " + record.incidenceAngle);
-
-        tag = "ASAR_Geo_Grid_ADSR.sd/" + line + "_tie_points.lats";
-        MetadataAttribute latAttr = recordAds.getAttribute(tag);
-        if (latAttr == null) {
-            throw new OperatorException(tag + " not found");
-        }
-        record.latitude = latAttr.getData().getElemDoubleAt(pointIdx) / 1000000.0; // 1e-6 degree to degree
-        System.out.println("Latitude is " + record.latitude);
-
-        tag = "ASAR_Geo_Grid_ADSR.sd/" + line + "_tie_points.longs";
-        MetadataAttribute lonAttr = recordAds.getAttribute(tag);
-        if (lonAttr == null) {
-            throw new OperatorException(tag + " not found");
-        }
-        record.longitude = lonAttr.getData().getElemDoubleAt(pointIdx) / 1000000.0; // 1e-6 degree to degree
-        System.out.println("Longitude is " + record.longitude);
-
-        return record;
-    }
 
     private final static class OrbitData {
         public double xPos;
