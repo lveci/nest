@@ -40,10 +40,14 @@
 		
 		<tocitem text="Import">
             <tocitem text="Import ENVISAT Data Product" target="importEnvisatProduct"/>
-            <tocitem text="Import ERS1/2 Data Product" target="importErsProduct"/>
-			<tocitem text="Import ERS1/2 CEOS Data Product" target="ImportERSCeos"/>
+            <tocitem text="Import ERS (.E1, .E2) Data Product" target="importErsProduct"/>
+			<tocitem text="Import ERS CEOS Data Product" target="ImportERSCeos"/>
 			<tocitem text="Import JERS CEOS Data Product" target="ImportJERSCeos"/>
 			<tocitem text="Import Radarsat-1 Data Product" target="ImportRadarsat1"/>
+			<tocitem text="Import Radarsat-2 Data Product" target="ImportRadarsat2"/>
+			<tocitem text="Import TerraSarX Data Product" target="ImportTerraSarX"/>
+			<tocitem text="Import ENVI Data Product" target="ImportEnvi"/>
+			<tocitem text="Import PolsarPro Data Product" target="ImportPolsarPro"/>
 			<tocitem text="Import ALOS PALSAR Data Product" target="ImportAlosPalsar"/>
 			<tocitem text="Import ALOS AVNIR2 Data Product" target="ImportAVNIR2"/>
 			<tocitem text="Import ALOS PRISM Data Product" target="ImportPRISM"/>
@@ -52,7 +56,10 @@
             <tocitem text="Import BEAM-DIMAP Data Product" target="importDimapProduct"/>
             <tocitem text="Import LANDSAT 5 TM Data Product" target="importLandsatTMProduct"/>
             <tocitem text="Import NetCDF Data Product" target="importNetCDF"/>
+			<tocitem text="Import HDF Data Product" target="importHDF"/>
+			<tocitem text="Import Generic Binary" target="importGenericBinary"/>
             <tocitem text="Import GETASSE30 Tile" target="importGETASSE30"/>
+			<tocitem text="Import GTOPO30 Tile" target="importGTOPO30"/>
 			<tocitem text="Import ACE DEM Tile" target="importACE"/>
 			<tocitem text="Import Transect Data" target="importTransectData"/>
 			
@@ -63,13 +70,13 @@
 		<tocitem text="Export">
             <tocitem text="Export BEAM-DIMAP Data Product" target="exportDimapProduct"/>
             <tocitem text="Export HDF-5 Data Product" target="exportHdf5Product"/>
+			<tocitem text="Export NetCDF Data Product" target="exportNetCDF"/>
             <tocitem text="Export ENVI GCP File" target="exportEnviGcpFile"/>
             <tocitem text="Export Displayed Image" target="exportImageFile"/>
             <tocitem text="Export KML" target="exportKml"/>
             <tocitem text="Export GeoTIFF Product" target="exportGeoTIFF"/>
             <tocitem text="Export Roi Pixels" target="exportROIPixels"/>
             <tocitem text="Export Transect Pixels" target="exportTransectPixels"/>
-            <tocitem text="Export Colour Legend" target="exportLegendImageFile"/>
             <tocitem text="Export Colour Palette" target="exportColorPalette"/>
         </tocitem>
             
@@ -121,6 +128,8 @@
 		</tocitem>
 		
 		<tocitem text="Operators">
+			<tocitem text="ALOS Palsar Calibration" target="ALOSPALSARCalibrationOp"/>
+			<tocitem text="Apply Orbit Correction" target="ApplyOrbitFileOp"/>
 			<tocitem text="ASAR Calibration" target="ASARCalibrationOp"/>
 			<tocitem text="ASAR Retro-Calibration" target="ASARRetroCalibrationOp"/>
 			<tocitem text="Collocate" target="CollocateOp"/>

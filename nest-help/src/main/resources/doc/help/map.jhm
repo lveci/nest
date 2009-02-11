@@ -33,32 +33,42 @@
     <mapID target="propertyEditor" url="visat/PropertyEditor.html"/>
     <mapID target="productGrabber" url="visat/ProductGrabber.html"/>
     <mapID target="subsetDialog" url="visat/ProductSubsetDialog.html"/>
+	
     <mapID target="importDimapProduct" url="general/BeamDimapFormat.html"/>
     <mapID target="importEnvisatProduct" url="visat/ImportEnvisat.html"/>
     <mapID target="importErsProduct" url="visat/ImportErs.html"/>
 	<mapID target="ImportERSCeos" url="visat/ImportERSCeos.html"/>
 	<mapID target="ImportJERSCeos" url="visat/ImportJERSCeos.html"/>
 	<mapID target="ImportRadarsat1" url="visat/ImportRadarsat1.html"/>
+	<mapID target="ImportRadarsat2" url="visat/ImportRadarsat2.html"/>
+	<mapID target="ImportTerraSarX" url="visat/ImportTerraSarX.html"/>
+	<mapID target="ImportEnvi" url="visat/ImportEnvi.html"/>
+	<mapID target="ImportPolsarPro" url="visat/ImportPolsarPro.html"/>
 	<mapID target="ImportAlosPalsar" url="visat/ImportAlosPalsar.html"/>
 	<mapID target="ImportAlosAVNIR2" url="visat/ImportAVNIR2.html"/>
 	<mapID target="ImportAlosPRISM" url="visat/ImportPRISM.html"/>
 	<mapID target="ImportGeoTIFF" url="visat/ImportGeoTIFF.html"/>
 	<mapID target="ImportImageIO" url="visat/ImportImageIO.html"/>
+	<mapID target="importNetCDF" url="visat/ImportNetCDF.html"/>
+	<mapID target="importHDF" url="visat/ImportHDF.html"/>
+	<mapID target="importGenericBinary" url="visat/ImportGenericBinary.html"/>
     <mapID target="importGETASSE30" url="visat/GETASSE30ElevationModel.html"/>
+	<mapID target="importGTOPO30" url="visat/ImportGTOPO30.html"/>
 	<mapID target="importACE" url="visat/ImportACE.html"/>
     <mapID target="importTransectData" url="visat/ImportTransectData.html"/>
     <mapID target="importLandsatTMProduct" url="visat/ImportLandsatTM.html"/>
-    <mapID target="importNetCDF" url="visat/ImportNetCDF.html"/>
+	
     <mapID target="exportDimapProduct" url="visat/ExportDimapProduct.html"/>
     <mapID target="exportEnviGcpFile" url="visat/ExportEnviGcpFile.html"/>
     <mapID target="exportHdf5Product" url="visat/ExportHDF.html"/>
+	<mapID target="exportNetCDF" url="visat/ExportNetCDF.html"/>
     <mapID target="exportImageFile" url="visat/ExportImage.html"/>
     <mapID target="exportKml" url="visat/ExportKml.html"/>
     <mapID target="exportROIPixels" url="visat/ExportROIPixels.html"/>
     <mapID target="exportTransectPixels" url="visat/ExportTransectPixels.html"/>
     <mapID target="exportGeoTIFF" url="visat/ExportGeoTIFF.html"/>
-    <mapID target="exportLegendImageFile" url="visat/ExportColorLegend.html"/>
     <mapID target="exportColorPalette" url="visat/ExportColorPalette.html"/>
+	
     <mapID target="preferences" url="visat/PreferencesDialog.html"/>
     <mapID target="imageView" url="visat/ProductSceneView.html"/>
     <mapID target="showNavigationWnd" url="visat/NavigationWindow.html"/>
@@ -100,6 +110,8 @@
 	
 	
 	<!--Operators-->
+	<mapID target="ALOSPALSARCalibrationOp" url="operators/ALOSPALSARCalibrationOp.html"/>
+	<mapID target="ApplyOrbitFileOp" url="operators/ApplyOrbitFileOp.html"/>
 	<mapID target="ASARCalibrationOp" url="operators/ASARCalibrationOp.html"/>
 	<mapID target="ASARRetroCalibrationOp" url="operators/ASARRetroCalibrationOp.html"/>
 	<mapID target="CollocateOp" url="operators/CollocateOp.html"/>
