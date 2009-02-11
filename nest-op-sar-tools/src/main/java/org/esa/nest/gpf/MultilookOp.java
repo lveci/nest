@@ -106,7 +106,7 @@ public final class MultilookOp extends Operator {
     public void initialize() throws OperatorException {
 
         try {
-            absRoot = OperatorUtils.getAbstractedMetadata(sourceProduct);
+            absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
             srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
 
@@ -272,7 +272,7 @@ public final class MultilookOp extends Operator {
      */
     void updateTargetProductMetadata() throws Exception {
 
-        final MetadataElement absTgt = OperatorUtils.getAbstractedMetadata(targetProduct);
+        final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_looks, azimuthLooks*nAzLooks);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_looks, rangeLooks*nRgLooks);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_spacing, azimuthSpacing*nAzLooks);

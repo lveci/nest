@@ -1,6 +1,7 @@
 package org.esa.nest.datamodel;
 
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.gpf.OperatorException;
 
 import java.text.ParseException;
 import java.io.File;
@@ -67,6 +68,7 @@ public class AbstractMetadata {
     public static final String num_samples_per_line = "num_samples_per_line";
     // SRGR
     public static final String srgr_flag = "srgr_flag";
+    public static final String isMapProjected = "isMapProjected";
 
     // calibration
     public static final String ant_elev_corr_flag = "ant_elev_corr_flag";
@@ -140,6 +142,7 @@ public class AbstractMetadata {
 
         // SRGR
         addAbstractedAttribute(absRoot, srgr_flag, ProductData.TYPE_UINT8, "flag", "SRGR applied");
+        addAbstractedAttribute(absRoot, isMapProjected, ProductData.TYPE_UINT8, "flag", "Map projection applied");
 
         // calibration
         addAbstractedAttribute(absRoot, ant_elev_corr_flag, ProductData.TYPE_UINT8, "flag", "Antenna elevation applied");
@@ -298,5 +301,19 @@ public class AbstractMetadata {
         final String metadataStr = inputStr.substring(0, inputStr.lastIndexOf('.')) + ".xml";
         final File metadataFile = new File(metadataStr);
         AbstractMetadataIO.Save(product, absRoot, metadataFile);
+    }
+
+    /**
+     * Get abstracted metadata.
+     * @param sourceProduct the product
+     * @return MetadataElement
+     */
+    public static MetadataElement getAbstractedMetadata(final Product sourceProduct) {
+
+        final MetadataElement abstractedMetadata = sourceProduct.getMetadataRoot().getElement("Abstracted Metadata");
+        if (abstractedMetadata == null) {
+            throw new OperatorException("Abstracted Metadata not found");
+        }
+        return abstractedMetadata;
     }
 }

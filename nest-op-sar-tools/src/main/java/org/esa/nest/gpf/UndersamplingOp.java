@@ -170,7 +170,7 @@ public class UndersamplingOp extends Operator {
         sourceImageWidth = sourceProduct.getSceneRasterWidth();
         sourceImageHeight = sourceProduct.getSceneRasterHeight();
 
-        absSrc = OperatorUtils.getAbstractedMetadata(sourceProduct);
+        absSrc = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
         if (method.equals(SUB_SAMPLING)) {
             initializeForSubSampling();
@@ -242,7 +242,7 @@ public class UndersamplingOp extends Operator {
         rangeSpacing = srcRangeSpacing * sourceImageWidth / targetImageWidth;
         azimuthSpacing = srcAzimuthSpacing * sourceImageHeight / targetImageHeight;
 
-        MetadataElement absTgt = OperatorUtils.getAbstractedMetadata(targetProduct);
+        MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_spacing, azimuthSpacing);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_spacing, rangeSpacing);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);
@@ -598,7 +598,7 @@ public class UndersamplingOp extends Operator {
      */
     private void updateTargetProductMetadata() throws Exception {
 
-        MetadataElement absTgt = OperatorUtils.getAbstractedMetadata(targetProduct);
+        MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_spacing, azimuthSpacing);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_spacing, rangeSpacing);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);

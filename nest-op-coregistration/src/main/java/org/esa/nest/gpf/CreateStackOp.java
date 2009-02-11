@@ -13,6 +13,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.awt.*;
 import java.text.MessageFormat;
@@ -127,7 +128,7 @@ public class CreateStackOp extends Operator {
             if(prod != masterProduct) {
                 final MetadataElement targetSlaveMetadata = new MetadataElement(prod.getName());
                 targetSlaveMetadataRoot.addElement(targetSlaveMetadata);
-                ProductUtils.copyMetadata(OperatorUtils.getAbstractedMetadata(prod), targetSlaveMetadata);
+                ProductUtils.copyMetadata(AbstractMetadata.getAbstractedMetadata(prod), targetSlaveMetadata);
             }
         }
     }

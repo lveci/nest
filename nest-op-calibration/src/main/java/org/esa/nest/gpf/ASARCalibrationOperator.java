@@ -125,7 +125,7 @@ public class ASARCalibrationOperator extends Operator {
     public void initialize() throws OperatorException {
         try {
             setExternalAuxFileAvailableFlag();
-            abstractedMetadata = OperatorUtils.getAbstractedMetadata(sourceProduct);
+            abstractedMetadata = AbstractMetadata.getAbstractedMetadata(sourceProduct);
             getProductType();
             sampleType = abstractedMetadata.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
             swath = getSwath(abstractedMetadata);
@@ -886,7 +886,7 @@ public class ASARCalibrationOperator extends Operator {
      */
     private void updateTargetProductMetadata() {
 
-        MetadataElement abs = OperatorUtils.getAbstractedMetadata(targetProduct);
+        MetadataElement abs = AbstractMetadata.getAbstractedMetadata(targetProduct);
 
         if (sampleType.contains("COMPLEX")) {
             MetadataAttribute sampleTypeAttr = abs.getAttribute(AbstractMetadata.SAMPLE_TYPE);

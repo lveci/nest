@@ -9,8 +9,6 @@ import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.dialogs.MapProjectionDialog;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.dataio.ReaderUtils;
-import org.esa.nest.gpf.OperatorUtils;
 
 public class ProjectionAction extends ExecCommand {
 
@@ -51,6 +49,10 @@ public class ProjectionAction extends ExecCommand {
         if (dialog.show() == ModalDialog.ID_OK) {
             final Product product = dialog.getOutputProduct();
             if (product != null) {
+                // set flag in metadata to show it's been projected
+                final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+                AbstractMetadata.setAttribute(absRoot, AbstractMetadata.isMapProjected, 1);
+
                 visatApp.addProduct(product);
             } else if (dialog.getException() != null) {
                 visatApp.showErrorDialog("Map-projected product could not be created:\n" +
@@ -61,10 +63,15 @@ public class ProjectionAction extends ExecCommand {
 
     private static boolean checkMetadata(final VisatApp visatApp, final Product product) {
         try {
-            final MetadataElement absRoot = OperatorUtils.getAbstractedMetadata(product);
+            final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
             final int srgrApplied = absRoot.getAttributeInt(AbstractMetadata.srgr_flag);
             if(srgrApplied != 1) {
                 visatApp.showErrorDialog("Product is in slant range. Please first convert to ground range.");
+                return false;
+            }
+            final int isMapProjected = absRoot.getAttributeInt(AbstractMetadata.isMapProjected);
+            if(isMapProjected == 1) {
+                visatApp.showErrorDialog("Product is already map projected");
                 return false;
             }
         } catch(Exception e) {

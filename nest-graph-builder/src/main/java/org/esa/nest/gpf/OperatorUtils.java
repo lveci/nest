@@ -13,20 +13,6 @@ public class OperatorUtils {
 
 
     /**
-     * Get abstracted metadata.
-     * @param sourceProduct the product
-     * @return MetadataElement
-     */
-    public static MetadataElement getAbstractedMetadata(final Product sourceProduct) {
-
-        final MetadataElement abstractedMetadata = sourceProduct.getMetadataRoot().getElement("Abstracted Metadata");
-        if (abstractedMetadata == null) {
-            throw new OperatorException("Abstracted Metadata not found");
-        }
-        return abstractedMetadata;
-    }
-
-    /**
      * Get incidence angle tie point grid.
      * @param sourceProduct The source product.
      * @param tiePointGridName The tie point grid name.

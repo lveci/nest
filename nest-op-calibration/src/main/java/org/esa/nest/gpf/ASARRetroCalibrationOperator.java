@@ -26,7 +26,6 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.util.Settings;
 import org.esa.nest.datamodel.AbstractMetadata;
@@ -111,7 +110,7 @@ public class ASARRetroCalibrationOperator extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        abstractedMetadata = OperatorUtils.getAbstractedMetadata(sourceProduct);
+        abstractedMetadata = AbstractMetadata.getAbstractedMetadata(sourceProduct);
         getCalibrationFlags();
         getPolarization();
         swath = ASARCalibrationOperator.getSwath(abstractedMetadata);

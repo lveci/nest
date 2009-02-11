@@ -26,17 +26,12 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.math.MathUtils;
 import org.esa.beam.dataio.envisat.EnvisatOrbitReader;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.util.Settings;
 import org.esa.nest.util.GeoUtils;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Date;
 import java.io.File;
 import java.io.IOException;
@@ -107,7 +102,7 @@ public final class ApplyOrbitFileOp extends Operator {
     public void initialize() throws OperatorException {
 
         try {
-            absRoot = OperatorUtils.getAbstractedMetadata(sourceProduct);
+            absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
             if (orbitType.contains("DORIS")) {
                 getDorisOrbitFile();

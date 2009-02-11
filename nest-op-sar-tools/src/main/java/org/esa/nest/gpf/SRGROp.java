@@ -114,7 +114,7 @@ public class SRGROp extends Operator {
                 throw new OperatorException("numRangePoints must be greater than warpPolynomialOrder");
             }
 
-            absRoot = OperatorUtils.getAbstractedMetadata(sourceProduct);
+            absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
             srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
 
@@ -317,7 +317,7 @@ public class SRGROp extends Operator {
      */
     private void updateTargetProductMetadata() {
 
-        final MetadataElement absTgt = OperatorUtils.getAbstractedMetadata(targetProduct);
+        final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.srgr_flag, 1);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_spacing, groundRangeSpacing);
     }

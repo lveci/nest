@@ -25,12 +25,12 @@ import java.util.*;
 class ERSProductDirectory extends CEOSProductDirectory {
 
     private final File _baseDir;
-    private ERSVolumeDirectoryFile _volumeDirectoryFile;
-    private ERSImageFile[] _imageFiles;
-    private ERSLeaderFile _leaderFile;
+    private ERSVolumeDirectoryFile _volumeDirectoryFile = null;
+    private ERSImageFile[] _imageFiles = null;
+    private ERSLeaderFile _leaderFile = null;
 
-    private int _sceneWidth;
-    private int _sceneHeight;
+    private int _sceneWidth = 0;
+    private int _sceneHeight = 0;
 
     private final static String ERS1_MISSION = "ERS-1";
     private final static String ERS2_MISSION = "ERS-2";
@@ -43,6 +43,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         _baseDir = dir;
     }
 
+    @Override
     protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         readVolumeDirectoryFile();
         _leaderFile = new ERSLeaderFile(createInputStream(ERSVolumeDirectoryFile.getLeaderFileName()));
@@ -83,6 +84,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
             return "";
     }
 
+    @Override
     public Product createProduct() throws IOException, IllegalBinaryFormatException {
         final Product product = new Product(getProductName(),
                                             productType,
@@ -170,10 +172,12 @@ class ERSProductDirectory extends CEOSProductDirectory {
         product.addTiePointGrid(slantRangeTimeGrid);        
     }
 
+    @Override
     public CEOSImageFile getImageFile(final Band band) throws IOException, IllegalBinaryFormatException {
         return bandImageFileMap.get(band.getName());
     }
 
+    @Override
     public void close() throws IOException {
         for (int i = 0; i < _imageFiles.length; i++) {
             _imageFiles[i].close();
@@ -315,6 +319,12 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 product.getRawStorageSize());
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange());
+        int isMapProjected = 0;
+        if(productType.contains("IMG")) {
+            isMapProjected = 1;
+        }
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.isMapProjected, isMapProjected);
+
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag,
                 facilityRec.getAttributeInt("Antenna pattern correction flag"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag,

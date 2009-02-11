@@ -114,7 +114,7 @@ public class OversamplingOp extends Operator {
             sourceImageWidth = sourceProduct.getSceneRasterWidth();
             sourceImageHeight = sourceProduct.getSceneRasterHeight();
 
-            abs = OperatorUtils.getAbstractedMetadata(sourceProduct);
+            abs = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
             getSrcImagePixelSpacings();
 
@@ -396,7 +396,7 @@ public class OversamplingOp extends Operator {
 
     private void updateTargetProductMetadata() throws Exception {
 
-        final MetadataElement absTgt = OperatorUtils.getAbstractedMetadata(targetProduct);
+        final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_spacing, azimuthSpacing);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_spacing, rangeSpacing);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);

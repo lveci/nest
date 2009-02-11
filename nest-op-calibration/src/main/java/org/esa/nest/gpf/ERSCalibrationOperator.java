@@ -214,7 +214,7 @@ public final class ERSCalibrationOperator extends Operator {
         //System.out.println("sourceImageWidth = " + sourceImageWidth + ", sourceImageHeight = " + sourceImageHeight);
 
         getImportantTimes();
-        abstractedMetadata = OperatorUtils.getAbstractedMetadata(sourceProduct);
+        abstractedMetadata = AbstractMetadata.getAbstractedMetadata(sourceProduct);
         getMissionType(); // abs
         getSampleType();  // abs
         getProductType(); // abs
