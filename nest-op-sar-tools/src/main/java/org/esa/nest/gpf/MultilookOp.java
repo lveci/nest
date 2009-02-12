@@ -67,14 +67,15 @@ public final class MultilookOp extends Operator {
                 label="Number of Range Looks")
     private int nRgLooks = 1;
 
+     @Parameter(description = "The user defined number of azimuth looks", interval = "[1, *)", defaultValue = "1",
+                label="Number of Azimuth Looks")
+    private int nAzLooks = 1;
+
     @Parameter(defaultValue="Currently, detection for complex data is performed without any resampling", label="Note")
     String note;
 
     private MetadataElement absRoot = null;
 
-    private boolean srgrFlag;
-
-    private double nAzLooks;     // current azimuth looks
     private double nAzRgLooks;
     private double azimuthLooks; // original azimuth_looks from metadata
     private double rangeLooks;   // original range_looks from metadata
@@ -85,9 +86,8 @@ public final class MultilookOp extends Operator {
 
     private double rangeSpacing;
     private double azimuthSpacing;
-    private double incidenceAngleAtCentreRangePixel; // in degree
 
-    private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();;
+    private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -108,19 +108,11 @@ public final class MultilookOp extends Operator {
         try {
             absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
-            srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
-
             getRangeAzimuthSpacing();
 
             getRangeAzimuthLooks();
 
             getSourceImageDimension();
-
-            if (!srgrFlag) {
-                getIncidenceAngleAtCentreRangePixel();
-            }
-
-            computeAzimuthLooks();
 
             createTargetProduct();
 
@@ -180,7 +172,7 @@ public final class MultilookOp extends Operator {
      * Get the range and azimuth spacings (in meter).
      * @throws Exception when metadata is missing or equal to default no data value
      */
-    void getRangeAzimuthSpacing() throws Exception {
+    private void getRangeAzimuthSpacing() throws Exception {
 
         rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
         azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
@@ -192,7 +184,7 @@ public final class MultilookOp extends Operator {
      * Get azimuth and range looks.
      * @throws Exception when metadata is missing or equal to default no data value
      */
-    void getRangeAzimuthLooks() throws Exception {
+    private void getRangeAzimuthLooks() throws Exception {
 
         azimuthLooks = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_looks);
         rangeLooks = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_looks);
@@ -203,7 +195,7 @@ public final class MultilookOp extends Operator {
     /**
      * Get source image dimension.
      */
-    void getSourceImageDimension() {
+    private void getSourceImageDimension() {
         sourceImageWidth = sourceProduct.getSceneRasterWidth();
         sourceImageHeight = sourceProduct.getSceneRasterHeight();
         //System.out.println("Source image width = " + sourceImageWidth);
@@ -211,43 +203,13 @@ public final class MultilookOp extends Operator {
     }
 
     /**
-     * Get incidence angle at centre range pixel (in degree).
-     */
-    void getIncidenceAngleAtCentreRangePixel() {
-
-        final int x = sourceImageWidth / 2;
-        final int y = sourceImageHeight / 2;
-        final TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
-        if(incidenceAngle == null) {
-            throw new OperatorException("incidence_angle tie point grid not found in product");
-        }
-        incidenceAngleAtCentreRangePixel = incidenceAngle.getPixelFloat(x + 0.5f, y + 0.5f);
-    }
-
-    /**
-     * Compute azimuth looks.
-     */
-    void computeAzimuthLooks() {
-
-        double groundRangeSpacing;
-        if (srgrFlag) {
-            groundRangeSpacing = rangeSpacing;
-        } else {
-            groundRangeSpacing = rangeSpacing / Math.sin(incidenceAngleAtCentreRangePixel*MathUtils.DTOR);
-        }
-
-        nAzLooks = Math.max(1, (int)((double)nRgLooks * groundRangeSpacing / azimuthSpacing + 0.5));
-        //System.out.println("nAzLooks = " + nAzLooks);
-    }
-
-    /**
      * Create target product.
-     * @throws Exception
+     * @throws Exception The exception.
      */
-    void createTargetProduct() throws Exception {
+    private void createTargetProduct() throws Exception {
 
-        targetImageWidth = (int)(sourceImageWidth / nRgLooks);
-        targetImageHeight = (int)(sourceImageHeight / nAzLooks);
+        targetImageWidth = sourceImageWidth / nRgLooks;
+        targetImageHeight = sourceImageHeight / nAzLooks;
 
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),
@@ -268,9 +230,9 @@ public final class MultilookOp extends Operator {
 
     /**
      * Update metadata in the target product.
-     * @throws Exception The exceptions.
+     * @throws Exception The exception.
      */
-    void updateTargetProductMetadata() throws Exception {
+    private void updateTargetProductMetadata() throws Exception {
 
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_looks, azimuthLooks*nAzLooks);
@@ -417,15 +379,15 @@ public final class MultilookOp extends Operator {
 
     /**
      * Compute the mean value of pixels of the source image in the sliding window.
-     *
      * @param tx The x coordinate of a pixel in the current target tile.
      * @param ty The y coordinate of a pixel in the current target tile.
      * @param sourceRaster1 The source raster for the 1st band.
-
+     * @param srcData1 The product data for i band in case of complex product.
+     * @param srcData2 The product data for q band in case of complex product.
      * @param bandUnit Integer indicating the unit of source data.
      * @return The mean value.
      */
-    double getMeanValue(int tx, int ty, Tile sourceRaster1, ProductData srcData1, ProductData srcData2,
+    private double getMeanValue(int tx, int ty, Tile sourceRaster1, ProductData srcData1, ProductData srcData2,
                         Unit.UnitType bandUnit) {
 
         final int xStart = tx * nRgLooks;
@@ -466,6 +428,55 @@ public final class MultilookOp extends Operator {
         }
 
         return meanValue;
+    }
+
+    /**
+     * Compute number of azimuth looks and the mean ground pixel spacings for given number of range looks.
+     * @param srcProduct The source product.
+     * @param nRgLooks The number of range looks.
+     * @param param The computed parameters.
+     * @throws Exception The exception.
+     */
+    public static void getDerivedParameters(Product srcProduct, int nRgLooks, DerivedParams param) throws Exception {
+
+        MetadataElement abs = AbstractMetadata.getAbstractedMetadata(srcProduct);
+        boolean srgrFlag = AbstractMetadata.getAttributeBoolean(abs, AbstractMetadata.srgr_flag);
+        double rangeSpacing = AbstractMetadata.getAttributeDouble(abs, AbstractMetadata.range_spacing);
+        double azimuthSpacing = AbstractMetadata.getAttributeDouble(abs, AbstractMetadata.azimuth_spacing);
+
+        double groundRangeSpacing = rangeSpacing;
+        if (!srgrFlag) {
+            double incidenceAngleAtCentreRangePixel = getIncidenceAngleAtCentreRangePixel(srcProduct);
+            groundRangeSpacing /= Math.sin(incidenceAngleAtCentreRangePixel*MathUtils.DTOR);
+        }
+
+        int nAzLooks = Math.max(1, (int)((double)nRgLooks * groundRangeSpacing / azimuthSpacing + 0.5));
+        float meanGRSqaurePixel = (float)((nRgLooks*groundRangeSpacing + nAzLooks*azimuthSpacing)*0.5);
+        param.nAzLooks = nAzLooks;
+        param.meanGRSqaurePixel = meanGRSqaurePixel;
+    }
+
+    /**
+     * Get incidence angle at centre range pixel (in degree).
+     * @param srcProduct The source product.
+     * @return The incidence angle.
+     */
+    private static double getIncidenceAngleAtCentreRangePixel(Product srcProduct) {
+
+        int sourceImageWidth = srcProduct.getSceneRasterWidth();
+        int sourceImageHeight = srcProduct.getSceneRasterHeight();
+        final int x = sourceImageWidth / 2;
+        final int y = sourceImageHeight / 2;
+        final TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(srcProduct);
+        if(incidenceAngle == null) {
+            throw new OperatorException("incidence_angle tie point grid not found in product");
+        }
+        return incidenceAngle.getPixelFloat((float)x, (float)y);
+    }
+
+    static class DerivedParams {
+        int nAzLooks;
+        float meanGRSqaurePixel;
     }
 
     /**

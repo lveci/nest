@@ -11,9 +11,15 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 import java.util.Map;
 import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.FocusEvent;
 
 /**
  * User interface for GCPSelectionOp
@@ -42,17 +48,24 @@ public class MultilookOpUI extends BaseOperatorUI {
         OperatorUIUtils.initBandList(bandList, getBandNames());
 
         nRgLooks.setText(String.valueOf(paramMap.get("nRgLooks")));
-
+        
         setAzimuthLooks();
     }
 
     private void setAzimuthLooks() {
         if(sourceProducts != null && sourceProducts.length > 0) {
-            final int azimuthLooks = 0; //MultilookOp.getAzimuthLooks(sourceProducts[0]);
-            nAzLooks.setText(String.valueOf(azimuthLooks));
+            try {
+                int nRgLooksVal = Integer.parseInt(nRgLooks.getText());
+                MultilookOp.DerivedParams param = new MultilookOp.DerivedParams();
+                MultilookOp.getDerivedParameters(sourceProducts[0], nRgLooksVal, param);
+                final int azimuthLooks = param.nAzLooks;
+                nAzLooks.setText(String.valueOf(azimuthLooks));
 
-            final int meanSqaurePixel = 0; //MultilookOp.getMeanGRSqaurePixel(sourceProducts[0]);
-            meanGRSqaurePixel.setText(String.valueOf(meanSqaurePixel));
+                final float meanSqaurePixel = param.meanGRSqaurePixel;
+                meanGRSqaurePixel.setText(String.valueOf(meanSqaurePixel));
+            } catch (Exception e) {
+                meanGRSqaurePixel.setText("");
+            }
         }
     }
 
@@ -68,7 +81,7 @@ public class MultilookOpUI extends BaseOperatorUI {
         OperatorUIUtils.updateBandList(bandList, paramMap);
 
         paramMap.put("nRgLooks", Integer.parseInt(nRgLooks.getText()));
-
+        paramMap.put("nAzLooks", Integer.parseInt(nAzLooks.getText()));
     }
 
     private JComponent createPanel() {
@@ -97,6 +110,24 @@ public class MultilookOpUI extends BaseOperatorUI {
         DialogUtils.addComponent(contentPane, gbc, "Number of Azimuth Looks:", nAzLooks);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Mean GR Square Pixel:", meanGRSqaurePixel);
+
+        nRgLooks.addFocusListener(new FocusListener() {
+
+            public void focusGained(final FocusEvent e) {
+            }
+            public void focusLost(final FocusEvent e) {
+                setAzimuthLooks();
+            }
+        });
+        
+        nRgLooks.addActionListener(new ActionListener() {
+
+            public void actionPerformed(final ActionEvent e) {
+                setAzimuthLooks();
+            }
+        });
+
+        meanGRSqaurePixel.setEditable(false);
 
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Note:",
