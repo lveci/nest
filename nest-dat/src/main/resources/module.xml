@@ -78,7 +78,6 @@
             <accelerator>ctrl alt P</accelerator>
             <smallIcon>/org/esa/nest/icons/project_view22.png</smallIcon>
             <largeIcon>/org/esa/nest/icons/project_view30.png</largeIcon>
-            <!--<helpId>TODO</helpId>-->
             <description>Project View.</description>
             <initState>DOCKED</initState>
             <initSide>WEST</initSide>
@@ -110,7 +109,6 @@
             <parent>file</parent>
             <text>New Project...</text>
             <accelerator>control P</accelerator>
-            <!--placeBefore>loadProject</placeBefore-->
             <shortDescr>Create a new project</shortDescr>
             <description>Create a new project</description>
             <smallIcon>/org/esa/nest/icons/project-new.png</smallIcon>
@@ -124,7 +122,6 @@
             <parent>file</parent>
             <text>Load Project...</text>
             <accelerator>control L</accelerator>
-            <!--placeBefore>saveProjectAs</placeBefore-->
             <placeAfter>newProject</placeAfter>
             <shortDescr>Load a project</shortDescr>
             <description>Load a project</description>
@@ -138,7 +135,6 @@
             <class>org.esa.nest.dat.actions.SaveProjectAsAction</class>
             <parent>file</parent>
             <text>Save Project As...</text>
-            <!--placeBefore>closeProject</placeBefore-->
             <placeAfter>openProductGrabber</placeAfter>
             <shortDescr>Save current project to a new location</shortDescr>
             <description>Save current project to a new location</description>
@@ -151,7 +147,6 @@
             <class>org.esa.nest.dat.actions.CloseProjectAction</class>
             <parent>file</parent>
             <text>Close Project</text>
-            <!--placeBefore>openRaster</placeBefore-->
             <placeAfter>saveProjectAs</placeAfter>
             <shortDescr>Close current project</shortDescr>
             <description>Close current project</description>
@@ -258,7 +253,6 @@
             <separatorAfter>true</separatorAfter>
             <shortDescr>Save a BEAM-DIMAP data product with a different name.</shortDescr>
             <description>Save a BEAM-DIMAP data product with a different name.</description>
-            <accelerator></accelerator>
             <smallIcon>icons/SaveAs16.gif</smallIcon>
             <largeIcon>icons/SaveAs24.gif</largeIcon>
             <helpId>saveAs</helpId>
