@@ -1,9 +1,8 @@
 package org.esa.nest.dat;
 
 import org.esa.beam.framework.ui.command.CommandEvent;
-import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.beam.visat.actions.AbstractVisatAction;
-import org.esa.beam.visat.VisatApp;
+import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
 
 /**
  * MultilookOp action.
@@ -11,13 +10,13 @@ import org.esa.beam.visat.VisatApp;
  */
 public class MultilookOpAction extends AbstractVisatAction {
 
-    private DefaultSingleTargetProductDialog dialog = null;
+    private NestSingleTargetProductDialog dialog = null;
 
     @Override
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("Multilook", getAppContext(), "Multilook", getHelpId());
+            dialog = new NestSingleTargetProductDialog("Multilook", getAppContext(), "Multilook", getHelpId());
             dialog.setTargetProductNameSuffix("_ML");
         }
         dialog.show();

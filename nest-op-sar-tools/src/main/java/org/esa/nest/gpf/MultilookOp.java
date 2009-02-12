@@ -51,7 +51,7 @@ import java.util.HashMap;
  */
 
 @OperatorMetadata(alias="Multilook",
-        description="Produces Multilooked image averaging the power across a number of lines in both the azimuth and range directions")
+        description="Averages the power across a number of lines in both the azimuth and range directions")
 public final class MultilookOp extends Operator {
 
     @SourceProduct(alias="source")
@@ -65,12 +65,12 @@ public final class MultilookOp extends Operator {
 
     @Parameter(description = "The user defined number of range looks", interval = "[1, *)", defaultValue = "1",
                 label="Number of Range Looks")
-    private int nRgLooks;
+    private int nRgLooks = 1;
 
     @Parameter(defaultValue="Currently, detection for complex data is performed without any resampling", label="Note")
     String note;
 
-    private MetadataElement absRoot;
+    private MetadataElement absRoot = null;
 
     private boolean srgrFlag;
 
@@ -87,7 +87,7 @@ public final class MultilookOp extends Operator {
     private double azimuthSpacing;
     private double incidenceAngleAtCentreRangePixel; // in degree
 
-    private HashMap<String, String[]> targetBandNameToSourceBandName;
+    private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -315,7 +315,6 @@ public final class MultilookOp extends Operator {
         }
 
         String targetBandName;
-        targetBandNameToSourceBandName = new HashMap<String, String[]>();
         for (int i = 0; i < sourceBands.length; i++) {
 
             final Band srcBand = sourceBands[i];
@@ -487,6 +486,7 @@ public final class MultilookOp extends Operator {
     public static class Spi extends OperatorSpi {
         public Spi() {
             super(MultilookOp.class);
+            super.setOperatorUI(MultilookOpUI.class);
         }
     }
 }
