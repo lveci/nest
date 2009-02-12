@@ -72,7 +72,7 @@ public class WarpOp extends Operator {
                 label="RMS Threshold")
     private float rmsThreshold = 1.0f;
 
-    @Parameter(description = "The order of WARP polynomial function", interval = "[1, 3]", defaultValue = "2",
+    @Parameter(description = "The order of WARP polynomial function", valueSet = {"1", "2", "3"}, defaultValue = "2",
                 label="Warp Polynomial Order")
     private int warpPolynomialOrder = 2;
 
@@ -80,6 +80,9 @@ public class WarpOp extends Operator {
                 label="Interpolation Method")
     private String interpolationMethod = BILINEAR;
     private Interpolation interp = null;
+
+    @Parameter(description = "Show the Residuals file in a text viewer", defaultValue = "true", label="Show Residuals")
+    private boolean openResidualsFile = true;
 
     private ProductNodeGroup<Pin> masterGCPGroup = null;
     private Band masterBand = null;
@@ -118,62 +121,74 @@ public class WarpOp extends Operator {
     @Override
     public void initialize() throws OperatorException
     {
-        masterBand = sourceProduct.getBandAt(0);
-        masterGCPGroup = sourceProduct.getGcpGroup(masterBand);
-        if(masterBand.getUnit() != null && masterBand.getUnit().equals(Unit.REAL) && sourceProduct.getNumBands() > 1) {
-            complexCoregistration = true;
-            masterBand2 = sourceProduct.getBandAt(1);
-        }
-
-        // determine interpolation method for warp function
-        if (interpolationMethod.equals(NEAREST_NEIGHBOR)) {
-            interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
-        } else if (interpolationMethod.equals(BILINEAR)) {
-            interp = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
-        } else if (interpolationMethod.equals(BICUBIC)) {
-            interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
-        } else if (interpolationMethod.equals(BICUBIC2)) {
-            interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC_2);
-        }
-
-        createTargetProduct();
-
-        // for all slave bands or band pairs compute a warp
-        final int numSrcBands = sourceProduct.getNumBands();
-        int inc = 1;
-        if(complexCoregistration)
-            inc = 2;
-        for(int i=0; i < numSrcBands; i+=inc) {
-
-            final Band srcBand = sourceProduct.getBandAt(i);
-            if(srcBand == masterBand || srcBand == masterBand2)
-                continue;
-
-            final ProductNodeGroup<Pin> slaveGCPGroup = sourceProduct.getGcpGroup(srcBand);
-            final WarpData warpData = new WarpData(slaveGCPGroup);
-            warpDataMap.put(srcBand, warpData);
-
-            int parseIdex = 0;
-            computeWARPPolynomial(warpData); // compute initial warp polynomial
-            outputCoRegistrationInfo(warpData, false, 0.0f, parseIdex);
-
-            //============
-            if (warpData.rmsMean > rmsThreshold && eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
-                final float threshold = (float)warpData.rmsMean;
-                computeWARPPolynomial(warpData); // compute 2nd warp polynomial
-                outputCoRegistrationInfo(warpData, true, threshold, ++parseIdex);
+        try {
+            masterBand = sourceProduct.getBandAt(0);
+            masterGCPGroup = sourceProduct.getGcpGroup(masterBand);
+            if(masterBand.getUnit() != null && masterBand.getUnit().equals(Unit.REAL) && sourceProduct.getNumBands() > 1) {
+                complexCoregistration = true;
+                masterBand2 = sourceProduct.getBandAt(1);
             }
 
-            if (warpData.rmsMean > rmsThreshold && eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
-                final float threshold = (float)warpData.rmsMean;
-                computeWARPPolynomial(warpData); // compute 3rd warp polynomial
-                outputCoRegistrationInfo(warpData, true, threshold, ++parseIdex);
+            // determine interpolation method for warp function
+            if (interpolationMethod.equals(NEAREST_NEIGHBOR)) {
+                interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
+            } else if (interpolationMethod.equals(BILINEAR)) {
+                interp = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
+            } else if (interpolationMethod.equals(BICUBIC)) {
+                interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
+            } else if (interpolationMethod.equals(BICUBIC2)) {
+                interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC_2);
             }
-            //============
 
-            eliminateGCPsBasedOnRMS(warpData, rmsThreshold);
-            computeWARPPolynomial(warpData); // compute final warp polynomial
-            outputCoRegistrationInfo(warpData, true, rmsThreshold, ++parseIdex);
+            createTargetProduct();
+
+            // for all slave bands or band pairs compute a warp
+            final int numSrcBands = sourceProduct.getNumBands();
+            int inc = 1;
+            if(complexCoregistration)
+                inc = 2;
+            for(int i=0; i < numSrcBands; i+=inc) {
+
+                final Band srcBand = sourceProduct.getBandAt(i);
+                if(srcBand == masterBand || srcBand == masterBand2)
+                    continue;
+
+                final ProductNodeGroup<Pin> slaveGCPGroup = sourceProduct.getGcpGroup(srcBand);
+                final WarpData warpData = new WarpData(slaveGCPGroup);
+                warpDataMap.put(srcBand, warpData);
+
+                int parseIdex = 0;
+                computeWARPPolynomial(warpData); // compute initial warp polynomial
+                outputCoRegistrationInfo(warpData, false, 0.0f, parseIdex);
+
+                //============
+                if (warpData.rmsMean > rmsThreshold && eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
+                    final float threshold = (float)warpData.rmsMean;
+                    computeWARPPolynomial(warpData); // compute 2nd warp polynomial
+                    outputCoRegistrationInfo(warpData, true, threshold, ++parseIdex);
+                }
+
+                if (warpData.rmsMean > rmsThreshold && eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
+                    final float threshold = (float)warpData.rmsMean;
+                    computeWARPPolynomial(warpData); // compute 3rd warp polynomial
+                    outputCoRegistrationInfo(warpData, true, threshold, ++parseIdex);
+                }
+                //============
+
+                eliminateGCPsBasedOnRMS(warpData, rmsThreshold);
+                computeWARPPolynomial(warpData); // compute final warp polynomial
+                outputCoRegistrationInfo(warpData, true, rmsThreshold, ++parseIdex);
+            }
+            
+            if(openResidualsFile) {
+                final File residualsFile = getResidualsFile(sourceProduct);
+
+                if(Desktop.isDesktopSupported()) {
+                    Desktop.getDesktop().edit(residualsFile);
+                }
+            }
+        } catch(Exception e) {
+            throw new OperatorException(e);
         }
     }
 
@@ -457,16 +472,11 @@ public class WarpOp extends Operator {
         final float[] xCoeffs = warpData.warp.getXCoeffs();
         final float[] yCoeffs = warpData.warp.getYCoeffs();
 
-        FileOutputStream out; // declare a file output object
-        PrintStream p; // declare a print stream object
-        String fileName = sourceProduct.getName() + "_residual.txt";
+        final File residualFile = getResidualsFile(sourceProduct);
+        PrintStream p = null; // declare a print stream object
+
         try {
-            final File appUserDir = new File(DatUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
-            if(!appUserDir.exists()) {
-                appUserDir.mkdirs();
-            }
-            fileName = appUserDir.toString() + File.separator + fileName;
-            out = new FileOutputStream(fileName, appendFlag);
+            final FileOutputStream out = new FileOutputStream(residualFile.getAbsolutePath(), appendFlag);
 
             // Connect print stream to the output stream
             p = new PrintStream(out);
@@ -540,11 +550,21 @@ public class WarpOp extends Operator {
             p.println();
             p.format("RMS std = %8.3f", warpData.rmsStd);
 
-            p.close();
-
         } catch(IOException exc) {
             throw new OperatorException(exc);
+        } finally {
+            if(p != null)
+                p.close();
         }
+    }
+
+    private static File getResidualsFile(final Product sourceProduct) {
+        String fileName = sourceProduct.getName() + "_residual.txt";
+        final File appUserDir = new File(DatUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
+        if(!appUserDir.exists()) {
+            appUserDir.mkdirs();
+        }
+        return new File(appUserDir.toString(), fileName);
     }
 
     private RenderedOp createWarpImage(WarpPolynomial warp, final RenderedImage srcImage) {
