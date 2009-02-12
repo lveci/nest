@@ -69,6 +69,7 @@ public class UndersamplingOpUI extends BaseOperatorUI {
     private final JLabel kernelFileLabel = new JLabel("Kernel File:");
     private final JTextField kernelFile = new JTextField("");
 
+    @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
         initializeOperatorUI(operatorName, parameterMap);
@@ -78,6 +79,7 @@ public class UndersamplingOpUI extends BaseOperatorUI {
         return new JScrollPane(panel);
     }
 
+    @Override
     public void initParameters() {
 
         OperatorUIUtils.initBandList(bandList, getBandNames());
@@ -101,11 +103,13 @@ public class UndersamplingOpUI extends BaseOperatorUI {
         azimuthSpacing.setText(String.valueOf(paramMap.get("azimuthSpacing")));
     }
 
+    @Override
     public UIValidation validateParameters() {
 
         return new UIValidation(true, "");
     }
 
+    @Override
     public void updateParameters() {
 
         OperatorUIUtils.updateBandList(bandList, paramMap);
@@ -165,9 +169,9 @@ public class UndersamplingOpUI extends BaseOperatorUI {
         });
 
         int savedY = ++_gbc.gridy;
-        DialogUtils.addTextField(contentPane, _gbc, subSamplingXLabel, subSamplingX);
+        DialogUtils.addComponent(contentPane, _gbc, subSamplingXLabel, subSamplingX);
         _gbc.gridy++;
-        DialogUtils.addTextField(contentPane, _gbc, subSamplingYLabel, subSamplingY);
+        DialogUtils.addComponent(contentPane, _gbc, subSamplingYLabel, subSamplingY);
 
         _gbc.gridy = savedY;
         _gbc.gridx = 0;
@@ -195,7 +199,7 @@ public class UndersamplingOpUI extends BaseOperatorUI {
         enableKernelFiltering(false);
 
         _gbc.gridy = savedY;
-        DialogUtils.addTextField(contentPane, _gbc, kernelFileLabel, kernelFile);
+        DialogUtils.addComponent(contentPane, _gbc, kernelFileLabel, kernelFile);
         DialogUtils.enableComponents(kernelFileLabel, kernelFile, false);
 
         _gbc.gridy++;
@@ -210,19 +214,19 @@ public class UndersamplingOpUI extends BaseOperatorUI {
         });
 
         savedY = ++_gbc.gridy;
-        DialogUtils.addTextField(contentPane, _gbc, targetImageHeightLabel, targetImageHeight);
+        DialogUtils.addComponent(contentPane, _gbc, targetImageHeightLabel, targetImageHeight);
         _gbc.gridy++;
-        DialogUtils.addTextField(contentPane, _gbc, targetImageWidthLabel, targetImageWidth);
+        DialogUtils.addComponent(contentPane, _gbc, targetImageWidthLabel, targetImageWidth);
         
         _gbc.gridy = savedY;
-        DialogUtils.addTextField(contentPane, _gbc, widthRatioLabel, widthRatio);
+        DialogUtils.addComponent(contentPane, _gbc, widthRatioLabel, widthRatio);
         _gbc.gridy++;
-        DialogUtils.addTextField(contentPane, _gbc, heightRatioLabel, heightRatio);
+        DialogUtils.addComponent(contentPane, _gbc, heightRatioLabel, heightRatio);
 
         _gbc.gridy = savedY;
-        DialogUtils.addTextField(contentPane, _gbc, rangeSpacingLabel, rangeSpacing);
+        DialogUtils.addComponent(contentPane, _gbc, rangeSpacingLabel, rangeSpacing);
         _gbc.gridy++;
-        DialogUtils.addTextField(contentPane, _gbc, azimuthSpacingLabel, azimuthSpacing);
+        DialogUtils.addComponent(contentPane, _gbc, azimuthSpacingLabel, azimuthSpacing);
 
         updateOutputImageBy(false);
 

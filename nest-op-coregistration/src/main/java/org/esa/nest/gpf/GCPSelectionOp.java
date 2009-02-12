@@ -1383,6 +1383,7 @@ public class GCPSelectionOp extends Operator {
     public static class Spi extends OperatorSpi {
         public Spi() {
             super(GCPSelectionOp.class);
+            super.setOperatorUI(GCPSelectionOpUI.class);
         }
     }
 }

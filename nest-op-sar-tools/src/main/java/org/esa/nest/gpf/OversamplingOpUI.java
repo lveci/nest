@@ -113,19 +113,19 @@ public class OversamplingOpUI extends BaseOperatorUI {
         });
 
         int savedY = ++_gbc.gridy;
-        DialogUtils.addTextField(contentPane, _gbc, targetImageHeightLabel, targetImageHeight);
+        DialogUtils.addComponent(contentPane, _gbc, targetImageHeightLabel, targetImageHeight);
         _gbc.gridy++;
-        DialogUtils.addTextField(contentPane, _gbc, targetImageWidthLabel, targetImageWidth);
+        DialogUtils.addComponent(contentPane, _gbc, targetImageWidthLabel, targetImageWidth);
 
         _gbc.gridy = savedY;
-        DialogUtils.addTextField(contentPane, _gbc, widthRatioLabel, widthRatio);
+        DialogUtils.addComponent(contentPane, _gbc, widthRatioLabel, widthRatio);
         _gbc.gridy++;
-        DialogUtils.addTextField(contentPane, _gbc, heightRatioLabel, heightRatio);
+        DialogUtils.addComponent(contentPane, _gbc, heightRatioLabel, heightRatio);
 
         _gbc.gridy = savedY;
-        DialogUtils.addTextField(contentPane, _gbc, rangeSpacingLabel, rangeSpacing);
+        DialogUtils.addComponent(contentPane, _gbc, rangeSpacingLabel, rangeSpacing);
         _gbc.gridy++;
-        DialogUtils.addTextField(contentPane, _gbc, azimuthSpacingLabel, azimuthSpacing);
+        DialogUtils.addComponent(contentPane, _gbc, azimuthSpacingLabel, azimuthSpacing);
 
         updateOutputImageBy(true);
 

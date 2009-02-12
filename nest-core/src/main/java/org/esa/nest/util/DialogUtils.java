@@ -18,9 +18,16 @@ public class DialogUtils {
         field.setVisible(flag);
     }
 
-    public static void addTextField(JPanel contentPane, GridBagConstraints gbc, JLabel label, JComponent component) {
+    public static void addComponent(JPanel contentPane, GridBagConstraints gbc, JLabel label, JComponent component) {
         gbc.gridx = 0;
         contentPane.add(label, gbc);
+        gbc.gridx = 1;
+        contentPane.add(component, gbc);
+    }
+
+    public static void addComponent(JPanel contentPane, GridBagConstraints gbc, String label, JComponent component) {
+        gbc.gridx = 0;
+        contentPane.add(new JLabel(label), gbc);
         gbc.gridx = 1;
         contentPane.add(component, gbc);
     }
@@ -34,6 +41,15 @@ public class DialogUtils {
             field.addPropertyChangeListener("value", propListener);
 
         return field;
+    }
+
+    public static void fillPanel(final JPanel panel, final GridBagConstraints gbc) {
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        panel.add(new JPanel(), gbc);
     }
 
     public static JButton CreateButton(final String name, final String text, final ImageIcon icon, final JPanel panel) {
