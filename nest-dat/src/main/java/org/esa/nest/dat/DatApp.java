@@ -17,6 +17,7 @@ import org.esa.beam.visat.*;
 import org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView;
 import org.esa.beam.visat.toolviews.stat.StatisticsToolView;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
+import org.esa.nest.dat.actions.LoadTabbedLayoutAction;
 
 import javax.swing.*;
 import java.util.List;
@@ -57,9 +58,10 @@ public final class DatApp extends VisatApp {
     protected void postInit() {
         String getStarted = VisatApp.getApp().getPreferences().getPropertyString("visat.showGettingStarted", "true");
         if(getStarted == null || getStarted.equals("true")) {
+            LoadTabbedLayoutAction.loadTabbedLayout();
+
             HelpSys.showTheme("using_dat");
-            VisatApp.getApp().getPreferences().setPropertyString("visat.showGettingStarted", "false");
-            
+            VisatApp.getApp().getPreferences().setPropertyString("visat.showGettingStarted", "false");       
         }
     }
 

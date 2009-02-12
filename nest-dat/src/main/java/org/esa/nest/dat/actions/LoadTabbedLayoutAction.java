@@ -8,18 +8,19 @@ import org.esa.beam.framework.ui.command.CommandEvent;
 import java.io.File;
 
 /**
- * User: Marco Peters
-* Date: 11.06.2008
 */
 public class LoadTabbedLayoutAction extends AbstractVisatAction {
 
     @Override
     public void actionPerformed(CommandEvent event) {
+        loadTabbedLayout();    
+    }
+
+    public static void loadTabbedLayout() {
         final LayoutPersistence layoutPersistence = VisatApp.getApp().getMainFrame().getLayoutPersistence();
 
         final String homeUrl = System.getProperty("nest.home", ".");
         String layoutPath = homeUrl + File.separator + "res" + File.separator + "tabbed.layout";
         layoutPersistence.loadLayoutDataFromFile(layoutPath);
     }
-
 }
