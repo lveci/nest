@@ -7,19 +7,19 @@ import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import java.io.File;
 
 /**
- * SLC to PRI action.
+ * Create Stack action.
  *
  */
-public class SLCtoPRIAction extends AbstractVisatAction {
+public class CreateStackAction extends AbstractVisatAction {
 
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "SLC to PRI", "SLCtoPRI", false);
+        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "Create Stack", "CreateStackOp", false);
         dialog.show();
 
         final File graphPath = GraphBuilderDialog.getInternalGraphFolder();
-        final File graphFile =  new File(graphPath, "SLCtoPRIGraph.xml");
+        final File graphFile =  new File(graphPath, "CreateStackGraph.xml");
 
         dialog.LoadGraph(graphFile);
     }

@@ -312,8 +312,8 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     /**
      * Call Help
      */             
-    private static void OnHelp() {
-        HelpSys.showTheme("graph_builder");
+    private void OnHelp() {
+        HelpSys.showTheme(super.getHelpID());
     }
 
     /**
@@ -453,4 +453,8 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         }
     }
 
+    public static File getInternalGraphFolder() {
+        final String homeUrl = System.getProperty("nest.home", ".");
+        return new File(homeUrl, File.separator + "graphs" + File.separator + "internal");
+    }
 }
