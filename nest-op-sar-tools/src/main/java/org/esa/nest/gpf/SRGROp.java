@@ -36,10 +36,8 @@ import Jama.Matrix;
 /**
  * Calibration for ASAR data products.
  *
- * @todo handle Incidence angle should be obtained from the abstracted metadata, mission type should not be used
  * @todo should use user selected interpolation methods
  * @todo add virtual band in target product (see createVirtualIntensityBand() in WSSDeBuestOp.java)
- * @todo compute xyz from lat/lon using library
  */
 /**
  * Slant Range to Ground Range Conversion.
@@ -61,16 +59,15 @@ public class SRGROp extends Operator {
                 label="Warp Polynomial Order")
     private int warpPolynomialOrder;
 
-    @Parameter(description = "The number of range points used in computing WARP polynomial",
-               interval = "(1, *)", defaultValue = "100", label="Number of Range Points")
-    private int numRangePoints;
+//    @Parameter(description = "The number of range points used in computing WARP polynomial",
+//               interval = "(1, *)", defaultValue = "100", label="Number of Range Points")
+    private int numRangePoints = 100;
 
 //    @Parameter(valueSet = {NEAREST_NEIGHBOR, LINEAR, CUBIC, SINC}, defaultValue = LINEAR, label="Interpolation Method")
 //    private String interpolationMethod;
 
     private MetadataElement absRoot;
     private GeoCoding geoCoding;
-    private String missionType;
     private boolean srgrFlag;
     private double slantRangeSpacing; // in m
     private double groundRangeSpacing; // in m
@@ -88,10 +85,6 @@ public class SRGROp extends Operator {
     private static final String LINEAR = "Linear interpolation";
     private static final String CUBIC = "Cubic interpolation";
     private static final String SINC = "Sinc interpolation";
-
-    private static double a = 6378137; // m
-    private static double earthFlatCoef = 298.257223563;
-    private static double e2 = 2 / earthFlatCoef - 1 / (earthFlatCoef * earthFlatCoef);
 
     /**
      * Initializes this operator and sets the one and only target product.
