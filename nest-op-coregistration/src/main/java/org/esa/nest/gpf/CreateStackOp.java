@@ -91,20 +91,29 @@ public class CreateStackOp extends Operator {
 
         OperatorUtils.copyProductNodes(masterProduct, targetProduct);
 
-        int cnt = 1;
-        String suffix = "_slv";
-        for (final Band slaveBand : slaveBandList) {
-            if(slaveBand == masterBands[0] || (masterBands.length > 1 && slaveBand == masterBands[1])) {
+        String suffix = "_mst";
+        // add master bands first
+        for (final Band srcBand : slaveBandList) {
+            if(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1])) {
                 suffix = "_mst";
-            } else {
-                if(slaveBand.getUnit() != null && slaveBand.getUnit().equals(Unit.IMAGINARY)) {
+                final Band targetBand = targetProduct.addBand(srcBand.getName() + suffix, srcBand.getDataType());
+                ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
+                sourceRasterMap.put(targetBand, srcBand);
+            }
+        }
+        // then add slave bands
+        int cnt = 1;
+        suffix = "_slv";
+        for (final Band srcBand : slaveBandList) {
+            if(!(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1]))) {
+                if(srcBand.getUnit() != null && srcBand.getUnit().equals(Unit.IMAGINARY)) {
                 } else {
                     suffix = "_slv" + cnt++;
-                }        
+                }
+                final Band targetBand = targetProduct.addBand(srcBand.getName() + suffix, srcBand.getDataType());
+                ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
+                sourceRasterMap.put(targetBand, srcBand);
             }
-            final Band targetBand = targetProduct.addBand(slaveBand.getName() + suffix, slaveBand.getDataType());
-            ProductUtils.copyRasterDataNodeProperties(slaveBand, targetBand);
-            sourceRasterMap.put(targetBand, slaveBand);
         }
 
         // copy slave abstracted metadata
