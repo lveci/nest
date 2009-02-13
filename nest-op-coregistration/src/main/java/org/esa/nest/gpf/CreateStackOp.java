@@ -156,41 +156,85 @@ public class CreateStackOp extends Operator {
         final ArrayList<Band> bandList = new ArrayList<Band>(5);
 
         // add master band
-        if(masterProduct == null)
+        if(masterProduct == null) {
             throw new OperatorException("masterProduct is null");
-        if(masterBandNames.length > 2)
+        }
+        if(masterBandNames.length > 2) {
             throw new OperatorException("Master band should be one real band or a real and imaginary band");
+        }
         masterBands[0] = masterProduct.getBand(getBandName(masterBandNames[0]));
         bandList.add(masterBands[0]);
-        if(masterBandNames.length > 1) {
-            Product prod = getMasterProduct(masterBandNames[1]);
-            if(prod != masterProduct)
-                throw new OperatorException("Please select master bands from the same product");
-            masterBands[1] = masterProduct.getBand(getBandName(masterBandNames[1]));
-            if(!masterBands[1].getUnit().equals(Unit.IMAGINARY))
-                throw new OperatorException("For complex products select a real and an imaginary band");
-            bandList.add(masterBands[1]);
+
+        final String unit = masterBands[0].getUnit();
+        if(unit == null) {
+            throw new OperatorException("band " + masterBands[0].getName() + " requires a unit");
+        } else if (unit.contains(Unit.PHASE)) {
+            throw new OperatorException("Phase band should not be selected for co-registration");
+        } else if (unit.contains(Unit.IMAGINARY)) {
+            throw new OperatorException("Real and imaginary master bands should be selected in pairs");
+        } else if (unit.contains(Unit.REAL)) {
+            if(masterBandNames.length < 2) {
+                throw new OperatorException("Real and imaginary master bands should be selected in pairs");
+            } else {
+                Product prod = getMasterProduct(masterBandNames[1]);
+                if(prod != masterProduct) {
+                    throw new OperatorException("Please select master bands from the same product");
+                }
+                masterBands[1] = masterProduct.getBand(getBandName(masterBandNames[1]));
+                if(!masterBands[1].getUnit().equals(Unit.IMAGINARY))
+                    throw new OperatorException("For complex products select a real and an imaginary band");
+                bandList.add(masterBands[1]);
+            }
+
         }
 
-
-        for(final String name : slaveBandNames) {
-            if(contains(masterBandNames, name))
+        // add slave bands
+        for(int i = 0; i < slaveBandNames.length; i++) {
+            final String name = slaveBandNames[i];
+            if(contains(masterBandNames, name)) {
                 continue;
-
+            }
             final String bandName = getBandName(name);
             final String productName = getProductName(name);
 
-            for(Product prod : sourceProduct) {
-                if(prod.getName().equals(productName)) {
-                    for(Band band : prod.getBands()) {
-                        if(band.getName().equals(bandName)) {
-                            bandList.add(band);
-                        }
-                    }
+            final Product prod = getProduct(productName);
+            final Band band = prod.getBand(bandName);
+            final String bandUnit = band.getUnit();
+            if(bandUnit == null) {
+                throw new OperatorException("band " + bandName + " requires a unit");
+            } else if (bandUnit.contains(Unit.PHASE)) {
+                throw new OperatorException("Phase band should not be selected for co-registration");
+            } else if (bandUnit.contains(Unit.IMAGINARY)) {
+                throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
+            } else if (bandUnit.contains(Unit.REAL)) {
+                if (slaveBandNames.length < 2) {
+                    throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
                 }
+                final String nextBandName = getBandName(slaveBandNames[i+1]);
+                if (!getProductName(nextBandName).contains(productName)){
+                    throw new OperatorException("Real and imaginary slave bands should be selected from the same product in pairs");
+                }
+                final Band nextBand = prod.getBand(nextBandName);
+                if (!nextBand.getUnit().contains(Unit.IMAGINARY)) {
+                    throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
+                }
+                bandList.add(band);
+                bandList.add(nextBand);
+                i++;
+            } else {
+                bandList.add(band);
             }
         }
         return bandList.toArray(new Band[bandList.size()]);
+    }
+
+    private Product getProduct(String productName) {
+        for(Product prod : sourceProduct) {
+            if(prod.getName().equals(productName)) {
+                return prod;
+            }
+        }
+        return null;
     }
 
     private static boolean contains(final String[] nameList, final String name) {
