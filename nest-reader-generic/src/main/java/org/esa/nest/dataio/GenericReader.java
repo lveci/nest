@@ -89,6 +89,8 @@ public class GenericReader extends AbstractProductReader {
         final ImageInputStream imageStream = FileImageInputStreamExtImpl.createInputStream(inputFile);
         binaryReader = new BinaryFileReader(imageStream);
 
+        product.setPreferredTileSize(rasterWidth, 500);
+
         return product;
     }
 
@@ -129,15 +131,25 @@ public class GenericReader extends AbstractProductReader {
         try {
             switch(dataType) {
             case ProductData.TYPE_INT8:
-            case ProductData.TYPE_UINT8:
                 readBandRasterDataByte(sourceOffsetX, sourceOffsetY,
                                 sourceWidth, sourceHeight, sourceStepX, sourceStepY,
                                 _startPosImageRecords +_imageHeaderLength, _imageRecordLength,
                                 destWidth, destBuffer, binaryReader, pm);
                 break;
+            case ProductData.TYPE_UINT8:
+                readBandRasterDataUByte(sourceOffsetX, sourceOffsetY,
+                                sourceWidth, sourceHeight, sourceStepX, sourceStepY,
+                                _startPosImageRecords +_imageHeaderLength, _imageRecordLength,
+                                destWidth, destBuffer, binaryReader, pm);
+                break;
             case ProductData.TYPE_INT16:
-            case ProductData.TYPE_UINT16:
                 readBandRasterDataShort(sourceOffsetX, sourceOffsetY,
+                                sourceWidth, sourceHeight, sourceStepX, sourceStepY,
+                                _startPosImageRecords +_imageHeaderLength, _imageRecordLength,
+                                destWidth, destBuffer, binaryReader, pm);
+                break;
+            case ProductData.TYPE_UINT16:
+                readBandRasterDataUShort(sourceOffsetX, sourceOffsetY,
                                 sourceWidth, sourceHeight, sourceStepX, sourceStepY,
                                 _startPosImageRecords +_imageHeaderLength, _imageRecordLength,
                                 destWidth, destBuffer, binaryReader, pm);
@@ -198,12 +210,59 @@ public class GenericReader extends AbstractProductReader {
                     binaryReader.seek(imageRecordLength * y + xpos);
                     binaryReader.read(srcLine);
                 }
-
+                
                 // Copy source line into destination buffer
                 final int currentLineIndex = (y - sourceOffsetY) * destWidth;
                 if (sourceStepX == 1) {
 
                     System.arraycopy(srcLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+                } else {
+                    copyLine(srcLine, destLine, sourceStepX);
+
+                    System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+                }
+
+                pm.worked(1);
+            }
+
+        } finally {
+            pm.done();
+        }
+    }
+
+    public static void readBandRasterDataUShort(final int sourceOffsetX, final int sourceOffsetY,
+                                        final int sourceWidth, final int sourceHeight,
+                                        final int sourceStepX, final int sourceStepY,
+                                        final int imageStartOffset, int imageRecordLength,
+                                        final int destWidth, final ProductData destBuffer,
+                                        final BinaryFileReader binaryReader, final ProgressMonitor pm)
+                                        throws IOException, IllegalBinaryFormatException
+    {
+        final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
+        final int x = sourceOffsetX * 4;
+        final long xpos = imageStartOffset + x;
+
+        pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
+        try {
+            final char[] srcLine = new char[sourceWidth];
+            final short[] destLine = new short[destWidth];
+            for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
+                if (pm.isCanceled()) {
+                    break;
+                }
+
+                // Read source line
+                synchronized (binaryReader) {
+                    binaryReader.seek(imageRecordLength * y + xpos);
+                    binaryReader.read(srcLine);
+                }
+
+                // Copy source line into destination buffer
+                final int currentLineIndex = (y - sourceOffsetY) * destWidth;
+                if (sourceStepX == 1) {
+                    copyLine(srcLine, destLine, sourceStepX);
+
+                    System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
                 } else {
                     copyLine(srcLine, destLine, sourceStepX);
 
@@ -265,6 +324,58 @@ public class GenericReader extends AbstractProductReader {
             pm.done();
         }
     }
+
+    public static void readBandRasterDataUByte(final int sourceOffsetX, final int sourceOffsetY,
+                                              final int sourceWidth, final int sourceHeight,
+                                              final int sourceStepX, final int sourceStepY,
+                                              final int imageStartOffset, int imageRecordLength,
+                                              final int destWidth, final ProductData destBuffer,
+                                              final BinaryFileReader binaryReader, final ProgressMonitor pm)
+            throws IOException, IllegalBinaryFormatException
+    {
+        final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
+        final int x = sourceOffsetX * 2;
+        final long xpos = imageStartOffset + x;
+
+        pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
+        try {
+            final byte[] srcLine = new byte[sourceWidth];
+            byte[] destLine = null;
+            if (sourceStepX != 1)
+                destLine = new byte[destWidth];
+            for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
+                if (pm.isCanceled()) {
+                    break;
+                }
+
+                // Read source line
+                synchronized (binaryReader) {
+                    binaryReader.seek(imageRecordLength * y + xpos);
+                    //binaryReader.read(srcLine);
+                    for(int i=0; i < sourceWidth; ++i) {
+                        srcLine[i] = (byte)binaryReader.readUB1();
+                    }
+                }
+
+                // Copy source line into destination buffer
+                final int currentLineIndex = (y - sourceOffsetY) * destWidth;
+                if (sourceStepX == 1) {
+
+                    System.arraycopy(srcLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+                } else {
+                    copyLine(srcLine, destLine, sourceStepX);
+
+                    System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+                }
+
+                pm.worked(1);
+            }
+
+        } finally {
+            pm.done();
+        }
+    }
+
 
     public static void readBandRasterDataInt(final int sourceOffsetX, final int sourceOffsetY,
                                              final int sourceWidth, final int sourceHeight,
@@ -590,15 +701,27 @@ public class GenericReader extends AbstractProductReader {
         }
     }
 
+    private static void copyLine(final byte[] srcLine, final byte[] destLine, final int sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
+            destLine[x] = srcLine[i];
+        }
+    }
+
     private static void copyLine(final short[] srcLine, final short[] destLine, final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[i];
         }
     }
 
-    private static void copyLine(final byte[] srcLine, final byte[] destLine, final int sourceStepX) {
+    private static void copyLine(final char[] srcLine, final char[] destLine, final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[i];
+        }
+    }
+
+    private static void copyLine(final char[] srcLine, final short[] destLine, final int sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
+            destLine[x] = (short)srcLine[i];
         }
     }
 

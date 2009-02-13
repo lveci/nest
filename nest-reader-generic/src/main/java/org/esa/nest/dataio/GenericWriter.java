@@ -15,7 +15,7 @@ import java.io.IOException;
 
 public class GenericWriter extends AbstractProductWriter {
 
-    private ImageOutputStream _outputStream;
+    private ImageOutputStream _outputStream = null;
 
     /**
      * Construct a new instance of a product writer for the given product writer plug-in.

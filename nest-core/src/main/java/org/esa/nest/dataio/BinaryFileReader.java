@@ -3,6 +3,7 @@ package org.esa.nest.dataio;
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.nio.ByteOrder;
 
 /**
  * A reader for reading binary files 
@@ -24,6 +25,10 @@ public final class BinaryFileReader {
         _stream.close();
     }
 
+    public void setByteOrder(ByteOrder order) {
+         _stream.setByteOrder(order);
+    }
+
     public void seek(final long pos) throws IOException {
         _stream.seek(pos);
     }
@@ -42,10 +47,30 @@ public final class BinaryFileReader {
         }
     }
 
+    public int readUB1() throws IOException, IllegalBinaryFormatException {
+        final long streamPosition = _stream.getStreamPosition();
+        try {
+            return _stream.readUnsignedByte();
+        } catch (IOException e) {
+            final String message = String.format(EM_READING_X_TYPE, new Object[]{"B2"});
+            throw new IllegalBinaryFormatException(message, streamPosition, e);
+        }
+    }
+
     public short readB2() throws IOException, IllegalBinaryFormatException {
         final long streamPosition = _stream.getStreamPosition();
         try {
             return _stream.readShort();
+        } catch (IOException e) {
+            final String message = String.format(EM_READING_X_TYPE, new Object[]{"B2"});
+            throw new IllegalBinaryFormatException(message, streamPosition, e);
+        }
+    }
+
+    public int readUB2() throws IOException, IllegalBinaryFormatException {
+        final long streamPosition = _stream.getStreamPosition();
+        try {
+            return _stream.readUnsignedShort();
         } catch (IOException e) {
             final String message = String.format(EM_READING_X_TYPE, new Object[]{"B2"});
             throw new IllegalBinaryFormatException(message, streamPosition, e);

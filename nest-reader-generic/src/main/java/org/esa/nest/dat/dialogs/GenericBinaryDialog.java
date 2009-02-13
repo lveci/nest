@@ -16,10 +16,10 @@ public class GenericBinaryDialog extends ModalDialog {
     private final NumberFormat numFormat = NumberFormat.getNumberInstance();
     private final ProteryListener propListener = new ProteryListener();
 
-    private int rasterWidth = 1000;
-    private int rasterHeight = 1000;
+    private int rasterWidth = 1494;
+    private int rasterHeight = 1215;
     private int numBands = 1;
-    private int dataType = ProductData.TYPE_INT8;
+    private int dataType = ProductData.TYPE_UINT16;
     private int headerBytes = 0;
 
     private final JFormattedTextField rasterWidthField = DialogUtils.createFormattedTextField(numFormat, rasterWidth, propListener);
@@ -28,10 +28,10 @@ public class GenericBinaryDialog extends ModalDialog {
     private final JFormattedTextField headerBytesField = DialogUtils.createFormattedTextField(numFormat, headerBytes, propListener);
 
     private final JComboBox dataTypeBox = new JComboBox(new String[] {  ProductData.TYPESTRING_INT8,
-                                                                        ProductData.TYPESTRING_INT16,
-                                                                        ProductData.TYPESTRING_INT32,
                                                                         ProductData.TYPESTRING_UINT8,
+                                                                        ProductData.TYPESTRING_INT16,
                                                                         ProductData.TYPESTRING_UINT16,
+                                                                        ProductData.TYPESTRING_INT32,
                                                                         ProductData.TYPESTRING_UINT32,
                                                                         ProductData.TYPESTRING_FLOAT32,
                                                                         ProductData.TYPESTRING_FLOAT64 } );
@@ -49,7 +49,7 @@ public class GenericBinaryDialog extends ModalDialog {
     @Override
     public int show() {
         dataTypeBox.addPropertyChangeListener("value", propListener);
-        dataTypeBox.setSelectedItem(ProductData.TYPESTRING_INT16);
+        dataTypeBox.setSelectedItem(dataType);
 
         createUI();
         return super.show();
