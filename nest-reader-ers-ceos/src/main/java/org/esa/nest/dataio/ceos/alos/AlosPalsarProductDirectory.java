@@ -34,12 +34,12 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     private static final int METER_PER_KILOMETER = 1000;
 
     private final File _baseDir;
-    private AlosPalsarVolumeDirectoryFile _volumeDirectoryFile;
-    private AlosPalsarImageFile[] _imageFiles;
-    private AlosPalsarLeaderFile _leaderFile;
+    private AlosPalsarVolumeDirectoryFile _volumeDirectoryFile = null;
+    private AlosPalsarImageFile[] _imageFiles = null;
+    private AlosPalsarLeaderFile _leaderFile = null;
 
-    private int _sceneWidth;
-    private int _sceneHeight;
+    private int _sceneWidth = 0;
+    private int _sceneHeight = 0;
 
     private transient Map<String, AlosPalsarImageFile> bandImageFileMap = new HashMap<String, AlosPalsarImageFile>(1);
 
@@ -49,6 +49,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         _baseDir = dir;
     }
 
+    @Override
     protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         readVolumeDirectoryFile();
         _leaderFile = new AlosPalsarLeaderFile(new FileImageInputStream(CeosHelper.getCEOSFile(_baseDir, "LED")));
@@ -140,8 +141,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             }
         }
 
-        //product.setStartTime(getUTCScanStartTime());
-        //product.setEndTime(getUTCScanStopTime());
+        product.setStartTime(getUTCScanStartTime());
+        product.setEndTime(getUTCScanStopTime());
         product.setDescription(getProductDescription());
 
         addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
@@ -208,10 +209,12 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
     }
 
+    @Override
     public CEOSImageFile getImageFile(final Band band) throws IOException, IllegalBinaryFormatException {
         return bandImageFileMap.get(band.getName());
     }
 
+    @Override
     public void close() throws IOException {
         for (int i = 0; i < _imageFiles.length; i++) {
             _imageFiles[i].close();
@@ -255,7 +258,6 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
     private void addMetaData(final Product product) throws IOException {
         final MetadataElement root = product.getMetadataRoot();
-        root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
 
         final MetadataElement leadMetadata = new MetadataElement("Leader");
         _leaderFile.addLeaderMetadata(leadMetadata);
@@ -278,10 +280,10 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
-        MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
-        BaseRecord sceneRec = _leaderFile.getSceneRecord();
-        BaseRecord mapProjRec = _leaderFile.getMapProjRecord();
-        BaseRecord radiometricRec = _leaderFile.getRadiometricRecord();
+        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        final BaseRecord sceneRec = _leaderFile.getSceneRecord();
+        final BaseRecord mapProjRec = _leaderFile.getMapProjRecord();
+        final BaseRecord radiometricRec = _leaderFile.getRadiometricRecord();
 
         //mph
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, getProductName());
@@ -302,8 +304,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
         //        _leaderFile.getFacilityRecord().getAttributeString("Time of input state vector used to processed the image"));
 
-        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getUTCScanStartTime());
-        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, getUTCScanStopTime());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getUTCScanStartTime());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, getUTCScanStopTime());
 
         if(mapProjRec != null) {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
@@ -331,6 +333,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
                 sceneRec.getAttributeString("Processing algorithm identifier"));
+        
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
                 getPolarization(_leaderFile.getSceneRecord().getAttributeString("Sensor ID and mode of operation for this channel")));
 
@@ -356,6 +359,9 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE,
                 product.getRawStorageSize());
 
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.isMapProjected, isMapProjected());
+
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.replica_power_corr_flag, 0);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
@@ -363,7 +369,6 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         absRoot.getAttribute(AbstractMetadata.calibration_factor).setUnit("dB");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
                 sceneRec.getAttributeDouble("Range sampling rate"));
-
     }
 
     private ProductData.UTC getProcTime() {
@@ -382,6 +387,20 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         double heading = _leaderFile.getMapProjRecord().getAttributeDouble("Platform heading at nadir corresponding to scene centre");
         if(heading > 90) return "DESCENDING";
         else return "ASCENDING";
+    }
+
+    private int isGroundRange() {
+        final String projDesc = _leaderFile.getMapProjRecord().getAttributeString("Map projection descriptor").toLowerCase();
+        if(projDesc.contains("slant"))
+            return 0;
+        return 1;
+    }
+
+    private int isMapProjected() {
+        final String projDesc = _leaderFile.getMapProjRecord().getAttributeString("Map projection descriptor").toLowerCase();
+        if(projDesc.contains("geo"))
+            return 1;
+        return 0;
     }
 
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {

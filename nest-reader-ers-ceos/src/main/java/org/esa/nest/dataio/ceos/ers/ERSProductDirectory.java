@@ -217,7 +217,6 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
     private void addMetaData(final Product product) throws IOException {
         final MetadataElement root = product.getMetadataRoot();
-        root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
 
         final MetadataElement leadMetadata = new MetadataElement("Leader");
         _leaderFile.addLeaderMetadata(leadMetadata);
@@ -240,10 +239,10 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
-        MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
-        BaseRecord sceneRec = _leaderFile.getSceneRecord();
-        BaseRecord mapProjRec = _leaderFile.getMapProjRecord();
-        BaseRecord facilityRec = _leaderFile.getFacilityRecord();
+        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        final BaseRecord sceneRec = _leaderFile.getSceneRecord();
+        final BaseRecord mapProjRec = _leaderFile.getMapProjRecord();
+        final BaseRecord facilityRec = _leaderFile.getFacilityRecord();
 
         //mph
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, getProductName());
@@ -319,11 +318,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 product.getRawStorageSize());
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange());
-        int isMapProjected = 0;
-        if(productType.contains("IMG")) {
-            isMapProjected = 1;
-        }
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.isMapProjected, isMapProjected);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.isMapProjected, isMapProjected());
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag,
                 facilityRec.getAttributeInt("Antenna pattern correction flag"));
@@ -361,6 +356,13 @@ class ERSProductDirectory extends CEOSProductDirectory {
         if(projDesc.contains("slant"))
             return 0;
         return 1;
+    }
+
+    private int isMapProjected() {
+        if(productType.contains("IMG") || productType.contains("GEC")) {
+            return 1;
+        }
+        return 0;
     }
 
     private double getLineTimeInterval() {

@@ -248,6 +248,8 @@ public class AbstractMetadata {
 
     public static ProductData.UTC parseUTC(final String timeStr) {
         try {
+            if(timeStr == null)
+                return new ProductData.UTC(0);
             return ProductData.UTC.parse(timeStr);
         } catch(ParseException e) {
             return new ProductData.UTC(0);

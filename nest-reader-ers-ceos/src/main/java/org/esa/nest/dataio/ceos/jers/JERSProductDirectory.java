@@ -44,6 +44,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
 
     }
 
+    @Override
     protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         readVolumeDirectoryFile();
         _leaderFile = new JERSLeaderFile(createInputStream(JERSVolumeDirectoryFile.getLeaderFileName()));
@@ -162,10 +163,12 @@ class JERSProductDirectory extends CEOSProductDirectory {
         product.addTiePointGrid(slantRangeTimeGrid);
     }
 
+    @Override
     public CEOSImageFile getImageFile(final Band band) throws IOException, IllegalBinaryFormatException {
         return bandImageFileMap.get(band.getName());
     }
 
+    @Override
     public void close() throws IOException {
         for (int i = 0; i < _imageFiles.length; i++) {
             _imageFiles[i].close();
@@ -205,7 +208,6 @@ class JERSProductDirectory extends CEOSProductDirectory {
 
     private void addMetaData(final Product product) throws IOException, IllegalBinaryFormatException {
         final MetadataElement root = product.getMetadataRoot();
-        root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
 
         final MetadataElement leadMetadata = new MetadataElement("Leader");
         _leaderFile.addLeaderMetadata(leadMetadata);
@@ -222,17 +224,16 @@ class JERSProductDirectory extends CEOSProductDirectory {
 
         addSummaryMetadata(root);
         addAbstractedMetadataHeader(product, root);
-
     }
 
     private void addAbstractedMetadataHeader(Product product, MetadataElement root) {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
-        MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
-        BaseRecord sceneRec = _leaderFile.getSceneRecord();
-        BaseRecord mapProjRec = _leaderFile.getMapProjRecord();
-        BaseRecord facilityRec = _leaderFile.getFacilityRecord();
+        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        final BaseRecord sceneRec = _leaderFile.getSceneRecord();
+        final BaseRecord mapProjRec = _leaderFile.getMapProjRecord();
+        final BaseRecord facilityRec = _leaderFile.getFacilityRecord();
 
         //mph
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, getProductName());
@@ -277,7 +278,6 @@ class JERSProductDirectory extends CEOSProductDirectory {
                 mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));
 
         //sph
-
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass());
         AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
@@ -307,6 +307,8 @@ class JERSProductDirectory extends CEOSProductDirectory {
                 product.getRawStorageSize());
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.isMapProjected, isMapProjected());
+        
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag,
                 facilityRec.getAttributeInt("Antenna pattern correction flag"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag,
@@ -342,6 +344,13 @@ class JERSProductDirectory extends CEOSProductDirectory {
         if(projDesc.contains("slant"))
             return 0;
         return 1;
+    }
+
+    private int isMapProjected() {
+        if(productType.contains("IMG") || productType.contains("GEC")) {
+            return 1;
+        }
+        return 0;
     }
 
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {

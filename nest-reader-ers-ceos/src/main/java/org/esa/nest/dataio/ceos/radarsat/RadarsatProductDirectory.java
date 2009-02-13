@@ -6,6 +6,7 @@ import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
+import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.imageio.stream.FileImageInputStream;
@@ -26,12 +27,12 @@ import java.util.*;
 class RadarsatProductDirectory extends CEOSProductDirectory {
 
     private final File _baseDir;
-    private RadarsatVolumeDirectoryFile _volumeDirectoryFile;
-    private RadarsatImageFile[] _imageFiles;
-    private RadarsatLeaderFile _leaderFile;
+    private RadarsatVolumeDirectoryFile _volumeDirectoryFile = null;
+    private RadarsatImageFile[] _imageFiles = null;
+    private RadarsatLeaderFile _leaderFile = null;
 
-    private int _sceneWidth;
-    private int _sceneHeight;
+    private int _sceneWidth = 0;
+    private int _sceneHeight = 0;
 
     private transient Map<String, RadarsatImageFile> bandImageFileMap = new HashMap<String, RadarsatImageFile>(1);
 
@@ -192,7 +193,6 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
     private void addMetaData(final Product product) throws IOException, IllegalBinaryFormatException {
 
         final MetadataElement root = product.getMetadataRoot();
-        root.addElement(new MetadataElement("Abstracted Metadata"));
 
         final MetadataElement leadMetadata = new MetadataElement("Leader");
         _leaderFile.addLeaderMetadata(leadMetadata);
@@ -210,8 +210,9 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
-        MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
-
+        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        final BaseRecord mapProjRec = _leaderFile.getMapProjRecord();
+        final BaseRecord radiometricRec = _leaderFile.getRadiometricRecord();
 
         //mph
         AbstractMetadata.setAttribute(absRoot, "PRODUCT", getProductName());
@@ -220,10 +221,36 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, getProcTime() );
 
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
+                mapProjRec.getAttributeDouble("1st line 1st pixel geodetic latitude"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_long,
+                mapProjRec.getAttributeDouble("1st line 1st pixel geodetic longitude"));
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_lat,
+                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic latitude"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_long,
+                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic longitude"));
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_lat,
+                mapProjRec.getAttributeDouble("Last line 1st pixel geodetic latitude"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_long,
+                mapProjRec.getAttributeDouble("Last line 1st pixel geodetic longitude"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_lat,
+                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic latitude"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long,
+                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));
 
         //sph
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass());
         AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());
 
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
+                mapProjRec.getAttributeDouble("Nominal inter-pixel distance in output scene"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
+                mapProjRec.getAttributeDouble("Nominal inter-line distance in output scene"));
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type,
+                ProductData.getTypeString(ProductData.TYPE_INT16)); 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
                 product.getSceneRasterHeight());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
@@ -231,18 +258,23 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE,
                 product.getRawStorageSize());
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
-                _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-pixel distance in output scene"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
-                _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-line distance in output scene"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
+                radiometricRec.getAttributeDouble("Calibration constant"));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.replica_power_corr_flag, 0);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
     }
 
+    private String getPass() {
+        final double heading = _leaderFile.getMapProjRecord().getAttributeDouble("Platform heading at nadir corresponding to scene centre");
+        if(heading > 90) return "DESCENDING";
+        else return "ASCENDING";
+    }
+
     private ProductData.UTC getProcTime() {
         try {
-            String procTime = _volumeDirectoryFile.getVolumeDescriptorRecord().getAttributeString("Logical volume preparation date").trim();
+            final String procTime = _volumeDirectoryFile.getVolumeDescriptorRecord().
+                    getAttributeString("Logical volume preparation date").trim();
 
             return ProductData.UTC.parse(procTime, "yyyyMMdd");
         } catch(ParseException e) {
@@ -306,11 +338,11 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         return _volumeDirectoryFile.getProductName();
     }
 
-    private String getProductDescription() throws IOException, IllegalBinaryFormatException {
-        return RadarsatConstants.PRODUCT_DESCRIPTION_PREFIX + _leaderFile.getProductLevel();
+    private static String getProductDescription() {
+        return RadarsatConstants.PRODUCT_DESCRIPTION_PREFIX + RadarsatLeaderFile.getProductLevel();
     }
 
-    private void assertSameWidthAndHeightForAllImages() throws IOException, IllegalBinaryFormatException {
+    private void assertSameWidthAndHeightForAllImages() {
         for (int i = 0; i < _imageFiles.length; i++) {
             final RadarsatImageFile imageFile = _imageFiles[i];
             Guardian.assertTrue("_sceneWidth == imageFile[" + i + "].getRasterWidth()",
