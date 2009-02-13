@@ -61,13 +61,16 @@ public class PCAStatisticsOp extends Operator {
                 label="Eigenvalue Threshold")
     private double eigenvalueThreshold = 1.0;
 
+    @Parameter(description = "Show the eigenvalues", defaultValue = "1", label="Show Eigenvalues")
+    private boolean showEigenvalues = false;
+
     private boolean statsCalculated = false;
-    private int numOfPixels = 0;    // total number of pixel values
-    private int numOfSourceBands;   // number of user selected bands
-    private double[] sum;           // summation of pixel values for each band
-    private double[][] sumCross;    // summation of the dot product of each band and the master band
-    private double[] mean;          // mean of pixel values for each band
-    private double[][] meanCross;   // mean of the dot product of each band and the master band
+    private int numOfPixels = 0;        // total number of pixel values
+    private int numOfSourceBands = 0;   // number of user selected bands
+    private double[] sum = null;        // summation of pixel values for each band
+    private double[][] sumCross = null; // summation of the dot product of each band and the master band
+    private double[] mean = null;       // mean of pixel values for each band
+    private double[][] meanCross = null;// mean of the dot product of each band and the master band
 
 //    private final HashMap<String, Integer> statisticsBandIndex = new HashMap<String, Integer>();
 
@@ -110,7 +113,7 @@ public class PCAStatisticsOp extends Operator {
                 writeStatsToMetadata();
             }
         } catch(Exception e) {
-            throw new OperatorException(e.getMessage());
+            throw new OperatorException(e);
         }
     }
 
@@ -294,16 +297,16 @@ public class PCAStatisticsOp extends Operator {
 
         // create temporary metadata
         final MetadataElement root = sourceProduct.getMetadataRoot();
-        final MetadataElement tempElemRoot = createElement(root, "temporary metadata");
-        setAttribute(tempElemRoot, "eigenvalue threshold", eigenvalueThreshold);
+        final MetadataElement tempElemRoot = AbstractMetadata.addElement(root, "temporary metadata");
+        tempElemRoot.setAttributeDouble("eigenvalue threshold", eigenvalueThreshold);
+        tempElemRoot.setAttributeInt("showEigenvalues", showEigenvalues ? 1 : 0);
 
-        final MetadataElement staSubElemRoot = createElement(tempElemRoot, "statistics");
+        final MetadataElement staSubElemRoot = AbstractMetadata.addElement(tempElemRoot, "statistics");
         for (int i = 0; i < numOfSourceBands; i++)  {
-            String bandName = sourceBandNames[i];
-            final MetadataElement subElemRoot = createElement(staSubElemRoot, bandName);
-            setAttribute(subElemRoot, "mean", mean[i]);
+            final MetadataElement subElemRoot = AbstractMetadata.addElement(staSubElemRoot, sourceBandNames[i]);
+            subElemRoot.setAttributeDouble("mean", mean[i]);
             for (int j = 0; j < numOfSourceBands; j++) {
-                setAttribute(subElemRoot, "cross mean " + j, meanCross[i][j]);
+                subElemRoot.setAttributeDouble("cross mean " + j, meanCross[i][j]);
             }
         }
         
@@ -314,70 +317,6 @@ public class PCAStatisticsOp extends Operator {
         } catch(Exception e) {
             throw new OperatorException(e.getMessage());
         }
-    }
-
-    /**
-     * Create sub-metadata element.
-     * @param root The root metadata element.
-     * @param tag The sub-metadata element name.
-     * @return The sub-metadata element.
-     */
-    public static MetadataElement createElement(MetadataElement root, String tag) {
-
-        MetadataElement subElemRoot = root.getElement(tag);
-        if(subElemRoot == null) {
-            subElemRoot = new MetadataElement(tag);
-            root.addElement(subElemRoot);
-        }
-        return subElemRoot;
-    }
-
-    /**
-     * Set attribute value.
-     * @param root The root metadata element.
-     * @param tag The attribute name.
-     * @param value The value for the attribute.
-     */
-    private static void setAttribute(MetadataElement root, String tag, String value) {
-
-        MetadataAttribute attr = root.getAttribute(tag);
-        if(attr == null) {
-            attr = new MetadataAttribute(tag, ProductData.TYPE_ASCII, 1);
-            root.addAttributeFast(attr);
-        }
-        AbstractMetadata.setAttribute(root, tag, value);
-    }
-
-    /**
-     * Set attribute value.
-     * @param root The root metadata element.
-     * @param tag The attribute name.
-     * @param value The value for the attribute.
-     */
-    static void setAttribute(MetadataElement root, String tag, double value) {
-
-        MetadataAttribute attr = root.getAttribute(tag);
-        if(attr == null) {
-            attr = new MetadataAttribute(tag, ProductData.TYPE_FLOAT64, 1);
-            root.addAttributeFast(attr);
-        }
-        AbstractMetadata.setAttribute(root, tag, value);
-    }
-
-    /**
-     * Set attribute value.
-     * @param root The root metadata element.
-     * @param tag The attribute name.
-     * @param value The value for the attribute.
-     */
-    static void setAttribute(MetadataElement root, String tag, int value) {
-
-        MetadataAttribute attr = root.getAttribute(tag);
-        if(attr == null) {
-            attr = new MetadataAttribute(tag, ProductData.TYPE_INT32, 1);
-            root.addAttributeFast(attr);
-        }
-        AbstractMetadata.setAttribute(root, tag, value);
     }
 
     // The following functions are for unit test only.

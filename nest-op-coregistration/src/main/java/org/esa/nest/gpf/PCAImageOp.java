@@ -58,12 +58,13 @@ public class PCAImageOp extends Operator {
 
     private boolean pcaImageComputed = false;
     private int numOfSourceBands = 0; // total number of user selected slave bands
-    private int numPCA; // number of PCA images output
-    private String[] sourceBandNames; // band names user selected slave bands
-    private double eigenvalueThreshold; // threshold for selecting eigenvalues
-    private double[][] eigenVectorMatrices; // eigenvector matrices for all slave bands
-    private double[] eigenValues; // eigenvalues for all slave bands
-    private double[] minPCA; // min value for first and second PCA images for all master/slave band pairs
+    private int numPCA = 0; // number of PCA images output
+    private String[] sourceBandNames = null; // band names user selected slave bands
+    private double eigenvalueThreshold = 0; // threshold for selecting eigenvalues
+    private int showEigenvalues = 0;
+    private double[][] eigenVectorMatrices = null; // eigenvector matrices for all slave bands
+    private double[] eigenValues = null; // eigenvalues for all slave bands
+    private double[] minPCA = null; // min value for first and second PCA images for all master/slave band pairs
     private boolean reloadStats = true;
 
     /**
@@ -116,32 +117,33 @@ public class PCAImageOp extends Operator {
                 return false;
             }
             eigenvalueThreshold = tempElemRoot.getAttributeDouble("eigenvalue threshold");
+            showEigenvalues = tempElemRoot.getAttributeInt("showEigenvalues");
             numPCA = tempElemRoot.getAttributeInt("number of PCA images");
 
-            MetadataElement staSubElemRoot = tempElemRoot.getElement("statistics");
+            final MetadataElement staSubElemRoot = tempElemRoot.getElement("statistics");
             numOfSourceBands = staSubElemRoot.getNumElements();
             sourceBandNames = new String[numOfSourceBands];
             for (int i = 0; i < numOfSourceBands; i++) {
-                MetadataElement subElemRoot = staSubElemRoot.getElementAt(i);
+                final MetadataElement subElemRoot = staSubElemRoot.getElementAt(i);
                 sourceBandNames[i] = subElemRoot.getName();
             }
 
             minPCA = new double[numPCA];
-            MetadataElement minSubElemRoot = tempElemRoot.getElement("PCA min");
+            final MetadataElement minSubElemRoot = tempElemRoot.getElement("PCA min");
             for (int i = 0; i < numPCA; i++)  {
                 minPCA[i] = minSubElemRoot.getAttributeDouble("min " + i);
             }
 
             eigenValues = new double[numOfSourceBands];
-            MetadataElement eigenvalueSubElemRoot = tempElemRoot.getElement("eigenvalues");
+            final MetadataElement eigenvalueSubElemRoot = tempElemRoot.getElement("eigenvalues");
             for (int i = 0; i < numOfSourceBands; i++)  {
                 eigenValues[i] = eigenvalueSubElemRoot.getAttributeDouble("element " + i);
             }
 
             eigenVectorMatrices = new double[numOfSourceBands][numOfSourceBands];
-            MetadataElement eigenvectorSubElemRoot = tempElemRoot.getElement("eigenvectors");
+            final MetadataElement eigenvectorSubElemRoot = tempElemRoot.getElement("eigenvectors");
             for (int j = 0; j < numOfSourceBands; j++)  {
-                MetadataElement colSubElemRoot = eigenvectorSubElemRoot.getElement("vector " + j);
+                final MetadataElement colSubElemRoot = eigenvectorSubElemRoot.getElement("vector " + j);
                 for (int i = 0; i < numOfSourceBands; i++) {
                     eigenVectorMatrices[i][j] = colSubElemRoot.getAttributeDouble("element " + i);
                 }
@@ -163,7 +165,6 @@ public class PCAImageOp extends Operator {
                                     sourceProduct.getSceneRasterWidth(),
                                     sourceProduct.getSceneRasterHeight());
 
-        //targetProduct.setPreferredTileSize(JAI.getDefaultTileSize());
         targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 10);
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
@@ -195,7 +196,7 @@ public class PCAImageOp extends Operator {
 
         for (int i = 0; i < numPCA; i++) {
             final String targetBandName = "PC" + i;
-            Band targetBand = new Band(targetBandName, ProductData.TYPE_FLOAT32, imageWidth, imageHeight);
+            final Band targetBand = new Band(targetBandName, ProductData.TYPE_FLOAT32, imageWidth, imageHeight);
             targetBand.setUnit(unit);
             targetProduct.addBand(targetBand);
         }
@@ -222,7 +223,7 @@ public class PCAImageOp extends Operator {
         }
 
         try {
-            ProductData[] bandsRawSamples = new ProductData[numOfSourceBands];
+            final ProductData[] bandsRawSamples = new ProductData[numOfSourceBands];
             for (int i = 0; i < numOfSourceBands; i++) {
                 bandsRawSamples[i] =
                         getSourceTile(sourceProduct.getBand(sourceBandNames[i]), targetRectangle, pm).getRawSamples();
@@ -286,14 +287,14 @@ public class PCAImageOp extends Operator {
 
     private void createReportFile() {
 
-        String fileName = sourceProduct.getName() + "_pca_report.txt";
+        final File appUserDir = new File(DatUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
+        if(!appUserDir.exists()) {
+            appUserDir.mkdirs();
+        }
+
+        final File reportFile = new File(appUserDir, sourceProduct.getName() + "_pca_report.txt");
         try {
-            final File appUserDir = new File(DatUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
-            if(!appUserDir.exists()) {
-                appUserDir.mkdirs();
-            }
-            fileName = appUserDir.toString() + File.separator + fileName;
-            final FileOutputStream out = new FileOutputStream(fileName);
+            final FileOutputStream out = new FileOutputStream(reportFile);
 
             // Connect print stream to the output stream
             final PrintStream p = new PrintStream(out);
@@ -315,6 +316,9 @@ public class PCAImageOp extends Operator {
             p.println();
             p.close();
 
+            if(showEigenvalues == 1) {
+                Desktop.getDesktop().edit(reportFile);         
+            }
         } catch(IOException exc) {
             throw new OperatorException(exc);
         }

@@ -197,7 +197,6 @@ public class AbstractMetadata {
             if(value == null)
                 System.out.println(tag + " metadata value is null");
         }
-
     }
 
     /**
@@ -265,7 +264,6 @@ public class AbstractMetadata {
         }
     }
 
-
     public static boolean getAttributeBoolean(final MetadataElement elem, final String tag) throws Exception {
         final int val = elem.getAttributeInt(tag);
         if(val == NO_METADATA)
@@ -317,5 +315,21 @@ public class AbstractMetadata {
             throw new OperatorException("Abstracted Metadata not found");
         }
         return abstractedMetadata;
+    }
+
+    /**
+     * Create sub-metadata element.
+     * @param root The root metadata element.
+     * @param tag The sub-metadata element name.
+     * @return The sub-metadata element.
+     */
+    public static MetadataElement addElement(final MetadataElement root, final String tag) {
+
+        MetadataElement subElemRoot = root.getElement(tag);
+        if(subElemRoot == null) {
+            subElemRoot = new MetadataElement(tag);
+            root.addElement(subElemRoot);
+        }
+        return subElemRoot;
     }
 }

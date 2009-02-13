@@ -32,6 +32,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.media.jai.JAI;
 import java.awt.*;
@@ -99,7 +100,7 @@ public class PCAMinOp extends Operator {
                 addSelectedBands();
             }
         } catch(Exception e) {
-            throw new OperatorException(e.getMessage());
+            throw new OperatorException(e);
         }
     }
 
@@ -118,7 +119,7 @@ public class PCAMinOp extends Operator {
                 return false;
             }
             eigenvalueThreshold = tempElemRoot.getAttributeDouble("eigenvalue threshold");
-            MetadataElement staSubElemRoot = tempElemRoot.getElement("statistics");
+            final MetadataElement staSubElemRoot = tempElemRoot.getElement("statistics");
             numOfSourceBands = staSubElemRoot.getNumElements();
                     
             sourceBandNames = new String[numOfSourceBands];
@@ -126,7 +127,7 @@ public class PCAMinOp extends Operator {
             meanCross = new double[numOfSourceBands][numOfSourceBands];
 
             for (int i = 0; i < numOfSourceBands; i++) {
-                MetadataElement subElemRoot = staSubElemRoot.getElementAt(i);
+                final MetadataElement subElemRoot = staSubElemRoot.getElementAt(i);
                 sourceBandNames[i] = subElemRoot.getName();
                 mean[i] = subElemRoot.getAttributeDouble("mean");
                 for (int j = 0; j < numOfSourceBands; j++) {
@@ -135,7 +136,7 @@ public class PCAMinOp extends Operator {
             }
 
         } catch (Exception e) {
-            throw new OperatorException(e.getMessage());
+            throw new OperatorException(e);
         }
         return true;
     }
@@ -259,7 +260,7 @@ public class PCAMinOp extends Operator {
         }
 
         try {
-            ProductData[] bandsRawSamples = new ProductData[numOfSourceBands];
+            final ProductData[] bandsRawSamples = new ProductData[numOfSourceBands];
             for (int i = 0; i < numOfSourceBands; i++) {
                 bandsRawSamples[i] =
                         getSourceTile(sourceProduct.getBand(sourceBandNames[i]), targetRectangle, pm).getRawSamples();
@@ -305,23 +306,23 @@ public class PCAMinOp extends Operator {
         final MetadataElement root = sourceProduct.getMetadataRoot();
         final MetadataElement tempElemRoot = root.getElement("temporary metadata");
 
-        PCAStatisticsOp.setAttribute(tempElemRoot, "number of PCA images", numPCA);
+        tempElemRoot.setAttributeInt("number of PCA images", numPCA);
 
-        final MetadataElement minSubElemRoot = PCAStatisticsOp.createElement(tempElemRoot, "PCA min");
+        final MetadataElement minSubElemRoot = AbstractMetadata.addElement(tempElemRoot, "PCA min");
         for (int i = 0; i < numPCA; i++)  {
-            PCAStatisticsOp.setAttribute(minSubElemRoot, "min " + i, minPCA[i]);
+            minSubElemRoot.setAttributeDouble("min " + i, minPCA[i]);
         }
 
-        final MetadataElement eigenvalueSubElemRoot = PCAStatisticsOp.createElement(tempElemRoot, "eigenvalues");
+        final MetadataElement eigenvalueSubElemRoot = AbstractMetadata.addElement(tempElemRoot, "eigenvalues");
         for (int i = 0; i < numOfSourceBands; i++)  {
-            PCAStatisticsOp.setAttribute(eigenvalueSubElemRoot, "element " + i, eigenValues[i]);
+            eigenvalueSubElemRoot.setAttributeDouble("element " + i, eigenValues[i]);
         }
 
-        final MetadataElement eigenVectorSubElemRoot = PCAStatisticsOp.createElement(tempElemRoot, "eigenvectors");
+        final MetadataElement eigenVectorSubElemRoot = AbstractMetadata.addElement(tempElemRoot, "eigenvectors");
         for (int j = 0; j < numOfSourceBands; j++)  {
-            MetadataElement colSubElemRoot = PCAStatisticsOp.createElement(eigenVectorSubElemRoot, "vector " + j);
+            MetadataElement colSubElemRoot = AbstractMetadata.addElement(eigenVectorSubElemRoot, "vector " + j);
             for (int i = 0; i < numOfSourceBands; i++) {
-                PCAStatisticsOp.setAttribute(colSubElemRoot, "element " + i, eigenVectorMatrices[i][j]);
+                colSubElemRoot.setAttributeDouble("element " + i, eigenVectorMatrices[i][j]);
             }
         }
 
