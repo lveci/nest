@@ -23,7 +23,9 @@ public class Unit {
     public static final String AMPLITUDE_DB = AMPLITUDE+'_'+DB;
     public static final String INTENSITY_DB = INTENSITY+'_'+DB;
 
-    public enum UnitType { AMPLITUDE, INTENSITY, REAL, IMAGINARY, PHASE, INTENSITY_DB, AMPLITUDE_DB, UNKNOWN }
+    public static final String METERS = "meters";
+
+    public enum UnitType { AMPLITUDE, INTENSITY, REAL, IMAGINARY, PHASE, INTENSITY_DB, AMPLITUDE_DB, METERS, UNKNOWN }
 
     public static UnitType getUnitType(Band sourceBand) {
 
@@ -44,6 +46,8 @@ public class Unit {
              return UnitType.REAL;
         } else if (unit.contains(IMAGINARY)) {
              return UnitType.IMAGINARY;
+        } else if (unit.contains(METERS)) {
+             return UnitType.METERS;
         } else {
             return UnitType.UNKNOWN;
         }
