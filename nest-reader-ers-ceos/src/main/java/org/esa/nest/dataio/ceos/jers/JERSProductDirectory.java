@@ -335,7 +335,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
 
     private String getPass() {
         double heading = _leaderFile.getMapProjRecord().getAttributeDouble("Platform heading at nadir corresponding to scene centre");
-        if(heading > 90) return "DESCENDING";
+        if(heading > 90 && heading < 270) return "DESCENDING";
         else return "ASCENDING";
     }
 
