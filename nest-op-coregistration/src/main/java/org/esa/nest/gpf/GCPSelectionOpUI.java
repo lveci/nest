@@ -4,11 +4,9 @@ import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.GridBagUtils;
-import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.util.DialogUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.datamodel.Unit;
 
 import javax.swing.*;
 
@@ -64,13 +62,13 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
         columnInterpFactor.setSelectedItem(paramMap.get("columnInterpFactor"));
         maxIteration.setText(String.valueOf(paramMap.get("maxIteration")));
         gcpTolerance.setText(String.valueOf(paramMap.get("gcpTolerance")));
+        coherenceWindowSize.setText(String.valueOf(paramMap.get("coherenceWindowSize")));
 
         checkIfComplex();
 
         if(isComplex) {
             fineRegistrationWindowWidth.setSelectedItem(paramMap.get("fineRegistrationWindowWidth"));
             fineRegistrationWindowHeight.setSelectedItem(paramMap.get("fineRegistrationWindowHeight"));
-            coherenceWindowSize.setText(String.valueOf(paramMap.get("coherenceWindowSize")));
             coherenceThreshold.setText(String.valueOf(paramMap.get("coherenceThreshold")));
         }
         enableComplexFields();
@@ -105,11 +103,11 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
         paramMap.put("columnInterpFactor", columnInterpFactor.getSelectedItem());
         paramMap.put("maxIteration", Integer.parseInt(maxIteration.getText()));
         paramMap.put("gcpTolerance", Double.parseDouble(gcpTolerance.getText()));
+        paramMap.put("coherenceWindowSize", Integer.parseInt(coherenceWindowSize.getText()));
 
         if(isComplex) {
             paramMap.put("fineRegistrationWindowWidth", fineRegistrationWindowWidth.getSelectedItem());
             paramMap.put("fineRegistrationWindowHeight", fineRegistrationWindowHeight.getSelectedItem());
-            paramMap.put("coherenceWindowSize", Integer.parseInt(coherenceWindowSize.getText()));
             paramMap.put("coherenceThreshold", Double.parseDouble(coherenceThreshold.getText()));
         }
     }
@@ -144,13 +142,13 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
         DialogUtils.addComponent(contentPane, gbc, "GCP Tolerance:", gcpTolerance);
 
         gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "Fine Registration Window Width:", fineRegistrationWindowWidth);
-        gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "Fine Registration Window Height:", fineRegistrationWindowHeight);
-        gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Coherence Window Size:", coherenceWindowSize);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Coherence Threshold:", coherenceThreshold);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "Fine Registration Window Width:", fineRegistrationWindowWidth);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "Fine Registration Window Height:", fineRegistrationWindowHeight);
         gbc.gridy++;
 
         enableComplexFields();
@@ -163,7 +161,6 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
     private void enableComplexFields() {
         fineRegistrationWindowWidth.setEnabled(isComplex);
         fineRegistrationWindowHeight.setEnabled(isComplex);
-        coherenceWindowSize.setEnabled(isComplex);
         coherenceThreshold.setEnabled(isComplex);
     }
 }
