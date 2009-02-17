@@ -55,8 +55,8 @@ public class MultilookOpUI extends BaseOperatorUI {
     private void setAzimuthLooks() {
         if(sourceProducts != null && sourceProducts.length > 0) {
             try {
-                int nRgLooksVal = Integer.parseInt(nRgLooks.getText());
-                MultilookOp.DerivedParams param = new MultilookOp.DerivedParams();
+                final int nRgLooksVal = Integer.parseInt(nRgLooks.getText());
+                final MultilookOp.DerivedParams param = new MultilookOp.DerivedParams();
                 MultilookOp.getDerivedParameters(sourceProducts[0], nRgLooksVal, param);
                 final int azimuthLooks = param.nAzLooks;
                 nAzLooks.setText(String.valueOf(azimuthLooks));
@@ -80,8 +80,12 @@ public class MultilookOpUI extends BaseOperatorUI {
 
         OperatorUIUtils.updateBandList(bandList, paramMap);
 
-        paramMap.put("nRgLooks", Integer.parseInt(nRgLooks.getText()));
-        paramMap.put("nAzLooks", Integer.parseInt(nAzLooks.getText()));
+        final String nRgLooksStr = nRgLooks.getText();
+        final String nAzLooksStr = nAzLooks.getText();
+        if(nRgLooksStr != null && !nRgLooksStr.isEmpty())
+            paramMap.put("nRgLooks", Integer.parseInt(nRgLooksStr));
+        if(nAzLooksStr != null && !nAzLooksStr.isEmpty())
+            paramMap.put("nAzLooks", Integer.parseInt(nAzLooksStr));
     }
 
     private JComponent createPanel() {

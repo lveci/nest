@@ -75,7 +75,7 @@ public class ProjectionAction extends ExecCommand {
                 return false;
             }
         } catch(Exception e) {
-            return false;
+            return true;
         }
         return true;
     }
