@@ -7,7 +7,7 @@ public class CoregistrationAction extends AbstractVisatAction {
 
     @Override
     public void actionPerformed(final CommandEvent event) {
-        CoregistrationDialog dialog = new CoregistrationDialog(getAppContext(), "Coregistration", "Coregistration");
+        CoregistrationDialog dialog = new CoregistrationDialog(getAppContext(), "Coregistration", "coregistering_products");
         dialog.setTargetProductNameSuffix("_coreg");
         dialog.show();
     }

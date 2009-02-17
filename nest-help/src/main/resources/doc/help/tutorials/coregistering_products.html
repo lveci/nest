@@ -38,36 +38,14 @@ and better than 0.05 pixels for two complex images.<br><br>
 Coregistration is achieved in NEST using two graphs, one for GCP
 Selection and the other to apply the Warp. The Warp graph requires that
 all slave GCPs have been determined before evaluating the warp function.<br>
-<br>
-<h4>GCP Selection</h4>
-The GCP Selection graph uses the <a href="../operators/CollocateOp.html">Collocate</a> and <a href="../operators/GCPSelectionOp.html">GCP Selection</a> operators.<br><br><div style="text-align: left;">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <img style="width: 421px; height: 144px;" alt="gcp selection graph" src="images/gcp_selection_graph.jpg"><br></div><br>
-1. Create a new project for your coregistered data products.<br>
-2. Open a product as the master and produce a subset of it for the
-desired area of interest.<br>
-3. Open the master product and from the <a href="../visat/GcpManagement.html">GCP Manager</a> enter a grid of
-evenly spaced GCPs.<br>4. Save the product.<br>
-5. Open a list of slave products which overlap the master area of
-interest.<br>
-6. From the Graph menu open the GCP Selection graph.<br>
-7. Drag and drop the master product from the project tree to the source
-entry of the Reader.<br>
-8. Drag and drop the slave products from the project tree to the
-ProductSet Reader.<br>9. In the GCP Selection tab, select one source band from the master and one source band from the slave. <br>
-9. Press Process to begin the GCP Selection graph.<br>
-10. You may open the resulting GCP selected slave images and view/modify
-the GCPs that have been shifted in the slaves.<br>
-<h4>Warp Application</h4>
-The Warp graph uses the <a href="../operators/WarpOp.html">Warp</a> operator.<br><br><div style="text-align: left;">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <img style="width: 364px; height: 139px;" alt="warp graph" src="images/warp_graph.jpg"><br></div><br>
-1. From the Graph menu open the Warp graph.<br>
-2. Drag and drop the master product from the project tree to the source
-entry of the Reader.<br>
-3. Drag and drop the GCP selected slave products from the project tree
-to the ProductSet Reader.<br>
-4. Press Process to begin the Warp graph.<br>
-<br>
-Note: Coregistration is currently only available for detected products.
-Coregistration of complex products will be available in the next
-release of the software.<br>
+<br><br>
+1. From the SAR Tools menu, select Coregistration.<br>
+2. Add a master product to the ProductSet Reader.<br>
+3. Add any slave products to the ProductSet reader or drag and drop products from a Project.<br>4.
+In the CreateStack tab, select one source band from the master and one
+source band from the slave for detected products. If you are using
+complex data products, select bands i and q for the master and select
+bands i and q from the slaves. <br>5. In the GCP Selection tab enter the number of GCPs to create.<br>6. In the Warp tab select the RMS threshold and warp polynomial order<br>7. In the Target tab enter in the output product name and location.<br>7. Press the Run button to begin processing.<br>
 <br>
 <hr>
 </body></html>
