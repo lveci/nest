@@ -43,7 +43,7 @@ public class CreateStackOp extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="sourceProduct", label="Slave Bands")
-    String[] slaveBandNames = null;
+    private String[] slaveBandNames = null;
 
     private Product masterProduct = null;
     private final Band[] masterBands = new Band[2];

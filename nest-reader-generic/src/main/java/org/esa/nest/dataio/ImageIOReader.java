@@ -52,6 +52,7 @@ public class ImageIOReader extends AbstractProductReader {
         final Product product = new Product(imgIOFile.getName(),
                                             productType,
                                             imgIOFile.getSceneWidth(), imgIOFile.getSceneHeight());
+        product.setFileLocation(inputFile);
 
         int bandCnt = 1;
         for(int i=0; i < imgIOFile.getNumImages(); ++i) {

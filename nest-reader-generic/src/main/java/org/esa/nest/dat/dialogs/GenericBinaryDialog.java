@@ -4,6 +4,7 @@ import java.awt.*;
 import java.text.NumberFormat;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.nio.ByteOrder;
 import javax.swing.*;
 
 import org.esa.beam.framework.ui.GridBagUtils;
@@ -16,11 +17,12 @@ public class GenericBinaryDialog extends ModalDialog {
     private final NumberFormat numFormat = NumberFormat.getNumberInstance();
     private final ProteryListener propListener = new ProteryListener();
 
-    private int rasterWidth = 1494;
-    private int rasterHeight = 1215;
+    private int rasterWidth = 0;
+    private int rasterHeight = 0;
     private int numBands = 1;
     private int dataType = ProductData.TYPE_UINT16;
     private int headerBytes = 0;
+    private ByteOrder byteOrder = ByteOrder.nativeOrder();
 
     private final JFormattedTextField rasterWidthField = DialogUtils.createFormattedTextField(numFormat, rasterWidth, propListener);
     private final JFormattedTextField rasterHeightField = DialogUtils.createFormattedTextField(numFormat, rasterHeight, propListener);
@@ -36,11 +38,7 @@ public class GenericBinaryDialog extends ModalDialog {
                                                                         ProductData.TYPESTRING_FLOAT32,
                                                                         ProductData.TYPESTRING_FLOAT64 } );
 
-    private final JLabel rasterHeightLabel = new JLabel("Height:");
-    private final JLabel rasterWidthLabel = new JLabel("Width:");
-    private final JLabel numBandsLabel = new JLabel("Number Of Bands:");
-    private final JLabel dataTypeLabel = new JLabel("Data Type:");
-    private final JLabel headerBytesLabel = new JLabel("Header Bytes:");
+    private final JComboBox byteOrderBox = new JComboBox(new String[] {  "BIG ENDIAN", "LITTLE ENDIAN" } );
 
     public GenericBinaryDialog(Window parent, String helpID) {
         super(parent, "Generic Binary", ModalDialog.ID_OK_CANCEL_HELP, helpID); /* I18N */
@@ -49,7 +47,7 @@ public class GenericBinaryDialog extends ModalDialog {
     @Override
     public int show() {
         dataTypeBox.addPropertyChangeListener("value", propListener);
-        dataTypeBox.setSelectedItem(dataType);
+        dataTypeBox.setSelectedItem(ProductData.getTypeString(dataType));
 
         createUI();
         return super.show();
@@ -75,32 +73,20 @@ public class GenericBinaryDialog extends ModalDialog {
         return headerBytes;
     }
 
+    public ByteOrder getByteOrder() {
+        return byteOrder;
+    }
+
     private void createUI() {
 
-        final JPanel contentPane = new JPanel();
-        final GridLayout grid = new GridLayout(0,1);
-        grid.setVgap(5);
+        final DialogUtils.ComponentListPanel contentPane = new DialogUtils.ComponentListPanel();
 
-        //Lay out the labels in a panel.
-        final JPanel labelPane = new JPanel(grid);
-        labelPane.add(rasterWidthLabel);
-        labelPane.add(rasterHeightLabel);
-        labelPane.add(numBandsLabel);
-        labelPane.add(headerBytesLabel);
-        labelPane.add(dataTypeLabel);
-
-        //Layout the text fields in a panel.
-        final JPanel fieldPane = new JPanel(new GridLayout(0,1));
-        fieldPane.add(rasterWidthField);
-        fieldPane.add(rasterHeightField);
-        fieldPane.add(numBandsField);
-        fieldPane.add(headerBytesField);
-        fieldPane.add(dataTypeBox);
-
-        //Put the panels in this panel, labels on left, text fields on right.
-        //contentPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        contentPane.add(labelPane, BorderLayout.CENTER);
-        contentPane.add(fieldPane, BorderLayout.LINE_END);
+        contentPane.addComponent("Width:", rasterWidthField);
+        contentPane.addComponent("Height:", rasterHeightField);
+        contentPane.addComponent("Number Of Bands:", numBandsField);
+        contentPane.addComponent("Data Type:", headerBytesField);
+        contentPane.addComponent("Header Bytes:", dataTypeBox);
+        contentPane.addComponent("Byte Order:", byteOrderBox);
 
         setContent(contentPane);
     }
@@ -115,6 +101,10 @@ public class GenericBinaryDialog extends ModalDialog {
         super.onOK();
 
         dataType = ProductData.getType((String)dataTypeBox.getSelectedItem());
+        if(byteOrderBox.getSelectedItem().equals("BIG ENDIAN"))
+            byteOrder = ByteOrder.BIG_ENDIAN;
+        else
+            byteOrder = ByteOrder.LITTLE_ENDIAN;
     }
 
     @Override
@@ -139,7 +129,7 @@ public class GenericBinaryDialog extends ModalDialog {
             } else if (source == numBandsField) {
                 numBands = ((Number)numBandsField.getValue()).intValue();
             } else if (source == headerBytesField) {
-                dataType = ((Number)headerBytesField.getValue()).intValue();
+                headerBytes = ((Number)headerBytesField.getValue()).intValue();
             }
         }
     }

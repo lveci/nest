@@ -1,0 +1,38 @@
+<?xml version="1.0"?><project>
+  <parent>
+    <artifactId>nest</artifactId>
+    <groupId>org.esa.nest</groupId>
+    <version>2B</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  
+  <groupId>org.esa.nest</groupId>
+  <artifactId>nest-op-orthorectification</artifactId>
+  <name>NEST Orthorectification</name>
+  <version>2B</version>
+  <description>Provides for orthorectifying SAR data</description>
+  
+  <dependencies>
+    <dependency>
+      <groupId>org.esa.beam</groupId>
+      <artifactId>beam-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.esa.beam</groupId>
+      <artifactId>beam-gpf</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.esa.beam</groupId>
+      <artifactId>beam-visat-rcp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.esa.nest</groupId>
+      <artifactId>nest-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.esa.nest</groupId>
+      <artifactId>nest-graph-builder</artifactId>
+    </dependency>
+  </dependencies>
+  
+</project>

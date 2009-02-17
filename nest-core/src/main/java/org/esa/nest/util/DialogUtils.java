@@ -62,4 +62,26 @@ public class DialogUtils {
         button.setActionCommand(name);
         return button;
     }
+
+    public static class ComponentListPanel extends JPanel {
+
+        private final JPanel labelPanel;
+        private final JPanel fieldPanel;
+
+        public ComponentListPanel() {
+            final GridLayout grid = new GridLayout(0,1);
+            grid.setVgap(5);
+
+            labelPanel = new JPanel(grid);
+            fieldPanel = new JPanel(new GridLayout(0,1));
+
+            this.add(labelPanel, BorderLayout.CENTER);
+            this.add(fieldPanel, BorderLayout.LINE_END);
+        }
+
+        public void addComponent(final String labelStr, final JComponent component) {
+            labelPanel.add(new JLabel(labelStr));
+            fieldPanel.add(component);
+        }
+    }
 }

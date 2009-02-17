@@ -14,6 +14,7 @@ import org.esa.nest.dat.dialogs.GenericBinaryDialog;
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteOrder;
 
 /**
  * The product reader for ImageIO products.
@@ -25,10 +26,12 @@ public class GenericReader extends AbstractProductReader {
     private int rasterHeight = 0;
     private int numBands = 1;
     private int dataType = ProductData.TYPE_INT16;
+    private ByteOrder byteOrder = ByteOrder.nativeOrder();
 
-    private int _imageRecordLength = rasterWidth;
+    private int imageRecordLength = rasterWidth;
     private int _startPosImageRecords = 0;
     private int _imageHeaderLength = 0;
+    private ImageInputStream imageInputStream = null;
     
     private BinaryFileReader binaryReader = null;
 
@@ -60,8 +63,9 @@ public class GenericReader extends AbstractProductReader {
                 rasterHeight = dialog.getRasterHeight();
                 numBands = dialog.getNumBands();
                 dataType = dialog.getDataType();
+                byteOrder = dialog.getByteOrder();
                 _imageHeaderLength = dialog.getHeaderBytes();
-                _imageRecordLength = rasterWidth;
+                imageRecordLength = rasterWidth;
             } else {
                 throw new IOException("Import Canceled");
             }
@@ -73,7 +77,8 @@ public class GenericReader extends AbstractProductReader {
         final Product product = new Product(inputFile.getName(),
                                             "Generic",
                                             rasterWidth, rasterHeight);
-
+        product.setFileLocation(inputFile);
+        
         int bandCnt = 1;
         for(int b=0; b < numBands; ++b) {
             final Band band = new Band("band"+ bandCnt++, dataType, rasterWidth, rasterHeight);
@@ -86,8 +91,9 @@ public class GenericReader extends AbstractProductReader {
         product.setModified(false);
         product.setFileLocation(inputFile);
 
-        final ImageInputStream imageStream = FileImageInputStreamExtImpl.createInputStream(inputFile);
-        binaryReader = new BinaryFileReader(imageStream);
+        imageInputStream = FileImageInputStreamExtImpl.createInputStream(inputFile);
+        imageInputStream.setByteOrder(byteOrder);
+        binaryReader = new BinaryFileReader(imageInputStream);
 
         product.setPreferredTileSize(rasterWidth, 500);
 
@@ -128,59 +134,56 @@ public class GenericReader extends AbstractProductReader {
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
 
-        try {
-            switch(dataType) {
-            case ProductData.TYPE_INT8:
-                readBandRasterDataByte(sourceOffsetX, sourceOffsetY,
-                                sourceWidth, sourceHeight, sourceStepX, sourceStepY,
-                                _startPosImageRecords +_imageHeaderLength, _imageRecordLength,
-                                destWidth, destBuffer, binaryReader, pm);
-                break;
-            case ProductData.TYPE_UINT8:
-                readBandRasterDataUByte(sourceOffsetX, sourceOffsetY,
-                                sourceWidth, sourceHeight, sourceStepX, sourceStepY,
-                                _startPosImageRecords +_imageHeaderLength, _imageRecordLength,
-                                destWidth, destBuffer, binaryReader, pm);
-                break;
-            case ProductData.TYPE_INT16:
-                readBandRasterDataShort(sourceOffsetX, sourceOffsetY,
-                                sourceWidth, sourceHeight, sourceStepX, sourceStepY,
-                                _startPosImageRecords +_imageHeaderLength, _imageRecordLength,
-                                destWidth, destBuffer, binaryReader, pm);
-                break;
-            case ProductData.TYPE_UINT16:
-                readBandRasterDataUShort(sourceOffsetX, sourceOffsetY,
-                                sourceWidth, sourceHeight, sourceStepX, sourceStepY,
-                                _startPosImageRecords +_imageHeaderLength, _imageRecordLength,
-                                destWidth, destBuffer, binaryReader, pm);
-                break;
-            case ProductData.TYPE_INT32:
-            case ProductData.TYPE_UINT32:
-                readBandRasterDataInt(sourceOffsetX, sourceOffsetY,
-                                sourceWidth, sourceHeight, sourceStepX, sourceStepY,
-                                _startPosImageRecords +_imageHeaderLength, _imageRecordLength,
-                                destWidth, destBuffer, binaryReader, pm);
-                break;
-            case ProductData.TYPE_FLOAT32:
-                readBandRasterDataFloat(sourceOffsetX, sourceOffsetY,
-                                sourceWidth, sourceHeight, sourceStepX, sourceStepY,
-                                _startPosImageRecords +_imageHeaderLength, _imageRecordLength,
-                                destWidth, destBuffer, binaryReader, pm);
-                break;
-            case ProductData.TYPE_FLOAT64:
-                readBandRasterDataDouble(sourceOffsetX, sourceOffsetY,
-                                sourceWidth, sourceHeight, sourceStepX, sourceStepY,
-                                _startPosImageRecords +_imageHeaderLength, _imageRecordLength,
-                                destWidth, destBuffer, binaryReader, pm);
-                break;
-            default:
-                throw new IOException("Undandled type "+ ProductData.getTypeString(dataType));
-            }
-        } catch(Exception e) {
-            throw new IOException(e);
-        }
+            readBandRasterData(sourceOffsetX,sourceOffsetY,
+                               sourceWidth, sourceHeight,
+                               sourceStepX, sourceStepY,
+                               _startPosImageRecords +_imageHeaderLength, imageInputStream,
+                               destBand, destWidth, destBuffer, pm);
     }
 
+    public static void readBandRasterData(final int sourceOffsetX, final int sourceOffsetY,
+                                          final int sourceWidth, final int sourceHeight,
+                                          final int sourceStepX, final int sourceStepY,
+                                          final long bandOffset, final ImageInputStream imageInputStream,
+                                          final Band destBand, final int destWidth,  final ProductData destBuffer,
+                                          final ProgressMonitor pm) throws IOException {
+
+        final int sourceMinX = sourceOffsetX;
+        final int sourceMinY = sourceOffsetY;
+        final int sourceMaxX = sourceOffsetX + sourceWidth - 1;
+        final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
+
+        final int sourceRasterWidth = destBand.getProduct().getSceneRasterWidth();
+
+        final int elemSize = destBuffer.getElemSize();
+        int destPos = 0;
+
+        pm.beginTask("Reading band '" + destBand.getName() + "'...", sourceMaxY - sourceMinY);
+        try {
+            for (int sourceY = sourceMinY; sourceY <= sourceMaxY; sourceY += sourceStepY) {
+                if (pm.isCanceled()) {
+                    break;
+                }
+                final int sourcePosY = sourceY * sourceRasterWidth;
+                synchronized (imageInputStream) {
+                    if (sourceStepX == 1) {
+                        imageInputStream.seek(bandOffset + elemSize * (sourcePosY + sourceMinX));
+                        destBuffer.readFrom(destPos, destWidth, imageInputStream);
+                        destPos += destWidth;
+                    } else {
+                        for (int sourceX = sourceMinX; sourceX <= sourceMaxX; sourceX += sourceStepX) {
+                            imageInputStream.seek(bandOffset + elemSize * (sourcePosY + sourceX));
+                            destBuffer.readFrom(destPos, 1, imageInputStream);
+                            destPos++;
+                        }
+                    }
+                }
+                pm.worked(1);
+            }
+        } finally {
+            pm.done();
+        }
+    }
 
     public static void readBandRasterDataShort(final int sourceOffsetX, final int sourceOffsetY,
                                         final int sourceWidth, final int sourceHeight,

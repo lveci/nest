@@ -1,0 +1,60 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>nest-op-orthorectification</symbolicName>
+    <version>2B</version>
+    <name>nest-op-orthorectification</name>
+    <description>NEST Orthorectification</description>
+	
+	<vendor>Array Systems Computing Inc</vendor>
+    <contactAddress>1120 Finch Ave W. Toronto (Canada)</contactAddress>
+    <copyright>(C) 2007 by Array Systems Computing Inc</copyright>
+    <url>http://www.array.ca/nest</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+	
+	<dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat-rcp</module>
+        <optional>true</optional>
+    </dependency>
+    <dependency>
+        <module>beam-gpf</module>
+    </dependency>
+    <dependency>
+      <module>nest-core</module>
+    </dependency>
+    <dependency>
+        <module>nest-graph-builder</module>
+    </dependency>
+
+    <categories>Processing</categories>
+
+    <extension point="beam-ui:actions">
+
+        <action>
+            <id>TerrainCorrectionGroup</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Terrain Correction</text>
+            <parent>geometry</parent>
+        </action>
+
+        <action>
+            <id>forwardTerrainCorrectionOp</id>
+            <class>org.esa.nest.dat.ForwardTerrainCorrectionOpAction</class>
+            <text>Forward</text>
+            <shortDescr>Terrain Correction Forward Method</shortDescr>
+            <parent>TerrainCorrectionGroup</parent>
+        </action>
+
+        <action>
+            <id>backwardTerrainCorrectionOp</id>
+            <class>org.esa.nest.dat.BackwardTerrainCorrectionOpAction</class>
+            <text>Backward</text>
+            <shortDescr>Terrain Correction Backward Method</shortDescr>
+            <parent>TerrainCorrectionGroup</parent>
+        </action>
+
+    </extension>
+
+</module>
