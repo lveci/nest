@@ -1,2 +1,3 @@
 org.esa.nest.dat.plugins.importbrowser.ImportBrowserVPI
 org.esa.nest.dat.plugins.StatusBarVPI
+org.esa.nest.dat.plugins.VersionCheckerVPI
