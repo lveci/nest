@@ -486,6 +486,15 @@ public final class MultilookOp extends Operator {
     public void setNumRangeLooks(int numRangelooks) {
         nRgLooks = numRangelooks;
     }
+
+    /**
+     * Set the number of azimuth looks. This method is for unit test only.
+     * @param numAzimuthlooks The number of azimuth looks.
+     */
+    public void setNumAzimuthLooks(int numAzimuthlooks) {
+        nAzLooks = numAzimuthlooks;
+    }
+
     /**
      * The SPI is used to register this operator in the graph processing framework
      * via the SPI configuration file
