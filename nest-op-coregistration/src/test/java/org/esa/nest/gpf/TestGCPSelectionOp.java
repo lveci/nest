@@ -28,7 +28,7 @@ public class TestGCPSelectionOp extends TestCase {
 
         final Product product = createTestMasterProduct(40,40);
 
-        final ProductNodeGroup<Pin> masterGcpGroup = product.getGcpGroup();
+        final ProductNodeGroup<Pin> masterGcpGroup = product.getGcpGroup(product.getBandAt(0));
         assertTrue(masterGcpGroup.getNodeCount() == 1);
 
         final GCPSelectionOp op = (GCPSelectionOp)spi.createOperator();
@@ -97,7 +97,7 @@ public class TestGCPSelectionOp extends TestCase {
         product.setGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
 
         // create GCP
-        final ProductNodeGroup<Pin> masterGcpGroup = product.getGcpGroup();
+        final ProductNodeGroup<Pin> masterGcpGroup = product.getGcpGroup(band);
         final Pin pin1 = new Pin("gcp_1",
                            "GCP 1",
                            "",
