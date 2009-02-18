@@ -44,7 +44,7 @@ public class TestOversamplingOperator extends TestCase {
         
         //Product sourceProduct = ProductIO.readProduct(file, null);
 
-        Product sourceProduct = createTestProduct(6, 12);
+        Product sourceProduct = createTestProduct(12, 6);
 
         OversamplingOp op = (OversamplingOp)spi.createOperator();
         assertNotNull(op);
@@ -59,14 +59,14 @@ public class TestOversamplingOperator extends TestCase {
         assertNotNull(band);
 
         // readPixels: execute computeTiles()
-        float[] floatValues = new float[8];
-        band.readPixels(0, 0, 4, 2, floatValues, ProgressMonitor.NULL);
+        float[] floatValues = new float[24];
+        band.readPixels(0, 0, 24, 1, floatValues, ProgressMonitor.NULL);
 
         // compare with expected outputs:
-        float[] expectedValues = {126.0f, 153.0f,   180.0f, 207.0f, 450.0f, 477.0f, 504.0f, 531.0f};
+        float[] expectedValues = {1.0f, 0.5090863f, 2.0f, 3.355916f, 3.0f, 3.0564091f, 4.0f, 4.8086267f, 5.0f,
+                5.391582f, 6.0f, 6.519202f, 7.0f, 7.648014f, 8.0f, 8.232636f, 9.0f, 9.997277f, 10.0f, 9.694443f,
+                11.0f, 13.105296f, 12.0f, 6.519202f};
         assertTrue(Arrays.equals(expectedValues, floatValues));
-
-
     }
 
 
@@ -87,12 +87,12 @@ public class TestOversamplingOperator extends TestCase {
         Product testProduct = TestOperator.createProduct("ASA_APG_1P", w, h);
 
         // create a Band: band1
-        Band band1 = testProduct.addBand("band1", ProductData.TYPE_INT32);
+        Band band1 = testProduct.addBand("band1", ProductData.TYPE_FLOAT32);
         band1.setUnit("amplitude");
         band1.setSynthetic(true);
-        int[] intValues = new int[w * h];
+        float[] intValues = new float[w * h];
         for (int i = 0; i < w * h; i++) {
-            intValues[i] = i + 1;
+            intValues[i] = i + 1.0f;
         }
         band1.setData(ProductData.createInstance(intValues));
 
@@ -100,6 +100,7 @@ public class TestOversamplingOperator extends TestCase {
         MetadataElement abs = testProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
 
         AbstractMetadata.setAttribute(abs, AbstractMetadata.PRODUCT_TYPE, "ASA_APG_1P");
+        AbstractMetadata.setAttribute(abs, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
         AbstractMetadata.setAttribute(abs, AbstractMetadata.range_spacing, 2.0F);
         AbstractMetadata.setAttribute(abs, AbstractMetadata.azimuth_spacing, 1.5F);
         AbstractMetadata.setAttribute(abs, AbstractMetadata.line_time_interval, 0.01F);
