@@ -30,7 +30,6 @@ public class XMLProductDirectory {
 
     private int _sceneWidth = 0;
     private int _sceneHeight = 0;
-    private boolean cosarFormat = false;
 
     protected transient Map<String, ImageIOFile> bandImageFileMap = new HashMap<String, ImageIOFile>(1);
     protected transient Map<Band, ImageIOFile.BandInfo> bandMap = new HashMap<Band, ImageIOFile.BandInfo>(3);
@@ -47,20 +46,24 @@ public class XMLProductDirectory {
 
         xmlDoc = XMLSupport.LoadXML(_xmlHeader.getAbsolutePath());
 
-        File[] fileList = imgFolder.listFiles();
+        final File[] fileList = imgFolder.listFiles();
         for (File file : fileList) {
-            if (file.getName().toUpperCase().endsWith("TIF") && !file.getName().toLowerCase().contains("browse")) {
-                final ImageIOFile img = new ImageIOFile(file);
-                bandImageFileMap.put(img.getName(), img);
-
-                _sceneWidth = img.getSceneWidth();
-                _sceneHeight = img.getSceneHeight();
-            } else if (file.getName().toUpperCase().endsWith("COS")) {
-                cosarFormat = true;
-
-                throw new IOException("Cosar format is not yet supported");
-            }
+            addImageFile(file);
         }   
+    }
+
+    protected void addImageFile(final File file) throws IOException {
+        if (file.getName().toUpperCase().endsWith("TIF") && !file.getName().toLowerCase().contains("browse")) {
+            final ImageIOFile img = new ImageIOFile(file);
+            bandImageFileMap.put(img.getName(), img);
+
+           setSceneWidthHeight(img.getSceneWidth(), img.getSceneHeight());
+        }
+    }
+
+    protected void setSceneWidthHeight(final int width, final int height) {
+        _sceneWidth = width;
+        _sceneHeight = height;
     }
 
     public Product createProduct() throws IOException {
@@ -86,18 +89,18 @@ public class XMLProductDirectory {
     }
 
     public void close() throws IOException {
-        Set keys = bandImageFileMap.keySet();                           // The set of keys in the map.
+        final Set keys = bandImageFileMap.keySet();                           // The set of keys in the map.
         for (Object key : keys) {
-            ImageIOFile img = bandImageFileMap.get(key);
+            final ImageIOFile img = bandImageFileMap.get(key);
             img.close();
         }
     }
 
-    protected void addBands(Product product) {
+    protected void addBands(final Product product) {
         int bandCnt = 1;
-        Set keys = bandImageFileMap.keySet();                           // The set of keys in the map.
+        final Set keys = bandImageFileMap.keySet();                           // The set of keys in the map.
         for (Object key : keys) {
-            ImageIOFile img = bandImageFileMap.get(key);
+            final ImageIOFile img = bandImageFileMap.get(key);
 
             for(int i=0; i < img.getNumImages(); ++i) {
 
@@ -129,13 +132,13 @@ public class XMLProductDirectory {
         float subSamplingX = (float)product.getSceneRasterWidth() / (gridWidth - 1);
         float subSamplingY = (float)product.getSceneRasterHeight() / (gridHeight - 1);
 
-        final TiePointGrid latGrid = new TiePointGrid("lat", gridWidth, gridHeight, 0.5f, 0.5f,
+        final TiePointGrid latGrid = new TiePointGrid("latitude", gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, fineLatTiePoints);
 
         final float[] fineLonTiePoints = new float[gridWidth*gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonCorners, fineLonTiePoints);
 
-        final TiePointGrid lonGrid = new TiePointGrid("lon", gridWidth, gridHeight, 0.5f, 0.5f,
+        final TiePointGrid lonGrid = new TiePointGrid("longitude", gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
 
         final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
@@ -155,6 +158,10 @@ public class XMLProductDirectory {
         AddXMLMetadata(rootElement, root);
 
         addAbstractedMetadataHeader(product, root);
+    }
+
+    protected Element getXMLRootElement() {
+        return xmlDoc.getRootElement();
     }
 
     private static void AddXMLMetadata(Element xmlRoot, MetadataElement metadataRoot) {

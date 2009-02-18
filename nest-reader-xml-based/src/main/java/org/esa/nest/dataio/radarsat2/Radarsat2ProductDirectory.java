@@ -30,7 +30,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
     }
 
     @Override
-    protected void addBands(Product product) {
+    protected void addBands(final Product product) {
 
         if(productType.contains("SLC"))
             isSLC = true;
@@ -40,9 +40,9 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         Band lastRealBand = null;
         String unit;
 
-        Set keys = bandImageFileMap.keySet();                           // The set of keys in the map.
+        final Set keys = bandImageFileMap.keySet();                           // The set of keys in the map.
         for (Object key : keys) {
-            ImageIOFile img = bandImageFileMap.get(key);
+            final ImageIOFile img = bandImageFileMap.get(key);
 
             for(int i=0; i < img.getNumImages(); ++i) {
 

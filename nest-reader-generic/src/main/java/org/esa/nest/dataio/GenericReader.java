@@ -185,6 +185,54 @@ public class GenericReader extends AbstractProductReader {
         }
     }
 
+    public static void readBandRasterDataIntSLC(final int sourceOffsetX, final int sourceOffsetY,
+                                          final int sourceWidth, final int sourceHeight,
+                                          final int sourceStepX, final int sourceStepY,
+                                          final long bandOffset, boolean oneOf2, final ImageInputStream imageInputStream,
+                                          final Band destBand, final int destWidth,  final ProductData destBuffer,
+                                          final ProgressMonitor pm) throws IOException {
+
+        final int sourceMinX = sourceOffsetX;
+        final int sourceMinY = sourceOffsetY;
+        final int sourceMaxX = sourceOffsetX + sourceWidth - 1;
+        final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
+
+        final int sourceRasterWidth = destBand.getProduct().getSceneRasterWidth();
+
+        final int elemSize = destBuffer.getElemSize();
+        int destPos = 0;
+
+        pm.beginTask("Reading band '" + destBand.getName() + "'...", sourceMaxY - sourceMinY);
+        try {
+            final int[] srcLine = new int[sourceWidth * 2];
+            final int[] destLine = new int[destWidth];
+
+            for (int sourceY = sourceMinY; sourceY <= sourceMaxY; sourceY += sourceStepY) {
+                if (pm.isCanceled()) {
+                    break;
+                }
+                final int currentLineIndex = (sourceY - sourceOffsetY) * destWidth;
+                final int sourcePosY = sourceY * sourceRasterWidth;
+                synchronized (imageInputStream) {
+                    imageInputStream.seek(bandOffset + elemSize * (sourcePosY + sourceMinX));
+                    imageInputStream.readFully(srcLine, 0, srcLine.length);
+                }
+
+                if (oneOf2)
+                    copyLine1Of2(srcLine, destLine, sourceStepX);
+                else
+                    copyLine2Of2(srcLine, destLine, sourceStepX);
+
+                System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+
+                pm.worked(1);
+            }
+        } finally {
+            pm.done();
+        }
+    }
+
+
     public static void readBandRasterDataShort(final int sourceOffsetX, final int sourceOffsetY,
                                         final int sourceWidth, final int sourceHeight,
                                         final int sourceStepX, final int sourceStepY,
@@ -752,7 +800,7 @@ public class GenericReader extends AbstractProductReader {
         }
     }
 
-    private static void copyLine1Of2(final short[] srcLine, final short[] destLine, final int sourceStepX) {
+    public static void copyLine1Of2(final short[] srcLine, final short[] destLine, final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[i << 1];
         }
@@ -764,13 +812,19 @@ public class GenericReader extends AbstractProductReader {
         }
     }
 
+    private static void copyLine1Of2(final int[] srcLine, final int[] destLine, final int sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
+            destLine[x] = srcLine[i << 1];
+        }
+    }
+
     private static void copyLine1Of2(final float[] srcLine, final float[] destLine, final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = (int)srcLine[i << 1];
         }
     }
 
-    private static void copyLine2Of2(final short[] srcLine, final short[] destLine, final int sourceStepX) {
+    public static void copyLine2Of2(final short[] srcLine, final short[] destLine, final int sourceStepX) {
         final int length = destLine.length;
         for (int x = 0, i = 0; x < length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[(i << 1) + 1];
@@ -778,6 +832,13 @@ public class GenericReader extends AbstractProductReader {
     }
 
     private static void copyLine2Of2(final byte[] srcLine, final byte[] destLine, final int sourceStepX) {
+        final int length = destLine.length;
+        for (int x = 0, i = 0; x < length; ++x, i += sourceStepX) {
+            destLine[x] = srcLine[(i << 1) + 1];
+        }
+    }
+
+    private static void copyLine2Of2(final int[] srcLine, final int[] destLine, final int sourceStepX) {
         final int length = destLine.length;
         for (int x = 0, i = 0; x < length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[(i << 1) + 1];

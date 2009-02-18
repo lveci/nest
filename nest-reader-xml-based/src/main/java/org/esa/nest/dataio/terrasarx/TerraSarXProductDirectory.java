@@ -2,13 +2,19 @@ package org.esa.nest.dataio.terrasarx;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
+import org.esa.beam.dataio.dimap.FileImageInputStreamExtImpl;
 import org.esa.nest.dataio.XMLProductDirectory;
 import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.dataio.ImageIOFile;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
+import org.jdom.Element;
+import org.jdom.Text;
 
+import javax.imageio.stream.ImageInputStream;
 import java.io.File;
-import java.util.Arrays;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * This class represents a product directory.
@@ -24,6 +30,9 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
     private final float[] lonCorners = new float[4];
     private final float[] slantRangeCorners = new float[4];
     private final float[] incidenceCorners = new float[4];
+
+    private final ArrayList<File> cosarFileList = new ArrayList<File>(1);
+    private final Map<Band, ImageInputStream> cosarBandMap = new HashMap<Band, ImageInputStream>(1);
 
     public TerraSarXProductDirectory(final File headerFile, final File imageFolder) {
         super(headerFile, imageFolder);
@@ -105,8 +114,8 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         final MetadataElement imageRaster = imageDataInfo.getElement("imageRaster");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks, imageRaster.getAttributeDouble("azimuthLooks", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks, imageRaster.getAttributeDouble("rangeLooks", defInt));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines, imageRaster.getAttributeDouble("numberOfRows", defInt));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line, imageRaster.getAttributeDouble("numberOfColumns", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines, imageRaster.getAttributeInt("numberOfRows", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line, imageRaster.getAttributeInt("numberOfColumns", defInt));
 
         final MetadataElement rowSpacing = imageRaster.getElement("rowSpacing");
         final MetadataElement columnSpacing = imageRaster.getElement("columnSpacing");
@@ -222,6 +231,54 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
     }
 
     @Override
+    protected void addImageFile(final File file) throws IOException {
+        if (file.getName().toUpperCase().endsWith("COS")) {
+            cosarFileList.add(file);
+
+            setSceneDimensions();
+        } else {
+            super.addImageFile(file);
+        }
+    }
+
+    private void setSceneDimensions() throws IOException {
+
+        final Element root = getXMLRootElement();
+        final Element productInfo = getElement(root, "productInfo");
+        final Element imageDataInfo = getElement(productInfo, "imageDataInfo");
+        final Element imageRaster = getElement(imageDataInfo, "imageRaster");
+        final Element numRows = getElement(imageRaster, "numberOfRows");
+        final Element numColumns = getElement(imageRaster, "numberOfColumns");
+
+
+        final int width = Integer.parseInt(getElementText(numRows).getValue());
+        final int height = Integer.parseInt(getElementText(numColumns).getValue());
+        setSceneWidthHeight(width, height);
+    }
+
+    private static Text getElementText(final Element root) throws IOException {
+        final List children = root.getContent();
+        for (Object aChild : children) {
+            if (aChild instanceof Text) {
+                return (Text)aChild;
+            }
+        }
+        throw new IOException("Element Text not found");
+    }
+
+    private static Element getElement(final Element root, final String name) throws IOException {
+        final List children = root.getContent();
+        for (Object aChild : children) {
+            if (aChild instanceof Element) {
+                final Element elem = (Element) aChild;
+                if(elem.getName().equalsIgnoreCase(name))
+                    return elem;
+            }
+        }
+        throw new IOException("Element "+name+" not found");
+    }
+
+    @Override
     protected void addGeoCoding(final Product product) {
 
         addGeoCoding(product, latCorners, lonCorners);
@@ -252,6 +309,76 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
                 subSamplingX, subSamplingY, fineSlantRange);
 
         product.addTiePointGrid(slantRangeGrid);
+    }
+
+    @Override
+    protected void addBands(final Product product) {
+        int bandCnt = 1;
+        final Set ImageKeys = bandImageFileMap.keySet();                           // The set of keys in the map.
+        for (Object key : ImageKeys) {
+            final ImageIOFile img = bandImageFileMap.get(key);
+
+            for(int i=0; i < img.getNumImages(); ++i) {
+
+                for(int b=0; b < img.getNumBands(); ++b) {
+                    final Band band = new Band(img.getName()+bandCnt++, img.getDataType(),
+                                       img.getSceneWidth(), img.getSceneHeight());
+                    band.setUnit(Unit.AMPLITUDE);
+                    product.addBand(band);
+
+                    ReaderUtils.createVirtualIntensityBand(product, band, '_'+img.getName());
+
+                    bandMap.put(band, new ImageIOFile.BandInfo(img, i, b));
+                }
+            }
+        }
+
+        if(!cosarFileList.isEmpty()) {
+            final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+            final int width = absRoot.getAttributeInt(AbstractMetadata.num_samples_per_line, 0);
+            final int height = absRoot.getAttributeInt(AbstractMetadata.num_output_lines, 0);
+
+            for (final File file : cosarFileList) {
+
+                // todo get polarizations
+
+                final Band realBand = new Band("i_"+file.getName(),
+                        ProductData.TYPE_INT16,
+                        width, height);
+                realBand.setUnit(Unit.REAL);
+                product.addBand(realBand);
+
+                final Band imaginaryBand = new Band("q_"+file.getName(),
+                        ProductData.TYPE_INT16,
+                        width, height);
+                imaginaryBand.setUnit(Unit.IMAGINARY);
+                product.addBand(imaginaryBand);
+
+                ReaderUtils.createVirtualIntensityBand(product, realBand, imaginaryBand, '_'+file.getName());
+                ReaderUtils.createVirtualPhaseBand(product, realBand, imaginaryBand, '_'+file.getName());
+
+                try {
+                    cosarBandMap.put(realBand, FileImageInputStreamExtImpl.createInputStream(file));
+                    cosarBandMap.put(imaginaryBand, FileImageInputStreamExtImpl.createInputStream(file));
+                } catch(Exception e) {
+                    //
+                }
+            }
+        }
+    }
+
+    ImageInputStream getCosarImageInputStream(final Band band) {
+        return cosarBandMap.get(band);
+    }
+
+    @Override
+    public void close() throws IOException {
+        super.close();
+        final Set keys = cosarBandMap.keySet();                           // The set of keys in the map.
+        for (Object key : keys) {
+            final ImageInputStream img = cosarBandMap.get(key);
+            img.close();
+        }
     }
 
     @Override

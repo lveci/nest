@@ -8,7 +8,12 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.Debug;
 import org.esa.nest.dataio.ImageIOFile;
+import org.esa.nest.dataio.GenericReader;
+import org.esa.nest.dataio.BinaryFileReader;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
+import org.esa.nest.datamodel.Unit;
 
+import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -107,11 +112,66 @@ public class TerraSarXProductReader extends AbstractProductReader {
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
 
-        ImageIOFile.BandInfo bandInfo = _dataDir.getBandInfo(destBand);
+        final ImageIOFile.BandInfo bandInfo = _dataDir.getBandInfo(destBand);
         if(bandInfo != null && bandInfo.img != null) {
             bandInfo.img.readImageIORasterBand(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceStepX, sourceStepY,
-                                        destBuffer, destOffsetX, destOffsetY, destWidth, destHeight,
-                                        pm, bandInfo.imageID);
+                    destBuffer, destOffsetX, destOffsetY, destWidth, destHeight,
+                    pm, bandInfo.imageID);
+        } else {
+            boolean oneOfTwo = true;
+            if(destBand.getUnit().equals(Unit.IMAGINARY))
+                oneOfTwo = false;
+            
+            readBandRasterDataSLCShort(sourceOffsetX, sourceOffsetY,
+                                             sourceWidth, sourceHeight,
+                                             sourceStepX, sourceStepY,
+                                             0, destBand.getSceneRasterWidth(), destWidth,  destBuffer,
+                                             oneOfTwo, _dataDir.getCosarImageInputStream(destBand), pm);
+        }
+    }
+
+    
+    public static void readBandRasterDataSLCShort(final int sourceOffsetX, final int sourceOffsetY,
+                                      final int sourceWidth, final int sourceHeight,
+                                      final int sourceStepX, final int sourceStepY,
+                                      final int imageStartOffset, int imageRecordLength,
+                                      final int destWidth, final ProductData destBuffer, boolean oneOf2,
+                                      final ImageInputStream iiStream, final ProgressMonitor pm)
+                                        throws IOException
+    {
+        final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
+        final int x = sourceOffsetX * 4;
+        final long xpos = imageStartOffset + x;
+
+        pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
+        try {
+            final short[] srcLine = new short[sourceWidth * 2];
+            final short[] destLine = new short[destWidth];
+            for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
+                if (pm.isCanceled()) {
+                    break;
+                }
+
+                // Read source line
+                synchronized (iiStream) {
+                    iiStream.seek(imageRecordLength * y + xpos);
+                    iiStream.readFully(srcLine, 0, srcLine.length);
+                }
+
+                // Copy source line into destination buffer
+                final int currentLineIndex = (y - sourceOffsetY) * destWidth;
+                if (oneOf2)
+                    GenericReader.copyLine1Of2(srcLine, destLine, sourceStepX);
+                else
+                    GenericReader.copyLine2Of2(srcLine, destLine, sourceStepX);
+
+                System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+
+                pm.worked(1);
+            }
+
+        } finally {
+            pm.done();
         }
     }
 }
