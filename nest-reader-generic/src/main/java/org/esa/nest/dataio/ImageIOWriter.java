@@ -13,10 +13,14 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.IIOImage;
+import javax.media.jai.RasterFactory;
+import javax.media.jai.PlanarImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Hashtable;
 import java.awt.*;
+import java.awt.image.*;
 
 
 public class ImageIOWriter extends AbstractProductWriter {
@@ -76,11 +80,35 @@ public class ImageIOWriter extends AbstractProductWriter {
                                     final ProductData sourceBuffer,
                                     ProgressMonitor pm) throws IOException {
 
-        //sourceBuffer.writeTo(_outputStream);
 
-        ImageWriteParam param = writer.getDefaultWriteParam();
-        param.setSourceRegion(new Rectangle(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight));
-        writer.write(null, new IIOImage(sourceBand.getSourceImage(), null, null), param);
+        final double[] dataArray = new double[sourceWidth];
+        int i = 0;
+        for(int y=sourceOffsetY; y < sourceHeight; ++y) {
+            for(int x=sourceOffsetX; x < sourceWidth; ++x) {
+                dataArray[i] = sourceBuffer.getElemDoubleAt(x);
+            }
+        }
+
+        final ImageWriteParam param = writer.getDefaultWriteParam();
+        //param.setSourceRegion(new Rectangle(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight));
+        param.setTiling(sourceWidth, sourceHeight, sourceOffsetX, sourceOffsetY);
+        //writer.write(null, new IIOImage(sourceBand.getSourceImage(), null, null), param);
+
+
+        final RenderedImage img = createRenderedImage(dataArray, sourceWidth, sourceHeight);
+        writer.write(null, new IIOImage(img, null, null), param);
+
+    }
+
+    private static RenderedImage createRenderedImage(final double[] array, final int w, final int h) {
+
+        // create rendered image with demension being width by height
+        final SampleModel sampleModel = RasterFactory.createBandedSampleModel(DataBuffer.TYPE_DOUBLE, w, h, 1);
+        final ColorModel colourModel = PlanarImage.createColorModel(sampleModel);
+        final DataBufferDouble dataBuffer = new DataBufferDouble(array, array.length);
+        final WritableRaster raster = RasterFactory.createWritableRaster(sampleModel, dataBuffer, new Point(0,0));
+
+        return new BufferedImage(colourModel, raster, false, new Hashtable());
     }
 
     /**
@@ -111,6 +139,9 @@ public class ImageIOWriter extends AbstractProductWriter {
             _outputStream.flush();
             _outputStream.close();
             _outputStream = null;
+        }
+        if(writer != null) {
+            writer.dispose();
         }
     }
 

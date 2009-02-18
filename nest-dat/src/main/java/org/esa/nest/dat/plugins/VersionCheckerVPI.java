@@ -1,5 +1,5 @@
 /*
- * $Id: VersionCheckerVPI.java,v 1.1 2009-02-17 17:38:19 lveci Exp $
+ * $Id: VersionCheckerVPI.java,v 1.2 2009-02-18 17:48:41 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -37,8 +37,9 @@ public class VersionCheckerVPI extends AbstractVisatPlugIn {
     private static final String MESSAGE_BOX_TITLE = "Software Version Check";  /*I18N*/
     private static final int DELAY_MILLIS = 5 * 1000;  // 5 seconds delay
 
-    private static final String remoteVersionUrl = "https://www.array.ca/nest2/devel-upload/web/version/VERSION.txt";
-    
+    private static final String remoteVersionUrl = "http://www.array.ca/nest/version.txt";
+    private static final String NEST_WEBSITE = "http://www.array.ca/nest";
+
     private static final String DISABLE_HINT = "Please note that you can disable the on-line version check\n" +
             "in the preferences dialog.";
 
@@ -144,16 +145,16 @@ public class VersionCheckerVPI extends AbstractVisatPlugIn {
         VisatApp.getApp().getLogger().info("version check performed, application is antiquated");
         JLabel beamHomeLabel;
         try {
-            beamHomeLabel = new UriLabel(new URI(SystemUtils.BEAM_HOME_PAGE));
+            beamHomeLabel = new UriLabel(new URI(NEST_WEBSITE));
         } catch (URISyntaxException e) {
-            beamHomeLabel = new JLabel(SystemUtils.BEAM_HOME_PAGE);
+            beamHomeLabel = new JLabel(NEST_WEBSITE);
             beamHomeLabel.setForeground(Color.BLUE.darker());
         }
         Object[] message = new Object[]{
                 "A new software version is available.\n" +
-                        "Please visit the BEAM homepage at\n", /*I18N*/
+                        "Please visit the NEST homepage at\n", /*I18N*/
                 beamHomeLabel,
-                "for detailed information.\n" + /*I18N*/
+                "to update your NEST software with the latest features and bug fixes.\n" + /*I18N*/
                         (auto ? "\n" + DISABLE_HINT : "")
         };
         JOptionPane.showMessageDialog(VisatApp.getApp().getMainFrame(),
