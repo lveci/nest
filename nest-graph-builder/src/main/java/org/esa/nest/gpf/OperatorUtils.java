@@ -85,6 +85,23 @@ public class OperatorUtils {
         }
     }
 
+    public static String getSuffixFromBandName(final String bandName) {
+
+        final int idx1 = bandName.lastIndexOf('_');
+        if (idx1 != -1) {
+            return bandName.substring(idx1+1).toLowerCase();
+        }
+        final int idx2 = bandName.lastIndexOf('-');
+        if (idx2 != -1) {
+            return bandName.substring(idx2+1).toLowerCase();
+        }
+        final int idx3 = bandName.lastIndexOf('.');
+        if (idx3 != -1) {
+            return bandName.substring(idx3+1).toLowerCase();
+        }
+        return null;
+    }
+
     public static void copyProductNodes(final Product sourceProduct, final Product targetProduct) {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);

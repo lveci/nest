@@ -117,7 +117,7 @@ public final class MultilookOp extends Operator {
             createTargetProduct();
 
         } catch(Exception e) {
-            throw new OperatorException(e.getMessage());
+            throw new OperatorException(e);
         }
     }
 
@@ -255,7 +255,7 @@ public final class MultilookOp extends Operator {
             AbstractMetadata.parseUTC(newFirstLineTime.substring(0,27)));
     }
 
-    private void addSelectedBands() {
+    private void addSelectedBands() throws OperatorException {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) {
             final Band[] bands = sourceProduct.getBands();
@@ -311,7 +311,12 @@ public final class MultilookOp extends Operator {
                 if (pol != null) {
                     targetBandName = "Intensity_" + pol.toUpperCase();
                 } else {
-                    targetBandName = "Intensity";
+                    final String suff = OperatorUtils.getSuffixFromBandName(srcBandNames[0]);
+                    if (suff != null) {
+                        targetBandName = "Intensity_" + suff;
+                    } else {
+                        targetBandName = "Intensity";
+                    }
                 }
                 ++i;
                 if(targetProduct.getBand(targetBandName) == null) {
@@ -439,19 +444,19 @@ public final class MultilookOp extends Operator {
      */
     public static void getDerivedParameters(Product srcProduct, int nRgLooks, DerivedParams param) throws Exception {
 
-        MetadataElement abs = AbstractMetadata.getAbstractedMetadata(srcProduct);
-        boolean srgrFlag = AbstractMetadata.getAttributeBoolean(abs, AbstractMetadata.srgr_flag);
-        double rangeSpacing = AbstractMetadata.getAttributeDouble(abs, AbstractMetadata.range_spacing);
-        double azimuthSpacing = AbstractMetadata.getAttributeDouble(abs, AbstractMetadata.azimuth_spacing);
+        final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(srcProduct);
+        final boolean srgrFlag = AbstractMetadata.getAttributeBoolean(abs, AbstractMetadata.srgr_flag);
+        final double rangeSpacing = AbstractMetadata.getAttributeDouble(abs, AbstractMetadata.range_spacing);
+        final double azimuthSpacing = AbstractMetadata.getAttributeDouble(abs, AbstractMetadata.azimuth_spacing);
 
         double groundRangeSpacing = rangeSpacing;
         if (!srgrFlag) {
-            double incidenceAngleAtCentreRangePixel = getIncidenceAngleAtCentreRangePixel(srcProduct);
+            final double incidenceAngleAtCentreRangePixel = getIncidenceAngleAtCentreRangePixel(srcProduct);
             groundRangeSpacing /= Math.sin(incidenceAngleAtCentreRangePixel*MathUtils.DTOR);
         }
 
-        int nAzLooks = Math.max(1, (int)((double)nRgLooks * groundRangeSpacing / azimuthSpacing + 0.5));
-        float meanGRSqaurePixel = (float)((nRgLooks*groundRangeSpacing + nAzLooks*azimuthSpacing)*0.5);
+        final int nAzLooks = Math.max(1, (int)((double)nRgLooks * groundRangeSpacing / azimuthSpacing + 0.5));
+        final float meanGRSqaurePixel = (float)((nRgLooks*groundRangeSpacing + nAzLooks*azimuthSpacing)*0.5);
         param.nAzLooks = nAzLooks;
         param.meanGRSqaurePixel = meanGRSqaurePixel;
     }
@@ -459,12 +464,13 @@ public final class MultilookOp extends Operator {
     /**
      * Get incidence angle at centre range pixel (in degree).
      * @param srcProduct The source product.
+     * @throws OperatorException
      * @return The incidence angle.
      */
-    private static double getIncidenceAngleAtCentreRangePixel(Product srcProduct) {
+    private static double getIncidenceAngleAtCentreRangePixel(Product srcProduct) throws OperatorException {
 
-        int sourceImageWidth = srcProduct.getSceneRasterWidth();
-        int sourceImageHeight = srcProduct.getSceneRasterHeight();
+        final int sourceImageWidth = srcProduct.getSceneRasterWidth();
+        final int sourceImageHeight = srcProduct.getSceneRasterHeight();
         final int x = sourceImageWidth / 2;
         final int y = sourceImageHeight / 2;
         final TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(srcProduct);
@@ -475,8 +481,8 @@ public final class MultilookOp extends Operator {
     }
 
     static class DerivedParams {
-        int nAzLooks;
-        float meanGRSqaurePixel;
+        int nAzLooks = 0;
+        float meanGRSqaurePixel = 0;
     }
 
     /**
