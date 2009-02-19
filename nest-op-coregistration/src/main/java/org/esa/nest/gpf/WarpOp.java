@@ -179,16 +179,21 @@ public class WarpOp extends Operator {
                 computeWARPPolynomial(warpData); // compute final warp polynomial
                 outputCoRegistrationInfo(warpData, true, rmsThreshold, ++parseIdex);
             }
-            
+
+        } catch(Exception e) {
+            openResidualsFile = true;
+            throw new OperatorException(e);
+        } finally {
             if(openResidualsFile) {
                 final File residualsFile = getResidualsFile(sourceProduct);
-
                 if(Desktop.isDesktopSupported()) {
-                    Desktop.getDesktop().edit(residualsFile);
+                    try {
+                        Desktop.getDesktop().edit(residualsFile);
+                    } catch(Exception e) {
+                        // do nothing
+                    }
                 }
             }
-        } catch(Exception e) {
-            throw new OperatorException(e);
         }
     }
 
@@ -228,7 +233,7 @@ public class WarpOp extends Operator {
         // coregistrated image should have the same geo-coding as the master image
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
-        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 20);
+        //targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 20);
     }
 
     /**
@@ -301,7 +306,7 @@ public class WarpOp extends Operator {
         computeRMS(warpData);
     }
 
-    private void getNumOfValidGCPs(final WarpData warpData) {
+    private void getNumOfValidGCPs(final WarpData warpData) throws OperatorException {
 
         warpData.numValidGCPs = warpData.slaveGCPGroup.getNodeCount();
         final int requiredGCPs = (warpPolynomialOrder + 2)*(warpPolynomialOrder + 1) / 2;
@@ -410,7 +415,8 @@ public class WarpOp extends Operator {
         return !pinList.isEmpty();
     }
 
-    private void getWarpedCoords(final WarpPolynomial warp, final float mX, final float mY, final PixelPos slavePos) {
+    private void getWarpedCoords(final WarpPolynomial warp, final float mX, final float mY, final PixelPos slavePos)
+                                throws OperatorException {
 
         final float[] xCoeffs = warp.getXCoeffs();
         final float[] yCoeffs = warp.getYCoeffs();
@@ -467,7 +473,7 @@ public class WarpOp extends Operator {
     }
 
     private void outputCoRegistrationInfo(final WarpData warpData, final boolean appendFlag,
-                                          final float threshold, final int parseIndex) {
+                                          final float threshold, final int parseIndex) throws OperatorException {
 
         final float[] xCoeffs = warpData.warp.getXCoeffs();
         final float[] yCoeffs = warpData.warp.getYCoeffs();

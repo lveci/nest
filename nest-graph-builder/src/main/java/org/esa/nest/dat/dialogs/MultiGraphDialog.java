@@ -236,6 +236,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
 
         private final ProgressMonitor pm;
         private Date executeStartTime = null;
+        private boolean errorOccured = false;
 
         public ProcessThread(final ProgressMonitor pm) {
             this.pm = pm;
@@ -258,6 +259,8 @@ public abstract class MultiGraphDialog extends ModelessDialog {
 
             } catch(Exception e) {
                 System.out.print(e.getMessage());
+                statusLabel.setText(e.getMessage());
+                errorOccured = true;
             } finally {
                 isProcessing = false;
                 pm.done();
@@ -267,20 +270,21 @@ public abstract class MultiGraphDialog extends ModelessDialog {
 
         @Override
         public void done() {
-            final Date now = Calendar.getInstance().getTime();
-            final long diff = (now.getTime() - executeStartTime.getTime()) / 1000;
-            if(diff > 120) {
-                final float minutes = diff / 60f;
-                statusLabel.setText("Processing completed in " + minutes + " minutes");
-            } else {
-                statusLabel.setText("Processing completed in " + diff + " seconds");
-            }
+            if(!errorOccured) {
+                final Date now = Calendar.getInstance().getTime();
+                final long diff = (now.getTime() - executeStartTime.getTime()) / 1000;
+                if(diff > 120) {
+                    final float minutes = diff / 60f;
+                    statusLabel.setText("Processing completed in " + minutes + " minutes");
+                } else {
+                    statusLabel.setText("Processing completed in " + diff + " seconds");
+                }
 
-            if(ioPanel.isOpenInAppSelected()) {
-                final GraphExecuter graphEx = graphExecuterList.get(graphExecuterList.size()-1);
-                openTargetProducts(graphEx.getProductsToOpenInDAT());
+                if(ioPanel.isOpenInAppSelected()) {
+                    final GraphExecuter graphEx = graphExecuterList.get(graphExecuterList.size()-1);
+                    openTargetProducts(graphEx.getProductsToOpenInDAT());
+                }
             }
-
             cleanUpTempFiles();
         }
 

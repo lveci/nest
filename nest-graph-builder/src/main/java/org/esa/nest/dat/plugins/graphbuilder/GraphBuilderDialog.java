@@ -396,6 +396,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
         private final ProgressMonitor pm;
         private Date executeStartTime = null;
+        private boolean errorOccured = false;
 
         public ProcessThread(final ProgressMonitor pm) {
             this.pm = pm;
@@ -412,6 +413,8 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
             } catch(Exception e) {
                 System.out.print(e.getMessage());
+                statusLabel.setText(e.getMessage());
+                errorOccured = true;
             } finally {
                 isProcessing = false;
                 pm.done();
@@ -421,18 +424,21 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
         @Override
         public void done() {
-            final Date now = Calendar.getInstance().getTime();
-            final long diff = (now.getTime() - executeStartTime.getTime()) / 1000;
-            if(diff > 120) {
-                final float minutes = diff / 60f;
-                statusLabel.setText("Processing completed in " + minutes + " minutes");
-            } else {
-                statusLabel.setText("Processing completed in " + diff + " seconds");
+            if(!errorOccured) {
+                final Date now = Calendar.getInstance().getTime();
+                final long diff = (now.getTime() - executeStartTime.getTime()) / 1000;
+                if(diff > 120) {
+                    final float minutes = diff / 60f;
+                    statusLabel.setText("Processing completed in " + minutes + " minutes");
+                } else {
+                    statusLabel.setText("Processing completed in " + diff + " seconds");
+                }
             }
-
             graphEx.disposeGraphContext();
 
-            openTargetProducts(graphEx.getProductsToOpenInDAT());
+            if(!errorOccured) {
+                openTargetProducts(graphEx.getProductsToOpenInDAT());
+            }
         }
 
     }
