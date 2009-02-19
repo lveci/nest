@@ -71,6 +71,7 @@ public class CreateStackOp extends Operator {
         if(masterBandNames.length == 0) {
             targetProduct = new Product("tmp", "tmp", 1, 1);
             targetProduct.addBand(new Band("tmp", ProductData.TYPE_INT8, 1, 1));
+            AbstractMetadata.addAbstractedMetadataHeader(targetProduct.getMetadataRoot());
             return;
         }
 
@@ -176,7 +177,7 @@ public class CreateStackOp extends Operator {
             if(masterBandNames.length < 2) {
                 throw new OperatorException("Real and imaginary master bands should be selected in pairs");
             } else {
-                Product prod = getMasterProduct(masterBandNames[1]);
+                final Product prod = getMasterProduct(masterBandNames[1]);
                 if(prod != masterProduct) {
                     throw new OperatorException("Please select master bands from the same product");
                 }
@@ -211,7 +212,8 @@ public class CreateStackOp extends Operator {
                     throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
                 }
                 final String nextBandName = getBandName(slaveBandNames[i+1]);
-                if (!getProductName(nextBandName).contains(productName)){
+                final String nextBandProdName = getProductName(slaveBandNames[i+1]);
+                if (!nextBandProdName.contains(productName)){
                     throw new OperatorException("Real and imaginary slave bands should be selected from the same product in pairs");
                 }
                 final Band nextBand = prod.getBand(nextBandName);
