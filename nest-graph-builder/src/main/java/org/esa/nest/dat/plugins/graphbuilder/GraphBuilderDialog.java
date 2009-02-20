@@ -413,7 +413,10 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
             } catch(Exception e) {
                 System.out.print(e.getMessage());
-                statusLabel.setText(e.getMessage());
+                if(e.getMessage() != null && !e.getMessage().isEmpty())
+                    statusLabel.setText(e.getMessage());
+                else
+                    statusLabel.setText(e.toString());
                 errorOccured = true;
             } finally {
                 isProcessing = false;

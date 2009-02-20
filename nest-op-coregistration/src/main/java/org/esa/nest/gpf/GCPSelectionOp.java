@@ -15,6 +15,7 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -239,7 +240,7 @@ public class GCPSelectionOp extends Operator {
 
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
-        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 50);  // 256
+        //targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 50);  // 256
     }
 
     /**
@@ -265,17 +266,19 @@ public class GCPSelectionOp extends Operator {
                         if(skipImaginary) {             // every other slave band
                             skipImaginary = false;
                         } else {
-                            computeSlaveGCPs(slaveBand, complexSrcMap.get(slaveBand), targetBand, targetRectangle);
+                            computeSlaveGCPs(slaveBand, complexSrcMap.get(slaveBand), targetBand, targetRectangle,
+                                    SubProgressMonitor.create(pm, 1));
                             skipImaginary = true;
                         }
                     } else {
-                        computeSlaveGCPs(slaveBand, null, targetBand, targetRectangle);
+                        computeSlaveGCPs(slaveBand, null, targetBand, targetRectangle, SubProgressMonitor.create(pm, 1));
                     }
                 }
 
                 // copy slave data to target
                 final Tile targetTile = targetTileMap.get(targetBand);
                 targetTile.setRawSamples(getSourceTile(slaveBand, targetRectangle, pm).getRawSamples());
+                pm.worked(1);
             }
 
         } catch (Exception e){
@@ -292,12 +295,14 @@ public class GCPSelectionOp extends Operator {
      * @param slaveBand2 for complex
      * @param targetBand the output band
      * @param targetRectangle The coordinates of the current tile.
+     * @param pm progress monitor
      */
     private void computeSlaveGCPs (final Band slaveBand, final Band slaveBand2, final Band targetBand,
-                                   final Rectangle targetRectangle) {
-
+                                   final Rectangle targetRectangle, final ProgressMonitor pm) {
+     try {
         final ProductNodeGroup<Pin> targetGCPGroup = targetProduct.getGcpGroup(targetBand);
 
+        pm.beginTask("computeSlaveGCPs ", masterGcpGroup.getNodeCount());
         for(int i = 0; i < masterGcpGroup.getNodeCount(); ++i) {
 
             final Pin mPin = masterGcpGroup.get(i);
@@ -339,7 +344,11 @@ public class GCPSelectionOp extends Operator {
                     //System.out.println("GCP(" + i + ") is invalid.");
                 }
             }
+            pm.worked(1);
         }
+     } finally {
+        pm.done();
+     }
     }
 
     /**
@@ -920,10 +929,20 @@ public class GCPSelectionOp extends Operator {
 
         final double[] rowArray = new double[fWindowWidth*2];
         final DoubleFFT_1D row_fft = new DoubleFFT_1D(fWindowWidth);
+
+        int signalLength = rowArray.length / 2;
+        int halfSignalLength = (int)(signalLength*0.5 + 0.5);
+        double phase = -2.0*Math.PI*xShift/signalLength;
+
         for (int r = 0; r < fWindowHeight; r++) {
-            getRowData(compleData, r, rowArray);
+            int k = 0;
+            for (int c = 0; c < fWindowWidth; c++) {
+                rowArray[k++] = compleData.sII0[r][c];
+                rowArray[k++] = compleData.sIQ0[r][c];
+            }
+
             row_fft.complexForward(rowArray);
-            multiplySpectrumByShiftFactor(xShift, rowArray);
+            multiplySpectrumByShiftFactor(rowArray, signalLength, halfSignalLength, phase);
             row_fft.complexInverse(rowArray, true);
             for (int c = 0; c < fWindowWidth; c++) {
                 compleData.sII[r][c] = rowArray[2*c];
@@ -933,10 +952,20 @@ public class GCPSelectionOp extends Operator {
 
         final double[] colArray = new double[2*fWindowHeight];
         final DoubleFFT_1D col_fft = new DoubleFFT_1D(fWindowHeight);
+
+        signalLength = colArray.length / 2;
+        halfSignalLength = (int)(signalLength*0.5 + 0.5);
+        phase = -2.0*Math.PI*yShift/signalLength;
+
         for (int c = 0; c < fWindowWidth; c++) {
-            getColData(compleData, c, colArray);
+            int k = 0;
+            for (int r = 0; r < fWindowHeight; r++) {
+                colArray[k++] = compleData.sII[r][c];
+                colArray[k++] = compleData.sIQ[r][c];
+            }
+
             col_fft.complexForward(colArray);
-            multiplySpectrumByShiftFactor(yShift, colArray);
+            multiplySpectrumByShiftFactor(colArray, signalLength, halfSignalLength, phase);
             col_fft.complexInverse(colArray, true);
             for (int r = 0; r < fWindowHeight; r++) {
                 compleData.sII[r][c] = colArray[2*r];
@@ -945,40 +974,23 @@ public class GCPSelectionOp extends Operator {
         }
     }
 
-    private void getRowData(final ComplexCoregData compleData, final int r, final double[] rowArray) {
+    private static void multiplySpectrumByShiftFactor(final double[] array, final int signalLength,
+                                                      final int halfSignalLength, double phase) {
 
-        int k = 0;
-        for (int c = 0; c < fWindowWidth; c++) {
-            rowArray[k++] = compleData.sII0[r][c];
-            rowArray[k++] = compleData.sIQ0[r][c];
-        }
-    }
-
-    private void getColData(final ComplexCoregData compleData, final int c, final double[] colArray) {
-
-        int k = 0;
-        for (int r = 0; r < fWindowHeight; r++) {
-            colArray[k++] = compleData.sII[r][c];
-            colArray[k++] = compleData.sIQ[r][c];
-        }
-    }
-
-    private static void multiplySpectrumByShiftFactor(final double shift, final double[] array) {
-
-        final int signalLength = array.length / 2;
-        final int halfSignalLength = (int)(signalLength*0.5 + 0.5);
-        double phase = -2.0*Math.PI*shift/signalLength;
-        for (int k = 0; k < signalLength; k++) {
+        int k2;
+        double c, s;
+        double real, imag;
+        for (int k = 0; k < signalLength; ++k) {
             if (k < halfSignalLength) {
                 phase *= k;
             } else {
                 phase *= k - signalLength;
             }
-            final int k2 = k * 2;
-            final double c = Math.cos(phase);
-            final double s = Math.sin(phase);
-            final double real = array[k2];
-            final double imag = array[k2+1];
+            k2 = k * 2;
+            c = Math.cos(phase);
+            s = Math.sin(phase);
+            real = array[k2];
+            imag = array[k2+1];
             array[k2] = real*c - imag*s;
             array[k2+1] = real*s + imag*c;
         }
@@ -991,12 +1003,20 @@ public class GCPSelectionOp extends Operator {
         double sum2 = 0.0;
         double sum3 = 0.0;
         double sum4 = 0.0;
+        double mr, mi, sr, si;
+        double[] mII, mIQ, sII, sIQ;
+        int rIdx;
         for (int r = 0; r < coherenceWindowSize; r++) {
+            rIdx = row + r;
+            mII = compleData.mII[rIdx];
+            mIQ = compleData.mIQ[rIdx];
+            sII = compleData.sII[rIdx];
+            sIQ = compleData.sIQ[rIdx];
             for (int c = 0; c < coherenceWindowSize; c++) {
-                final double mr = compleData.mII[row+r][col+c];
-                final double mi = compleData.mIQ[row+r][col+c];
-                final double sr = compleData.sII[row+r][col+c];
-                final double si = compleData.sIQ[row+r][col+c];
+                mr = mII[col+c];
+                mi = mIQ[col+c];
+                sr = sII[col+c];
+                si = sIQ[col+c];
                 sum1 += mr*sr + mi*si;
                 sum2 += mi*sr - mr*si;
                 sum3 += mr*mr + mi*mi;
