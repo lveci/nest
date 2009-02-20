@@ -76,7 +76,9 @@ public class WarpOp extends Operator {
                 label="Warp Polynomial Order")
     private int warpPolynomialOrder = 2;
 
-    @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR, BICUBIC, BICUBIC2}, defaultValue = BILINEAR,
+//    @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR, BICUBIC, BICUBIC2}, defaultValue = BILINEAR,
+//                label="Interpolation Method")
+    @Parameter(valueSet = {NEAREST_NEIGHBOR, BILINEAR}, defaultValue = BILINEAR,
                 label="Interpolation Method")
     private String interpolationMethod = BILINEAR;
     private Interpolation interp = null;
@@ -129,6 +131,17 @@ public class WarpOp extends Operator {
                 masterBand2 = sourceProduct.getBandAt(1);
             }
 
+            // The following code is temporary
+            if (complexCoregistration) {
+                interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
+            } else {
+                if (interpolationMethod.equals(NEAREST_NEIGHBOR)) {
+                    interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
+                } else if (interpolationMethod.equals(BILINEAR)) {
+                    interp = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
+                }
+            }
+            /*
             // determine interpolation method for warp function
             if (interpolationMethod.equals(NEAREST_NEIGHBOR)) {
                 interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
@@ -139,7 +152,7 @@ public class WarpOp extends Operator {
             } else if (interpolationMethod.equals(BICUBIC2)) {
                 interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC_2);
             }
-
+            */
             createTargetProduct();
 
             // for all slave bands or band pairs compute a warp
