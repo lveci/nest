@@ -23,6 +23,7 @@ public class GenericBinaryDialog extends ModalDialog {
     private int dataType = ProductData.TYPE_UINT16;
     private int headerBytes = 0;
     private ByteOrder byteOrder = ByteOrder.nativeOrder();
+    private String interleave = BSQ;
 
     private final JFormattedTextField rasterWidthField = DialogUtils.createFormattedTextField(numFormat, rasterWidth, propListener);
     private final JFormattedTextField rasterHeightField = DialogUtils.createFormattedTextField(numFormat, rasterHeight, propListener);
@@ -39,6 +40,11 @@ public class GenericBinaryDialog extends ModalDialog {
                                                                         ProductData.TYPESTRING_FLOAT64 } );
 
     private final JComboBox byteOrderBox = new JComboBox(new String[] {  "BIG ENDIAN", "LITTLE ENDIAN" } );
+
+    private final JComboBox interleaveBox = new JComboBox(new String[] {  BSQ } );
+    final static String BSQ = "BSQ";
+    final static String BIP = "BIP";
+    final static String BIL = "BIL";
 
     public GenericBinaryDialog(Window parent, String helpID) {
         super(parent, "Generic Binary", ModalDialog.ID_OK_CANCEL_HELP, helpID); /* I18N */
@@ -77,6 +83,10 @@ public class GenericBinaryDialog extends ModalDialog {
         return byteOrder;
     }
 
+    public String getInterleave() {
+        return interleave;
+    }
+
     private void createUI() {
 
         final DialogUtils.ComponentListPanel contentPane = new DialogUtils.ComponentListPanel();
@@ -87,6 +97,7 @@ public class GenericBinaryDialog extends ModalDialog {
         contentPane.addComponent("Data Type:", headerBytesField);
         contentPane.addComponent("Header Bytes:", dataTypeBox);
         contentPane.addComponent("Byte Order:", byteOrderBox);
+        contentPane.addComponent("Interleave:", interleaveBox);
 
         setContent(contentPane);
     }
@@ -105,6 +116,8 @@ public class GenericBinaryDialog extends ModalDialog {
             byteOrder = ByteOrder.BIG_ENDIAN;
         else
             byteOrder = ByteOrder.LITTLE_ENDIAN;
+        
+        interleave = (String)interleaveBox.getSelectedItem();
     }
 
     @Override
