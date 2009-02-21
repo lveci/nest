@@ -93,9 +93,9 @@ public class GCPSelectionOp extends Operator {
     @Parameter(description = "The coherence window size", interval = "(1, 10]", defaultValue = "3",
                 label="Coherence Window Size")
     private int coherenceWindowSize = 3;
-    @Parameter(description = "The coherence threshold", interval = "(0, *)", defaultValue = "0.4",
+    @Parameter(description = "The coherence threshold", interval = "(0, *)", defaultValue = "0.6",
                 label="Coherence Threshold")
-    private double coherenceThreshold = 0.4;
+    private double coherenceThreshold = 0.6;
 //    @Parameter(description = "The coherence function tolerance", interval = "(0, *)", defaultValue = "1.e-6",
 //                label="Coherence Function Tolerance")
 //    private double coherenceFuncToler;
@@ -815,13 +815,15 @@ public class GCPSelectionOp extends Operator {
         final double[] p = {sGCPPixelPos.x, sGCPPixelPos.y};
 
         final double coherence = powell(compleData, p);
-        //System.out.println("Final sGCP = (" + p[0] + ", " + p[1] + "), coherence = " + coherence);
+        //System.out.println("Final sGCP = (" + p[0] + ", " + p[1] + "), coherence = " + (1-coherence));
 
         if (1 - coherence < coherenceThreshold) {
+            //System.out.println("Invalid GCP");
             return false;
         } else {
             sGCPPixelPos.x = (float)p[0];
             sGCPPixelPos.y = (float)p[1];
+            //System.out.println("Valid GCP");
             return true;
         }
     }
@@ -863,8 +865,8 @@ public class GCPSelectionOp extends Operator {
         final int x0 = (int)(sGCPPixelPos.x + 0.5);
         final int y0 = (int)(sGCPPixelPos.y + 0.5);
 
-        compleData.point0[0] = (double)x0;
-        compleData.point0[1] = (double)y0;
+        compleData.point0[0] = sGCPPixelPos.x;
+        compleData.point0[1] = sGCPPixelPos.y;
 
         final int halfWidth = fWindowWidth / 2;
         final int halfHeight = fWindowHeight / 2;
@@ -888,6 +890,13 @@ public class GCPSelectionOp extends Operator {
     }
 
     private double computeCoherence(final ComplexCoregData compleData, final double[] point) {
+
+        // Set penalty at the boundary of the pixel so that the searching area is within a pixel
+        final double xShift = Math.abs(compleData.point0[0] - point[0]);
+        final double yShift = Math.abs(compleData.point0[1] - point[1]);
+        if (xShift >= 0.5 || yShift >= 0.5) {
+            return 1.0;
+        }
 
         getComplexSlaveImagette(compleData, point);
         /*
@@ -922,18 +931,20 @@ public class GCPSelectionOp extends Operator {
         compleData.sII = new double[fWindowHeight][fWindowWidth];
         compleData.sIQ = new double[fWindowHeight][fWindowWidth];
 
-        final double xShift = compleData.point0[0] - point[0];
-        final double yShift = compleData.point0[1] - point[1];
+        final int x0 = (int)(compleData.point0[0] + 0.5);
+        final int y0 = (int)(compleData.point0[1] + 0.5);
+
+        final double xShift = x0 - point[0];
+        final double yShift = y0 - point[1];
         //System.out.println("xShift = " + xShift);
         //System.out.println("yShift = " + yShift);
 
         final double[] rowArray = new double[fWindowWidth*2];
+        final double[] rowPhaseArray = new double[fWindowWidth*2];
         final DoubleFFT_1D row_fft = new DoubleFFT_1D(fWindowWidth);
 
         int signalLength = rowArray.length / 2;
-        int halfSignalLength = (int)(signalLength*0.5 + 0.5);
-        double phase = -2.0*Math.PI*xShift/signalLength;
-
+        computeShiftPhaseArray(xShift, signalLength, rowPhaseArray);
         for (int r = 0; r < fWindowHeight; r++) {
             int k = 0;
             for (int c = 0; c < fWindowWidth; c++) {
@@ -942,7 +953,7 @@ public class GCPSelectionOp extends Operator {
             }
 
             row_fft.complexForward(rowArray);
-            multiplySpectrumByShiftFactor(rowArray, signalLength, halfSignalLength, phase);
+            multiplySpectrumByShiftFactor(rowArray, rowPhaseArray);
             row_fft.complexInverse(rowArray, true);
             for (int c = 0; c < fWindowWidth; c++) {
                 compleData.sII[r][c] = rowArray[2*c];
@@ -951,12 +962,11 @@ public class GCPSelectionOp extends Operator {
         }
 
         final double[] colArray = new double[2*fWindowHeight];
+        final double[] colPhaseArray = new double[2*fWindowHeight];
         final DoubleFFT_1D col_fft = new DoubleFFT_1D(fWindowHeight);
 
         signalLength = colArray.length / 2;
-        halfSignalLength = (int)(signalLength*0.5 + 0.5);
-        phase = -2.0*Math.PI*yShift/signalLength;
-
+        computeShiftPhaseArray(yShift, signalLength, colPhaseArray);
         for (int c = 0; c < fWindowWidth; c++) {
             int k = 0;
             for (int r = 0; r < fWindowHeight; r++) {
@@ -965,7 +975,7 @@ public class GCPSelectionOp extends Operator {
             }
 
             col_fft.complexForward(colArray);
-            multiplySpectrumByShiftFactor(colArray, signalLength, halfSignalLength, phase);
+            multiplySpectrumByShiftFactor(colArray, colPhaseArray);
             col_fft.complexInverse(colArray, true);
             for (int r = 0; r < fWindowHeight; r++) {
                 compleData.sII[r][c] = colArray[2*r];
@@ -974,21 +984,35 @@ public class GCPSelectionOp extends Operator {
         }
     }
 
-    private static void multiplySpectrumByShiftFactor(final double[] array, final int signalLength,
-                                                      final int halfSignalLength, double phase) {
+    private static void computeShiftPhaseArray(final double shift, final int signalLength, final double[] phaseArray) {
+
+        int k2;
+        double phaseK;
+        double phase = -2.0*Math.PI*shift/signalLength;
+        int halfSignalLength = (int)(signalLength*0.5 + 0.5);
+
+        for (int k = 0; k < signalLength; ++k) {
+            if (k < halfSignalLength) {
+                phaseK = phase*k;
+            } else {
+                phaseK = phase * (k - signalLength);
+            }
+            k2 = k * 2;
+            phaseArray[k2] = Math.cos(phaseK);
+            phaseArray[k2 + 1] = Math.sin(phaseK);
+        }
+    }
+
+    private static void multiplySpectrumByShiftFactor(final double[] array, final double[] phaseArray) {
 
         int k2;
         double c, s;
         double real, imag;
+        int signalLength = array.length / 2;
         for (int k = 0; k < signalLength; ++k) {
-            if (k < halfSignalLength) {
-                phase *= k;
-            } else {
-                phase *= k - signalLength;
-            }
             k2 = k * 2;
-            c = Math.cos(phase);
-            s = Math.sin(phase);
+            c = phaseArray[k2];
+            s = phaseArray[k2+1];
             real = array[k2];
             imag = array[k2+1];
             array[k2] = real*c - imag*s;
@@ -1075,6 +1099,7 @@ public class GCPSelectionOp extends Operator {
             // After trying all directions, check the decrement from start point to end point.
             // If the decrement is less than certain amount, then stop.
             if (2.0*Math.abs(fp0 - fp) <= ftol*(Math.abs(fp0) + Math.abs(fp))) { //Termination criterion.
+                //System.out.println("Number of iterations: " + (iter+1));
                 return fp;
             }
             /*
@@ -1083,16 +1108,18 @@ public class GCPSelectionOp extends Operator {
             }
             */
             // Otherwise, prepare for the next iteration
-            final double[] pe = new double[2];
-            final double[] averageDirection = new double[2];
+            //final double[] pe = new double[2];
+            final double[] averageDirection = {p[0] - p0[0] , p[1] - p0[1]};
+            final double norm = Math.sqrt(averageDirection[0]*averageDirection[0] +
+                                          averageDirection[1]*averageDirection[1]);
             for (int j = 0; j < 2; j++) {
-                averageDirection[j] = p[j] - p0[j]; // construct the average direction
-                pe[j] = p[j] + averageDirection[j]; // construct the extrapolated point
+                averageDirection[j] /= norm; // construct the average direction
+                //pe[j] = p[j] + averageDirection[j]; // construct the extrapolated point
                 p0[j] = p[j]; // save the final opint of current iteration as the initial point for the next iteration
             }
 
-            final double fpe = computeCoherence(complexData, pe); // get function value for the extrapolated point.
-            //double fpe = linmin(p0, averageDirection); // JL test
+            //final double fpe = computeCoherence(complexData, pe); // get function value for the extrapolated point.
+            final double fpe = linmin(complexData, p, averageDirection); // JL test
 
             if (fpe < fp0) { // condition 1 for updating search direction
 
@@ -1104,7 +1131,7 @@ public class GCPSelectionOp extends Operator {
                     // The calling of linmin() next line should be commented out because it changes
                     // the starting point for the next iteration and this average direction will be
                     // added to the searching directions anyway.
-                    fp = linmin(complexData, p, averageDirection); // minimize function along the average direction
+                    //fp = linmin(complexData, p, averageDirection); // minimize function along the average direction
 
                     for (int j = 0; j < 2; j++) {
                         directions[imax][j] = directions[1][j]; // discard the direction for the largest decrement
@@ -1131,7 +1158,7 @@ public class GCPSelectionOp extends Operator {
     private double linmin(final ComplexCoregData complexData, final double[] p, final double[] xi) {
 
          // set initial guess for brackets: [ax, bx, cx]
-        final double[] bracketPoints = {0.0, 1.0, 0.0};
+        final double[] bracketPoints = {0.0, 0.02, 0.0};
 
         // get new brackets [ax, bx, cx] that bracket a minimum of the function
         mnbrak(complexData, bracketPoints, p, xi);
