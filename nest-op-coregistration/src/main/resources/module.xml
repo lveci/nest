@@ -57,6 +57,16 @@
             <helpId>CreateStackOp</helpId>
         </action>
 
+        <action>
+            <id>CreateCoherenceImageOp</id>
+            <class>org.esa.nest.dat.CreateCoherenceImageOpAction</class>
+            <text>Create Coherence Image</text>
+            <shortDescr>Create coherence images</shortDescr>
+            <helpId>CreateCoherenceImageOp</helpId>
+            <parent>sartools</parent>
+            <placeAfter>openCoregistrationDialog</placeAfter>
+        </action>
+
     </extension>
 
 </module>
