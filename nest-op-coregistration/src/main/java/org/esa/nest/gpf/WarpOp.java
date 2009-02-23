@@ -132,6 +132,7 @@ public class WarpOp extends Operator {
             }
 
             // The following code is temporary
+            
             if (complexCoregistration) {
                 interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
             } else {
@@ -264,28 +265,37 @@ public class WarpOp extends Operator {
     {
         try {
             final Rectangle targetTileRectangle = targetTile.getRectangle();
+            final int x0 = targetTileRectangle.x;
+            final int y0 = targetTileRectangle.y;
+            final int w = targetTileRectangle.width;
+            final int h = targetTileRectangle.height;
+            //System.out.println("WARPOperator: x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+
             final Band srcBand = sourceRasterMap.get(targetBand);
             if(srcBand == masterBand || srcBand == masterBand2) {
 
                 final Tile masterRaster = getSourceTile(masterBand, targetTileRectangle, pm);
+                final ProductData masterData = masterRaster.getDataBuffer();
+                final ProductData targetData = targetTile.getDataBuffer();
+                for (int y = y0; y < y0 + h; y++) {
+                    for (int x = x0; x < x0 + w; x++) {
+                        final int index = masterRaster.getDataBufferIndex(x, y);
+                        targetData.setElemFloatAt(index, masterData.getElemFloatAt(index));
+                    }
+                }
+                /* The following code has problem that is cannot handle the last tile at right and bottom
                 final ProductData masterData = masterRaster.getRawSamples();
                 final ProductData targetData = targetTile.getRawSamples();
                 final int n = masterData.getNumElems();
-
                 for (int i = 0; i < n; ++i) {
                     targetData.setElemFloatAt(i, masterData.getElemFloatAt(i));
                 }
+                */
             } else {
 
                 Band realSrcBand = complexSrcMap.get(srcBand);
                 if(realSrcBand == null)
                     realSrcBand = srcBand;
-
-                final int x0 = targetTileRectangle.x;
-                final int y0 = targetTileRectangle.y;
-                final int w = targetTileRectangle.width;
-                final int h = targetTileRectangle.height;
-                //System.out.println("WARPOperator: x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
                 // create source image
                 final Tile sourceRaster = getSourceTile(srcBand, targetTileRectangle, pm);
