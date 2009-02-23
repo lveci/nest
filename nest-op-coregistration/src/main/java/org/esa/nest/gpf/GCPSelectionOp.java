@@ -98,10 +98,10 @@ public class GCPSelectionOp extends Operator {
     private double coherenceThreshold = 0.6;
 //    @Parameter(description = "The coherence function tolerance", interval = "(0, *)", defaultValue = "1.e-6",
 //                label="Coherence Function Tolerance")
-//    private double coherenceFuncToler;
+    private double coherenceFuncToler = 1.e-5;
 //    @Parameter(description = "The coherence value tolerance", interval = "(0, *)", defaultValue = "1.e-3",
 //                label="Coherence Value Tolerance")
-//    private double coherenceValueToler;
+    private double coherenceValueToler = 1.e-2;
     // =========================================================================================
 
     private Band masterBand1 = null;
@@ -1075,6 +1075,8 @@ public class GCPSelectionOp extends Operator {
 
             //System.out.println("Iteration: " + iter);
 
+            p0[0] = p[0];
+            p0[1] = p[1];
             double fp0 = fp; // save function value for the initial point
             int imax = 0;     // direction index for the largest single step decrement
             double maxDecrement = 0.0; // the largest single step decrement
@@ -1098,15 +1100,23 @@ public class GCPSelectionOp extends Operator {
 
             // After trying all directions, check the decrement from start point to end point.
             // If the decrement is less than certain amount, then stop.
-            if (2.0*Math.abs(fp0 - fp) <= ftol*(Math.abs(fp0) + Math.abs(fp))) { //Termination criterion.
-                //System.out.println("Number of iterations: " + (iter+1));
-                return fp;
-            }
             /*
-            if (Math.abs(fp0 - fp) < coherenceFuncToler) { //Termination criterion 1: stop if coherence change is small
+            if (2.0*Math.abs(fp0 - fp) <= ftol*(Math.abs(fp0) + Math.abs(fp))) { //Termination criterion.
+                System.out.println("Number of iterations: " + (iter+1));
                 return fp;
             }
             */
+            //Termination criterion 1: stop if coherence change is small
+            if (Math.abs(fp0 - fp) < coherenceFuncToler) {
+                //System.out.println("C1: Number of iterations: " + (iter+1));
+                return fp;
+            }
+
+            //Termination criterion 2: stop if GCP shift is small
+            if (Math.sqrt((p0[0] - p[0])*(p0[0] - p[0]) + (p0[1] - p[1])*(p0[1] - p[1])) < coherenceValueToler) {
+                //System.out.println("C2: Number of iterations: " + (iter+1));
+                return fp;
+            }
             // Otherwise, prepare for the next iteration
             //final double[] pe = new double[2];
             final double[] averageDirection = {p[0] - p0[0] , p[1] - p0[1]};
@@ -1115,7 +1125,7 @@ public class GCPSelectionOp extends Operator {
             for (int j = 0; j < 2; j++) {
                 averageDirection[j] /= norm; // construct the average direction
                 //pe[j] = p[j] + averageDirection[j]; // construct the extrapolated point
-                p0[j] = p[j]; // save the final opint of current iteration as the initial point for the next iteration
+                //p0[j] = p[j]; // save the final opint of current iteration as the initial point for the next iteration
             }
 
             //final double fpe = computeCoherence(complexData, pe); // get function value for the extrapolated point.
