@@ -81,6 +81,17 @@ public class AbstractMetadata {
 
     public static final String range_sampling_rate = "range_sampling_rate";
 
+    // orbit state vectors
+    public static final String orbit_state_vectors = "Orbit_State_Vectors";
+    public static final String orbit_vector = "orbit_vector";
+    public static final String orbit_vector_time = "time";
+    public static final String orbit_vector_x_pos = "x_pos";
+    public static final String orbit_vector_y_pos = "y_pos";
+    public static final String orbit_vector_z_pos = "z_pos";
+    public static final String orbit_vector_x_vel = "x_vel";
+    public static final String orbit_vector_y_vel = "y_vel";
+    public static final String orbit_vector_z_vel = "z_vel";
+
     /**
      * Abstract common metadata from products to be used uniformly by all operators
      * @param root the product metadata root
@@ -155,6 +166,8 @@ public class AbstractMetadata {
 
         addAbstractedAttribute(absRoot, external_calibration_file, ProductData.TYPE_ASCII, "", "External calibration file used");
         addAbstractedAttribute(absRoot, orbit_state_vector_file, ProductData.TYPE_ASCII, "", "Orbit file");
+
+        absRoot.addElement(new MetadataElement(orbit_state_vectors));
     }
 
     /**

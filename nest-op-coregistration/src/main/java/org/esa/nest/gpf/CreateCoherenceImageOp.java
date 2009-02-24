@@ -248,14 +248,14 @@ public final class CreateCoherenceImageOp extends Operator {
 
             } else { // coherence bands
 
-                String[] iqBandNames = coherenceSlaveMap.get(targetBand.getName());
+                final String[] iqBandNames = coherenceSlaveMap.get(targetBand.getName());
                 float[] dataArray;
                 if (masterBandNames.length == 1) { // real image
-                    Band slaveBand = sourceProduct.getBand(iqBandNames[0]);
+                    final Band slaveBand = sourceProduct.getBand(iqBandNames[0]);
                     dataArray = createCoherenceImage(targetTileRectangle, slaveBand, pm);
                 } else { // complex image
-                    Band iSlaveBand = sourceProduct.getBand(iqBandNames[0]);
-                    Band qSlaveBand = sourceProduct.getBand(iqBandNames[1]);
+                    final Band iSlaveBand = sourceProduct.getBand(iqBandNames[0]);
+                    final Band qSlaveBand = sourceProduct.getBand(iqBandNames[1]);
                     dataArray = createCoherenceImage(targetTileRectangle, iSlaveBand, qSlaveBand, pm);
                 }
 
@@ -311,17 +311,17 @@ public final class CreateCoherenceImageOp extends Operator {
             int xC, int yC, Band slaveBand, RealCoherenceData realData, ProgressMonitor pm) {
 
         // compute upper left corner coordinate (xUL, yUL)
-        int halfWindowSize = coherenceWindowSize / 2;
-        int xUL = Math.max(xC - halfWindowSize, 0);
-        int yUL = Math.max(yC - halfWindowSize, 0);
+        final int halfWindowSize = coherenceWindowSize / 2;
+        final int xUL = Math.max(xC - halfWindowSize, 0);
+        final int yUL = Math.max(yC - halfWindowSize, 0);
 
         // compute lower right corner coordinate (xLR, yLR)
-        int xLR = Math.min(xC + halfWindowSize, sourceImageWidth - 1);
-        int yLR = Math.min(yC + halfWindowSize, sourceImageHeight - 1);
+        final int xLR = Math.min(xC + halfWindowSize, sourceImageWidth - 1);
+        final int yLR = Math.min(yC + halfWindowSize, sourceImageHeight - 1);
 
         // compute actual window width (w) and height (h)
-        int w = xLR - xUL + 1;
-        int h = yLR - yUL + 1;
+        final int w = xLR - xUL + 1;
+        final int h = yLR - yUL + 1;
 
         realData.m = new double[w*h];
         realData.s = new double[w*h];
@@ -347,17 +347,17 @@ public final class CreateCoherenceImageOp extends Operator {
             int xC, int yC, Band iSlaveBand, Band qSlaveBand, ComplexCoherenceData complexData, ProgressMonitor pm) {
 
         // compute upper left corner coordinate (xUL, yUL)
-        int halfWindowSize = coherenceWindowSize / 2;
-        int xUL = Math.max(xC - halfWindowSize, 0);
-        int yUL = Math.max(yC - halfWindowSize, 0);
+        final int halfWindowSize = coherenceWindowSize / 2;
+        final int xUL = Math.max(xC - halfWindowSize, 0);
+        final int yUL = Math.max(yC - halfWindowSize, 0);
 
         // compute lower right corner coordinate (xLR, yLR)
-        int xLR = Math.min(xC + halfWindowSize, sourceImageWidth - 1);
-        int yLR = Math.min(yC + halfWindowSize, sourceImageHeight - 1);
+        final int xLR = Math.min(xC + halfWindowSize, sourceImageWidth - 1);
+        final int yLR = Math.min(yC + halfWindowSize, sourceImageHeight - 1);
 
         // compute actual window width (w) and height (h)
-        int w = xLR - xUL + 1;
-        int h = yLR - yUL + 1;
+        final int w = xLR - xUL + 1;
+        final int h = yLR - yUL + 1;
 
         complexData.mI = new double[w*h];
         complexData.mQ = new double[w*h];
@@ -387,7 +387,7 @@ public final class CreateCoherenceImageOp extends Operator {
         }
     }
 
-    private float computeCoherence(RealCoherenceData realData) {
+    private static float computeCoherence(RealCoherenceData realData) {
 
         double sum1 = 0.0;
         double sum2 = 0.0;
@@ -403,7 +403,7 @@ public final class CreateCoherenceImageOp extends Operator {
         return (float)(Math.abs(sum1) / Math.sqrt(sum2*sum3));
     }
 
-    private float computeCoherence(ComplexCoherenceData complexData) {
+    private static float computeCoherence(ComplexCoherenceData complexData) {
 
         double sum1 = 0.0;
         double sum2 = 0.0;

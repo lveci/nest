@@ -29,14 +29,37 @@
     <extension point="beam-ui:actions">
 
         <action>
+            <id>Coregistration</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Coregistration</text>
+            <parent>sartools</parent>
+        </action>
+
+        <action>
             <id>openCoregistrationDialog</id>
             <class>org.esa.nest.dat.CoregistrationAction</class>
-            <parent>sartools</parent>
+            <parent>Coregistration</parent>
             <text>Coregistration</text>
             <shortDescr>Perform Coregistration</shortDescr>
-            <placeAfter>Calibration</placeAfter>
-            <placeBefore>openPCADialog</placeBefore>
             <helpId>Coregistration</helpId>
+        </action>
+
+        <action>
+            <id>GCPSelectionAction</id>
+            <class>org.esa.nest.dat.GCPSelectionAction</class>
+            <parent>Coregistration</parent>
+            <text>GCP Selection</text>
+            <shortDescr>Perform GCP Selection for Coregistration</shortDescr>
+            <helpId>GCPSelection</helpId>
+        </action>
+
+        <action>
+            <id>WarpAction</id>
+            <class>org.esa.nest.dat.WarpAction</class>
+            <parent>Coregistration</parent>
+            <text>Warp</text>
+            <shortDescr>Perform Warp for Coregistration</shortDescr>
+            <helpId>Warp</helpId>
         </action>
         
         <action>
@@ -60,11 +83,12 @@
         <action>
             <id>CreateCoherenceImageOp</id>
             <class>org.esa.nest.dat.CreateCoherenceImageOpAction</class>
-            <text>Create Coherence Image</text>
+            <text>Generate Coherence Image</text>
             <shortDescr>Create coherence images</shortDescr>
             <helpId>CreateCoherenceImageOp</helpId>
-            <parent>sartools</parent>
+            <parent>Coregistration</parent>
             <placeAfter>openCoregistrationDialog</placeAfter>
+            <separatorAfter>true</separatorAfter>
         </action>
 
     </extension>

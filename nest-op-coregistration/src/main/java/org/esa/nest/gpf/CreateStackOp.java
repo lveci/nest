@@ -69,10 +69,23 @@ public class CreateStackOp extends Operator {
         }
         
         if(masterBandNames.length == 0) {
-            targetProduct = new Product("tmp", "tmp", 1, 1);
-            targetProduct.addBand(new Band("tmp", ProductData.TYPE_INT8, 1, 1));
-            AbstractMetadata.addAbstractedMetadataHeader(targetProduct.getMetadataRoot());
-            return;
+            final Product defaultProd = sourceProduct[0];
+            if(defaultProd != null) {
+                final Band defaultBand = defaultProd.getBandAt(0);
+                if(defaultBand != null) {
+                    if(defaultBand.getUnit().equals(Unit.REAL))
+                        masterBandNames = new String[] { defaultProd.getBandAt(0).getName(),
+                                                         defaultProd.getBandAt(1).getName() };
+                    else
+                        masterBandNames = new String[] { defaultProd.getBandAt(0).getName() };
+                }
+            }
+            if(masterBandNames.length == 0) {
+                targetProduct = new Product("tmp", "tmp", 1, 1);
+                targetProduct.addBand(new Band("tmp", ProductData.TYPE_INT8, 1, 1));
+                AbstractMetadata.addAbstractedMetadataHeader(targetProduct.getMetadataRoot());
+                return;
+            }
         }
 
         masterProduct = getMasterProduct(masterBandNames[0]);
@@ -81,9 +94,9 @@ public class CreateStackOp extends Operator {
         if(masterProduct == null || slaveBandList.length == 0 || slaveBandList[0] == null) {
             targetProduct = new Product("tmp", "tmp", 1, 1);
             targetProduct.addBand(new Band("tmp", ProductData.TYPE_INT8, 1, 1));
+            AbstractMetadata.addAbstractedMetadataHeader(targetProduct.getMetadataRoot());
             return;
         }
-
 
         targetProduct = new Product(masterProduct.getName(),
                                     masterProduct.getProductType(),

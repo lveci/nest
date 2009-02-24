@@ -65,7 +65,7 @@ public class BaseRecord {
         return db.getAttributeInt(name);
     }
 
-    public final Double getAttributeDouble(final String name) {
+    public final double getAttributeDouble(final String name) {
         return db.getAttributeDouble(name);
     }
 
