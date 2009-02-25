@@ -203,10 +203,11 @@ public class GCPSelectionOp extends Operator {
 
             for(float x=spacingX/2f; x < width; x+= spacingX) {
 
-                final String[] uniquePinNameAndLabel = PlacemarkNameFactory.createUniqueNameAndLabel(GcpDescriptor.INSTANCE, group);
+                final String[] uniquePinNameAndLabel =
+                        PlacemarkNameFactory.createUniqueNameAndLabel(GcpDescriptor.INSTANCE, group);
                 final Pin newPin = new Pin(uniquePinNameAndLabel[0],
                              uniquePinNameAndLabel[1], "",
-                             new PixelPos(x, y), null,
+                             new PixelPos((int)x, (int)y), null,
                              GcpDescriptor.INSTANCE.createDefaultSymbol());
                 group.add(newPin);
             }
