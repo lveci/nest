@@ -274,7 +274,7 @@ public class WarpOp extends Operator {
             final Band srcBand = sourceRasterMap.get(targetBand);
             if(srcBand == masterBand || srcBand == masterBand2) {
 
-                final Tile masterRaster = getSourceTile(masterBand, targetTileRectangle, pm);
+                final Tile masterRaster = getSourceTile(srcBand, targetTileRectangle, pm);
                 final ProductData masterData = masterRaster.getDataBuffer();
                 final ProductData targetData = targetTile.getDataBuffer();
                 for (int y = y0; y < y0 + h; y++) {
