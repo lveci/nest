@@ -125,6 +125,8 @@ public final class CreateCoherenceImageOp extends Operator {
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
 
+        // The tile width must be set to the image width because otherwise the last tile may have different
+        // tile width than other tiles, and getDataBufferIndex() cannot return the correct index in this case.
         targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 20);
     }
 
@@ -165,12 +167,12 @@ public final class CreateCoherenceImageOp extends Operator {
         int cnt = 1;
         for(int i = 0; i < slaveBandNames.length; i++) {
             final String bandName = slaveBandNames[i];
-
+            /*
             if(bandName.contains(masterBandNames[0]) ||
                (masterBandNames.length == 2 && bandName.contains(masterBandNames[1]))) {
                 continue;
             }
-
+            */
             String[] iqBandNames = new String[2];
             final Band slaveBand = sourceProduct.getBand(bandName);
             final String slaveUnit1 = slaveBand.getUnit();
@@ -209,7 +211,7 @@ public final class CreateCoherenceImageOp extends Operator {
 
         if(targetProduct.getBand(bandName) == null) {
             final Band targetBand = new Band(bandName,
-                                             dataType,
+                                             ProductData.TYPE_FLOAT32, //dataType,
                                              sourceProduct.getSceneRasterWidth(),
                                              sourceProduct.getSceneRasterHeight());
 
@@ -234,18 +236,33 @@ public final class CreateCoherenceImageOp extends Operator {
 
         try {
             final Rectangle targetTileRectangle = targetTile.getRectangle();
+            final int x0 = targetTileRectangle.x;
+            final int y0 = targetTileRectangle.y;
+            final int w = targetTileRectangle.width;
+            final int h = targetTileRectangle.height;
+            //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+
             final Band srcBand = sourceProduct.getBand(targetBand.getName());
             if(!targetBand.getUnit().contains("coherence")) { // master and slave bands
 
                 final Tile srcRaster = getSourceTile(srcBand, targetTileRectangle, pm);
+                final ProductData srcData = srcRaster.getDataBuffer();
+                final ProductData targetData = targetTile.getDataBuffer();
+                for (int y = y0; y < y0 + h; y++) {
+                    for (int x = x0; x < x0 + w; x++) {
+                        final int index = srcRaster.getDataBufferIndex(x, y);
+                        targetData.setElemFloatAt(index, srcData.getElemFloatAt(index));
+                    }
+                }
+                /* The following code has problem that is cannot handle the last tile at right and bottom
+                final Tile srcRaster = getSourceTile(srcBand, targetTileRectangle, pm);
                 final ProductData srcData = srcRaster.getRawSamples();
                 final ProductData targetData = targetTile.getRawSamples();
                 final int n = srcData.getNumElems();
-
                 for (int i = 0; i < n; ++i) {
                     targetData.setElemFloatAt(i, srcData.getElemFloatAt(i));
                 }
-
+                */
             } else { // coherence bands
 
                 final String[] iqBandNames = coherenceSlaveMap.get(targetBand.getName());
