@@ -62,13 +62,13 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
         columnInterpFactor.setSelectedItem(paramMap.get("columnInterpFactor"));
         maxIteration.setText(String.valueOf(paramMap.get("maxIteration")));
         gcpTolerance.setText(String.valueOf(paramMap.get("gcpTolerance")));
-        coherenceWindowSize.setText(String.valueOf(paramMap.get("coherenceWindowSize")));
 
         checkIfComplex();
 
         if(isComplex) {
             fineRegistrationWindowWidth.setSelectedItem(paramMap.get("fineRegistrationWindowWidth"));
             fineRegistrationWindowHeight.setSelectedItem(paramMap.get("fineRegistrationWindowHeight"));
+            coherenceWindowSize.setText(String.valueOf(paramMap.get("coherenceWindowSize")));
             coherenceThreshold.setText(String.valueOf(paramMap.get("coherenceThreshold")));
         }
         enableComplexFields();
@@ -103,11 +103,11 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
         paramMap.put("columnInterpFactor", columnInterpFactor.getSelectedItem());
         paramMap.put("maxIteration", Integer.parseInt(maxIteration.getText()));
         paramMap.put("gcpTolerance", Double.parseDouble(gcpTolerance.getText()));
-        paramMap.put("coherenceWindowSize", Integer.parseInt(coherenceWindowSize.getText()));
 
         if(isComplex) {
             paramMap.put("fineRegistrationWindowWidth", fineRegistrationWindowWidth.getSelectedItem());
             paramMap.put("fineRegistrationWindowHeight", fineRegistrationWindowHeight.getSelectedItem());
+            paramMap.put("coherenceWindowSize", Integer.parseInt(coherenceWindowSize.getText()));
             paramMap.put("coherenceThreshold", Double.parseDouble(coherenceThreshold.getText()));
         }
     }
@@ -161,6 +161,7 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
     private void enableComplexFields() {
         fineRegistrationWindowWidth.setEnabled(isComplex);
         fineRegistrationWindowHeight.setEnabled(isComplex);
+        coherenceWindowSize.setEnabled(isComplex);
         coherenceThreshold.setEnabled(isComplex);
     }
 }

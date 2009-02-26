@@ -329,7 +329,7 @@ public class GraphExecuter extends Observable {
                 final Xpp3Dom config = n.getConfiguration();
                 final Xpp3Dom[] params = config.getChildren();
                 for(Xpp3Dom p : params) {
-                    if(p.getName().equals("fileList")) {
+                    if(p.getName().equals("fileList") && p.getValue() != null) {
 
                         final StringTokenizer st = new StringTokenizer(p.getValue(), SEPARATOR);
                         int length = st.countTokens();

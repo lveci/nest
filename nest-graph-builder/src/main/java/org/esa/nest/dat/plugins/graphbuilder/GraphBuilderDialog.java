@@ -64,6 +64,13 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
         initUI();
         super.getJDialog().setMinimumSize(new Dimension(600, 700));
+
+        if(this.allowGraphBuilding) {
+            final File graphPath = GraphBuilderDialog.getInternalGraphFolder();
+            final File graphFile =  new File(graphPath, "ReadWriteGraph.xml");
+    
+            LoadGraph(graphFile);
+        }
     }
 
     public GraphBuilderDialog(final AppContext theAppContext, final String title, final String helpID, final boolean allowGraphBuilding) {

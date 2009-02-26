@@ -94,8 +94,8 @@ public class GenericBinaryDialog extends ModalDialog {
         contentPane.addComponent("Width:", rasterWidthField);
         contentPane.addComponent("Height:", rasterHeightField);
         contentPane.addComponent("Number Of Bands:", numBandsField);
-        contentPane.addComponent("Data Type:", headerBytesField);
-        contentPane.addComponent("Header Bytes:", dataTypeBox);
+        contentPane.addComponent("Data Type:", dataTypeBox);
+        contentPane.addComponent("Header Bytes:", headerBytesField);
         contentPane.addComponent("Byte Order:", byteOrderBox);
         contentPane.addComponent("Interleave:", interleaveBox);
 

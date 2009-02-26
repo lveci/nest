@@ -251,6 +251,10 @@ public abstract class MultiGraphDialog extends ModelessDialog {
                 isProcessing = true;
 
                 for(GraphExecuter graphEx : graphExecuterList) {
+                    final String desc = graphEx.getGraphDescription();
+                    if(desc != null && !desc.isEmpty())
+                        statusLabel.setText("Processing "+ graphEx.getGraphDescription());
+                    
                     graphEx.InitGraph();
 
                     graphEx.executeGraph(new SubProgressMonitor(pm, 100));

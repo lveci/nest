@@ -79,7 +79,10 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         paramMap.put("defaultFile", fileList.get(0));
         final String[] fList = new String[fileList.size()];
         for(int i=0; i < fileList.size(); ++i) {
-            fList[i] = fileList.get(i).getAbsolutePath();
+            if(fileList.get(i).getName().isEmpty())
+                fList[i] = "";
+            else
+                fList[i] = fileList.get(i).getAbsolutePath();
         }
         paramMap.put("fileList", fList);
     }
