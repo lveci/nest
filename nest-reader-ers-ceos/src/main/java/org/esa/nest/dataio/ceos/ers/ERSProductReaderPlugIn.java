@@ -28,7 +28,7 @@ public class ERSProductReaderPlugIn extends CEOSProductReaderPlugIn {
 
     @Override
     protected DecodeQualification checkProductQualification(File file) {
-        ERSProductReader reader = new ERSProductReader(this);
+        final ERSProductReader reader = new ERSProductReader(this);
         return reader.checkProductQualification(file);
     }
 

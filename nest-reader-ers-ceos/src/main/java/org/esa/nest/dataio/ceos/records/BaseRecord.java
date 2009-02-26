@@ -4,6 +4,7 @@ import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.dataio.BinaryFileReader;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CeosDB;
+import org.esa.nest.util.DatUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +15,8 @@ public class BaseRecord {
     private final BinaryFileReader _reader;
 
     private CeosDB db;
-    private final static String ceosDBPath = "org/esa/nest/ceosFormatDB";
+    private final static String sep = File.separator;
+    private final static String ceosDBPath = sep+"org"+sep+"esa"+sep+"nest"+sep+"ceos_db";
     private final int recordLength;
 
     public BaseRecord(final BinaryFileReader reader, final long startPos,
@@ -29,9 +31,8 @@ public class BaseRecord {
             _startPos = reader.getCurrentPos();
         }
 
-        String resPath = ceosDBPath + File.separator + mission + File.separator + recordDefinitionFileName;
-
-        db = new CeosDB(resPath);
+        final String resPath = mission + sep + recordDefinitionFileName;
+        db = new CeosDB(getResFile(resPath).getAbsolutePath());
         db.readRecord(reader);
 
         recordLength = getAttributeInt("Record Length");
@@ -55,6 +56,12 @@ public class BaseRecord {
         db.readRecord(reader);
 
         recordLength = getAttributeInt("Record Length");
+    }
+
+    private static File getResFile(String fileName) {
+        final String homeUrl = DatUtils.findHomeFolder().getAbsolutePath();
+        final String path = homeUrl + sep + "res" + sep + "ceos_db" + sep + fileName;
+        return new File(path);
     }
 
     public final String getAttributeString(final String name) {

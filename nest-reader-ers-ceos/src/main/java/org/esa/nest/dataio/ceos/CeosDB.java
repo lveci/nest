@@ -49,9 +49,7 @@ public final class CeosDB {
 
         definitionFile = defFile;
         try {
-
-            xmlDoc = XMLSupport.LoadXMLFromResource(defFile, this.getClass());
-
+            xmlDoc = XMLSupport.LoadXML(defFile);
         } catch(Exception e) {
             System.out.println(e.toString());
         }
