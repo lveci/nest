@@ -39,8 +39,9 @@
             <id>openCoregistrationDialog</id>
             <class>org.esa.nest.dat.CoregistrationAction</class>
             <parent>Coregistration</parent>
-            <text>Coregistration</text>
+            <text>Full Coregistration</text>
             <shortDescr>Perform Coregistration</shortDescr>
+            <separatorAfter>true</separatorAfter>
             <helpId>Coregistration</helpId>
         </action>
 
@@ -80,16 +81,15 @@
             <helpId>CreateStackOp</helpId>
         </action>
 
-        <action>
+        <!--action>
             <id>CreateCoherenceImageOp</id>
             <class>org.esa.nest.dat.CreateCoherenceImageOpAction</class>
             <text>Generate Coherence Image</text>
             <shortDescr>Create coherence images</shortDescr>
             <helpId>CreateCoherenceImageOp</helpId>
-            <parent>Coregistration</parent>
+            <parent>Insar</parent>
             <placeAfter>openCoregistrationDialog</placeAfter>
-            <separatorAfter>true</separatorAfter>
-        </action>
+        </action-->
 
     </extension>
 

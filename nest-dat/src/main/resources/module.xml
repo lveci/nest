@@ -423,7 +423,7 @@
             <shortDescr>Search product metadata</shortDescr>
             <description>Search product metadata</description>
             <helpId>searchMetadata</helpId>
-            <placeBefore>Calibration</placeBefore>
+            <placeBefore>applyOrbitFile</placeBefore>
             <parent>sartools</parent>
             <context>metadata</context>
         </action>

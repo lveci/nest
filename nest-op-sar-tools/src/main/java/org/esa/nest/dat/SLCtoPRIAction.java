@@ -15,7 +15,7 @@ public class SLCtoPRIAction extends AbstractVisatAction {
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "SLC to PRI", "SLCtoPRI", false);
+        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "SLC to Detected Ground Range", "SLCtoPRI", false);
         dialog.show();
 
         final File graphPath = GraphBuilderDialog.getInternalGraphFolder();

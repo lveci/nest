@@ -41,14 +41,14 @@
             <helpId>SRGROp</helpId>
         </action>
 
-        <action>
+        <!--action>
             <id>GeographicToSatelliteOp</id>
             <class>org.esa.nest.dat.GeographicToSatelliteOpAction</class>
             <text>Geographic To Satellite Geometry</text>
             <shortDescr>Converts from geographic to satellite geometry</shortDescr>
             <parent>geometry</parent>
             <helpId>GeographicToSatelliteOp</helpId>
-        </action>
+        </action-->
 
         <action>
             <id>MultilookOp</id>
@@ -59,14 +59,14 @@
             <helpId>MultilookOp</helpId>
         </action>
 
-        <action>
+        <!--action>
             <id>FocusingAdjustmentOp</id>
             <class>org.esa.nest.dat.FocusingAdjustmentOpAction</class>
             <text>Focusing Adjustment</text>
             <shortDescr>Focusing Adjustment</shortDescr>
             <parent>sartools</parent>
             <helpId>FocusingAdjustmentOp</helpId>
-        </action>
+        </action-->
 
         <action>
             <id>Resampling</id>
@@ -112,8 +112,8 @@
         <action>
             <id>SLCtoPRI</id>
             <class>org.esa.nest.dat.SLCtoPRIAction</class>
-            <text>SLC to PRI</text>
-            <shortDescr>Change the SLC product to a PRI-like product</shortDescr>
+            <text>Complex to Detected GR</text>
+            <shortDescr>Convert a SLC product to a detected ground range product</shortDescr>
             <parent>DatasetConversion</parent>
             <helpId>SLCtoPRI</helpId>
         </action>
@@ -142,6 +142,7 @@
             <id>ASARWSS</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>ASAR WSS</text>
+            <placeAfter>SpeckleFilteringGroup</placeAfter>
             <parent>sartools</parent>
         </action>
 
@@ -172,7 +173,7 @@
             <description>Update product metadata with orbit file</description>
             <helpId>ApplyOrbitFileOp</helpId>
             <parent>sartools</parent>
-            <placeAfter>editMetadata</placeAfter>
+            <placeBefore>Calibration</placeBefore>
             <separatorAfter>true</separatorAfter>
         </action>
 
