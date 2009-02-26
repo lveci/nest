@@ -58,7 +58,7 @@ public class PCAMinOp extends Operator {
     private boolean statsCalculated = false;
     private int numOfSourceBands = 0; // total number of user selected source bands
     private int numPCA; // number of PCA images output
-    private double eigenvalueThreshold; // threshold for selecting eigenvalues
+    private double eigenvalueThreshold; // threshold for selecting eigenvalues (in decimal, not in %)
 
     private String[] sourceBandNames; // band names user selected source bands
     private double[] mean; // mean of source bands
@@ -67,6 +67,7 @@ public class PCAMinOp extends Operator {
     private double[][] eigenVectorMatrices; // eigenvector matrices for all source bands
     private double[] eigenValues; // eigenvalues for all source bands
     private double[] minPCA; // min value for all PCA images
+    private double totalEigenvalues; // summation of all eigenvalues
     private boolean reloadStats = true;
 
     /**
@@ -118,7 +119,7 @@ public class PCAMinOp extends Operator {
                 //throw new OperatorException("Cannot find temporary metadata");
                 return false;
             }
-            eigenvalueThreshold = tempElemRoot.getAttributeDouble("eigenvalue threshold");
+            eigenvalueThreshold = tempElemRoot.getAttributeDouble("eigenvalue threshold") / 100.0; // % to decimal
             final MetadataElement staSubElemRoot = tempElemRoot.getElement("statistics");
             numOfSourceBands = staSubElemRoot.getNumElements();
                     
@@ -175,7 +176,7 @@ public class PCAMinOp extends Operator {
         final Matrix U = Svd.getU();
         final Matrix V = Svd.getV();
 
-        double totalEigenvalues = 0.0;
+        totalEigenvalues = 0.0;
         for (int i = 0; i < numOfSourceBands; i++) {
             eigenValues[i] = S.get(i,i);
             totalEigenvalues += eigenValues[i];
@@ -315,7 +316,7 @@ public class PCAMinOp extends Operator {
 
         final MetadataElement eigenvalueSubElemRoot = AbstractMetadata.addElement(tempElemRoot, "eigenvalues");
         for (int i = 0; i < numOfSourceBands; i++)  {
-            eigenvalueSubElemRoot.setAttributeDouble("element " + i, eigenValues[i]);
+            eigenvalueSubElemRoot.setAttributeDouble("element " + i, eigenValues[i]/totalEigenvalues);
         }
 
         final MetadataElement eigenVectorSubElemRoot = AbstractMetadata.addElement(tempElemRoot, "eigenvectors");

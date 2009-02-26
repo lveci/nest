@@ -305,11 +305,11 @@ public class PCAImageOp extends Operator {
                 p.println("    " + sourceBandNames[i]);
             }
             p.println();
-            p.println("User Input Eigenvalue Threshold: " + eigenvalueThreshold);
+            p.println("User Input Eigenvalue Threshold: " + eigenvalueThreshold + " %");
             p.println();
             p.println("Number of PCA Images Output: " + numPCA);
             p.println();
-            p.println("Eigenvalues: ");
+            p.println("Normalized Eigenvalues: ");
             for (int i = 0; i < numOfSourceBands; i++)  {
                 p.println("    " + eigenValues[i]);
             }

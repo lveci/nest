@@ -57,20 +57,29 @@ public class PCAStatisticsOp extends Operator {
             sourceProductId="source", label="Source Bands")
     private String[] sourceBandNames = null;
 
-    @Parameter(description = "The threshold for selecting eigenvalues", interval = "(0, 1]", defaultValue = "1.0",
-                label="Eigenvalue Threshold")
-    private double eigenvalueThreshold = 1.0;
+    @Parameter(description = "The threshold for selecting eigenvalues", interval = "(0, 100]", defaultValue = "100",
+                label="Eigenvalue Threshold (%)")
+    
+    private double eigenvalueThreshold = 100.0;
 
     @Parameter(description = "Show the eigenvalues", defaultValue = "1", label="Show Eigenvalues")
     private boolean showEigenvalues = false;
 
+    @Parameter(description = "Substract mean image", defaultValue = "1", label="Substract Mean Image")
+    private boolean substractMeanImage = false;
+
     private boolean statsCalculated = false;
+    private boolean virtualBandCreated = false;
     private int numOfPixels = 0;        // total number of pixel values
     private int numOfSourceBands = 0;   // number of user selected bands
     private double[] sum = null;        // summation of pixel values for each band
     private double[][] sumCross = null; // summation of the dot product of each band and the master band
     private double[] mean = null;       // mean of pixel values for each band
     private double[][] meanCross = null;// mean of the dot product of each band and the master band
+
+    private static final String meanImageBandName = "Mean_Image";
+
+    private Band meanImageBand;
 
 //    private final HashMap<String, Integer> statisticsBandIndex = new HashMap<String, Integer>();
 
@@ -174,6 +183,44 @@ public class PCAStatisticsOp extends Operator {
     }
 
     /**
+     * Create mean image as a virtual band from user selected bands.
+     * @param sourceProduct The source product.
+     * @param sourceBandNames The user selected band names.
+     * @param meanImageBandName The mean image band name.
+     */
+    public static void createMeanImageVirtualBand(
+            Product sourceProduct, String[] sourceBandNames, String meanImageBandName) {
+
+        if (sourceProduct.getBand(meanImageBandName) != null) {
+            return;
+        }
+
+        boolean isFirstBand = true;
+        String unit = "";
+        String expression = "( ";
+        for (String bandName : sourceBandNames) {
+            if (isFirstBand) {
+                expression += bandName;
+                unit = sourceProduct.getBand(bandName).getUnit();
+                isFirstBand = false;
+            } else {
+                expression += " + " + bandName;
+            }
+        }
+        expression += " ) / " + sourceBandNames.length;
+
+        final VirtualBand band = new VirtualBand(meanImageBandName,
+                                                 ProductData.TYPE_FLOAT64,
+                                                 sourceProduct.getSceneRasterWidth(),
+                                                 sourceProduct.getSceneRasterHeight(),
+                                                 expression);
+        band.setSynthetic(true);
+        band.setUnit(unit);
+        band.setDescription("Mean image");
+        sourceProduct.addBand(band);
+    }
+
+    /**
      * Set initial values to some internal variables.
      */
     private void setInitialValues() {
@@ -216,37 +263,29 @@ public class PCAStatisticsOp extends Operator {
             int h = targetRectangle.height;
             System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
             */
+
+            if (substractMeanImage && !virtualBandCreated) {
+                createMeanImageVirtualBand(sourceProduct, sourceBandNames, meanImageBandName);
+                meanImageBand = sourceProduct.getBand(meanImageBandName);
+                virtualBandCreated = true;
+            }
+
             ProductData[] bandsRawSamples = new ProductData[numOfSourceBands];
             for (int i = 0; i < numOfSourceBands; i++) {
                 bandsRawSamples[i] =
                         getSourceTile(sourceProduct.getBand(sourceBandNames[i]), targetRectangle, pm).getRawSamples();
             }
 
-            final int n = bandsRawSamples[0].getNumElems();
+            if (substractMeanImage && virtualBandCreated) {
 
-            double vi, vj;
-            for (int i = 0; i < numOfSourceBands; i++)  {
-                checkForCancelation(pm);
-                for (int j = 0; j <= i; j++) {
+                ProductData meanBandRawSamples =
+                        getSourceTile(sourceProduct.getBand(meanImageBandName), targetRectangle, pm).getRawSamples();
 
-                    //System.out.println("i = " + i + ", j = " + j);
-                    if (j < i) {
+                computeStatisticsWithMeanImageSubstract(bandsRawSamples, meanBandRawSamples, pm);
 
-                        for (int k = 0; k < n; k++) {
-                            vi = bandsRawSamples[i].getElemDoubleAt(k);
-                            vj = bandsRawSamples[j].getElemDoubleAt(k);
-                            sumCross[i][j] += vi*vj;
-                        }
+            } else {
 
-                    } else { // j == i
-
-                        for (int k = 0; k < n; k++) {
-                            vi = bandsRawSamples[i].getElemDoubleAt(k);
-                            sum[i] += vi;
-                            sumCross[i][j] += vi*vi;
-                        }
-                    }
-                }
+                computeStatisticsWithoutMeanImageSubstract(bandsRawSamples, pm);
             }
 
         } catch (Exception e){
@@ -256,6 +295,70 @@ public class PCAStatisticsOp extends Operator {
         }
 
         statsCalculated = true;
+    }
+
+    private void computeStatisticsWithoutMeanImageSubstract (
+            ProductData[] bandsRawSamples, ProgressMonitor pm) throws Exception {
+
+        final int n = bandsRawSamples[0].getNumElems();
+
+        double vi, vj;
+        for (int i = 0; i < numOfSourceBands; i++) {
+            checkForCancelation(pm);
+            for (int j = 0; j <= i; j++) {
+
+                //System.out.println("i = " + i + ", j = " + j);
+                if (j < i) {
+
+                    for (int k = 0; k < n; k++) {
+                        vi = bandsRawSamples[i].getElemDoubleAt(k);
+                        vj = bandsRawSamples[j].getElemDoubleAt(k);
+                        sumCross[i][j] += vi*vj;
+                    }
+
+                } else { // j == i
+
+                    for (int k = 0; k < n; k++) {
+                        vi = bandsRawSamples[i].getElemDoubleAt(k);
+                        sum[i] += vi;
+                        sumCross[i][j] += vi*vi;
+                    }
+                }
+            }
+        }
+    }
+
+    private void computeStatisticsWithMeanImageSubstract (
+            ProductData[] bandsRawSamples, ProductData meanBandRawSamples, ProgressMonitor pm) throws Exception {
+
+        final int n = bandsRawSamples[0].getNumElems();
+
+        double vi, vj, vm;
+        for (int i = 0; i < numOfSourceBands; i++) {
+            checkForCancelation(pm);
+            for (int j = 0; j <= i; j++) {
+
+                //System.out.println("i = " + i + ", j = " + j);
+                if (j < i) {
+
+                    for (int k = 0; k < n; k++) {
+                        vm = meanBandRawSamples.getElemDoubleAt(k);
+                        vi = bandsRawSamples[i].getElemDoubleAt(k) - vm;
+                        vj = bandsRawSamples[j].getElemDoubleAt(k) - vm;
+                        sumCross[i][j] += vi*vj;
+                    }
+
+                } else { // j == i
+
+                    for (int k = 0; k < n; k++) {
+                        vm = meanBandRawSamples.getElemDoubleAt(k);
+                        vi = bandsRawSamples[i].getElemDoubleAt(k) - vm;
+                        sum[i] += vi;
+                        sumCross[i][j] += vi*vi;
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -270,6 +373,9 @@ public class PCAStatisticsOp extends Operator {
 
         completeStatistics();
 
+        if (virtualBandCreated) {
+            sourceProduct.removeBand(meanImageBand);
+        }
         writeStatsToMetadata();
     }
 
