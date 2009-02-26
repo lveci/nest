@@ -337,7 +337,7 @@ public final class MultilookOp extends Operator {
             if(targetProduct.getBand(targetBandName) == null) {
 
                 final Band targetBand = new Band(targetBandName,
-                                           ProductData.TYPE_INT32,
+                                           ProductData.TYPE_FLOAT32,
                                            targetImageWidth,
                                            targetImageHeight);
 
