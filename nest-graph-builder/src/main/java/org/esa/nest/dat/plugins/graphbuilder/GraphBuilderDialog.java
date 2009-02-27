@@ -356,7 +356,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         if(!isValid) {
 
             statusLabel.setText(msg.toString());
-            return false;
+            //return false;
         }
 
         return InitGraph();
