@@ -17,9 +17,11 @@ import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.awt.*;
 import java.text.MessageFormat;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Date;
 
 /**
  * The CreateStack operator.
@@ -109,7 +111,7 @@ public class CreateStackOp extends Operator {
         // add master bands first
         for (final Band srcBand : slaveBandList) {
             if(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1])) {
-                suffix = "_mst";
+                suffix = "_mst_" + getBandTimeStamp(srcBand);
                 final Band targetBand = targetProduct.addBand(srcBand.getName() + suffix, srcBand.getDataType());
                 ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
                 sourceRasterMap.put(targetBand, srcBand);
@@ -117,12 +119,11 @@ public class CreateStackOp extends Operator {
         }
         // then add slave bands
         int cnt = 1;
-        suffix = "_slv";
         for (final Band srcBand : slaveBandList) {
             if(!(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1]))) {
                 if(srcBand.getUnit() != null && srcBand.getUnit().equals(Unit.IMAGINARY)) {
                 } else {
-                    suffix = "_slv" + cnt++;
+                    suffix = "_slv" + cnt++ + "_" + getBandTimeStamp(srcBand);
                 }
                 final Band targetBand = targetProduct.addBand(srcBand.getName() + suffix, srcBand.getDataType());
                 ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
@@ -138,6 +139,21 @@ public class CreateStackOp extends Operator {
         if (masterGCPgroup.getNodeCount() > 0) {
             OperatorUtils.copyGCPsToTarget(masterGCPgroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
         }
+    }
+
+    private static String getBandTimeStamp(final Band band) {
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(band.getProduct());
+        final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION, "");
+        String dateString;
+
+        try {
+            final ProductData.UTC date = absRoot.getAttributeUTC(AbstractMetadata.first_line_time);
+            final DateFormat dateFormat = ProductData.UTC.createDateFormat("dd-MMM-yyyy");
+            dateString = "_" + dateFormat.format(date.getAsDate());
+        } catch(Exception e) {
+            dateString = "";
+        }
+        return mission + dateString;
     }
 
     private void copySlaveMetadata() {

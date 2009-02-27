@@ -32,9 +32,6 @@ class ERSProductDirectory extends CEOSProductDirectory {
     private int _sceneWidth = 0;
     private int _sceneHeight = 0;
 
-    private final static String ERS1_MISSION = "ERS-1";
-    private final static String ERS2_MISSION = "ERS-2";
-
     private transient Map<String, ERSImageFile> bandImageFileMap = new HashMap<String, ERSImageFile>(1);
 
     public ERSProductDirectory(final File dir) {
@@ -71,17 +68,23 @@ class ERSProductDirectory extends CEOSProductDirectory {
     public boolean isERS() throws IOException, IllegalBinaryFormatException {
         if(productType == null || _volumeDirectoryFile == null)
             readVolumeDirectoryFile();
-        return (productType.contains(ERS1_MISSION) || productType.contains(ERS2_MISSION) ||
-                productType.contains("ERS1") || productType.contains("ERS2"));
+        return isERS1() || isERS2();
+    }
+
+    private boolean isERS1() {
+        return productType.contains("ERS1") || productType.contains("ERS-1") || productType.contains("ERS_1");
+    }
+
+    private boolean isERS2() {
+        return productType.contains("ERS2") || productType.contains("ERS-2") || productType.contains("ERS_2");
     }
 
     public String getMission() {
-        if(productType.contains(ERS1_MISSION) || productType.contains("ERS1"))
-            return ERS1_MISSION;
-        else if(productType.contains(ERS2_MISSION) || productType.contains("ERS2"))
-            return ERS2_MISSION;
-        else
-            return "";
+        if(isERS1())
+            return "ERS1";
+        else if(isERS2())
+            return "ERS2";
+        return "";
     }
 
     @Override
