@@ -25,9 +25,9 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.util.GeoUtils;
+import org.esa.nest.util.MathUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -63,8 +63,8 @@ public class SRGROp extends Operator {
 //               interval = "(1, *)", defaultValue = "100", label="Number of Range Points")
     private int numRangePoints = 100;
 
-//    @Parameter(valueSet = {NEAREST_NEIGHBOR, LINEAR, CUBIC, SINC}, defaultValue = LINEAR, label="Interpolation Method")
-//    private String interpolationMethod;
+    @Parameter(valueSet = {NEAREST_NEIGHBOR, LINEAR, CUBIC, CUBIC2}, defaultValue = LINEAR, label="Interpolation Method")
+    private String interpolationMethod;
 
     private MetadataElement absRoot;
     private GeoCoding geoCoding;
@@ -84,7 +84,7 @@ public class SRGROp extends Operator {
     private static final String NEAREST_NEIGHBOR = "Nearest-neighbor interpolation";
     private static final String LINEAR = "Linear interpolation";
     private static final String CUBIC = "Cubic interpolation";
-    private static final String SINC = "Sinc interpolation";
+    private static final String CUBIC2 = "Cubic2 interpolation";
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -124,7 +124,7 @@ public class SRGROp extends Operator {
             computeSlantRangeDistanceArray();
             getNearRangeIncidenceAngle();
 
-            groundRangeSpacing = slantRangeSpacing / Math.sin(nearRangeIncidenceAngle*MathUtils.DTOR);
+            groundRangeSpacing = slantRangeSpacing / Math.sin(nearRangeIncidenceAngle*Math.PI/180.0);
 
             createTargetProduct();
 
@@ -168,27 +168,47 @@ public class SRGROp extends Operator {
         final ProductData trgData = targetTile.getDataBuffer();
         final ProductData srcData = sourceRaster.getDataBuffer();
 
+        int p0 = 0, p1 = 0, p2 = 0, p3 = 0;
+        double v0 = 0.0, v1 = 0.0, v2 = 0.0, v3 = 0.0, v = 0.0;
+        double mu = 0.0;
+
         for (int x = x0; x < x0 + w; x++) {
-
-            final double srpp = getSlantRangePixelPosition(x);
-
-            int x1, x2;
-            if (srpp < x0 + sourceImageWidth - 1) {
-                x1 = (int)srpp;
-                x2 = x1 + 1;
-            } else {
-                x1 = x0 + sourceImageWidth - 2;
-                x2 = x0 + sourceImageWidth - 1;
+            final double p = getSlantRangePixelPosition(x);
+            if (interpolationMethod.equals(NEAREST_NEIGHBOR)) {
+                p0 = Math.min((int)(p + 0.5), sourceImageWidth - 1);
+            } else if (interpolationMethod.equals(LINEAR))  {
+                p0 = Math.min((int)p, sourceImageWidth - 2);
+                p1 = p0 + 1;
+                mu = p - p0;
+            } else if (interpolationMethod.equals(CUBIC) || interpolationMethod.equals(CUBIC2))  {
+                p1 = Math.min((int)p, sourceImageWidth - 1);
+                p0 = Math.max(p1 - 1, 0);
+                p2 = Math.min(p1 + 1, sourceImageWidth - 1);
+                p3 = Math.min(p1 + 2, sourceImageWidth - 1);
+                mu = Math.min(p - p1, 1.0);
             }
-            final double a = x2 - srpp;
-            final double b = srpp - x1;
 
             for (int y = y0; y < y0 + h; y++) {
-
-                final double v1 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x1, y));
-                final double v2 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x2, y));
-                final double v = a*v1 + b*v2;
-
+                if (interpolationMethod.equals(NEAREST_NEIGHBOR)) {
+                    v = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p0, y));
+                } else if (interpolationMethod.equals(LINEAR))  {
+                    v0 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p0, y));
+                    v1 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p1, y));
+                    v = MathUtils.interpolationLinear(v0, v1, mu);
+                } else if (interpolationMethod.equals(CUBIC))  {
+                    v0 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p0, y));
+                    v1 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p1, y));
+                    v2 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p2, y));
+                    v3 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p3, y));
+                    v = MathUtils.interpolationCubic(v0, v1, v2, v3, mu);
+                } else if (interpolationMethod.equals(CUBIC2))  {
+                    v0 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p0, y));
+                    v1 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p1, y));
+                    v2 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p2, y));
+                    v3 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p3, y));
+                    v = MathUtils.interpolationCubic2(v0, v1, v2, v3, mu);
+                }
+                v = Math.max(v, 0.0);
                 trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), v);
             }
         }
