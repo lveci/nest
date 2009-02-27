@@ -12,6 +12,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.util.StringUtils;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.datamodel.AbstractMetadata;
 
@@ -148,12 +149,12 @@ public class CreateStackOp extends Operator {
 
         try {
             final ProductData.UTC date = absRoot.getAttributeUTC(AbstractMetadata.first_line_time);
-            final DateFormat dateFormat = ProductData.UTC.createDateFormat("dd-MMM-yyyy");
+            final DateFormat dateFormat = ProductData.UTC.createDateFormat("dd.MMM.yyyy");
             dateString = "_" + dateFormat.format(date.getAsDate());
         } catch(Exception e) {
             dateString = "";
         }
-        return mission + dateString;
+        return StringUtils.createValidName(mission + dateString, new char[]{'_', '.'}, '_');
     }
 
     private void copySlaveMetadata() {
