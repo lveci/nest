@@ -12,6 +12,7 @@
 
     <mapID target="NestOverview" url="general/NestOverview.html"/>
     <mapID target="beamDefinitions" url="general/BeamDefinitions.html"/>
+	<mapID target="SupportedProducts" url="general/SupportedProducts.html"/>
     <mapID target="beamDataSources" url="general/BeamDataSources.html"/>
 
     <mapID target="visat" url="visat/dat.html"/>
@@ -35,39 +36,39 @@
     <mapID target="subsetDialog" url="visat/ProductSubsetDialog.html"/>
 	
     <mapID target="importDimapProduct" url="general/BeamDimapFormat.html"/>
-    <mapID target="importEnvisatProduct" url="visat/ImportEnvisat.html"/>
-    <mapID target="importErsProduct" url="visat/ImportErs.html"/>
-	<mapID target="ImportERSCeos" url="visat/ImportERSCeos.html"/>
-	<mapID target="ImportJERSCeos" url="visat/ImportJERSCeos.html"/>
-	<mapID target="ImportRadarsat1" url="visat/ImportRadarsat1.html"/>
-	<mapID target="ImportRadarsat2" url="visat/ImportRadarsat2.html"/>
-	<mapID target="ImportTerraSarX" url="visat/ImportTerraSarX.html"/>
-	<mapID target="ImportEnvi" url="visat/ImportEnvi.html"/>
-	<mapID target="ImportPolsarPro" url="visat/ImportPolsarPro.html"/>
-	<mapID target="ImportAlosPalsar" url="visat/ImportAlosPalsar.html"/>
-	<mapID target="ImportAlosAVNIR2" url="visat/ImportAVNIR2.html"/>
-	<mapID target="ImportAlosPRISM" url="visat/ImportPRISM.html"/>
-	<mapID target="ImportGeoTIFF" url="visat/ImportGeoTIFF.html"/>
-	<mapID target="ImportImageIO" url="visat/ImportImageIO.html"/>
-	<mapID target="importNetCDF" url="visat/ImportNetCDF.html"/>
-	<mapID target="importHDF" url="visat/ImportHDF.html"/>
-	<mapID target="importGenericBinary" url="visat/ImportGenericBinary.html"/>
+    <mapID target="importEnvisatProduct" url="readers/ImportEnvisat.html"/>
+    <mapID target="importErsProduct" url="readers/ImportErs.html"/>
+	<mapID target="ImportERSCeos" url="readers/ImportERSCeos.html"/>
+	<mapID target="ImportJERSCeos" url="readers/ImportJERSCeos.html"/>
+	<mapID target="ImportRadarsat1" url="readers/ImportRadarsat1.html"/>
+	<mapID target="ImportRadarsat2" url="readers/ImportRadarsat2.html"/>
+	<mapID target="ImportTerraSarX" url="readers/ImportTerraSarX.html"/>
+	<mapID target="ImportEnvi" url="readers/ImportEnvi.html"/>
+	<mapID target="ImportPolsarPro" url="readers/ImportPolsarPro.html"/>
+	<mapID target="ImportAlosPalsar" url="readers/ImportAlosPalsar.html"/>
+	<mapID target="ImportAlosAVNIR2" url="readers/ImportAVNIR2.html"/>
+	<mapID target="ImportAlosPRISM" url="readers/ImportPRISM.html"/>
+	<mapID target="ImportGeoTIFF" url="readers/ImportGeoTIFF.html"/>
+	<mapID target="ImportImageIO" url="readers/ImportImageIO.html"/>
+	<mapID target="importNetCDF" url="readers/ImportNetCDF.html"/>
+	<mapID target="importHDF" url="readers/ImportHDF.html"/>
+	<mapID target="importGenericBinary" url="readers/ImportGenericBinary.html"/>
     <mapID target="importGETASSE30" url="visat/GETASSE30ElevationModel.html"/>
-	<mapID target="importGTOPO30" url="visat/ImportGTOPO30.html"/>
-	<mapID target="importACE" url="visat/ImportACE.html"/>
-    <mapID target="importTransectData" url="visat/ImportTransectData.html"/>
-    <mapID target="importLandsatTMProduct" url="visat/ImportLandsatTM.html"/>
+	<mapID target="importGTOPO30" url="readers/ImportGTOPO30.html"/>
+	<mapID target="importACE" url="readers/ImportACE.html"/>
+    <mapID target="importTransectData" url="readers/ImportTransectData.html"/>
+    <mapID target="importLandsatTMProduct" url="readers/ImportLandsatTM.html"/>
 	
-    <mapID target="exportDimapProduct" url="visat/ExportDimapProduct.html"/>
-    <mapID target="exportEnviGcpFile" url="visat/ExportEnviGcpFile.html"/>
-    <mapID target="exportHdf5Product" url="visat/ExportHDF.html"/>
-	<mapID target="exportNetCDF" url="visat/ExportNetCDF.html"/>
-    <mapID target="exportImageFile" url="visat/ExportImage.html"/>
-    <mapID target="exportKml" url="visat/ExportKml.html"/>
-    <mapID target="exportROIPixels" url="visat/ExportROIPixels.html"/>
-    <mapID target="exportTransectPixels" url="visat/ExportTransectPixels.html"/>
-    <mapID target="exportGeoTIFF" url="visat/ExportGeoTIFF.html"/>
-    <mapID target="exportColorPalette" url="visat/ExportColorPalette.html"/>
+    <mapID target="exportDimapProduct" url="writers/ExportDimapProduct.html"/>
+    <mapID target="exportEnviGcpFile" url="writers/ExportEnviGcpFile.html"/>
+    <mapID target="exportHdf5Product" url="writers/ExportHDF.html"/>
+	<mapID target="exportNetCDF" url="writers/ExportNetCDF.html"/>
+    <mapID target="exportImageFile" url="writers/ExportImage.html"/>
+    <mapID target="exportKml" url="writers/ExportKml.html"/>
+    <mapID target="exportROIPixels" url="writers/ExportROIPixels.html"/>
+    <mapID target="exportTransectPixels" url="writers/ExportTransectPixels.html"/>
+    <mapID target="exportGeoTIFF" url="writers/ExportGeoTIFF.html"/>
+    <mapID target="exportColorPalette" url="writers/ExportColorPalette.html"/>
 	
     <mapID target="preferences" url="visat/PreferencesDialog.html"/>
     <mapID target="imageView" url="visat/ProductSceneView.html"/>

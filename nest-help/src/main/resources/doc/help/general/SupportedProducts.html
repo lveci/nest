@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>BEAM Help - Supported Products</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+<table class="header" width="100%">
+<tbody>
+<tr class="header">
+<td class="header">&nbsp; NEST Supported
+Products </td>
+<td class="header" align="right"><a href="../general/BeamOverview.html"><img src="../images/BeamHeader.jpg" border="0"></a></td>
+</tr>
+</tbody>
+</table>
+<h1>Product Readers</h1>
+<br>
+NEST&nbsp;includes readers for the following data products:<br>
+<br>
+<ul>
+<li><a href="../readers/ImportEnvisat.html"> ENVISAT ASAR</a> &nbsp;( IODD 3H to 4B )</li><ul><li>ASA_APG_1P, &nbsp;ASA_APM_1P,&nbsp;ASA_APP_1P,&nbsp;ASA_APS_1P,&nbsp;ASA_AP__BP</li><li>ASA_IMG_1P, &nbsp;ASA_IMM_1P,&nbsp;ASA_IMP_1P,&nbsp;ASA_IMS_1P,&nbsp;ASA_IM__BP</li><li>ASA_WSS_1P, &nbsp;ASA_WSM_1P,&nbsp;ASA_WS__BP</li><li>ASA_WVS_1P, ASA_WVW_2P</li><li>ASA_GM1_1P,&nbsp;ASA_GM__BP</li><li>ASA_XCA_AX</li></ul>
+<li><a href="../readers/ImportErs.html"> ERS AMI 1 &amp; 2</a> (PGS in ENVISAT Format)</li><ul><li>SAR_IMG_1P, SAR_IMM_1P, SAR_IMP_1P, SAR_IMS_1P, SAR_IM__BP</li></ul><li><a href="../readers/ImportERSCeos.html"> ERS AMI 1 &amp; 2</a> (VMP &amp; PGS in CEOS Format)</li><ul><li>SLC, PRI, GEC</li></ul><li><a href="../readers/ImportJERSCeos.html"> JERS SAR CEOS</a></li><ul><li>SLC, PRI, GEC</li></ul>
+
+<li><a href="../readers/ImportAlosPalsar.html"> ALOS PALSAR CEOS</a></li><ul><li>FBS, FBD, PLR,&nbsp;WB1 at levels 1.1 and 1.5</li></ul>
+<li><a href="../readers/ImportRadarsat1.html"> Radarsat 1 CEOS</a></li><ul><li>Standard, Fine</li></ul><li><a href="../readers/ImportRadarsat2.html">Radarsat 2</a></li><li><a href="../readers/ImportTerraSarX.html"> TerraSAR X</a></li><ul><li>MGD, GEC, EEC, SSC(coming soon)</li></ul><li><a href="BeamDimapFormat.html"> Beam DIMAP</a></li><li><a href="../readers/ImportEnvi.html">ENVI</a></li><li><a href="../readers/ImportPolsarPro.html">PolsarPro</a></li>
+
+<li><a href="../readers/ImportGeoTIFF.html"> GeoTiff</a></li><li><a href="../readers/ImportNetCDF.html">NetCDF</a></li>
+<li><a href="../readers/ImportHDF.html"> HDF 4 &amp; 5</a>
+</li>
+<li><a href="../readers/ImportImageIO.html">ImageIO</a></li><ul><li>JPG, BMP, PNG, GIF</li></ul><li>Digital Elevation Maps</li><ul><li>GETASSE30, ACE, GTOPO30</li></ul><li>Orbit Files</li><ul><li>DOR_VOR_AX, DOR_POR_AX</li></ul><li>Optical</li><ul><li><a href="../readers/ImportEnvisat.html">ENVISAT MERIS</a> (<a name="meris">1b/L2 RR/FR/FRG/FSG)</a></li><li><a href="../readers/ImportATSR.html">ERS ATSR and ATSR-2</a></li><li><a href="../readers/ImportAVNIR2.html">ALOS AVNIR-2</a> (1A, 1B1, 1B2)</li><li><a href="../readers/ImportPRISM.html">ALOS PRISM</a> (1A, 1B1, 1B2)</li><li><a href="../readers/ImportLandsatTM.html">Landsat 5 TM</a> in FAST format</li></ul>
+</ul>
+<br>
+An API is provided with NEST to allow&nbsp;users to
+add data ingestion of other formats and to support data formats of
+future missions.<br><h1>Product Writers</h1><br>
+NEST supports various data conversion options and output to common
+georeferenced data formats for import into 3rd party software.<br>
+<br>
+The following data format writers are available:<br>
+<br>
+<ul>
+<li><a href="BeamDimapFormat.html"> Beam DIMAP</a>
+</li>
+<li><a href="../writers/ExportGeoTIFF.html"> GeoTiff</a>
+</li>
+<li><a href="../writers/ExportHDF.html"> HDF&nbsp;5</a>
+</li>
+<li><a href="../writers/ExportNetCDF.html"> NetCDF</a>
+</li>
+
+<li> ENVI
+</li>
+<li> Generic Binary</li><li>JPG</li><li>BMP</li><li>PNG</li><li><a href="../writers/ExportKml.html">Google Earth KMZ</a></li>
+</ul>
+<br>
+New Writer Plugins could also be developed with the easy to use API<br>
+<hr>
+</body></html>

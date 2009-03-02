@@ -10,6 +10,7 @@
     <tocitem text="General">
         <tocitem text="Overview" target="NestOverview"/>
         <tocitem text="Definitions" target="beamDefinitions"/>
+		<tocitem text="Supported Products" target="SupportedProducts"/>
         <tocitem text="Data Sources" target="beamDataSources"/>
     </tocitem>
 
@@ -38,36 +39,36 @@
 	        <tocitem text="Help Menu" target="helpMenu"/>
 		</tocitem>
 		
-		<tocitem text="Import">
-            <tocitem text="Import ENVISAT Data Product" target="importEnvisatProduct"/>
-            <tocitem text="Import ERS (.E1, .E2) Data Product" target="importErsProduct"/>
-			<tocitem text="Import ERS CEOS Data Product" target="ImportERSCeos"/>
-			<tocitem text="Import JERS CEOS Data Product" target="ImportJERSCeos"/>
-			<tocitem text="Import Radarsat-1 Data Product" target="ImportRadarsat1"/>
-			<tocitem text="Import Radarsat-2 Data Product" target="ImportRadarsat2"/>
-			<tocitem text="Import TerraSarX Data Product" target="ImportTerraSarX"/>
-			<tocitem text="Import ENVI Data Product" target="ImportEnvi"/>
-			<tocitem text="Import PolsarPro Data Product" target="ImportPolsarPro"/>
-			<tocitem text="Import ALOS PALSAR Data Product" target="ImportAlosPalsar"/>
-			<tocitem text="Import ALOS AVNIR2 Data Product" target="ImportAVNIR2"/>
-			<tocitem text="Import ALOS PRISM Data Product" target="ImportPRISM"/>
-			<tocitem text="Import GeoTIFF Data Product" target="ImportGeoTIFF"/>
-			<tocitem text="Import ImageIO Data Product" target="ImportImageIO"/>
-            <tocitem text="Import BEAM-DIMAP Data Product" target="importDimapProduct"/>
-            <tocitem text="Import LANDSAT 5 TM Data Product" target="importLandsatTMProduct"/>
-            <tocitem text="Import NetCDF Data Product" target="importNetCDF"/>
-			<tocitem text="Import HDF Data Product" target="importHDF"/>
-			<tocitem text="Import Generic Binary" target="importGenericBinary"/>
-            <tocitem text="Import GETASSE30 Tile" target="importGETASSE30"/>
-			<tocitem text="Import GTOPO30 Tile" target="importGTOPO30"/>
-			<tocitem text="Import ACE DEM Tile" target="importACE"/>
-			<tocitem text="Import Transect Data" target="importTransectData"/>
+		<tocitem text="Product Readers">
+            <tocitem text="Open ENVISAT Data Product" target="importEnvisatProduct"/>
+            <tocitem text="Open ERS (.E1, .E2) Data Product" target="importErsProduct"/>
+			<tocitem text="Open ERS CEOS Data Product" target="ImportERSCeos"/>
+			<tocitem text="Open JERS CEOS Data Product" target="ImportJERSCeos"/>
+			<tocitem text="Open Radarsat-1 Data Product" target="ImportRadarsat1"/>
+			<tocitem text="Open Radarsat-2 Data Product" target="ImportRadarsat2"/>
+			<tocitem text="Open TerraSarX Data Product" target="ImportTerraSarX"/>
+			<tocitem text="Open ENVI Data Product" target="ImportEnvi"/>
+			<tocitem text="Open PolsarPro Data Product" target="ImportPolsarPro"/>
+			<tocitem text="Open ALOS PALSAR Data Product" target="ImportAlosPalsar"/>
+			<tocitem text="Open ALOS AVNIR2 Data Product" target="ImportAVNIR2"/>
+			<tocitem text="Open ALOS PRISM Data Product" target="ImportPRISM"/>
+			<tocitem text="Open GeoTIFF Data Product" target="ImportGeoTIFF"/>
+			<tocitem text="Open ImageIO Data Product" target="ImportImageIO"/>
+            <tocitem text="Open BEAM-DIMAP Data Product" target="importDimapProduct"/>
+            <tocitem text="Open LANDSAT 5 TM Data Product" target="importLandsatTMProduct"/>
+            <tocitem text="Open NetCDF Data Product" target="importNetCDF"/>
+			<tocitem text="Open HDF Data Product" target="importHDF"/>
+			<tocitem text="Open Generic Binary" target="importGenericBinary"/>
+            <tocitem text="Open GETASSE30 Tile" target="importGETASSE30"/>
+			<tocitem text="Open GTOPO30 Tile" target="importGTOPO30"/>
+			<tocitem text="Open ACE DEM Tile" target="importACE"/>
+			<tocitem text="Open Transect Data" target="importTransectData"/>
 			
 			<tocitem text="Product Subset Dialog" target="subsetDialog"/>
             <tocitem text="Import Browser" target="productGrabber"/>
 		</tocitem>
 		
-		<tocitem text="Export">
+		<tocitem text="Product Writers">
             <tocitem text="Export BEAM-DIMAP Data Product" target="exportDimapProduct"/>
             <tocitem text="Export HDF-5 Data Product" target="exportHdf5Product"/>
 			<tocitem text="Export NetCDF Data Product" target="exportNetCDF"/>
