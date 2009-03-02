@@ -5,6 +5,7 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.ProductUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 /**
  * Helper methods for working with Operators
@@ -135,5 +136,12 @@ public class OperatorUtils {
 
             targetGCPGroup.add(tPin);
         }
+    }
+
+    public static Product createDummyTargetProduct() {
+        Product targetProduct = new Product("tmp", "tmp", 1, 1);
+        targetProduct.addBand(new Band("tmp", ProductData.TYPE_INT8, 1, 1));
+        AbstractMetadata.addAbstractedMetadataHeader(targetProduct.getMetadataRoot());
+        return targetProduct;
     }
 }

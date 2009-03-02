@@ -192,7 +192,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
             }
         });
 
-        final JButton infoButton = DialogUtils.CreateButton("infoButton", "Info", infoIcon, panel);
+        final JButton infoButton = DialogUtils.CreateButton("infoButton", "Note", infoIcon, panel);
         infoButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {

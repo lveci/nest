@@ -158,7 +158,7 @@
         <action>
             <id>WSSMosaicOp</id>
             <class>org.esa.nest.dat.WSSMosaicOpAction</class>
-            <text>WSS Mosaic</text>
+            <text>WSS Mosaic (coming soon)</text>
             <shortDescr>Invoke the ASAR WSS Mosaic operator.</shortDescr>
             <parent>ASARWSS</parent>
             <placeAfter>WSSDeBurstOp</placeAfter>

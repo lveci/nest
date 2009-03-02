@@ -257,12 +257,11 @@ class ERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, getProcTime() );
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier,
                 sceneRec.getAttributeString("Processing system identifier").trim() );
-        // cycle n/a?
 
-        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT,
-        //        Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
-                Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
+        final int absOrbit = Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.CYCLE, getCycle(absOrbit));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT, getRelOrbit(absOrbit));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT, absOrbit);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
                 AbstractMetadata.parseUTC(facilityRec.getAttributeString(
                         "Time of input state vector used to processed the image")));
@@ -425,6 +424,54 @@ class ERSProductDirectory extends CEOSProductDirectory {
                                   hour+':'+minute+':'+second, "yyyy-mm-dd HH:mm:ss");
     }
 
+    private int getCycle(final int absOrbit) {
+        if(isERS1()) {
+            if(absOrbit < 12754) {              // phase C
+                final int orbitsPerCycle = 501;
+                return (absOrbit + 37930)/orbitsPerCycle;
+            } else if(absOrbit < 14302) {       // phase D
+                final int orbitsPerCycle = 43;
+                return (absOrbit - 8342)/orbitsPerCycle;
+            } else if(absOrbit < 16747) {       // phase E
+                final int orbitsPerCycle = 2411;
+                return ((absOrbit-12511)/orbitsPerCycle) + 139;
+            } else if(absOrbit < 19248) {       // phase F
+                final int orbitsPerCycle = 2411;
+                return ((absOrbit - 14391)/orbitsPerCycle) + 141;
+            } else {                            // phase G
+                final int orbitsPerCycle = 501;
+                return ((absOrbit - 19027)/orbitsPerCycle) + 144;
+            }
+        } else {
+            final int orbitsPerCycle = 501;
+            return (absOrbit + 145)/orbitsPerCycle;
+        }
+    }
+
+    private int getRelOrbit(final int absOrbit) {
+        if(isERS1()) {
+            if(absOrbit < 12754) {               // phase C
+                final int orbitsPerCycle = 501;
+                return absOrbit + 37931 - getCycle(absOrbit) * orbitsPerCycle;
+            } else if(absOrbit < 14302) {        // phase D
+                final int orbitsPerCycle = 43;
+                return absOrbit - 8341 - getCycle(absOrbit) * orbitsPerCycle;
+            } else if(absOrbit < 16747) {        // phase E
+                final int orbitsPerCycle = 2411;
+                return absOrbit - 12510 -(getCycle(absOrbit)-139) * orbitsPerCycle;
+            } else if(absOrbit < 19248) {        // phase F
+                final int orbitsPerCycle = 2411;
+                return absOrbit - 14390 -(getCycle(absOrbit)-141) * orbitsPerCycle;
+            } else {                             // phase G
+                final int orbitsPerCycle = 501;
+                return absOrbit - 19026 - (getCycle(absOrbit)-144)*orbitsPerCycle;
+            }
+        } else {
+            final int orbitsPerCycle = 501;
+            return absOrbit + 146 - getCycle(absOrbit)*orbitsPerCycle; 
+        }
+    }
+
     private void addSummaryMetadata(final MetadataElement parent) throws IOException {
         final MetadataElement summaryMetadata = new MetadataElement("Summary Information");
         final Properties properties = new Properties();
@@ -448,8 +495,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
             // strip of double quotes
             final String strippedData = data.substring(1, data.length() - 1);
             final MetadataAttribute attribute = new MetadataAttribute((String) entry.getKey(),
-                    new ProductData.ASCII(strippedData),
-                    true);
+                    new ProductData.ASCII(strippedData), true);
             summaryMetadata.addAttribute(attribute);
         }
 

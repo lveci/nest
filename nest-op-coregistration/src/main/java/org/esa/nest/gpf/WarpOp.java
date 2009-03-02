@@ -168,6 +168,11 @@ public class WarpOp extends Operator {
                     continue;
 
                 final ProductNodeGroup<Pin> slaveGCPGroup = sourceProduct.getGcpGroup(srcBand);
+                if(slaveGCPGroup.getNodeCount() < 3) {
+                    throw new OperatorException(slaveGCPGroup.getNodeCount() + 
+                            " GCPs survived. Try using more GCPs or a larger window");
+                }
+
                 final WarpData warpData = new WarpData(slaveGCPGroup);
                 warpDataMap.put(srcBand, warpData);
 
@@ -202,8 +207,9 @@ public class WarpOp extends Operator {
                 final File residualsFile = getResidualsFile(sourceProduct);
                 if(Desktop.isDesktopSupported()) {
                     try {
-                        Desktop.getDesktop().edit(residualsFile);
+                        Desktop.getDesktop().open(residualsFile);
                     } catch(Exception e) {
+                        System.out.println(e.getMessage());
                         // do nothing
                     }
                 }

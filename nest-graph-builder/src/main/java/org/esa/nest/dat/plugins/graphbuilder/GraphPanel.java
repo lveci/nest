@@ -8,6 +8,7 @@ import javax.swing.border.BevelBorder;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,17 +23,19 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
 
     private final GraphExecuter graphEx;
     private JMenu addMenu;
-    private Point lastMousePos;
+    private Point lastMousePos = null;
     private final AddMenuListener addListener = new AddMenuListener(this);
     private final RemoveSourceMenuListener removeSourceListener = new RemoveSourceMenuListener(this);
 
     private static final Color opColor = new Color(200, 200, 255, 128);
     private static final Color selColor = new Color(200, 255, 200, 150);
-    private GraphNode selectedNode;
+    private static final Color helpColor = new Color(250, 255, 250, 150);
+    private GraphNode selectedNode = null;
     private boolean showSourceHotSpot = false;
     private boolean connectingSource = false;
-    private Point connectingSourcePos;
-    private GraphNode connectSourceTargetNode;
+    private Point connectingSourcePos = null;
+    private GraphNode connectSourceTargetNode = null;
+    private boolean showRightClickHelp = true;
 
     GraphPanel(GraphExecuter graphExec) {
 
@@ -127,6 +130,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
             popup.setBorder(new BevelBorder(BevelBorder.RAISED));
             popup.addPopupMenuListener(this);
             popup.show(this, e.getX(), e.getY());
+            showRightClickHelp = false;
         }
     }
 
@@ -162,6 +166,10 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
 
         final Font font = new Font("Ariel", 10, 10);
         g.setFont(font);
+        if(showRightClickHelp) {
+            drawHelp(g, helpColor);
+        }
+
         for(GraphNode n : nodeList) {
             
             if(n == selectedNode)
@@ -195,6 +203,19 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
         }
     }
 
+    private static void drawHelp(final Graphics g, final Color col) {
+        final int x = (int)(g.getClipBounds().getWidth()/2);
+        final int y = (int)(g.getClipBounds().getHeight()/2);
+
+        final FontMetrics metrics = g.getFontMetrics();
+        final String name = "Right click here to add an operator";
+        final Rectangle2D rect = metrics.getStringBounds(name, g);
+        final int stringWidth = (int) rect.getWidth();
+
+        g.setColor(Color.black);
+        g.drawString(name, x - stringWidth / 2, y);
+    }
+
     /**
      * Handle mouse pressed event
      * @param e the mouse event
@@ -215,6 +236,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
      */
     public void mouseClicked(MouseEvent e) {
         checkPopup(e);
+        showRightClickHelp = false;
     }
 
     public void mouseEntered(MouseEvent e) {

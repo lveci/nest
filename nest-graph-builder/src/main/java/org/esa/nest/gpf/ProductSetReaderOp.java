@@ -16,13 +16,11 @@ import java.io.IOException;
 /**
  * ProductSet Operator to be replaced by ReadOp
  */
-@OperatorMetadata(alias="ProductSet-Reader")
+@OperatorMetadata(alias="ProductSet-Reader", description="Adds a list of sources")
 public class ProductSetReaderOp extends Operator {
 
     @TargetProduct
     private Product targetProduct;
-    @Parameter(description = "The file from which the data product is read.")
-    private File defaultFile;
     @Parameter
     private String[] fileList;
 
@@ -48,11 +46,7 @@ public class ProductSetReaderOp extends Operator {
      */
     @Override
     public void initialize() throws OperatorException {
-        try {
-            targetProduct = ProductIO.readProduct(defaultFile, null);
-        } catch(IOException e) {
-            throw new OperatorException(e);
-        }
+        throw new OperatorException("Please add a source product");
     }
 
     /**

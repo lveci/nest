@@ -84,9 +84,7 @@ public class CreateStackOp extends Operator {
                 }
             }
             if(masterBandNames.length == 0) {
-                targetProduct = new Product("tmp", "tmp", 1, 1);
-                targetProduct.addBand(new Band("tmp", ProductData.TYPE_INT8, 1, 1));
-                AbstractMetadata.addAbstractedMetadataHeader(targetProduct.getMetadataRoot());
+                targetProduct = OperatorUtils.createDummyTargetProduct();
                 return;
             }
         }
@@ -95,9 +93,7 @@ public class CreateStackOp extends Operator {
 
         final Band[] slaveBandList = getSlaveBands();
         if(masterProduct == null || slaveBandList.length == 0 || slaveBandList[0] == null) {
-            targetProduct = new Product("tmp", "tmp", 1, 1);
-            targetProduct.addBand(new Band("tmp", ProductData.TYPE_INT8, 1, 1));
-            AbstractMetadata.addAbstractedMetadataHeader(targetProduct.getMetadataRoot());
+            targetProduct = OperatorUtils.createDummyTargetProduct();
             return;
         }
 
