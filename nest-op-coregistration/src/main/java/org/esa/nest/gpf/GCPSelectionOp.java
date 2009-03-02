@@ -111,14 +111,20 @@ public class GCPSelectionOp extends Operator {
 
     private ProductNodeGroup<Pin> masterGcpGroup = null;
 
+    private int sourceImageWidth;
+    private int sourceImageHeight;
     private int cWindowWidth = 0; // row dimension for master and slave imagette for cross correlation, must be power of 2
     private int cWindowHeight = 0; // column dimension for master and slave imagette for cross correlation, must be power of 2
     private int rowUpSamplingFactor = 0; // cross correlation interpolation factor in row direction, must be power of 2
     private int colUpSamplingFactor = 0; // cross correlation interpolation factor in column direction, must be power of 2
+    private int cHalfWindowWidth;
+    private int cHalfWindowHeight;
 
     // parameters used for complex co-registration
     private int fWindowWidth = 0;  // row dimension for master and slave imagette for computing coherence, must be power of 2
     private int fWindowHeight = 0; // column dimension for master and slave imagette for computing coherence, must be power of 2
+    private int fHalfWindowWidth;
+    private int fHalfWindowHeight;
 
     private final static int ITMAX = 200;
     private final static double TOL = 2.0e-4;      // Tolerance passed to brent
@@ -156,6 +162,8 @@ public class GCPSelectionOp extends Operator {
     {
         cWindowWidth = Integer.parseInt(coarseRegistrationWindowWidth);
         cWindowHeight = Integer.parseInt(coarseRegistrationWindowHeight);
+        cHalfWindowWidth = cWindowWidth / 2;
+        cHalfWindowHeight = cWindowHeight / 2;
 
         rowUpSamplingFactor = Integer.parseInt(rowInterpFactor);
         colUpSamplingFactor = Integer.parseInt(columnInterpFactor);
@@ -172,11 +180,14 @@ public class GCPSelectionOp extends Operator {
             complexCoregistration = true;
         }
 
+        sourceImageWidth = sourceProduct.getSceneRasterWidth();
+        sourceImageHeight = sourceProduct.getSceneRasterHeight();
+
         createTargetProduct();
 
         masterGcpGroup = sourceProduct.getGcpGroup(masterBand1);
         if (masterGcpGroup.getNodeCount() <= 0) {
-            addGCPGrid(sourceProduct, numGCPtoGenerate, masterGcpGroup);
+            addGCPGrid(sourceImageWidth, sourceImageHeight, numGCPtoGenerate, masterGcpGroup);
         }
 
         OperatorUtils.copyGCPsToTarget(masterGcpGroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
@@ -184,14 +195,15 @@ public class GCPSelectionOp extends Operator {
         if (complexCoregistration) {
             fWindowWidth = Integer.parseInt(fineRegistrationWindowWidth);
             fWindowHeight = Integer.parseInt(fineRegistrationWindowHeight);
+            fHalfWindowWidth = fWindowWidth / 2;
+            fHalfWindowHeight = fWindowHeight / 2;
         }
     }
 
-    private static void addGCPGrid(final Product product, final int numPins, final ProductNodeGroup<Pin> group) {
-        final int width = product.getSceneRasterWidth();
-        final int height = product.getSceneRasterHeight();
-        final float ratio = width / (float)height;
+    private static void addGCPGrid(
+            final int width, final int height, final int numPins, final ProductNodeGroup<Pin> group) {
 
+        final float ratio = width / (float)height;
         final float n = (float)Math.sqrt(numPins / ratio);
         final float m = ratio * n;
         final float spacingX = width / m;
@@ -221,8 +233,8 @@ public class GCPSelectionOp extends Operator {
 
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),
-                                    sourceProduct.getSceneRasterWidth(),
-                                    sourceProduct.getSceneRasterHeight());
+                                    sourceImageWidth,
+                                    sourceImageHeight);
 
         final int numSrcBands = sourceProduct.getNumBands();
         for(int i=0; i < numSrcBands; ++i) {
@@ -241,7 +253,7 @@ public class GCPSelectionOp extends Operator {
 
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
-        //targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 50);  // 256
+        //targetProduct.setPreferredTileSize(sourceImageWidth, 50);  // 256
     }
 
     /**
@@ -308,13 +320,12 @@ public class GCPSelectionOp extends Operator {
             final Pin mPin = masterGcpGroup.get(i);
             final PixelPos mGCPPixelPos = mPin.getPixelPos();
 
-            if (checkGCPValidity(mGCPPixelPos, targetRectangle)) {
+            if (checkMasterGCPValidity(mGCPPixelPos, targetRectangle)) {
 
                 final GeoPos mGCPGeoPos = mPin.getGeoPos();
                 final PixelPos sGCPPixelPos = slaveBand.getGeoCoding().getPixelPos(mGCPGeoPos, null);
 
-                if (sGCPPixelPos.x < 0.0f || sGCPPixelPos.x >= sourceProduct.getSceneRasterWidth() ||
-                    sGCPPixelPos.y < 0.0f || sGCPPixelPos.y >= sourceProduct.getSceneRasterHeight()) {
+                if (!checkSlaveGCPValidity(sGCPPixelPos)) {
                     //System.out.println("GCP(" + i + ") is outside slave image.");
                     continue;
                 }
@@ -352,17 +363,29 @@ public class GCPSelectionOp extends Operator {
     }
 
     /**
-     * Check if a given GCP is within the given tile.
-     *
+     * Check if a given master GCP is within the given tile and the GCP imagette is within the image.
      * @param pixelPos The GCP pixel position.
      * @param targetRectangle The coordinates of the current tile.
-     * @return flag Return true if the GCP is within the given tile, false otherwise.
+     * @return flag Return true if the GCP is within the given tile and the GCP imagette is within the image,
+     *              false otherwise.
      */
-    private static boolean checkGCPValidity(final PixelPos pixelPos,
-                                            final Rectangle targetRectangle) {
+    private boolean checkMasterGCPValidity(final PixelPos pixelPos, final Rectangle targetRectangle) {
 
-        return (pixelPos.x >= targetRectangle.x && pixelPos.x < targetRectangle.x + targetRectangle.width &&
-                pixelPos.y >= targetRectangle.y && pixelPos.y < targetRectangle.y + targetRectangle.height);
+        return (pixelPos.x >= targetRectangle.x && pixelPos.x < targetRectangle.x + targetRectangle.width ) &&
+               (pixelPos.y >= targetRectangle.y && pixelPos.y < targetRectangle.y + targetRectangle.height) &&
+               (pixelPos.x - cHalfWindowWidth + 1 >= 0 && pixelPos.x + cHalfWindowWidth <= sourceImageWidth - 1) &&
+               (pixelPos.y - cHalfWindowHeight + 1 >= 0 && pixelPos.y + cHalfWindowHeight <= sourceImageHeight -1);
+    }
+
+    /**
+     * Check if a given slave GCP imagette is within the image.
+     * @param pixelPos The GCP pixel position.
+     * @return flag Return true if the GCP is within the image, false otherwise.
+     */
+    private boolean checkSlaveGCPValidity(final PixelPos pixelPos) {
+
+        return (pixelPos.x - cHalfWindowWidth + 1 >= 0 && pixelPos.x + cHalfWindowWidth <= sourceImageWidth - 1) &&
+               (pixelPos.y - cHalfWindowHeight + 1 >= 0 && pixelPos.y + cHalfWindowHeight <= sourceImageHeight -1);
     }
 
     private boolean getCoarseSlaveGCPPosition(final Band slaveBand, final Band slaveBand2,
@@ -379,6 +402,10 @@ public class GCPSelectionOp extends Operator {
         while (Math.abs(rowShift) >= gcpTolerance || Math.abs(colShift) >= gcpTolerance) {
 
             if (numIter >= maxIteration) {
+                return false;
+            }
+
+            if (!checkSlaveGCPValidity(sGCPPixelPos)) {
                 return false;
             }
 
@@ -405,10 +432,8 @@ public class GCPSelectionOp extends Operator {
         final double[] mI = new double[cWindowWidth*cWindowHeight];
         final int x0 = (int)gcpPixelPos.x;
         final int y0 = (int)gcpPixelPos.y;
-        final int halfWidth = cWindowWidth / 2;
-        final int halfHeight = cWindowHeight / 2;
-        final int xul = x0 - halfWidth + 1;
-        final int yul = y0 - halfHeight + 1;
+        final int xul = x0 - cHalfWindowWidth + 1;
+        final int yul = y0 - cHalfWindowHeight + 1;
         final Rectangle masterImagetteRectangle = new Rectangle(xul, yul, cWindowWidth, cWindowHeight);
 
         try {
@@ -443,13 +468,12 @@ public class GCPSelectionOp extends Operator {
 
     private double[] getSlaveImagette(final Band slaveBand, final Band slaveBand2, final PixelPos gcpPixelPos)
                                         throws OperatorException {
+        
         final double[] sI = new double[cWindowWidth*cWindowHeight];
         final float x0 = gcpPixelPos.x;
         final float y0 = gcpPixelPos.y;
-        final int halfWidth = cWindowWidth / 2;
-        final int halfHeight = cWindowHeight / 2;
-        final int xul = (int)x0 - halfWidth + 1;
-        final int yul = (int)y0 - halfHeight + 1;
+        final int xul = (int)x0 - cHalfWindowWidth + 1;
+        final int yul = (int)y0 - cHalfWindowHeight + 1;
         final Rectangle slaveImagetteRectangle = new Rectangle(xul, yul, cWindowWidth + 1, cWindowHeight + 1);
         int k = 0;
 
@@ -464,13 +488,10 @@ public class GCPSelectionOp extends Operator {
                 slaveData2 = slaveImagetteRaster2.getDataBuffer();
             }
 
-            final int maxX = slaveImagetteRaster1.getMaxX()-1;
-            final int maxY = slaveImagetteRaster1.getMaxY()-1;
             for (int j = 0; j < cWindowHeight; j++) {
-                final float y = Math.max(0, Math.min(y0 - halfHeight + j + 1, maxY));
-
+                final float y = y0 - cHalfWindowHeight + j + 1;
                 for (int i = 0; i < cWindowWidth; i++) {
-                    final float x = Math.max(0, Math.min(x0 - halfWidth + i + 1, maxX));
+                    final float x = x0 - cHalfWindowWidth + i + 1;
 
                     if (complexCoregistration) {
                         final double v1 = getInterpolatedSampleValue(slaveImagetteRaster1, slaveData1, x, y);
@@ -846,10 +867,8 @@ public class GCPSelectionOp extends Operator {
         compleData.mIQ = new double[fWindowHeight][fWindowWidth];
         final int x0 = (int)gcpPixelPos.x;
         final int y0 = (int)gcpPixelPos.y;
-        final int halfWidth = fWindowWidth / 2;
-        final int halfHeight = fWindowHeight / 2;
-        final int xul = x0 - halfWidth + 1;
-        final int yul = y0 - halfHeight + 1;
+        final int xul = x0 - fHalfWindowWidth + 1;
+        final int yul = y0 - fHalfWindowHeight + 1;
         final Rectangle masterImagetteRectangle = new Rectangle(xul, yul, fWindowWidth, fWindowHeight);
 
         final Tile masterImagetteRaster1 = getSourceTile(masterBand1, masterImagetteRectangle, null);
@@ -880,10 +899,8 @@ public class GCPSelectionOp extends Operator {
         compleData.point0[0] = sGCPPixelPos.x;
         compleData.point0[1] = sGCPPixelPos.y;
 
-        final int halfWidth = fWindowWidth / 2;
-        final int halfHeight = fWindowHeight / 2;
-        final int xul = x0 - halfWidth + 1;
-        final int yul = y0 - halfHeight + 1;
+        final int xul = x0 - fHalfWindowWidth + 1;
+        final int yul = y0 - fHalfWindowHeight + 1;
         final Rectangle slaveImagetteRectangle = new Rectangle(xul, yul, fWindowWidth, fWindowHeight);
 
         final Tile slaveImagetteRaster1 = getSourceTile(slaveBand1, slaveImagetteRectangle, null);
