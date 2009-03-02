@@ -15,10 +15,12 @@ import java.io.IOException;
  */
 public class AbstractMetadata {
 
-    public static int NO_METADATA = 99999;
-    //public static short NO_METADATA_BYTE = 99;
-    public static short NO_METADATA_BYTE = 0;
-    public static String NO_METADATA_STRING = " ";
+    public static final int NO_METADATA = 99999;
+    //public static final short NO_METADATA_BYTE = 99;
+    public static final short NO_METADATA_BYTE = 0;
+    public static final String NO_METADATA_STRING = " ";
+
+    public static final String SLAVE_METADATA_ROOT = "Slave Metadata";
 
     public static final String PRODUCT = "PRODUCT";
     public static final String PRODUCT_TYPE = "PRODUCT_TYPE";

@@ -155,14 +155,15 @@ public class CreateStackOp extends Operator {
 
     private void copySlaveMetadata() {
         final MetadataElement targetRoot = targetProduct.getMetadataRoot();
-        MetadataElement targetSlaveMetadataRoot = targetRoot.getElement("Slave Metadata");
+        MetadataElement targetSlaveMetadataRoot = targetRoot.getElement(AbstractMetadata.SLAVE_METADATA_ROOT);
         if(targetSlaveMetadataRoot == null) {
-            targetSlaveMetadataRoot = new MetadataElement("Slave Metadata");
+            targetSlaveMetadataRoot = new MetadataElement(AbstractMetadata.SLAVE_METADATA_ROOT);
             targetRoot.addElement(targetSlaveMetadataRoot);
         }
         for(Product prod : sourceProduct) {
             if(prod != masterProduct) {
-                final MetadataElement targetSlaveMetadata = new MetadataElement(prod.getName());
+                final String timeStamp = getBandTimeStamp(prod.getBandAt(0));
+                final MetadataElement targetSlaveMetadata = new MetadataElement(prod.getName()+'_'+timeStamp);
                 targetSlaveMetadataRoot.addElement(targetSlaveMetadata);
                 ProductUtils.copyMetadata(AbstractMetadata.getAbstractedMetadata(prod), targetSlaveMetadata);
             }

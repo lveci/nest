@@ -275,7 +275,6 @@ public class GCPSelectionOp extends Operator {
                         computeSlaveGCPs(slaveBand, null, targetBand, targetRectangle, SubProgressMonitor.create(pm, 1));
                     }
                 }
-
                 // copy slave data to target
                 final Tile targetTile = targetTileMap.get(targetBand);
                 targetTile.setRawSamples(getSourceTile(slaveBand, targetRectangle, pm).getRawSamples());
@@ -402,8 +401,7 @@ public class GCPSelectionOp extends Operator {
         return true;
     }
 
-    private double[] getMasterImagette(final PixelPos gcpPixelPos) {
-
+    private double[] getMasterImagette(final PixelPos gcpPixelPos) throws OperatorException {
         final double[] mI = new double[cWindowWidth*cWindowHeight];
         final int x0 = (int)gcpPixelPos.x;
         final int y0 = (int)gcpPixelPos.y;
@@ -413,33 +411,38 @@ public class GCPSelectionOp extends Operator {
         final int yul = y0 - halfHeight + 1;
         final Rectangle masterImagetteRectangle = new Rectangle(xul, yul, cWindowWidth, cWindowHeight);
 
-        final Tile masterImagetteRaster1 = getSourceTile(masterBand1, masterImagetteRectangle, null);
-        final ProductData masterData1 = masterImagetteRaster1.getDataBuffer();
-        
-        ProductData masterData2 = null;
-        if (complexCoregistration) {
-            final Tile masterImagetteRaster2 = getSourceTile(masterBand2, masterImagetteRectangle, null);
-            masterData2 = masterImagetteRaster2.getDataBuffer();
-        }
+        try {
+            final Tile masterImagetteRaster1 = getSourceTile(masterBand1, masterImagetteRectangle, null);
+            final ProductData masterData1 = masterImagetteRaster1.getDataBuffer();
 
-        int k = 0;
-        for (int j = 0; j < cWindowHeight; j++) {
-            for (int i = 0; i < cWindowWidth; i++) {
-                final int index = masterImagetteRaster1.getDataBufferIndex(xul + i, yul + j);
-                if (complexCoregistration) {
-                    final double v1 = masterData1.getElemDoubleAt(index);
-                    final double v2 = masterData2.getElemDoubleAt(index);
-                    mI[k++] = v1*v1 + v2*v2;
-                } else {
-                    mI[k++] = masterData1.getElemDoubleAt(index);
+            ProductData masterData2 = null;
+            if (complexCoregistration) {
+                final Tile masterImagetteRaster2 = getSourceTile(masterBand2, masterImagetteRectangle, null);
+                masterData2 = masterImagetteRaster2.getDataBuffer();
+            }
+
+            int k = 0;
+            for (int j = 0; j < cWindowHeight; j++) {
+                for (int i = 0; i < cWindowWidth; i++) {
+                    final int index = masterImagetteRaster1.getDataBufferIndex(xul + i, yul + j);
+                    if (complexCoregistration) {
+                        final double v1 = masterData1.getElemDoubleAt(index);
+                        final double v2 = masterData2.getElemDoubleAt(index);
+                        mI[k++] = v1*v1 + v2*v2;
+                    } else {
+                        mI[k++] = masterData1.getElemDoubleAt(index);
+                    }
                 }
             }
+            return mI;
+
+        } catch (Exception e){
+            throw new OperatorException(e);
         }
-        return mI;
     }
 
-    private double[] getSlaveImagette(final Band slaveBand, final Band slaveBand2, final PixelPos gcpPixelPos) {
-
+    private double[] getSlaveImagette(final Band slaveBand, final Band slaveBand2, final PixelPos gcpPixelPos)
+                                        throws OperatorException {
         final double[] sI = new double[cWindowWidth*cWindowHeight];
         final float x0 = gcpPixelPos.x;
         final float y0 = gcpPixelPos.y;
@@ -448,37 +451,45 @@ public class GCPSelectionOp extends Operator {
         final int xul = (int)x0 - halfWidth + 1;
         final int yul = (int)y0 - halfHeight + 1;
         final Rectangle slaveImagetteRectangle = new Rectangle(xul, yul, cWindowWidth + 1, cWindowHeight + 1);
-
-        final Tile slaveImagetteRaster1 = getSourceTile(slaveBand, slaveImagetteRectangle, null);
-        final ProductData slaveData1 = slaveImagetteRaster1.getDataBuffer();
-
-        Tile slaveImagetteRaster2 = null;
-        ProductData slaveData2 = null;
-        if (complexCoregistration) {
-            slaveImagetteRaster2 = getSourceTile(slaveBand2, slaveImagetteRectangle, null);
-            slaveData2 = slaveImagetteRaster2.getDataBuffer();
-        }
-
         int k = 0;
-        for (int j = 0; j < cWindowHeight; j++) {
-            for (int i = 0; i < cWindowWidth; i++) {
-                float x = x0 - halfWidth + i + 1;
-                float y = y0 - halfHeight + j + 1;
-                if (complexCoregistration) {
-                    final double v1 = getInterpolatedSampleValue(slaveImagetteRaster1, slaveData1, x, y);
-                    final double v2 = getInterpolatedSampleValue(slaveImagetteRaster2, slaveData2, x, y);
-                    sI[k++] = v1*v1 + v2*v2;
-                } else {
-                    sI[k++] = getInterpolatedSampleValue(slaveImagetteRaster1, slaveData1, x, y);
+
+        try {
+            final Tile slaveImagetteRaster1 = getSourceTile(slaveBand, slaveImagetteRectangle, null);
+            final ProductData slaveData1 = slaveImagetteRaster1.getDataBuffer();
+
+            Tile slaveImagetteRaster2 = null;
+            ProductData slaveData2 = null;
+            if (complexCoregistration) {
+                slaveImagetteRaster2 = getSourceTile(slaveBand2, slaveImagetteRectangle, null);
+                slaveData2 = slaveImagetteRaster2.getDataBuffer();
+            }
+
+            final int maxX = slaveImagetteRaster1.getMaxX()-1;
+            final int maxY = slaveImagetteRaster1.getMaxY()-1;
+            for (int j = 0; j < cWindowHeight; j++) {
+                final float y = Math.max(0, Math.min(y0 - halfHeight + j + 1, maxY));
+
+                for (int i = 0; i < cWindowWidth; i++) {
+                    final float x = Math.max(0, Math.min(x0 - halfWidth + i + 1, maxX));
+
+                    if (complexCoregistration) {
+                        final double v1 = getInterpolatedSampleValue(slaveImagetteRaster1, slaveData1, x, y);
+                        final double v2 = getInterpolatedSampleValue(slaveImagetteRaster2, slaveData2, x, y);
+                        sI[k++] = v1*v1 + v2*v2;
+                    } else {
+                        sI[k++] = getInterpolatedSampleValue(slaveImagetteRaster1, slaveData1, x, y);
+                    }
                 }
             }
+            return sI;
+
+        } catch (Exception e){
+            throw new OperatorException(e);
         }
-        return sI;
     }
 
     private static double getInterpolatedSampleValue(final Tile slaveRaster, final ProductData slaveData,
                                                      final float x, final float y) {
-
         final int x0 = (int)x;
         final int x1 = x0 + 1;
         final int y0 = (int)y;
