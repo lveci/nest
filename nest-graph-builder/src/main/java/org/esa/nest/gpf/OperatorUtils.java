@@ -7,6 +7,8 @@ import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
+import java.text.DateFormat;
+
 /**
  * Helper methods for working with Operators
  */
@@ -143,5 +145,17 @@ public class OperatorUtils {
         targetProduct.addBand(new Band("tmp", ProductData.TYPE_INT8, 1, 1));
         AbstractMetadata.addAbstractedMetadataHeader(targetProduct.getMetadataRoot());
         return targetProduct;
+    }
+
+    public static String getAcquisitionDate(MetadataElement root) {
+        String dateString;
+        try {
+            final ProductData.UTC date = root.getAttributeUTC(AbstractMetadata.first_line_time);
+            final DateFormat dateFormat = ProductData.UTC.createDateFormat("dd.MMM.yyyy");
+            dateString = dateFormat.format(date.getAsDate());
+        } catch(Exception e) {
+            dateString = "";
+        }
+        return dateString;
     }
 }

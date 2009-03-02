@@ -70,6 +70,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
             final File graphFile =  new File(graphPath, "ReadWriteGraph.xml");
     
             LoadGraph(graphFile);
+            graphPanel.showRightClickHelp(true);
         }
     }
 
@@ -295,8 +296,10 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
             initGraphEnabled = false;
             tabbedPanel.removeAll();
             graphEx.loadGraph(file, true);
-            if(allowGraphBuilding)
+            if(allowGraphBuilding) {
+                graphPanel.showRightClickHelp(false);
                 graphPanel.repaint();
+            }
             initGraphEnabled = true;
         } catch(GraphException e) {
             showErrorDialog(e.getMessage());

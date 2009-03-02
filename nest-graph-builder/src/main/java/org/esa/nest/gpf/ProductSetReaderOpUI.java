@@ -1,6 +1,7 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.binding.swing.BindingContext;
+import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.framework.dataio.ProductReader;
@@ -8,15 +9,19 @@ import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.util.io.FileChooserFactory;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.DialogUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.dnd.*;
 import java.awt.datatransfer.DataFlavor;
@@ -76,7 +81,6 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         final ArrayList<File> fileList = fileModel.getFileList();
         if(fileList.isEmpty()) return;
 
-        paramMap.put("defaultFile", fileList.get(0));
         final String[] fList = new String[fileList.size()];
         for(int i=0; i < fileList.size(); ++i) {
             if(fileList.get(i).getName().isEmpty())
@@ -91,7 +95,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
 
         final JPanel fileListPanel = new JPanel(new BorderLayout(4, 4));
 
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        fileModel.setColumnWidths(table.getColumnModel());
         table.setColumnSelectionAllowed(true);
         table.setDropMode(DropMode.ON);
         table.setTransferHandler(new ProductSetTransferHandler(fileModel));
@@ -106,6 +110,8 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         return fileListPanel;
     }
 
+
+
     private static void initButtonPanel(final JPanel panel, final JTable table, final FileModel fileModel) {
         panel.setLayout(new GridLayout(10, 1));
 
@@ -113,11 +119,13 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         addButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
-                final File file = GetFilePath(addButton, "Add Product");
-                if(file != null) {
-                    final ProductReader reader = ProductIO.getProductReaderForFile(file);
-                    if (reader != null) {
-                        fileModel.addFile(file);
+                final File[] files = GetFilePath(addButton, "Add Product");
+                if(files != null) {
+                    for(File file : files) {
+                        final ProductReader reader = ProductIO.getProductReaderForFile(file);
+                        if (reader != null) {
+                            fileModel.addFile(file);
+                        }
                     }
                 }
             }
@@ -148,29 +156,33 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         panel.add(clearButton);
     }
 
-    public static File GetFilePath(Component component, String title) {
+    public static File[] GetFilePath(Component component, String title) {
 
-        File file = null;
+        File[] files = null;
         final File openDir = new File(VisatApp.getApp().getPreferences().
                 getPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_OPEN_DIR, "."));
         final JFileChooser chooser = FileChooserFactory.getInstance().createFileChooser(openDir);
+        chooser.setMultiSelectionEnabled(true);
         chooser.setDialogTitle(title);
         if (chooser.showDialog(component, "ok") == JFileChooser.APPROVE_OPTION) {
-            file = chooser.getSelectedFile();
+            files = chooser.getSelectedFiles();
         }
-
-        return file;
+        return files;
     }
 
 
     public static class FileModel extends AbstractTableModel {
 
         private final String titles[] = new String[]{
-                "File Name", "Size", "Last Modified"
+                "File Name", "Type", "Acquisition", "Track", "Orbit"
         };
 
         private final Class types[] = new Class[]{
-                String.class, Number.class, Date.class
+                String.class, String.class, String.class, Number.class, Number.class
+        };
+
+        private final int widths[] = new int[]{
+                75, 10, 20, 5, 5
         };
 
         private Object data[][] = new Object[0][titles.length];
@@ -238,7 +250,15 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
             return data[r][c];
         }
 
-        //  Our own method for setting/changing the current directory
+        void setColumnWidths(TableColumnModel columnModel) {
+            for(int i=0; i < widths.length; ++i) {
+                columnModel.getColumn(i).setMinWidth(widths[i]);
+                columnModel.getColumn(i).setPreferredWidth(widths[i]);
+                columnModel.getColumn(i).setWidth(widths[i]);
+            }
+        }
+
+        // Our own method for setting/changing the current directory
         // being displayed.  This method fills the data set with file info
         // from the given directory.  It also fires an update event so this
         // method could also be called after the table is on display.
@@ -246,18 +266,44 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
 
             data = new Object[fileList.size()][titles.length];
 
-            for (int i = 0; i < fileList.size(); i++) {
-                final File file = fileList.get(i);
+            updateProductData(data, fileList);
+        }
 
-                if(!file.getName().isEmpty()) {
-                    data[i][0] = file.getName();
-                    data[i][1] = file.length();
-                    data[i][2] = new Date(file.lastModified());
+        private void updateProductData(final Object[][] data, final ArrayList<File> fileList) {
+
+            final SwingWorker worker = new SwingWorker() {
+                @Override
+                protected Object doInBackground() throws Exception {
+                    try {
+                        for(int i=0; i < fileList.size(); ++i) {
+                            final File file = fileList.get(i);
+
+                            if(!file.getName().isEmpty()) {
+                                try {
+                                    final Product product = ProductIO.readProduct(file, null);
+                                    final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+
+                                    data[i][0] = product.getName();
+                                    data[i][1] = product.getProductType();
+                                    data[i][2] = OperatorUtils.getAcquisitionDate(absRoot);
+                                    data[i][3] = absRoot.getAttributeInt(AbstractMetadata.REL_ORBIT, 0);
+                                    data[i][4] = absRoot.getAttributeInt(AbstractMetadata.ABS_ORBIT, 0);
+                                } catch(Exception ex) {
+                                    data[i][0] = file.getName();
+                                    data[i][1] = "";
+                                    data[i][2] = "";
+                                    data[i][3] = 0;
+                                    data[i][4] = 0;
+                                }
+                            }
+                        }
+                    } finally {
+                        fireTableDataChanged();
+                    }
+                    return null;
                 }
-            }
-
-            // Just in case anyone's listening...
-            fireTableDataChanged();
+            };
+            worker.execute();
         }
     }
 

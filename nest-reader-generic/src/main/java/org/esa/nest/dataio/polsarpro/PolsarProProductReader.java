@@ -84,13 +84,4 @@ public class PolsarProProductReader extends EnviProductReader {
         return product;
     }
 
-    @Override
-    protected void initMetadata(final Product product, final File inputFile) throws IOException {
-
-        final MetadataElement root = product.getMetadataRoot();
-        AbstractMetadata.addAbstractedMetadataHeader(root);
-
-        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
-        AbstractMetadata.loadExternalMetadata(product, absRoot, inputFile);
-    }
 }

@@ -108,7 +108,7 @@ public class CreateStackOp extends Operator {
         // add master bands first
         for (final Band srcBand : slaveBandList) {
             if(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1])) {
-                suffix = "_mst_" + getBandTimeStamp(srcBand);
+                suffix = "_mst_" + getBandTimeStamp(srcBand.getProduct());
                 final Band targetBand = targetProduct.addBand(srcBand.getName() + suffix, srcBand.getDataType());
                 ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
                 sourceRasterMap.put(targetBand, srcBand);
@@ -120,7 +120,7 @@ public class CreateStackOp extends Operator {
             if(!(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1]))) {
                 if(srcBand.getUnit() != null && srcBand.getUnit().equals(Unit.IMAGINARY)) {
                 } else {
-                    suffix = "_slv" + cnt++ + "_" + getBandTimeStamp(srcBand);
+                    suffix = "_slv" + cnt++ + "_" + getBandTimeStamp(srcBand.getProduct());
                 }
                 final Band targetBand = targetProduct.addBand(srcBand.getName() + suffix, srcBand.getDataType());
                 ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
@@ -138,18 +138,13 @@ public class CreateStackOp extends Operator {
         }
     }
 
-    private static String getBandTimeStamp(final Band band) {
-        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(band.getProduct());
+    private static String getBandTimeStamp(final Product product) {
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION, "");
-        String dateString;
+        String dateString = OperatorUtils.getAcquisitionDate(absRoot);
+        if(!dateString.isEmpty())
+            dateString = '_' + dateString;
 
-        try {
-            final ProductData.UTC date = absRoot.getAttributeUTC(AbstractMetadata.first_line_time);
-            final DateFormat dateFormat = ProductData.UTC.createDateFormat("dd.MMM.yyyy");
-            dateString = "_" + dateFormat.format(date.getAsDate());
-        } catch(Exception e) {
-            dateString = "";
-        }
         return StringUtils.createValidName(mission + dateString, new char[]{'_', '.'}, '_');
     }
 
@@ -162,7 +157,7 @@ public class CreateStackOp extends Operator {
         }
         for(Product prod : sourceProduct) {
             if(prod != masterProduct) {
-                final String timeStamp = getBandTimeStamp(prod.getBandAt(0));
+                final String timeStamp = getBandTimeStamp(prod);
                 final MetadataElement targetSlaveMetadata = new MetadataElement(prod.getName()+'_'+timeStamp);
                 targetSlaveMetadataRoot.addElement(targetSlaveMetadata);
                 ProductUtils.copyMetadata(AbstractMetadata.getAbstractedMetadata(prod), targetSlaveMetadata);

@@ -35,7 +35,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
     private boolean connectingSource = false;
     private Point connectingSourcePos = null;
     private GraphNode connectSourceTargetNode = null;
-    private boolean showRightClickHelp = true;
+    private boolean showRightClickHelp = false;
 
     GraphPanel(GraphExecuter graphExec) {
 
@@ -201,6 +201,10 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
                 g.drawLine(p1.x, p1.y + connectSourceTargetNode.getHalfNodeHeight(), p2.x, p2.y);
             }
         }
+    }
+
+    void showRightClickHelp(boolean flag) {
+        showRightClickHelp = flag;
     }
 
     private static void drawHelp(final Graphics g, final Color col) {

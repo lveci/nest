@@ -98,12 +98,12 @@ public class ImageIOReader extends AbstractProductReader {
         final MetadataElement root = product.getMetadataRoot();
         root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
 
-        AbstractMetadata.addAbstractedMetadataHeader(root);
-
-        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, imgIOFile.getName());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line, imgIOFile.getSceneWidth());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines, imgIOFile.getSceneHeight());
 
         AbstractMetadata.loadExternalMetadata(product, absRoot, inputFile);
     }

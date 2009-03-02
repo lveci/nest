@@ -97,8 +97,9 @@ public class AbstractMetadata {
     /**
      * Abstract common metadata from products to be used uniformly by all operators
      * @param root the product metadata root
+     * @return abstracted metadata root
      */
-    public static void addAbstractedMetadataHeader(MetadataElement root) {
+    public static MetadataElement addAbstractedMetadataHeader(MetadataElement root) {
         MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
         if(absRoot == null) {
             absRoot = new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
@@ -170,6 +171,8 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, orbit_state_vector_file, ProductData.TYPE_ASCII, "", "Orbit file");
 
         absRoot.addElement(new MetadataElement(orbit_state_vectors));
+
+        return absRoot;
     }
 
     /**
