@@ -442,13 +442,11 @@ ul
 	font-family:"Times New Roman";}
 </style>
 <![endif]--></head>
-
-
 <body style="" lang="EN-US" link="blue" vlink="purple">
 
 <div class="Section1">
 
-<h1>About NEST Version 1A</h1>
+<h1>About NEST Version 2B</h1>
 
 <div class="MsoNormal" style="text-align: center;" align="center">
 
@@ -517,21 +515,20 @@ contact us.</p>
      1.6 JDK</a> and set JAVA_HOME accordingly. </li>
  <li class="MsoNormal" style="">Install <a href="http://maven.apache.org/" target="_blank">Maven</a> and set
      MAVEN_HOME accordingly. </li>
- <li class="MsoNormal" style="">Install <a href="http://subversion.tigris.org/" target="_blank">Subversion</a> and
-     set SVN_HOME accordingly. </li>
+ 
  <li class="MsoNormal" style="">Install <a href="https://jai.dev.java.net/binary-builds.html" target="_blank">Java
      Advanced Imaging</a> JDK &amp; JRE </li>
  <li class="MsoNormal" style="">Install <a href="https://jai-imageio.dev.java.net/binary-builds.html" target="_blank">JAI
      Image I/O</a> JDK &amp; JRE </li>
 </ul>
 
-<p class="MsoNormal">2. Add $JAVA_HOME/bin, $MAVEN_HOME/bin and $SVN_HOME/bin to
+<p class="MsoNormal">2. Add $JAVA_HOME/bin, $MAVEN_HOME/bin to
 your PATH.<br />
 <br />3. Download the NEST source code and unpack into $MY_PROJECTS/nest.<br />4.
 Copy 3rd-party folder found in nest-developer-tools\maven-dependencies
-into your Maven repository, which is by default ~/.m2/repository.<br />5. Cd into $MY_PROJECTS/nest<br />6. Build NEST from source: Type mvn compile or mvn package<br />7. Open project in the your IDE. IntelliJ IDEA users:<br /><br /></p><ul><li>&nbsp;&nbsp;&nbsp;&nbsp; Build IDEA project files for NEST: Type mvn idea:idea</li><li>&nbsp;&nbsp;&nbsp;&nbsp;
+into your Maven repository, which is by default ~/.m2/repository.<br />5. Cd into $MY_PROJECTS/nest<br />6. Build NEST from source: Type mvn compile or mvn package<br />7. Open project in the your IDE. IntelliJ IDEA users:<br /><br /></p><ul><li>&nbsp;&nbsp;&nbsp;&nbsp; To build IDEA project files for NEST: Type mvn idea:idea</li><li>&nbsp;&nbsp;&nbsp;&nbsp;
 In IDEA, go to the IDEA Main Menu/File/Open Project and simply open the
-created project file $MY_PROJECTS/nest/nest.ipr</li></ul><p class="MsoNormal"><br />8. Open project in the your IDE. Eclipse users:<br /><br /></p><ul><li>&nbsp;&nbsp;&nbsp;&nbsp; Build IDEA project files for NEST: Type mvn eclipse:eclipse</li><li>&nbsp;&nbsp;&nbsp;&nbsp; Make sure that M2_REPO classpath variable is set:</li></ul><p class="MsoNormal"><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1. Open Window/Preferences..., then select Java/Build Path/Classpath Variables<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2. Select New... and add variable M2_REPO<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+created project file $MY_PROJECTS/nest/nest.ipr</li></ul><p class="MsoNormal"><br />8. Open project in the your IDE. Eclipse users:<br /><br /></p><ul><li>&nbsp;&nbsp;&nbsp;&nbsp; To build Eclipse project files for NEST: Type mvn eclipse:eclipse</li><li>&nbsp;&nbsp;&nbsp;&nbsp; Make sure that M2_REPO classpath variable is set:</li></ul><p class="MsoNormal"><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1. Open Window/Preferences..., then select Java/Build Path/Classpath Variables<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2. Select New... and add variable M2_REPO<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 3. Select Folder... and choose the location of your Maven local
 repository, e.g ~/.m2/repository<br /></p><ul><li>&nbsp;&nbsp;&nbsp;&nbsp; Click Main Menu/File/Import</li><li>&nbsp;&nbsp;&nbsp;&nbsp; Select General/Existing Project into Workspace</li><li>&nbsp;&nbsp;&nbsp;&nbsp; Select Root Directory $MY_PROJECTS/nest</li><li>&nbsp;&nbsp;&nbsp;&nbsp; Click Finish</li></ul><p class="MsoNormal"><br /><br />9. Use the following configuration to run DAT:<br /><br /></p><ul><li>&nbsp;&nbsp;&nbsp;&nbsp; Main class: com.bc.ceres.launcher.Launcher</li><li>&nbsp;&nbsp;&nbsp;&nbsp; VM parameters: -Xmx1024M -Dceres.context=nest</li><li>&nbsp;&nbsp;&nbsp;&nbsp; Program parameters: none</li><li>&nbsp;&nbsp;&nbsp;&nbsp; Working directory: $MY_PROJECTS/nest/beam</li><li>&nbsp;&nbsp;&nbsp;&nbsp; Use classpath of module (project in Eclipse): nest-bootstrap</li></ul><p class="MsoNormal"><br /><br />Enjoy!</p></div>
 

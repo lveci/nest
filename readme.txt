@@ -1,4 +1,4 @@
-About NEST Version 1C
+About NEST Version 2B
 
 The Next ESA SAR Toolbox (NEST) will be used for reading, post-processing, analyzing and visualizing the large archive of data from present and planned ESA SAR missions including Sentinel-1, as well as third party SAR-data from JERS SAR, ALOS PALSAR, TerraSAR-X and Radarsat-2. NEST will help the remote sensing community by handling ESA SAR products and complimenting existing commercial packages.
 
@@ -22,10 +22,9 @@ Building NEST from the source
 1. Download and install the required build tools
 * Install J2SE 1.6 JDK and set JAVA_HOME accordingly. 
 * Install Maven and set MAVEN_HOME accordingly. 
-* Install Subversion and set SVN_HOME accordingly. 
 * Install Java Advanced Imaging JDK & JRE 
 * Install JAI Image I/O JDK & JRE 
-2. Add $JAVA_HOME/bin, $MAVEN_HOME/bin and $SVN_HOME/bin to your PATH.
+2. Add $JAVA_HOME/bin, $MAVEN_HOME/bin to your PATH.
 
 3. Download the NEST source code and unpack into $MY_PROJECTS/nest.
 4. Copy 3rd-party folder found in nest-developer-tools\maven-dependencies into your Maven repository, which is by default ~/.m2/repository.
@@ -33,12 +32,12 @@ Building NEST from the source
 6. Build NEST from source: Type mvn compile or mvn package
 7. Open project in the your IDE. IntelliJ IDEA users:
 
-    * Build IDEA project files for NEST: Type mvn idea:idea
+    * To build IDEA project files for NEST: Type mvn idea:idea
     * In IDEA, go to the IDEA Main Menu/File/Open Project and simply open the created project file $MY_PROJECTS/nest/nest.ipr
 
 8. Open project in the your IDE. Eclipse users:
 
-    * Build IDEA project files for NEST: Type mvn eclipse:eclipse
+    * To build Eclipse project files for NEST: Type mvn eclipse:eclipse
     * Make sure that M2_REPO classpath variable is set:
 
         1. Open Window/Preferences..., then select Java/Build Path/Classpath Variables
