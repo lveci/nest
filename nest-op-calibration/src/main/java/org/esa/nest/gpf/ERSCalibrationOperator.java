@@ -490,11 +490,11 @@ public final class ERSCalibrationOperator extends Operator {
         missionType = missionTypeAttr.getData().getElemString();
         //System.out.println("Mission is " + missionType);
 
-        if (!missionType.contains("ERS-1") && !missionType.contains("ERS-2")) {
+        if (!missionType.contains("ERS1") && !missionType.contains("ERS2")) {
             throw new OperatorException("Invorrect mission type");
         }
 
-        if(missionType.equals("ERS-1"))
+        if(missionType.equals("ERS1"))
             isERS1Mission = true;
     }
 
