@@ -48,8 +48,8 @@ public class TestASARCalibrationOperator extends TestCase {
         band.readPixels(0, 0, 4, 4, floatValues, ProgressMonitor.NULL);
 
         // compare with expected outputs
-        float[] expectedValues = {0.6087614f,3.1734133f,8.314916f,15.863118f,15.219036f,28.56072f,45.270096f,
-                63.452473f,49.309677f,79.335335f,111.78942f,142.76807f,102.880684f,155.49725f,207.8729f,253.80989f};
+        float[] expectedValues = {0.5f,2.828427f,7.7942286f,15.454813f,12.5f,25.455845f,42.435246f,
+                61.819252f,40.5f,70.71068f,104.78907f,139.09332f,84.5f,138.59293f,194.85571f,247.27701f};
         assertTrue(Arrays.equals(expectedValues, floatValues));
     }
 
@@ -74,8 +74,9 @@ public class TestASARCalibrationOperator extends TestCase {
                                    0.005337F,0.006535F,0.009244F,0.017858F,
                                    0.005337F,0.006535F,0.009244F,0.017858F,
                                    0.005337F,0.006535F,0.009244F,0.017858F};
-        testProduct.addTiePointGrid(new TiePointGrid("incident_angle", 4, 4, 0, 0, 1, 1, incidence_angle));
-        testProduct.addTiePointGrid(new TiePointGrid("slant_range_time", 4, 4, 0, 0, 1, 1, slant_rage_time));
+
+        testProduct.addTiePointGrid(new TiePointGrid("incident_angle", 4, 4, 0, 0, 2, 2, incidence_angle));
+        testProduct.addTiePointGrid(new TiePointGrid("slant_range_time", 4, 4, 0, 0, 2, 2, slant_rage_time));
 
         MetadataElement abs = new MetadataElement("Abstracted Metadata");
         abs.addAttribute(new MetadataAttribute(AbstractMetadata.PRODUCT_TYPE,
