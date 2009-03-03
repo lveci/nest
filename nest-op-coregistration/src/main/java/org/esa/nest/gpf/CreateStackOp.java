@@ -231,7 +231,7 @@ public class CreateStackOp extends Operator {
             for(int i = 0; i < slaveBandNames.length; i++) {
                 final String name = slaveBandNames[i];
                 if(contains(masterBandNames, name)) {
-                    continue;
+                    throw new OperatorException("Please do not select the same band as master and slave");
                 }
                 final String bandName = getBandName(name);
                 final String productName = getProductName(name);
