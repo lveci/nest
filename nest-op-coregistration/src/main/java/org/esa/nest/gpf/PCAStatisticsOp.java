@@ -65,8 +65,8 @@ public class PCAStatisticsOp extends Operator {
     @Parameter(description = "Show the eigenvalues", defaultValue = "1", label="Show Eigenvalues")
     private boolean showEigenvalues = false;
 
-    @Parameter(description = "Substract mean image", defaultValue = "1", label="Substract Mean Image")
-    private boolean substractMeanImage = false;
+    @Parameter(description = "Subtract mean image", defaultValue = "1", label="Subtract Mean Image")
+    private boolean subtractMeanImage = false;
 
     private boolean statsCalculated = false;
     private boolean virtualBandCreated = false;
@@ -264,7 +264,7 @@ public class PCAStatisticsOp extends Operator {
             System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
             */
 
-            if (substractMeanImage && !virtualBandCreated) {
+            if (subtractMeanImage && !virtualBandCreated) {
                 createMeanImageVirtualBand(sourceProduct, sourceBandNames, meanImageBandName);
                 meanImageBand = sourceProduct.getBand(meanImageBandName);
                 virtualBandCreated = true;
@@ -276,7 +276,7 @@ public class PCAStatisticsOp extends Operator {
                         getSourceTile(sourceProduct.getBand(sourceBandNames[i]), targetRectangle, pm).getRawSamples();
             }
 
-            if (substractMeanImage && virtualBandCreated) {
+            if (subtractMeanImage && virtualBandCreated) {
 
                 ProductData meanBandRawSamples =
                         getSourceTile(sourceProduct.getBand(meanImageBandName), targetRectangle, pm).getRawSamples();
