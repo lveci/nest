@@ -69,7 +69,7 @@ public class WarpOp extends Operator {
     private Product targetProduct;
 
     @Parameter(description = "The RMS threshold for eliminating invalid GCPs", interval = "(0, *)", defaultValue = "1.0",
-                label="RMS Threshold")
+                label="RMS Pixel Threshold")
     private float rmsThreshold = 1.0f;
 
     @Parameter(description = "The order of WARP polynomial function", valueSet = {"1", "2", "3"}, defaultValue = "2",
@@ -83,8 +83,8 @@ public class WarpOp extends Operator {
     private String interpolationMethod = BILINEAR;
     private Interpolation interp = null;
 
-    @Parameter(description = "Show the Residuals file in a text viewer", defaultValue = "true", label="Show Residuals")
-    private boolean openResidualsFile = true;
+    @Parameter(description = "Show the Residuals file in a text viewer", defaultValue = "false", label="Show Residuals")
+    private boolean openResidualsFile = false;
 
     private ProductNodeGroup<Pin> masterGCPGroup = null;
     private Band masterBand = null;
