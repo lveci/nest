@@ -123,6 +123,7 @@
 	<mapID target="GCPSelectionOp" url="operators/GCPSelectionOp.html"/>
 	<mapID target="MultilookOp" url="operators/MultilookOp.html"/>
 	<mapID target="OverSampleOp" url="operators/OverSampleOp.html"/>
+	<mapID target="PCAOp" url="operators/PCAOp.html"/>
 	<mapID target="SpeckleFilterOp" url="operators/SpeckleFilterOp.html"/>
 	<mapID target="SRGROp" url="operators/SRGROp.html"/>
 	<mapID target="UnderSampleOp" url="operators/UnderSampleOp.html"/>

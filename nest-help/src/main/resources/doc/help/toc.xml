@@ -141,6 +141,7 @@
 			<tocitem text="GCP Selection" target="GCPSelectionOp"/>
 			<tocitem text="Multilook" target="MultilookOp"/>
 			<tocitem text="Over Sample" target="OverSampleOp"/>	
+			<tocitem text="Principle Component Analysis" target="PCAOp"/>	
 	        <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>
 			<tocitem text="Slant Range to Ground Range" target="SRGROp"/>
 			<tocitem text="Under Sample" target="UnderSampleOp"/>
