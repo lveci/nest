@@ -74,10 +74,9 @@ public class OversamplingOp extends Operator {
 
     private MetadataElement abs; // root of the abstracted metadata
     private String sampleType;
-    private String productType;
+    private String productFormat;
 
     private boolean isDetectedSampleType = false;
-    private boolean isCEOSFormat = false;
 
     private int sourceImageWidth;
     private int sourceImageHeight;
@@ -88,11 +87,13 @@ public class OversamplingOp extends Operator {
     private double[][] tmpQ;
 
     private double prf; // pulse repetition frequency in Hz
-    private double samplingRate; // range sampling rate in Hz
     private double[] dopplerCentroidFreq; // Doppler centroid frequencies for all columns in a range line
     private double widthRatioByHeightRatio;
 
     private static final double nsTOs = 1.0 / 1000000000.0; // ns to s
+    private static final String CEOS = "CEOS";
+    private static final String ENVISAT = "ENVISAT";
+    private static final String OTHER = "OTHER";
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -115,21 +116,16 @@ public class OversamplingOp extends Operator {
             sourceImageHeight = sourceProduct.getSceneRasterHeight();
 
             abs = AbstractMetadata.getAbstractedMetadata(sourceProduct);
-
             getSrcImagePixelSpacings();
-
             getSampleType();
+            getPRF();
 
-            getProductType();
-
-            prf = abs.getAttributeDouble(AbstractMetadata.pulse_repetition_frequency);
             if (!isDetectedSampleType) {
-                samplingRate = abs.getAttributeDouble(AbstractMetadata.range_sampling_rate);
+                getProductFormat();
                 computeDopplerCentroidFrequencies();
             }
 
             computeTargetImageSizeAndPixelSpacings();
-
             createTargetProduct();
 
         } catch(Exception e) {
@@ -160,40 +156,57 @@ public class OversamplingOp extends Operator {
         //System.out.println("Sample type is " + sampleType);
         isDetectedSampleType = sampleType.contains("DETECTED");
     }
+
     /**
-     * Get Product type.
+     * Get the pulse repetition frequency.
      * @throws Exception when metadata not found
      */
-    private void getProductType() throws Exception {
+    void getPRF() throws Exception {
 
-        productType = abs.getAttributeString(AbstractMetadata.PRODUCT_TYPE);
+        prf = abs.getAttributeDouble(AbstractMetadata.pulse_repetition_frequency);
+        //System.out.println("PRF is " + prf);
+    }
 
+    /**
+     * Get Product format.
+     * @throws Exception when metadata not found
+     */
+    private void getProductFormat() throws Exception {
+
+        String productType = abs.getAttributeString(AbstractMetadata.PRODUCT_TYPE);
         if (productType.contains("ERS")) {
-            isCEOSFormat = true;
+            productFormat = CEOS;
         } else if (productType.contains("ASA") || productType.contains("SAR")) {
-            isCEOSFormat = false;
+            productFormat = ENVISAT;
         } else {
-            throw new OperatorException("Invalid product type: " + productType);
+            productFormat = OTHER;
         }
-        //System.out.println("product type is " + productType);
+        //System.out.println("product format is " + productFormat);
     }
 
     /**
      * Compute Doppler centroid frequency for all columns in a range line.
+     * @throws Exception The exception.
      */
-    private void computeDopplerCentroidFrequencies() {
+    private void computeDopplerCentroidFrequencies() throws Exception {
 
-        if (isCEOSFormat) { // CEOS
+        if (productFormat.contains(CEOS)) { // CEOS
             computeDopplerCentroidFreqForERSProd();
-        } else { // ENVISAT
+        } else if (productFormat.contains(ENVISAT)) { // ENVISAT
             computeDopplerCentroidFreqForENVISATProd();
+        } else {
+            computeDopplerCentroidFreqForOtherProd();
         }
     }
 
     /**
      * Compute Doppler centroid frequency for all columns for ERS product.
+     * @throws Exception when metadata not found
      */
-    private void computeDopplerCentroidFreqForERSProd() {
+    private void computeDopplerCentroidFreqForERSProd() throws Exception {
+
+        // get range sampling rate (in Hz)
+        final double samplingRate = abs.getAttributeDouble(AbstractMetadata.range_sampling_rate);
 
         // Get coefficients of Doppler frequency polynomial from
         // fields 105, 106 and 107 in PRI Data Set Summary Record
@@ -275,6 +288,16 @@ public class OversamplingOp extends Operator {
         */
     }
 
+    /**
+     * Set Doppler centroid frequency to zero for all products other than CEOS or ENVISAT product.
+     */
+    private void computeDopplerCentroidFreqForOtherProd() {
+        dopplerCentroidFreq = new double[sourceImageWidth];
+        for (int c = 0; c < sourceImageWidth; c++) {
+            dopplerCentroidFreq[c] = 0.0;
+        }
+    }
+    
     /**
      * Compute target image size and range/azimuth spacings.
      *
