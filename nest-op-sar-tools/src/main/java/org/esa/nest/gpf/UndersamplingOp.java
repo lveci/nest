@@ -126,11 +126,8 @@ public class UndersamplingOp extends Operator {
     @Parameter(description = "The azimuth pixel spacing", defaultValue = "12.5", label="Azimuth Spacing")
     private float azimuthSpacing = 12.5f;
 
-    private Band sourceBand1;
-    private Band sourceBand2;
-
-    private ProductReader subsetReader;
-    private MetadataElement absSrc;
+    private ProductReader subsetReader = null;
+    private MetadataElement absSrc = null;
 
     private int filterWidth;
     private int filterHeight;
@@ -143,7 +140,7 @@ public class UndersamplingOp extends Operator {
     private float srcRangeSpacing; // range pixel spacing of source image
     private float srcAzimuthSpacing; // azimuth pixel spacing of source image
     private float[][] kernel; // kernel for filtering
-    private HashMap<String, String[]> targetBandNameToSourceBandName;
+    private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
 
     public static final String SUB_SAMPLING = "Sub-Sampling";
     public static final String KERNEL_FILTERING = "Kernel Filtering";
@@ -215,6 +212,7 @@ public class UndersamplingOp extends Operator {
         subsetDef.addNodeNames(sourceBandNames);
         subsetDef.setSubSampling(subSamplingX, subSamplingY);
         subsetDef.setIgnoreMetadata(false);
+        subsetDef.setVirtualBandsAsRealBands(true);
 
         try {
             targetProduct = subsetReader.readProductNodes(sourceProduct, subsetDef);
@@ -526,7 +524,6 @@ public class UndersamplingOp extends Operator {
         }
 
         String targetBandName;
-        targetBandNameToSourceBandName = new HashMap<String, String[]>();
         for (int i = 0; i < sourceBands.length; i++) {
 
             final Band srcBand = sourceBands[i];
@@ -664,21 +661,17 @@ public class UndersamplingOp extends Operator {
 
         Tile sourceRaster1 = null;
         Tile sourceRaster2 = null;
-        ProductData srcData1 = null;
-        ProductData srcData2 = null;
+        Band sourceBand1;
 
         final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
         if (srcBandNames.length == 1) {
             sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
             sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
-            srcData1 = sourceRaster1.getDataBuffer();
         } else {
             sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
-            sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
+            final Band sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
             sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
             sourceRaster2 = getSourceTile(sourceBand2, sourceTileRectangle, pm);
-            srcData1 = sourceRaster1.getDataBuffer();
-            srcData2 = sourceRaster2.getDataBuffer();
         }
 
         final Unit.UnitType bandUnitType = Unit.getUnitType(sourceBand1);
