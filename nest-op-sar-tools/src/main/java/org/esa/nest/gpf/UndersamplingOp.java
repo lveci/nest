@@ -582,7 +582,7 @@ public class UndersamplingOp extends Operator {
             if(targetProduct.getBand(targetBandName) == null) {
 
                 final Band targetBand = new Band(targetBandName,
-                                           ProductData.TYPE_INT16,
+                                           srcBand.getDataType(),
                                            targetImageWidth,
                                            targetImageHeight);
 
