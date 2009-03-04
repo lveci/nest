@@ -41,7 +41,7 @@ public class AbstractMetadataIO {
          XMLSupport.SaveXML(doc, metadataFile.getAbsoluteFile().toString());
     }
 
-    static void Load(final Product product, final MetadataElement metadataElem, final File metadataFile)
+    static boolean Load(final Product product, final MetadataElement metadataElem, final File metadataFile)
         throws IOException {
 
         Document doc;
@@ -49,7 +49,7 @@ public class AbstractMetadataIO {
             doc = XMLSupport.LoadXML(metadataFile.getAbsolutePath());
         } catch(IOException e) {
             System.out.println(e.getMessage());
-            return;
+            return false;
         }
 
         Element root = doc.getRootElement();
@@ -63,6 +63,7 @@ public class AbstractMetadataIO {
                     parseTiePointGrids(product, elem);
             }
         }
+        return true;
     }
 
     private static void findAbstractedMetadata(final MetadataElement metadataElem, final Element root) {

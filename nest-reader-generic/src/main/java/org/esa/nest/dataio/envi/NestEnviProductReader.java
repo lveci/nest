@@ -11,7 +11,7 @@ import java.io.IOException;
 
 public class NestEnviProductReader extends EnviProductReader {
 
-    NestEnviProductReader(ProductReaderPlugIn readerPlugIn) {
+    public NestEnviProductReader(ProductReaderPlugIn readerPlugIn) {
         super(readerPlugIn);
     }
 
@@ -26,6 +26,10 @@ public class NestEnviProductReader extends EnviProductReader {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line, product.getSceneRasterWidth());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines, product.getSceneRasterHeight());
         
-        AbstractMetadata.loadExternalMetadata(product, absRoot, inputFile);
+        if(!AbstractMetadata.loadExternalMetadata(product, absRoot, inputFile))
+            AbstractMetadata.loadExternalMetadata(product, absRoot, new File(inputFile.getParentFile(), "PolSARPro_NEST_metadata.xml"));
+
+        // set name from metadata if found
+        product.setName(absRoot.getAttributeString(AbstractMetadata.PRODUCT, product.getName()));
     }
 }

@@ -9,6 +9,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.dataio.envi.NestEnviProductReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +17,7 @@ import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class PolsarProProductReader extends EnviProductReader {
+public class PolsarProProductReader extends NestEnviProductReader {
 
     PolsarProProductReader(ProductReaderPlugIn readerPlugIn) {
         super(readerPlugIn);
@@ -24,19 +25,26 @@ public class PolsarProProductReader extends EnviProductReader {
 
     @Override
     protected Product readProductNodesImpl() throws IOException {
-        final Object inputObject = getInput();
-        final File inputFile = ReaderUtils.getFileFromInput(inputObject);
-        final File inputFolder = inputFile.getParentFile();
+        final File inputFile = ReaderUtils.getFileFromInput(getInput());
+        final File[] fileList;
+        if(inputFile.isDirectory())
+            fileList = inputFile.listFiles();
+        else
+            fileList = new File[] { inputFile };
 
         final ArrayList<Header> headerList = new ArrayList<Header>();
         final HashMap<Header, File> headerFileMap = new HashMap<Header, File>();
         Header mainHeader = null;
         File mainHeaderFile = null;
 
-        for(File file : inputFolder.listFiles()) {
+        for(File file : fileList) {
             if(file.isDirectory())
                 continue;
             if(file.getName().toLowerCase().endsWith("hdr")) {
+                final File imgFile = createEnviImageFile(file);
+                if(!imgFile.exists())
+                    continue;
+                
                 final BufferedReader headerReader = getHeaderReader(file);
                 try {
 
@@ -62,8 +70,13 @@ public class PolsarProProductReader extends EnviProductReader {
         if(mainHeader == null)
             throw new IOException("Unable to read files");
 
-        final String headerFileName = mainHeaderFile.getName();
-        final String productName = headerFileName.substring(0, headerFileName.indexOf('.'));
+        final String productName;
+        if(inputFile.isDirectory()) {
+            productName = inputFile.getName();
+        } else {
+            final String headerFileName = mainHeaderFile.getName();
+            productName = headerFileName.substring(0, headerFileName.indexOf('.'));
+        }
 
         final Product product = new Product(productName, mainHeader.getSensorType(),
                 mainHeader.getNumSamples(), mainHeader.getNumLines());

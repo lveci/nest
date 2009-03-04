@@ -59,6 +59,7 @@
             <readerPlugin>org.esa.nest.dataio.polsarpro.PolsarProProductReaderPlugIn</readerPlugin>
             <formatName>PolsarPro</formatName>
             <useAllFileFilter>true</useAllFileFilter>
+            <useFilesAndFolders>true</useFilesAndFolders>
             <shortDescr>Import a PolsarPro data product.</shortDescr>
             <placeAfter>importNestEnvi</placeAfter>
             <helpId>importPolsarPro</helpId>
