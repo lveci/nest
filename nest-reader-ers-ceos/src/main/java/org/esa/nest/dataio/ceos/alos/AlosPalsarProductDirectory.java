@@ -278,9 +278,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
     private void addAbstractedMetadataHeader(Product product, MetadataElement root) {
 
-        AbstractMetadata.addAbstractedMetadataHeader(root);
+        final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
 
-        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
         final BaseRecord sceneRec = _leaderFile.getSceneRecord();
         final BaseRecord mapProjRec = _leaderFile.getMapProjRecord();
         final BaseRecord radiometricRec = _leaderFile.getRadiometricRecord();
@@ -390,6 +389,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     }
 
     private int isGroundRange() {
+        if(_leaderFile.getMapProjRecord() == null) return isProductSLC ? 0 : 1;
         final String projDesc = _leaderFile.getMapProjRecord().getAttributeString("Map projection descriptor").toLowerCase();
         if(projDesc.contains("slant"))
             return 0;
@@ -397,6 +397,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     }
 
     private int isMapProjected() {
+        if(_leaderFile.getMapProjRecord() == null) return 0;
         final String projDesc = _leaderFile.getMapProjRecord().getAttributeString("Map projection descriptor").toLowerCase();
         if(projDesc.contains("geo"))
             return 1;
