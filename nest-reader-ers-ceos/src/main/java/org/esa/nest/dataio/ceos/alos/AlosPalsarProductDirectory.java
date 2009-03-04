@@ -13,12 +13,11 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 
 import javax.imageio.stream.FileImageInputStream;
-import javax.imageio.stream.ImageInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class represents a product directory.
@@ -58,12 +57,13 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         final int numImageFiles = imageFileNames.length;
         _imageFiles = new AlosPalsarImageFile[numImageFiles];
         for (int i = 0; i < numImageFiles; i++) {
-            _imageFiles[i] = new AlosPalsarImageFile(createInputStream(imageFileNames[i]), getProductLevel());
+            _imageFiles[i] = new AlosPalsarImageFile(
+                    createInputStream(new File(_baseDir, imageFileNames[i])), getProductLevel());
         }
 
         _sceneWidth = _imageFiles[0].getRasterWidth();
         _sceneHeight = _imageFiles[0].getRasterHeight();
-        assertSameWidthAndHeightForAllImages();
+        assertSameWidthAndHeightForAllImages(_imageFiles, _sceneWidth, _sceneHeight);
 
         if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_0 ||
            _leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1) {
@@ -141,8 +141,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             }
         }
 
-        product.setStartTime(getUTCScanStartTime());
-        product.setEndTime(getUTCScanStopTime());
+        product.setStartTime(getUTCScanStartTime(_leaderFile.getSceneRecord()));
+        product.setEndTime(getUTCScanStopTime(_leaderFile.getSceneRecord()));
         product.setDescription(getProductDescription());
 
         addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
@@ -272,7 +272,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             imageFile.assignMetadataTo(root, c++);
         }
 
-        addSummaryMetadata(root);
+        addSummaryMetadata(new File(_baseDir, AlosPalsarConstants.SUMMARY_FILE_NAME), root);
         addAbstractedMetadataHeader(product, root);
     }
 
@@ -291,7 +291,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 _leaderFile.getSceneRecord().getAttributeString("Product type descriptor"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, getMission());
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, getProcTime() );
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
+                getProcTime(_volumeDirectoryFile.getVolumeDescriptorRecord()));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier,
                 sceneRec.getAttributeString("Processing system identifier").trim() );
         // cycle n/a?
@@ -303,8 +304,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
         //        _leaderFile.getFacilityRecord().getAttributeString("Time of input state vector used to processed the image"));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getUTCScanStartTime());
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, getUTCScanStopTime());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getUTCScanStartTime(sceneRec));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, getUTCScanStopTime(sceneRec));
 
         if(mapProjRec != null) {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
@@ -328,7 +329,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         }
 
         //sph
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec));
         AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
                 sceneRec.getAttributeString("Processing algorithm identifier"));
@@ -349,14 +350,15 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
                 sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
 
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
+                getLineTimeInterval(sceneRec, _sceneHeight));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type,
                 "UInt"+_imageFiles[0].getImageFileDescriptor().getAttributeInt("Number of bits per sample"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
                 product.getSceneRasterHeight());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
                 product.getSceneRasterWidth());
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE,
-                product.getRawStorageSize());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, getTotalSize(product));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.isMapProjected, isMapProjected());
@@ -368,24 +370,57 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         absRoot.getAttribute(AbstractMetadata.calibration_factor).setUnit("dB");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
                 sceneRec.getAttributeDouble("Range sampling rate"));
+
+        addOrbitStateVectors(absRoot, _leaderFile.getPlatformPositionRecord());
     }
 
-    private ProductData.UTC getProcTime() {
-        try {
-            String procTime = _volumeDirectoryFile.getVolumeDescriptorRecord().getAttributeString("Logical volume preparation date").trim();
+    private static void addOrbitStateVectors(final MetadataElement absRoot, final BaseRecord platformPosRec) {
+        final MetadataElement orbitVectorListElem = absRoot.getElement(AbstractMetadata.orbit_state_vectors);
 
-            return ProductData.UTC.parse(procTime, "yyyyMMdd");
-        } catch(ParseException e) {
-            System.out.println(e.toString());
-            return new ProductData.UTC(0);
-        }
+        addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, 1);
+        /*addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, 2);
+        addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, 3);
+        addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, 4);
+        addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, 5);   */
     }
 
-    private String getPass() {
-        if(_leaderFile.getMapProjRecord() == null) return " ";
-        double heading = _leaderFile.getMapProjRecord().getAttributeDouble("Platform heading at nadir corresponding to scene centre");
-        if(heading > 90 && heading < 270) return "DESCENDING";
-        else return "ASCENDING";
+    private static void addVector(String name, MetadataElement orbitVectorListElem,
+                                  BaseRecord platformPosRec, int num) {
+        final MetadataElement orbitVectorElem = new MetadataElement(name+num);
+
+        orbitVectorElem.setAttributeUTC(AbstractMetadata.orbit_vector_time, getOrbitTime(platformPosRec, num));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_x_pos,
+                platformPosRec.getAttributeDouble("1st orbital element x"));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_y_pos,
+                platformPosRec.getAttributeDouble("2nd orbital element y"));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_z_pos,
+                platformPosRec.getAttributeDouble("3rd orbital element z"));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_x_vel,
+                platformPosRec.getAttributeDouble("4th orbital element x'"));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_y_vel,
+                platformPosRec.getAttributeDouble("5th orbital element y'"));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_z_vel,
+                platformPosRec.getAttributeDouble("6th orbital element z'"));
+
+        orbitVectorListElem.addElement(orbitVectorElem);
+    }
+
+    private static ProductData.UTC getOrbitTime(BaseRecord platformPosRec, int num) {
+        final int year = platformPosRec.getAttributeInt("Year of data point");
+        final int month = platformPosRec.getAttributeInt("Month of data point");
+        final int day = platformPosRec.getAttributeInt("Day of data point");
+        final float secondsOfDay = (float)platformPosRec.getAttributeDouble("Seconds of day");
+        final float hoursf = secondsOfDay / 3600f;
+        final int hour = (int)hoursf;
+        final float minutesf = (hoursf - hour) * 60f;
+        final int minute = (int)minutesf;
+        float second = (minutesf - minute) * 60f;
+
+        final float interval = (float)platformPosRec.getAttributeDouble("Time interval between DATA points");
+        second += interval * (num-1);
+
+        return AbstractMetadata.parseUTC(String.valueOf(year)+'-'+month+'-'+day+' '+
+                                  hour+':'+minute+':'+(int)second, "yyyy-mm-dd HH:mm:ss");
     }
 
     private int isGroundRange() {
@@ -404,57 +439,6 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         return 0;
     }
 
-    private void addSummaryMetadata(final MetadataElement parent) throws IOException {
-        final MetadataElement summaryMetadata = new MetadataElement("Summary Information");
-        final Properties properties = new Properties();
-        final File file = new File(_baseDir, AlosPalsarConstants.SUMMARY_FILE_NAME);
-        if (!file.exists()) {
-            return;
-        }
-        properties.load(new FileInputStream(file));
-        final Set unsortedEntries = properties.entrySet();
-        final TreeSet sortedEntries = new TreeSet(new Comparator() {
-            public int compare(final Object a, final Object b) {
-                final Map.Entry entryA = (Map.Entry) a;
-                final Map.Entry entryB = (Map.Entry) b;
-                return ((String) entryA.getKey()).compareTo((String) entryB.getKey());
-            }
-        });
-        sortedEntries.addAll(unsortedEntries);
-        for (Object sortedEntry : sortedEntries) {
-            final Map.Entry entry = (Map.Entry) sortedEntry;
-            final String data = (String) entry.getValue();
-            // strip of double quotes
-            final String strippedData = data.substring(1, data.length() - 1);
-            final MetadataAttribute attribute = new MetadataAttribute((String) entry.getKey(),
-                    new ProductData.ASCII(strippedData),
-                    true);
-            summaryMetadata.addAttribute(attribute);
-        }
-
-        parent.addElement(summaryMetadata);
-    }
-
-    private static int getMinSampleValue(final int[] histogram) {
-        // search for first non zero value
-        for (int i = 0; i < histogram.length; i++) {
-            if (histogram[i] != 0) {
-                return i;
-            }
-        }
-        return 0;
-    }
-
-    private static int getMaxSampleValue(final int[] histogram) {
-        // search for first non zero value backwards
-        for (int i = histogram.length - 1; i >= 0; i--) {
-            if (histogram[i] != 0) {
-                return i;
-            }
-        }
-        return 0;
-    }
-
     private String getProductName() {
         return getMission() + '-' + _volumeDirectoryFile.getProductName();
     }
@@ -462,29 +446,4 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     private String getProductDescription() {
         return AlosPalsarConstants.PRODUCT_DESCRIPTION_PREFIX + _leaderFile.getProductLevel();
     }
-
-    private void assertSameWidthAndHeightForAllImages() {
-        for (int i = 0; i < _imageFiles.length; i++) {
-            final AlosPalsarImageFile imageFile = _imageFiles[i];
-            Guardian.assertTrue("_sceneWidth == imageFile[" + i + "].getRasterWidth()",
-                                _sceneWidth == imageFile.getRasterWidth());
-            Guardian.assertTrue("_sceneHeight == imageFile[" + i + "].getRasterHeight()",
-                                _sceneHeight == imageFile.getRasterHeight());
-        }
-    }
-
-    private ProductData.UTC getUTCScanStartTime() {
-        return AbstractMetadata.parseUTC(_leaderFile.getSceneRecord().
-                getAttributeString("Zero-doppler azimuth time of first azimuth pixel"));
-    }
-
-    private ProductData.UTC getUTCScanStopTime() {
-        return AbstractMetadata.parseUTC(_leaderFile.getSceneRecord().
-                getAttributeString("Zero-doppler azimuth time of last azimuth pixel"));
-    }
-
-    private ImageInputStream createInputStream(final String fileName) throws IOException {
-        return new FileImageInputStream(new File(_baseDir, fileName));
-    }
-
 }

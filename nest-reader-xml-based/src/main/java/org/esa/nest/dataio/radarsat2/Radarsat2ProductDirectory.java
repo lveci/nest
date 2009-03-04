@@ -126,9 +126,9 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
 
         productType = generalProcessingInformation.getAttributeString("productType", defStr);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
-        productName = "RSAT2-" + productType + '-' + productElem.getAttributeString("productId", defStr);
+        productName = getMission() +'-'+ productType + '-' + productElem.getAttributeString("productId", defStr);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, productName);
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, "RADARSAT-2");
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, getMission());
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, getTime(generalProcessingInformation, "processingTime"));
 
@@ -160,6 +160,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                 rasterAttributes.getAttributeInt("numberOfLines", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
                 rasterAttributes.getAttributeInt("numberOfSamplesPerLine", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, getTotalSize(product));
 
         final MetadataElement sampledPixelSpacing = rasterAttributes.getElement("sampledPixelSpacing");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
@@ -300,6 +301,10 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                 subSamplingX, subSamplingY, fineAngles);
 
         product.addTiePointGrid(incidentAngleGrid);
+    }
+
+    public static String getMission() {
+        return "RS2";
     }
 
     @Override

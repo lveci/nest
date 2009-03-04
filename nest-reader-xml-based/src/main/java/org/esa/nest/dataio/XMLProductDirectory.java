@@ -210,6 +210,10 @@ public class XMLProductDirectory {
         meta.addAttributeFast(attribute);
     }
 
+    protected static int getTotalSize(Product product) {
+        return (int)(product.getRawStorageSize() / (1024.0f * 1024.0f));
+    }
+
     protected void addAbstractedMetadataHeader(Product product, MetadataElement root) {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);

@@ -33,7 +33,6 @@ public class AbstractMetadata {
     public static final String ABS_ORBIT = "ABS_ORBIT";
     public static final String STATE_VECTOR_TIME = "STATE_VECTOR_TIME";
     public static final String VECTOR_SOURCE = "VECTOR_SOURCE";
-    public static final String TOT_SIZE = "TOT_SIZE";
 
     // SPH
     public static final String NUM_SLICES = "NUM_SLICES";
@@ -64,10 +63,12 @@ public class AbstractMetadata {
     public static final String azimuth_spacing = "azimuth_spacing";
     public static final String pulse_repetition_frequency = "pulse_repetition_frequency";
     public static final String line_time_interval = "line_time_interval";
-    public static final String data_type = "data_type";
 
+    public static final String data_type = "data_type";
+    public static final String TOT_SIZE = "TOT_SIZE";
     public static final String num_output_lines = "num_output_lines";
     public static final String num_samples_per_line = "num_samples_per_line";
+
     // SRGR
     public static final String srgr_flag = "srgr_flag";
     public static final String isMapProjected = "isMapProjected";
@@ -78,10 +79,10 @@ public class AbstractMetadata {
     public static final String abs_calibration_flag = "abs_calibration_flag";
     public static final String calibration_factor = "calibration_factor";
     public static final String replica_power_corr_flag = "replica_power_corr_flag";
+    public static final String range_sampling_rate = "range_sampling_rate";
+    
     public static final String external_calibration_file = "external_calibration_file";
     public static final String orbit_state_vector_file = "orbit_state_vector_file";
-
-    public static final String range_sampling_rate = "range_sampling_rate";
 
     // orbit state vectors
     public static final String orbit_state_vectors = "Orbit_State_Vectors";
@@ -109,16 +110,15 @@ public class AbstractMetadata {
         // MPH
         addAbstractedAttribute(absRoot, PRODUCT, ProductData.TYPE_ASCII, "", "Product Name");
         addAbstractedAttribute(absRoot, PRODUCT_TYPE, ProductData.TYPE_ASCII, "", "Product Type");
-        addAbstractedAttribute(absRoot, SPH_DESCRIPTOR, ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, SPH_DESCRIPTOR, ProductData.TYPE_ASCII, "", "Description");
         addAbstractedAttribute(absRoot, MISSION, ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, PROC_TIME, ProductData.TYPE_UTC, "utc", "");
         addAbstractedAttribute(absRoot, ProcessingSystemIdentifier, ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, CYCLE, ProductData.TYPE_INT32, "", "");
-        addAbstractedAttribute(absRoot, REL_ORBIT, ProductData.TYPE_INT32, "", "");
-        addAbstractedAttribute(absRoot, ABS_ORBIT, ProductData.TYPE_INT32, "", "");
+        addAbstractedAttribute(absRoot, REL_ORBIT, ProductData.TYPE_INT32, "", "Track");
+        addAbstractedAttribute(absRoot, ABS_ORBIT, ProductData.TYPE_INT32, "", "Orbit");
         addAbstractedAttribute(absRoot, STATE_VECTOR_TIME, ProductData.TYPE_UTC, "utc", "");
         addAbstractedAttribute(absRoot, VECTOR_SOURCE, ProductData.TYPE_ASCII, "", "");
-        addAbstractedAttribute(absRoot, TOT_SIZE, ProductData.TYPE_UINT32, "bytes", "");
 
         // SPH
         addAbstractedAttribute(absRoot, NUM_SLICES, ProductData.TYPE_INT32, "", "");
@@ -146,13 +146,14 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, azimuth_looks, ProductData.TYPE_FLOAT64, "", "");
         addAbstractedAttribute(absRoot, range_looks, ProductData.TYPE_FLOAT64, "", "");
         addAbstractedAttribute(absRoot, range_spacing, ProductData.TYPE_FLOAT64, "m", "Range sample spacing");
-        addAbstractedAttribute(absRoot, azimuth_spacing, ProductData.TYPE_FLOAT64, "m", "");
-        addAbstractedAttribute(absRoot, pulse_repetition_frequency, ProductData.TYPE_FLOAT64, "Hz", "");
+        addAbstractedAttribute(absRoot, azimuth_spacing, ProductData.TYPE_FLOAT64, "m", "Azimuth sample spacing");
+        addAbstractedAttribute(absRoot, pulse_repetition_frequency, ProductData.TYPE_FLOAT64, "Hz", "PRF");
         addAbstractedAttribute(absRoot, line_time_interval, ProductData.TYPE_FLOAT64, "s", "");
-        addAbstractedAttribute(absRoot, data_type, ProductData.TYPE_ASCII, "", "");
 
-        addAbstractedAttribute(absRoot, num_output_lines, ProductData.TYPE_UINT32, "lines", "");
-        addAbstractedAttribute(absRoot, num_samples_per_line, ProductData.TYPE_UINT32, "samples", "");
+        addAbstractedAttribute(absRoot, data_type, ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, TOT_SIZE, ProductData.TYPE_UINT32, "Mb", "Total product size");
+        addAbstractedAttribute(absRoot, num_output_lines, ProductData.TYPE_UINT32, "lines", "Raster height");
+        addAbstractedAttribute(absRoot, num_samples_per_line, ProductData.TYPE_UINT32, "samples", "Raster width");
 
         // SRGR
         addAbstractedAttribute(absRoot, srgr_flag, ProductData.TYPE_UINT8, "flag", "SRGR applied");

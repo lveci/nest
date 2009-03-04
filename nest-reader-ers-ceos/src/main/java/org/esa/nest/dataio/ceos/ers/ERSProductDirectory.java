@@ -1,6 +1,5 @@
 package org.esa.nest.dataio.ceos.ers;
 
-import org.esa.beam.dataio.dimap.FileImageInputStreamExtImpl;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
@@ -11,12 +10,11 @@ import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 
-import javax.imageio.stream.ImageInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class represents a product directory.
@@ -43,18 +41,18 @@ class ERSProductDirectory extends CEOSProductDirectory {
     @Override
     protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         readVolumeDirectoryFile();
-        _leaderFile = new ERSLeaderFile(createInputStream(ERSVolumeDirectoryFile.getLeaderFileName()));
+        _leaderFile = new ERSLeaderFile(createInputStream(new File(_baseDir, ERSVolumeDirectoryFile.getLeaderFileName())));
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, "DAT_");
         final int numImageFiles = imageFileNames.length;
         _imageFiles = new ERSImageFile[numImageFiles];
         for (int i = 0; i < numImageFiles; i++) {
-            _imageFiles[i] = new ERSImageFile(createInputStream(imageFileNames[i]));
+            _imageFiles[i] = new ERSImageFile(createInputStream(new File(_baseDir, imageFileNames[i])));
         }
 
         _sceneWidth = _imageFiles[0].getRasterWidth();
         _sceneHeight = _imageFiles[0].getRasterHeight();
-        assertSameWidthAndHeightForAllImages();
+        assertSameWidthAndHeightForAllImages(_imageFiles, _sceneWidth, _sceneHeight);
     }
 
     private void readVolumeDirectoryFile() throws IOException, IllegalBinaryFormatException {
@@ -121,8 +119,8 @@ class ERSProductDirectory extends CEOSProductDirectory {
             }
         }
 
-        product.setStartTime(getUTCScanStartTime());
-        product.setEndTime(getUTCScanStopTime());
+        product.setStartTime(getUTCScanStartTime(_leaderFile.getSceneRecord()));
+        product.setEndTime(getUTCScanStopTime(_leaderFile.getSceneRecord()));
         product.setDescription(getProductDescription());
 
         addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
@@ -234,7 +232,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
             imageFile.assignMetadataTo(root, c++);
         }
 
-        addSummaryMetadata(root);
+        addSummaryMetadata(new File(_baseDir, ERSConstants.SUMMARY_FILE_NAME), root);
         addAbstractedMetadataHeader(product, root);
     }
 
@@ -254,7 +252,8 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeString("Product type descriptor"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, getMission());
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, getProcTime() );
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
+                getProcTime(_volumeDirectoryFile.getVolumeDescriptorRecord()));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier,
                 sceneRec.getAttributeString("Processing system identifier").trim() );
 
@@ -266,8 +265,8 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 AbstractMetadata.parseUTC(facilityRec.getAttributeString(
                         "Time of input state vector used to processed the image")));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getUTCScanStartTime());
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, getUTCScanStopTime());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getUTCScanStartTime(sceneRec));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, getUTCScanStopTime(sceneRec));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
                 mapProjRec.getAttributeDouble("1st line 1st pixel geodetic latitude"));
@@ -290,7 +289,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
         //sph
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, getSampleType());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
                 sceneRec.getAttributeString("Processing algorithm identifier"));
@@ -309,15 +308,15 @@ class ERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
                 sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval, getLineTimeInterval());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
+                getLineTimeInterval(sceneRec, _sceneHeight));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type,
                 ProductData.getTypeString(ProductData.TYPE_INT16));      
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
                 product.getSceneRasterHeight());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
                 product.getSceneRasterWidth());
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE,
-                product.getRawStorageSize());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, getTotalSize(product));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.isMapProjected, isMapProjected());
@@ -337,24 +336,6 @@ class ERSProductDirectory extends CEOSProductDirectory {
         addOrbitStateVectors(absRoot, _leaderFile.getPlatformPositionRecord());
     }
 
-    private ProductData.UTC getProcTime() {
-        try {
-            final String procDate = _volumeDirectoryFile.getVolumeDescriptorRecord().getAttributeString("Logical volume preparation date").trim();
-            final String procTime = _volumeDirectoryFile.getVolumeDescriptorRecord().getAttributeString("Logical volume preparation time").trim();
-
-            return ProductData.UTC.parse(procDate + procTime, "yyyyMMddHHmmss");
-        } catch(ParseException e) {
-            System.out.println(e.toString());
-            return new ProductData.UTC(0);
-        }
-    }
-
-    private String getPass() {
-        final double heading = _leaderFile.getMapProjRecord().getAttributeDouble("Platform heading at nadir corresponding to scene centre");
-        if(heading > 90 && heading < 270) return "DESCENDING";
-        else return "ASCENDING";
-    }
-
     private int isGroundRange() {
         final String projDesc = _leaderFile.getMapProjRecord().getAttributeString("Map projection descriptor").toLowerCase();
         if(projDesc.contains("slant"))
@@ -367,12 +348,6 @@ class ERSProductDirectory extends CEOSProductDirectory {
             return 1;
         }
         return 0;
-    }
-
-    private double getLineTimeInterval() {
-        final double startTime = getUTCScanStartTime().getMJD() * 24 * 3600;
-        final double stopTime = getUTCScanStopTime().getMJD() * 24 * 3600;
-        return (stopTime-startTime) / (_sceneHeight-1);
     }
 
     private static void addOrbitStateVectors(final MetadataElement absRoot, final BaseRecord platformPosRec) {
@@ -472,56 +447,6 @@ class ERSProductDirectory extends CEOSProductDirectory {
         }
     }
 
-    private void addSummaryMetadata(final MetadataElement parent) throws IOException {
-        final MetadataElement summaryMetadata = new MetadataElement("Summary Information");
-        final Properties properties = new Properties();
-        final File file = new File(_baseDir, ERSConstants.SUMMARY_FILE_NAME);
-        if (!file.exists()) {
-            return;
-        }
-        properties.load(new FileInputStream(file));
-        final Set unsortedEntries = properties.entrySet();
-        final TreeSet sortedEntries = new TreeSet(new Comparator() {
-            public int compare(final Object a, final Object b) {
-                final Map.Entry entryA = (Map.Entry) a;
-                final Map.Entry entryB = (Map.Entry) b;
-                return ((String) entryA.getKey()).compareTo((String) entryB.getKey());
-            }
-        });
-        sortedEntries.addAll(unsortedEntries);
-        for (Object sortedEntry : sortedEntries) {
-            final Map.Entry entry = (Map.Entry) sortedEntry;
-            final String data = (String) entry.getValue();
-            // strip of double quotes
-            final String strippedData = data.substring(1, data.length() - 1);
-            final MetadataAttribute attribute = new MetadataAttribute((String) entry.getKey(),
-                    new ProductData.ASCII(strippedData), true);
-            summaryMetadata.addAttribute(attribute);
-        }
-
-        parent.addElement(summaryMetadata);
-    }
-
-    private static int getMinSampleValue(final int[] histogram) {
-        // search for first non zero value
-        for (int i = 0; i < histogram.length; i++) {
-            if (histogram[i] != 0) {
-                return i;
-            }
-        }
-        return 0;
-    }
-
-    private static int getMaxSampleValue(final int[] histogram) {
-        // search for first non zero value backwards
-        for (int i = histogram.length - 1; i >= 0; i--) {
-            if (histogram[i] != 0) {
-                return i;
-            }
-        }
-        return 0;
-    }
-
     private String getProductName() {
         return _volumeDirectoryFile.getProductName();
     }
@@ -529,29 +454,4 @@ class ERSProductDirectory extends CEOSProductDirectory {
     private String getProductDescription() {
         return ERSConstants.PRODUCT_DESCRIPTION_PREFIX + _leaderFile.getProductLevel();
     }
-
-    private void assertSameWidthAndHeightForAllImages() {
-        for (int i = 0; i < _imageFiles.length; i++) {
-            final ERSImageFile imageFile = _imageFiles[i];
-            Guardian.assertTrue("_sceneWidth == imageFile[" + i + "].getRasterWidth()",
-                                _sceneWidth == imageFile.getRasterWidth());
-            Guardian.assertTrue("_sceneHeight == imageFile[" + i + "].getRasterHeight()",
-                                _sceneHeight == imageFile.getRasterHeight());
-        }
-    }
-
-    private ProductData.UTC getUTCScanStartTime() {
-        return AbstractMetadata.parseUTC(_leaderFile.getSceneRecord().
-                getAttributeString("Zero-doppler azimuth time of first azimuth pixel"));
-    }
-
-    private ProductData.UTC getUTCScanStopTime() {
-        return AbstractMetadata.parseUTC(_leaderFile.getSceneRecord().
-                getAttributeString("Zero-doppler azimuth time of last azimuth pixel"));
-    }
-
-    private ImageInputStream createInputStream(final String fileName) throws IOException {
-        return FileImageInputStreamExtImpl.createInputStream(new File(_baseDir, fileName));
-    }
-
 }

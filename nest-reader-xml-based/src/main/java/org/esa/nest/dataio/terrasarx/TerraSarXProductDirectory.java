@@ -68,7 +68,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
                 generalHeader.getAttributeString("itemName", defStr));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, generalHeader.getAttributeString("mission", defStr));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, "TSX1");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, getTime(generalHeader, "generationTime"));
 
         MetadataElement elem = generalHeader.getElement("generationSystem");
@@ -112,15 +112,22 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long, lonCorners[3]);  
 
         final MetadataElement imageRaster = imageDataInfo.getElement("imageRaster");
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks, imageRaster.getAttributeDouble("azimuthLooks", defInt));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks, imageRaster.getAttributeDouble("rangeLooks", defInt));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines, imageRaster.getAttributeInt("numberOfRows", defInt));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line, imageRaster.getAttributeInt("numberOfColumns", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
+                imageRaster.getAttributeDouble("azimuthLooks", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks,
+                imageRaster.getAttributeDouble("rangeLooks", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
+                imageRaster.getAttributeInt("numberOfRows", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
+                imageRaster.getAttributeInt("numberOfColumns", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, getTotalSize(product));
 
         final MetadataElement rowSpacing = imageRaster.getElement("rowSpacing");
         final MetadataElement columnSpacing = imageRaster.getElement("columnSpacing");
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing, columnSpacing.getAttributeDouble("columnSpacing", defInt));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing, rowSpacing.getAttributeDouble("rowSpacing", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
+                columnSpacing.getAttributeDouble("columnSpacing", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
+                rowSpacing.getAttributeDouble("rowSpacing", defInt));
 
         final MetadataElement settings = instrument.getElement("settings");
         final MetadataElement settingRecord = settings.getElement("settingRecord");
