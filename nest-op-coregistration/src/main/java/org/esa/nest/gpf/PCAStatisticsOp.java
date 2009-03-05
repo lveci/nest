@@ -55,12 +55,19 @@ public class PCAStatisticsOp extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
-    private String[] sourceBandNames = null;
+    String[] sourceBandNames;
+
+    @Parameter(valueSet = {EIGENVALUE_THRESHOLD, NUMBER_EIGENVALUES},
+            defaultValue = EIGENVALUE_THRESHOLD, label="Select Eigenvalues By:")
+    private String selectEigenvaluesBy = EIGENVALUE_THRESHOLD;
 
     @Parameter(description = "The threshold for selecting eigenvalues", interval = "(0, 100]", defaultValue = "100",
                 label="Eigenvalue Threshold (%)")
-    
     private double eigenvalueThreshold = 100.0;
+
+    @Parameter(description = "The number of PCA images output", interval = "(0, 100]", defaultValue = "1",
+                label="Number Of PCA Images")
+    private int numPCA = 1;
 
     @Parameter(description = "Show the eigenvalues", defaultValue = "1", label="Show Eigenvalues")
     private boolean showEigenvalues = false;
@@ -77,6 +84,8 @@ public class PCAStatisticsOp extends Operator {
     private double[] mean = null;       // mean of pixel values for each band
     private double[][] meanCross = null;// mean of the dot product of each band and the master band
 
+    public static final String EIGENVALUE_THRESHOLD = "Eigenvalue Threshold";
+    public static final String NUMBER_EIGENVALUES = "Number of Eigenvalues";
     private static final String meanImageBandName = "Mean_Image";
 
     private Band meanImageBand;
@@ -109,6 +118,10 @@ public class PCAStatisticsOp extends Operator {
         try {
             if(!OperatorUtils.isDIMAP(sourceProduct)) {
                 throw new OperatorException("Source Product should be in BEAM-DIMAP format");
+            }
+
+            if (selectEigenvaluesBy.equals(NUMBER_EIGENVALUES) && numPCA > sourceBandNames.length) {
+                throw new OperatorException("The number of eigenvalues should not be greater than the number of selected bands");
             }
 
             createTargetProduct();
@@ -163,6 +176,10 @@ public class PCAStatisticsOp extends Operator {
         }
 
         numOfSourceBands = sourceBandNames.length;
+
+        if (numOfSourceBands <= 1) {
+            throw new OperatorException("For PCA, more than one band should be selected");
+        }
 
         // add selected source bands in target product
         for (String bandName : sourceBandNames) {
@@ -404,8 +421,13 @@ public class PCAStatisticsOp extends Operator {
         // create temporary metadata
         final MetadataElement root = sourceProduct.getMetadataRoot();
         final MetadataElement tempElemRoot = AbstractMetadata.addElement(root, "temporary metadata");
-        tempElemRoot.setAttributeDouble("eigenvalue threshold", eigenvalueThreshold);
-        tempElemRoot.setAttributeInt("showEigenvalues", showEigenvalues ? 1 : 0);
+        tempElemRoot.setAttributeString("select eigenvalues by", selectEigenvaluesBy);
+        if (selectEigenvaluesBy.equals(EIGENVALUE_THRESHOLD)) {
+            tempElemRoot.setAttributeDouble("eigenvalue threshold", eigenvalueThreshold);
+        } else {
+            tempElemRoot.setAttributeInt("number Of PCA Images", numPCA);
+        }
+        tempElemRoot.setAttributeInt("show eigenvalues", showEigenvalues ? 1 : 0);
 
         final MetadataElement staSubElemRoot = AbstractMetadata.addElement(tempElemRoot, "statistics");
         for (int i = 0; i < numOfSourceBands; i++)  {
@@ -424,7 +446,7 @@ public class PCAStatisticsOp extends Operator {
             throw new OperatorException(e.getMessage());
         }
     }
-
+    
     // The following functions are for unit test only.
     public int getNumOfBands() {
         return numOfSourceBands;
@@ -449,6 +471,7 @@ public class PCAStatisticsOp extends Operator {
     public static class Spi extends OperatorSpi {
         public Spi() {
             super(PCAStatisticsOp.class);
+            super.setOperatorUI(PCAStatisticsOpUI.class);
         }
     }
 }

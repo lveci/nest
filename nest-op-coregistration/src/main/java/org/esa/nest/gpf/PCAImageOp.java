@@ -66,6 +66,7 @@ public class PCAImageOp extends Operator {
     private double[] eigenValues = null; // eigenvalues for all slave bands
     private double[] minPCA = null; // min value for first and second PCA images for all master/slave band pairs
     private boolean reloadStats = true;
+    private String selectEigenvaluesBy;
 
     /**
      * Default constructor. The graph processing framework
@@ -116,8 +117,12 @@ public class PCAImageOp extends Operator {
                 //throw new OperatorException("Cannot find temporary metadata");
                 return false;
             }
-            eigenvalueThreshold = tempElemRoot.getAttributeDouble("eigenvalue threshold");
-            showEigenvalues = tempElemRoot.getAttributeInt("showEigenvalues");
+
+            selectEigenvaluesBy = tempElemRoot.getAttributeString("select eigenvalues by");
+            if (selectEigenvaluesBy.equals(PCAStatisticsOp.EIGENVALUE_THRESHOLD)) {
+                eigenvalueThreshold = tempElemRoot.getAttributeDouble("eigenvalue threshold");
+            }
+            showEigenvalues = tempElemRoot.getAttributeInt("show eigenvalues");
             numPCA = tempElemRoot.getAttributeInt("number of PCA images");
 
             final MetadataElement staSubElemRoot = tempElemRoot.getElement("statistics");
@@ -305,8 +310,10 @@ public class PCAImageOp extends Operator {
                 p.println("    " + sourceBandNames[i]);
             }
             p.println();
-            p.println("User Input Eigenvalue Threshold: " + eigenvalueThreshold + " %");
-            p.println();
+            if (selectEigenvaluesBy.equals(PCAStatisticsOp.EIGENVALUE_THRESHOLD)) {
+                p.println("User Input Eigenvalue Threshold: " + eigenvalueThreshold + " %");
+                p.println();
+            }
             p.println("Number of PCA Images Output: " + numPCA);
             p.println();
             p.println("Normalized Eigenvalues: ");

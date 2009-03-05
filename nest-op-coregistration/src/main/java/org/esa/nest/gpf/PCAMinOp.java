@@ -60,6 +60,7 @@ public class PCAMinOp extends Operator {
     private int numPCA; // number of PCA images output
     private double eigenvalueThreshold; // threshold for selecting eigenvalues (in decimal, not in %)
 
+    private String selectEigenvaluesBy;
     private String[] sourceBandNames; // band names user selected source bands
     private double[] mean; // mean of source bands
     private double[][] meanCross; // cross mean of source bands
@@ -119,7 +120,14 @@ public class PCAMinOp extends Operator {
                 //throw new OperatorException("Cannot find temporary metadata");
                 return false;
             }
-            eigenvalueThreshold = tempElemRoot.getAttributeDouble("eigenvalue threshold") / 100.0; // % to decimal
+
+            selectEigenvaluesBy = tempElemRoot.getAttributeString("select eigenvalues by");
+            if (selectEigenvaluesBy.equals(PCAStatisticsOp.EIGENVALUE_THRESHOLD)) {
+                eigenvalueThreshold = tempElemRoot.getAttributeDouble("eigenvalue threshold", -1.0)/100.0; // to decimal
+            } else {
+                numPCA = tempElemRoot.getAttributeInt("number Of PCA Images");
+            }
+
             final MetadataElement staSubElemRoot = tempElemRoot.getElement("statistics");
             numOfSourceBands = staSubElemRoot.getNumElements();
                     
@@ -185,12 +193,14 @@ public class PCAMinOp extends Operator {
             }
         }
 
-        double sum = 0.0;
-        for (int i = 0; i < numOfSourceBands; i++) {
-            sum += eigenValues[i];
-            if (sum / totalEigenvalues >= eigenvalueThreshold) {
-                numPCA = i + 1;
-                break;
+        if (selectEigenvaluesBy.equals(PCAStatisticsOp.EIGENVALUE_THRESHOLD)) {
+            double sum = 0.0;
+            for (int i = 0; i < numOfSourceBands; i++) {
+                sum += eigenValues[i];
+                if (sum / totalEigenvalues >= eigenvalueThreshold) {
+                    numPCA = i + 1;
+                    break;
+                }
             }
         }
     }
@@ -306,9 +316,9 @@ public class PCAMinOp extends Operator {
 
         final MetadataElement root = sourceProduct.getMetadataRoot();
         final MetadataElement tempElemRoot = root.getElement("temporary metadata");
-
-        tempElemRoot.setAttributeInt("number of PCA images", numPCA);
-
+        if (selectEigenvaluesBy.equals(PCAStatisticsOp.EIGENVALUE_THRESHOLD)) {
+            tempElemRoot.setAttributeInt("number of PCA images", numPCA);
+        }
         final MetadataElement minSubElemRoot = AbstractMetadata.addElement(tempElemRoot, "PCA min");
         for (int i = 0; i < numPCA; i++)  {
             minSubElemRoot.setAttributeDouble("min " + i, minPCA[i]);
