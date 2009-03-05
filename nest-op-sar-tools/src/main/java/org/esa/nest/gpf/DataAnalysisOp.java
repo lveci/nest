@@ -170,14 +170,7 @@ public class DataAnalysisOp extends Operator {
                                     sourceProduct.getSceneRasterWidth(),
                                     sourceProduct.getSceneRasterHeight());
 
-        targetProduct.setPreferredTileSize(JAI.getDefaultTileSize());
-
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        targetProduct.setStartTime(sourceProduct.getStartTime());
-        targetProduct.setEndTime(sourceProduct.getEndTime());
+        OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
         for(Band band : sourceProduct.getBands()) {
             ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct);
