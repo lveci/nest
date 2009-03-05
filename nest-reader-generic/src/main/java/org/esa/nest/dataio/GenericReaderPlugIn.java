@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class GenericReaderPlugIn implements ProductReaderPlugIn {
 
 	final static String[] FORMAT_NAMES = { "Generic Binary" };
-	final static String[] FORMAT_FILE_EXTENSIONS = null;
+	final static String[] FORMAT_FILE_EXTENSIONS = { "bin", "bil", "bsq", "bip", "img", "ras", "dat" };
     final static String PLUGIN_DESCRIPTION = "Generic Binary";
     Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
 
@@ -33,7 +33,7 @@ public class GenericReaderPlugIn implements ProductReaderPlugIn {
      * @return true if this product reader can decode the given input, otherwise false.
      */
     public DecodeQualification getDecodeQualification(final Object input) {
-        final File file = ReaderUtils.getFileFromInput(input);
+       /* final File file = ReaderUtils.getFileFromInput(input);
         if (file == null) {
             return DecodeQualification.UNABLE;
         }
@@ -51,11 +51,7 @@ public class GenericReaderPlugIn implements ProductReaderPlugIn {
             if (files != null) {
                 return checkProductQualification(file);
             }
-        }
-        return DecodeQualification.UNABLE;
-    }
-
-    protected static DecodeQualification checkProductQualification(File file) {
+        }    */
         return DecodeQualification.SUITABLE;
     }
 

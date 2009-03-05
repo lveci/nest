@@ -45,7 +45,7 @@ import java.io.IOException;
  * The operator computes coherence images for given master and co-registrated slave bands.
  */
 
-@OperatorMetadata(alias="Create-Coherence-Image", description="Create Coherence Image")
+@OperatorMetadata(alias="Create-Coherence-Image", description="Create Coherence Image", internal=true)
 public final class CreateCoherenceImageOp extends Operator {
 
     @SourceProduct(alias="source")
