@@ -6,7 +6,7 @@ import java.awt.*;
 
 public class PolarCanvas extends Container {
 
-    private AxisPolar rAxis;
+    private Axis rAxis;
     private Axis cAxis;
     private PolarData data;
     private double rings[];
@@ -26,10 +26,10 @@ public class PolarCanvas extends Container {
     protected static final int MIN_INSETS = 20;
 
     public PolarCanvas() {
-        this(new AxisPolar(), new Axis(4));
+        this(new Axis(Axis.RADIAL), new Axis(4));
     }
 
-    private PolarCanvas(AxisPolar rAxis, Axis cAxis) {
+    private PolarCanvas(Axis rAxis, Axis cAxis) {
         opaque = false;
         graphSize = new Dimension(200, 100);
         annotationHeight = 20;
@@ -44,13 +44,13 @@ public class PolarCanvas extends Container {
         this.rAxis = rAxis;
         this.cAxis = cAxis;
         cAxis.setLocation(4);
-        cAxis.setName("Colour");
         rAxis.setSpacing(0);
         cAxis.setSpacing(0);
         //enableEvents(16L);
         //setBackground(Color.white);
     }
 
+    @Override
     public Font getFont() {
         Font font = super.getFont();
         if (font == null)
@@ -292,7 +292,7 @@ public class PolarCanvas extends Container {
         } else {
             final int r = (int) Math.sqrt(p.x * p.x + p.y * p.y);
             final double rV = data.valueFromScreenPoint(r);
-            return new double[] { rV, (360D - (Math.atan2(p.x, p.y) * 180D) / 3.1415926535897931D) % 360D };
+            return new double[]{rV, (360D - (Math.atan2(p.x, p.y) * 180D) / 3.1415926535897931D) % 360D};
         }
     }
 

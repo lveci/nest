@@ -5,24 +5,24 @@ import java.awt.image.ColorModel;
 import java.awt.image.DirectColorModel;
 import java.awt.image.ImageConsumer;
 import java.awt.image.ImageProducer;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-import java.util.Enumeration;
 
 
 public class ColorBar implements ImageProducer {
     private ColourScale colourScale;
     private ColorModel model;
-    private static Dimension barSize = new Dimension(24, 256);
-    private static byte barPixels[] = new byte[barSize.height];
-    private static int barRGBPixels[] = new int[barSize.height];
+    private static final Dimension barSize = new Dimension(24, 256);
+    private static final byte barPixels[] = new byte[barSize.height];
+    private static final int barRGBPixels[] = new int[barSize.height];
 
-    private Dimension imageSize;
-    private Rectangle imageArea;
+    private final Dimension imageSize = new Dimension(barSize.width, barSize.height);
+    private final Rectangle imageArea = new Rectangle(imageSize);
     protected static final Point p0 = new Point(0, 0);
-    private Hashtable properties;
-    private Vector theConsumers;
-    private int hints;
+    private final Hashtable properties = new Hashtable();
+    private final Vector<ImageConsumer> theConsumers = new Vector<ImageConsumer>();
+    private static final int hints = 3 & 0xffffffef;
 
     static {
         int p = 0;
@@ -35,15 +35,9 @@ public class ColorBar implements ImageProducer {
     }
 
     public ColorBar(ColourScale colourScale) {
-        theConsumers = new Vector();
-        imageSize = new Dimension(barSize.width, barSize.height);
-        imageArea = new Rectangle(imageSize);
-        this.hints = 3 & 0xffffffef;
-        properties = new Hashtable();
-
         this.colourScale = colourScale;
         colourScale.addColoredObject(this);
-        updateColorModel();
+        model = colourScale.getColorModel();
     }
 
     public synchronized boolean isConsumer(ImageConsumer ic) {
@@ -65,10 +59,6 @@ public class ColorBar implements ImageProducer {
         theConsumers.removeAllElements();
     }
 
-    public ColourScale getColorScale() {
-        return null;
-    }
-
     public void startProduction(ImageConsumer ic) {
         addConsumer(ic);
     }
@@ -76,17 +66,13 @@ public class ColorBar implements ImageProducer {
     public void requestTopDownLeftRightResend(ImageConsumer imageconsumer) {
     }
 
-    protected void setProperties(Hashtable properties) {
-        this.properties = properties;
-    }
-
-    void initConsumer(ImageConsumer ic) {
+    private void initConsumer(ImageConsumer ic) {
         if (isConsumer(ic))
             ic.setDimensions(imageSize.width, imageSize.height);
         if (isConsumer(ic))
             ic.setProperties(properties);
         if (isConsumer(ic))
-            ic.setColorModel(getColorModel());
+            ic.setColorModel(model);
         if (isConsumer(ic))
             ic.setHints(hints);
     }
@@ -99,6 +85,7 @@ public class ColorBar implements ImageProducer {
         theConsumers.addElement(ic);
     }
 
+    @Override
     protected void finalize() {
         removeAllConsumers();
     }
@@ -109,11 +96,9 @@ public class ColorBar implements ImageProducer {
         addConsumerToList(ic);
         try {
             initConsumer(ic);
-            if (readyToSendAll()) {
-                deliverPixels(ic, imageArea);
-                if (isConsumer(ic))
-                    ic.imageComplete(2);
-            }
+            deliverPixels(ic, imageArea);
+            if (isConsumer(ic))
+                ic.imageComplete(2);
         }
         catch (Exception e) {
             if (isConsumer(ic))
@@ -122,12 +107,11 @@ public class ColorBar implements ImageProducer {
     }
 
     synchronized void resend() {
-        if (readyToSendAll())
-            resend(imageArea);
+        resend(imageArea);
     }
 
     public void updatedColorMap() {
-        updateColorModel();
+        model = colourScale.getColorModel();
         resendColorModel();
         resend();
     }
@@ -136,14 +120,10 @@ public class ColorBar implements ImageProducer {
         updatedColorMap();
     }
 
-    boolean readyToSendAll() {
-        return true;
-    }
-
     synchronized void resend(Rectangle area) {
-        Enumeration con = getConsumers();
+        final Enumeration con = getConsumers();
         while (con.hasMoreElements()) {
-            ImageConsumer ic = (ImageConsumer) con.nextElement();
+            final ImageConsumer ic = (ImageConsumer) con.nextElement();
             try {
                 deliverPixels(ic, area);
                 if (isConsumer(ic))
@@ -156,7 +136,7 @@ public class ColorBar implements ImageProducer {
         }
     }
 
-    protected synchronized void resend(ImageConsumer ic, Rectangle area) {
+    private synchronized void resend(ImageConsumer ic, Rectangle area) {
         if (ic == null) {
             resend(area);
             return;
@@ -175,7 +155,7 @@ public class ColorBar implements ImageProducer {
 
     synchronized void resendColorModel() {
         ImageConsumer ic;
-        for (Enumeration elem = getConsumers(); elem.hasMoreElements(); ic.setColorModel(getColorModel()))
+        for (Enumeration elem = getConsumers(); elem.hasMoreElements(); ic.setColorModel(model))
             ic = (ImageConsumer) elem.nextElement();
     }
 
@@ -183,26 +163,15 @@ public class ColorBar implements ImageProducer {
         return new Dimension(barSize);
     }
 
-    protected void updateColorModel() {
-        model = colourScale.getColorModel();
-    }
-
-    protected void deliverPixels(ImageConsumer ic, Rectangle area) {
+    private void deliverPixels(ImageConsumer ic, Rectangle area) {
         if (model instanceof DirectColorModel) {
             for (int i = 0; i < barSize.width; i++) {
                 ic.setPixels(i, 0, 1, barSize.height, model, barRGBPixels, 0, 1);
             }
-
         } else {
             for (int i = 0; i < barSize.width; i++) {
                 ic.setPixels(i, 0, 1, barSize.height, model, barPixels, 0, 1);
             }
         }
     }
-
-    protected ColorModel getColorModel() {
-        return model;
-    }
-
-
 }

@@ -13,6 +13,7 @@ log
 modules
 repository
 testdata
+testDir
 src
 build.properties
 build.xml

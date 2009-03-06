@@ -6,6 +6,14 @@ import java.awt.*;
 
 abstract class AxisGraphics {
 
+    Graphics g;
+    private Color backgroundColor;
+
+    public static final int MAX_POINTS = 16380;
+    private static final int pointBuffer[][] = {
+            new int[16380], new int[16380]
+    };
+
     AxisGraphics() {
         backgroundColor = VisatApp.getApp().getDesktopPane().getBackground();
     }
@@ -20,13 +28,13 @@ abstract class AxisGraphics {
 
     abstract void drawLine(int i, int j, int k, int l);
 
-    abstract void drawAxisTitle();
+    abstract void drawAxisTitle(String title, Font titleFont, int length);
 
     abstract Rectangle getTickNameBB(String s, int i, int j, int k, int l, FontMetrics fontmetrics);
 
     abstract void drawTickName(String s, int i, int j, int k, int l, int i1, int j1);
 
-    abstract int maxTickSize();
+    abstract int maxTickSize(String[] tickNames, int tickCount, Font font);
 
     void setGraphics(Graphics g) {
         this.g = g;
@@ -37,37 +45,34 @@ abstract class AxisGraphics {
     }
 
     void drawMultiLineTickName(String name, int tickPixel, int tickLength, FontMetrics fm) {
-        int height = fm.getAscent();
-        int leading = Math.max(fm.getLeading(), 3);
+        final int leading = Math.max(fm.getLeading(), 3);
         int lineCount = 0;
         int p = 0;
         do {
             p = name.indexOf('\n', p);
             lineCount++;
         } while (++p > 0);
-        p = 0;
         int f = 0;
         for (int i = 1; i <= lineCount; i++) {
             p = name.indexOf('\n', f);
             if (p < 0)
                 p = name.length();
-            String text = name.substring(f, p);
-            Rectangle bb = getTickNameBB(text, tickPixel, tickLength, i, lineCount, fm);
-            Color col = g.getColor();
+            final String text = name.substring(f, p);
+            final Rectangle bb = getTickNameBB(text, tickPixel, tickLength, i, lineCount, fm);
+            final Color col = g.getColor();
             g.setColor(backgroundColor);
             g.fillRect(bb.x - leading, bb.y, bb.width + 2 * leading, bb.height + leading);
             g.setColor(col);
             g.drawString(text, bb.x, bb.y + fm.getAscent());
             f = p + 1;
         }
-
     }
 
     Dimension getTickLabelBounds(String name, Font font) {
-        FontMetrics fm = g.getFontMetrics(font);
+        final FontMetrics fm = g.getFontMetrics(font);
         int maxWidth = 0;
         int height = 0;
-        int p = 0;
+        int p;
         int f = 0;
         do {
             p = name.indexOf('\n', f);
@@ -76,53 +81,141 @@ abstract class AxisGraphics {
                 n = name.length();
             else
                 n = p;
-            String text = name.substring(f, n);
-            maxWidth = Math.max(fm.stringWidth(text), maxWidth);
+            maxWidth = Math.max(fm.stringWidth(name.substring(f, n)), maxWidth);
             height += fm.getAscent();
             f = p + 1;
         } while (f > 0);
         return new Dimension(maxWidth, height);
     }
 
-    void drawPolyline(int x[], int y[], int points) {
-        if (points == 1)
-            g.drawLine(x[0], y[0], x[0], y[0]);
-        else if (points <= 16380) {
-            g.drawPolyline(x, y, points);
-        } else {
-            int o = 0;
-            for (int N = 16380; points > 1; N = Math.min(points, 16380)) {
-                System.arraycopy(x, o, pointBuffer[0], 0, N);
-                System.arraycopy(y, o, pointBuffer[1], 0, N);
-                g.drawPolyline(pointBuffer[0], pointBuffer[1], N);
-                N--;
-                points -= N;
-                o += N;
-            }
+    public static class XAxisGraphics extends AxisGraphics {
+        final boolean isBottomLeft;
 
+        public XAxisGraphics(boolean bottomLeft) {
+            isBottomLeft = bottomLeft;
+        }
+
+        @Override
+        void drawLine(int x1, int y1, int x2, int y2) {
+            if (isBottomLeft)
+                g.drawLine(x1, -y1, x2, -y2);
+            else
+                g.drawLine(x1, y1, x2, y2);
+        }
+
+        @Override
+        void drawAxisTitle(String title, Font titleFont, int length) {
+            if (title != null) {
+                final FontMetrics tfm = g.getFontMetrics(titleFont);
+                final int x = (length - tfm.stringWidth(title)) / 2;
+                final int y = tfm.getHeight() * 3;
+                g.drawString(title, x, y);
+            }
+        }
+
+        @Override
+        Rectangle getTickNameBB(String name, int tickPixel, int tickLength, int lineNumber, int lineCount, FontMetrics fm) {
+            final int height = fm.getAscent();
+            final int width = fm.stringWidth(name);
+            int x = tickPixel;
+            int y = tickLength >= 0 ? 0 : tickLength;
+            x -= width / 2;
+            if (isBottomLeft) {
+                y -= Math.round((float) height * ((float) lineNumber + 0.5F));
+                y = -y;
+            } else {
+                y -= Math.round((float) height * ((float) lineNumber - 0.5F));
+            }
+            return new Rectangle(x, y - height, width, height);
+        }
+
+        @Override
+        void drawTickName(String name, int tickPixel, int tickLength, int width, int height, int lineNumber, int lineCount) {
+            int x = tickPixel;
+            int y = tickLength >= 0 ? 0 : tickLength;
+            x -= width / 2;
+            if (isBottomLeft) {
+                y -= Math.round((float) height * ((float) lineNumber + 0.5F));
+                g.drawString(name, x, -y);
+            } else {
+                y -= Math.round((float) height * ((float) lineNumber - 0.5F));
+                g.drawString(name, x, y);
+            }
+        }
+
+        @Override
+        int maxTickSize(String[] tickNames, int tickCount, Font font) {
+            int maxWidth = 0;
+            for (int i = 0; i < tickCount; i++) {
+                maxWidth = Math.max(getTickLabelBounds(tickNames[i], font).width + 6, maxWidth);
+            }
+            return maxWidth;
         }
     }
 
-    void drawPolygon(int x[], int y[], int points) {
-        if (points == 1)
-            g.drawLine(x[0], y[0], x[0], y[0]);
-        else
-            g.drawPolygon(x, y, points);
+    public static class YAxisGraphics extends AxisGraphics {
+        final boolean isBottomLeft;
+
+        public YAxisGraphics(boolean bottomLeft) {
+            isBottomLeft = bottomLeft;
+        }
+
+        @Override
+        void drawLine(int x1, int y1, int x2, int y2) {
+            if (isBottomLeft)
+                g.drawLine(y1, -x1, y2, -x2);
+            else
+                g.drawLine(-y1, -x1, -y2, -x2);
+        }
+
+        @Override
+        void drawAxisTitle(String title, Font titleFont, int length) {
+            if (title != null) {
+                final FontMetrics fm = g.getFontMetrics(titleFont);
+                final int y = length + fm.getHeight();
+                final int w = fm.stringWidth(title);
+                final int x = isBottomLeft ? -w / 2 : -(w / 2);
+                g.drawString(title, x, -y);
+            }
+        }
+
+        @Override
+        Rectangle getTickNameBB(String name, int tickPixel, int tickLength, int lineNumber, int lineCount, FontMetrics fm) {
+            final int height = fm.getAscent();
+            final int width = fm.stringWidth(name);
+            int y = tickPixel;
+            int x = tickLength >= 0 ? 0 : tickLength;
+            y -= height * lineNumber - (height * lineCount) / 2;
+            x -= height / 2;
+            if (isBottomLeft) {
+                x -= width;
+                x = -x;
+            }
+            return new Rectangle(-x, -y - height, width, height);
+        }
+
+        @Override
+        void drawTickName(String name, int tickPixel, int tickLength, int width, int height, int lineNumber, int lineCount) {
+            int y = tickPixel;
+            int x = tickLength >= 0 ? 0 : tickLength;
+            y -= height * lineNumber - (height * lineCount) / 2;
+            x -= height / 2;
+            if (isBottomLeft) {
+                x -= width;
+                g.drawString(name, x, -y);
+            } else {
+                g.drawString(name, -x, -y);
+            }
+        }
+
+        @Override
+        int maxTickSize(String[] tickNames, int tickCount, Font font) {
+            int maxHeight = 0;
+            for (int i = 0; i < tickCount; i++) {
+                maxHeight = Math.max(getTickLabelBounds(tickNames[i], font).height + 6, maxHeight);
+            }
+            return maxHeight;
+        }
     }
-
-    void fillPolygon(int x[], int y[], int points) {
-        if (points == 1)
-            g.drawLine(x[0], y[0], x[0], y[0]);
-        else
-            g.fillPolygon(x, y, points);
-    }
-
-    Graphics g;
-    private Color backgroundColor;
-
-    public static final int MAX_POINTS = 16380;
-    private static final int pointBuffer[][] = {
-            new int[16380], new int[16380]
-    };
 
 }

@@ -1,24 +1,18 @@
 package org.esa.nest.dat.views.polarview;
 
-import org.esa.beam.util.Debug;
-
 import java.awt.*;
 
 public class Axis {
-    private static double warmNumbers[] = {
-            0.10000000000000001D, 1.0D, 2D, 3D, 5D, 10D
-    };
+    private static final double warmNumbers[] = {0.10000000000000001D, 1.0D, 2D, 3D, 5D, 10D};
 
     public static final int TOP_X = 1;
     public static final int BOTTOM_X = 2;
     public static final int LEFT_Y = 3;
     public static final int RIGHT_Y = 4;
-    public static final boolean INSIDE = true;
-    public static final boolean OUTSIDE = false;
-    AxisGraphics gr;
-    String name;
-    boolean isX;
-    boolean isBottomLeft;
+    public static final int RADIAL = 5;
+
+    private AxisGraphics gr = null;
+    private boolean isX;
     private boolean ticksInside;
     private boolean withGrid;
     private double minValue;
@@ -30,150 +24,25 @@ public class Axis {
     private double minRange;
     private boolean visible;
     private boolean autoRange;
-    private Object values;
     private int length;
     private int breadth;
     private int TouchId;
     private String title;
     private int tickLength;
-    private int minorTickLength;
     private int tickCount;
     private int bestTickCount;
-    private int minorTickCount;
     private int spacing;
-    private String tickNames[] = {
-            "0", "0.5", "1"
-    };
-    private double tickValues[] = {
-            0.0D, 0.5D, 1.0D
-    };
-    private int tickPositions[];
+    private String tickNames[] = {"0", "0.5", "1"};
+    private double tickValues[] = {0.0D, 0.5D, 1.0D};
+    private int tickPositions[] = null;
     private Font font;
     private Font titleFont;
     private Color axisColor;
     private Color labelColor;
     private Color gridColor;
 
-    class XAxisGraphics extends AxisGraphics {
-
-        void drawLine(int x1, int y1, int x2, int y2) {
-            if (isBottomLeft)
-                g.drawLine(x1, -y1, x2, -y2);
-            else
-                g.drawLine(x1, y1, x2, y2);
-        }
-
-        void drawAxisTitle() {
-            if (title != null) {
-                FontMetrics tfm = g.getFontMetrics(titleFont);
-                int x = (length - tfm.stringWidth(title)) / 2;
-                int y = tfm.getHeight() * 3;
-                g.drawString(title, x, y);
-            }
-        }
-
-        Rectangle getTickNameBB(String name, int tickPixel, int tickLength, int lineNumber, int lineCount, FontMetrics fm) {
-            int height = fm.getAscent();
-            int width = fm.stringWidth(name);
-            int x = tickPixel;
-            int y = tickLength >= 0 ? 0 : tickLength;
-            x -= width / 2;
-            if (isBottomLeft) {
-                y -= Math.round((float) height * ((float) lineNumber + 0.5F));
-                y = -y;
-            } else {
-                y -= Math.round((float) height * ((float) lineNumber - 0.5F));
-            }
-            return new Rectangle(x, y - height, width, height);
-        }
-
-        void drawTickName(String name, int tickPixel, int tickLength, int width, int height, int lineNumber, int lineCount) {
-            int x = tickPixel;
-            int y = tickLength >= 0 ? 0 : tickLength;
-            x -= width / 2;
-            if (isBottomLeft) {
-                y -= Math.round((float) height * ((float) lineNumber + 0.5F));
-                g.drawString(name, x, -y);
-            } else {
-                y -= Math.round((float) height * ((float) lineNumber - 0.5F));
-                g.drawString(name, x, y);
-            }
-        }
-
-        int maxTickSize() {
-            int maxWidth = 0;
-            for (int i = 0; i < tickCount; i++)
-                maxWidth = Math.max(getTickLabelBounds(tickNames[i], font).width + 6, maxWidth);
-
-            return maxWidth;
-        }
-
-        XAxisGraphics() {
-        }
-    }
-
-    class YAxisGraphics extends AxisGraphics {
-
-        void drawLine(int x1, int y1, int x2, int y2) {
-            if (isBottomLeft)
-                g.drawLine(y1, -x1, y2, -x2);
-            else
-                g.drawLine(-y1, -x1, -y2, -x2);
-        }
-
-        void drawAxisTitle() {
-            if (title != null) {
-                FontMetrics fm = g.getFontMetrics(titleFont);
-                int y = length + fm.getHeight();
-                int w = fm.stringWidth(title);
-                int x = isBottomLeft ? -w / 2 : -(w / 2);
-                g.drawString(title, x, -y);
-            }
-        }
-
-        Rectangle getTickNameBB(String name, int tickPixel, int tickLength, int lineNumber, int lineCount, FontMetrics fm) {
-            int height = fm.getAscent();
-            int width = fm.stringWidth(name);
-            int y = tickPixel;
-            int x = tickLength >= 0 ? 0 : tickLength;
-            y -= height * lineNumber - (height * lineCount) / 2;
-            x -= height / 2;
-            if (isBottomLeft) {
-                x -= width;
-                x = -x;
-            }
-            return new Rectangle(-x, -y - height, width, height);
-        }
-
-        void drawTickName(String name, int tickPixel, int tickLength, int width, int height, int lineNumber, int lineCount) {
-            int y = tickPixel;
-            int x = tickLength >= 0 ? 0 : tickLength;
-            y -= height * lineNumber - (height * lineCount) / 2;
-            x -= height / 2;
-            if (isBottomLeft) {
-                x -= width;
-                g.drawString(name, x, -y);
-            } else {
-                g.drawString(name, -x, -y);
-            }
-        }
-
-        int maxTickSize() {
-            int maxHeight = 0;
-            for (int i = 0; i < tickCount; i++)
-                maxHeight = Math.max(getTickLabelBounds(tickNames[i], font).height + 6, maxHeight);
-
-            return maxHeight;
-        }
-
-        YAxisGraphics() {
-        }
-    }
-
-
     public Axis(int orientation) {
         isX = true;
-        isBottomLeft = true;
         ticksInside = false;
         withGrid = false;
         minValue = 0.0D;
@@ -185,16 +54,13 @@ public class Axis {
         minRange = 0.0D;
         visible = true;
         autoRange = true;
-        values = null;
         length = 0;
         breadth = 0;
         TouchId = 0;
         title = null;
         tickLength = -5;
-        minorTickLength = -3;
         tickCount = 3;
         bestTickCount = 3;
-        minorTickCount = 0;
         spacing = Math.abs(tickLength);
         font = getFont("default.font.plot.axis.tick", "SansSerif-plain-9");
         titleFont = getFont("default.font.plot.axis.title", "SansSerif-plain-9");
@@ -209,19 +75,8 @@ public class Axis {
         return Font.decode(fontSpec);
     }
 
-    public void setValues(Object values) {
-        this.values = values;
-        if (values == null)
-            clearData();
-    }
-
-    public Object getValues() {
-        return values;
-    }
-
-    final void clearData() {
+    private void clearData() {
         title = "";
-        values = null;
         setRange(0.0D, 1.0D);
         setTickCount(3);
     }
@@ -231,60 +86,12 @@ public class Axis {
         return gr;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean getVisible() {
-        return visible;
-    }
-
-    public void setVisible(boolean visible) {
-        this.visible = visible;
-    }
-
-    public int getSpacing() {
-        return spacing;
-    }
-
     public void setSpacing(int spacing) {
         this.spacing = spacing;
     }
 
-    public boolean isAutoRange() {
-        return autoRange;
-    }
-
     public final double[] getRange() {
         return new double[]{minValue, maxValue};
-    }
-
-    public final double getRangeMin() {
-        return minValue;
-    }
-
-    public final double getRangeMax() {
-        return maxValue;
-    }
-
-    public final double[] getDataRange() {
-        return new double[]{minData, maxData};
-    }
-
-    public final double getDataRangeMin() {
-        return minData;
-    }
-
-    public final double getDataRangeMax() {
-        return maxData;
-    }
-
-    public void setMinRange(double minRange) {
-        this.minRange = minRange;
     }
 
     public void setAutoRange(boolean autoRange) {
@@ -293,16 +100,8 @@ public class Axis {
         this.autoRange = autoRange;
     }
 
-    public void setDataRange(double minValue, double maxValue) {
-        setDataRange(minValue, maxValue, java.lang.Double.class);
-    }
-
     public void setDataRange(double range[]) {
         setDataRange(range[0], range[1], java.lang.Double.class);
-    }
-
-    public void setDataRange(double range[], Class dataType) {
-        setDataRange(range[0], range[1], dataType);
     }
 
     void setDataRange(double minValue, double maxValue, Class dataType) {
@@ -310,10 +109,6 @@ public class Axis {
         maxData = maxValue;
         if (autoRange)
             setApproximateRange(minValue, maxValue);
-    }
-
-    public void setApproximateRange(double range[]) {
-        setApproximateRange(range[0], range[1]);
     }
 
     void setApproximateRange(double minValue, double maxValue) {
@@ -326,23 +121,23 @@ public class Axis {
             maxValue = minValue + minRange;
             range = maxValue - minValue;
         }
-        double step = warmNumber(range / 5D, true);
-        double first = Math.floor(minValue / step + 1.0000000000000001E-005D) * step;
-        int count = (int) Math.ceil((maxValue - first) / step);
+        final double step = warmNumber(range / 5D, true);
+        final double first = Math.floor(minValue / step + 1.0000000000000001E-005D) * step;
+        final int count = (int) Math.ceil((maxValue - first) / step);
         setRange(first, first + (double) count * step, count + 1);
     }
 
     private static double warmNumber(double value, boolean up) {
-        boolean negative = value < 0.0D;
+        final boolean negative = value < 0.0D;
         if (negative)
             value = -value;
         int exponent = (int) Math.floor(Math.log10(value));
         value *= Math.pow(10D, -exponent);
         int i;
-        for (i = warmNumbers.length - 1; i > 0; i--)
+        for (i = warmNumbers.length - 1; i > 0; i--) {
             if (value > warmNumbers[i])
                 break;
-
+        }
         if (up)
             value = warmNumbers[i + 1];
         else
@@ -351,10 +146,6 @@ public class Axis {
         if (negative)
             value = -value;
         return value;
-    }
-
-    public final void setRange(double range[]) {
-        setRange(range[0], range[1]);
     }
 
     void setRange(double rangeMin, double rangeMax) {
@@ -394,11 +185,11 @@ public class Axis {
         setTickCount(tickCount);
     }
 
-    void setTickCount(int newTickCount) {
+    private void setTickCount(int newTickCount) {
         tickCount = Math.abs(newTickCount);
-        double absMin = Math.abs(minValue);
-        double absMax = Math.abs(maxValue);
-        double largestValue = absMin <= absMax ? absMax : absMin;
+        final double absMin = Math.abs(minValue);
+        final double absMax = Math.abs(maxValue);
+        final double largestValue = absMin <= absMax ? absMax : absMin;
         int exponent = (int) Math.floor(Math.log10(largestValue));
         if (Math.abs(exponent) < 5)
             exponent = 0;
@@ -438,61 +229,30 @@ public class Axis {
         computeTickPositions();
     }
 
-    public void setTickOrientation(boolean orientation) {
-        ticksInside = orientation;
-    }
-
-    void setFont(Font font) {
-        this.font = font;
-    }
-
-    public Font getFont() {
-        return font;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    void setLocation(int orientation) {
+    final void setLocation(int orientation) {
         switch (orientation) {
-            case 1: // '\001'
+            case TOP_X:
             default:
                 isX = true;
-                name = "X'";
-                isBottomLeft = false;
-                gr = new XAxisGraphics();
+                gr = new AxisGraphics.XAxisGraphics(false);
                 break;
-
-            case 2: // '\002'
+            case BOTTOM_X:
                 isX = true;
-                name = "X";
-                isBottomLeft = true;
-                gr = new XAxisGraphics();
+                gr = new AxisGraphics.XAxisGraphics(true);
                 break;
-
-            case 3: // '\003'
+            case LEFT_Y:
                 isX = false;
-                name = "Y";
-                isBottomLeft = true;
-                gr = new YAxisGraphics();
+                gr = new AxisGraphics.YAxisGraphics(true);
                 break;
-
-            case 4: // '\004'
+            case RIGHT_Y:
                 isX = false;
-                name = "Y'";
-                isBottomLeft = false;
-                gr = new YAxisGraphics();
+                gr = new AxisGraphics.YAxisGraphics(false);
+                break;
+            case RADIAL:
+                isX = true;
+                gr = new AxisGraphics.XAxisGraphics(false);
                 break;
         }
-    }
-
-    public boolean isTouchedSince(int TouchId) {
-        return TouchId != this.TouchId;
     }
 
     public int getTouchId() {
@@ -516,10 +276,6 @@ public class Axis {
         }
     }
 
-    public int getLength() {
-        return length;
-    }
-
     public Color getBackground() {
         return gr.getBackground();
     }
@@ -537,22 +293,21 @@ public class Axis {
         if (!visible)
             return;
         gr.setGraphics(g);
-        setFont(font);
-        FontMetrics fm = g.getFontMetrics(font);
+        final FontMetrics fm = g.getFontMetrics(font);
         g.setColor(axisColor);
         gr.drawLine(0, 0, length + 2 * spacing, 0);
         int tickLength = this.tickLength;
         if (ticksInside)
             tickLength = -tickLength;
-        int maxTickCount = (int) (((float) length + 0.5F) / (float) gr.maxTickSize());
-        int minTickCount = Math.min(maxTickCount, bestTickCount);
+        final int maxTickCount = (int) (((float) length + 0.5F) / (float) gr.maxTickSize(tickNames, tickCount, font));
+        final int minTickCount = Math.min(maxTickCount, bestTickCount);
         if (tickCount > maxTickCount)
             setTickCount(maxTickCount);
         else if (tickCount < minTickCount)
             setTickCount(minTickCount);
-        for (int i = 0; i < tickCount; i++)
+        for (int i = 0; i < tickCount; i++) {
             gr.drawTick(tickPositions[i], tickLength);
-
+        }
         g.setColor(labelColor);
         g.setFont(font);
         for (int i = 0; i < tickCount; i++) {
@@ -561,57 +316,39 @@ public class Axis {
         }
 
         g.setFont(titleFont);
-        gr.drawAxisTitle();
+        gr.drawAxisTitle(title, titleFont, length);
         if (!withGrid)
             return;
         g.setColor(gridColor);
-        for (int i = 0; i < tickCount; i++)
+        for (int i = 0; i < tickCount; i++) {
             gr.drawTick(tickPositions[i], breadth);
-
+        }
     }
 
-    String valueToString(double v, int exponent) {
+    private static String valueToString(double v, int exponent) {
         if (exponent != 0) {
-            float vm = (float) (v * Math.pow(10D, -exponent));
+            final float vm = (float) (v * Math.pow(10D, -exponent));
             if (vm != 0.0F)
                 return Float.toString(vm) + "e" + exponent;
         }
         return Float.toString((float) v);
     }
 
-    public double valueFromString(String s) {
-        try {
-            return new Double(s);
-        }
-        catch (Exception e) {
-            Debug.trace(e);
-        }
-        return 0.0D;
-    }
-
     public final int computeScreenPoint(double value) {
-        int p = spacing + (int) (((double) length * (value - minValue)) / axisRange);
-        if (isX)
-            return p;
-        else
-            return -p;
-    }
-
-    public final double valueFromScreenPoint(int p) {
-        if (!isX)
-            p = -p;
-        return ((double) (p - spacing) * axisRange) / (double) length + minValue;
+        final int p = spacing + (int) (((double) length * (value - minValue)) / axisRange);
+        if (isX) return p;
+        return -p;
     }
 
     private void computeTickPositions() {
         if (tickPositions == null || tickPositions.length != tickCount)
             tickPositions = new int[tickCount];
-        for (int i = 0; i < tickCount; i++)
+        for (int i = 0; i < tickCount; i++) {
             if (isX)
                 tickPositions[i] = computeScreenPoint(tickValues[i]);
             else
                 tickPositions[i] = -computeScreenPoint(tickValues[i]);
-
+        }
         TouchId++;
     }
 

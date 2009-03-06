@@ -8,45 +8,30 @@ import java.util.Vector;
 
 public class ColourScale {
 
-    private ColorModel cm;
+    private ColorModel cm = null;
     private Color[] colors;
-    int thresholdCount;
-    int[] colorIndexThresholds;
-    private int[] defaultIndexThresholds;
-    private Vector coloredClients;
-    private static Color greyColorTable[];
-    private static Color thermalColorTable[];
-    private static ColourScale defaultScale = null;
+    private int thresholdCount;
+    private int[] colorIndexThresholds;
+    private final Vector<ColorBar> coloredClients = new Vector<ColorBar>();
 
-    static {
-        greyColorTable = (new Color[]{
-                Color.black, Color.black, Color.white, Color.white
-        });
-        thermalColorTable = (new Color[]{
-                Color.black, Color.blue, Color.cyan, Color.green, Color.yellow, Color.red, Color.white
-        });
-    }
-
-    private double colorIndexValues[];
-    private double darkestValue;
-    private double darkestIndex;
-    private double lightestValue;
-    private double lightestIndex;
-    private double range;
-    private double scale;
+    private double colorIndexValues[] = null;
+    private double darkestValue = 0;
+    private double darkestIndex = 0;
+    private double lightestValue = 0;
+    private double lightestIndex = 0;
+    private double range = 0;
+    private double scale = 0;
 
     ColourScale(Color colorTable[]) {
-        coloredClients = new Vector();
         thresholdCount = colorTable.length;
         colorIndexThresholds = new int[thresholdCount];
         colorIndexThresholds[0] = 0;
         colorIndexThresholds[thresholdCount - 1] = 255;
         colors = colorTable;
-        setDefaultThresholds();
     }
 
     public static ColourScale newMonochromeScale(double range[], Color chromum) {
-        Color monochromeColorTable[] = {
+        final Color monochromeColorTable[] = {
                 Color.black, Color.black, chromum, chromum
         };
         return new ColourScale(monochromeColorTable, range);
@@ -63,25 +48,6 @@ public class ColourScale {
         createColorMap();
     }
 
-    public boolean isDirectIndex() {
-        return false;
-    }
-
-    public boolean isIntegerValue() {
-        return false;
-    }
-
-    public double getTotalRange() {
-        return range;
-    }
-
-    public double[] getRange() {
-        double dRange[] = new double[2];
-        dRange[0] = darkestValue;
-        dRange[1] = lightestValue;
-        return dRange;
-    }
-
     public void setRange(double range[]) {
         setRange(range[0], range[1]);
     }
@@ -90,11 +56,11 @@ public class ColourScale {
         setRange(range[0], range[1]);
     }
 
-    void setRange(int minValue, int maxValue) {
+    private void setRange(int minValue, int maxValue) {
         setRange((double) minValue, (double) maxValue);
     }
 
-    void setRange(double minValue, double maxValue) {
+    private void setRange(double minValue, double maxValue) {
         darkestValue = minValue;
         lightestValue = maxValue;
         validateRange();
@@ -125,34 +91,34 @@ public class ColourScale {
             return (byte) ((int) Math.round(value) & 0xff);
     }
 
-    public int getIntegerColorValue(int index) {
+    private int getIntegerColorValue(int index) {
         return (int) Math.round(getDoubleColorValue(index));
     }
 
-    public float getFloatColorValue(int index) {
+    private float getFloatColorValue(int index) {
         return (float) getDoubleColorValue(index);
     }
 
-    public double getDoubleColorValue(int index) {
+    private double getDoubleColorValue(int index) {
         double value = (double) index - darkestIndex;
         if (scale != 0.0D)
             value /= scale;
         return value + darkestValue;
     }
 
-    public int getIntegerThresholdValue(int thresholdIndex) {
+    private int getIntegerThresholdValue(int thresholdIndex) {
         return (int) Math.round(getDoubleThresholdValue(thresholdIndex));
     }
 
-    public float getFloatThresholdValue(int thresholdIndex) {
+    private float getFloatThresholdValue(int thresholdIndex) {
         return (float) getDoubleThresholdValue(thresholdIndex);
     }
 
-    public double getDoubleThresholdValue(int thresholdIndex) {
+    private double getDoubleThresholdValue(int thresholdIndex) {
         return colorIndexValues[thresholdIndex];
     }
 
-    protected void updateColorValues() {
+    private void updateColorValues() {
         for (int i = 0; i < thresholdCount; i++) {
             colorIndexValues[i] = getIntegerColorValue(colorIndexThresholds[i]);
         }
@@ -176,49 +142,16 @@ public class ColourScale {
         return new Color(getRGB(value));
     }
 
-    int getRGB(int value) {
+    private int getRGB(int value) {
         return cm.getRGB(getColorIndex(value) & 0xff);
     }
 
-    int getRGB(float value) {
+    private int getRGB(float value) {
         return cm.getRGB(getColorIndex(value) & 0xff);
     }
 
-    int getRGB(double value) {
+    private int getRGB(double value) {
         return cm.getRGB(getColorIndex(value) & 0xff);
-    }
-
-    public boolean isDirectRGB() {
-        return false;
-    }
-
-    public int getThresholdCount() {
-        return thresholdCount;
-    }
-
-    public int getThresholdIndex(int th) {
-        return colorIndexThresholds[th];
-    }
-
-    public void resetColorThresholds() {
-        if (defaultIndexThresholds != null) {
-            colorIndexThresholds = new int[thresholdCount];
-            System.arraycopy(defaultIndexThresholds, 0, colorIndexThresholds, 0, thresholdCount);
-            update();
-        }
-    }
-
-    void setDefaultThresholds() {
-        defaultIndexThresholds = new int[thresholdCount];
-        System.arraycopy(colorIndexThresholds, 0, defaultIndexThresholds, 0, thresholdCount);
-    }
-
-    public void setColorThreshold(int i, int index) {
-        if (!(i < 1 || i >= thresholdCount - 1)) {
-            index = limitColorThreshold(i, index);
-            colorIndexThresholds[i] = index;
-            update();
-        }
     }
 
     public ColorModel getColorModel() {
@@ -231,12 +164,8 @@ public class ColourScale {
         }
     }
 
-    public synchronized void removeColoredObject(ColorBar ip) {
-        coloredClients.removeElement(ip);
-    }
-
-    int limitColorThreshold(int i, int index) {
-        int lastThreshold = thresholdCount - 1;
+    private int limitColorThreshold(int i, int index) {
+        final int lastThreshold = thresholdCount - 1;
         if (i < 1 || i >= lastThreshold)
             return index;
         int upperLimit = colorIndexThresholds[i + 1];
@@ -245,12 +174,12 @@ public class ColourScale {
         int lowerLimit = colorIndexThresholds[i - 1];
         if (i > 1)
             lowerLimit += 2;
-        index = Math.min(index, upperLimit);
-        index = Math.max(index, lowerLimit);
-        return index;
+        int idx = Math.min(index, upperLimit);
+        idx = Math.max(idx, lowerLimit);
+        return idx;
     }
 
-    void setEvenThresholds() {
+    private void setEvenThresholds() {
         int N = thresholdCount - 1;
         int first = 0;
         int last = N;
@@ -264,15 +193,8 @@ public class ColourScale {
             first++;
             N--;
         }
-        double colorStep = 255D;
+        final double colorStep = 255D / N;
         int offset = 0;
-        if (isDirectIndex()) {
-            double range[] = getRange();
-            offset = (int) Math.round(range[0]);
-            colorStep = Math.min(colorStep, getTotalRange());
-        } else if (isIntegerValue())
-            colorStep = Math.min(colorStep, getTotalRange());
-        colorStep /= N;
         int i = 0;
         for (int t = first; t <= last; t++) {
             colorIndexThresholds[t] = offset + (int) Math.round((double) i * colorStep);
@@ -280,25 +202,20 @@ public class ColourScale {
         }
     }
 
-    void createColorMap() {
-        int lastThreshold = thresholdCount - 1;
-        byte cmap[] = new byte[768];
+    private void createColorMap() {
+        final int lastThreshold = thresholdCount - 1;
+        final byte cmap[] = new byte[768];
         Color lastColor = colors[0];
         int lastIndex = colorIndexThresholds[0];
         int c = 0;
-        int k = 0;
         for (int i = 1; i < thresholdCount; i++) {
-            int cRange = colorIndexThresholds[i] - lastIndex;
-            int lastRGB[] = {
-                    lastColor.getRed(), lastColor.getGreen(), lastColor.getBlue()
-            };
-            int nextRGB[] = {
-                    colors[i].getRed(), colors[i].getGreen(), colors[i].getBlue()
-            };
+            final int cRange = colorIndexThresholds[i] - lastIndex;
+            final int lastRGB[] = {lastColor.getRed(), lastColor.getGreen(), lastColor.getBlue()};
+            final int nextRGB[] = {colors[i].getRed(), colors[i].getGreen(), colors[i].getBlue()};
+
             for (int j = 0; j < cRange; j++) {
-                float nextScale = (float) j / (float) cRange;
-                float lastScale = 1.0F - nextScale;
-                k++;
+                final float nextScale = (float) j / (float) cRange;
+                final float lastScale = 1.0F - nextScale;
                 cmap[c++] = (byte) (int) ((float) lastRGB[0] * lastScale + (float) nextRGB[0] * nextScale);
                 cmap[c++] = (byte) (int) ((float) lastRGB[1] * lastScale + (float) nextRGB[1] * nextScale);
                 cmap[c++] = (byte) (int) ((float) lastRGB[2] * lastScale + (float) nextRGB[2] * nextScale);
@@ -308,28 +225,28 @@ public class ColourScale {
             lastIndex = colorIndexThresholds[i];
         }
 
-        Color finalColor = colors[lastThreshold];
+        final Color finalColor = colors[lastThreshold];
         cmap[c++] = (byte) finalColor.getRed();
         cmap[c++] = (byte) finalColor.getGreen();
         cmap[c] = (byte) finalColor.getBlue();
         cm = new IndexColorModel(8, 256, cmap, 0, false);
     }
 
-    synchronized void notifyMapChange() {
+    private synchronized void notifyMapChange() {
         ColorBar ip;
         for (Enumeration elem = coloredClients.elements(); elem.hasMoreElements(); ip.updatedColorMap()) {
             ip = (ColorBar) elem.nextElement();
         }
     }
 
-    synchronized void notifyRangeChange() {
+    private synchronized void notifyRangeChange() {
         ColorBar ip;
         for (Enumeration elem = coloredClients.elements(); elem.hasMoreElements(); ip.updatedColorScale()) {
             ip = (ColorBar) elem.nextElement();
         }
     }
 
-    void updateRange() {
+    private void updateRange() {
         updateColorValues();
         createColorMap();
         notifyRangeChange();
