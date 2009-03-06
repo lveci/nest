@@ -359,12 +359,13 @@ public class OversamplingOp extends Operator {
         addSelectedBands();
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
+        //ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+        //ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
 
+        addGeoCoding();
         updateTargetProductMetadata();
 
         final int sourceImageTileWidth = sourceImageWidth;
@@ -415,6 +416,45 @@ public class OversamplingOp extends Operator {
             targetBand.setUnit(unit);
             targetProduct.addBand(targetBand);
         }
+    }
+
+    private void addGeoCoding() {
+
+        int gridWidth = 11;
+        int gridHeight = 11;
+
+        float subSamplingX = targetImageWidth / (gridWidth - 1.0f);
+        float subSamplingY = targetImageHeight / (gridHeight - 1.0f);
+
+        TiePointGrid lat = OperatorUtils.getLatitude(sourceProduct);
+        TiePointGrid lon = OperatorUtils.getLongitude(sourceProduct);
+
+        float[] latTiePoints = new float[gridWidth*gridHeight];
+        float[] lonTiePoints = new float[gridWidth*gridHeight];
+        int k = 0;
+        for (int j = 0; j < gridHeight; j++) {
+            float ty = Math.min(j*subSamplingY, targetImageHeight - 1);
+            float y = (int)(ty / heightRatio + 0.5f);
+            for (int i = 0; i < gridWidth; i++) {
+                float tx = Math.min(i*subSamplingX, targetImageWidth - 1);
+                float x = (int)(tx / widthRatio + 0.5f);
+                latTiePoints[k] = lat.getPixelFloat(x, y);
+                lonTiePoints[k] = lon.getPixelFloat(x, y);
+                k++;
+            }
+        }
+
+        TiePointGrid latGrid = new TiePointGrid(
+                "latitude", gridWidth, gridHeight, 0.0f, 0.0f, subSamplingX, subSamplingY, latTiePoints);
+
+        TiePointGrid lonGrid = new TiePointGrid(
+                "longitude", gridWidth, gridHeight, 0.0f, 0.0f, subSamplingX, subSamplingY, lonTiePoints);
+
+        TiePointGeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
+
+        targetProduct.addTiePointGrid(latGrid);
+        targetProduct.addTiePointGrid(lonGrid);
+        targetProduct.setGeoCoding(gc);
     }
 
     private void updateTargetProductMetadata() throws Exception {
