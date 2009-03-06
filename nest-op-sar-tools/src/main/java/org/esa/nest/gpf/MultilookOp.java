@@ -232,14 +232,20 @@ public final class MultilookOp extends Operator {
 
     private void addGeoCoding() {
 
+        TiePointGrid lat = OperatorUtils.getLatitude(sourceProduct);
+        TiePointGrid lon = OperatorUtils.getLongitude(sourceProduct);
+
+        if (lat == null || lon == null) {
+            ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
+            ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+            return;
+        }
+
         int gridWidth = 11;
         int gridHeight = 11;
 
         float subSamplingX = targetImageWidth / (gridWidth - 1.0f);
         float subSamplingY = targetImageHeight / (gridHeight - 1.0f);
-
-        TiePointGrid lat = OperatorUtils.getLatitude(sourceProduct);
-        TiePointGrid lon = OperatorUtils.getLongitude(sourceProduct);
 
         float[] latTiePoints = new float[gridWidth*gridHeight];
         float[] lonTiePoints = new float[gridWidth*gridHeight];
