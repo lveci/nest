@@ -79,7 +79,7 @@ public class SRGROp extends Operator {
     private int sourceImageWidth;
     private int sourceImageHeight;
     private int targetImageWidth;
-    private int tileIdx;
+    private int targetImageHeight;
 
     private static final String NEAREST_NEIGHBOR = "Nearest-neighbor interpolation";
     private static final String LINEAR = "Linear interpolation";
@@ -122,13 +122,15 @@ public class SRGROp extends Operator {
             geoCoding = sourceProduct.getGeoCoding();
 
             computeSlantRangeDistanceArray();
+
             getNearRangeIncidenceAngle();
 
             groundRangeSpacing = slantRangeSpacing / Math.sin(nearRangeIncidenceAngle*Math.PI/180.0);
 
+            computeWarpPolynomial(sourceImageHeight / 2);
+
             createTargetProduct();
 
-            tileIdx = -1;
         } catch(Exception e) {
             throw new OperatorException(e.getMessage());
         }
@@ -154,12 +156,6 @@ public class SRGROp extends Operator {
         final int h = targetTileRectangle.height;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        // compute WARP polynomial coefficients
-        if (tileIdx != y0) {
-            tileIdx = y0;
-            computeWarpPolynomial(y0);
-        }
-
         // compute ground range image pixel values
         final Band sourceBand = sourceProduct.getBand(targetBand.getName());
         final Rectangle sourceTileRectangle = new Rectangle(x0, y0, sourceImageWidth, h);
@@ -173,7 +169,7 @@ public class SRGROp extends Operator {
         double mu = 0.0;
 
         for (int x = x0; x < x0 + w; x++) {
-            final double p = getSlantRangePixelPosition(x);
+            final double p = getSlantRangePixelPosition((double)x);
             if (interpolationMethod.equals(NEAREST_NEIGHBOR)) {
                 p0 = Math.min((int)(p + 0.5), sourceImageWidth - 1);
             } else if (interpolationMethod.equals(LINEAR))  {
@@ -220,9 +216,9 @@ public class SRGROp extends Operator {
      * @param x The pixel index in the ground range image.
      * @return The pixel index in the slant range image
      */
-    private double getSlantRangePixelPosition(int x) {
+    private double getSlantRangePixelPosition(double x) {
 
-        if (x == 0) {
+        if (Double.compare(x, 0.0) == 0) {
             return 0.0;
         }
 
@@ -278,28 +274,30 @@ public class SRGROp extends Operator {
      */
     private void createTargetProduct() {
 
-        computeTargetImageWidth();
+        computeTargetImageDimension();
 
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),
                                     targetImageWidth,
-                                    sourceImageHeight);
+                                    targetImageHeight);
 
         addSelectedBands();
 
         targetProduct.setPreferredTileSize(targetImageWidth, 256);
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
+        //ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+        //ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
+
+        addGeoCoding();
 
         updateTargetProductMetadata();
     }
 
-    private void computeTargetImageWidth() {
+    private void computeTargetImageDimension() {
 
         final double[] xyz = new double[3];
         GeoPos geoPos = geoCoding.getGeoPos(new PixelPos(0, 0), null);
@@ -323,6 +321,7 @@ public class SRGROp extends Operator {
         }
 
         targetImageWidth = (int)(totalDistance / groundRangeSpacing);
+        targetImageHeight = sourceImageHeight;
     }
 
     /**
@@ -363,10 +362,48 @@ public class SRGROp extends Operator {
             final Band targetBand = new Band(srcBand.getName(),
                                        srcBand.getDataType(),
                                        targetImageWidth,
-                                       sourceImageHeight);
+                                       targetImageHeight);
             targetBand.setUnit(srcBand.getUnit());
             targetProduct.addBand(targetBand);
         }
+    }
+
+    private void addGeoCoding() {
+
+        int gridWidth = 11;
+        int gridHeight = 11;
+
+        float subSamplingX = targetImageWidth / (gridWidth - 1.0f);
+        float subSamplingY = targetImageHeight / (gridHeight - 1.0f);
+
+        TiePointGrid lat = OperatorUtils.getLatitude(sourceProduct);
+        TiePointGrid lon = OperatorUtils.getLongitude(sourceProduct);
+
+        float[] latTiePoints = new float[gridWidth*gridHeight];
+        float[] lonTiePoints = new float[gridWidth*gridHeight];
+        int k = 0;
+        for (int j = 0; j < gridHeight; j++) {
+            float y = Math.min(j*subSamplingY, targetImageHeight - 1);
+            for (int i = 0; i < gridWidth; i++) {
+                float tx = Math.min(i*subSamplingX, targetImageWidth - 1);
+                float x = (float)getSlantRangePixelPosition((double)tx);
+                latTiePoints[k] = lat.getPixelFloat(x, y);
+                lonTiePoints[k] = lon.getPixelFloat(x, y);
+                k++;
+            }
+        }
+
+        TiePointGrid latGrid = new TiePointGrid(
+                "latitude", gridWidth, gridHeight, 0.0f, 0.0f, subSamplingX, subSamplingY, latTiePoints);
+
+        TiePointGrid lonGrid = new TiePointGrid(
+                "longitude", gridWidth, gridHeight, 0.0f, 0.0f, subSamplingX, subSamplingY, lonTiePoints);
+
+        TiePointGeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
+
+        targetProduct.addTiePointGrid(latGrid);
+        targetProduct.addTiePointGrid(lonGrid);
+        targetProduct.setGeoCoding(gc);
     }
 
     /**
