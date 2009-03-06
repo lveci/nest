@@ -44,8 +44,8 @@ public class PolarView extends JPanel {
 
     private static final double F = 10000D;
     public static final Color waveColorTable[] = (new Color[]{
-            new Color(0, 30, 255), new Color(125, 210, 255),
-            new Color(85, 210, 90), new Color(255, 210, 40), new Color(255, 30, 0)
+            new Color(0, 0, 0), new Color(0, 0, 255), new Color(0, 255, 255),
+            new Color(0, 255, 0), new Color(255, 255, 0), new Color(255, 0, 0)
     });
     private static final double rings[] = {50.0, 100.0, 200.0};
     private static final String ringTextStrings[] = { "200 (m)", "100 (m)", "50 (m)" };
