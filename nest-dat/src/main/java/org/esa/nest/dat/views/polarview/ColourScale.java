@@ -19,7 +19,6 @@ public class ColourScale {
     private double darkestIndex = 0;
     private double lightestValue = 0;
     private double lightestIndex = 0;
-    private double range = 0;
     private double scale = 0;
 
     ColourScale(Color colorTable[]) {
@@ -79,16 +78,16 @@ public class ColourScale {
     }
 
     public byte getColorIndex(double value) {
-        value -= darkestValue;
-        if (value < 0.0D)
+        double val = value - darkestValue;
+        if (val < 0.0D)
             return (byte) (int) darkestIndex;
         if (scale != 0.0D)
-            value *= scale;
-        value += darkestIndex;
-        if (value > lightestIndex)
+            val *= scale;
+        val += darkestIndex;
+        if (val > lightestIndex)
             return (byte) (int) lightestIndex;
         else
-            return (byte) ((int) Math.round(value) & 0xff);
+            return (byte) ((int) Math.round(val) & 0xff);
     }
 
     private int getIntegerColorValue(int index) {
@@ -106,18 +105,6 @@ public class ColourScale {
         return value + darkestValue;
     }
 
-    private int getIntegerThresholdValue(int thresholdIndex) {
-        return (int) Math.round(getDoubleThresholdValue(thresholdIndex));
-    }
-
-    private float getFloatThresholdValue(int thresholdIndex) {
-        return (float) getDoubleThresholdValue(thresholdIndex);
-    }
-
-    private double getDoubleThresholdValue(int thresholdIndex) {
-        return colorIndexValues[thresholdIndex];
-    }
-
     private void updateColorValues() {
         for (int i = 0; i < thresholdCount; i++) {
             colorIndexValues[i] = getIntegerColorValue(colorIndexThresholds[i]);
@@ -126,7 +113,7 @@ public class ColourScale {
 
     private void validateRange() {
         darkestValue = Math.min(darkestValue, lightestValue);
-        range = lightestValue - darkestValue;
+        final double range = lightestValue - darkestValue;
         scale = 255D / range;
     }
 
@@ -162,21 +149,6 @@ public class ColourScale {
         if (!coloredClients.contains(ip)) {
             coloredClients.addElement(ip);
         }
-    }
-
-    private int limitColorThreshold(int i, int index) {
-        final int lastThreshold = thresholdCount - 1;
-        if (i < 1 || i >= lastThreshold)
-            return index;
-        int upperLimit = colorIndexThresholds[i + 1];
-        if (i < lastThreshold - 1)
-            upperLimit -= 2;
-        int lowerLimit = colorIndexThresholds[i - 1];
-        if (i > 1)
-            lowerLimit += 2;
-        int idx = Math.min(index, upperLimit);
-        idx = Math.max(idx, lowerLimit);
-        return idx;
     }
 
     private void setEvenThresholds() {
@@ -232,13 +204,6 @@ public class ColourScale {
         cm = new IndexColorModel(8, 256, cmap, 0, false);
     }
 
-    private synchronized void notifyMapChange() {
-        ColorBar ip;
-        for (Enumeration elem = coloredClients.elements(); elem.hasMoreElements(); ip.updatedColorMap()) {
-            ip = (ColorBar) elem.nextElement();
-        }
-    }
-
     private synchronized void notifyRangeChange() {
         ColorBar ip;
         for (Enumeration elem = coloredClients.elements(); elem.hasMoreElements(); ip.updatedColorScale()) {
@@ -250,11 +215,5 @@ public class ColourScale {
         updateColorValues();
         createColorMap();
         notifyRangeChange();
-    }
-
-    private void update() {
-        updateColorValues();
-        createColorMap();
-        notifyMapChange();
     }
 }

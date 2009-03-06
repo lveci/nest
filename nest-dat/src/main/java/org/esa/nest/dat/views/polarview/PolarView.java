@@ -31,13 +31,13 @@ public class PolarView extends JPanel {
     private final float[] dataset;
     private int currentRecord = 0;
 
+    private static final int REAL = 0;
+    private static final int IMAG = 1;
+    private static final int BOTH = 2;
+    private static final int POWER = 3;
+    private static final int INTENSITY = 4;
+    private static final int MULTIPLIED = 5;
 
-    public static final int REAL = 0;
-    public static final int IMAG = 1;
-    public static final int BOTH = 2;
-    public static final int POWER = 3;
-    public static final int INTENSITY = 4;
-    public static final int MULTIPLIED = 5;
     private PolarCanvas graphView;
     private int graphType = 0;
     private float spectrum[][];
@@ -48,15 +48,13 @@ public class PolarView extends JPanel {
             new Color(85, 210, 90), new Color(255, 210, 40), new Color(255, 30, 0)
     });
     private static final double rings[] = {50.0, 100.0, 200.0};
-    private static final String ringTextStrings[] = {
-            "200 (m)", "100 (m)", "50 (m)"
-    };
+    private static final String ringTextStrings[] = { "200 (m)", "100 (m)", "50 (m)" };
 
     public PolarView(Product prod, ProductSceneImage sceneImage) {
         productSceneImage = sceneImage;
         product = prod;
 
-        MetadataElement sph = product.getMetadataRoot().getElement("SPH");
+        final MetadataElement sph = product.getMetadataRoot().getElement("SPH");
         numDirBins = sph.getAttributeInt("NUM_DIR_BINS", 0);
         numWLBins = sph.getAttributeInt("NUM_WL_BINS", 0);
         firstDirBins = (float) sph.getAttributeDouble("FIRST_DIR_BIN", 0);
@@ -64,8 +62,8 @@ public class PolarView extends JPanel {
         firstWLBin = (float) sph.getAttributeDouble("FIRST_WL_BIN", 0);
         lastWLBin = (float) sph.getAttributeDouble("LAST_WL_BIN", 0);
 
-        RasterDataNode[] rasters = productSceneImage.getRasters();
-        RasterDataNode rasterNode = rasters[0];
+        final RasterDataNode[] rasters = productSceneImage.getRasters();
+        final RasterDataNode rasterNode = rasters[0];
         numRecords = rasterNode.getRasterHeight();
         recordLength = rasterNode.getRasterWidth();
         dataset = new float[recordLength];
@@ -91,14 +89,14 @@ public class PolarView extends JPanel {
 
         // complex data
         if (graphType == 3 || graphType == 4 || graphType == 2 || graphType == 5) {
-            float imagSpectrum[][] = getSpectrum(false);
+            final float imagSpectrum[][] = getSpectrum(false);
             minValue = Float.MAX_VALUE;
             maxValue = Float.MIN_VALUE;
-            int halfCircle = spectrum.length / 2;
+            final int halfCircle = spectrum.length / 2;
             for (int i = 0; i < spectrum.length; i++) {
                 for (int j = 0; j < spectrum[0].length; j++) {
-                    float rS = spectrum[i][j];
-                    float iS = imagSpectrum[i][j];
+                    final float rS = spectrum[i][j];
+                    final float iS = imagSpectrum[i][j];
                     float v = rS;
                     if (graphType == 2) {
                         if (i >= halfCircle)
@@ -120,27 +118,24 @@ public class PolarView extends JPanel {
                     minValue = Math.min(minValue, v);
                     maxValue = Math.max(maxValue, v);
                 }
-
             }
-
         }
 
-        float thFirst = firstDirBins - 5F;
-        float rStep = (float) (Math.log(lastWLBin) - Math.log(firstWLBin)) / (float) (numWLBins - 1);
-        double cRange[] = {
-                (double) minValue, (double) maxValue
-        };
-        double rRange[] = {0.0, 333.33333333333};
+        final float thFirst = firstDirBins - 5F;
+        final float rStep = (float) (Math.log(lastWLBin) - Math.log(firstWLBin)) / (float) (numWLBins - 1);
+        final double cRange[] = { (double) minValue, (double) maxValue };
+        final double rRange[] = {0.0, 333.33333333333};
         double logr = Math.log(firstWLBin);
+
         logr -= rStep / 2.0;
-        int nWl = spectrum[0].length;
-        float radii[] = new float[nWl + 1];
+        final int nWl = spectrum[0].length;
+        final float radii[] = new float[nWl + 1];
         for (int j = 0; j <= nWl; j++) {
             radii[j] = (float) (10000.0 / Math.exp(logr));
             logr += rStep;
         }
 
-        PolarData data = new PolarData(spectrum, 90F + thFirst, dirBinStep, radii);
+        final PolarData data = new PolarData(spectrum, 90F + thFirst, dirBinStep, radii);
 
         graphView.getCAxis().setDataRange(cRange);
         graphView.getRAxis().setAutoRange(false);
@@ -151,14 +146,13 @@ public class PolarView extends JPanel {
         graphView.setData(data);
     }
 
+    private float[][] getSpectrum(boolean getReal) {
 
-    float[][] getSpectrum(boolean getReal) {
-
-        int Nd2 = numDirBins / 2;
-        float minValue = 0;
-        float maxValue = 255;
-        float scale = (maxValue - minValue) / 255F;
-        float spectrum[][] = new float[numDirBins][numWLBins];
+        final int Nd2 = numDirBins / 2;
+        final float minValue = 0;
+        final float maxValue = 255;
+        final float scale = (maxValue - minValue) / 255F;
+        final float spectrum[][] = new float[numDirBins][numWLBins];
         int index = 0;
         for (int i = 0; i < Nd2; i++) {
             for (int j = 0; j < numWLBins; j++)
@@ -171,8 +165,9 @@ public class PolarView extends JPanel {
             }
         } else {
             for (int i = 0; i < Nd2; i++) {
-                for (int j = 0; j < numWLBins; j++)
+                for (int j = 0; j < numWLBins; j++)  {
                     spectrum[i + Nd2][j] = -spectrum[i][j];
+                }
             }
         }
         return spectrum;
@@ -203,7 +198,6 @@ public class PolarView extends JPanel {
 
         return resampledSpectrum;
     }
-
 
     /**
      * Paints the panel component

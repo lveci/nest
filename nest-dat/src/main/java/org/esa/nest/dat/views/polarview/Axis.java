@@ -3,7 +3,7 @@ package org.esa.nest.dat.views.polarview;
 import java.awt.*;
 
 public class Axis {
-    private static final double warmNumbers[] = {0.10000000000000001D, 1.0D, 2D, 3D, 5D, 10D};
+    private static final double warmNumbers[] = {0.1D, 1.0D, 2D, 3D, 5D, 10D};
 
     public static final int TOP_X = 1;
     public static final int BOTTOM_X = 2;
@@ -127,25 +127,26 @@ public class Axis {
         setRange(first, first + (double) count * step, count + 1);
     }
 
-    private static double warmNumber(double value, boolean up) {
-        final boolean negative = value < 0.0D;
+    private static double warmNumber(double thevalue, boolean up) {
+        final boolean negative = thevalue < 0.0D;
+        double val = thevalue;
         if (negative)
-            value = -value;
-        int exponent = (int) Math.floor(Math.log10(value));
-        value *= Math.pow(10D, -exponent);
+            val = -val;
+        int exponent = (int) Math.floor(Math.log10(val));
+        val *= Math.pow(10D, -exponent);
         int i;
         for (i = warmNumbers.length - 1; i > 0; i--) {
-            if (value > warmNumbers[i])
+            if (val > warmNumbers[i])
                 break;
         }
         if (up)
-            value = warmNumbers[i + 1];
+            val = warmNumbers[i + 1];
         else
-            value = warmNumbers[i];
-        value *= Math.pow(10D, exponent);
+            val = warmNumbers[i];
+        val *= Math.pow(10D, exponent);
         if (negative)
-            value = -value;
-        return value;
+            val = -val;
+        return val;
     }
 
     void setRange(double rangeMin, double rangeMax) {
@@ -196,12 +197,12 @@ public class Axis {
         double first = minValue;
         int lastTickIndex = tickCount - 1;
         double step = tickRange / (double) lastTickIndex;
-        if (Math.abs((first + step) - minValue) < Math.abs(step * 0.14999999999999999D)) {
+        if (Math.abs((first + step) - minValue) < Math.abs(step * 0.15D)) {
             tickCount = lastTickIndex--;
             first += step;
             tickRange -= step;
         }
-        if (Math.abs((first + tickRange) - maxValue) > Math.abs(step * 0.84999999999999998D)) {
+        if (Math.abs((first + tickRange) - maxValue) > Math.abs(step * 0.85D)) {
             tickCount = lastTickIndex--;
             tickRange -= step;
         }

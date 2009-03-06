@@ -48,7 +48,7 @@ public class ColorBar implements ImageProducer {
         theConsumers.removeElement(ic);
     }
 
-    synchronized void removeAllConsumers() {
+    private synchronized void removeAllConsumers() {
         for (Enumeration elem = theConsumers.elements(); elem.hasMoreElements();) {
             ImageConsumer ic = (ImageConsumer) elem.nextElement();
             ic.imageComplete(3);
@@ -77,11 +77,11 @@ public class ColorBar implements ImageProducer {
             ic.setHints(hints);
     }
 
-    synchronized Enumeration getConsumers() {
+    private synchronized Enumeration getConsumers() {
         return theConsumers.elements();
     }
 
-    synchronized void addConsumerToList(ImageConsumer ic) {
+    private synchronized void addConsumerToList(ImageConsumer ic) {
         theConsumers.addElement(ic);
     }
 
@@ -106,7 +106,7 @@ public class ColorBar implements ImageProducer {
         }
     }
 
-    synchronized void resend() {
+    private synchronized void resend() {
         resend(imageArea);
     }
 
@@ -120,7 +120,7 @@ public class ColorBar implements ImageProducer {
         updatedColorMap();
     }
 
-    synchronized void resend(Rectangle area) {
+    private synchronized void resend(Rectangle area) {
         final Enumeration con = getConsumers();
         while (con.hasMoreElements()) {
             final ImageConsumer ic = (ImageConsumer) con.nextElement();
@@ -136,24 +136,7 @@ public class ColorBar implements ImageProducer {
         }
     }
 
-    private synchronized void resend(ImageConsumer ic, Rectangle area) {
-        if (ic == null) {
-            resend(area);
-            return;
-        }
-        if (isConsumer(ic))
-            try {
-                deliverPixels(ic, area);
-                if (isConsumer(ic))
-                    ic.imageComplete(2);
-            }
-            catch (Exception e) {
-                if (isConsumer(ic))
-                    ic.imageComplete(1);
-            }
-    }
-
-    synchronized void resendColorModel() {
+    private synchronized void resendColorModel() {
         ImageConsumer ic;
         for (Enumeration elem = getConsumers(); elem.hasMoreElements(); ic.setColorModel(model))
             ic = (ImageConsumer) elem.nextElement();
