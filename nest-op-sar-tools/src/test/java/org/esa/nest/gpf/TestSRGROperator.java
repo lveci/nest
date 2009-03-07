@@ -52,6 +52,12 @@ public class TestSRGROperator extends TestCase {
         float[] floatValues = new float[28];
         band.readPixels(0, 0, 7, 4, floatValues, ProgressMonitor.NULL);
 
+        double[] warpPolynomialCoef = op.getWarpPolynomialCoef();
+        double[] expectedWarpCoeff = {-0.267942583741615, 1.039902702338278, -0.001031550514190, 0.000014679621756,
+                                      -0.000000075665832};
+        for (int i = 0; i < warpPolynomialCoef.length; i++) {
+            assertTrue(Math.abs(expectedWarpCoeff[i] - warpPolynomialCoef[i]) < 0.000001);
+        }
         // compare with expected outputs:
         float[] expectedValues = {1.0f, 3.0221484f, 5.0534487f, 7.0752897f, 9.097291f, 11.119023f, 13.130011f, 17.0f,
         19.022148f, 21.053448f, 23.07529f, 25.09729f, 27.119024f, 29.13001f, 33.0f, 35.02215f, 37.053448f, 39.07529f,
