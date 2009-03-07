@@ -360,7 +360,7 @@ public class SRGROp extends Operator {
                 continue;
             }
             final Band targetBand = new Band(srcBand.getName(),
-                                       srcBand.getDataType(),
+                                       ProductData.TYPE_FLOAT32, //srcBand.getDataType(),
                                        targetImageWidth,
                                        targetImageHeight);
             targetBand.setUnit(srcBand.getUnit());
@@ -503,6 +503,10 @@ public class SRGROp extends Operator {
         sourceBandNames[0] = name;
     }
 
+    public double[] getWarpPolynomialCoef() {
+        return warpPolynomialCoef;
+    }
+    
     /**
      * The SPI is used to register this operator in the graph processing framework
      * via the SPI configuration file
