@@ -37,7 +37,7 @@ public class ColourScale {
     }
 
     public static ColourScale newCustomScale(double range[]) {
-        return new ColourScale(PolarView.waveColorTable, range);
+        return new ColourScale(PolarView.colourTable, range);
     }
 
     ColourScale(Color colorTable[], double range[]) {

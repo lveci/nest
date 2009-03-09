@@ -68,8 +68,9 @@ public class ShowCrossSpectraViewAction extends ExecCommand {
                         return;
                     }
 
-                    PolarView view = new PolarView(product, productSceneImage);
-
+                    final PolarView view = new PolarView(product, productSceneImage);
+                    view.setCommandUIFactory(visatApp.getCommandUIFactory());
+                    
                     final String title = createInternalFrameTitle(selectedProductNode);
                     final Icon icon = UIUtils.loadImageIcon("icons/RsBandAsSwath16.gif");
                     final JInternalFrame internalFrame = visatApp.createInternalFrame(title, icon, view, getHelpId());

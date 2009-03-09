@@ -6,8 +6,8 @@ import java.awt.*;
 
 public class PolarCanvas extends Container {
 
-    private Axis rAxis;
-    private Axis cAxis;
+    private Axis radialAxis;
+    private Axis colourAxis;
     private PolarData data = null;
     private double rings[] = null;
     //private Glyph ringText[];
@@ -25,17 +25,17 @@ public class PolarCanvas extends Container {
         this(new Axis(Axis.RADIAL), new Axis(Axis.RIGHT_Y));
     }
 
-    private PolarCanvas(Axis rAxis, Axis cAxis) {
+    private PolarCanvas(Axis radialAxis, Axis colourAxis) {
         opaque = false;
         //xTitle = new StyledText("E");
         //yTitle = new StyledText("N");
         dirOffset = 0.0F;
         plotRadius = 0;
-        this.rAxis = rAxis;
-        this.cAxis = cAxis;
-        cAxis.setLocation(4);
-        rAxis.setSpacing(0);
-        cAxis.setSpacing(0);
+        this.radialAxis = radialAxis;
+        this.colourAxis = colourAxis;
+        colourAxis.setLocation(4);
+        radialAxis.setSpacing(0);
+        colourAxis.setSpacing(0);
 
         enableEvents(16L);
         setBackground(Color.white);
@@ -138,13 +138,13 @@ public class PolarCanvas extends Container {
     }
 
     private void drawColorBar(Graphics g, Axis cAxis) {
-        final Dimension cbSize = new Dimension((int)(graphSize.width * 0.03D),
+        final Dimension cbSize = new Dimension((int) (graphSize.width * 0.03D),
                 (int) (Math.min(200, graphSize.height * 0.6D)));
-        final Point at = new Point(0,-100);
+        final Point at = new Point(0, -100);
 
         g.translate(at.x, at.y);
-        g.drawImage(colorBar, 0,0, cbSize.width, cbSize.height, this);
-        g.drawRect(0,0, cbSize.width, cbSize.height);
+        g.drawImage(colorBar, 0, 0, cbSize.width, cbSize.height, this);
+        g.drawRect(0, 0, cbSize.width, cbSize.height);
         g.translate(cbSize.width, cbSize.height);
         cAxis.draw(g, cbSize);
         g.translate(-cbSize.width - at.x, -cbSize.height - at.y);
@@ -194,12 +194,12 @@ public class PolarCanvas extends Container {
         }
     }
 
-    public Axis getRAxis() {
-        return rAxis;
+    public Axis getRadialAxis() {
+        return radialAxis;
     }
 
-    public Axis getCAxis() {
-        return cAxis;
+    public Axis getColourAxis() {
+        return colourAxis;
     }
 
     public PolarData getData() {
@@ -209,17 +209,16 @@ public class PolarCanvas extends Container {
     public void setData(PolarData data) {
         this.data = data;
         if (data != null) {
-            data.setRAxis(rAxis);
+            data.setRAxis(radialAxis);
             data.setDirOffset(dirOffset);
-            data.setCAxis(cAxis);
+            data.setCAxis(colourAxis);
         }
     }
 
-    //public void setRings(double rings[], Glyph ringText[])
-    //{
-    //    this.rings = rings;
-    //this.ringText = ringText;
-    //}
+    public void setRings(double rings[], String ringText[]) {
+        this.rings = rings;
+        //this.ringText = ringText;
+    }
 
     public float getDirOffset() {
         return dirOffset;
@@ -258,9 +257,9 @@ public class PolarCanvas extends Container {
         p.x -= origin.x;
         if (Math.abs(p.y) < plotRadius) {
             if (Math.abs(p.x) < plotRadius)
-                return rAxis;
+                return radialAxis;
             if (p.x > graphSize.width / 2)
-                return cAxis;
+                return colourAxis;
         }
         return null;
     }
@@ -277,7 +276,7 @@ public class PolarCanvas extends Container {
         g.translate(origin.x, origin.y + r.height);
         if (data != null) {
             loadColorBar(data.getColorScale());
-            drawColorBar(g, cAxis);
+            drawColorBar(g, colourAxis);
         }
         g.translate(-origin.x, -origin.y - r.height);
         final Point xYo = new Point(origin.x, origin.y + r.height);
@@ -286,21 +285,21 @@ public class PolarCanvas extends Container {
         origin.x += r.width / 2;
         final Graphics oGraphics = g.create();
         oGraphics.translate(origin.x, origin.y);
-        rAxis.setSize(quadrantSize);
+        radialAxis.setSize(quadrantSize);
         if (data != null)
             data.draw(oGraphics);
         oGraphics.setColor(Color.darkGray);
         if (rings != null) {
             for (double ring : rings) {
-                final int rad = rAxis.computeScreenPoint(ring);
+                final int rad = radialAxis.computeScreenPoint(ring);
                 final int rad2 = rad + rad;
                 oGraphics.drawOval(-rad, -rad, rad2, rad2);
                 //if(ringText != null && ringText[ri] != null)
                 //    ringText[ri].drawCentered(oGraphics, 0, -(rad + ringText[ri].getDescent(oGraphics) * 3));
             }
-        } else {
-            rAxis.draw(oGraphics);
-        }
+        } //else {
+            radialAxis.draw(oGraphics);
+       // }
         oGraphics.translate(-origin.x, -origin.y);
         oGraphics.dispose();
         //drawAnnotation(g, size);
