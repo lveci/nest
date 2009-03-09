@@ -60,6 +60,7 @@
         <action>
             <id>importRadarsatProduct</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <text>Open Radarsat 1 CEOS... (work in progress)</text>
             <formatName>Radarsat 1 CEOS</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import a Radarsat 1 CEOS data product or subset.</shortDescr>
