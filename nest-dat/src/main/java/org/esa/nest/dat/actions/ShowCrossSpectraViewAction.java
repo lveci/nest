@@ -102,11 +102,11 @@ public class ShowCrossSpectraViewAction extends ExecCommand {
         visatApp.getExecutorService().submit(worker);
     }
 
-    private String createInternalFrameTitle(final RasterDataNode raster) {
+    private static String createInternalFrameTitle(final RasterDataNode raster) {
         return UIUtils.getUniqueFrameTitle(VisatApp.getApp().getAllInternalFrames(), raster.getDisplayName());
     }
 
-    private ProductSceneImage createProductSceneImage(final RasterDataNode raster,
+    private static ProductSceneImage createProductSceneImage(final RasterDataNode raster,
                                                      ProgressMonitor pm) {
         Debug.assertNotNull(raster);
         Debug.assertNotNull(pm);
@@ -131,12 +131,15 @@ public class ShowCrossSpectraViewAction extends ExecCommand {
 
     @Override
     public void updateState(final CommandEvent event) {
-        Product product = VisatApp.getApp().getSelectedProduct();
+        setEnabled(false);
+
+
+      /*  final Product product = VisatApp.getApp().getSelectedProduct();
         if(product != null) {
             final String productType = VisatApp.getApp().getSelectedProduct().getProductType();
             setEnabled(productType.startsWith("ASA_WV") &&
                 VisatApp.getApp().getSelectedProductNode() instanceof RasterDataNode);
         } else
-            setEnabled(false);
+            setEnabled(false);    */
     }
 }
