@@ -84,7 +84,10 @@ public class XMLSupport {
             final Element childDomElem = new Element("attrib");
             setAttribute(childDomElem, "name", childMetaAttrib.getName());
             setAttribute(childDomElem, "value", childMetaAttrib.getData().getElemString());
-            setAttribute(childDomElem, "type", String.valueOf(childMetaAttrib.getDataType()));
+            if(childMetaAttrib.getUnit() != null && childMetaAttrib.getUnit().equalsIgnoreCase("utc"))
+                setAttribute(childDomElem, "type", String.valueOf(ProductData.TYPE_UTC));
+            else
+                setAttribute(childDomElem, "type", String.valueOf(childMetaAttrib.getDataType()));
             setAttribute(childDomElem, "unit", childMetaAttrib.getUnit());
             setAttribute(childDomElem, "desc", childMetaAttrib.getDescription());
             domElem.addContent(childDomElem);

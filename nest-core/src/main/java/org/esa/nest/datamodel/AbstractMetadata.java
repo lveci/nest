@@ -309,8 +309,13 @@ public class AbstractMetadata {
         // load metadata xml file if found
         final String inputStr = productFile.getAbsolutePath();
         final String metadataStr = inputStr.substring(0, inputStr.lastIndexOf('.')) + ".xml";
-        final File metadataFile = new File(metadataStr);
-        return metadataFile.exists() && AbstractMetadataIO.Load(product, absRoot, metadataFile);
+        File metadataFile = new File(metadataStr);
+        if(metadataFile.exists() && AbstractMetadataIO.Load(product, absRoot, metadataFile)) {
+            return true;
+        } else {
+            metadataFile = new File(productFile.getParentFile(), "metadata.xml");
+            return metadataFile.exists() && AbstractMetadataIO.Load(product, absRoot, metadataFile);
+        }
     }
 
     public static void saveExternalMetadata(final Product product, final MetadataElement absRoot, final File productFile) {

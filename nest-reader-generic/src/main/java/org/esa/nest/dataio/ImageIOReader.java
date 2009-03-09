@@ -96,7 +96,6 @@ public class ImageIOReader extends AbstractProductReader {
 
     private void addMetaData(final Product product, final File inputFile) throws IOException {
         final MetadataElement root = product.getMetadataRoot();
-        root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
 
         final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
 

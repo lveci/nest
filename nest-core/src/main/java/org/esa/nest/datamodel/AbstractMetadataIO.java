@@ -24,16 +24,16 @@ public class AbstractMetadataIO {
 
      static void Save(final Product product, final MetadataElement metadataElem, final File metadataFile) {
 
-         Element root = new Element("Metadata");
-         Document doc = new Document(root);
+         final Element root = new Element("Metadata");
+         final Document doc = new Document(root);
 
          if(metadataElem != null) {
-             Element AbstractedMetadataElem = new Element("AbstractedMetadata");
+             final Element AbstractedMetadataElem = new Element("AbstractedMetadata");
              root.addContent(AbstractedMetadataElem);
              XMLSupport.metadataElementToDOMElement(metadataElem, AbstractedMetadataElem);
          }
          if(product.getTiePointGrids().length > 0) {
-             Element tiePointGridsElem = new Element("tie-point-grids");
+             final Element tiePointGridsElem = new Element("tie-point-grids");
              root.addContent(tiePointGridsElem);
              writeTiePointGrids(product, tiePointGridsElem);
          }
@@ -52,13 +52,13 @@ public class AbstractMetadataIO {
             return false;
         }
 
-        Element root = doc.getRootElement();
+        final Element root = doc.getRootElement();
         final List elements = root.getContent();
         for(Object o : elements) {
             if(o instanceof Element) {
                 final Element elem = (Element) o;
                 if(elem.getName().equals("AbstractedMetadata"))
-                    findAbstractedMetadata(metadataElem, elem);
+                    findAbstractedMetadata(elem.getContent(), metadataElem);
                 else if(elem.getName().equals("tie-point-grids"))
                     parseTiePointGrids(product, elem);
             }
@@ -66,45 +66,43 @@ public class AbstractMetadataIO {
         return true;
     }
 
-    private static void findAbstractedMetadata(final MetadataElement metadataElem, final Element root) {
-        final MetadataElement[] metaElements = metadataElem.getElements();
-        for(MetadataElement childMetaElem : metaElements) {
-            findAbstractedMetadata(childMetaElem, root);
-        }
-
-        final MetadataAttribute[] metaAttributes = metadataElem.getAttributes();
-        final List domChildren = root.getContent();
-        for(MetadataAttribute childMetaAttrib : metaAttributes) {
-            findElement(domChildren, childMetaAttrib);
-        }
-    }
-
-    private static void findElement(final List domChildren, final MetadataAttribute childMetaAttrib) {
-
+    private static void findAbstractedMetadata(final List domChildren, final MetadataElement metadataElem) {
         for (Object aChild : domChildren) {
             if (aChild instanceof Element) {
                 final Element child = (Element) aChild;
-                final List grandChild = child.getContent();
-                if(!grandChild.isEmpty())
-                   findElement(grandChild, childMetaAttrib);
-
-                if(child.getName().equals("attrib")) {
-                   loadAttribute(childMetaAttrib, child);
+                final String childName = child.getName();
+                if(child.getContentSize() > 0) {
+                    MetadataElement subElem = metadataElem.getElement(childName);
+                    if(subElem == null) {
+                        subElem = new  MetadataElement(childName);
+                        metadataElem.addElement(subElem);
+                    }
+                    findAbstractedMetadata(child.getContent(), subElem);
+                } else if(childName.equals("attrib")) {
+                    loadAttribute(child, metadataElem);
                 }
             }
         }
     }
 
-    private static void loadAttribute(final MetadataAttribute metaAttrib, final Element domElem) {
+    private static void loadAttribute(final Element domElem, final MetadataElement rootElem) {
 
         final Attribute nameAttrib = domElem.getAttribute("name");
         if(nameAttrib == null) return;
 
-        if(!metaAttrib.getName().equalsIgnoreCase(nameAttrib.getValue()))
-            return;
+        final String name = nameAttrib.getValue();
+        if(name == null) return;
 
         final Attribute valueAttrib = domElem.getAttribute("value");
         if(valueAttrib == null) return;
+
+        MetadataAttribute metaAttrib = rootElem.getAttribute(name);
+        if(metaAttrib == null) {
+            final Attribute typeAttrib = domElem.getAttribute("type");
+            if(typeAttrib == null) return;
+            metaAttrib = new MetadataAttribute(name, Integer.parseInt(typeAttrib.getValue()));
+            rootElem.addAttributeFast(metaAttrib);
+        }        
 
         final int type = metaAttrib.getDataType();
         if(type == ProductData.TYPE_ASCII)

@@ -15,10 +15,10 @@ import java.util.Locale;
  */
 public class NetCDFReaderPlugIn implements ProductReaderPlugIn {
 
-    String[] FORMAT_NAMES = NetcdfConstants.NETCDF_FORMAT_NAMES;
-	String[] FORMAT_FILE_EXTENSIONS = NetcdfConstants.NETCDF_FORMAT_FILE_EXTENSIONS;
-    String PLUGIN_DESCRIPTION = NetcdfConstants.NETCDF_PLUGIN_DESCRIPTION;
-    Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
+    protected String[] FORMAT_NAMES = NetcdfConstants.NETCDF_FORMAT_NAMES;
+	protected String[] FORMAT_FILE_EXTENSIONS = NetcdfConstants.NETCDF_FORMAT_FILE_EXTENSIONS;
+    protected String PLUGIN_DESCRIPTION = NetcdfConstants.NETCDF_PLUGIN_DESCRIPTION;
+    protected Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
 
     /**
      * Checks whether the given object is an acceptable input for this product reader and if so, the method checks if it

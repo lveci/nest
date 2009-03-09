@@ -62,7 +62,7 @@
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>GTOPO30</formatName>
             <parent>importDEM</parent>
-            <readerPlugin>org.esa.nest.dataio.GTOPO30ReaderPlugIn</readerPlugin>
+            <readerPlugin>org.esa.nest.dataio.gtopo30.GTOPO30ReaderPlugIn</readerPlugin>
             <useAllFileFilter>true</useAllFileFilter>
             <text>Import GTOPO30 DEM Tile...</text>
             <shortDescr>Import a GTOPO30 tile</shortDescr>
