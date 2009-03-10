@@ -1416,10 +1416,9 @@ public final class ERSCalibrationOperator extends Operator {
                 throw new OperatorException("band "+srcBand.getName()+" requires a unit");
             }
 
-            if(unit.contains(Unit.DB_UNIT)) {
+            if(unit.contains(Unit.DB)) {
 
                 throw new OperatorException("Calibration of bands in dB is not supported");
-
             } else if (unit.contains(Unit.PHASE)) {
 
                 final String[] srcBandNames = {srcBand.getName()};

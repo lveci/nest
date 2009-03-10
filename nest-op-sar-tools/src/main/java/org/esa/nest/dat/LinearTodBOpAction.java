@@ -12,6 +12,8 @@ import org.esa.nest.datamodel.Unit;
  */
 public class LinearTodBOpAction extends AbstractVisatAction {
 
+    private static final String dBStr = "_"+Unit.DB;
+
     @Override
     public void actionPerformed(CommandEvent event) {
 
@@ -24,8 +26,8 @@ public class LinearTodBOpAction extends AbstractVisatAction {
             String bandName = band.getName();
             final String unit = band.getUnit();
 
-            if(!unit.toLowerCase().contains("db")) {
-                bandName += "_dB";
+            if(!unit.contains(Unit.DB)) {
+                bandName += dBStr;
                 if(product.getBand(bandName) != null) {
                     visatApp.showWarningDialog(product.getName() + " already contains a dB "
                         + bandName + " band");
@@ -38,7 +40,7 @@ public class LinearTodBOpAction extends AbstractVisatAction {
                 }
             } else {
 
-                bandName = bandName.substring(0, bandName.indexOf("_dB"));
+                bandName = bandName.substring(0, bandName.indexOf(dBStr));
                 if(product.getBand(bandName) != null) {
                     visatApp.showWarningDialog(product.getName() + " already contains a linear "
                         + bandName + " band");
@@ -58,7 +60,7 @@ public class LinearTodBOpAction extends AbstractVisatAction {
         if(node instanceof Band) {
             final Band band = (Band) node;
             final String unit = band.getUnit();
-            if(unit != null && !unit.contains("phase")) {
+            if(unit != null && !unit.contains(Unit.PHASE)) {
                 event.getCommand().setEnabled(true);
                 return;
             }
@@ -69,7 +71,6 @@ public class LinearTodBOpAction extends AbstractVisatAction {
     static void convert(Product product, Band band, boolean todB) {
         String bandName = band.getName();
         String unit = band.getUnit();
-        final String dBStr = "_dB";
 
         String expression;
         if(todB) {
@@ -79,7 +80,7 @@ public class LinearTodBOpAction extends AbstractVisatAction {
         } else {
             expression = "pow(10," + bandName + "/10.0)";
             bandName = bandName.substring(0, bandName.indexOf(dBStr));
-            unit = unit.substring(0, unit.indexOf(Unit.DB_UNIT));
+            unit = unit.substring(0, unit.indexOf(dBStr));
         }
 
         final VirtualBand virtBand = new VirtualBand(bandName,

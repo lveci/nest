@@ -187,12 +187,13 @@ public final class DatApp extends VisatApp {
         if(filesList == null || filesList.length == 0) return;
 
         for (final File file : filesList) {
-            if(file.isDirectory() && !file.isHidden() && !file.getName().equalsIgnoreCase("internal")) {
-                final JMenu subMenu = new JMenu(file.getName());
+            final String name = file.getName();
+            if(file.isDirectory() && !file.isHidden() && !name.equalsIgnoreCase("internal")) {
+                final JMenu subMenu = new JMenu(name);
                 menu.add(subMenu);
                 createGraphMenu(subMenu, file);
-            } else if(file.getName().toLowerCase().endsWith(".xml")) {
-                final JMenuItem item = new JMenuItem(file.getName());
+            } else if(name.toLowerCase().endsWith(".xml")) {
+                final JMenuItem item = new JMenuItem(name.substring(0, name.indexOf(".xml")));
                 item.addActionListener(new ActionListener() {
 
                     public void actionPerformed(final ActionEvent e) {

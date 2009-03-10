@@ -182,7 +182,10 @@ public class ALOSPALSARCalibrationOperator extends Operator {
 
             String targetUnit = Unit.INTENSITY;
 
-            if (unit.contains(Unit.PHASE)) {
+            if(unit.contains(Unit.DB)) {
+
+                throw new OperatorException("Calibration of bands in dB is not supported");
+            } else if (unit.contains(Unit.PHASE)) {
 
                 final String[] srcBandNames = {srcBand.getName()};
                 targetBandName = srcBand.getName();
