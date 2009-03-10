@@ -214,6 +214,9 @@ public class ALOSPALSARCalibrationOperator extends Operator {
                 } else {
                     targetBandName = "Sigma0";
                 }
+                if(outputImageScaleInDb) {
+                    targetBandName += "_dB";
+                }
                 ++i;
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
@@ -227,6 +230,9 @@ public class ALOSPALSARCalibrationOperator extends Operator {
                     targetBandName = "Sigma0_" + pol.toUpperCase();  
                 } else
                     targetBandName = "Sigma0";
+                if(outputImageScaleInDb) {
+                    targetBandName += "_dB";
+                }
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
                 }
@@ -240,7 +246,7 @@ public class ALOSPALSARCalibrationOperator extends Operator {
                                            sourceProduct.getSceneRasterHeight());
 
                 if (outputImageScaleInDb && !targetUnit.equals(Unit.PHASE)) {
-                    targetUnit = "intensity_db";
+                    targetUnit = Unit.INTENSITY_DB;
                 }
                 targetBand.setUnit(targetUnit);
                 targetProduct.addBand(targetBand);

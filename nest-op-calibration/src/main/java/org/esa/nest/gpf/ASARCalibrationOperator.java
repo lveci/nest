@@ -72,16 +72,16 @@ public class ASARCalibrationOperator extends Operator {
     @Parameter(description = "Create beta0 virtual band", defaultValue = "false", label="Create beta0 virtual band")
     private boolean createBetaBand = false;
 
-    protected MetadataElement abstractedMetadata;
+    protected MetadataElement abstractedMetadata = null;
 
     private String productType;
     private String sampleType;
     protected final String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
 
-    protected TiePointGrid incidenceAngle;
-    protected TiePointGrid slantRangeTime;
-    private QuadInterpolator slantRangeTimeQuadInterp;
-    private QuadInterpolator incidenceAngleQuadInterp;
+    protected TiePointGrid incidenceAngle = null;
+    protected TiePointGrid slantRangeTime = null;
+    private QuadInterpolator slantRangeTimeQuadInterp = null;
+    private QuadInterpolator incidenceAngleQuadInterp = null;
 
     private boolean extAuxFileAvailableFlag;
     private boolean antElevCorrFlag;
@@ -89,14 +89,14 @@ public class ASARCalibrationOperator extends Operator {
 
     private double rangeSpreadingCompPower; // power in range spreading loss compensation calculation
     private double elevationAngle; // elevation angle for given swath, in degree
-    protected double[] rSat; // the distance from satellite to the Earth center for each MPP ADSR record, in m
+    protected double[] rSat = null; // the distance from satellite to the Earth center for each MPP ADSR record, in m
     private final double[] calibrationFactor = new double[2]; // calibration constants corresponding to 2 bands in product
-    private float[][] newAntPat; // antenna pattern for two bands for given swath, in dB
-    private double[] targetTileNewAntPat; // antenna pattern for a given tile, in linear scale
+    private float[][] newAntPat = null; // antenna pattern for two bands for given swath, in dB
+    private double[] targetTileNewAntPat = null; // antenna pattern for a given tile, in linear scale
 
     protected int swath;
     protected int numMPPRecords; // number of MPP ADSR records
-    protected int[] lastLineIndex; // the index of the last line covered by each MPP ADSR record
+    protected int[] lastLineIndex = null; // the index of the last line covered by each MPP ADSR record
 
     private static final double refSlantRange = 800000.0; //  m
     protected static final double lightSpeed = 299792458.0; //  m / s
@@ -736,14 +736,17 @@ public class ASARCalibrationOperator extends Operator {
             String gammeBandName = "Gamma0";
 
             if(bands.length > 1) {
-                if(trgBandName.endsWith("_HH"))
+                if(trgBandName.contains("_HH"))
                     gammeBandName += "_HH";
-                else if(trgBandName.endsWith("_VV"))
+                else if(trgBandName.contains("_VV"))
                     gammeBandName += "_VV";
-                else if(trgBandName.endsWith("_HV"))
+                else if(trgBandName.contains("_HV"))
                     gammeBandName += "_HV";
-                else if(trgBandName.endsWith("_VH"))
+                else if(trgBandName.contains("_VH"))
                     gammeBandName += "_VH";
+            }
+            if(outputImageScaleInDb) {
+                gammeBandName += "_dB";
             }
 
             while(trgProduct.getBand(gammeBandName) != null) {
@@ -791,14 +794,17 @@ public class ASARCalibrationOperator extends Operator {
             String betaBandName = "Beta0";
 
             if(bands.length > 1) {
-                if(trgBandName.endsWith("_HH"))
+                if(trgBandName.contains("_HH"))
                     betaBandName += "_HH";
-                else if(trgBandName.endsWith("_VV"))
+                else if(trgBandName.contains("_VV"))
                     betaBandName += "_VV";
-                else if(trgBandName.endsWith("_HV"))
+                else if(trgBandName.contains("_HV"))
                     betaBandName += "_HV";
-                else if(trgBandName.endsWith("_VH"))
+                else if(trgBandName.contains("_VH"))
                     betaBandName += "_VH";
+            }
+            if(outputImageScaleInDb) {
+                betaBandName += "_dB";
             }
 
             while(trgProduct.getBand(betaBandName) != null) {
@@ -880,6 +886,9 @@ public class ASARCalibrationOperator extends Operator {
                 } else {
                     targetBandName = "Sigma0";
                 }
+                if(outputImageScaleInDb) {
+                    targetBandName += "_dB";
+                }
                 ++i;
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
@@ -893,6 +902,9 @@ public class ASARCalibrationOperator extends Operator {
                     targetBandName = "Sigma0_" + pol.toUpperCase();  
                 } else
                     targetBandName = "Sigma0";
+                if(outputImageScaleInDb) {
+                    targetBandName += "_dB";
+                }
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
                 }
@@ -906,7 +918,7 @@ public class ASARCalibrationOperator extends Operator {
                                            sourceProduct.getSceneRasterHeight());
 
                 if (outputImageScaleInDb && !targetUnit.equals(Unit.PHASE)) {
-                    targetUnit = "intensity_db";
+                    targetUnit = Unit.INTENSITY_DB;
                 }
                 targetBand.setUnit(targetUnit);
                 targetProduct.addBand(targetBand);
@@ -919,7 +931,7 @@ public class ASARCalibrationOperator extends Operator {
      */
     private void updateTargetProductMetadata() {
 
-        MetadataElement abs = AbstractMetadata.getAbstractedMetadata(targetProduct);
+        final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(targetProduct);
 
         if (sampleType.contains("COMPLEX")) {
             MetadataAttribute sampleTypeAttr = abs.getAttribute(AbstractMetadata.SAMPLE_TYPE);

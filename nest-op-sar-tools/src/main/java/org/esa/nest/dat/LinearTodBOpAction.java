@@ -4,6 +4,7 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.actions.AbstractVisatAction;
+import org.esa.nest.datamodel.Unit;
 
 /**
  * LinearTodB action.
@@ -14,14 +15,14 @@ public class LinearTodBOpAction extends AbstractVisatAction {
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        VisatApp visatApp = VisatApp.getApp();
+        final VisatApp visatApp = VisatApp.getApp();
 
         final ProductNode node = visatApp.getSelectedProductNode();
         if(node instanceof Band) {
             final Product product = visatApp.getSelectedProduct();
             final Band band = (Band) node;
             String bandName = band.getName();
-            String unit = band.getUnit();
+            final String unit = band.getUnit();
 
             if(!unit.toLowerCase().contains("db")) {
                 bandName += "_dB";
@@ -78,7 +79,7 @@ public class LinearTodBOpAction extends AbstractVisatAction {
         } else {
             expression = "pow(10," + bandName + "/10.0)";
             bandName = bandName.substring(0, bandName.indexOf(dBStr));
-            unit = unit.substring(0, unit.indexOf(dBStr));
+            unit = unit.substring(0, unit.indexOf(Unit.DB_UNIT));
         }
 
         final VirtualBand virtBand = new VirtualBand(bandName,

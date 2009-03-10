@@ -90,7 +90,7 @@ public final class ERSCalibrationOperator extends Operator {
     private Band sourceBand1;
     private Band sourceBand2;
 
-    private MetadataElement abstractedMetadata;
+    private MetadataElement abstractedMetadata = null;
     private String pafID; // processing facility identifier
     private String psID;  // processing system identifier
     private String pvID;  // processing version identifier
@@ -146,19 +146,19 @@ public final class ERSCalibrationOperator extends Operator {
     private Date time20040904; // = 1094292254.0;  04-Sep-2004 10:04:14.000, in s
     private Date time20041014; // = 1097764631.0;  14-Oct-2004 14:37:11.000, in s
 
-    private double[] incidenceAngles; // for a complete range line, in radian
-    private double[] lookAngles; // for a complete range line, in radian
-    private double[] rangeSpreadingLoss; // for a complete range line
-    private double[] antennaPatternCorrFactor; // for a range line in current tile, in linear scale
-    private double[] antennaPatternGain; // used in ADC, for a range line in current tile, in linear scale
-    private double[][] appendixF1; // ERS-1 SAR ADC Power Loss Correction Look-up Table, in dB
-    private double[][] adcPowerLoss;
-    private double[][] appendixF2; // ERS-2 SAR ADC Power Loss Correction Look-up Table, in dB
-    private double[][] appendixG1; // initial ERS-1 SAR antenna pattern gain, in dB
-    private double[][] appendixG2; // improved ERS-1 SAR antenna pattern gain, in dB
-    private double[][] appendixG3; // ERS-2 SAR antenna pattern gain, in dB
-    private double[][] appendixH;  // UK-PAF elevation antenna pattern correction, in dB
-    private float[] antPatForPGS; // antenna pattern for swath IS2 VV for PGS product, in dB
+    private double[] incidenceAngles = null; // for a complete range line, in radian
+    private double[] lookAngles = null; // for a complete range line, in radian
+    private double[] rangeSpreadingLoss = null; // for a complete range line
+    private double[] antennaPatternCorrFactor = null; // for a range line in current tile, in linear scale
+    private double[] antennaPatternGain = null; // used in ADC, for a range line in current tile, in linear scale
+    private double[][] appendixF1 = null; // ERS-1 SAR ADC Power Loss Correction Look-up Table, in dB
+    private double[][] adcPowerLoss = null;
+    private double[][] appendixF2 = null; // ERS-2 SAR ADC Power Loss Correction Look-up Table, in dB
+    private double[][] appendixG1 = null; // initial ERS-1 SAR antenna pattern gain, in dB
+    private double[][] appendixG2 = null; // improved ERS-1 SAR antenna pattern gain, in dB
+    private double[][] appendixG3 = null; // ERS-2 SAR antenna pattern gain, in dB
+    private double[][] appendixH = null;  // UK-PAF elevation antenna pattern correction, in dB
+    private float[] antPatForPGS = null; // antenna pattern for swath IS2 VV for PGS product, in dB
 
     // parameters used for PGS-ENVISAT calibration
     private int numMPPRecords;
@@ -1406,7 +1406,7 @@ public final class ERSCalibrationOperator extends Operator {
         }
 
         String targetBandName;
-        String targetUnit = "intensity";
+        String targetUnit = Unit.INTENSITY;
 
         for (int i = 0; i < sourceBands.length; i++) {
 
@@ -1416,33 +1416,36 @@ public final class ERSCalibrationOperator extends Operator {
                 throw new OperatorException("band "+srcBand.getName()+" requires a unit");
             }
 
-            if(unit.contains("dB")) {
+            if(unit.contains(Unit.DB_UNIT)) {
 
                 throw new OperatorException("Calibration of bands in dB is not supported");
 
-            } else if (unit.contains("phase")) {
+            } else if (unit.contains(Unit.PHASE)) {
 
                 final String[] srcBandNames = {srcBand.getName()};
                 targetBandName = srcBand.getName();
-                targetUnit = "phase";
+                targetUnit = Unit.PHASE;
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
                 }
 
-            } else if (unit.contains("imaginary")) {
+            } else if (unit.contains(Unit.IMAGINARY)) {
 
                 throw new OperatorException("Real and imaginary bands should be selected in pairs");
 
-            } else if (unit.contains("real")) {
+            } else if (unit.contains(Unit.REAL)) {
 
                 final String nextUnit = sourceBands[i+1].getUnit();
-                if (nextUnit == null || !nextUnit.contains("imaginary")) {
+                if (nextUnit == null || !nextUnit.contains(Unit.IMAGINARY)) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
                 }
                 final String[] srcBandNames = new String[2];
                 srcBandNames[0] = srcBand.getName();
                 srcBandNames[1] = sourceBands[i+1].getName();
                 targetBandName = "Sigma0";
+                if(outputImageScaleInDb) {
+                    targetBandName += "_dB";
+                }
                 i++;
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
@@ -1452,6 +1455,9 @@ public final class ERSCalibrationOperator extends Operator {
 
                 final String[] srcBandNames = {srcBand.getName()};
                 targetBandName = "Sigma0";
+                if(outputImageScaleInDb) {
+                    targetBandName += "_dB";
+                }
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
                 }
@@ -1465,8 +1471,8 @@ public final class ERSCalibrationOperator extends Operator {
                                            sourceProduct.getSceneRasterWidth(),
                                            sourceProduct.getSceneRasterHeight());
 
-                if (outputImageScaleInDb && !targetUnit.equals("phase")) {
-                    targetUnit = "intensity_db";
+                if (outputImageScaleInDb && !targetUnit.equals(Unit.PHASE)) {
+                    targetUnit = Unit.INTENSITY_DB;
                 }
                 targetBand.setUnit(targetUnit);
                 targetProduct.addBand(targetBand);
