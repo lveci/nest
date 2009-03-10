@@ -307,8 +307,8 @@ public class OversamplingOp extends Operator {
 
         if (outputImageBy.equals(UndersamplingOp.IMAGE_SIZE)) {
 
-            if (targetImageHeight <= sourceImageHeight || targetImageWidth <= sourceImageWidth) {
-                throw new OperatorException("Output image size must be greater than the source image size");
+            if (targetImageHeight < sourceImageHeight || targetImageWidth < sourceImageWidth) {
+                throw new OperatorException("Output image size must not be smaller than the source image size");
             }
 
             widthRatio = (float)targetImageWidth / (float)sourceImageWidth;
@@ -319,8 +319,8 @@ public class OversamplingOp extends Operator {
 
         } else if (outputImageBy.equals(UndersamplingOp.RATIO)) {
 
-            if (widthRatio <= 1 || heightRatio <= 1) {
-                throw new OperatorException("The width or height ratio must be greater than 1");
+            if (widthRatio < 1 || heightRatio < 1) {
+                throw new OperatorException("The width or height ratio must not be smaller than 1");
             }
 
             targetImageHeight = (int)(heightRatio * sourceImageHeight + 0.5f);
@@ -331,16 +331,16 @@ public class OversamplingOp extends Operator {
 
         } else if (outputImageBy.equals(UndersamplingOp.PIXEL_SPACING)) {
 
-            if (rangeSpacing <= 0.0f || rangeSpacing >= srcRangeSpacing ||
-                azimuthSpacing <= 0.0f || azimuthSpacing >= srcAzimuthSpacing) {
-                throw new OperatorException("The azimuth or range spacing must be positive and smaller than the source spacing");
+            if (rangeSpacing <= 0.0f || rangeSpacing > srcRangeSpacing ||
+                azimuthSpacing <= 0.0f || azimuthSpacing > srcAzimuthSpacing) {
+                throw new OperatorException("The azimuth or range spacing must be positive and no greater than the source spacing");
             }
 
             widthRatio = srcRangeSpacing / rangeSpacing;
             heightRatio = srcAzimuthSpacing / azimuthSpacing;
 
-            targetImageHeight = (int)(widthRatio * sourceImageHeight + 0.5);
-            targetImageWidth = (int)(heightRatio * sourceImageWidth + 0.5);
+            targetImageHeight = (int)(heightRatio * sourceImageHeight + 0.5);
+            targetImageWidth = (int)(widthRatio * sourceImageWidth + 0.5);
 
         } else {
             throw new OperatorException("Please specify output image size, or row and column ratios, or pixel spacings");
