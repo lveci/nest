@@ -1434,7 +1434,9 @@ public final class ERSCalibrationOperator extends Operator {
                 throw new OperatorException("Real and imaginary bands should be selected in pairs");
 
             } else if (unit.contains(Unit.REAL)) {
-
+               if(i+1 >= sourceBands.length)
+                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
+                
                 final String nextUnit = sourceBands[i+1].getUnit();
                 if (nextUnit == null || !nextUnit.contains(Unit.IMAGINARY)) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");

@@ -159,7 +159,7 @@ public class ASARCalibrationOperator extends Operator {
 
             targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 10);
         } catch(Exception e) {
-            throw new OperatorException(e);
+            throw new OperatorException(getId() + ": " + e.getMessage());
         }
     }
 
@@ -872,9 +872,11 @@ public class ASARCalibrationOperator extends Operator {
                 throw new OperatorException("Real and imaginary bands should be selected in pairs");
 
             } else if (unit.contains(Unit.REAL)) {
+                if(i+1 >= sourceBands.length)
+                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
 
                 final String nextUnit = sourceBands[i+1].getUnit();
-                if (nextUnit == null || !nextUnit.contains("imaginary")) {
+                if (nextUnit == null || !nextUnit.contains(Unit.IMAGINARY)) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
                 }
                 final String[] srcBandNames = new String[2];

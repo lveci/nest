@@ -196,11 +196,9 @@ public class ALOSPALSARCalibrationOperator extends Operator {
                 throw new OperatorException("Real and imaginary bands should be selected in pairs");
 
             } else if (unit.contains(Unit.REAL)) {
-
-                if (sourceBands.length == 1) {
+                if(i+1 >= sourceBands.length)
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
-                }
-                
+
                 final String nextUnit = sourceBands[i+1].getUnit();
                 if (nextUnit == null || !nextUnit.contains("imaginary")) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
