@@ -370,40 +370,43 @@ public class SRGROp extends Operator {
 
     private void addGeoCoding() {
 
-        int gridWidth = 11;
-        int gridHeight = 11;
-
-        float subSamplingX = targetImageWidth / (gridWidth - 1.0f);
-        float subSamplingY = targetImageHeight / (gridHeight - 1.0f);
-
         TiePointGrid lat = OperatorUtils.getLatitude(sourceProduct);
         TiePointGrid lon = OperatorUtils.getLongitude(sourceProduct);
+        TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
+        TiePointGrid slantRgTime = OperatorUtils.getSlantRangeTime(sourceProduct);
+        if (lat == null || lon == null || incidenceAngle == null || slantRgTime == null) { // for unit test
+            ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
+            ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+            return;
+        }
 
-        float[] latTiePoints = new float[gridWidth*gridHeight];
-        float[] lonTiePoints = new float[gridWidth*gridHeight];
+        int gridWidth = 11;
+        int gridHeight = 11;
+        float subSamplingX = targetImageWidth / (gridWidth - 1.0f);
+        float subSamplingY = targetImageHeight / (gridHeight - 1.0f);
+        PixelPos[] newTiePointPos = new PixelPos[gridWidth*gridHeight];
+
         int k = 0;
         for (int j = 0; j < gridHeight; j++) {
             float y = Math.min(j*subSamplingY, targetImageHeight - 1);
             for (int i = 0; i < gridWidth; i++) {
                 float tx = Math.min(i*subSamplingX, targetImageWidth - 1);
                 float x = (float)getSlantRangePixelPosition((double)tx);
-                latTiePoints[k] = lat.getPixelFloat(x, y);
-                lonTiePoints[k] = lon.getPixelFloat(x, y);
+                newTiePointPos[k] = new PixelPos();
+                newTiePointPos[k].x = x;
+                newTiePointPos[k].y = y;
                 k++;
             }
         }
 
-        TiePointGrid latGrid = new TiePointGrid(
-                "latitude", gridWidth, gridHeight, 0.0f, 0.0f, subSamplingX, subSamplingY, latTiePoints);
-
-        TiePointGrid lonGrid = new TiePointGrid(
-                "longitude", gridWidth, gridHeight, 0.0f, 0.0f, subSamplingX, subSamplingY, lonTiePoints);
-
-        TiePointGeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
-
-        targetProduct.addTiePointGrid(latGrid);
-        targetProduct.addTiePointGrid(lonGrid);
-        targetProduct.setGeoCoding(gc);
+        OperatorUtils.createNewTiePointGridsAndGeoCoding(
+                sourceProduct,
+                targetProduct,
+                gridWidth,
+                gridHeight,
+                subSamplingX,
+                subSamplingY,
+                newTiePointPos);
     }
 
     /**
