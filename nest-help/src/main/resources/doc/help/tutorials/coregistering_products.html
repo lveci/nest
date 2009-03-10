@@ -45,7 +45,10 @@ all slave GCPs have been determined before evaluating the warp function.<br>
 In the CreateStack tab, select one source band from the master and one
 source band from the slave for detected products. If you are using
 complex data products, select bands i and q for the master and select
-bands i and q from the slaves. <br>5. In the GCP Selection tab enter the number of GCPs to create.<br>6. In the Warp tab select the RMS threshold and warp polynomial order<br>7. In the Target tab enter in the output product name and location.<br>7. Press the Run button to begin processing.<br>
-<br>
+bands i and q from the slaves. <br>5. In the GCP Selection tab enter the number of GCPs to create.<br>6. In the Warp tab select the RMS threshold and warp polynomial order<br>7. In the Target tab enter in the output product name and location.<br>7. Press the Run button to begin processing.<br><h3>Coregistration from the Command Line</h3>To coregister from the command line run the gpt with the graphs found in the folder nest installation/command line/<br><br>First, run the GCP Selection<br>&nbsp;&nbsp;&nbsp; <br>&nbsp;&nbsp;&nbsp; gpt GCPSelectionGraph.xml -Pfilelist="masterProduct.N1,slaveProduct1.N1,slaveProduct2.E1,slaveProduct3.E1"
+-Ptarget="gcp_selected.dim" <br><br>The input parameter filelist should be in the form "master,slave1,slave2"<br><br>Then, run the the Warp<br><br>&nbsp;&nbsp;&nbsp; gpt WarpGraph.xml
+-Pfile="gcp_selected.dim" -Ptarget=coregistered_stack.dim<br><br><br>You
+can combine the operations in a script. An example Windows batch file
+can be found in the folder nest installation/command line/<br><br>To run the batch file type the following<br>&nbsp;&nbsp;&nbsp; coregister "masterProduct.N1, slaveProduct1.N1, slaveProduct2.E1, slaveProduct2.E1"<br><br><br><br><br><br>
 <hr>
 </body></html>
