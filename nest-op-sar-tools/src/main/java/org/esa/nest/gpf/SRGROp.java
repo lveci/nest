@@ -57,16 +57,15 @@ public class SRGROp extends Operator {
 
     @Parameter(description = "The order of WARP polynomial function", interval = "[1, *)", defaultValue = "4",
                 label="Warp Polynomial Order")
-    private int warpPolynomialOrder;
+    private int warpPolynomialOrder = 4;
 
 //    @Parameter(description = "The number of range points used in computing WARP polynomial",
 //               interval = "(1, *)", defaultValue = "100", label="Number of Range Points")
     private int numRangePoints = 100;
 
     @Parameter(valueSet = {NEAREST_NEIGHBOR, LINEAR, CUBIC, CUBIC2}, defaultValue = LINEAR, label="Interpolation Method")
-    private String interpolationMethod;
+    private String interpolationMethod = LINEAR;
 
-    private MetadataElement absRoot;
     private GeoCoding geoCoding;
     private boolean srgrFlag;
     private double slantRangeSpacing; // in m
@@ -107,7 +106,7 @@ public class SRGROp extends Operator {
                 throw new OperatorException("numRangePoints must be greater than warpPolynomialOrder");
             }
 
-            absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+            final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
             srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
 
@@ -132,7 +131,7 @@ public class SRGROp extends Operator {
             createTargetProduct();
 
         } catch(Exception e) {
-            throw new OperatorException(e.getMessage());
+            throw new OperatorException("SRGR:"+e.getMessage());
         }
     }
 
@@ -148,7 +147,7 @@ public class SRGROp extends Operator {
      */
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-
+      try {
         final Rectangle targetTileRectangle = targetTile.getRectangle();
         final int x0 = targetTileRectangle.x;
         final int y0 = targetTileRectangle.y;
@@ -208,6 +207,9 @@ public class SRGROp extends Operator {
                 trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), v);
             }
         }
+      } catch(Exception e) {
+        throw new OperatorException("SRGR:"+e.getMessage());
+      }
     }
 
     /**
