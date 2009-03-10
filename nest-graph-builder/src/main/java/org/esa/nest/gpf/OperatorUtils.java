@@ -158,4 +158,49 @@ public class OperatorUtils {
         }
         return dateString;
     }
+
+    public static void createNewTiePointGridsAndGeoCoding(
+            Product sourceProduct,
+            Product targetProduct,
+            int gridWidth,
+            int gridHeight,
+            float subSamplingX,
+            float subSamplingY,
+            PixelPos[] newTiePointPos) {
+
+        int targetImageWidth = targetProduct.getSceneRasterWidth();
+        int targetImageHeight = targetProduct.getSceneRasterHeight();
+
+        TiePointGrid latGrid = null;
+        TiePointGrid lonGrid = null;
+
+        for(TiePointGrid srcTPG : sourceProduct.getTiePointGrids()) {
+
+            float[] tiePoints = new float[gridWidth*gridHeight];
+            for (int k = 0; k < newTiePointPos.length; k++) {
+                tiePoints[k] = srcTPG.getPixelFloat(newTiePointPos[k].x, newTiePointPos[k].y);
+            }
+
+            TiePointGrid tgtTPG = new TiePointGrid(srcTPG.getName(),
+                                                   gridWidth,
+                                                   gridHeight,
+                                                   0.0f,
+                                                   0.0f,
+                                                   subSamplingX,
+                                                   subSamplingY,
+                                                   tiePoints);
+
+            targetProduct.addTiePointGrid(tgtTPG);
+
+            if (srcTPG.getName().equals("latitude")) {
+                latGrid = tgtTPG;
+            } else if (srcTPG.getName().equals("longitude")) {
+                lonGrid = tgtTPG;
+            }
+        }
+
+        TiePointGeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
+
+        targetProduct.setGeoCoding(gc);
+    }
 }
