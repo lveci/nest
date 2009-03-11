@@ -144,15 +144,15 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         final float[] rangeDist = new float[gridWidth];
         final float[] rangeTime = new float[gridWidth];
         if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1) {
-            final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel();
+            final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel(0);
             
             for(int j = 0; j < gridWidth; ++j) {
                 rangeDist[j] = (float)(slantRangeToFirstPixel + (halfSpeedOfLight * ((j*subSamplingX)) / samplingRate));
             }
         } else if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_5) {
-            final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel();    // meters
-            final int slantRangeToMidPixel = _imageFiles[0].getSlantRangeToMidPixel();
-            final int slantRangeToLastPixel = _imageFiles[0].getSlantRangeToLastPixel();
+            final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel(0);    // meters
+            final int slantRangeToMidPixel = _imageFiles[0].getSlantRangeToMidPixel(0);
+            final int slantRangeToLastPixel = _imageFiles[0].getSlantRangeToLastPixel(0);
 
             // @todo: get cofficients
             //float r10 =

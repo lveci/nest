@@ -20,13 +20,13 @@ class AlosPalsarImageFile extends CEOSImageFile {
     private final static String image_recordDefinition = "image_record.xml";
     private final static String processedData_recordDefinition = "processed_data_record.xml";
     private final String imageFileName;
-    private int slantRangeToFirstPixel = 0;
-    private int slantRangeToMidPixel = 0;
-    private int slantRangeToLastPixel = 0;
+    private final int productLevel;
 
-    public AlosPalsarImageFile(final ImageInputStream imageStream, int productLevel, String fileName)
+    public AlosPalsarImageFile(final ImageInputStream imageStream, int prodLevel, String fileName)
             throws IOException, IllegalBinaryFormatException {
+        this.productLevel = prodLevel;
         imageFileName = fileName.toUpperCase();
+
         binaryReader = new BinaryFileReader(imageStream);
         _imageFDR = new BaseRecord(binaryReader, -1, mission, image_DefinitionFile);
         binaryReader.seek(_imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()));
@@ -34,14 +34,8 @@ class AlosPalsarImageFile extends CEOSImageFile {
 
         if(productLevel == AlosPalsarConstants.LEVEL1_5) {
             _imageRecords[0] = new ImageRecord(binaryReader, -1, mission, processedData_recordDefinition);
-
-            slantRangeToFirstPixel = _imageRecords[0].getAttributeInt("Slant Range to 1st pixel");
-            slantRangeToMidPixel = _imageRecords[0].getAttributeInt("Slant Range to mid-pixel");
-            slantRangeToLastPixel = _imageRecords[0].getAttributeInt("Slant Range to last-pixel");
         } else {
             _imageRecords[0] = new ImageRecord(binaryReader, -1, mission, image_recordDefinition);
-
-            slantRangeToFirstPixel = _imageRecords[0].getAttributeInt("Slant range to 1st data sample");
         }
         _imageRecordLength = _imageRecords[0].getRecordLength();
         _startPosImageRecords = _imageRecords[0].getStartPos();
@@ -49,16 +43,46 @@ class AlosPalsarImageFile extends CEOSImageFile {
         
     }
 
-    public int getSlantRangeToFirstPixel() {
-        return slantRangeToFirstPixel;
+    public ImageRecord getImageRecord(int line) throws IOException, IllegalBinaryFormatException {
+        if(_imageRecords[line] == null) {
+
+            binaryReader.seek(_imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()));
+            if(productLevel == AlosPalsarConstants.LEVEL1_5)
+                _imageRecords[line] = new ImageRecord(binaryReader, -1, mission, processedData_recordDefinition);
+            else
+                _imageRecords[line] = new ImageRecord(binaryReader, -1, mission, image_recordDefinition);
+        }
+        return _imageRecords[line];
     }
 
-    public int getSlantRangeToMidPixel() {
-        return slantRangeToMidPixel;
+    public int getSlantRangeToFirstPixel(int line) {
+        try {
+            final ImageRecord imgRec = getImageRecord(line);
+            if(productLevel == AlosPalsarConstants.LEVEL1_5)
+                return imgRec.getAttributeInt("Slant Range to 1st pixel");
+            else
+                return imgRec.getAttributeInt("Slant range to 1st data sample");
+        } catch(Exception e) {
+            return 0;
+        }
     }
 
-    public int getSlantRangeToLastPixel() {
-        return slantRangeToLastPixel;
+    public int getSlantRangeToMidPixel(int line) {
+        try {
+            final ImageRecord imgRec = getImageRecord(line);
+            return imgRec.getAttributeInt("Slant Range to mid-pixel");
+        } catch(Exception e) {
+            return 0;
+        }
+    }
+
+    public int getSlantRangeToLastPixel(int line) {
+        try {
+            final ImageRecord imgRec = getImageRecord(line);
+            return imgRec.getAttributeInt("Slant Range to last-pixel");
+        } catch(Exception e) {
+            return 0;
+        }
     }
 
     public String getPolarization() {
