@@ -7,6 +7,7 @@ import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
@@ -79,12 +80,14 @@ public abstract class CEOSProductDirectory {
 
         final TiePointGrid latGrid = new TiePointGrid("latitude", gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, fineLatTiePoints);
+        latGrid.setUnit(Unit.DEGREES);
 
         final float[] fineLonTiePoints = new float[gridWidth*gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonCorners, fineLonTiePoints);
 
         final TiePointGrid lonGrid = new TiePointGrid("longitude", gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
+        lonGrid.setUnit(Unit.DEGREES);
 
         final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
 

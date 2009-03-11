@@ -152,6 +152,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
         final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineAngles);
+        incidentAngleGrid.setUnit(Unit.DEGREES);
 
         product.addTiePointGrid(incidentAngleGrid);
 
@@ -169,6 +170,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
         final TiePointGrid slantRangeTimeGrid = new TiePointGrid("slant_range_time", gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineTimes);
+        slantRangeTimeGrid.setUnit(Unit.NANOSECONDS);
 
         product.addTiePointGrid(slantRangeTimeGrid);        
     }

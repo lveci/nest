@@ -135,8 +135,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
         // slant range
         final BaseRecord sceneRec = _leaderFile.getSceneRecord();
-        final int slantRangeToFirstSample = _imageFiles[0].getSlantRangeToFirstSample() / 1000;
-        final double samplingRate = sceneRec.getAttributeDouble("Range sampling rate") * 1000000.0;
+        final double samplingRate = sceneRec.getAttributeDouble("Range sampling rate") * 1000000.0;  // MHz to Hz
         final double halfSpeedOfLight = 299792458 / 2.0;
 
         final int gridWidth = 6, gridHeight = 6;
@@ -145,13 +144,18 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
         final float[] range = new float[gridWidth];
         if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1) {
-
+            final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel();
+            
             for(int j = 0; j < gridWidth; ++j) {
-                range[j] = (float)(slantRangeToFirstSample + (halfSpeedOfLight * ((j*subSamplingX)) / samplingRate));
+                range[j] = (float)(slantRangeToFirstPixel + (halfSpeedOfLight * ((j*subSamplingX)) / samplingRate));
             }
         } else if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1) {
+            final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel();
+            final int slantRangeToMidPixel = _imageFiles[0].getSlantRangeToMidPixel();
+            final int slantRangeToLastPixel = _imageFiles[0].getSlantRangeToLastPixel();
+
             for(int j = 0; j < gridWidth; ++j) {
-               // range[j] = 
+                range[j] = (float)(slantRangeToFirstPixel + (slantRangeToMidPixel*j) + (slantRangeToLastPixel * (j*j)));
             }
         }
 
@@ -162,7 +166,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 subSamplingX, subSamplingY, fineRanges);
 
         product.addTiePointGrid(slantRangeGrid);
-        slantRangeGrid.setUnit("ns");
+        slantRangeGrid.setUnit(Unit.NANOSECONDS);
 
         // incidence angle
         final double a0 = sceneRec.getAttributeDouble("Incidence angle constant term");
@@ -174,7 +178,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
         final float[] angles = new float[gridWidth];
         for(int j = 0; j < gridWidth; ++j) {
-            angles[j] = (float)((a0 + a1*range[j] +
+            angles[j] = (float)((a0 + a1*range[j]/1000.0 +
                                 a2*Math.pow(range[j]/1000.0,2) +
                                 a3*Math.pow(range[j]/1000.0,3) +
                                 a4*Math.pow(range[j]/1000.0,4) +
@@ -186,7 +190,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
         final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineAngles);
-        incidentAngleGrid.setUnit("deg");
+        incidentAngleGrid.setUnit(Unit.DEGREES);
 
         product.addTiePointGrid(incidentAngleGrid);
 
@@ -271,7 +275,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, getProductName());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, getProductType());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
-                _leaderFile.getSceneRecord().getAttributeString("Product type descriptor"));
+                sceneRec.getAttributeString("Product type descriptor"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, getMission());
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
@@ -326,9 +330,14 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
         if(mapProjRec != null) {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
-                _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-pixel distance in output scene"));
+                mapProjRec.getAttributeDouble("Nominal inter-pixel distance in output scene"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
-                _leaderFile.getMapProjRecord().getAttributeDouble("Nominal inter-line distance in output scene"));
+                mapProjRec.getAttributeDouble("Nominal inter-line distance in output scene"));
+        } else {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
+                sceneRec.getAttributeDouble("Pixel spacing"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
+                sceneRec.getAttributeDouble("Pixel spacing"));
         }
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
                 sceneRec.getAttributeDouble("Nominal number of looks processed in azimuth"));

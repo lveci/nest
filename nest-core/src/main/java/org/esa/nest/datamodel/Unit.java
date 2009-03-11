@@ -52,4 +52,9 @@ public class Unit {
             return UnitType.UNKNOWN;
         }
     }
+
+    // tiepoint grid units
+
+    public static final String DEGREES = "deg";
+    public static final String NANOSECONDS = "ns";
 }
