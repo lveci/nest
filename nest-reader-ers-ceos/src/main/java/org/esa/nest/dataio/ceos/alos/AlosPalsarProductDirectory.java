@@ -141,28 +141,40 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         final float subSamplingX = (float)product.getSceneRasterWidth() / (float)(gridWidth - 1);
         final float subSamplingY = (float)product.getSceneRasterHeight() / (float)(gridHeight - 1);
 
-        final float[] range = new float[gridWidth];
+        final float[] rangeDist = new float[gridWidth];
+        final float[] rangeTime = new float[gridWidth];
         if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1) {
             final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel();
             
             for(int j = 0; j < gridWidth; ++j) {
-                range[j] = (float)(slantRangeToFirstPixel + (halfSpeedOfLight * ((j*subSamplingX)) / samplingRate));
+                rangeDist[j] = (float)(slantRangeToFirstPixel + (halfSpeedOfLight * ((j*subSamplingX)) / samplingRate));
             }
         } else if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_5) {
-            final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel();
+            final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel();    // meters
             final int slantRangeToMidPixel = _imageFiles[0].getSlantRangeToMidPixel();
             final int slantRangeToLastPixel = _imageFiles[0].getSlantRangeToLastPixel();
 
+            // @todo: get cofficients
+            //float r10 =
+            //float r11 =
+            //float r12 =
+
             for(int j = 0; j < gridWidth; ++j) {
-                range[j] = (float)(slantRangeToFirstPixel + (slantRangeToMidPixel*j) + (slantRangeToLastPixel * (j*j)));
+                //rangeDist[j] = (float)(r10 + (r11*j) + (r12 * (j*j)));
             }
         }
 
-        final float[] fineRanges = new float[gridWidth*gridHeight];
-        ReaderUtils.createFineTiePointGrid(6, 1, gridWidth, gridHeight, range, fineRanges);
+        // @todo: get slant range time in nanoseconds from range distance in meters
+        for(int j = 0; j < gridWidth; ++j) {
+             //rangeTime[j] =
+        }
+
+        // @todo: we may not need this interpolation here
+        final float[] fineRangeTimes = new float[gridWidth*gridHeight];
+        ReaderUtils.createFineTiePointGrid(6, 1, gridWidth, gridHeight, rangeTime, fineRangeTimes);
 
         final TiePointGrid slantRangeGrid = new TiePointGrid("slant_range_time", gridWidth, gridHeight, 0, 0,
-                subSamplingX, subSamplingY, fineRanges);
+                subSamplingX, subSamplingY, fineRangeTimes);
 
         product.addTiePointGrid(slantRangeGrid);
         slantRangeGrid.setUnit(Unit.NANOSECONDS);
@@ -177,13 +189,14 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
         final float[] angles = new float[gridWidth];
         for(int j = 0; j < gridWidth; ++j) {
-            angles[j] = (float)((a0 + a1*range[j]/1000.0 +
-                                a2*Math.pow(range[j]/1000.0,2) +
-                                a3*Math.pow(range[j]/1000.0,3) +
-                                a4*Math.pow(range[j]/1000.0,4) +
-                                a5*Math.pow(range[j]/1000.0,5) ) * MathUtils.RTOD);
+            angles[j] = (float)((a0 + a1*rangeDist[j]/1000.0 +
+                                a2*Math.pow(rangeDist[j]/1000.0,2) +
+                                a3*Math.pow(rangeDist[j]/1000.0,3) +
+                                a4*Math.pow(rangeDist[j]/1000.0,4) +
+                                a5*Math.pow(rangeDist[j]/1000.0,5) ) * MathUtils.RTOD);
         }
 
+        // @todo: we may not need this interpolation here
         final float[] fineAngles = new float[gridWidth*gridHeight];
         ReaderUtils.createFineTiePointGrid(6, 1, gridWidth, gridHeight, angles, fineAngles);
 
