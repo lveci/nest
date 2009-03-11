@@ -149,6 +149,10 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             for(int j = 0; j < gridWidth; ++j) {
                 range[j] = (float)(slantRangeToFirstSample + (halfSpeedOfLight * ((j*subSamplingX)) / samplingRate));
             }
+        } else if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1) {
+            for(int j = 0; j < gridWidth; ++j) {
+               // range[j] = 
+            }
         }
 
         final float[] fineRanges = new float[gridWidth*gridHeight];
@@ -312,9 +316,13 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
                 sceneRec.getAttributeString("Processing algorithm identifier"));
-        
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
-                getPolarization(_leaderFile.getSceneRecord().getAttributeString("Sensor ID and mode of operation for this channel")));
+
+        if(_imageFiles.length > 0 && _imageFiles[0] != null)
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
+                _imageFiles[0].getPolarization());
+        if(_imageFiles.length > 1 && _imageFiles[1] != null)
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds2_tx_rx_polar,
+                _imageFiles[1].getPolarization());
 
         if(mapProjRec != null) {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,

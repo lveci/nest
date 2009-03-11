@@ -16,7 +16,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.20 $ $Date: 2009-02-09 21:12:33 $
+ * @version $Revision: 1.21 $ $Date: 2009-03-11 17:29:08 $
  */
 public abstract class CEOSImageFile {
 
@@ -44,9 +44,9 @@ public abstract class CEOSImageFile {
     }
 
     public void assignMetadataTo(MetadataElement rootElem, int count) {
-        MetadataElement metadata = new MetadataElement("Image Descriptor " + count);
-         _imageFDR.assignMetadataTo(metadata);
-        rootElem.addElement(metadata);
+        final MetadataElement imgDescElem = new MetadataElement("Image Descriptor " + count);
+        _imageFDR.assignMetadataTo(imgDescElem);
+        rootElem.addElement(imgDescElem);
     }
 
     public static String[] getImageFileNames(File baseDir, String prefix) {

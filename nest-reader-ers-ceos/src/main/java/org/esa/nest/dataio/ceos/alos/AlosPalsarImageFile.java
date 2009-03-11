@@ -49,18 +49,35 @@ class AlosPalsarImageFile extends CEOSImageFile {
 
     public String getPolarization() {
         if(imageFileName.startsWith("IMG-") && imageFileName.length() > 6) {
-            final String pol = imageFileName.substring(4, 6);
-            if(pol.equals("HH") || pol.equals("VV") || pol.equals("HV") || pol.equals("VH"))
+            String pol = imageFileName.substring(4, 6);
+            if(pol.equals("HH") || pol.equals("VV") || pol.equals("HV") || pol.equals("VH")) {
                 return pol;
+            } else if(_imageRecords[0] != null) {
+                final int tx = _imageRecords[0].getAttributeInt("Transmitted polarization");
+                final int rx = _imageRecords[0].getAttributeInt("Received polarization");
+                if(tx == 1) pol = "V";
+                else pol = "H";
+
+                if(rx == 1) pol += "V";
+                else pol += "H";
+
+                return pol;
+            }
         }
         return "";
     }
 
     @Override
     public void assignMetadataTo(MetadataElement rootElem, int count) {
-        final MetadataElement metadata = new MetadataElement("Image Descriptor " + count);
-         _imageFDR.assignMetadataTo(metadata);
-        rootElem.addElement(metadata);
+        final MetadataElement imgDescElem = new MetadataElement("Image Descriptor " + count);
+        _imageFDR.assignMetadataTo(imgDescElem);
+        rootElem.addElement(imgDescElem);
+
+        if(_imageRecords[0] != null) {
+            final MetadataElement imgRecElem = new MetadataElement("Image Record ");
+            _imageRecords[0].assignMetadataTo(imgRecElem);
+            imgDescElem.addElement(imgRecElem);
+        }
 
         if(_processedData != null) {
             final MetadataElement procDataMetadata = new MetadataElement("Processed Data " + count);
