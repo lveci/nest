@@ -30,7 +30,6 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
     private static final double UTM_FALSE_EASTING = 500000.00;
     private static final double UTM_FALSE_NORTHING = 10000000.00;
-    private static final int METER_PER_KILOMETER = 1000;
 
     private final File _baseDir;
     private AlosPalsarVolumeDirectoryFile _volumeDirectoryFile = null;
@@ -149,7 +148,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             for(int j = 0; j < gridWidth; ++j) {
                 range[j] = (float)(slantRangeToFirstPixel + (halfSpeedOfLight * ((j*subSamplingX)) / samplingRate));
             }
-        } else if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1) {
+        } else if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_5) {
             final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel();
             final int slantRangeToMidPixel = _imageFiles[0].getSlantRangeToMidPixel();
             final int slantRangeToLastPixel = _imageFiles[0].getSlantRangeToLastPixel();
