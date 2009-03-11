@@ -42,7 +42,7 @@
         <action>
             <id>forwardTerrainCorrectionOp</id>
             <class>org.esa.nest.dat.ForwardTerrainCorrectionOpAction</class>
-            <text>Forward (coming soon)</text>
+            <text>Forward</text>
             <shortDescr>Terrain Correction Forward Method</shortDescr>
             <parent>TerrainCorrectionGroup</parent>
         </action>
