@@ -51,7 +51,7 @@ import java.util.HashMap;
  */
 
 @OperatorMetadata(alias="Forward-Terrain-Correction",
-        description="Forward method for correcting topographic distortion caused by target elevation")
+        description="Forward method for correcting topographic distortion caused by target elevation", internal=true)
 public final class ForwardTerrainCorrectionOp extends Operator {
 
     @SourceProduct(alias="source")
