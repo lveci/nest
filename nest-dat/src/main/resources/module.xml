@@ -336,7 +336,7 @@
             <id>ReportABug</id>
             <parent>help</parent>
             <class>org.esa.nest.dat.actions.ReportABugAction</class>
-            <text>Report A Bug</text>
+            <text>Report a Bug</text>
             <shortDescr>Email a bug to Array</shortDescr>
             <description>Email a problem with NEST to Array</description>
             <placeAfter>helpTopics</placeAfter>
