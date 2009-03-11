@@ -19,11 +19,12 @@ class AlosPalsarImageFile extends CEOSImageFile {
     private final static String image_DefinitionFile = "image_file.xml";
     private final static String image_recordDefinition = "image_record.xml";
     private final static String processedData_recordDefinition = "processed_data_record.xml";
-
+    private final String imageFileName;
     private final int slantRangeToFirstSample;
 
-    public AlosPalsarImageFile(final ImageInputStream imageStream, int productLevel)
+    public AlosPalsarImageFile(final ImageInputStream imageStream, int productLevel, String fileName)
             throws IOException, IllegalBinaryFormatException {
+        imageFileName = fileName.toUpperCase();
         binaryReader = new BinaryFileReader(imageStream);
         _imageFDR = new BaseRecord(binaryReader, -1, mission, image_DefinitionFile);
         binaryReader.seek(_imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()));
@@ -44,6 +45,15 @@ class AlosPalsarImageFile extends CEOSImageFile {
 
     public int getSlantRangeToFirstSample() {
         return slantRangeToFirstSample;
+    }
+
+    public String getPolarization() {
+        if(imageFileName.startsWith("IMG-") && imageFileName.length() > 6) {
+            final String pol = imageFileName.substring(4, 6);
+            if(pol.equals("HH") || pol.equals("VV") || pol.equals("HV") || pol.equals("VH"))
+                return pol;
+        }
+        return "";
     }
 
     @Override

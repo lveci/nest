@@ -58,7 +58,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         _imageFiles = new AlosPalsarImageFile[numImageFiles];
         for (int i = 0; i < numImageFiles; i++) {
             _imageFiles[i] = new AlosPalsarImageFile(
-                    createInputStream(new File(_baseDir, imageFileNames[i])), getProductLevel());
+                    createInputStream(new File(_baseDir, imageFileNames[i])), getProductLevel(), imageFileNames[i]);
         }
 
         _sceneWidth = _imageFiles[0].getRasterWidth();
@@ -98,46 +98,25 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                                             productType,
                                             _sceneWidth, _sceneHeight);
 
-        if(_imageFiles.length > 1) {
-            int index = 1;
-            for (final AlosPalsarImageFile imageFile : _imageFiles) {
+        for (final AlosPalsarImageFile imageFile : _imageFiles) {
 
-                if(isProductSLC) {
-                    String bandName = "i_" + index;
-                    final Band bandI = createBand(bandName, Unit.REAL);
-                    product.addBand(bandI);
-                    bandImageFileMap.put(bandName, imageFile);
-                    bandName = "q_" + index;
-                    final Band bandQ = createBand(bandName, Unit.IMAGINARY);
-                    product.addBand(bandQ);
-                    bandImageFileMap.put(bandName, imageFile);
-
-                    ReaderUtils.createVirtualIntensityBand(product, bandI, bandQ, "_"+index);
-                    ++index;
-                } else {
-                    String bandName = "Amplitude_" + index;
-                    final Band band = createBand(bandName, Unit.AMPLITUDE);
-                    product.addBand(band);
-                    bandImageFileMap.put(bandName, imageFile);
-                    ReaderUtils.createVirtualIntensityBand(product, band, "_"+index);
-                    ++index;
-                }
-            }
-        } else {
-            final AlosPalsarImageFile imageFile = _imageFiles[0];
             if(isProductSLC) {
-                final Band bandI = createBand("i", Unit.REAL);
+                String bandName = "i_" + imageFile.getPolarization();
+                final Band bandI = createBand(bandName, Unit.REAL);
                 product.addBand(bandI);
-                bandImageFileMap.put("i", imageFile);
-                final Band bandQ = createBand("q", Unit.IMAGINARY);
+                bandImageFileMap.put(bandName, imageFile);
+                bandName = "q_" + imageFile.getPolarization();
+                final Band bandQ = createBand(bandName, Unit.IMAGINARY);
                 product.addBand(bandQ);
-                bandImageFileMap.put("q", imageFile);
-                ReaderUtils.createVirtualIntensityBand(product, bandI, bandQ, "");
+                bandImageFileMap.put(bandName, imageFile);
+
+                ReaderUtils.createVirtualIntensityBand(product, bandI, bandQ, "_"+imageFile.getPolarization());
             } else {
-                final Band band = createBand("Amplitude", Unit.AMPLITUDE);
+                final String bandName = "Amplitude_" + imageFile.getPolarization();
+                final Band band = createBand(bandName, Unit.AMPLITUDE);
                 product.addBand(band);
-                bandImageFileMap.put("Amplitude", imageFile);
-                ReaderUtils.createVirtualIntensityBand(product, band, "");
+                bandImageFileMap.put(bandName, imageFile);
+                ReaderUtils.createVirtualIntensityBand(product, band, "_"+imageFile.getPolarization());
             }
         }
 
@@ -363,6 +342,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.isMapProjected, isMapProjected());
 
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag, 1);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag, 1);        
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.replica_power_corr_flag, 0);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
