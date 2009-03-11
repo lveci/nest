@@ -108,6 +108,9 @@ public final class ForwardTerrainCorrectionOp extends Operator {
             slantRangeTime = OperatorUtils.getSlantRangeTime(sourceProduct);
 
             elevationBand = sourceProduct.getBand("elevation");
+            if (elevationBand == null) {
+                throw new OperatorException("Source product does not have elevation band, please run Create Elevation Band Operator first");
+            }
 
             createTargetProduct();
 
@@ -230,7 +233,7 @@ public final class ForwardTerrainCorrectionOp extends Operator {
         double del = (tmp1*Math.tan(alpha) - Math.sqrt(tmp2*tmp2 - Q*Q)) / rangeSpacing; // ground range displacement
         double xip = x - del; // imaged pixel position
 
-        if (xip < 0.0) {
+        if (xip < 0.0 || xip >= sourceImageWidth - 1) {
             return srcData.getElemDoubleAt(index);
         }
 
