@@ -94,12 +94,11 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
     @Override
     protected void addAbstractedMetadataHeader(Product product, MetadataElement root) {
 
-        AbstractMetadata.addAbstractedMetadataHeader(root);
+        final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
 
         final String defStr = AbstractMetadata.NO_METADATA_STRING;
         final int defInt = AbstractMetadata.NO_METADATA;
 
-        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
         final MetadataElement productElem = root.getElement("product");
 
         // sourceAttributes
@@ -140,10 +139,15 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 
                 getFlag(sarProcessingInformation, "rawDataCorrection"));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time,
-                getTime(sarProcessingInformation, "zeroDopplerTimeFirstLine"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time,
-                getTime(sarProcessingInformation, "zeroDopplerTimeLastLine"));
+        final ProductData.UTC startTime = getTime(sarProcessingInformation, "zeroDopplerTimeFirstLine");
+        final ProductData.UTC stopTime = getTime(sarProcessingInformation, "zeroDopplerTimeLastLine");
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, stopTime);
+        product.setStartTime(startTime);
+        product.setEndTime(stopTime);
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, stopTime);
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks,
                 sarProcessingInformation.getAttributeInt("numberOfRangeLooks", defInt));
@@ -161,6 +165,9 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
                 rasterAttributes.getAttributeInt("numberOfSamplesPerLine", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, getTotalSize(product));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type, getDataTypeString());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
+                ReaderUtils.getLineTimeInterval(startTime, stopTime, product.getSceneRasterHeight()));
 
         final MetadataElement sampledPixelSpacing = rasterAttributes.getElement("sampledPixelSpacing");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
@@ -187,7 +194,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
     private static ProductData.UTC getTime(MetadataElement elem, String tag) {
         final String timeStr = createValidUTCString(elem.getAttributeString(tag, " ").toUpperCase(),
                 new char[]{':','.','-'}, ' ').trim();
-        return AbstractMetadata.parseUTC(timeStr, "yyyy-mm-dd HH:mm:ss");
+        return AbstractMetadata.parseUTC(timeStr, "yyyy-MM-dd HH:mm:ss");
     }
 
     private static String createValidUTCString(String name, char[] validChars, char replaceChar) {
@@ -233,7 +240,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         final MetadataElement geographicInformation = imageAttributes.getElement("geographicInformation");
         final MetadataElement geolocationGrid = geographicInformation.getElement("geolocationGrid");
 
-        MetadataElement[] geoGrid = geolocationGrid.getElements();
+        final MetadataElement[] geoGrid = geolocationGrid.getElements();
 
         float[] latList = new float[geoGrid.length];
         float[] lngList = new float[geoGrid.length];
@@ -261,17 +268,44 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         float subSamplingX = (float)product.getSceneRasterWidth() / (gridWidth - 1);
         float subSamplingY = (float)product.getSceneRasterHeight() / (gridHeight - 1);
 
-        final TiePointGrid latGrid = new TiePointGrid("lat", gridWidth, gridHeight, 0.5f, 0.5f,
+        final TiePointGrid latGrid = new TiePointGrid("latitude", gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, latList);
+        latGrid.setUnit(Unit.DEGREES);
 
-        final TiePointGrid lonGrid = new TiePointGrid("lon", gridWidth, gridHeight, 0.5f, 0.5f,
+        final TiePointGrid lonGrid = new TiePointGrid("longitude", gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, lngList, TiePointGrid.DISCONT_AT_180);
-        
-        TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
+        lonGrid.setUnit(Unit.DEGREES);
+
+        final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
 
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
-        product.setGeoCoding(tpGeoCoding);    
+        product.setGeoCoding(tpGeoCoding);
+
+        setLatLongMetadata(product, latGrid, lonGrid);
+    }
+
+    private static void setLatLongMetadata(Product product, TiePointGrid latGrid, TiePointGrid lonGrid) {
+        final MetadataElement root = product.getMetadataRoot();
+        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+
+        final int w = product.getSceneRasterWidth();
+        final int h = product.getSceneRasterHeight();
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat, latGrid.getPixelFloat(0, 0));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_long, lonGrid.getPixelFloat(0, 0));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_lat, latGrid.getPixelFloat(w, 0));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_long, lonGrid.getPixelFloat(w, 0));
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_mid_lat, latGrid.getPixelFloat(w/2, 0));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_mid_long, lonGrid.getPixelFloat(w/2, 0));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_mid_lat, latGrid.getPixelFloat(w/2, h));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_mid_long, lonGrid.getPixelFloat(w/2, h));
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_lat, latGrid.getPixelFloat(0, h));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_long, lonGrid.getPixelFloat(0, h));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_lat, latGrid.getPixelFloat(w, h));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long, lonGrid.getPixelFloat(w, h));
     }
 
     @Override
@@ -299,6 +333,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
 
         final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineAngles);
+        incidentAngleGrid.setUnit(Unit.DEGREES);
 
         product.addTiePointGrid(incidentAngleGrid);
     }

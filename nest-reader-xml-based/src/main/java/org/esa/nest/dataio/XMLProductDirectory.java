@@ -134,12 +134,14 @@ public class XMLProductDirectory {
 
         final TiePointGrid latGrid = new TiePointGrid("latitude", gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, fineLatTiePoints);
+        latGrid.setUnit(Unit.DEGREES);
 
         final float[] fineLonTiePoints = new float[gridWidth*gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonCorners, fineLonTiePoints);
 
         final TiePointGrid lonGrid = new TiePointGrid("longitude", gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
+        lonGrid.setUnit(Unit.DEGREES);
 
         final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
 
@@ -217,6 +219,14 @@ public class XMLProductDirectory {
     protected void addAbstractedMetadataHeader(Product product, MetadataElement root) {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
+    }
+
+    public String getDataTypeString() {
+        if(!bandImageFileMap.isEmpty()) {
+            final ImageIOFile img = bandImageFileMap.get(bandImageFileMap.keySet().iterator().next());
+            return ProductData.getTypeString(img.getDataType());
+        }
+        return "";
     }
 
     protected String getProductName() {

@@ -117,28 +117,14 @@ public abstract class CEOSProductDirectory {
 
     protected static ProductData.UTC getUTCScanStartTime(BaseRecord sceneRec) {
         if(sceneRec == null) return new ProductData.UTC(0);
-        String startTime = sceneRec.getAttributeString("Zero-doppler azimuth time of first azimuth pixel");
-        if(startTime == null || startTime.trim().isEmpty()) {
-            startTime = sceneRec.getAttributeString("Scene centre time");
-            return AbstractMetadata.parseUTC(startTime.trim(), "yyyymmddHHmmssSSS");
-        }
+        final String startTime = sceneRec.getAttributeString("Zero-doppler azimuth time of first azimuth pixel");
         return AbstractMetadata.parseUTC(startTime);
     }
 
     protected static ProductData.UTC getUTCScanStopTime(BaseRecord sceneRec) {
         if(sceneRec == null) return new ProductData.UTC(0);
-        String endTime = sceneRec.getAttributeString("Zero-doppler azimuth time of last azimuth pixel");
-        if(endTime == null || endTime.trim().isEmpty()) {
-            endTime = sceneRec.getAttributeString("Scene centre time");
-            return AbstractMetadata.parseUTC(endTime.trim(), "yyyymmddHHmmssSSS");
-        }
+        final String endTime = sceneRec.getAttributeString("Zero-doppler azimuth time of last azimuth pixel");
         return AbstractMetadata.parseUTC(endTime);
-    }
-
-    protected static double getLineTimeInterval(BaseRecord sceneRec, int sceneHeight) {
-        final double startTime = getUTCScanStartTime(sceneRec).getMJD() * 24 * 3600;
-        final double stopTime = getUTCScanStopTime(sceneRec).getMJD() * 24 * 3600;
-        return (stopTime-startTime) / (sceneHeight-1);
     }
 
     protected static void addSummaryMetadata(final File summaryFile, final MetadataElement parent) throws IOException {

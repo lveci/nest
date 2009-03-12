@@ -120,4 +120,18 @@ public class ReaderUtils {
             }
         }
     }
+
+    public static double getLineTimeInterval(ProductData.UTC startUTC, ProductData.UTC endUTC, int sceneHeight) {
+        final double startTime = startUTC.getMJD() * 24 * 3600;
+        final double stopTime = endUTC.getMJD() * 24 * 3600;
+        return (stopTime-startTime) / (sceneHeight-1);
+    }
+
+    public static String getDataTypeString(Product product) {
+        final Band band = product.getBandAt(0);
+        if(band != null) {
+            return ProductData.getTypeString(band.getDataType());
+        }
+        return "";
+    }
 }

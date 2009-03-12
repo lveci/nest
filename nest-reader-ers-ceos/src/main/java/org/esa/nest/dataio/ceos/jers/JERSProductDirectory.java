@@ -254,6 +254,8 @@ class JERSProductDirectory extends CEOSProductDirectory {
                 AbstractMetadata.parseUTC(_leaderFile.getFacilityRecord().getAttributeString(
                         "Time of input state vector used to processed the image")));
 
+        final ProductData.UTC startTime = getUTCScanStartTime(sceneRec);
+        final ProductData.UTC endTime = getUTCScanStopTime(sceneRec);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getUTCScanStartTime(sceneRec));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, getUTCScanStopTime(sceneRec));
 
@@ -297,7 +299,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
-                getLineTimeInterval(sceneRec, _sceneHeight));
+                ReaderUtils.getLineTimeInterval(startTime, endTime, _sceneHeight));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type,
                 ProductData.getTypeString(ProductData.TYPE_INT16));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,

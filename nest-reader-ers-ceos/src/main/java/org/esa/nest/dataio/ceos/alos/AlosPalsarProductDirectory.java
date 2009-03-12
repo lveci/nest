@@ -324,11 +324,14 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         //        Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
                 Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
-        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
-        //        _leaderFile.getFacilityRecord().getAttributeString("Time of input state vector used to processed the image"));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getUTCScanStartTime(sceneRec));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, getUTCScanStopTime(sceneRec));
+        final ProductData.UTC startTime = getStartEndTime(sceneRec, root, "StartDateTime");
+        final ProductData.UTC endTime = getStartEndTime(sceneRec, root, "EndDateTime");
+        product.setStartTime(startTime);
+        product.setEndTime(endTime);
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, endTime);
 
         if(mapProjRec != null) {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
@@ -383,9 +386,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
-                getLineTimeInterval(sceneRec, _sceneHeight));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type,
-                "UInt"+_imageFiles[0].getImageFileDescriptor().getAttributeInt("Number of bits per sample"));
+                ReaderUtils.getLineTimeInterval(startTime, endTime, _sceneHeight));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type, ReaderUtils.getDataTypeString(product));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
                 product.getSceneRasterHeight());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
@@ -411,14 +413,18 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     private static void addOrbitStateVectors(final MetadataElement absRoot, final BaseRecord platformPosRec) {
         final MetadataElement orbitVectorListElem = absRoot.getElement(AbstractMetadata.orbit_state_vectors);
 
-        addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, 1);
+        final MetadataElement firstOrbitVectorElem =
+                addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, 1);
         /*addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, 2);
         addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, 3);
         addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, 4);
         addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, 5);   */
+          
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
+                firstOrbitVectorElem.getAttributeUTC(AbstractMetadata.orbit_vector_time, new ProductData.UTC(0)));
     }
 
-    private static void addVector(String name, MetadataElement orbitVectorListElem,
+    private static MetadataElement addVector(String name, MetadataElement orbitVectorListElem,
                                   BaseRecord platformPosRec, int num) {
         final MetadataElement orbitVectorElem = new MetadataElement(name+num);
 
@@ -437,6 +443,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 platformPosRec.getAttributeDouble("6th orbital element z'"));
 
         orbitVectorListElem.addElement(orbitVectorElem);
+        return orbitVectorElem;
     }
 
     private static ProductData.UTC getOrbitTime(BaseRecord platformPosRec, int num) {
@@ -454,7 +461,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         second += interval * (num-1);
 
         return AbstractMetadata.parseUTC(String.valueOf(year)+'-'+month+'-'+day+' '+
-                                  hour+':'+minute+':'+(int)second, "yyyy-mm-dd HH:mm:ss");
+                                  hour+':'+minute+':'+(int)second, "yyyy-MM-dd HH:mm:ss");
     }
 
     private int isGroundRange() {
@@ -471,6 +478,28 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         if(projDesc.contains("geo"))
             return 1;
         return 0;
+    }
+
+    private static ProductData.UTC getStartEndTime(BaseRecord sceneRec, MetadataElement root, String tag) {
+        ProductData.UTC time = getUTCScanStartTime(sceneRec);
+        if(time.equalElems(new ProductData.UTC(0))) {
+            try {
+                final MetadataElement summaryElem = root.getElement("Summary Information");
+                if(summaryElem != null) {
+                    for(MetadataAttribute sum : summaryElem.getAttributes()) {
+                        if(sum.getName().contains(tag)) {
+                            return AbstractMetadata.parseUTC(summaryElem.getAttributeString(sum.getName().trim()),
+                                    "yyyyMMdd HH:mm:ss");
+                        }
+                    }
+                }
+                final String centreTimeStr = sceneRec.getAttributeString("Scene centre time");
+                return AbstractMetadata.parseUTC(centreTimeStr.trim(), "yyyyMMddHHmmssSSS");
+            } catch(Exception e) {
+                time = new ProductData.UTC(0);
+            }
+        }
+        return time;
     }
 
     private String getProductName() {

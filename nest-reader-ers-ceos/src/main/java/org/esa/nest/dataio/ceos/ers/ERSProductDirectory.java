@@ -267,8 +267,10 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 AbstractMetadata.parseUTC(facilityRec.getAttributeString(
                         "Time of input state vector used to processed the image")));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getUTCScanStartTime(sceneRec));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, getUTCScanStopTime(sceneRec));
+        final ProductData.UTC startTime = getUTCScanStartTime(sceneRec);
+        final ProductData.UTC endTime = getUTCScanStopTime(sceneRec);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, endTime);
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
                 mapProjRec.getAttributeDouble("1st line 1st pixel geodetic latitude"));
@@ -311,7 +313,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
-                getLineTimeInterval(sceneRec, _sceneHeight));
+                ReaderUtils.getLineTimeInterval(startTime, endTime, _sceneHeight));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type,
                 ProductData.getTypeString(ProductData.TYPE_INT16));      
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
@@ -398,7 +400,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         second += interval * (num-1);
 
         return AbstractMetadata.parseUTC(String.valueOf(year)+'-'+month+'-'+day+' '+
-                                  hour+':'+minute+':'+second, "yyyy-mm-dd HH:mm:ss");
+                                  hour+':'+minute+':'+second, "yyyy-MM-dd HH:mm:ss");
     }
 
     private int getCycle(final int absOrbit) {

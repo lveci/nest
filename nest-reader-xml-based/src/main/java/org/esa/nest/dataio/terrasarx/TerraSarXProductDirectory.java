@@ -41,12 +41,11 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
     @Override
     protected void addAbstractedMetadataHeader(Product product, MetadataElement root) {
 
-        AbstractMetadata.addAbstractedMetadataHeader(root);
+        final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
 
         final String defStr = AbstractMetadata.NO_METADATA_STRING;
         final int defInt = AbstractMetadata.NO_METADATA;
 
-        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
         final MetadataElement level1Elem = root.getElementAt(1);
         final MetadataElement generalHeader = level1Elem.getElement("generalHeader");
         final MetadataElement productInfo = level1Elem.getElement("productInfo");
@@ -121,6 +120,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
                 imageRaster.getAttributeInt("numberOfColumns", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, getTotalSize(product));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type, getDataTypeString());
 
         final MetadataElement rowSpacing = imageRaster.getElement("rowSpacing");
         final MetadataElement columnSpacing = imageRaster.getElement("columnSpacing");
@@ -134,7 +134,8 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         final MetadataElement PRF = settingRecord.getElement("PRF");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
                 PRF.getAttributeDouble("PRF", defInt));
-
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
+                ReaderUtils.getLineTimeInterval(startTime, stopTime, product.getSceneRasterHeight()));
 
         setFlag(productVariantInfo, "projection", "GROUNDRANGE", absRoot, AbstractMetadata.srgr_flag);
         setFlag(productVariantInfo, "radiometricCorrection", "CALIBRATED", absRoot, AbstractMetadata.abs_calibration_flag);
@@ -162,7 +163,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
     private static ProductData.UTC getTime(MetadataElement elem, String tag) {
         final String timeStr = createValidUTCString(elem.getAttributeString(tag, " ").toUpperCase(), 
                 new char[]{':','.','-'}, ' ').trim();
-        return AbstractMetadata.parseUTC(timeStr, "yyyy-mm-dd HH:mm:ss");
+        return AbstractMetadata.parseUTC(timeStr, "yyyy-MM-dd HH:mm:ss");
     }
 
     private static String createValidUTCString(String name, char[] validChars, char replaceChar) {
@@ -213,26 +214,35 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
             }
         }
 
+        int index = 0;
         for(CornerCoord coord : coordList) {
-            int index = -1;
-            if(coord.refRow == minRow) {
-                if(Math.abs(coord.refCol - minCol) < Math.abs(coord.refCol - maxCol)) {            // UL
-                    index = 0;
-                } else {     // UR
-                    index = 1;
-                }
-            } else if(coord.refRow == maxRow) {
-                if(Math.abs(coord.refCol - minCol) < Math.abs(coord.refCol - maxCol)) {            // LL
-                    index = 2;
-                } else {     // LR
-                    index = 3;
-                }
-            }
-            if(index >= 0) {
+            if(minRow == maxRow && minCol == maxCol) {
                 latCorners[index] = coord.lat;
                 lonCorners[index] = coord.lon;
                 slantRangeCorners[index] = coord.rangeTime;
                 incidenceCorners[index] = coord.incidenceAngle;
+                ++index;
+            } else {
+                index = -1;
+                if(coord.refRow == minRow) {
+                    if(Math.abs(coord.refCol - minCol) < Math.abs(coord.refCol - maxCol)) {            // UL
+                        index = 0;
+                    } else {     // UR
+                        index = 1;
+                    }
+                } else if(coord.refRow == maxRow) {
+                    if(Math.abs(coord.refCol - minCol) < Math.abs(coord.refCol - maxCol)) {            // LL
+                        index = 2;
+                    } else {     // LR
+                        index = 3;
+                    }
+                }
+                if(index >= 0) {
+                    latCorners[index] = coord.lat;
+                    lonCorners[index] = coord.lon;
+                    slantRangeCorners[index] = coord.rangeTime;
+                    incidenceCorners[index] = coord.incidenceAngle;
+                }
             }
         }
     }
@@ -305,6 +315,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
         final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineAngles);
+        incidentAngleGrid.setUnit(Unit.DEGREES);
 
         product.addTiePointGrid(incidentAngleGrid);
 
@@ -314,6 +325,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
         final TiePointGrid slantRangeGrid = new TiePointGrid("slant_range", gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineSlantRange);
+        slantRangeGrid.setUnit(Unit.NANOSECONDS);
 
         product.addTiePointGrid(slantRangeGrid);
     }
