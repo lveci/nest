@@ -19,6 +19,8 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
+import Jama.Matrix;
+
 /**
  * This class represents a product directory.
  * <p/>
@@ -132,49 +134,58 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
     private void addTiePointGrids(final Product product) throws IllegalBinaryFormatException, IOException {
 
-        // slant range
+        // slant range time (2-way)
         final BaseRecord sceneRec = _leaderFile.getSceneRecord();
         final double samplingRate = sceneRec.getAttributeDouble("Range sampling rate") * 1000000.0;  // MHz to Hz
-        final double halfSpeedOfLight = 299792458 / 2.0;
+        final double halfSpeedOfLight = 299792458 / 2.0; // in m/s
 
-        final int gridWidth = 6, gridHeight = 6;
-        final float subSamplingX = (float)product.getSceneRasterWidth() / (float)(gridWidth - 1);
-        final float subSamplingY = (float)product.getSceneRasterHeight() / (float)(gridHeight - 1);
+        final int gridWidth = 11;
+        final int gridHeight = 11;
+        final int sceneWidth = product.getSceneRasterWidth();
+        final int sceneHeight = product.getSceneRasterHeight();
+        final int subSamplingX = sceneWidth / (gridWidth - 1);
+        final int subSamplingY = sceneHeight / (gridHeight - 1);
+        final float[] rangeDist = new float[gridWidth*gridHeight];
+        final float[] rangeTime = new float[gridWidth*gridHeight];
 
-        final float[] rangeDist = new float[gridWidth];
-        final float[] rangeTime = new float[gridWidth];
         if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1) {
-            final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel(0);
-            
-            for(int j = 0; j < gridWidth; ++j) {
-                rangeDist[j] = (float)(slantRangeToFirstPixel + (halfSpeedOfLight * ((j*subSamplingX)) / samplingRate));
+
+            final double tmp = subSamplingX * halfSpeedOfLight / samplingRate;
+            int k = 0;
+            for(int j = 0; j < gridHeight; j++) {
+                final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel(j*subSamplingY);
+                for (int i = 0; i < gridWidth; i++) {
+                    rangeDist[k++] = (float)(slantRangeToFirstPixel + i*tmp);
+                }
             }
+
         } else if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_5) {
-            final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel(0);    // meters
-            final int slantRangeToMidPixel = _imageFiles[0].getSlantRangeToMidPixel(0);
-            final int slantRangeToLastPixel = _imageFiles[0].getSlantRangeToLastPixel(0);
 
-            // @todo: get cofficients
-            //float r10 =
-            //float r11 =
-            //float r12 =
+            int k = 0;
+            for (int j = 0; j < gridHeight; j++) {
+                int y = Math.min(j*subSamplingY, sceneHeight-1);
+                final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel(y); // meters
+                final int slantRangeToMidPixel = _imageFiles[0].getSlantRangeToMidPixel(y);
+                final int slantRangeToLastPixel = _imageFiles[0].getSlantRangeToLastPixel(y);
+                final double[] polyCoef = computePolynomialCoefficients(slantRangeToFirstPixel,
+                                                                        slantRangeToMidPixel,
+                                                                        slantRangeToLastPixel,
+                                                                        sceneWidth);
 
-            for(int j = 0; j < gridWidth; ++j) {
-                //rangeDist[j] = (float)(r10 + (r11*j) + (r12 * (j*j)));
+                for(int i = 0; i < gridWidth; i++) {
+                    int x = i*subSamplingX;
+                    rangeDist[k++] = (float)(polyCoef[0] + polyCoef[1]*x + polyCoef[2]*x*x);
+                }
             }
         }
 
-        // @todo: get slant range time in nanoseconds from range distance in meters
-        for(int j = 0; j < gridWidth; ++j) {
-             //rangeTime[j] =
+        // get slant range time in nanoseconds from range distance in meters
+        for(int k = 0; k < rangeDist.length; k++) {
+             rangeTime[k] = (float)(rangeDist[k] / halfSpeedOfLight * 1000000000.0); // in ns
         }
 
-        // @todo: we may not need this interpolation here
-        final float[] fineRangeTimes = new float[gridWidth*gridHeight];
-        ReaderUtils.createFineTiePointGrid(6, 1, gridWidth, gridHeight, rangeTime, fineRangeTimes);
-
-        final TiePointGrid slantRangeGrid = new TiePointGrid("slant_range_time", gridWidth, gridHeight, 0, 0,
-                subSamplingX, subSamplingY, fineRangeTimes);
+        final TiePointGrid slantRangeGrid = new TiePointGrid(
+                "slant_range_time", gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, rangeTime);
 
         product.addTiePointGrid(slantRangeGrid);
         slantRangeGrid.setUnit(Unit.NANOSECONDS);
@@ -187,25 +198,38 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         final double a4 = sceneRec.getAttributeDouble("Incidence angle fourth term");
         final double a5 = sceneRec.getAttributeDouble("Incidence angle fifth term");
 
-        final float[] angles = new float[gridWidth];
-        for(int j = 0; j < gridWidth; ++j) {
-            angles[j] = (float)((a0 + a1*rangeDist[j]/1000.0 +
-                                a2*Math.pow(rangeDist[j]/1000.0,2) +
-                                a3*Math.pow(rangeDist[j]/1000.0,3) +
-                                a4*Math.pow(rangeDist[j]/1000.0,4) +
-                                a5*Math.pow(rangeDist[j]/1000.0,5) ) * MathUtils.RTOD);
+        final float[] angles = new float[gridWidth*gridHeight];
+        int k = 0;
+        for(int j = 0; j < gridHeight; j++) {
+            for (int i = 0; i < gridWidth; i++) {
+                angles[k] = (float)((a0 + a1*rangeDist[k]/1000.0 +
+                                     a2*Math.pow(rangeDist[k]/1000.0, 2.0) +
+                                     a3*Math.pow(rangeDist[k]/1000.0, 3.0) +
+                                     a4*Math.pow(rangeDist[k]/1000.0, 4.0) +
+                                     a5*Math.pow(rangeDist[k]/1000.0, 5.0) ) * MathUtils.RTOD);
+                k++;
+            }
         }
 
-        // @todo: we may not need this interpolation here
-        final float[] fineAngles = new float[gridWidth*gridHeight];
-        ReaderUtils.createFineTiePointGrid(6, 1, gridWidth, gridHeight, angles, fineAngles);
+        final TiePointGrid incidentAngleGrid = new TiePointGrid(
+                "incident_angle", gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, angles);
 
-        final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
-                subSamplingX, subSamplingY, fineAngles);
         incidentAngleGrid.setUnit(Unit.DEGREES);
-
         product.addTiePointGrid(incidentAngleGrid);
+    }
 
+    private double[] computePolynomialCoefficients(
+                    int slantRangeToFirstPixel, int slantRangeToMidPixel, int slantRangeToLastPixel, int imageWidth) {
+
+        int firstPixel = 0;
+        int midPixel = imageWidth/2;
+        int lastPixel = imageWidth - 1;
+        double[] idxArray = {firstPixel, midPixel, lastPixel};
+        double[] rangeArray = {slantRangeToFirstPixel, slantRangeToMidPixel, slantRangeToLastPixel};
+        final Matrix A = org.esa.nest.util.MathUtils.createVandermondeMatrix(idxArray, 2);
+        final Matrix b = new Matrix(rangeArray, 3);
+        final Matrix x = A.solve(b);
+        return x.getColumnPackedCopy();
     }
 
     @Override
