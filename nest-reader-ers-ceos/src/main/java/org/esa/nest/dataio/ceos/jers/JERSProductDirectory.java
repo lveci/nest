@@ -226,9 +226,8 @@ class JERSProductDirectory extends CEOSProductDirectory {
 
     private void addAbstractedMetadataHeader(Product product, MetadataElement root) {
 
-        AbstractMetadata.addAbstractedMetadataHeader(root);
+        final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
 
-        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
         final BaseRecord sceneRec = _leaderFile.getSceneRecord();
         final BaseRecord mapProjRec = _leaderFile.getMapProjRecord();
         final BaseRecord facilityRec = _leaderFile.getFacilityRecord();
@@ -300,13 +299,12 @@ class JERSProductDirectory extends CEOSProductDirectory {
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
                 ReaderUtils.getLineTimeInterval(startTime, endTime, _sceneHeight));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type,
-                ProductData.getTypeString(ProductData.TYPE_INT16));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type, ReaderUtils.getDataTypeString(product));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
                 product.getSceneRasterHeight());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
                 product.getSceneRasterWidth());
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, getTotalSize(product));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(product));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.isMapProjected, isMapProjected());
@@ -322,6 +320,8 @@ class JERSProductDirectory extends CEOSProductDirectory {
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
                 sceneRec.getAttributeDouble("Range sampling rate"));
+
+        addOrbitStateVectors(absRoot, _leaderFile.getPlatformPositionRecord());
     }
 
     private int isGroundRange() {

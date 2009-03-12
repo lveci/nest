@@ -65,13 +65,13 @@ public class AbstractMetadata {
     public static final String line_time_interval = "line_time_interval";
 
     public static final String data_type = "data_type";
-    public static final String TOT_SIZE = "TOT_SIZE";
+    public static final String TOT_SIZE = "total_size";
     public static final String num_output_lines = "num_output_lines";
     public static final String num_samples_per_line = "num_samples_per_line";
 
     // SRGR
     public static final String srgr_flag = "srgr_flag";
-    public static final String isMapProjected = "isMapProjected";
+    public static final String isMapProjected = "is_map_projected";
 
     // calibration
     public static final String ant_elev_corr_flag = "ant_elev_corr_flag";

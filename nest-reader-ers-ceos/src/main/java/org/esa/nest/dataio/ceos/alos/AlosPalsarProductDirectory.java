@@ -218,14 +218,14 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         product.addTiePointGrid(incidentAngleGrid);
     }
 
-    private double[] computePolynomialCoefficients(
+    private static double[] computePolynomialCoefficients(
                     int slantRangeToFirstPixel, int slantRangeToMidPixel, int slantRangeToLastPixel, int imageWidth) {
 
-        int firstPixel = 0;
-        int midPixel = imageWidth/2;
-        int lastPixel = imageWidth - 1;
-        double[] idxArray = {firstPixel, midPixel, lastPixel};
-        double[] rangeArray = {slantRangeToFirstPixel, slantRangeToMidPixel, slantRangeToLastPixel};
+        final int firstPixel = 0;
+        final int midPixel = imageWidth/2;
+        final int lastPixel = imageWidth - 1;
+        final double[] idxArray = {firstPixel, midPixel, lastPixel};
+        final double[] rangeArray = {slantRangeToFirstPixel, slantRangeToMidPixel, slantRangeToLastPixel};
         final Matrix A = org.esa.nest.util.MathUtils.createVandermondeMatrix(idxArray, 2);
         final Matrix b = new Matrix(rangeArray, 3);
         final Matrix x = A.solve(b);
@@ -392,7 +392,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 product.getSceneRasterHeight());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
                 product.getSceneRasterWidth());
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, getTotalSize(product));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(product));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.isMapProjected, isMapProjected());
@@ -408,60 +408,6 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeDouble("Range sampling rate"));
 
         addOrbitStateVectors(absRoot, _leaderFile.getPlatformPositionRecord());
-    }
-
-    private static void addOrbitStateVectors(final MetadataElement absRoot, final BaseRecord platformPosRec) {
-        final MetadataElement orbitVectorListElem = absRoot.getElement(AbstractMetadata.orbit_state_vectors);
-
-        final MetadataElement firstOrbitVectorElem =
-                addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, 1);
-        /*addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, 2);
-        addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, 3);
-        addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, 4);
-        addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, 5);   */
-          
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
-                firstOrbitVectorElem.getAttributeUTC(AbstractMetadata.orbit_vector_time, new ProductData.UTC(0)));
-    }
-
-    private static MetadataElement addVector(String name, MetadataElement orbitVectorListElem,
-                                  BaseRecord platformPosRec, int num) {
-        final MetadataElement orbitVectorElem = new MetadataElement(name+num);
-
-        orbitVectorElem.setAttributeUTC(AbstractMetadata.orbit_vector_time, getOrbitTime(platformPosRec, num));
-        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_x_pos,
-                platformPosRec.getAttributeDouble("1st orbital element x"));
-        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_y_pos,
-                platformPosRec.getAttributeDouble("2nd orbital element y"));
-        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_z_pos,
-                platformPosRec.getAttributeDouble("3rd orbital element z"));
-        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_x_vel,
-                platformPosRec.getAttributeDouble("4th orbital element x'"));
-        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_y_vel,
-                platformPosRec.getAttributeDouble("5th orbital element y'"));
-        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_z_vel,
-                platformPosRec.getAttributeDouble("6th orbital element z'"));
-
-        orbitVectorListElem.addElement(orbitVectorElem);
-        return orbitVectorElem;
-    }
-
-    private static ProductData.UTC getOrbitTime(BaseRecord platformPosRec, int num) {
-        final int year = platformPosRec.getAttributeInt("Year of data point");
-        final int month = platformPosRec.getAttributeInt("Month of data point");
-        final int day = platformPosRec.getAttributeInt("Day of data point");
-        final float secondsOfDay = (float)platformPosRec.getAttributeDouble("Seconds of day");
-        final float hoursf = secondsOfDay / 3600f;
-        final int hour = (int)hoursf;
-        final float minutesf = (hoursf - hour) * 60f;
-        final int minute = (int)minutesf;
-        float second = (minutesf - minute) * 60f;
-
-        final float interval = (float)platformPosRec.getAttributeDouble("Time interval between DATA points");
-        second += interval * (num-1);
-
-        return AbstractMetadata.parseUTC(String.valueOf(year)+'-'+month+'-'+day+' '+
-                                  hour+':'+minute+':'+(int)second, "yyyy-MM-dd HH:mm:ss");
     }
 
     private int isGroundRange() {

@@ -134,4 +134,8 @@ public class ReaderUtils {
         }
         return "";
     }
+
+    public static int getTotalSize(Product product) {
+        return (int)(product.getRawStorageSize() / (1024.0f * 1024.0f));
+    }
 }

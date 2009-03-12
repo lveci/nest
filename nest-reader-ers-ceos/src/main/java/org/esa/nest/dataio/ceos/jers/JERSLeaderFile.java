@@ -60,6 +60,10 @@ class JERSLeaderFile {
         return _mapProjRecord;
     }
 
+    public final BaseRecord getPlatformPositionRecord() {
+        return _platformPositionRecord;
+    }
+
     public float[] getLatCorners() throws IOException, IllegalBinaryFormatException {
         if(_mapProjRecord == null) return null;
 

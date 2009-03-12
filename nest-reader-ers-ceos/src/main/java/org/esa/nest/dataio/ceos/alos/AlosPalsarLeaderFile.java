@@ -77,7 +77,7 @@ class AlosPalsarLeaderFile {
         _reader.seek(_facilityRecord.getAbsolutPosition(_facilityRecord.getRecordLength()));
     }
 
-    public int getProductLevel() {
+    public final int getProductLevel() {
         if(productLevel < 0) {
             String level = _sceneHeaderRecord.getAttributeString("Product level code").trim();
             if(level.contains("1.5"))

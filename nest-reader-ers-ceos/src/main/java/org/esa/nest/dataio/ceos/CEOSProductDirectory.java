@@ -48,10 +48,6 @@ public abstract class CEOSProductDirectory {
         return productType;
     }
 
-    protected static int getTotalSize(Product product) {
-        return (int)(product.getRawStorageSize() / (1024.0f * 1024.0f));
-    }
-
     protected static String getPolarization(String theID) {
         final String id = theID.toUpperCase();
         if(id.contains("HH") || id.contains("H/H") || id.contains("H-H"))
@@ -166,6 +162,61 @@ public abstract class CEOSProductDirectory {
             Guardian.assertTrue("_sceneHeight == imageFile[" + i + "].getRasterHeight()",
                                 height == imageFile.getRasterHeight());
         }
+    }
+
+    protected static void addOrbitStateVectors(final MetadataElement absRoot, final BaseRecord platformPosRec) {
+        final MetadataElement orbitVectorListElem = absRoot.getElement(AbstractMetadata.orbit_state_vectors);
+        final int numPoints = platformPosRec.getAttributeInt("Number of data points");
+
+        for(int i=1; i <= numPoints; ++i) {
+            addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, i);
+        }
+
+        if(absRoot.getAttributeUTC(AbstractMetadata.STATE_VECTOR_TIME, new ProductData.UTC(0)).
+                equalElems(new ProductData.UTC(0))) {
+            
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
+                getOrbitTime(platformPosRec, 1));
+        }
+    }
+
+    private static void addVector(String name, MetadataElement orbitVectorListElem,
+                                  BaseRecord platformPosRec, int num) {
+        final MetadataElement orbitVectorElem = new MetadataElement(name+num);
+
+        orbitVectorElem.setAttributeUTC(AbstractMetadata.orbit_vector_time, getOrbitTime(platformPosRec, num));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_x_pos,
+                platformPosRec.getAttributeDouble("Position vector X "+num));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_y_pos,
+                platformPosRec.getAttributeDouble("Position vector Y "+num));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_z_pos,
+                platformPosRec.getAttributeDouble("Position vector Z "+num));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_x_vel,
+                platformPosRec.getAttributeDouble("Velocity vector X' "+num));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_y_vel,
+                platformPosRec.getAttributeDouble("Velocity vector Y' "+num));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_z_vel,
+                platformPosRec.getAttributeDouble("Velocity vector Z' "+num));
+
+        orbitVectorListElem.addElement(orbitVectorElem);
+    }
+
+    private static ProductData.UTC getOrbitTime(BaseRecord platformPosRec, int num) {
+        final int year = platformPosRec.getAttributeInt("Year of data point");
+        final int month = platformPosRec.getAttributeInt("Month of data point");
+        final int day = platformPosRec.getAttributeInt("Day of data point");
+        final float secondsOfDay = (float)platformPosRec.getAttributeDouble("Seconds of day");
+        final float hoursf = secondsOfDay / 3600f;
+        final int hour = (int)hoursf;
+        final float minutesf = (hoursf - hour) * 60f;
+        final int minute = (int)minutesf;
+        float second = (minutesf - minute) * 60f;
+
+        final float interval = (float)platformPosRec.getAttributeDouble("Time interval between DATA points");
+        second += interval * (num-1);
+
+        return AbstractMetadata.parseUTC(String.valueOf(year)+'-'+month+'-'+day+' '+
+                                  hour+':'+minute+':'+second, "yyyy-MM-dd HH:mm:ss");
     }
 
     protected static ImageInputStream createInputStream(final File file) throws IOException {
