@@ -1,6 +1,7 @@
 package org.esa.nest.datamodel;
 
 import org.esa.beam.framework.datamodel.TiePointGrid;
+import org.esa.nest.util.MathUtils;
 import Jama.Matrix;
 
 /**
@@ -42,7 +43,7 @@ public class QuadInterpolator {
             }
         }
 
-        final Matrix A = createVandermondeMatrix(sampleIndexArray, warpPolynomialOrder);
+        final Matrix A = MathUtils.createVandermondeMatrix(sampleIndexArray, warpPolynomialOrder);
 
         double[] tiePointArray = new double[width];
         warpPolynomialCoef = new double[height][warpPolynomialOrder + 1];
@@ -54,24 +55,6 @@ public class QuadInterpolator {
             final Matrix x = A.solve(b);
             warpPolynomialCoef[r] = x.getColumnPackedCopy();
         }
-    }
-
-    /**
-     * Get Vandermonde matrix constructed from a given array.
-     * @param d The given range distance array.
-     * @param warpPolynomialOrder The warp polynomial order.
-     * @return The Vandermonde matrix.
-     */
-    public Matrix createVandermondeMatrix(double[] d, int warpPolynomialOrder) {
-
-        final int n = d.length;
-        final double[][] array = new double[n][warpPolynomialOrder + 1];
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j <= warpPolynomialOrder; j++) {
-                array[i][j] = Math.pow(d[i], (double)j);
-            }
-        }
-        return new Matrix(array);
     }
 
     /**
