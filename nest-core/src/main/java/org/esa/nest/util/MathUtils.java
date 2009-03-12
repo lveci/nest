@@ -1,5 +1,7 @@
 package org.esa.nest.util;
 
+import Jama.Matrix;
+
 public final class MathUtils
 {
 
@@ -63,5 +65,22 @@ public final class MathUtils
         return (a0*mu*mu2 + a1*mu2 + a2*mu + a3);
     }
 
+    /**
+     * Get Vandermonde matrix constructed from a given array.
+     * @param d The given range distance array.
+     * @param warpPolynomialOrder The warp polynomial order.
+     * @return The Vandermonde matrix.
+     */
+    public static Matrix createVandermondeMatrix(double[] d, int warpPolynomialOrder) {
+
+        final int n = d.length;
+        final double[][] array = new double[n][warpPolynomialOrder + 1];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j <= warpPolynomialOrder; j++) {
+                array[i][j] = Math.pow(d[i], (double)j);
+            }
+        }
+        return new Matrix(array);
+    }
 
 }
