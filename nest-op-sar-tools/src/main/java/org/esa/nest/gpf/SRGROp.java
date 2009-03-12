@@ -419,7 +419,7 @@ public class SRGROp extends Operator {
     private void computeWarpPolynomial(int y0) {
 
         computeGroundRangeDistanceArray(y0);
-        final Matrix A = createVandermondeMatrix(groundRangeDistanceArray);
+        final Matrix A = MathUtils.createVandermondeMatrix(groundRangeDistanceArray, warpPolynomialOrder);
         final Matrix b = new Matrix(slantRangeDistanceArray, numRangePoints - 1);
         final Matrix x = A.solve(b);
         warpPolynomialCoef = x.getColumnPackedCopy();
@@ -471,26 +471,6 @@ public class SRGROp extends Operator {
             yP0 = xyz[1];
             zP0 = xyz[2];
         }
-    }
-
-    /**
-     * Get Vandermonde matrix constructed from a given distance array.
-     *
-     * @param d The given range distance array.
-     * @return the matrix
-     */
-    private Matrix createVandermondeMatrix(double[] d) {
-
-        final int n = d.length;
-        final double[][] array = new double[n][warpPolynomialOrder + 1];
-
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < warpPolynomialOrder + 1; j++) {
-                array[i][j] = Math.pow(d[i], (double)j);
-            }
-        }
-
-        return new Matrix(array);
     }
 
     /**
