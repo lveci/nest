@@ -46,6 +46,11 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>gt-primary</id>
+            <name>Primary GeoTools Maven Repository</name>
+            <url>http://maven.geotools.fr/repository</url>
+        </repository>
     </repositories>
 
     <pluginRepositories>
@@ -119,12 +124,11 @@
         <module>beam-geotiff</module>
         <module>beam-hdf5-writer</module>
         <module>beam-shapefile-reader</module>
-        <!--module>beam-smos-reader</module-->
 
         <module>lib-hdf</module>
         <!--module>lib-netcdf</module-->
 
-		<module>beam-envi-reader</module>
+	<module>beam-envi-reader</module>
         <!--<module>nest-dat</module>-->
 
     </modules>
@@ -222,6 +226,19 @@
                 <artifactId>lib-netcdf</artifactId>
                 <version>2.2.16</version>
             </dependency-->
+
+            <!-- GeoTools Libraries ############################################# -->
+
+            <dependency>
+                <groupId>org.opengis</groupId>
+                <artifactId>geoapi</artifactId>
+                <version>2.2-M1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-referencing</artifactId>
+                <version>2.5.3</version>
+            </dependency>
 
             <!-- JAI Libraries ############################################# -->
 
@@ -377,7 +394,7 @@
                     <source>1.6</source>
                     <target>1.6</target>
                     <debug>true</debug>
-					<optimize>true</optimize>
+		    <optimize>true</optimize>
                     <encoding>ISO-8859-1</encoding>
                 </configuration>
             </plugin>

@@ -3,6 +3,7 @@ package org.esa.nest.dat;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductManager;
+import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.util.PropertyMap;
 
@@ -38,11 +39,19 @@ public class DatContext implements AppContext {
             return VisatApp.getApp().getAppName();
         }
 
-        public void handleError(Throwable e) {
+		public void handleError(Throwable e) {
             VisatApp.getApp().showErrorDialog(toolTitle, e.getMessage());
+        }
+		
+        public void handleError(String message, Throwable e) {
+            VisatApp.getApp().showErrorDialog(toolTitle, message);
         }
 
         public PropertyMap getPreferences() {
             return VisatApp.getApp().getPreferences();
         }
+		
+		public ProductSceneView getSelectedProductSceneView() {
+			return VisatApp.getApp().getSelectedProductSceneView();
+		}
 }

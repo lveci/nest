@@ -33,6 +33,44 @@
        <url>www.array.ca/nest</url>
     </scm>
 
+	<repositories>
+        <repository>
+            <id>bc-public</id>
+            <name>Public Maven Repository at Brockmann-Consult</name>
+            <url>http://www.brockmann-consult.de/mvn/os</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>gt-primary</id>
+            <name>Primary GeoTools Maven Repository</name>
+            <url>http://maven.geotools.fr/repository</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>bc-public</id>
+            <name>Public Maven Repository at Brockmann-Consult</name>
+            <url>http://www.brockmann-consult.de/mvn/os</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>apache.org</id>
+            <name>Maven Plugin Snapshots</name>
+            <url>http://people.apache.org/repo/m2-snapshot-repository</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+	
     <modules>
 		<module>beam</module>
 		<module>nest-bootstrap</module>
@@ -164,6 +202,19 @@
 			    <version>2B</version>
             </dependency>
 
+			<!-- GeoTools Libraries ############################################# -->
+
+            <dependency>
+                <groupId>org.opengis</groupId>
+                <artifactId>geoapi</artifactId>
+                <version>2.2-M1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-referencing</artifactId>
+                <version>2.5.3</version>
+            </dependency>
+			
             <!-- JAI Libraries ############################################# -->
 
             <dependency>
@@ -441,20 +492,6 @@
 			</plugin>
         </plugins>
     </reporting>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>apache.org</id>
-            <name>Maven Plugin Snapshots</name>
-            <url>http://people.apache.org/repo/m2-snapshot-repository</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
 
     <developers>
         <developer>
