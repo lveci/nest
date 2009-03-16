@@ -131,15 +131,12 @@ public class ShowCrossSpectraViewAction extends ExecCommand {
 
     @Override
     public void updateState(final CommandEvent event) {
-        setEnabled(false);
-
-
-      /*  final Product product = VisatApp.getApp().getSelectedProduct();
+        final Product product = VisatApp.getApp().getSelectedProduct();
         if(product != null) {
             final String productType = VisatApp.getApp().getSelectedProduct().getProductType();
             setEnabled(productType.startsWith("ASA_WV") &&
                 VisatApp.getApp().getSelectedProductNode() instanceof RasterDataNode);
         } else
-            setEnabled(false);    */
+            setEnabled(false);
     }
 }

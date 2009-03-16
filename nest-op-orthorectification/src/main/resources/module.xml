@@ -50,14 +50,14 @@
         <action>
             <id>backwardTerrainCorrectionOp</id>
             <class>org.esa.nest.dat.BackwardTerrainCorrectionOpAction</class>
-            <text>Backward (coming soon)</text>
+            <text>Backward</text>
             <shortDescr>Terrain Correction Backward Method</shortDescr>
             <parent>TerrainCorrectionGroup</parent>
         </action>
 
         <!--action>
-            <id>AddElevationBandOp</id>
-            <class>org.esa.nest.dat.AddElevationBandOpAction</class>
+            <id>CreateElevationBandOp</id>
+            <class>org.esa.nest.dat.CreateElevationBandOpActionion</class>
             <text>Add Elevation Band</text>
             <shortDescr>Creates an elevation band</shortDescr>
             <parent>TerrainCorrectionGroup</parent>

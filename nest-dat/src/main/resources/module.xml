@@ -459,7 +459,7 @@
         <action>
             <id>showPolarWaveView</id>
             <class>org.esa.nest.dat.actions.ShowCrossSpectraViewAction</class>
-            <text>Open Polar Wave View (coming soon)</text>
+            <text>Open Polar Wave View</text>
             <shortDescr>Open Polar Wave View</shortDescr>
             <parent>view</parent>
             <context>band</context>

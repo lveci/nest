@@ -5,10 +5,10 @@ import org.esa.beam.visat.actions.AbstractVisatAction;
 import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
 
 /**
- * AddElevationBandOp action.
+ * CreateElevationBandOp action.
  *
  */
-public class AddElevationBandOpAction extends AbstractVisatAction {
+public class CreateElevationBandOpAction extends AbstractVisatAction {
 
     private NestSingleTargetProductDialog dialog = null;
 
@@ -16,7 +16,7 @@ public class AddElevationBandOpAction extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new NestSingleTargetProductDialog("AddElevationBand", getAppContext(), "Add Elevation Band", getHelpId());
+            dialog = new NestSingleTargetProductDialog("CreateElevationBand", getAppContext(), "Create Elevation Band", getHelpId());
         }
         dialog.show();
     }

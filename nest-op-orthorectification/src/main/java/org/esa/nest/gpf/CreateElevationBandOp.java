@@ -23,11 +23,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
-
+    CreateElevationBandOp adds an elevation band to a product
  */
 
-@OperatorMetadata(alias="AddElevationBand", description="Creates a DEM band", internal=true)
-public final class AddElevationBandOp extends Operator {
+@OperatorMetadata(alias="CreateElevationBand", description="Creates a DEM band")
+public final class CreateElevationBandOp extends Operator {
 
     @SourceProduct(alias="source")
     private Product sourceProduct;
@@ -190,7 +190,7 @@ public final class AddElevationBandOp extends Operator {
      */
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(AddElevationBandOp.class);
+            super(CreateElevationBandOp.class);
         }
     }
 }
