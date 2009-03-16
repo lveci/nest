@@ -19,11 +19,13 @@ public class GTOPO30ElevationModel implements ElevationModel, Resampling.Raster 
 
     public static final int NUM_X_TILES = GTOPO30ElevationModelDescriptor.NUM_X_TILES;
     public static final int NUM_Y_TILES = GTOPO30ElevationModelDescriptor.NUM_Y_TILES;
-    public static final int DEGREE_RES = GTOPO30ElevationModelDescriptor.DEGREE_RES;
-    public static final int NUM_PIXELS_PER_TILE = GTOPO30ElevationModelDescriptor.PIXEL_RES_X * GTOPO30ElevationModelDescriptor.PIXEL_RES_Y;
+    public static final int DEGREE_RES_LAT = GTOPO30ElevationModelDescriptor.DEGREE_RES_LAT;
+    public static final int DEGREE_RES_LON = GTOPO30ElevationModelDescriptor.DEGREE_RES_LON;
+    public static final int NUM_PIXELS_PER_TILE_X = GTOPO30ElevationModelDescriptor.PIXEL_RES_X;
+    public static final int NUM_PIXELS_PER_TILE_Y = GTOPO30ElevationModelDescriptor.PIXEL_RES_Y;
     public static final int NO_DATA_VALUE = GTOPO30ElevationModelDescriptor.NO_DATA_VALUE;
-    public static final int RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
-    public static final int RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
+    public static final int RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE_X;
+    public static final int RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE_Y;
 
     private final GTOPO30ElevationModelDescriptor _descriptor;
     private final GTOPO30ElevationTile[][] _elevationTiles;
@@ -46,8 +48,8 @@ public class GTOPO30ElevationModel implements ElevationModel, Resampling.Raster 
     }
 
     public float getElevation(GeoPos geoPos) throws Exception {
-        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES * NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5
-        float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES * NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5, y = (90 - lon) / DEGREE_RES * NUM_PIXELS_PER_TILE;
+        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_LON * NUM_PIXELS_PER_TILE_X;
+        float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES_LAT * NUM_PIXELS_PER_TILE_Y;
         _resampling.computeIndex(pixelX, pixelY,
                 RASTER_WIDTH,
                 RASTER_HEIGHT,
@@ -78,14 +80,14 @@ public class GTOPO30ElevationModel implements ElevationModel, Resampling.Raster 
     }
 
     public float getSample(int pixelX, int pixelY) throws IOException {
-        final int tileXIndex = pixelX / NUM_PIXELS_PER_TILE;
-        final int tileYIndex = pixelY / NUM_PIXELS_PER_TILE;
+        final int tileXIndex = pixelX / NUM_PIXELS_PER_TILE_X;
+        final int tileYIndex = pixelY / NUM_PIXELS_PER_TILE_Y;
         final GTOPO30ElevationTile tile = _elevationTiles[tileXIndex][tileYIndex];
         if (tile == null) {
             return Float.NaN;
         }
-        final int tileX = pixelX - tileXIndex * NUM_PIXELS_PER_TILE;
-        final int tileY = pixelY - tileYIndex * NUM_PIXELS_PER_TILE;
+        final int tileX = pixelX - tileXIndex * NUM_PIXELS_PER_TILE_X;
+        final int tileY = pixelY - tileYIndex * NUM_PIXELS_PER_TILE_Y;
         final float sample = tile.getSample(tileX, tileY);
         if (sample == _descriptor.getNoDataValue()) {
             return Float.NaN;
@@ -97,11 +99,11 @@ public class GTOPO30ElevationModel implements ElevationModel, Resampling.Raster 
         final GTOPO30ElevationTile[][] elevationTiles = new GTOPO30ElevationTile[NUM_X_TILES][NUM_Y_TILES];
         final ProductReaderPlugIn ACEReaderPlugIn = getACEReaderPlugIn();
         for (int i = 0; i < elevationTiles.length; i++) {
-            final int minLon = i * DEGREE_RES - 180;
+            final int minLon = i * DEGREE_RES_LON - 180;
 
             for (int j = 0; j < elevationTiles[i].length; j++) {
                 final ProductReader productReader = ACEReaderPlugIn.createReaderInstance();
-                final int minLat = j * DEGREE_RES - 90;
+                final int minLat = 90 - (DEGREE_RES_LAT *j);
 
                 final File file = _descriptor.getTileFile(minLon, minLat);
                 if (file != null && file.exists() && file.isFile()) {

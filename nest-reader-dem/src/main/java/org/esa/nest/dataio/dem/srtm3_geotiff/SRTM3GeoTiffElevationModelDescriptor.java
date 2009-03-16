@@ -1,4 +1,5 @@
-package org.esa.nest.dataio.gtopo30;
+
+package org.esa.nest.dataio.dem.srtm3_geotiff;
 
 import org.esa.beam.framework.dataop.dem.AbstractElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
@@ -11,25 +12,23 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class GTOPO30ElevationModelDescriptor extends AbstractElevationModelDescriptor {
+public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModelDescriptor {
 
-    public static final String NAME = "GTOPO30";
-    public static final String DB_FILE_SUFFIX = ".DEM";
+    public static final String NAME = "ACE";
+    public static final String DB_FILE_SUFFIX = ".ACE";
     public static final String ARCHIVE_URL_PATH = SystemUtils.BEAM_HOME_PAGE + "data/ACE.zip";
-    public static final int NUM_X_TILES = 9;
-    public static final int NUM_Y_TILES = 3;
-    public static final int DEGREE_RES_LAT = 50;
-    public static final int DEGREE_RES_LON = 40;
-    public static final int PIXEL_RES_X = 4800;
-    public static final int PIXEL_RES_Y = 6000;
-    public static final int NO_DATA_VALUE = -9999;
-    public static final int RASTER_WIDTH = NUM_X_TILES * PIXEL_RES_X;
-    public static final int RASTER_HEIGHT = NUM_Y_TILES * PIXEL_RES_Y;
+    public static final int NUM_X_TILES = 24;
+    public static final int NUM_Y_TILES = 12;
+    public static final int DEGREE_RES = 15;
+    public static final int PIXEL_RES = 1800;
+    public static final int NO_DATA_VALUE = -500;
+    public static final int RASTER_WIDTH = NUM_X_TILES * PIXEL_RES;
+    public static final int RASTER_HEIGHT = NUM_Y_TILES * PIXEL_RES;
     public static final Datum DATUM = Datum.WGS_84;
 
     private File aceDemInstallDir = null;
 
-    public GTOPO30ElevationModelDescriptor() {
+    public SRTM3GeoTiffElevationModelDescriptor() {
     }
 
     public String getName() {
@@ -46,15 +45,15 @@ public class GTOPO30ElevationModelDescriptor extends AbstractElevationModelDescr
 
     @Override
     public File getDemInstallDir() {
-        if (aceDemInstallDir == null) {
-            final String path = Settings.instance().get("gtopo30DEMDataPath");
+        if(aceDemInstallDir == null) {
+            String path = Settings.instance().get("aceDEMDataPath");
             aceDemInstallDir = new File(path);
         }
         return aceDemInstallDir;
     }
 
     public boolean isDemInstalled() {
-        final File file = getTileFile(-180, -60);
+        final File file = getTileFile(-180, -90);   // todo (nf) - check all tiles
         return file.canRead();
     }
 
@@ -68,7 +67,7 @@ public class GTOPO30ElevationModelDescriptor extends AbstractElevationModelDescr
 
     public ElevationModel createDem() {
         try {
-            return new GTOPO30ElevationModel(this);
+            return new SRTM3GeoTiffElevationModel(this);
         } catch (IOException e) {
             return null;
         }
@@ -79,15 +78,15 @@ public class GTOPO30ElevationModelDescriptor extends AbstractElevationModelDescr
     }
 
     public static String createTileFilename(int minLat, int minLon) {
-        String latString = minLat < 0 ? "S" + Math.abs(minLat) : "N" +minLat;
+        String latString = minLat < 0 ? Math.abs(minLat) + "S" : minLat + "N";
         while (latString.length() < 3) {
             latString = '0' + latString;
         }
-        String lonString = minLon < 0 ? "W" + Math.abs(minLon) : "E" + minLon;
+        String lonString = minLon < 0 ? Math.abs(minLon) + "W" : minLon + "E";
         while (lonString.length() < 4) {
-            lonString = minLon < 0 ? "W0" + Math.abs(minLon) : "E0" + minLon;
+            lonString = '0' + lonString;
         }
-        return lonString + latString + DB_FILE_SUFFIX;
+        return latString + lonString + DB_FILE_SUFFIX;
     }
 
 }
