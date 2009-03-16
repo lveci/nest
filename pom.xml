@@ -3,11 +3,15 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+	<properties>
+		<nest.version>2C</nest.version>
+	</properties>
+	
     <name>NEST Project</name>
     <url>http://www.array.ca/nest</url>
     <groupId>org.esa.nest</groupId>
     <artifactId>nest</artifactId>
-    <version>2B</version>
+    <version>${nest.version}</version>
 
     <packaging>pom</packaging>
 
@@ -193,13 +197,13 @@
             <dependency>
                 <groupId>org.esa.nest</groupId>
                 <artifactId>nest-core</artifactId>
-                <version>2B</version>
+                <version>${nest.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.nest</groupId>
                 <artifactId>nest-graph-builder</artifactId>
-			    <version>2B</version>
+			    <version>${nest.version}</version>
             </dependency>
 
 			<!-- GeoTools Libraries ############################################# -->

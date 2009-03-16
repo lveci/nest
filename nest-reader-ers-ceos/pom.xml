@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.esa.nest</groupId>
         <artifactId>nest</artifactId>
-        <version>2B</version>
+        <version>${nest.version}</version>
     </parent>
 
     <groupId>org.esa.nest</groupId>
     <artifactId>nest-reader-ers-ceos</artifactId>
     <name>NEST ERS 1 and 2 CEOS Product Reader</name>
-    <version>2B</version>
+    <version>${nest.version}</version>
 
     <packaging>jar</packaging>
 
