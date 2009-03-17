@@ -349,4 +349,41 @@ public class AbstractMetadata {
         }
         return subElemRoot;
     }
+
+    /**
+     * Get orbit state vectors.
+     * @param absRoot Abstracted metadata root
+     * @return orbitStateVectors Array of orbit state vectors.
+     * @throws Exception The exceptions.
+     */
+    public static OrbitStateVector[] getOrbitStateVectors(final MetadataElement absRoot) throws Exception {
+
+        MetadataElement elemRoot = absRoot.getElement(orbit_state_vectors);
+        int numElems = elemRoot.getNumElements();
+        OrbitStateVector[] orbitStateVectors = new OrbitStateVector[numElems];
+        for (int i = 0; i < numElems; i++) {
+            OrbitStateVector vector = new OrbitStateVector();
+            MetadataElement subElemRoot = elemRoot.getElement(orbit_vector + (i+1));
+            vector.time  = subElemRoot.getAttributeUTC(orbit_vector_time);
+            vector.x_pos = subElemRoot.getAttributeDouble(orbit_vector_x_pos);
+            vector.y_pos = subElemRoot.getAttributeDouble(orbit_vector_y_pos);
+            vector.z_pos = subElemRoot.getAttributeDouble(orbit_vector_z_pos);
+            vector.x_vel = subElemRoot.getAttributeDouble(orbit_vector_x_vel);
+            vector.y_vel = subElemRoot.getAttributeDouble(orbit_vector_y_vel);
+            vector.z_vel = subElemRoot.getAttributeDouble(orbit_vector_z_vel);
+            orbitStateVectors[i] = vector;
+        }
+        return orbitStateVectors;
+    }
+
+    public static class OrbitStateVector {
+
+        public ProductData.UTC time;
+        public double x_pos;
+        public double y_pos;
+        public double z_pos;
+        public double x_vel;
+        public double y_vel;
+        public double z_vel;
+    }
 }
