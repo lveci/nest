@@ -66,6 +66,23 @@ public final class MathUtils
     }
 
     /**
+     * Perform Bi-linear interpolation.
+     * @param v00 Sample value for pixel at (x0, y0).
+     * @param v01 Sample value for pixel at (x1, y0).
+     * @param v10 Sample value for pixel at (x0, y1).
+     * @param v11 Sample value for pixel at (x1, y1).
+     * @param muX A perameter in range [0,1] that defines the interpolated sample position between x0 and x1.
+     *           A 0 value of muX corresponds to sample x0.
+     * @param muY A perameter in range [0,1] that defines the interpolated sample position between y0 and y1.
+     *           A 0 value of muY corresponds to sample y0.
+     * @return The interpolated sample value.
+     */
+    public static double interpolationBiLinear(
+            final double v00, final double v01, final double v10, final double v11, final double muX, final double muY) {
+        return (1 - muY)*((1 - muX)*v00 + muX*v01) + muY*((1 - muX)*v10 + muX*v11);
+    }
+
+    /**
      * Get Vandermonde matrix constructed from a given array.
      * @param d The given range distance array.
      * @param warpPolynomialOrder The warp polynomial order.
