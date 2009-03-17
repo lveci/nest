@@ -22,16 +22,31 @@ public final class GeoUtils
      */
     public static void geo2xyz(GeoPos geoPos, double xyz[]) {
 
-        final double lat = ((double)geoPos.lat) * org.esa.beam.util.math.MathUtils.DTOR;
-        final double lon = ((double)geoPos.lon) * org.esa.beam.util.math.MathUtils.DTOR;
+        final double lat = ((double)geoPos.lat);
+        final double lon = ((double)geoPos.lon);
+        final double alt = 0.0;
+        geo2xyz(lat, lon, alt, xyz);
+    }
+
+    /**
+     * Convert geodetic coordinate into cartesian XYZ coordinate.
+     * @param latitude The latitude of a given pixel (in degree).
+     * @param longitude The longitude of the given pixel (in degree).
+     * @param altitude The altitude of the given pixel (in m)
+     * @param xyz The xyz coordinates of the given pixel.
+     */
+    public static void geo2xyz(double latitude, double longitude, double altitude, double xyz[]) {
+
+        final double lat = latitude * org.esa.beam.util.math.MathUtils.DTOR;
+        final double lon = longitude * org.esa.beam.util.math.MathUtils.DTOR;
 
         final double sinLat = Math.sin(lat);
         final double cosLat = Math.cos(lat);
         final double N = a / Math.sqrt(1 - e2*sinLat*sinLat);
 
-        xyz[0] = N * cosLat * Math.cos(lon); // in m
-        xyz[1] = N * cosLat * Math.sin(lon); // in m
-        xyz[2] = (1 - e2) * N * sinLat;   // in m
+        xyz[0] = (N + altitude) * cosLat * Math.cos(lon); // in m
+        xyz[1] = (N + altitude) * cosLat * Math.sin(lon); // in m
+        xyz[2] = ((1 - e2) * N + altitude) * sinLat;   // in m
     }
 
     /**
