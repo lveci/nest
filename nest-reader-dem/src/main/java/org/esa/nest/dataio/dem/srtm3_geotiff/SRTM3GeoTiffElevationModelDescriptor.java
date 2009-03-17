@@ -26,7 +26,7 @@ public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModel
     public static final int RASTER_HEIGHT = NUM_Y_TILES * PIXEL_RES;
     public static final Datum DATUM = Datum.WGS_84;
 
-    private File aceDemInstallDir = null;
+    private File demInstallDir = null;
 
     public SRTM3GeoTiffElevationModelDescriptor() {
     }
@@ -45,11 +45,11 @@ public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModel
 
     @Override
     public File getDemInstallDir() {
-        if(aceDemInstallDir == null) {
+        if(demInstallDir == null) {
             final String path = Settings.instance().get("srtm3GeoTiffDEMDataPath");
-            aceDemInstallDir = new File(path);
+            demInstallDir = new File(path);
         }
-        return aceDemInstallDir;
+        return demInstallDir;
     }
 
     public boolean isDemInstalled() {
@@ -72,20 +72,18 @@ public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModel
         }
     }
 
-    public File getTileFile(int minLon, int minLat) {
-        return new File(getDemInstallDir(), createTileFilename(minLat, minLon));
-    }
-
-    public static String createTileFilename(int minLat, int minLon) {
-        String latString = minLat < 0 ? Math.abs(minLat) + "S" : minLat + "N";
-        while (latString.length() < 3) {
-            latString = '0' + latString;
-        }
-        String lonString = minLon < 0 ? Math.abs(minLon) + "W" : minLon + "E";
-        while (lonString.length() < 4) {
-            lonString = '0' + lonString;
-        }
-        return latString + lonString + DB_FILE_SUFFIX;
+    public static String createTileFilename(int tileX, int tileY) {
+        String name = "srtm_";
+        if(tileX < 10)
+            name += "0" + tileX;
+        else
+            name += tileX;
+        name += '_';
+        if(tileY < 10)
+            name += "0" + tileY;
+        else
+            name += tileY;
+        return name + ".zip";
     }
 
 }

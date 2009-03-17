@@ -11,11 +11,13 @@ import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.dataio.geotiff.GeoTiffProductReaderPlugIn;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Iterator;
+import java.util.concurrent.ExecutionException;
 
 public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Raster {
 
@@ -28,18 +30,21 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
     public static final int RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
 
     private final SRTM3GeoTiffElevationModelDescriptor _descriptor;
-    private final SRTM3GeoTiffElevationTile[][] _elevationTiles;
+    private final SRTM3GeoTiffElevationTile[][] _elevationTiles = null;
+    private final SRTM3GeoTiffFile[][] elevationFiles;
     private final ArrayList<SRTM3GeoTiffElevationTile> _elevationTileCache = new ArrayList<SRTM3GeoTiffElevationTile>();
     private final Resampling _resampling;
     private final Resampling.Index _resamplingIndex;
     private final Resampling.Raster _resamplingRaster;
+
+    final ProductReader productReader = getReaderPlugIn().createReaderInstance();
 
     public SRTM3GeoTiffElevationModel(SRTM3GeoTiffElevationModelDescriptor descriptor) throws IOException {
         _descriptor = descriptor;
         _resampling = Resampling.BILINEAR_INTERPOLATION;
         _resamplingIndex = _resampling.createIndex();
         _resamplingRaster = this;
-        _elevationTiles = createEleveationTiles();
+        elevationFiles = createElevationFiles();
     }
 
     public ElevationModelDescriptor getDescriptor() {
@@ -81,7 +86,7 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
     public float getSample(int pixelX, int pixelY) throws IOException {
         final int tileXIndex = pixelX / NUM_PIXELS_PER_TILE;
         final int tileYIndex = pixelY / NUM_PIXELS_PER_TILE;
-        final SRTM3GeoTiffElevationTile tile = _elevationTiles[tileXIndex][tileYIndex];
+        final SRTM3GeoTiffElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile();
         if(tile == null) {
             return Float.NaN;
         }
@@ -94,26 +99,18 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
         return sample;
     }
 
-    private SRTM3GeoTiffElevationTile[][] createEleveationTiles() throws IOException {
-        final SRTM3GeoTiffElevationTile[][] elevationTiles = new SRTM3GeoTiffElevationTile[NUM_X_TILES][NUM_Y_TILES];
-        final ProductReaderPlugIn readerPlugIn = getReaderPlugIn();
-        for (int i = 0; i < elevationTiles.length; i++) {
-            final int minLon = i * DEGREE_RES - 180;
+    private SRTM3GeoTiffFile[][] createElevationFiles() throws IOException {
+        final SRTM3GeoTiffFile[][] elevationFiles = new SRTM3GeoTiffFile[NUM_X_TILES][NUM_Y_TILES];
+        for (int x = 0; x < elevationFiles.length; x++) {
 
-            for (int j = 0; j < elevationTiles[i].length; j++) {
-                final ProductReader productReader = readerPlugIn.createReaderInstance();
-                final int minLat = j * DEGREE_RES - 90;
+            for (int y = 0; y < elevationFiles[x].length; y++) {
 
-                File file = _descriptor.getTileFile(minLon, minLat);
-                if (file != null && file.exists() && file.isFile()) {
-                    final Product product = productReader.readProductNodes(file, null);
-                    elevationTiles[i][NUM_Y_TILES - 1 - j] = new SRTM3GeoTiffElevationTile(this, product);
-                } else {
-                    elevationTiles[i][NUM_Y_TILES - 1 - j] = null;
-                }
+                final String fileName = SRTM3GeoTiffElevationModelDescriptor.createTileFilename(x, y);
+                final File localFile = new File(_descriptor.getDemInstallDir(), fileName);
+                elevationFiles[x][NUM_Y_TILES - 1 - y] = new SRTM3GeoTiffFile(this, localFile, productReader);
             }
-        }
-        return elevationTiles;
+        }             
+        return elevationFiles;
     }
 
     public void updateCache(SRTM3GeoTiffElevationTile tile) {
@@ -131,4 +128,27 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
         final Iterator readerPlugIns = ProductIOPlugInManager.getInstance().getReaderPlugIns("GeoTIFF");
         return (ProductReaderPlugIn) readerPlugIns.next();
     }
+
+
+  /*  private static void run(final boolean auto, final boolean prompt) {
+        final SwingWorker swingWorker = new SwingWorker<Integer, Integer>() {
+            @Override
+            protected Integer doInBackground() throws Exception {
+                return new Integer(getVersionStatus());
+            }
+
+            @Override
+            public void done() {
+                try {
+                    showVersionStatus(auto, prompt, get().intValue());
+                } catch (InterruptedException e) {
+                    showVersionCheckFailedMessage(auto, prompt, e);
+                } catch (ExecutionException e) {
+                    showVersionCheckFailedMessage(auto, prompt, e.getCause());
+
+                }
+            }
+        };
+        swingWorker.execute();
+    }      */
 }
