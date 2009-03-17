@@ -51,7 +51,7 @@ import java.util.HashMap;
  */
 
 @OperatorMetadata(alias="Forward-Terrain-Correction",
-        description="Forward method for correcting topographic distortion caused by target elevation", internal=true)
+        description="Forward method for correcting topographic distortion caused by target elevation")
 public final class ForwardTerrainCorrectionOp extends Operator {
 
     @SourceProduct(alias="source")
@@ -73,6 +73,7 @@ public final class ForwardTerrainCorrectionOp extends Operator {
     private int sourceImageWidth;
     private int sourceImageHeight;
     private double rangeSpacing;
+    private double noDataValue; // NoDataValue for elevation band
 
     protected static final double lightSpeed = 299792458.0; //  m / s
     protected static final double halfLightSpeed = lightSpeed / 2.0;
@@ -96,21 +97,13 @@ public final class ForwardTerrainCorrectionOp extends Operator {
         try {
             absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
-            boolean srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
-            if (!srgrFlag) {
-                throw new OperatorException("Source product should be ground detected image");
-            }
+            getSRGRFlag();
 
-            rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
+            getRangeSpacing();
 
-            incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
+            getTiePointGrids();
 
-            slantRangeTime = OperatorUtils.getSlantRangeTime(sourceProduct);
-
-            elevationBand = sourceProduct.getBand("elevation");
-            if (elevationBand == null) {
-                throw new OperatorException("Source product does not have elevation band, please run Create Elevation Band Operator first");
-            }
+            getElevationBand();
 
             createTargetProduct();
 
@@ -153,6 +146,60 @@ public final class ForwardTerrainCorrectionOp extends Operator {
                 trgData.setElemDoubleAt(index, v);
             }
         }
+        /*
+        double t = slantRangeTime.getPixelFloat(740.0f, 0.0f);
+        int y = 0;
+        for (int x = x0; x < x0 + w; x++) {
+            double slrgTime = slantRangeTime.getPixelFloat((float)x, (float)y) / 1000000000.0; //convert ns to s
+            double R = slrgTime * halfLightSpeed; // slant range distance in m
+            System.out.print(R + ", ");
+        }
+        System.out.println();
+        for (int x = x0; x < x0 + w; x++) {
+            double alpha = incidenceAngle.getPixelFloat((float)x, (float)y);
+            System.out.print(alpha + ", ");
+        }
+        System.out.println();
+        */
+    }
+
+    /**
+     * Get SRGR flag from the abstracted metadata.
+     * @throws Exception The exceptions.
+     */
+    private void getSRGRFlag() throws Exception {
+        boolean srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
+        if (!srgrFlag) {
+            throw new OperatorException("Source product should be ground detected image");
+        }
+    }
+
+    /**
+     * Get range spacing from the abstracted metadata.
+     * @throws Exception The exceptions.
+     */
+    private void getRangeSpacing() throws Exception {
+        rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
+    }
+
+    /**
+     * Get incidence angle and slant range time tie point grids.
+     */
+    private void getTiePointGrids() {
+        incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
+        slantRangeTime = OperatorUtils.getSlantRangeTime(sourceProduct);
+    }
+
+    /**
+     * Get elevation band.
+     */
+    private void getElevationBand() {
+        elevationBand = sourceProduct.getBand("elevation");
+        if (elevationBand == null) {
+            throw new OperatorException(
+                    "Source product does not have elevation band, please run Create Elevation Band Operator first");
+        }
+        noDataValue = elevationBand.getNoDataValue();        
     }
 
     /**
@@ -183,6 +230,10 @@ public final class ForwardTerrainCorrectionOp extends Operator {
         targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 20);
     }
 
+    /**
+     * Add user selected bands to target product.
+     * @throws OperatorException The exceptions.
+     */
     private void addSelectedBands() throws OperatorException {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) {
@@ -220,18 +271,30 @@ public final class ForwardTerrainCorrectionOp extends Operator {
         }
     }
 
+    /**
+     * Compute orthorectified pixel value for given pixel.
+     * @param x The x coordinate for given pixel.
+     * @param y The y coordinate for given pixel.
+     * @param index The data index for given pixel in current tile.
+     * @param srcData The source data for current tile.
+     * @param sourceRaster The source raster for current tile.
+     * @param elevData The elevation data.
+     * @return The pixel value.
+     */
     private double computeOrthoRectifiedPixelValue(
             int x, int y, int index, ProductData srcData, Tile sourceRaster, ProductData elevData) {
 
-        double slrgTime = slantRangeTime.getPixelDouble(x, y) / 1000000000.0; //convert ns to s
+        double slrgTime = slantRangeTime.getPixelFloat((float)x, (float)y) / 1000000000.0; //convert ns to s
         double R = slrgTime * halfLightSpeed; // slant range distance in m
-        double alpha = incidenceAngle.getPixelDouble(x, y) * Math.PI / 180.0; // incidence angle in radian
+        double alpha = incidenceAngle.getPixelFloat((float)x, (float)y) * Math.PI / 180.0; // incidence angle in radian
         double h = elevData.getElemDoubleAt(index); // target elevation in m
-        double Q = R*Math.cos(alpha);
-        double tmp1 = Q - h;
-        double tmp2 = tmp1 / Math.cos(alpha);
-        double del = (tmp1*Math.tan(alpha) - Math.sqrt(tmp2*tmp2 - Q*Q)) / rangeSpacing; // ground range displacement
+        if (Double.compare(h, noDataValue) == 0) {
+            return srcData.getElemDoubleAt(index);
+        }
+
+        double del = getRangeDisplacement(R, alpha, h, rangeSpacing);
         double xip = x - del; // imaged pixel position
+        //System.out.print(del + ", ");
 
         if (xip < 0.0 || xip >= sourceImageWidth - 1) {
             return srcData.getElemDoubleAt(index);
@@ -242,9 +305,26 @@ public final class ForwardTerrainCorrectionOp extends Operator {
         double mu = xip - x0;
         int index0 = sourceRaster.getDataBufferIndex(x0, y);
         int index1 = sourceRaster.getDataBufferIndex(x1, y);
-        double y0 = srcData.getElemDoubleAt(index0);
-        double y1 = srcData.getElemDoubleAt(index1);
-        return MathUtils.interpolationLinear(y0, y1, mu);
+        double v0 = srcData.getElemDoubleAt(index0);
+        double v1 = srcData.getElemDoubleAt(index1);
+        return MathUtils.interpolationLinear(v0, v1, mu);
+    }
+
+    /**
+     * Compute ground range displacement in pixels.
+     * @param slantRange The slant range in meters.
+     * @param incidenceAngle The incidence angle in radian.
+     * @param elevation The target elevation in meters.
+     * @param rangeSpacing The range spacing in meters.
+     * @return The range displacement in pixels.
+     */
+    public static double getRangeDisplacement(
+            double slantRange, double incidenceAngle, double elevation, double rangeSpacing) {
+
+        double Q = slantRange*Math.cos(incidenceAngle);
+        double tmp1 = Q - elevation;
+        double tmp2 = tmp1 / Math.cos(incidenceAngle);
+        return (tmp1*Math.tan(incidenceAngle) - Math.sqrt(tmp2*tmp2 - Q*Q)) / rangeSpacing;
     }
 
     /**
