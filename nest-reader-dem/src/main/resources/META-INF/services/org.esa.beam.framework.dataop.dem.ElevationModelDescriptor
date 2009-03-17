@@ -1,1 +1,2 @@
 org.esa.nest.dataio.dem.ace.ACEElevationModelDescriptor
+org.esa.nest.dataio.dem.srtm2_geotiff.SRTM3GeoTiffElevationModelDescriptor

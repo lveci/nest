@@ -14,14 +14,14 @@ import java.net.URL;
 
 public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModelDescriptor {
 
-    public static final String NAME = "ACE";
-    public static final String DB_FILE_SUFFIX = ".ACE";
+    public static final String NAME = "SRTM 3Sec GeoTiff";
+    public static final String DB_FILE_SUFFIX = ".TIF";
     public static final String ARCHIVE_URL_PATH = SystemUtils.BEAM_HOME_PAGE + "data/ACE.zip";
-    public static final int NUM_X_TILES = 24;
-    public static final int NUM_Y_TILES = 12;
+    public static final int NUM_X_TILES = 72;
+    public static final int NUM_Y_TILES = 24;
     public static final int DEGREE_RES = 15;
     public static final int PIXEL_RES = 1800;
-    public static final int NO_DATA_VALUE = -500;
+    public static final int NO_DATA_VALUE = -32768;
     public static final int RASTER_WIDTH = NUM_X_TILES * PIXEL_RES;
     public static final int RASTER_HEIGHT = NUM_Y_TILES * PIXEL_RES;
     public static final Datum DATUM = Datum.WGS_84;
@@ -46,15 +46,14 @@ public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModel
     @Override
     public File getDemInstallDir() {
         if(aceDemInstallDir == null) {
-            String path = Settings.instance().get("aceDEMDataPath");
+            final String path = Settings.instance().get("srtm3GeoTiffDEMDataPath");
             aceDemInstallDir = new File(path);
         }
         return aceDemInstallDir;
     }
 
     public boolean isDemInstalled() {
-        final File file = getTileFile(-180, -90);   // todo (nf) - check all tiles
-        return file.canRead();
+        return true;
     }
 
     public URL getDemArchiveUrl() {

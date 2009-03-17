@@ -40,14 +40,10 @@ public class AbstractMetadata {
     public static final String last_line_time = "last_line_time";
     public static final String first_near_lat = "first_near_lat";
     public static final String first_near_long = "first_near_long";
-    public static final String first_mid_lat = "first_mid_lat";
-    public static final String first_mid_long = "first_mid_long";
     public static final String first_far_lat = "first_far_lat";
     public static final String first_far_long = "first_far_long";
     public static final String last_near_lat = "last_near_lat";
     public static final String last_near_long = "last_near_long";
-    public static final String last_mid_lat = "last_mid_lat";
-    public static final String last_mid_long = "last_mid_long";
     public static final String last_far_lat = "last_far_lat";
     public static final String last_far_long = "last_far_long";
 
@@ -62,6 +58,7 @@ public class AbstractMetadata {
     public static final String range_spacing = "range_spacing";
     public static final String azimuth_spacing = "azimuth_spacing";
     public static final String pulse_repetition_frequency = "pulse_repetition_frequency";
+    public static final String radar_frequency = "radar_frequency";
     public static final String line_time_interval = "line_time_interval";
 
     public static final String data_type = "data_type";
@@ -126,14 +123,10 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, last_line_time, ProductData.TYPE_UTC, "utc", "");
         addAbstractedAttribute(absRoot, first_near_lat, ProductData.TYPE_FLOAT64, "deg", "");
         addAbstractedAttribute(absRoot, first_near_long, ProductData.TYPE_FLOAT64, "deg", "");
-        addAbstractedAttribute(absRoot, first_mid_lat, ProductData.TYPE_FLOAT64, "deg", "");
-        addAbstractedAttribute(absRoot, first_mid_long, ProductData.TYPE_FLOAT64, "deg", "");
         addAbstractedAttribute(absRoot, first_far_lat, ProductData.TYPE_FLOAT64, "deg", "");
         addAbstractedAttribute(absRoot, first_far_long, ProductData.TYPE_FLOAT64, "deg", "");
         addAbstractedAttribute(absRoot, last_near_lat, ProductData.TYPE_FLOAT64, "deg", "");
         addAbstractedAttribute(absRoot, last_near_long, ProductData.TYPE_FLOAT64, "deg", "");
-        addAbstractedAttribute(absRoot, last_mid_lat, ProductData.TYPE_FLOAT64, "deg", "");
-        addAbstractedAttribute(absRoot, last_mid_long, ProductData.TYPE_FLOAT64, "deg", "");
         addAbstractedAttribute(absRoot, last_far_lat, ProductData.TYPE_FLOAT64, "deg", "");
         addAbstractedAttribute(absRoot, last_far_long, ProductData.TYPE_FLOAT64, "deg", "");
         
@@ -148,6 +141,7 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, range_spacing, ProductData.TYPE_FLOAT64, "m", "Range sample spacing");
         addAbstractedAttribute(absRoot, azimuth_spacing, ProductData.TYPE_FLOAT64, "m", "Azimuth sample spacing");
         addAbstractedAttribute(absRoot, pulse_repetition_frequency, ProductData.TYPE_FLOAT64, "Hz", "PRF");
+        addAbstractedAttribute(absRoot, radar_frequency, ProductData.TYPE_FLOAT64, "MHz", "Radar Frequency");
         addAbstractedAttribute(absRoot, line_time_interval, ProductData.TYPE_FLOAT64, "s", "");
 
         addAbstractedAttribute(absRoot, data_type, ProductData.TYPE_ASCII, "", "");

@@ -111,6 +111,9 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         final MetadataElement pulseRepetitionFrequency = radarParameters.getElement("pulseRepetitionFrequency");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
                 pulseRepetitionFrequency.getAttributeDouble("pulseRepetitionFrequency", defInt));
+        final MetadataElement radarCenterFrequency = radarParameters.getElement("radarCenterFrequency");
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency,
+                radarCenterFrequency.getAttributeDouble("radarCenterFrequency", defInt) / 1000000.0);
 
         final MetadataElement orbitAndAttitude = sourceAttributes.getElement("orbitAndAttitude");
         final MetadataElement orbitInformation = orbitAndAttitude.getElement("orbitInformation");
@@ -296,11 +299,6 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_long, lonGrid.getPixelFloat(0, 0));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_lat, latGrid.getPixelFloat(w, 0));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_long, lonGrid.getPixelFloat(w, 0));
-
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_mid_lat, latGrid.getPixelFloat(w/2, 0));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_mid_long, lonGrid.getPixelFloat(w/2, 0));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_mid_lat, latGrid.getPixelFloat(w/2, h));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_mid_long, lonGrid.getPixelFloat(w/2, h));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_lat, latGrid.getPixelFloat(0, h));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_long, lonGrid.getPixelFloat(0, h));

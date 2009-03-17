@@ -310,6 +310,8 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeDouble("Nominal number of looks processed in range"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
                 sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency,
+                sceneRec.getAttributeDouble("Radar frequency") * 1000.0);
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
                 ReaderUtils.getLineTimeInterval(startTime, endTime, _sceneHeight));

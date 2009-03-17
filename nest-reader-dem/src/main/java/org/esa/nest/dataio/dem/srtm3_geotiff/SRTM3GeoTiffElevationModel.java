@@ -29,7 +29,7 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
 
     private final SRTM3GeoTiffElevationModelDescriptor _descriptor;
     private final SRTM3GeoTiffElevationTile[][] _elevationTiles;
-    private final List _elevationTileCache;
+    private final ArrayList<SRTM3GeoTiffElevationTile> _elevationTileCache = new ArrayList<SRTM3GeoTiffElevationTile>();
     private final Resampling _resampling;
     private final Resampling.Index _resamplingIndex;
     private final Resampling.Raster _resamplingRaster;
@@ -40,7 +40,6 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
         _resamplingIndex = _resampling.createIndex();
         _resamplingRaster = this;
         _elevationTiles = createEleveationTiles();
-        _elevationTileCache = new ArrayList();
     }
 
     public ElevationModelDescriptor getDescriptor() {
@@ -88,7 +87,7 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
         }
         final int tileX = pixelX - tileXIndex * NUM_PIXELS_PER_TILE;
         final int tileY = pixelY - tileYIndex * NUM_PIXELS_PER_TILE;
-        final float sample = tile.getSample(tileX, tileY);
+        final float sample = tile.getSample(tileX, tileY);    
         if (sample == _descriptor.getNoDataValue()) {
             return Float.NaN;
         }
@@ -122,7 +121,7 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
         _elevationTileCache.add(0, tile);
         while (_elevationTileCache.size() > 60) {
             final int index = _elevationTileCache.size() - 1;
-            SRTM3GeoTiffElevationTile lastTile = (SRTM3GeoTiffElevationTile) _elevationTileCache.get(index);
+            final SRTM3GeoTiffElevationTile lastTile = _elevationTileCache.get(index);
             lastTile.clearCache();
             _elevationTileCache.remove(index);
         }
