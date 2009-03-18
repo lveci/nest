@@ -4,6 +4,7 @@ import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.beam.visat.actions.AbstractVisatAction;
+import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
 
 /**
  * Backward-Terrain-Correction action.
@@ -11,14 +12,15 @@ import org.esa.beam.visat.actions.AbstractVisatAction;
  */
 public class BackwardTerrainCorrectionOpAction extends AbstractVisatAction {
 
-    private ModelessDialog dialog;
+    private NestSingleTargetProductDialog dialog;
 
     @Override
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("Backward-Terrain-Correction",
+            dialog = new NestSingleTargetProductDialog("Backward-Terrain-Correction",
                     getAppContext(), "Backward-Terrain-Correction", getHelpId());
+            dialog.setTargetProductNameSuffix("_OrthRect");
         }
         dialog.show();
 
