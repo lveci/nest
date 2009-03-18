@@ -19,8 +19,8 @@ public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModel
     public static final String ARCHIVE_URL_PATH = SystemUtils.BEAM_HOME_PAGE + "data/ACE.zip";
     public static final int NUM_X_TILES = 72;
     public static final int NUM_Y_TILES = 24;
-    public static final int DEGREE_RES = 15;
-    public static final int PIXEL_RES = 1800;
+    public static final int DEGREE_RES = 5;
+    public static final int PIXEL_RES = 6000;
     public static final int NO_DATA_VALUE = -32768;
     public static final int RASTER_WIDTH = NUM_X_TILES * PIXEL_RES;
     public static final int RASTER_HEIGHT = NUM_Y_TILES * PIXEL_RES;

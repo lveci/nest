@@ -95,11 +95,12 @@ public class SRTM3GeoTiffFile {
                     throw new IOException("Entry '" + baseName + "' not found in zip file.");
                 }
 
-                final byte[] buf = new byte[1024];
+                final int size = 8192;
+                final byte[] buf = new byte[size];
                 InputStream zipinputstream = zipFile.getInputStream(zipEntry);
 
                 int n;
-                while ((n = zipinputstream.read(buf, 0, 1024)) > -1)
+                while ((n = zipinputstream.read(buf, 0, size)) > -1)
                     fileoutputstream.write(buf, 0, n);
 
                 return newFile;

@@ -52,8 +52,9 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
     }
 
     public float getElevation(GeoPos geoPos) throws Exception {
-        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES * NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5
-        float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES * NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5, y = (90 - lon) / DEGREE_RES * NUM_PIXELS_PER_TILE;
+        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES * NUM_PIXELS_PER_TILE; 
+        float pixelY = RASTER_HEIGHT - (geoPos.lat + 60.0f) / DEGREE_RES * NUM_PIXELS_PER_TILE;
+
         _resampling.computeIndex(pixelX, pixelY,
                                  RASTER_WIDTH,
                                  RASTER_HEIGHT,
@@ -84,14 +85,14 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
     }
 
     public float getSample(int pixelX, int pixelY) throws IOException {
-        final int tileXIndex = pixelX / NUM_PIXELS_PER_TILE;
-        final int tileYIndex = pixelY / NUM_PIXELS_PER_TILE;
+        final int tileXIndex = (pixelX / NUM_PIXELS_PER_TILE)+1;
+        final int tileYIndex = (pixelY / NUM_PIXELS_PER_TILE)+1;
         final SRTM3GeoTiffElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile();
         if(tile == null) {
             return Float.NaN;
         }
-        final int tileX = pixelX - tileXIndex * NUM_PIXELS_PER_TILE;
-        final int tileY = pixelY - tileYIndex * NUM_PIXELS_PER_TILE;
+        final int tileX = pixelX - (tileXIndex-1) * NUM_PIXELS_PER_TILE;
+        final int tileY = pixelY - (tileYIndex-1) * NUM_PIXELS_PER_TILE;
         final float sample = tile.getSample(tileX, tileY);    
         if (sample == _descriptor.getNoDataValue()) {
             return Float.NaN;
@@ -107,7 +108,7 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
 
                 final String fileName = SRTM3GeoTiffElevationModelDescriptor.createTileFilename(x, y);
                 final File localFile = new File(_descriptor.getDemInstallDir(), fileName);
-                elevationFiles[x][NUM_Y_TILES - 1 - y] = new SRTM3GeoTiffFile(this, localFile, productReader);
+                elevationFiles[x][y] = new SRTM3GeoTiffFile(this, localFile, productReader);
             }
         }             
         return elevationFiles;
