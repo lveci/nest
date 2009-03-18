@@ -55,7 +55,7 @@ public class NetCDFReaderPlugIn implements ProductReaderPlugIn {
                 return DecodeQualification.INTENDED;
         }
 
-        return DecodeQualification.SUITABLE;
+        return DecodeQualification.UNABLE;
     }
 
      public static File getFileFromInput(final Object input) {
