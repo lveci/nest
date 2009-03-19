@@ -45,7 +45,7 @@ public class ftpUtils {
             fos = new FileOutputStream(localFile.getAbsolutePath());
 
             if(VisatApp.getApp() != null) {
-                readFile(fis, fos, fileSize);
+                readFile(fis, fos, remoteFile.getName(), fileSize);
             } else {
                 final int size = 1024;//8192;
                 final byte[] buf = new byte[size];
@@ -83,15 +83,16 @@ public class ftpUtils {
         return 0;
     }
 
-    private static void readFile(final InputStream fis, final FileOutputStream fos, final long fileSize) {
+    private static void readFile(final InputStream fis, final FileOutputStream fos,
+                                 final String fileName, final long fileSize) {
 
-        final ProgressMonitorSwingWorker worker = new ProgressMonitorSwingWorker(VisatApp.getApp().getMainFrame(), "Downloading ") {
+        final ProgressMonitorSwingWorker worker = new ProgressMonitorSwingWorker(VisatApp.getApp().getMainFrame(), "Downloading...") {
             @Override
             protected Object doInBackground(com.bc.ceres.core.ProgressMonitor pm) throws Exception {
                 final int size = 1024;//8192;
                 final byte[] buf = new byte[size];
 
-                pm.beginTask("Downloading...", (int)(fileSize/size) + 10);
+                pm.beginTask("Downloading "+fileName, (int)(fileSize/size) + 20);
                 try {
 
                     int n;
