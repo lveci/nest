@@ -30,7 +30,6 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
     public static final int RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
 
     private final SRTM3GeoTiffElevationModelDescriptor _descriptor;
-    private final SRTM3GeoTiffElevationTile[][] _elevationTiles = null;
     private final SRTM3GeoTiffFile[][] elevationFiles;
     private final ArrayList<SRTM3GeoTiffElevationTile> _elevationTileCache = new ArrayList<SRTM3GeoTiffElevationTile>();
     private final Resampling _resampling;
@@ -69,9 +68,9 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
 
     public void dispose() {
         _elevationTileCache.clear();
-        for (int i = 0; i < _elevationTiles.length; i++) {
-            for (int j = 0; j < _elevationTiles[i].length; j++) {
-                _elevationTiles[i][j].dispose();
+        for (int i = 0; i < elevationFiles.length; i++) {
+            for (int j = 0; j < elevationFiles[i].length; j++) {
+                elevationFiles[i][j].dispose();
             }
         }
     }
@@ -130,26 +129,4 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
         return (ProductReaderPlugIn) readerPlugIns.next();
     }
 
-
-  /*  private static void run(final boolean auto, final boolean prompt) {
-        final SwingWorker swingWorker = new SwingWorker<Integer, Integer>() {
-            @Override
-            protected Integer doInBackground() throws Exception {
-                return new Integer(getVersionStatus());
-            }
-
-            @Override
-            public void done() {
-                try {
-                    showVersionStatus(auto, prompt, get().intValue());
-                } catch (InterruptedException e) {
-                    showVersionCheckFailedMessage(auto, prompt, e);
-                } catch (ExecutionException e) {
-                    showVersionCheckFailedMessage(auto, prompt, e.getCause());
-
-                }
-            }
-        };
-        swingWorker.execute();
-    }      */
 }

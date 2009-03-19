@@ -6,6 +6,8 @@ import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.dataio.dem.ace.ACEElevationModelDescriptor;
 import org.esa.nest.util.ftpUtils;
+import org.esa.nest.util.DatUtils;
+import org.apache.commons.net.ftp.FTPFile;
 
 import javax.imageio.stream.FileCacheImageInputStream;
 import java.io.*;
@@ -24,7 +26,10 @@ public class SRTM3GeoTiffFile {
     private final File localFile;
     private final ProductReader productReader;
     private boolean localFileExists = false;
+    private boolean remoteFileExists = true;
     private SRTM3GeoTiffElevationTile tile = null;
+    private ftpUtils ftp = null;
+    private FTPFile[] remoteFileList = null;
 
     private static final String remotePath = "/SRTM_v41/SRTM_Data_GeoTIFF/";
 
@@ -35,6 +40,16 @@ public class SRTM3GeoTiffFile {
 
         if (localFile.exists() && localFile.isFile()) {
             localFileExists = true;
+        }
+    }
+
+    public void dispose() {
+        try {
+            if(ftp != null)
+                ftp.disconnect();
+            ftp = null;
+        } catch(Exception e) {
+            //
         }
     }
 
@@ -49,7 +64,7 @@ public class SRTM3GeoTiffFile {
                     final Product product = productReader.readProductNodes(getFileFromZip(localFile), null);
                     tile = new SRTM3GeoTiffElevationTile(demModel, product);
                 } else {
-                    if(getRemoteFile()) {
+                    if(remoteFileExists && getRemoteFile()) {
                         final Product product = productReader.readProductNodes(getFileFromZip(localFile), null);
                         tile = new SRTM3GeoTiffElevationTile(demModel, product);
                     }
@@ -64,16 +79,25 @@ public class SRTM3GeoTiffFile {
 
     private boolean getRemoteFile() {
         try {
-            final ftpUtils ftp = new ftpUtils("srtm.csi.cgiar.org");
+            if(ftp == null) {
+                ftp = new ftpUtils("srtm.csi.cgiar.org");
 
-            final String fileName = localFile.getName();
-            final boolean result = ftp.retrieveFile(remotePath + fileName, localFile.getAbsolutePath());
-            if(!result) {
+                remoteFileList = ftp.getRemoteFileList(remotePath);
+            }
+
+            final File remoteFile = new File(remotePath, localFile.getName());
+            final long fileSize = ftpUtils.getFileSize(remoteFileList, remoteFile);
+            
+            final ftpUtils.FTPError result = ftp.retrieveFile(remoteFile, localFile, fileSize);
+            if(result == ftpUtils.FTPError.OK) {
+                return true;
+            } else {
+                if(result == ftpUtils.FTPError.FILE_NOT_FOUND)
+                    remoteFileExists = false;
                 localFile.delete();
             }
 
-            ftp.disconnect();
-            return result;
+            return false;
         } catch(Exception e) {
             System.out.println(e.getMessage());
         }
@@ -85,8 +109,8 @@ public class SRTM3GeoTiffFile {
         if (ext.equalsIgnoreCase(".zip")) {
             final String baseName = FileUtils.getFilenameWithoutExtension(dataFile.getName()) + ".tif";
             final ZipFile zipFile = new ZipFile(dataFile);
-
-            final File newFile = new File(dataFile.getParentFile(), baseName);
+   
+            final File newFile = new File(DatUtils.getApplicationUserTempDataDir(), baseName);
             final FileOutputStream fileoutputstream = new FileOutputStream(newFile);
             try {
                 //final ZipEntry zipEntry = getZipEntryIgnoreCase(zipFile, baseName);
@@ -112,16 +136,5 @@ public class SRTM3GeoTiffFile {
             }
         }
         return dataFile;
-    }      
-
-    private static ZipEntry getZipEntryIgnoreCase(final ZipFile zipFile, final String name) {
-        final Enumeration enumeration = zipFile.entries();
-        while (enumeration.hasMoreElements()) {
-            final ZipEntry zipEntry = (ZipEntry) enumeration.nextElement();
-            if (zipEntry.getName().equalsIgnoreCase(name)) {
-                return zipEntry;
-            }
-        }
-        return null;
     }
 }
