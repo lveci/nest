@@ -384,8 +384,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeDouble("Nominal number of looks processed in range"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
                 sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency,
-                sceneRec.getAttributeDouble("Radar frequency") * 1000.0);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency, getRadarFrequency(sceneRec));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
                 ReaderUtils.getLineTimeInterval(startTime, endTime, _sceneHeight));
@@ -412,6 +411,11 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         addOrbitStateVectors(absRoot, _leaderFile.getPlatformPositionRecord());
     }
 
+    private static double getRadarFrequency(BaseRecord sceneRec) {
+        final double wavelength = sceneRec.getAttributeDouble("Radar wavelength");
+        return (299792458.0 / wavelength) / 1000000;  // MHz
+    }
+
     private int isGroundRange() {
         if(_leaderFile.getMapProjRecord() == null) return isProductSLC ? 0 : 1;
         final String projDesc = _leaderFile.getMapProjRecord().getAttributeString("Map projection descriptor").toLowerCase();
@@ -422,8 +426,9 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
     private int isMapProjected() {
         if(_leaderFile.getMapProjRecord() == null) return 0;
-        final String projDesc = _leaderFile.getMapProjRecord().getAttributeString("Map projection descriptor").toLowerCase();
-        if(projDesc.contains("geo"))
+        //final String projDesc = _leaderFile.getMapProjRecord().getAttributeString("Map projection descriptor").toLowerCase();
+        //if(projDesc.contains("geo"))
+        if(getProductType().contains("1.5G"))
             return 1;
         return 0;
     }

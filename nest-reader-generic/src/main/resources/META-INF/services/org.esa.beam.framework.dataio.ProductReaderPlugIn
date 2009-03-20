@@ -1,3 +1,4 @@
 org.esa.nest.dataio.ImageIOReaderPlugIn
 org.esa.nest.dataio.envi.NestEnviProductReaderPlugIn
+org.esa.nest.dataio.geotiff.NestGeoTiffProductReaderPlugIn
 org.esa.nest.dataio.polsarpro.PolsarProProductReaderPlugIn

@@ -15,6 +15,9 @@
         <module>nest-core</module>
     </dependency>
     <dependency>
+        <module>beam-geotiff</module>
+    </dependency>
+    <dependency>
         <module>beam-envi-reader</module>
     </dependency>
 
@@ -64,6 +67,19 @@
             <placeAfter>importNestEnvi</placeAfter>
             <helpId>importPolsarPro</helpId>
         </action>
+        <action>
+            <id>importGeoTIFFProduct</id>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <readerPlugin>org.esa.nest.dataio.geotiff.NestGeoTiffProductReaderPlugIn</readerPlugin>
+            <formatName>GeoTIFF</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <mnemonic>O</mnemonic>
+            <text>Import GeoTIFF Product...</text>
+            <shortDescr>Import a GeoTIFF data product or subset.</shortDescr>
+            <description>Import a GeoTIFF data product or product subset.</description>
+            <helpId>importGeoTIFFProduct</helpId>
+        </action>
+
         <action>
             <id>importGenericBinary</id>
             <text>Import Generic Binary... (work in progress)</text>

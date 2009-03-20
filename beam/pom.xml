@@ -75,7 +75,6 @@
         </pluginRepository>
     </pluginRepositories>
 
-
     <modules>
         <module>ceres-0.x</module>
 
@@ -384,159 +383,154 @@
         </dependency>
     </dependencies>
 
+    <!--
+       In version 2.1 of Maven the sourceEncoding property will be embedded in the
+       build tag. For now the convention is to that it as property.
+       TODO: Move the sourceEncoding property to the build tag if version 2.1 is released
+       -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+
+
     <build>
         <outputDirectory>../modules/${artifactId}-${version}</outputDirectory>
 
+        <!-- Maven plugin configurations common to all BEAM modules -->
+        <pluginManagement>
+            <plugins>
+
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>1.6</source>
+                        <target>1.6</target>
+                        <debug>true</debug>
+						<optimize>true</optimize>
+                        <encoding>ISO-8859-1</encoding>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.2-beta-2</version>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <!-- Source JARs are used in IDEs only, we don't need resources -->
+                        <excludeResources>true</excludeResources>
+                    </configuration>
+                </plugin>
+                
+                <plugin>
+                    <groupId>com.bc.maven.plugins</groupId>
+                    <artifactId>maven-javahelp-plugin</artifactId>
+                    <version>1.0</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>javahelp-indexer</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <skip>true</skip>
+                        <printSummary>true</printSummary>
+                        <excludes>
+                            <exclude>**/TestRaster.java</exclude>
+                            <exclude>**/TestHelper$1.java</exclude>
+                        </excludes>
+                        <systemProperties>
+                            <property>
+                                <name>org.esa.beam.testdata.out</name>
+                                <value>target/test-data</value>
+                            </property>
+                        </systemProperties>
+                        <argLine>-Xmx512M -enableassertions</argLine>
+                    </configuration>
+                    
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <configuration>
+                        <links>
+                            <link>http://java.sun.com/javase/6/docs/api/</link>
+                        </links>
+                        <aggregate>true</aggregate>
+                        <subpackages>
+                            com.bc.ceres:org.esa.beam.framework:org.esa.beam.util:org.esa.beam.visat:com.bc.jexp
+                        </subpackages>
+                        <excludePackageNames>
+                            *.internal:com.bc.ceres.site:org.esa.beam.visat.toolviews:org.esa.beam.visat.actions:org.esa.beam.visat.dialogs:org.esa.beam.visat.plugins
+                        </excludePackageNames>
+                        <maxmemory>256m</maxmemory>
+                        <quiet>false</quiet>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-surefire-report-plugin</artifactId>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-eclipse-plugin</artifactId>
+                    <version>2.3-bc</version>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-idea-plugin</artifactId>
+                    <configuration>
+                        <downloadSources>true</downloadSources>
+                        <downloadJavadocs>true</downloadJavadocs>
+                        <jdkName>1.6</jdkName>
+                        <jdkLevel>1.6</jdkLevel>
+                        <exclude>target</exclude>
+                    </configuration>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+
         <plugins>
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <debug>true</debug>
-		    <optimize>true</optimize>
-                    <encoding>ISO-8859-1</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2-beta-1</version>
                 <configuration>
+                    <finalName>beam</finalName>
                     <descriptors>
                         <!-- <descriptor>src/main/assembly/beam-web-help.xml</descriptor> -->
                         <descriptor>src/main/assembly/bin.xml</descriptor>
                         <descriptor>src/main/assembly/src.xml</descriptor>
                     </descriptors>
-                    <finalName>beam</finalName>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                    <printSummary>true</printSummary>
-                    <excludes>
-                        <exclude>**/TestRaster.java</exclude>
-                        <exclude>**/TestHelper$1.java</exclude>
-                    </excludes>
-                    <systemProperties>
-                        <property>
-                            <name>org.esa.beam.testdata.out</name>
-                            <value>target/test-data</value>
-                        </property>
-                    </systemProperties>
-                    <argLine>-Xmx512M -enableassertions</argLine>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-surefire-report-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-idea-plugin</artifactId>
-                <configuration>
-                    <downloadSources>true</downloadSources>
-                    <downloadJavadocs>true</downloadJavadocs>
-                    <jdkName>1.6</jdkName>
-                    <jdkLevel>1.5</jdkLevel>
-                    <exclude>target</exclude>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-eclipse-plugin</artifactId>
-                <version>2.3-bc</version>
-            </plugin>
-
-            <plugin>
-                <groupId>com.bc.maven.plugins</groupId>
-                <artifactId>maven-template-plugin</artifactId>
-                <version>1.1</version>
-                <executions>
-                    <execution>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>template</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <templates>
-                        <template>
-                            <source>src/main/bin/win/beam-cli-template.bat</source>
-                            <lineEnding>dos</lineEnding>
-                            <outputDirectory>target/beam-bin.dir/bin</outputDirectory>
-                            <outputFileNamePattern>@{filterBaseName}.@{sourceExtension}</outputFileNamePattern>
-                            <filterSet>
-                                <directory>src/main/filters</directory>
-                                <includes>
-                                    <include>*.properties</include>
-                                </includes>
-                            </filterSet>
-                        </template>
-                        <template>
-                            <source>src/main/bin/linux/beam-cli-template.sh</source>
-                            <lineEnding>unix</lineEnding>
-                            <outputDirectory>target/beam-bin.dir/bin</outputDirectory>
-                            <outputFileNamePattern>@{filterBaseName}.@{sourceExtension}</outputFileNamePattern>
-                            <filterSet>
-                                <directory>src/main/filters</directory>
-                                <includes>
-                                    <include>*.properties</include>
-                                </includes>
-                            </filterSet>
-                        </template>
-                        <template>
-                            <source>src/main/bin/macosx/beam-cli-template.command</source>
-                            <lineEnding>unix</lineEnding>
-                            <outputDirectory>target/beam-bin.dir/bin</outputDirectory>
-                            <outputFileNamePattern>@{filterBaseName}.@{sourceExtension}</outputFileNamePattern>
-                            <filterSet>
-                                <directory>src/main/filters</directory>
-                                <includes>
-                                    <include>*.properties</include>
-                                </includes>
-                            </filterSet>
-                        </template>
-                    </templates>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <excludeResources>true</excludeResources>
                 </configuration>
             </plugin>
         </plugins>
+        
     </build>
 
     <reporting>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <links>
-                        <link>http://java.sun.com/javase/6/docs/api/</link>
-                    </links>
-                    <aggregate>true</aggregate>
-                    <subpackages>
-                        com.bc.ceres:org.esa.beam.framework:org.esa.beam.util:org.esa.beam.visat:com.bc.jexp
-                    </subpackages>
-                    <excludePackageNames>
-                        *.internal:com.bc.ceres.site:org.esa.beam.visat.toolviews:org.esa.beam.visat.actions:org.esa.beam.visat.dialogs:org.esa.beam.visat.plugins
-                    </excludePackageNames>
-                    <maxmemory>256m</maxmemory>
-                    <quiet>false</quiet>
-                </configuration>
             </plugin>
         </plugins>
     </reporting>

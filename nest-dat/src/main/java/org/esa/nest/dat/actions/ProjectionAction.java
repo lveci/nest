@@ -50,8 +50,12 @@ public class ProjectionAction extends ExecCommand {
             final Product product = dialog.getOutputProduct();
             if (product != null) {
                 // set flag in metadata to show it's been projected
-                final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-                AbstractMetadata.setAttribute(absRoot, AbstractMetadata.isMapProjected, 1);
+                try {
+                    final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+                    AbstractMetadata.setAttribute(absRoot, AbstractMetadata.isMapProjected, 1);
+                } catch(Exception e) {
+                    // continue
+                }
 
                 visatApp.addProduct(product);
             } else if (dialog.getException() != null) {
