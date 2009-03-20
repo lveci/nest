@@ -136,6 +136,8 @@ public final class ForwardTerrainCorrectionOp extends Operator {
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         sourceBand = sourceProduct.getBand(targetBand.getName());
+        srcBandNoDataValue = sourceBand.getNoDataValue();
+
         final Tile sourceRaster = getSourceTile(sourceBand, targetTileRectangle, pm);
         final Tile elevationRaster = getSourceTile(elevationBand, targetTileRectangle, pm);
         final ProductData srcData = sourceRaster.getDataBuffer();
@@ -197,7 +199,13 @@ public final class ForwardTerrainCorrectionOp extends Operator {
      * Get elevation band.
      */
     private void getElevationBand() {
-        elevationBand = sourceProduct.getBand("elevation");
+        Band[] srcBands = sourceProduct.getBands();
+        for (Band band : srcBands) {
+            if (band.getUnit().equals(Unit.METERS)) {
+                elevationBand = band;
+                break;
+            }
+        }
         if (elevationBand == null) {
             throw new OperatorException(
                     "Source product does not have elevation band, please run Create Elevation Band Operator first");
@@ -211,7 +219,6 @@ public final class ForwardTerrainCorrectionOp extends Operator {
     private void getSourceImageDimension() {
         sourceImageWidth = sourceProduct.getSceneRasterWidth();
         sourceImageHeight = sourceProduct.getSceneRasterHeight();
-        srcBandNoDataValue = sourceBand.getNoDataValue();
     }
 
     /**
@@ -266,7 +273,7 @@ public final class ForwardTerrainCorrectionOp extends Operator {
 
         for (Band srcBand : sourceBands) {
 
-            if (srcBand.getName().contains("elevation")) {
+            if (srcBand.getUnit().equals(Unit.METERS)) { // skip elevation band
                 continue;
             }
 
