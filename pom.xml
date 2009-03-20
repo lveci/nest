@@ -38,6 +38,14 @@
     </scm>
 
 	<repositories>
+		<repository>
+            <id>maven-central</id>
+            <name>Public Maven Repository</name>
+            <url>http://repo1.maven.org/maven2</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
         <repository>
             <id>bc-public</id>
             <name>Public Maven Repository at Brockmann-Consult</name>
@@ -54,6 +62,14 @@
     </repositories>
 
     <pluginRepositories>
+		<pluginRepository>
+            <id>maven-central</id>
+            <name>Public Maven Repository</name>
+            <url>http://repo1.maven.org/maven2</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
         <pluginRepository>
             <id>bc-public</id>
             <name>Public Maven Repository at Brockmann-Consult</name>
@@ -82,11 +98,11 @@
 		<module>nest-core</module>
 		<module>nest-dat</module>
 		<module>nest-graph-builder</module>
+		<module>nest-reader-generic</module>
 		<!--module>nest-world-wind-view</module-->
 		<module>nest-reader-dem</module>
 		<module>nest-reader-ers-ceos</module>
 		<module>nest-reader-xml-based</module>
-		<module>nest-reader-generic</module>
 		<!--module>nest-writer-gdal</module-->
 		<module>nest-writer-netcdf</module>
 		<module>nest-op-filter</module>
@@ -209,6 +225,12 @@
             <dependency>
                 <groupId>org.esa.nest</groupId>
                 <artifactId>nest-graph-builder</artifactId>
+			    <version>${nest.version}</version>
+            </dependency>
+			
+			<dependency>
+                <groupId>org.esa.nest</groupId>
+                <artifactId>nest-reader-generic</artifactId>
 			    <version>${nest.version}</version>
             </dependency>
 

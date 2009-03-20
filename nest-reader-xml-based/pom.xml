@@ -28,7 +28,6 @@
         <dependency>
             <groupId>org.esa.nest</groupId>
             <artifactId>nest-reader-generic</artifactId>
-            <version>2B</version>
         </dependency>
     </dependencies>
 </project>
