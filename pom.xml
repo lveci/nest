@@ -99,7 +99,7 @@
 		<module>nest-dat</module>
 		<module>nest-graph-builder</module>
 		<module>nest-reader-generic</module>
-		<!--module>nest-world-wind-view</module-->
+		<module>nest-world-wind-view</module>
 		<module>nest-reader-dem</module>
 		<module>nest-reader-ers-ceos</module>
 		<module>nest-reader-xml-based</module>
@@ -518,6 +518,23 @@
                     </descriptors>
                 </configuration>
             </plugin>
+			
+			<plugin>
+			  <groupId>org.codehaus.mojo</groupId>
+			  <artifactId>findbugs-maven-plugin</artifactId>
+			  <version>1.2</version>
+		      <configuration>
+		        <xmlOutput>true</xmlOutput>
+		        <xmlOutputDirectory>directory location of findbugs xdoc xml report</xmlOutputDirectory>
+		        <threshold>Normal</threshold>
+		        <effort>Default</effort>
+		        <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
+		        <includeFilterFile>findbugs-include.xml</includeFilterFile>
+		        <onlyAnalyze>org.esa.nest.*</onlyAnalyze>
+		        <debug>true</debug>
+		      </configuration>
+			</plugin>
+
         </plugins>
 		
     </build>
