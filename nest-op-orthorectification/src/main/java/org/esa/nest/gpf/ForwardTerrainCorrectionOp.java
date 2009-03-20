@@ -73,7 +73,8 @@ public final class ForwardTerrainCorrectionOp extends Operator {
     private int sourceImageWidth;
     private int sourceImageHeight;
     private double rangeSpacing;
-    private double noDataValue; // NoDataValue for elevation band
+    private double elevBandNoDataValue; // NoDataValue for elevation band
+    private double srcBandNoDataValue; // NoDataValue for source band
 
     protected static final double lightSpeed = 299792458.0; //  m / s
     protected static final double halfLightSpeed = lightSpeed / 2.0;
@@ -104,6 +105,8 @@ public final class ForwardTerrainCorrectionOp extends Operator {
             getTiePointGrids();
 
             getElevationBand();
+
+            getSourceImageDimension();
 
             createTargetProduct();
 
@@ -199,7 +202,16 @@ public final class ForwardTerrainCorrectionOp extends Operator {
             throw new OperatorException(
                     "Source product does not have elevation band, please run Create Elevation Band Operator first");
         }
-        noDataValue = elevationBand.getNoDataValue();        
+        elevBandNoDataValue = elevationBand.getNoDataValue();
+    }
+
+    /**
+     * Get source image width and height.
+     */
+    private void getSourceImageDimension() {
+        sourceImageWidth = sourceProduct.getSceneRasterWidth();
+        sourceImageHeight = sourceProduct.getSceneRasterHeight();
+        srcBandNoDataValue = sourceBand.getNoDataValue();
     }
 
     /**
@@ -207,9 +219,6 @@ public final class ForwardTerrainCorrectionOp extends Operator {
      * @throws Exception The exception.
      */
     private void createTargetProduct() throws Exception {
-
-        sourceImageWidth = sourceProduct.getSceneRasterWidth();
-        sourceImageHeight = sourceProduct.getSceneRasterHeight();
 
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),
@@ -288,7 +297,7 @@ public final class ForwardTerrainCorrectionOp extends Operator {
         double R = slrgTime * halfLightSpeed; // slant range distance in m
         double alpha = incidenceAngle.getPixelFloat((float)x, (float)y) * Math.PI / 180.0; // incidence angle in radian
         double h = elevData.getElemDoubleAt(index); // target elevation in m
-        if (Double.compare(h, noDataValue) == 0) {
+        if (Double.compare(h, elevBandNoDataValue) == 0) {
             return srcData.getElemDoubleAt(index);
         }
 
@@ -297,7 +306,7 @@ public final class ForwardTerrainCorrectionOp extends Operator {
         //System.out.print(del + ", ");
 
         if (xip < 0.0 || xip >= sourceImageWidth - 1) {
-            return srcData.getElemDoubleAt(index);
+            return srcBandNoDataValue;
         }
 
         int x0 = (int)(xip);
