@@ -1,2 +1,3 @@
 org.esa.nest.gpf.CreateElevationBandOp$Spi
 org.esa.nest.gpf.ForwardTerrainCorrectionOp$Spi
+org.esa.nest.gpf.BackwardTerrainCorrectionOp$Spi
