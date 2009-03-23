@@ -101,12 +101,13 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
 
     private SRTM3GeoTiffFile[][] createElevationFiles() throws IOException {
         final SRTM3GeoTiffFile[][] elevationFiles = new SRTM3GeoTiffFile[NUM_X_TILES][NUM_Y_TILES];
+        final File demInstallDir = _descriptor.getDemInstallDir();
         for (int x = 0; x < elevationFiles.length; x++) {
 
             for (int y = 0; y < elevationFiles[x].length; y++) {
 
                 final String fileName = SRTM3GeoTiffElevationModelDescriptor.createTileFilename(x, y);
-                final File localFile = new File(_descriptor.getDemInstallDir(), fileName);
+                final File localFile = new File(demInstallDir, fileName);
                 elevationFiles[x][y] = new SRTM3GeoTiffFile(this, localFile, productReader);
             }
         }             

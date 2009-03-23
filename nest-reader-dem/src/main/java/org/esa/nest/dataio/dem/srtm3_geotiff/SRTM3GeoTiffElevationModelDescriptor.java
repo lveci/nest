@@ -48,6 +48,8 @@ public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModel
         if(demInstallDir == null) {
             final String path = Settings.instance().get("srtm3GeoTiffDEMDataPath");
             demInstallDir = new File(path);
+            if(!demInstallDir.exists())
+                demInstallDir.mkdirs();
         }
         return demInstallDir;
     }

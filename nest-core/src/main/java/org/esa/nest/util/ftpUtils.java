@@ -35,17 +35,21 @@ public class ftpUtils {
         ftpClient.disconnect();
     }
 
-    public FTPError retrieveFile(File remoteFile, File localFile, long fileSize) {
+    public FTPError retrieveFile(String remotePath, File localFile, long fileSize) {
         FileOutputStream fos = null;
         InputStream fis = null;
         try {
-            fis = ftpClient.retrieveFileStream(remoteFile.toString());
-            if(fis == null) return FTPError.FILE_NOT_FOUND;
+            fis = ftpClient.retrieveFileStream(remotePath);
+            if(fis == null) {
+                final int code = ftpClient.getReplyCode();
+                System.out.println("error code:"+code);
+                return FTPError.FILE_NOT_FOUND;
+            }
 
             fos = new FileOutputStream(localFile.getAbsolutePath());
 
             if(VisatApp.getApp() != null) {
-                readFile(fis, fos, remoteFile.getName(), fileSize);
+                readFile(fis, fos, localFile.getName(), fileSize);
             } else {
                 final int size = 1024;//8192;
                 final byte[] buf = new byte[size];
@@ -74,9 +78,9 @@ public class ftpUtils {
         }
     }
 
-    public static long getFileSize(FTPFile[] fileList, File remoteFile) {
+    public static long getFileSize(FTPFile[] fileList, String remoteFileName) {
         for(FTPFile file : fileList) {
-            if(file.getName().equalsIgnoreCase(remoteFile.getName())) {
+            if(file.getName().equalsIgnoreCase(remoteFileName)) {
                 return file.getSize();
             }
         }
@@ -92,7 +96,7 @@ public class ftpUtils {
                 final int size = 1024;//8192;
                 final byte[] buf = new byte[size];
 
-                pm.beginTask("Downloading "+fileName, (int)(fileSize/size) + 20);
+                pm.beginTask("Downloading "+fileName, (int)(fileSize/size) + 200);
                 try {
 
                     int n;

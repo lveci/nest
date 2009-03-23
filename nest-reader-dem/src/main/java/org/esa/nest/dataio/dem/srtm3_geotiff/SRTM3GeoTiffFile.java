@@ -7,6 +7,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.dataio.dem.ace.ACEElevationModelDescriptor;
 import org.esa.nest.util.ftpUtils;
 import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.Settings;
 import org.apache.commons.net.ftp.FTPFile;
 
 import javax.imageio.stream.FileCacheImageInputStream;
@@ -31,7 +32,8 @@ public class SRTM3GeoTiffFile {
     private ftpUtils ftp = null;
     private FTPFile[] remoteFileList = null;
 
-    private static final String remotePath = "/SRTM_v41/SRTM_Data_GeoTIFF/";
+    private static final String remoteFTP = Settings.instance().get("srtm3GeoTiffDEM_FTP");
+    private static final String remotePath = getPath("srtm3GeoTiffDEM_remotePath");
 
     public SRTM3GeoTiffFile(SRTM3GeoTiffElevationModel model, File localFile, ProductReader reader) {
         this.demModel = model;
@@ -51,6 +53,14 @@ public class SRTM3GeoTiffFile {
         } catch(Exception e) {
             //
         }
+    }
+
+    private static String getPath(String tag) {
+        String path = Settings.instance().get(tag);
+        path = path.replace("\\", "/");
+        if(!path.endsWith("/"))
+            path += "/";
+        return path;
     }
 
     public String getFileName() {
@@ -80,15 +90,15 @@ public class SRTM3GeoTiffFile {
     private boolean getRemoteFile() {
         try {
             if(ftp == null) {
-                ftp = new ftpUtils("srtm.csi.cgiar.org");
+                ftp = new ftpUtils(remoteFTP);
 
                 remoteFileList = ftp.getRemoteFileList(remotePath);
             }
 
-            final File remoteFile = new File(remotePath, localFile.getName());
-            final long fileSize = ftpUtils.getFileSize(remoteFileList, remoteFile);
+            final String remoteFileName = localFile.getName();
+            final long fileSize = ftpUtils.getFileSize(remoteFileList, remoteFileName);
             
-            final ftpUtils.FTPError result = ftp.retrieveFile(remoteFile, localFile, fileSize);
+            final ftpUtils.FTPError result = ftp.retrieveFile(remotePath + remoteFileName, localFile, fileSize);
             if(result == ftpUtils.FTPError.OK) {
                 return true;
             } else {
@@ -104,7 +114,7 @@ public class SRTM3GeoTiffFile {
         return false;
     }
 
-    private static File getFileFromZip(final File dataFile) throws IOException {
+    private File getFileFromZip(final File dataFile) throws IOException {
         final String ext = FileUtils.getExtension(dataFile.getName());
         if (ext.equalsIgnoreCase(".zip")) {
             final String baseName = FileUtils.getFilenameWithoutExtension(dataFile.getName()) + ".tif";
@@ -116,6 +126,7 @@ public class SRTM3GeoTiffFile {
                 //final ZipEntry zipEntry = getZipEntryIgnoreCase(zipFile, baseName);
                 final ZipEntry zipEntry = zipFile.getEntry(baseName);
                 if (zipEntry == null) {
+                    localFileExists = false;
                     throw new IOException("Entry '" + baseName + "' not found in zip file.");
                 }
 
