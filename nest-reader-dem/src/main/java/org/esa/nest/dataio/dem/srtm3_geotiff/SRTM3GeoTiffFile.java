@@ -95,6 +95,9 @@ public class SRTM3GeoTiffFile {
                 remoteFileList = ftp.getRemoteFileList(remotePath);
             }
 
+            if(remoteFileList == null)
+                throw new IOException("Unable to get remote file list");
+
             final String remoteFileName = localFile.getName();
             final long fileSize = ftpUtils.getFileSize(remoteFileList, remoteFileName);
             
