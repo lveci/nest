@@ -56,12 +56,19 @@ public final class ApplyOrbitFileOp extends Operator {
     private MetadataElement absRoot;
     private EnvisatOrbitReader dorisReader;
     private File orbitFile;
+
     private int absOrbit;
-    private int numLines;
-    private int numSamplesPerLine;
+    private int sourceImageWidth;
+    private int sourceImageHeight;
+    private int targetTiePointGridHeight;
+    private int targetTiePointGridWidth;
+    private int subSamplingX;
+    private int subSamplingY;
+
     private double firstLineUTC;
     private double lastLineUTC;
     private double lineTimeInterval;
+
     private TiePointGrid slantRangeTime;
     private TiePointGrid incidenceAngle;
     private TiePointGrid latitude;
@@ -75,8 +82,6 @@ public final class ApplyOrbitFileOp extends Operator {
     private static final double e = 2 / earthFlatCoef - 1 / (earthFlatCoef * earthFlatCoef);
     private static final double lightSpeed = 299792458.0; //  m / s
     private static final double halfLightSpeed = lightSpeed / 2.0;
-    private static final int targetTiePointGridHeight = 10;
-    private static final int targetTiePointGridWidth = 10;
 
     /**
      * Default constructor. The graph processing framework
@@ -110,7 +115,14 @@ public final class ApplyOrbitFileOp extends Operator {
                 getDelftOrbitFile();
             }
 
+            getTiePointGrid();
+
+            getSourceImageDimension();
+
+            getFirstLastLineUTC();
+
             createTargetProduct();
+
             updateTargetProductGEOCoding();
 
         } catch(Exception e) {
@@ -137,6 +149,42 @@ public final class ApplyOrbitFileOp extends Operator {
     }
 
     /**
+     * Get source product tie point grids for latitude, longitude, incidence angle and slant range time.
+     */
+    private void getTiePointGrid() {
+
+        latitude = OperatorUtils.getLatitude(sourceProduct);
+        longitude = OperatorUtils.getLongitude(sourceProduct);
+        slantRangeTime = OperatorUtils.getSlantRangeTime(sourceProduct);
+        incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
+
+        targetTiePointGridWidth = latitude.getRasterWidth();
+        targetTiePointGridHeight = latitude.getRasterHeight();
+    }
+
+    /**
+     * Get source image dimention.
+     */
+    private void getSourceImageDimension() {
+
+        sourceImageWidth = sourceProduct.getSceneRasterWidth();
+        sourceImageHeight = sourceProduct.getSceneRasterHeight();
+    }
+
+    /**
+     * Get the first anf last line UTC in days.
+     * @throws Exception The exceptions.
+     */
+    private void getFirstLastLineUTC() throws Exception {
+
+        firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
+        lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD();
+        lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
+        //System.out.println((new ProductData.UTC(firstLineUTC)).toString());
+        //System.out.println((new ProductData.UTC(lastLineUTC)).toString());
+    }
+
+    /**
      * Create target product.
      * @throws Exception The exception.
      */
@@ -148,12 +196,6 @@ public final class ApplyOrbitFileOp extends Operator {
                                     sourceProduct.getSceneRasterHeight());
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
-
-        //ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-        TiePointGrid srcTPG = sourceProduct.getTiePointGrid("slant_range_time");
-        targetProduct.addTiePointGrid(srcTPG.cloneTiePointGrid());
-        srcTPG = sourceProduct.getTiePointGrid("incident_angle");
-        targetProduct.addTiePointGrid(srcTPG.cloneTiePointGrid());
 
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
@@ -173,102 +215,117 @@ public final class ApplyOrbitFileOp extends Operator {
         targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 50);
     }
 
+    /**
+     * Update target product GEOCoding. A new tie point grid is generated.
+     * @throws Exception The exceptions.
+     */
     private void updateTargetProductGEOCoding() throws Exception {
-
-        latitude = OperatorUtils.getLatitude(sourceProduct);
-        longitude = OperatorUtils.getLongitude(sourceProduct);
-        slantRangeTime = OperatorUtils.getSlantRangeTime(sourceProduct);
-        incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
-
-        firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
-        //System.out.println((new ProductData.UTC(firstLineUTC)).toString());
-        lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD();
-        //System.out.println((new ProductData.UTC(lastLineUTC)).toString());
-        lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
-        numLines = absRoot.getAttributeInt(AbstractMetadata.num_output_lines);
-        numSamplesPerLine = absRoot.getAttributeInt(AbstractMetadata.num_samples_per_line);
 
         final float[] targetLatTiePoints = new float[targetTiePointGridHeight*targetTiePointGridWidth];
         final float[] targetLonTiePoints = new float[targetTiePointGridHeight*targetTiePointGridWidth];
+        final float[] targetIncidenceAngleTiePoints = new float[targetTiePointGridHeight*targetTiePointGridWidth];
+        final float[] targetSlantRangeTimeTiePoints = new float[targetTiePointGridHeight*targetTiePointGridWidth];
 
-        // Create a new 10x10 tie point grid
+        computeSubSamplingXY();
+
+        // Create new tie point grid
         int k = 0;
         for (int r = 0; r < targetTiePointGridHeight; r++) {
 
-            // get the zero Doppler time for the line
+            // get the zero Doppler time for the rth line
             int y = getLineIndex(r);
             double curLineUTC = computeCurrentLineUTC(y);
-            System.out.println((new ProductData.UTC(curLineUTC)).toString());
-
+            //System.out.println((new ProductData.UTC(curLineUTC)).toString());
+            
             // compute the satellite position and velocity for the zero Doppler time using cubic interpolation
             OrbitData data = getOrbitData(curLineUTC);
 
             for (int c = 0; c < targetTiePointGridWidth; c++) {
 
-                // get slant range time for the tie point
                 final int x = getSampleIndex(c);
-                final double time = (double)slantRangeTime.getPixelFloat((float)x, (float)y) / 1000000000.0; // ns to s;
-                double[] xyz = new double[3];
+                targetIncidenceAngleTiePoints[k] = incidenceAngle.getPixelFloat((float)x, (float)y);
+                targetSlantRangeTimeTiePoints[k] = slantRangeTime.getPixelFloat((float)x, (float)y);
 
-                // get the geo position (lat/lon) for the tie point
-                final float lat = latitude.getPixelFloat((float)x, (float)y);
-                final float lon = longitude.getPixelFloat((float)x, (float)y);
-                final GeoPos geoPos = new GeoPos(lat, lon);
-
-                // compute initial (x,y,z) coordinate from lat/lon
-                GeoUtils.geo2xyz(geoPos, xyz);
-
-                // compute accurate (x,y,z) coordinate using Newton's method
-                computeAccurateXYZ(data, xyz, time);
-
-                // compute (lat, lon, alt) from accurate (x,y,z) coordinate
-                GeoUtils.xyz2geo(xyz, geoPos);
-
-                // update tie point geocoding in target product
+                final double slrgTime = (double)targetSlantRangeTimeTiePoints[k] / 1000000000.0; // ns to s;
+                final GeoPos geoPos = computeLatLon(x, y, slrgTime, data);
                 targetLatTiePoints[k] = geoPos.lat;
                 targetLonTiePoints[k] = geoPos.lon;
                 k++;
             }
         }
 
-        float subSamplingX = (float)targetProduct.getSceneRasterWidth() / (targetTiePointGridWidth - 1);
-        float subSamplingY = (float)targetProduct.getSceneRasterHeight() / (targetTiePointGridWidth - 1);
+        final TiePointGrid angleGrid = new TiePointGrid("incident_angle", targetTiePointGridWidth, targetTiePointGridHeight,
+                0.0f, 0.0f, (float)subSamplingX, (float)subSamplingY, targetIncidenceAngleTiePoints);
+
+        final TiePointGrid slrgtGrid = new TiePointGrid("slant_range_time", targetTiePointGridWidth, targetTiePointGridHeight,
+                0.0f, 0.0f, (float)subSamplingX, (float)subSamplingY, targetSlantRangeTimeTiePoints);
 
         final TiePointGrid latGrid = new TiePointGrid("latitude", targetTiePointGridWidth, targetTiePointGridHeight,
-                0.5f, 0.5f, subSamplingX, subSamplingY, targetLatTiePoints);
+                0.0f, 0.0f, (float)subSamplingX, (float)subSamplingY, targetLatTiePoints);
 
         final TiePointGrid lonGrid = new TiePointGrid("longitude", targetTiePointGridWidth, targetTiePointGridHeight,
-                0.5f, 0.5f, subSamplingX, subSamplingY, targetLonTiePoints, TiePointGrid.DISCONT_AT_180);
+                0.0f, 0.0f, (float)subSamplingX, (float)subSamplingY, targetLonTiePoints, TiePointGrid.DISCONT_AT_180);
 
         final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
 
+        targetProduct.addTiePointGrid(angleGrid);
+        targetProduct.addTiePointGrid(slrgtGrid);
         targetProduct.addTiePointGrid(latGrid);
         targetProduct.addTiePointGrid(lonGrid);
         targetProduct.setGeoCoding(tpGeoCoding);
     }
 
+    /**
+     * Compute subSamplingX and subSamplingY.
+     */
+    private void computeSubSamplingXY() {
+        subSamplingX = sourceImageWidth / (targetTiePointGridWidth - 1);
+        subSamplingY = sourceImageHeight / (targetTiePointGridHeight - 1);
+    }
+
+    /**
+     * Get corresponding range line index for a given row index in the new tie point grid.
+     * @param rowIdx The row index in the new tie point grid.
+     * @return The range line index.
+     */
     private int getLineIndex(int rowIdx) {
 
         if (rowIdx == targetTiePointGridHeight - 1) { // last row
-            return numLines - 1;
+            return sourceImageHeight - 1;
         } else { // other rows
-            return rowIdx * (numLines / (targetTiePointGridHeight - 1));
+            return rowIdx * subSamplingY;
         }
     }
 
+    /**
+     * Get corresponding sample index for a given column index in the new tie point grid.
+     * @param colIdx The column index in the new tie point grid.
+     * @return The sample index.
+     */
     private int getSampleIndex(int colIdx) {
 
         if (colIdx == targetTiePointGridWidth - 1) { // last column
-            return numSamplesPerLine - 1;
+            return sourceImageWidth - 1;
         } else { // other columns
-            return colIdx * (numSamplesPerLine / (targetTiePointGridWidth - 1));
+            return colIdx * subSamplingX;
         }
     }
 
+    /**
+     * Compute UTC for a given range line.
+     * @param y The range line index.
+     * @return The UTC in days.
+     */
     private double computeCurrentLineUTC(int y) {
         return firstLineUTC + y*lineTimeInterval;
     }
 
+    /**
+     * Get orbit information for given time.
+     * @param utc The UTC in days.
+     * @return The orbit information.
+     * @throws Exception The exceptions.
+     */
     private OrbitData getOrbitData(double utc) throws Exception {
 
         OrbitData orbitData = new OrbitData();
@@ -290,6 +347,39 @@ public final class ApplyOrbitFileOp extends Operator {
         return orbitData;
     }
 
+    /**
+     * Compute accurate target geo position.
+     * @param x The x coordinate of the given pixel.
+     * @param y The y coordinate of the given pixel.
+     * @param slrgTime The slant range time of the given pixel.
+     * @param data The orbit data.
+     * @return The geo position of the target.
+     */
+    private GeoPos computeLatLon(int x, int y, double slrgTime, OrbitData data) {
+
+        double[] xyz = new double[3];
+        final float lat = latitude.getPixelFloat((float)x, (float)y);
+        final float lon = longitude.getPixelFloat((float)x, (float)y);
+        final GeoPos geoPos = new GeoPos(lat, lon);
+
+        // compute initial (x,y,z) coordinate from lat/lon
+        GeoUtils.geo2xyz(geoPos, xyz);
+
+        // compute accurate (x,y,z) coordinate using Newton's method
+        computeAccurateXYZ(data, xyz, slrgTime);
+
+        // compute (lat, lon, alt) from accurate (x,y,z) coordinate
+        GeoUtils.xyz2geo(xyz, geoPos);
+
+        return geoPos;
+    }
+
+    /**
+     * Compute accurate target position for given orbit information using Newton's method.
+     * @param data The orbit data.
+     * @param xyz The xyz coordinate for the target.
+     * @param time The slant range time in seconds.
+     */
     private void computeAccurateXYZ(OrbitData data, double[] xyz, double time) {
 
         final double del = 0.001;
