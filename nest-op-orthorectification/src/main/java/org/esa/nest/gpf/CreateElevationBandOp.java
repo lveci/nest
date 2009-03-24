@@ -34,9 +34,9 @@ public final class CreateElevationBandOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(valueSet = {"ACE", "GETASSE30"},
-            description = "The digital elevation model.", defaultValue="ACE", label="Digital Elevation Model")
-    private String demName = "ACE";
+    @Parameter(valueSet = {"ACE", "GETASSE30", "SRTM 3Sec GeoTiff"},
+            description = "The digital elevation model.", defaultValue="SRTM 3Sec GeoTiff", label="Digital Elevation Model")
+    private String demName = "SRTM 3Sec GeoTiff";
 
     @Parameter(description = "The elevation band name.", defaultValue="elevation", label="Elevation Band Name")
     private String elevationBandName = "elevation";
@@ -172,7 +172,7 @@ public final class CreateElevationBandOp extends Operator {
                     pm.done();
                 }
             } else if(targetBand instanceof VirtualBand) {
-                System.out.println("virtual");
+                //System.out.println("skipping virtual band");
             } else {
                 final Band sourceBand = sourceRasterMap.get(targetBand);
                 targetTile.setRawSamples(getSourceTile(sourceBand, targetRectangle, pm).getRawSamples());    
@@ -191,6 +191,7 @@ public final class CreateElevationBandOp extends Operator {
     public static class Spi extends OperatorSpi {
         public Spi() {
             super(CreateElevationBandOp.class);
+            setOperatorUI(CreateElevationBandOpUI.class);
         }
     }
 }

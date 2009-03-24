@@ -55,14 +55,6 @@
             <parent>TerrainCorrectionGroup</parent>
         </action>
 
-        <action>
-            <id>CreateElevationBandOp</id>
-            <class>org.esa.nest.dat.CreateElevationBandOpAction</class>
-            <text>Add Elevation Band</text>
-            <shortDescr>Creates an elevation band</shortDescr>
-            <parent>TerrainCorrectionGroup</parent>
-        </action>
-
     </extension>
 
 </module>
