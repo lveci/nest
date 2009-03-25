@@ -3,8 +3,7 @@ package org.esa.nest.util;
 import Jama.Matrix;
 
 public final class MathUtils
-{
-
+{    
     private MathUtils()
     {
     }

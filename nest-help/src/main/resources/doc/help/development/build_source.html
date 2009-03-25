@@ -34,15 +34,14 @@
   </li>
   <li> Install <a class="wiki" target="_blank" href="http://maven.apache.org/">Maven</a> and set MAVEN_HOME accordingly.
   </li>
-  <li> Install <a class="wiki" target="_blank" href="http://subversion.tigris.org/">Subversion</a> and set SVN_HOME accordingly.
-  </li>
+  
   <li> Install <a class="wiki" target="_blank" href="https://jai.dev.java.net/binary-builds.html">Java Advanced Imaging</a> JDK &amp; JRE
   </li>
   <li> Install <a class="wiki" target="_blank" href="https://jai-imageio.dev.java.net/binary-builds.html">JAI Image I/O</a> JDK &amp; JRE
   </li>
 </ul>
 
-2. Add $JAVA_HOME/bin, $MAVEN_HOME/bin and $SVN_HOME/bin to your PATH.<br>
+2. Add $JAVA_HOME/bin and $MAVEN_HOME/bin&nbsp;to your PATH.<br>
 
 <br>
 
@@ -58,7 +57,7 @@ repository, which is by default ~/.m2/repository.<br>
 7. Open project in&nbsp;your IDE. IntelliJ IDEA users:<br>
 
 <ul>
-  <li> Build IDEA project files for NEST: Type mvn idea:idea
+  <li> Build IDEA project files for NEST: Type mvn compile idea:idea
   </li>
   <li> In IDEA, go to the IDEA Main Menu/File/Open Project and open the created project file $MY_PROJECTS/nest/nest.ipr
   </li>
@@ -67,26 +66,14 @@ repository, which is by default ~/.m2/repository.<br>
 8. Open project in your IDE. Eclipse users:<br>
 
 <ul>
-  <li> Build IDEA project files for NEST: Type mvn eclipse:eclipse
-  </li>
+  <li> Build IDEA project files for NEST: Type mvn compile eclipse:eclipse</li><li> Click Main Menu/File/Import
+  </li><li> Select General/Existing Project into Workspace
+  </li><li> Select Root Directory $MY_PROJECTS/nest</li>
   <li> Make sure that M2_REPO classpath variable is set:
   </li>
 </ul>
 
 <pre>        1. Open Window/Preferences..., then select Java/Build Path/Classpath Variables<br>        2. Select New... and add variable M2_REPO<br>        3. Select Folder... and choose the location of your Maven local repository, e.g ~/.m2/repository</pre>
-<br>
-
-<ul>
-  <li> Click Main Menu/File/Import
-  </li>
-  <li> Select General/Existing Project into Workspace
-  </li>
-  <li> Select Root Directory $MY_PROJECTS/nest
-  </li>
-  <li> Click Finish
-  </li>
-</ul>
-
 <br>
 
 9. Use the following configuration to run DAT:<br>

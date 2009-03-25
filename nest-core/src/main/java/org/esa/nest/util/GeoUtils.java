@@ -4,16 +4,15 @@ import org.esa.beam.framework.datamodel.GeoPos;
 
 public final class GeoUtils
 {
-
-    private GeoUtils()
-    {
-    }
-
     private static final double a = 6378137; // m
     private static final double b = 6356752.315; // m
     private static final double earthFlatCoef = 298.257223563;
     private static final double e2 = 2 / earthFlatCoef - 1 / (earthFlatCoef * earthFlatCoef);
     private static final double ep2 = e2 / (1 - e2);
+
+    private GeoUtils()
+    {
+    }
 
     /**
      * Convert geodetic coordinate into cartesian XYZ coordinate.

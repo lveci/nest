@@ -63,18 +63,17 @@ public final class ForwardTerrainCorrectionOp extends Operator {
             sourceProductId="source", label="Source Bands")
     String[] sourceBandNames;
 
-    private Band sourceBand;
-    private Band elevationBand;
+    private Band elevationBand = null;
     private MetadataElement absRoot = null;
 
-    private TiePointGrid incidenceAngle;
-    private TiePointGrid slantRangeTime;
+    private TiePointGrid incidenceAngle = null;
+    private TiePointGrid slantRangeTime = null;
 
-    private int sourceImageWidth;
-    private int sourceImageHeight;
-    private double rangeSpacing;
-    private double elevBandNoDataValue; // NoDataValue for elevation band
-    private double srcBandNoDataValue; // NoDataValue for source band
+    private int sourceImageWidth = 0;
+    private int sourceImageHeight = 0;
+    private double rangeSpacing = 0;
+    private double elevBandNoDataValue = 0; // NoDataValue for elevation band
+    private double srcBandNoDataValue = 0; // NoDataValue for source band
 
     protected static final double lightSpeed = 299792458.0; //  m / s
     protected static final double halfLightSpeed = lightSpeed / 2.0;
@@ -135,7 +134,7 @@ public final class ForwardTerrainCorrectionOp extends Operator {
         final int h  = targetTileRectangle.height;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        sourceBand = sourceProduct.getBand(targetBand.getName());
+        final Band sourceBand = sourceProduct.getBand(targetBand.getName());
         srcBandNoDataValue = sourceBand.getNoDataValue();
 
         final Tile sourceRaster = getSourceTile(sourceBand, targetTileRectangle, pm);
@@ -146,22 +145,22 @@ public final class ForwardTerrainCorrectionOp extends Operator {
 
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
-                int index = sourceRaster.getDataBufferIndex(x, y);
-                double v = computeOrthoRectifiedPixelValue(x, y, index, srcData, sourceRaster, elevData);
+                final int index = sourceRaster.getDataBufferIndex(x, y);
+                final double v = computeOrthoRectifiedPixelValue(x, y, index, srcData, sourceRaster, elevData);
                 trgData.setElemDoubleAt(index, v);
             }
         }
         /*
-        double t = slantRangeTime.getPixelFloat(740.0f, 0.0f);
+        final double t = slantRangeTime.getPixelFloat(740.0f, 0.0f);
         int y = 0;
         for (int x = x0; x < x0 + w; x++) {
-            double slrgTime = slantRangeTime.getPixelFloat((float)x, (float)y) / 1000000000.0; //convert ns to s
-            double R = slrgTime * halfLightSpeed; // slant range distance in m
+            final double slrgTime = slantRangeTime.getPixelFloat((float)x, (float)y) / 1000000000.0; //convert ns to s
+            final double R = slrgTime * halfLightSpeed; // slant range distance in m
             System.out.print(R + ", ");
         }
         System.out.println();
         for (int x = x0; x < x0 + w; x++) {
-            double alpha = incidenceAngle.getPixelFloat((float)x, (float)y);
+            final double alpha = incidenceAngle.getPixelFloat((float)x, (float)y);
             System.out.print(alpha + ", ");
         }
         System.out.println();
@@ -199,7 +198,7 @@ public final class ForwardTerrainCorrectionOp extends Operator {
      * Get elevation band.
      */
     private void getElevationBand() {
-        Band[] srcBands = sourceProduct.getBands();
+        final Band[] srcBands = sourceProduct.getBands();
         for (Band band : srcBands) {
             if (band.getUnit().equals(Unit.METERS)) {
                 elevationBand = band;
@@ -234,12 +233,7 @@ public final class ForwardTerrainCorrectionOp extends Operator {
 
         addSelectedBands();
 
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        targetProduct.setStartTime(sourceProduct.getStartTime());
-        targetProduct.setEndTime(sourceProduct.getEndTime());
+        OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
         // the tile width has to be the image width because otherwise sourceRaster.getDataBufferIndex(x, y)
         // returns incorrect index for the last tile on the right
@@ -300,29 +294,27 @@ public final class ForwardTerrainCorrectionOp extends Operator {
     private double computeOrthoRectifiedPixelValue(
             int x, int y, int index, ProductData srcData, Tile sourceRaster, ProductData elevData) {
 
-        double slrgTime = slantRangeTime.getPixelFloat((float)x, (float)y) / 1000000000.0; //convert ns to s
-        double R = slrgTime * halfLightSpeed; // slant range distance in m
-        double alpha = incidenceAngle.getPixelFloat((float)x, (float)y) * Math.PI / 180.0; // incidence angle in radian
-        double h = elevData.getElemDoubleAt(index); // target elevation in m
+        final double slrgTime = slantRangeTime.getPixelFloat((float)x, (float)y) / 1000000000.0; //convert ns to s
+        final double R = slrgTime * halfLightSpeed; // slant range distance in m
+        final double alpha = incidenceAngle.getPixelFloat((float)x, (float)y) * org.esa.beam.util.math.MathUtils.DTOR; // incidence angle in radian
+        final double h = elevData.getElemDoubleAt(index); // target elevation in m
         if (Double.compare(h, elevBandNoDataValue) == 0) {
             return srcData.getElemDoubleAt(index);
         }
 
-        double del = getRangeDisplacement(R, alpha, h, rangeSpacing);
-        double xip = x - del; // imaged pixel position
+        final double del = getRangeDisplacement(R, alpha, h, rangeSpacing);
+        final double xip = x - del; // imaged pixel position
         //System.out.print(del + ", ");
 
         if (xip < 0.0 || xip >= sourceImageWidth - 1) {
             return srcBandNoDataValue;
         }
 
-        int x0 = (int)(xip);
-        int x1 = x0 + 1;
-        double mu = xip - x0;
-        int index0 = sourceRaster.getDataBufferIndex(x0, y);
-        int index1 = sourceRaster.getDataBufferIndex(x1, y);
-        double v0 = srcData.getElemDoubleAt(index0);
-        double v1 = srcData.getElemDoubleAt(index1);
+        final int x0 = (int)(xip);
+        final int x1 = x0 + 1;
+        final double mu = xip - x0;
+        final double v0 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y));
+        final double v1 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x1, y));
         return MathUtils.interpolationLinear(v0, v1, mu);
     }
 
@@ -337,9 +329,10 @@ public final class ForwardTerrainCorrectionOp extends Operator {
     public static double getRangeDisplacement(
             double slantRange, double incidenceAngle, double elevation, double rangeSpacing) {
 
-        double Q = slantRange*Math.cos(incidenceAngle);
-        double tmp1 = Q - elevation;
-        double tmp2 = tmp1 / Math.cos(incidenceAngle);
+        final double cosIncidenceAngle = Math.cos(incidenceAngle);
+        final double Q = slantRange*cosIncidenceAngle;
+        final double tmp1 = Q - elevation;
+        final double tmp2 = tmp1 / cosIncidenceAngle;
         return (tmp1*Math.tan(incidenceAngle) - Math.sqrt(tmp2*tmp2 - Q*Q)) / rangeSpacing;
     }
 

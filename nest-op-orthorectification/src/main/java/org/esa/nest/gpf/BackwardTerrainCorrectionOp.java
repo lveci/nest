@@ -29,6 +29,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.MathUtils;
 import org.esa.nest.util.GeoUtils;
+import org.esa.nest.util.Constants;
 import org.esa.nest.gpf.OperatorUtils;
 
 import java.awt.*;
@@ -69,37 +70,34 @@ public final class BackwardTerrainCorrectionOp extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
-    String[] sourceBandNames;
+    String[] sourceBandNames = null;
 
-    private Band sourceBand;
-    private Band elevationBand;
+    private Band sourceBand = null;
+    private Band elevationBand = null;
     private MetadataElement absRoot = null;
 
-    private TiePointGrid incidenceAngle;
-    private TiePointGrid latitude;
-    private TiePointGrid longitude;
+    private TiePointGrid incidenceAngle = null;
+    private TiePointGrid latitude = null;
+    private TiePointGrid longitude = null;
 
-    private int sourceImageWidth;
-    private int sourceImageHeight;
+    private int sourceImageWidth = 0;
+    private int sourceImageHeight = 0;
 
-    private double lineTimeInterval; // in days
-    private double firstLineUTC; // in days
-    private double wavelength; // in m
-    private double rangeSpacing;
-    private double noDataValue; // NoDataValue for elevation band
+    private double lineTimeInterval = 0; // in days
+    private double firstLineUTC = 0; // in days
+    private double wavelength = 0; // in m
+    private double rangeSpacing = 0;
+    private double noDataValue = 0; // NoDataValue for elevation band
 
-    private AbstractMetadata.OrbitStateVector[] orbitStateVectors;
-    private double[][] sensorPosition; // sensor position for all range lines
-    private double[][] sensorVelocity; // sensor velocity for all range lines
-    private double[] xPosWarpCoef; // warp polynomial coefficients for interpolating sensor xPos
-    private double[] yPosWarpCoef; // warp polynomial coefficients for interpolating sensor yPos
-    private double[] zPosWarpCoef; // warp polynomial coefficients for interpolating sensor zPos
-    private double[] xVelWarpCoef; // warp polynomial coefficients for interpolating sensor xVel
-    private double[] yVelWarpCoef; // warp polynomial coefficients for interpolating sensor yVel
-    private double[] zVelWarpCoef; // warp polynomial coefficients for interpolating sensor zVel
-
-    protected static final double lightSpeed = 299792458.0; //  m / s
-    protected static final double halfLightSpeed = lightSpeed / 2.0;
+    private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
+    private double[][] sensorPosition = null; // sensor position for all range lines
+    private double[][] sensorVelocity = null; // sensor velocity for all range lines
+    private double[] xPosWarpCoef = null; // warp polynomial coefficients for interpolating sensor xPos
+    private double[] yPosWarpCoef = null; // warp polynomial coefficients for interpolating sensor yPos
+    private double[] zPosWarpCoef = null; // warp polynomial coefficients for interpolating sensor zPos
+    private double[] xVelWarpCoef = null; // warp polynomial coefficients for interpolating sensor xVel
+    private double[] yVelWarpCoef = null; // warp polynomial coefficients for interpolating sensor yVel
+    private double[] zVelWarpCoef = null; // warp polynomial coefficients for interpolating sensor zVel
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -163,8 +161,9 @@ public final class BackwardTerrainCorrectionOp extends Operator {
      * @throws Exception The exceptions.
      */
     private void getRadarFrequency() throws Exception {
-        double radarFreq = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.radar_frequency)*1000000; // Hz
-        wavelength = lightSpeed / radarFreq;
+        final double radarFreq = AbstractMetadata.getAttributeDouble(absRoot,
+                                                    AbstractMetadata.radar_frequency)*Constants.oneMillion; // Hz
+        wavelength = Constants.lightSpeed / radarFreq;
     }
 
     /**
@@ -182,7 +181,7 @@ public final class BackwardTerrainCorrectionOp extends Operator {
     private void getOrbitStateVectors() throws Exception {
 
         orbitStateVectors = AbstractMetadata.getOrbitStateVectors(absRoot);
-        for (int i = 0; i < orbitStateVectors.length; i++) {
+       /* for (int i = 0; i < orbitStateVectors.length; i++) {
             System.out.println("utcTime = " + orbitStateVectors[i].time);
             System.out.println("xPos = " + orbitStateVectors[i].x_pos);
             System.out.println("yPos = " + orbitStateVectors[i].y_pos);
@@ -190,7 +189,7 @@ public final class BackwardTerrainCorrectionOp extends Operator {
             System.out.println("xVel = " + orbitStateVectors[i].x_vel);
             System.out.println("yVel = " + orbitStateVectors[i].y_vel);
             System.out.println("zVel = " + orbitStateVectors[i].z_vel);
-        }
+        }       */
     }
 
     /**
@@ -222,7 +221,7 @@ public final class BackwardTerrainCorrectionOp extends Operator {
      * Get elevation band.
      */
     private void getElevationBand() {
-        Band[] srcBands = sourceProduct.getBands();
+        final Band[] srcBands = sourceProduct.getBands();
         for (Band band : srcBands) {
             if (band.getUnit().equals(Unit.METERS)) {
                 elevationBand = band;
@@ -258,12 +257,7 @@ public final class BackwardTerrainCorrectionOp extends Operator {
 
         addSelectedBands();
 
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        targetProduct.setStartTime(sourceProduct.getStartTime());
-        targetProduct.setEndTime(sourceProduct.getEndTime());
+        OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
         // the tile width has to be the image width because otherwise sourceRaster.getDataBufferIndex(x, y)
         // returns incorrect index for the last tile on the right
@@ -317,16 +311,16 @@ public final class BackwardTerrainCorrectionOp extends Operator {
      */
     private void computeSensorPositionsAndVelocities() {
 
-        int warpPolynomialOrder = 3;
-        int numVerctors = orbitStateVectors.length;
+        final int warpPolynomialOrder = 3;
+        final int numVerctors = orbitStateVectors.length;
 
-        double[] timeArray = new double[numVerctors];
-        double[] xPosArray = new double[numVerctors];
-        double[] yPosArray = new double[numVerctors];
-        double[] zPosArray = new double[numVerctors];
-        double[] xVelArray = new double[numVerctors];
-        double[] yVelArray = new double[numVerctors];
-        double[] zVelArray = new double[numVerctors];
+        final double[] timeArray = new double[numVerctors];
+        final double[] xPosArray = new double[numVerctors];
+        final double[] yPosArray = new double[numVerctors];
+        final double[] zPosArray = new double[numVerctors];
+        final double[] xVelArray = new double[numVerctors];
+        final double[] yVelArray = new double[numVerctors];
+        final double[] zVelArray = new double[numVerctors];
 
         for (int i = 0; i < numVerctors; i++) {
             timeArray[i] = orbitStateVectors[i].time.getMJD();
@@ -348,7 +342,7 @@ public final class BackwardTerrainCorrectionOp extends Operator {
         sensorPosition = new double[sourceImageHeight][3]; // xPos, yPos, zPos
         sensorVelocity = new double[sourceImageHeight][3]; // xVel, yVel, zVel
         for (int i = 0; i < sourceImageHeight; i++) {
-            double time = firstLineUTC + i*lineTimeInterval; // zero Doppler time (in days) for each range line
+            final double time = firstLineUTC + i*lineTimeInterval; // zero Doppler time (in days) for each range line
             sensorPosition[i][0] = getInterpolatedData(xPosWarpCoef, time);
             sensorPosition[i][1] = getInterpolatedData(yPosWarpCoef, time);
             sensorPosition[i][2] = getInterpolatedData(zPosWarpCoef, time);
@@ -365,7 +359,7 @@ public final class BackwardTerrainCorrectionOp extends Operator {
      * @param warpPolynomialOrder The order of the warp polynomial.
      * @return The array holding warp polynomial coefficients.
      */
-    private double[] computeWarpPolynomial(double[] timeArray, double[] stateArray, int warpPolynomialOrder) {
+    private static double[] computeWarpPolynomial(double[] timeArray, double[] stateArray, int warpPolynomialOrder) {
 
         final Matrix A = MathUtils.createVandermondeMatrix(timeArray, warpPolynomialOrder);
         final Matrix b = new Matrix(stateArray, stateArray.length);
@@ -379,9 +373,9 @@ public final class BackwardTerrainCorrectionOp extends Operator {
      * @param time The given time in days.
      * @return The interpolated data.
      */
-    private double getInterpolatedData(double[] warpCoef, double time) {
-        double time2 = time*time;
-        double time3 = time*time2;
+    private static double getInterpolatedData(double[] warpCoef, double time) {
+        final double time2 = time*time;
+        final double time3 = time*time2;
         return warpCoef[0] + warpCoef[1]*time + warpCoef[2]*time2 + warpCoef[3]*time3;
     }
 
@@ -404,7 +398,7 @@ public final class BackwardTerrainCorrectionOp extends Operator {
         final int y0 = targetTileRectangle.y;
         final int w  = targetTileRectangle.width;
         final int h  = targetTileRectangle.height;
-        System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+        //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         sourceBand = sourceProduct.getBand(targetBand.getName());
         final Rectangle sourceTileRectangle = getSourceTileRectangle(x0, y0, w, h);
@@ -416,9 +410,9 @@ public final class BackwardTerrainCorrectionOp extends Operator {
 
         for (int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
-                int index = targetTile.getDataBufferIndex(x, y);
-                double alt = elevData.getElemDoubleAt(index); // target elevation in m
-                double v = computeOrthoRectifiedPixelValue(x, y, alt, srcData, sourceRaster);
+                final int index = targetTile.getDataBufferIndex(x, y);
+                final double alt = elevData.getElemDoubleAt(index); // target elevation in m
+                final double v = computeOrthoRectifiedPixelValue(x, y, alt, srcData, sourceRaster);
                 trgData.setElemDoubleAt(index, v);
             }
         }
@@ -472,21 +466,21 @@ public final class BackwardTerrainCorrectionOp extends Operator {
     private double computeOrthoRectifiedPixelValue(
             int x, int y, double alt, ProductData srcData, Tile sourceRaster) {
 
-        int index = sourceRaster.getDataBufferIndex(x, y);
+        final int index = sourceRaster.getDataBufferIndex(x, y);
         if (Double.compare(alt, noDataValue) == 0) {
             return srcData.getElemDoubleAt(index);
         }
 
         // compute azimuth displacement
-        double[] earthPoint = getEarthPoint(x, y, alt);
-        double initialZeroDopplerTime = getCurrentLineUTC((double)y); // zero Doppler time for current range line
-        double zeroDopplerTime = getEarthPointZeroDopplerTime(y, earthPoint);
-        double delAz = (initialZeroDopplerTime - zeroDopplerTime) / lineTimeInterval;
+        final double[] earthPoint = getEarthPoint(x, y, alt);
+        final double initialZeroDopplerTime = getCurrentLineUTC((double)y); // zero Doppler time for current range line
+        final double zeroDopplerTime = getEarthPointZeroDopplerTime(y, earthPoint);
+        final double delAz = (initialZeroDopplerTime - zeroDopplerTime) / lineTimeInterval;
 
         // compute range displacement
-        double slantRange = computeSlantRangeDistance(earthPoint, zeroDopplerTime); // slant range in m
-        double alpha = incidenceAngle.getPixelFloat((float)x, (float)y) * Math.PI / 180.0; // incidence angle in radian
-        double delRg = ForwardTerrainCorrectionOp.getRangeDisplacement(slantRange, alpha, alt, rangeSpacing);
+        final double slantRange = computeSlantRangeDistance(earthPoint, zeroDopplerTime); // slant range in m
+        final double alpha = incidenceAngle.getPixelFloat((float)x, (float)y) * org.esa.beam.util.math.MathUtils.DTOR; // incidence angle in radian
+        final double delRg = ForwardTerrainCorrectionOp.getRangeDisplacement(slantRange, alpha, alt, rangeSpacing);
 
         // get pixel value
         return getPixelValue(x, y, index, delAz, delRg, srcData, sourceRaster);
@@ -501,9 +495,9 @@ public final class BackwardTerrainCorrectionOp extends Operator {
      */
     private double[] getEarthPoint(int x, int y, double alt) {
 
-        double[] earthPoint = new double[3];
-        double lat = latitude.getPixelFloat((float)x, (float)y);
-        double lon = longitude.getPixelFloat((float)x, (float)y);
+        final double[] earthPoint = new double[3];
+        final double lat = latitude.getPixelFloat((float)x, (float)y);
+        final double lon = longitude.getPixelFloat((float)x, (float)y);
         GeoUtils.geo2xyz(lat, lon, alt, earthPoint);
 
         return earthPoint;
@@ -555,7 +549,7 @@ public final class BackwardTerrainCorrectionOp extends Operator {
             return getCurrentLineUTC(y1);
         }
 
-        double y0 = y1 + f1*(y2 - y1)/(f1 - f2);
+        final double y0 = y1 + f1*(y2 - y1)/(f1 - f2);
 
         return getCurrentLineUTC(y0);
     }
@@ -572,13 +566,13 @@ public final class BackwardTerrainCorrectionOp extends Operator {
             throw new OperatorException("Invalid range line index: " + y);
         }
         
-        double xVel = sensorVelocity[y][0];
-        double yVel = sensorVelocity[y][1];
-        double zVel = sensorVelocity[y][2];
-        double xDiff = earthPoint[0] - sensorPosition[y][0];
-        double yDiff = earthPoint[1] - sensorPosition[y][1];
-        double zDiff = earthPoint[2] - sensorPosition[y][2];
-        double distance = Math.sqrt(xDiff*xDiff + yDiff*yDiff + zDiff*zDiff);
+        final double xVel = sensorVelocity[y][0];
+        final double yVel = sensorVelocity[y][1];
+        final double zVel = sensorVelocity[y][2];
+        final double xDiff = earthPoint[0] - sensorPosition[y][0];
+        final double yDiff = earthPoint[1] - sensorPosition[y][1];
+        final double zDiff = earthPoint[2] - sensorPosition[y][2];
+        final double distance = Math.sqrt(xDiff*xDiff + yDiff*yDiff + zDiff*zDiff);
 
         return 2.0 * (xVel*xDiff + yVel*yDiff + zVel*zDiff) / (distance*wavelength);
     }
@@ -591,12 +585,12 @@ public final class BackwardTerrainCorrectionOp extends Operator {
      */
     private double computeSlantRangeDistance(double[] earthPoint, double time) {
 
-        double sensorXPos = getInterpolatedData(xPosWarpCoef, time);
-        double sensorYPos = getInterpolatedData(yPosWarpCoef, time);
-        double sensorZPos = getInterpolatedData(zPosWarpCoef, time);
-        double xDiff = sensorXPos - earthPoint[0];
-        double yDiff = sensorYPos - earthPoint[1];
-        double zDiff = sensorZPos - earthPoint[2];
+        final double sensorXPos = getInterpolatedData(xPosWarpCoef, time);
+        final double sensorYPos = getInterpolatedData(yPosWarpCoef, time);
+        final double sensorZPos = getInterpolatedData(zPosWarpCoef, time);
+        final double xDiff = sensorXPos - earthPoint[0];
+        final double yDiff = sensorYPos - earthPoint[1];
+        final double zDiff = sensorZPos - earthPoint[2];
 
         return Math.sqrt(xDiff*xDiff + yDiff*yDiff + zDiff*zDiff);
     }
@@ -615,24 +609,24 @@ public final class BackwardTerrainCorrectionOp extends Operator {
     private double getPixelValue(
             int x, int y, int index, double delAz, double delRg, ProductData srcData, Tile sourceRaster) {
 
-        double xip = x - delRg; // imaged pixel position in range
-        double yip = y - delAz; // imaged pixel position in azimuth
+        final double xip = x - delRg; // imaged pixel position in range
+        final double yip = y - delAz; // imaged pixel position in azimuth
         if (xip < 0.0 || xip >= sourceImageWidth - 1 || yip < 0.0 || yip >= sourceImageHeight - 1) {
             return srcData.getElemDoubleAt(index);
         }
 
-        int x0 = (int)xip;
-        int x1 = x0 + 1;
-        double muX = xip - x0;
+        final int x0 = (int)xip;
+        final int x1 = x0 + 1;
+        final double muX = xip - x0;
 
-        int y0 = (int)yip;
-        int y1 = y0 + 1;
-        double muY = yip - y0;
+        final int y0 = (int)yip;
+        final int y1 = y0 + 1;
+        final double muY = yip - y0;
 
-        double v00 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0));
-        double v01 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x1, y0));
-        double v10 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y1));
-        double v11 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x1, y1));
+        final double v00 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0));
+        final double v01 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x1, y0));
+        final double v10 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y1));
+        final double v11 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x1, y1));
         return MathUtils.interpolationBiLinear(v00, v01, v10, v11, muX, muY);        
     }
 
