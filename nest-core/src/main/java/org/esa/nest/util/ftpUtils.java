@@ -42,7 +42,7 @@ public class ftpUtils {
             fis = ftpClient.retrieveFileStream(remotePath);
             if(fis == null) {
                 final int code = ftpClient.getReplyCode();
-                System.out.println("error code:"+code);
+                System.out.println("error code:"+code + " on " + remotePath);
                 return FTPError.FILE_NOT_FOUND;
             }
 

@@ -36,7 +36,7 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
     private final Resampling.Index _resamplingIndex;
     private final Resampling.Raster _resamplingRaster;
 
-    final ProductReader productReader = getReaderPlugIn().createReaderInstance();
+    final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn();
 
     public SRTM3GeoTiffElevationModel(SRTM3GeoTiffElevationModelDescriptor descriptor) throws IOException {
         _descriptor = descriptor;
@@ -84,14 +84,14 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
     }
 
     public float getSample(int pixelX, int pixelY) throws IOException {
-        final int tileXIndex = (pixelX / NUM_PIXELS_PER_TILE)+1;
-        final int tileYIndex = (pixelY / NUM_PIXELS_PER_TILE)+1;
+        final int tileXIndex = pixelX / NUM_PIXELS_PER_TILE;
+        final int tileYIndex = pixelY / NUM_PIXELS_PER_TILE;
         final SRTM3GeoTiffElevationTile tile = elevationFiles[tileXIndex][tileYIndex].getTile();
         if(tile == null) {
             return Float.NaN;
         }
-        final int tileX = pixelX - (tileXIndex-1) * NUM_PIXELS_PER_TILE;
-        final int tileY = pixelY - (tileYIndex-1) * NUM_PIXELS_PER_TILE;
+        final int tileX = pixelX - tileXIndex * NUM_PIXELS_PER_TILE;
+        final int tileY = pixelY - tileYIndex * NUM_PIXELS_PER_TILE;
         final float sample = tile.getSample(tileX, tileY);    
         if (sample == _descriptor.getNoDataValue()) {
             return Float.NaN;
@@ -106,9 +106,9 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
 
             for (int y = 0; y < elevationFiles[x].length; y++) {
 
-                final String fileName = SRTM3GeoTiffElevationModelDescriptor.createTileFilename(x, y);
+                final String fileName = SRTM3GeoTiffElevationModelDescriptor.createTileFilename(x+1, y+1);
                 final File localFile = new File(demInstallDir, fileName);
-                elevationFiles[x][y] = new SRTM3GeoTiffFile(this, localFile, productReader);
+                elevationFiles[x][y] = new SRTM3GeoTiffFile(this, localFile, productReaderPlugIn.createReaderInstance());
             }
         }             
         return elevationFiles;

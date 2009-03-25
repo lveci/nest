@@ -121,12 +121,13 @@ public class SRTM3GeoTiffFile {
         final String ext = FileUtils.getExtension(dataFile.getName());
         if (ext.equalsIgnoreCase(".zip")) {
             final String baseName = FileUtils.getFilenameWithoutExtension(dataFile.getName()) + ".tif";
-            final ZipFile zipFile = new ZipFile(dataFile);
-   
             final File newFile = new File(DatUtils.getApplicationUserTempDataDir(), baseName);
+            if(newFile.exists())
+                return newFile;
+
+            final ZipFile zipFile = new ZipFile(dataFile);
             final FileOutputStream fileoutputstream = new FileOutputStream(newFile);
             try {
-                //final ZipEntry zipEntry = getZipEntryIgnoreCase(zipFile, baseName);
                 final ZipEntry zipEntry = zipFile.getEntry(baseName);
                 if (zipEntry == null) {
                     localFileExists = false;
