@@ -551,7 +551,13 @@ public final class BackwardTerrainCorrectionOp extends Operator {
 
         final double y0 = y1 + f1*(y2 - y1)/(f1 - f2);
 
-        return getCurrentLineUTC(y0);
+        double zeroDopplerTimeWithBias = getCurrentLineUTC(y0);
+
+        double slantRange = computeSlantRangeDistance(earthPoint, zeroDopplerTimeWithBias); // slant range in m
+
+        double zeroDopplerTimeWithoutBias = zeroDopplerTimeWithBias + slantRange / Constants.halfLightSpeed / 86400.0;
+
+        return zeroDopplerTimeWithoutBias;
     }
 
     /**
