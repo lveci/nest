@@ -64,9 +64,9 @@ public class Axis {
         spacing = Math.abs(tickLength);
         font = getFont("default.font.plot.axis.tick", "SansSerif-plain-9");
         titleFont = getFont("default.font.plot.axis.title", "SansSerif-plain-9");
-        axisColor = Color.black;
+        axisColor = Color.white;
         labelColor = Color.black;
-        gridColor = Color.gray;
+        gridColor = Color.darkGray;
         setLocation(orientation);
     }
 
@@ -79,6 +79,10 @@ public class Axis {
         title = "";
         setRange(0.0D, 1.0D);
         setTickCount(3);
+    }
+
+    public void setTitle(String str) {
+        title = str;
     }
 
     public AxisGraphics getAxisGraphics(Graphics g) {
@@ -101,10 +105,10 @@ public class Axis {
     }
 
     public void setDataRange(double range[]) {
-        setDataRange(range[0], range[1], java.lang.Double.class);
+        setDataRange(range[0], range[1]);
     }
 
-    void setDataRange(double minValue, double maxValue, Class dataType) {
+    void setDataRange(double minValue, double maxValue) {
         minData = minValue;
         maxData = maxValue;
         if (autoRange)

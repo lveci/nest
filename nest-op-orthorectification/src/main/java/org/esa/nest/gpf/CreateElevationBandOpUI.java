@@ -65,15 +65,7 @@ public class CreateElevationBandOpUI extends BaseOperatorUI {
 
         final JPanel contentPane = new JPanel();
         contentPane.setLayout(new GridBagLayout());
-        final GridBagConstraints gbc = GridBagUtils.createDefaultConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.insets.top = 1;
-        gbc.insets.bottom = 1;
-        gbc.insets.right = 1;
-        gbc.insets.left = 1;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
+        final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Digital Elevation Model:", demName);

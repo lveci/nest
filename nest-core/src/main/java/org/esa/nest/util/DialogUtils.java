@@ -1,5 +1,7 @@
 package org.esa.nest.util;
 
+import org.esa.beam.framework.ui.GridBagUtils;
+
 import javax.swing.*;
 import java.awt.*;
 import java.text.NumberFormat;
@@ -83,5 +85,18 @@ public class DialogUtils {
             labelPanel.add(new JLabel(labelStr));
             fieldPanel.add(component);
         }
+    }
+
+    public static GridBagConstraints createGridBagConstraints() {
+        final GridBagConstraints gbc = GridBagUtils.createDefaultConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.insets.top = 1;
+        gbc.insets.bottom = 1;
+        gbc.insets.right = 1;
+        gbc.insets.left = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        return gbc;
     }
 }

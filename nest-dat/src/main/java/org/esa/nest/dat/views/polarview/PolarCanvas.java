@@ -10,9 +10,6 @@ public class PolarCanvas extends Container {
     private Axis colourAxis;
     private PolarData data = null;
     private double rings[] = null;
-    //private Glyph ringText[];
-    //private StyledText xTitle;
-    // private StyledText yTitle;
     private float dirOffset;
     private int plotRadius;
     private boolean opaque;
@@ -27,8 +24,6 @@ public class PolarCanvas extends Container {
 
     private PolarCanvas(Axis radialAxis, Axis colourAxis) {
         opaque = false;
-        //xTitle = new StyledText("E");
-        //yTitle = new StyledText("N");
         dirOffset = 0.0F;
         plotRadius = 0;
         this.radialAxis = radialAxis;
@@ -230,14 +225,6 @@ public class PolarCanvas extends Container {
             data.setDirOffset(dirOffset);
     }
 
-    public void setCompassNames(String eStr, String nStr) {
-        if (eStr == null || nStr == null) {
-        } else {
-            //xTitle.setText(eStr);
-            //yTitle.setText(nStr);
-        }
-    }
-
     public double[] getRTheta(Point oP) {
         final Point p = new Point(oP);
         p.y = origin.y - p.y;
@@ -279,8 +266,7 @@ public class PolarCanvas extends Container {
             drawColorBar(g, colourAxis);
         }
         g.translate(-origin.x, -origin.y - r.height);
-        final Point xYo = new Point(origin.x, origin.y + r.height);
-        final int xYs = origin.x / 2;
+
         origin.y += r.height / 2;
         origin.x += r.width / 2;
         final Graphics oGraphics = g.create();
@@ -288,7 +274,7 @@ public class PolarCanvas extends Container {
         radialAxis.setSize(quadrantSize);
         if (data != null)
             data.draw(oGraphics);
-        oGraphics.setColor(Color.darkGray);
+        oGraphics.setColor(Color.white);
         if (rings != null) {
             for (double ring : rings) {
                 final int rad = radialAxis.computeScreenPoint(ring);
@@ -297,12 +283,11 @@ public class PolarCanvas extends Container {
                 //if(ringText != null && ringText[ri] != null)
                 //    ringText[ri].drawCentered(oGraphics, 0, -(rad + ringText[ri].getDescent(oGraphics) * 3));
             }
-        } //else {
+        } else {
             radialAxis.draw(oGraphics);
-       // }
+        }
         oGraphics.translate(-origin.x, -origin.y);
         oGraphics.dispose();
-        //drawAnnotation(g, size);
     }
 
 }

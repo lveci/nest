@@ -20,7 +20,6 @@ public class PolarData {
     private float dirOffset = 0;
 
     private Color[][] colors;
-    private boolean connectPoints;
     private ColourScale cScale = null;
     private int plotCount = 0;
 
@@ -34,7 +33,6 @@ public class PolarData {
         this.radii = radii;
         Nth = cValues.length;
         Nr = cValues[0].length;
-        connectPoints = true;
     }
 
     public void setRAxis(Axis rAxis) {
@@ -43,18 +41,14 @@ public class PolarData {
 
     private void setRPoints(Object rPoints[]) {
         this.rPoints = rPoints;
-        rData.setArrayType(rPoints);
     }
 
     private void setTPoints(Object tPoints[]) {
         this.tPoints = tPoints;
-        tData.setArrayType(tPoints);
     }
 
     private void setColorValues(Object cValues[]) {
         this.cValues = cValues;
-        connectPoints = cValues == null;
-        cData.setArrayType(cValues);
         colors = null;
     }
 
@@ -227,66 +221,7 @@ public class PolarData {
         if (cData.touched) {
             cData.touched = false;
             cScale.setRange(cData.axis.getRange());
-            computeColors(cValues, cData.type, colors, cScale);
-        }
-    }
-
-    private static void computeColors(Object oPoints[], int oType, Color colors[][], ColourScale scale) {
-        switch (oType) {
-            case 0: // '\0'
-                computeColors((int[][]) oPoints, colors, scale);
-                break;
-
-            case 1: // '\001'
-                computeColors((short[][]) oPoints, colors, scale);
-                break;
-
-            case 2: // '\002'
-                computeColors((float[][]) oPoints, colors, scale);
-                break;
-
-            case 3: // '\003'
-                computeColors((double[][]) oPoints, colors, scale);
-                break;
-
-            case 4: // '\004'
-                computeColors((long[][]) oPoints, colors, scale);
-                break;
-        }
-    }
-
-    private static void computeColors(int values[][], Color colors[][], ColourScale cScale) {
-        if (cScale == null)
-            return;
-        final int np = values.length;
-        for (int i = 0; i < np; i++) {
-            if (values[i] == null) {
-                colors[i] = null;
-            } else {
-                final int n = values[i].length;
-                if (colors[i] == null || colors[i].length != n)
-                    colors[i] = new Color[n];
-                for (int j = 0; j < n; j++) {
-                    colors[i][j] = cScale.getColor(values[i][j]);
-                }
-            }
-        }
-    }
-
-    private static void computeColors(short values[][], Color colors[][], ColourScale cScale) {
-        if (cScale == null)
-            return;
-        final int np = values.length;
-        for (int i = 0; i < np; i++) {
-            if (values[i] == null) {
-                colors[i] = null;
-            } else {
-                final int n = values[i].length;
-                if (colors[i] == null || colors[i].length != n)
-                    colors[i] = new Color[n];
-                for (int j = 0; j < n; j++)
-                    colors[i][j] = cScale.getColor(values[i][j]);
-            }
+            computeColors((float[][])cValues, colors, cScale);
         }
     }
 
@@ -308,75 +243,19 @@ public class PolarData {
         }
     }
 
-    private static void computeColors(double values[][], Color colors[][], ColourScale cScale) {
-        if (cScale == null)
-            return;
-        final int np = values.length;
-        for (int i = 0; i < np; i++) {
-            if (values[i] == null) {
-                colors[i] = null;
-            } else {
-                final int n = values[i].length;
-                if (colors[i] == null || colors[i].length != n)
-                    colors[i] = new Color[n];
-                for (int j = 0; j < n; j++) {
-                    colors[i][j] = cScale.getColor(values[i][j]);
-                }
-            }
-        }
-    }
-
-    private static void computeColors(long values[][], Color colors[][], ColourScale cScale) {
-        if (cScale == null) return;
-        final int np = values.length;
-        for (int i = 0; i < np; i++) {
-            if (values[i] == null) {
-                colors[i] = null;
-            } else {
-                final int n = values[i].length;
-                if (colors[i] == null || colors[i].length != n)
-                    colors[i] = new Color[n];
-                for (int j = 0; j < n; j++) {
-                    colors[i][j] = cScale.getColor(values[i][j]);
-                }
-            }
-        }
-    }
-
-    private static int getArrayType(Object oPoints[]) {
-        if (oPoints == null)
-            return -1;
-        if (oPoints instanceof double[][])
-            return 3;
-        if (oPoints instanceof int[][])
-            return 0;
-        if (oPoints instanceof float[][])
-            return 2;
-        if (oPoints instanceof short[][])
-            return 1;
-        return !(oPoints instanceof long[][]) ? -1 : 4;
-    }
-
     private static final class AxisInfo {
 
         private Axis axis = null;
         private boolean touched;
         private int touchId;
-        private int type;
 
         AxisInfo() {
             touched = true;
             touchId = -1;
-            type = -1;
         }
 
         void setAxis(Axis axis) {
             this.axis = axis;
-            touched = true;
-        }
-
-        void setArrayType(Object oPoints[]) {
-            type = getArrayType(oPoints);
             touched = true;
         }
 
