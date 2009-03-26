@@ -357,7 +357,7 @@ public class AbstractMetadata {
 
     /**
      * Get orbit state vectors.
-     * @param absRoot Abstracted metadata root
+     * @param absRoot Abstracted metadata root.
      * @return orbitStateVectors Array of orbit state vectors.
      * @throws Exception The exceptions.
      */
@@ -379,6 +379,32 @@ public class AbstractMetadata {
             orbitStateVectors[i] = vector;
         }
         return orbitStateVectors;
+    }
+
+    /**
+     * Set orbit state vectors.
+     * @param absRoot Abstracted metadata root.
+     * @param orbitStateVectors The orbit state vectors.
+     */
+    public static void setOrbitStateVectors(final MetadataElement absRoot, OrbitStateVector[] orbitStateVectors) {
+
+        MetadataElement elemRoot = absRoot.getElement(orbit_state_vectors);
+        int numElems = elemRoot.getNumElements();
+        if (numElems != orbitStateVectors.length) {
+            throw new OperatorException("Length of orbit state vector array is not correct");
+        }
+
+        for (int i = 0; i < numElems; i++) {
+            OrbitStateVector vector = orbitStateVectors[i];
+            MetadataElement subElemRoot = elemRoot.getElement(orbit_vector + (i+1));
+            subElemRoot.setAttributeUTC(orbit_vector_time, vector.time);
+            subElemRoot.setAttributeDouble(orbit_vector_x_pos, vector.x_pos);
+            subElemRoot.setAttributeDouble(orbit_vector_y_pos, vector.y_pos);
+            subElemRoot.setAttributeDouble(orbit_vector_z_pos, vector.z_pos);
+            subElemRoot.setAttributeDouble(orbit_vector_x_vel, vector.x_vel);
+            subElemRoot.setAttributeDouble(orbit_vector_y_vel, vector.y_vel);
+            subElemRoot.setAttributeDouble(orbit_vector_z_vel, vector.z_vel);
+        }
     }
 
     public static class OrbitStateVector {
