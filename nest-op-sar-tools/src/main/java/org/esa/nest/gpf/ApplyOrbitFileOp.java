@@ -31,6 +31,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.util.Settings;
 import org.esa.nest.util.GeoUtils;
+import org.esa.nest.util.Constants;
 
 import java.util.Date;
 import java.io.File;
@@ -76,12 +77,6 @@ public final class ApplyOrbitFileOp extends Operator {
 
     public static final String DORIS_POR = "DORIS_POR";
     public static final String DORIS_VOR = "DORIS_VOR";
-    private static final double a = 6378137; // m
-    private static final double b = 6356752.315; // m
-    private static final double earthFlatCoef = 298.257223563;
-    private static final double e = 2 / earthFlatCoef - 1 / (earthFlatCoef * earthFlatCoef);
-    private static final double lightSpeed = 299792458.0; //  m / s
-    private static final double halfLightSpeed = lightSpeed / 2.0;
 
     /**
      * Default constructor. The graph processing framework
@@ -124,6 +119,8 @@ public final class ApplyOrbitFileOp extends Operator {
             createTargetProduct();
 
             updateTargetProductGEOCoding();
+
+            updateOrbitStateVectors();
 
         } catch(Exception e) {
             throw new OperatorException(e.getMessage());
@@ -382,6 +379,8 @@ public final class ApplyOrbitFileOp extends Operator {
      */
     private void computeAccurateXYZ(OrbitData data, double[] xyz, double time) {
 
+        final double a = Constants.semiMajorAxis;
+        final double b = Constants.semiMinorAxis;
         final double del = 0.001;
         final int maxIter = 10;
 
@@ -408,7 +407,7 @@ public final class ApplyOrbitFileOp extends Operator {
             final double dz = z - data.zPos;
 
             F.set(0, 0, data.xVel*dx + data.yVel*dy + data.zVel*dz);
-            F.set(1, 0, dx*dx + dy*dy + dz*dz - Math.pow(time*halfLightSpeed, 2.0));
+            F.set(1, 0, dx*dx + dy*dy + dz*dz - Math.pow(time*Constants.halfLightSpeed, 2.0));
             F.set(2, 0, x*x/(a*a) + y*y/(a*a) + z*z/(b*b) - 1);
 
             J.set(1, 0, 2.0*dx);
@@ -430,6 +429,32 @@ public final class ApplyOrbitFileOp extends Operator {
         xyz[2] = X.get(2,0);
     }
 
+    /**
+     * Update orbit state vectors using data from the orbit file.
+     * @throws Exception The exceptions.
+     */
+    private void updateOrbitStateVectors() throws Exception {
+
+        // get original orbit state vectors
+        MetadataElement tgtAbsRoot = AbstractMetadata.getAbstractedMetadata(targetProduct);
+        AbstractMetadata.OrbitStateVector[] orbitStateVectors = AbstractMetadata.getOrbitStateVectors(tgtAbsRoot);
+
+        // compute new orbit state vectors
+        for (int i = 0; i< orbitStateVectors.length; i++) {
+            double time = orbitStateVectors[i].time.getMJD();
+            OrbitData orbitData = getOrbitData(time);
+            orbitStateVectors[i].x_pos = orbitData.xPos * 100.0; // m to 10^-2 m
+            orbitStateVectors[i].y_pos = orbitData.yPos * 100.0; // m to 10^-2 m
+            orbitStateVectors[i].z_pos = orbitData.zPos * 100.0; // m to 10^-2 m
+            orbitStateVectors[i].x_vel = orbitData.xVel * 100000.0; // m/s to 10^-5 m/s
+            orbitStateVectors[i].y_vel = orbitData.yVel * 100000.0; // m/s to 10^-5 m/s
+            orbitStateVectors[i].z_vel = orbitData.zVel * 100000.0; // m/s to 10^-5 m/s
+        }
+
+        // save new orbit state vectors
+        AbstractMetadata.setOrbitStateVectors(tgtAbsRoot, orbitStateVectors);
+    }
+    
     // ====================================== DORIS ORBIT FILE ===============================================
 
     /**
