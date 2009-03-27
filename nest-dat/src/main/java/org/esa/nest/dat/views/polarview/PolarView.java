@@ -37,11 +37,16 @@ public final class PolarView extends BasicView implements ActionListener, PopupM
     private float firstWLBin = 0;
     private float lastWLBin = 0;
 
-    private ProductData.UTC zeroDopplerTime;
+    private ProductData.UTC zeroDopplerTime = null;
     private double minSpectrum = 0;
     private double maxSpectrum = 255;
     private double maxSpecDir = 0;
     private double maxSpecWL = 0;
+
+    private double minReal = 0;
+    private double maxReal = 0;
+    private double minImaginary = 0;
+    private double maxImaginary = 0;
 
     private double windSpeed = 0;
     private double windDirection = 0;
@@ -73,10 +78,13 @@ public final class PolarView extends BasicView implements ActionListener, PopupM
         //super(sceneImage);
         product = prod;
 
-        if(prod.getProductType().equals("ASA_WVW_2P"))
+        if(prod.getProductType().equals("ASA_WVW_2P")) {
             waveProductType = WaveProductType.WAVE_SPECTRA;
-        else if(prod.getProductType().equals("ASA_WVS_1P"))
+            graphUnit = Unit.REAL;
+        } else {
             waveProductType = WaveProductType.CROSS_SPECTRA;
+            graphUnit = Unit.INTENSITY;
+        }
 
         getMetadata();
 
@@ -135,17 +143,22 @@ public final class PolarView extends BasicView implements ActionListener, PopupM
                 sarWaveHeight = spectraMetadata.getAttributeDouble("SAR_wave_height", 0);
                 sarAzShiftVar = spectraMetadata.getAttributeDouble("SAR_az_shift_var", 0);
                 backscatter = spectraMetadata.getAttributeDouble("backscatter", 0);
+            } else {
+                minReal = spectraMetadata.getAttributeDouble("min_real", 0);
+                maxReal = spectraMetadata.getAttributeDouble("max_real", 255);
+                minImaginary = spectraMetadata.getAttributeDouble("min_imag", 0);
+                maxImaginary = spectraMetadata.getAttributeDouble("max_imag", 255);
             }
         } catch(Exception e) {
             System.out.println("Unable to get metadata for "+spectraMetadataRoot.getName());
         }
 
-        DecimalFormat frmt = new DecimalFormat("0.0000");
+        final DecimalFormat frmt = new DecimalFormat("0.0000");
 
         final ArrayList<String> metadataList = new ArrayList<String>(10);
         metadataList.add("Time: " + zeroDopplerTime.toString());
-        metadataList.add("Direction of Spectrum Max: " + maxSpecDir + " deg");
-        metadataList.add("Wavelength of Spectrum Max: " + frmt.format(maxSpecWL) + " m");
+        metadataList.add("Peak Direction: " + maxSpecDir + " deg");
+        metadataList.add("Peak Wavelength: " + frmt.format(maxSpecWL) + " m");
 
         if(waveProductType == WaveProductType.WAVE_SPECTRA) {
             metadataList.add("Min Spectrum: " + frmt.format(minSpectrum));
@@ -161,27 +174,43 @@ public final class PolarView extends BasicView implements ActionListener, PopupM
         readoutView.setMetadata(metadataList.toArray(new String[metadataList.size()]));
     }
 
+    private float getMinValue(boolean real) {
+        if(waveProductType == WaveProductType.WAVE_SPECTRA) {
+            return (float)minSpectrum;
+        } else {
+            return real ? (float)minReal : (float)minImaginary;
+        }
+    }
+
+    private float getMaxValue(boolean real) {
+        if(waveProductType == WaveProductType.WAVE_SPECTRA) {
+            return (float)maxSpectrum;
+        } else {
+            return real ? (float)maxReal : (float)maxImaginary;
+        }
+    }
+
     private void createPlot(int rec) {
 
         spectrum = getSpectrum(0, rec, graphUnit != Unit.IMAGINARY);
         getSpectraMetadata(rec);
 
-        float minValue = 0;//Float.MAX_VALUE;
-        float maxValue = 255;//Float.MIN_VALUE;
+        float minValue = getMinValue(graphUnit != Unit.IMAGINARY);
+        float maxValue = getMaxValue(graphUnit != Unit.IMAGINARY);
 
         // complex data
         if (graphUnit == Unit.AMPLITUDE || graphUnit == Unit.INTENSITY || graphUnit == Unit.BOTH || graphUnit == Unit.MULTIPLIED) {
             final float imagSpectrum[][] = getSpectrum(1, rec, false);
             minValue = Float.MAX_VALUE;
             maxValue = Float.MIN_VALUE;
-            final int halfCircle = spectrum.length / 2;
+            final int semiCircle = spectrum.length / 2;
             for (int i = 0; i < spectrum.length; i++) {
                 for (int j = 0; j < spectrum[0].length; j++) {
                     final float rS = spectrum[i][j];
                     final float iS = imagSpectrum[i][j];
                     float v = rS;
                     if (graphUnit == Unit.BOTH) {
-                        if (i >= halfCircle)
+                        if (i >= semiCircle)
                             v = iS;
                     } else if (graphUnit == Unit.MULTIPLIED) {
                         if (sign(rS) == sign(iS))
@@ -203,20 +232,19 @@ public final class PolarView extends BasicView implements ActionListener, PopupM
             }
         }
 
-        final float thFirst;
-        double logr;
         final float rStep = (float) (Math.log(lastWLBin) - Math.log(firstWLBin)) / (float) (numWLBins - 1);
-        logr = Math.log(firstWLBin) - (rStep / 2.0);
+        double logr = Math.log(firstWLBin) - (rStep / 2.0);
         final double colourRange[] = {(double) minValue, (double) maxValue};
         final double radialRange[] = {0.0, 333.33333333333};
-        final float thStep;
 
+        final float thFirst;
+        final float thStep;
         if(waveProductType == WaveProductType.WAVE_SPECTRA) {
-            thFirst = firstDirBins - 5f;
-            thStep = dirBinStep;
-        } else {
             thFirst = firstDirBins + 5f;
             thStep = -dirBinStep;
+        } else {
+            thFirst = firstDirBins - 5f;
+            thStep = dirBinStep;
         }
 
         final int nWl = spectrum[0].length;
@@ -255,13 +283,12 @@ public final class PolarView extends BasicView implements ActionListener, PopupM
             return null;
         }
 
-        final int Nd2 = numDirBins / 2;
-        final float minValue = 0;
-        final float maxValue = 255;
-        final float scale = (maxValue - minValue) / 255F;
+        final float minValue = getMinValue(getReal);
+        final float maxValue = getMaxValue(getReal);
+        final float scale = (maxValue - minValue) / 255f;
         final float spectrum[][] = new float[numDirBins][numWLBins];
-        int index = 0;
 
+        int index = 0;
         if(waveProductType == WaveProductType.WAVE_SPECTRA) {
             for (int i = 0; i < numDirBins; i++) {
                 for (int j = 0; j < numWLBins; j++) {
@@ -269,6 +296,7 @@ public final class PolarView extends BasicView implements ActionListener, PopupM
                 }
             }
         } else {
+            final int Nd2 = numDirBins / 2;
             for (int i = 0; i < Nd2; i++) {
                 for (int j = 0; j < numWLBins; j++) {
                     spectrum[i][j] = dataset[index++] * scale + minValue;
