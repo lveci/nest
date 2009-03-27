@@ -1,32 +1,28 @@
 
 package org.esa.nest.dat;
 
+import com.bc.ceres.core.ProgressMonitor;
 import com.jidesoft.action.CommandBar;
 import com.jidesoft.action.CommandMenuBar;
 import com.jidesoft.status.LabelStatusBarItem;
-import com.jidesoft.status.TimeStatusBarItem;
-import com.jidesoft.status.MemoryStatusBarItem;
-import com.jidesoft.status.ResizeStatusBarItem;
-import com.jidesoft.swing.JideBoxLayout;
-import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.ui.*;
-import org.esa.beam.framework.ui.application.ApplicationDescriptor;
-import org.esa.beam.framework.ui.application.ToolViewDescriptor;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.help.HelpSys;
-import org.esa.beam.visat.*;
+import org.esa.beam.framework.ui.ModalDialog;
+import org.esa.beam.framework.ui.application.ApplicationDescriptor;
+import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView;
 import org.esa.beam.visat.toolviews.stat.StatisticsToolView;
-import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.dat.actions.LoadTabbedLayoutAction;
+import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
+import org.esa.nest.dat.views.polarview.PolarView;
 
 import javax.swing.*;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.awt.event.ActionListener;
+import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.HashSet;
+import java.util.List;
 
 public final class DatApp extends VisatApp {
     public DatApp(ApplicationDescriptor applicationDescriptor) {
@@ -253,5 +249,37 @@ public final class DatApp extends VisatApp {
         });
 
         return toolBar;
+    }
+
+        /**
+     * Closes all (internal) frames associated with the given product.
+     *
+     * @param product The product to close the internal frames for.
+     */
+    @Override
+    public synchronized void closeAllAssociatedFrames(final Product product) {
+        super.closeAllAssociatedFrames(product);
+
+        boolean frameFound;
+        do {
+            frameFound = false;
+            final JInternalFrame[] frames = getDesktopPane().getAllFrames();
+            if (frames == null) {
+                break;
+            }
+            for (final JInternalFrame frame : frames) {
+                final Container cont = frame.getContentPane();
+                Product frameProduct = null;
+                if (cont instanceof PolarView) {
+                    final PolarView view = (PolarView) cont;
+                    frameProduct = view.getProduct();
+                }
+                if (frameProduct != null && frameProduct == product) {
+                    getDesktopPane().closeFrame(frame);
+                    frameFound = true;
+                    break;
+                }
+            }
+        } while (frameFound);
     }
 }

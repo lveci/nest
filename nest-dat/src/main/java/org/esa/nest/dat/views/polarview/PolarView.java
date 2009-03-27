@@ -1,9 +1,9 @@
 package org.esa.nest.dat.views.polarview;
 
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.ui.product.ProductSceneImage;
-import org.esa.beam.framework.ui.product.ProductNodeView;
 import org.esa.beam.framework.ui.BasicView;
+import org.esa.beam.framework.ui.product.ProductNodeView;
+import org.esa.beam.framework.ui.product.ProductSceneImage;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
@@ -12,8 +12,8 @@ import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 /**
  * NEST
@@ -60,8 +60,7 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
     private enum WaveProductType { CROSS_SPECTRA, WAVE_SPECTRA }
 
     private final ControlPanel controlPanel;
-    private final PolarCanvas graphView;
-    private final ReadoutCanvas readoutView;
+    private final PolarPanel polarPanel;
     private Unit graphUnit = Unit.REAL;
     private WaveProductType waveProductType = WaveProductType.WAVE_SPECTRA;
     private float spectrum[][] = null;
@@ -92,16 +91,13 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
         numRecords = rasterNode.getRasterHeight()-1;
         recordLength = rasterNode.getRasterWidth();
 
-        graphView = new PolarCanvas();
-
-        readoutView = new ReadoutCanvas();
-
-        CreateContextMenu();
         addMouseListener(this);
         addMouseMotionListener(this);
 
         this.setLayout(new BorderLayout());
 
+        polarPanel = new PolarPanel(this);
+        this.add(polarPanel, BorderLayout.CENTER);
         controlPanel = new ControlPanel(this);
         this.add(controlPanel, BorderLayout.SOUTH);
 
@@ -125,8 +121,8 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
         super.dispose();
     }
 
-    public void disposeLayers() {
-        sceneImage.getRootLayer().dispose();
+    public Product getProduct() {
+        return product;
     }
 
     private void getMetadata() {
@@ -191,7 +187,7 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
             metadataList.add("Backscatter: " + frmt.format(backscatter) + " dB");
         }
 
-        readoutView.setMetadata(metadataList.toArray(new String[metadataList.size()]));
+        polarPanel.setMetadata(metadataList.toArray(new String[metadataList.size()]));
     }
 
     private float getMinValue(boolean real) {
@@ -291,14 +287,15 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
 
         final PolarData data = new PolarData(spectrum, 90f + thFirst, thStep, radii);
 
-        graphView.getColourAxis().setDataRange(colourRange);
-        graphView.getRadialAxis().setAutoRange(false);
-        graphView.getRadialAxis().setDataRange(radialRange);
-        graphView.getRadialAxis().setRange(radialRange[0], radialRange[1], 4);
-        graphView.getRadialAxis().setTitle("Wavelength (m)");
-        graphView.setRings(rings, null);
+        final PolarCanvas polarCanvas = polarPanel.getPolarCanvas();
+        polarCanvas.getColourAxis().setDataRange(colourRange);
+        polarCanvas.getRadialAxis().setAutoRange(false);
+        polarCanvas.getRadialAxis().setDataRange(radialRange);
+        polarCanvas.getRadialAxis().setRange(radialRange[0], radialRange[1], 4);
+        polarCanvas.getRadialAxis().setTitle("Wavelength (m)");
+        polarCanvas.setRings(rings, null);
         data.setColorScale(ColourScale.newCustomScale(colourRange));
-        graphView.setData(data);
+        polarCanvas.setData(data);
 
         repaint();
         controlPanel.updateControls();
@@ -360,27 +357,22 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
     /**
      * Paints the panel component
      *
-     * @param g The Graphics
+    // * @param g The Graphics
      */
-    @Override
+ /*   @Override
     protected void paintComponent(java.awt.Graphics g) {
         super.paintComponent(g);
 
         ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
 
-        graphView.setSize(getWidth(), getHeight());
-        graphView.paint(g);
+        //graphView.setSize(getWidth(), getHeight());
+        //graphView.paint(g);
 
+        polarPanel.paint(g);
         readoutView.paint(g);
         controlPanel.paint(g);
-    }
-
-    private void CreateContextMenu() {
-        //final ImageIcon opIcon = null;
-
-    }
-
+    }       */
 
     @Override
     public JPopupMenu createPopupMenu(Component component) {
@@ -495,6 +487,12 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
         createPlot(currentRecord);
     }
 
+    private void callColourScaleDlg() {
+        final PolarCanvas polarCanvas = polarPanel.getPolarCanvas();
+        final ColourScaleDialog dlg = new ColourScaleDialog(polarCanvas.getColourAxis());
+        dlg.show();
+    }
+
     private void checkPopup(MouseEvent e) {
         if (e.isPopupTrigger()) {
             createPopupMenu(e);
@@ -510,7 +508,6 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
     public void popupMenuCanceled(PopupMenuEvent e) {
     }
 
-
     /**
      * Handle mouse pressed event
      *
@@ -518,7 +515,6 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
      */
     public void mousePressed(MouseEvent e) {
         checkPopup(e);
-
     }
 
     /**
@@ -530,11 +526,11 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
         checkPopup(e);
 
         final Object src = e.getSource();
-        if(src == graphView) {
-            final Axis axis = graphView.selectAxis(e.getPoint());
-            if(axis != null && axis == graphView.getColourAxis()) {
-                //axisPanel = new AxisDialog(this);
-                //axisPanel.show(axis, graphView, p);
+        final PolarCanvas polarCanvas = polarPanel.getPolarCanvas();
+        if(src == polarCanvas) {
+            final Axis axis = polarCanvas.selectAxis(e.getPoint());
+            if(axis != null && axis == polarCanvas.getColourAxis()) {
+                callColourScaleDlg();
             }
         }
     }
@@ -545,24 +541,11 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
     public void mouseExited(MouseEvent e) {
     }
 
-    /**
-     * Handle mouse released event
-     *
-     * @param e the mouse event
-     */
     public void mouseReleased(MouseEvent e) {
         checkPopup(e);
-
-
     }
 
-    /**
-     * Handle mouse dragged event
-     *
-     * @param e the mouse event
-     */
     public void mouseDragged(MouseEvent e) {
-
     }
 
     /**
@@ -574,15 +557,11 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
         updateReadout(e);
     }
 
-    private void callColourScaleDlg() {
-        final ColourScaleDialog dlg = new ColourScaleDialog(graphView.getColourAxis());
-        dlg.show();
-    }
-
     private void updateReadout(MouseEvent evt) {
         if(spectrum == null)
             return;
-        final double rTh[] = graphView.getRTheta(evt.getPoint());
+
+        final double rTh[] = polarPanel.getPolarCanvas().getRTheta(evt.getPoint());
         if(rTh != null) {
             final float thFirst;
             final int thBin;
@@ -616,10 +595,10 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
             readoutList.add("Bin: " + (thBin+1) + "," + (wvBin+1) + " Element: " + element);
             readoutList.add("Value: " + spectrum[thBin][wvBin]);
 
-            readoutView.setReadout(readoutList.toArray(new String[readoutList.size()]));
+            polarPanel.setReadout(readoutList.toArray(new String[readoutList.size()]));
 
         } else {
-            readoutView.setReadout(null);   
+            polarPanel.setReadout(null);
         }
         repaint();
     }

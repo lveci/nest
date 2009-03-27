@@ -1,7 +1,5 @@
 package org.esa.nest.dat.views.polarview;
 
-import org.esa.beam.util.Debug;
-
 import java.awt.*;
 
 public class ReadoutCanvas {

@@ -1,12 +1,11 @@
 package org.esa.nest.dat.views.polarview;
 
 import javax.swing.*;
-import javax.swing.Timer;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
-import java.awt.event.ActionListener;
+import javax.swing.event.ChangeListener;
 import java.awt.event.ActionEvent;
-import java.util.*;
+import java.awt.event.ActionListener;
+import java.util.TimerTask;
 
 /**
 
@@ -60,6 +59,7 @@ public class ControlPanel extends JPanel {
         animateBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 animate = !animate;
+                updateControls();
             }
         });
     }
@@ -68,8 +68,8 @@ public class ControlPanel extends JPanel {
         final int currentRecord = polarView.getCurrentRecord();
         final int numRecords = polarView.getNumRecords();
 
-        prevBtn.setEnabled(currentRecord > 0);
-        nextBtn.setEnabled(currentRecord < numRecords);
+        prevBtn.setEnabled(currentRecord > 0 && !animate);
+        nextBtn.setEnabled(currentRecord < numRecords && !animate);
         recordSlider.setValue(currentRecord);
 
         recordLabel.setText("Record "+ (currentRecord+1) + " of " + (numRecords+1));
