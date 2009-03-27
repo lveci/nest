@@ -1,10 +1,8 @@
 package org.esa.nest.dat.views.polarview;
 
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.RasterDataNode;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.ui.product.ProductSceneImage;
+import org.esa.beam.framework.ui.product.ProductNodeView;
 import org.esa.beam.framework.ui.BasicView;
 
 import javax.swing.*;
@@ -22,9 +20,10 @@ import java.text.DecimalFormat;
  * User: lveci
  * Date: Dec 1, 2008
  */
-public final class PolarView extends BasicView implements ActionListener, PopupMenuListener, MouseListener, MouseMotionListener {
+public final class PolarView extends BasicView implements ProductNodeView, ActionListener, PopupMenuListener, MouseListener, MouseMotionListener {
 
     private final Product product;
+    private ProductSceneImage sceneImage;
     private MetadataElement spectraMetadataRoot = null;
 
     private final int numRecords;
@@ -74,13 +73,13 @@ public final class PolarView extends BasicView implements ActionListener, PopupM
     private static final double rings[] = {50.0, 100.0, 200.0};
     private static final String ringTextStrings[] = {"200 (m)", "100 (m)", "50 (m)"};
 
-    public PolarView(Product prod, ProductSceneImage sceneImage) {
-        //super(sceneImage);
+    public PolarView(Product prod, ProductSceneImage image) {
         product = prod;
+        sceneImage = image;
 
         if(prod.getProductType().equals("ASA_WVW_2P")) {
             waveProductType = WaveProductType.WAVE_SPECTRA;
-            graphUnit = Unit.REAL;
+            graphUnit = Unit.AMPLITUDE;
         } else {
             waveProductType = WaveProductType.CROSS_SPECTRA;
             graphUnit = Unit.INTENSITY;
@@ -107,6 +106,27 @@ public final class PolarView extends BasicView implements ActionListener, PopupM
         this.add(controlPanel, BorderLayout.SOUTH);
 
         createPlot(currentRecord);
+    }
+
+    /**
+     * Returns the currently visible product node.
+     */
+    @Override
+    public ProductNode getVisibleProductNode() {
+        return sceneImage.getRasters()[0];
+    }
+
+    /**
+     * Releases all of the resources used by this view, its subcomponents, and all of its owned children.
+     */
+    @Override
+    public void dispose() {
+        sceneImage = null;
+        super.dispose();
+    }
+
+    public void disposeLayers() {
+        sceneImage.getRootLayer().dispose();
     }
 
     private void getMetadata() {
@@ -192,42 +212,57 @@ public final class PolarView extends BasicView implements ActionListener, PopupM
 
     private void createPlot(int rec) {
 
-        spectrum = getSpectrum(0, rec, graphUnit != Unit.IMAGINARY);
         getSpectraMetadata(rec);
+        spectrum = getSpectrum(0, rec, graphUnit != Unit.IMAGINARY);
 
         float minValue = getMinValue(graphUnit != Unit.IMAGINARY);
         float maxValue = getMaxValue(graphUnit != Unit.IMAGINARY);
 
-        // complex data
-        if (graphUnit == Unit.AMPLITUDE || graphUnit == Unit.INTENSITY || graphUnit == Unit.BOTH || graphUnit == Unit.MULTIPLIED) {
+        if(waveProductType == WaveProductType.WAVE_SPECTRA) {
+            if(graphUnit == Unit.INTENSITY) {
+                minValue = Float.MAX_VALUE;
+                maxValue = Float.MIN_VALUE; 
+                for (int i = 0; i < spectrum.length; i++) {
+                    for (int j = 0; j < spectrum[0].length; j++) {
+                        final float realVal = spectrum[i][j];
+                        final float val = realVal*realVal;
+                        spectrum[i][j] = val;
+                        minValue = Math.min(minValue, val);
+                        maxValue = Math.max(maxValue, val);
+                    }
+                }
+            }
+        } else if (graphUnit == Unit.AMPLITUDE || graphUnit == Unit.INTENSITY ||
+                graphUnit == Unit.BOTH || graphUnit == Unit.MULTIPLIED) {
+            // complex data
             final float imagSpectrum[][] = getSpectrum(1, rec, false);
             minValue = Float.MAX_VALUE;
             maxValue = Float.MIN_VALUE;
             final int semiCircle = spectrum.length / 2;
             for (int i = 0; i < spectrum.length; i++) {
                 for (int j = 0; j < spectrum[0].length; j++) {
-                    final float rS = spectrum[i][j];
-                    final float iS = imagSpectrum[i][j];
-                    float v = rS;
+                    final float realVal = spectrum[i][j];
+                    final float imagVal = imagSpectrum[i][j];
+                    float val = realVal;
                     if (graphUnit == Unit.BOTH) {
                         if (i >= semiCircle)
-                            v = iS;
+                            val = imagVal;
                     } else if (graphUnit == Unit.MULTIPLIED) {
-                        if (sign(rS) == sign(iS))
-                            v *= iS;
+                        if (sign(realVal) == sign(imagVal))
+                            val *= imagVal;
                         else
-                            v = 0.0F;
+                            val = 0.0F;
                     } else {
-                        if (sign(rS) == sign(iS))
-                            v = rS * rS + iS * iS;
+                        if (sign(realVal) == sign(imagVal))
+                            val = realVal * realVal + imagVal * imagVal;
                         else
-                            v = 0.0F;
-                        if (graphUnit == Unit.INTENSITY)
-                            v = (float) Math.sqrt(v);
+                            val = 0.0F;
+                        if (graphUnit == Unit.AMPLITUDE)
+                            val = (float) Math.sqrt(val);
                     }
-                    spectrum[i][j] = v;
-                    minValue = Math.min(minValue, v);
-                    maxValue = Math.max(maxValue, v);
+                    spectrum[i][j] = val;
+                    minValue = Math.min(minValue, val);
+                    maxValue = Math.max(maxValue, val);
                 }
             }
         }
@@ -265,8 +300,8 @@ public final class PolarView extends BasicView implements ActionListener, PopupM
         data.setColorScale(ColourScale.newCustomScale(colourRange));
         graphView.setData(data);
 
-        controlPanel.updateControls();
         repaint();
+        controlPanel.updateControls();
     }
 
     private float[][] getSpectrum(int imageNum, int rec, boolean getReal) {
@@ -338,10 +373,11 @@ public final class PolarView extends BasicView implements ActionListener, PopupM
         graphView.paint(g);
 
         readoutView.paint(g);
+        controlPanel.paint(g);
     }
 
     private void CreateContextMenu() {
-        final ImageIcon opIcon = null;
+        //final ImageIcon opIcon = null;
 
     }
 
@@ -369,12 +405,17 @@ public final class PolarView extends BasicView implements ActionListener, PopupM
         final JMenu unitMenu = new JMenu("Unit");
         popup.add(unitMenu);
 
-        createCheckedMenuItem(unitTypes[Unit.REAL.ordinal()], unitMenu, graphUnit == Unit.REAL);
-        createCheckedMenuItem(unitTypes[Unit.IMAGINARY.ordinal()], unitMenu, graphUnit == Unit.IMAGINARY);
-        createCheckedMenuItem(unitTypes[Unit.BOTH.ordinal()], unitMenu, graphUnit == Unit.BOTH);
-        createCheckedMenuItem(unitTypes[Unit.AMPLITUDE.ordinal()], unitMenu, graphUnit == Unit.AMPLITUDE);
-        createCheckedMenuItem(unitTypes[Unit.INTENSITY.ordinal()], unitMenu, graphUnit == Unit.INTENSITY);
-        createCheckedMenuItem(unitTypes[Unit.MULTIPLIED.ordinal()], unitMenu, graphUnit == Unit.MULTIPLIED);
+        if(waveProductType == WaveProductType.WAVE_SPECTRA) {
+            createCheckedMenuItem(unitTypes[Unit.AMPLITUDE.ordinal()], unitMenu, graphUnit == Unit.AMPLITUDE);
+            createCheckedMenuItem(unitTypes[Unit.INTENSITY.ordinal()], unitMenu, graphUnit == Unit.INTENSITY);
+        } else {
+            createCheckedMenuItem(unitTypes[Unit.REAL.ordinal()], unitMenu, graphUnit == Unit.REAL);
+            createCheckedMenuItem(unitTypes[Unit.IMAGINARY.ordinal()], unitMenu, graphUnit == Unit.IMAGINARY);
+            createCheckedMenuItem(unitTypes[Unit.BOTH.ordinal()], unitMenu, graphUnit == Unit.BOTH);
+            createCheckedMenuItem(unitTypes[Unit.AMPLITUDE.ordinal()], unitMenu, graphUnit == Unit.AMPLITUDE);
+            createCheckedMenuItem(unitTypes[Unit.INTENSITY.ordinal()], unitMenu, graphUnit == Unit.INTENSITY);
+            createCheckedMenuItem(unitTypes[Unit.MULTIPLIED.ordinal()], unitMenu, graphUnit == Unit.MULTIPLIED);
+        }
 
         popup.setLabel("Justification");
         popup.setBorder(new BevelBorder(BevelBorder.RAISED));
@@ -513,7 +554,6 @@ public final class PolarView extends BasicView implements ActionListener, PopupM
         checkPopup(e);
 
 
-        repaint();
     }
 
     /**
@@ -578,9 +618,10 @@ public final class PolarView extends BasicView implements ActionListener, PopupM
 
             readoutView.setReadout(readoutList.toArray(new String[readoutList.size()]));
 
-            repaint();
-            controlPanel.repaint();
+        } else {
+            readoutView.setReadout(null);   
         }
+        repaint();
     }
 
 }

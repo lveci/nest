@@ -62,8 +62,8 @@ public class Axis {
         tickCount = 3;
         bestTickCount = 3;
         spacing = Math.abs(tickLength);
-        font = getFont("default.font.plot.axis.tick", "SansSerif-plain-9");
-        titleFont = getFont("default.font.plot.axis.title", "SansSerif-plain-9");
+        font = getFont("default.font.plot.axis.tick", "SansSerif-plain-12");
+        titleFont = getFont("default.font.plot.axis.title", "SansSerif-plain-12");
         axisColor = Color.white;
         labelColor = Color.black;
         gridColor = Color.darkGray;
