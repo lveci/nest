@@ -65,6 +65,30 @@ public final class MathUtils
     }
 
     /**
+     * Perform sinc interpolation.
+     * @param y0 First sample value.
+     * @param y1 Second sample value.
+     * @param y2 Third sample value.
+     * @param y3 Forth sample value.
+     * @param y4 Fifth sample value.
+     * @param mu A perameter in range [-0.5, 0.5] that defines the interpolated sample position wrt y2.
+     *           A 0 value of mu corresponds to sample y2.
+     * @return The interpolated sample value.
+     */
+    public static double interpolationSinc(
+            final double y0, final double y1, final double y2, final double y3, final double y4, final double mu) {
+
+        final int filterLength = 5;
+        final double f0 = sinc(mu + 2.0) * hanning(mu + 2.0, filterLength);
+        final double f1 = sinc(mu + 1.0) * hanning(mu + 1.0, filterLength);
+        final double f2 = sinc(mu + 0.0) * hanning(mu + 0.0, filterLength);
+        final double f3 = sinc(mu - 1.0) * hanning(mu - 1.0, filterLength);
+        final double f4 = sinc(mu - 2.0) * hanning(mu - 2.0, filterLength);
+        double sum = f0 + f1 + f2 + f3 + f4;
+        return (f0*y0 + f1*y1 + f2*y2 + f3*y3 + f4*y4)/sum;
+    }
+
+    /**
      * Perform Bi-linear interpolation.
      * @param v00 Sample value for pixel at (x0, y0).
      * @param v01 Sample value for pixel at (x1, y0).
@@ -99,4 +123,32 @@ public final class MathUtils
         return new Matrix(array);
     }
 
+    /**
+     * The sinc function.
+     * @param x The input variable.
+     * @return The sinc function value.
+     */
+    public static double sinc(double x) {
+
+        if (Double.compare(x, 0.0) == 0) {
+            return 1.0;
+        } else {
+            return Math.sin(x*Math.PI) / (x*Math.PI);
+        }
+    }
+
+    /**
+     * The Hanning window.
+     * @param x The input variable.
+     * @param windowLength The window length.
+     * @return The Hanning window value.
+     */
+    public static double hanning(double x, int windowLength) {
+
+        if (x >= -0.5*windowLength && x <= 0.5*windowLength) {
+            return 0.5*(1.0 + Math.cos(2.0*Math.PI*x/(windowLength + 1)));
+        } else {
+            return 0.0;
+        }
+    }
 }
