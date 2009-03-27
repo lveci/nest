@@ -3,6 +3,7 @@ package org.esa.nest.dat.views.polarview;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.RasterDataNode;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.ui.product.ProductSceneImage;
 import org.esa.beam.framework.ui.BasicView;
 
@@ -13,28 +14,45 @@ import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.text.DecimalFormat;
 
 /**
  * NEST
  * User: lveci
  * Date: Dec 1, 2008
  */
-public class PolarView extends BasicView implements ActionListener, PopupMenuListener, MouseListener, MouseMotionListener {
+public final class PolarView extends BasicView implements ActionListener, PopupMenuListener, MouseListener, MouseMotionListener {
 
     private final Product product;
+    private MetadataElement spectraMetadataRoot = null;
+
     private final int numRecords;
     private final int recordLength;
     private int numDirBins;
     private int numWLBins;
 
-    private float firstDirBins;
-    private float dirBinStep;
-    private float firstWLBin;
-    private float lastWLBin;
+    private float firstDirBins = 0;
+    private float dirBinStep = 0;
+    private float firstWLBin = 0;
+    private float lastWLBin = 0;
+
+    private ProductData.UTC zeroDopplerTime;
+    private double minSpectrum = 0;
+    private double maxSpectrum = 255;
+    private double maxSpecDir = 0;
+    private double maxSpecWL = 0;
+
+    private double windSpeed = 0;
+    private double windDirection = 0;
+    private double sarWaveHeight = 0;
+    private double sarAzShiftVar = 0;
+    private double backscatter = 0;
 
     private int currentRecord = 0;
 
     private enum Unit { REAL, IMAGINARY, BOTH, AMPLITUDE, INTENSITY, MULTIPLIED }
+    private final String[] unitTypes = new String[] { "Real", "Imaginary", "Both", "Amplitude", "Intensity", "Multiplied" };
     private enum WaveProductType { CROSS_SPECTRA, WAVE_SPECTRA }
 
     private final ControlPanel controlPanel;
@@ -84,18 +102,70 @@ public class PolarView extends BasicView implements ActionListener, PopupMenuLis
     }
 
     private void getMetadata() {
-        final MetadataElement sph = product.getMetadataRoot().getElement("SPH");
+        final MetadataElement root = product.getMetadataRoot();
+        final MetadataElement sph = root.getElement("SPH");
         numDirBins = sph.getAttributeInt("NUM_DIR_BINS", 0);
         numWLBins = sph.getAttributeInt("NUM_WL_BINS", 0);
         firstDirBins = (float) sph.getAttributeDouble("FIRST_DIR_BIN", 0);
         dirBinStep = (float) sph.getAttributeDouble("DIR_BIN_STEP", 0);
         firstWLBin = (float) sph.getAttributeDouble("FIRST_WL_BIN", 0);
         lastWLBin = (float) sph.getAttributeDouble("LAST_WL_BIN", 0);
+
+        if(waveProductType == WaveProductType.WAVE_SPECTRA) {
+            spectraMetadataRoot = root.getElement("OCEAN_WAVE_SPECTRA_MDS");
+        } else {
+            spectraMetadataRoot = root.getElement("CROSS_SPECTRA_MDS");
+        }
+    }
+
+    private void getSpectraMetadata(int rec) {
+        try {
+            final String elemName = spectraMetadataRoot.getName()+'.'+(rec+1);
+            final MetadataElement spectraMetadata = spectraMetadataRoot.getElement(elemName);
+
+            zeroDopplerTime = spectraMetadata.getAttributeUTC("zero_doppler_time");
+            maxSpecDir = spectraMetadata.getAttributeDouble("spec_max_dir", 0);
+            maxSpecWL = spectraMetadata.getAttributeDouble("spec_max_wl", 0);
+
+            if(waveProductType == WaveProductType.WAVE_SPECTRA) {
+                minSpectrum = spectraMetadata.getAttributeDouble("min_spectrum", 0);
+                maxSpectrum = spectraMetadata.getAttributeDouble("max_spectrum", 255);
+                windSpeed = spectraMetadata.getAttributeDouble("wind_speed", 0);
+                windDirection = spectraMetadata.getAttributeDouble("wind_direction", 0);
+                sarWaveHeight = spectraMetadata.getAttributeDouble("SAR_wave_height", 0);
+                sarAzShiftVar = spectraMetadata.getAttributeDouble("SAR_az_shift_var", 0);
+                backscatter = spectraMetadata.getAttributeDouble("backscatter", 0);
+            }
+        } catch(Exception e) {
+            System.out.println("Unable to get metadata for "+spectraMetadataRoot.getName());
+        }
+
+        DecimalFormat frmt = new DecimalFormat("0.0000");
+
+        final ArrayList<String> metadataList = new ArrayList<String>(10);
+        metadataList.add("Time: " + zeroDopplerTime.toString());
+        metadataList.add("Direction of Spectrum Max: " + maxSpecDir + " deg");
+        metadataList.add("Wavelength of Spectrum Max: " + frmt.format(maxSpecWL) + " m");
+
+        if(waveProductType == WaveProductType.WAVE_SPECTRA) {
+            metadataList.add("Min Spectrum: " + frmt.format(minSpectrum));
+            metadataList.add("Max Spectrum: " + frmt.format(maxSpectrum));
+
+            metadataList.add("Wind Speed: " + windSpeed + " m/s");
+            metadataList.add("Wind Direction: " + windDirection + " deg");
+            metadataList.add("SAR Swell Wave Height: " + frmt.format(sarWaveHeight) + " m");
+            metadataList.add("SAR Azimuth Shift Var: " + frmt.format(sarAzShiftVar) + " m^2");
+            metadataList.add("Backscatter: " + frmt.format(backscatter) + " dB");
+        }
+
+        readoutView.setMetadata(metadataList.toArray(new String[metadataList.size()]));
     }
 
     private void createPlot(int rec) {
 
         spectrum = getSpectrum(0, rec, graphUnit != Unit.IMAGINARY);
+        getSpectraMetadata(rec);
+
         float minValue = 0;//Float.MAX_VALUE;
         float maxValue = 255;//Float.MIN_VALUE;
 
@@ -271,12 +341,12 @@ public class PolarView extends BasicView implements ActionListener, PopupMenuLis
         final JMenu unitMenu = new JMenu("Unit");
         popup.add(unitMenu);
 
-        createSubMenuItem("Real", unitMenu);
-        createSubMenuItem("Imaginary", unitMenu);
-        createSubMenuItem("Both", unitMenu);
-        createSubMenuItem("Amplitude", unitMenu);
-        createSubMenuItem("Intensity", unitMenu);
-        createSubMenuItem("Multiplied", unitMenu);
+        createCheckedMenuItem(unitTypes[Unit.REAL.ordinal()], unitMenu, graphUnit == Unit.REAL);
+        createCheckedMenuItem(unitTypes[Unit.IMAGINARY.ordinal()], unitMenu, graphUnit == Unit.IMAGINARY);
+        createCheckedMenuItem(unitTypes[Unit.BOTH.ordinal()], unitMenu, graphUnit == Unit.BOTH);
+        createCheckedMenuItem(unitTypes[Unit.AMPLITUDE.ordinal()], unitMenu, graphUnit == Unit.AMPLITUDE);
+        createCheckedMenuItem(unitTypes[Unit.INTENSITY.ordinal()], unitMenu, graphUnit == Unit.INTENSITY);
+        createCheckedMenuItem(unitTypes[Unit.MULTIPLIED.ordinal()], unitMenu, graphUnit == Unit.MULTIPLIED);
 
         popup.setLabel("Justification");
         popup.setBorder(new BevelBorder(BevelBorder.RAISED));
@@ -293,8 +363,10 @@ public class PolarView extends BasicView implements ActionListener, PopupMenuLis
         return item;
     }
 
-    private JMenuItem createSubMenuItem(String name, JMenu parent) {
-        final JMenuItem item = createMenuItem(name);
+    private JCheckBoxMenuItem createCheckedMenuItem(String name, JMenu parent, boolean state) {
+        final JCheckBoxMenuItem item = new JCheckBoxMenuItem(name);
+        item.setHorizontalTextPosition(JMenuItem.RIGHT);
+        item.addActionListener(this);
         parent.add(item);
         return item;
     }
@@ -446,42 +518,40 @@ public class PolarView extends BasicView implements ActionListener, PopupMenuLis
         if(rTh != null) {
             final float thFirst;
             final int thBin;
-            int wvBin;
-            final int wl;
+            final float thStep;
             final int element;
             final int direction;
+
             final float rStep = (float) (Math.log(lastWLBin) - Math.log(firstWLBin)) / (float) (numWLBins - 1);
-            final float thStep;
+            int wvBin = (int)(((rStep / 2.0 + Math.log(10000.0 / rTh[0])) - Math.log(firstWLBin)) / rStep);
+            wvBin = Math.min(wvBin, spectrum[0].length - 1);
+            final int wl = (int)Math.round(Math.exp((double)wvBin * rStep + Math.log(firstWLBin)));
+
             if(waveProductType == WaveProductType.CROSS_SPECTRA) {
                 thFirst = firstDirBins - 5f;
                 thStep = dirBinStep;
-                thBin = (int)(((rTh[1] - (double)thFirst) % 360D) / (double)thStep);
-                wvBin = (int)(((rStep / 2D + Math.log(10000D / rTh[0])) - Math.log(firstWLBin)) / rStep);
-                wvBin = Math.min(wvBin, spectrum[0].length - 1);
-                wl = (int)Math.round(Math.exp((double)wvBin * rStep + Math.log(firstWLBin)));
+                thBin = (int)(((rTh[1] - (double)thFirst) % 360.0) / (double)thStep);
                 element = (thBin % (spectrum.length / 2)) * spectrum[0].length + wvBin;
-                direction = (int)((float)thBin * thStep + thStep / 2.0F + thFirst);
+                direction = (int)((float)thBin * thStep + thStep / 2.0f + thFirst);
             } else {
                 thFirst = firstDirBins + 5f;
                 thStep = -dirBinStep;
-                thBin = (int)((((360D - rTh[1]) + (double)thFirst) % 360D) / (double)(-thStep));
-                wvBin = (int)(((rStep / 2D + Math.log(10000D / rTh[0])) - Math.log(firstWLBin)) / rStep);
-                wvBin = Math.min(wvBin, spectrum[0].length - 1);
-                wl = (int)Math.round(Math.exp((double)wvBin * rStep + Math.log(firstWLBin)));
+                thBin = (int)((((360.0 - rTh[1]) + (double)thFirst) % 360.0) / (double)(-thStep));
                 element = thBin * spectrum[0].length + wvBin;
-                direction = (int)(-((float)thBin * thStep + thStep / 2.0F + thFirst));
-            }
+                direction = (int)(-((float)thBin * thStep + thStep / 2.0f + thFirst));
+            }             
 
-            final String[] readoutList = new String[5];
-            readoutList[0] = "Record: " + (currentRecord+1) + " of " + (numRecords+1);
-            readoutList[1] = "Wavelength: " + wl + " m";
-            readoutList[2] = "Direction: " + direction + " deg";
-            readoutList[3] = "Bin: " + (thBin + 1) + "," + (wvBin + 1) + " Element: " + element;
-            readoutList[4] = "Value: " + spectrum[thBin][wvBin];
+            final ArrayList<String> readoutList = new ArrayList<String>(5);
+            readoutList.add("Record: " + (currentRecord+1) + " of " + (numRecords+1));
+            readoutList.add("Wavelength: " + wl + " m");
+            readoutList.add("Direction: " + direction + " deg");
+            readoutList.add("Bin: " + (thBin+1) + "," + (wvBin+1) + " Element: " + element);
+            readoutList.add("Value: " + spectrum[thBin][wvBin]);
 
-            readoutView.setReadout(readoutList);
+            readoutView.setReadout(readoutList.toArray(new String[readoutList.size()]));
 
             repaint();
+            controlPanel.repaint();
         }
     }
 

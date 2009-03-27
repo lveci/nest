@@ -6,12 +6,11 @@ import java.awt.*;
 
 public class ReadoutCanvas {
 
-    private Point origin = new Point(0, 0);
+    private Point readoutOrigin = new Point(20, 40);
+    private Point metadataOrigin = new Point(20, 40);
     private final Font font = Font.decode("SansSerif-plain-9");
     private String[] readoutList = null;
-
-    private static final int marginX = 50;
-    private static final int marginY = 50;
+    private String[] metadataList = null;
 
     public ReadoutCanvas() {
 
@@ -19,6 +18,10 @@ public class ReadoutCanvas {
 
     public void setReadout(String[] readout) {
         this.readoutList = readout;
+    }
+
+    public void setMetadata(String[] metadata) {
+        this.metadataList = metadata;
     }
 
     public void paint(Graphics g) {
@@ -37,11 +40,22 @@ public class ReadoutCanvas {
         if(readoutList == null)
             return;
 
-        g.translate(origin.x, origin.y);
+        g.translate(readoutOrigin.x, readoutOrigin.y);
 
-        int x = marginX;
-        int y = marginY;
+        int x = 0, y = 0;
         for(String str : readoutList) {
+            g.drawString(str, x, y);
+            y += 20;
+        }
+
+        if(metadataList == null)
+            return;
+
+        g.translate((int)g.getClipBounds().getWidth() - 220, 0);
+
+        x = 0;
+        y = 0;
+        for(String str : metadataList) {
             g.drawString(str, x, y);
             y += 20;
         }
