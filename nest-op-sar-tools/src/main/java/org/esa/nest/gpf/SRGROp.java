@@ -63,7 +63,7 @@ public class SRGROp extends Operator {
 //               interval = "(1, *)", defaultValue = "100", label="Number of Range Points")
     private int numRangePoints = 100;
 
-    @Parameter(valueSet = {NEAREST_NEIGHBOR, LINEAR, CUBIC, CUBIC2}, defaultValue = LINEAR, label="Interpolation Method")
+    @Parameter(valueSet = {NEAREST_NEIGHBOR, LINEAR, CUBIC, CUBIC2, SINC}, defaultValue = LINEAR, label="Interpolation Method")
     private String interpolationMethod = LINEAR;
 
     private GeoCoding geoCoding;
@@ -84,6 +84,7 @@ public class SRGROp extends Operator {
     private static final String LINEAR = "Linear interpolation";
     private static final String CUBIC = "Cubic interpolation";
     private static final String CUBIC2 = "Cubic2 interpolation";
+    private static final String SINC = "Sinc interpolation";
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -163,8 +164,8 @@ public class SRGROp extends Operator {
         final ProductData trgData = targetTile.getDataBuffer();
         final ProductData srcData = sourceRaster.getDataBuffer();
 
-        int p0 = 0, p1 = 0, p2 = 0, p3 = 0;
-        double v0 = 0.0, v1 = 0.0, v2 = 0.0, v3 = 0.0, v = 0.0;
+        int p0 = 0, p1 = 0, p2 = 0, p3 = 0, p4 = 0;
+        double v0 = 0.0, v1 = 0.0, v2 = 0.0, v3 = 0.0, v4 = 0.0, v = 0.0;
         double mu = 0.0;
 
         for (int x = x0; x < x0 + w; x++) {
@@ -175,12 +176,19 @@ public class SRGROp extends Operator {
                 p0 = Math.min((int)p, sourceImageWidth - 2);
                 p1 = p0 + 1;
                 mu = p - p0;
-            } else if (interpolationMethod.equals(CUBIC) || interpolationMethod.equals(CUBIC2))  {
+            } else if (interpolationMethod.equals(CUBIC) || interpolationMethod.equals(CUBIC2)) {
                 p1 = Math.min((int)p, sourceImageWidth - 1);
                 p0 = Math.max(p1 - 1, 0);
                 p2 = Math.min(p1 + 1, sourceImageWidth - 1);
                 p3 = Math.min(p1 + 2, sourceImageWidth - 1);
                 mu = Math.min(p - p1, 1.0);
+            } else if (interpolationMethod.equals(SINC)) {
+                p2 = Math.min((int)(p + 0.5), sourceImageWidth - 1);
+                p0 = Math.max(p2 - 2, 0);
+                p1 = Math.max(p2 - 1, 0);
+                p3 = Math.min(p2 + 1, sourceImageWidth - 1);
+                p4 = Math.min(p2 + 2, sourceImageWidth - 1);
+                mu = p - p2;
             }
 
             for (int y = y0; y < y0 + h; y++) {
@@ -202,6 +210,13 @@ public class SRGROp extends Operator {
                     v2 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p2, y));
                     v3 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p3, y));
                     v = MathUtils.interpolationCubic2(v0, v1, v2, v3, mu);
+                } else if (interpolationMethod.equals(SINC)) {
+                    v0 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p0, y));
+                    v1 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p1, y));
+                    v2 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p2, y));
+                    v3 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p3, y));
+                    v4 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(p4, y));
+                    v = MathUtils.interpolationSinc(v0, v1, v2, v3, v4, mu);
                 }
                 v = Math.max(v, 0.0);
                 trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), v);
