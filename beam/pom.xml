@@ -127,7 +127,8 @@
         <module>lib-hdf</module>
         <!--module>lib-netcdf</module-->
 
-	<module>beam-envi-reader</module>
+		<!--module>blue-marble-worldmap</module-->
+		<module>beam-envi-reader</module>
         <!--<module>nest-dat</module>-->
 
     </modules>
@@ -408,7 +409,7 @@
                         <target>1.6</target>
                         <debug>true</debug>
 						<optimize>true</optimize>
-                        <encoding>ISO-8859-1</encoding>
+                        <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
 
