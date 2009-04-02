@@ -32,8 +32,8 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
     private final SRTM3GeoTiffElevationModelDescriptor _descriptor;
     private final SRTM3GeoTiffFile[][] elevationFiles;
     private final ArrayList<SRTM3GeoTiffElevationTile> _elevationTileCache = new ArrayList<SRTM3GeoTiffElevationTile>();
-    private final Resampling _resampling;
-    private final Resampling.Index _resamplingIndex;
+    private Resampling _resampling;
+    private Resampling.Index _resamplingIndex;
     private final Resampling.Raster _resamplingRaster;
 
     final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn();
@@ -44,6 +44,15 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
         _resamplingIndex = _resampling.createIndex();
         _resamplingRaster = this;
         elevationFiles = createElevationFiles();
+    }
+
+    /**
+     * Sets the resampling method to use
+     * @param method the interpolation
+     */
+    public void setResamplingMethod(Resampling method) {
+        _resampling = method;
+        _resamplingIndex = _resampling.createIndex();
     }
 
     public ElevationModelDescriptor getDescriptor() {

@@ -86,7 +86,7 @@ public class SurfaceImageLayer extends RenderableLayer {
 
     private static BufferedImage createQuickLook(final Product product) throws IOException {
         final ProductSubsetDef productSubsetDef = new ProductSubsetDef("subset");
-        int scaleFactor = product.getSceneRasterWidth() / 500;
+        int scaleFactor = product.getSceneRasterWidth() / 1000;
         if (scaleFactor < 1) {
             scaleFactor = 1;
         }

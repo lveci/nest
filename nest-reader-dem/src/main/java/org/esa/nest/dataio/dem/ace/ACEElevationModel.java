@@ -29,8 +29,8 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
     private final ACEElevationModelDescriptor _descriptor;
     private final ACEElevationTile[][] _elevationTiles;
     private final List _elevationTileCache;
-    private final Resampling _resampling;
-    private final Resampling.Index _resamplingIndex;
+    private Resampling _resampling;
+    private Resampling.Index _resamplingIndex;
     private final Resampling.Raster _resamplingRaster;
 
     public ACEElevationModel(ACEElevationModelDescriptor descriptor) throws IOException {
@@ -40,6 +40,15 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
         _resamplingRaster = this;
         _elevationTiles = createEleveationTiles();
         _elevationTileCache = new ArrayList();
+    }
+
+    /**
+     * Sets the resampling method to use
+     * @param method the interpolation
+     */
+    public void setResamplingMethod(Resampling method) {
+        _resampling = method;
+        _resamplingIndex = _resampling.createIndex();
     }
 
     public ElevationModelDescriptor getDescriptor() {

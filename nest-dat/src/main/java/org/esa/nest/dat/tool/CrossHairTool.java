@@ -16,6 +16,7 @@ import java.awt.*;
 public class CrossHairTool extends SelectTool {
     public static final String SELECT_TOOL_PROPERTY_NAME = "crossHairTool";
 
+    @Override
     public Cursor getCursor() {
         final Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
         final String cursorName = "crossHairCursor";

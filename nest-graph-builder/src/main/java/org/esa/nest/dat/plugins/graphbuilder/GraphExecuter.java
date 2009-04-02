@@ -1,6 +1,8 @@
 package org.esa.nest.dat.plugins.graphbuilder;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.binding.dom.Xpp3DomElement;
+import com.bc.ceres.binding.dom.DomElement;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -99,7 +101,7 @@ public class GraphExecuter extends Observable {
     private GraphNode createNewGraphNode(final String opName, final String id) {
         final Node newNode = new Node(id, opName);
 
-        final Xpp3Dom parameters = new Xpp3Dom("parameters");
+        final Xpp3DomElement parameters = Xpp3DomElement.createDomElement("parameters");
         newNode.setConfiguration(parameters);
 
         graph.addNode(newNode);
@@ -142,9 +144,9 @@ public class GraphExecuter extends Observable {
 
     public void setOperatorParam(final String id, final String paramName, final String value) {
         final Node node = graph.getNode(id);
-        Xpp3Dom xml = node.getConfiguration().getChild(paramName);
+        DomElement xml = node.getConfiguration().getChild(paramName);
         if(xml == null) {
-            xml = new Xpp3Dom(paramName);
+            xml = Xpp3DomElement.createDomElement(paramName);
             node.getConfiguration().addChild(xml);
         }
         xml.setValue(value);
@@ -326,9 +328,9 @@ public class GraphExecuter extends Observable {
                 final ProductSetData psData = new ProductSetData();
                 psData.nodeID = n.getId();
 
-                final Xpp3Dom config = n.getConfiguration();
-                final Xpp3Dom[] params = config.getChildren();
-                for(Xpp3Dom p : params) {
+                final DomElement config = n.getConfiguration();
+                final DomElement[] params = config.getChildren();
+                for(DomElement p : params) {
                     if(p.getName().equals("fileList") && p.getValue() != null) {
 
                         final StringTokenizer st = new StringTokenizer(p.getValue(), SEPARATOR);
@@ -391,8 +393,8 @@ public class GraphExecuter extends Observable {
         GraphNode newReaderNode = createNewGraphNode(OperatorSpi.getOperatorAlias(ReadOp.class), id);
         newReaderNode.setOperatorUI(null);
         newReaderNode.getNode().getConfiguration();
-        final Xpp3Dom config = newReaderNode.getNode().getConfiguration();
-        final Xpp3Dom fileParam = new Xpp3Dom("file");
+        final DomElement config = newReaderNode.getNode().getConfiguration();
+        final DomElement fileParam = Xpp3DomElement.createDomElement("file");
         fileParam.setValue(value);
         config.addChild(fileParam);
 
@@ -411,8 +413,8 @@ public class GraphExecuter extends Observable {
         final Node[] nodes = graph.getNodes();
         for(Node n : nodes) {
             if(n.getOperatorName().equalsIgnoreCase(OperatorSpi.getOperatorAlias(WriteOp.class))) {
-                final Xpp3Dom config = n.getConfiguration();
-                final Xpp3Dom fileParam = config.getChild("file");
+                final DomElement config = n.getConfiguration();
+                final DomElement fileParam = config.getChild("file");
                 final String filePath = fileParam.getValue();
                 if(filePath != null && !filePath.isEmpty()) {
                     final File file = new File(filePath);

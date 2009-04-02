@@ -119,8 +119,8 @@ public class AbstractMetadata {
 
         // SPH
         addAbstractedAttribute(absRoot, NUM_SLICES, ProductData.TYPE_INT32, "", "");
-        addAbstractedAttribute(absRoot, first_line_time, ProductData.TYPE_UTC, "utc", "");
-        addAbstractedAttribute(absRoot, last_line_time, ProductData.TYPE_UTC, "utc", "");
+        addAbstractedAttribute(absRoot, first_line_time, ProductData.TYPE_UTC, "utc", "First zero doppler azimuth time");
+        addAbstractedAttribute(absRoot, last_line_time, ProductData.TYPE_UTC, "utc", "Last zero doppler azimuth time");
         addAbstractedAttribute(absRoot, first_near_lat, ProductData.TYPE_FLOAT64, "deg", "");
         addAbstractedAttribute(absRoot, first_near_long, ProductData.TYPE_FLOAT64, "deg", "");
         addAbstractedAttribute(absRoot, first_far_lat, ProductData.TYPE_FLOAT64, "deg", "");
@@ -141,7 +141,7 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, range_spacing, ProductData.TYPE_FLOAT64, "m", "Range sample spacing");
         addAbstractedAttribute(absRoot, azimuth_spacing, ProductData.TYPE_FLOAT64, "m", "Azimuth sample spacing");
         addAbstractedAttribute(absRoot, pulse_repetition_frequency, ProductData.TYPE_FLOAT64, "Hz", "PRF");
-        addAbstractedAttribute(absRoot, radar_frequency, ProductData.TYPE_FLOAT64, "MHz", "Radar Frequency");
+        addAbstractedAttribute(absRoot, radar_frequency, ProductData.TYPE_FLOAT64, "MHz", "Radar frequency");
         addAbstractedAttribute(absRoot, line_time_interval, ProductData.TYPE_FLOAT64, "s", "");
 
         addAbstractedAttribute(absRoot, data_type, ProductData.TYPE_ASCII, "", "");

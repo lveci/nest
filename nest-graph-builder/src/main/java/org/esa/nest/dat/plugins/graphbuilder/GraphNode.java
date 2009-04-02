@@ -1,6 +1,8 @@
 package org.esa.nest.dat.plugins.graphbuilder;
 
 import com.bc.ceres.binding.*;
+import com.bc.ceres.binding.dom.DomElement;
+import com.bc.ceres.binding.dom.Xpp3DomElement;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
@@ -9,7 +11,6 @@ import org.esa.beam.framework.gpf.OperatorUI;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.framework.gpf.graph.Node;
 import org.esa.beam.framework.gpf.graph.NodeSource;
-import org.esa.beam.framework.gpf.internal.Xpp3DomElement;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 
 import java.awt.*;
@@ -64,10 +65,10 @@ public class GraphNode {
         final ParameterDescriptorFactory parameterDescriptorFactory = new ParameterDescriptorFactory();
         final ValueContainer valueContainer = ValueContainer.createMapBacked(parameterMap, operatorSpi.getOperatorClass(), parameterDescriptorFactory);
 
-        final Xpp3Dom config = node.getConfiguration();
+        final DomElement config = node.getConfiguration();
         final int count = config.getChildCount();
         for (int i = 0; i < count; ++i) {
-            final Xpp3Dom child = config.getChild(i);
+            final DomElement child = config.getChild(i);
             final String name = child.getName();
             final String value = child.getValue();
             if(name == null || value == null)
@@ -81,7 +82,7 @@ public class GraphNode {
                     final Converter converter = getConverter(valueContainer, name);
                     final Object[] objArray = new Object[child.getChildCount()];
                     int c = 0;
-                    for(Xpp3Dom ch : child.getChildren()) {
+                    for(DomElement ch : child.getChildren()) {
                         final String v = ch.getValue();
 
                         objArray[c++] = converter.parse(v);
@@ -128,7 +129,7 @@ public class GraphNode {
 
         final Xpp3DomElement config = Xpp3DomElement.createDomElement("parameters");
         updateParameterMap(config);
-        node.setConfiguration(config.getXpp3Dom());
+        node.setConfiguration(config);
 
         AssignDisplayParameters(presentationXML);
     }

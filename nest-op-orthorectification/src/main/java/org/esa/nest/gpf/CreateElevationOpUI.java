@@ -16,7 +16,7 @@ import java.awt.*;
 /**
  * User interface for CreateElevationBandOp
  */
-public class CreateElevationBandOpUI extends BaseOperatorUI {
+public class CreateElevationOpUI extends BaseOperatorUI {
 
     private static final ElevationModelDescriptor[] descriptors = ElevationModelRegistry.getInstance().getAllDescriptors();
     private static final String[] demValueSet = new String[descriptors.length];
@@ -30,6 +30,9 @@ public class CreateElevationBandOpUI extends BaseOperatorUI {
     private final JComboBox demName = new JComboBox(demValueSet);
 
     private final JTextField elevationBandName = new JTextField("");
+
+    private final JComboBox resamplingMethod = new JComboBox(
+            new String[] { CreateElevationOp.NEAREST_NEIGHBOUR, CreateElevationOp.BILINEAR, CreateElevationOp.CUBIC } );
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -46,6 +49,7 @@ public class CreateElevationBandOpUI extends BaseOperatorUI {
 
         demName.setSelectedItem(paramMap.get("demName"));
         elevationBandName.setText(String.valueOf(paramMap.get("elevationBandName")));
+        resamplingMethod.setSelectedItem(paramMap.get("resamplingMethod"));
     }
 
     @Override
@@ -59,6 +63,7 @@ public class CreateElevationBandOpUI extends BaseOperatorUI {
 
         paramMap.put("demName", demName.getSelectedItem());
         paramMap.put("elevationBandName", elevationBandName.getText());
+        paramMap.put("resamplingMethod", resamplingMethod.getSelectedItem());
     }
 
     private JComponent createPanel() {
@@ -71,6 +76,8 @@ public class CreateElevationBandOpUI extends BaseOperatorUI {
         DialogUtils.addComponent(contentPane, gbc, "Digital Elevation Model:", demName);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Elevation Band Name:", elevationBandName);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "Resampling Method:", resamplingMethod);
         gbc.gridy++;
 
         DialogUtils.fillPanel(contentPane, gbc);

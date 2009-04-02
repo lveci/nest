@@ -1,4 +1,3 @@
-
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
@@ -6,6 +5,7 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
+import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -26,8 +26,8 @@ import java.util.Set;
     CreateElevationBandOp adds an elevation band to a product
  */
 
-@OperatorMetadata(alias="CreateElevationBand", description="Creates a DEM band")
-public final class CreateElevationBandOp extends Operator {
+@OperatorMetadata(alias="CreateElevation", description="Creates a DEM band")
+public final class CreateElevationOp extends Operator {
 
     @SourceProduct(alias="source")
     private Product sourceProduct;
@@ -40,6 +40,14 @@ public final class CreateElevationBandOp extends Operator {
 
     @Parameter(description = "The elevation band name.", defaultValue="elevation", label="Elevation Band Name")
     private String elevationBandName = "elevation";
+
+    @Parameter(valueSet = { NEAREST_NEIGHBOUR, BILINEAR, CUBIC }, defaultValue = BILINEAR,
+                label="Resampling Method")
+    private String resamplingMethod;
+
+    static final String NEAREST_NEIGHBOUR = "Nearest Neighbour";
+    static final String BILINEAR = "Bilinear Interpolation";
+    static final String CUBIC = "Cubic Convolution";
 
     private ElevationModel dem = null;
     private Band elevationBand = null;
@@ -76,6 +84,13 @@ public final class CreateElevationBandOp extends Operator {
                 throw new OperatorException("The DEM '" + demName + "' has not been installed.");
             
             createTargetProduct();
+
+            if(resamplingMethod.equals(NEAREST_NEIGHBOUR))
+                dem.setResamplingMethod(Resampling.NEAREST_NEIGHBOUR);
+            else if(resamplingMethod.equals(BILINEAR))
+                dem.setResamplingMethod(Resampling.BILINEAR_INTERPOLATION);
+            else if(resamplingMethod.equals(CUBIC))
+                dem.setResamplingMethod(Resampling.CUBIC_CONVOLUTION); 
 
             final float noDataValue = dem.getDescriptor().getNoDataValue();
             elevationBand = targetProduct.addBand(elevationBandName, ProductData.TYPE_INT16);
@@ -190,8 +205,8 @@ public final class CreateElevationBandOp extends Operator {
      */
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(CreateElevationBandOp.class);
-            setOperatorUI(CreateElevationBandOpUI.class);
+            super(CreateElevationOp.class);
+            setOperatorUI(CreateElevationOpUI.class);
         }
     }
 }

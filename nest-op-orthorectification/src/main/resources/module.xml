@@ -55,6 +55,26 @@
             <parent>TerrainCorrectionGroup</parent>
         </action>
 
+        <action>
+            <id>createElevationOp</id>
+            <class>org.esa.nest.dat.CreateElevationOpAction</class>
+            <text>Create Elevation</text>
+            <shortDescr>Creates a new product with a DEM</shortDescr>
+            <parent>geometry</parent>
+        </action>
+
+        <action>
+            <id>nestCreateElevationBand</id>
+            <class>org.esa.beam.visat.actions.CreateElevationBandAction</class>
+            <text>Create Elevation Band</text>
+            <shortDescr>Creates an elevation band from a selected DEM</shortDescr>
+            <description>Creates an elevation band from a selected Digital Elevation Model (DEM)</description>
+            <context>createElevationBand</context>
+            <helpId>createElevationBand</helpId>
+            <parent>geometry</parent>
+            <placeAfter>createElevationOp</placeAfter>
+        </action>
+
     </extension>
 
 </module>

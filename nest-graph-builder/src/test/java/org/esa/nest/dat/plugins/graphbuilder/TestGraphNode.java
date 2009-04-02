@@ -5,6 +5,7 @@ import org.esa.beam.framework.gpf.graph.Node;
 import org.esa.beam.framework.gpf.graph.NodeSource;
 import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
+import com.bc.ceres.binding.dom.Xpp3DomElement;
 
 import java.awt.*;
 
@@ -26,7 +27,7 @@ public class TestGraphNode extends TestCase {
 
     public void setUp() throws Exception {
         node = new Node("id", "readOp");
-        Xpp3Dom parameters = new Xpp3Dom("parameters");
+        final Xpp3DomElement parameters = Xpp3DomElement.createDomElement("parameters");
         node.setConfiguration(parameters);
 
         graphNode = new GraphNode(node);
@@ -54,8 +55,8 @@ public class TestGraphNode extends TestCase {
     }
 
     public void testSourceConnection() {
-        Node sourceNode = new Node("sourceID", "testSourceNodeOp");
-        Xpp3Dom parameters = new Xpp3Dom("parameters");
+        final Node sourceNode = new Node("sourceID", "testSourceNodeOp");
+        final Xpp3DomElement parameters = Xpp3DomElement.createDomElement("parameters");
         sourceNode.setConfiguration(parameters);
 
         GraphNode sourceGraphNode = new GraphNode(sourceNode);
