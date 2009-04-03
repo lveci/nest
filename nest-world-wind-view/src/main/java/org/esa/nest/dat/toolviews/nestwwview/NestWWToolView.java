@@ -19,12 +19,12 @@ import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.examples.ClickAndGoSelectListener;
 import gov.nasa.worldwind.examples.StatisticsPanel;
 import gov.nasa.worldwind.examples.WMSLayersPanel;
-import gov.nasa.worldwind.examples.util.LayerManagerLayer;
 import gov.nasa.worldwind.layers.CompassLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.layers.Earth.OpenStreetMapLayer;
+import gov.nasa.worldwind.layers.Earth.MSVirtualEarthLayer;
 import gov.nasa.worldwind.layers.placename.PlaceNameLayer;
 import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.util.Logging;
@@ -55,7 +55,7 @@ import java.beans.PropertyChangeEvent;
 /**
  * The window displaying the world map.
  *
- * @version $Revision: 1.4 $ $Date: 2009-04-02 19:43:34 $
+ * @version $Revision: 1.5 $ $Date: 2009-04-03 19:59:29 $
  */
 public class NestWWToolView extends AbstractToolView {
 
@@ -115,31 +115,33 @@ public class NestWWToolView extends AbstractToolView {
           mainPane.add(toolbar, BorderLayout.NORTH); */
 
         // world wind canvas
-        initialize(mainPane, true, true, false);
+        initialize(mainPane, true, false, false);
+
+        final MSVirtualEarthLayer virtualEarthLayerA = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_AERIAL);
+        virtualEarthLayerA.setName("MS Virtual Earth Aerial");
+        insertTiledLayer(getWwd(), virtualEarthLayerA);
+
+        final MSVirtualEarthLayer virtualEarthLayerR = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_ROADS);
+        virtualEarthLayerR.setName("MS Virtual Earth Roads");
+        virtualEarthLayerR.setEnabled(false);
+        insertTiledLayer(getWwd(), virtualEarthLayerR);
+
+        final MSVirtualEarthLayer virtualEarthLayerH = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_HYBRID);
+        virtualEarthLayerH.setName("MS Virtual Earth Hybrid");
+        virtualEarthLayerH.setEnabled(false);
+        insertTiledLayer(getWwd(), virtualEarthLayerH);
 
         final OpenStreetMapLayer streetLayer = new OpenStreetMapLayer();
         streetLayer.setOpacity(0.7);
         streetLayer.setEnabled(false);
         streetLayer.setName("Open Street Map");
-
         insertTiledLayer(getWwd(), streetLayer);
 
         surfaceLayer = new SurfaceImageLayer();
         surfaceLayer.setOpacity(0.8);
         surfaceLayer.setPickEnabled(false);
         surfaceLayer.setName("NEST Opened Products");
-
         insertTiledLayer(getWwd(), surfaceLayer);
-
-        final CountryBoundariesLayer countriesLayer = new CountryBoundariesLayer();
-        countriesLayer.setOpacity(0.7);
-        streetLayer.setEnabled(false);
-        countriesLayer.setName("Country Borders");
-
-        insertTiledLayer(getWwd(), countriesLayer);
-
-        getLayerPanel().add(makeControlPanel(), BorderLayout.SOUTH);
-        getLayerPanel().update(getWwd());
 
         // Add an internal frame listener to VISAT so that we can update our
         // world map window with the information of the currently activated  product scene view.
@@ -148,25 +150,11 @@ public class NestWWToolView extends AbstractToolView {
         setProducts(datApp.getProductManager().getProducts());
         setSelectedProduct(datApp.getSelectedProduct());
 
-        getWwd().getModel().getLayers().add(new LayerManagerLayer(getWwd()));
-
         return mainPane;
     }
 
     public WorldWindowGLCanvas getWwd() {
         return wwjPanel.getWwd();
-    }
-
-    public StatusBar getStatusBar() {
-        return wwjPanel.getStatusBar();
-    }
-
-    public LayerPanel getLayerPanel() {
-        return layerPanel;
-    }
-
-    public StatisticsPanel getStatsPanel() {
-        return statsPanel;
     }
 
     public static void insertTiledLayer(WorldWindow wwd, Layer layer) {
@@ -204,6 +192,9 @@ public class NestWWToolView extends AbstractToolView {
         if (includeLayerPanel) {
             layerPanel = new LayerPanel(wwjPanel.getWwd(), null);
             mainPane.add(layerPanel, BorderLayout.WEST);
+
+            layerPanel.add(makeControlPanel(), BorderLayout.SOUTH);
+            layerPanel.update(getWwd());
         }
         if (includeStatsPanel) {
             statsPanel = new StatisticsPanel(wwjPanel.getWwd(), new Dimension(250, canvasSize.height));
@@ -221,37 +212,40 @@ public class NestWWToolView extends AbstractToolView {
             });
         }
 
-        tabbedPane.add(new JPanel());
-        tabbedPane.setTitleAt(0, "+");
-        tabbedPane.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent changeEvent) {
-                if (tabbedPane.getSelectedIndex() != 0) {
-                    previousTabIndex = tabbedPane.getSelectedIndex();
-                    return;
-                }
+        boolean addWMSPanel = false;           
+        if(addWMSPanel) {
+            tabbedPane.add(new JPanel());
+            tabbedPane.setTitleAt(0, "+");
+            tabbedPane.addChangeListener(new ChangeListener() {
+                public void stateChanged(ChangeEvent changeEvent) {
+                    if (tabbedPane.getSelectedIndex() != 0) {
+                        previousTabIndex = tabbedPane.getSelectedIndex();
+                        return;
+                    }
 
-                final String server = JOptionPane.showInputDialog("Enter wms server URL");
-                if (server == null || server.length() < 1) {
-                    tabbedPane.setSelectedIndex(previousTabIndex);
-                    return;
-                }
+                    final String server = JOptionPane.showInputDialog("Enter wms server URL");
+                    if (server == null || server.length() < 1) {
+                        tabbedPane.setSelectedIndex(previousTabIndex);
+                        return;
+                    }
 
-                // Respond by adding a new WMSLayerPanel to the tabbed pane.
-                if (addTab(tabbedPane.getTabCount(), server.trim()) != null)
-                    tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+                    // Respond by adding a new WMSLayerPanel to the tabbed pane.
+                    if (addTab(tabbedPane.getTabCount(), server.trim()) != null)
+                        tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+                }
+            });
+
+            // Create a tab for each server and add it to the tabbed panel.
+            for (int i = 0; i < servers.length; i++) {
+                this.addTab(i + 1, servers[i]); // i+1 to place all server tabs to the right of the Add Server tab
             }
-        });
 
-        // Create a tab for each server and add it to the tabbed panel.
-        for (int i = 0; i < servers.length; i++) {
-            this.addTab(i + 1, servers[i]); // i+1 to place all server tabs to the right of the Add Server tab
+            // Display the first server pane by default.
+            this.tabbedPane.setSelectedIndex(this.tabbedPane.getTabCount() > 0 ? 1 : 0);
+            this.previousTabIndex = this.tabbedPane.getSelectedIndex();
+
+            mainPane.add(tabbedPane, BorderLayout.EAST);
         }
-
-        // Display the first server pane by default.
-        this.tabbedPane.setSelectedIndex(this.tabbedPane.getTabCount() > 0 ? 1 : 0);
-        this.previousTabIndex = this.tabbedPane.getSelectedIndex();
-
-        mainPane.add(tabbedPane, BorderLayout.EAST);
     }
 
     private JPanel makeControlPanel() {
@@ -318,9 +312,9 @@ public class NestWWToolView extends AbstractToolView {
             // Add a server to the tabbed dialog.
             try
             {
-                WMSLayersPanel layersPanel = new WMSLayersPanel(wwjPanel.getWwd(), server, wmsPanelSize);
+                final WMSLayersPanel layersPanel = new WMSLayersPanel(wwjPanel.getWwd(), server, wmsPanelSize);
                 this.tabbedPane.add(layersPanel, BorderLayout.CENTER);
-                String title = layersPanel.getServerDisplayString();
+                final String title = layersPanel.getServerDisplayString();
                 this.tabbedPane.setTitleAt(position, title != null && title.length() > 0 ? title : server);
 
                 // Add a listener to notice wms layer selections and tell the layer panel to reflect the new state.
@@ -371,7 +365,7 @@ public class NestWWToolView extends AbstractToolView {
         final double DEPTH_OF_MARIANAS_TRENCH = -11000d; // meters
 
         // Set up and instantiate the elevation model
-        AVList params = new AVListImpl();
+        final AVList params = new AVListImpl();
         params.setValue(AVKey.LAYER_NAMES, "|srtm3");
         params.setValue(AVKey.TILE_WIDTH, 150);
         params.setValue(AVKey.TILE_HEIGHT, 150);
@@ -410,6 +404,8 @@ public class NestWWToolView extends AbstractToolView {
                 this.add(statusBar, BorderLayout.PAGE_END);
                 this.statusBar.setEventSource(wwd);
             }
+
+            m.getLayers().add(new LayerPanelLayer(getWwd()));
 
             try {
                 final ElevationModel em = makeElevationModel();
