@@ -89,6 +89,10 @@ public class ALOSPALSARCalibrationOperator extends Operator {
         try {
             abstractedMetadata = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
+            final String mission = abstractedMetadata.getAttributeString(AbstractMetadata.MISSION);
+            if(!mission.equals("ALOS"))
+                throw new OperatorException(mission + " is not a valid mission for ALOS Calibration");
+
             if (abstractedMetadata.getAttribute(AbstractMetadata.abs_calibration_flag).getData().getElemBoolean()) {
                 throw new OperatorException("Absolute radiometric calibration has already applied to the product");
             }

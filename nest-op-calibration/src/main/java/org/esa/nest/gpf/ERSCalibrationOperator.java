@@ -491,7 +491,7 @@ public final class ERSCalibrationOperator extends Operator {
         //System.out.println("Mission is " + missionType);
 
         if (!missionType.contains("ERS1") && !missionType.contains("ERS2")) {
-            throw new OperatorException("Invorrect mission type");
+            throw new OperatorException(missionType + " is not a valid mission for ERS Calibration");
         }
 
         if(missionType.equals("ERS1"))

@@ -38,7 +38,7 @@ public class AlosPalsarProductReader extends CEOSProductReader {
         try {
             _dataDir = createProductDirectory(file);
 
-            AlosPalsarProductDirectory ersDataDir = (AlosPalsarProductDirectory)_dataDir;
+            final AlosPalsarProductDirectory ersDataDir = (AlosPalsarProductDirectory)_dataDir;
             if(ersDataDir.isALOS())
                 return DecodeQualification.INTENDED;
             return DecodeQualification.SUITABLE;
@@ -57,7 +57,7 @@ public class AlosPalsarProductReader extends CEOSProductReader {
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
         try {
-            AlosPalsarProductDirectory dataDir = (AlosPalsarProductDirectory) _dataDir;
+            final AlosPalsarProductDirectory dataDir = (AlosPalsarProductDirectory) _dataDir;
             final AlosPalsarImageFile imageFile = (AlosPalsarImageFile)dataDir.getImageFile(destBand);
             if(dataDir.isSLC()) {
                 boolean oneOf2 = !destBand.getName().startsWith("q");
@@ -66,21 +66,21 @@ public class AlosPalsarProductReader extends CEOSProductReader {
                     imageFile.readBandRasterDataSLCByte(sourceOffsetX, sourceOffsetY,
                                          sourceWidth, sourceHeight,
                                          sourceStepX, sourceStepY,
-                            destWidth,
-                            destBuffer, oneOf2, pm);
+                                         destWidth,
+                                         destBuffer, oneOf2, pm);
                 } else {
                     imageFile.readBandRasterDataSLCFloat(sourceOffsetX, sourceOffsetY,
                                          sourceWidth, sourceHeight,
                                          sourceStepX, sourceStepY,
-                            destWidth,
-                            destBuffer, oneOf2, pm);
+                                         destWidth,
+                                         destBuffer, oneOf2, pm);
                 }
             } else {
                 imageFile.readBandRasterDataShort(sourceOffsetX, sourceOffsetY,
                                          sourceWidth, sourceHeight,
                                          sourceStepX, sourceStepY,
-                        destWidth,
-                        destBuffer, pm);
+                                         destWidth,
+                                         destBuffer, pm);
             }
 
         } catch (Exception e) {
