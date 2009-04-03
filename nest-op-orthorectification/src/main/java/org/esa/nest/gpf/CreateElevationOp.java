@@ -43,7 +43,7 @@ public final class CreateElevationOp extends Operator {
 
     @Parameter(valueSet = { NEAREST_NEIGHBOUR, BILINEAR, CUBIC }, defaultValue = BILINEAR,
                 label="Resampling Method")
-    private String resamplingMethod;
+    private String resamplingMethod = BILINEAR;
 
     static final String NEAREST_NEIGHBOUR = "Nearest Neighbour";
     static final String BILINEAR = "Bilinear Interpolation";
@@ -52,7 +52,7 @@ public final class CreateElevationOp extends Operator {
     private ElevationModel dem = null;
     private Band elevationBand = null;
 
-    private final static Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
+    private final Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
 
     /**
      * Initializes this operator and sets the one and only target product.
