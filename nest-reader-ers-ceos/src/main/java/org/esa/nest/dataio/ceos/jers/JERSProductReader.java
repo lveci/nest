@@ -34,7 +34,7 @@ public class JERSProductReader extends CEOSProductReader {
         try {
             _dataDir = createProductDirectory(file);
 
-            JERSProductDirectory jersDataDir = (JERSProductDirectory)_dataDir;
+            final JERSProductDirectory jersDataDir = (JERSProductDirectory)_dataDir;
             if(jersDataDir.isJERS())
                 return DecodeQualification.INTENDED;
             return DecodeQualification.SUITABLE;

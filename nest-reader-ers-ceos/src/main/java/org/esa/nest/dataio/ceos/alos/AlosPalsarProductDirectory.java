@@ -1,5 +1,6 @@
 package org.esa.nest.dataio.ceos.alos;
 
+import Jama.Matrix;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.math.MathUtils;
@@ -15,11 +16,8 @@ import org.esa.nest.datamodel.Unit;
 import javax.imageio.stream.FileImageInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
-
-import Jama.Matrix;
 
 /**
  * This class represents a product directory.

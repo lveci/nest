@@ -3,8 +3,8 @@ package org.esa.nest.dataio.ceos.alos;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.util.io.FileUtils;
+import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.ceos.CEOSProductReaderPlugIn;
-import org.esa.nest.dataio.ceos.ers.ERSProductReader;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -39,7 +39,7 @@ public class AlosPalsarProductReaderPlugIn extends CEOSProductReaderPlugIn {
      */
     @Override
     public DecodeQualification getDecodeQualification(final Object input) {
-        final File file = ERSProductReader.getFileFromInput(input);
+        final File file = ReaderUtils.getFileFromInput(input);
         if (file == null) {
             return DecodeQualification.UNABLE;
         }

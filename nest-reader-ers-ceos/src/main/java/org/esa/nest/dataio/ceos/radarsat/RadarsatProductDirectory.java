@@ -14,7 +14,6 @@ import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 

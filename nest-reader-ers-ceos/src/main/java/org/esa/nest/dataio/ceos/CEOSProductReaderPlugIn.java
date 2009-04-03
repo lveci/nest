@@ -5,6 +5,7 @@ import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
+import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.ceos.ers.ERSProductReader;
 
 import java.io.File;
@@ -28,7 +29,7 @@ public class CEOSProductReaderPlugIn implements ProductReaderPlugIn {
      * @return true if this product reader can decode the given input, otherwise false.
      */
     public DecodeQualification getDecodeQualification(final Object input) {
-        final File file = ERSProductReader.getFileFromInput(input);
+        final File file = ReaderUtils.getFileFromInput(input);
         if (file == null) {
             return DecodeQualification.UNABLE;
         }

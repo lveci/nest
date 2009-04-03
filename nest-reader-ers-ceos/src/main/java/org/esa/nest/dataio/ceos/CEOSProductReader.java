@@ -8,6 +8,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.Debug;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
+import org.esa.nest.dataio.ReaderUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,23 +55,6 @@ public abstract class CEOSProductReader extends AbstractProductReader {
     }
 
     /**
-     * Returns a <code>File</code> if the given input is a <code>String</code> or <code>File</code>,
-     * otherwise it returns null;
-     *
-     * @param input an input object of unknown type
-     *
-     * @return a <code>File</code> or <code>null</code> it the input can not be resolved to a <code>File</code>.
-     */
-    public static File getFileFromInput(final Object input) {
-        if (input instanceof String) {
-            return new File((String) input);
-        } else if (input instanceof File) {
-            return (File) input;
-        }
-        return null;
-    }
-
-    /**
      * Provides an implementation of the <code>readProductNodes</code> interface method. Clients implementing this
      * method can be sure that the input object and eventually the subset information has already been set.
      * <p/>
@@ -83,7 +67,7 @@ public abstract class CEOSProductReader extends AbstractProductReader {
         //final ProductReaderPlugIn readerPlugIn = getReaderPlugIn();
         final Object input = getInput();
 
-        final File fileFromInput = getFileFromInput(input);
+        final File fileFromInput = ReaderUtils.getFileFromInput(input);
         Product product;
         try {
             _dataDir = createProductDirectory(fileFromInput);
