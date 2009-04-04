@@ -5,14 +5,11 @@ import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.examples.util.LayerManagerLayer;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.event.*;
-import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.*;
 import gov.nasa.worldwind.pick.PickedObject;
 import gov.nasa.worldwind.render.*;
-import gov.nasa.worldwind.util.Logging;
 
 import java.awt.*;
-import java.awt.geom.*;
 
 /**
  * Displays the layer list in a viewport corner.
@@ -223,6 +220,7 @@ public class LayerPanelLayer extends LayerManagerLayer
                 text.append((layer.isEnabled() ? "<b>" : "<i>"));
                 text.append(layer.getName());
                 text.append((layer.isEnabled() ? "</b>" : "</i>"));
+                text.append((layer.isMultiResolution() && layer.isAtMaxResolution() ? "*" : ""));
                 text .append("</a><br />");
             }
             i++;
