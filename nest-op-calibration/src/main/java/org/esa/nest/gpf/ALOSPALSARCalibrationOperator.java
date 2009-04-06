@@ -62,7 +62,7 @@ public class ALOSPALSARCalibrationOperator extends Operator {
     private double calibrationFactor = 0;
 
     protected static final double underFlowFloat = 1.0e-30;
-    private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();;
+    private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>(2);
 
     /**
      * Default constructor. The graph processing framework
@@ -111,7 +111,7 @@ public class ALOSPALSARCalibrationOperator extends Operator {
                 ASARCalibrationOperator.createBetaVirtualBand(targetProduct, outputImageScaleInDb);
             }
 
-            targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 10);
+            targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 5);
 
         } catch(Exception e) {
             throw new OperatorException(e);
@@ -356,7 +356,7 @@ public class ALOSPALSARCalibrationOperator extends Operator {
                     }
                 }
 
-                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x,y), sigma);
+                trgData.setElemDoubleAt(index, sigma);
             }
         }
     }

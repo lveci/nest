@@ -74,8 +74,8 @@ public class ASARCalibrationOperator extends Operator {
 
     protected MetadataElement abstractedMetadata = null;
 
-    private String productType;
-    private String sampleType;
+    private String productType = null;
+    private String sampleType = null;
     protected final String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
 
     protected TiePointGrid incidenceAngle = null;
@@ -83,9 +83,9 @@ public class ASARCalibrationOperator extends Operator {
     private QuadInterpolator slantRangeTimeQuadInterp = null;
     private QuadInterpolator incidenceAngleQuadInterp = null;
 
-    private boolean extAuxFileAvailableFlag;
-    private boolean antElevCorrFlag;
-    private boolean rangeSpreadCompFlag;
+    private boolean extAuxFileAvailableFlag = false;
+    private boolean antElevCorrFlag = false;
+    private boolean rangeSpreadCompFlag = false;
 
     private double rangeSpreadingCompPower; // power in range spreading loss compensation calculation
     private double elevationAngle; // elevation angle for given swath, in degree
@@ -101,8 +101,9 @@ public class ASARCalibrationOperator extends Operator {
     private static final double refSlantRange = 800000.0; //  m
     protected static final double lightSpeed = 299792458.0; //  m / s
     protected static final double halfLightSpeed = lightSpeed / 2.0;
+    protected static final double halfLightSpeedByRefSlantRange = halfLightSpeed / refSlantRange;
     protected static final double underFlowFloat = 1.0e-30;
-    private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();;
+    private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>(2);
 
     /**
      * Default constructor. The graph processing framework
@@ -157,7 +158,7 @@ public class ASARCalibrationOperator extends Operator {
                 createBetaVirtualBand(targetProduct, outputImageScaleInDb);
             }
 
-            targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 10);
+            targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 5);
         } catch(Exception e) {
             throw new OperatorException(getId() + ": " + e.getMessage());
         }
@@ -1033,22 +1034,14 @@ public class ASARCalibrationOperator extends Operator {
         }
 
         double sigma, dn, i, q, time;
-        final double halfLightSpeedByRefSlantRange = halfLightSpeed / refSlantRange;
         final double theCalibrationFactor = calibrationFactor[prodBand];
 
         int index;
         for (int y = y0; y < maxY; ++y) {
-            /*
-            incidenceAngle.getPixels(x0, y, w, 1,
-                incidenceAnglesArray, ProgressMonitor.NULL);
-            */
+
             incidenceAngleQuadInterp.getPixelFloats(x0, y, w, 1,incidenceAnglesArray);
 
             if (!rangeSpreadCompFlag) {
-                /*
-                slantRangeTime.getPixels(x0, y, w, 1,
-                    slantRangeTimeArray, ProgressMonitor.NULL);
-                */
                 slantRangeTimeQuadInterp.getPixelFloats(x0, y, w, 1,slantRangeTimeArray);
             }
             
@@ -1091,7 +1084,7 @@ public class ASARCalibrationOperator extends Operator {
                     }
                 }
 
-                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x,y), sigma);
+                trgData.setElemDoubleAt(index, sigma);
             }
         }
     }
@@ -1141,9 +1134,7 @@ public class ASARCalibrationOperator extends Operator {
         for (int x = x0; x < x0 + w; x++) {
 
             // compute elevation angle for each pixel in the middle row
-            //double alpha = incidenceAngle.getPixelFloat(x + 0.5f, y + 0.5f) * MathUtils.DTOR; // in radian
             final double alpha = incidenceAnlglesArray[x-x0] * MathUtils.DTOR; // in radian
-            //double time = slantRangeTime.getPixelFloat(x + 0.5f, y + 0.5f) / 1000000000.0; //convert ns to s
             final double time = slantRangeTimeArray[x-x0] / 1000000000.0; //convert ns to s
             final double r = time * halfLightSpeed; // in m
             final double theta = (alpha - (float) Math.asin(Math.sin(alpha) * r / rsat)) * MathUtils.RTOD; // in degree
