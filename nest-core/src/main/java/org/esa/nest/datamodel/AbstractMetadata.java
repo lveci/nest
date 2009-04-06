@@ -92,6 +92,14 @@ public class AbstractMetadata {
     public static final String orbit_vector_y_vel = "y_vel";
     public static final String orbit_vector_z_vel = "z_vel";
 
+    // SRGR Coefficients
+    public static final String srgr_coefficients = "SRGR_Coefficients";
+    public static final String srgr_coef_list = "srgr_coef_list";
+    public static final String srgr_coef_time = "zero_doppler_time";
+    public static final String ground_range_origin = "ground_range_origin";
+    public static final String coefficient = "coefficient";
+    public static final String srgr_coef = "srgr_coef";
+
     /**
      * Abstract common metadata from products to be used uniformly by all operators
      * @param root the product metadata root
@@ -166,6 +174,7 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, orbit_state_vector_file, ProductData.TYPE_ASCII, "", "Orbit file");
 
         absRoot.addElement(new MetadataElement(orbit_state_vectors));
+        absRoot.addElement(new MetadataElement(srgr_coefficients));
 
         return absRoot;
     }
