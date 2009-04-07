@@ -39,6 +39,7 @@ import org.esa.nest.gpf.OperatorUtils;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.io.IOException;
 
 import Jama.Matrix;
 
@@ -426,8 +427,8 @@ public final class RangeDopplerGeocodingOp extends Operator {
      */
     private void computeImageGeoBoundary() throws Exception {
 
-        double[] lats  = {firstNearLat, firstFarLat, lastNearLat, lastFarLat};
-        double[] lons  = {firstNearLon, firstFarLon, lastNearLon, lastFarLon};
+        final double[] lats  = {firstNearLat, firstFarLat, lastNearLat, lastFarLat};
+        final double[] lons  = {firstNearLon, firstFarLon, lastNearLon, lastFarLon};
         latMin = 90.0;
         latMax = -90.0;
         for (double lat : lats) {
@@ -744,78 +745,62 @@ public final class RangeDopplerGeocodingOp extends Operator {
         final int h  = targetTileRectangle.height;
         System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        sourceBand = sourceProduct.getBand(targetBand.getName());
-        srcBandNoDataValue = sourceBand.getNoDataValue();
-        final ProductData trgData = targetTile.getDataBuffer();
+        try {
+            sourceBand = sourceProduct.getBand(targetBand.getName());
+            srcBandNoDataValue = sourceBand.getNoDataValue();
 
-        for (int y = y0; y < y0 + h; y++) {
-            for (int x = x0; x < x0 + w; x++) {
-                final int index = targetTile.getDataBufferIndex(x, y);
+            final ProductData trgData = targetTile.getDataBuffer();
+            final GeoPos geoPos = new GeoPos();
+            final double[] earthPoint = new double[3];
+
+            for (int y = y0; y < y0 + h; y++) {
                 final double lat = latMax - y*delLat;
-                final double lon = lonMin + x*delLon;
-                final double alt = getLocalElevation(lat, lon);
-                final double[] earthPoint = getEarthPoint(lat, lon, alt);
-                final double zeroDopplerTime = getEarthPointZeroDopplerTime(earthPoint);
-                if (zeroDopplerTime < 0.0) {
-                    trgData.setElemDoubleAt(index, srcBandNoDataValue);
-                    continue;
+
+                for (int x = x0; x < x0 + w; x++) {
+                    final int index = targetTile.getDataBufferIndex(x, y);
+
+                    final double lon = lonMin + x*delLon;
+                    geoPos.setLocation((float)lat, (float)lon);
+                    final double alt = getLocalElevation(geoPos);
+
+                    GeoUtils.geo2xyz(lat, lon, alt, earthPoint);
+                    final double zeroDopplerTime = getEarthPointZeroDopplerTime(earthPoint);
+                    if (zeroDopplerTime < 0.0) {
+                        trgData.setElemDoubleAt(index, srcBandNoDataValue);
+                        continue;
+                    }
+
+                    double slantRange = computeSlantRangeDistance(earthPoint, zeroDopplerTime);
+                    final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / Constants.halfLightSpeed / 86400.0;
+                    final double azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
+                    slantRange = computeSlantRangeDistance(earthPoint, zeroDopplerTimeWithoutBias);
+
+                    final double rangeIndex = computeRangeIndex(zeroDopplerTimeWithoutBias, slantRange);
+                    if (rangeIndex < 0.0 || rangeIndex >= sourceImageWidth - 1 ||
+                        azimuthIndex < 0.0 || azimuthIndex >= sourceImageHeight - 1) {
+                            trgData.setElemDoubleAt(index, srcBandNoDataValue);
+                    } else
+                        trgData.setElemDoubleAt(index, getPixelValue(azimuthIndex, rangeIndex));
                 }
-
-                double slantRange = computeSlantRangeDistance(earthPoint, zeroDopplerTime);
-                final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / Constants.halfLightSpeed / 86400.0;
-                final double azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
-                slantRange = computeSlantRangeDistance(earthPoint, zeroDopplerTimeWithoutBias);
-                final double rangeIndex = computeRangeIndex(zeroDopplerTimeWithoutBias, slantRange);
-                final double v = getPixelValue(azimuthIndex, rangeIndex);
-                trgData.setElemDoubleAt(index, v);
             }
+        } catch(Exception e) {
+            throw new OperatorException(e);
         }
-
     }
 
     /**
      * Get local elevation 9in meter) for given latitude and longitude.
-     * @param lat The latitude in degree.
-     * @param lon The longitude in degree (in [-180, 180]).
+     * @param geoPos The latitude and longitude in degrees.
      * @return The elevation in meter.
      */
-    private double getLocalElevation(double lat, double lon) {
-
-        final GeoPos geoPos = new GeoPos((float)lat, (float)lon);
+    private double getLocalElevation(GeoPos geoPos) {
         double alt;
         try {
             alt = dem.getElevation(geoPos);
         } catch (Exception e) {
             alt = demNoDataValue;
         }
-
-        if (alt == demNoDataValue) {
-            alt = 0.0;
-        }
-        return alt;
-    }
-
-    /**
-     * Get earth point for given DEM sample.
-     * @param lat The latitude of the given DEM sample.
-     * @param lon The longitude of the given DEM sample.
-     * @param alt The altitude in meters for the given DEM sample.
-     * @return The earth point in xyz coordinate.
-     */
-    private double[] getEarthPoint(double lat, double lon, double alt) {
-
-        final double[] earthPoint = new double[3];
-        GeoUtils.geo2xyz(lat, lon, alt, earthPoint);
-        return earthPoint;
-    }
-
-    /**
-     * Get zero Doppler time for given range line.
-     * @param y The index for a given range line.
-     * @return The zero Doppler time in days.
-     */
-    private double getCurrentLineUTC(double y) {
-        return (firstLineUTC + y*lineTimeInterval);
+        return alt == demNoDataValue ? 0.0 : alt;
     }
 
     /**
@@ -833,21 +818,21 @@ public final class RangeDopplerGeocodingOp extends Operator {
         double upperBoundFreq = getDopplerFrequency(upperBound, earthPoint);
 
         if (Double.compare(lowerBoundFreq, 0.0) == 0) {
-            return getCurrentLineUTC(lowerBound);
+            return firstLineUTC + lowerBound*lineTimeInterval;
         } else if (Double.compare(upperBoundFreq, 0.0) == 0) {
-            return getCurrentLineUTC(upperBound);
+            return firstLineUTC + upperBound*lineTimeInterval;
         } else if (lowerBoundFreq*upperBoundFreq > 0.0) {
             return -1.0;
         }
 
         // start binary search
-        double midFreq = 0.0;
+        double midFreq;
         while(upperBound - lowerBound > 1) {
 
-            int mid = (int)((lowerBound + upperBound)/2.0);
+            final int mid = (int)((lowerBound + upperBound)/2.0);
             midFreq = getDopplerFrequency(mid, earthPoint);
             if (Double.compare(midFreq, 0.0) == 0) {
-                return getCurrentLineUTC(mid);
+                return firstLineUTC + mid*lineTimeInterval;
             } else if (midFreq*lowerBoundFreq > 0.0) {
                 lowerBound = mid;
                 lowerBoundFreq = midFreq;
@@ -858,7 +843,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
         }
 
         final double y0 = lowerBound - lowerBoundFreq*(upperBound - lowerBound)/(upperBoundFreq - lowerBoundFreq);
-        return getCurrentLineUTC(y0);
+        return firstLineUTC + y0*lineTimeInterval;
     }
 
     /**
@@ -917,8 +902,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
                 break;
             }
         }
-        double groundRange = computeGroundRange(slantRange, srgrConvParams[i-1].srgeCoeff);
-        return groundRange / rangeSpacing;
+        return computeGroundRange(slantRange, srgrConvParams[i-1].srgeCoeff) / rangeSpacing;
     }
 
     /**
@@ -927,21 +911,23 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @param srgrCoeff The SRGR coefficients for converting ground range to slant range.
      * @return The ground range in meters.
      */
-    private double computeGroundRange(double slantRange, double[] srgrCoeff) {
+    private static double computeGroundRange(double slantRange, double[] srgrCoeff) {
 
         // todo Can Newton's method be uaed in find zeros for the 4th order polynomial?
-        double s0 = srgrCoeff[0];
-        double s1 = srgrCoeff[1];
-        double s2 = srgrCoeff[2];
-        double s3 = srgrCoeff[3];
-        double s4 = srgrCoeff[4];
+        final double s0 = srgrCoeff[0];
+        final double s1 = srgrCoeff[1];
+        final double s2 = srgrCoeff[2];
+        final double s3 = srgrCoeff[3];
+        final double s4 = srgrCoeff[4];
         double x = slantRange;
-        double y = s4*x*x*x*x + s3*x*x*x + s2*x*x + s1*x + s0 - slantRange;
+        double x2 = x*x;
+        double y = s4*x2*x2 + s3*x2*x + s2*x2 + s1*x + s0 - slantRange;
         while (Math.abs(y) > 0.001) {
-            
-            double derivative = 4*s4*x*x*x + 3*s3*x*x + 2*s2*x + s1;
-            x = x - y / derivative;
-            y = s4*x*x*x*x + s3*x*x*x + s2*x*x + s1*x + s0 - slantRange;
+
+            final double derivative = 4*s4*x2*x + 3*s3*x2 + 2*s2*x + s1;
+            x -= y / derivative;
+            x2 = x*x;
+            y = s4*x2*x2 + s3*x2*x + s2*x2 + s1*x + s0 - slantRange;
         }
         return x;
     }
@@ -951,41 +937,30 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @param azimuthIndex The azimuth index for pixel in source image.
      * @param rangeIndex The range index for pixel in source image.
      * @return The pixel value.
+     * @throws IOException from readPixels
      */
-    private double getPixelValue(double azimuthIndex, double rangeIndex) {
+    private double getPixelValue(double azimuthIndex, double rangeIndex) throws IOException {
 
         // todo For complex image, intensity image is generated first.
-        if (rangeIndex < 0.0 || rangeIndex >= sourceImageWidth - 1 ||
-            azimuthIndex < 0.0 || azimuthIndex >= sourceImageHeight - 1) {
-            return srcBandNoDataValue;
-        }
+
         /*
         final Rectangle sourceTileRectangle = getSourceTileRectangle(x0, y0, w, h);
         final Tile sourceRaster = getSourceTile(sourceBand, sourceTileRectangle, pm);
         final ProductData srcData = sourceRaster.getDataBuffer();
         */
         final int x0 = (int)rangeIndex;
-        final int x1 = x0 + 1;
         final double muX = rangeIndex - x0;
 
         final int y0 = (int)azimuthIndex;
-        final int y1 = y0 + 1;
         final double muY = azimuthIndex - y0;
 
         // todo check if the following call will triger previous operator
-        double v00 = 0, v01 = 0, v10 = 0, v11 = 0;
-        try {
-            double[] pixels = new double[4];
-            sourceBand.readPixels(x0, y0, 2, 2, pixels);
-            v00 = pixels[0];
-            v01 = pixels[1];
-            v10 = pixels[2];
-            v11 = pixels[3];
-        } catch(Exception e) {
-             throw new OperatorException(e);
-        }
+        double[] pixels = new double[4];
+        sourceBand.readPixels(x0, y0, 2, 2, pixels);
 
-        return MathUtils.interpolationBiLinear(v00*v00, v01*v01, v10*v10, v11*v11, muX, muY);
+        return MathUtils.interpolationBiLinear(pixels[0]*pixels[0], pixels[1]*pixels[1],
+                                               pixels[2]*pixels[2], pixels[3]*pixels[3],
+                                               muX, muY);
     }
 
     private static class SRGRConvParameters {
