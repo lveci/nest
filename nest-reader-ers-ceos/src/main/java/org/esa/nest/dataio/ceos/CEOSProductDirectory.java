@@ -219,6 +219,37 @@ public abstract class CEOSProductDirectory {
                                   hour+':'+minute+':'+second, "yyyy-MM-dd HH:mm:ss");
     }
 
+    protected static void addSRGRCoefficients(final MetadataElement absRoot, final BaseRecord facilityRec) {
+        final MetadataElement srgrCoefficientsElem = absRoot.getElement(AbstractMetadata.srgr_coefficients);
+
+        final MetadataElement srgrListElem = new MetadataElement("srgr_coef_list");
+        srgrCoefficientsElem.addElement(srgrListElem);
+
+        final ProductData.UTC utcTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time, new ProductData.UTC(0));
+        srgrListElem.setAttributeUTC(AbstractMetadata.srgr_coef_time, utcTime);
+        AbstractMetadata.addAbstractedAttribute(absRoot, AbstractMetadata.ground_range_origin,
+                ProductData.TYPE_FLOAT64, "m", "Ground Range Origin");
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ground_range_origin, 0.0);
+
+        addSRGRCoef(srgrListElem, facilityRec,
+                "coefficients of the ground range to slant range conversion polynomial 1");
+        addSRGRCoef(srgrListElem, facilityRec,
+                "coefficients of the ground range to slant range conversion polynomial 2");
+        addSRGRCoef(srgrListElem, facilityRec,
+                "coefficients of the ground range to slant range conversion polynomial 3");
+        addSRGRCoef(srgrListElem, facilityRec,
+                "coefficients of the ground range to slant range conversion polynomial 4");
+    }
+
+    private static void addSRGRCoef(final MetadataElement srgrListElem, final BaseRecord facilityRec, final String tag) {
+        final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient);
+        srgrListElem.addElement(coefElem);
+
+        AbstractMetadata.addAbstractedAttribute(coefElem, AbstractMetadata.srgr_coef,
+                ProductData.TYPE_FLOAT64, "", "SRGR Coefficient");
+        AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, facilityRec.getAttributeDouble(tag));
+    }
+
     protected static ImageInputStream createInputStream(final File file) throws IOException {
         return new FileImageInputStream(file);
     }

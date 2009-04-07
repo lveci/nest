@@ -187,7 +187,7 @@ public class AbstractMetadata {
      * @param unit The unit
      * @param desc The description
      */
-    private static void addAbstractedAttribute(final MetadataElement dest, final String tag, final int dataType,
+    public static void addAbstractedAttribute(final MetadataElement dest, final String tag, final int dataType,
                                                final String unit, final String desc) {
         final MetadataAttribute attribute = new MetadataAttribute(tag, dataType, 1);
         if(dataType == ProductData.TYPE_ASCII) {
@@ -372,12 +372,12 @@ public class AbstractMetadata {
      */
     public static OrbitStateVector[] getOrbitStateVectors(final MetadataElement absRoot) throws Exception {
 
-        MetadataElement elemRoot = absRoot.getElement(orbit_state_vectors);
-        int numElems = elemRoot.getNumElements();
-        OrbitStateVector[] orbitStateVectors = new OrbitStateVector[numElems];
+        final MetadataElement elemRoot = absRoot.getElement(orbit_state_vectors);
+        final int numElems = elemRoot.getNumElements();
+        final OrbitStateVector[] orbitStateVectors = new OrbitStateVector[numElems];
         for (int i = 0; i < numElems; i++) {
-            OrbitStateVector vector = new OrbitStateVector();
-            MetadataElement subElemRoot = elemRoot.getElement(orbit_vector + (i+1));
+            final OrbitStateVector vector = new OrbitStateVector();
+            final MetadataElement subElemRoot = elemRoot.getElement(orbit_vector + (i+1));
             vector.time  = subElemRoot.getAttributeUTC(orbit_vector_time);
             vector.x_pos = subElemRoot.getAttributeDouble(orbit_vector_x_pos);
             vector.y_pos = subElemRoot.getAttributeDouble(orbit_vector_y_pos);
@@ -397,15 +397,15 @@ public class AbstractMetadata {
      */
     public static void setOrbitStateVectors(final MetadataElement absRoot, OrbitStateVector[] orbitStateVectors) {
 
-        MetadataElement elemRoot = absRoot.getElement(orbit_state_vectors);
-        int numElems = elemRoot.getNumElements();
+        final MetadataElement elemRoot = absRoot.getElement(orbit_state_vectors);
+        final int numElems = elemRoot.getNumElements();
         if (numElems != orbitStateVectors.length) {
             throw new OperatorException("Length of orbit state vector array is not correct");
         }
 
         for (int i = 0; i < numElems; i++) {
-            OrbitStateVector vector = orbitStateVectors[i];
-            MetadataElement subElemRoot = elemRoot.getElement(orbit_vector + (i+1));
+            final OrbitStateVector vector = orbitStateVectors[i];
+            final MetadataElement subElemRoot = elemRoot.getElement(orbit_vector + (i+1));
             subElemRoot.setAttributeUTC(orbit_vector_time, vector.time);
             subElemRoot.setAttributeDouble(orbit_vector_x_pos, vector.x_pos);
             subElemRoot.setAttributeDouble(orbit_vector_y_pos, vector.y_pos);
@@ -416,14 +416,46 @@ public class AbstractMetadata {
         }
     }
 
+    /**
+     * Get SRGR Coefficients.
+     * @param absRoot Abstracted metadata root.
+     * @return orbitStateVectors Array of orbit state vectors.
+     * @throws Exception The exceptions.
+     */
+    public static SRGRCoefficientList[] getSRGRCoefficients(final MetadataElement absRoot) throws Exception {
+
+        final MetadataElement elemRoot = absRoot.getElement(srgr_coefficients);
+        final int numElems = elemRoot.getNumElements();
+        final SRGRCoefficientList[] srgrCoefficientList = new SRGRCoefficientList[numElems];
+        for (MetadataElement listElem : elemRoot.getElements()) {
+            final SRGRCoefficientList srgrList = new SRGRCoefficientList();
+            srgrList.time  = listElem.getAttributeUTC(srgr_coef_time);
+            srgrList.ground_range_origin = listElem.getAttributeDouble(ground_range_origin);
+
+            final int numSubElems = listElem.getNumElements();
+            srgrList.coefficients = new double[numSubElems];
+            for (int i=0; i < numSubElems; ++i) {
+                final MetadataElement coefElem = listElem.getElementAt(i);
+                srgrList.coefficients[i] = coefElem.getAttributeDouble(srgr_coef, 0.0);
+            }
+        }
+        return srgrCoefficientList;
+    }
+
     public static class OrbitStateVector {
 
-        public ProductData.UTC time;
-        public double x_pos;
-        public double y_pos;
-        public double z_pos;
-        public double x_vel;
-        public double y_vel;
-        public double z_vel;
+        public ProductData.UTC time = null;
+        public double x_pos = 0.0;
+        public double y_pos = 0.0;
+        public double z_pos = 0.0;
+        public double x_vel = 0.0;
+        public double y_vel = 0.0;
+        public double z_vel = 0.0;
+    }
+
+    public static class SRGRCoefficientList {
+        public ProductData.UTC time = null;
+        public double ground_range_origin = 0.0;
+        public double[] coefficients = null;
     }
 }

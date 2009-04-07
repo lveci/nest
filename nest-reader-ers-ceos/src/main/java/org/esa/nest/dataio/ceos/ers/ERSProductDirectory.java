@@ -337,6 +337,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeDouble("Range sampling rate"));
 
         addOrbitStateVectors(absRoot, _leaderFile.getPlatformPositionRecord());
+        addSRGRCoefficients(absRoot, _leaderFile.getFacilityRecord());
     }
 
     private int isGroundRange() {
