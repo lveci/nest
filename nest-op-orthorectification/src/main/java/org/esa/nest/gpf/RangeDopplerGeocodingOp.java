@@ -752,6 +752,8 @@ public final class RangeDopplerGeocodingOp extends Operator {
             final ProductData trgData = targetTile.getDataBuffer();
             final GeoPos geoPos = new GeoPos();
             final double[] earthPoint = new double[3];
+            final int srcMaxRange = sourceImageWidth - 1;
+            final int srcMaxAzimuth = sourceImageHeight - 1;
 
             for (int y = y0; y < y0 + h; y++) {
                 final double lat = latMax - y*delLat;
@@ -776,8 +778,8 @@ public final class RangeDopplerGeocodingOp extends Operator {
                     slantRange = computeSlantRangeDistance(earthPoint, zeroDopplerTimeWithoutBias);
 
                     final double rangeIndex = computeRangeIndex(zeroDopplerTimeWithoutBias, slantRange);
-                    if (rangeIndex < 0.0 || rangeIndex >= sourceImageWidth - 1 ||
-                        azimuthIndex < 0.0 || azimuthIndex >= sourceImageHeight - 1) {
+                    if (rangeIndex < 0.0 || rangeIndex >= srcMaxRange ||
+                        azimuthIndex < 0.0 || azimuthIndex >= srcMaxAzimuth) {
                             trgData.setElemDoubleAt(index, srcBandNoDataValue);
                     } else
                         trgData.setElemDoubleAt(index, getPixelValue(azimuthIndex, rangeIndex));
@@ -942,25 +944,33 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private double getPixelValue(double azimuthIndex, double rangeIndex) throws IOException {
 
         // todo For complex image, intensity image is generated first.
-
-        /*
-        final Rectangle sourceTileRectangle = getSourceTileRectangle(x0, y0, w, h);
-        final Tile sourceRaster = getSourceTile(sourceBand, sourceTileRectangle, pm);
-        final ProductData srcData = sourceRaster.getDataBuffer();
-        */
         final int x0 = (int)rangeIndex;
-        final double muX = rangeIndex - x0;
-
         final int y0 = (int)azimuthIndex;
-        final double muY = azimuthIndex - y0;
+
+        final Tile sourceRaster = getSourceTile(sourceBand, new Rectangle(x0, y0, 2, 2), ProgressMonitor.NULL);
+        final ProductData srcData = sourceRaster.getDataBuffer();
+
+        final double v00 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0));
+        final double v01 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0+1));
+        final double v10 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0+1, y0));
+        final double v11 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0+1, y0+1));
+
+       /* final ProductData srcData = sourceBand.createCompatibleRasterData(2, 2);
+        sourceBand.readRasterData(x0, y0, 2, 2, srcData, ProgressMonitor.NULL);
+        final double v00 = srcData.getElemDoubleAt(0);
+        final double v01 = srcData.getElemDoubleAt(1);
+        final double v10 = srcData.getElemDoubleAt(2);
+        final double v11 = srcData.getElemDoubleAt(3);   */
+
+        return MathUtils.interpolationBiLinear(v00*v00, v01*v01, v10*v10, v11*v11, rangeIndex - x0, rangeIndex - x0);
 
         // todo check if the following call will triger previous operator
-        double[] pixels = new double[4];
-        sourceBand.readPixels(x0, y0, 2, 2, pixels);
+        //double[] pixels = new double[4];
+        //sourceBand.readPixels(x0, y0, 2, 2, pixels, ProgressMonitor.NULL);
 
-        return MathUtils.interpolationBiLinear(pixels[0]*pixels[0], pixels[1]*pixels[1],
-                                               pixels[2]*pixels[2], pixels[3]*pixels[3],
-                                               muX, muY);
+        //return MathUtils.interpolationBiLinear(pixels[0]*pixels[0], pixels[1]*pixels[1],
+        //                                       pixels[2]*pixels[2], pixels[3]*pixels[3],
+        //                                       rangeIndex - x0, rangeIndex - x0);
     }
 
     private static class SRGRConvParameters {
