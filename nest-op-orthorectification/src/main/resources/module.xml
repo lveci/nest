@@ -56,6 +56,14 @@
         </action>
 
         <action>
+            <id>RangeDopplerGeocodingOp</id>
+            <class>org.esa.nest.dat.RangeDopplerGeocodingOpAction</class>
+            <text>Range Doppler</text>
+            <shortDescr>Terrain Correction Range-Doppler Method</shortDescr>
+            <parent>TerrainCorrectionGroup</parent>
+        </action>
+
+        <action>
             <id>createElevationOp</id>
             <class>org.esa.nest.dat.CreateElevationOpAction</class>
             <text>Create Elevation</text>
