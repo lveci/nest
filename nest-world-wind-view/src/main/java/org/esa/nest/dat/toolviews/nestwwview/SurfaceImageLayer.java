@@ -25,6 +25,10 @@ public class SurfaceImageLayer extends RenderableLayer {
 
     private final ConcurrentHashMap<String, SurfaceImage> imageTable = new ConcurrentHashMap<String, SurfaceImage>();
 
+    public String[] getProductNames() {
+        return imageTable.keySet().toArray(new String[imageTable.size()]);
+    }
+
     public void removeImage(String imagePath) {
         final SurfaceImage si = this.imageTable.get(imagePath);
         if (si != null) {
@@ -40,6 +44,14 @@ public class SurfaceImageLayer extends RenderableLayer {
         for (Map.Entry<String, SurfaceImage> entry : this.imageTable.entrySet()) {
             entry.getValue().setOpacity(opacity);
         }
+    }
+
+    public void setOpacity(String name, double opacity) {
+        imageTable.get(name).setOpacity(opacity);
+    }
+
+    public double getOpacity(String name) {
+        return imageTable.get(name).getOpacity();
     }
 
     public void setSelectedProduct(Product product) {

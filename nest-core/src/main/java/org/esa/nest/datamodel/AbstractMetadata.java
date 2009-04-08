@@ -120,20 +120,20 @@ public class AbstractMetadata {
         }
 
         // MPH
-        addAbstractedAttribute(absRoot, PRODUCT, ProductData.TYPE_ASCII, "", "Product Name");
-        addAbstractedAttribute(absRoot, PRODUCT_TYPE, ProductData.TYPE_ASCII, "", "Product Type");
+        addAbstractedAttribute(absRoot, PRODUCT, ProductData.TYPE_ASCII, "", "Product name");
+        addAbstractedAttribute(absRoot, PRODUCT_TYPE, ProductData.TYPE_ASCII, "", "Product type");
         addAbstractedAttribute(absRoot, SPH_DESCRIPTOR, ProductData.TYPE_ASCII, "", "Description");
-        addAbstractedAttribute(absRoot, MISSION, ProductData.TYPE_ASCII, "", "");
-        addAbstractedAttribute(absRoot, PROC_TIME, ProductData.TYPE_UTC, "utc", "");
-        addAbstractedAttribute(absRoot, ProcessingSystemIdentifier, ProductData.TYPE_ASCII, "", "");
-        addAbstractedAttribute(absRoot, CYCLE, ProductData.TYPE_INT32, "", "");
+        addAbstractedAttribute(absRoot, MISSION, ProductData.TYPE_ASCII, "", "Satellite mission");
+        addAbstractedAttribute(absRoot, PROC_TIME, ProductData.TYPE_UTC, "utc", "Processed time");
+        addAbstractedAttribute(absRoot, ProcessingSystemIdentifier, ProductData.TYPE_ASCII, "", "Processing system identifier");
+        addAbstractedAttribute(absRoot, CYCLE, ProductData.TYPE_INT32, "", "Cycle");
         addAbstractedAttribute(absRoot, REL_ORBIT, ProductData.TYPE_INT32, "", "Track");
         addAbstractedAttribute(absRoot, ABS_ORBIT, ProductData.TYPE_INT32, "", "Orbit");
-        addAbstractedAttribute(absRoot, STATE_VECTOR_TIME, ProductData.TYPE_UTC, "utc", "");
-        addAbstractedAttribute(absRoot, VECTOR_SOURCE, ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, STATE_VECTOR_TIME, ProductData.TYPE_UTC, "utc", "Time of orbit state vector");
+        addAbstractedAttribute(absRoot, VECTOR_SOURCE, ProductData.TYPE_ASCII, "", "State vector source");
 
         // SPH
-        addAbstractedAttribute(absRoot, NUM_SLICES, ProductData.TYPE_INT32, "", "");
+        addAbstractedAttribute(absRoot, NUM_SLICES, ProductData.TYPE_INT32, "", "Number of slices");
         addAbstractedAttribute(absRoot, first_line_time, ProductData.TYPE_UTC, "utc", "First zero doppler azimuth time");
         addAbstractedAttribute(absRoot, last_line_time, ProductData.TYPE_UTC, "utc", "Last zero doppler azimuth time");
         addAbstractedAttribute(absRoot, first_near_lat, ProductData.TYPE_FLOAT64, "deg", "");
@@ -148,8 +148,8 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, SWATH, ProductData.TYPE_ASCII, "", "Swath name");
         addAbstractedAttribute(absRoot, PASS, ProductData.TYPE_ASCII, "", "ASCENDING or DESCENDING");
         addAbstractedAttribute(absRoot, SAMPLE_TYPE, ProductData.TYPE_ASCII, "", "DETECTED or COMPLEX");
-        addAbstractedAttribute(absRoot, mds1_tx_rx_polar, ProductData.TYPE_ASCII, "", "");
-        addAbstractedAttribute(absRoot, mds2_tx_rx_polar, ProductData.TYPE_ASCII, "", "");
+        addAbstractedAttribute(absRoot, mds1_tx_rx_polar, ProductData.TYPE_ASCII, "", "Polarization");
+        addAbstractedAttribute(absRoot, mds2_tx_rx_polar, ProductData.TYPE_ASCII, "", "Polarization");
         addAbstractedAttribute(absRoot, algorithm, ProductData.TYPE_ASCII, "", "Processing algorithm");
         addAbstractedAttribute(absRoot, azimuth_looks, ProductData.TYPE_FLOAT64, "", "");
         addAbstractedAttribute(absRoot, range_looks, ProductData.TYPE_FLOAT64, "", "");
@@ -167,6 +167,12 @@ public class AbstractMetadata {
         // SRGR
         addAbstractedAttribute(absRoot, srgr_flag, ProductData.TYPE_UINT8, "flag", "SRGR applied");
         addAbstractedAttribute(absRoot, isMapProjected, ProductData.TYPE_UINT8, "flag", "Map projection applied");
+        // orthorectification
+        addAbstractedAttribute(absRoot, is_geocoded, ProductData.TYPE_UINT8, "flag", "orthorectification applied");
+        addAbstractedAttribute(absRoot, DEM, ProductData.TYPE_ASCII, "", "Digital Elevation Model used");
+        addAbstractedAttribute(absRoot, geo_ref_system, ProductData.TYPE_ASCII, "", "geographic reference system");
+        addAbstractedAttribute(absRoot, lat_pixel_res, ProductData.TYPE_FLOAT64, "deg", "pixel resolution in geocoded image");
+        addAbstractedAttribute(absRoot, lon_pixel_res, ProductData.TYPE_FLOAT64, "deg", "pixel resolution in geocoded image");
 
         // calibration
         addAbstractedAttribute(absRoot, ant_elev_corr_flag, ProductData.TYPE_UINT8, "flag", "Antenna elevation applied");
@@ -178,14 +184,7 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, range_sampling_rate, ProductData.TYPE_FLOAT64, "MHz", "Range Sampling Rate");
 
         addAbstractedAttribute(absRoot, external_calibration_file, ProductData.TYPE_ASCII, "", "External calibration file used");
-        addAbstractedAttribute(absRoot, orbit_state_vector_file, ProductData.TYPE_ASCII, "", "Orbit file");
-
-        // orthorectification
-        addAbstractedAttribute(absRoot, is_geocoded, ProductData.TYPE_UINT8, "flag", "orthorectification applied");
-        addAbstractedAttribute(absRoot, DEM, ProductData.TYPE_ASCII, "", "DEM used in orthorectification");
-        addAbstractedAttribute(absRoot, geo_ref_system, ProductData.TYPE_ASCII, "", "geographic reference system");
-        addAbstractedAttribute(absRoot, lat_pixel_res, ProductData.TYPE_FLOAT64, "deg", "pixel resolution in geocoded image");
-        addAbstractedAttribute(absRoot, lon_pixel_res, ProductData.TYPE_FLOAT64, "deg", "pixel resolution in geocoded image");
+        addAbstractedAttribute(absRoot, orbit_state_vector_file, ProductData.TYPE_ASCII, "", "Orbit file used");
 
         absRoot.addElement(new MetadataElement(orbit_state_vectors));
         absRoot.addElement(new MetadataElement(srgr_coefficients));
