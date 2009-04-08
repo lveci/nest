@@ -7,10 +7,7 @@ import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.SurfaceImage;
 import gov.nasa.worldwind.util.Logging;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.ProductUtils;
 
 import javax.imageio.ImageIO;
@@ -94,6 +91,7 @@ public class SurfaceImageLayer extends RenderableLayer {
         final Product productSubset = product.createSubset(productSubsetDef, null, null);
 
         final String quicklookBandName = ProductUtils.findSuitableQuicklookBandName(productSubset);
-        return ProductUtils.createColorIndexedImage(productSubset.getBand(quicklookBandName), ProgressMonitor.NULL);
+        final Band band = productSubset.getBand(quicklookBandName);
+        return ProductUtils.createRgbImage(new RasterDataNode[] {band}, band.getImageInfo(ProgressMonitor.NULL), ProgressMonitor.NULL);
     }
 }
