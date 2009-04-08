@@ -100,6 +100,13 @@ public class AbstractMetadata {
     public static final String coefficient = "coefficient";
     public static final String srgr_coef = "srgr_coef";
 
+    // orthorectification
+    public static final String is_geocoded = "is_geocoded";
+    public static final String DEM = "DEM";
+    public static final String geo_ref_system = "geo_ref_system";
+    public static final String lat_pixel_res = "lat_pixel_res";
+    public static final String lon_pixel_res = "lon_pixel_res";
+
     /**
      * Abstract common metadata from products to be used uniformly by all operators
      * @param root the product metadata root
@@ -172,6 +179,13 @@ public class AbstractMetadata {
 
         addAbstractedAttribute(absRoot, external_calibration_file, ProductData.TYPE_ASCII, "", "External calibration file used");
         addAbstractedAttribute(absRoot, orbit_state_vector_file, ProductData.TYPE_ASCII, "", "Orbit file");
+
+        // orthorectification
+        addAbstractedAttribute(absRoot, is_geocoded, ProductData.TYPE_UINT8, "flag", "orthorectification applied");
+        addAbstractedAttribute(absRoot, DEM, ProductData.TYPE_ASCII, "", "DEM used in orthorectification");
+        addAbstractedAttribute(absRoot, geo_ref_system, ProductData.TYPE_ASCII, "", "geographic reference system");
+        addAbstractedAttribute(absRoot, lat_pixel_res, ProductData.TYPE_FLOAT64, "deg", "pixel resolution in geocoded image");
+        addAbstractedAttribute(absRoot, lon_pixel_res, ProductData.TYPE_FLOAT64, "deg", "pixel resolution in geocoded image");
 
         absRoot.addElement(new MetadataElement(orbit_state_vectors));
         absRoot.addElement(new MetadataElement(srgr_coefficients));
