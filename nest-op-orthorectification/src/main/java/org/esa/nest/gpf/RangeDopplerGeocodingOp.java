@@ -189,9 +189,6 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
             computeSensorPositionsAndVelocities();
 
-
-
-
         } catch(Exception e) {
             throw new OperatorException(e);
         }
@@ -203,6 +200,9 @@ public final class RangeDopplerGeocodingOp extends Operator {
      */
     private void getSRGRFlag() throws Exception {
         srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
+        if (!srgrFlag) {
+            throw new OperatorException("Slant range image currently cannot be handled.");
+        }
     }
 
     /**
@@ -249,7 +249,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private void getSrgrCoeff() throws Exception {
 
         srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
-
+        /*
         for (int i = 0; i < srgrConvParams.length; i++) {
             System.out.println("time = " + srgrConvParams[i].time);
             System.out.println("ground_range_origin = " + srgrConvParams[i].ground_range_origin);
@@ -257,6 +257,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
                 System.out.print("s[" + j + "] = " + srgrConvParams[i].coefficients[j] + ", ");
             }
         }
+        */
     }
 
     /**
@@ -385,9 +386,9 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
     /**
      * Create target product.
-     * @throws Exception The exception.
+     * @throws OperatorException The exception.
      */
-    private void createTargetProduct() throws Exception {
+    private void createTargetProduct() throws OperatorException {
         
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),
@@ -396,8 +397,9 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
         addSelectedBands();
 
-        // todo create new tie points for target product (lat, lon)
-        // todo update metadata for target product
+        addGeoCoding();
+
+        updateTargetProductMetadata();
 
         //OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
@@ -487,7 +489,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
             if(targetProduct.getBand(targetBandName) == null) {
 
                 final Band targetBand = new Band(targetBandName,
-                                                 ProductData.TYPE_FLOAT64,
+                                                 ProductData.TYPE_FLOAT32,
                                                  targetImageWidth,
                                                  targetImageHeight);
 
@@ -495,6 +497,62 @@ public final class RangeDopplerGeocodingOp extends Operator {
                 targetProduct.addBand(targetBand);
             }
         }
+    }
+
+    /**
+     * Add geocoding to the target product.
+     */
+    private void addGeoCoding() {
+
+        int gridWidth = 2;
+        int gridHeight = 2;
+
+        float subSamplingX = targetImageWidth;
+        float subSamplingY = targetImageHeight;
+
+        float[] latTiePoints = {(float)latMax, (float)latMax, (float)latMin, (float)latMin};
+        float[] lonTiePoints = {(float)lonMin, (float)lonMax, (float)lonMin, (float)lonMax};
+
+        TiePointGrid latGrid = new TiePointGrid(
+                "latitude", gridWidth, gridHeight, 0.0f, 0.0f, subSamplingX, subSamplingY, latTiePoints);
+
+        TiePointGrid lonGrid = new TiePointGrid(
+                "longitude", gridWidth, gridHeight, 0.0f, 0.0f, subSamplingX, subSamplingY, lonTiePoints);
+
+        targetProduct.addTiePointGrid(latGrid);
+        targetProduct.addTiePointGrid(lonGrid);
+
+        TiePointGeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
+        targetProduct.setGeoCoding(gc);
+    }
+
+    /**
+     * Update metadata in the target product.
+     * @throws Exception The exception.
+     */
+    private void updateTargetProductMetadata() throws OperatorException {
+
+        ProductUtils.copyMetadata(sourceProduct, targetProduct);
+        final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.srgr_flag, 1);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.isMapProjected, 1);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetImageHeight);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_lat, latMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_lat, latMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_lat, latMin);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_lat, latMin);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_long, lonMin);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_long, lonMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, lonMin);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, lonMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE,
+                (int)(targetProduct.getRawStorageSize() / (1024.0f * 1024.0f)));
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_geocoded, 1);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.geo_ref_system, "WGS84");
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lat_pixel_res, delLat);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lon_pixel_res, delLon);
     }
 
     /**
@@ -601,7 +659,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
         final int y0 = targetTileRectangle.y;
         final int w  = targetTileRectangle.width;
         final int h  = targetTileRectangle.height;
-        System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+        //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         try {
             sourceBand = sourceProduct.getBand(targetBand.getName());
@@ -782,7 +840,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
         double x = slantRange;
         double x2 = x*x;
         double y = s4*x2*x2 + s3*x2*x + s2*x2 + s1*x + s0 - slantRange;
-        while (Math.abs(y) > 0.001) {
+        while (Math.abs(y) > 0.0001) {
 
             final double derivative = 4*s4*x2*x + 3*s3*x2 + 2*s2*x + s1;
             x -= y / derivative;
