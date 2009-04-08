@@ -130,7 +130,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private double[] yVelWarpCoef = null; // warp polynomial coefficients for interpolating sensor yVel
     private double[] zVelWarpCoef = null; // warp polynomial coefficients for interpolating sensor zVel
 
-    private SRGRConvParameters[] srgrConvParams;
+    private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
 
@@ -247,160 +247,16 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @throws Exception The exceptions.
      */
     private void getSrgrCoeff() throws Exception {
-        srgrConvParams = new SRGRConvParameters[14];
-        /*
+
+        srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
+
         for (int i = 0; i < srgrConvParams.length; i++) {
-            SRGRConvParameters params = new SRGRConvParameters();
-            params.zeroDopplerTime = 0;
-            params.groundRangeOrigin = 0;
-            params.srgeCoeff = new double[5];
-            params.srgeCoeff[0] = 0;
-            params.srgeCoeff[1] = 0;
-            params.srgeCoeff[2] = 0;
-            params.srgeCoeff[3] = 0;
-            params.srgeCoeff[4] = 0;
-            srgrConvParams[i] = params;
+            System.out.println("time = " + srgrConvParams[i].time);
+            System.out.println("ground_range_origin = " + srgrConvParams[i].ground_range_origin);
+            for (int j = 0; j < srgrConvParams[i].coefficients.length; j++) {
+                System.out.print("s[" + j + "] = " + srgrConvParams[i].coefficients[j] + ", ");
+            }
         }
-        */
-        srgrConvParams[0] = new SRGRConvParameters();
-        srgrConvParams[0].zeroDopplerTime = ProductData.UTC.parse("19-JAN-2008 09:34:46.546519").getMJD();
-        srgrConvParams[0].groundRangeOrigin = 0;
-        srgrConvParams[0].srgeCoeff = new double[5];
-        srgrConvParams[0].srgeCoeff[0] = 819107.94;
-        srgrConvParams[0].srgeCoeff[1] = 0.27902585;
-        srgrConvParams[0].srgeCoeff[2] = 6.5015223e-7;
-        srgrConvParams[0].srgeCoeff[3] = -2.9536695e-13;
-        srgrConvParams[0].srgeCoeff[4] = 3.545273e-20;
-
-        srgrConvParams[1] = new SRGRConvParameters();
-        srgrConvParams[1].zeroDopplerTime = ProductData.UTC.parse("19-JAN-2008 09:34:52.664346").getMJD();
-        srgrConvParams[1].groundRangeOrigin = 0;
-        srgrConvParams[1].srgeCoeff = new double[5];
-        srgrConvParams[1].srgeCoeff[0] = 819021.3;
-        srgrConvParams[1].srgeCoeff[1] = 0.27899656;
-        srgrConvParams[1].srgeCoeff[2] = 6.5022937e-7;
-        srgrConvParams[1].srgeCoeff[3] = -2.954239e-13;
-        srgrConvParams[1].srgeCoeff[4] = 3.5463617e-20;
-
-        srgrConvParams[2] = new SRGRConvParameters();
-        srgrConvParams[2].zeroDopplerTime = ProductData.UTC.parse("19-JAN-2008 09:34:58.782173").getMJD();
-        srgrConvParams[2].groundRangeOrigin = 0;
-        srgrConvParams[2].srgeCoeff = new double[5];
-        srgrConvParams[2].srgeCoeff[0] = 818935.06;
-        srgrConvParams[2].srgeCoeff[1] = 0.27896845;
-        srgrConvParams[2].srgeCoeff[2] = 6.503057e-7;
-        srgrConvParams[2].srgeCoeff[3] = -2.9548098e-13;
-        srgrConvParams[2].srgeCoeff[4] = 3.547482e-20;
-
-        srgrConvParams[3] = new SRGRConvParameters();
-        srgrConvParams[3].zeroDopplerTime = ProductData.UTC.parse("19-JAN-2008 09:35:04.900000").getMJD();
-        srgrConvParams[3].groundRangeOrigin = 0;
-        srgrConvParams[3].srgeCoeff = new double[5];
-        srgrConvParams[3].srgeCoeff[0] = 818848.75;
-        srgrConvParams[3].srgeCoeff[1] = 0.27893913;
-        srgrConvParams[3].srgeCoeff[2] = 6.5038273e-7;
-        srgrConvParams[3].srgeCoeff[3] = -2.9553774e-13;
-        srgrConvParams[3].srgeCoeff[4] = 3.5485644e-20;
-
-        srgrConvParams[4] = new SRGRConvParameters();
-        srgrConvParams[4].zeroDopplerTime = ProductData.UTC.parse("19-JAN-2008 09:35:11.017827").getMJD();
-        srgrConvParams[4].groundRangeOrigin = 0;
-        srgrConvParams[4].srgeCoeff = new double[5];
-        srgrConvParams[4].srgeCoeff[0] = 818762.5;
-        srgrConvParams[4].srgeCoeff[1] = 0.27890918;
-        srgrConvParams[4].srgeCoeff[2] = 6.5046e-7;
-        srgrConvParams[4].srgeCoeff[3] = -2.955943e-13;
-        srgrConvParams[4].srgeCoeff[4] = 3.549626e-20;
-
-        srgrConvParams[5] = new SRGRConvParameters();
-        srgrConvParams[5].zeroDopplerTime = ProductData.UTC.parse("19-JAN-2008 09:35:17.135654").getMJD();
-        srgrConvParams[5].groundRangeOrigin = 0;
-        srgrConvParams[5].srgeCoeff = new double[5];
-        srgrConvParams[5].srgeCoeff[0] = 818676.75;
-        srgrConvParams[5].srgeCoeff[1] = 0.27888086;
-        srgrConvParams[5].srgeCoeff[2] = 6.505361E-7;
-        srgrConvParams[5].srgeCoeff[3] = -2.9565098E-13	;
-        srgrConvParams[5].srgeCoeff[4] = 3.5507293E-20;
-
-        srgrConvParams[6] = new SRGRConvParameters();
-        srgrConvParams[6].zeroDopplerTime = ProductData.UTC.parse("19-JAN-2008 09:35:23.253481").getMJD();
-        srgrConvParams[6].groundRangeOrigin = 0;
-        srgrConvParams[6].srgeCoeff = new double[5];
-        srgrConvParams[6].srgeCoeff[0] = 818591.25;
-        srgrConvParams[6].srgeCoeff[1] = 0.27885258;
-        srgrConvParams[6].srgeCoeff[2] = 6.506121E-7;
-        srgrConvParams[6].srgeCoeff[3] = -2.9570752E-13;
-        srgrConvParams[6].srgeCoeff[4] = 3.551828E-20;
-
-        srgrConvParams[7] = new SRGRConvParameters();
-        srgrConvParams[7].zeroDopplerTime = ProductData.UTC.parse("19-JAN-2008 09:35:29.371308").getMJD();
-        srgrConvParams[7].groundRangeOrigin = 0;
-        srgrConvParams[7].srgeCoeff = new double[5];
-        srgrConvParams[7].srgeCoeff[0] = 818505.6;
-        srgrConvParams[7].srgeCoeff[1] = 0.27882284;
-        srgrConvParams[7].srgeCoeff[2] = 6.5068883E-7;
-        srgrConvParams[7].srgeCoeff[3] = -2.9576368E-13;
-        srgrConvParams[7].srgeCoeff[4] = 3.5528826E-20;
-
-        srgrConvParams[8] = new SRGRConvParameters();
-        srgrConvParams[8].zeroDopplerTime = ProductData.UTC.parse("19-JAN-2008 09:35:35.489135").getMJD();
-        srgrConvParams[8].groundRangeOrigin = 0;
-        srgrConvParams[8].srgeCoeff = new double[5];
-        srgrConvParams[8].srgeCoeff[0] = 818420.56;
-        srgrConvParams[8].srgeCoeff[1] = 0.27879432;
-        srgrConvParams[8].srgeCoeff[2] = 6.507646E-7;
-        srgrConvParams[8].srgeCoeff[3] = -2.9581987E-13;
-        srgrConvParams[8].srgeCoeff[4] = 3.5539653E-20;
-
-        srgrConvParams[9] = new SRGRConvParameters();
-        srgrConvParams[9].zeroDopplerTime = ProductData.UTC.parse("19-JAN-2008 09:35:41.606962").getMJD();
-        srgrConvParams[9].groundRangeOrigin = 0;
-        srgrConvParams[9].srgeCoeff = new double[5];
-        srgrConvParams[9].srgeCoeff[0] = 818335.8;
-        srgrConvParams[9].srgeCoeff[1] = 0.27876624;
-        srgrConvParams[9].srgeCoeff[2] = 6.5084E-7;
-        srgrConvParams[9].srgeCoeff[3] = -2.9587595E-13;
-        srgrConvParams[9].srgeCoeff[4] = 3.5550546E-20;
-
-        srgrConvParams[10] = new SRGRConvParameters();
-        srgrConvParams[10].zeroDopplerTime = ProductData.UTC.parse("19-JAN-2008 09:35:47.724789").getMJD();
-        srgrConvParams[10].groundRangeOrigin = 0;
-        srgrConvParams[10].srgeCoeff = new double[5];
-        srgrConvParams[10].srgeCoeff[0] = 818251.4;
-        srgrConvParams[10].srgeCoeff[1] = 0.27873793;
-        srgrConvParams[10].srgeCoeff[2] = 6.509153E-7;
-        srgrConvParams[10].srgeCoeff[3] = -2.959318E-13;
-        srgrConvParams[10].srgeCoeff[4] = 3.5561312E-20;
-
-        srgrConvParams[11] = new SRGRConvParameters();
-        srgrConvParams[11].zeroDopplerTime = ProductData.UTC.parse("19-JAN-2008 09:35:53.842620").getMJD();
-        srgrConvParams[11].groundRangeOrigin = 0;
-        srgrConvParams[11].srgeCoeff = new double[5];
-        srgrConvParams[11].srgeCoeff[0] = 818166.9;
-        srgrConvParams[11].srgeCoeff[1] = 0.27870905;
-        srgrConvParams[11].srgeCoeff[2] = 6.509909E-7;
-        srgrConvParams[11].srgeCoeff[3] = -2.9598744E-13;
-        srgrConvParams[11].srgeCoeff[4] = 3.5571888E-20;
-
-        srgrConvParams[12] = new SRGRConvParameters();
-        srgrConvParams[12].zeroDopplerTime = ProductData.UTC.parse("19-JAN-2008 09:35:59.960447").getMJD();
-        srgrConvParams[12].groundRangeOrigin = 0;
-        srgrConvParams[12].srgeCoeff = new double[5];
-        srgrConvParams[12].srgeCoeff[0] = 818083.0;
-        srgrConvParams[12].srgeCoeff[1] = 0.27868077;
-        srgrConvParams[12].srgeCoeff[2] = 6.5106576E-7;
-        srgrConvParams[12].srgeCoeff[3] = -2.960428E-13;
-        srgrConvParams[12].srgeCoeff[4] = 3.5582525E-20;
-
-        srgrConvParams[13] = new SRGRConvParameters();
-        srgrConvParams[13].zeroDopplerTime = ProductData.UTC.parse("19-JAN-2008 09:36:06.078274").getMJD();
-        srgrConvParams[13].groundRangeOrigin = 0;
-        srgrConvParams[13].srgeCoeff = new double[5];
-        srgrConvParams[13].srgeCoeff[0] = 817999.6;
-        srgrConvParams[13].srgeCoeff[1] = 0.27865288;
-        srgrConvParams[13].srgeCoeff[2] = 6.5114017E-7;
-        srgrConvParams[13].srgeCoeff[3] = -2.9609805E-13;
-        srgrConvParams[13].srgeCoeff[4] = 3.55932E-20;
     }
 
     /**
@@ -458,9 +314,11 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private void computeDEMTraversalSampleInterval() {
 
         final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
-        final double meanLat = 0.5*(latMin + latMax)*org.esa.beam.util.math.MathUtils.DTOR;
+        final double minAbsLat = Math.min(Math.abs(latMin), Math.abs(latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
         delLat = minSpacing / MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
-        delLon = minSpacing / (MeanEarthRadius*Math.cos(meanLat)) * org.esa.beam.util.math.MathUtils.RTOD;
+        delLon = minSpacing / (MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
+        delLat = Math.min(delLat, delLon);
+        delLon = delLat;
     }
 
     /**
@@ -900,11 +758,11 @@ public final class RangeDopplerGeocodingOp extends Operator {
         //todo For slant range image, the index is computed differently.
         int i;
         for (i = 0; i < srgrConvParams.length; i++) {
-            if (zeroDopplerTime < srgrConvParams[i].zeroDopplerTime) {
+            if (zeroDopplerTime < srgrConvParams[i].time.getMJD()) {
                 break;
             }
         }
-        return computeGroundRange(slantRange, srgrConvParams[i-1].srgeCoeff) / rangeSpacing;
+        return computeGroundRange(slantRange, srgrConvParams[i-1].coefficients) / rangeSpacing;
     }
 
     /**
@@ -962,21 +820,14 @@ public final class RangeDopplerGeocodingOp extends Operator {
         final double v10 = srcData.getElemDoubleAt(2);
         final double v11 = srcData.getElemDoubleAt(3);   */
 
-        return MathUtils.interpolationBiLinear(v00*v00, v01*v01, v10*v10, v11*v11, rangeIndex - x0, rangeIndex - x0);
+        return MathUtils.interpolationBiLinear(v00, v01, v10, v11, rangeIndex - x0, rangeIndex - x0);
 
-        // todo check if the following call will triger previous operator
         //double[] pixels = new double[4];
         //sourceBand.readPixels(x0, y0, 2, 2, pixels, ProgressMonitor.NULL);
 
         //return MathUtils.interpolationBiLinear(pixels[0]*pixels[0], pixels[1]*pixels[1],
         //                                       pixels[2]*pixels[2], pixels[3]*pixels[3],
         //                                       rangeIndex - x0, rangeIndex - x0);
-    }
-
-    private static class SRGRConvParameters {
-        private double zeroDopplerTime;   // in MJD
-        private double groundRangeOrigin; // in m
-        private double[] srgeCoeff;
     }
 
     /**
