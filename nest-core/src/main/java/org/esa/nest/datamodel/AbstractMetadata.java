@@ -427,6 +427,7 @@ public class AbstractMetadata {
         final MetadataElement elemRoot = absRoot.getElement(srgr_coefficients);
         final int numElems = elemRoot.getNumElements();
         final SRGRCoefficientList[] srgrCoefficientList = new SRGRCoefficientList[numElems];
+        int k = 0;
         for (MetadataElement listElem : elemRoot.getElements()) {
             final SRGRCoefficientList srgrList = new SRGRCoefficientList();
             srgrList.time  = listElem.getAttributeUTC(srgr_coef_time);
@@ -438,6 +439,7 @@ public class AbstractMetadata {
                 final MetadataElement coefElem = listElem.getElementAt(i);
                 srgrList.coefficients[i] = coefElem.getAttributeDouble(srgr_coef, 0.0);
             }
+            srgrCoefficientList[k++] = srgrList;
         }
         return srgrCoefficientList;
     }
