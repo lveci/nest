@@ -55,7 +55,7 @@ import java.beans.PropertyChangeEvent;
 /**
  * The window displaying the world map.
  *
- * @version $Revision: 1.5 $ $Date: 2009-04-03 19:59:29 $
+ * @version $Revision: 1.6 $ $Date: 2009-04-08 17:26:21 $
  */
 public class NestWWToolView extends AbstractToolView {
 
@@ -91,6 +91,7 @@ public class NestWWToolView extends AbstractToolView {
     @Override
     public JComponent createControl() {
 
+        getPaneWindow().setSize(200,200);
         final JPanel mainPane = new JPanel(new BorderLayout(4, 4));
         mainPane.setSize(new Dimension(300, 300));
 

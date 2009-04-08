@@ -21,7 +21,6 @@ import org.esa.beam.framework.gpf.ui.*;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.TableLayout;
 import org.esa.beam.framework.ui.application.SelectionChangeEvent;
 import org.esa.beam.framework.ui.application.SelectionChangeListener;
 
@@ -29,6 +28,8 @@ import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueContainer;
 import com.bc.ceres.binding.ValueDescriptor;
 import com.bc.ceres.binding.ValueModel;
+import com.bc.ceres.binding.swing.ValueEditor;
+import com.bc.ceres.swing.TableLayout;
 
 /**
  */
@@ -158,7 +159,7 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
                 if (!annot.alias().isEmpty()) {
                     name = annot.alias();
                 }
-                label = ParametersPane.createDisplayName(name);
+                label = ValueEditor.createDisplayName(name);
             }
             if (!label.endsWith(":")) {
                 label += ":";

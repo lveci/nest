@@ -31,8 +31,8 @@ public class XMLProductDirectory {
     private int _sceneWidth = 0;
     private int _sceneHeight = 0;
 
-    protected transient Map<String, ImageIOFile> bandImageFileMap = new HashMap<String, ImageIOFile>(1);
-    protected transient Map<Band, ImageIOFile.BandInfo> bandMap = new HashMap<Band, ImageIOFile.BandInfo>(3);
+    protected transient final Map<String, ImageIOFile> bandImageFileMap = new HashMap<String, ImageIOFile>(1);
+    protected transient final Map<Band, ImageIOFile.BandInfo> bandMap = new HashMap<Band, ImageIOFile.BandInfo>(3);
 
     public XMLProductDirectory(final File headerFile, final File imageFolder) {
         Guardian.assertNotNull("headerFile", headerFile);

@@ -40,7 +40,7 @@ public class DatAboutBox extends ModalDialog {
     private DatAboutBox(JButton[] others) {
         super(DatApp.getApp().getMainFrame(), "About DAT", ModalDialog.ID_OK, others, null);    /*I18N*/
 
-        JButton creditsButton = others[0];
+        final JButton creditsButton = others[0];
         creditsButton.setText("Credits...");  /*I18N*/
         creditsButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -48,7 +48,7 @@ public class DatAboutBox extends ModalDialog {
             }
         });
 
-        JButton systemButton = others[1];
+        final JButton systemButton = others[1];
         systemButton.setText("System Info...");  /*I18N*/
         systemButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -56,16 +56,16 @@ public class DatAboutBox extends ModalDialog {
             }
         });
 
-        URL resource = getClass().getResource("/about_nest.jpg");
+        final URL resource = getClass().getResource("/about_nest.jpg");
         Assert.notNull(resource);
-        Icon icon = new ImageIcon(resource);
+        final Icon icon = new ImageIcon(resource);
 
-        JLabel imageLabel = new JLabel(icon);
-        JPanel dialogContent = new JPanel(new BorderLayout());
-        String versionText = getVersionHtml();
-        JLabel versionLabel = new JLabel(versionText);
+        final JLabel imageLabel = new JLabel(icon);
+        final JPanel dialogContent = new JPanel(new BorderLayout());
+        final String versionText = getVersionHtml();
+        final JLabel versionLabel = new JLabel(versionText);
 
-        JPanel labelPane = new JPanel(new BorderLayout());
+        final JPanel labelPane = new JPanel(new BorderLayout());
         labelPane.add(BorderLayout.NORTH, versionLabel);
 
         dialogContent.setLayout(new BorderLayout(4, 4));
@@ -183,7 +183,7 @@ public class DatAboutBox extends ModalDialog {
 
     private static Object[][] getSystemInfo() {
 
-        List<Object[]> data = new ArrayList<Object[]>();
+        final List<Object[]> data = new ArrayList<Object[]>();
 
         Properties sysProps = null;
         try {
@@ -191,19 +191,19 @@ public class DatAboutBox extends ModalDialog {
         } catch (RuntimeException e) {
         }
         if (sysProps != null) {
-            String[] names = new String[sysProps.size()];
-            Enumeration<?> e = sysProps.propertyNames();
+            final String[] names = new String[sysProps.size()];
+            final Enumeration<?> e = sysProps.propertyNames();
             for (int i = 0; i < names.length; i++) {
                 names[i] = (String) e.nextElement();
             }
             Arrays.sort(names);
             for (String name : names) {
-                String value = sysProps.getProperty(name);
+                final String value = sysProps.getProperty(name);
                 data.add(new Object[]{name, value});
             }
         }
 
-        Object[][] dataArray = new Object[data.size()][2];
+        final Object[][] dataArray = new Object[data.size()][2];
         for (int i = 0; i < dataArray.length; i++) {
             dataArray[i] = data.get(i);
         }

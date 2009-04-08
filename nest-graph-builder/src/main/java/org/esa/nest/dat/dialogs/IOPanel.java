@@ -4,7 +4,6 @@ import org.esa.beam.framework.gpf.ui.TargetProductSelector;
 import org.esa.beam.framework.gpf.ui.SourceProductSelector;
 import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
 import org.esa.beam.framework.ui.BasicApp;
-import org.esa.beam.framework.ui.TableLayout;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.application.SelectionChangeListener;
 import org.esa.beam.framework.ui.application.SelectionChangeEvent;
@@ -15,8 +14,10 @@ import javax.swing.*;
 import java.io.File;
 import java.util.ArrayList;
 
+import com.bc.ceres.swing.TableLayout;
+
 /**
- * NEST
+ * NEST IO Panel to handle source and target selection
  * User: lveci
  * Date: Feb 5, 2009
  */

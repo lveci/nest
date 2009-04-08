@@ -18,44 +18,39 @@ import java.io.IOException;
  * Date: Apr 24, 2008
  * To change this template use File | Settings | File Templates.
  */
-public class Settings {
+public final class Settings {
 
-    static private Settings _instance = null;
-    static private String settingsFile = "settings.xml";
-    private Map settingMap;
+    private static final Settings _instance = new Settings();
+    private static final String settingsFile = "settings.xml";
+    private final Map<String, String> settingMap = new HashMap<String, String>(100);
 
     /**
     * @return The unique instance of this class.
     */
     static public Settings instance() {
-      if(null == _instance) {
-         _instance = new Settings();
-      }
       return _instance;
     }
 
     private Settings() {
-        settingMap = new HashMap(100);
-
         Load();
     }
 
     public void Save() {
 
-        File userHomePath = SystemUtils.getUserHomeDir();
-        String filePath = userHomePath.getAbsolutePath() + File.separator + "."
+        final File userHomePath = SystemUtils.getUserHomeDir();
+        final String filePath = userHomePath.getAbsolutePath() + File.separator + "."
                 + System.getProperty("ceres.context", "nest")
                 + File.separator + settingsFile;
 
-        Element root = new Element("DAT");
-        Document doc = new Document(root);
+        final Element root = new Element("DAT");
+        final Document doc = new Document(root);
 
-        Set keys = settingMap.keySet();                           // The set of keys in the map.
+        final Set keys = settingMap.keySet();                           // The set of keys in the map.
         for (Object key : keys) {
-            Object value = settingMap.get(key);                   // Get the value for that key.
+            final Object value = settingMap.get(key);                   // Get the value for that key.
             if (value == null) continue;
 
-            Element projElem = new Element(key.toString()).setAttribute("value", value.toString());
+            final Element projElem = new Element(key.toString()).setAttribute("value", value.toString());
             root.addContent(projElem);
         }
 
@@ -64,7 +59,7 @@ public class Settings {
 
     public void Load() {
 
-        File filePath = DatUtils.findSystemFile(settingsFile);
+        final File filePath = DatUtils.findSystemFile(settingsFile);
 
         org.jdom.Document doc;
         try {
@@ -75,13 +70,13 @@ public class Settings {
 
         settingMap.clear();
 
-        Element root = doc.getRootElement();
+        final Element root = doc.getRootElement();
 
-        List children = root.getContent();
+        final List children = root.getContent();
         for (Object aChild : children) {
             if (aChild instanceof Element) {
-                Element child = (Element) aChild;
-                Attribute attrib = child.getAttribute("value");
+                final Element child = (Element) aChild;
+                final Attribute attrib = child.getAttribute("value");
                 if (attrib != null) {
 
                     String value = attrib.getValue();
@@ -96,17 +91,17 @@ public class Settings {
     private String resolve(String value)
     {
         String out;
-        int idx1 = value.indexOf("$(");
-        int idx2 = value.indexOf(')') + 1;
-        String keyWord = value.substring(idx1+2, idx2-1);
-        String fullKey = value.substring(idx1, idx2);
+        final int idx1 = value.indexOf("$(");
+        final int idx2 = value.indexOf(')') + 1;
+        final String keyWord = value.substring(idx1+2, idx2-1);
+        final String fullKey = value.substring(idx1, idx2);
 
-        String property = System.getProperty(keyWord);
+        final String property = System.getProperty(keyWord);
         if (property != null && property.length() > 0) {
             out = value.replace(fullKey, property);
         } else {
 
-            String settingStr = get(keyWord);
+            final String settingStr = get(keyWord);
             if(settingStr != null) {
                 out = value.replace(fullKey, settingStr);
             } else {
@@ -115,7 +110,7 @@ public class Settings {
         }
 
         if(keyWord.equalsIgnoreCase("nest.home") || keyWord.equalsIgnoreCase("NEST_HOME")) {
-            File file = DatUtils.findInHomeFolder(out);
+            final File file = DatUtils.findInHomeFolder(out);
             if(file != null)
                 return file.getAbsolutePath();
         }
@@ -128,6 +123,6 @@ public class Settings {
 
     public String get(String key)
     {
-        return (String)settingMap.get(key);
+        return settingMap.get(key);
     }
 }
