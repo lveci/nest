@@ -1,0 +1,39 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    
+    <symbolicName>ceres-ui</symbolicName>
+    <version>0.9-SNAPSHOT</version>
+    <name>Ceres User Interface Library</name>
+
+    <categories>System,Library</categories>
+
+    <description>
+        The Ceres User Interface Library provides basic Java Swing user interface 
+        components supporting the Ceres Runtime Library, e.g. a module manager
+        dialog and a configuration panel for connecting remote module repositories.
+    </description>
+
+    <changelog>
+        <![CDATA[
+        <p>Changes in 0.8<br/>
+        [CERES-32] ProgressMonitorSwingWorker can cause deadlock<br/>
+        [CERES-22] Multiple versions of one module available for installation<br/>
+        [CERES-21] Version-controlled dependencies are not considered during update<br/>
+        </p>
+        <p>Changes in 0.5<br/>
+        [CERES-004]: "null" displayed instead of Changelog<br/>
+        </p>
+        ]]>
+    </changelog>
+
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
+    <url>http://www.brockmann-consult.de/</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <extension point="ceres-core:applications">
+        <application id="UpdateUIMain" class="com.bc.ceres.swing.update.ModuleManagerMain"/>
+    </extension>
+
+</module>
