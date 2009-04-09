@@ -55,7 +55,7 @@ import java.beans.PropertyChangeEvent;
 /**
  * The window displaying the world map.
  *
- * @version $Revision: 1.7 $ $Date: 2009-04-08 19:16:44 $
+ * @version $Revision: 1.8 $ $Date: 2009-04-08 20:20:19 $
  */
 public class NestWWToolView extends AbstractToolView {
 
@@ -67,15 +67,22 @@ public class NestWWToolView extends AbstractToolView {
 
     private AppPanel wwjPanel = null;
     private LayerPanel layerPanel = null;
+    private ProductPanel productPanel = null;
     private StatisticsPanel statsPanel = null;
 
     private JSlider opacitySlider = null;
-    private SurfaceImageLayer surfaceLayer = null;
+    private final SurfaceImageLayer surfaceLayer = new SurfaceImageLayer();
 
     private final Dimension wmsPanelSize = new Dimension(400, 600);
 
     private JTabbedPane tabbedPane = new JTabbedPane();
     private int previousTabIndex;
+
+    private final boolean includeStatusBar = true;
+    private final boolean includeLayerPanel = false;
+    private final boolean includeStatsPanel = false;
+    private final boolean includeProductPanel = true;
+    private final boolean includeWMSPanel = false;
 
     private static final String[] servers = new String[]
         {
@@ -91,7 +98,9 @@ public class NestWWToolView extends AbstractToolView {
     @Override
     public JComponent createControl() {
 
-        getPaneWindow().setSize(400,400);
+        final Window windowPane = getPaneWindow();
+        if(windowPane != null)
+            windowPane.setSize(800,400);
         final JPanel mainPane = new JPanel(new BorderLayout(4, 4));
         mainPane.setSize(new Dimension(300, 300));
 
@@ -116,7 +125,7 @@ public class NestWWToolView extends AbstractToolView {
           mainPane.add(toolbar, BorderLayout.NORTH); */
 
         // world wind canvas
-        initialize(mainPane, true, false, false);
+        initialize(mainPane);
 
         final MSVirtualEarthLayer virtualEarthLayerA = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_AERIAL);
         virtualEarthLayerA.setName("MS Virtual Earth Aerial");
@@ -138,7 +147,6 @@ public class NestWWToolView extends AbstractToolView {
         streetLayer.setName("Open Street Map");
         insertTiledLayer(getWwd(), streetLayer);
 
-        surfaceLayer = new SurfaceImageLayer();
         surfaceLayer.setOpacity(0.8);
         surfaceLayer.setPickEnabled(false);
         surfaceLayer.setName("NEST Opened Products");
@@ -183,7 +191,7 @@ public class NestWWToolView extends AbstractToolView {
         layers.add(compassPosition, layer);
     }
 
-    private void initialize(JPanel mainPane, boolean includeStatusBar, boolean includeLayerPanel, boolean includeStatsPanel) {
+    private void initialize(JPanel mainPane) {
         // Create the WorldWindow.
         wwjPanel = new AppPanel(canvasSize, includeStatusBar);
         wwjPanel.setPreferredSize(canvasSize);
@@ -196,6 +204,13 @@ public class NestWWToolView extends AbstractToolView {
 
             layerPanel.add(makeControlPanel(), BorderLayout.SOUTH);
             layerPanel.update(getWwd());
+        }
+        if(includeProductPanel) {
+            productPanel = new ProductPanel(wwjPanel.getWwd(), surfaceLayer);
+            mainPane.add(productPanel, BorderLayout.WEST);
+
+            productPanel.add(makeControlPanel(), BorderLayout.SOUTH);
+            productPanel.update(getWwd());
         }
         if (includeStatsPanel) {
             statsPanel = new StatisticsPanel(wwjPanel.getWwd(), new Dimension(250, canvasSize.height));
@@ -211,10 +226,8 @@ public class NestWWToolView extends AbstractToolView {
                     }
                 }
             });
-        }
-
-        boolean addWMSPanel = false;           
-        if(addWMSPanel) {
+        }           
+        if(includeWMSPanel) {
             tabbedPane.add(new JPanel());
             tabbedPane.setTitleAt(0, "+");
             tabbedPane.addChangeListener(new ChangeListener() {
@@ -279,18 +292,20 @@ public class NestWWToolView extends AbstractToolView {
     }
 
     public void setSelectedProduct(Product product) {
-        if (surfaceLayer != null)
+        if(surfaceLayer != null)
             surfaceLayer.setSelectedProduct(product);
+        if(productPanel != null)
+            productPanel.update(getWwd());
     }
 
     public Product getSelectedProduct() {
-        if (surfaceLayer != null)
+        if(surfaceLayer != null)
             return surfaceLayer.getSelectedProduct();
         return null;
     }
 
     public void setProducts(Product[] products) {
-        if (surfaceLayer != null) {
+        if(surfaceLayer != null) {
             for (Product prod : products) {
                 try {
                     surfaceLayer.addProduct(prod);
@@ -300,12 +315,17 @@ public class NestWWToolView extends AbstractToolView {
                 }
             }
         }
+        if(productPanel != null)
+            productPanel.update(getWwd());
     }
 
     public void removeProduct(Product product) {
         if(getSelectedProduct() == product)
             setSelectedProduct(null);
-        surfaceLayer.removeProduct(product);
+        if(surfaceLayer != null)
+            surfaceLayer.removeProduct(product);
+        if(productPanel != null)
+            productPanel.update(getWwd());
     }
 
     private WMSLayersPanel addTab(int position, String server)

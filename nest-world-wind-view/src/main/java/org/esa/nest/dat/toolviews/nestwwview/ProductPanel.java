@@ -10,22 +10,22 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 
 public class ProductPanel extends JPanel {
-    private SurfaceImageLayer imageLayer;
+    private final SurfaceImageLayer imageLayer;
     private JPanel layersPanel;
     private JPanel westPanel;
     private JScrollPane scrollPane;
-    private Font defaultFont;
+    private Font defaultFont = null;
 
     public ProductPanel(WorldWindow wwd, SurfaceImageLayer layer) {
         super(new BorderLayout());
-        this.makePanel(wwd, new Dimension(100, 400));
         imageLayer = layer;
+        this.makePanel(wwd, new Dimension(100, 400));
     }
 
     public ProductPanel(WorldWindow wwd, Dimension size, SurfaceImageLayer layer) {
         super(new BorderLayout());
-        this.makePanel(wwd, size);
         imageLayer = layer;
+        this.makePanel(wwd, size);
     }
 
     private void makePanel(WorldWindow wwd, Dimension size) {
@@ -87,7 +87,7 @@ public class ProductPanel extends JPanel {
         private String name;
 
         public LayerAction(SurfaceImageLayer layer, WorldWindow wwd, String name, boolean selected) {
-            super(layer.getName());
+            super(name);
             this.wwd = wwd;
             this.layer = layer;
             this.name = name;
