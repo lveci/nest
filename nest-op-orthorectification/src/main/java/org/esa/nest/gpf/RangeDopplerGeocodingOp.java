@@ -707,7 +707,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
     }
 
     /**
-     * Get local elevation 9in meter) for given latitude and longitude.
+     * Get local elevation (in meter) for given latitude and longitude.
      * @param geoPos The latitude and longitude in degrees.
      * @return The elevation in meter.
      */
@@ -814,13 +814,24 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private double computeRangeIndex(double zeroDopplerTime, double slantRange) {
 
         //todo For slant range image, the index is computed differently.
-        int i;
-        for (i = 0; i < srgrConvParams.length; i++) {
-            if (zeroDopplerTime < srgrConvParams[i].time.getMJD()) {
-                break;
+        double rangeIndex = 0.0;
+
+        if (srgrFlag) { // ground detected image
+
+            int i;
+            for (i = 0; i < srgrConvParams.length; i++) {
+                if (zeroDopplerTime < srgrConvParams[i].time.getMJD()) {
+                    break;
+                }
             }
+            rangeIndex = computeGroundRange(slantRange, srgrConvParams[i-1].coefficients) / rangeSpacing;
+
+        } else {        // slant range image
+
+            double r0 = 0; //todo how do we get r0
+            rangeIndex = (slantRange - r0) / rangeSpacing;
         }
-        return computeGroundRange(slantRange, srgrConvParams[i-1].coefficients) / rangeSpacing;
+        return rangeIndex;
     }
 
     /**
@@ -867,25 +878,11 @@ public final class RangeDopplerGeocodingOp extends Operator {
         final ProductData srcData = sourceRaster.getDataBuffer();
 
         final double v00 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0));
-        final double v01 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0+1));
-        final double v10 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0+1, y0));
+        final double v01 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0+1, y0));
+        final double v10 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0+1));
         final double v11 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0+1, y0+1));
 
-       /* final ProductData srcData = sourceBand.createCompatibleRasterData(2, 2);
-        sourceBand.readRasterData(x0, y0, 2, 2, srcData, ProgressMonitor.NULL);
-        final double v00 = srcData.getElemDoubleAt(0);
-        final double v01 = srcData.getElemDoubleAt(1);
-        final double v10 = srcData.getElemDoubleAt(2);
-        final double v11 = srcData.getElemDoubleAt(3);   */
-
-        return MathUtils.interpolationBiLinear(v00, v01, v10, v11, rangeIndex - x0, rangeIndex - x0);
-
-        //double[] pixels = new double[4];
-        //sourceBand.readPixels(x0, y0, 2, 2, pixels, ProgressMonitor.NULL);
-
-        //return MathUtils.interpolationBiLinear(pixels[0]*pixels[0], pixels[1]*pixels[1],
-        //                                       pixels[2]*pixels[2], pixels[3]*pixels[3],
-        //                                       rangeIndex - x0, rangeIndex - x0);
+        return MathUtils.interpolationBiLinear(v00, v01, v10, v11, rangeIndex - x0, azimuthIndex - y0);
     }
 
     /**
