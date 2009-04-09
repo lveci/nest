@@ -18,6 +18,9 @@
         <module>beam-core</module>
     </dependency>
     <dependency>
+        <module>ceres-ui</module>
+    </dependency>
+    <dependency>
         <module>beam-visat-rcp</module>
     </dependency>
     <dependency>

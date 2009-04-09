@@ -1,0 +1,11 @@
+*.ipr
+*.iml
+*.iws
+.svn*
+.project
+.classpath
+.settings
+target
+*.png
+*.psd
+

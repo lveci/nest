@@ -9,7 +9,7 @@
   <priority>normal</priority>
   <downloadUrl>http://java.com/download</downloadUrl>
   <supportUrl></supportUrl>
-  <customProcName>false</customProcName>
+  <customProcName>true</customProcName>
   <stayAlive>false</stayAlive>
   <manifest></manifest>
   <icon>C:\build\nest\src\main\assembly\dat.ico</icon>
@@ -18,7 +18,7 @@
     <minVersion>1.5.0</minVersion>
     <maxVersion></maxVersion>
     <jdkPreference>jdkOnly</jdkPreference>
-    <initialHeapPercent>30</initialHeapPercent>
+    <initialHeapPercent>20</initialHeapPercent>
     <maxHeapPercent>90</maxHeapPercent>
     <opt>-server -Dceres.context=nest</opt>
     <opt>-Xverify:none -XX:+UseParallelGC -XX:CompileThreshold=100</opt>

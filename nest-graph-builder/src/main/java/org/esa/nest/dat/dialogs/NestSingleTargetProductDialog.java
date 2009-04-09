@@ -71,7 +71,7 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
         tableLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
         tableLayout.setTablePadding(3, 3);
 
-        JPanel ioParametersPanel = new JPanel(tableLayout);
+        final JPanel ioParametersPanel = new JPanel(tableLayout);
         for (SourceProductSelector selector : sourceProductSelectorList) {
             ioParametersPanel.add(selector.createDefaultPanel());
         }
@@ -91,7 +91,7 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
         this.form = new JTabbedPane();
         this.form.add("I/O Parameters", ioParametersPanel);
 
-        ParameterDescriptorFactory parameterDescriptorFactory = new ParameterDescriptorFactory();
+        final ParameterDescriptorFactory parameterDescriptorFactory = new ParameterDescriptorFactory();
         parameterMap = new HashMap<String, Object>(17);
         final ValueContainer valueContainer = ValueContainer.createMapBacked(parameterMap, operatorSpi.getOperatorClass(), parameterDescriptorFactory);
         try {
@@ -102,7 +102,7 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
         }
         if (valueContainer.getModels().length > 0) {
 
-            JComponent paremetersPanel = opUI.CreateOpTab(operatorName, parameterMap, appContext);
+            final JComponent paremetersPanel = opUI.CreateOpTab(operatorName, parameterMap, appContext);
 
             //BindingContext context = new BindingContext(valueContainer);
             //ParametersPane parametersPane = new ParametersPane(context);
@@ -115,10 +115,10 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
                 final String sourceAlias = field.getAnnotation(SourceProduct.class).alias();
 
                 for (ValueModel valueModel : valueContainer.getModels()) {
-                    ValueDescriptor parameterDescriptor = valueModel.getDescriptor();
-                    String sourceId = (String) parameterDescriptor.getProperty("sourceId");
+                    final ValueDescriptor parameterDescriptor = valueModel.getDescriptor();
+                    final String sourceId = (String) parameterDescriptor.getProperty("sourceId");
                     if (sourceId != null && (sourceId.equals(field.getName()) || sourceId.equals(sourceAlias))) {
-                        SelectionChangeListener valueSetUpdater = new ValueSetUpdater(parameterDescriptor);
+                        final SelectionChangeListener valueSetUpdater = new ValueSetUpdater(parameterDescriptor);
                         sourceProductSelector.addSelectionChangeListener(valueSetUpdater);
                     }
                 }
