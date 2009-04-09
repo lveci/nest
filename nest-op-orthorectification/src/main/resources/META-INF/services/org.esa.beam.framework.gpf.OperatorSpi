@@ -1,4 +1,2 @@
 org.esa.nest.gpf.CreateElevationOp$Spi
-org.esa.nest.gpf.ForwardTerrainCorrectionOp$Spi
-org.esa.nest.gpf.BackwardTerrainCorrectionOp$Spi
 org.esa.nest.gpf.RangeDopplerGeocodingOp$Spi

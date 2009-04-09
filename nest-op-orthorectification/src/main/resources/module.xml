@@ -40,22 +40,6 @@
         </action>
 
         <action>
-            <id>forwardTerrainCorrectionOp</id>
-            <class>org.esa.nest.dat.ForwardTerrainCorrectionOpAction</class>
-            <text>Forward</text>
-            <shortDescr>Terrain Correction Forward Method</shortDescr>
-            <parent>TerrainCorrectionGroup</parent>
-        </action>
-
-        <action>
-            <id>backwardTerrainCorrectionOp</id>
-            <class>org.esa.nest.dat.BackwardTerrainCorrectionOpAction</class>
-            <text>Backward</text>
-            <shortDescr>Terrain Correction Backward Method</shortDescr>
-            <parent>TerrainCorrectionGroup</parent>
-        </action>
-
-        <action>
             <id>RangeDopplerGeocodingOp</id>
             <class>org.esa.nest.dat.RangeDopplerGeocodingOpAction</class>
             <text>Range Doppler</text>
