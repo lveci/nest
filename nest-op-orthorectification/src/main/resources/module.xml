@@ -48,6 +48,14 @@
         </action>
 
         <action>
+            <id>GeolocationGridGeocodingOp</id>
+            <class>org.esa.nest.dat.GeolocationGridGeocodingOpAction</class>
+            <text>Geolocation Grid</text>
+            <shortDescr>Terrain Correction Geolocation-Grid Method</shortDescr>
+            <parent>TerrainCorrectionGroup</parent>
+        </action>
+
+        <action>
             <id>createElevationOp</id>
             <class>org.esa.nest.dat.CreateElevationOpAction</class>
             <text>Create Elevation</text>
