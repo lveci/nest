@@ -31,7 +31,8 @@ public class LayerPanelLayer extends LayerManagerLayer
         final LayerList allLayers = wwd.getModel().getLayers();
         for(Layer l : allLayers) {
             if(l.getName().equalsIgnoreCase("Atmosphere") || l.getName().equalsIgnoreCase("World Map") ||
-               l.getName().equalsIgnoreCase("Scale bar") || l.getName().equalsIgnoreCase("Compass"))
+               l.getName().equalsIgnoreCase("Scale bar") || l.getName().equalsIgnoreCase("Compass") ||
+               l.getName().equalsIgnoreCase("NASA Blue Marble Image"))
                 continue;
             if(l.getName().equalsIgnoreCase("MS Virtual Earth Aerial"))
                 virtualEarthAerialLayer = l;

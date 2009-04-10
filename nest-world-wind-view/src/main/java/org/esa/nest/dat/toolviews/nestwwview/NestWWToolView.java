@@ -55,7 +55,7 @@ import java.beans.PropertyChangeEvent;
 /**
  * The window displaying the world map.
  *
- * @version $Revision: 1.8 $ $Date: 2009-04-08 20:20:19 $
+ * @version $Revision: 1.9 $ $Date: 2009-04-09 20:25:48 $
  */
 public class NestWWToolView extends AbstractToolView {
 
@@ -167,28 +167,15 @@ public class NestWWToolView extends AbstractToolView {
     }
 
     public static void insertTiledLayer(WorldWindow wwd, Layer layer) {
-        int compassPosition = 0;
+        int position = 0;
         final LayerList layers = wwd.getModel().getLayers();
         for (Layer l : layers) {
             if (l instanceof PlaceNameLayer) {
-                compassPosition = layers.indexOf(l);
+                position = layers.indexOf(l);
                 break;
             }
         }
-        layers.add(compassPosition, layer);
-    }
-
-    public static void insertBeforeCompass(WorldWindow wwd, Layer layer) {
-        // Insert the surfaceLayer into the surfaceLayer list just before the compass.
-        int compassPosition = 0;
-        final LayerList layers = wwd.getModel().getLayers();
-        for (Layer l : layers) {
-            if (l instanceof CompassLayer) {
-                compassPosition = layers.indexOf(l);
-                break;
-            }
-        }
-        layers.add(compassPosition, layer);
+        layers.add(position, layer);
     }
 
     private void initialize(JPanel mainPane) {

@@ -9,8 +9,10 @@ import gov.nasa.worldwind.util.Logging;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.visat.VisatApp;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -70,23 +72,43 @@ public class SurfaceImageLayer extends RenderableLayer {
         if(this.imageTable.get(name) != null)
             return;
 
-        final BufferedImage image = createQuickLook(product);
-        final GeoPos geoPos1 = product.getGeoCoding().getGeoPos(new PixelPos(0, 0), null);
-        final GeoPos geoPos2 = product.getGeoCoding().getGeoPos(new PixelPos(product.getSceneRasterWidth(),
-                product.getSceneRasterHeight()), null);
 
-        final Sector sector = new Sector(Angle.fromDegreesLatitude(geoPos1.getLat()),
-                Angle.fromDegreesLatitude(geoPos2.getLat()),
-                Angle.fromDegreesLongitude(geoPos1.getLon()),
-                Angle.fromDegreesLongitude(geoPos2.getLon()));
+        final SwingWorker worker = new SwingWorker() {
 
-        if (this.imageTable.contains(name))
-            this.removeImage(name);
+            @Override
+            protected SurfaceImage doInBackground() throws Exception {
+                final BufferedImage image = createQuickLook(product);
+                final GeoPos geoPos1 = product.getGeoCoding().getGeoPos(new PixelPos(0, 0), null);
+                final GeoPos geoPos2 = product.getGeoCoding().getGeoPos(new PixelPos(product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight()), null);
 
-        final SurfaceImage si = new SurfaceImage(image, sector);
-        si.setOpacity(this.getOpacity());
-        this.addRenderable(si);
-        this.imageTable.put(name, si);
+                final Sector sector = new Sector(Angle.fromDegreesLatitude(geoPos1.getLat()),
+                        Angle.fromDegreesLatitude(geoPos2.getLat()),
+                        Angle.fromDegreesLongitude(geoPos1.getLon()),
+                        Angle.fromDegreesLongitude(geoPos2.getLon()));
+
+                if (imageTable.contains(name))
+                    removeImage(name);
+
+                final SurfaceImage si = new SurfaceImage(image, sector);
+                si.setOpacity(getOpacity());
+                return si;
+            }
+
+            @Override
+            public void done() {
+
+                try {
+                    final SurfaceImage si = (SurfaceImage)get();
+                    addRenderable(si);
+                    imageTable.put(name, si);
+                } catch(Exception e) {
+                    VisatApp.getApp().showErrorDialog(e.getMessage());
+                }
+            }
+        };
+        worker.execute();
+
     }
 
     public void removeProduct(final Product product) {
