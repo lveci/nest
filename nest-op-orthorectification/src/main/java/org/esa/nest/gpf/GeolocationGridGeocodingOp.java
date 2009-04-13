@@ -85,6 +85,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
     //private String demName = "SRTM 3Sec GeoTiff";
 
     private Band sourceBand = null;
+    private Band sourceBand2 = null;
     private MetadataElement absRoot = null;
     private boolean srgrFlag = false;
 
@@ -149,7 +150,9 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
             getLineTimeInterval();
 
-            getSrgrCoeff();
+            if (srgrFlag) {
+                getSrgrCoeff();
+            }
 
             getImageCornerLatLon();
 
@@ -176,9 +179,11 @@ public final class GeolocationGridGeocodingOp extends Operator {
      */
     private void getSRGRFlag() throws Exception {
         srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
+        /*
         if (!srgrFlag) {
             throw new OperatorException("Slant range image currently cannot be handled.");
         }
+        */
     }
 
     /**
@@ -503,10 +508,16 @@ public final class GeolocationGridGeocodingOp extends Operator {
         final int h  = targetTileRectangle.height;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        try {
-            sourceBand = sourceProduct.getBand(targetBand.getName());
-            srcBandNoDataValue = sourceBand.getNoDataValue();
+        final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
+        if (srcBandNames.length == 1) {
+            sourceBand = sourceProduct.getBand(srcBandNames[0]);
+        } else {
+            sourceBand = sourceProduct.getBand(srcBandNames[0]);
+            sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
+        }
+        srcBandNoDataValue = sourceBand.getNoDataValue();
 
+        try {
             final ProductData trgData = targetTile.getDataBuffer();
             final int srcMaxRange = sourceImageWidth - 1;
             final int srcMaxAzimuth = sourceImageHeight - 1;
@@ -523,6 +534,25 @@ public final class GeolocationGridGeocodingOp extends Operator {
                         trgData.setElemDoubleAt(index, srcBandNoDataValue);
                         continue;
                     }
+                    /*
+                    int i0 = (int)pixPos.x;
+                    int i1 = i0 + 1;
+                    int j0 = (int)pixPos.y;
+                    int j1 = j0 + 1;
+                    float lat00 = latitude.getPixelFloat(i0, j0);
+                    float lat01 = latitude.getPixelFloat(i1, j0);
+                    float lat10 = latitude.getPixelFloat(i0, j1);
+                    float lat11 = latitude.getPixelFloat(i1, j1);
+                    float lon00 = longitude.getPixelFloat(i0, j0);
+                    float lon01 = longitude.getPixelFloat(i1, j0);
+                    float lon10 = longitude.getPixelFloat(i0, j1);
+                    float lon11 = longitude.getPixelFloat(i1, j1);
+                    System.out.println("lat = " + lat + ", lon = " + lon);
+                    System.out.println("lat00 = " + lat00 + ", lon00 = " + lon00);
+                    System.out.println("lat01 = " + lat01 + ", lon01 = " + lon01);
+                    System.out.println("lat10 = " + lat10 + ", lon10 = " + lon10);
+                    System.out.println("lat11 = " + lat11 + ", lon11 = " + lon11);
+                    */
                     final double slantRange = computeSlantRange(pixPos);
                     final double zeroDopplerTime = computeZeroDopplerTime(pixPos);
                     final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / Constants.halfLightSpeed / 86400.0;
@@ -592,14 +622,26 @@ public final class GeolocationGridGeocodingOp extends Operator {
      */
     private double computeRangeIndex(double zeroDopplerTime, double slantRange) {
 
-        //todo For slant range image, the index is computed differently.
-        int i;
-        for (i = 0; i < srgrConvParams.length; i++) {
-            if (zeroDopplerTime < srgrConvParams[i].time.getMJD()) {
-                break;
+        double rangeIndex = 0.0;
+
+        if (srgrFlag) { // ground detected image
+
+            int i;
+            for (i = 0; i < srgrConvParams.length; i++) {
+                if (zeroDopplerTime < srgrConvParams[i].time.getMJD()) {
+                    break;
+                }
             }
+            rangeIndex = computeGroundRange(slantRange, srgrConvParams[i-1].coefficients) / rangeSpacing;
+
+        } else { // slant range image
+
+            final int azimuthIndex = (int)((zeroDopplerTime - firstLineUTC) / lineTimeInterval);
+            final double r0 = slantRangeTime.getPixelDouble(0, azimuthIndex) / 1000000000.0 * Constants.halfLightSpeed;
+            rangeIndex = (slantRange - r0) / rangeSpacing;
         }
-        return computeGroundRange(slantRange, srgrConvParams[i-1].coefficients) / rangeSpacing;
+
+        return rangeIndex;
     }
 
     /**
@@ -638,17 +680,42 @@ public final class GeolocationGridGeocodingOp extends Operator {
      */
     private double getPixelValue(double azimuthIndex, double rangeIndex) throws IOException {
 
-        // todo For complex image, intensity image is generated first.
+        // todo should use the same function in RD method
         final int x0 = (int)rangeIndex;
         final int y0 = (int)azimuthIndex;
 
         final Tile sourceRaster = getSourceTile(sourceBand, new Rectangle(x0, y0, 2, 2), ProgressMonitor.NULL);
         final ProductData srcData = sourceRaster.getDataBuffer();
 
-        final double v00 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0));
-        final double v01 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0+1, y0));
-        final double v10 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0+1));
-        final double v11 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0+1, y0+1));
+        final double v00, v01, v10, v11;
+
+        if (sourceBand.getUnit().contains(Unit.REAL)) {
+
+            final Tile sourceRaster2 = getSourceTile(sourceBand2, new Rectangle(x0, y0, 2, 2), ProgressMonitor.NULL);
+            final ProductData srcData2 = sourceRaster2.getDataBuffer();
+
+            final double vi00 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0));
+            final double vi01 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0+1, y0));
+            final double vi10 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0+1));
+            final double vi11 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0+1, y0+1));
+
+            final double vq00 = srcData2.getElemDoubleAt(sourceRaster2.getDataBufferIndex(x0, y0));
+            final double vq01 = srcData2.getElemDoubleAt(sourceRaster2.getDataBufferIndex(x0+1, y0));
+            final double vq10 = srcData2.getElemDoubleAt(sourceRaster2.getDataBufferIndex(x0, y0+1));
+            final double vq11 = srcData2.getElemDoubleAt(sourceRaster2.getDataBufferIndex(x0+1, y0+1));
+
+            v00 = vi00*vi00 + vq00*vq00;
+            v01 = vi01*vi01 + vq01*vq01;
+            v10 = vi10*vi10 + vq10*vq10;
+            v11 = vi11*vi11 + vq11*vq11;
+
+        } else {
+
+            v00 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0));
+            v01 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0+1, y0));
+            v10 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0+1));
+            v11 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0+1, y0+1));
+        }
 
         return MathUtils.interpolationBiLinear(v00, v01, v10, v11, rangeIndex - x0, azimuthIndex - y0);
     }
