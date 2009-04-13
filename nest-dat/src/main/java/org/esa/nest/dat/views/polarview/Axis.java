@@ -3,7 +3,7 @@ package org.esa.nest.dat.views.polarview;
 import java.awt.*;
 
 public class Axis {
-    private static final double warmNumbers[] = {0.1D, 1.0D, 2D, 3D, 5D, 10D};
+    private static final double stepValues[] = {0.1D, 1.0D, 2D, 3D, 5D, 10D};
 
     public static final int TOP_X = 1;
     public static final int BOTTOM_X = 2;
@@ -71,14 +71,8 @@ public class Axis {
     }
 
     private static Font getFont(String propertyName, String defaultFont) {
-        String fontSpec = System.getProperty(propertyName, defaultFont);
+        final String fontSpec = System.getProperty(propertyName, defaultFont);
         return Font.decode(fontSpec);
-    }
-
-    private void clearData() {
-        title = "";
-        setRange(0.0D, 1.0D);
-        setTickCount(3);
     }
 
     public void setTitle(String str) {
@@ -125,28 +119,28 @@ public class Axis {
             maxValue = minValue + minRange;
             range = maxValue - minValue;
         }
-        final double step = warmNumber(range / 5D, true);
+        final double step = getStepValue(range / 5D, true);
         final double first = Math.floor(minValue / step + 1.0000000000000001E-005D) * step;
         final int count = (int) Math.ceil((maxValue - first) / step);
         setRange(first, first + (double) count * step, count + 1);
     }
 
-    private static double warmNumber(double thevalue, boolean up) {
+    private static double getStepValue(double thevalue, boolean up) {
         final boolean negative = thevalue < 0.0D;
         double val = thevalue;
         if (negative)
             val = -val;
-        int exponent = (int) Math.floor(Math.log10(val));
+        final int exponent = (int) Math.floor(Math.log10(val));
         val *= Math.pow(10D, -exponent);
         int i;
-        for (i = warmNumbers.length - 1; i > 0; i--) {
-            if (val > warmNumbers[i])
+        for (i = stepValues.length - 1; i > 0; i--) {
+            if (val > stepValues[i])
                 break;
         }
         if (up)
-            val = warmNumbers[i + 1];
+            val = stepValues[i + 1];
         else
-            val = warmNumbers[i];
+            val = stepValues[i];
         val *= Math.pow(10D, exponent);
         if (negative)
             val = -val;
@@ -281,14 +275,6 @@ public class Axis {
         }
     }
 
-    public Color getBackground() {
-        return gr.getBackground();
-    }
-
-    public void setBackground(Color backgroundColor) {
-        gr.setBackground(backgroundColor);
-    }
-
     public void draw(Graphics g, Dimension graphSize) {
         setSize(graphSize);
         draw(g);
@@ -316,8 +302,7 @@ public class Axis {
         g.setColor(labelColor);
         g.setFont(font);
         for (int i = 0; i < tickCount; i++) {
-            String s = tickNames[i];
-            gr.drawMultiLineTickName(s, tickPositions[i], tickLength, fm);
+            gr.drawMultiLineTickName(tickNames[i], tickPositions[i], tickLength, fm);
         }
 
         g.setFont(titleFont);
@@ -334,7 +319,7 @@ public class Axis {
         if (exponent != 0) {
             final float vm = (float) (v * Math.pow(10D, -exponent));
             if (vm != 0.0F)
-                return Float.toString(vm) + "e" + exponent;
+                return Float.toString(vm) + 'e' + exponent;
         }
         return Float.toString((float) v);
     }

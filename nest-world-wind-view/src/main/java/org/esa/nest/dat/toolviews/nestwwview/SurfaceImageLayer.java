@@ -31,14 +31,6 @@ public class SurfaceImageLayer extends RenderableLayer {
         return imageTable.keySet().toArray(new String[imageTable.size()]);
     }
 
-    public void removeImage(String imagePath) {
-        final SurfaceImage si = this.imageTable.get(imagePath);
-        if (si != null) {
-            this.removeRenderable(si);
-            this.imageTable.remove(imagePath);
-        }
-    }
-
     @Override
     public void setOpacity(double opacity) {
         super.setOpacity(opacity);
@@ -108,11 +100,18 @@ public class SurfaceImageLayer extends RenderableLayer {
             }
         };
         worker.execute();
-
     }
 
     public void removeProduct(final Product product) {
         removeImage(product.getName());
+    }
+
+    private void removeImage(String imagePath) {
+        final SurfaceImage si = this.imageTable.get(imagePath);
+        if (si != null) {
+            this.removeRenderable(si);
+            this.imageTable.remove(imagePath);
+        }
     }
 
     private static BufferedImage createQuickLook(final Product product) throws IOException {

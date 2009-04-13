@@ -41,19 +41,19 @@
             <initIndex>0</initIndex>
         </toolView>
 
-        <!--toolView>
+        <toolView>
             <id>org.esa.nest.dat.toolviews.nestwwview.FlatEarthWWToolView</id>
             <class>org.esa.nest.dat.toolviews.nestwwview.FlatEarthWWToolView</class>
-            <title>Flat Earth</title>
-            <tabTitle>Flat Earth</tabTitle>
+            <title>World Map</title>
+            <tabTitle>World Map</tabTitle>
             <description>Display product in a Flat Earth view.</description>
-            <smallIcon>/org/esa/nest/icons/earth.gif</smallIcon>
-            <largeIcon>/org/esa/nest/icons/earth.gif</largeIcon>
+            <smallIcon>/org/esa/beam/resources/images/icons/WorldMap16.gif</smallIcon>
+            <largeIcon>/org/esa/beam/resources/images/icons/WorldMap24.gif</largeIcon>
             <helpId>show3DMapWnd</helpId>
             <initState>HIDDEN</initState>
             <initSide>SOUTH</initSide>
             <initIndex>0</initIndex>
-        </toolView-->
+        </toolView>
 
     </extension>
 

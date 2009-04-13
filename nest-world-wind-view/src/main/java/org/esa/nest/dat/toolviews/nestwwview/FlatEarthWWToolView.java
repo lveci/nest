@@ -2,55 +2,26 @@ package org.esa.nest.dat.toolviews.nestwwview;
 
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.WorldWind;
-import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.view.FlatOrbitView;
-import gov.nasa.worldwind.terrain.CompoundElevationModel;
-import gov.nasa.worldwind.terrain.WMSBasicElevationModel;
-import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.wms.Capabilities;
-import gov.nasa.worldwind.wms.CapabilitiesRequest;
-import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.globes.EarthFlat;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.avlist.AVListImpl;
-import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
-import gov.nasa.worldwind.event.RenderingEvent;
-import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.examples.ClickAndGoSelectListener;
-import gov.nasa.worldwind.examples.StatisticsPanel;
-import gov.nasa.worldwind.examples.WMSLayersPanel;
 import gov.nasa.worldwind.layers.*;
-import gov.nasa.worldwind.layers.Earth.OpenStreetMapLayer;
 import gov.nasa.worldwind.layers.Earth.MSVirtualEarthLayer;
 import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
-import gov.nasa.worldwind.layers.placename.PlaceNameLayer;
 import gov.nasa.worldwind.util.StatusBar;
-import gov.nasa.worldwind.util.Logging;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.framework.ui.product.ProductTreeListener;
 import org.esa.beam.visat.VisatApp;
-import org.xml.sax.SAXException;
-import org.w3c.dom.Document;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
 import java.awt.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.io.IOException;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
 
 /**
  * The window displaying the world map.
@@ -63,9 +34,9 @@ public class FlatEarthWWToolView extends AbstractToolView {
 
     private AppPanel wwjPanel = null;
 
-    private final SurfaceImageLayer surfaceLayer = new SurfaceImageLayer();
+    private final ProductLayer productLayer = new ProductLayer();
 
-    private final boolean includeStatusBar = true;
+    private static final boolean includeStatusBar = true;
 
     public FlatEarthWWToolView() {
         Configuration.setValue(AVKey.GLOBE_CLASS_NAME, EarthFlat.class.getName());
@@ -77,21 +48,25 @@ public class FlatEarthWWToolView extends AbstractToolView {
 
         final Window windowPane = getPaneWindow();
         if(windowPane != null)
-            windowPane.setSize(800,400);
+            windowPane.setSize(300,300);
         final JPanel mainPane = new JPanel(new BorderLayout(4, 4));
         mainPane.setSize(new Dimension(300, 300));
 
         // world wind canvas
         initialize(mainPane);
+        final LayerList layerList = getWwd().getModel().getLayers();
 
         final MSVirtualEarthLayer virtualEarthLayerA = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_AERIAL);
         virtualEarthLayerA.setName("MS Virtual Earth Aerial");
-        insertTiledLayer(getWwd(), virtualEarthLayerA);
+        layerList.add(virtualEarthLayerA);
 
-        surfaceLayer.setOpacity(0.8);
-        surfaceLayer.setPickEnabled(false);
-        surfaceLayer.setName("NEST Opened Products");
-        insertTiledLayer(getWwd(), surfaceLayer);
+        productLayer.setOpacity(1.0);
+        productLayer.setPickEnabled(false);
+        productLayer.setName("NEST Opened Products");
+        layerList.add(productLayer);
+
+        final Layer placeNameLayer = layerList.getLayerByName("Place Names");
+        placeNameLayer.setEnabled(false);
 
         // Add an internal frame listener to VISAT so that we can update our
         // world map window with the information of the currently activated  product scene view.
@@ -107,18 +82,6 @@ public class FlatEarthWWToolView extends AbstractToolView {
         return wwjPanel.getWwd();
     }
 
-    public static void insertTiledLayer(WorldWindow wwd, Layer layer) {
-        int position = 0;
-        final LayerList layers = wwd.getModel().getLayers();
-        for (Layer l : layers) {
-            if (l instanceof PlaceNameLayer) {
-                position = layers.indexOf(l);
-                break;
-            }
-        }
-        layers.add(position, layer);
-    }
-
     private void initialize(JPanel mainPane) {
         // Create the WorldWindow.
         wwjPanel = new AppPanel(canvasSize, includeStatusBar);
@@ -129,21 +92,22 @@ public class FlatEarthWWToolView extends AbstractToolView {
     }
 
     public void setSelectedProduct(Product product) {
-        if(surfaceLayer != null)
-            surfaceLayer.setSelectedProduct(product);
+        if(productLayer != null)
+            productLayer.setSelectedProduct(product);
+        wwjPanel.repaint();
     }
 
     public Product getSelectedProduct() {
-        if(surfaceLayer != null)
-            return surfaceLayer.getSelectedProduct();
+        if(productLayer != null)
+            return productLayer.getSelectedProduct();
         return null;
     }
 
     public void setProducts(Product[] products) {
-        if(surfaceLayer != null) {
+        if(productLayer != null) {
             for (Product prod : products) {
                 try {
-                    surfaceLayer.addProduct(prod);
+                    productLayer.addProduct(prod);
                 } catch(Exception e) {
                     datApp.showErrorDialog("WorldWind unable to add product " + prod.getName()+
                                             "\n"+e.getMessage());
@@ -155,8 +119,8 @@ public class FlatEarthWWToolView extends AbstractToolView {
     public void removeProduct(Product product) {
         if(getSelectedProduct() == product)
             setSelectedProduct(null);
-        if(surfaceLayer != null)
-            surfaceLayer.removeProduct(product);
+        if(productLayer != null)
+            productLayer.removeProduct(product);
     }
 
     public static class AppPanel extends JPanel {
@@ -182,7 +146,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
 
 
             // Setup a select listener for the worldmap click-and-go feature
-            this.wwd.addSelectListener(new ClickAndGoSelectListener(this.getWwd(), WorldMapLayer.class));
+            this.wwd.addSelectListener(new ClickAndGoSelectListener(wwd, WorldMapLayer.class));
 
             this.add(this.wwd, BorderLayout.CENTER);
             if (includeStatusBar) {

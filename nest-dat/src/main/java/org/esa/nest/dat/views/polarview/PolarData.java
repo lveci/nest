@@ -10,12 +10,9 @@ public class PolarData {
     private final int Nr;
     private final int Nth;
     private final AxisInfo rData = new AxisInfo();
-    private final AxisInfo tData = new AxisInfo();
     private final AxisInfo cData = new AxisInfo();
 
     private int rScreenPoints[] = null;
-    private Object[] rPoints = null;
-    private Object[] tPoints = null;
     private Object[] cValues = null;
     private float dirOffset = 0;
 
@@ -24,9 +21,8 @@ public class PolarData {
     private int plotCount = 0;
 
     public PolarData(float cValues[][], float firstDir, float dirStep, float radii[]) {
-        setRPoints(rPoints);
-        setTPoints(tPoints);
-        setColorValues(cValues);
+        this.cValues = cValues;
+        colors = null;
 
         this.firstDir = firstDir;
         this.dirStep = dirStep;
@@ -37,19 +33,6 @@ public class PolarData {
 
     public void setRAxis(Axis rAxis) {
         rData.setAxis(rAxis);
-    }
-
-    private void setRPoints(Object rPoints[]) {
-        this.rPoints = rPoints;
-    }
-
-    private void setTPoints(Object tPoints[]) {
-        this.tPoints = tPoints;
-    }
-
-    private void setColorValues(Object cValues[]) {
-        this.cValues = cValues;
-        colors = null;
     }
 
     public void setDirOffset(float dirOffset) {

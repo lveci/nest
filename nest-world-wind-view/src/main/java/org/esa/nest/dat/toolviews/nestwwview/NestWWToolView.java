@@ -55,7 +55,7 @@ import java.beans.PropertyChangeEvent;
 /**
  * The window displaying the world map.
  *
- * @version $Revision: 1.9 $ $Date: 2009-04-09 20:25:48 $
+ * @version $Revision: 1.10 $ $Date: 2009-04-13 16:37:24 $
  */
 public class NestWWToolView extends AbstractToolView {
 
@@ -76,13 +76,13 @@ public class NestWWToolView extends AbstractToolView {
     private final Dimension wmsPanelSize = new Dimension(400, 600);
 
     private JTabbedPane tabbedPane = new JTabbedPane();
-    private int previousTabIndex;
+    private int previousTabIndex = 0;
 
-    private final boolean includeStatusBar = true;
-    private final boolean includeLayerPanel = false;
-    private final boolean includeStatsPanel = false;
-    private final boolean includeProductPanel = true;
-    private final boolean includeWMSPanel = false;
+    private static final boolean includeStatusBar = true;
+    private static final boolean includeLayerPanel = false;
+    private static final boolean includeStatsPanel = false;
+    private static final boolean includeProductPanel = true;
+    private static final boolean includeWMSPanel = false;
 
     private static final String[] servers = new String[]
         {

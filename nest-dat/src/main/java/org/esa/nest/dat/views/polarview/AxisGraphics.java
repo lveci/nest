@@ -6,13 +6,10 @@ import java.awt.*;
 
 abstract class AxisGraphics {
 
-    Graphics g;
+    Graphics g = null;
     private Color backgroundColor;
 
     public static final int MAX_POINTS = 16380;
-    private static final int pointBuffer[][] = {
-            new int[16380], new int[16380]
-    };
 
     AxisGraphics() {
         backgroundColor = VisatApp.getApp().getDesktopPane().getBackground();

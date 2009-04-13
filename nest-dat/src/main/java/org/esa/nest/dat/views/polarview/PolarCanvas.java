@@ -44,35 +44,10 @@ public class PolarCanvas extends Container {
         return font;
     }
 
-    public Frame getParentFrame() {
-        return (Frame) getParentWindow(this);
-    }
-
-    private static Window getParentWindow(Component comp) {
-        if (comp == null)
-            return null;
-        if (comp instanceof Window)
-            return (Window) comp;
-        for (Container c = comp.getParent(); c != null; c = c.getParent()) {
-            if (c instanceof Window)
-                return (Window) c;
-        }
-        return null;
-    }
-
     @Override
-    public void setBackground(Color background) {
+    public final void setBackground(Color background) {
         opaque = true;
         super.setBackground(background);
-    }
-
-    public void setFontSize(int size) {
-        final Font f = getFont();
-        if (f == null)
-            return;
-        if (f.getSize() != size) {
-            setFont(new Font(f.getName(), f.getStyle(), size));
-        }
     }
 
     private void fillBackground(Graphics g) {
@@ -213,16 +188,6 @@ public class PolarCanvas extends Container {
     public void setRings(double rings[], String ringText[]) {
         this.rings = rings;
         //this.ringText = ringText;
-    }
-
-    public float getDirOffset() {
-        return dirOffset;
-    }
-
-    public void setDirOffset(float dirOffset) {
-        this.dirOffset = dirOffset;
-        if (data != null)
-            data.setDirOffset(dirOffset);
     }
 
     public double[] getRTheta(Point oP) {

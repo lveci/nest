@@ -94,10 +94,6 @@ public class ColourScale {
         return (int) Math.round(getDoubleColorValue(index));
     }
 
-    private float getFloatColorValue(int index) {
-        return (float) getDoubleColorValue(index);
-    }
-
     private double getDoubleColorValue(int index) {
         double value = (double) index - darkestIndex;
         if (scale != 0.0D)

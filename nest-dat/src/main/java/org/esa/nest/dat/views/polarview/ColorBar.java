@@ -20,13 +20,13 @@ public class ColorBar implements ImageProducer {
     private final Dimension imageSize = new Dimension(barSize.width, barSize.height);
     private final Rectangle imageArea = new Rectangle(imageSize);
     protected static final Point p0 = new Point(0, 0);
-    private final Hashtable properties = new Hashtable();
-    private final Vector<ImageConsumer> theConsumers = new Vector<ImageConsumer>();
+    private final Hashtable properties = new Hashtable(1);
+    private final Vector<ImageConsumer> theConsumers = new Vector<ImageConsumer>(1);
     private static final int hints = 3 & 0xffffffef;
 
     static {
         int p = 0;
-        float scale = 0xffffff / (barSize.height - 1);
+        final float scale = 0xffffff / (barSize.height - 1);
         for (int i = barSize.height - 1; i >= 0; i--) {
             barPixels[p] = (byte) i;
             barRGBPixels[p] = (int) ((float) p * scale);

@@ -63,6 +63,7 @@
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
                     <id>org.esa.beam.scripting.visat.ScriptConsoleToolView</id>
                     <id>org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView</id>
+                    <id>org.esa.beam.visat.toolviews.worldmap.WorldMapToolView</id>
                 </excludedToolViews>
             </applicationDescriptor>
     </extension>
@@ -96,6 +97,22 @@
             <smallIcon>/org/esa/beam/resources/images/icons/Statistics16.gif</smallIcon>
             <largeIcon>/org/esa/beam/resources/images/icons/Statistics24.gif</largeIcon>
             <helpId>statisticsToolView</helpId>
+            <initState>HIDDEN</initState>
+            <initSide>SOUTH</initSide>
+            <initIndex>0</initIndex>
+        </toolView>
+
+        <toolView>
+            <id>org.esa.nest.dat.toolviews.worldmap.NestWorldMapToolView</id>
+            <class>org.esa.nest.dat.toolviews.worldmap.NestWorldMapToolView</class>
+            <title>World Map</title>
+            <tabTitle>World Map</tabTitle>
+            <mnemonic>W</mnemonic>
+            <accelerator>ctrl alt W</accelerator>
+            <description>Display product boundaries in a world map.</description>
+            <smallIcon>/org/esa/beam/resources/images/icons/WorldMap16.gif</smallIcon>
+            <largeIcon>/org/esa/beam/resources/images/icons/WorldMap24.gif</largeIcon>
+            <helpId>showWorldMapWnd</helpId>
             <initState>HIDDEN</initState>
             <initSide>SOUTH</initSide>
             <initIndex>0</initIndex>
