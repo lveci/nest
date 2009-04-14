@@ -15,6 +15,7 @@ import org.esa.beam.visat.toolviews.stat.StatisticsToolView;
 import org.esa.nest.dat.actions.LoadTabbedLayoutAction;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.dat.views.polarview.PolarView;
+import org.esa.nest.util.DatUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,6 +24,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Arrays;
 
 public final class DatApp extends VisatApp {
     public DatApp(ApplicationDescriptor applicationDescriptor) {
@@ -58,6 +60,38 @@ public final class DatApp extends VisatApp {
 
             HelpSys.showTheme("using_dat");
             VisatApp.getApp().getPreferences().setPropertyString("visat.showGettingStarted", "false");       
+        }
+    }
+
+    @Override
+    public synchronized void shutDown() {
+        cleanTempFolder();
+
+        super.shutDown();
+    }
+
+    private static void cleanTempFolder() {
+        final File tempFolder = DatUtils.getApplicationUserTempDataDir();
+        final File[] fileList = tempFolder.listFiles();
+
+        long freeSpace = tempFolder.getFreeSpace() / 1024 / 1024 / 1024;
+        int cutoff = 20;
+        if(freeSpace > 30)
+            cutoff = 60;
+
+        if(fileList.length > cutoff) {
+            final long[] dates = new long[fileList.length];
+            int i = 0;
+            for(File file : fileList) {
+                dates[i++] = file.lastModified();
+            }
+            Arrays.sort(dates);
+            final long cutoffDate = dates[dates.length - cutoff];
+
+            for(File file : fileList) {
+                if(file.lastModified() < cutoffDate)
+                    file.delete();
+            }
         }
     }
 
