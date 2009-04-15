@@ -25,14 +25,16 @@ public class TestGraphNode extends TestCase {
         super(name);
     }
 
+    @Override
     public void setUp() throws Exception {
         node = new Node("id", "readOp");
-        final Xpp3DomElement parameters = Xpp3DomElement.createDomElement("parameters");
+        final Xpp3DomElement parameters = new Xpp3DomElement("parameters");
         node.setConfiguration(parameters);
 
         graphNode = new GraphNode(node);
     }
 
+    @Override
     public void tearDown() throws Exception {
         node = null;
         graphNode = null;
@@ -56,7 +58,7 @@ public class TestGraphNode extends TestCase {
 
     public void testSourceConnection() {
         final Node sourceNode = new Node("sourceID", "testSourceNodeOp");
-        final Xpp3DomElement parameters = Xpp3DomElement.createDomElement("parameters");
+        final Xpp3DomElement parameters = new Xpp3DomElement("parameters");
         sourceNode.setConfiguration(parameters);
 
         GraphNode sourceGraphNode = new GraphNode(sourceNode);

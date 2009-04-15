@@ -101,7 +101,7 @@ public class GraphExecuter extends Observable {
     private GraphNode createNewGraphNode(final String opName, final String id) {
         final Node newNode = new Node(id, opName);
 
-        final Xpp3DomElement parameters = Xpp3DomElement.createDomElement("parameters");
+        final Xpp3DomElement parameters = new Xpp3DomElement("parameters");
         newNode.setConfiguration(parameters);
 
         graph.addNode(newNode);
@@ -146,7 +146,7 @@ public class GraphExecuter extends Observable {
         final Node node = graph.getNode(id);
         DomElement xml = node.getConfiguration().getChild(paramName);
         if(xml == null) {
-            xml = Xpp3DomElement.createDomElement(paramName);
+            xml = new Xpp3DomElement(paramName);
             node.getConfiguration().addChild(xml);
         }
         xml.setValue(value);
@@ -394,7 +394,7 @@ public class GraphExecuter extends Observable {
         newReaderNode.setOperatorUI(null);
         newReaderNode.getNode().getConfiguration();
         final DomElement config = newReaderNode.getNode().getConfiguration();
-        final DomElement fileParam = Xpp3DomElement.createDomElement("file");
+        final DomElement fileParam = new Xpp3DomElement("file");
         fileParam.setValue(value);
         config.addChild(fileParam);
 

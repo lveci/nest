@@ -1,7 +1,6 @@
 package org.esa.nest.dat.toolviews.nestwwview;
 
 import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.layers.Layer;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
@@ -10,21 +9,21 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 
 public class ProductPanel extends JPanel {
-    private final SurfaceImageLayer imageLayer;
+    private final ProductLayer productLayer;
     private JPanel layersPanel;
     private JPanel westPanel;
     private JScrollPane scrollPane;
     private Font defaultFont = null;
 
-    public ProductPanel(WorldWindow wwd, SurfaceImageLayer layer) {
+    public ProductPanel(WorldWindow wwd, ProductLayer prodLayer) {
         super(new BorderLayout());
-        imageLayer = layer;
+        productLayer = prodLayer;
         this.makePanel(wwd, new Dimension(100, 400));
     }
 
-    public ProductPanel(WorldWindow wwd, Dimension size, SurfaceImageLayer layer) {
+    public ProductPanel(WorldWindow wwd, Dimension size, ProductLayer prodLayer) {
         super(new BorderLayout());
-        imageLayer = layer;
+        productLayer = prodLayer;
         this.makePanel(wwd, size);
     }
 
@@ -54,9 +53,9 @@ public class ProductPanel extends JPanel {
     }
 
     private void fill(WorldWindow wwd) {
-        final String[] productNames = imageLayer.getProductNames();
+        final String[] productNames = productLayer.getProductNames();
         for(String name : productNames) {
-            final LayerAction action = new LayerAction(imageLayer, wwd, name, imageLayer.getOpacity(name) != 0);
+            final LayerAction action = new LayerAction(productLayer, wwd, name, productLayer.getOpacity(name) != 0);
             final JCheckBox jcb = new JCheckBox(action);
             jcb.setSelected(action.selected);
             this.layersPanel.add(jcb);
@@ -82,11 +81,11 @@ public class ProductPanel extends JPanel {
 
     private static class LayerAction extends AbstractAction {
         WorldWindow wwd;
-        private SurfaceImageLayer layer;
+        private ProductLayer layer;
         private boolean selected;
         private String name;
 
-        public LayerAction(SurfaceImageLayer layer, WorldWindow wwd, String name, boolean selected) {
+        public LayerAction(ProductLayer layer, WorldWindow wwd, String name, boolean selected) {
             super(name);
             this.wwd = wwd;
             this.layer = layer;

@@ -4,12 +4,17 @@ import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.Configuration;
+import gov.nasa.worldwind.view.FlatOrbitView;
+import gov.nasa.worldwind.view.OrbitView;
+import gov.nasa.worldwind.view.BasicOrbitView;
 import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.terrain.WMSBasicElevationModel;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.wms.Capabilities;
 import gov.nasa.worldwind.wms.CapabilitiesRequest;
 import gov.nasa.worldwind.globes.ElevationModel;
+import gov.nasa.worldwind.globes.EarthFlat;
+import gov.nasa.worldwind.globes.Earth;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.avlist.AVList;
@@ -55,7 +60,7 @@ import java.beans.PropertyChangeEvent;
 /**
  * The window displaying the world map.
  *
- * @version $Revision: 1.10 $ $Date: 2009-04-13 16:37:24 $
+ * @version $Revision: 1.11 $ $Date: 2009-04-15 16:08:43 $
  */
 public class NestWWToolView extends AbstractToolView {
 
@@ -71,7 +76,7 @@ public class NestWWToolView extends AbstractToolView {
     private StatisticsPanel statsPanel = null;
 
     private JSlider opacitySlider = null;
-    private final SurfaceImageLayer surfaceLayer = new SurfaceImageLayer();
+    private final ProductLayer productLayer = new ProductLayer(true);
 
     private final Dimension wmsPanelSize = new Dimension(400, 600);
 
@@ -147,10 +152,10 @@ public class NestWWToolView extends AbstractToolView {
         streetLayer.setName("Open Street Map");
         insertTiledLayer(getWwd(), streetLayer);
 
-        surfaceLayer.setOpacity(0.8);
-        surfaceLayer.setPickEnabled(false);
-        surfaceLayer.setName("NEST Opened Products");
-        insertTiledLayer(getWwd(), surfaceLayer);
+        productLayer.setOpacity(0.8);
+        productLayer.setPickEnabled(false);
+        productLayer.setName("NEST Opened Products");
+        insertTiledLayer(getWwd(), productLayer);
 
         // Add an internal frame listener to VISAT so that we can update our
         // world map window with the information of the currently activated  product scene view.
@@ -193,7 +198,7 @@ public class NestWWToolView extends AbstractToolView {
             layerPanel.update(getWwd());
         }
         if(includeProductPanel) {
-            productPanel = new ProductPanel(wwjPanel.getWwd(), surfaceLayer);
+            productPanel = new ProductPanel(wwjPanel.getWwd(), productLayer);
             mainPane.add(productPanel, BorderLayout.WEST);
 
             productPanel.add(makeControlPanel(), BorderLayout.SOUTH);
@@ -254,12 +259,12 @@ public class NestWWToolView extends AbstractToolView {
 
         opacitySlider = new JSlider();
         opacitySlider.setMaximum(100);
-        opacitySlider.setValue((int) (surfaceLayer.getOpacity() * 100));
+        opacitySlider.setValue((int) (productLayer.getOpacity() * 100));
         opacitySlider.setEnabled(true);
         opacitySlider.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
                 int value = opacitySlider.getValue();
-                surfaceLayer.setOpacity(value / 100d);
+                productLayer.setOpacity(value / 100d);
                 getWwd().repaint();
             }
         });
@@ -279,40 +284,43 @@ public class NestWWToolView extends AbstractToolView {
     }
 
     public void setSelectedProduct(Product product) {
-        if(surfaceLayer != null)
-            surfaceLayer.setSelectedProduct(product);
+        if(productLayer != null)
+            productLayer.setSelectedProduct(product);
         if(productPanel != null)
             productPanel.update(getWwd());
+        getWwd().redrawNow();
     }
 
     public Product getSelectedProduct() {
-        if(surfaceLayer != null)
-            return surfaceLayer.getSelectedProduct();
+        if(productLayer != null)
+            return productLayer.getSelectedProduct();
         return null;
     }
 
     public void setProducts(Product[] products) {
-        if(surfaceLayer != null) {
+        if(productLayer != null) {
             for (Product prod : products) {
                 try {
-                    surfaceLayer.addProduct(prod);
+                    productLayer.addProduct(prod);
                 } catch(Exception e) {
                     datApp.showErrorDialog("WorldWind unable to add product " + prod.getName()+
-                                            "\n"+e.getMessage());    
+                                            "\n"+e.getMessage());
                 }
             }
         }
         if(productPanel != null)
             productPanel.update(getWwd());
+        getWwd().redrawNow();
     }
 
     public void removeProduct(Product product) {
         if(getSelectedProduct() == product)
             setSelectedProduct(null);
-        if(surfaceLayer != null)
-            surfaceLayer.removeProduct(product);
+        if(productLayer != null)
+            productLayer.removeProduct(product);
         if(productPanel != null)
             productPanel.update(getWwd());
+        getWwd().redrawNow();
     }
 
     private WMSLayersPanel addTab(int position, String server)
@@ -402,6 +410,8 @@ public class NestWWToolView extends AbstractToolView {
             // Create the default model as described in the current worldwind properties.
             final Model m = (Model) WorldWind.createConfigurationComponent(AVKey.MODEL_CLASS_NAME);
             this.wwd.setModel(m);
+            m.setGlobe(new Earth());
+            this.wwd.setView(new BasicOrbitView());
 
             // Setup a select listener for the worldmap click-and-go feature
             this.wwd.addSelectListener(new ClickAndGoSelectListener(this.getWwd(), WorldMapLayer.class));
@@ -471,7 +481,7 @@ public class NestWWToolView extends AbstractToolView {
             Product product = null;
             if (contentPane instanceof ProductSceneView) {
                 product = ((ProductSceneView) contentPane).getProduct();
-            }
+            } 
             setSelectedProduct(product);
         }
 

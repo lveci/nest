@@ -20,10 +20,12 @@ public class NestWorldMapToolView extends WorldMapToolView {
     public NestWorldMapToolView() {
     }
 
+    @Override
     protected void createWorldMapPane() {
         _worldMapPane = new NestWorldMapPane(WorldMapImageLoader.getWorldMapImage(false));
     }
 
+    @Override
     protected void addProductListeners() {
         final VisatApp visatApp = VisatApp.getApp();
         visatApp.addProductTreeListener(new WorldMapToolView.WorldMapPTL());

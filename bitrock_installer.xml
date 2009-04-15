@@ -16,6 +16,21 @@
             <canBeEdited>1</canBeEdited>
             <selected>1</selected>
             <show>1</show>
+            <desktopShortcutList>
+                <shortcut>
+                    <comment>Text that will appear on Tooltip</comment>
+                    <exec>nest_dat.sh</exec>
+                    <icon></icon>
+                    <name>NEST 2C</name>
+                    <path></path>
+                    <platforms>all</platforms>
+                    <runInTerminal>0</runInTerminal>
+                    <windowsExec>nest_dat.exe</windowsExec>
+                    <windowsExecArgs></windowsExecArgs>
+                    <windowsIcon></windowsIcon>
+                    <windowsPath></windowsPath>
+                </shortcut>
+            </desktopShortcutList>
             <folderList>
                 <folder>
                     <description>Program Files</description>

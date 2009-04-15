@@ -127,7 +127,7 @@ public class GraphNode {
 
     void AssignParameters(final Xpp3Dom presentationXML) {
 
-        final Xpp3DomElement config = Xpp3DomElement.createDomElement("parameters");
+        final Xpp3DomElement config = new Xpp3DomElement("parameters");
         updateParameterMap(config);
         node.setConfiguration(config);
 

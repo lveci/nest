@@ -4,7 +4,9 @@ import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.view.FlatOrbitView;
+import gov.nasa.worldwind.view.BasicOrbitView;
 import gov.nasa.worldwind.globes.EarthFlat;
+import gov.nasa.worldwind.globes.Earth;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.examples.ClickAndGoSelectListener;
@@ -31,16 +33,13 @@ public class FlatEarthWWToolView extends AbstractToolView {
 
     private final VisatApp datApp = VisatApp.getApp();
     private Dimension canvasSize = new Dimension(800, 600);
-
     private AppPanel wwjPanel = null;
 
-    private final ProductLayer productLayer = new ProductLayer();
+    private final ProductLayer productLayer = new ProductLayer(false);
 
     private static final boolean includeStatusBar = true;
 
     public FlatEarthWWToolView() {
-        Configuration.setValue(AVKey.GLOBE_CLASS_NAME, EarthFlat.class.getName());
-        Configuration.setValue(AVKey.VIEW_CLASS_NAME, FlatOrbitView.class.getName());
     }
 
     @Override
@@ -94,7 +93,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
     public void setSelectedProduct(Product product) {
         if(productLayer != null)
             productLayer.setSelectedProduct(product);
-        wwjPanel.repaint();
+        getWwd().redrawNow();
     }
 
     public Product getSelectedProduct() {
@@ -114,6 +113,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
                 }
             }
         }
+        getWwd().redrawNow();
     }
 
     public void removeProduct(Product product) {
@@ -121,6 +121,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
             setSelectedProduct(null);
         if(productLayer != null)
             productLayer.removeProduct(product);
+        getWwd().redrawNow();
     }
 
     public static class AppPanel extends JPanel {
@@ -136,6 +137,8 @@ public class FlatEarthWWToolView extends AbstractToolView {
             // Create the default model as described in the current worldwind properties.
             final Model m = (Model) WorldWind.createConfigurationComponent(AVKey.MODEL_CLASS_NAME);
             this.wwd.setModel(m);
+            m.setGlobe(new EarthFlat());
+            this.wwd.setView(new FlatOrbitView());
 
             final LayerList layerList = m.getLayers();
             for(Layer layer : layerList) {
