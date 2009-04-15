@@ -29,7 +29,6 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.datamodel.QuadInterpolator;
 import org.esa.nest.util.Settings;
 
 import java.awt.*;
@@ -80,8 +79,8 @@ public class ASARCalibrationOperator extends Operator {
 
     protected TiePointGrid incidenceAngle = null;
     protected TiePointGrid slantRangeTime = null;
-    private QuadInterpolator slantRangeTimeQuadInterp = null;
-    private QuadInterpolator incidenceAngleQuadInterp = null;
+//    private QuadInterpolator slantRangeTimeQuadInterp = null;
+//    private QuadInterpolator incidenceAngleQuadInterp = null;
 
     private boolean extAuxFileAvailableFlag = false;
     private boolean antElevCorrFlag = false;
@@ -335,10 +334,10 @@ public class ASARCalibrationOperator extends Operator {
     private void getTiePointGridData(Product sourceProduct) {
 
         slantRangeTime = OperatorUtils.getSlantRangeTime(sourceProduct);
-        slantRangeTimeQuadInterp = new QuadInterpolator(slantRangeTime);
+//        slantRangeTimeQuadInterp = new QuadInterpolator(slantRangeTime);
 
         incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
-        incidenceAngleQuadInterp = new QuadInterpolator(incidenceAngle);
+//        incidenceAngleQuadInterp = new QuadInterpolator(incidenceAngle);
         /*
         int w = 2000;
         int h = 2;
@@ -1039,10 +1038,16 @@ public class ASARCalibrationOperator extends Operator {
         int index;
         for (int y = y0; y < maxY; ++y) {
 
-            incidenceAngleQuadInterp.getPixelFloats(x0, y, w, 1,incidenceAnglesArray);
+            incidenceAngle.getPixels(x0, y, w, 1,incidenceAnglesArray, pm, TiePointGrid.QUADRATIC);
+//            incidenceAngleQuadInterp.getPixelFloats(x0, y, w, 1, incidenceAnglesArray);
+//            incidenceAngle.getPixels(x0, y, w, 1,incidenceAnglesArray, pm, TiePointGrid.BIQUADRATIC);
+//            incidenceAngle.getPixels(x0, y, w, 1,incidenceAnglesArray, pm);
 
             if (!rangeSpreadCompFlag) {
-                slantRangeTimeQuadInterp.getPixelFloats(x0, y, w, 1,slantRangeTimeArray);
+                slantRangeTime.getPixels(x0, y, w, 1,slantRangeTimeArray, pm, TiePointGrid.QUADRATIC);
+//                slantRangeTimeQuadInterp.getPixelFloats(x0, y, w, 1, slantRangeTimeArray);
+//                slantRangeTime.getPixels(x0, y, w, 1,slantRangeTimeArray, pm, TiePointGrid.BIQUADRATIC);
+//                slantRangeTime.getPixels(x0, y, w, 1,slantRangeTimeArray, pm);
             }
             
             for (int x = x0, xx = 0; x < maxX; ++x, ++xx) {
@@ -1105,16 +1110,18 @@ public class ASARCalibrationOperator extends Operator {
 
         final float[] incidenceAnlglesArray = new float[w];
         final float[] slantRangeTimeArray = new float[w];
-        /*
-        incidenceAngle.getPixels(x0, y, w, 1,
-                incidenceAnlglesArray, ProgressMonitor.NULL);
-        */
-        incidenceAngleQuadInterp.getPixelFloats(x0, y, w, 1,incidenceAnlglesArray);
-        /*
-        slantRangeTime.getPixels(x0, y, w, 1,
-                slantRangeTimeArray, ProgressMonitor.NULL);
-        */
-        slantRangeTimeQuadInterp.getPixelFloats(x0, y, w, 1,slantRangeTimeArray);
+
+        incidenceAngle.getPixels(x0, y, w, 1, incidenceAnlglesArray, ProgressMonitor.NULL, TiePointGrid.QUADRATIC);
+        slantRangeTime.getPixels(x0, y, w, 1, slantRangeTimeArray, ProgressMonitor.NULL, TiePointGrid.QUADRATIC);
+
+//        incidenceAngle.getPixels(x0, y, w, 1, incidenceAnlglesArray, ProgressMonitor.NULL);
+//        slantRangeTime.getPixels(x0, y, w, 1, slantRangeTimeArray, ProgressMonitor.NULL);
+
+//        incidenceAngle.getPixels(x0, y, w, 1, incidenceAnlglesArray, ProgressMonitor.NULL, TiePointGrid.BIQUADRATIC);
+//        slantRangeTime.getPixels(x0, y, w, 1, slantRangeTimeArray, ProgressMonitor.NULL, TiePointGrid.BIQUADRATIC);
+
+//        incidenceAngleQuadInterp.getPixelFloats(x0, y, w, 1,incidenceAnlglesArray);
+//        slantRangeTimeQuadInterp.getPixelFloats(x0, y, w, 1,slantRangeTimeArray);
 
         // set rsat
         double rsat = 0.0;
