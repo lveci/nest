@@ -1,6 +1,7 @@
 package org.esa.nest.util;
 
 import Jama.Matrix;
+import org.esa.beam.framework.gpf.OperatorException;
 
 public final class MathUtils
 {    
@@ -102,7 +103,73 @@ public final class MathUtils
      */
     public static double interpolationBiLinear(
             final double v00, final double v01, final double v10, final double v11, final double muX, final double muY) {
-        return (1 - muY)*((1 - muX)*v00 + muX*v01) + muY*((1 - muX)*v10 + muX*v11);
+
+        final double tmpV0 = interpolationLinear(v00, v01, muX);
+        final double tmpV1 = interpolationLinear(v10, v11, muX);
+        return interpolationLinear(tmpV0, tmpV1, muY);
+        //return (1 - muY)*((1 - muX)*v00 + muX*v01) + muY*((1 - muX)*v10 + muX*v11);
+    }
+
+    /**
+     * Perform Bi-cubic interpolation.
+     * @param v Array of 4x4 sample values with vij is the value for pixel at (xj, yi) where i,j = 0,1,2,3.
+     * @param muX A perameter in range [0,1] that defines the interpolated sample position between x1 and x2.
+     *           A 0 value of muX corresponds to sample x1.
+     * @param muY A perameter in range [0,1] that defines the interpolated sample position between y1 and y2.
+     *           A 0 value of muY corresponds to sample y1.
+     * @return The interpolated sample value.
+     */
+    public static double interpolationBiCubic(final double[][] v, final double muX, final double muY) {
+        if (v.length != 4 || v[0].length != 4 || v[1].length != 4 || v[2].length != 4 || v[3].length != 4) {
+            throw new OperatorException("Incorrect sample array length");
+        }
+        final double tmpV0 = interpolationCubic(v[0][0], v[0][1], v[0][2], v[0][3], muX);
+        final double tmpV1 = interpolationCubic(v[1][0], v[1][1], v[1][2], v[1][3], muX);
+        final double tmpV2 = interpolationCubic(v[2][0], v[2][1], v[2][2], v[2][3], muX);
+        final double tmpV3 = interpolationCubic(v[3][0], v[3][1], v[3][2], v[3][3], muX);
+        return interpolationCubic(tmpV0, tmpV1, tmpV2, tmpV3, muY);
+    }
+
+    /**
+     * Perform Bi-cubic2 interpolation.
+     * @param v Array of 4x4 sample values with vij is the value for pixel at (xj, yi) where i,j = 0,1,2,3.
+     * @param muX A perameter in range [0,1] that defines the interpolated sample position between x1 and x2.
+     *           A 0 value of muX corresponds to sample x1.
+     * @param muY A perameter in range [0,1] that defines the interpolated sample position between y1 and y2.
+     *           A 0 value of muY corresponds to sample y1.
+     * @return The interpolated sample value.
+     */
+    public static double interpolationBiCubic2(final double[][] v, final double muX, final double muY) {
+        if (v.length != 4 || v[0].length != 4 || v[1].length != 4 || v[2].length != 4 || v[3].length != 4) {
+            throw new OperatorException("Incorrect sample array length");
+        }
+        final double tmpV0 = interpolationCubic2(v[0][0], v[0][1], v[0][2], v[0][3], muX);
+        final double tmpV1 = interpolationCubic2(v[1][0], v[1][1], v[1][2], v[1][3], muX);
+        final double tmpV2 = interpolationCubic2(v[2][0], v[2][1], v[2][2], v[2][3], muX);
+        final double tmpV3 = interpolationCubic2(v[3][0], v[3][1], v[3][2], v[3][3], muX);
+        return interpolationCubic2(tmpV0, tmpV1, tmpV2, tmpV3, muY);
+    }
+
+    /**
+     * Perform Bi-sinc interpolation.
+     * @param v Array of 5x5 sample values with vij is the value for pixel at (xj, yi) where i,j = 0,1,2,3,4.
+     * @param muX A perameter in range [-0.5, 0.5] that defines the interpolated sample position wrt x2.
+     *           A 0 value of mu corresponds to sample x2.
+     * @param muY A perameter in range [-0.5, 0.5] that defines the interpolated sample position wrt y2.
+     *           A 0 value of mu corresponds to sample y2.
+     * @return The interpolated sample value.
+     */
+    public static double interpolationBiSinc(final double[][] v, final double muX, final double muY) {
+        if (v.length != 5 ||
+            v[0].length != 5 || v[1].length != 5 || v[2].length != 5 || v[3].length != 5 || v[4].length != 5) {
+            throw new OperatorException("Incorrect sample array length");
+        }
+        final double tmpV0 = interpolationSinc(v[0][0], v[0][1], v[0][2], v[0][3], v[0][4], muX);
+        final double tmpV1 = interpolationSinc(v[1][0], v[1][1], v[1][2], v[1][3], v[1][4], muX);
+        final double tmpV2 = interpolationSinc(v[2][0], v[2][1], v[2][2], v[2][3], v[2][4], muX);
+        final double tmpV3 = interpolationSinc(v[3][0], v[3][1], v[3][2], v[3][3], v[3][4], muX);
+        final double tmpV4 = interpolationSinc(v[4][0], v[4][1], v[4][2], v[4][3], v[4][4], muX);
+        return interpolationSinc(tmpV0, tmpV1, tmpV2, tmpV3, tmpV4, muY);
     }
 
     /**
