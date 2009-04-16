@@ -126,9 +126,8 @@
 
         <module>lib-hdf</module>
         <!--module>lib-netcdf</module-->
-
-		<!--module>blue-marble-worldmap</module-->
-		<module>beam-envi-reader</module>
+        <!--module>blue-marble-worldmap</module-->
+	    <module>beam-envi-reader</module>
         <!--<module>nest-dat</module>-->
 
     </modules>
@@ -394,7 +393,6 @@
     </properties>
 
 
-
     <build>
         <outputDirectory>../modules/${artifactId}-${version}</outputDirectory>
 
@@ -408,7 +406,7 @@
                         <source>1.6</source>
                         <target>1.6</target>
                         <debug>true</debug>
-						<optimize>true</optimize>
+			<optimize>true</optimize>
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
@@ -437,7 +435,7 @@
                         <excludeResources>true</excludeResources>
                     </configuration>
                 </plugin>
-                
+
                 <plugin>
                     <groupId>com.bc.maven.plugins</groupId>
                     <artifactId>maven-javahelp-plugin</artifactId>
@@ -456,10 +454,10 @@
                     <configuration>
                         <skip>true</skip>
                         <printSummary>true</printSummary>
-                        <excludes>
-                            <exclude>**/TestRaster.java</exclude>
-                            <exclude>**/TestHelper$1.java</exclude>
-                        </excludes>
+                        <useFile>false</useFile>
+                        <includes>
+                            <include>**/*Test.java</include>
+                        </includes>
                         <systemProperties>
                             <property>
                                 <name>org.esa.beam.testdata.out</name>
@@ -468,7 +466,6 @@
                         </systemProperties>
                         <argLine>-Xmx512M -enableassertions</argLine>
                     </configuration>
-                    
                 </plugin>
 
                 <plugin>
@@ -525,7 +522,7 @@
                 </configuration>
             </plugin>
         </plugins>
-        
+
     </build>
 
     <reporting>
