@@ -128,12 +128,13 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
     private double[][] sensorPosition = null; // sensor position for all range lines
     private double[][] sensorVelocity = null; // sensor velocity for all range lines
-    private double[] xPosWarpCoef = null; // warp polynomial coefficients for interpolating sensor xPos
-    private double[] yPosWarpCoef = null; // warp polynomial coefficients for interpolating sensor yPos
-    private double[] zPosWarpCoef = null; // warp polynomial coefficients for interpolating sensor zPos
-    private double[] xVelWarpCoef = null; // warp polynomial coefficients for interpolating sensor xVel
-    private double[] yVelWarpCoef = null; // warp polynomial coefficients for interpolating sensor yVel
-    private double[] zVelWarpCoef = null; // warp polynomial coefficients for interpolating sensor zVel
+    private double[] timeArray = null;
+    private double[] xPosArray = null;
+    private double[] yPosArray = null;
+    private double[] zPosArray = null;
+    private double[] xVelArray = null;
+    private double[] yVelArray = null;
+    private double[] zVelArray = null;
 
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
@@ -578,16 +579,15 @@ public final class RangeDopplerGeocodingOp extends Operator {
      */
     private void computeSensorPositionsAndVelocities() {
 
-        final int warpPolynomialOrder = 3;
         final int numVerctors = orbitStateVectors.length;
 
-        final double[] timeArray = new double[numVerctors];
-        final double[] xPosArray = new double[numVerctors];
-        final double[] yPosArray = new double[numVerctors];
-        final double[] zPosArray = new double[numVerctors];
-        final double[] xVelArray = new double[numVerctors];
-        final double[] yVelArray = new double[numVerctors];
-        final double[] zVelArray = new double[numVerctors];
+        timeArray = new double[numVerctors];
+        xPosArray = new double[numVerctors];
+        yPosArray = new double[numVerctors];
+        zPosArray = new double[numVerctors];
+        xVelArray = new double[numVerctors];
+        yVelArray = new double[numVerctors];
+        zVelArray = new double[numVerctors];
 
         for (int i = 0; i < numVerctors; i++) {
             timeArray[i] = orbitStateVectors[i].time.getMJD();
@@ -599,23 +599,17 @@ public final class RangeDopplerGeocodingOp extends Operator {
             zVelArray[i] = orbitStateVectors[i].z_vel / 100000.0; // 10^-5 m/s to m/s
         }
 
-        xPosWarpCoef = computeWarpPolynomial(timeArray, xPosArray, warpPolynomialOrder);
-        yPosWarpCoef = computeWarpPolynomial(timeArray, yPosArray, warpPolynomialOrder);
-        zPosWarpCoef = computeWarpPolynomial(timeArray, zPosArray, warpPolynomialOrder);
-        xVelWarpCoef = computeWarpPolynomial(timeArray, xVelArray, warpPolynomialOrder);
-        yVelWarpCoef = computeWarpPolynomial(timeArray, yVelArray, warpPolynomialOrder);
-        zVelWarpCoef = computeWarpPolynomial(timeArray, zVelArray, warpPolynomialOrder);
-
+        // Lagrange polynomial interpolation
         sensorPosition = new double[sourceImageHeight][3]; // xPos, yPos, zPos
         sensorVelocity = new double[sourceImageHeight][3]; // xVel, yVel, zVel
         for (int i = 0; i < sourceImageHeight; i++) {
             final double time = firstLineUTC + i*lineTimeInterval; // zero Doppler time (in days) for each range line
-            sensorPosition[i][0] = getInterpolatedData(xPosWarpCoef, time);
-            sensorPosition[i][1] = getInterpolatedData(yPosWarpCoef, time);
-            sensorPosition[i][2] = getInterpolatedData(zPosWarpCoef, time);
-            sensorVelocity[i][0] = getInterpolatedData(xVelWarpCoef, time);
-            sensorVelocity[i][1] = getInterpolatedData(yVelWarpCoef, time);
-            sensorVelocity[i][2] = getInterpolatedData(zVelWarpCoef, time);
+            sensorPosition[i][0] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, xPosArray, time);
+            sensorPosition[i][1] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, yPosArray, time);
+            sensorPosition[i][2] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, zPosArray, time);
+            sensorVelocity[i][0] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, xVelArray, time);
+            sensorVelocity[i][1] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, yVelArray, time);
+            sensorVelocity[i][2] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, zVelArray, time);
         }
     }
 
@@ -633,19 +627,6 @@ public final class RangeDopplerGeocodingOp extends Operator {
         final Matrix x = A.solve(b);
         return x.getColumnPackedCopy();
     }
-
-    /**
-     * Get the interpolated data using warp polynomial for a given time.
-     * @param warpCoef The warp polynomial coefficients.
-     * @param time The given time in days.
-     * @return The interpolated data.
-     */
-    private static double getInterpolatedData(double[] warpCoef, double time) {
-        final double time2 = time*time;
-        final double time3 = time*time2;
-        return warpCoef[0] + warpCoef[1]*time + warpCoef[2]*time2 + warpCoef[3]*time3;
-    }
-
 
     /**
      * Called by the framework in order to compute a tile for the given target band.
@@ -819,9 +800,10 @@ public final class RangeDopplerGeocodingOp extends Operator {
      */
     private double computeSlantRangeDistance(double[] earthPoint, double time) {
 
-        final double sensorXPos = getInterpolatedData(xPosWarpCoef, time);
-        final double sensorYPos = getInterpolatedData(yPosWarpCoef, time);
-        final double sensorZPos = getInterpolatedData(zPosWarpCoef, time);
+        final double sensorXPos = MathUtils.lagrangeInterpolatingPolynomial(timeArray, xPosArray, time);
+        final double sensorYPos = MathUtils.lagrangeInterpolatingPolynomial(timeArray, yPosArray, time);
+        final double sensorZPos = MathUtils.lagrangeInterpolatingPolynomial(timeArray, zPosArray, time);
+
         final double xDiff = sensorXPos - earthPoint[0];
         final double yDiff = sensorYPos - earthPoint[1];
         final double zDiff = sensorZPos - earthPoint[2];
@@ -895,7 +877,6 @@ public final class RangeDopplerGeocodingOp extends Operator {
      */
     private double getPixelValue(double azimuthIndex, double rangeIndex) throws IOException {
 
-        // todo here bilinear interpolation is used, need other interpolation method?
         if (imgResamplingMethod.contains(NEAREST_NEIGHBOUR)) {
             return getPixelValueUsingNearestNeighbourInterp(azimuthIndex, rangeIndex);
         } else if (imgResamplingMethod.contains(BILINEAR)) {
