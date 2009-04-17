@@ -203,4 +203,12 @@ public class OperatorUtils {
 
         targetProduct.setGeoCoding(gc);
     }
+
+    public static void catchOperatorException(String opName, Exception e) throws OperatorException {
+
+        if(e.getMessage() == null)
+            throw new OperatorException(opName + ":" + e.getMessage());
+        else
+            throw new OperatorException(opName + ":" + e.toString());
+    }
 }

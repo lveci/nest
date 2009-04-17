@@ -4,11 +4,9 @@ import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.util.io.BeamFileFilter;
-import org.esa.beam.util.io.FileUtils;
 
 import javax.imageio.ImageIO;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.Locale;
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -76,28 +74,21 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
         if (file == null) {
             return DecodeQualification.UNABLE;
         }
-        final String filename = FileUtils.getFilenameWithoutExtension(file).toUpperCase();
-
 
         final File parentDir = file.getParentFile();
         if (file.isFile() && parentDir.isDirectory()) {
-            final FilenameFilter filter = new FilenameFilter() {
-                public boolean accept(final File dir, final String name) {
-                    return true;//name.contains(constants.getIndicationKey());
-                }
-            };
-            final File[] files = parentDir.listFiles(filter);
-            if (files != null) {
-                return checkProductQualification(file);
-            }
+            return checkProductQualification(file);
         }
         return DecodeQualification.UNABLE;
     }
 
     protected static DecodeQualification checkProductQualification(File file) {
         for(String ext : FORMAT_FILE_EXTENSIONS) {
-            if(!ext.isEmpty() && file.getName().toLowerCase().endsWith(ext.toLowerCase()))
+            if(!ext.isEmpty() && file.getName().toLowerCase().endsWith(ext.toLowerCase())) {
+                if(ext.equalsIgnoreCase("tif") || ext.equalsIgnoreCase("tiff"))
+                    return DecodeQualification.SUITABLE;
                 return DecodeQualification.INTENDED;
+            }
         }
 
         return DecodeQualification.UNABLE;

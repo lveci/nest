@@ -102,7 +102,7 @@
             <initIndex>0</initIndex>
         </toolView>
 
-        <toolView>
+        <!--toolView>
             <id>org.esa.nest.dat.toolviews.worldmap.NestWorldMapToolView</id>
             <class>org.esa.nest.dat.toolviews.worldmap.NestWorldMapToolView</class>
             <title>World Map</title>
@@ -116,7 +116,7 @@
             <initState>HIDDEN</initState>
             <initSide>SOUTH</initSide>
             <initIndex>0</initIndex>
-        </toolView>
+        </toolView-->
     </extension>
 
     <extension point="beam-ui:actions">

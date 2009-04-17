@@ -64,79 +64,83 @@ public class CreateStackOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        if(sourceProduct.length < 2)
-            throw new OperatorException("Please select at least two source products");
-        for(final Product prod : sourceProduct) {
-            if (prod.getGeoCoding() == null) {
-                throw new OperatorException(
-                        MessageFormat.format("Product ''{0}'' has no geo-coding.", prod.getName()));
-            }
-        }
-        
-        if(masterBandNames.length == 0) {
-            final Product defaultProd = sourceProduct[0];
-            if(defaultProd != null) {
-                final Band defaultBand = defaultProd.getBandAt(0);
-                if(defaultBand != null) {
-                    if(defaultBand.getUnit().equals(Unit.REAL))
-                        masterBandNames = new String[] { defaultProd.getBandAt(0).getName(),
-                                                         defaultProd.getBandAt(1).getName() };
-                    else
-                        masterBandNames = new String[] { defaultBand.getName() };
+        try {
+            if(sourceProduct.length < 2)
+                throw new OperatorException("Please select at least two source products");
+            for(final Product prod : sourceProduct) {
+                if (prod.getGeoCoding() == null) {
+                    throw new OperatorException(
+                            MessageFormat.format("Product ''{0}'' has no geo-coding.", prod.getName()));
                 }
             }
+
             if(masterBandNames.length == 0) {
+                final Product defaultProd = sourceProduct[0];
+                if(defaultProd != null) {
+                    final Band defaultBand = defaultProd.getBandAt(0);
+                    if(defaultBand != null) {
+                        if(defaultBand.getUnit() != null && defaultBand.getUnit().equals(Unit.REAL))
+                            masterBandNames = new String[] { defaultProd.getBandAt(0).getName(),
+                                                             defaultProd.getBandAt(1).getName() };
+                        else
+                            masterBandNames = new String[] { defaultBand.getName() };
+                    }
+                }
+                if(masterBandNames.length == 0) {
+                    targetProduct = OperatorUtils.createDummyTargetProduct();
+                    return;
+                }
+            }
+
+            masterProduct = getMasterProduct(masterBandNames[0]);
+
+            final Band[] slaveBandList = getSlaveBands();
+            if(masterProduct == null || slaveBandList.length == 0 || slaveBandList[0] == null) {
                 targetProduct = OperatorUtils.createDummyTargetProduct();
                 return;
             }
-        }
 
-        masterProduct = getMasterProduct(masterBandNames[0]);
+            targetProduct = new Product(masterProduct.getName(),
+                                        masterProduct.getProductType(),
+                                        masterProduct.getSceneRasterWidth(),
+                                        masterProduct.getSceneRasterHeight());
 
-        final Band[] slaveBandList = getSlaveBands();
-        if(masterProduct == null || slaveBandList.length == 0 || slaveBandList[0] == null) {
-            targetProduct = OperatorUtils.createDummyTargetProduct();
-            return;
-        }
+            OperatorUtils.copyProductNodes(masterProduct, targetProduct);
 
-        targetProduct = new Product(masterProduct.getName(),
-                                    masterProduct.getProductType(),
-                                    masterProduct.getSceneRasterWidth(),
-                                    masterProduct.getSceneRasterHeight());
-
-        OperatorUtils.copyProductNodes(masterProduct, targetProduct);
-
-        String suffix = "_mst";
-        // add master bands first
-        for (final Band srcBand : slaveBandList) {
-            if(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1])) {
-                suffix = "_mst_" + getBandTimeStamp(srcBand.getProduct());
-                final Band targetBand = targetProduct.addBand(srcBand.getName() + suffix, srcBand.getDataType());
-                ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
-                sourceRasterMap.put(targetBand, srcBand);
-            }
-        }
-        // then add slave bands
-        int cnt = 1;
-        for (final Band srcBand : slaveBandList) {
-            if(!(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1]))) {
-                if(srcBand.getUnit() != null && srcBand.getUnit().equals(Unit.IMAGINARY)) {
-                } else {
-                    suffix = "_slv" + cnt++ + "_" + getBandTimeStamp(srcBand.getProduct());
+            String suffix = "_mst";
+            // add master bands first
+            for (final Band srcBand : slaveBandList) {
+                if(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1])) {
+                    suffix = "_mst_" + getBandTimeStamp(srcBand.getProduct());
+                    final Band targetBand = targetProduct.addBand(srcBand.getName() + suffix, srcBand.getDataType());
+                    ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
+                    sourceRasterMap.put(targetBand, srcBand);
                 }
-                final Band targetBand = targetProduct.addBand(srcBand.getName() + suffix, srcBand.getDataType());
-                ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
-                sourceRasterMap.put(targetBand, srcBand);
             }
-        }
+            // then add slave bands
+            int cnt = 1;
+            for (final Band srcBand : slaveBandList) {
+                if(!(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1]))) {
+                    if(srcBand.getUnit() != null && srcBand.getUnit().equals(Unit.IMAGINARY)) {
+                    } else {
+                        suffix = "_slv" + cnt++ + "_" + getBandTimeStamp(srcBand.getProduct());
+                    }
+                    final Band targetBand = targetProduct.addBand(srcBand.getName() + suffix, srcBand.getDataType());
+                    ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
+                    sourceRasterMap.put(targetBand, srcBand);
+                }
+            }
 
-        // copy slave abstracted metadata
-        copySlaveMetadata();
+            // copy slave abstracted metadata
+            copySlaveMetadata();
 
-        // copy GCPs if found to master band
-        final ProductNodeGroup<Pin> masterGCPgroup = masterProduct.getGcpGroup();
-        if (masterGCPgroup.getNodeCount() > 0) {
-            OperatorUtils.copyGCPsToTarget(masterGCPgroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
+            // copy GCPs if found to master band
+            final ProductNodeGroup<Pin> masterGCPgroup = masterProduct.getGcpGroup();
+            if (masterGCPgroup.getNodeCount() > 0) {
+                OperatorUtils.copyGCPsToTarget(masterGCPgroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
+            }
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
@@ -191,26 +195,25 @@ public class CreateStackOp extends Operator {
         bandList.add(masterBands[0]);
 
         final String unit = masterBands[0].getUnit();
-        if(unit == null) {
-            throw new OperatorException("band " + masterBands[0].getName() + " requires a unit");
-        } else if (unit.contains(Unit.PHASE)) {
-            throw new OperatorException("Phase band should not be selected for co-registration");
-        } else if (unit.contains(Unit.IMAGINARY)) {
-            throw new OperatorException("Real and imaginary master bands should be selected in pairs");
-        } else if (unit.contains(Unit.REAL)) {
-            if(masterBandNames.length < 2) {
+        if(unit != null) {
+            if (unit.contains(Unit.PHASE)) {
+                throw new OperatorException("Phase band should not be selected for co-registration");
+            } else if (unit.contains(Unit.IMAGINARY)) {
                 throw new OperatorException("Real and imaginary master bands should be selected in pairs");
-            } else {
-                final Product prod = getMasterProduct(masterBandNames[1]);
-                if(prod != masterProduct) {
-                    throw new OperatorException("Please select master bands from the same product");
+            } else if (unit.contains(Unit.REAL)) {
+                if(masterBandNames.length < 2) {
+                    throw new OperatorException("Real and imaginary master bands should be selected in pairs");
+                } else {
+                    final Product prod = getMasterProduct(masterBandNames[1]);
+                    if(prod != masterProduct) {
+                        throw new OperatorException("Please select master bands from the same product");
+                    }
+                    masterBands[1] = masterProduct.getBand(getBandName(masterBandNames[1]));
+                    if(!masterBands[1].getUnit().equals(Unit.IMAGINARY))
+                        throw new OperatorException("For complex products select a real and an imaginary band");
+                    bandList.add(masterBands[1]);
                 }
-                masterBands[1] = masterProduct.getBand(getBandName(masterBandNames[1]));
-                if(!masterBands[1].getUnit().equals(Unit.IMAGINARY))
-                    throw new OperatorException("For complex products select a real and an imaginary band");
-                bandList.add(masterBands[1]);
             }
-
         }
 
         // add slave bands
@@ -239,28 +242,30 @@ public class CreateStackOp extends Operator {
                 final Product prod = getProduct(productName);
                 final Band band = prod.getBand(bandName);
                 final String bandUnit = band.getUnit();
-                if(bandUnit == null) {
-                    throw new OperatorException("band " + bandName + " requires a unit");
-                } else if (bandUnit.contains(Unit.PHASE)) {
-                    throw new OperatorException("Phase band should not be selected for co-registration");
-                } else if (bandUnit.contains(Unit.IMAGINARY)) {
-                    throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
-                } else if (bandUnit.contains(Unit.REAL)) {
-                    if (slaveBandNames.length < 2) {
+                if(bandUnit != null) {
+                    if (bandUnit.contains(Unit.PHASE)) {
+                        throw new OperatorException("Phase band should not be selected for co-registration");
+                    } else if (bandUnit.contains(Unit.IMAGINARY)) {
                         throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
+                    } else if (bandUnit.contains(Unit.REAL)) {
+                        if (slaveBandNames.length < 2) {
+                            throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
+                        }
+                        final String nextBandName = getBandName(slaveBandNames[i+1]);
+                        final String nextBandProdName = getProductName(slaveBandNames[i+1]);
+                        if (!nextBandProdName.contains(productName)){
+                            throw new OperatorException("Real and imaginary slave bands should be selected from the same product in pairs");
+                        }
+                        final Band nextBand = prod.getBand(nextBandName);
+                        if (!nextBand.getUnit().contains(Unit.IMAGINARY)) {
+                            throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
+                        }
+                        bandList.add(band);
+                        bandList.add(nextBand);
+                        i++;
+                    } else {
+                        bandList.add(band);
                     }
-                    final String nextBandName = getBandName(slaveBandNames[i+1]);
-                    final String nextBandProdName = getProductName(slaveBandNames[i+1]);
-                    if (!nextBandProdName.contains(productName)){
-                        throw new OperatorException("Real and imaginary slave bands should be selected from the same product in pairs");
-                    }
-                    final Band nextBand = prod.getBand(nextBandName);
-                    if (!nextBand.getUnit().contains(Unit.IMAGINARY)) {
-                        throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
-                    }
-                    bandList.add(band);
-                    bandList.add(nextBand);
-                    i++;
                 } else {
                     bandList.add(band);
                 }
