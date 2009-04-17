@@ -55,6 +55,14 @@
             <parent>TerrainCorrectionGroup</parent>
         </action>
 
+        <!--action>
+            <id>ForwardTerrainCorrectionOp</id>
+            <class>org.esa.nest.dat.ForwardTerrainCorrectionOpAction</class>
+            <text>Forward Method</text>
+            <shortDescr>Terrain Correction Forward Method</shortDescr>
+            <parent>TerrainCorrectionGroup</parent>
+        </action-->
+
         <action>
             <id>createElevationOp</id>
             <class>org.esa.nest.dat.CreateElevationOpAction</class>
@@ -75,13 +83,13 @@
             <placeAfter>createElevationOp</placeAfter>
         </action>
 
-        <action>
+        <!--action>
             <id>mapProjectionOp</id>
             <class>org.esa.nest.dat.MapProjectionOpAction</class>
             <text>Map Projection Op</text>
             <shortDescr>Map projects the product</shortDescr>
             <parent>geometry</parent>
-        </action>
+        </action-->
 
     </extension>
 
