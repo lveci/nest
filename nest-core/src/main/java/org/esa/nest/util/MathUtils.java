@@ -179,7 +179,7 @@ public final class MathUtils
      * @param desiredPos Desired position.
      * @return The interpolated sample value.
      */
-    public static double lagrangeInterpolatingPolynomial (double pos[], double val[], double desiredPos)  {
+    public static double lagrangeInterpolatingPolynomial (final double pos[], final double val[], final double desiredPos)  {
 
         if (pos.length != val.length) {
             throw new OperatorException("Incorrect array length");
@@ -204,7 +204,7 @@ public final class MathUtils
      * @param warpPolynomialOrder The warp polynomial order.
      * @return The Vandermonde matrix.
      */
-    public static Matrix createVandermondeMatrix(double[] d, int warpPolynomialOrder) {
+    public static Matrix createVandermondeMatrix(final double[] d, final int warpPolynomialOrder) {
 
         final int n = d.length;
         final double[][] array = new double[n][warpPolynomialOrder + 1];
@@ -221,7 +221,7 @@ public final class MathUtils
      * @param x The input variable.
      * @return The sinc function value.
      */
-    public static double sinc(double x) {
+    public static double sinc(final double x) {
 
         if (Double.compare(x, 0.0) == 0) {
             return 1.0;
@@ -236,10 +236,10 @@ public final class MathUtils
      * @param windowLength The window length.
      * @return The Hanning window value.
      */
-    public static double hanning(double x, int windowLength) {
+    public static double hanning(final double x, final int windowLength) {
 
         if (x >= -0.5*windowLength && x <= 0.5*windowLength) {
-            return 0.5*(1.0 + Math.cos(2.0*Math.PI*x/(windowLength + 1)));
+            return 0.5*(1.0 + Math.cos(Constants.TWO_PI*x/(windowLength + 1)));
         } else {
             return 0.0;
         }

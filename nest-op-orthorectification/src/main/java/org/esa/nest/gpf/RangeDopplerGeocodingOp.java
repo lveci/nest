@@ -110,7 +110,6 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private double firstLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
     private double demNoDataValue = 0.0; // no data value for DEM
-    private double srcBandNoDataValue = 0.0; // no data value for source band
     private double firstNearLat = 0.0;
     private double firstFarLat = 0.0;
     private double lastNearLat = 0.0;
@@ -132,9 +131,6 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private double[] xPosArray = null;
     private double[] yPosArray = null;
     private double[] zPosArray = null;
-    private double[] xVelArray = null;
-    private double[] yVelArray = null;
-    private double[] zVelArray = null;
 
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
@@ -200,7 +196,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
             computeSensorPositionsAndVelocities();
 
         } catch(Exception e) {
-            throw new OperatorException(e);
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
@@ -210,11 +206,6 @@ public final class RangeDopplerGeocodingOp extends Operator {
      */
     private void getSRGRFlag() throws Exception {
         srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
-        /*
-        if (!srgrFlag) {
-            throw new OperatorException("Slant range image currently cannot be handled.");
-        }
-        */
     }
 
     /**
@@ -522,25 +513,25 @@ public final class RangeDopplerGeocodingOp extends Operator {
      */
     private void addGeoCoding() {
 
-        int gridWidth = 2;
-        int gridHeight = 2;
+        final int gridWidth = 2;
+        final int gridHeight = 2;
 
-        float subSamplingX = targetImageWidth;
-        float subSamplingY = targetImageHeight;
+        final float subSamplingX = targetImageWidth;
+        final float subSamplingY = targetImageHeight;
 
-        float[] latTiePoints = {(float)latMax, (float)latMax, (float)latMin, (float)latMin};
-        float[] lonTiePoints = {(float)lonMin, (float)lonMax, (float)lonMin, (float)lonMax};
+        final float[] latTiePoints = {(float)latMax, (float)latMax, (float)latMin, (float)latMin};
+        final float[] lonTiePoints = {(float)lonMin, (float)lonMax, (float)lonMin, (float)lonMax};
 
-        TiePointGrid latGrid = new TiePointGrid(
+        final TiePointGrid latGrid = new TiePointGrid(
                 "latitude", gridWidth, gridHeight, 0.0f, 0.0f, subSamplingX, subSamplingY, latTiePoints);
 
-        TiePointGrid lonGrid = new TiePointGrid(
+        final TiePointGrid lonGrid = new TiePointGrid(
                 "longitude", gridWidth, gridHeight, 0.0f, 0.0f, subSamplingX, subSamplingY, lonTiePoints);
 
         targetProduct.addTiePointGrid(latGrid);
         targetProduct.addTiePointGrid(lonGrid);
 
-        TiePointGeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
+        final TiePointGeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
         targetProduct.setGeoCoding(gc);
     }
 
@@ -585,9 +576,9 @@ public final class RangeDopplerGeocodingOp extends Operator {
         xPosArray = new double[numVerctors];
         yPosArray = new double[numVerctors];
         zPosArray = new double[numVerctors];
-        xVelArray = new double[numVerctors];
-        yVelArray = new double[numVerctors];
-        zVelArray = new double[numVerctors];
+        final double[] xVelArray = new double[numVerctors];
+        final double[] yVelArray = new double[numVerctors];
+        final double[] zVelArray = new double[numVerctors];
 
         for (int i = 0; i < numVerctors; i++) {
             timeArray[i] = orbitStateVectors[i].time.getMJD();
@@ -666,7 +657,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
             sourceBand = sourceProduct.getBand(srcBandNames[0]);
             sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
         }
-        srcBandNoDataValue = sourceBand.getNoDataValue();
+        final double srcBandNoDataValue = sourceBand.getNoDataValue();
 
         try {
             final ProductData trgData = targetTile.getDataBuffer();
@@ -707,7 +698,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
                 }
             }
         } catch(Exception e) {
-            throw new OperatorException(e);
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
@@ -716,7 +707,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @param geoPos The latitude and longitude in degrees.
      * @return The elevation in meter.
      */
-    private double getLocalElevation(GeoPos geoPos) {
+    private double getLocalElevation(final GeoPos geoPos) {
         double alt;
         try {
             alt = dem.getElevation(geoPos);
@@ -732,7 +723,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @return The zero Doppler time in days if it is found, -1 otherwise.
      * @throws OperatorException The operator exception.
      */
-    private double getEarthPointZeroDopplerTime(double[] earthPoint) throws OperatorException {
+    private double getEarthPointZeroDopplerTime(final double[] earthPoint) throws OperatorException {
 
         // binary search is used in finding the zero doppler time
         int lowerBound = 0;
@@ -775,7 +766,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @param earthPoint The earth point in xyz coordinate.
      * @return The Doppler frequency in Hz.
      */
-    private double getDopplerFrequency(int y, double[] earthPoint) {
+    private double getDopplerFrequency(final int y, final double[] earthPoint) {
 
         if (y < 0 || y > sourceImageHeight - 1) {
             throw new OperatorException("Invalid range line index: " + y);
@@ -798,7 +789,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @param time The given time in days.
      * @return The slant range distance in meters.
      */
-    private double computeSlantRangeDistance(double[] earthPoint, double time) {
+    private double computeSlantRangeDistance(final double[] earthPoint, final double time) {
 
         final double sensorXPos = MathUtils.lagrangeInterpolatingPolynomial(timeArray, xPosArray, time);
         final double sensorYPos = MathUtils.lagrangeInterpolatingPolynomial(timeArray, yPosArray, time);
@@ -817,7 +808,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @param slantRange The slant range in meters.
      * @return The range index.
      */
-    private double computeRangeIndex(double zeroDopplerTime, double slantRange) {
+    private double computeRangeIndex(final double zeroDopplerTime, final double slantRange) {
 
         double rangeIndex = 0.0;
 
@@ -847,7 +838,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @param srgrCoeff The SRGR coefficients for converting ground range to slant range.
      * @return The ground range in meters.
      */
-    private static double computeGroundRange(double slantRange, double[] srgrCoeff) {
+    private static double computeGroundRange(final double slantRange, final double[] srgrCoeff) {
 
         // todo Can Newton's method be uaed in find zeros for the 4th order polynomial?
         final double s0 = srgrCoeff[0];
@@ -875,7 +866,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @return The pixel value.
      * @throws IOException from readPixels
      */
-    private double getPixelValue(double azimuthIndex, double rangeIndex) throws IOException {
+    private double getPixelValue(final double azimuthIndex, final double rangeIndex) throws IOException {
 
         if (imgResamplingMethod.contains(NEAREST_NEIGHBOUR)) {
             return getPixelValueUsingNearestNeighbourInterp(azimuthIndex, rangeIndex);
@@ -894,7 +885,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @param rangeIndex The range index for pixel in source image.
      * @return The pixel value.
      */
-    private double getPixelValueUsingNearestNeighbourInterp(double azimuthIndex, double rangeIndex) {
+    private double getPixelValueUsingNearestNeighbourInterp(final double azimuthIndex, final double rangeIndex) {
 
         final int x0 = (int)rangeIndex;
         final int y0 = (int)azimuthIndex;
@@ -925,7 +916,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @param rangeIndex The range index for pixel in source image.
      * @return The pixel value.
      */
-    private double getPixelValueUsingBilinearInterp(double azimuthIndex, double rangeIndex) {
+    private double getPixelValueUsingBilinearInterp(final double azimuthIndex, final double rangeIndex) {
 
         final int x0 = (int)rangeIndex;
         final int y0 = (int)azimuthIndex;
@@ -972,7 +963,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @param rangeIndex The range index for pixel in source image.
      * @return The pixel value.
      */
-    private double getPixelValueUsingBicubicInterp(double azimuthIndex, double rangeIndex) {
+    private double getPixelValueUsingBicubicInterp(final double azimuthIndex, final double rangeIndex) {
 
         final int [] x = new int[4];
         x[1] = (int)rangeIndex;

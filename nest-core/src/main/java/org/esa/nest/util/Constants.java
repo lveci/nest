@@ -10,6 +10,8 @@ public final class Constants
 
     public static final double oneMillion = 1000000.0;
 
+    public static final double TWO_PI = 2.0*Math.PI;
+
     private Constants()
     {
     }
