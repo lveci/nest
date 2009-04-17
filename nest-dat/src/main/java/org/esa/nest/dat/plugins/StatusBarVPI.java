@@ -13,6 +13,7 @@ import javax.swing.event.InternalFrameEvent;
 
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.framework.ui.PixelPositionListener;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.util.PropertyMap;
@@ -114,11 +115,13 @@ public class StatusBarVPI extends AbstractVisatPlugIn {
 
                 dimensionStatusBarItem.setText(_text.toString());
 
-                final String selectedNodeName = _visatApp.getSelectedProductNode().getName();
-                final Band band = prod.getBand(selectedNodeName);
-                if(band != null)
-                    valueStatusBarItem.setText(band.getPixelString(pixelX, pixelY));
-
+                final ProductNode prodNode = _visatApp.getSelectedProductNode();
+                if(prodNode != null) {
+                    final String selectedNodeName = prodNode.getName();
+                    final Band band = prod.getBand(selectedNodeName);
+                    if(band != null)
+                        valueStatusBarItem.setText(band.getPixelString(pixelX, pixelY));
+                }
             } else {
                 dimensionStatusBarItem.setText(_EMPTYSTR);
                 valueStatusBarItem.setText(_EMPTYSTR);

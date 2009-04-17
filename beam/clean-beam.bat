@@ -5,7 +5,6 @@ rmdir /S /Q beam-binning
 rmdir /S /Q beam-bootstrap
 rmdir /S /Q beam-chris-reader
 rmdir /S /Q beam-collocation
-rmdir /S /Q beam-cluster-analysis
 rmdir /S /Q beam-flhmci
 rmdir /S /Q beam-gpf-docgen
 rmdir /S /Q beam-help

@@ -4,12 +4,11 @@ import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.grender.Rendering;
+import com.bc.ceres.binding.ValueContainer;
 
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Rectangle;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A background layer is used to draw a background using a unique {@link java.awt.Paint}.
@@ -59,15 +58,16 @@ public class BackgroundLayer extends Layer {
         }
 
         @Override
-        public Map<String, Object> createConfiguration(LayerContext ctx, Layer layer) {
-            final HashMap<String, Object> configuration = new HashMap<String, Object>();
-            configuration.put("paint", ((BackgroundLayer) layer).getPaint());
-            return configuration;
+        public ValueContainer getConfigurationCopy(LayerContext ctx, Layer layer) {
+            final ValueContainer vc = new ValueContainer();
+            vc.addModel(createDefaultValueModel("paint", ((BackgroundLayer) layer).getPaint()));
+
+            return vc;
         }
 
         @Override
-        public Layer createLayer(LayerContext ctx, Map<String, Object> configuration) {
-            Paint paint = (Paint) configuration.get("paint");
+        public Layer createLayer(LayerContext ctx, ValueContainer configuration) {
+            Paint paint = (Paint) configuration.getValue("paint");
             return new BackgroundLayer(paint);
         }
     }

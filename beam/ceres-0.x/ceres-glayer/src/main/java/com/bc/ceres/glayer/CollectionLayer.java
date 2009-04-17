@@ -1,7 +1,6 @@
 package com.bc.ceres.glayer;
 
-import java.util.Collections;
-import java.util.Map;
+import com.bc.ceres.binding.ValueContainer;
 
 
 /**
@@ -23,7 +22,8 @@ public class CollectionLayer extends Layer {
     }
     
     protected CollectionLayer(Type type, String name) {
-        super(type, name);
+        super(type);
+        setName(name);
     }
 
     @Override
@@ -43,12 +43,12 @@ public class CollectionLayer extends Layer {
         }
 
         @Override
-        public Map<String, Object> createConfiguration(LayerContext ctx, Layer layer) {
-            return Collections.emptyMap();
+        public ValueContainer getConfigurationCopy(LayerContext ctx, Layer layer) {
+            return new ValueContainer();
         }
 
         @Override
-        public Layer createLayer(LayerContext ctx, Map<String, Object> configuration) {
+        public Layer createLayer(LayerContext ctx, ValueContainer configuration) {
             return new CollectionLayer();
         }
     }

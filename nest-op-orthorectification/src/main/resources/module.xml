@@ -75,6 +75,14 @@
             <placeAfter>createElevationOp</placeAfter>
         </action>
 
+        <action>
+            <id>mapProjectionOp</id>
+            <class>org.esa.nest.dat.MapProjectionOpAction</class>
+            <text>Map Projection Op</text>
+            <shortDescr>Map projects the product</shortDescr>
+            <parent>geometry</parent>
+        </action>
+
     </extension>
 
 </module>
