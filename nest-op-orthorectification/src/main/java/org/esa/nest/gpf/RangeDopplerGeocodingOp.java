@@ -546,14 +546,14 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
     /**
      * Update metadata in the target product.
-     * @throws Exception The exception.
+     * @throws OperatorException The exception.
      */
     private void updateTargetProductMetadata() throws OperatorException {
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.srgr_flag, 1);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.isMapProjected, 1);
+        //AbstractMetadata.setAttribute(absTgt, AbstractMetadata.isMapProjected, 1);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetImageHeight);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_lat, latMax);
