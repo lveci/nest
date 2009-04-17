@@ -53,6 +53,7 @@
                     <id>showHomePage</id>
                     <id>about</id>
                     <id>projection</id>
+                    <id>mapProjAction</id>
                     <id>attachPixelGeoCoding</id>
                     <id>detachPixelGeoCoding</id>
                     <id>exportLegendImageFile</id>
