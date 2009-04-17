@@ -173,6 +173,32 @@ public final class MathUtils
     }
 
     /**
+     * Perform Lagrange polynomial based interpolation.
+     * @param pos Position array.
+     * @param val Sample value array.
+     * @param desiredPos Desired position.
+     * @return The interpolated sample value.
+     */
+    public static double lagrangeInterpolatingPolynomial (double pos[], double val[], double desiredPos)  {
+
+        if (pos.length != val.length) {
+            throw new OperatorException("Incorrect array length");
+        }
+
+        double retVal = 0;
+        for (int i = 0; i < pos.length; ++i) {
+            double weight = 1;
+            for (int j = 0; j < pos.length; ++j) {
+                if (j != i) {
+                    weight *= (desiredPos - pos[j]) / (pos[i] - pos[j]);
+                }
+            }
+            retVal += weight * val[i];
+        }
+        return retVal;
+    }
+
+    /**
      * Get Vandermonde matrix constructed from a given array.
      * @param d The given range distance array.
      * @param warpPolynomialOrder The warp polynomial order.
