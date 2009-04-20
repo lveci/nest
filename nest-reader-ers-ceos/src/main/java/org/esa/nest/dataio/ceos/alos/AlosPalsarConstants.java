@@ -20,6 +20,7 @@ public class AlosPalsarConstants implements CEOSConstants {
     final static String PRODUCT_DESCRIPTION_PREFIX = "ALOS PALSAR product ";
 
     final static String SUMMARY_FILE_NAME = "summary.txt";
+    final static String WORKREPORT_FILE_NAME = "workreport";
 
     final static int LEVEL1_0 = 0;
     final static int LEVEL1_1 = 1;

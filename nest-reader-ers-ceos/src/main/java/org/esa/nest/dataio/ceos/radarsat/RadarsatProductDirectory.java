@@ -202,7 +202,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         _volumeDirectoryFile.assignMetadataTo(volMetadata);
         root.addElement(volMetadata);
 
-        addSummaryMetadata(new File(_baseDir, RadarsatConstants.SUMMARY_FILE_NAME), root);
+        addSummaryMetadata(new File(_baseDir, RadarsatConstants.SUMMARY_FILE_NAME), "Summary Information", root);
         addAbstractedMetadataHeader(product, root);
     }
 

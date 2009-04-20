@@ -233,7 +233,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
             imageFile.assignMetadataTo(root, c++);
         }
 
-        addSummaryMetadata(new File(_baseDir, ERSConstants.SUMMARY_FILE_NAME), root);
+        addSummaryMetadata(new File(_baseDir, ERSConstants.SUMMARY_FILE_NAME), "Summary Information", root);
         addAbstractedMetadataHeader(product, root);
     }
 

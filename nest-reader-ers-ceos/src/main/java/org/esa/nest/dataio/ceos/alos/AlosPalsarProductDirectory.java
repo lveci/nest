@@ -127,6 +127,10 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         addTiePointGrids(product);
         addMetaData(product);
 
+        if(product.getGeoCoding() == null) {
+            addGeoCodingFromWorkReport(product);
+        }
+
         return product;
     }
 
@@ -230,6 +234,27 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         return x.getColumnPackedCopy();
     }
 
+    private static void addGeoCodingFromWorkReport(Product product) {
+
+        final MetadataElement workReportElem = product.getMetadataRoot().getElement("Work Report");
+        if(workReportElem != null) {
+
+            final float latUL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftTopLatitude", "0"));
+            final float latUR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightTopLatitude", "0"));
+            final float latLL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftBottomLatitude", "0"));
+            final float latLR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightBottomLatitude", "0"));
+            final float[] latCorners = new float[]{latUL, latUR, latLL, latLR};
+
+            final float lonUL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftTopLongitude", "0"));
+            final float lonUR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightTopLongitude", "0"));
+            final float lonLL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftBottomLongitude", "0"));
+            final float lonLR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightBottomLongitude", "0"));
+            final float[] lonCorners = new float[]{lonUL, lonUR, lonLL, lonLR};
+
+            addGeoCoding(product, latCorners, lonCorners);
+        }
+    }
+
     @Override
     public CEOSImageFile getImageFile(final Band band) throws IOException, IllegalBinaryFormatException {
         return bandImageFileMap.get(band.getName());
@@ -293,7 +318,9 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             imageFile.assignMetadataTo(root, c++);
         }
 
-        addSummaryMetadata(new File(_baseDir, AlosPalsarConstants.SUMMARY_FILE_NAME), root);
+        addSummaryMetadata(new File(_baseDir, AlosPalsarConstants.SUMMARY_FILE_NAME), "Summary Information", root);
+        addSummaryMetadata(new File(_baseDir, AlosPalsarConstants.WORKREPORT_FILE_NAME), "Work Report", root);
+        
         addAbstractedMetadataHeader(product, root);
     }
 

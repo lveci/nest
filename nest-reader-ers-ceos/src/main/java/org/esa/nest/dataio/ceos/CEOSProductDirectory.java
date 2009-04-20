@@ -123,11 +123,12 @@ public abstract class CEOSProductDirectory {
         return AbstractMetadata.parseUTC(endTime);
     }
 
-    protected static void addSummaryMetadata(final File summaryFile, final MetadataElement parent) throws IOException {
+    protected static void addSummaryMetadata(final File summaryFile, final String name, final MetadataElement parent) 
+                                            throws IOException {
         if (!summaryFile.exists())
             return;
 
-        final MetadataElement summaryMetadata = new MetadataElement("Summary Information");
+        final MetadataElement summaryMetadata = new MetadataElement(name);
         final Properties properties = new Properties();
 
         properties.load(new FileInputStream(summaryFile));
