@@ -104,6 +104,9 @@ public class ShapeLayer extends Layer {
 
     public static class Type extends LayerType {
 
+        public static final String PROPERTY_SHAPE_LIST = "shapes";
+        public static final String PROPTERY_SHAPE_TO_MODEL_TRANSFORM = "shapeToModelTransform";
+
         @Override
         public String getName() {
             return "Shape Layer";
@@ -115,20 +118,19 @@ public class ShapeLayer extends Layer {
         }
 
         @Override
-        public Layer createLayer(LayerContext ctx, ValueContainer configuration) {
-            List<Shape> shapes = (List<Shape>) configuration.getValue("shapes");
-            AffineTransform shapeToModelTransform = (AffineTransform) configuration.getValue("shapeToModelTransform");
+        protected Layer createLayerImpl(LayerContext ctx, ValueContainer configuration) {
+            List<Shape> shapes = (List<Shape>) configuration.getValue(PROPERTY_SHAPE_LIST);
+            AffineTransform shapeToModelTransform = (AffineTransform) configuration.getValue(
+                    PROPTERY_SHAPE_TO_MODEL_TRANSFORM);
             return new ShapeLayer(shapes.toArray(new Shape[shapes.size()]), shapeToModelTransform);
         }
 
         @Override
-        public ValueContainer getConfigurationCopy(LayerContext ctx, Layer layer) {
-            ShapeLayer shapeLayer = (ShapeLayer) layer;
-
+        public ValueContainer getConfigurationTemplate() {
             final ValueContainer vc = new ValueContainer();
-            vc.addModel(createDefaultValueModel("shapes", shapeLayer.shapeList));
-            vc.addModel(createDefaultValueModel("shapeToModelTransform",
-                                                shapeLayer.shapeToModelTransform));
+            vc.addModel(createDefaultValueModel(PROPERTY_SHAPE_LIST, List.class));
+            vc.addModel(createDefaultValueModel(PROPTERY_SHAPE_TO_MODEL_TRANSFORM,
+                                                AffineTransform.class));
 
             return vc;
         }
