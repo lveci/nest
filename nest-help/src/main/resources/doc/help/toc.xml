@@ -129,25 +129,34 @@
 	        <tocitem text="Graph Builder Tool" target="graph_builder"/>
 		</tocitem>
 		
-		<tocitem text="Operators">
+		<tocitem text="SAR Operators">
 			<tocitem text="ALOS Palsar Calibration" target="ALOSPALSARCalibrationOp"/>
 			<tocitem text="Apply Orbit Correction" target="ApplyOrbitFileOp"/>
 			<tocitem text="ASAR Calibration" target="ASARCalibrationOp"/>
-			<tocitem text="ASAR Retro-Calibration" target="ASARRetroCalibrationOp"/>
-			<tocitem text="Collocate" target="CollocateOp"/>
-			<tocitem text="Convert Datatype" target="ConvertDatatypeOp"/>
-			<tocitem text="Data Analysis" target="DataAnalysisOp"/>
+			<tocitem text="ASAR Retro-Calibration" target="ASARRetroCalibrationOp"/>			
+			<tocitem text="EM Cluster Analysis" target="clusterAnalysisEM"/>
 			<tocitem text="ERS Calibration" target="ERSCalibrationOp"/>
 			<tocitem text="GCP Selection" target="GCPSelectionOp"/>
-			<tocitem text="Multilook" target="MultilookOp"/>
-			<tocitem text="Over Sample" target="OverSampleOp"/>	
+			<tocitem text="K-Means Cluster Analysis" target="clusterAnalysisKMeans"/>
+			<tocitem text="Multilook" target="MultilookOp"/>			
 			<tocitem text="Principle Component Analysis" target="PCAOp"/>	
-	        <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>
-			<tocitem text="Slant Range to Ground Range" target="SRGROp"/>
-			<tocitem text="Under Sample" target="UnderSampleOp"/>
+	        <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>			
 			<tocitem text="Warp" target="WarpOp"/>
 			<tocitem text="WSS Deburst" target="WSSDeburstOp"/>
 			<tocitem text="WSS Mosaic" target="WSSMosaicOp"/>
+		</tocitem>	
+		<tocitem text="Geometry Operators">
+			<tocitem text="CreateElevation" target="CreateElevationOp"/>
+			<tocitem text="Geolocation Grid Terrain Correction" url="GeolocationGridGeocodingOp"/>
+			<tocitem text="Range Doppler Terrain Correction" url="RangeDopplerGeocodingOp"/>
+			<tocitem text="Slant Range to Ground Range" target="SRGROp"/>
+		</tocitem>	
+		<tocitem text="Utility Operators">
+			<tocitem text="Create Stack" target="CreateStackOp"/>
+			<tocitem text="Convert Datatype" target="ConvertDatatypeOp"/>
+			<tocitem text="Data Analysis" target="DataAnalysisOp"/>
+			<tocitem text="Over Sample" target="OverSampleOp"/>	
+			<tocitem text="Under Sample" target="UnderSampleOp"/>
 		</tocitem>		
 	</tocitem>
 	
