@@ -45,9 +45,9 @@ public class ImageIOReader extends AbstractProductReader {
     protected Product readProductNodesImpl() throws IOException {
         final File inputFile = ReaderUtils.getFileFromInput(getInput());
 
-        imgIOFile = new ImageIOFile(inputFile);
+        imgIOFile = new ImageIOFile(inputFile, ImageIOFile.getIIOReader(inputFile));
 
-        productType = imgIOFile.reader.getFormatName();
+        productType = imgIOFile.getReader().getFormatName();
 
         final Product product = new Product(imgIOFile.getName(),
                                             productType,

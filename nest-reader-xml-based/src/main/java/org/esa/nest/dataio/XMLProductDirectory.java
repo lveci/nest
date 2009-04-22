@@ -54,7 +54,7 @@ public class XMLProductDirectory {
 
     protected void addImageFile(final File file) throws IOException {
         if (file.getName().toUpperCase().endsWith("TIF") && !file.getName().toLowerCase().contains("browse")) {
-            final ImageIOFile img = new ImageIOFile(file);
+            final ImageIOFile img = new ImageIOFile(file, ImageIOFile.getTiffIIOReader(file));
             bandImageFileMap.put(img.getName(), img);
 
            setSceneWidthHeight(img.getSceneWidth(), img.getSceneHeight());

@@ -1,7 +1,7 @@
 package org.esa.nest.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.sun.media.imageioimpl.plugins.tiff.TIFFRenderedImage;
+import com.sun.media.imageioimpl.plugins.tiff.TIFFImageReader;
 import org.esa.beam.framework.datamodel.*;
 
 import java.io.File;
@@ -10,8 +10,6 @@ import java.util.Iterator;
 import java.awt.*;
 import java.awt.image.*;
 import javax.imageio.*;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.ImageInputStream;
 
 /**
@@ -30,20 +28,55 @@ public class ImageIOFile {
     private IndexCoding indexCoding = null;
     private boolean isIndexed = false;
 
-    private ImageInputStream stream;
-    ImageReader reader;
+    private ImageInputStream stream = null;
+    private ImageReader reader = null;
 
-    public ImageIOFile(final File inputFile) throws IOException {
+    public static ImageReader getIIOReader(final File inputFile) throws IOException {
+        final ImageInputStream stream = ImageIO.createImageInputStream(inputFile);
+        if(stream == null)
+            throw new IOException("Unable to open " + inputFile.toString());
+
+        final Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(stream);
+        final ImageReader reader = imageReaders.next();
+
+        if(reader == null)
+            throw new IOException("Unable to open " + inputFile.toString());
+        return reader;
+    }
+
+    public static ImageReader getTiffIIOReader(final File inputFile) throws IOException {
+        final ImageInputStream stream = ImageIO.createImageInputStream(inputFile);
+        if(stream == null)
+            throw new IOException("Unable to open " + inputFile.toString());
+
+        ImageReader reader = null;
+        final Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(stream);
+        while(imageReaders.hasNext()) {
+            final ImageReader iioReader = imageReaders.next();
+            if(iioReader instanceof TIFFImageReader) {
+                reader = iioReader;
+                break;
+            }
+        }
+        if(reader == null)
+            throw new IOException("Unable to open " + inputFile.toString());
+        return reader;
+    }
+
+    public ImageReader getReader() {
+        return reader;
+    }
+
+    public ImageIOFile(final File inputFile, final ImageReader iioReader) throws IOException {
 
         stream = ImageIO.createImageInputStream(inputFile);
         if(stream == null)
             throw new IOException("Unable to open " + inputFile.toString());
 
-        final Iterator iter = ImageIO.getImageReaders(stream);
-        reader = (ImageReader) iter.next();
+        reader = iioReader;
         reader.setInput(stream);
 
-        IIOMetadata iioMetadata = reader.getImageMetadata(0);
+        //IIOMetadata iioMetadata = reader.getImageMetadata(0);
 
         name = inputFile.getName();
         numImages = reader.getNumImages(true);
