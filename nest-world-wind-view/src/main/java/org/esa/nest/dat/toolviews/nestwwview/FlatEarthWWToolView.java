@@ -3,6 +3,9 @@ package org.esa.nest.dat.toolviews.nestwwview;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.Configuration;
+import gov.nasa.worldwind.View;
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.view.FlatOrbitView;
 import gov.nasa.worldwind.view.BasicOrbitView;
 import gov.nasa.worldwind.globes.EarthFlat;
@@ -90,9 +93,24 @@ public class FlatEarthWWToolView extends AbstractToolView {
         mainPane.add(wwjPanel, BorderLayout.CENTER);
     }
 
+    private void gotoProduct(Product product) {
+        if(product == null) return;
+        
+        final View theView = getWwd().getView();     
+        final Position origPos = theView.getEyePosition();
+        final GeoCoding geoCoding = product.getGeoCoding();
+        if(geoCoding != null) {
+            final GeoPos centre = product.getGeoCoding().getGeoPos(new PixelPos(product.getSceneRasterWidth()/2,
+                                                                   product.getSceneRasterHeight()/2), null);
+            theView.setEyePosition(Position.fromDegrees(centre.getLat(), centre.getLon(), origPos.getElevation()));
+        }
+    }
+
     public void setSelectedProduct(Product product) {
         if(productLayer != null)
             productLayer.setSelectedProduct(product);
+
+        gotoProduct(product);
         getWwd().redrawNow();
     }
 
