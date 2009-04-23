@@ -1,11 +1,11 @@
 package org.esa.nest.dataio.terrasarx;
 
+import org.esa.beam.dataio.dimap.FileImageInputStreamExtImpl;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
-import org.esa.beam.dataio.dimap.FileImageInputStreamExtImpl;
-import org.esa.nest.dataio.XMLProductDirectory;
-import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.ImageIOFile;
+import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.dataio.XMLProductDirectory;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.jdom.Element;
