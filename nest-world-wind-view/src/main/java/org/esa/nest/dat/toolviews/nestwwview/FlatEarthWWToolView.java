@@ -1,22 +1,18 @@
 package org.esa.nest.dat.toolviews.nestwwview;
 
 import gov.nasa.worldwind.Model;
-import gov.nasa.worldwind.WorldWind;
-import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.View;
-import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.geom.Angle;
-import gov.nasa.worldwind.view.FlatOrbitView;
-import gov.nasa.worldwind.view.BasicOrbitView;
-import gov.nasa.worldwind.globes.EarthFlat;
-import gov.nasa.worldwind.globes.Earth;
+import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.examples.ClickAndGoSelectListener;
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.globes.EarthFlat;
 import gov.nasa.worldwind.layers.*;
-import gov.nasa.worldwind.layers.Earth.MSVirtualEarthLayer;
 import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
+import gov.nasa.worldwind.layers.Earth.MSVirtualEarthLayer;
 import gov.nasa.worldwind.util.StatusBar;
+import gov.nasa.worldwind.view.FlatOrbitView;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.framework.ui.product.ProductSceneView;

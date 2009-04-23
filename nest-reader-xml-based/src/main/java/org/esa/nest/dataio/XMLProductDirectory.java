@@ -3,16 +3,18 @@ package org.esa.nest.dataio;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
-import org.esa.beam.util.math.MathUtils;
-import org.esa.nest.util.XMLSupport;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
-import org.jdom.Element;
+import org.esa.nest.util.XMLSupport;
 import org.jdom.Attribute;
+import org.jdom.Element;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class represents a product directory.

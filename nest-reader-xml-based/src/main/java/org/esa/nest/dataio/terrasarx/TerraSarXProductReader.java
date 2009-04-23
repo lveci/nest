@@ -7,10 +7,8 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.Debug;
-import org.esa.nest.dataio.ImageIOFile;
 import org.esa.nest.dataio.GenericReader;
-import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
+import org.esa.nest.dataio.ImageIOFile;
 import org.esa.nest.datamodel.Unit;
 
 import javax.imageio.stream.ImageInputStream;

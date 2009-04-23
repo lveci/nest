@@ -3,7 +3,6 @@ package org.esa.nest.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.AbstractProductWriter;
-import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.io.FileUtils;
@@ -17,7 +16,6 @@ import ucar.nc2.NetcdfFileWriteable;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 
 public class NetCDFWriter extends AbstractProductWriter {

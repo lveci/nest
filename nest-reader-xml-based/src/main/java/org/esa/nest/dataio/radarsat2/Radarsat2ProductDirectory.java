@@ -3,9 +3,9 @@ package org.esa.nest.dataio.radarsat2;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
-import org.esa.nest.dataio.XMLProductDirectory;
 import org.esa.nest.dataio.ImageIOFile;
 import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.dataio.XMLProductDirectory;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 
@@ -209,7 +209,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         Guardian.assertNotNull("name", name);
         char[] sortedValidChars = null;
         if (validChars == null) {
-            sortedValidChars = new char[0];
+            sortedValidChars = new char[5];
         } else {
             sortedValidChars = (char[]) validChars.clone();
         }
@@ -425,11 +425,92 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         incidentAngleGrid.setUnit(Unit.DEGREES);
 
         product.addTiePointGrid(incidentAngleGrid);
+
+        addSlantRangeTime(product, imageGenerationParameters);
     }
 
-    private void addSlantRangeTime(final Product product) {
+    private static void addSlantRangeTime(final Product product, final MetadataElement imageGenerationParameters) {
 
-        //SlantRange = s0 + s1(GR - GR0) + s2(GR-GR0)^2 + s3(GRGR0)^3 + s4(GR-GR0)^4;
+        class coefList {
+            double utcSeconds = 0.0;
+            double grOrigin = 0.0;
+            final ArrayList<Double> coefficients = new ArrayList<Double>();
+        }
+
+        final ArrayList<coefList> segmentsArray = new ArrayList<coefList>();
+
+        for(MetadataElement elem : imageGenerationParameters.getElements()) {
+            if(elem.getName().equalsIgnoreCase("slantRangeToGroundRange")) {
+                final coefList coef = new coefList();
+                segmentsArray.add(coef);
+                coef.utcSeconds = getTime(elem, "zeroDopplerAzimuthTime").getMJD() * 24 * 3600;
+                coef.grOrigin = elem.getElement("groundRangeOrigin").getAttributeDouble("groundRangeOrigin", 0);
+
+                final String coeffStr = elem.getAttributeString("groundToSlantRangeCoefficients", "");
+                if(!coeffStr.isEmpty()) {
+                    final StringTokenizer st = new StringTokenizer(coeffStr);
+                    while(st.hasMoreTokens()) {
+                        coef.coefficients.add(Double.parseDouble(st.nextToken()));
+                    }
+                }
+            }
+        }
+
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        final double lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval, 0);
+        final ProductData.UTC startTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time, new ProductData.UTC(0));
+        final double startSeconds = startTime.getMJD() * 24 * 3600;
+        final double pixelSpacing = absRoot.getAttributeDouble(AbstractMetadata.range_spacing, 0);
+
+        final double halfSpeedOfLight = 299792458 / 2.0; // in m/s
+
+        final int gridWidth = 11;
+        final int gridHeight = 11;
+        final int sceneWidth = product.getSceneRasterWidth();
+        final int sceneHeight = product.getSceneRasterHeight();
+        final int subSamplingX = sceneWidth / (gridWidth - 1);
+        final int subSamplingY = sceneHeight / (gridHeight - 1);
+        final float[] rangeDist = new float[gridWidth*gridHeight];
+        final float[] rangeTime = new float[gridWidth*gridHeight];
+
+        final coefList[] segments = segmentsArray.toArray(new coefList[segmentsArray.size()]);
+
+        int k = 0;
+        int c = 0;
+        for (int j = 0; j < gridHeight; j++) {
+            final double time = startSeconds + (j*lineTimeInterval);
+            while(segments[c].utcSeconds < time)
+                ++c;
+
+            final coefList coef = segments[c];
+            final double GR0 = coef.grOrigin;
+            final double s0 = coef.coefficients.get(0);
+            final double s1 = coef.coefficients.get(1);
+            final double s2 = coef.coefficients.get(2);
+            final double s3 = coef.coefficients.get(3);
+            final double s4 = coef.coefficients.get(4);
+
+            for(int i = 0; i < gridWidth; i++) {
+                int x = i*subSamplingX;
+                final double GR = x * pixelSpacing;
+                final double g = GR-GR0;
+                final double g2 = g*g;
+
+                //SlantRange = s0 + s1(GR - GR0) + s2(GR-GR0)^2 + s3(GRGR0)^3 + s4(GR-GR0)^4;
+                rangeDist[k++] = (float)(s0 + s1*g + s2*g2 + s3*g2*g + s4*g2*g2);
+            }
+        }
+
+        // get slant range time in nanoseconds from range distance in meters
+        for(int i = 0; i < rangeDist.length; i++) {
+             rangeTime[i] = (float)(rangeDist[i] / halfSpeedOfLight * 1000000000.0); // in ns
+        }
+
+        final TiePointGrid slantRangeGrid = new TiePointGrid(
+                "slant_range_time", gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, rangeTime);
+
+        product.addTiePointGrid(slantRangeGrid);
+        slantRangeGrid.setUnit(Unit.NANOSECONDS);
     }
 
     public static String getMission() {

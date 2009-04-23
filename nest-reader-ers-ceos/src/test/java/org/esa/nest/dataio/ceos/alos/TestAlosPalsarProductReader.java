@@ -1,10 +1,10 @@
 package org.esa.nest.dataio.ceos.alos;
 
 import junit.framework.TestCase;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.DecodeQualification;
-import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.dataio.ReaderUtils;
 
 import java.io.File;

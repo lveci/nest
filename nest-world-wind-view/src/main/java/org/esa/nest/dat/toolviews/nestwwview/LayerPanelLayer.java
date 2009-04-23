@@ -2,12 +2,13 @@
 package org.esa.nest.dat.toolviews.nestwwview;
 
 import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.examples.util.LayerManagerLayer;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.event.*;
-import gov.nasa.worldwind.layers.*;
+import gov.nasa.worldwind.event.SelectEvent;
+import gov.nasa.worldwind.examples.util.LayerManagerLayer;
+import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.pick.PickedObject;
-import gov.nasa.worldwind.render.*;
+import gov.nasa.worldwind.render.ScreenAnnotation;
 
 import java.awt.*;
 

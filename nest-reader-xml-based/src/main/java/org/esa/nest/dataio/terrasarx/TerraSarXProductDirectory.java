@@ -179,7 +179,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         Guardian.assertNotNull("name", name);
         char[] sortedValidChars = null;
         if (validChars == null) {
-            sortedValidChars = new char[0];
+            sortedValidChars = new char[5];
         } else {
             sortedValidChars = (char[]) validChars.clone();
         }
@@ -213,7 +213,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
                 coordList.add( new CornerCoord(refRow, refCol,
                                                 (float)child.getAttributeDouble("lat", 0),
                                                 (float)child.getAttributeDouble("lon", 0),
-                                                (float)child.getAttributeDouble("rangeTime", 0),
+                                                (float)child.getAttributeDouble("rangeTime", 0) * 1000000000f,
                                                 (float)child.getAttributeDouble("incidenceAngle", 0)) );
 
                 if(refRow > maxRow) maxRow = refRow;

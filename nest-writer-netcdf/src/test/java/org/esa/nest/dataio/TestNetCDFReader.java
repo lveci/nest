@@ -1,14 +1,8 @@
 package org.esa.nest.dataio;
 
 import junit.framework.TestCase;
-import ucar.nc2.Variable;
-import ucar.nc2.Group;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.NetcdfFileWriteable;
-import ucar.nc2.dataset.NetcdfDataset;
 
 import java.io.IOException;
-import java.util.List;
 
 
 /**

@@ -1,45 +1,44 @@
 package org.esa.nest.dat.toolviews.nestwwview;
 
+import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;
-import gov.nasa.worldwind.Configuration;
-import gov.nasa.worldwind.view.FlatOrbitView;
-import gov.nasa.worldwind.view.OrbitView;
-import gov.nasa.worldwind.view.BasicOrbitView;
-import gov.nasa.worldwind.terrain.CompoundElevationModel;
-import gov.nasa.worldwind.terrain.WMSBasicElevationModel;
-import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.wms.Capabilities;
-import gov.nasa.worldwind.wms.CapabilitiesRequest;
-import gov.nasa.worldwind.globes.ElevationModel;
-import gov.nasa.worldwind.globes.EarthFlat;
-import gov.nasa.worldwind.globes.Earth;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.examples.ClickAndGoSelectListener;
 import gov.nasa.worldwind.examples.StatisticsPanel;
 import gov.nasa.worldwind.examples.WMSLayersPanel;
-import gov.nasa.worldwind.layers.CompassLayer;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.globes.Earth;
+import gov.nasa.worldwind.globes.ElevationModel;
+import gov.nasa.worldwind.layers.Earth.MSVirtualEarthLayer;
+import gov.nasa.worldwind.layers.Earth.OpenStreetMapLayer;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.WorldMapLayer;
-import gov.nasa.worldwind.layers.Earth.OpenStreetMapLayer;
-import gov.nasa.worldwind.layers.Earth.MSVirtualEarthLayer;
 import gov.nasa.worldwind.layers.placename.PlaceNameLayer;
-import gov.nasa.worldwind.util.StatusBar;
+import gov.nasa.worldwind.terrain.CompoundElevationModel;
+import gov.nasa.worldwind.terrain.WMSBasicElevationModel;
 import gov.nasa.worldwind.util.Logging;
-import org.esa.beam.framework.datamodel.*;
+import gov.nasa.worldwind.util.StatusBar;
+import gov.nasa.worldwind.view.BasicOrbitView;
+import gov.nasa.worldwind.wms.Capabilities;
+import gov.nasa.worldwind.wms.CapabilitiesRequest;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.framework.ui.product.ProductTreeListener;
 import org.esa.beam.visat.VisatApp;
-import org.xml.sax.SAXException;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -47,20 +46,20 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.io.IOException;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
 
 /**
  * The window displaying the world map.
  *
- * @version $Revision: 1.11 $ $Date: 2009-04-15 16:08:43 $
+ * @version $Revision: 1.12 $ $Date: 2009-04-23 18:04:02 $
  */
 public class NestWWToolView extends AbstractToolView {
 

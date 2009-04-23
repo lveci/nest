@@ -2,8 +2,8 @@ package org.esa.nest.dataio.ceos.radarsat;
 
 
 import junit.framework.TestCase;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.DecodeQualification;
+import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.dataio.ReaderUtils;
 
