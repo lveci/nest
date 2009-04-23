@@ -55,7 +55,9 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         final MetadataElement sceneInfo = productInfo.getElement("sceneInfo");
         final MetadataElement processing = level1Elem.getElement("processing");
         final MetadataElement instrument = level1Elem.getElement("instrument");
-        
+        final MetadataElement platform = level1Elem.getElement("platform");
+        final MetadataElement orbit = platform.getElement("orbit");
+
         MetadataAttribute attrib = generalHeader.getAttribute("fileName");
         if(attrib != null)
             productName = attrib.getData().getElemString();
@@ -153,6 +155,8 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
                     calibrationConstant.getAttributeDouble("calFactor", defInt));
         }
+
+        addOrbitStateVectors(absRoot, orbit);
     }
 
     private static void setFlag(MetadataElement elem, String attribTag, String trueValue,
@@ -388,6 +392,46 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
                 }
             }
         }
+    }
+
+    private static void addOrbitStateVectors(MetadataElement absRoot, MetadataElement orbitInformation) {
+        final MetadataElement orbitVectorListElem = absRoot.getElement(AbstractMetadata.orbit_state_vectors);
+
+        final MetadataElement[] stateVectorElems = orbitInformation.getElements();
+        for(int i=1; i < stateVectorElems.length; ++i) {
+            // first stateVectorElem is orbitHeader therefore skip it
+            addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, stateVectorElems[i], i);
+        }
+
+        // set state vector time
+        if(absRoot.getAttributeUTC(AbstractMetadata.STATE_VECTOR_TIME, new ProductData.UTC(0)).
+                equalElems(new ProductData.UTC(0))) {
+
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
+                getTime(stateVectorElems[1], "timeUTC"));
+        }
+    }
+
+    private static void addVector(String name, MetadataElement orbitVectorListElem,
+                                  MetadataElement srcElem, int num) {
+        final MetadataElement orbitVectorElem = new MetadataElement(name+num);
+
+        orbitVectorElem.setAttributeUTC(AbstractMetadata.orbit_vector_time, getTime(srcElem, "timeUTC"));
+
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_x_pos,
+                srcElem.getAttributeDouble("posX", 0));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_y_pos,
+                srcElem.getAttributeDouble("posY", 0));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_z_pos,
+                srcElem.getAttributeDouble("posZ", 0));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_x_vel,
+                srcElem.getAttributeDouble("velX", 0));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_y_vel,
+                srcElem.getAttributeDouble("velY", 0));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_z_vel,
+                srcElem.getAttributeDouble("velZ", 0));
+
+        orbitVectorListElem.addElement(orbitVectorElem);
     }
 
     ImageInputStream getCosarImageInputStream(final Band band) {

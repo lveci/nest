@@ -133,6 +133,9 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         productName = getMission() +'-'+ productType + '-' + productElem.getAttributeString("productId", defStr);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, productName);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, getMission());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier,
+                generalProcessingInformation.getAttributeString("processingFacility", defStr) +"-"+
+                generalProcessingInformation.getAttributeString("softwareVersion", defStr));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, getTime(generalProcessingInformation, "processingTime"));
 
@@ -163,8 +166,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         final MetadataElement imageAttributes = productElem.getElement("imageAttributes");
         final MetadataElement rasterAttributes = imageAttributes.getElement("rasterAttributes");
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE,
-                rasterAttributes.getAttributeString("dataType", defStr).toUpperCase());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, getDataType(rasterAttributes));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
                 rasterAttributes.getAttributeInt("numberOfLines", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
@@ -234,6 +236,13 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                                     elem.getAttributeString("pole", "").toUpperCase());
             }
         }
+    }
+
+    private static String getDataType(MetadataElement rasterAttributes) {
+        final String dataType = rasterAttributes.getAttributeString("dataType", AbstractMetadata.NO_METADATA_STRING).toUpperCase();
+        if(dataType.contains("COMPLEX"))
+            return "COMPLEX";
+        return "DETECTED";
     }
 
     private static void addOrbitStateVectors(MetadataElement absRoot, MetadataElement orbitInformation) {
