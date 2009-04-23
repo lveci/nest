@@ -228,9 +228,9 @@ public abstract class CEOSProductDirectory {
 
         final ProductData.UTC utcTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time, new ProductData.UTC(0));
         srgrListElem.setAttributeUTC(AbstractMetadata.srgr_coef_time, utcTime);
-        AbstractMetadata.addAbstractedAttribute(absRoot, AbstractMetadata.ground_range_origin,
+        AbstractMetadata.addAbstractedAttribute(srgrListElem, AbstractMetadata.ground_range_origin,
                 ProductData.TYPE_FLOAT64, "m", "Ground Range Origin");
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ground_range_origin, 0.0);
+        AbstractMetadata.setAttribute(srgrListElem, AbstractMetadata.ground_range_origin, 0.0);
 
         addSRGRCoef(srgrListElem, facilityRec,
                 "coefficients of the ground range to slant range conversion polynomial 1");

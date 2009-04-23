@@ -205,7 +205,8 @@ public class OperatorUtils {
     }
 
     public static void catchOperatorException(String opName, Exception e) throws OperatorException {
-
+        if(opName.contains("$"))
+            opName = opName.substring(0, opName.indexOf('$'));
         if(e.getMessage() == null)
             throw new OperatorException(opName + ":" + e.getMessage());
         else
