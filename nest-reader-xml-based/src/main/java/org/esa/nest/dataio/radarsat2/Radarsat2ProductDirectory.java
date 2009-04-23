@@ -187,6 +187,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         getPolarizations(imageAttributes);
 
         addOrbitStateVectors(absRoot, orbitInformation);
+        addSRGRCoefficients(absRoot, imageGenerationParameters);
     }
 
     private static int getFlag(MetadataElement elem, String tag) {
@@ -290,6 +291,40 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         orbitVectorListElem.addElement(orbitVectorElem);
     }
 
+    private static void addSRGRCoefficients(final MetadataElement absRoot, final MetadataElement imageGenerationParameters) {
+        final MetadataElement srgrCoefficientsElem = absRoot.getElement(AbstractMetadata.srgr_coefficients);
+
+        for(MetadataElement elem : imageGenerationParameters.getElements()) {
+            if(elem.getName().equalsIgnoreCase("slantRangeToGroundRange")) {
+                final MetadataElement srgrListElem = new MetadataElement("srgr_coef_list");
+                srgrCoefficientsElem.addElement(srgrListElem);
+
+                final ProductData.UTC utcTime = getTime(elem, "zeroDopplerAzimuthTime");
+                srgrListElem.setAttributeUTC(AbstractMetadata.srgr_coef_time, utcTime);
+
+                final double grOrigin = elem.getElement("groundRangeOrigin").getAttributeDouble("groundRangeOrigin", 0);
+                AbstractMetadata.addAbstractedAttribute(srgrListElem, AbstractMetadata.ground_range_origin,
+                        ProductData.TYPE_FLOAT64, "m", "Ground Range Origin");
+                AbstractMetadata.setAttribute(srgrListElem, AbstractMetadata.ground_range_origin, grOrigin);
+
+                final String coeffStr = elem.getAttributeString("groundToSlantRangeCoefficients", "");
+                if(!coeffStr.isEmpty()) {
+                    final StringTokenizer st = new StringTokenizer(coeffStr);
+                    while(st.hasMoreTokens()) {
+                        final double coefValue = Double.parseDouble(st.nextToken());
+
+                        final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient);
+                        srgrListElem.addElement(coefElem);
+
+                        AbstractMetadata.addAbstractedAttribute(coefElem, AbstractMetadata.srgr_coef,
+                                ProductData.TYPE_FLOAT64, "", "SRGR Coefficient");
+                        AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, coefValue);
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     protected void addGeoCoding(final Product product) {
 
@@ -390,6 +425,11 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         incidentAngleGrid.setUnit(Unit.DEGREES);
 
         product.addTiePointGrid(incidentAngleGrid);
+    }
+
+    private void addSlantRangeTime(final Product product) {
+
+        //SlantRange = s0 + s1(GR - GR0) + s2(GR-GR0)^2 + s3(GRGR0)^3 + s4(GR-GR0)^4;
     }
 
     public static String getMission() {

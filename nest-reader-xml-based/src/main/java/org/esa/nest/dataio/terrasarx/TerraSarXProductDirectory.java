@@ -49,6 +49,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         final MetadataElement level1Elem = root.getElementAt(1);
         final MetadataElement generalHeader = level1Elem.getElement("generalHeader");
         final MetadataElement productInfo = level1Elem.getElement("productInfo");
+        final MetadataElement productSpecific = level1Elem.getElement("productSpecific");
         final MetadataElement missionInfo = productInfo.getElement("missionInfo");
         final MetadataElement productVariantInfo = productInfo.getElement("productVariantInfo");
         final MetadataElement imageDataInfo = productInfo.getElement("imageDataInfo");
@@ -157,6 +158,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         }
 
         addOrbitStateVectors(absRoot, orbit);
+        addSRGRCoefficients(absRoot, productSpecific);
     }
 
     private static void setFlag(MetadataElement elem, String attribTag, String trueValue,
@@ -432,6 +434,35 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
                 srcElem.getAttributeDouble("velZ", 0));
 
         orbitVectorListElem.addElement(orbitVectorElem);
+    }
+
+    private static void addSRGRCoefficients(final MetadataElement absRoot, final MetadataElement productSpecific) {
+        final MetadataElement projectedImageInfo = productSpecific.getElement("projectedImageInfo");
+        if(projectedImageInfo == null) return;
+
+        final MetadataElement slantToGroundRangeProjection = projectedImageInfo.getElement("slantToGroundRangeProjection");
+        final MetadataElement srgrCoefficientsElem = absRoot.getElement(AbstractMetadata.srgr_coefficients);
+
+        final MetadataElement srgrListElem = new MetadataElement("srgr_coef_list");
+        srgrCoefficientsElem.addElement(srgrListElem);
+
+        final ProductData.UTC utcTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time, new ProductData.UTC(0));
+        srgrListElem.setAttributeUTC(AbstractMetadata.srgr_coef_time, utcTime);
+        AbstractMetadata.addAbstractedAttribute(srgrListElem, AbstractMetadata.ground_range_origin,
+                ProductData.TYPE_FLOAT64, "m", "Ground Range Origin");
+        AbstractMetadata.setAttribute(srgrListElem, AbstractMetadata.ground_range_origin, 0.0);
+
+        for (MetadataElement elem : slantToGroundRangeProjection.getElements()) {
+
+            final double coefValue = elem.getAttributeDouble("coefficient", 0);
+
+            final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient);
+            srgrListElem.addElement(coefElem);
+
+            AbstractMetadata.addAbstractedAttribute(coefElem, AbstractMetadata.srgr_coef,
+                    ProductData.TYPE_FLOAT64, "", "SRGR Coefficient");
+            AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, coefValue);
+        }
     }
 
     ImageInputStream getCosarImageInputStream(final Band band) {
