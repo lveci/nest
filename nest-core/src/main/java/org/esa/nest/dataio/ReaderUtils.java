@@ -138,4 +138,24 @@ public class ReaderUtils {
     public static int getTotalSize(Product product) {
         return (int)(product.getRawStorageSize() / (1024.0f * 1024.0f));
     }
+
+    public static void verifyProduct(Product product) throws Exception {
+        if(product == null)
+            throw new Exception("product is null");
+        if(product.getGeoCoding() == null)
+            throw new Exception("geocoding is null");
+        if(product.getMetadataRoot() == null)
+            throw new Exception("metadataroot is null");
+        if(product.getNumBands() == 0)
+            throw new Exception("numbands is zero");
+        if(product.getProductType() == null || product.getProductType().isEmpty())
+            throw new Exception("productType is null");
+        if(product.getStartTime() == null)
+            throw new Exception("startTime is null");
+
+        for(Band b : product.getBands()) {
+            if(b.getUnit() == null || b.getUnit().isEmpty())
+                throw new Exception("band " + b.getName() + " has null unit");
+        }
+    }
 }

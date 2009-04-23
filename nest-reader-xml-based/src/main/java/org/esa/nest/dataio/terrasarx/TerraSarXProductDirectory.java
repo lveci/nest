@@ -253,6 +253,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
     @Override
     protected void addImageFile(final File file) throws IOException {
         if (file.getName().toUpperCase().endsWith("COS")) {
+
             cosarFileList.add(file);
 
             setSceneDimensions();

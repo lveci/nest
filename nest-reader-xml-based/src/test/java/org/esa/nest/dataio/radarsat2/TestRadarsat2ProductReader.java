@@ -1,4 +1,4 @@
-package org.esa.nest.dataio.ceos.ers;
+package org.esa.nest.dataio.radarsat2;
 
 import junit.framework.TestCase;
 import org.esa.beam.framework.dataio.ProductReader;
@@ -9,19 +9,19 @@ import org.esa.nest.dataio.ReaderUtils;
 import java.io.File;
 
 /**
- * Test ERS CEOS Product Reader.
+ * Test Product Reader.
  *
  * @author lveci
  */
-public class TestERSProductReader extends TestCase {
+public class TestRadarsat2ProductReader extends TestCase {
 
-    private ERSProductReaderPlugIn readerPlugin;
+    private Radarsat2ProductReaderPlugIn readerPlugin;
     private ProductReader reader;
 
-    private final static String rootPath = "P:\\nest\\nest\\ESA Data\\RADAR\\ERS_products";
-    private final static String filePath = "P:\\nest\\nest\\ESA Data\\RADAR\\ERS_products\\ERS_VMP_CEOS\\E1_GEC_VMP CEOS_19980811_orbit 17297 frame 2493_UKpaf\\SCENE1\\VDF_DAT.001";
+    private final static String rootPath = "P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat2";
+    private final static String filePath = "P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat2\\Vancouver\\RS2_OK871_PK6636_DK3211_SCNA_20080422_143357_VV_VH_SGF\\product.xml";
 
-    public TestERSProductReader(String name) {
+    public TestRadarsat2ProductReader(String name) {
         super(name);
     }
 
@@ -29,7 +29,7 @@ public class TestERSProductReader extends TestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        readerPlugin = new ERSProductReaderPlugIn();
+        readerPlugin = new Radarsat2ProductReaderPlugIn();
         reader = readerPlugin.createReaderInstance();
     }
 
@@ -62,7 +62,7 @@ public class TestERSProductReader extends TestCase {
 
     private void recurseFolder(File folder) throws Exception {
         for(File file : folder.listFiles()) {
-            if(!file.getName().equalsIgnoreCase("raw") && file.isDirectory()) {
+            if(file.isDirectory()) {
                 recurseFolder(file);
             } else if(readerPlugin.getDecodeQualification(file) == DecodeQualification.INTENDED) {
 

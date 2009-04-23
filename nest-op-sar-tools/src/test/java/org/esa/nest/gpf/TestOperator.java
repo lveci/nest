@@ -3,6 +3,7 @@ package org.esa.nest.gpf;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.dataio.ReaderUtils;
 import junit.framework.TestCase;
 
 /**
@@ -56,23 +57,7 @@ public class TestOperator extends TestCase {
 
 
     public static void verifyProduct(Product product) throws Exception {
-        if(product == null)
-            throwErr("product is null");
-        if(product.getGeoCoding() == null)
-            throwErr("geocoding is null");
-        if(product.getMetadataRoot() == null)
-            throwErr("metadataroot is null");
-        if(product.getNumBands() == 0)
-            throwErr("numbands is zero");
-        if(product.getProductType() == null || product.getProductType().isEmpty())
-            throwErr("productType is null");
-        if(product.getStartTime() == null)
-            throwErr("startTime is null");
-
-        for(Band b : product.getBands()) {
-            if(b.getUnit() == null || b.getUnit().isEmpty())
-                throwErr("band " + b.getName() + " has null unit");    
-        }
+        ReaderUtils.verifyProduct(product);
     }
 
     public static void attributeEquals(MetadataElement elem, String name, double trueValue) throws Exception {

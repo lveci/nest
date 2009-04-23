@@ -226,7 +226,7 @@ public class XMLProductDirectory {
             final ImageIOFile img = bandImageFileMap.get(bandImageFileMap.keySet().iterator().next());
             return ProductData.getTypeString(img.getDataType());
         }
-        return "";
+        return " ";
     }
 
     protected String getProductName() {

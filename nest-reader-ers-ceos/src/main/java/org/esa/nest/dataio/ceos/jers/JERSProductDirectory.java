@@ -252,10 +252,20 @@ class JERSProductDirectory extends CEOSProductDirectory {
                 AbstractMetadata.parseUTC(_leaderFile.getFacilityRecord().getAttributeString(
                         "Time of input state vector used to processed the image")));
 
-        final ProductData.UTC startTime = getUTCScanStartTime(sceneRec);
-        final ProductData.UTC endTime = getUTCScanStopTime(sceneRec);
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, getUTCScanStartTime(sceneRec));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, getUTCScanStopTime(sceneRec));
+        addOrbitStateVectors(absRoot, _leaderFile.getPlatformPositionRecord());
+        
+        ProductData.UTC startTime = getUTCScanStartTime(sceneRec);
+        ProductData.UTC endTime = getUTCScanStopTime(sceneRec);
+        // fix times if not found
+        if(startTime.equalElems(new ProductData.UTC(0))) {
+            startTime = absRoot.getAttributeUTC(AbstractMetadata.STATE_VECTOR_TIME, new ProductData.UTC(0));
+            endTime = startTime;
+            product.setStartTime(startTime);
+            product.setEndTime(endTime);
+        }
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, endTime);
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
                 mapProjRec.getAttributeDouble("1st line 1st pixel geodetic latitude"));
@@ -322,7 +332,6 @@ class JERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
                 sceneRec.getAttributeDouble("Range sampling rate"));
 
-        addOrbitStateVectors(absRoot, _leaderFile.getPlatformPositionRecord());
     }
 
     private int isGroundRange() {

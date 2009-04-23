@@ -40,19 +40,20 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         Band lastRealBand = null;
         String unit;
 
-        final Set keys = bandImageFileMap.keySet();                           // The set of keys in the map.
-        for (Object key : keys) {
+        final Set<String> keys = bandImageFileMap.keySet();                           // The set of keys in the map.
+        for (String key : keys) {
             final ImageIOFile img = bandImageFileMap.get(key);
 
             for(int i=0; i < img.getNumImages(); ++i) {
 
                 if(isSLC) {
                     for(int b=0; b < img.getNumBands(); ++b) {
+                        final String imgName = img.getName().toLowerCase();
                         if(real) {
-                            bandName = "i_" + polarizationMap.get(img.getName());
+                            bandName = "i_" + polarizationMap.get(imgName);
                             unit = Unit.REAL;
                         } else {
-                            bandName = "q_" + polarizationMap.get(img.getName());
+                            bandName = "q_" + polarizationMap.get(imgName);
                             unit = Unit.IMAGINARY;
                         }
 
@@ -67,15 +68,16 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                             lastRealBand = band;
                         else {
                             ReaderUtils.createVirtualIntensityBand(product, lastRealBand, band,
-                                    '_'+polarizationMap.get(img.getName()));
+                                    '_'+polarizationMap.get(imgName));
                             ReaderUtils.createVirtualPhaseBand(product, lastRealBand, band,
-                                    '_'+polarizationMap.get(img.getName()));
+                                    '_'+polarizationMap.get(imgName));
                         }
                         real = !real;
                     }
                 } else {
                     for(int b=0; b < img.getNumBands(); ++b) {
-                        bandName = "Amplitude_" + polarizationMap.get(img.getName());
+                        final String imgName = img.getName().toLowerCase();
+                        bandName = "Amplitude_" + polarizationMap.get(imgName);
                         final Band band = new Band(bandName, img.getDataType(),
                                            img.getSceneWidth(), img.getSceneHeight());
                         band.setUnit(Unit.AMPLITUDE);
@@ -84,7 +86,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                         bandMap.put(band, new ImageIOFile.BandInfo(img, i, b));
 
                         ReaderUtils.createVirtualIntensityBand(product, band,
-                                    '_'+polarizationMap.get(img.getName()));
+                                    '_'+polarizationMap.get(imgName));
                     }
                 }
             }
@@ -182,7 +184,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         // polarizations
         getPolarizations(imageAttributes);
 
-        
+        addOrbitStateVectors(absRoot, orbitInformation);
     }
 
     private static int getFlag(MetadataElement elem, String tag) {
@@ -209,7 +211,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
             sortedValidChars = (char[]) validChars.clone();
         }
         Arrays.sort(sortedValidChars);
-        StringBuilder validName = new StringBuilder(name.length());
+        final StringBuilder validName = new StringBuilder(name.length());
         for (int i = 0; i < name.length(); i++) {
             final char ch = name.charAt(i);
             if (Character.isDigit(ch)) {
@@ -224,14 +226,59 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
     }
 
     private void getPolarizations(MetadataElement imageAttributes) {
-        MetadataElement[] imageAttribElems = imageAttributes.getElements();
+        final MetadataElement[] imageAttribElems = imageAttributes.getElements();
         for(MetadataElement elem : imageAttribElems) {
             if(elem.getName().equals("fullResolutionImageData")) {
 
-                polarizationMap.put(elem.getAttributeString("fullResolutionImageData", ""),
-                                    elem.getAttributeString("pole", ""));
+                polarizationMap.put(elem.getAttributeString("fullResolutionImageData", "").toLowerCase(),
+                                    elem.getAttributeString("pole", "").toUpperCase());
             }
         }
+    }
+
+    private static void addOrbitStateVectors(MetadataElement absRoot, MetadataElement orbitInformation) {
+        final MetadataElement orbitVectorListElem = absRoot.getElement(AbstractMetadata.orbit_state_vectors);
+
+        final MetadataElement[] stateVectorElems = orbitInformation.getElements();
+        for(int i=1; i <= stateVectorElems.length; ++i) {
+            addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, stateVectorElems[i-1], i);
+        }
+
+        // set state vector time
+        if(absRoot.getAttributeUTC(AbstractMetadata.STATE_VECTOR_TIME, new ProductData.UTC(0)).
+                equalElems(new ProductData.UTC(0))) {
+
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
+                getTime(stateVectorElems[0], "timeStamp"));
+        }
+    }
+
+    private static void addVector(String name, MetadataElement orbitVectorListElem,
+                                  MetadataElement srcElem, int num) {
+        final MetadataElement orbitVectorElem = new MetadataElement(name+num);
+
+        orbitVectorElem.setAttributeUTC(AbstractMetadata.orbit_vector_time, getTime(srcElem, "timeStamp"));
+
+        final MetadataElement xpos = srcElem.getElement("xPosition");
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_x_pos,
+                xpos.getAttributeDouble("xPosition", 0));
+        final MetadataElement ypos = srcElem.getElement("yPosition");
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_y_pos,
+                ypos.getAttributeDouble("yPosition", 0));
+        final MetadataElement zpos = srcElem.getElement("zPosition");
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_z_pos,
+                zpos.getAttributeDouble("zPosition", 0));
+        final MetadataElement xvel = srcElem.getElement("xVelocity");
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_x_vel,
+                xvel.getAttributeDouble("xVelocity", 0));
+        final MetadataElement yvel = srcElem.getElement("yVelocity");
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_y_vel,
+                yvel.getAttributeDouble("yVelocity", 0));
+        final MetadataElement zvel = srcElem.getElement("zVelocity");
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_z_vel,
+                zvel.getAttributeDouble("zVelocity", 0));
+
+        orbitVectorListElem.addElement(orbitVectorElem);
     }
 
     @Override

@@ -68,7 +68,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
         layerList.add(productLayer);
 
         final Layer placeNameLayer = layerList.getLayerByName("Place Names");
-        placeNameLayer.setEnabled(false);
+        placeNameLayer.setEnabled(true);
 
         // Add an internal frame listener to VISAT so that we can update our
         // world map window with the information of the currently activated  product scene view.
