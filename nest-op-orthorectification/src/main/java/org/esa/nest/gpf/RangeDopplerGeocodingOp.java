@@ -836,27 +836,49 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * Compute ground range for given slant range.
      * @param slantRange The salnt range in meters.
      * @param srgrCoeff The SRGR coefficients for converting ground range to slant range.
+     *                  Here it is assumed that the polinomial is given by
+     *                  c0 + c1*x + c2*x^2 + ... + cn*x^n, where {c0, c1, ..., cn} are the SRGR coefficients.
      * @return The ground range in meters.
      */
     private static double computeGroundRange(final double slantRange, final double[] srgrCoeff) {
 
         // todo Can Newton's method be uaed in find zeros for the 4th order polynomial?
-        final double s0 = srgrCoeff[0];
-        final double s1 = srgrCoeff[1];
-        final double s2 = srgrCoeff[2];
-        final double s3 = srgrCoeff[3];
-        final double s4 = srgrCoeff[4];
         double x = slantRange;
-        double x2 = x*x;
-        double y = s4*x2*x2 + s3*x2*x + s2*x2 + s1*x + s0 - slantRange;
+        double y = computePolinomialValue(x, srgrCoeff) - slantRange;
         while (Math.abs(y) > 0.0001) {
-
-            final double derivative = 4*s4*x2*x + 3*s3*x2 + 2*s2*x + s1;
+            final double derivative = computePolinomialDerivativeValue(x, srgrCoeff);
             x -= y / derivative;
-            x2 = x*x;
-            y = s4*x2*x2 + s3*x2*x + s2*x2 + s1*x + s0 - slantRange;
+            y = computePolinomialValue(x, srgrCoeff) - slantRange;
         }
         return x;
+    }
+
+    /**
+     * Compute polynomial value.
+     * @param x The variable.
+     * @param srgrCoeff The polynomial coefficients.
+     * @return The function value.
+     */
+    private static double computePolinomialValue(final double x, final double[] srgrCoeff) {
+        double v = 0.0;
+        for (int i = srgrCoeff.length-1; i > 0; i--) {
+            v = (v + srgrCoeff[i])*x;
+        }
+        return v + srgrCoeff[0];
+    }
+
+    /**
+     * Compute polynomial derivative value.
+     * @param x The variable.
+     * @param srgrCoeff The polynomial coefficients.
+     * @return The function derivative value.
+     */
+    private static double computePolinomialDerivativeValue(final double x, final double[] srgrCoeff) {
+        double v = 0.0;
+        for (int i = srgrCoeff.length-1; i > 1; i--) {
+            v = (v + i*srgrCoeff[i])*x;
+        }
+        return v + srgrCoeff[1];
     }
 
     /**
