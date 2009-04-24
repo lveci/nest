@@ -128,9 +128,6 @@ public class ProductLayer extends RenderableLayer {
                                                  Angle.fromDegreesLongitude(geoPos1.getLon()),
                                                  Angle.fromDegreesLongitude(geoPos2.getLon()));
 
-                if (imageTable.contains(name))
-                    removeImage(name);
-
                 final SurfaceImage si = new SurfaceImage(image, sector);
                 si.setOpacity(getOpacity());
                 return si;
@@ -140,6 +137,8 @@ public class ProductLayer extends RenderableLayer {
             public void done() {
 
                 try {
+                    if (imageTable.contains(name))
+                        removeImage(name);
                     final SurfaceImage si = (SurfaceImage) get();
                     addRenderable(si);
                     imageTable.put(name, si);

@@ -2,28 +2,22 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
+import org.esa.beam.framework.dataop.maptransf.MapInfo;
+import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
+import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.framework.dataio.ProductSubsetDef;
-import org.esa.beam.framework.dataop.maptransf.MapInfo;
-import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
-import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.datamodel.Unit;
-import org.esa.nest.gpf.OperatorUtils;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.io.IOException;
 
 /**
@@ -36,13 +30,15 @@ public final class MapProjectionOp extends Operator {
     @SourceProduct(alias="source")
     private Product sourceProduct;
     @TargetProduct
-    private Product targetProduct;
-    private Product projectedProduct;
+    private Product targetProduct = null;
+    private Product projectedProduct = null;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
-    String[] sourceBandNames;
+    private String[] sourceBandNames = null;
 
+    @Parameter(description = "The projection name", defaultValue = IdentityTransformDescriptor.NAME)
+    private String projectionName = IdentityTransformDescriptor.NAME;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -61,15 +57,18 @@ public final class MapProjectionOp extends Operator {
     public void initialize() throws OperatorException {
 
         try {
-            projectedProduct = createSubsampledProduct(sourceProduct, sourceBandNames);
+            projectedProduct = createSubsampledProduct(sourceProduct, sourceBandNames, projectionName);
 
             targetProduct = new Product(sourceProduct.getName(),
                                         sourceProduct.getProductType(),
                                         projectedProduct.getSceneRasterWidth(),
                                         projectedProduct.getSceneRasterHeight());
             ProductUtils.copyMetadata(sourceProduct, targetProduct);
-            targetProduct.setStartTime(sourceProduct.getStartTime());
-            targetProduct.setEndTime(sourceProduct.getEndTime());
+            ProductUtils.copyTiePointGrids(projectedProduct, targetProduct);
+            ProductUtils.copyFlagCodings(projectedProduct, targetProduct);
+            ProductUtils.copyGeoCoding(projectedProduct, targetProduct);
+            targetProduct.setStartTime(projectedProduct.getStartTime());
+            targetProduct.setEndTime(projectedProduct.getEndTime());
 
             for (Band sourceBand : projectedProduct.getBands()) {
                 final Band targetBand = new Band(sourceBand.getName(),
@@ -79,10 +78,37 @@ public final class MapProjectionOp extends Operator {
                 ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
                 targetProduct.addBand(targetBand);
             }
-            
+
+     /*       for (final TiePointGrid sourceGrid : projectedProduct.getTiePointGrids()) {
+                if (sourceGrid.getGeoCoding() != null) {
+                    final Band targetBand = new Band(sourceGrid.getName(),
+                                               sourceGrid.getGeophysicalDataType(),
+                                               targetProduct.getSceneRasterWidth(),
+                                               targetProduct.getSceneRasterHeight());
+                    targetBand.setUnit(sourceGrid.getUnit());
+                    if (sourceGrid.getDescription() != null) {
+                        targetBand.setDescription(sourceGrid.getDescription());
+                    }
+                    if (sourceGrid.isNoDataValueUsed()) {
+                        targetBand.setNoDataValue(sourceGrid.getNoDataValue());
+                    } else {
+                        targetBand.setNoDataValue(0);
+                    }
+                    targetBand.setNoDataValueUsed(true);
+                    targetProduct.addBand(targetBand);
+                }
+            }      */
+
+            updateMetadata(targetProduct);
+
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
+    }
+
+    private static void updateMetadata(Product product) {
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        absRoot.setAttributeInt(AbstractMetadata.isMapProjected, 1);
     }
 
     private static boolean isMapProjected(Product product) {
@@ -92,7 +118,8 @@ public final class MapProjectionOp extends Operator {
         return absRoot != null && absRoot.getAttributeInt("isMapProjected", 0) == 1;
     }
 
-    private static Product createSubsampledProduct(final Product product, String[] selectedBands) throws IOException {
+    private static Product createSubsampledProduct(final Product product, final String[] selectedBands,
+                                                   final String projectionName) throws IOException {
 
         final String quicklookBandName = ProductUtils.findSuitableQuicklookBandName(product);
         final ProductSubsetDef productSubsetDef = new ProductSubsetDef("subset");
@@ -102,7 +129,7 @@ public final class MapProjectionOp extends Operator {
 
         if(!isMapProjected(product)) {
             final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(productSubset,
-                                                MapProjectionRegistry.getProjection(IdentityTransformDescriptor.NAME),
+                                                MapProjectionRegistry.getProjection(projectionName),
                                                 0.0,
                                                 product.getBand(quicklookBandName).getNoDataValue());
             productSubset = productSubset.createProjectedProduct(mapInfo, quicklookBandName, null);
@@ -139,7 +166,7 @@ public final class MapProjectionOp extends Operator {
     public static class Spi extends OperatorSpi {
         public Spi() {
             super(MapProjectionOp.class);
-            //super.setOperatorUI(MapProjectionOpUI.class);
+            super.setOperatorUI(MapProjectionOpUI.class);
         }
     }
 }
