@@ -30,6 +30,7 @@ import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Settings;
+import org.esa.nest.util.Constants;
 
 import java.awt.*;
 import java.io.File;
@@ -55,10 +56,6 @@ public class ASARCalibrationOperator extends Operator {
             sourceProductId="source", label="Source Band")
     String[] sourceBandNames;
 
-    //@Parameter(description = "The calibration factor", interval = "(0, *)", defaultValue = "0",
-    //            label="Calibration Factor")
-    //private double extCalibrationFactor;
-
     @Parameter(description = "The antenne elevation pattern gain auxiliary data file.", label="External Aux File")
     private File externalAuxFile = null;
 
@@ -71,7 +68,7 @@ public class ASARCalibrationOperator extends Operator {
     @Parameter(description = "Create beta0 virtual band", defaultValue = "false", label="Create beta0 virtual band")
     private boolean createBetaBand = false;
 
-    protected MetadataElement abstractedMetadata = null;
+    protected MetadataElement absRoot = null;
 
     private String productType = null;
     private String sampleType = null;
@@ -79,28 +76,29 @@ public class ASARCalibrationOperator extends Operator {
 
     protected TiePointGrid incidenceAngle = null;
     protected TiePointGrid slantRangeTime = null;
-//    private QuadInterpolator slantRangeTimeQuadInterp = null;
-//    private QuadInterpolator incidenceAngleQuadInterp = null;
 
     private boolean extAuxFileAvailableFlag = false;
     private boolean antElevCorrFlag = false;
     private boolean rangeSpreadCompFlag = false;
 
+    private double firstLineUTC = 0.0; // in days
+    private double lineTimeInterval = 0.0; // in days
     private double rangeSpreadingCompPower; // power in range spreading loss compensation calculation
-    private double elevationAngle; // elevation angle for given swath, in degree
-    protected double[] rSat = null; // the distance from satellite to the Earth center for each MPP ADSR record, in m
     private final double[] calibrationFactor = new double[2]; // calibration constants corresponding to 2 bands in product
-    private float[][] newAntPat = null; // antenna pattern for two bands for given swath, in dB
+    private double[] refElevationAngle = null; // reference elevation angles, in degree
     private double[] targetTileNewAntPat = null; // antenna pattern for a given tile, in linear scale
+    private float[][] antennaPatternSingleSwath = null; // antenna pattern for two bands for single swath product, in dB
+    private float[][] antennaPatternWideSwath = null; // antenna patterm for 5 sub swathes for wide swath product, in dB
 
-    protected int swath;
     protected int numMPPRecords; // number of MPP ADSR records
     protected int[] lastLineIndex = null; // the index of the last line covered by each MPP ADSR record
+    protected String swath;
+    private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
 
+    private static final int numOfGains = 201; // number of antenna pattern gain values for a given swath and
+                                               // polarization in the aux file
     private static final double refSlantRange = 800000.0; //  m
-    protected static final double lightSpeed = 299792458.0; //  m / s
-    protected static final double halfLightSpeed = lightSpeed / 2.0;
-    protected static final double halfLightSpeedByRefSlantRange = halfLightSpeed / refSlantRange;
+    protected static final double halfLightSpeedByRefSlantRange = Constants.halfLightSpeed / refSlantRange;
     protected static final double underFlowFloat = 1.0e-30;
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>(2);
 
@@ -128,19 +126,34 @@ public class ASARCalibrationOperator extends Operator {
     public void initialize() throws OperatorException {
         try {
             setExternalAuxFileAvailableFlag();
-            abstractedMetadata = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+
+            absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+
             getProductType();
-            sampleType = abstractedMetadata.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
-            swath = getSwath(abstractedMetadata);
-            getPolarization();
+
+            getSampleType();
+
+            getProductSwath();
+
+            getProductPolarization();
+
             getCalibrationFlags();
-            numMPPRecords = getNumOfRecordsInMainProcParam(sourceProduct);
+
+            numMPPRecords = getNumOfRecordsInMainProcParam(sourceProduct);  //???
+
             getTiePointGridData(sourceProduct);
+
             getCalibrationFactor();
 
             if (!antElevCorrFlag) {
+
+                getFirstLineTime();
+
+                getLineTimeInterval();
+
+                getOrbitStateVectors();
+
                 getAntennaPatternGain();
-                getSatelliteToEarthCenterDistance(sourceProduct);
             }
 
             if (sampleType.contains("COMPLEX")) {
@@ -158,6 +171,7 @@ public class ASARCalibrationOperator extends Operator {
             }
 
             targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 5);
+
         } catch(Exception e) {
             throw new OperatorException(getId() + ": " + e.getMessage());
         }
@@ -178,96 +192,82 @@ public class ASARCalibrationOperator extends Operator {
 
     /**
      * Get Product ID from MPH.
+     * @throws Exception The exceptions.
      */
-    private void getProductType() {
+    private void getProductType() throws Exception {
 
-        final MetadataAttribute productTypeAttr = abstractedMetadata.getAttribute(AbstractMetadata.PRODUCT_TYPE);
-        if (productTypeAttr == null) {
-            throw new OperatorException(AbstractMetadata.PRODUCT_TYPE + " not found");
-        }
-
-        productType = productTypeAttr.getData().getElemString();
-
+        productType = absRoot.getAttributeString(AbstractMetadata.PRODUCT_TYPE);
         if (!productType.equals("ASA_IMP_1P") && !productType.equals("ASA_IMM_1P") &&
-                !productType.equals("ASA_APP_1P") && !productType.equals("ASA_APM_1P") &&
-                !productType.equals("ASA_WSM_1P") && !productType.equals("ASA_IMG_1P") &&
-                !productType.equals("ASA_APG_1P") && !productType.equals("ASA_IMS_1P") &&
-                !productType.equals("ASA_APS_1P")) {
+            !productType.equals("ASA_APP_1P") && !productType.equals("ASA_APM_1P") &&
+            !productType.equals("ASA_WSM_1P") && !productType.equals("ASA_IMG_1P") &&
+            !productType.equals("ASA_APG_1P") && !productType.equals("ASA_IMS_1P") &&
+            !productType.equals("ASA_APS_1P")) {
 
             throw new OperatorException(productType + " is not a valid product ID.");
         }
-        //System.out.println("product type is " + productType);
+    }
+
+    /**
+     * Get sample type.
+     * @throws Exception The exceptions.
+     */
+    private void getSampleType() throws Exception {
+        sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
     }
 
     /**
      * Get product swath.
-     * @param absMetadata
-     * @return
+     * @throws Exception The exceptions.
      */
-    static int getSwath(MetadataElement absMetadata) {
-
-        final MetadataAttribute swathAttr = absMetadata.getAttribute(AbstractMetadata.SWATH);
-        if (swathAttr == null) {
-            throw new OperatorException(AbstractMetadata.SWATH + " not found");
-        }
-
-        int swath = 0;
-        final String swathName = swathAttr.getData().getElemString();
-        if (swathName.contains("IS1")) {
-            swath = 0;
-        } else if (swathName.contains("IS2")) {
-            swath = 1;
-        } else if (swathName.contains("IS3")) {
-            swath = 2;
-        } else if (swathName.contains("IS4")) {
-            swath = 3;
-        } else if (swathName.contains("IS5")) {
-            swath = 4;
-        } else if (swathName.contains("IS6")) {
-            swath = 5;
-        } else if (swathName.contains("IS7")) {
-            swath = 6;
-        } else if (swathName.contains("WS")) {
-            swath = 7;
-        } else {
-            throw new OperatorException("Invalid swath");
-        }
-        //System.out.println("Swath is " + swath);
-
-        return swath;
+    private void getProductSwath() throws Exception {
+        swath = absRoot.getAttributeString(AbstractMetadata.SWATH);
     }
 
     /**
-     * Get polarizations for each band in the product.
+     * Get product polarizations for each band in the product.
+     * @throws Exception The exceptions.
      */
-    private void getPolarization() {
+    private void getProductPolarization() throws Exception {
 
-        MetadataAttribute polarAttr = abstractedMetadata.getAttribute(AbstractMetadata.mds1_tx_rx_polar);
-        if (polarAttr == null) {
-            throw new OperatorException(AbstractMetadata.mds1_tx_rx_polar + " not found");
-        }
-
+        String polarName = absRoot.getAttributeString(AbstractMetadata.mds1_tx_rx_polar);
         mdsPolar[0] = null;
-        String polarName = polarAttr.getData().getElemString();
         if (polarName.contains("HH") || polarName.contains("HV") || polarName.contains("VH") || polarName.contains("VV")) {
             mdsPolar[0] = polarName.toLowerCase();
         }
 
         mdsPolar[1] = null;
-        polarAttr = abstractedMetadata.getAttribute(AbstractMetadata.mds2_tx_rx_polar);
-        if (polarAttr != null) {
-            polarName = polarAttr.getData().getElemString();
-            if (polarName.contains("HH") || polarName.contains("HV") || polarName.contains("VH") || polarName.contains("VV")) {
-                mdsPolar[1] = polarName.toLowerCase();
-            }
+        polarName = absRoot.getAttributeString(AbstractMetadata.mds2_tx_rx_polar);
+        if (polarName.contains("HH") || polarName.contains("HV") || polarName.contains("VH") || polarName.contains("VV")) {
+            mdsPolar[1] = polarName.toLowerCase();
+        }
+    }
+
+    /**
+     * Get antenna elevation correction flag and range spreading compensation flag from Metadata.
+     * @throws Exception The exceptions.
+     */
+    private void getCalibrationFlags() throws Exception {
+
+        if (AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.abs_calibration_flag)) {
+            throw new OperatorException("The product has already been calibrated.");
         }
 
-        //System.out.println("MDS1 polarization is " + mdsPolar[0]);
-        //System.out.println("MDS2 polarization is " + mdsPolar[1]);
+        antElevCorrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.ant_elev_corr_flag);
+        rangeSpreadCompFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.range_spread_comp_flag);
+
+        if (!antElevCorrFlag || !rangeSpreadCompFlag) {
+            if (!productType.equals("ASA_IMS_1P") && !productType.equals("ASA_APS_1P")) {
+                throw new OperatorException("Antenna pattern correction or range spreading compensation" +
+                        " has not been applied to the ground detected source product.");
+            }
+        }
     }
 
     /**
      * Get number of records in Main Processing Params data set.
+     * @param sourceProduct The source prodict.
+     * @return The number of records.
+     * @throws OperatorException The exceptions.
      */
     static int getNumOfRecordsInMainProcParam(Product sourceProduct) throws OperatorException {
 
@@ -289,153 +289,12 @@ public class ASARCalibrationOperator extends Operator {
     }
 
     /**
-     * Get antenna elevation correction flag and range spreading compensation flag from Metadata.
-     * Here it is assumed that the flag values do not change in case that there are multiple records
-     * in the Main Processing Parameters data set.
-     */
-    private void getCalibrationFlags() {
-
-        final MetadataAttribute absCalibrationFlagAttr = abstractedMetadata.getAttribute(AbstractMetadata.abs_calibration_flag);
-        if (absCalibrationFlagAttr == null) {
-            throw new OperatorException(AbstractMetadata.abs_calibration_flag + " not found.");
-        }
-
-        if (absCalibrationFlagAttr.getData().getElemBoolean()) {
-            throw new OperatorException("The product has already been calibrated.");
-        }
-
-        final MetadataAttribute antElevCorrFlagAttr = abstractedMetadata.getAttribute(AbstractMetadata.ant_elev_corr_flag);
-        if (antElevCorrFlagAttr == null) {
-            throw new OperatorException(AbstractMetadata.ant_elev_corr_flag + " not found");
-        }
-        antElevCorrFlag = antElevCorrFlagAttr.getData().getElemBoolean();
-        //System.out.println("Antenna elevation corr flag is " + antElevCorrFlag);
-
-        final MetadataAttribute rangeSpreadCompFlagAttr =
-                abstractedMetadata.getAttribute(AbstractMetadata.range_spread_comp_flag);
-        if (rangeSpreadCompFlagAttr == null) {
-            throw new OperatorException(AbstractMetadata.range_spread_comp_flag + " not found");
-        }
-        rangeSpreadCompFlag = rangeSpreadCompFlagAttr.getData().getElemBoolean();
-        //System.out.println("Range-spreading loss compensation flag is " + rangeSpreadCompFlag);
-
-        if (!antElevCorrFlag || !rangeSpreadCompFlag) {
-            if (!productType.equals("ASA_IMS_1P") && !productType.equals("ASA_APS_1P")) {
-                throw new OperatorException("Antenna pattern correction or range spreading compensation" +
-                        " has not been applied to the ground detected source product.");
-            }
-        }
-    }
-
-    /**
      * Get incidence angle and slant range time tie point grids.
      * @param sourceProduct the source
      */
     private void getTiePointGridData(Product sourceProduct) {
-
         slantRangeTime = OperatorUtils.getSlantRangeTime(sourceProduct);
-//        slantRangeTimeQuadInterp = new QuadInterpolator(slantRangeTime);
-
         incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
-//        incidenceAngleQuadInterp = new QuadInterpolator(incidenceAngle);
-        /*
-        int w = 2000;
-        int h = 2;
-        float[] arrayQ = new float[w*h];
-        slantRangeTimeQuadInterp.getPixelFloats(0,1000,w,h,arrayQ);
-        for (int i = 0; i < w*h; i++) {
-            System.out.print(arrayQ[i] + ",");
-        }
-        System.out.println();
-
-        float[] arrayB = new float[w*h];
-        slantRangeTime.getPixels(0,0,w,h,arrayB);
-        for (int i = 0; i < w*h; i++) {
-            System.out.print(arrayB[i] + ",");
-        }
-        System.out.println();
-
-        incidenceAngleQuadInterp.getPixelFloats(0,0,w,h,arrayQ);
-        incidenceAngle.getPixels(0,0,w,h,arrayB);
-        for (int i = 0; i < w*h; i++) {
-            System.out.print(arrayQ[i] + ",");
-        }
-        System.out.println();
-        for (int i = 0; i < w*h; i++) {
-            System.out.print(arrayB[i] + ",");
-        }
-        System.out.println();
-        */
-    }
-
-    /**
-     * Obtain from auxiliary data the elevation angles for given swath and the antenna elevation
-     * pattern gains for the swath and the polarization of the product.
-     *
-     * @param fileName The auxiliary data file name.
-     * @throws OperatorException
-     */
-    private void getAntennaPatternGainFromAuxData(String fileName) throws OperatorException {
-
-        final EnvisatAuxReader reader = new EnvisatAuxReader();
-
-        try {
-            reader.readProduct(fileName);
-        } catch (IOException e) {
-            throw new OperatorException("Please provide external auxiliary file (ASAR_XCA_AXVIEC) which" +
-                    " is available at http://earth.esa.int/services/auxiliary_data/asar/.");
-        }
-
-        try {
-            final String[] swathName = {"is1", "is2", "is3_ss2", "is4_ss3", "is5_ss4", "is6_ss5", "is7", "ss1"};
-            final String elevAngName = "elev_ang_" + swathName[swath];
-
-            final ProductData elevAngleData = reader.getAuxData(elevAngName);
-            elevationAngle = (double) elevAngleData.getElemFloat();
-            //System.out.println("elevation angle is " + elevationAngle);
-            //System.out.println();
-
-            final String patternName = "pattern_" + swathName[swath];
-            final ProductData patData = reader.getAuxData(patternName);
-            final float[] pattern = ((float[]) patData.getElems());
-
-            if (pattern.length != 804) {
-                throw new OperatorException("Incorrect array length for " + patternName);
-            }
-            /*
-            System.out.print("num values " + pattern.length);
-            System.out.println();
-            for (float val : pattern) {
-                System.out.print(val + ", ");
-            }
-            System.out.println();
-            */
-            final int numOfGains = 201;
-            newAntPat = new float[2][numOfGains];
-            for (int i = 0; i < 2 && mdsPolar[i] != null && mdsPolar[i].length() != 0; i++) {
-                if (mdsPolar[i].contains("hh")) {
-                    System.arraycopy(pattern, 0, newAntPat[i], 0, numOfGains);
-                } else if (mdsPolar[i].contains("vv")) {
-                    System.arraycopy(pattern, numOfGains, newAntPat[i], 0, numOfGains);
-                } else if (mdsPolar[i].contains("hv")) {
-                    System.arraycopy(pattern, 2 * numOfGains, newAntPat[i], 0, numOfGains);
-                } else if (mdsPolar[i].contains("vh")) {
-                    System.arraycopy(pattern, 3 * numOfGains, newAntPat[i], 0, numOfGains);
-                }
-            }
-            /*
-            for (float val : newAntPat[0]) {
-                System.out.print(val + ", ");
-            }
-            System.out.println();
-            for (float val : newAntPat[1]) {
-                System.out.print(val + ", ");
-            }
-            System.out.println();
-            */
-        } catch (IOException e) {
-            throw new OperatorException(e);
-        }
     }
 
     /**
@@ -443,25 +302,18 @@ public class ASARCalibrationOperator extends Operator {
      */
     private void getCalibrationFactor() {
 
-//        if (Double.compare(extCalibrationFactor, 0.0) != 0) {
-
-//            calibrationFactor[0] = extCalibrationFactor;
-//            calibrationFactor[1] = extCalibrationFactor;
-
-//        } else {
-
-            if (extAuxFileAvailableFlag) {
-                getCalibrationFactorFromAuxData(externalAuxFile.getAbsolutePath());
-            } else {
-                getCalibrationFactorFromMetadata();
-            }
-//        }
+        if (extAuxFileAvailableFlag) {
+            getCalibrationFactorFromExternalAuxFile(externalAuxFile.getAbsolutePath());
+        } else {
+            getCalibrationFactorFromMetadata();
+        }
     }
 
     /**
      * Get calibration factor from user specified auxiliary data.
+     * @param auxFilePath The absolute path to the aux file.
      */
-    private void getCalibrationFactorFromAuxData(String auxFilePath) {
+    private void getCalibrationFactorFromExternalAuxFile(String auxFilePath) {
 
         final EnvisatAuxReader reader = new EnvisatAuxReader();
 
@@ -506,7 +358,23 @@ public class ASARCalibrationOperator extends Operator {
                     if (factors.length != numOfSwaths) {
                         throw new OperatorException("Incorrect array length for " + calibrationFactorName);
                     }
-                    calibrationFactor[i] = factors[swath];
+                    if (swath.contains("IS1")) {
+                        calibrationFactor[i] = factors[0];
+                    } else if (swath.contains("IS2")) {
+                        calibrationFactor[i] = factors[1];
+                    } else if (swath.contains("IS3")) {
+                        calibrationFactor[i] = factors[2];
+                    } else if (swath.contains("IS4")) {
+                        calibrationFactor[i] = factors[3];
+                    } else if (swath.contains("IS5")) {
+                        calibrationFactor[i] = factors[4];
+                    } else if (swath.contains("IS6")) {
+                        calibrationFactor[i] = factors[5];
+                    } else if (swath.contains("IS7")) {
+                        calibrationFactor[i] = factors[6];
+                    } else {
+                        throw new OperatorException("Invalid swath");
+                    }
                 }
             }
 
@@ -564,6 +432,30 @@ public class ASARCalibrationOperator extends Operator {
     }
 
     /**
+     * Get orbit state vectors from the abstracted metadata.
+     * @throws Exception The exceptions.
+     */
+    private void getOrbitStateVectors() throws Exception {
+        orbitStateVectors = AbstractMetadata.getOrbitStateVectors(absRoot);
+    }
+
+    /**
+     * Get first line time from the abstracted metadata (in days).
+     * @throws Exception The exceptions.
+     */
+    private void getFirstLineTime() throws Exception {
+        firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
+    }
+
+    /**
+     * Get line time interval from the abstracted metadata (in days).
+     * @throws Exception The exceptions.
+     */
+    private void getLineTimeInterval() throws Exception {
+        lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
+    }
+
+    /**
      * Get antenna pattern from aux file for each band in the product.
      */
     private void getAntennaPatternGain() {
@@ -579,7 +471,17 @@ public class ASARCalibrationOperator extends Operator {
             fileName = getDefaultAuxFile(sourceProduct);
         }
 
-        getAntennaPatternGainFromAuxData(fileName);
+        if (swath.contains("WS")) {
+            refElevationAngle = new double[5]; // reference elevation angles for 5 sub swathes
+            antennaPatternWideSwath = new float[5][numOfGains]; // antenna pattern gain for 5 sub swathes
+            getWideSwathAntennaPatternGainFromAuxData(
+                    fileName, mdsPolar[0], numOfGains, refElevationAngle, antennaPatternWideSwath);
+        } else {
+            refElevationAngle = new double[1]; // reference elevation angle for 1 swath
+            antennaPatternSingleSwath = new float[2][numOfGains];  // antenna pattern gain for 2 bands
+            getSingleSwathAntennaPatternGainFromAuxData(
+                    fileName, swath, mdsPolar, numOfGains, refElevationAngle, antennaPatternSingleSwath);
+        }
     }
 
     /**
@@ -613,62 +515,116 @@ public class ASARCalibrationOperator extends Operator {
     }
 
     /**
-     * Compute distance from satellite to the Earth center using satellite corrodinate in Metadata.
+     * Get reference elevation angle and antenna pattern gain from auxiliary file for single swath product.
+     * @param fileName The auxiliary data file name
+     * @param swath The swath name.
+     * @param pol The polarizations for 2 bands.
+     * @param numOfGains The number of gains for given swath and polarization (201).
+     * @param refElevAngle The reference elevation angle array.
+     * @param antPatArray The antenna pattern array.
+     * @throws OperatorException The IO exception.
      */
-    private void getSatelliteToEarthCenterDistance(Product sourceProduct) {
+     static void getSingleSwathAntennaPatternGainFromAuxData(
+            String fileName, String swath, String[] pol, int numOfGains, double[] refElevAngle, float[][] antPatArray)
+            throws OperatorException {
 
-        lastLineIndex = new int[numMPPRecords];
-        rSat = new double[numMPPRecords];
+        final EnvisatAuxReader reader = new EnvisatAuxReader();
+        try {
+            reader.readProduct(fileName);
 
-        MetadataElement mppAds = sourceProduct.getMetadataRoot().getElement("MAIN_PROCESSING_PARAMS_ADS");
-        if (mppAds == null) {
-            throw new OperatorException("MAIN_PROCESSING_PARAMS_ADS not found");
+            String swathName;
+            if (swath.contains("IS1")) {
+                swathName = "is1";
+            } else if (swath.contains("IS2")) {
+                swathName = "is2";
+            } else if (swath.contains("IS3")) {
+                swathName = "is3_ss2";
+            } else if (swath.contains("IS4")) {
+                swathName = "is4_ss3";
+            } else if (swath.contains("IS5")) {
+                swathName = "is5_ss4";
+            } else if (swath.contains("IS6")) {
+                swathName = "is6_ss5";
+            } else if (swath.contains("IS7")) {
+                swathName = "is7";
+            } else {
+                throw new OperatorException("Invalid swath");
+            }
+
+            final String refElevAngleName = "elev_ang_" + swathName;
+            final ProductData refElevAngleData = reader.getAuxData(refElevAngleName);
+            refElevAngle[0] = (double) refElevAngleData.getElemFloat();
+
+            final String patternName = "pattern_" + swathName;
+            final ProductData patternData = reader.getAuxData(patternName);
+            final float[] pattern = ((float[]) patternData.getElems());
+            if (pattern.length != 804) {
+                throw new OperatorException("Incorret array length for " + patternName);
+            }
+
+            for (int i = 0; i < 2 && pol[i] != null && pol[i].length() != 0; i++) {
+                if (pol[i].contains("hh")) {
+                    System.arraycopy(pattern, 0, antPatArray[i], 0, numOfGains);
+                } else if (pol[i].contains("vv")) {
+                    System.arraycopy(pattern, numOfGains, antPatArray[i], 0, numOfGains);
+                } else if (pol[i].contains("hv")) {
+                    System.arraycopy(pattern, 2 * numOfGains, antPatArray[i], 0, numOfGains);
+                } else if (pol[i].contains("vh")) {
+                    System.arraycopy(pattern, 3 * numOfGains, antPatArray[i], 0, numOfGains);
+                }
+            }
+
+        } catch (IOException e) {
+            throw new OperatorException(e);
         }
+    }
 
-        MetadataElement ads;
-        for (int i = 0; i < numMPPRecords; i++) {
+    /**
+     * Get reference elevation angle and antenna pattern gain from auxiliary file for wide swath product.
+     * @param fileName The auxiliary data file name
+     * @param pol The polarization.
+     * @param numOfGains The number of gains for given swath and polarization (201).
+     * @param refElevAngle The reference elevation angle array.
+     * @param antPatArray The antenna pattern array.
+     * @throws OperatorException The IO exception.
+     */
+    static void getWideSwathAntennaPatternGainFromAuxData(
+            String fileName, String pol, int numOfGains, double[] refElevAngle, float[][] antPatArray)
+            throws OperatorException {
 
-            if (numMPPRecords == 1) {
-                ads = mppAds;
-            } else {
-                ads = mppAds.getElement("MAIN_PROCESSING_PARAMS_ADS." + (i+1));
+        final EnvisatAuxReader reader = new EnvisatAuxReader();
+        try {
+            reader.readProduct(fileName);
+
+            String[] swathName = {"ss1", "is3_ss2", "is4_ss3", "is5_ss4", "is6_ss5"};
+
+            for (int i = 0; i < swathName.length; i++) {
+
+                // read elevation angles
+                final String refElevAngleName = "elev_ang_" + swathName[i];
+                final ProductData refElevAngleData = reader.getAuxData(refElevAngleName);
+                refElevAngle[i] = (double) refElevAngleData.getElemFloat();
+
+                // read antenna pattern gains
+                final String patternName = "pattern_" + swathName[i];
+                final ProductData patternData = reader.getAuxData(patternName);
+                final float[] pattern = ((float[]) patternData.getElems());
+                if (pattern.length != 804) {
+                    throw new OperatorException("Incorret array length for " + patternName);
+                }
+
+                if (pol.contains("hh")) {
+                    System.arraycopy(pattern, 0, antPatArray[i], 0, numOfGains);
+                } else if (pol.contains("vv")) {
+                    System.arraycopy(pattern, numOfGains, antPatArray[i], 0, numOfGains);
+                } else if (pol.contains("hv")) {
+                    System.arraycopy(pattern, 2 * numOfGains, antPatArray[i], 0, numOfGains);
+                } else if (pol.contains("vh")) {
+                    System.arraycopy(pattern, 3 * numOfGains, antPatArray[i], 0, numOfGains);
+                }
             }
-
-            MetadataAttribute numOutputLinesAttr = ads.getAttribute("num_output_lines");
-            if (numOutputLinesAttr == null) {
-                throw new OperatorException("num_output_lines not found");
-            }
-            int numLinesPerRecord = numOutputLinesAttr.getData().getElemInt();
-
-            if (i == 0) {
-                lastLineIndex[i] = numLinesPerRecord - 1;
-            } else {
-                lastLineIndex[i] = lastLineIndex[i - 1] + numLinesPerRecord;
-            }
-
-            MetadataAttribute xPositionAttr = ads.getAttribute("ASAR_Main_ADSR.sd/orbit_state_vectors.3.x_pos_1");
-            if (xPositionAttr == null) {
-                throw new OperatorException("x_pos_1 not found");
-            }
-            float x_pos = xPositionAttr.getData().getElemInt() / 100.0f; // divide 100 to convert unit from 10^-2 m to m
-            //System.out.println("x position is " + x_pos);
-
-            MetadataAttribute yPositionAttr = ads.getAttribute("ASAR_Main_ADSR.sd/orbit_state_vectors.3.y_pos_1");
-            if (yPositionAttr == null) {
-                throw new OperatorException("y_pos_1 not found");
-            }
-            float y_pos = yPositionAttr.getData().getElemInt() / 100.0f; // divide 100 to convert unit from 10^-2 m to m
-            //System.out.println("y position is " + y_pos);
-
-            MetadataAttribute zPositionAttr = ads.getAttribute("ASAR_Main_ADSR.sd/orbit_state_vectors.3.z_pos_1");
-            if (zPositionAttr == null) {
-                throw new OperatorException("z_pos_1 not found");
-            }
-            float z_pos = zPositionAttr.getData().getElemInt() / 100.0f; // divide 100 to convert unit from 10^-2 m to m
-            //System.out.println("z position is " + z_pos);
-
-            rSat[i] = Math.sqrt(x_pos * x_pos + y_pos * y_pos + z_pos * z_pos); // in m
-            //System.out.println("Rsat is " + rSat[i]);
+        } catch (IOException e) {
+            throw new OperatorException(e);
         }
     }
 
@@ -936,34 +892,25 @@ public class ASARCalibrationOperator extends Operator {
      */
     private void updateTargetProductMetadata() {
 
-        final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(targetProduct);
+        final MetadataElement tgtAbsRoot = AbstractMetadata.getAbstractedMetadata(targetProduct);
 
         if (sampleType.contains("COMPLEX")) {
-            MetadataAttribute sampleTypeAttr = abs.getAttribute(AbstractMetadata.SAMPLE_TYPE);
-            abs.removeAttribute(sampleTypeAttr);
-            abs.addAttribute(new MetadataAttribute(AbstractMetadata.SAMPLE_TYPE, ProductData.createInstance("DETECTED"), false));
+            AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
         }
 
-        // update ant_elev_corr_flag
         if (!antElevCorrFlag) {
-            abs.getAttribute(AbstractMetadata.ant_elev_corr_flag).getData().setElemBoolean(true);
+            AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.ant_elev_corr_flag, 1);
         }
 
-        // update range_spread_comp_flag
         if (!rangeSpreadCompFlag) {
-            abs.getAttribute(AbstractMetadata.range_spread_comp_flag).getData().setElemBoolean(true);
+            AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.range_spread_comp_flag, 1);
         }
 
-        // add abs_calibration_flag
-        abs.getAttribute(AbstractMetadata.abs_calibration_flag).getData().setElemBoolean(true);
+        AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.abs_calibration_flag, 1);
 
         if (extAuxFileAvailableFlag) {
-            String auxFileName = externalAuxFile.getName();
-            MetadataAttribute attr = abs.getAttribute(AbstractMetadata.external_calibration_file);
-            abs.removeAttribute(attr);
-            abs.addAttribute(new MetadataAttribute(AbstractMetadata.external_calibration_file,
-                                                   ProductData.createInstance(auxFileName),
-                                                   false));
+            AbstractMetadata.setAttribute(
+                tgtAbsRoot, AbstractMetadata.external_calibration_file, externalAuxFile.getName());
         }
     }
 
@@ -986,6 +933,7 @@ public class ASARCalibrationOperator extends Operator {
         final int y0 = targetTileRectangle.y;
         final int w = targetTileRectangle.width;
         final int h = targetTileRectangle.height;
+        //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         Band sourceBand1;
         Tile sourceRaster1;
@@ -1029,7 +977,11 @@ public class ASARCalibrationOperator extends Operator {
         final float[] slantRangeTimeArray = new float[w];
 
         if (!antElevCorrFlag) {
-            computeTargetTileNewAntPat(x0, y0, w, h, prodBand);
+            if (swath.contains("WS")) {
+                computeWideSwathAntennaPatternForCurrentTile(x0, y0, w, h);
+            } else {
+                computeSingleSwathAntennaPatternForCurrentTile(x0, y0, w, h, prodBand);
+            }
         }
 
         double sigma, dn, i, q, time;
@@ -1039,15 +991,9 @@ public class ASARCalibrationOperator extends Operator {
         for (int y = y0; y < maxY; ++y) {
 
             incidenceAngle.getPixels(x0, y, w, 1,incidenceAnglesArray, pm, TiePointGrid.QUADRATIC);
-//            incidenceAngleQuadInterp.getPixelFloats(x0, y, w, 1, incidenceAnglesArray);
-//            incidenceAngle.getPixels(x0, y, w, 1,incidenceAnglesArray, pm, TiePointGrid.BIQUADRATIC);
-//            incidenceAngle.getPixels(x0, y, w, 1,incidenceAnglesArray, pm);
 
             if (!rangeSpreadCompFlag) {
                 slantRangeTime.getPixels(x0, y, w, 1,slantRangeTimeArray, pm, TiePointGrid.QUADRATIC);
-//                slantRangeTimeQuadInterp.getPixelFloats(x0, y, w, 1, slantRangeTimeArray);
-//                slantRangeTime.getPixels(x0, y, w, 1,slantRangeTimeArray, pm, TiePointGrid.BIQUADRATIC);
-//                slantRangeTime.getPixels(x0, y, w, 1,slantRangeTimeArray, pm);
             }
             
             for (int x = x0, xx = 0; x < maxX; ++x, ++xx) {
@@ -1078,7 +1024,7 @@ public class ASARCalibrationOperator extends Operator {
                 if (!antElevCorrFlag) { // apply antenna pattern correction
                     //gain = targetTileNewAntPat[xx];
                     //sigma /= gain * gain;
-                    sigma /= targetTileNewAntPat[xx];
+                    sigma /= targetTileNewAntPat[xx] * targetTileNewAntPat[xx];
                 }
 
                 if (outputImageScaleInDb) { // convert calibration result to dB
@@ -1095,76 +1041,130 @@ public class ASARCalibrationOperator extends Operator {
     }
 
     /**
-     * Compute antenna elevation pattern gain for pixels in the middle row of the given tile.
+     * Compute antenna pattern for the middle row of the given tile for single swath product.
      * Here it is assumed that the elevation angles for pixels in the same column are the same.
-     *
      * @param x0 The x coordinate of the upper left point in the current tile.
      * @param y0 The y coordinate of the upper left point in the current tile.
      * @param w The width of the current tile.
      * @param h The height of the current tile.
-     * @param band the band
+     * @param band The band index.
      */
-    private void computeTargetTileNewAntPat(int x0, int y0, int w, int h, int band) {
+    private void computeSingleSwathAntennaPatternForCurrentTile(int x0, int y0, int w, int h, int band) {
+
+        targetTileNewAntPat = new double[w];
 
         final int y = y0 + h / 2;
+        double rsat = computeSatalliteToEarthCentreDistance(y, firstLineUTC, lineTimeInterval, orbitStateVectors);
+        for (int x = x0; x < x0 + w; x++) {
+            final double theta = computeElevationAngle(x, y, rsat); // in degree
+            targetTileNewAntPat[x - x0] = computeAntPatGain(theta, refElevationAngle[0], antennaPatternSingleSwath[band]);
+        }
+    }
 
-        final float[] incidenceAnlglesArray = new float[w];
-        final float[] slantRangeTimeArray = new float[w];
+    /**
+     * Compute antenna pattern for the middle row of the given tile for wide swath product.
+     * Here it is assumed that the elevation angles for pixels in the same column are the same.
+     * @param x0 The x coordinate of the upper left point in the current tile.
+     * @param y0 The y coordinate of the upper left point in the current tile.
+     * @param w The width of the current tile.
+     * @param h The height of the current tile.
+     */
+    private void computeWideSwathAntennaPatternForCurrentTile(int x0, int y0, int w, int h) {
 
-        incidenceAngle.getPixels(x0, y, w, 1, incidenceAnlglesArray, ProgressMonitor.NULL, TiePointGrid.QUADRATIC);
-        slantRangeTime.getPixels(x0, y, w, 1, slantRangeTimeArray, ProgressMonitor.NULL, TiePointGrid.QUADRATIC);
+        targetTileNewAntPat = new double[w];
 
-//        incidenceAngle.getPixels(x0, y, w, 1, incidenceAnlglesArray, ProgressMonitor.NULL);
-//        slantRangeTime.getPixels(x0, y, w, 1, slantRangeTimeArray, ProgressMonitor.NULL);
+        final int y = y0 + h / 2;
+        double rsat = computeSatalliteToEarthCentreDistance(y, firstLineUTC, lineTimeInterval, orbitStateVectors);
+        for (int x = x0; x < x0 + w; x++) {
 
-//        incidenceAngle.getPixels(x0, y, w, 1, incidenceAnlglesArray, ProgressMonitor.NULL, TiePointGrid.BIQUADRATIC);
-//        slantRangeTime.getPixels(x0, y, w, 1, slantRangeTimeArray, ProgressMonitor.NULL, TiePointGrid.BIQUADRATIC);
+            final double theta = computeElevationAngle(x, y, rsat); // in degree
 
-//        incidenceAngleQuadInterp.getPixelFloats(x0, y, w, 1,incidenceAnlglesArray);
-//        slantRangeTimeQuadInterp.getPixelFloats(x0, y, w, 1,slantRangeTimeArray);
+            int idx = findNearestRefElevAngle(theta, refElevationAngle);
+            targetTileNewAntPat[x - x0] = computeAntPatGain(theta, refElevationAngle[idx], antennaPatternWideSwath[idx]);
+        }
+    }
 
-        // set rsat
+    /**
+     * Compute satellite to erath centre distance (in m).
+     * @param y The y coordinate of a range line.
+     * @return The distance.
+     */
+    static double computeSatalliteToEarthCentreDistance(
+           int y, double firstLineUTC, double lineTimeInterval, AbstractMetadata.OrbitStateVector[] orbitStateVectors) {
+
+        // todo should use the 3rd state vector as suggested by the doc?
+        final double time = firstLineUTC + y*lineTimeInterval;
         double rsat = 0.0;
-        for (int i = 0; i < numMPPRecords; i++) {
-            if (y <= lastLineIndex[i]) {
-                rsat = rSat[i];
+        for (int i = 0; i < orbitStateVectors.length; i++) {
+            if (time <= orbitStateVectors[i].time.getMJD()) {
+                rsat = Math.sqrt(orbitStateVectors[i].x_pos*orbitStateVectors[i].x_pos +
+                                 orbitStateVectors[i].y_pos*orbitStateVectors[i].y_pos +
+                                 orbitStateVectors[i].z_pos*orbitStateVectors[i].z_pos) / 100.0; // 10^-2 m to m
                 break;
             }
         }
-        if (Double.compare(rsat, 0.0) == 0) {
-            throw new OperatorException("No Main Processing Parameters ADSR for range line " + y);
-        }
+        return rsat;
+    }
 
-        targetTileNewAntPat = new double[w];
+    /**
+     * Compute elevation angle (in degree) for the given pixel.
+     *
+     * @param x The x coordinate of the given pixel.
+     * @param y The y coordinate of the given pixel.
+     * @param rsat The distance from satellite to the Earth center (in m).
+     * @return The elevation angle.
+     */
+    private double computeElevationAngle(int x, int y, double rsat) {
+
+        final double alpha = incidenceAngle.getPixelFloat((float)x, (float)y) * MathUtils.DTOR; // in radian
+        final double time = slantRangeTime.getPixelFloat((float)x, (float)y) / 1000000000.0; //convert ns to s
+        final double r = time * Constants.halfLightSpeed; // in m
+        return (alpha - (float) Math.asin(Math.sin(alpha) * r / rsat)) * MathUtils.RTOD; // in degree
+    }
+
+    /**
+     * Find the index of the nearest reference elevation angle to a given elevation angle.
+     * @param theta The elevation angle.
+     * @param refElevationAngle The reference elevation array.
+     * @return The index.
+     */
+    static int findNearestRefElevAngle(double theta, double[] refElevationAngle) {
+        int idx = -1;
+        double min = 360.0;
+        for (int i = 0 ; i < refElevationAngle.length; i++) {
+            double d = Math.abs(theta - refElevationAngle[i]);
+            if (d < min) {
+                min = d;
+                idx = i;
+            }
+        }
+        return idx;
+    }
+
+    /**
+     * Compute antenna pattern gains for the given elevation angle using linear interpolation.
+     *
+     * @param elevAngle The elevation angle (in degree) of a given pixel.
+     * @param refElevationAngle The reference elevation angle (in degree).
+     * @param antPatArray The antenna pattern array.
+     * @return The antenna pattern gain (in linear scale).
+     */
+    static double computeAntPatGain(double elevAngle, double refElevationAngle, float[] antPatArray) {
+
         final double delta = 0.05;
-
-        for (int x = x0; x < x0 + w; x++) {
-
-            // compute elevation angle for each pixel in the middle row
-            final double alpha = incidenceAnlglesArray[x-x0] * MathUtils.DTOR; // in radian
-            final double time = slantRangeTimeArray[x-x0] / 1000000000.0; //convert ns to s
-            final double r = time * halfLightSpeed; // in m
-            final double theta = (alpha - (float) Math.asin(Math.sin(alpha) * r / rsat)) * MathUtils.RTOD; // in degree
-
-            // compute antenna pattern gain for the given pixel using linear interpolation
-
-            final int k = (int) ((theta - elevationAngle + 5.0) / delta);
-            final double theta1 = elevationAngle - 5.0 + k * delta;
-            final double theta2 = theta1 + delta;
-            final double gain1 = Math.pow(10.0, (double) newAntPat[band][k] / 10.0); // convert dB to linear scale
-            final double gain2 = Math.pow(10.0, (double) newAntPat[band][k + 1] / 10.0);
-            targetTileNewAntPat[x - x0] = ((theta2 - theta) * gain1 + (theta - theta1) * gain2) / (theta2 - theta1);
-
-            /*
-            System.out.println("Reference elevation angle is " + elevationAngle);
-            System.out.println("Pixel elevation angle is " + theta);
-            System.out.println("theta1 = " + theta1);
-            System.out.println("theta2 = " + theta2);
-            System.out.println("gain1 = " + pattern[k]);
-            System.out.println("gain2 = " + pattern[k+1]);
-            System.out.println("gain = " + targetTileNewAntPat[x - x0]);
-            */
+        int k0 = (int) ((elevAngle - refElevationAngle + 5.0) / delta);
+        if (k0 < 0) {
+            k0 = 0;
+        } else if (k0 >= antPatArray.length - 1) {
+            k0 = antPatArray.length - 2;
         }
+        final double theta0 = refElevationAngle - 5.0 + k0*delta;
+        final double theta1 = theta0 + delta;
+        final double gain0 = Math.pow(10, (double) antPatArray[k0] / 10.0); // convert dB to linear scale
+        final double gain1 = Math.pow(10, (double) antPatArray[k0+1] / 10.0);
+        final double mu = (elevAngle - theta0) / (theta1 - theta0);
+
+        return org.esa.nest.util.MathUtils.interpolationLinear(gain0, gain1, mu);
     }
 
     /**
