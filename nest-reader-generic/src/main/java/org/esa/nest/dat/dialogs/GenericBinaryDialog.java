@@ -55,6 +55,11 @@ public class GenericBinaryDialog extends ModalDialog {
         dataTypeBox.addPropertyChangeListener("value", propListener);
         dataTypeBox.setSelectedItem(ProductData.getTypeString(dataType));
 
+        rasterWidth = Integer.parseInt(System.getProperty("genericReaderWidth", String.valueOf(rasterWidth)));
+        rasterWidthField.setValue(rasterWidth);
+        rasterHeight = Integer.parseInt(System.getProperty("genericReaderHeight", String.valueOf(rasterHeight)));
+        rasterHeightField.setValue(rasterHeight);
+
         createUI();
         return super.show();
     }
@@ -118,6 +123,9 @@ public class GenericBinaryDialog extends ModalDialog {
             byteOrder = ByteOrder.LITTLE_ENDIAN;
         
         interleave = (String)interleaveBox.getSelectedItem();
+
+        System.setProperty("genericReaderWidth", String.valueOf(rasterWidth));
+        System.setProperty("genericReaderHeight", String.valueOf(rasterHeight));
     }
 
     @Override

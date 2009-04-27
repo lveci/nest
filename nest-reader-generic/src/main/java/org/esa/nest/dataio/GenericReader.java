@@ -65,12 +65,11 @@ public class GenericReader extends AbstractProductReader {
                 dataType = dialog.getDataType();
                 byteOrder = dialog.getByteOrder();
                 _imageHeaderLength = dialog.getHeaderBytes();
-                imageRecordLength = rasterWidth;
+                imageRecordLength = getImageRecordLength(rasterWidth, dataType);
             } else {
                 throw new IOException("Import Canceled");
             }
         }
-
 
         final File inputFile = ReaderUtils.getFileFromInput(getInput());
 
@@ -98,6 +97,11 @@ public class GenericReader extends AbstractProductReader {
         product.setPreferredTileSize(rasterWidth, 500);
 
         return product;
+    }
+
+    private static int getImageRecordLength(final int rasterWidth, final int dataType) {
+
+        return rasterWidth * ProductData.getElemSize(dataType);
     }
 
     @Override
