@@ -479,8 +479,10 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         int c = 0;
         for (int j = 0; j < gridHeight; j++) {
             final double time = startSeconds + (j*lineTimeInterval);
-            while(segments[c].utcSeconds < time)
+            while(c < segments.length && segments[c].utcSeconds < time)
                 ++c;
+            if(c >= segments.length)
+                c = segments.length-1;
 
             final coefList coef = segments[c];
             final double GR0 = coef.grOrigin;

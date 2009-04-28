@@ -48,7 +48,7 @@ public class TestRadarsatProductReader extends TestCase {
         if(!file.exists()) return;
 
         final Product product = reader.readProductNodes(file, null);
-        ReaderUtils.verifyProduct(product);
+        //ReaderUtils.verifyProduct(product);
     }
 
     public void testOpenAll() throws Exception
@@ -69,7 +69,7 @@ public class TestRadarsatProductReader extends TestCase {
 
                 try {
                     final Product product = reader.readProductNodes(file, null);
-                    ReaderUtils.verifyProduct(product);
+                    //ReaderUtils.verifyProduct(product);
                 } catch(Exception e) {
                     System.out.println("Failed to read "+ file.toString());
                     throw e;
