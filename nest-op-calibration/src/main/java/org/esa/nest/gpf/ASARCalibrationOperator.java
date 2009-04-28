@@ -1099,7 +1099,7 @@ public class ASARCalibrationOperator extends Operator {
             if (time <= orbitStateVectors[i].time.getMJD()) {
                 rsat = Math.sqrt(orbitStateVectors[i].x_pos*orbitStateVectors[i].x_pos +
                                  orbitStateVectors[i].y_pos*orbitStateVectors[i].y_pos +
-                                 orbitStateVectors[i].z_pos*orbitStateVectors[i].z_pos) / 100.0; // 10^-2 m to m
+                                 orbitStateVectors[i].z_pos*orbitStateVectors[i].z_pos); // m
                 break;
             }
         }
