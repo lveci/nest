@@ -605,21 +605,6 @@ public final class RangeDopplerGeocodingOp extends Operator {
     }
 
     /**
-     * Compute warp polynomial coefficients.
-     * @param timeArray The array of times for all orbit state vectors.
-     * @param stateArray The array of data to be interpolated.
-     * @param warpPolynomialOrder The order of the warp polynomial.
-     * @return The array holding warp polynomial coefficients.
-     */
-    private static double[] computeWarpPolynomial(double[] timeArray, double[] stateArray, int warpPolynomialOrder) {
-
-        final Matrix A = MathUtils.createVandermondeMatrix(timeArray, warpPolynomialOrder);
-        final Matrix b = new Matrix(stateArray, stateArray.length);
-        final Matrix x = A.solve(b);
-        return x.getColumnPackedCopy();
-    }
-
-    /**
      * Called by the framework in order to compute a tile for the given target band.
      * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
      *
@@ -820,7 +805,8 @@ public final class RangeDopplerGeocodingOp extends Operator {
                     break;
                 }
             }
-            rangeIndex = computeGroundRange(slantRange, srgrConvParams[i-1].coefficients) / rangeSpacing;
+            final double groundRange = computeGroundRange(slantRange, srgrConvParams[i-1].coefficients);
+            rangeIndex = (groundRange - srgrConvParams[i-1].ground_range_origin) / rangeSpacing;
 
         } else { // slant range image
 
