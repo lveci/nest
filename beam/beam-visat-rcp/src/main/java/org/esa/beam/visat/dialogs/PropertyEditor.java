@@ -1,5 +1,5 @@
 /*
- * $Id: PropertyEditor.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: PropertyEditor.java,v 1.2 2009-04-28 13:21:31 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -156,6 +156,7 @@ public class PropertyEditor {
         public Parameter _paramNoDataValue;
         public Parameter _paramGeophysUnit;
         public Parameter _paramValidPixelExpr;
+        public Parameter _paramWriteData;
         private Parameter _paramVBExpression;
         private boolean _virtualBandPropertyChanged;
         private boolean _validMaskPropertyChanged;
@@ -338,6 +339,7 @@ public class PropertyEditor {
                 }
                 if (_virtualBand != null) {
                     _virtualBand.setExpression(_paramVBExpression.getValueAsText());
+                    _virtualBand.setWriteData(((Boolean) _paramWriteData.getValue()).booleanValue());
                 }
             } finally {
                 _node.getProduct().removeProductNodeListener(listener);
@@ -429,6 +431,7 @@ public class PropertyEditor {
         private void initParamsForVirtualBand(final VirtualBand virtualBand) {
             _virtualBand = virtualBand;
             initVirtualBandExpressionParam();
+            initWriteDataParam();
         }
 
         private boolean ignoreVisit() {
@@ -467,6 +470,15 @@ public class PropertyEditor {
                     _paramVBExpression.setValueAsText(newExpression, null);
                 }
             });
+        }
+        
+        private void initWriteDataParam() {
+            final ParamProperties properties = new ParamProperties(Boolean.class);
+            properties.setLabel("Write band data"); /*I18N*/
+            properties.setDescription("Write the band data together with the expression."); /*I18N*/
+            _paramWriteData = new Parameter("writeData",
+                                                  Boolean.valueOf(_virtualBand.getWriteData()),
+                                                  properties);
         }
 
         private void initValidPixelExpressionParam() {
@@ -652,6 +664,10 @@ public class PropertyEditor {
             add(_paramVBExpression.getEditor().getComponent(), _gbc);
             _gbc.fill = GridBagConstraints.HORIZONTAL;
             _gbc.weighty = 1;
+
+            _gbc.gridy++;
+            _gbc.weightx = 0;
+            add(_paramWriteData.getEditor().getComponent(), _gbc);
             _gbc.insets.top -= GROUP_GAP;
         }
 

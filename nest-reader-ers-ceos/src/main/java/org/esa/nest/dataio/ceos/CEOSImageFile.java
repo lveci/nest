@@ -16,7 +16,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.21 $ $Date: 2009-03-11 17:29:08 $
+ * @version $Revision: 1.22 $ $Date: 2009-04-28 13:21:31 $
  */
 public abstract class CEOSImageFile {
 
@@ -67,7 +67,7 @@ public abstract class CEOSImageFile {
                                         throws IOException, IllegalBinaryFormatException
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
-        final int x = sourceOffsetX * 2;
+        final int x = sourceOffsetX * ProductData.getElemSize(destBuffer.getType());
         final long xpos = _startPosImageRecords +_imageHeaderLength + x;
 
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
@@ -106,6 +106,51 @@ public abstract class CEOSImageFile {
         }
     }
 
+    public void readBandRasterDataInt(final int sourceOffsetX, final int sourceOffsetY,
+                                             final int sourceWidth, final int sourceHeight,
+                                             final int sourceStepX, final int sourceStepY,
+                                             final int destWidth, final ProductData destBuffer,
+                                             final ProgressMonitor pm)
+                                             throws IOException, IllegalBinaryFormatException
+    {
+        final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
+        final int x = sourceOffsetX * ProductData.getElemSize(destBuffer.getType());
+        final long xpos = _startPosImageRecords +_imageHeaderLength + x;
+
+        pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
+        try {
+            final int[] srcLine = new int[sourceWidth];
+            int[] destLine = null;
+            if (sourceStepX != 1)
+                destLine = new int[destWidth];
+            for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
+                if (pm.isCanceled()) {
+                    break;
+                }
+
+                // Read source line
+                synchronized (binaryReader) {
+                    binaryReader.seek(_imageRecordLength * y + xpos);
+                    binaryReader.read(srcLine);
+                }
+
+                // Copy source line into destination buffer
+                final int currentLineIndex = (y - sourceOffsetY) * destWidth;
+                if (sourceStepX == 1) {
+
+                    System.arraycopy(srcLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+                } else {
+                    copyLine(srcLine, destLine, sourceStepX);
+
+                    System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+                }
+                pm.worked(1);
+            }
+        } finally {
+            pm.done();
+        }
+    }
+
     public void readBandRasterDataByte(final int sourceOffsetX, final int sourceOffsetY,
                                        final int sourceWidth, final int sourceHeight,
                                        final int sourceStepX, final int sourceStepY,
@@ -113,7 +158,7 @@ public abstract class CEOSImageFile {
                                         throws IOException, IllegalBinaryFormatException
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
-        final int x = sourceOffsetX * 1;
+        final int x = sourceOffsetX * ProductData.getElemSize(destBuffer.getType());
         final long xpos = _startPosImageRecords +_imageHeaderLength + x;
 
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
@@ -286,6 +331,13 @@ public abstract class CEOSImageFile {
     }
 
     protected static void copyLine(final byte[] srcLine, final byte[] destLine,
+                          final int sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
+            destLine[x] = srcLine[i];
+        }
+    }
+
+    protected static void copyLine(final int[] srcLine, final int[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[i];
