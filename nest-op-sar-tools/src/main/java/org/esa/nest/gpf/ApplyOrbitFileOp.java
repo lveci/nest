@@ -443,12 +443,12 @@ public final class ApplyOrbitFileOp extends Operator {
         for (int i = 0; i< orbitStateVectors.length; i++) {
             double time = orbitStateVectors[i].time.getMJD();
             OrbitData orbitData = getOrbitData(time);
-            orbitStateVectors[i].x_pos = orbitData.xPos * 100.0; // m to 10^-2 m
-            orbitStateVectors[i].y_pos = orbitData.yPos * 100.0; // m to 10^-2 m
-            orbitStateVectors[i].z_pos = orbitData.zPos * 100.0; // m to 10^-2 m
-            orbitStateVectors[i].x_vel = orbitData.xVel * 100000.0; // m/s to 10^-5 m/s
-            orbitStateVectors[i].y_vel = orbitData.yVel * 100000.0; // m/s to 10^-5 m/s
-            orbitStateVectors[i].z_vel = orbitData.zVel * 100000.0; // m/s to 10^-5 m/s
+            orbitStateVectors[i].x_pos = orbitData.xPos; // m
+            orbitStateVectors[i].y_pos = orbitData.yPos; // m
+            orbitStateVectors[i].z_pos = orbitData.zPos; // m
+            orbitStateVectors[i].x_vel = orbitData.xVel; // m/s
+            orbitStateVectors[i].y_vel = orbitData.yVel; // m/s
+            orbitStateVectors[i].z_vel = orbitData.zVel; // m/s
         }
 
         // save new orbit state vectors
