@@ -667,28 +667,6 @@ public class ASARRetroCalibrationOperator extends Operator {
     }
 
     /**
-     * Compute satellite to erath centre distance (in m).
-     * @param y The y coordinate of a range line.
-     * @return The distance.
-     */
-    /*
-    private double computeSatalliteToEarthCentreDistance(int y) {
-
-        // todo should use the 3rd state vector as suggested by the doc?
-        final double time = firstLineUTC + y*lineTimeInterval;
-        double rsat = 0.0;
-        for (int i = 0; i < orbitStateVectors.length; i++) {
-            if (time <= orbitStateVectors[i].time.getMJD()) {
-                rsat = Math.sqrt(orbitStateVectors[i].x_pos*orbitStateVectors[i].x_pos +
-                                 orbitStateVectors[i].y_pos*orbitStateVectors[i].y_pos +
-                                 orbitStateVectors[i].z_pos*orbitStateVectors[i].z_pos) / 100.0; // 10^-2 m to m
-                break;
-            }
-        }
-        return rsat;
-    }
-    */
-    /**
      * Compute elevation angle (in degree) for the given pixel.
      *
      * @param x The x coordinate of the given pixel.
@@ -704,53 +682,6 @@ public class ASARRetroCalibrationOperator extends Operator {
         return (alpha - (float) Math.asin(Math.sin(alpha) * r / rsat)) * MathUtils.RTOD; // in degree
     }
 
-    /**
-     * Find the index of the nearest reference elevation angle to a given elevation angle. 
-     * @param theta The elevation angle.
-     * @param refElevationAngle The reference elevation array.
-     * @return The index.
-     */
-    /*
-    private int findNearestRefElevAngle(double theta, double[] refElevationAngle) {
-        int idx = -1;
-        double min = 360.0;
-        for (int i = 0 ; i < refElevationAngle.length; i++) {
-            double d = Math.abs(theta - refElevationAngle[i]);
-            if (d < min) {
-                min = d;
-                idx = i;
-            }
-        }
-        return idx;
-    }
-    */
-    /**
-     * Compute antenna pattern gains for the given elevation angle using linear interpolation.
-     *
-     * @param elevAngle The elevation angle (in degree) of a given pixel.
-     * @param refElevationAngle The reference elevation angle (in degree).
-     * @param antPatArray The antenna pattern array.
-     * @return The antenna pattern gain (in linear scale).
-     */
-    /*
-    private static double computeAntPatGain(double elevAngle, double refElevationAngle, float[] antPatArray) {
-
-        final double delta = 0.05;
-        int k0 = (int) ((elevAngle - refElevationAngle + 5.0) / delta);
-        if (k0 < 0) {
-            k0 = 0;
-        } else if (k0 >= antPatArray.length - 1) {
-            k0 = antPatArray.length - 2;
-        }
-        final double theta0 = refElevationAngle - 5.0 + k0*delta;
-        final double theta1 = theta0 + delta;
-        final double gain0 = Math.pow(10, (double) antPatArray[k0] / 10.0); // convert dB to linear scale
-        final double gain1 = Math.pow(10, (double) antPatArray[k0+1] / 10.0);
-        final double mu = (elevAngle - theta0) / (theta1 - theta0);
-
-        return org.esa.nest.util.MathUtils.interpolationLinear(gain0, gain1, mu);
-    }
-    */
     /**
     * Set the path to the external antenna pattern file.
     * This function is used by unit test only.
