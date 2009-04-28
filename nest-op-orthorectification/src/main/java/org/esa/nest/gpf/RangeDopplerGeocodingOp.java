@@ -582,12 +582,12 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
         for (int i = 0; i < numVerctors; i++) {
             timeArray[i] = orbitStateVectors[i].time.getMJD();
-            xPosArray[i] = orbitStateVectors[i].x_pos / 100.0; // 10^-2 m to m
-            yPosArray[i] = orbitStateVectors[i].y_pos / 100.0; // 10^-2 m to m
-            zPosArray[i] = orbitStateVectors[i].z_pos / 100.0; // 10^-2 m to m
-            xVelArray[i] = orbitStateVectors[i].x_vel / 100000.0; // 10^-5 m/s to m/s
-            yVelArray[i] = orbitStateVectors[i].y_vel / 100000.0; // 10^-5 m/s to m/s
-            zVelArray[i] = orbitStateVectors[i].z_vel / 100000.0; // 10^-5 m/s to m/s
+            xPosArray[i] = orbitStateVectors[i].x_pos; // m
+            yPosArray[i] = orbitStateVectors[i].y_pos; // m
+            zPosArray[i] = orbitStateVectors[i].z_pos; // m
+            xVelArray[i] = orbitStateVectors[i].x_vel; // m/s
+            yVelArray[i] = orbitStateVectors[i].y_vel; // m/s
+            zVelArray[i] = orbitStateVectors[i].z_vel; // m/s
         }
 
         // Lagrange polynomial interpolation
