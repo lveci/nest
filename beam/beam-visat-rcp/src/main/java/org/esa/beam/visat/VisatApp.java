@@ -1,5 +1,5 @@
 /*
- * $Id: VisatApp.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: VisatApp.java,v 1.2 2009-04-27 20:47:38 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -136,7 +136,7 @@ import java.util.logging.Level;
  * @author Norman Fomferra
  * @author Marco Peters
  * @author Sabine Embacher
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2009-04-27 20:47:38 $
  */
 public class VisatApp extends BasicApp implements AppContext {
 
@@ -1574,12 +1574,12 @@ public class VisatApp extends BasicApp implements AppContext {
             }
         }
 
-        final boolean saveOk = writeProductImpl(product, product.getFileLocation(),
+        final boolean saveOk = writeProductImpl(product, file,
                                                 DimapProductConstants.DIMAP_FORMAT_NAME,
                                                 incremental);
         if (saveOk) {
             product.setModified(false);
-            historyPush(product.getFileLocation());
+            historyPush(file);
         } else {
             if (metadataRoot != null) {
                 final MetadataElement[] elementsArray = new MetadataElement[metadataElementBackup.size()];
