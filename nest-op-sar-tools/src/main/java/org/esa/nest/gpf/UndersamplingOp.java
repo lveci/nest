@@ -212,7 +212,7 @@ public class UndersamplingOp extends Operator {
         subsetDef.addNodeNames(sourceBandNames);
         subsetDef.setSubSampling(subSamplingX, subSamplingY);
         subsetDef.setIgnoreMetadata(false);
-        subsetDef.setVirtualBandsAsRealBands(true);
+        subsetDef.setTreatVirtualBandsAsRealBands(true);
 
         try {
             targetProduct = subsetReader.readProductNodes(sourceProduct, subsetDef);

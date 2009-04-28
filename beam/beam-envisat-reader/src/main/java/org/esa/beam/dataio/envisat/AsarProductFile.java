@@ -1,5 +1,5 @@
 /*
- * $Id: AsarProductFile.java,v 1.1 2009-04-28 14:37:13 lveci Exp $
+ * $Id: AsarProductFile.java,v 1.2 2009-04-28 17:38:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -34,7 +34,7 @@ import java.util.Arrays;
  * ASAR data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:13 $
+ * @version $Revision: 1.2 $ $Date: 2009-04-28 17:38:56 $
  * @see org.esa.beam.dataio.envisat.ProductFile
  */
 public class AsarProductFile extends ProductFile {
@@ -335,6 +335,7 @@ public class AsarProductFile extends ProductFile {
             if(prod_descriptor.contains("Geocoded"))
                 chronologicalOrder = true;
             
+			// don't flip - leave in satellite geometry
             //final String pass = getSPH().getParamString("PASS").trim();
             //if (pass.equals("ASCENDING")) {
             //    chronologicalOrder = false;

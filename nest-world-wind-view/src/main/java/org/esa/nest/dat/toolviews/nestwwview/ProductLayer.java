@@ -254,7 +254,7 @@ public class ProductLayer extends RenderableLayer {
             scaleFactor = 1;
         }
         productSubsetDef.setSubSampling(scaleFactor, scaleFactor);
-        productSubsetDef.setVirtualBandsAsRealBands(true);
+        productSubsetDef.setTreatVirtualBandsAsRealBands(true);
         productSubsetDef.setNodeNames(new String[] {quicklookBandName} );
         Product productSubset = product.createSubset(productSubsetDef, quicklookBandName, null);
 

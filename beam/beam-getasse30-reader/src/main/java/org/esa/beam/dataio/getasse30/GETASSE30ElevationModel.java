@@ -1,5 +1,5 @@
 /*
- * $Id: GETASSE30ElevationModel.java,v 1.1 2009-04-28 14:37:14 lveci Exp $
+ * $Id: GETASSE30ElevationModel.java,v 1.2 2009-04-28 17:38:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -65,10 +65,12 @@ public class GETASSE30ElevationModel implements ElevationModel, Resampling.Raste
         _resamplingIndex = _resampling.createIndex();
     }
 
+    @Override
     public ElevationModelDescriptor getDescriptor() {
         return _descriptor;
     }
 
+    @Override
     public float getElevation(GeoPos geoPos) throws Exception {
         float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES * NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5
         float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES * NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5, y = (90 - lon) / DEGREE_RES * NUM_PIXELS_PER_TILE;
@@ -84,6 +86,7 @@ public class GETASSE30ElevationModel implements ElevationModel, Resampling.Raste
         return elevation;
     }
 
+    @Override
     public void dispose() {
         _elevationTileCache.clear();
         for (int i = 0; i < _elevationTiles.length; i++) {
@@ -93,14 +96,17 @@ public class GETASSE30ElevationModel implements ElevationModel, Resampling.Raste
         }
     }
 
+    @Override
     public int getWidth() {
         return RASTER_WIDTH;
     }
 
+    @Override
     public int getHeight() {
         return RASTER_HEIGHT;
     }
 
+    @Override
     public float getSample(int pixelX, int pixelY) throws IOException {
         final int tileXIndex = pixelX / NUM_PIXELS_PER_TILE;
         final int tileYIndex = pixelY / NUM_PIXELS_PER_TILE;

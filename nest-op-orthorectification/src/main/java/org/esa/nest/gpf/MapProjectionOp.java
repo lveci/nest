@@ -123,7 +123,7 @@ public final class MapProjectionOp extends Operator {
 
         final String quicklookBandName = ProductUtils.findSuitableQuicklookBandName(product);
         final ProductSubsetDef productSubsetDef = new ProductSubsetDef("subset");
-        productSubsetDef.setVirtualBandsAsRealBands(true);
+        productSubsetDef.setTreatVirtualBandsAsRealBands(true);
         productSubsetDef.setNodeNames(selectedBands);
         Product productSubset = product.createSubset(productSubsetDef, product.getName(), null);
 

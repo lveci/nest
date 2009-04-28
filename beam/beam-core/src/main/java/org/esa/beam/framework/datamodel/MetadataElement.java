@@ -1,5 +1,5 @@
 /*
- * $Id: MetadataElement.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: MetadataElement.java,v 1.2 2009-04-28 17:38:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,7 +27,7 @@ import java.text.ParseException;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-04-28 17:38:56 $
  */
 public class MetadataElement extends ProductNode {
 
@@ -69,7 +69,7 @@ public class MetadataElement extends ProductNode {
      * Adds the given element to this element at index.
      *
      * @param element the element to added, ignored if <code>null</code>
-     * @param index where to put it
+     * @param index   where to put it
      */
     public void addElementAt(MetadataElement element, int index) {
         if (element == null) {
@@ -78,10 +78,11 @@ public class MetadataElement extends ProductNode {
         if (_elements == null) {
             _elements = new ProductNodeList<MetadataElement>();
         }
-        if(index < 0) 
+        if (index < 0) {
             index = 0;
-        else if(index > _elements.size())
+        } else if (index > _elements.size()) {
             index = _elements.size();
+        }
 
         _elements.insert(element, index);
         element.setOwner(this);
@@ -96,6 +97,7 @@ public class MetadataElement extends ProductNode {
      * Removes the given element from this element.
      *
      * @param element the element to be removed, ignored if <code>null</code>
+     * @return true, if so
      */
     public boolean removeElement(MetadataElement element) {
         if (element == null) {
@@ -108,7 +110,7 @@ public class MetadataElement extends ProductNode {
     }
 
     /**
-     * Returns the number of elements contained in this element.
+     * @return the number of elements contained in this element.
      */
     public int getNumElements() {
         if (_elements == null) {
@@ -121,9 +123,7 @@ public class MetadataElement extends ProductNode {
      * Returns the element at the given index.
      *
      * @param index the element index
-     *
      * @return the element at the given index
-     *
      * @throws IndexOutOfBoundsException if the index is out of bounds
      */
     public MetadataElement getElementAt(int index) {
@@ -164,7 +164,6 @@ public class MetadataElement extends ProductNode {
      * Returns the element with the given name.
      *
      * @param name the element name
-     *
      * @return the element with the given name or <code>null</code> if a element with the given name is not contained in
      *         this element.
      */
@@ -180,7 +179,6 @@ public class MetadataElement extends ProductNode {
      * Tests if a element with the given name is contained in this element.
      *
      * @param name the name, must not be <code>null</code>
-     *
      * @return <code>true</code> if a element with the given name is contained in this element, <code>false</code>
      *         otherwise
      */
@@ -234,7 +232,6 @@ public class MetadataElement extends ProductNode {
      * does nothing.
      *
      * @param attribute the attribute to be removed, <code>null</code> is ignored
-     *
      * @return <code>true</code> if it was removed
      */
     public boolean removeAttribute(MetadataAttribute attribute) {
@@ -264,9 +261,7 @@ public class MetadataElement extends ProductNode {
      * Returns the attribute at the given index.
      *
      * @param index the attribute index
-     *
      * @return the attribute, or <code>null</code> if this node does not contain attributes
-     *
      * @throws IndexOutOfBoundsException
      */
     public MetadataAttribute getAttributeAt(int index) {
@@ -305,6 +300,7 @@ public class MetadataElement extends ProductNode {
     /**
      * Returns the attribute with the given name.
      *
+     * @param name the attribute name
      * @return the attribute with the given name or <code>null</code> if it could not be found
      */
     public MetadataAttribute getAttribute(String name) {
@@ -317,6 +313,7 @@ public class MetadataElement extends ProductNode {
     /**
      * Checks whether this node has an element with the given name.
      *
+     * @param name the attribute name
      * @return <code>true</code> if so
      */
     public boolean containsAttribute(String name) {
@@ -333,16 +330,17 @@ public class MetadataElement extends ProductNode {
      *
      * @param name         the attribute name
      * @param defaultValue the default value
-     *
      * @return the attribute value as double.
+     * @throws NumberFormatException if the attribute type is ASCII but cannot be converted to a number
      */
     public double getAttributeDouble(String name, double defaultValue) {
         final MetadataAttribute attribute = getAttribute(name);
         if (attribute == null) {
             return defaultValue;
         }
-        if(attribute.getDataType() == ProductData.TYPE_ASCII)
+        if (attribute.getDataType() == ProductData.TYPE_ASCII) {
             return Double.parseDouble(attribute.getData().getElemString());
+        }
         return attribute.getData().getElemDouble();
     }
 
@@ -350,18 +348,19 @@ public class MetadataElement extends ProductNode {
      * Returns the double value of the attribute with the given name. <p>An Exception is thrown if an
      * attribute with the given name could not be found in this node.
      *
-     * @param name         the attribute name
-     * @throws Exception when attribute not found
-     *
+     * @param name the attribute name
      * @return the attribute value as double.
+     * @throws NumberFormatException    if the attribute type is ASCII but cannot be converted to a number
+     * @throws IllegalArgumentException if an attribute with the given name could not be found
      */
-    public double getAttributeDouble(String name) throws Exception {
+    public double getAttributeDouble(String name) {
         final MetadataAttribute attribute = getAttribute(name);
         if (attribute == null) {
-            throw new Exception("Metadata Attribute "+name+" not found");
+            throw new IllegalArgumentException(getAttributeNotFoundMessage(name));
         }
-        if(attribute.getDataType() == ProductData.TYPE_ASCII)
+        if (attribute.getDataType() == ProductData.TYPE_ASCII) {
             return Double.parseDouble(attribute.getData().getElemString());
+        }
         return attribute.getData().getElemDouble();
     }
 
@@ -371,7 +370,6 @@ public class MetadataElement extends ProductNode {
      *
      * @param name         the attribute name
      * @param defaultValue the default value
-     *
      * @return the attribute value as UTC.
      */
     public ProductData.UTC getAttributeUTC(String name, ProductData.UTC defaultValue) {
@@ -380,31 +378,33 @@ public class MetadataElement extends ProductNode {
             if (attribute != null) {
                 return ProductData.UTC.parse(attribute.getData().getElemString());
             }
-        } catch(ParseException e) {
+        } catch (ParseException e) {
             // continue
         }
         return defaultValue;
     }
 
     /**
-     * Returns the UTC value of the attribute with the given name. <p>The given default value is returned if an
-     * attribute with the given name could not be found in this node.
+     * Returns the UTC value of the attribute with the given name.
      *
-     * @param name         the attribute name
-     * @throws Exception when attribute not found
-     *
+     * @param name the attribute name
      * @return the attribute value as UTC.
+     * @throws IllegalArgumentException if an attribute with the given name could not be found
      */
-    public ProductData.UTC getAttributeUTC(String name) throws Exception {
+    public ProductData.UTC getAttributeUTC(String name) {
         try {
             final MetadataAttribute attribute = getAttribute(name);
             if (attribute != null) {
                 return ProductData.UTC.parse(attribute.getData().getElemString());
             }
-        } catch(ParseException e) {
-            throw new Exception("Unable to parse "+name);
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("Unable to parse metadata attribute " + name);
         }
-        throw new Exception("Metadata Attribute "+name+" not found");
+        throw new IllegalArgumentException(getAttributeNotFoundMessage(name));
+    }
+
+    private String getAttributeNotFoundMessage(String name) {
+        return "Metadata attribute " + name + " not found";
     }
 
     /**
@@ -413,16 +413,17 @@ public class MetadataElement extends ProductNode {
      *
      * @param name         the attribute name
      * @param defaultValue the default value
-     *
      * @return the attribute value as integer.
+     * @throws NumberFormatException if the attribute type is ASCII but cannot be converted to a number
      */
     public int getAttributeInt(String name, int defaultValue) {
         final MetadataAttribute attribute = getAttribute(name);
         if (attribute == null) {
             return defaultValue;
         }
-        if(attribute.getDataType() == ProductData.TYPE_ASCII)
+        if (attribute.getDataType() == ProductData.TYPE_ASCII) {
             return Integer.parseInt(attribute.getData().getElemString());
+        }
         return attribute.getData().getElemInt();
     }
 
@@ -430,18 +431,19 @@ public class MetadataElement extends ProductNode {
      * Returns the integer value of the attribute with the given name. <p>An Exception is thrown if an
      * attribute with the given name could not be found in this node.
      *
-     * @param name         the attribute name
-     * @throws Exception when attribute not found
-     *
+     * @param name the attribute name
      * @return the attribute value as integer.
+     * @throws NumberFormatException    if the attribute type is ASCII but cannot be converted to a number
+     * @throws IllegalArgumentException if an attribute with the given name could not be found
      */
-    public int getAttributeInt(String name) throws Exception {
+    public int getAttributeInt(String name) {
         final MetadataAttribute attribute = getAttribute(name);
         if (attribute == null) {
-            throw new Exception("Metadata Attribute "+name+" not found");
+            throw new IllegalArgumentException(getAttributeNotFoundMessage(name));
         }
-        if(attribute.getDataType() == ProductData.TYPE_ASCII)
+        if (attribute.getDataType() == ProductData.TYPE_ASCII) {
             return Integer.parseInt(attribute.getData().getElemString());
+        }
         return attribute.getData().getElemInt();
     }
 
@@ -494,15 +496,14 @@ public class MetadataElement extends ProductNode {
      * Returns the string value of the attribute with the given name. <p>An Exception is thrown if an
      * attribute with the given name could not be found in this node.
      *
-     * @param name         the attribute name
-     * @throws Exception when attribute not found
-     *
+     * @param name the attribute name
      * @return the attribute value as integer.
+     * @throws IllegalArgumentException if an attribute with the given name could not be found
      */
-    public String getAttributeString(String name) throws Exception {
+    public String getAttributeString(String name) {
         final MetadataAttribute attribute = getAttribute(name);
         if (attribute == null) {
-            throw new Exception("Metadata Attribute "+name+" not found");
+            throw new IllegalArgumentException(getAttributeNotFoundMessage(name));
         }
         return attribute.getData().getElemString();
     }
@@ -513,7 +514,6 @@ public class MetadataElement extends ProductNode {
      *
      * @param name         the attribute name
      * @param defaultValue the default value
-     *
      * @return the attribute value as integer.
      */
     public String getAttributeString(String name, String defaultValue) {
@@ -544,7 +544,6 @@ public class MetadataElement extends ProductNode {
      * modified flag of all children to <code>false</code>.
      *
      * @param modified <code>true</code> if this node has been modified, <code>false otherwise</code>
-     *
      * @see ProductNode#setModified
      */
     @Override
@@ -599,21 +598,10 @@ public class MetadataElement extends ProductNode {
         return attribute;
     }
 
-    private MetadataAttribute getAndMaybeCreateAttribute(final String name, final String value) {
-        MetadataAttribute attribute = getAttribute(name);
-        if (attribute == null) {
-            final ProductData data = ProductData.createInstance(value);
-            attribute = new MetadataAttribute(name, data, false);
-            addAttribute(attribute);
-        }
-        return attribute;
-    }
-
     /**
      * Gets an estimated, raw storage size in bytes of this product node.
      *
      * @param subsetDef if not <code>null</code> the subset may limit the size returned
-     *
      * @return the size in bytes.
      */
     @Override

@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetBuilder.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: ProductSubsetBuilder.java,v 1.2 2009-04-28 17:38:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +31,7 @@ import java.util.Arrays;
  * A special-purpose product reader used to build subsets of data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-04-28 17:38:56 $
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
@@ -515,7 +515,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             if (isNodeAccepted(bandName)) {
                 Band destBand;
                 boolean treatVirtualBandsAsRealBands = false;
-                if(getSubsetDef() != null && getSubsetDef().treatVirtualBandsAsRealBands())
+                if(getSubsetDef() != null && getSubsetDef().getTreatVirtualBandsAsRealBands())
                     treatVirtualBandsAsRealBands = true;
 
                 //@todo 1 se/se - extract copy of a band or virtual band to create deep clone of band and virtual band

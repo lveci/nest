@@ -1,5 +1,5 @@
 /*
- * $Id: Record.java,v 1.1 2009-04-28 14:37:13 lveci Exp $
+ * $Id: Record.java,v 1.2 2009-04-28 17:38:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -28,7 +28,7 @@ import java.io.IOException;
  * <p> A record performs its <code>readFrom</code> operation by delegating it sequentially to all of its fields.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:13 $
+ * @version $Revision: 1.2 $ $Date: 2009-04-28 17:38:56 $
  */
 public class Record {
 

@@ -13,6 +13,8 @@ import java.util.ArrayList;
  */
 public final class AsarAbstractMetadata {
 
+    public static final String ABSTRACTED_METADATA_ROOT_NAME = "Abstracted Metadata";
+
     private final String _productType;
     private final String _version;
     private final File _file;
@@ -29,7 +31,7 @@ public final class AsarAbstractMetadata {
      * @param root the product metadata root
      */
     void addAbstractedMetadataHeader(Product product, MetadataElement root) {
-        final MetadataElement absRoot = new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        final MetadataElement absRoot = new MetadataElement(ABSTRACTED_METADATA_ROOT_NAME);
         product.getMetadataRoot().addElementAt(absRoot, 0);
 
         final MetadataElement mph = root.getElement("MPH");

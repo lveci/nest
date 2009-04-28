@@ -48,7 +48,6 @@ public class EnvisatOrbitReaderTest extends TestCase {
 
         ProductData.UTC utc = new ProductData.UTC(orb.utcTime);
         assertEquals("01-APR-2008 21:55:27.000000", utc.format());
-        //assertEquals("01-APR-2008 21:55:27.000000", orb.utcTime.format());
         assertEquals(-3300453.451, orb.xPos);
         assertEquals(881817.654, orb.yPos);
         assertEquals(-6304026.222, orb.zPos);
@@ -71,7 +70,6 @@ public class EnvisatOrbitReaderTest extends TestCase {
 
         ProductData.UTC utc = new ProductData.UTC(orb.utcTime);
         assertEquals("01-MAR-2008 21:55:27.000000", utc.format());
-        //assertEquals("01-MAR-2008 21:55:27.000000", orb.utcTime.format());
         assertEquals(6494931.106, orb.xPos);
         assertEquals(578715.148, orb.yPos);
         assertEquals(-2977719.455, orb.zPos);

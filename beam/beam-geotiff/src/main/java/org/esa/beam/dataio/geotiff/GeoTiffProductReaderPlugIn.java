@@ -1,5 +1,5 @@
 /*
- * $Id: GeoTiffProductReaderPlugIn.java,v 1.1 2009-04-28 14:37:14 lveci Exp $
+ * $Id: GeoTiffProductReaderPlugIn.java,v 1.2 2009-04-28 17:38:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -35,9 +35,10 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
 
     private static final String[] FORMAT_NAMES = new String[]{"GeoTIFF"};
 
+    @Override
     public DecodeQualification getDecodeQualification(Object input) {
         try {
-                final File file = Utils.getFile(input);
+            final File file = Utils.getFile(input);
             final ImageInputStream stream = ImageIO.createImageInputStream(file);
 
             try {
@@ -56,16 +57,17 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
         try {
             Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(stream);
             TIFFImageReader imageReader = null;
-            while(imageReaders.hasNext()) {
+            while (imageReaders.hasNext()) {
                 final ImageReader reader = imageReaders.next();
-                if(reader instanceof TIFFImageReader) {
+                if (reader instanceof TIFFImageReader) {
                     imageReader = (TIFFImageReader) reader;
                     break;
                 }
             }
-            if(imageReader == null)
+            if (imageReader == null) {
                 return DecodeQualification.UNABLE;
-            
+            }
+
             imageReader.setInput(stream);
 
             final TIFFImageMetadata imageMetadata = (TIFFImageMetadata) imageReader.getImageMetadata(0);
@@ -81,26 +83,32 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
         return DecodeQualification.SUITABLE;
     }
 
+    @Override
     public Class[] getInputTypes() {
         return new Class[]{String.class, File.class};
     }
 
+    @Override
     public ProductReader createReaderInstance() {
         return new GeoTiffProductReader(this);
     }
 
+    @Override
     public String[] getFormatNames() {
         return FORMAT_NAMES;
     }
 
+    @Override
     public String[] getDefaultFileExtensions() {
         return new String[]{".tif", ".tiff"};
     }
 
+    @Override
     public String getDescription(Locale locale) {
         return "GeoTIFF data product.";
     }
 
+    @Override
     public BeamFileFilter getProductFileFilter() {
         return new BeamFileFilter(FORMAT_NAMES[0], getDefaultFileExtensions(), getDescription(null));
     }

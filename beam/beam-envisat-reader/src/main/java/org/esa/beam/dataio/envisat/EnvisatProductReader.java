@@ -1,5 +1,5 @@
 /*
- * $Id: EnvisatProductReader.java,v 1.1 2009-04-28 14:37:13 lveci Exp $
+ * $Id: EnvisatProductReader.java,v 1.2 2009-04-28 17:38:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -18,9 +18,20 @@ package org.esa.beam.dataio.envisat;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.AbstractProductReader;
-import org.esa.beam.framework.dataio.ProductIOException;
 import org.esa.beam.framework.dataio.IllegalFileFormatException;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataio.ProductIOException;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.BitmaskDef;
+import org.esa.beam.framework.datamodel.BitmaskOverlayInfo;
+import org.esa.beam.framework.datamodel.MetadataAttribute;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.PointingFactory;
+import org.esa.beam.framework.datamodel.PointingFactoryRegistry;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.TiePointGeoCoding;
+import org.esa.beam.framework.datamodel.TiePointGrid;
+import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.ArrayUtils;
 import org.esa.beam.util.Debug;
@@ -41,7 +52,7 @@ import java.util.Vector;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:13 $
+ * @version $Revision: 1.2 $ $Date: 2009-04-28 17:38:56 $
  * @see org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn
  */
 public class EnvisatProductReader extends AbstractProductReader {
@@ -162,7 +173,7 @@ public class EnvisatProductReader extends AbstractProductReader {
         final BandLineReader bandLineReader = getBandLineReader(destBand);
         final int sourceMinX = sourceOffsetX;
         final int sourceMinY = sourceOffsetY;
-        final int sourceMaxX = Math.min(destBand.getRasterWidth()-1, sourceMinX + sourceWidth - 1);
+        final int sourceMaxX = Math.min(destBand.getRasterWidth() - 1, sourceMinX + sourceWidth - 1);
         final int sourceMaxY = sourceMinY + sourceHeight - 1;
         int destArrayPos = 0;
 
@@ -177,8 +188,8 @@ public class EnvisatProductReader extends AbstractProductReader {
                 }
 
                 bandLineReader.readRasterLine(sourceMinX, sourceMaxX, sourceStepX,
-                                                sourceY, 
-                                                destBuffer, destArrayPos);
+                                              sourceY,
+                                              destBuffer, destArrayPos);
 
                 destArrayPos += destWidth;
                 pm.worked(sourceStepY);
@@ -200,6 +211,7 @@ public class EnvisatProductReader extends AbstractProductReader {
         if (file != null) {
             final String mission = AsarAbstractMetadata.getMission(getProductFile().getProductType(), file);
             productName = mission + '-' + file.getName();
+//            		productName = file.getName();
         } else {
             productName = getProductFile().getProductId();
         }
