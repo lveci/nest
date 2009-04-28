@@ -335,12 +335,12 @@ public final class AsarAbstractMetadata {
         double xPos, yPos, zPos, xVel, yVel, zVel;
         try {
             utcTime = mppAds.getAttributeUTC(orbitPrefix+".state_vect_time_1");
-            xPos = mppAds.getAttributeDouble(orbitPrefix+".x_pos_1");
-            yPos = mppAds.getAttributeDouble(orbitPrefix+".y_pos_1");
-            zPos = mppAds.getAttributeDouble(orbitPrefix+".z_pos_1");
-            xVel = mppAds.getAttributeDouble(orbitPrefix+".x_vel_1");
-            yVel = mppAds.getAttributeDouble(orbitPrefix+".y_vel_1");
-            zVel = mppAds.getAttributeDouble(orbitPrefix+".z_vel_1");
+            xPos = mppAds.getAttributeDouble(orbitPrefix+".x_pos_1") / 100.0; // 10^-2 m to m
+            yPos = mppAds.getAttributeDouble(orbitPrefix+".y_pos_1") / 100.0; // 10^-2 m to m
+            zPos = mppAds.getAttributeDouble(orbitPrefix+".z_pos_1") / 100.0; // 10^-2 m to m
+            xVel = mppAds.getAttributeDouble(orbitPrefix+".x_vel_1") / 100000.0; // 10^-5 m/s to m/s
+            yVel = mppAds.getAttributeDouble(orbitPrefix+".y_vel_1") / 100000.0; // 10^-5 m/s to m/s
+            zVel = mppAds.getAttributeDouble(orbitPrefix+".z_vel_1") / 100000.0; // 10^-5 m/s to m/s
         } catch(Exception e) {
             System.out.println(e.getMessage());
             return;
