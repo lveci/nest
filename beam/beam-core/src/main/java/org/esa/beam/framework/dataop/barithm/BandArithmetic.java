@@ -1,5 +1,5 @@
 /*
- * $Id: BandArithmetic.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: BandArithmetic.java,v 1.2 2009-04-29 19:35:16 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -276,11 +276,11 @@ public class BandArithmetic {
         if (rasters.length == 0) {
             return validMaskExpression;
         }
-        if (validMaskExpression == null && rasters.length == 1) {
+        final Product contextProduct = products[defaultProductIndex];
+        if (validMaskExpression == null && rasters.length == 1 && contextProduct == rasters[0].getProduct()) {
             return rasters[0].getValidMaskExpression();
         }
 
-        final Product contextProduct = products[defaultProductIndex];
         final List<String> vmes = new ArrayList<String>(rasters.length);
         for (RasterDataNode raster : rasters) {
             String vme = raster.getValidMaskExpression();

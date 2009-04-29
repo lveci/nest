@@ -66,7 +66,7 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
     private float spectrum[][] = null;
 
     public static final Color colourTable[] = (new Color[]{
-            new Color(0, 0, 0), new Color(0, 0, 255), new Color(0, 255, 255),
+            new Color(255, 255, 255), new Color(0, 0, 255), new Color(0, 255, 255),
             new Color(0, 255, 0), new Color(255, 255, 0), new Color(255, 0, 0)
     });
     private static final double rings[] = {50.0, 100.0, 200.0};

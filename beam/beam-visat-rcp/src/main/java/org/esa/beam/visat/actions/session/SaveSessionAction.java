@@ -1,5 +1,5 @@
 /*
- * $Id: SaveSessionAction.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: SaveSessionAction.java,v 1.2 2009-04-29 19:35:16 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,10 +32,11 @@ import java.util.ArrayList;
  * Saves a VISAT session.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2009-04-29 19:35:16 $
  * @since BEAM 4.6
  */
 public class SaveSessionAction extends ExecCommand {
+
     public static final String ID = "saveSession";
     private static final String TITLE = "Save Session As";
 
@@ -60,8 +61,8 @@ public class SaveSessionAction extends ExecCommand {
         }
         if (!noFileProducts.isEmpty()) {
             StringBuilder sb = new StringBuilder(
-                    "The session connot be saved because the following" +
-                            "products have not been saved yet:\n");
+                    "The session connot be saved because the following " +
+                    "products have not been saved yet:\n");
             for (Product product : noFileProducts) {
                 sb.append("  ");
                 sb.append(product.getDisplayName());
@@ -72,11 +73,12 @@ public class SaveSessionAction extends ExecCommand {
         }
         File sessionFile = app.getSessionFile();
         if (sessionFile == null || saveAs) {
-             sessionFile = app.showFileSaveDialog(TITLE, false,
-                                                        OpenSessionAction.SESSION_FILE_FILTER,
-                                                        OpenSessionAction.SESSION_FILE_FILTER.getDefaultExtension(),
-                                                        sessionFile != null ? sessionFile.getName() : System.getProperty("user.name", "noname"),
-                                                        OpenSessionAction.LAST_SESSION_DIR_KEY);
+            sessionFile = app.showFileSaveDialog(TITLE, false,
+                                                 OpenSessionAction.SESSION_FILE_FILTER,
+                                                 OpenSessionAction.SESSION_FILE_FILTER.getDefaultExtension(),
+                                                 sessionFile != null ? sessionFile.getName() : System.getProperty(
+                                                         "user.name", "noname"),
+                                                 OpenSessionAction.LAST_SESSION_DIR_KEY);
             if (sessionFile == null) {
                 return;
             }

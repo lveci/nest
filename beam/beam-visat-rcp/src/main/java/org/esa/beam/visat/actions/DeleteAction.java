@@ -1,5 +1,5 @@
 /*
- * $Id: DeleteAction.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: DeleteAction.java,v 1.2 2009-04-29 19:35:16 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -38,7 +38,7 @@ import java.util.List;
  * This action deletes the currently selected product node, if possible.
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2009-04-29 19:35:16 $
  */
 public class DeleteAction extends ExecCommand {
 
@@ -56,7 +56,7 @@ public class DeleteAction extends ExecCommand {
         if (object instanceof Band) {
             final Band band = (Band) object;
             final String[] virtualBands = getVirtualBandsReferencing(band);
-            final String[] validMaskNodes = getRasterDataNodesVaidMaskReferencing(band);
+            final String[] validMaskNodes = getRasterDataNodesValidMaskReferencing(band);
             final String[] roiNodes = getRasterDataNodesRoiReferencing(band);
             final String[] bitmaskDefs = getBitmaskDefsReferencing(band);
             String message = "Do you really want to delete the band '" + band.getName() + "'?\n"
@@ -65,30 +65,31 @@ public class DeleteAction extends ExecCommand {
                 || validMaskNodes.length > 0
                 || roiNodes.length > 0
                 || bitmaskDefs.length > 0) {
-                message += "The band to be deleted was referenced by:\n"; /*I18N*/
+                message += "The band to be deleted is referenced by\n"; /*I18N*/
             }
+            String indent = "    ";
             if (virtualBands.length > 0) {
-                message += "  - Expression of virtual band -\n"; /*I18N*/
+                message += "the expression of virtual band(s):\n"; /*I18N*/
                 for (String virtualBand : virtualBands) {
-                    message += "      " + virtualBand + "\n";
+                    message += indent + virtualBand + "\n";
                 }
             }
             if (validMaskNodes.length > 0) {
-                message += "  - Valid mask expression of band or tie point grid -\n"; /*I18N*/
+                message += "the valid-mask expression of band(s) or tie-point grid(s)\n"; /*I18N*/
                 for (String validMaskNode : validMaskNodes) {
-                    message += "      " + validMaskNode + "\n";
+                    message += indent + validMaskNode + "\n";
                 }
             }
             if (roiNodes.length > 0) {
-                message += "  - ROI of band or tie point grid -\n"; /*I18N*/
+                message += "the ROI of band(s) or tie-point grid(s):\n"; /*I18N*/
                 for (String roiNode : roiNodes) {
-                    message += "      " + roiNode + "\n";
+                    message += indent + roiNode + "\n";
                 }
             }
             if (bitmaskDefs.length > 0) {
-                message += "  - Bitmask definition -\n"; /*I18N*/
+                message += "the bitmask definition(s):\n"; /*I18N*/
                 for (String bitmaskDef : bitmaskDefs) {
-                    message += "      " + bitmaskDef + "\n";
+                    message += indent + bitmaskDef + "\n";
                 }
             }
 
@@ -119,7 +120,7 @@ public class DeleteAction extends ExecCommand {
         return VisatApp.getApp().getSelectedProductNode() instanceof Band;
     }
 
-    private static String[] getRasterDataNodesVaidMaskReferencing(final RasterDataNode node) {
+    private static String[] getRasterDataNodesValidMaskReferencing(final RasterDataNode node) {
         final Product product = node.getProduct();
         final List<String> namesList = new ArrayList<String>();
         if (product != null) {
