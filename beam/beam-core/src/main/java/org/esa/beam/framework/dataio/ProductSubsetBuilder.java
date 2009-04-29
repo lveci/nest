@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetBuilder.java,v 1.3 2009-04-29 15:00:08 lveci Exp $
+ * $Id: ProductSubsetBuilder.java,v 1.4 2009-04-29 17:03:49 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +31,7 @@ import java.util.Arrays;
  * A special-purpose product reader used to build subsets of data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-04-29 15:00:08 $
+ * @version $Revision: 1.4 $ $Date: 2009-04-29 17:03:49 $
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
@@ -53,11 +53,11 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         ProductSubsetBuilder productSubsetBuilder = new ProductSubsetBuilder(sourceProductOwner);
         final Product resultingProduct = productSubsetBuilder.readProductNodes(sourceProduct, subsetDef, name, desc);
 
-        updateMetadata(resultingProduct);
+        updateMetadata(resultingProduct, subsetDef);
         return resultingProduct;
     }
 
-    private static void updateMetadata(final Product product) throws IOException {
+    private static void updateMetadata(final Product product, ProductSubsetDef subsetDef) throws IOException {
         try {
             final MetadataElement root = product.getMetadataRoot();
             if(root == null) return;
@@ -101,18 +101,20 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             if(width != null)
                 width.getData().setElemUInt(product.getSceneRasterWidth());
 
-            setSubsetSRGRCoefficients(product, absRoot);
+            setSubsetSRGRCoefficients(product, subsetDef, absRoot);
         } catch(Exception e) {
             throw new IOException(e);
         }
     }
 
-    private static void setSubsetSRGRCoefficients(final Product product, final MetadataElement absRoot) {
+    private static void setSubsetSRGRCoefficients(final Product product, final ProductSubsetDef subsetDef,
+                                                  final MetadataElement absRoot) {
         final MetadataElement SRGRCoefficientsElem = absRoot.getElement("SRGR_Coefficients");
         if(SRGRCoefficientsElem != null) {
             final double startTime = product.getStartTime().getMJD();
             final double endTime = product.getEndTime().getMJD();
             final double rangeSpacing = absRoot.getAttributeDouble("RANGE_SPACING", 0);
+            final double colIndex = subsetDef.getRegion().getX();
 
             // find item before start time
             MetadataElement itemBeforeStart = null;
@@ -136,7 +138,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                     SRGRCoefficientsElem.removeElement(srgrList);
                 } else {
                     final double grO = srgrList.getAttributeDouble("ground_range_origin", 0);
-                    final double ground_range_origin_subset = grO + 1000*rangeSpacing;
+                    final double ground_range_origin_subset = grO + colIndex*rangeSpacing;
                     srgrList.setAttributeDouble("ground_range_origin", ground_range_origin_subset);
                 }
             }
