@@ -108,6 +108,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private double rangeSpacing = 0.0;
     private double azimuthSpacing = 0.0;
     private double firstLineUTC = 0.0; // in days
+    private double lastLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
     private double demNoDataValue = 0.0; // no data value for DEM
     private double firstNearLat = 0.0;
@@ -167,7 +168,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
             getRangeAzimuthSpacings();
 
-            getFirstLineTime();
+            getFirstLastLineTimes();
 
             getLineTimeInterval();
 
@@ -232,17 +233,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @throws Exception The exceptions.
      */
     private void getOrbitStateVectors() throws Exception {
-
         orbitStateVectors = AbstractMetadata.getOrbitStateVectors(absRoot);
-       /* for (int i = 0; i < orbitStateVectors.length; i++) {
-            System.out.println("utcTime = " + orbitStateVectors[i].time);
-            System.out.println("xPos = " + orbitStateVectors[i].x_pos);
-            System.out.println("yPos = " + orbitStateVectors[i].y_pos);
-            System.out.println("zPos = " + orbitStateVectors[i].z_pos);
-            System.out.println("xVel = " + orbitStateVectors[i].x_vel);
-            System.out.println("yVel = " + orbitStateVectors[i].y_vel);
-            System.out.println("zVel = " + orbitStateVectors[i].z_vel);
-        }       */
     }
 
     /**
@@ -250,17 +241,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @throws Exception The exceptions.
      */
     private void getSrgrCoeff() throws Exception {
-
         srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
-        /*
-        for (int i = 0; i < srgrConvParams.length; i++) {
-            System.out.println("time = " + srgrConvParams[i].time);
-            System.out.println("ground_range_origin = " + srgrConvParams[i].ground_range_origin);
-            for (int j = 0; j < srgrConvParams[i].coefficients.length; j++) {
-                System.out.print("s[" + j + "] = " + srgrConvParams[i].coefficients[j] + ", ");
-            }
-        }
-        */
     }
 
     /**
@@ -342,8 +323,9 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * Get first line time from the abstracted metadata (in days).
      * @throws Exception The exceptions.
      */
-    private void getFirstLineTime() throws Exception {
+    private void getFirstLastLineTimes() throws Exception {
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
+        lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD(); // in days
     }
 
     /**
@@ -545,7 +527,6 @@ public final class RangeDopplerGeocodingOp extends Operator {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.srgr_flag, 1);
-        //AbstractMetadata.setAttribute(absTgt, AbstractMetadata.isMapProjected, 1);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetImageHeight);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_lat, latMax);
@@ -634,7 +615,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
         final int y0 = targetTileRectangle.y;
         final int w  = targetTileRectangle.width;
         final int h  = targetTileRectangle.height;
-        //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+        System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
         if (srcBandNames.length == 1) {
@@ -798,16 +779,18 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
         double rangeIndex = 0.0;
 
+        if (zeroDopplerTime < firstLineUTC || zeroDopplerTime > lastLineUTC) {
+            return -1.0;
+        }
+
         if (srgrFlag) { // ground detected image
 
-            int i;
-            for (i = 0; i < srgrConvParams.length; i++) {
-                if (zeroDopplerTime < srgrConvParams[i].time.getMJD()) {
-                    break;
-                }
+            int idx = 0;
+            for (int i = 0; i < srgrConvParams.length && zeroDopplerTime >= srgrConvParams[i].time.getMJD(); i++) {
+                idx = i;
             }
-            final double groundRange = computeGroundRange(slantRange, srgrConvParams[i-1].coefficients);
-            rangeIndex = (groundRange - srgrConvParams[i-1].ground_range_origin) / rangeSpacing;
+            final double groundRange = computeGroundRange(slantRange, srgrConvParams[idx].coefficients);
+            rangeIndex = (groundRange - srgrConvParams[idx].ground_range_origin) / rangeSpacing;
 
         } else { // slant range image
 
