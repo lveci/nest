@@ -1,5 +1,5 @@
 /*
- * $Id: ElevationModel.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ElevationModel.java,v 1.2 2009-04-29 15:00:08 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -14,7 +14,7 @@ import org.esa.beam.framework.dataop.resamp.Resampling;
  * specified geographical datum for a given geographical position.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface ElevationModel {
 
@@ -33,10 +33,10 @@ public interface ElevationModel {
     float getElevation(GeoPos geoPos) throws Exception;
 
     /**
-     * Sets the resampling method to use
-     * @param method the interpolation
+     * @return The resampling method used.
+     * @since BEAM 4.6
      */
-    void setResamplingMethod(Resampling method);
+    Resampling getResampling();
 
     /**
      * Releases all of the resources used by this object instance and all of its owned children. Its primary use is to

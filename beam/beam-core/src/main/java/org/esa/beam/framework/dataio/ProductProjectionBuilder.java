@@ -1,5 +1,5 @@
 /*
- * $Id: ProductProjectionBuilder.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: ProductProjectionBuilder.java,v 1.2 2009-04-29 15:00:08 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -40,7 +40,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * A special purpose product reader used to build map-projected data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-04-29 15:00:08 $
  */
 public class ProductProjectionBuilder extends AbstractProductBuilder {
 
@@ -95,7 +95,7 @@ public class ProductProjectionBuilder extends AbstractProductBuilder {
                 if (!demDescriptor.isDemInstalled()) {
                     throw new IOException("DEM not installed: " + demName);
                 }
-                productProjectionBuilder.setElevationModel(demDescriptor.createDem());
+                productProjectionBuilder.setElevationModel(demDescriptor.createDem(Resampling.BILINEAR_INTERPOLATION));
             } else {
                 productProjectionBuilder.setElevationModel(null); // force use of elevation from tie-points
             }

@@ -4,6 +4,7 @@ package org.esa.nest.dataio.dem.ace;
 import org.esa.beam.framework.dataop.dem.AbstractElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.maptransf.Datum;
+import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.util.SystemUtils;
 import org.esa.nest.util.Settings;
 
@@ -65,9 +66,18 @@ public class ACEElevationModelDescriptor extends AbstractElevationModelDescripto
         }
     }
 
+    @Deprecated
     public ElevationModel createDem() {
         try {
-            return new ACEElevationModel(this);
+            return new ACEElevationModel(this, Resampling.BILINEAR_INTERPOLATION);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    public ElevationModel createDem(Resampling resamplingMethod) {
+        try {
+            return new ACEElevationModel(this, resamplingMethod);
         } catch (IOException e) {
             return null;
         }

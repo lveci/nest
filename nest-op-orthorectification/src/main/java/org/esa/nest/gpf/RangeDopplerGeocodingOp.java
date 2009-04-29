@@ -369,17 +369,18 @@ public final class RangeDopplerGeocodingOp extends Operator {
             throw new OperatorException("The DEM '" + demName + "' is currently being installed.");
         }
 
-        dem = demDescriptor.createDem();
-        if(dem == null) {
-            throw new OperatorException("The DEM '" + demName + "' has not been installed.");
+        Resampling resamplingMethod = Resampling.BILINEAR_INTERPOLATION;
+        if(demResamplingMethod.equals(NEAREST_NEIGHBOUR)) {
+            resamplingMethod = Resampling.NEAREST_NEIGHBOUR;
+        } else if(demResamplingMethod.equals(BILINEAR)) {
+            resamplingMethod = Resampling.BILINEAR_INTERPOLATION;
+        } else if(demResamplingMethod.equals(CUBIC)) {
+            resamplingMethod = Resampling.CUBIC_CONVOLUTION;
         }
 
-        if(demResamplingMethod.equals(NEAREST_NEIGHBOUR)) {
-            dem.setResamplingMethod(Resampling.NEAREST_NEIGHBOUR);
-        } else if(demResamplingMethod.equals(BILINEAR)) {
-            dem.setResamplingMethod(Resampling.BILINEAR_INTERPOLATION);
-        } else if(demResamplingMethod.equals(CUBIC)) {
-            dem.setResamplingMethod(Resampling.CUBIC_CONVOLUTION);
+        dem = demDescriptor.createDem(resamplingMethod);
+        if(dem == null) {
+            throw new OperatorException("The DEM '" + demName + "' has not been installed.");
         }
 
         demNoDataValue = dem.getDescriptor().getNoDataValue();

@@ -79,18 +79,20 @@ public final class CreateElevationOp extends Operator {
             if (demDescriptor.isInstallingDem())
                 throw new OperatorException("The DEM '" + demName + "' is currently being installed.");
 
-            dem = demDescriptor.createDem();
+            Resampling resamplingMethod = Resampling.BILINEAR_INTERPOLATION;
+            if(resamplingMethod.equals(NEAREST_NEIGHBOUR)) {
+                resamplingMethod = Resampling.NEAREST_NEIGHBOUR;
+            } else if(resamplingMethod.equals(BILINEAR)) {
+                resamplingMethod = Resampling.BILINEAR_INTERPOLATION;
+            } else if(resamplingMethod.equals(CUBIC)) {
+                resamplingMethod = Resampling.CUBIC_CONVOLUTION;
+            }
+
+            dem = demDescriptor.createDem(resamplingMethod);
             if(dem == null)
                 throw new OperatorException("The DEM '" + demName + "' has not been installed.");
             
             createTargetProduct();
-
-            if(resamplingMethod.equals(NEAREST_NEIGHBOUR))
-                dem.setResamplingMethod(Resampling.NEAREST_NEIGHBOUR);
-            else if(resamplingMethod.equals(BILINEAR))
-                dem.setResamplingMethod(Resampling.BILINEAR_INTERPOLATION);
-            else if(resamplingMethod.equals(CUBIC))
-                dem.setResamplingMethod(Resampling.CUBIC_CONVOLUTION); 
 
             final float noDataValue = dem.getDescriptor().getNoDataValue();
             elevationBand = targetProduct.addBand(elevationBandName, ProductData.TYPE_INT16);

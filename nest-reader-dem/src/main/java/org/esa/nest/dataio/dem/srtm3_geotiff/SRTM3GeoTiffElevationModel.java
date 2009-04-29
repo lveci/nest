@@ -38,21 +38,20 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
 
     final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn();
 
-    public SRTM3GeoTiffElevationModel(SRTM3GeoTiffElevationModelDescriptor descriptor) throws IOException {
+    public SRTM3GeoTiffElevationModel(SRTM3GeoTiffElevationModelDescriptor descriptor, Resampling resamplingMethod) throws IOException {
         _descriptor = descriptor;
-        _resampling = Resampling.BILINEAR_INTERPOLATION;
+        _resampling = resamplingMethod;
         _resamplingIndex = _resampling.createIndex();
         _resamplingRaster = this;
         elevationFiles = createElevationFiles();
     }
 
     /**
-     * Sets the resampling method to use
-     * @param method the interpolation
+     * @return The resampling method used.
+     * @since BEAM 4.6
      */
-    public void setResamplingMethod(Resampling method) {
-        _resampling = method;
-        _resamplingIndex = _resampling.createIndex();
+    public Resampling getResampling() {
+        return _resampling;
     }
 
     public ElevationModelDescriptor getDescriptor() {

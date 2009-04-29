@@ -4,6 +4,7 @@ package org.esa.nest.dataio.dem.srtm3_geotiff;
 import org.esa.beam.framework.dataop.dem.AbstractElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.maptransf.Datum;
+import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.util.SystemUtils;
 import org.esa.nest.util.Settings;
 
@@ -66,9 +67,18 @@ public class SRTM3GeoTiffElevationModelDescriptor extends AbstractElevationModel
         }
     }
 
+    @Deprecated
     public ElevationModel createDem() {
         try {
-            return new SRTM3GeoTiffElevationModel(this);
+            return new SRTM3GeoTiffElevationModel(this, Resampling.BILINEAR_INTERPOLATION);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    public ElevationModel createDem(Resampling resamplingMethod) {
+        try {
+            return new SRTM3GeoTiffElevationModel(this, resamplingMethod);
         } catch (IOException e) {
             return null;
         }

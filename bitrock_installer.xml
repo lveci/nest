@@ -3,6 +3,16 @@
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>2C</version>
     <licenseFile>LICENSE.txt</licenseFile>
+    <postInstallationActionList>
+        <associateWindowsFileExtension>
+            <extensions>N1 E1 E2</extensions>
+            <friendlyName>Envisat</friendlyName>
+            <icon>C:\build\nest\src\main\assembly\dat.ico</icon>
+            <mimeType></mimeType>
+            <progID></progID>
+            <scope>user</scope>
+        </associateWindowsFileExtension>
+    </postInstallationActionList>
     <compressionAlgorithm>lzma</compressionAlgorithm>
     <enableRollback>1</enableRollback>
     <enableTimestamp>1</enableTimestamp>
@@ -73,6 +83,36 @@
                         <distributionDirectory>
                             <origin>../dist/jre</origin>
                         </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-win.dir/auxdata</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-win.dir/bin</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-win.dir/commandline</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-win.dir/config</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-win.dir/graphs</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-win.dir/images</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-win.dir/lib</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-win.dir/licenses</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-win.dir/modules</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-win.dir/res</origin>
+                        </distributionDirectory>
                         <distributionFile>
                             <origin>target/nest-2C-bin-win.dir/VERSION.txt</origin>
                         </distributionFile>
@@ -125,41 +165,11 @@
                             <origin>target/nest-2C-bin-win.dir/nest-dat.exe</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/readme.html</origin>
+                            <origin>target/nest-2C-bin-win.dir/post-uninstall.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/uninstall.bat</origin>
+                            <origin>target/nest-2C-bin-win.dir/readme.html</origin>
                         </distributionFile>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/auxdata</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/bin</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/commandline</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/config</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/graphs</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/images</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/lib</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/licenses</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/modules</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/res</origin>
-                        </distributionDirectory>
                     </distributionFileList>
                 </folder>
                 <folder>
@@ -194,6 +204,13 @@
                     <windowsPath></windowsPath>
                 </startMenuShortcut>
             </startMenuShortcutList>
+        </component>
+        <component>
+            <name>newcomponent</name>
+            <description>New Component</description>
+            <canBeEdited>1</canBeEdited>
+            <selected>1</selected>
+            <show>1</show>
         </component>
     </componentList>
     <parameterList>

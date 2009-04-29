@@ -33,9 +33,9 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
     private Resampling.Index _resamplingIndex;
     private final Resampling.Raster _resamplingRaster;
 
-    public ACEElevationModel(ACEElevationModelDescriptor descriptor) throws IOException {
+    public ACEElevationModel(ACEElevationModelDescriptor descriptor, Resampling resamplingMethod) throws IOException {
         _descriptor = descriptor;
-        _resampling = Resampling.BILINEAR_INTERPOLATION;
+        _resampling = resamplingMethod;
         _resamplingIndex = _resampling.createIndex();
         _resamplingRaster = this;
         _elevationTiles = createEleveationTiles();
@@ -43,12 +43,11 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
     }
 
     /**
-     * Sets the resampling method to use
-     * @param method the interpolation
+     * @return The resampling method used.
+     * @since BEAM 4.6
      */
-    public void setResamplingMethod(Resampling method) {
-        _resampling = method;
-        _resamplingIndex = _resampling.createIndex();
+    public Resampling getResampling() {
+        return _resampling;
     }
 
     public ElevationModelDescriptor getDescriptor() {
