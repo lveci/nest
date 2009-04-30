@@ -562,24 +562,26 @@ public final class RangeDopplerGeocodingOp extends Operator {
      */
     private void computeSensorPositionsAndVelocities() {
 
-        final int numVerctors = orbitStateVectors.length;
+        final int numVectors = orbitStateVectors.length;
+        final int numVectorsUsed = Math.min(numVectors, 5);
+        final int d = numVectors / numVectorsUsed;
 
-        timeArray = new double[numVerctors];
-        xPosArray = new double[numVerctors];
-        yPosArray = new double[numVerctors];
-        zPosArray = new double[numVerctors];
-        final double[] xVelArray = new double[numVerctors];
-        final double[] yVelArray = new double[numVerctors];
-        final double[] zVelArray = new double[numVerctors];
+        timeArray = new double[numVectorsUsed];
+        xPosArray = new double[numVectorsUsed];
+        yPosArray = new double[numVectorsUsed];
+        zPosArray = new double[numVectorsUsed];
+        final double[] xVelArray = new double[numVectorsUsed];
+        final double[] yVelArray = new double[numVectorsUsed];
+        final double[] zVelArray = new double[numVectorsUsed];
 
-        for (int i = 0; i < numVerctors; i++) {
-            timeArray[i] = orbitStateVectors[i].time.getMJD();
-            xPosArray[i] = orbitStateVectors[i].x_pos; // m
-            yPosArray[i] = orbitStateVectors[i].y_pos; // m
-            zPosArray[i] = orbitStateVectors[i].z_pos; // m
-            xVelArray[i] = orbitStateVectors[i].x_vel; // m/s
-            yVelArray[i] = orbitStateVectors[i].y_vel; // m/s
-            zVelArray[i] = orbitStateVectors[i].z_vel; // m/s
+        for (int i = 0; i < numVectorsUsed; i++) {
+            timeArray[i] = orbitStateVectors[i*d].time.getMJD();
+            xPosArray[i] = orbitStateVectors[i*d].x_pos; // m
+            yPosArray[i] = orbitStateVectors[i*d].y_pos; // m
+            zPosArray[i] = orbitStateVectors[i*d].z_pos; // m
+            xVelArray[i] = orbitStateVectors[i*d].x_vel; // m/s
+            yVelArray[i] = orbitStateVectors[i*d].y_vel; // m/s
+            zVelArray[i] = orbitStateVectors[i*d].z_vel; // m/s
         }
 
         // Lagrange polynomial interpolation
@@ -625,7 +627,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
         final int y0 = targetTileRectangle.y;
         final int w  = targetTileRectangle.width;
         final int h  = targetTileRectangle.height;
-        System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+        //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
         if (srcBandNames.length == 1) {
