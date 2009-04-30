@@ -25,6 +25,7 @@
         <tocitem text="Colour Manipulation" target="showColorManipulationWnd"/>
 		<tocitem text="Product World Map" target="showWorldMapWnd"/>
         <tocitem text="Preferences Dialog" target="preferences"/>
+		<tocitem text="Polar View" target="polarView"/>
         
 		<tocitem text="Menus">
 			<tocitem text="Main Toolbar" target="mainToolbar"/>

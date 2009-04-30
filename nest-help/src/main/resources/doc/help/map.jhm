@@ -34,6 +34,7 @@
     <mapID target="propertyEditor" url="visat/PropertyEditor.html"/>
     <mapID target="productGrabber" url="visat/ProductGrabber.html"/>
     <mapID target="subsetDialog" url="visat/ProductSubsetDialog.html"/>
+	<mapID target="polarView" url="visat/PolarView.html"/>
 	
     <mapID target="importDimapProduct" url="general/BeamDimapFormat.html"/>
     <mapID target="importEnvisatProduct" url="readers/ImportEnvisat.html"/>
