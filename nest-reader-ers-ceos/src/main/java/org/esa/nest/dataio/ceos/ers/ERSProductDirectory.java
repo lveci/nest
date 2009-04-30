@@ -9,6 +9,7 @@ import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.util.Constants;
 
 import java.io.File;
 import java.io.IOException;
@@ -254,8 +255,15 @@ class ERSProductDirectory extends CEOSProductDirectory {
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
                 getProcTime(_volumeDirectoryFile.getVolumeDescriptorRecord()));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier,
-                sceneRec.getAttributeString("Processing system identifier").trim() );
+
+        final String psID = sceneRec.getAttributeString("Processing system identifier").trim();
+        if (psID.contains("PGS")) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier, "PGS");
+        } else { // VMP
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier, "VMP");
+        }
+        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier,
+        //        sceneRec.getAttributeString("Processing system identifier").trim() );
 
         final int absOrbit = Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.CYCLE, getCycle(absOrbit));
@@ -337,7 +345,38 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeDouble("Range sampling rate"));
 
         addOrbitStateVectors(absRoot, _leaderFile.getPlatformPositionRecord());
-        addSRGRCoefficients(absRoot, _leaderFile.getFacilityRecord());
+        addSRGRCoefficients(absRoot, facilityRec);
+
+        // convert srgr coefficients that are used to compute slant range time to new coefficients that are used to compute slant range
+        if (!psID.contains("PGS")) { // VMP
+
+            final double Fr = sceneRec.getAttributeDouble("Range sampling rate")*1000000; // MHz to Hz
+            final double T0 = sceneRec.getAttributeDouble("Zero-doppler range time of first range pixel")/1000; // ms to s
+
+            final MetadataElement srgrCoefficientsElem = absRoot.getElement(AbstractMetadata.srgr_coefficients);
+            final MetadataElement srgrListElem = srgrCoefficientsElem.getElement(AbstractMetadata.srgr_coef_list);
+
+            MetadataElement coefElem = srgrListElem.getElementAt(0);
+            double c0 = coefElem.getAttributeDouble(AbstractMetadata.srgr_coef);
+            c0 = (c0/Fr + T0)* Constants.halfLightSpeed;
+            AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, c0);
+
+            coefElem = srgrListElem.getElementAt(1);
+            double c1 = coefElem.getAttributeDouble(AbstractMetadata.srgr_coef);
+            c1 = c1/Fr*Constants.halfLightSpeed;
+            AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, c1);
+
+            coefElem = srgrListElem.getElementAt(2);
+            double c2 = coefElem.getAttributeDouble(AbstractMetadata.srgr_coef);
+            c2 = c2/Fr*Constants.halfLightSpeed;
+            AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, c2);
+
+            coefElem = srgrListElem.getElementAt(3);
+            double c3 = coefElem.getAttributeDouble(AbstractMetadata.srgr_coef);
+            c3 = c3/Fr*Constants.halfLightSpeed;
+            AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, c3);
+        }
+
     }
 
     private int isGroundRange() {
