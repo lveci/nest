@@ -28,6 +28,7 @@ import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.resamp.Resampling;
+import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
@@ -35,6 +36,7 @@ import org.esa.nest.util.MathUtils;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.Constants;
 import org.esa.nest.gpf.OperatorUtils;
+import org.esa.nest.dataio.ReaderUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -496,26 +498,34 @@ public final class RangeDopplerGeocodingOp extends Operator {
      */
     private void addGeoCoding() {
 
-        final int gridWidth = 2;
-        final int gridHeight = 2;
-
-        final float subSamplingX = targetImageWidth;
-        final float subSamplingY = targetImageHeight;
-
         final float[] latTiePoints = {(float)latMax, (float)latMax, (float)latMin, (float)latMin};
         final float[] lonTiePoints = {(float)lonMin, (float)lonMax, (float)lonMin, (float)lonMax};
 
-        final TiePointGrid latGrid = new TiePointGrid(
-                "latitude", gridWidth, gridHeight, 0.0f, 0.0f, subSamplingX, subSamplingY, latTiePoints);
+        final int gridWidth = 10;
+        final int gridHeight = 10;
 
-        final TiePointGrid lonGrid = new TiePointGrid(
-                "longitude", gridWidth, gridHeight, 0.0f, 0.0f, subSamplingX, subSamplingY, lonTiePoints);
+        final float[] fineLatTiePoints = new float[gridWidth*gridHeight];
+        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latTiePoints, fineLatTiePoints);
+
+        float subSamplingX = (float)targetImageWidth / (gridWidth - 1);
+        float subSamplingY = (float)targetImageHeight / (gridHeight - 1);
+
+        final TiePointGrid latGrid = new TiePointGrid("latitude", gridWidth, gridHeight, 0.5f, 0.5f,
+                subSamplingX, subSamplingY, fineLatTiePoints);
+        latGrid.setUnit(Unit.DEGREES);
+
+        final float[] fineLonTiePoints = new float[gridWidth*gridHeight];
+        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonTiePoints, fineLonTiePoints);
+
+        final TiePointGrid lonGrid = new TiePointGrid("longitude", gridWidth, gridHeight, 0.5f, 0.5f,
+                subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
+        lonGrid.setUnit(Unit.DEGREES);
+
+        final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
 
         targetProduct.addTiePointGrid(latGrid);
         targetProduct.addTiePointGrid(lonGrid);
-
-        final TiePointGeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
-        targetProduct.setGeoCoding(gc);
+        targetProduct.setGeoCoding(tpGeoCoding);
     }
 
     /**
