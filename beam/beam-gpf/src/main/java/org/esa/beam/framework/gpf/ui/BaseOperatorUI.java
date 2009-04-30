@@ -81,8 +81,12 @@ public abstract class BaseOperatorUI implements OperatorUI {
             final ValueDescriptor descriptor = model.getDescriptor();
             final DomConverter domConverter = descriptor.getDomConverter();
             if(domConverter != null) {
-                final DomElement childElement = parentElement.createChild(getElementName(model));
-                domConverter.convertValueToDom(model.getValue(), childElement);
+                try {
+                    final DomElement childElement = parentElement.createChild(getElementName(model));
+                    domConverter.convertValueToDom(model.getValue(), childElement);
+                } catch (ConversionException e) {
+                    e.printStackTrace();
+                }
             } else {
 
                 final String itemAlias = descriptor.getItemAlias();

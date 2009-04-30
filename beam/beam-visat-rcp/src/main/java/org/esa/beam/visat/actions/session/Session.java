@@ -51,7 +51,7 @@ import java.util.List;
  *
  * @author Ralf Quast
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-04-29 19:35:16 $
+ * @version $Revision: 1.4 $ $Date: 2009-04-30 13:24:27 $
  * @since BEAM 4.6
  */
 @XStreamAlias("session")
@@ -149,7 +149,11 @@ public class Session {
             final ValueContainer configuration = getConfiguration(layerContext, layer);
             final SessionDomConverter domConverter = new SessionDomConverter(productManager);
             final DomElement element = new DefaultDomElement("configuration");
-            domConverter.convertValueToDom(configuration, element);
+            try {
+                domConverter.convertValueToDom(configuration, element);
+            } catch (ConversionException e) {
+                e.printStackTrace();
+            }
             layerRefs[i] = new LayerRef(layer.getLayerType().getClass().getName(),
                                         layer.getId(),
                                         layer.getName(),

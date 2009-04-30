@@ -1,5 +1,5 @@
 /*
- * $Id: ProductNodeEvent.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ProductNodeEvent.java,v 1.2 2009-04-30 13:24:27 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -24,7 +24,7 @@ import org.esa.beam.util.Guardian;
  * A product node event informs a product change listener about the source of the notification.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2009-04-30 13:24:27 $
  * @see ProductNodeListener
  */
 public class ProductNodeEvent extends EventObject {
@@ -47,16 +47,6 @@ public class ProductNodeEvent extends EventObject {
         super(sourceNode);
         _propertyName = id == NODE_DATA_CHANGED ? "data" : null;
         _id = id;
-    }
-
-    /**
-     * Constructs a productEvent object.
-     *
-     * @param sourceNode   the source class where the object originates
-     * @param propertyName the name of the property that was changed
-     */
-    public ProductNodeEvent(final ProductNode sourceNode, final String propertyName) {
-        this(sourceNode, propertyName, null);
     }
 
     /**
