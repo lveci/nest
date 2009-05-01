@@ -1,5 +1,5 @@
 /*
- * $Id: SaveSessionAction.java,v 1.2 2009-04-29 19:35:16 lveci Exp $
+ * $Id: SaveSessionAction.java,v 1.3 2009-05-01 13:37:58 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,7 +32,7 @@ import java.util.ArrayList;
  * Saves a VISAT session.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-04-29 19:35:16 $
+ * @version $Revision: 1.3 $ $Date: 2009-05-01 13:37:58 $
  * @since BEAM 4.6
  */
 public class SaveSessionAction extends ExecCommand {
@@ -47,7 +47,7 @@ public class SaveSessionAction extends ExecCommand {
 
     @Override
     public final void updateState(final CommandEvent event) {
-        setEnabled(VisatApp.getApp().getProductManager().getProductCount() > 0);
+        setEnabled(true);
     }
 
     public void saveSession(boolean saveAs) {

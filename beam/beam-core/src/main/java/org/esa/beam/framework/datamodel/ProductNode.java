@@ -1,5 +1,5 @@
 /*
- * $Id: ProductNode.java,v 1.2 2009-04-30 13:24:27 lveci Exp $
+ * $Id: ProductNode.java,v 1.3 2009-05-01 13:37:58 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,7 +27,7 @@ import org.esa.beam.util.ObjectUtils;
  * product itself.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-04-30 13:24:27 $
+ * @version $Revision: 1.3 $ $Date: 2009-05-01 13:37:58 $
  */
 public abstract class ProductNode {
 
@@ -232,7 +232,6 @@ public abstract class ProductNode {
      *
      * @return the product, or <code>null</code> if this node was not owned by a product at the time this method was
      *         called
-     * @throws IllegalStateException if this node does not belong to a product
      */
     public Product getProduct() {
         if (product == null) {

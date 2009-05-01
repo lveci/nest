@@ -1,5 +1,5 @@
 /*
- * $Id: PropertyEditor.java,v 1.2 2009-04-28 13:21:31 lveci Exp $
+ * $Id: PropertyEditor.java,v 1.3 2009-05-01 13:37:58 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -531,18 +531,12 @@ public class PropertyEditor {
         }
 
         private void initNoDataValueParam() {
-            final double noDataValue = _rasterDataNode.getGeophysicalNoDataValue();
-            final Double value;
-            if (Double.isNaN(noDataValue)) {
-                value = new Double(0.0);
-            } else {
-                value = new Double(noDataValue);
-            }
+            final Double noDataValue = _rasterDataNode.getGeophysicalNoDataValue();
             final ParamProperties properties = new ParamProperties(Double.class);
             properties.setLabel("No-data value"); /*I18N*/
             properties.setDescription("The value used to indicate no-data"); /*I18N*/
             properties.setNumCols(13);
-            _paramNoDataValue = new Parameter("noDataValue", value, properties);
+            _paramNoDataValue = new Parameter("noDataValue", noDataValue, properties);
             _paramNoDataValue.getEditor().setEnabled(_rasterDataNode.isNoDataValueUsed());
         }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetBuilder.java,v 1.4 2009-04-29 17:03:49 lveci Exp $
+ * $Id: ProductSubsetBuilder.java,v 1.5 2009-05-01 13:37:58 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +31,7 @@ import java.util.Arrays;
  * A special-purpose product reader used to build subsets of data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2009-04-29 17:03:49 $
+ * @version $Revision: 1.5 $ $Date: 2009-05-01 13:37:58 $
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
@@ -52,6 +52,8 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                                               ProductSubsetDef subsetDef, String name, String desc) throws IOException {
         ProductSubsetBuilder productSubsetBuilder = new ProductSubsetBuilder(sourceProductOwner);
         final Product resultingProduct = productSubsetBuilder.readProductNodes(sourceProduct, subsetDef, name, desc);
+        resultingProduct.setStartTime(sourceProduct.getStartTime());
+        resultingProduct.setEndTime(sourceProduct.getEndTime());
 
         updateMetadata(resultingProduct, subsetDef);
         return resultingProduct;
@@ -111,29 +113,34 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                                                   final MetadataElement absRoot) {
         final MetadataElement SRGRCoefficientsElem = absRoot.getElement("SRGR_Coefficients");
         if(SRGRCoefficientsElem != null) {
-            final double startTime = product.getStartTime().getMJD();
-            final double endTime = product.getEndTime().getMJD();
+            final ProductData.UTC startTimeUTC = product.getStartTime();
+            final ProductData.UTC endTimeUTC = product.getEndTime();
+            final double startTime = startTimeUTC==null ? 0 : startTimeUTC.getMJD();
+            final double endTime = endTimeUTC==null ? 0 : endTimeUTC.getMJD();
             final double rangeSpacing = absRoot.getAttributeDouble("RANGE_SPACING", 0);
-            final double colIndex = subsetDef.getRegion().getX();
+            final double colIndex = subsetDef.getRegion() == null ? 0 : subsetDef.getRegion().getX();
 
             // find item before start time
             MetadataElement itemBeforeStart = null;
-            for(MetadataElement srgrList : SRGRCoefficientsElem.getElements()) {
-                final ProductData.UTC time = srgrList.getAttributeUTC("zero_doppler_time");
-                if(time.getMJD() < startTime) {
-                    if(itemBeforeStart == null) {
-                        itemBeforeStart = srgrList;
-                    } else {
-                        final ProductData.UTC minTimeSoFar = itemBeforeStart.getAttributeUTC("zero_doppler_time");
-                        if(startTime - minTimeSoFar.getMJD() < startTime - time.getMJD()) {
+            if(startTimeUTC != null && endTimeUTC != null) {
+                for(MetadataElement srgrList : SRGRCoefficientsElem.getElements()) {
+                    final ProductData.UTC time = srgrList.getAttributeUTC("zero_doppler_time");
+                    if(time.getMJD() < startTime) {
+                        if(itemBeforeStart == null) {
                             itemBeforeStart = srgrList;
+                        } else {
+                            final ProductData.UTC minTimeSoFar = itemBeforeStart.getAttributeUTC("zero_doppler_time");
+                            if(startTime - minTimeSoFar.getMJD() < startTime - time.getMJD()) {
+                                itemBeforeStart = srgrList;
+                            }
                         }
                     }
                 }
             }
             for(MetadataElement srgrList : SRGRCoefficientsElem.getElements()) {
                 final ProductData.UTC time = srgrList.getAttributeUTC("zero_doppler_time");
-                if((time.getMJD() < startTime || time.getMJD() > endTime) &&
+                if(startTimeUTC != null && endTimeUTC != null &&
+                   (time.getMJD() < startTime || time.getMJD() > endTime) &&
                         srgrList != itemBeforeStart) {
                     SRGRCoefficientsElem.removeElement(srgrList);
                 } else {

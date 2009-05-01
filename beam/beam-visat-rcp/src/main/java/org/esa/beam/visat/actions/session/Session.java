@@ -51,7 +51,7 @@ import java.util.List;
  *
  * @author Ralf Quast
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2009-04-30 13:24:27 $
+ * @version $Revision: 1.5 $ $Date: 2009-05-01 13:37:58 $
  * @since BEAM 4.6
  */
 @XStreamAlias("session")
@@ -305,8 +305,9 @@ public class Session {
                     }
                 } catch (Exception e) {
                     problems.add(e);
+                } finally {
+                    pm.worked(1);
                 }
-                pm.worked(1);
             }
         } finally {
             pm.done();

@@ -22,7 +22,7 @@ import java.util.Hashtable;
  * @author Ralf Quast
  * @author Marco Zühlke
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-01 13:37:58 $
  * @since BEAM 4.6
  */
 public class FeatureLayerEditor implements LayerEditor {
@@ -36,7 +36,7 @@ public class FeatureLayerEditor implements LayerEditor {
     @Override
     public JComponent createControl(AppContext appContext, Layer layer) {
         currentLayer = (FeatureLayer) layer;
-        Hashtable sliderLabelTable = new Hashtable();
+        Hashtable<Integer, JLabel> sliderLabelTable = new Hashtable<Integer, JLabel>();
         sliderLabelTable.put(0, createSliderLabel("0%"));
         sliderLabelTable.put(127, createSliderLabel("50%"));
         sliderLabelTable.put(255, createSliderLabel("100%"));
