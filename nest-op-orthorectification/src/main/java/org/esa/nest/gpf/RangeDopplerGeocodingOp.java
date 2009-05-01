@@ -113,14 +113,6 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private double lastLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
     private double demNoDataValue = 0.0; // no data value for DEM
-    private double firstNearLat = 0.0;
-    private double firstFarLat = 0.0;
-    private double lastNearLat = 0.0;
-    private double lastFarLat = 0.0;
-    private double firstNearLon = 0.0;
-    private double firstFarLon = 0.0;
-    private double lastNearLon = 0.0;
-    private double lastFarLon = 0.0;
     private double latMin = 0.0;
     private double latMax = 0.0;
     private double lonMin = 0.0;
@@ -181,8 +173,6 @@ public final class RangeDopplerGeocodingOp extends Operator {
             } else {
                 slantRangeTime = OperatorUtils.getSlantRangeTime(sourceProduct);
             }
-
-            getImageCornerLatLon();
 
             computeImageGeoBoundary();
 
@@ -247,31 +237,21 @@ public final class RangeDopplerGeocodingOp extends Operator {
     }
 
     /**
-     * Get source image corner latitude and longitude (in degree).
-     * @throws Exception The exceptions.
-     */
-    private void getImageCornerLatLon() throws Exception {
-
-        // note longitude is in given in range [-180, 180]
-        firstNearLat = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.first_near_lat);
-        firstNearLon = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.first_near_long);
-        firstFarLat  = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.first_far_lat);
-        firstFarLon  = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.first_far_long);
-        lastNearLat  = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.last_near_lat);
-        lastNearLon  = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.last_near_long);
-        lastFarLat   = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.last_far_lat);
-        lastFarLon   = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.last_far_long);
-    }
-
-    /**
      * Compute source image geodetic boundary (minimum/maximum latitude/longitude) from the its corner
      * latitude/longitude.
      * @throws Exception The exceptions.
      */
     private void computeImageGeoBoundary() throws Exception {
 
-        final double[] lats  = {firstNearLat, firstFarLat, lastNearLat, lastFarLat};
-        final double[] lons  = {firstNearLon, firstFarLon, lastNearLon, lastFarLon};
+        final GeoCoding geoCoding = sourceProduct.getGeoCoding();
+        final GeoPos geoPosFirstNear = geoCoding.getGeoPos(new PixelPos(0,0), null);
+        final GeoPos geoPosFirstFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth(),0), null);
+        final GeoPos geoPosLastNear = geoCoding.getGeoPos(new PixelPos(0,sourceProduct.getSceneRasterHeight()), null);
+        final GeoPos geoPosLastFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth(),
+                                                                      sourceProduct.getSceneRasterHeight()), null);
+        
+        final double[] lats  = {geoPosFirstNear.getLat(), geoPosFirstFar.getLat(), geoPosLastNear.getLat(), geoPosLastFar.getLat()};
+        final double[] lons  = {geoPosFirstNear.getLon(), geoPosFirstFar.getLon(), geoPosLastNear.getLon(), geoPosLastFar.getLon()};
         latMin = 90.0;
         latMax = -90.0;
         for (double lat : lats) {
