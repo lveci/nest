@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetBuilder.java,v 1.5 2009-05-01 13:37:58 lveci Exp $
+ * $Id: ProductSubsetBuilder.java,v 1.6 2009-05-01 19:54:38 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +31,7 @@ import java.util.Arrays;
  * A special-purpose product reader used to build subsets of data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.5 $ $Date: 2009-05-01 13:37:58 $
+ * @version $Revision: 1.6 $ $Date: 2009-05-01 19:54:38 $
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
@@ -52,8 +52,6 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                                               ProductSubsetDef subsetDef, String name, String desc) throws IOException {
         ProductSubsetBuilder productSubsetBuilder = new ProductSubsetBuilder(sourceProductOwner);
         final Product resultingProduct = productSubsetBuilder.readProductNodes(sourceProduct, subsetDef, name, desc);
-        resultingProduct.setStartTime(sourceProduct.getStartTime());
-        resultingProduct.setEndTime(sourceProduct.getEndTime());
 
         updateMetadata(resultingProduct, subsetDef);
         return resultingProduct;
@@ -508,6 +506,9 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             final double newStop = vPerLine * (regionHeight - 1) + newStart;
             product.setStartTime(new ProductData.UTC(newStart));
             product.setEndTime(new ProductData.UTC(newStop));
+        } else {
+            product.setStartTime(startTime);
+            product.setEndTime(stopTime);    
         }
     }
 
