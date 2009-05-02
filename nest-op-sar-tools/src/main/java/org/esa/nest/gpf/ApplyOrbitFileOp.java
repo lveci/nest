@@ -41,6 +41,30 @@ import Jama.Matrix;
 
 /**
  * This operator applies orbit file to a given product.
+ *
+ * The following major processing steps are implemented:
+ *
+ * 1. Get orbit file with valid time period and user specified orbit file type.
+ * 2. Get the old tie point grid of the source image: latitude, longitude, slant range time and incidence angle.
+ * 3. Repeat the following steps for each new tie point in the new tie point grid:
+ *    1)  Get the range line index y for the tie point;
+ *    2)  Get zero Doppler time t for the range line.
+ *    3)  Compute satellite position and velocity for the zero Doppler time t using cubic interpolation. (dorisReader)
+ *    4)  Get sample number x (index in the range line).
+ *    5)  Get slant range time for pixel (x, y) from the old slant range time tie point grid.
+ *    6)  Get incidence angle for pixel (x, y) from the old incidence angle tie point grid.
+ *    7)  Get latitude for pixel (x, y) from the old latitude tie point grid.
+ *    8)  Get longitude for pixel (x, y) from the old longitude tie point grid.
+ *    9)  Convert (latitude, longitude, h = 0) to global Cartesian coordinate (x0, y0, z0).
+ *    10) Solve Range equation, Doppler equation and Earth equation system for accurate (x, y, z) using Newton’s
+ *        method with (x0, y0, z0) as initial point.
+ *    11) Convert (x, y, z) back to (latitude, longitude, h).
+ *    12) Save the new latitude and longitude for current tie point.
+ * 4. Create new geocoding with the newly computed latitude and longitude tie points.
+ * 5. Update orbit state vectors in the metadata:
+ *    1) Get zero Doppler time for each orbit state vector in the metadata of the source image.
+ *    2) Compute new orbit state vector for the zero Doppler time using cubic interpolation.
+ *    3) Save the new orbit state vector in the target product.
  */
 
 @OperatorMetadata(alias="Apply-Orbit-File", description="Apply orbit file")
@@ -51,8 +75,8 @@ public final class ApplyOrbitFileOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(valueSet = {DORIS_POR, DORIS_VOR}, defaultValue = DORIS_POR, label="Orbit Type")
-    private String orbitType = DORIS_POR;
+    @Parameter(valueSet = {DORIS_POR, DORIS_VOR}, defaultValue = DORIS_VOR, label="Orbit Type")
+    private String orbitType = DORIS_VOR;
 
     private MetadataElement absRoot;
     private EnvisatOrbitReader dorisReader;
