@@ -178,7 +178,7 @@ public final class PrareOrbitReader {
 
             orbitVectors[i] = new OrbitVector();
             // todo need to convert TDT time to UTC time
-            orbitVectors[i].utcTime = (double)dataRecord.tTagD*0.1 +
+            orbitVectors[i].utcTime = (double)dataRecord.tTagD*0.1 +  0.5 +
                                       (double)dataRecord.tTagMs * microSecondToSecond * secondToDay;
             orbitVectors[i].xPos = (double)dataRecord.xSat * millimeterToMeter;
             orbitVectors[i].yPos = (double)dataRecord.ySat * millimeterToMeter;
@@ -342,7 +342,8 @@ public final class PrareOrbitReader {
      * @return The start time.
      */
     public float getSensingStart() {
-        // add 0.5 days because the start time is given as Julian days since 1.1.2000 12h in TDT.
+        // The start time is given as Julian days since 1.1.2000 12h in TDT.
+        // Add 0.5 days to make it as Julian days since 1.1.2000 0h in TDT. 
         // todo need to convert TDT time to UTC time
         return dataHeaderRecord.start*0.1f + 0.5f; // 0.1 days to days
     }
@@ -352,7 +353,8 @@ public final class PrareOrbitReader {
      * @return The end time.
      */
     public float getSensingStop() {
-        // add 0.5 days because the end time is given as Julian days since 1.1.2000 12h in TDT.
+        // The end time is given as Julian days since 1.1.2000 12h in TDT.
+        // Add 0.5 days to make it as Julian days since 1.1.2000 0h in TDT.
         // todo need to convert TDT time to UTC time
         return dataHeaderRecord.end*0.1f + 0.5f; // 0.1 days to days
     }
