@@ -32,6 +32,8 @@ import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.util.Settings;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.Constants;
+import org.esa.nest.dataio.OrbitalDataRecordReader;
+import org.esa.nest.dataio.PrareOrbitReader;
 
 import java.util.Date;
 import java.io.File;
@@ -75,11 +77,14 @@ public final class ApplyOrbitFileOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(valueSet = {DORIS_POR, DORIS_VOR}, defaultValue = DORIS_VOR, label="Orbit Type")
+    @Parameter(valueSet = {DORIS_POR, DORIS_VOR, DELFT_ENVISAT, DELFT_ERS_1, DELFT_ERS_2, PRARE_ERS_1, PRARE_ERS_2},
+            defaultValue = DORIS_VOR, label="Orbit Type")
     private String orbitType = DORIS_VOR;
 
     private MetadataElement absRoot;
     private EnvisatOrbitReader dorisReader;
+    private OrbitalDataRecordReader delftReader;
+    private PrareOrbitReader prareReader;
     private File orbitFile;
 
     private int absOrbit;
@@ -101,6 +106,11 @@ public final class ApplyOrbitFileOp extends Operator {
 
     public static final String DORIS_POR = "DORIS_POR";
     public static final String DORIS_VOR = "DORIS_VOR";
+    public static final String DELFT_ENVISAT = "DELFT_ENVISAT";
+    public static final String DELFT_ERS_1 = "DELFT_ERS_1";
+    public static final String DELFT_ERS_2 = "DELFT_ERS_2";
+    public static final String PRARE_ERS_1 = "PRARE_ERS_1";
+    public static final String PRARE_ERS_2 = "PRARE_ERS_2";
 
     /**
      * Default constructor. The graph processing framework
@@ -132,6 +142,8 @@ public final class ApplyOrbitFileOp extends Operator {
                 getDorisOrbitFile();
             } else if (orbitType.contains("DELFT")) {
                 getDelftOrbitFile();
+            } else if (orbitType.contains("PRARE")) {
+                getPrareOrbitFile();
             }
 
             getTiePointGrid();
@@ -362,7 +374,24 @@ public final class ApplyOrbitFileOp extends Operator {
             orbitData.zVel = orb.zVel;
 
         } else if (orbitType.contains("DELFT")) {
-            // get orbit data with OrbitalDataRecordReader
+
+            OrbitalDataRecordReader.OrbitVector orb = delftReader.getOrbitVector(utc);
+            orbitData.xPos = orb.xPos;
+            orbitData.yPos = orb.yPos;
+            orbitData.zPos = orb.zPos;
+            orbitData.xVel = orb.xVel;
+            orbitData.yVel = orb.yVel;
+            orbitData.zVel = orb.zVel;
+
+        } else if (orbitType.contains("PRARE")) {
+
+            PrareOrbitReader.OrbitVector orb = prareReader.getOrbitVector(utc);
+            orbitData.xPos = orb.xPos;
+            orbitData.yPos = orb.yPos;
+            orbitData.zPos = orb.zPos;
+            orbitData.xVel = orb.xVel;
+            orbitData.yVel = orb.yVel;
+            orbitData.zVel = orb.zVel;
         }
 
         return orbitData;
@@ -560,8 +589,152 @@ public final class ApplyOrbitFileOp extends Operator {
     }
 
     // ====================================== DELFT ORBIT FILE ===============================================
-    private void getDelftOrbitFile() throws IOException {
+    /**
+     * Get DELFT orbit file.
+     * @throws IOException The exceptions.
+     */
+    private void getDelftOrbitFile() throws Exception {
 
+        delftReader = new OrbitalDataRecordReader();
+
+        // construct path to the orbit file folder
+        String orbitPath = "";
+        if(orbitType.contains(DELFT_ENVISAT)) {
+            orbitPath = Settings.instance().get("delftEnvisatOrbitPath");
+        } else if(orbitType.contains(DELFT_ERS_1)) {
+            orbitPath = Settings.instance().get("delftERS1OrbitPath");
+        } else if(orbitType.contains(DELFT_ERS_2)) {
+            orbitPath = Settings.instance().get("delftERS2OrbitPath");
+        }
+
+        // get product start time
+        final Date startDate = sourceProduct.getStartTime().getAsDate();
+
+        // find orbit file in the folder
+        orbitFile = FindDelftOrbitFile(delftReader, new File(orbitPath), startDate);
+
+        if(orbitFile == null) {
+            throw new IOException("Unable to find suitable orbit file");
+        }
+    }
+
+    /**
+     * Find DELFT orbit file.
+     * @param delftReader The DELFT oribit reader.
+     * @param path The path to the orbit file.
+     * @param productDate The start date of the product.
+     * @return The orbit file.
+     * @throws Exception The exceptions.
+     */
+    private static File FindDelftOrbitFile(OrbitalDataRecordReader delftReader, File path, Date productDate)
+            throws Exception  {
+
+        final File[] list = path.listFiles();
+        if(list == null) {
+            return null;
+        }
+
+        // loop through all orbit files in the given folder to find arclist file, then get the arc# of the orbit file
+        int arcNum = OrbitalDataRecordReader.invalidArcNumber;
+        for(File f : list) {
+            if (f.getName().contains("arclist")) {
+                if (!f.exists()) {
+                    return null;
+                } else {
+                    arcNum = delftReader.getArcNumber(f, productDate);
+                    break;
+                }
+            }
+        }
+
+        if (arcNum == OrbitalDataRecordReader.invalidArcNumber) {
+            return null;
+        }
+
+        String orbitFileName = path.getAbsolutePath() + File.separator + "ODR.";
+        if (arcNum < 10) {
+            orbitFileName += "00" + arcNum;
+        } else if (arcNum < 100) {
+            orbitFileName += "0" + arcNum;
+        } else {
+            orbitFileName += arcNum;
+        }
+
+        File orbitFile = new File(orbitFileName);
+        if (!orbitFile.exists()) {
+            return null;
+        }
+
+        // read content of the orbit file
+        delftReader.readOrbitFile(orbitFileName);
+
+        return orbitFile;
+    }
+
+    // ====================================== PRARE ORBIT FILE ===============================================
+    /**
+     * Get PRARE orbit file.
+     * @throws IOException The exceptions.
+     */
+    private void getPrareOrbitFile() throws IOException {
+
+        prareReader = new PrareOrbitReader();
+
+        // construct path to the orbit file folder
+        String orbitPath = "";
+        if(orbitType.contains(PRARE_ERS_1)) {
+            orbitPath = Settings.instance().get("prareERS1OrbitPath");
+        } else if(orbitType.contains(PRARE_ERS_2)) {
+            orbitPath = Settings.instance().get("prareERS2OrbitPath");
+        }
+
+        // get product start time
+        // todo the startDate below is different from the start time in the metadata, why?
+        final Date startDate = sourceProduct.getStartTime().getAsDate();
+        String folder = String.valueOf(startDate.getYear() + 1900);
+        orbitPath += File.separator + folder;
+
+        // find orbit file in the folder
+        orbitFile = FindPrareOrbitFile(prareReader, new File(orbitPath), startDate);
+
+        if(orbitFile == null) {
+            throw new IOException("Unable to find suitable orbit file");
+        }
+    }
+
+    /**
+     * Find PRARE orbit file.
+     * @param prareReader The PRARE oribit reader.
+     * @param path The path to the orbit file.
+     * @param productDate The start date of the product.
+     * @return The orbit file.
+     * @throws IOException The exceptions.
+     */
+    private static File FindPrareOrbitFile(PrareOrbitReader prareReader, File path, Date productDate)
+            throws IOException {
+
+        final File[] list = path.listFiles();
+        if(list == null) return null;
+        final float productDateInMJD = (float)ProductData.UTC.create(productDate, 0).getMJD(); // in days
+
+        // loop through all orbit files in the given folder
+        for(File f : list) {
+
+            // read header record of each orbit file
+            prareReader.readOrbitHeader(f);
+
+            // get the start and end dates and compare them against product start date
+            final float startDateInMJD = prareReader.getSensingStart(); // in days
+            final float stopDateInMJD = prareReader.getSensingStop(); // in days
+            if (startDateInMJD <= productDateInMJD && productDateInMJD < stopDateInMJD) {
+
+                // read orbit data records in each orbit file
+                prareReader.readOrbitData(f);
+                return f;
+            }
+        }
+
+        return null;
     }
 
 
