@@ -1,24 +1,24 @@
 package org.esa.nest.util;
 
 import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.gpf.OperatorException;
 
 public final class GeoUtils
 {
-    private static final double a = 6378137; // m
-    private static final double b = 6356752.315; // m
-    private static final double earthFlatCoef = 298.257223563;
-    private static final double e2 = 2 / earthFlatCoef - 1 / (earthFlatCoef * earthFlatCoef);
-    private static final double ep2 = e2 / (1 - e2);
+    private static final double a = 6378137; // m (same for WGS84 and GRS80)
 
     private static final double EPS5 = 1e-5;
     private static final double EPS = 1e-10;
 
+    public static final String GRS80 = "GRS80";
+    public static final String WGS84 = "WGS84";
+    
     private GeoUtils()
     {
     }
 
     /**
-     * Convert geodetic coordinate into cartesian XYZ coordinate.
+     * Convert geodetic coordinate into cartesian XYZ coordinate (WGS84 geodetic system is used).
      * @param geoPos The geodetic coordinate of a given pixel.
      * @param xyz The xyz coordinates of the given pixel.
      */
@@ -31,13 +31,60 @@ public final class GeoUtils
     }
 
     /**
-     * Convert geodetic coordinate into cartesian XYZ coordinate.
+     * Convert geodetic coordinate into cartesian XYZ coordinate with specified geodetic system.
+     * @param geoPos The geodetic coordinate of a given pixel.
+     * @param xyz The xyz coordinates of the given pixel.
+     * @param geoSystem The geodetic system.
+     */
+    public static void geo2xyz(GeoPos geoPos, double xyz[], String geoSystem) {
+
+        final double lat = ((double)geoPos.lat);
+        final double lon = ((double)geoPos.lon);
+        final double alt = 0.0;
+        geo2xyz(lat, lon, alt, xyz, geoSystem);
+    }
+
+    /**
+     * Convert geodetic coordinate into cartesian XYZ coordinate (WGS84 geodetic system is used).
      * @param latitude The latitude of a given pixel (in degree).
      * @param longitude The longitude of the given pixel (in degree).
      * @param altitude The altitude of the given pixel (in m)
      * @param xyz The xyz coordinates of the given pixel.
      */
     public static void geo2xyz(double latitude, double longitude, double altitude, double xyz[]) {
+        geo2xyz(latitude, longitude, altitude, xyz, WGS84);
+    }
+
+    /**
+     * Convert geodetic coordinate into cartesian XYZ coordinate with specified geodetic system.
+     * @param latitude The latitude of a given pixel (in degree).
+     * @param longitude The longitude of the given pixel (in degree).
+     * @param altitude The altitude of the given pixel (in m)
+     * @param xyz The xyz coordinates of the given pixel.
+     * @param geoSystem The geodetic system.
+     */
+    public static void geo2xyz(double latitude, double longitude, double altitude, double xyz[], String geoSystem) {
+
+        double a = 0.0;
+        double earthFlatCoef = 0.0;
+
+        if (geoSystem.contains(WGS84)) {
+
+            WGS84 earthModel = new WGS84();
+            a = earthModel.a;
+            earthFlatCoef = earthModel.earthFlatCoef;
+
+        } else if (geoSystem.contains(GRS80)) {
+
+            GRS80 earthModel = new GRS80();
+            a = earthModel.a;
+            earthFlatCoef = earthModel.earthFlatCoef;
+
+        } else {
+            throw new OperatorException("Incorrect geodetic system");
+        }
+
+        final double e2 = 2 / earthFlatCoef - 1 / (earthFlatCoef * earthFlatCoef);
 
         final double lat = latitude * org.esa.beam.util.math.MathUtils.DTOR;
         final double lon = longitude * org.esa.beam.util.math.MathUtils.DTOR;
@@ -52,11 +99,46 @@ public final class GeoUtils
     }
 
     /**
-     * Convert cartesian XYZ coordinate into geodetic coordinate.
+     * Convert cartesian XYZ coordinate into geodetic coordinate (WGS84 geodetic system is used).
      * @param xyz The xyz coordinate of the given pixel.
      * @param geoPos The geodetic coordinate of the given pixel.
      */
     public static void xyz2geo(double xyz[], GeoPos geoPos) {
+        xyz2geo(xyz, geoPos, WGS84);
+    }
+
+    /**
+     * Convert cartesian XYZ coordinate into geodetic coordinate with specified geodetic system.
+     * @param xyz The xyz coordinate of the given pixel.
+     * @param geoPos The geodetic coordinate of the given pixel.
+     * @param geoSystem The geodetic system.
+     */
+    public static void xyz2geo(double xyz[], GeoPos geoPos, String geoSystem) {
+
+        double a = 0.0;
+        double b = 0.0;
+        double earthFlatCoef = 0.0;
+
+        if (geoSystem.contains(WGS84)) {
+
+            WGS84 earthModel = new WGS84();
+            a = earthModel.a;
+            b = earthModel.b;
+            earthFlatCoef = earthModel.earthFlatCoef;
+
+        } else if (geoSystem.contains(GRS80)) {
+
+            GRS80 earthModel = new GRS80();
+            a = earthModel.a;
+            b = earthModel.b;
+            earthFlatCoef = earthModel.earthFlatCoef;
+
+        } else {
+            throw new OperatorException("Incorrect geodetic system");
+        }
+
+        final double e2 = 2 / earthFlatCoef - 1 / (earthFlatCoef * earthFlatCoef);
+        final double ep2 = e2 / (1 - e2);
 
         final double x = xyz[0];
         final double y = xyz[1];
@@ -261,5 +343,17 @@ public final class GeoUtils
         public double distance;
         public double heading1;
         public double heading2;
+    }
+
+    public static class WGS84 {
+        public final double a = 6378137; // m
+        public final double b = 6356752.314245; // m
+        public final double earthFlatCoef = 298.257223563;
+    }
+
+    public static class GRS80 {
+        public final double a = 6378137; // m
+        public final double b = 6356752.314140 ; // m
+        public final double earthFlatCoef = 298.257222101;
     }
 }
