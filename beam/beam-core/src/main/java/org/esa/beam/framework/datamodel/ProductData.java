@@ -1,5 +1,5 @@
 /*
- * $Id: ProductData.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ProductData.java,v 1.2 2009-05-08 20:57:22 junlu Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -57,7 +57,7 @@ import java.util.*;
  * <code>float</code>, <code>double</code> and <code>String</code>.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-08 20:57:22 $
  */
 public abstract class ProductData implements Cloneable {
 
@@ -2791,7 +2791,8 @@ public abstract class ProductData implements Cloneable {
          * @see #getMJD()
          */
         public long getSecondsFraction() {
-            return this.getElemUIntAt(1);
+            //return this.getElemUIntAt(1);
+            return this.getElemIntAt(1);
         }
 
         /**
@@ -2801,7 +2802,8 @@ public abstract class ProductData implements Cloneable {
          * @see #getMJD()
          */
         public long getMicroSecondsFraction() {
-            return this.getElemUIntAt(2);
+            //return this.getElemUIntAt(2);
+            return this.getElemIntAt(2);
         }
     }
 }
