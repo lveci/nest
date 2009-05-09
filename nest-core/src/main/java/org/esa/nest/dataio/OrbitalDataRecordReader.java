@@ -1,8 +1,20 @@
 package org.esa.nest.dataio;
 
 import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.GeoUtils;
+import org.esa.nest.util.MathUtils;
+import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.framework.datamodel.ProductData;
+
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.FileImageInputStream;
+import java.util.Date;
+import java.util.StringTokenizer;
+import java.util.Arrays;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -24,20 +36,35 @@ public final class OrbitalDataRecordReader {
     private int numRecords = 0;
     private int version;
     // data records
-    private OrbitDataRecord[] dataRecords;
+    private OrbitDataRecord[] dataRecords = null;
+    private OrbitPositionRecord[] orbitPositions = null;
+    private double[] recordTimes = null;
+    private double days1985To2000; // Days from Jan. 1, 1985 to Jan. 1, 2000
 
-    boolean readOrbitFile(String path) {
+    public static final int invalidArcNumber = -1;
+
+    public boolean readOrbitFile(String path) throws Exception {
+
         if(OpenOrbitFile(path)) {
             parseHeader1();
             parseHeader2();
+
             if(numRecords > 0) {
                 dataRecords = new OrbitDataRecord[numRecords];
+                orbitPositions = new OrbitPositionRecord[numRecords];
+                recordTimes = new double[numRecords];
+                days1985To2000 = ProductData.UTC.parse("01-JAN-1985 00:00:00").getMJD();
+
                 for(int i=0; i < numRecords; ++i) {
                     dataRecords[i] = parseDataRecord();
+                    orbitPositions[i] = computeOrbitPosition(dataRecords[i]);
+                    recordTimes[i] = orbitPositions[i].utcTime;
                 }
             }
+
             return true;
         }
+
         return false;
     }
 
@@ -51,7 +78,6 @@ public final class OrbitalDataRecordReader {
         } 
         return true;
     }
-
 
     void parseHeader1() {
         if(in == null) return;
@@ -205,6 +231,207 @@ public final class OrbitalDataRecordReader {
         return new String(bytes);
     }
 
+    /**
+     * Convert satellite position from deodetic coordinate to global cartesian coordinate.
+     * @param dataRecord The data record read from delft orbit file.
+     * @return The data record in cartesian coordinate.
+     */
+    private OrbitPositionRecord computeOrbitPosition(OrbitDataRecord dataRecord) {
+
+        // record time in UTC seconds past 1.0 January 1985.
+        final double time = (double)dataRecord.time / 86400.0; // to days
+
+        // record time in days past since Jan.1, 2000
+        final double utcTime = time + days1985To2000; // days1985To2000 is negative
+
+        // Height of the nominal center of mass above the GRS80 reference ellipsoid (in millimeters)
+        final double alt = (double)dataRecord.heightOfCenterOfMass / 1000.0; // millimeters to meters
+
+        double lat, lon;
+        if (productSpecifier.contains("xODR")) {
+            lat = (double)dataRecord.latitude / 10000000.0; // xODR: 0.1 microdegrees to degrees
+            lon = (double)dataRecord.longitude / 10000000.0; // xODR: 0.1 microdegrees, [-180, 180]
+        } else if (productSpecifier.contains("@ODR")) {
+            lat = (double)dataRecord.latitude / 1000000.0; //  @ODR: microdegrees to degrees
+            lon = (double)dataRecord.longitude / 1000000.0; // @ODR: in microdegrees, [0, 360]
+            if (lon > 180) { // convert to interval [-180, 180]
+                lon -= 360;
+            }
+        } else {
+            throw new OperatorException("Invalid product specifier: " + productSpecifier);
+        }
+
+        final double[] xyz = new double[3];
+        GeoUtils.geo2xyz(lat, lon, alt, xyz, GeoUtils.GRS80);
+
+        OrbitPositionRecord orbitPosition = new OrbitPositionRecord();
+        orbitPosition.utcTime = utcTime;
+        orbitPosition.xPos = xyz[0];
+        orbitPosition.yPos = xyz[1];
+        orbitPosition.zPos = xyz[2];
+
+        return orbitPosition;
+    }
+
+    /**
+     * Get orbit position for given UTC time using cubic interpolation.
+     * @param utc The UTC time.
+     * @return The orbit position.
+     * @throws Exception The exceptions.
+     */
+    private OrbitPositionRecord getOrbitPosition(double utc) throws Exception {
+
+        final int n = Arrays.binarySearch(recordTimes, utc);
+
+		if (n >= 0) {
+			return orbitPositions[n];
+		}
+
+		final int n2 = -n - 1;
+        final int n0 = n2 - 2;
+        final int n1 = n2 - 1;
+        final int n3 = n2 + 1;
+
+        if (n0 < 0 || n1 < 0 || n2 >= recordTimes.length || n3 >= recordTimes.length) {
+            throw new Exception("Incorrect UTC time");
+        }
+
+        final double mu = (utc - recordTimes[n1]) / (recordTimes[n2] - recordTimes[n1]);
+
+        OrbitPositionRecord orbitPosition = new OrbitPositionRecord();
+
+        orbitPosition.utcTime = MathUtils.interpolationCubic(orbitPositions[n0].utcTime,
+                                                             orbitPositions[n1].utcTime,
+                                                             orbitPositions[n2].utcTime,
+                                                             orbitPositions[n3].utcTime,
+                                                             mu);
+
+        orbitPosition.xPos = MathUtils.interpolationCubic(orbitPositions[n0].xPos,
+                                                          orbitPositions[n1].xPos,
+                                                          orbitPositions[n2].xPos,
+                                                          orbitPositions[n3].xPos,
+                                                          mu);
+
+        orbitPosition.yPos = MathUtils.interpolationCubic(orbitPositions[n0].yPos,
+                                                          orbitPositions[n1].yPos,
+                                                          orbitPositions[n2].yPos,
+                                                          orbitPositions[n3].yPos,
+                                                          mu);
+
+        orbitPosition.zPos = MathUtils.interpolationCubic(orbitPositions[n0].zPos,
+                                                          orbitPositions[n1].zPos,
+                                                          orbitPositions[n2].zPos,
+                                                          orbitPositions[n3].zPos,
+                                                          mu);
+
+        return orbitPosition;
+    }
+
+    /**
+     * Get orbit vector for given UTC time.
+     * @param utc The UTC time.
+     * @throws Exception for incorrect time.
+     * @return The orbit vector.
+     */
+    public OrbitVector getOrbitVector(double utc) throws Exception {
+
+        double halfSecond = 0.5 / (24*3600); // in days
+        OrbitPositionRecord orbitPos = getOrbitPosition(utc);
+        OrbitPositionRecord orbitPosFw = getOrbitPosition(utc + halfSecond);
+        OrbitPositionRecord orbitPosBw = getOrbitPosition(utc - halfSecond);
+
+        OrbitVector orbitVector = new OrbitVector();
+        orbitVector.utcTime = orbitPos.utcTime;
+        orbitVector.xPos = orbitPos.xPos;
+        orbitVector.yPos = orbitPos.yPos;
+        orbitVector.zPos = orbitPos.zPos;
+
+        // compute velocity as suggested by http://www.deos.tudelft.nl/ers/precorbs/faq.shtml
+        orbitVector.xVel = orbitPosFw.xPos - orbitPosBw.xPos;
+        orbitVector.yVel = orbitPosFw.yPos - orbitPosBw.yPos;
+        orbitVector.zVel = orbitPosFw.zPos - orbitPosBw.zPos;
+
+        return orbitVector;
+    }
+    
+    /**
+     * Get the arc number from the arclist file for a given product date.
+     * @param file The arclist file.
+     * @param productDate The product date.
+     * @return The arc number.
+     * @throws IOException The exceptions.
+     */
+    public int getArcNumber(File file, Date productDate) throws IOException {
+
+        String fileName = file.getAbsolutePath();
+
+        // get reader
+        FileInputStream stream;
+        try {
+            stream = new FileInputStream(fileName);
+        } catch(FileNotFoundException e) {
+            throw new OperatorException("File not found: " + fileName);
+        }
+
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+
+        // read data from file and compare each record with product date
+        final String titleLine = "Arc# ------- Arc interval ------ -SLR-xover-altim  Repeat Ver  ---- Begin ----";
+        final SimpleDateFormat dateformat = new SimpleDateFormat("yyMMdd HH:mm");
+        int arcNum = invalidArcNumber;
+        Date startDate;
+        Date endDate;
+        String line = "";
+        StringTokenizer st;
+
+        try {
+            // get the title line
+            while((line = reader.readLine()) != null) {
+                if (line.equals(titleLine)) {
+                    break;
+                }
+            }
+
+            // get the rest arc record lines
+            while((line = reader.readLine()) != null) {
+
+                st = new StringTokenizer(line);
+
+                // get arc number
+                int recordArcNum = Integer.parseInt(st.nextToken());
+
+                // get start date and start time
+                try {
+                    startDate = dateformat.parse(st.nextToken() + " " + st.nextToken());
+                } catch (ParseException e) {
+                    throw new OperatorException(e);
+                }
+
+                // get a hyphen (-)
+                String hyphen = st.nextToken();
+
+                // get end date and end time
+                try {
+                    endDate = dateformat.parse(st.nextToken() + " " + st.nextToken());
+                } catch (ParseException e) {
+                    throw new OperatorException(e);
+                }
+
+                if (productDate.compareTo(startDate) >= 0 && productDate.compareTo(endDate) < 0) {
+                    arcNum = recordArcNum;
+                    break;
+                }
+            }
+
+            reader.close();
+            stream.close();
+
+        } catch (IOException e) {
+            throw new OperatorException(e);
+        }
+
+        return arcNum;
+    }
 
     static class OrbitDataRecord {
         int time;
@@ -213,4 +440,20 @@ public final class OrbitalDataRecordReader {
         int heightOfCenterOfMass;
     }
 
+    static class OrbitPositionRecord {
+        double utcTime = 0;
+        double xPos = 0;
+        double yPos = 0;
+        double zPos = 0;
+    }
+
+    public final static class OrbitVector {
+        public double utcTime = 0;
+        public double xPos = 0;
+        public double yPos = 0;
+        public double zPos = 0;
+        public double xVel = 0;
+        public double yVel = 0;
+        public double zVel = 0;
+    }
 }
