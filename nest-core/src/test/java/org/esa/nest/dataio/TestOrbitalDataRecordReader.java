@@ -44,22 +44,22 @@ public class TestOrbitalDataRecordReader extends TestCase {
             assertTrue(false);
     }
 
-    public void testReadERS1OrbitFiles() {
+    public void testReadERS1OrbitFiles() throws Exception {
         System.out.print("ERS1 ORD ");
         readOrbitFile(ers1OrbitFilePath);
     }
 
-    public void testReadERS2OrbitFile() {
+    public void testReadERS2OrbitFile() throws Exception {
         System.out.print("ERS2 ORD ");
         readOrbitFile(ers2OrbitFilePath);
     }
 
-    public void testReadEnvisatOrbitFile() {
+    public void testReadEnvisatOrbitFile() throws Exception {
         System.out.print("Envisat ORD ");
         readOrbitFile(envisatOrbitFilePath);
     }
 
-    public static void readOrbitFile(String path) {
+    public static void readOrbitFile(String path) throws Exception {
         OrbitalDataRecordReader reader = new OrbitalDataRecordReader();
         boolean res = reader.readOrbitFile(path);
         assertTrue(res);
