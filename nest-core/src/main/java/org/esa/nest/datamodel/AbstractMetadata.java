@@ -61,7 +61,6 @@ public class AbstractMetadata {
     public static final String radar_frequency = "radar_frequency";
     public static final String line_time_interval = "line_time_interval";
 
-    public static final String data_type = "data_type";
     public static final String TOT_SIZE = "total_size";
     public static final String num_output_lines = "num_output_lines";
     public static final String num_samples_per_line = "num_samples_per_line";
@@ -159,7 +158,6 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, radar_frequency, ProductData.TYPE_FLOAT64, "MHz", "Radar frequency");
         addAbstractedAttribute(absRoot, line_time_interval, ProductData.TYPE_FLOAT64, "s", "");
 
-        addAbstractedAttribute(absRoot, data_type, ProductData.TYPE_ASCII, "", "");
         addAbstractedAttribute(absRoot, TOT_SIZE, ProductData.TYPE_UINT32, "Mb", "Total product size");
         addAbstractedAttribute(absRoot, num_output_lines, ProductData.TYPE_UINT32, "lines", "Raster height");
         addAbstractedAttribute(absRoot, num_samples_per_line, ProductData.TYPE_UINT32, "samples", "Raster width");

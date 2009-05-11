@@ -127,14 +127,6 @@ public class ReaderUtils {
         return (stopTime-startTime) / (sceneHeight-1);
     }
 
-    public static String getDataTypeString(Product product) {
-        final Band band = product.getBandAt(0);
-        if(band != null) {
-            return ProductData.getTypeString(band.getDataType());
-        }
-        return "";
-    }
-
     public static int getTotalSize(Product product) {
         return (int)(product.getRawStorageSize() / (1024.0f * 1024.0f));
     }

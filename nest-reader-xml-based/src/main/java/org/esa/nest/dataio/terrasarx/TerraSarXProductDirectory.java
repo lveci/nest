@@ -123,7 +123,6 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
                 imageRaster.getAttributeInt("numberOfColumns", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, getTotalSize(product));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type, getDataTypeString());
 
         final MetadataElement rowSpacing = imageRaster.getElement("rowSpacing");
         final MetadataElement columnSpacing = imageRaster.getElement("columnSpacing");

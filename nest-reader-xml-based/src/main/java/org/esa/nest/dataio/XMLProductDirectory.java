@@ -223,14 +223,6 @@ public class XMLProductDirectory {
         AbstractMetadata.addAbstractedMetadataHeader(root);
     }
 
-    public String getDataTypeString() {
-        if(!bandImageFileMap.isEmpty()) {
-            final ImageIOFile img = bandImageFileMap.get(bandImageFileMap.keySet().iterator().next());
-            return ProductData.getTypeString(img.getDataType());
-        }
-        return " ";
-    }
-
     protected String getProductName() {
         return _xmlHeader.getName();
     }

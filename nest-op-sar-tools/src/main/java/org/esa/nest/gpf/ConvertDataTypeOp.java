@@ -151,11 +151,9 @@ public class ConvertDataTypeOp extends Operator {
     }
 
     private void updateMetadata() {
-        final MetadataElement root = targetProduct.getMetadataRoot();
-        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
-        if(absRoot != null) {
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.data_type, targetDataType);
-        }
+        //final MetadataElement root = targetProduct.getMetadataRoot();
+        //final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        
     }
 
     /**

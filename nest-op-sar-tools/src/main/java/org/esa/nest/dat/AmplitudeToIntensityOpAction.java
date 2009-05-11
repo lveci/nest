@@ -81,7 +81,7 @@ public class AmplitudeToIntensityOpAction extends AbstractVisatAction {
             bandName = bandName.replace("Intensity", "Amplitude");
             unit = Unit.AMPLITUDE;
         } else {
-            expression = bandName + " * "+bandName+"))";
+            expression = bandName + " * "+bandName;
             bandName = bandName.replace("Amplitude", "Intensity");
             unit = Unit.INTENSITY;
         }
