@@ -1,5 +1,5 @@
 /*
- * $Id: BasicApp.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: BasicApp.java,v 1.2 2009-05-11 16:17:37 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -124,7 +124,7 @@ import java.util.logging.Logger;
  * dialog boxes.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $  $Date: 2009-04-28 14:17:18 $
+ * @version $Revision: 1.2 $  $Date: 2009-05-11 16:17:37 $
  * @see org.esa.beam.framework.ui.command.Command
  * @see org.esa.beam.framework.ui.command.ExecCommand
  * @see org.esa.beam.framework.ui.command.CommandGroup
@@ -198,7 +198,8 @@ public class BasicApp {
         Assert.notNull(applicationDescriptor, "applicationDescriptor");
         this.applicationDescriptor = applicationDescriptor;
         if (applicationDescriptor.getSymbolicName() != null) {
-            BeamLogManager.setSystemLoggerName(applicationDescriptor.getSymbolicName());
+            // todo - check logging, use Ceres logger! (nf - 05.05.2009)
+            // BeamLogManager.setSystemLoggerName(applicationDescriptor.getSymbolicName());
         }
         _fileHistory = new FileHistory(10, "recent.files");
         _mouseOverActionHandler = new MouseOverActionHandler();
@@ -323,7 +324,8 @@ public class BasicApp {
             initBeamUserDir();
             initResources();
             initPreferences();
-            initLogging();
+            // todo - check logging, use Ceres logger! (nf - 05.05.2009)
+            // initLogging();
             logStartUpInfo();
             pm.worked(1);
 
@@ -478,7 +480,8 @@ public class BasicApp {
 
     private void initLogger() {
         _logFormatter = BeamLogManager.createFormatter(getAppName(), getAppVersion(), getAppCopyright());
-        BeamLogManager.configureSystemLogger(_logFormatter, false);
+        // todo - check logging, use Ceres logger! (nf - 05.05.2009)
+        //BeamLogManager.configureSystemLogger(_logFormatter, false);
         _logger = BeamLogManager.getSystemLogger();
     }
 

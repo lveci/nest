@@ -1,5 +1,5 @@
 /*
- * $Id: ProductUtilsTest.java,v 1.1 2009-04-28 14:39:34 lveci Exp $
+ * $Id: ProductUtilsTest.java,v 1.2 2009-05-11 16:17:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -473,7 +473,7 @@ public class ProductUtilsTest extends TestCase {
     public static class SGeoCoding implements GeoCoding {
 
         @Override
-        public AffineTransform getGridToModelTransform() {
+        public AffineTransform getImageToModelTransform() {
             return null;
         }
 
@@ -515,7 +515,7 @@ public class ProductUtilsTest extends TestCase {
         }
 
         @Override
-        public CoordinateReferenceSystem getGridCRS() {
+        public CoordinateReferenceSystem getImageCRS() {
             return null;
         }
 
@@ -560,7 +560,7 @@ public class ProductUtilsTest extends TestCase {
         }
 
         @Override
-        public CoordinateReferenceSystem getGridCRS() {
+        public CoordinateReferenceSystem getImageCRS() {
             return null;
         }
 
@@ -575,7 +575,7 @@ public class ProductUtilsTest extends TestCase {
         }
 
         @Override
-        public AffineTransform getGridToModelTransform() {
+        public AffineTransform getImageToModelTransform() {
             return null;
         }
     }

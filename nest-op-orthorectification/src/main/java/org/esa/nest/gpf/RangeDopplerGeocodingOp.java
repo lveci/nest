@@ -42,6 +42,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.IOException;
+import java.io.File;
 
 import Jama.Matrix;
 
@@ -88,6 +89,10 @@ public final class RangeDopplerGeocodingOp extends Operator {
                defaultValue="SRTM 3Sec GeoTiff", label="Digital Elevation Model")
     private String demName = "SRTM 3Sec GeoTiff";
 
+
+    @Parameter(label="External DEM")
+    private File externalDemFile = null;
+
     @Parameter(valueSet = {NEAREST_NEIGHBOUR, BILINEAR, CUBIC}, defaultValue = BILINEAR, label="DEM Resampling Method")
     private String demResamplingMethod = BILINEAR;
 
@@ -98,6 +103,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private Band sourceBand2 = null; // q band in case of complex product
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
+    private FileElevationModel fileElevationModel = null;
     private TiePointGrid slantRangeTime = null;
     private boolean srgrFlag = false;
 
@@ -333,6 +339,15 @@ public final class RangeDopplerGeocodingOp extends Operator {
             throw new OperatorException("The DEM '" + demName + "' is currently being installed.");
         }
 
+        dem = demDescriptor.createDem(getResamplingMethod());
+        if(dem == null) {
+            throw new OperatorException("The DEM '" + demName + "' has not been installed.");
+        }
+
+        demNoDataValue = dem.getDescriptor().getNoDataValue();
+    }
+
+    private Resampling getResamplingMethod() {
         Resampling resamplingMethod = Resampling.BILINEAR_INTERPOLATION;
         if(demResamplingMethod.equals(NEAREST_NEIGHBOUR)) {
             resamplingMethod = Resampling.NEAREST_NEIGHBOUR;
@@ -341,13 +356,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
         } else if(demResamplingMethod.equals(CUBIC)) {
             resamplingMethod = Resampling.CUBIC_CONVOLUTION;
         }
-
-        dem = demDescriptor.createDem(resamplingMethod);
-        if(dem == null) {
-            throw new OperatorException("The DEM '" + demName + "' has not been installed.");
-        }
-
-        demNoDataValue = dem.getDescriptor().getNoDataValue();
+        return resamplingMethod;
     }
 
     /**
@@ -669,7 +678,15 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private double getLocalElevation(final GeoPos geoPos) {
         double alt;
         try {
-            alt = dem.getElevation(geoPos);
+            if(externalDemFile == null) {
+                alt = dem.getElevation(geoPos);
+            } else {
+                if(fileElevationModel == null) {
+                    fileElevationModel = new FileElevationModel(externalDemFile,
+                            getResamplingMethod());
+                }
+                alt = fileElevationModel.getElevation(geoPos);
+            }
         } catch (Exception e) {
             alt = demNoDataValue;
         }

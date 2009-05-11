@@ -1,5 +1,5 @@
 /*
- * $Id: ImageFileLayerSource.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: ImageFileLayerSource.java,v 1.2 2009-05-11 16:17:37 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,7 +17,9 @@
 package org.esa.beam.visat.toolviews.layermanager.layersrc.image;
 
 import com.bc.ceres.glayer.Layer;
+import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.glayer.support.ImageLayer;
+import com.bc.ceres.binding.ValueContainer;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.visat.toolviews.layermanager.LayerSource;
@@ -26,6 +28,7 @@ import org.esa.beam.visat.toolviews.layermanager.layersrc.LayerSourcePageContext
 
 import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
+import java.io.File;
 
 /**
  * A layer source for images.
@@ -34,7 +37,7 @@ import java.awt.image.RenderedImage;
  * the orientation relative to the existing layers has to be given by hand.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-11 16:17:37 $
  * @since BEAM 4.6
  */
 public class ImageFileLayerSource implements LayerSource {
@@ -79,14 +82,18 @@ public class ImageFileLayerSource implements LayerSource {
                 PROPERTY_WORLD_TRANSFORM);
         RenderedImage image = (RenderedImage) pageContext.getPropertyValue(PROPERTY_IMAGE);
         String imageFilePath = (String) pageContext.getPropertyValue(PROPERTY_IMAGE_FILE_PATH);
-        String fileName = FileUtils.getFileNameFromPath(imageFilePath);
 
         try {
-            ImageLayer imageLayer = new ImageLayer(image, transform, 1);
-            imageLayer.setName(fileName);
             ProductSceneView sceneView = pageContext.getAppContext().getSelectedProductSceneView();
+            final LayerType type = LayerType.getLayerType(ImageFileLayerType.class.getName());
+            final ValueContainer configuration = type.getConfigurationTemplate();
+            configuration.setValue(ImageFileLayerType.PROPERTY_IMAGE, image);
+            configuration.setValue(ImageFileLayerType.PROPERTY_IMAGE_FILE, new File(imageFilePath));
+            configuration.setValue(ImageFileLayerType.PROPERTY_WORLD_TRANSFORM, transform);
+            Layer layer = type.createLayer(sceneView.getLayerContext(), configuration);
+            layer.setName(FileUtils.getFileNameFromPath(imageFilePath));
             Layer rootLayer = sceneView.getRootLayer();
-            rootLayer.getChildren().add(sceneView.getFirstImageLayerIndex(), imageLayer);
+            rootLayer.getChildren().add(sceneView.getFirstImageLayerIndex(), layer);
             return true;
         } catch (Exception e) {
             pageContext.showErrorDialog(e.getMessage());

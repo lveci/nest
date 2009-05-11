@@ -1,5 +1,6 @@
 package org.esa.beam.visat.toolviews.layermanager;
 
+import com.bc.ceres.glayer.Layer;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.UIUtils;
 
@@ -7,11 +8,9 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import java.awt.event.ActionEvent;
 
-import com.bc.ceres.glayer.Layer;
-
 /**
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-11 16:17:37 $
  * @since BEAM 4.6
  */
 class MoveLayerLeftAction extends AbstractAction {
@@ -35,9 +34,9 @@ class MoveLayerLeftAction extends AbstractAction {
     }
 
     void moveLeft(Layer layer) {
-        Layer parentLayer = layer.getParent();
-        final Layer parentsParentLayer = parentLayer.getParent();
-        if (parentsParentLayer != null ) {
+        if (canMove(layer)) {
+            Layer parentLayer = layer.getParent();
+            final Layer parentsParentLayer = parentLayer.getParent();
             parentLayer.getChildren().remove(layer);
             final int parentIndex = parentsParentLayer.getChildIndex(parentLayer.getId());
             if (parentIndex < parentsParentLayer.getChildren().size() - 1) {
@@ -46,6 +45,12 @@ class MoveLayerLeftAction extends AbstractAction {
                 parentsParentLayer.getChildren().add(layer);
             }
         }
+    }
+
+    public boolean canMove(Layer layer) {
+        Layer parentLayer = layer.getParent();
+        final Layer parentsParentLayer = parentLayer.getParent();
+        return parentsParentLayer != null;
     }
 
 }

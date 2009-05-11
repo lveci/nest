@@ -1,5 +1,5 @@
 /*
- * $Id: ProductMetadataView.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: ProductMetadataView.java,v 1.2 2009-05-11 16:17:37 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -65,10 +65,12 @@ public class ProductMetadataView extends BasicView implements ProductNodeView {
     /**
      * Returns the currently visible product node.
      */
+    @Override
     public ProductNode getVisibleProductNode() {
         return getMetadataElement();
     }
 
+    @Override
     public JPopupMenu createPopupMenu(Component component) {
         JPopupMenu popupMenu = new JPopupMenu();
         if (getCommandUIFactory() != null) {
@@ -79,6 +81,7 @@ public class ProductMetadataView extends BasicView implements ProductNodeView {
         return popupMenu;
     }
 
+    @Override
     public JPopupMenu createPopupMenu(MouseEvent event) {
         return null;
     }
@@ -120,6 +123,7 @@ public class ProductMetadataView extends BasicView implements ProductNodeView {
             return metadataTable.isExpandAllAllowed();
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             final ProductMetadataTable metadataTable = getMetadataTable();
             metadataTable.collapseAll();
@@ -141,6 +145,7 @@ public class ProductMetadataView extends BasicView implements ProductNodeView {
             return metadataTable.isExpandAllAllowed();
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             final ProductMetadataTable metadataTable = getMetadataTable();
             metadataTable.expandAll();

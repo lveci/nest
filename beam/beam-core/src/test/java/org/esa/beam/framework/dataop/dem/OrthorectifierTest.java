@@ -1,5 +1,5 @@
 /*
- * $Id: OrthorectifierTest.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: OrthorectifierTest.java,v 1.2 2009-05-11 16:17:36 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -122,7 +122,7 @@ public class OrthorectifierTest extends TestCase {
     static class GeoCodingMock implements GeoCoding {
 
         @Override
-        public AffineTransform getGridToModelTransform() {
+        public AffineTransform getImageToModelTransform() {
             return null;
         }
 
@@ -143,7 +143,7 @@ public class OrthorectifierTest extends TestCase {
         }
 
         @Override
-        public CoordinateReferenceSystem getGridCRS() {
+        public CoordinateReferenceSystem getImageCRS() {
             return null;
         }
 

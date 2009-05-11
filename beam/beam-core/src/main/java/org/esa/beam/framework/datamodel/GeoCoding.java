@@ -1,5 +1,5 @@
 /*
- * $Id: GeoCoding.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: GeoCoding.java,v 1.2 2009-05-11 16:17:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -33,7 +33,7 @@ import java.awt.geom.AffineTransform;
  * the {@link Object#equals(Object) equals()} and  {@link Object#hashCode() hashCode()} methods.</p>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-11 16:17:36 $
  */
 public interface GeoCoding {
 
@@ -97,22 +97,27 @@ public interface GeoCoding {
      */
     void dispose();
 
+    // todo - remove? (nf - 05.05.2009)
     /**
-     * @return The coordinate reference system (CRS) which may be either a geographical CRS (nominal case is
-     *         WGS 84) or a projected CRS.
+     * @return The base coordinate reference system (CRS). It may be either a geographical CRS (nominal case is
+     *         "WGS-84") or a derived projected CRS, e.g. "UTM 32 - North".
      */
     CoordinateReferenceSystem getBaseCRS();
 
     /**
-     * @return A derived coordinate reference system (CRS) which can be used to convert grid (pixel) coordinates
-     *         into geographic coordinates.
+     * @return The image coordinate reference system (CRS). It is usually derived from the base CRS by including
+     * a linear or non-linear transformation from base (geodetic) coordinates to image coordinates.
      */
-    CoordinateReferenceSystem getGridCRS();
+    CoordinateReferenceSystem getImageCRS();
 
     /**
-     * @return ?
+     * @return The model coordinate reference system (CRS). It may be the same as the base CRS for rectified,
+     * geo-referenced images or may be same as the image CRS for unrectified images still in satellite coordinates.
      */
     CoordinateReferenceSystem getModelCRS();
 
-    AffineTransform getGridToModelTransform();
+    /**
+     * @return The affine transformation used to convert image coordinates to model coordinates.
+     */
+    AffineTransform getImageToModelTransform();
 }

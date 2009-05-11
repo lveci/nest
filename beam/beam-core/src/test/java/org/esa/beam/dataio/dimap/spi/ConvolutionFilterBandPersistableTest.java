@@ -1,6 +1,6 @@
 package org.esa.beam.dataio.dimap.spi;
 /*
- * $Id: ConvolutionFilterBandPersistableTest.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ConvolutionFilterBandPersistableTest.java,v 1.2 2009-05-11 16:17:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -34,7 +34,7 @@ import java.util.List;
  * Created by Marco Peters.
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-11 16:17:36 $
  */
 public class ConvolutionFilterBandPersistableTest extends TestCase {
 
@@ -70,7 +70,7 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
         assertEquals(1, _product.getBandIndex(cfb.getName()));
         assertEquals("aBand", cfb.getName());
         assertEquals("this is a band", cfb.getDescription());
-        assertEquals(_source.getGeophysicalDataType(), cfb.getDataType());
+        assertEquals(ProductData.TYPE_FLOAT32, cfb.getDataType());
         assertEquals("l", cfb.getUnit());
         assertEquals(0.0, cfb.getSolarFlux(), EPS);
         assertEquals(0.0, cfb.getSpectralWavelength(), EPS);
@@ -182,8 +182,7 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
         contentList.add(createElement(DimapProductConstants.TAG_BAND_INDEX, "1"));
         contentList.add(createElement(DimapProductConstants.TAG_BAND_NAME, "aBand"));
         contentList.add(createElement(DimapProductConstants.TAG_BAND_DESCRIPTION, "this is a band"));
-        final String dataType = ProductData.getTypeString(_source.getGeophysicalDataType());
-        contentList.add(createElement(DimapProductConstants.TAG_DATA_TYPE, dataType));
+        contentList.add(createElement(DimapProductConstants.TAG_DATA_TYPE, "float32"));
         contentList.add(createElement(DimapProductConstants.TAG_PHYSICAL_UNIT, "l"));
         contentList.add(createElement(DimapProductConstants.TAG_SOLAR_FLUX, "0.0"));
         contentList.add(createElement(DimapProductConstants.TAG_BAND_WAVELEN, "0.0"));

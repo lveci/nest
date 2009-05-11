@@ -1,5 +1,5 @@
 /*
- * $Id: DimapHeaderWriter.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: DimapHeaderWriter.java,v 1.2 2009-05-11 16:17:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -289,7 +289,7 @@ public final class DimapHeaderWriter extends XmlWriter {
         }
     }
 
-    protected void writeBitmaskDefinitions(int indent) { //�bernommen
+    protected void writeBitmaskDefinitions(int indent) {
         final BitmaskDef[] bitmaskDefs = _product.getBitmaskDefs();
         if (bitmaskDefs.length > 0) {
             final String[] bdTags = createTags(indent, DimapProductConstants.TAG_BITMASK_DEFINITIONS);

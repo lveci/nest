@@ -249,7 +249,7 @@ public class ProductLayer extends RenderableLayer {
 
         final String quicklookBandName = ProductUtils.findSuitableQuicklookBandName(product);
         final ProductSubsetDef productSubsetDef = new ProductSubsetDef("subset");
-        int scaleFactor = product.getSceneRasterWidth() / 500;
+        int scaleFactor = product.getSceneRasterWidth() / 1000;
         if (scaleFactor < 1) {
             scaleFactor = 1;
         }

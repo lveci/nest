@@ -1,5 +1,5 @@
 /*
- * $Id: CreateFilteredBandAction.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: CreateFilteredBandAction.java,v 1.2 2009-05-11 16:17:37 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -52,7 +52,7 @@ import java.text.MessageFormat;
  * Installs commands into VISAT which lets a user attach a {@link org.esa.beam.framework.datamodel.PixelGeoCoding} based on pixels rather than tie points to the current product.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-11 16:17:37 $
  */
 public class CreateFilteredBandAction extends ExecCommand {
 
@@ -347,8 +347,7 @@ public class CreateFilteredBandAction extends ExecCommand {
 
         DefaultMutableTreeNode category = new DefaultMutableTreeNode(categoryName);
 
-        for (int i = 0; i < filters.length; i++) {
-            Filter filter = filters[i];
+        for (Filter filter : filters) {
             DefaultMutableTreeNode item = new DefaultMutableTreeNode(filter);
             category.add(item);
         }
@@ -464,17 +463,17 @@ public class CreateFilteredBandAction extends ExecCommand {
         }
 
         @Override
-            protected boolean verifyUserInput() {
+        protected boolean verifyUserInput() {
             String message = null;
             final String bandName = nameField.getText().trim();
             if (bandName.equals("")) {
                 message = "Please enter a name for the new filtered band."; /*I18N*/
             } else if (!ProductNode.isValidNodeName(bandName)) {
                 message = MessageFormat.format("The band name ''{0}'' appears not to be valid.\n" +
-                                               "Please choose a different band name.", bandName); /*I18N*/
+                        "Please choose a different band name.", bandName); /*I18N*/
             } else if (product.containsBand(bandName)) {
                 message = MessageFormat.format("The selected product already contains a band named ''{0}''.\n" +
-                                               "Please choose a different band name.", bandName); /*I18N*/
+                        "Please choose a different band name.", bandName); /*I18N*/
             } else if (getSelectedFilter(tree) == null) {
                 message = "Please select a filter.";    /*I18N*/
             }

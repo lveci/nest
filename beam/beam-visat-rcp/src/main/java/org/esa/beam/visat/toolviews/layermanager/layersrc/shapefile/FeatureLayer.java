@@ -40,7 +40,7 @@ import java.util.Map;
  *
  * @author Marco Peters
  * @author Marco Zühlke
- * @version $Revision: 1.2 $ $Date: 2009-04-28 17:38:56 $
+ * @version $Revision: 1.3 $ $Date: 2009-05-11 16:17:37 $
  * @since BEAM 4.6
  */
 public class FeatureLayer extends Layer {
@@ -164,7 +164,8 @@ public class FeatureLayer extends Layer {
         mapContext.setAreaOfInterest(mapArea);
 
         labelCache.clear();  // workaround for labelCache bug
-        renderer.paint(rendering.getGraphics(), bounds, mapArea);
+        final AffineTransform modelToViewTransform = rendering.getViewport().getModelToViewTransform();
+        renderer.paint(rendering.getGraphics(), bounds, mapArea, modelToViewTransform);
     }
 
     private void applyOpacity() {

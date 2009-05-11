@@ -1,5 +1,5 @@
 /*
- * $Id: WmsLayerSource.java,v 1.1 2009-04-27 13:08:26 lveci Exp $
+ * $Id: WmsLayerSource.java,v 1.2 2009-05-11 16:17:37 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -26,6 +26,7 @@ import org.esa.beam.visat.toolviews.layermanager.layersrc.LayerSourcePageContext
 public class WmsLayerSource implements LayerSource {
 
     static final String PROPERTY_WMS = "WmsLayerSource.wms";
+    static final String PROPERTY_WMS_URL = "WmsLayerSource.wmsUrl";
     static final String PROPERTY_WMS_CAPABILITIES = "WmsLayerSource.wmsCapabilities";
     static final String PROPERTY_SELECTED_LAYER = "WmsLayerSource.selectedLayer";
     static final String PROPERTY_SELECTED_STYLE = "WmsLayerSource.selectedStyle";
@@ -55,11 +56,11 @@ public class WmsLayerSource implements LayerSource {
     public boolean performFinish(LayerSourcePageContext pageContext) {
         return false;
     }
-    
+
     @Override
     public void cancel(LayerSourcePageContext pageContext) {
     }
-    
+
     static void insertWmsLayer(LayerSourcePageContext pageContext) {
         ProductSceneView view = pageContext.getAppContext().getSelectedProductSceneView();
         RasterDataNode raster = view.getRaster();

@@ -37,6 +37,7 @@ import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.framework.ui.tool.ToolInputEvent;
 import org.esa.beam.glayer.FigureLayer;
 import org.esa.beam.glayer.GraticuleLayer;
+import org.esa.beam.glayer.RoiLayerType;
 import org.esa.beam.glevel.MaskImageMultiLevelSource;
 import org.esa.beam.glevel.RoiImageMultiLevelSource;
 import org.esa.beam.util.Guardian;
@@ -76,6 +77,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
+
+// todo - Layer API: make it implement ProductSceneViewContext 
 
 /**
  * The class <code>ProductSceneView</code> is a high-level image display component for color index/RGB images created
@@ -262,6 +265,9 @@ public class ProductSceneView extends BasicView
      */
     @Override
     public ProductNode getVisibleProductNode() {
+        if (isRGB()) {
+            return null;
+        }
         return getRaster();
     }
 
@@ -443,27 +449,30 @@ public class ProductSceneView extends BasicView
         return getSceneImage().getRasters().length >= 3;
     }
 
-    /**
-     * Adds a new figure to the drawing.
-     */
     @Override
     public void addFigure(Figure figure) {
         Guardian.assertNotNull("figure", figure);
-
-        int insertMode = 0; // replace
+        InsertMode insertMode = InsertMode.REPLACE;
         ToolInputEvent toolInputEvent = (ToolInputEvent) figure.getAttribute(Figure.TOOL_INPUT_EVENT_KEY);
         if (toolInputEvent != null && toolInputEvent.getMouseEvent() != null) {
             MouseEvent mouseEvent = toolInputEvent.getMouseEvent();
             if ((mouseEvent.isShiftDown())) {
-                insertMode = +1; // add
+                insertMode = InsertMode.ADD;
             } else if ((mouseEvent.isControlDown())) {
-                insertMode = -1; // subtract
+                insertMode = InsertMode.SUBTRACT;
             }
         }
 
+        insertFigure(figure, insertMode);
+    }
+
+    @Override
+    public void insertFigure(Figure figure, InsertMode insertMode) {
+        Guardian.assertNotNull("figure", figure);
+
         Figure oldFigure = getCurrentShapeFigure();
 
-        if (insertMode == 0 || oldFigure == null) {
+        if (InsertMode.REPLACE.equals(insertMode) || oldFigure == null) {
             setCurrentShapeFigure(figure);
             return;
         }
@@ -475,7 +484,7 @@ public class ProductSceneView extends BasicView
 
         Area area1 = oldFigure.getAsArea();
         Area area2 = figure.getAsArea();
-        if (insertMode == 1) {
+        if (InsertMode.ADD.equals(insertMode)) {
             area1.add(area2);
         } else {
             area1.subtract(area2);
@@ -947,7 +956,7 @@ public class ProductSceneView extends BasicView
         final ImageLayer roiLayer = getRoiLayer(false);
         if (roiLayer != null) {
             if (getRaster().getROIDefinition() != null && getRaster().getROIDefinition().isUsable()) {
-                final Color color = (Color) roiLayer.getStyle().getProperty("color");
+                final Color color = (Color) roiLayer.getConfiguration().getValue(RoiLayerType.PROPERTY_COLOR);
                 final MultiLevelSource multiLevelSource = RoiImageMultiLevelSource.create(getRaster(),
                                                                                           color,
                                                                                           getBaseImageLayer().getImageToModelTransform());

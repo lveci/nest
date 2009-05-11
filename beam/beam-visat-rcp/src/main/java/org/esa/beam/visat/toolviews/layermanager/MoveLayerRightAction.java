@@ -1,5 +1,6 @@
 package org.esa.beam.visat.toolviews.layermanager;
 
+import com.bc.ceres.glayer.Layer;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.UIUtils;
 
@@ -7,11 +8,9 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import java.awt.event.ActionEvent;
 
-import com.bc.ceres.glayer.Layer;
-
 /**
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-11 16:17:37 $
  * @since BEAM 4.6
  */
 class MoveLayerRightAction extends AbstractAction {
@@ -35,13 +34,25 @@ class MoveLayerRightAction extends AbstractAction {
     }
 
     void moveRight(Layer layer) {
-        final Layer parentLayer = layer.getParent();
-        final int layerIndex = parentLayer.getChildIndex(layer.getId());
-        if (layerIndex > 0) {
+        if (canMove(layer)) {
+            final Layer parentLayer = layer.getParent();
+            final int layerIndex = parentLayer.getChildIndex(layer.getId());
             final Layer targetLayer = parentLayer.getChildren().get(layerIndex - 1);
             parentLayer.getChildren().remove(layer);
             targetLayer.getChildren().add(layer);
         }
+    }
+
+    public boolean canMove(Layer layer) {
+        final Layer parentLayer = layer.getParent();
+        final int layerIndex = parentLayer.getChildIndex(layer.getId());
+        if (layerIndex > 0) {
+            final Layer targetLayer = parentLayer.getChildren().get(layerIndex - 1);
+            if (targetLayer.isCollectionLayer()) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

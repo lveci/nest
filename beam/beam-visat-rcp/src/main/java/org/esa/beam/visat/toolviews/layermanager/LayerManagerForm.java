@@ -51,6 +51,7 @@ class LayerManagerForm extends AbstractLayerForm {
     private MoveLayerDownAction moveLayerDownAction;
     private MoveLayerLeftAction moveLayerLeftAction;
     private MoveLayerRightAction moveLayerRightAction;
+    private OpenLayerEditorAction openLayerEditorAction;
 
     LayerManagerForm(AppContext appContext) {
         super(appContext);
@@ -78,6 +79,9 @@ class LayerManagerForm extends AbstractLayerForm {
         removeLayerAction = new RemoveLayerAction(getAppContext());
         AbstractButton removeButton = ToolButtonFactory.createButton(removeLayerAction, false);
 
+        openLayerEditorAction = new OpenLayerEditorAction();
+        AbstractButton openButton = ToolButtonFactory.createButton(openLayerEditorAction, false);
+
         moveLayerUpAction = new MoveLayerUpAction(getAppContext());
         AbstractButton upButton = ToolButtonFactory.createButton(moveLayerUpAction, false);
 
@@ -93,6 +97,7 @@ class LayerManagerForm extends AbstractLayerForm {
         JPanel actionBar = new JPanel(new GridLayout(-1, 1, 2, 2));
         actionBar.add(addButton);
         actionBar.add(removeButton);
+        actionBar.add(openButton);
         actionBar.add(upButton);
         actionBar.add(downButton);
         actionBar.add(leftButton);
@@ -127,10 +132,11 @@ class LayerManagerForm extends AbstractLayerForm {
         updateLayerTreeSelection(selectedLayer);
         boolean isLayerSelected = selectedLayer != null;
         removeLayerAction.setEnabled(isLayerSelected && !isLayerProtected(selectedLayer));
-        moveLayerUpAction.setEnabled(isLayerSelected);
-        moveLayerDownAction.setEnabled(isLayerSelected);
-        moveLayerLeftAction.setEnabled(isLayerSelected);
-        moveLayerRightAction.setEnabled(isLayerSelected);
+        openLayerEditorAction.setEnabled(isLayerSelected);
+        moveLayerUpAction.setEnabled(isLayerSelected && moveLayerUpAction.canMove(selectedLayer));
+        moveLayerDownAction.setEnabled(isLayerSelected && moveLayerDownAction.canMove(selectedLayer));
+        moveLayerLeftAction.setEnabled(isLayerSelected && moveLayerLeftAction.canMove(selectedLayer));
+        moveLayerRightAction.setEnabled(isLayerSelected && moveLayerRightAction.canMove(selectedLayer));
     }
 
     public boolean isLayerProtected(Layer layer) {

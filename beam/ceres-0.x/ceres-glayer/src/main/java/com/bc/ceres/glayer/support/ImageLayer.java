@@ -99,6 +99,13 @@ public class ImageLayer extends Layer {
         super(layerType, configuration);
         multiLevelSource = (MultiLevelSource) configuration.getValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE);
         Assert.notNull(multiLevelSource);
+        getStyle().setProperty(ImageLayer.PROPERTY_NAME_BORDER_SHOWN,
+                               configuration.getValue(ImageLayer.PROPERTY_NAME_BORDER_SHOWN));
+        getStyle().setProperty(ImageLayer.PROPERTY_NAME_BORDER_COLOR,
+                               configuration.getValue(ImageLayer.PROPERTY_NAME_BORDER_COLOR));
+        getStyle().setProperty(ImageLayer.PROPERTY_NAME_BORDER_WIDTH,
+                               configuration.getValue(ImageLayer.PROPERTY_NAME_BORDER_WIDTH));
+
     }
 
     @Override
@@ -279,17 +286,6 @@ public class ImageLayer extends Layer {
 
     private static ValueContainer addMultiLevelSourceModel(ValueContainer valueContainer,
                                                            MultiLevelSource multiLevelSource) {
-//        final DefaultValueAccessor multiLevelSourceAccessor = new DefaultValueAccessor();
-//        multiLevelSourceAccessor.setValue(multiLevelSource);
-//        final ValueDescriptor multiLevelSourceDescriptor = new ValueDescriptor(PROPERTY_NAME_MULTI_LEVEL_SOURCE,
-//                                                                               MultiLevelSource.class);
-//        valueContainer.addModel(new ValueModel(multiLevelSourceDescriptor, multiLevelSourceAccessor));
-//
-//        final DefaultValueAccessor transformAccessor = new DefaultValueAccessor();
-//        transformAccessor.setValue(multiLevelSource.getModel().getImageToModelTransform(0));
-//        final ValueDescriptor transformDescriptor = new ValueDescriptor(PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM,
-//                                                                        AffineTransform.class);
-//        valueContainer.addModel(new ValueModel(transformDescriptor, transformAccessor));
         try {
             valueContainer.setValue(PROPERTY_NAME_MULTI_LEVEL_SOURCE, multiLevelSource);
             valueContainer.setValue(PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM,
@@ -329,15 +325,15 @@ public class ImageLayer extends Layer {
             template.getDescriptor(PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM).setNotNull(true);
 
             template.addModel(createDefaultValueModel(ImageLayer.PROPERTY_NAME_BORDER_SHOWN,
-                                                      ImageLayer.DEFAULT_BORDER_SHOWN,
+                                                      Boolean.class,
                                                       ImageLayer.DEFAULT_BORDER_SHOWN));
 
             template.addModel(createDefaultValueModel(ImageLayer.PROPERTY_NAME_BORDER_COLOR,
-                                                      ImageLayer.DEFAULT_BORDER_COLOR,
+                                                      Color.class,
                                                       ImageLayer.DEFAULT_BORDER_COLOR));
 
             template.addModel(createDefaultValueModel(ImageLayer.PROPERTY_NAME_BORDER_WIDTH,
-                                                      ImageLayer.DEFAULT_BORDER_WIDTH,
+                                                      Double.class,
                                                       ImageLayer.DEFAULT_BORDER_WIDTH));
 
             return template;

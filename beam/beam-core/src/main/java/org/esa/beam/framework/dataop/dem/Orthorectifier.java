@@ -1,5 +1,5 @@
 /*
- * $Id: Orthorectifier.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: Orthorectifier.java,v 1.2 2009-05-11 16:17:36 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -28,7 +28,7 @@ import java.awt.geom.AffineTransform;
  * @author Norman Fomferra
  * @author Sabine Embacher
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-11 16:17:36 $
  */
 public class Orthorectifier implements GeoCoding {
 
@@ -94,8 +94,8 @@ public class Orthorectifier implements GeoCoding {
     }
 
     @Override
-    public CoordinateReferenceSystem getGridCRS() {
-        return _geoCoding.getGridCRS();
+    public CoordinateReferenceSystem getImageCRS() {
+        return _geoCoding.getImageCRS();
     }
 
     @Override
@@ -104,8 +104,8 @@ public class Orthorectifier implements GeoCoding {
     }
 
     @Override
-    public AffineTransform getGridToModelTransform() {
-        return _geoCoding.getGridToModelTransform();
+    public AffineTransform getImageToModelTransform() {
+        return _geoCoding.getImageToModelTransform();
     }
 
     public Pointing getPointing() {

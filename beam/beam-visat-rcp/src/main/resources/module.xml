@@ -119,6 +119,9 @@
     <dependency>
         <module>ceres-binding</module>
     </dependency>
+    <dependency>
+        <module>ceres-ui</module>
+    </dependency>
 
     <categories>System,Application,VISAT</categories>
 
@@ -183,8 +186,8 @@
     <extension point="beam-visat-rcp:layerSources">
         <layerSource>
             <id>wms-layer-source</id>
-            <name>Image from Web Mapping Server (WMS)</name>
-            <description>Retrieves images from a Web Mapping Server (WMS)</description>
+            <name>Image from Web Map Server (WMS)</name>
+            <description>Retrieves images from a Web Map Server (WMS)</description>
             <class>org.esa.beam.visat.toolviews.layermanager.layersrc.wms.WmsLayerSource</class>
         </layerSource>
         <layerSource>
@@ -211,6 +214,15 @@
             <description>Inserts an empty Layer Group</description>
             <class>org.esa.beam.visat.toolviews.layermanager.layersrc.CollectionLayerSource</class>
         </layerSource>
+
+        <layerSource>
+            <id>windfield-layer-source</id>
+            <name>Wind Field</name>
+            <description>?</description>
+            <class>org.esa.beam.visat.toolviews.layermanager.layersrc.windfield.WindFieldLayerSource</class>
+        </layerSource>
+
+
     </extension>
 
     <!--
@@ -304,8 +316,11 @@
             <id>org.esa.beam.visat.toolviews.layermanager.LayerEditorToolView</id>
             <class>org.esa.beam.visat.toolviews.layermanager.LayerEditorToolView</class>
             <title>Layer Editor</title>
+            <mnemonic>E</mnemonic>
+            <accelerator>ctrl alt E</accelerator>
             <description>Edit layer properties.</description>
-            <largeIcon>/org/esa/beam/resources/images/icons/Layers24.png</largeIcon>
+            <smallIcon>/org/esa/beam/resources/images/icons/LayerEditor16.png</smallIcon>
+            <largeIcon>/org/esa/beam/resources/images/icons/LayerEditor24.png</largeIcon>
             <helpId>showLayerEditorWnd</helpId>
             <!-- todo provide help -->
             <initState>HIDDEN</initState>

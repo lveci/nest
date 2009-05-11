@@ -1,5 +1,5 @@
 /*
- * $Id: Figure.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: Figure.java,v 1.2 2009-05-11 16:17:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -34,16 +34,16 @@ import java.util.Map;
  * <p>A default implementation for the Figure interface are provided by the <code>AbstractFigure</code> class.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $  $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $  $Date: 2009-05-11 16:17:36 $
  * @see FigureHandle
  * @see AbstractFigure
  */
 public interface Figure extends Drawable, Cloneable, Serializable {
 
     /**
-     * The attribute key used to determine the tool input event (if any) which created or modified this figure. The
-     * value must be an instance of {@link org.esa.beam.framework.ui.tool.ToolInputEvent}.
+     * @deprecated since BEAM 4.6, no replacement
      */
+    @Deprecated
     public static final String TOOL_INPUT_EVENT_KEY = "toolInputEvent";
 
     /**

@@ -1,6 +1,7 @@
 package org.esa.beam.visat.toolviews.layermanager;
 
 import com.bc.ceres.glayer.Layer;
+import org.esa.beam.framework.ui.product.ProductSceneView;
 
 import javax.swing.JComponent;
 import javax.swing.JTree;
@@ -12,8 +13,6 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.List;
 
-import org.esa.beam.framework.ui.product.ProductSceneView;
-
 /**
  * Class that enables the support for Drag & Drop.
  * <p/>
@@ -22,7 +21,7 @@ import org.esa.beam.framework.ui.product.ProductSceneView;
  * which is backed by {@link Layer layer}.
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-11 16:17:37 $
  * @since BEAM 4.6
  */
 class LayerTreeTransferHandler extends TransferHandler {
@@ -38,9 +37,18 @@ class LayerTreeTransferHandler extends TransferHandler {
 
     @Override
     public boolean canImport(TransferSupport support) {
+        JTree.DropLocation dropLocation = (JTree.DropLocation) support.getDropLocation();
+        TreePath treePath = dropLocation.getPath();
+        Layer targetLayer = (Layer) treePath.getLastPathComponent();
+        int targetIndex = dropLocation.getChildIndex();
+        boolean moveAllowed = true;
+        if (targetIndex == -1) { //  -1 indicates move into other layer
+            moveAllowed = targetLayer.isCollectionLayer();
+        }
         return support.isDataFlavorSupported(layerFlavor) &&
                support.isDrop() &&
-               support.getComponent() == tree;
+               support.getComponent() == tree &&
+               moveAllowed;
     }
 
     @Override
@@ -129,6 +137,13 @@ class LayerTreeTransferHandler extends TransferHandler {
                 return false;
             }
         }
+
+        Layer targetLayer = (Layer) treePath.getLastPathComponent();
+        int targetIndex = dropLocation.getChildIndex();
+        if (targetIndex == -1) { //  -1 indicates move into other layer
+            return targetLayer.isCollectionLayer();
+        }
+
         return true;
     }
 
