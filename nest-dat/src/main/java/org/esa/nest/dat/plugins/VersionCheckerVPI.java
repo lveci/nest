@@ -1,5 +1,5 @@
 /*
- * $Id: VersionCheckerVPI.java,v 1.2 2009-02-18 17:48:41 lveci Exp $
+ * $Id: VersionCheckerVPI.java,v 1.3 2009-05-12 16:21:01 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -12,11 +12,10 @@ import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.CommandManager;
 import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.util.PropertyMap;
-import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.VersionChecker;
 import org.esa.beam.visat.AbstractVisatPlugIn;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -119,7 +118,7 @@ public class VersionCheckerVPI extends AbstractVisatPlugIn {
 
     private static int getVersionStatus() throws IOException {
         final VersionChecker versionChecker = new VersionChecker();
-        versionChecker.setLocalVersionFile(new File(DatUtils.findHomeFolder(), "VERSION.txt"));
+        versionChecker.setLocalVersionFile(new File(ResourceUtils.findHomeFolder(), "VERSION.txt"));
         versionChecker.setRemoteVersionUrlString(remoteVersionUrl);
         VisatApp.getApp().getLogger().info(
                 "comparing local software version with the one from " + versionChecker.getRemoteVersionUrlString());

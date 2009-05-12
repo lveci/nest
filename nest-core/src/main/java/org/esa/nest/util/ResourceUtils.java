@@ -15,17 +15,13 @@ import java.net.URISyntaxException;
 import com.bc.ceres.core.runtime.internal.RuntimeActivator;
 
 /**
- * Created by IntelliJ IDEA.
- * User: lveci
- * Date: Jan 29, 2008
- * Time: 2:18:16 PM
- * To change this template use File | Settings | File Templates.
+ * Look up paths to resources
  */
-public class DatUtils {
+public class ResourceUtils {
 
 
     public static ImageIcon LoadIcon(String path) {
-        java.net.URL imageURL = DatUtils.class.getClassLoader().getResource(path);
+        final java.net.URL imageURL = ResourceUtils.class.getClassLoader().getResource(path);
         if (imageURL == null) return null;
         return new ImageIcon(imageURL);
     }
@@ -59,11 +55,11 @@ public class DatUtils {
 
      public static InputStream getResourceAsStream(final String filename) throws IOException {
         // Try to load resource from jar
-        InputStream stream = ClassLoader.getSystemResourceAsStream(filename);
+        final InputStream stream = ClassLoader.getSystemResourceAsStream(filename);
         if (stream != null) return stream;
 
         // If not found in jar, then load from disk
-        java.net.URL resURL = DatUtils.class.getClassLoader().getResource(filename);
+        final java.net.URL resURL = ResourceUtils.class.getClassLoader().getResource(filename);
         if (resURL != null) {
             try {
                 return new FileInputStream(resURL.toURI().getPath());
@@ -77,11 +73,11 @@ public class DatUtils {
 
     public static InputStream getResourceAsStream(final String filename, Class theClass) throws IOException {
         // Try to load resource from jar
-        InputStream stream = ClassLoader.getSystemResourceAsStream(filename);
+        final InputStream stream = ClassLoader.getSystemResourceAsStream(filename);
         if (stream != null) return stream;
 
         // If not found in jar, then load from disk
-        java.net.URL resURL = theClass.getClassLoader().getResource(filename);
+        final java.net.URL resURL = theClass.getClassLoader().getResource(filename);
         if (resURL != null) {
             try {
                 return new FileInputStream(resURL.toURI().getPath());
@@ -97,7 +93,7 @@ public class DatUtils {
 
         try {
             // load from disk
-            java.net.URL resURL = theClass.getClassLoader().getResource(filename);
+            final java.net.URL resURL = theClass.getClassLoader().getResource(filename);
             if (resURL != null) {
                 return new File(resURL.getFile());
             }
@@ -135,7 +131,7 @@ public class DatUtils {
      * @return the temp folder
      */
     public static File getApplicationUserTempDataDir() {
-        final File tmpDir = new File(DatUtils.getApplicationUserDir(true), "temp");
+        final File tmpDir = new File(ResourceUtils.getApplicationUserDir(true), "temp");
         if(!tmpDir.exists())
             tmpDir.mkdirs();
         return tmpDir;
@@ -144,30 +140,30 @@ public class DatUtils {
     public static File findSystemFile(String filename)
     {
         // check userhome/.nest first
-        File appHomePath = DatUtils.getApplicationUserDir(false);
-        String filePath = appHomePath.getAbsolutePath()
+        final File appHomePath = ResourceUtils.getApplicationUserDir(false);
+        final String filePath = appHomePath.getAbsolutePath()
                 + File.separator + filename;
         
-        File outFile = new File(filePath);
+        final File outFile = new File(filePath);
         if(outFile.exists())
             return outFile;
 
         // next check config folder
-        String homeDir = System.getProperty("nest.home");
+        final String homeDir = System.getProperty("nest.home");
         if (homeDir != null && homeDir.length() > 0) {
-            File homeDirFile = new File(homeDir);
+            final File homeDirFile = new File(homeDir);
 
-            String homeDirStr = homeDirFile.getAbsolutePath();
+            final String homeDirStr = homeDirFile.getAbsolutePath();
             String settingsfilePath = homeDirStr + File.separator + "config" + File.separator + filename;
 
-            File outFile2 = new File(settingsfilePath);
+            final File outFile2 = new File(settingsfilePath);
             if(outFile2.exists())
                 return outFile2;
 
-            int idx = homeDirStr.lastIndexOf(File.separator);
+            final int idx = homeDirStr.lastIndexOf(File.separator);
             settingsfilePath = homeDirStr.substring(0, idx) + File.separator + "config" + File.separator + filename;
 
-            File outFile3 = new File(settingsfilePath);
+            final File outFile3 = new File(settingsfilePath);
             if(outFile3.exists())
                 return outFile3;
         }
@@ -191,25 +187,25 @@ public class DatUtils {
 
     public static File findInHomeFolder(String filename)
     {
-        File homePath = findHomeFolder();
+        final File homePath = findHomeFolder();
         String homePathStr = homePath.getAbsolutePath();
         if(homePathStr.endsWith(".") && homePathStr.length() > 1)
             homePathStr = homePathStr.substring(0, homePathStr.lastIndexOf(File.separator));
         String filePath = homePathStr + filename;
 
-        File outFile = new File(filePath);
+        final File outFile = new File(filePath);
         if(outFile.exists())
             return outFile;
 
         filePath = homePathStr.substring(0, homePathStr.lastIndexOf(File.separator)) + filename;
 
-        File outFile2 = new File(filePath);
+        final File outFile2 = new File(filePath);
         if(outFile2.exists())
             return outFile2;
 
         filePath = homePathStr.substring(0, homePathStr.lastIndexOf(File.separator)) + File.separator + "beam" + filename;
 
-        File outFile3 = new File(filePath);
+        final File outFile3 = new File(filePath);
         if(outFile3.exists())
             return outFile3;
 

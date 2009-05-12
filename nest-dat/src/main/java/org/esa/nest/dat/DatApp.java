@@ -15,7 +15,7 @@ import org.esa.beam.visat.toolviews.stat.StatisticsToolView;
 import org.esa.nest.dat.actions.LoadTabbedLayoutAction;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.dat.views.polarview.PolarView;
-import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -71,7 +71,7 @@ public final class DatApp extends VisatApp {
     }
 
     private static void cleanTempFolder() {
-        final File tempFolder = DatUtils.getApplicationUserTempDataDir();
+        final File tempFolder = ResourceUtils.getApplicationUserTempDataDir();
         final File[] fileList = tempFolder.listFiles();
 
         long freeSpace = tempFolder.getFreeSpace() / 1024 / 1024 / 1024;

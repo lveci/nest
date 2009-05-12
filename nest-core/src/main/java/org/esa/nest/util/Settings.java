@@ -59,7 +59,7 @@ public final class Settings {
 
     public void Load() {
 
-        final File filePath = DatUtils.findSystemFile(settingsFile);
+        final File filePath = ResourceUtils.findSystemFile(settingsFile);
 
         org.jdom.Document doc;
         try {
@@ -110,7 +110,7 @@ public final class Settings {
         }
 
         if(keyWord.equalsIgnoreCase("nest.home") || keyWord.equalsIgnoreCase("NEST_HOME")) {
-            final File file = DatUtils.findInHomeFolder(out);
+            final File file = ResourceUtils.findInHomeFolder(out);
             if(file != null)
                 return file.getAbsolutePath();
         }

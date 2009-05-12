@@ -4,7 +4,7 @@ import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.dataio.BinaryFileReader;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CeosDB;
-import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.ResourceUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,7 +59,7 @@ public class BaseRecord {
     }
 
     private static File getResFile(String fileName) {
-        final String homeUrl = DatUtils.findHomeFolder().getAbsolutePath();
+        final String homeUrl = ResourceUtils.findHomeFolder().getAbsolutePath();
         final String path = homeUrl + sep + "res" + sep + "ceos_db" + sep + fileName;
         return new File(path);
     }

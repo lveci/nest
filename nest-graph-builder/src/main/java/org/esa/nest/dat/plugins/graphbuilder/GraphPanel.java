@@ -1,7 +1,7 @@
 package org.esa.nest.dat.plugins.graphbuilder;
 
 import org.esa.beam.framework.gpf.graph.NodeSource;
-import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
@@ -51,7 +51,7 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
      * Creates a menu containing the list of operators to the addMenu
      */
     private void CreateAddOpMenu() {
-        final ImageIcon opIcon = DatUtils.LoadIcon("org/esa/nest/icons/cog_add.png");
+        final ImageIcon opIcon = ResourceUtils.LoadIcon("org/esa/nest/icons/cog_add.png");
         addMenu = new JMenu("Add");
 
         // get operator list from graph executor

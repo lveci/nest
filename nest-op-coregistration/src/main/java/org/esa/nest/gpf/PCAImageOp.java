@@ -29,10 +29,9 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
-import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.ResourceUtils;
 
 import java.awt.*;
-import java.util.HashMap;
 import java.util.Map;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -292,7 +291,7 @@ public class PCAImageOp extends Operator {
 
     private void createReportFile() {
 
-        final File appUserDir = new File(DatUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
+        final File appUserDir = new File(ResourceUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
         if(!appUserDir.exists()) {
             appUserDir.mkdirs();
         }

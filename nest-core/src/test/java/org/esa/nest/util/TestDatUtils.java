@@ -25,7 +25,7 @@ public class TestDatUtils extends TestCase {
 
     public void testFindHomeFolder()
     {
-        File file = DatUtils.findInHomeFolder(File.separator + "config" + File.separator + "settings.xml");
+        File file = ResourceUtils.findInHomeFolder(File.separator + "config" + File.separator + "settings.xml");
 
         assertTrue(file != null);
         assertTrue(file.exists());

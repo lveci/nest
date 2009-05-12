@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 
 import java.io.File;
 
-import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.ResourceUtils;
 import org.esa.beam.util.SystemUtils;
 
 
@@ -17,7 +17,7 @@ import org.esa.beam.util.SystemUtils;
 public class TestProject extends TestCase {
 
     private Project project = Project.instance();
-    private final static File projectFolder = new File(DatUtils.findHomeFolder().getAbsolutePath()
+    private final static File projectFolder = new File(ResourceUtils.findHomeFolder().getAbsolutePath()
             + File.separator + "testProject");
     private final static File projectFile = new File(projectFolder.getAbsolutePath()
             + File.separator + "TestProjectFile.xml");

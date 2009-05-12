@@ -12,7 +12,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.graph.*;
 import org.esa.beam.framework.gpf.operators.common.ReadOp;
 import org.esa.beam.framework.gpf.operators.common.WriteOp;
-import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.gpf.ProductSetReaderOp;
 
 import java.io.File;
@@ -244,7 +244,7 @@ public class GraphExecuter extends Observable {
 
     void saveGraph() throws GraphException {
 
-        final File filePath = DatUtils.GetFilePath("Save Graph", "XML", "xml", "Graph", true);
+        final File filePath = ResourceUtils.GetFilePath("Save Graph", "XML", "xml", "Graph", true);
         if(filePath != null)
             writeGraph(filePath.getAbsolutePath());
     }

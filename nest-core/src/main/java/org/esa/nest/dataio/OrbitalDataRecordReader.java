@@ -1,13 +1,11 @@
 package org.esa.nest.dataio;
 
-import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.MathUtils;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.datamodel.ProductData;
 
-import javax.imageio.stream.ImageInputStream;
-import javax.imageio.stream.FileImageInputStream;
 import java.util.Date;
 import java.util.StringTokenizer;
 import java.util.Arrays;
@@ -71,7 +69,7 @@ public final class OrbitalDataRecordReader {
     boolean OpenOrbitFile(String path) {
 
         try {
-            in = new DataInputStream(new BufferedInputStream(DatUtils.getResourceAsStream(path)));
+            in = new DataInputStream(new BufferedInputStream(ResourceUtils.getResourceAsStream(path)));
         } catch(Exception e) {
             in = null;
             return false;

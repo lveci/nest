@@ -1,11 +1,8 @@
 
 package org.esa.nest.dat.tool;
 
-import org.esa.beam.framework.ui.product.ProductSceneView;
-import org.esa.beam.framework.ui.tool.AbstractTool;
-import org.esa.beam.framework.ui.tool.ToolInputEvent;
 import org.esa.beam.framework.ui.tool.impl.SelectTool;
-import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,7 +17,7 @@ public class CrossHairTool extends SelectTool {
     public Cursor getCursor() {
         final Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
         final String cursorName = "crossHairCursor";
-        final ImageIcon icon = DatUtils.LoadIcon("org/esa/nest/icons/CrossHairTool.gif");
+        final ImageIcon icon = ResourceUtils.LoadIcon("org/esa/nest/icons/CrossHairTool.gif");
 
         //Dimension bestCursorSize = defaultToolkit.getBestCursorSize(icon.getIconWidth(), icon.getIconHeight());
         //Point hotSpot = new Point((8 * bestCursorSize.width) / icon.getIconWidth(),

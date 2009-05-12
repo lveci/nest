@@ -1,22 +1,16 @@
 package org.esa.nest.dataio.dem.srtm3_geotiff;
 
-import org.esa.beam.util.Guardian;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.nest.dataio.dem.ace.ACEElevationModelDescriptor;
 import org.esa.nest.util.ftpUtils;
-import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.Settings;
 import org.apache.commons.net.ftp.FTPFile;
 
-import javax.imageio.stream.FileCacheImageInputStream;
 import java.io.*;
-import java.text.ParseException;
-import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 /**
  * Holds information about a dem file.
@@ -121,7 +115,7 @@ public class SRTM3GeoTiffFile {
         final String ext = FileUtils.getExtension(dataFile.getName());
         if (ext.equalsIgnoreCase(".zip")) {
             final String baseName = FileUtils.getFilenameWithoutExtension(dataFile.getName()) + ".tif";
-            final File newFile = new File(DatUtils.getApplicationUserTempDataDir(), baseName);
+            final File newFile = new File(ResourceUtils.getApplicationUserTempDataDir(), baseName);
             if(newFile.exists())
                 return newFile;
 

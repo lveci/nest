@@ -31,7 +31,7 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.gpf.OperatorUtils;
-import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.ResourceUtils;
 
 import java.awt.*;
 import java.io.*;
@@ -397,7 +397,7 @@ public class UndersamplingOp extends Operator {
     }
 
     private static File getResFile(String fileName) {
-        final String homeUrl = DatUtils.findHomeFolder().getAbsolutePath();
+        final String homeUrl = ResourceUtils.findHomeFolder().getAbsolutePath();
         final String path = homeUrl + File.separator + "res" + File.separator + "kernels" + File.separator + fileName;
         return new File(path);
     }

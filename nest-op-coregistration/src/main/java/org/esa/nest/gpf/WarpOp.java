@@ -22,7 +22,7 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.*;
 import org.esa.beam.util.ProductUtils;
-import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.dataio.ReaderUtils;
 
@@ -595,7 +595,7 @@ public class WarpOp extends Operator {
 
     private static File getResidualsFile(final Product sourceProduct) {
         String fileName = sourceProduct.getName() + "_residual.txt";
-        final File appUserDir = new File(DatUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
+        final File appUserDir = new File(ResourceUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
         if(!appUserDir.exists()) {
             appUserDir.mkdirs();
         }

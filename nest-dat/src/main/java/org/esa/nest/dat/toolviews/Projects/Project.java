@@ -15,7 +15,7 @@ import org.esa.beam.visat.dialogs.PromptDialog;
 import org.esa.nest.dat.DatContext;
 import org.esa.nest.dat.dialogs.ProductSetDialog;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
-import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.XMLSupport;
 import org.jdom.Attribute;
 import org.jdom.Document;
@@ -64,7 +64,7 @@ public class Project extends Observable {
     }
 
     public void CreateNewProject() {
-        final File file = DatUtils.GetFilePath("Create Project", "xml", "xml", "Project File", true);
+        final File file = ResourceUtils.GetFilePath("Create Project", "xml", "xml", "Project File", true);
 
         if(file != null) {
             final String prjName = file.getName();
@@ -440,7 +440,7 @@ public class Project extends Observable {
                 final String pathStr = file.getAbsolutePath();
                 final File dataDir = new File(pathStr.substring(0, pathStr.length()-4) + ".data");
                 if(dataDir.exists()) {
-                    DatUtils.deleteDir(dataDir);
+                    ResourceUtils.deleteDir(dataDir);
                     file.delete();
                 }
             } else {
@@ -472,7 +472,7 @@ public class Project extends Observable {
     }
 
     public void SaveProjectAs() {
-        final File file = DatUtils.GetFilePath("Save Project", "XML", "xml", "Project File", true);
+        final File file = ResourceUtils.GetFilePath("Save Project", "XML", "xml", "Project File", true);
         if(file == null) return;
         
         projectFile = file;
@@ -502,7 +502,7 @@ public class Project extends Observable {
 
     public void LoadProject() {
 
-        final File file = DatUtils.GetFilePath("Load Project", "XML", "xml", "Project File", false);
+        final File file = ResourceUtils.GetFilePath("Load Project", "XML", "xml", "Project File", false);
         if(file == null) return;
 
         initProject(file);

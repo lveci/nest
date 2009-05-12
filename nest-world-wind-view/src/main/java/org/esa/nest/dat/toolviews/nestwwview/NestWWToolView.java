@@ -59,12 +59,12 @@ import java.net.URISyntaxException;
 /**
  * The window displaying the world map.
  *
- * @version $Revision: 1.12 $ $Date: 2009-04-23 18:04:02 $
+ * @version $Revision: 1.13 $ $Date: 2009-05-12 16:21:01 $
  */
 public class NestWWToolView extends AbstractToolView {
 
     //private static final String loadDEMCommand = "loadDEM";
-    //private static final ImageIcon loadDEMIcon = DatUtils.LoadIcon("org/esa/nest/icons/dem24.gif");
+    //private static final ImageIcon loadDEMIcon = ResourceUtils.LoadIcon("org/esa/nest/icons/dem24.gif");
 
     private final VisatApp datApp = VisatApp.getApp();
     private Dimension canvasSize = new Dimension(800, 600);

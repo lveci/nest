@@ -15,7 +15,6 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.swing.progress.DialogProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -24,18 +23,9 @@ import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.PropertyMap;
-import org.esa.beam.util.Debug;
-import org.esa.beam.dataio.dimap.DimapProductReader;
-import org.esa.beam.dataio.dimap.DimapProductConstants;
-import org.esa.nest.util.DatUtils;
-import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.util.ResourceUtils;
 
-import javax.media.jai.JAI;
-import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.io.FileOutputStream;
@@ -261,7 +251,7 @@ public class DataAnalysisOp extends Operator {
     private void writeStatsToFile() {
         String fileName = sourceProduct.getName() + "_statistics.txt";
         try {
-            final File appUserDir = new File(DatUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
+            final File appUserDir = new File(ResourceUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
             if(!appUserDir.exists()) {
                 appUserDir.mkdirs();
             }

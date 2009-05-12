@@ -3,7 +3,6 @@ package org.esa.nest.dat.plugins.graphbuilder;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.graph.Graph;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.help.HelpSys;
@@ -11,7 +10,7 @@ import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.visat.dialogs.PromptDialog;
-import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.DialogUtils;
 
 import javax.media.jai.JAI;
@@ -30,12 +29,12 @@ import java.util.*;
  */
 public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
-    private static final ImageIcon processIcon = DatUtils.LoadIcon("org/esa/nest/icons/cog.png");
-    private static final ImageIcon saveIcon = DatUtils.LoadIcon("org/esa/nest/icons/save.png");
-    private static final ImageIcon loadIcon = DatUtils.LoadIcon("org/esa/nest/icons/open.png");
-    private static final ImageIcon clearIcon = DatUtils.LoadIcon("org/esa/nest/icons/edit-clear.png");
-    private static final ImageIcon helpIcon = DatUtils.LoadIcon("org/esa/nest/icons/help-browser.png");
-    private static final ImageIcon infoIcon = DatUtils.LoadIcon("org/esa/nest/icons/info22.png");
+    private static final ImageIcon processIcon = ResourceUtils.LoadIcon("org/esa/nest/icons/cog.png");
+    private static final ImageIcon saveIcon = ResourceUtils.LoadIcon("org/esa/nest/icons/save.png");
+    private static final ImageIcon loadIcon = ResourceUtils.LoadIcon("org/esa/nest/icons/open.png");
+    private static final ImageIcon clearIcon = ResourceUtils.LoadIcon("org/esa/nest/icons/edit-clear.png");
+    private static final ImageIcon helpIcon = ResourceUtils.LoadIcon("org/esa/nest/icons/help-browser.png");
+    private static final ImageIcon infoIcon = ResourceUtils.LoadIcon("org/esa/nest/icons/info22.png");
 
     private final AppContext appContext;
     private GraphPanel graphPanel = null;
@@ -284,7 +283,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
      * Loads a new graph from a file
      */
     private void LoadGraph() {
-        final File file = DatUtils.GetFilePath("Load Graph", "XML", "xml", "Graph", false);
+        final File file = ResourceUtils.GetFilePath("Load Graph", "XML", "xml", "Graph", false);
         if(file == null) return;
 
         LoadGraph(file);

@@ -3,11 +3,10 @@ package org.esa.nest.dat;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.nest.dat.dialogs.IOPanel;
 import org.esa.nest.dat.dialogs.MultiGraphDialog;
 import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
 import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
-import org.esa.nest.util.DatUtils;
+import org.esa.nest.util.ResourceUtils;
 
 import java.awt.*;
 import java.io.File;
@@ -21,7 +20,7 @@ public class CoregistrationDialog extends MultiGraphDialog {
     private final static File graphPath = new File(homeUrl, File.separator + "graphs" + File.separator + "internal");
     private final static String internalFormat = DimapProductConstants.DIMAP_FORMAT_NAME;
 
-    private final static File tmpFolder = DatUtils.getApplicationUserTempDataDir();
+    private final static File tmpFolder = ResourceUtils.getApplicationUserTempDataDir();
     private final static File tmpFile1 = new File(tmpFolder, TMP_FILENAME + ".dim");
     private final static File tmpDataFile1 = new File(tmpFolder, TMP_FILENAME + ".data");
 
@@ -111,6 +110,6 @@ public class CoregistrationDialog extends MultiGraphDialog {
     @Override
     protected void cleanUpTempFiles() {
         tmpFile1.delete();
-        DatUtils.deleteDir(tmpDataFile1);
+        ResourceUtils.deleteDir(tmpDataFile1);
     }
 }

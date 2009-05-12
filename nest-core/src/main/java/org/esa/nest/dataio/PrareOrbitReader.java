@@ -1,19 +1,11 @@
 package org.esa.nest.dataio;
 
-import org.esa.nest.util.DatUtils;
-import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.MathUtils;
 import org.esa.beam.framework.gpf.OperatorException;
 
-import javax.imageio.stream.ImageInputStream;
-import javax.imageio.stream.FileImageInputStream;
-import java.util.Date;
-import java.util.StringTokenizer;
 import java.util.Arrays;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
-import java.text.ParseException;
 
 /**
  * Created by IntelliJ IDEA.

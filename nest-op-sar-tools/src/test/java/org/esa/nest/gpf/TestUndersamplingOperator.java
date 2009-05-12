@@ -6,10 +6,8 @@ import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.gpf.TestOperator;
-import org.esa.nest.util.DatUtils;
 
 import java.util.Arrays;
-import java.io.File;
 
 import com.bc.ceres.core.ProgressMonitor;
 
