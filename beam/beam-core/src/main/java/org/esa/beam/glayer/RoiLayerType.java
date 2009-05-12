@@ -5,7 +5,6 @@ import com.bc.ceres.binding.ValueContainer;
 import com.bc.ceres.binding.ValueModel;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
-import com.bc.ceres.glayer.Style;
 import com.bc.ceres.glayer.support.ImageLayer;
 import com.bc.ceres.glevel.MultiLevelSource;
 import org.esa.beam.framework.datamodel.RasterDataNode;
@@ -23,9 +22,9 @@ import java.awt.geom.AffineTransform;
 public class RoiLayerType extends ImageLayer.Type {
 
     public static final String ROI_LAYER_ID = "org.esa.beam.layers.roi";
-    public static final String PROPERTY_COLOR = "roiOverlay.color";
-    public static final String PROPERTY_TRANSPARENCY = "roiOverlay.transparency";
-    public static final String PROPERTY_REFERENCED_RASTER = "roiOverlay.referencedRaster";
+    public static final String PROPERTY_NAME_COLOR = "color";
+    public static final String PROPERTY_NAME_TRANSPARENCY = "transparency";
+    public static final String PROPERTY_NAME_RASTER = "raster";
 
     @Override
     public String getName() {
@@ -34,12 +33,12 @@ public class RoiLayerType extends ImageLayer.Type {
 
     @Override
     protected Layer createLayerImpl(LayerContext ctx, ValueContainer configuration) {
-        final RasterDataNode raster = (RasterDataNode) configuration.getValue(PROPERTY_REFERENCED_RASTER);
+        final RasterDataNode raster = (RasterDataNode) configuration.getValue(PROPERTY_NAME_RASTER);
 
         if (configuration.getValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE) == null) {
             final MultiLevelSource multiLevelSource;
             if (raster.getROIDefinition() != null && raster.getROIDefinition().isUsable()) {
-                final Color color = (Color) configuration.getValue(PROPERTY_COLOR);
+                final Color color = (Color) configuration.getValue(PROPERTY_NAME_COLOR);
                 final AffineTransform i2mTransform = (AffineTransform) configuration.getValue(
                         ImageLayer.PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM);
                 multiLevelSource = RoiImageMultiLevelSource.create(raster, color, i2mTransform);
@@ -57,8 +56,6 @@ public class RoiLayerType extends ImageLayer.Type {
         roiLayer.setName("ROI");
         roiLayer.setId(ROI_LAYER_ID);
 
-        configureLayer(configuration, roiLayer);
-
         return roiLayer;
     }
 
@@ -66,33 +63,13 @@ public class RoiLayerType extends ImageLayer.Type {
     public ValueContainer getConfigurationTemplate() {
         final ValueContainer template = super.getConfigurationTemplate();
 
-        final ValueModel rasterModel = createDefaultValueModel(PROPERTY_REFERENCED_RASTER, RasterDataNode.class);
+        final ValueModel rasterModel = createDefaultValueModel(PROPERTY_NAME_RASTER, RasterDataNode.class);
         rasterModel.getDescriptor().setNotNull(true);
         template.addModel(rasterModel);
 
-        template.addModel(createDefaultValueModel(PROPERTY_COLOR, Color.class, Color.RED));
-        template.addModel(createDefaultValueModel(PROPERTY_TRANSPARENCY, Double.class, 0.5));
+        template.addModel(createDefaultValueModel(PROPERTY_NAME_COLOR, Color.class, Color.RED));
+        template.addModel(createDefaultValueModel(PROPERTY_NAME_TRANSPARENCY, Double.class, 0.5));
 
         return template;
-    }
-
-    private void configureLayer(ValueContainer configuration, Layer layer) {
-        Color color = (Color) configuration.getValue(PROPERTY_COLOR);
-        Double transparency = (Double) configuration.getValue(PROPERTY_TRANSPARENCY);
-        RasterDataNode raster = (RasterDataNode) configuration.getValue(PROPERTY_REFERENCED_RASTER);
-        AffineTransform i2mTransform = (AffineTransform) configuration.getValue(
-                ImageLayer.PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM);
-        if (transparency == null) {
-            transparency = 0.0;
-        }
-        Style style = layer.getStyle();
-        style.setProperty(PROPERTY_COLOR, color);
-        style.setOpacity(1.0 - transparency);
-        style.setProperty(PROPERTY_REFERENCED_RASTER, raster);
-        style.setProperty(ImageLayer.PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM, i2mTransform);
-
-        style.setComposite(layer.getStyle().getComposite());
-
-        layer.setStyle(style);
     }
 }

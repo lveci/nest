@@ -6,7 +6,7 @@ import com.bc.ceres.core.Assert;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerType;
-import com.bc.ceres.glayer.Style;
+import com.bc.ceres.glevel.MultiLevelModel;
 import com.bc.ceres.glevel.MultiLevelRenderer;
 import com.bc.ceres.glevel.MultiLevelSource;
 import com.bc.ceres.glevel.support.ConcurrentMultiLevelRenderer;
@@ -40,9 +40,9 @@ public class ImageLayer extends Layer {
 
     public static final String PROPERTY_NAME_MULTI_LEVEL_SOURCE = "multiLevelSource";
     public static final String PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM = "imageToModelTransform";
-    public static final String PROPERTY_NAME_BORDER_SHOWN = "border.shown";
-    public static final String PROPERTY_NAME_BORDER_WIDTH = "border.width";
-    public static final String PROPERTY_NAME_BORDER_COLOR = "border.color";
+    public static final String PROPERTY_NAME_BORDER_SHOWN = "borderShown";
+    public static final String PROPERTY_NAME_BORDER_WIDTH = "borderWidth";
+    public static final String PROPERTY_NAME_BORDER_COLOR = "borderColor";
 
     public static final boolean DEFAULT_BORDER_SHOWN = false;
     public static final double DEFAULT_BORDER_WIDTH = 1.0;
@@ -99,13 +99,6 @@ public class ImageLayer extends Layer {
         super(layerType, configuration);
         multiLevelSource = (MultiLevelSource) configuration.getValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE);
         Assert.notNull(multiLevelSource);
-        getStyle().setProperty(ImageLayer.PROPERTY_NAME_BORDER_SHOWN,
-                               configuration.getValue(ImageLayer.PROPERTY_NAME_BORDER_SHOWN));
-        getStyle().setProperty(ImageLayer.PROPERTY_NAME_BORDER_COLOR,
-                               configuration.getValue(ImageLayer.PROPERTY_NAME_BORDER_COLOR));
-        getStyle().setProperty(ImageLayer.PROPERTY_NAME_BORDER_WIDTH,
-                               configuration.getValue(ImageLayer.PROPERTY_NAME_BORDER_WIDTH));
-
     }
 
     @Override
@@ -171,10 +164,15 @@ public class ImageLayer extends Layer {
     }
 
     public int getLevel(Viewport vp) {
-        final double i2mScale = Math.sqrt(Math.abs(getImageToModelTransform().getDeterminant()));
+        return getLevel(multiLevelSource.getModel(), vp);
+    }
+
+    public static int getLevel(MultiLevelModel model, Viewport vp) {
+        final AffineTransform i2m = model.getImageToModelTransform(0);
+        final double i2mScale = Math.sqrt(Math.abs(i2m.getDeterminant()));
         final double m2vScale = 1.0 / vp.getZoomFactor();
         final double scale = m2vScale / i2mScale;
-        return multiLevelSource.getModel().getLevel(scale);
+        return model.getLevel(scale);
     }
 
     @Override
@@ -258,30 +256,15 @@ public class ImageLayer extends Layer {
     }
 
     public boolean isBorderShown() {
-        final Style style = getStyle();
-
-        if (style.hasProperty(PROPERTY_NAME_BORDER_SHOWN)) {
-            return (Boolean) style.getProperty(PROPERTY_NAME_BORDER_SHOWN);
-        }
-        return DEFAULT_BORDER_SHOWN;
+        return getConfigurationProperty(PROPERTY_NAME_BORDER_SHOWN, DEFAULT_BORDER_SHOWN);
     }
 
     public double getBorderWidth() {
-        final Style style = getStyle();
-
-        if (style.hasProperty(PROPERTY_NAME_BORDER_WIDTH)) {
-            return (Double) style.getProperty(PROPERTY_NAME_BORDER_WIDTH);
-        }
-        return DEFAULT_BORDER_WIDTH;
+        return getConfigurationProperty(PROPERTY_NAME_BORDER_WIDTH, DEFAULT_BORDER_WIDTH);
     }
 
     public Color getBorderColor() {
-        final Style style = getStyle();
-
-        if (style.hasProperty(PROPERTY_NAME_BORDER_COLOR)) {
-            return (Color) style.getProperty(PROPERTY_NAME_BORDER_COLOR);
-        }
-        return DEFAULT_BORDER_COLOR;
+        return getConfigurationProperty(PROPERTY_NAME_BORDER_COLOR, DEFAULT_BORDER_COLOR);
     }
 
     private static ValueContainer addMultiLevelSourceModel(ValueContainer valueContainer,

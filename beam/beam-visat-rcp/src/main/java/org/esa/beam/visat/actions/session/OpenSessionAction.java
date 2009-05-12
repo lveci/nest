@@ -1,5 +1,5 @@
 /*
- * $Id: OpenSessionAction.java,v 1.3 2009-05-11 16:17:37 lveci Exp $
+ * $Id: OpenSessionAction.java,v 1.4 2009-05-12 12:56:42 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -52,7 +52,7 @@ import java.util.concurrent.ExecutionException;
  * Opens a VISAT session.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-05-11 16:17:37 $
+ * @version $Revision: 1.4 $ $Date: 2009-05-12 12:56:42 $
  * @since BEAM 4.6
  */
 public class OpenSessionAction extends ExecCommand {
@@ -165,8 +165,7 @@ public class OpenSessionAction extends ExecCommand {
                 if (e.getCause() instanceof CanceledException) {
                     return;
                 }
-                app.showErrorDialog("An unexpected exception occured!\n" +
-                                    "Message: " + e.getCause().getMessage());
+                app.showErrorDialog(MessageFormat.format("An unexpected exception occured!\nMessage: {0}", e.getCause().getMessage()));
                 e.printStackTrace();
                 return;
             }
@@ -188,6 +187,11 @@ public class OpenSessionAction extends ExecCommand {
                 app.getProductManager().addProduct(product);
             }
 
+
+            // todo - Handle view persistence in a generic way. (nf - 08.05.2009)
+            //        These are the only 3 views currently known in BEAM.
+            //        NEST already uses another view type which cannot be stored/restored.
+            //
             ShowImageViewAction showImageViewAction = getAction(ShowImageViewAction.ID);
             ShowImageViewRGBAction showImageViewRGBAction = getAction(ShowImageViewRGBAction.ID);
             ShowMetadataViewAction showMetadataViewAction = getAction(ShowMetadataViewAction.ID);
@@ -216,7 +220,7 @@ public class OpenSessionAction extends ExecCommand {
                     try {
                         internalFrame.setMaximum(false);
                     } catch (PropertyVetoException e) {
-                        // ok, ignore
+                        // ok to ignore
                     }
                     internalFrame.setBounds(bounds);
                 }

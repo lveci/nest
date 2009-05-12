@@ -32,10 +32,12 @@ import javax.swing.tree.TreePath;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
+import java.util.Hashtable;
 
 class LayerManagerForm extends AbstractLayerForm {
 
@@ -64,13 +66,21 @@ class LayerManagerForm extends AbstractLayerForm {
         layerTree = createCheckBoxTree(layerTreeModel);
         layerTree.setCellRenderer(new MyTreeCellRenderer());
 
-        transparencySlider = new JSlider(0, 100, 0);
+        Hashtable<Integer, JLabel> transparencySliderLabelTable = new Hashtable<Integer, JLabel>();
+        transparencySliderLabelTable.put(0, createSliderLabel("0%"));
+        transparencySliderLabelTable.put(127, createSliderLabel("50%"));
+        transparencySliderLabelTable.put(255, createSliderLabel("100%"));
+        transparencySlider = new JSlider(0, 255, 0);
+        transparencySlider.setLabelTable(transparencySliderLabelTable);
+        transparencySlider.setPaintLabels(true);
+        transparencySlider.addChangeListener(new TransparencySliderListener());
+
+        transparencyLabel = new JLabel("Transparency:");
+
         final JPanel sliderPanel = new JPanel(new BorderLayout(4, 4));
         sliderPanel.setBorder(new EmptyBorder(4, 4, 4, 4));
-        transparencyLabel = new JLabel("Transparency:");
         sliderPanel.add(transparencyLabel, BorderLayout.WEST);
         sliderPanel.add(transparencySlider, BorderLayout.CENTER);
-        transparencySlider.addChangeListener(new TransparencySliderListener());
 
         getRootLayer().addListener(new RootLayerListener());
 
@@ -114,6 +124,14 @@ class LayerManagerForm extends AbstractLayerForm {
 
         initLayerTreeVisibility(view.getRootLayer());
         updateFormControl();
+    }
+
+    private JLabel createSliderLabel(String text) {
+        JLabel label = new JLabel(text);
+        Font oldFont = label.getFont();
+        Font newFont = oldFont.deriveFont(oldFont.getSize2D() * 0.85f);
+        label.setFont(newFont);
+        return label;
     }
 
     public Layer getRootLayer() {
@@ -211,8 +229,8 @@ class LayerManagerForm extends AbstractLayerForm {
         transparencyLabel.setEnabled(layer != null);
         transparencySlider.setEnabled(layer != null);
         if (layer != null) {
-            final double transparency = 1 - layer.getStyle().getOpacity();
-            final int n = (int) Math.round(100.0 * transparency);
+            final double transparency = layer.getTransparency();
+            final int n = (int) Math.round(255.0 * transparency);
             transparencySlider.setValue(n);
         }
     }
@@ -299,7 +317,7 @@ class LayerManagerForm extends AbstractLayerForm {
             if (path != null) {
                 Layer layer = getLayer(path);
                 adjusting = true;
-                layer.getStyle().setOpacity(1.0 - transparencySlider.getValue() / 100.0f);
+                layer.setTransparency(transparencySlider.getValue() / 255.0);
                 adjusting = false;
             }
 

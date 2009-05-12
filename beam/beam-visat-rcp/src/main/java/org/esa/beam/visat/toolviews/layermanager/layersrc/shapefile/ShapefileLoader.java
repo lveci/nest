@@ -66,8 +66,8 @@ class ShapefileLoader extends SwingWorker<Layer, Object> {
         CoordinateReferenceSystem targetCrs = targetProduct.getGeoCoding().getModelCRS();
         final Geometry clipGeometry = createProductGeometry(targetProduct);
 
-        File file = new File((String) context.getPropertyValue(ShapefileLayerSource.PROPERTY_FILE_PATH));
-        Object featureCollectionValue = context.getPropertyValue(ShapefileLayerSource.PROPERTY_FEATURE_COLLECTION);
+        File file = new File((String) context.getPropertyValue(ShapefileLayerSource.PROPERTY_NAME_FILE_PATH));
+        Object featureCollectionValue = context.getPropertyValue(ShapefileLayerSource.PROPERTY_NAME_FEATURE_COLLECTION);
         FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection;
         if (featureCollectionValue == null) {
             featureCollection = FeatureLayerType.createFeatureCollection(targetCrs, clipGeometry, file.toURI().toURL());
@@ -80,11 +80,11 @@ class ShapefileLoader extends SwingWorker<Layer, Object> {
 
         final LayerType type = LayerType.getLayerType(FeatureLayerType.class.getName());
         final ValueContainer configuration = type.getConfigurationTemplate();
-        configuration.setValue(FeatureLayerType.PROPERTY_FEATURE_COLLECTION_URL, file.toURI().toURL());
-        configuration.setValue(FeatureLayerType.PROPERTY_FEATURE_COLLECTION_CRS, targetCrs);
-        configuration.setValue(FeatureLayerType.PROPERTY_FEATURE_COLLECTION_CLIP_GEOMETRY, clipGeometry);
-        configuration.setValue(FeatureLayerType.PROPERTY_FEATURE_COLLECTION, featureCollection);
-        configuration.setValue(FeatureLayerType.PROPERTY_SLD_STYLE, selectedStyle);
+        configuration.setValue(FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION_URL, file.toURI().toURL());
+        configuration.setValue(FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION_CRS, targetCrs);
+        configuration.setValue(FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION_CLIP_GEOMETRY, clipGeometry);
+        configuration.setValue(FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION, featureCollection);
+        configuration.setValue(FeatureLayerType.PROPERTY_NAME_SLD_STYLE, selectedStyle);
         Layer featureLayer = type.createLayer(sceneView.getLayerContext(), configuration);
         featureLayer.setName(file.getName());
         featureLayer.setVisible(true);
@@ -93,20 +93,20 @@ class ShapefileLoader extends SwingWorker<Layer, Object> {
 
     private Style getSelectedStyle(Style[] styles) {
         Style selectedStyle;
-        selectedStyle = (Style) context.getPropertyValue(ShapefileLayerSource.PROPERTY_SELECTED_STYLE);
+        selectedStyle = (Style) context.getPropertyValue(ShapefileLayerSource.PROPERTY_NAME_SELECTED_STYLE);
         if (selectedStyle == null) {
             selectedStyle = styles[0];
-            context.setPropertyValue(ShapefileLayerSource.PROPERTY_SELECTED_STYLE, styles[0]);
+            context.setPropertyValue(ShapefileLayerSource.PROPERTY_NAME_SELECTED_STYLE, styles[0]);
         }
         return selectedStyle;
     }
 
     private Style[] getStyles(File file, FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection) {
         Style[] styles;
-        styles = (Style[]) context.getPropertyValue(ShapefileLayerSource.PROPERTY_STYLES);
+        styles = (Style[]) context.getPropertyValue(ShapefileLayerSource.PROPERTY_NAME_STYLES);
         if (styles == null) {
             styles = createStyle(file, featureCollection.getSchema());
-            context.setPropertyValue(ShapefileLayerSource.PROPERTY_STYLES, styles);
+            context.setPropertyValue(ShapefileLayerSource.PROPERTY_NAME_STYLES, styles);
         }
         return styles;
     }

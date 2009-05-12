@@ -1,5 +1,5 @@
 /*
- * $Id: FigureLayer.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: FigureLayer.java,v 1.2 2009-05-12 12:56:42 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -35,17 +35,17 @@ import java.util.List;
 
 public class FigureLayer extends Layer {
 
-    public static final String PROPERTY_NAME_FIGURE_LIST = "shape.figureList";
-    public static final String PROPERTY_NAME_TRANSFORM = "shape.transform";
-    public static final String PROPERTY_NAME_SHAPE_OUTLINED = "shape.outlined";
-    public static final String PROPERTY_NAME_SHAPE_FILLED = "shape.filled";
-    public static final String PROPERTY_NAME_SHAPE_OUTL_COLOR = "shape.outl.color";
-    public static final String PROPERTY_NAME_SHAPE_FILL_COLOR = "shape.fill.color";
-    public static final String PROPERTY_NAME_SHAPE_OUTL_TRANSPARENCY = "shape.outl.transparency";
-    public static final String PROPERTY_NAME_SHAPE_FILL_TRANSPARENCY = "shape.fill.transparency";
-    public static final String PROPERTY_NAME_SHAPE_OUTL_WIDTH = "shape.outl.width";
-    public static final String PROPERTY_NAME_SHAPE_OUTL_COMPOSITE = "shape.outl.composite";
-    public static final String PROPERTY_NAME_SHAPE_FILL_COMPOSITE = "shape.fill.composite";
+    public static final String PROPERTY_NAME_FIGURE_LIST = "figureList";
+    public static final String PROPERTY_NAME_TRANSFORM = "shapeToModelTransform";
+    public static final String PROPERTY_NAME_SHAPE_OUTLINED = "outlined";
+    public static final String PROPERTY_NAME_SHAPE_FILLED = "filled";
+    public static final String PROPERTY_NAME_SHAPE_OUTL_COLOR = "outlineColor";
+    public static final String PROPERTY_NAME_SHAPE_FILL_COLOR = "fillColor";
+    public static final String PROPERTY_NAME_SHAPE_OUTL_TRANSPARENCY = "outlineTransparency";
+    public static final String PROPERTY_NAME_SHAPE_FILL_TRANSPARENCY = "fillTransparency";
+    public static final String PROPERTY_NAME_SHAPE_OUTL_WIDTH = "outlineWidth";
+    public static final String PROPERTY_NAME_SHAPE_OUTL_COMPOSITE = "outlineComposite";
+    public static final String PROPERTY_NAME_SHAPE_FILL_COMPOSITE = "fillComposite";
 
     public static final boolean DEFAULT_SHAPE_OUTLINED = Boolean.TRUE;
     public static final boolean DEFAULT_SHAPE_FILLED = Boolean.TRUE;
@@ -129,7 +129,7 @@ public class FigureLayer extends Layer {
             transform.concatenate(shapeToModelTransform);
             g2d.setTransform(transform);
 
-            double layerOpacity = getStyle().getOpacity();
+            double layerOpacity = 1.0 - getTransparency();
             for (final Figure figure : figureList) {
                 setAttributes(figure);
                 Composite oldOutlComposite = (Composite) figure.getAttribute(Figure.OUTL_COMPOSITE_KEY);
@@ -170,73 +170,30 @@ public class FigureLayer extends Layer {
     }
 
     private boolean isShapeOutlined() {
-        final Style style = getStyle();
-
-        if (style.hasProperty(PROPERTY_NAME_SHAPE_OUTLINED)) {
-            return (Boolean) style.getProperty(PROPERTY_NAME_SHAPE_OUTLINED);
-        }
-
-        return DEFAULT_SHAPE_OUTLINED;
+        return getConfigurationProperty(PROPERTY_NAME_SHAPE_OUTLINED, DEFAULT_SHAPE_OUTLINED);
     }
 
     private Color getShapeOutlineColor() {
-        final Style style = getStyle();
-
-        if (style.hasProperty(PROPERTY_NAME_SHAPE_OUTL_COLOR)) {
-            return (Color) style.getProperty(PROPERTY_NAME_SHAPE_OUTL_COLOR);
-        }
-
-        return DEFAULT_SHAPE_OUTL_COLOR;
+        return getConfigurationProperty(PROPERTY_NAME_SHAPE_OUTL_COLOR, DEFAULT_SHAPE_OUTL_COLOR);
     }
 
     private double getShapeOutlineTransparency() {
-        final Style style = getStyle();
-
-        if (style.hasProperty(PROPERTY_NAME_SHAPE_OUTL_TRANSPARENCY)) {
-            return (Double) style.getProperty(PROPERTY_NAME_SHAPE_OUTL_TRANSPARENCY);
-        }
-
-        return DEFAULT_SHAPE_OUTL_TRANSPARENCY;
+        return getConfigurationProperty(PROPERTY_NAME_SHAPE_OUTL_TRANSPARENCY, DEFAULT_SHAPE_OUTL_TRANSPARENCY);
     }
 
     private boolean isShapeFilled() {
-        final Style style = getStyle();
-
-        if (style.hasProperty(PROPERTY_NAME_SHAPE_FILLED)) {
-            return (Boolean) style.getProperty(PROPERTY_NAME_SHAPE_FILLED);
-        }
-
-        return DEFAULT_SHAPE_FILLED;
+        return getConfigurationProperty(PROPERTY_NAME_SHAPE_FILLED, DEFAULT_SHAPE_FILLED);
     }
 
     private double getShapeOutlineWidth() {
-        final Style style = getStyle();
-
-        if (style.hasProperty(PROPERTY_NAME_SHAPE_OUTL_WIDTH)) {
-            return (Double) style.getProperty(PROPERTY_NAME_SHAPE_OUTL_WIDTH);
-        }
-
-        return DEFAULT_SHAPE_OUTL_WIDTH;
+        return getConfigurationProperty(PROPERTY_NAME_SHAPE_OUTL_WIDTH, DEFAULT_SHAPE_OUTL_WIDTH);
     }
 
     private Color getShapeFillColor() {
-        final Style style = getStyle();
-
-        if (style.hasProperty(PROPERTY_NAME_SHAPE_FILL_COLOR)) {
-            return (Color) style.getProperty(PROPERTY_NAME_SHAPE_FILL_COLOR);
-        }
-
-        return DEFAULT_SHAPE_FILL_COLOR;
+        return getConfigurationProperty(PROPERTY_NAME_SHAPE_FILL_COLOR, DEFAULT_SHAPE_FILL_COLOR);
     }
 
     private double getShapeFillTransparency() {
-        final Style style = getStyle();
-
-        if (style.hasProperty(PROPERTY_NAME_SHAPE_FILL_TRANSPARENCY)) {
-            return (Double) style.getProperty(PROPERTY_NAME_SHAPE_FILL_TRANSPARENCY);
-        }
-
-        return DEFAULT_SHAPE_FILL_TRANSPARENCY;
+        return getConfigurationProperty(PROPERTY_NAME_SHAPE_FILL_TRANSPARENCY, DEFAULT_SHAPE_FILL_TRANSPARENCY);
     }
-
 }

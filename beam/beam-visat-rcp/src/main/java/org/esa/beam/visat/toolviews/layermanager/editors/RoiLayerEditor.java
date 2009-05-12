@@ -1,8 +1,8 @@
 package org.esa.beam.visat.toolviews.layermanager.editors;
 
 import com.bc.ceres.binding.ValueDescriptor;
+import com.bc.ceres.binding.ValueContainer;
 import com.bc.ceres.binding.swing.BindingContext;
-import com.bc.ceres.glayer.Style;
 import com.bc.ceres.glayer.support.ImageLayer;
 import com.bc.ceres.glevel.MultiLevelSource;
 import org.esa.beam.framework.datamodel.ROIDefinition;
@@ -25,13 +25,13 @@ public class RoiLayerEditor extends AbstractBindingLayerEditor {
 
     @Override
     protected void initializeBinding(AppContext appContext, final BindingContext bindingContext) {
-        ValueDescriptor vd = new ValueDescriptor(RoiLayerType.PROPERTY_COLOR, Color.class);
+        ValueDescriptor vd = new ValueDescriptor(RoiLayerType.PROPERTY_NAME_COLOR, Color.class);
         vd.setDefaultValue(Color.RED);
         vd.setDisplayName("ROI colour");
         vd.setDefaultConverter();
         addValueDescriptor(vd);
 
-        bindingContext.getValueContainer().addPropertyChangeListener(RoiLayerType.PROPERTY_COLOR,
+        bindingContext.getValueContainer().addPropertyChangeListener(RoiLayerType.PROPERTY_NAME_COLOR,
                                                                      new UpdateImagePropertyChangeListener());
     }
 
@@ -39,13 +39,13 @@ public class RoiLayerEditor extends AbstractBindingLayerEditor {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            if (getLayer() != null && RoiLayerType.PROPERTY_COLOR.equals(evt.getPropertyName())) {
+            if (getLayer() != null && RoiLayerType.PROPERTY_NAME_COLOR.equals(evt.getPropertyName())) {
                 final ImageLayer layer = (ImageLayer) getLayer();
-                final Style style = layer.getStyle();
+                final ValueContainer configuration = layer.getConfiguration();
                 final Color newColor = (Color) evt.getNewValue();
-                final RasterDataNode raster = (RasterDataNode) style.getProperty(
-                        RoiLayerType.PROPERTY_REFERENCED_RASTER);
-                final AffineTransform transform = (AffineTransform) style.getProperty(
+                final RasterDataNode raster = (RasterDataNode) configuration.getValue(
+                        RoiLayerType.PROPERTY_NAME_RASTER);
+                final AffineTransform transform = (AffineTransform) configuration.getValue(
                         ImageLayer.PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM);
                 final ROIDefinition definition = raster.getROIDefinition();
                 MultiLevelSource multiLevelSource;

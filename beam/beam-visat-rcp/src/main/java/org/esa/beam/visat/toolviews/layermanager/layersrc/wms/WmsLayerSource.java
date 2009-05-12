@@ -1,5 +1,5 @@
 /*
- * $Id: WmsLayerSource.java,v 1.2 2009-05-11 16:17:37 lveci Exp $
+ * $Id: WmsLayerSource.java,v 1.3 2009-05-12 12:56:42 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -25,12 +25,12 @@ import org.esa.beam.visat.toolviews.layermanager.layersrc.LayerSourcePageContext
 
 public class WmsLayerSource implements LayerSource {
 
-    static final String PROPERTY_WMS = "WmsLayerSource.wms";
-    static final String PROPERTY_WMS_URL = "WmsLayerSource.wmsUrl";
-    static final String PROPERTY_WMS_CAPABILITIES = "WmsLayerSource.wmsCapabilities";
-    static final String PROPERTY_SELECTED_LAYER = "WmsLayerSource.selectedLayer";
-    static final String PROPERTY_SELECTED_STYLE = "WmsLayerSource.selectedStyle";
-    static final String PROPERTY_CRS_ENVELOPE = "WmsLayerSource.crsEnvelope";
+    static final String PROPERTY_NAME_WMS = "wms";
+    static final String PROPERTY_NAME_WMS_URL = "wmsUrl";
+    static final String PROPERTY_NAME_WMS_CAPABILITIES = "wmsCapabilities";
+    static final String PROPERTY_NAME_SELECTED_LAYER = "selectedLayer";
+    static final String PROPERTY_NAME_SELECTED_STYLE = "selectedStyle";
+    static final String PROPERTY_NAME_CRS_ENVELOPE = "crsEnvelope";
 
     @Override
     public boolean isApplicable(LayerSourcePageContext pageContext) {

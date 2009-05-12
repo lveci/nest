@@ -60,8 +60,8 @@ class ImageFileAssistantPage1 extends AbstractLayerSourceAssistantPage {
 
     @Override
     public boolean validatePage() {
-        String imageFilePath = (String) getContext().getPropertyValue(ImageFileLayerSource.PROPERTY_IMAGE_FILE_PATH);
-        String worldFilePath = (String) getContext().getPropertyValue(ImageFileLayerSource.PROPERTY_WORLD_FILE_PATH);
+        String imageFilePath = (String) getContext().getPropertyValue(ImageFileLayerSource.PROPERTY_NAME_IMAGE_FILE_PATH);
+        String worldFilePath = (String) getContext().getPropertyValue(ImageFileLayerSource.PROPERTY_NAME_WORLD_FILE_PATH);
         if (imageFilePath == null) {
             return false;
         }
@@ -70,7 +70,7 @@ class ImageFileAssistantPage1 extends AbstractLayerSourceAssistantPage {
 
     @Override
     public boolean hasNextPage() {
-        return getContext().getPropertyValue(ImageFileLayerSource.PROPERTY_IMAGE) != null;
+        return getContext().getPropertyValue(ImageFileLayerSource.PROPERTY_NAME_IMAGE) != null;
     }
 
     @Override
@@ -82,7 +82,7 @@ class ImageFileAssistantPage1 extends AbstractLayerSourceAssistantPage {
 
     @Override
     public boolean canFinish() {
-        return getContext().getPropertyValue(ImageFileLayerSource.PROPERTY_IMAGE) != null;
+        return getContext().getPropertyValue(ImageFileLayerSource.PROPERTY_NAME_IMAGE) != null;
     }
 
     @Override
@@ -114,7 +114,7 @@ class ImageFileAssistantPage1 extends AbstractLayerSourceAssistantPage {
         imageFileButton.addActionListener(new FileChooserActionListener(imageFileFilter) {
             @Override
             protected void onFileSelected(LayerSourcePageContext pageContext, String filePath) {
-                pageContext.setPropertyValue(ImageFileLayerSource.PROPERTY_IMAGE_FILE_PATH, filePath);
+                pageContext.setPropertyValue(ImageFileLayerSource.PROPERTY_NAME_IMAGE_FILE_PATH, filePath);
             }
         });
         addRow(panel, gbc, imageFileLabel, imageFileBox, imageFileButton);
@@ -128,7 +128,7 @@ class ImageFileAssistantPage1 extends AbstractLayerSourceAssistantPage {
         worldFileButton.addActionListener(new FileChooserActionListener(worldFileFilter) {
             @Override
             protected void onFileSelected(LayerSourcePageContext pageContext, String filePath) {
-                pageContext.setPropertyValue(ImageFileLayerSource.PROPERTY_WORLD_FILE_PATH, filePath);
+                pageContext.setPropertyValue(ImageFileLayerSource.PROPERTY_NAME_WORLD_FILE_PATH, filePath);
             }
 
         });
@@ -146,10 +146,10 @@ class ImageFileAssistantPage1 extends AbstractLayerSourceAssistantPage {
         imagePreviewLabel = new JLabel();
         imagePreviewLabel.setPreferredSize(new Dimension(200, 200));
         panel.add(imagePreviewLabel, gbc);
-        getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_IMAGE_FILE_PATH, null);
-        getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_WORLD_FILE_PATH, null);
-        getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_IMAGE, null);
-        getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_WORLD_TRANSFORM, null);
+        getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_NAME_IMAGE_FILE_PATH, null);
+        getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_NAME_WORLD_FILE_PATH, null);
+        getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_NAME_IMAGE, null);
+        getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_NAME_WORLD_TRANSFORM, null);
 
         return panel;
     }
@@ -181,7 +181,7 @@ class ImageFileAssistantPage1 extends AbstractLayerSourceAssistantPage {
 
     private static void createTransform(LayerSourcePageContext pageContext) {
         AffineTransform transform = new AffineTransform();
-        String worldFilePath = (String) pageContext.getPropertyValue(ImageFileLayerSource.PROPERTY_WORLD_FILE_PATH);
+        String worldFilePath = (String) pageContext.getPropertyValue(ImageFileLayerSource.PROPERTY_NAME_WORLD_FILE_PATH);
         if (worldFilePath != null && !worldFilePath.isEmpty()) {
             try {
                 transform = Tools.loadWorldFile(worldFilePath);
@@ -190,26 +190,26 @@ class ImageFileAssistantPage1 extends AbstractLayerSourceAssistantPage {
                 pageContext.showErrorDialog(e.getMessage());
             }
         }
-        pageContext.setPropertyValue(ImageFileLayerSource.PROPERTY_WORLD_TRANSFORM, transform);
+        pageContext.setPropertyValue(ImageFileLayerSource.PROPERTY_NAME_WORLD_TRANSFORM, transform);
     }
 
     private class WorldFilePathDocumentListener implements DocumentListener {
 
         @Override
         public void insertUpdate(DocumentEvent e) {
-            getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_WORLD_FILE_PATH, worldFileField.getText());
+            getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_NAME_WORLD_FILE_PATH, worldFileField.getText());
             getContext().updateState();
         }
 
         @Override
         public void removeUpdate(DocumentEvent e) {
-            getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_WORLD_FILE_PATH, worldFileField.getText());
+            getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_NAME_WORLD_FILE_PATH, worldFileField.getText());
             getContext().updateState();
         }
 
         @Override
         public void changedUpdate(DocumentEvent e) {
-            getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_WORLD_FILE_PATH, worldFileField.getText());
+            getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_NAME_WORLD_FILE_PATH, worldFileField.getText());
             getContext().updateState();
         }
     }
@@ -264,8 +264,8 @@ class ImageFileAssistantPage1 extends AbstractLayerSourceAssistantPage {
             }
 
             RenderedImage image = FileLoadDescriptor.create(imageFilePath, null, true, null);
-            getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_IMAGE, image);
-            getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_IMAGE_FILE_PATH, imageFilePath);
+            getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_NAME_IMAGE, image);
+            getContext().setPropertyValue(ImageFileLayerSource.PROPERTY_NAME_IMAGE_FILE_PATH, imageFilePath);
             ImagePreviewWorker worker = new ImagePreviewWorker(image, imagePreviewLabel);
             worker.execute();
 

@@ -1,5 +1,5 @@
 /*
- * $Id: ShapefileLayerSource.java,v 1.1 2009-04-27 13:08:26 lveci Exp $
+ * $Id: ShapefileLayerSource.java,v 1.2 2009-05-12 12:56:42 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -24,15 +24,15 @@ import org.esa.beam.visat.toolviews.layermanager.layersrc.LayerSourcePageContext
  * A LayerSource for ESRI shape files.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:26 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-12 12:56:42 $
  * @since BEAM 4.6
  */
 public class ShapefileLayerSource implements LayerSource {
 
-    static final String PROPERTY_FILE_PATH = "ShapefileLayerSource.fileName";
-    static final String PROPERTY_FEATURE_COLLECTION = "ShapefileLayerSource.featureCollection";
-    static final String PROPERTY_STYLES = "ShapefileLayerSource.styles";
-    static final String PROPERTY_SELECTED_STYLE = "ShapefileLayerSource.selectedStyle";
+    static final String PROPERTY_NAME_FILE_PATH = "fileName";
+    static final String PROPERTY_NAME_FEATURE_COLLECTION = "featureCollection";
+    static final String PROPERTY_NAME_STYLES = "styles";
+    static final String PROPERTY_NAME_SELECTED_STYLE = "selectedStyle";
 
     @Override
     public boolean isApplicable(LayerSourcePageContext pageContext) {

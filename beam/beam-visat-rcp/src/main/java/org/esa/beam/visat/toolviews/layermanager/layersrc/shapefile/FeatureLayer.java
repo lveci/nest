@@ -40,7 +40,7 @@ import java.util.Map;
  *
  * @author Marco Peters
  * @author Marco Zühlke
- * @version $Revision: 1.3 $ $Date: 2009-05-11 16:17:37 $
+ * @version $Revision: 1.4 $ $Date: 2009-05-12 12:56:42 $
  * @since BEAM 4.6
  */
 public class FeatureLayer extends Layer {
@@ -63,20 +63,20 @@ public class FeatureLayer extends Layer {
         super(layerType, configuration);
         FeatureCollection<SimpleFeatureType, SimpleFeature> fc;
         fc = (FeatureCollection<SimpleFeatureType, SimpleFeature>) configuration.getValue(
-                FeatureLayerType.PROPERTY_FEATURE_COLLECTION);
+                FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION);
         if (fc == null) {
-            final URL url = (URL) configuration.getValue(FeatureLayerType.PROPERTY_FEATURE_COLLECTION_URL);
+            final URL url = (URL) configuration.getValue(FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION_URL);
             final CoordinateReferenceSystem targetCrs = (CoordinateReferenceSystem) configuration.getValue(
-                    FeatureLayerType.PROPERTY_FEATURE_COLLECTION_CRS);
+                    FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION_CRS);
             final Geometry clipGeometry = (Geometry) configuration.getValue(
-                    FeatureLayerType.PROPERTY_FEATURE_COLLECTION_CLIP_GEOMETRY);
+                    FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION_CLIP_GEOMETRY);
             try {
                 fc = FeatureLayerType.createFeatureCollection(targetCrs, clipGeometry, url);
             } catch (IOException e) {
                 throw new IllegalArgumentException(e);
             }
         }
-        Style style = (Style) configuration.getValue(FeatureLayerType.PROPERTY_SLD_STYLE);
+        Style style = (Style) configuration.getValue(FeatureLayerType.PROPERTY_NAME_SLD_STYLE);
 
         crs = fc.getSchema().getGeometryDescriptor().getCoordinateReferenceSystem();
         final ReferencedEnvelope envelope = new ReferencedEnvelope(fc.getBounds(), crs);
@@ -187,10 +187,11 @@ public class FeatureLayer extends Layer {
 
         private ApplyingStyleVisitor() {
             StyleBuilder sb = new StyleBuilder();
-            polyFillExp = sb.literalExpression(polyFillOpacity * getStyle().getOpacity());
-            polyStrokeExp = sb.literalExpression(polyStrokeOpacity * getStyle().getOpacity());
-            textExp = sb.literalExpression(textOpacity * getStyle().getOpacity());
-            defaultTextFill = sb.createFill(Color.BLACK, textOpacity * getStyle().getOpacity());
+            final double layerOpacity = 1.0 - getTransparency();
+            polyFillExp = sb.literalExpression(polyFillOpacity * layerOpacity);
+            polyStrokeExp = sb.literalExpression(polyStrokeOpacity * layerOpacity);
+            textExp = sb.literalExpression(textOpacity * layerOpacity);
+            defaultTextFill = sb.createFill(Color.BLACK, textOpacity * layerOpacity);
         }
 
         @Override

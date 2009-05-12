@@ -5,7 +5,6 @@ import com.bc.ceres.binding.ValueContainer;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerType;
-import com.bc.ceres.glayer.Style;
 import com.bc.ceres.glayer.support.ImageLayer;
 import com.bc.ceres.glevel.MultiLevelSource;
 import org.esa.beam.framework.datamodel.BitmaskDef;
@@ -24,8 +23,8 @@ import java.awt.geom.AffineTransform;
  */
 public class BitmaskLayerType extends ImageLayer.Type {
 
-    public static final String PROPERTY_BITMASKDEF = "bitmask.bitmaskDef";
-    public static final String PROPERTY_PRODUCT = "bitmask.product";
+    public static final String PROPERTY_NAME_BITMASK_DEF = "bitmaskDef";
+    public static final String PROPERTY_NAME_PRODUCT = "product";
 
     @Override
     public String getName() {
@@ -37,8 +36,8 @@ public class BitmaskLayerType extends ImageLayer.Type {
         final LayerType type = LayerType.getLayerType(BitmaskLayerType.class.getName());
         final ValueContainer configuration = type.getConfigurationTemplate();
         try {
-            configuration.setValue(BitmaskLayerType.PROPERTY_BITMASKDEF, bitmaskDef);
-            configuration.setValue(BitmaskLayerType.PROPERTY_PRODUCT, raster.getProduct());
+            configuration.setValue(BitmaskLayerType.PROPERTY_NAME_BITMASK_DEF, bitmaskDef);
+            configuration.setValue(BitmaskLayerType.PROPERTY_NAME_PRODUCT, raster.getProduct());
             configuration.setValue(ImageLayer.PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM, i2mTransform);
         } catch (ValidationException e) {
             throw new IllegalStateException(e);
@@ -61,45 +60,32 @@ public class BitmaskLayerType extends ImageLayer.Type {
             }
         }
         final ImageLayer layer = new ImageLayer(this, configuration);
-        final BitmaskDef bitmaskDef = (BitmaskDef) configuration.getValue(PROPERTY_BITMASKDEF);
+        final BitmaskDef bitmaskDef = (BitmaskDef) configuration.getValue(PROPERTY_NAME_BITMASK_DEF);
         layer.setName(bitmaskDef.getName());
-        configureLayer(configuration, layer);
+        // TODO: Is this correct? (rq-2009-05-11)
+        layer.setTransparency(bitmaskDef.getTransparency());
 
         return layer;
     }
 
     private MultiLevelSource createMultiLevelSource(ValueContainer configuration) {
-        final BitmaskDef bitmaskDef = (BitmaskDef) configuration.getValue(PROPERTY_BITMASKDEF);
-        final Product product = (Product) configuration.getValue(PROPERTY_PRODUCT);
+        final BitmaskDef bitmaskDef = (BitmaskDef) configuration.getValue(PROPERTY_NAME_BITMASK_DEF);
+        final Product product = (Product) configuration.getValue(PROPERTY_NAME_PRODUCT);
         final AffineTransform transform = (AffineTransform) configuration.getValue(
                 ImageLayer.PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM);
 
         return MaskImageMultiLevelSource.create(product, bitmaskDef.getColor(), bitmaskDef.getExpr(), false, transform);
     }
 
-    private void configureLayer(ValueContainer configuration, Layer layer) {
-        final BitmaskDef bitmaskDef = (BitmaskDef) configuration.getValue(PROPERTY_BITMASKDEF);
-
-        final Style style = layer.getStyle();
-        style.setOpacity(bitmaskDef.getAlpha());
-        style.setComposite(layer.getStyle().getComposite());
-        style.setProperty(ImageLayer.PROPERTY_NAME_BORDER_SHOWN,
-                          configuration.getValue(ImageLayer.PROPERTY_NAME_BORDER_SHOWN));
-        style.setProperty(ImageLayer.PROPERTY_NAME_BORDER_COLOR,
-                          configuration.getValue(ImageLayer.PROPERTY_NAME_BORDER_COLOR));
-        style.setProperty(ImageLayer.PROPERTY_NAME_BORDER_WIDTH,
-                          configuration.getValue(ImageLayer.PROPERTY_NAME_BORDER_WIDTH));
-    }
-
     @Override
     public ValueContainer getConfigurationTemplate() {
         final ValueContainer vc = super.getConfigurationTemplate();
 
-        vc.addModel(createDefaultValueModel(PROPERTY_BITMASKDEF, BitmaskDef.class));
-        vc.getModel(PROPERTY_BITMASKDEF).getDescriptor().setNotNull(true);
+        vc.addModel(createDefaultValueModel(PROPERTY_NAME_BITMASK_DEF, BitmaskDef.class));
+        vc.getModel(PROPERTY_NAME_BITMASK_DEF).getDescriptor().setNotNull(true);
 
-        vc.addModel(createDefaultValueModel(PROPERTY_PRODUCT, Product.class));
-        vc.getModel(PROPERTY_PRODUCT).getDescriptor().setNotNull(true);
+        vc.addModel(createDefaultValueModel(PROPERTY_NAME_PRODUCT, Product.class));
+        vc.getModel(PROPERTY_NAME_PRODUCT).getDescriptor().setNotNull(true);
 
         return vc;
     }
@@ -108,8 +94,8 @@ public class BitmaskLayerType extends ImageLayer.Type {
         final ValueContainer configuration = getConfigurationTemplate();
 
         try {
-            configuration.setValue(PROPERTY_BITMASKDEF, bitmaskDef);
-            configuration.setValue(PROPERTY_PRODUCT, product);
+            configuration.setValue(PROPERTY_NAME_BITMASK_DEF, bitmaskDef);
+            configuration.setValue(PROPERTY_NAME_PRODUCT, product);
             configuration.setValue(ImageLayer.PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM, i2m);
         } catch (ValidationException e) {
             throw new IllegalArgumentException(e);
