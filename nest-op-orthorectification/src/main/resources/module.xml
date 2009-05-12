@@ -33,37 +33,22 @@
     <extension point="beam-ui:actions">
 
         <action>
-            <id>TerrainCorrectionGroup</id>
-            <class>org.esa.beam.visat.actions.ActionGroup</class>
-            <text>Terrain Correction</text>
-            <parent>geometry</parent>
-        </action>
-
-        <action>
             <id>RangeDopplerGeocodingOp</id>
             <class>org.esa.nest.dat.RangeDopplerGeocodingOpAction</class>
-            <text>Range Doppler</text>
+            <text>Terrain Correction</text>
             <shortDescr>Terrain Correction Range-Doppler Method</shortDescr>
-            <parent>TerrainCorrectionGroup</parent>
+            <parent>geometry</parent>
             <helpId>RangeDopplerGeocodingOp</helpId>
         </action>
 
         <action>
             <id>GeolocationGridGeocodingOp</id>
             <class>org.esa.nest.dat.GeolocationGridGeocodingOpAction</class>
-            <text>Geolocation Grid</text>
-            <shortDescr>Terrain Correction Geolocation-Grid Method</shortDescr>
-            <parent>TerrainCorrectionGroup</parent>
+            <text>Ellipsoid Correction</text>
+            <shortDescr>Ellipsoid Correction Geolocation-Grid Method</shortDescr>
+            <parent>geometry</parent>
             <helpId>GeolocationGridGeocodingOp</helpId>
         </action>
-
-        <!--action>
-            <id>ForwardTerrainCorrectionOp</id>
-            <class>org.esa.nest.dat.ForwardTerrainCorrectionOpAction</class>
-            <text>Forward Method</text>
-            <shortDescr>Terrain Correction Forward Method</shortDescr>
-            <parent>TerrainCorrectionGroup</parent>
-        </action-->
 
         <action>
             <id>createElevationOp</id>
@@ -85,14 +70,6 @@
             <parent>geometry</parent>
             <placeAfter>createElevationOp</placeAfter>
         </action>
-
-        <!--action>
-            <id>mapProjectionOp</id>
-            <class>org.esa.nest.dat.MapProjectionOpAction</class>
-            <text>Map Projection Op</text>
-            <shortDescr>Map projects the product</shortDescr>
-            <parent>geometry</parent>
-        </action-->
 
     </extension>
 
