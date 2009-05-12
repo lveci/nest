@@ -41,6 +41,8 @@ import org.esa.nest.dataio.ReaderUtils;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.io.IOException;
 import java.io.File;
 
@@ -99,6 +101,9 @@ public final class RangeDopplerGeocodingOp extends Operator {
     @Parameter(valueSet = {NEAREST_NEIGHBOUR, BILINEAR, CUBIC}, defaultValue = BILINEAR, label="Image Resampling Method")
     private String imgResamplingMethod = BILINEAR;
 
+    @Parameter(defaultValue="false", label="Save DEM as band")
+    private boolean saveDEM = false;
+
     private Band sourceBand = null;  // i band in case of complex product
     private Band sourceBand2 = null; // q band in case of complex product
     private MetadataElement absRoot = null;
@@ -142,6 +147,8 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private static final String CUBIC = "Cubic Convolution";
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
 
+    private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
+    private ResampleMethod imgResampling;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -193,6 +200,16 @@ public final class RangeDopplerGeocodingOp extends Operator {
             createTargetProduct();
 
             computeSensorPositionsAndVelocities();
+
+            if (imgResamplingMethod.equals(NEAREST_NEIGHBOUR)) {
+                imgResampling = ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR;
+            } else if (imgResamplingMethod.contains(BILINEAR)) {
+                imgResampling = ResampleMethod.RESAMPLE_BILINEAR;
+            } else if (imgResamplingMethod.contains(CUBIC)) {
+                imgResampling = ResampleMethod.RESAMPLE_CUBIC;
+            } else {
+                throw new OperatorException("Unknown interpolation method");
+            }
 
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
@@ -384,8 +401,6 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
         updateTargetProductMetadata();
 
-        //OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
-
         // the tile width has to be the image width because otherwise sourceRaster.getDataBufferIndex(x, y)
         // returns incorrect index for the last tile on the right
         targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 20);
@@ -479,6 +494,15 @@ public final class RangeDopplerGeocodingOp extends Operator {
                 targetBand.setUnit(targetUnit);
                 targetProduct.addBand(targetBand);
             }
+        }
+
+        if(saveDEM) {
+            final Band demBand = new Band("elevation",
+                                             ProductData.TYPE_INT32,
+                                             targetImageWidth,
+                                             targetImageHeight);
+            demBand.setUnit(Unit.METERS);
+            targetProduct.addBand(demBand);
         }
     }
 
@@ -588,17 +612,16 @@ public final class RangeDopplerGeocodingOp extends Operator {
     }
 
     /**
-     * Called by the framework in order to compute a tile for the given target band.
+     * Called by the framework in order to compute the stack of tiles for the given target bands.
      * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
      *
-     * @param targetBand The target band.
-     * @param targetTile The current tile associated with the target band to be computed.
-     * @param pm         A progress monitor which should be used to determine computation cancelation requests.
-     * @throws org.esa.beam.framework.gpf.OperatorException
-     *          If an error occurs during computation of the target raster.
+     * @param targetTiles     The current tiles to be computed for each target band.
+     * @param targetRectangle The area in pixel coordinates to be computed (same for all rasters in <code>targetRasters</code>).
+     * @param pm              A progress monitor which should be used to determine computation cancelation requests.
+     * @throws OperatorException if an error occurs during computation of the target rasters.
      */
     @Override
-    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+    public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
         /*
         * (8.1) Get local elevation h(i,j) for current sample given local latitude lat(i,j) and longitude lon(i,j);
@@ -611,43 +634,56 @@ public final class RangeDopplerGeocodingOp extends Operator {
         * (8.8) Compute range image index Ir using slant range r(tc(i,j)) or groung range;
         * (8.9) Compute pixel value x(Ia,Ir) using interpolation and save it for current sample.
         */
-        final Rectangle targetTileRectangle = targetTile.getRectangle();
-        final int x0 = targetTileRectangle.x;
-        final int y0 = targetTileRectangle.y;
-        final int w  = targetTileRectangle.width;
-        final int h  = targetTileRectangle.height;
+        final int x0 = targetRectangle.x;
+        final int y0 = targetRectangle.y;
+        final int w  = targetRectangle.width;
+        final int h  = targetRectangle.height;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
-        if (srcBandNames.length == 1) {
-            sourceBand = sourceProduct.getBand(srcBandNames[0]);
-        } else {
-            sourceBand = sourceProduct.getBand(srcBandNames[0]);
-            sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
+        final GeoPos geoPos = new GeoPos();
+        final double[] earthPoint = new double[3];
+        final int srcMaxRange = sourceImageWidth - 1;
+        final int srcMaxAzimuth = sourceImageHeight - 1;
+        ProductData demBuffer = null;
+
+        final ArrayList<TileData> trgTileList = new ArrayList<TileData>();
+        final Set<Band> keySet = targetTiles.keySet();
+        for(Band targetBand : keySet) {
+            if(targetBand.getName().equals("elevation")) {
+                demBuffer = targetTiles.get(targetBand).getDataBuffer();
+                continue;
+            }
+            final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
+
+            final TileData td = new TileData();
+            td.targetTile = targetTiles.get(targetBand);
+            td.tileDataBuffer = td.targetTile.getDataBuffer();
+            td.noDataValue = sourceProduct.getBand(srcBandNames[0]).getNoDataValue();
+            trgTileList.add(td);
         }
-        final double srcBandNoDataValue = sourceBand.getNoDataValue();
+        final TileData[] trgTiles = trgTileList.toArray(new TileData[trgTileList.size()]);
 
         try {
-            final ProductData trgData = targetTile.getDataBuffer();
-            final GeoPos geoPos = new GeoPos();
-            final double[] earthPoint = new double[3];
-            final int srcMaxRange = sourceImageWidth - 1;
-            final int srcMaxAzimuth = sourceImageHeight - 1;
-
             for (int y = y0; y < y0 + h; y++) {
                 final double lat = latMax - y*delLat;
 
                 for (int x = x0; x < x0 + w; x++) {
-                    final int index = targetTile.getDataBufferIndex(x, y);
+                    final int index = trgTiles[0].targetTile.getDataBufferIndex(x, y);
 
                     final double lon = lonMin + x*delLon;
                     geoPos.setLocation((float)lat, (float)lon);
                     final double alt = getLocalElevation(geoPos);
 
+                    if(saveDEM) {
+                        demBuffer.setElemDoubleAt(index, alt);
+                    }
+
                     GeoUtils.geo2xyz(lat, lon, alt, earthPoint);
                     final double zeroDopplerTime = getEarthPointZeroDopplerTime(earthPoint);
                     if (zeroDopplerTime < 0.0) {
-                        trgData.setElemDoubleAt(index, srcBandNoDataValue);
+                        for(TileData tileData : trgTiles) {
+                            tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
+                        }
                         continue;
                     }
 
@@ -658,10 +694,14 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
                     final double rangeIndex = computeRangeIndex(zeroDopplerTimeWithoutBias, slantRange);
                     if (rangeIndex < 0.0 || rangeIndex >= srcMaxRange ||
-                        azimuthIndex < 0.0 || azimuthIndex >= srcMaxAzimuth) {
-                            trgData.setElemDoubleAt(index, srcBandNoDataValue);
+                            azimuthIndex < 0.0 || azimuthIndex >= srcMaxAzimuth) {
+                        for(TileData tileData : trgTiles) {
+                            tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
+                        }
                     } else {
-                        trgData.setElemDoubleAt(index, getPixelValue(azimuthIndex, rangeIndex));
+                        for(TileData tileData : trgTiles) {
+                            tileData.tileDataBuffer.setElemDoubleAt(index, getPixelValue(azimuthIndex, rangeIndex, tileData.targetTile));
+                        }
                     }
                 }
             }
@@ -864,16 +904,25 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * Compute orthorectified pixel value for given pixel.
      * @param azimuthIndex The azimuth index for pixel in source image.
      * @param rangeIndex The range index for pixel in source image.
+     * @param targetTile the tile to get the data from
      * @return The pixel value.
      * @throws IOException from readPixels
      */
-    private double getPixelValue(final double azimuthIndex, final double rangeIndex) throws IOException {
+    private double getPixelValue(final double azimuthIndex, final double rangeIndex, final Tile targetTile) throws IOException {
 
-        if (imgResamplingMethod.contains(NEAREST_NEIGHBOUR)) {
+        final String[] srcBandNames = targetBandNameToSourceBandName.get(targetTile.getRasterDataNode().getName());
+        if (srcBandNames.length == 1) {
+            sourceBand = sourceProduct.getBand(srcBandNames[0]);
+        } else {
+            sourceBand = sourceProduct.getBand(srcBandNames[0]);
+            sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
+        }
+
+        if (imgResampling.equals(ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR)) {
             return getPixelValueUsingNearestNeighbourInterp(azimuthIndex, rangeIndex);
-        } else if (imgResamplingMethod.contains(BILINEAR)) {
+        } else if (imgResampling.equals(ResampleMethod.RESAMPLE_BILINEAR)) {
             return getPixelValueUsingBilinearInterp(azimuthIndex, rangeIndex);
-        } else if (imgResamplingMethod.contains(CUBIC)) {
+        } else if (imgResampling.equals(ResampleMethod.RESAMPLE_CUBIC)) {
             return getPixelValueUsingBicubicInterp(azimuthIndex, rangeIndex);
         } else {
             throw new OperatorException("Unknown interpolation method");
@@ -891,13 +940,14 @@ public final class RangeDopplerGeocodingOp extends Operator {
         final int x0 = (int)rangeIndex;
         final int y0 = (int)azimuthIndex;
 
-        final Tile sourceRaster = getSourceTile(sourceBand, new Rectangle(x0, y0, 2, 2), ProgressMonitor.NULL);
+        final Rectangle srcRect = new Rectangle(x0, y0, 2, 2);
+        final Tile sourceRaster = getSourceTile(sourceBand, srcRect, ProgressMonitor.NULL);
         final ProductData srcData = sourceRaster.getDataBuffer();
 
         double v = 0.0;
-        if (sourceBand.getUnit().contains(Unit.REAL)) {
+        if (sourceBand.getUnit().equals(Unit.REAL)) {
 
-            final Tile sourceRaster2 = getSourceTile(sourceBand2, new Rectangle(x0, y0, 2, 2), ProgressMonitor.NULL);
+            final Tile sourceRaster2 = getSourceTile(sourceBand2, srcRect, ProgressMonitor.NULL);
             final ProductData srcData2 = sourceRaster2.getDataBuffer();
             final double vi = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0));
             final double vq = srcData2.getElemDoubleAt(sourceRaster2.getDataBufferIndex(x0, y0));
@@ -924,13 +974,14 @@ public final class RangeDopplerGeocodingOp extends Operator {
         final int x1 = Math.min(x0 + 1, sourceImageWidth - 1);
         final int y1 = Math.min(y0 + 1, sourceImageHeight - 1);
 
-        final Tile sourceRaster = getSourceTile(sourceBand, new Rectangle(x0, y0, 2, 2), ProgressMonitor.NULL);
+        final Rectangle srcRect = new Rectangle(x0, y0, 2, 2);
+        final Tile sourceRaster = getSourceTile(sourceBand, srcRect, ProgressMonitor.NULL);
         final ProductData srcData = sourceRaster.getDataBuffer();
 
         final double v00, v01, v10, v11;
-        if (sourceBand.getUnit().contains(Unit.REAL)) {
+        if (sourceBand.getUnit().equals(Unit.REAL)) {
 
-            final Tile sourceRaster2 = getSourceTile(sourceBand2, new Rectangle(x0, y0, 2, 2), ProgressMonitor.NULL);
+            final Tile sourceRaster2 = getSourceTile(sourceBand2, srcRect, ProgressMonitor.NULL);
             final ProductData srcData2 = sourceRaster2.getDataBuffer();
 
             final double vi00 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0));
@@ -978,13 +1029,14 @@ public final class RangeDopplerGeocodingOp extends Operator {
         y[2] = Math.min(y[1] + 1, sourceImageHeight - 1);
         y[3] = Math.min(y[1] + 2, sourceImageHeight - 1);
 
-        final Tile sourceRaster = getSourceTile(sourceBand, new Rectangle(x[0], y[0], 4, 4), ProgressMonitor.NULL);
+        final Rectangle srcRect = new Rectangle(x[0], y[0], 4, 4);
+        final Tile sourceRaster = getSourceTile(sourceBand, srcRect, ProgressMonitor.NULL);
         final ProductData srcData = sourceRaster.getDataBuffer();
 
         final double[][] v = new double[4][4];
-        if (sourceBand.getUnit().contains(Unit.REAL)) {
+        if (sourceBand.getUnit().equals(Unit.REAL)) {
 
-            final Tile sourceRaster2 = getSourceTile(sourceBand2, new Rectangle(x[0], y[0], 4, 4), ProgressMonitor.NULL);
+            final Tile sourceRaster2 = getSourceTile(sourceBand2, srcRect, ProgressMonitor.NULL);
             final ProductData srcData2 = sourceRaster2.getDataBuffer();
             for (int i = 0; i < y.length; i++) {
                 for (int j = 0; j < x.length; j++) {
@@ -1004,6 +1056,12 @@ public final class RangeDopplerGeocodingOp extends Operator {
         }
 
         return MathUtils.interpolationBiCubic(v, rangeIndex - x[1], azimuthIndex - y[1]);
+    }
+
+    private static class TileData {
+        Tile targetTile = null;
+        ProductData tileDataBuffer = null;
+        double noDataValue = 0;
     }
 
     /**

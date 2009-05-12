@@ -18,7 +18,7 @@ public class GeolocationGridGeocodingOpAction extends AbstractVisatAction {
         if (dialog == null) {
             dialog = new NestSingleTargetProductDialog(
                     "Geolocation-Grid-Geocoding", getAppContext(), "Geolocation-Grid-Geocoding", getHelpId());
-            dialog.setTargetProductNameSuffix("_GEOCODED");
+            dialog.setTargetProductNameSuffix("_EC");
         }
         dialog.show();
 
