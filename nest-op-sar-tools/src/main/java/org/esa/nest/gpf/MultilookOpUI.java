@@ -32,8 +32,8 @@ public class MultilookOpUI extends BaseOperatorUI {
     private final JTextField nAzLooks = new JTextField("");
     private final JTextField meanGRSqaurePixel = new JTextField("");
 
-    private final JRadioButton grSquarePixel = new JRadioButton("");
-    private final JRadioButton independentLooks = new JRadioButton("");
+    private final JRadioButton grSquarePixel = new JRadioButton("GR Square Pixel");
+    private final JRadioButton independentLooks = new JRadioButton("Independent Looks");
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -108,32 +108,36 @@ public class MultilookOpUI extends BaseOperatorUI {
         gbc.insets.left = 1;
         gbc.gridx = 0;
         gbc.gridy = 0;
-
         contentPane.add(new JLabel("Source Bands:"), gbc);
+
         gbc.fill = GridBagConstraints.BOTH;
         gbc.gridx = 1;
         contentPane.add(new JScrollPane(bandList), gbc);
+
         gbc.fill = GridBagConstraints.HORIZONTAL;
-
+        gbc.gridx = 0;
         gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "GR Square Pixel:", grSquarePixel);
+        contentPane.add(grSquarePixel, gbc);
+
+        gbc.gridx = 1;
+        contentPane.add(independentLooks, gbc);
+
         grSquarePixel.setSelected(true);
-        gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "Independent Looks:", independentLooks);
-
-        RadioListener myListener = new RadioListener();
         grSquarePixel.setActionCommand("GR Square Pixel:");
         independentLooks.setActionCommand("Independent Looks:");
         ButtonGroup group = new ButtonGroup();
     	group.add(grSquarePixel);
 	    group.add(independentLooks);
+        RadioListener myListener = new RadioListener();
         grSquarePixel.addActionListener(myListener);
         independentLooks.addActionListener(myListener);
 
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Number of Range Looks:", nRgLooks);
+
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Number of Azimuth Looks:", nAzLooks);
+
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Mean GR Square Pixel:", meanGRSqaurePixel);
 
