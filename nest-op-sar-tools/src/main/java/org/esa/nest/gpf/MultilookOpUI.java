@@ -32,6 +32,9 @@ public class MultilookOpUI extends BaseOperatorUI {
     private final JTextField nAzLooks = new JTextField("");
     private final JTextField meanGRSqaurePixel = new JTextField("");
 
+    private final JRadioButton grSquarePixel = new JRadioButton("");
+    private final JRadioButton independentLooks = new JRadioButton("");
+
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
@@ -55,14 +58,18 @@ public class MultilookOpUI extends BaseOperatorUI {
     private void setAzimuthLooks() {
         if(sourceProducts != null && sourceProducts.length > 0) {
             try {
-                final int nRgLooksVal = Integer.parseInt(nRgLooks.getText());
-                final MultilookOp.DerivedParams param = new MultilookOp.DerivedParams();
-                MultilookOp.getDerivedParameters(sourceProducts[0], nRgLooksVal, param);
-                final int azimuthLooks = param.nAzLooks;
-                nAzLooks.setText(String.valueOf(azimuthLooks));
+                if (grSquarePixel.isSelected()) {
+                    final int nRgLooksVal = Integer.parseInt(nRgLooks.getText());
+                    final MultilookOp.DerivedParams param = new MultilookOp.DerivedParams();
+                    MultilookOp.getDerivedParameters(sourceProducts[0], nRgLooksVal, param);
+                    final int azimuthLooks = param.nAzLooks;
+                    nAzLooks.setText(String.valueOf(azimuthLooks));
 
-                final float meanSqaurePixel = param.meanGRSqaurePixel;
-                meanGRSqaurePixel.setText(String.valueOf(meanSqaurePixel));
+                    final float meanSqaurePixel = param.meanGRSqaurePixel;
+                    meanGRSqaurePixel.setText(String.valueOf(meanSqaurePixel));
+                } else { // independent looks
+                    meanGRSqaurePixel.setText("");
+                }
             } catch (Exception e) {
                 meanGRSqaurePixel.setText("");
             }
@@ -109,11 +116,29 @@ public class MultilookOpUI extends BaseOperatorUI {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "GR Square Pixel:", grSquarePixel);
+        grSquarePixel.setSelected(true);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "Independent Looks:", independentLooks);
+
+        RadioListener myListener = new RadioListener();
+        grSquarePixel.setActionCommand("GR Square Pixel:");
+        independentLooks.setActionCommand("Independent Looks:");
+        ButtonGroup group = new ButtonGroup();
+    	group.add(grSquarePixel);
+	    group.add(independentLooks);
+        grSquarePixel.addActionListener(myListener);
+        independentLooks.addActionListener(myListener);
+
+        gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Number of Range Looks:", nRgLooks);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Number of Azimuth Looks:", nAzLooks);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Mean GR Square Pixel:", meanGRSqaurePixel);
+
+        nAzLooks.setEditable(false);
+        meanGRSqaurePixel.setEditable(false);
 
         nRgLooks.addFocusListener(new FocusListener() {
 
@@ -123,15 +148,13 @@ public class MultilookOpUI extends BaseOperatorUI {
                 setAzimuthLooks();
             }
         });
-        
+
         nRgLooks.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
                 setAzimuthLooks();
             }
         });
-
-        meanGRSqaurePixel.setEditable(false);
 
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Note:",
@@ -140,6 +163,22 @@ public class MultilookOpUI extends BaseOperatorUI {
         DialogUtils.fillPanel(contentPane, gbc);
 
         return contentPane;
+    }
+
+    class RadioListener implements ActionListener {
+
+        public void actionPerformed(ActionEvent e) {
+
+            meanGRSqaurePixel.setText("");
+            meanGRSqaurePixel.setEditable(false);
+            if (e.getActionCommand().contains("GR Square Pixel:")) {
+                nAzLooks.setText("");
+                nAzLooks.setEditable(false);
+                setAzimuthLooks();
+            } else { // independent looks
+                nAzLooks.setEditable(true);
+            }
+        }
     }
 
 }
