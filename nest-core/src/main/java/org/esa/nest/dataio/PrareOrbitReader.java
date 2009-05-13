@@ -408,6 +408,23 @@ public final class PrareOrbitReader {
             throw new Exception("Incorrect UTC time");
         }
 
+        final double[] timeArray = {recordTimes[n0], recordTimes[n1], recordTimes[n2], recordTimes[n3]};
+        final double[] xPosArray = {orbitVectors[n0].xPos, orbitVectors[n1].xPos, orbitVectors[n2].xPos, orbitVectors[n3].xPos};
+        final double[] yPosArray = {orbitVectors[n0].yPos, orbitVectors[n1].yPos, orbitVectors[n2].yPos, orbitVectors[n3].yPos};
+        final double[] zPosArray = {orbitVectors[n0].zPos, orbitVectors[n1].zPos, orbitVectors[n2].zPos, orbitVectors[n3].zPos};
+        final double[] xVelArray = {orbitVectors[n0].xVel, orbitVectors[n1].xVel, orbitVectors[n2].xVel, orbitVectors[n3].xVel};
+        final double[] yVelArray = {orbitVectors[n0].yVel, orbitVectors[n1].yVel, orbitVectors[n2].yVel, orbitVectors[n3].yVel};
+        final double[] zVelArray = {orbitVectors[n0].zVel, orbitVectors[n1].zVel, orbitVectors[n2].zVel, orbitVectors[n3].zVel};
+
+        final OrbitVector orb = new OrbitVector();
+        orb.utcTime = utc;
+        orb.xPos = MathUtils.lagrangeInterpolatingPolynomial(timeArray, xPosArray, utc);
+        orb.yPos = MathUtils.lagrangeInterpolatingPolynomial(timeArray, yPosArray, utc);
+        orb.zPos = MathUtils.lagrangeInterpolatingPolynomial(timeArray, zPosArray, utc);
+        orb.xVel = MathUtils.lagrangeInterpolatingPolynomial(timeArray, xVelArray, utc);
+        orb.yVel = MathUtils.lagrangeInterpolatingPolynomial(timeArray, yVelArray, utc);
+        orb.zVel = MathUtils.lagrangeInterpolatingPolynomial(timeArray, zVelArray, utc);
+        /*
         final double mu = (utc - recordTimes[n1]) / (recordTimes[n2] - recordTimes[n1]);
 
         OrbitVector orb = new OrbitVector();
@@ -432,7 +449,7 @@ public final class PrareOrbitReader {
 
         orb.zVel = MathUtils.interpolationCubic(
             orbitVectors[n0].zVel, orbitVectors[n1].zVel, orbitVectors[n2].zVel, orbitVectors[n3].zVel, mu);
-
+        */
         return orb;
     }
 

@@ -294,6 +294,17 @@ public final class OrbitalDataRecordReader {
             throw new Exception("Incorrect UTC time");
         }
 
+        final double[] timeArray = {recordTimes[n0], recordTimes[n1], recordTimes[n2], recordTimes[n3]};
+        final double[] xPosArray = {orbitPositions[n0].xPos, orbitPositions[n1].xPos, orbitPositions[n2].xPos, orbitPositions[n3].xPos};
+        final double[] yPosArray = {orbitPositions[n0].yPos, orbitPositions[n1].yPos, orbitPositions[n2].yPos, orbitPositions[n3].yPos};
+        final double[] zPosArray = {orbitPositions[n0].zPos, orbitPositions[n1].zPos, orbitPositions[n2].zPos, orbitPositions[n3].zPos};
+
+        final OrbitPositionRecord orbitPosition = new OrbitPositionRecord();
+        orbitPosition.utcTime = utc;
+        orbitPosition.xPos = MathUtils.lagrangeInterpolatingPolynomial(timeArray, xPosArray, utc);
+        orbitPosition.yPos = MathUtils.lagrangeInterpolatingPolynomial(timeArray, yPosArray, utc);
+        orbitPosition.zPos = MathUtils.lagrangeInterpolatingPolynomial(timeArray, zPosArray, utc);
+        /*
         final double mu = (utc - recordTimes[n1]) / (recordTimes[n2] - recordTimes[n1]);
 
         OrbitPositionRecord orbitPosition = new OrbitPositionRecord();
@@ -321,7 +332,7 @@ public final class OrbitalDataRecordReader {
                                                           orbitPositions[n2].zPos,
                                                           orbitPositions[n3].zPos,
                                                           mu);
-
+        */
         return orbitPosition;
     }
 
