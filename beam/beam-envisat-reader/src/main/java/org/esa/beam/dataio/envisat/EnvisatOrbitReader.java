@@ -127,6 +127,27 @@ public class EnvisatOrbitReader extends EnvisatAuxReader {
             throw new Exception("Incorrect UTC time");
         }
 
+        final double[] timeArray = {recordTimes[n0], recordTimes[n1], recordTimes[n2], recordTimes[n3]};
+        final double[] delta_ut1Array = {dataRecords[n0].delta_ut1, dataRecords[n1].delta_ut1, dataRecords[n2].delta_ut1, dataRecords[n3].delta_ut1};
+        final double[] xPosArray = {dataRecords[n0].xPos, dataRecords[n1].xPos, dataRecords[n2].xPos, dataRecords[n3].xPos};
+        final double[] yPosArray = {dataRecords[n0].yPos, dataRecords[n1].yPos, dataRecords[n2].yPos, dataRecords[n3].yPos};
+        final double[] zPosArray = {dataRecords[n0].zPos, dataRecords[n1].zPos, dataRecords[n2].zPos, dataRecords[n3].zPos};
+        final double[] xVelArray = {dataRecords[n0].xVel, dataRecords[n1].xVel, dataRecords[n2].xVel, dataRecords[n3].xVel};
+        final double[] yVelArray = {dataRecords[n0].yVel, dataRecords[n1].yVel, dataRecords[n2].yVel, dataRecords[n3].yVel};
+        final double[] zVelArray = {dataRecords[n0].zVel, dataRecords[n1].zVel, dataRecords[n2].zVel, dataRecords[n3].zVel};
+
+        final OrbitVector orb = new OrbitVector();
+        orb.utcTime = utc;
+        orb.absOrbit = dataRecords[n1].absOrbit;
+        orb.qualFlags = dataRecords[n1].qualFlags;
+        orb.delta_ut1 = lagrangeInterpolatingPolynomial(timeArray, delta_ut1Array, utc);
+        orb.xPos = lagrangeInterpolatingPolynomial(timeArray, xPosArray, utc);
+        orb.yPos = lagrangeInterpolatingPolynomial(timeArray, yPosArray, utc);
+        orb.zPos = lagrangeInterpolatingPolynomial(timeArray, zPosArray, utc);
+        orb.xVel = lagrangeInterpolatingPolynomial(timeArray, xVelArray, utc);
+        orb.yVel = lagrangeInterpolatingPolynomial(timeArray, yVelArray, utc);
+        orb.zVel = lagrangeInterpolatingPolynomial(timeArray, zVelArray, utc);
+        /*
         final double dt = (utc - recordTimes[n1]) / (recordTimes[n2] - recordTimes[n1]);
         final double w0 = w(dt + 1.0);
         final double w1 = w(dt);
@@ -172,7 +193,7 @@ public class EnvisatOrbitReader extends EnvisatAuxReader {
                    w1*dataRecords[n1].zVel +
                    w2*dataRecords[n2].zVel +
                    w3*dataRecords[n3].zVel;
-
+        */
         return orb;
     }
 
@@ -193,6 +214,33 @@ public class EnvisatOrbitReader extends EnvisatAuxReader {
         } else {
             return 0.0;
         }
+    }
+
+    /**
+     * Perform Lagrange polynomial based interpolation.
+     * @param pos Position array.
+     * @param val Sample value array.
+     * @param desiredPos Desired position.
+     * @return The interpolated sample value.
+     */
+    public static double lagrangeInterpolatingPolynomial (final double pos[], final double val[], final double desiredPos)
+            throws Exception {
+
+        if (pos.length != val.length) {
+            throw new Exception("Incorrect array length");
+        }
+
+        double retVal = 0;
+        for (int i = 0; i < pos.length; ++i) {
+            double weight = 1;
+            for (int j = 0; j < pos.length; ++j) {
+                if (j != i) {
+                    weight *= (desiredPos - pos[j]) / (pos[i] - pos[j]);
+                }
+            }
+            retVal += weight * val[i];
+        }
+        return retVal;
     }
 
     public final static class OrbitVector {
