@@ -1,5 +1,7 @@
 package org.esa.nest.dat.views.polarview;
 
+import org.esa.beam.visat.VisatApp;
+
 import java.awt.*;
 
 public class PolarData {
@@ -16,6 +18,7 @@ public class PolarData {
     private Object[] cValues = null;
     private float dirOffset = 0;
 
+    private Color backgroundColor = VisatApp.getApp().getDesktopPane().getBackground();
     private Color[][] colors;
     private ColourScale cScale = null;
     private int plotCount = 0;
@@ -75,7 +78,7 @@ public class PolarData {
 
             rad = rScreenPoints[0];
             rad2 = rad + rad;
-            g.setColor(Color.white);
+            g.setColor(backgroundColor);
             g.fillOval(-rad, -rad, rad2, rad2);
         } else {
             int rad, rad2;
@@ -100,7 +103,7 @@ public class PolarData {
 
             rad = rScreenPoints[Nr];
             rad2 = rad + rad;
-            g.setColor(Color.white);
+            g.setColor(backgroundColor);
             g.fillOval(-rad, -rad, rad2, rad2);
         }
     }

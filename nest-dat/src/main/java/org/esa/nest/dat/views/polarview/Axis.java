@@ -12,26 +12,26 @@ public class Axis {
     public static final int RADIAL = 5;
 
     private AxisGraphics gr = null;
-    private boolean isX;
-    private boolean ticksInside;
-    private boolean withGrid;
-    private double minValue;
-    private double maxValue;
-    private double axisRange;
-    private double tickRange;
-    private double minData;
-    private double maxData;
-    private double minRange;
-    private boolean visible;
-    private boolean autoRange;
-    private int length;
-    private int breadth;
-    private int TouchId;
-    private String title;
-    private int tickLength;
-    private int tickCount;
-    private int bestTickCount;
-    private int spacing;
+    private boolean isX = true;
+    private boolean ticksInside = false;
+    private boolean withGrid = false;
+    private double minValue = 0.0;
+    private double maxValue = 1.0;
+    private double axisRange = maxValue - minValue;
+    private double tickRange = maxValue - minValue;
+    private double minData = 0.0;
+    private double maxData = 1.0;
+    private double minRange = 0.0;
+    private boolean visible = true;
+    private boolean autoRange = true;
+    private int length = 0;
+    private int breadth = 0;
+    private int TouchId = 0;
+    private String title = null;
+    private int tickLength = -5;
+    private int tickCount = 3;
+    private int bestTickCount = 3;
+    private int spacing = Math.abs(tickLength);
     private String tickNames[] = {"0", "0.5", "1"};
     private double tickValues[] = {0.0D, 0.5D, 1.0D};
     private int tickPositions[] = null;
@@ -40,31 +40,13 @@ public class Axis {
     private Color axisColor;
     private Color labelColor;
     private Color gridColor;
+    private String unit = "";
 
     public Axis(int orientation) {
-        isX = true;
-        ticksInside = false;
-        withGrid = false;
-        minValue = 0.0D;
-        maxValue = 1.0D;
-        axisRange = maxValue - minValue;
-        tickRange = maxValue - minValue;
-        minData = 0.0D;
-        maxData = 1.0D;
-        minRange = 0.0D;
-        visible = true;
-        autoRange = true;
-        length = 0;
-        breadth = 0;
-        TouchId = 0;
-        title = null;
-        tickLength = -5;
-        tickCount = 3;
-        bestTickCount = 3;
-        spacing = Math.abs(tickLength);
+
         font = getFont("default.font.plot.axis.tick", "SansSerif-plain-12");
         titleFont = getFont("default.font.plot.axis.title", "SansSerif-plain-12");
-        axisColor = Color.white;
+        axisColor = Color.black;
         labelColor = Color.black;
         gridColor = Color.darkGray;
         setLocation(orientation);
@@ -77,6 +59,14 @@ public class Axis {
 
     public void setTitle(String str) {
         title = str;
+    }
+
+    public void setUnit(String unitStr) {
+        unit = unitStr;
+    }
+
+    public String getUnit() {
+        return unit;
     }
 
     public AxisGraphics getAxisGraphics(Graphics g) {

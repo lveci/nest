@@ -16,6 +16,8 @@ public class ControlPanel extends JPanel {
     private final JButton prevBtn = new JButton("Prev");
     private final JButton nextBtn = new JButton("Next");
     private final JLabel recordLabel = new JLabel();
+    private final JButton zoomInBtn = new JButton("Zoom In");
+    private final JButton zoomOutBtn = new JButton("Zoom Out");
 
     private boolean animate = false;
     private final JToggleButton animateBtn = new JToggleButton("Animate", animate);
@@ -62,6 +64,20 @@ public class ControlPanel extends JPanel {
                 updateControls();
             }
         });
+
+        /*add(zoomInBtn);
+        zoomInBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                polarView.zoomIn();
+            }
+        });
+
+        add(zoomOutBtn);
+        zoomOutBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                polarView.zoomOut();
+            }
+        });   */
     }
 
     public void updateControls() {

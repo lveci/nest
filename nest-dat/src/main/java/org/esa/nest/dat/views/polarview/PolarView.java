@@ -35,6 +35,7 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
     private float dirBinStep = 0;
     private float firstWLBin = 0;
     private float lastWLBin = 0;
+    private double minRadius = -10;
 
     private ProductData.UTC zeroDopplerTime = null;
     private double minSpectrum = 0;
@@ -70,7 +71,7 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
             new Color(0, 255, 0), new Color(255, 255, 0), new Color(255, 0, 0)
     });
     private static final double rings[] = {50.0, 100.0, 200.0};
-    private static final String ringTextStrings[] = {"200 (m)", "100 (m)", "50 (m)"};
+    private static final String ringTextStrings[] = {"200 m", "100 m", "50 m"};
 
     public PolarView(Product prod, ProductSceneImage image) {
         product = prod;
@@ -266,7 +267,7 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
         final float rStep = (float) (Math.log(lastWLBin) - Math.log(firstWLBin)) / (float) (numWLBins - 1);
         double logr = Math.log(firstWLBin) - (rStep / 2.0);
         final double colourRange[] = {(double) minValue, (double) maxValue};
-        final double radialRange[] = {0.0, 333.33333333333};
+        final double radialRange[] = {minRadius, 333.33333333333};
 
         final float thFirst;
         final float thStep;
@@ -288,12 +289,15 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
         final PolarData data = new PolarData(spectrum, 90f + thFirst, thStep, radii);
 
         final PolarCanvas polarCanvas = polarPanel.getPolarCanvas();
-        polarCanvas.getColourAxis().setDataRange(colourRange);
-        polarCanvas.getRadialAxis().setAutoRange(false);
-        polarCanvas.getRadialAxis().setDataRange(radialRange);
-        polarCanvas.getRadialAxis().setRange(radialRange[0], radialRange[1], 4);
-        polarCanvas.getRadialAxis().setTitle("Wavelength (m)");
-        polarCanvas.setRings(rings, null);
+        final Axis colourAxis = polarCanvas.getColourAxis();
+        final Axis radialAxis = polarCanvas.getRadialAxis();
+        colourAxis.setDataRange(colourRange);
+        colourAxis.setUnit(unitTypes[graphUnit.ordinal()]);
+        radialAxis.setAutoRange(false);
+        radialAxis.setDataRange(radialRange);
+        radialAxis.setRange(radialRange[0], radialRange[1], 4);
+        radialAxis.setTitle("Wavelength (m)");
+        polarCanvas.setRings(rings, ringTextStrings);
         data.setColorScale(ColourScale.newCustomScale(colourRange));
         polarCanvas.setData(data);
 
@@ -403,10 +407,10 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
         } else {
             createCheckedMenuItem(unitTypes[Unit.REAL.ordinal()], unitMenu, graphUnit == Unit.REAL);
             createCheckedMenuItem(unitTypes[Unit.IMAGINARY.ordinal()], unitMenu, graphUnit == Unit.IMAGINARY);
-            createCheckedMenuItem(unitTypes[Unit.BOTH.ordinal()], unitMenu, graphUnit == Unit.BOTH);
+            //createCheckedMenuItem(unitTypes[Unit.BOTH.ordinal()], unitMenu, graphUnit == Unit.BOTH);
             createCheckedMenuItem(unitTypes[Unit.AMPLITUDE.ordinal()], unitMenu, graphUnit == Unit.AMPLITUDE);
             createCheckedMenuItem(unitTypes[Unit.INTENSITY.ordinal()], unitMenu, graphUnit == Unit.INTENSITY);
-            createCheckedMenuItem(unitTypes[Unit.MULTIPLIED.ordinal()], unitMenu, graphUnit == Unit.MULTIPLIED);
+            //createCheckedMenuItem(unitTypes[Unit.MULTIPLIED.ordinal()], unitMenu, graphUnit == Unit.MULTIPLIED);
         }
 
         popup.setLabel("Justification");
@@ -484,6 +488,16 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
 
     void showPlot(int record) {
         currentRecord = record;
+        createPlot(currentRecord);
+    }
+
+    void zoomOut() {
+
+        createPlot(currentRecord);
+    }
+
+    void zoomIn() {
+
         createPlot(currentRecord);
     }
 

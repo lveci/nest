@@ -95,15 +95,14 @@ public class ImageManager {
     }
 
     public MultiLevelModel getMultiLevelModel(RasterDataNode rasterDataNode) {
-        if (rasterDataNode.isSourceImageSet() && rasterDataNode.getSourceImage() instanceof MultiLevelSource) {
-            return ((MultiLevelSource) rasterDataNode.getSourceImage()).getModel();
+        if (rasterDataNode.isSourceImageSet()) {
+            return rasterDataNode.getSourceImage().getModel();
         }
         return createMultiLevelModel(rasterDataNode);
     }
 
     public PlanarImage getSourceImage(RasterDataNode rasterDataNode, int level) {
-        RenderedImage sourceImage = rasterDataNode.getSourceImage();
-        return getLevelImage(sourceImage, level);
+        return getLevelImage(rasterDataNode.getSourceImage(), level);
     }
 
 
@@ -115,8 +114,7 @@ public class ImageManager {
     }
 
     public PlanarImage getGeophysicalImage(RasterDataNode rasterDataNode, int level) {
-        RenderedImage levelZeroImage = rasterDataNode.getGeophysicalImage();
-        return getLevelImage(levelZeroImage, level);
+        return getLevelImage(rasterDataNode.getGeophysicalImage(), level);
     }
 
     public static MultiLevelSource getMultiLevelSource(RenderedImage levelZeroImage) {
@@ -273,8 +271,8 @@ public class ImageManager {
         Assert.notNull(rasterDataNodes,
                        "rasterDataNodes");
         Assert.state(rasterDataNodes.length == 1
-                     || rasterDataNodes.length == 3
-                     || rasterDataNodes.length == 4,
+                || rasterDataNodes.length == 3
+                || rasterDataNodes.length == 4,
                      "invalid number of bands");
 
         prepareImageInfos(rasterDataNodes, ProgressMonitor.NULL);
@@ -617,7 +615,7 @@ public class ImageManager {
             for (int i = 1; i < binCount; i++) {
                 double deviation = i - mu;
                 normCDF[b][i] = normCDF[b][i - 1] +
-                                (float) Math.exp(-deviation * deviation / twoSigmaSquared);
+                        (float) Math.exp(-deviation * deviation / twoSigmaSquared);
             }
         }
 
@@ -632,9 +630,8 @@ public class ImageManager {
         return MatchCDFDescriptor.create(sourceImage, normCDF, createDefaultRenderingHints());
     }
 
-    private static PlanarImage getLevelImage(RenderedImage levelZeroImage, int level) {
-        final MultiLevelSource multiLevelSource = getMultiLevelSource(levelZeroImage);
-        RenderedImage image = multiLevelSource.getImage(level);
+    private static PlanarImage getLevelImage(MultiLevelImage levelZeroImage, int level) {
+        RenderedImage image = levelZeroImage.getImage(level);
         return PlanarImage.wrapRenderedImage(image);
     }
 
@@ -827,7 +824,7 @@ public class ImageManager {
         // Step 2:  insert ROI pixels within value range
         if (roiDefinition.isValueRangeEnabled()) {
             String rangeExpr = rasterDataNode.getName() + " >= " + roiDefinition.getValueRangeMin() + " && "
-                               + rasterDataNode.getName() + " <= " + roiDefinition.getValueRangeMax();
+                    + rasterDataNode.getName() + " <= " + roiDefinition.getValueRangeMax();
             roiImages.add(getMaskImage(rangeExpr, rasterDataNode.getProduct(), level));
         }
 

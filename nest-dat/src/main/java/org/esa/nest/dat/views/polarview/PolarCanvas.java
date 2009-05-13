@@ -10,6 +10,7 @@ public class PolarCanvas extends Container {
     private Axis colourAxis;
     private PolarData data = null;
     private double rings[] = null;
+    private String ringText[] = null;
     private float dirOffset;
     private int plotRadius;
     private boolean opaque;
@@ -80,7 +81,7 @@ public class PolarCanvas extends Container {
                     fillBackground(g);
                 g.setColor(getForeground());
                 g.setFont(getFont());
-                paintLightweightChildren(this, g);
+                paintComponents(this, g);
             }
             drawSynchronised(g, getSize());
         } catch (Throwable e) {
@@ -117,6 +118,7 @@ public class PolarCanvas extends Container {
         g.drawRect(0, 0, cbSize.width, cbSize.height);
         g.translate(cbSize.width, cbSize.height);
         cAxis.draw(g, cbSize);
+        g.drawString(cAxis.getUnit(), 50, 5);
         g.translate(-cbSize.width - at.x, -cbSize.height - at.y);
     }
 
@@ -129,7 +131,7 @@ public class PolarCanvas extends Container {
         super.finalize();
     }
 
-    private static void paintLightweightChildren(Container c, Graphics g) {
+    private static void paintComponents(Container c, Graphics g) {
         if (!c.isShowing()) return;
 
         final int ncomponents = c.getComponentCount();
@@ -187,7 +189,7 @@ public class PolarCanvas extends Container {
 
     public void setRings(double rings[], String ringText[]) {
         this.rings = rings;
-        //this.ringText = ringText;
+        this.ringText = ringText;
     }
 
     public double[] getRTheta(Point oP) {
@@ -239,14 +241,18 @@ public class PolarCanvas extends Container {
         radialAxis.setSize(quadrantSize);
         if (data != null)
             data.draw(oGraphics);
-        oGraphics.setColor(Color.white);
         if (rings != null) {
+            int ri = 0;
             for (double ring : rings) {
                 final int rad = radialAxis.computeScreenPoint(ring);
                 final int rad2 = rad + rad;
+                oGraphics.setColor(Color.lightGray);
                 oGraphics.drawOval(-rad, -rad, rad2, rad2);
-                //if(ringText != null && ringText[ri] != null)
-                //    ringText[ri].drawCentered(oGraphics, 0, -(rad + ringText[ri].getDescent(oGraphics) * 3));
+                if(ringText != null && ringText[ri] != null) {
+                    oGraphics.setColor(Color.black);
+                    oGraphics.drawString(ringText[ri], 0, -rad);
+                }
+                ++ri;
             }
         } else {
             radialAxis.draw(oGraphics);
