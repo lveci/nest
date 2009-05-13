@@ -1,6 +1,7 @@
 package org.esa.nest.dat.views.polarview;
 
 import org.esa.beam.util.Debug;
+import org.esa.beam.util.math.MathUtils;
 
 import java.awt.*;
 
@@ -13,6 +14,8 @@ public class PolarCanvas extends Container {
     private String ringText[] = null;
     private float dirOffset;
     private int plotRadius;
+    private double windDirection = 0;
+    private boolean showWindDirection = false;
     private boolean opaque;
     private final Dimension graphSize = new Dimension(200, 100);
     private Point origin = new Point(0, 0);
@@ -257,8 +260,41 @@ public class PolarCanvas extends Container {
         } else {
             radialAxis.draw(oGraphics);
         }
+
+        // draw wind direction & speed
+        if(showWindDirection)
+            drawWindDirection(oGraphics, plotRadius, windDirection-90);
+
         oGraphics.translate(-origin.x, -origin.y);
         oGraphics.dispose();
     }
 
+    private static void drawWindDirection(Graphics oGraphics, double radius, double theta) {
+        final double a = theta * MathUtils.DTOR;
+        final int x1 = (int)(radius * Math.cos(a));
+        final int y1 = (int)(radius * Math.sin(a));
+        final int x2 = (int)((radius+50) * Math.cos(a));
+        final int y2 = (int)((radius+50) * Math.sin(a));
+
+        oGraphics.setColor(Color.black);
+        oGraphics.drawLine(x1, y1, x2, y2);
+
+        final double b = (theta + 1) * MathUtils.DTOR;
+        final int x3 = (int)((radius+40) * Math.cos(b));
+        final int y3 = (int)((radius+40) * Math.sin(b));
+        oGraphics.drawLine(x2, y2, x3, y3);
+
+        final double c = (theta - 1) * MathUtils.DTOR;
+        final int x4 = (int)((radius+40) * Math.cos(c));
+        final int y4 = (int)((radius+40) * Math.sin(c));
+        oGraphics.drawLine(x2, y2, x4, y4);
+    }
+
+    public void setWindDirection(double dir) {
+        windDirection = dir;
+    }
+
+    public void showWindDirection(boolean flag) {
+        showWindDirection = flag;
+    }
 }
