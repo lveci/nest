@@ -1,5 +1,5 @@
 /*
- * $Id: Product.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: Product.java,v 1.2 2009-05-13 12:33:22 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -72,7 +72,7 @@ import java.util.TreeSet;
  * necessarily store data in the same format. Furthermore, it is not mandatory for a product to have both of them.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-13 12:33:22 $
  */
 public class Product extends ProductNode {
 
@@ -2036,27 +2036,18 @@ public class Product extends ProductNode {
     @Override
     public void setModified(final boolean modified) {
         super.setModified(modified);
+
         if (!modified) {
-            for (int i = 0; i < getNumBands(); i++) {
-                getBandAt(i).setModified(false);
-            }
-            for (int i = 0; i < getNumTiePointGrids(); i++) {
-                getTiePointGridAt(i).setModified(false);
-            }
-            for (int i = 0; i < getNumFlagCodings(); i++) {
-                getFlagCodingAt(i).setModified(false);
-            }
-            for (int i = 0; i < getNumBitmaskDefs(); i++) {
-                getBitmaskDefAt(i).setModified(false);
-            }
-            final MetadataElement metadataRoot = getMetadataRoot();
-            metadataRoot.setModified(false);
-            bands.clearRemovedList();
-            bitmaskDefs.clearRemovedList();
-            flagCodings.clearRemovedList();
-            tiePointGrids.clearRemovedList();
-            pinGroup.clearRemovedList();
-            gcpGroup.clearRemovedList();
+            setNotModified(bands);
+            setNotModified(tiePointGrids);
+            setNotModified(bitmaskDefs);
+
+            setNotModified(flagCodingGroup);
+            setNotModified(indexCodingGroup);
+            setNotModified(pinGroup);
+            setNotModified(gcpGroup);
+
+            getMetadataRoot().setModified(false);
 
             for(Object key : bandGCPGroup.keySet()) {
                 bandGCPGroup.get(key).clearRemovedList();
@@ -2064,6 +2055,21 @@ public class Product extends ProductNode {
         }
     }
 
+    private void setNotModified(ProductNodeList<?> nodeList) {
+        for (int i = 0; i < nodeList.size(); i++) {
+            nodeList.getAt(i).setModified(false);
+        }
+        nodeList.clearRemovedList();
+    }
+
+    // TODO: think about overriding setModified in class ProductNodeGroup (rq-2009-05-11)
+    private static void setNotModified(ProductNodeGroup<?> nodeGroup) {
+        nodeGroup.setModified(false);
+        for (int i = 0; i < nodeGroup.getNodeCount(); i++) {
+            nodeGroup.get(i).setModified(false);
+        }
+        nodeGroup.clearRemovedList();
+    }
 
     /**
      * Gets an estimated, raw storage size in bytes of this product node.
