@@ -25,7 +25,7 @@
         <tocitem text="Colour Manipulation" target="showColorManipulationWnd"/>
 		<tocitem text="Product World Map" target="showWorldMapWnd"/>
         <tocitem text="Preferences Dialog" target="preferences"/>
-		<tocitem text="Polar View" target="polarView"/>
+		<tocitem text="Wave Mode Polar View" target="polarView"/>
         
 		<tocitem text="Menus">
 			<tocitem text="Main Toolbar" target="mainToolbar"/>
@@ -135,16 +135,25 @@
 			<tocitem text="Apply Orbit Correction" target="ApplyOrbitFileOp"/>
 			<tocitem text="ASAR Calibration" target="ASARCalibrationOp"/>
 			<tocitem text="ASAR Retro-Calibration" target="ASARRetroCalibrationOp"/>			
-			<tocitem text="EM Cluster Analysis" target="clusterAnalysisEM"/>
 			<tocitem text="ERS Calibration" target="ERSCalibrationOp"/>
-			<tocitem text="GCP Selection" target="GCPSelectionOp"/>
-			<tocitem text="K-Means Cluster Analysis" target="clusterAnalysisKMeans"/>
+			<tocitem text="GCP Selection" target="GCPSelectionOp"/>			
 			<tocitem text="Multilook" target="MultilookOp"/>			
-			<tocitem text="Principle Component Analysis" target="PCAOp"/>	
 	        <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>			
 			<tocitem text="Warp" target="WarpOp"/>
 			<tocitem text="WSS Deburst" target="WSSDeburstOp"/>
 			<tocitem text="WSS Mosaic" target="WSSMosaicOp"/>
+		</tocitem>	
+		<tocitem text="Analysis Operators">
+			<tocitem text="Principle Component Analysis" target="PCAOp"/>	
+			<tocitem text="EM Cluster Analysis" target="clusterAnalysisEM"/>
+			<tocitem text="K-Means Cluster Analysis" target="clusterAnalysisKMeans"/>
+			<tocitem text="Data Analysis" target="DataAnalysisOp"/>
+		</tocitem>	
+		<tocitem text="Utility Operators">
+			<tocitem text="Create Stack" target="CreateStackOp"/>
+			<tocitem text="Convert Datatype" target="ConvertDatatypeOp"/>
+			<tocitem text="Over Sample" target="OverSampleOp"/>	
+			<tocitem text="Under Sample" target="UnderSampleOp"/>
 		</tocitem>	
 		<tocitem text="Geometry Operators">
 			<tocitem text="CreateElevation" target="CreateElevationOp"/>
@@ -152,13 +161,6 @@
 			<tocitem text="Range Doppler Terrain Correction" url="RangeDopplerGeocodingOp"/>
 			<tocitem text="Slant Range to Ground Range" target="SRGROp"/>
 		</tocitem>	
-		<tocitem text="Utility Operators">
-			<tocitem text="Create Stack" target="CreateStackOp"/>
-			<tocitem text="Convert Datatype" target="ConvertDatatypeOp"/>
-			<tocitem text="Data Analysis" target="DataAnalysisOp"/>
-			<tocitem text="Over Sample" target="OverSampleOp"/>	
-			<tocitem text="Under Sample" target="UnderSampleOp"/>
-		</tocitem>		
 	</tocitem>
 	
 	<tocitem text="Tutorials">

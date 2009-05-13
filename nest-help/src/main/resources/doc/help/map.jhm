@@ -117,29 +117,31 @@
 	<mapID target="ApplyOrbitFileOp" url="operators/ApplyOrbitFileOp.html"/>
 	<mapID target="ASARCalibrationOp" url="operators/ASARCalibrationOp.html"/>
 	<mapID target="ASARRetroCalibrationOp" url="operators/ASARRetroCalibrationOp.html"/>	
-	<mapID target="clusterAnalysisEM" url="operators/EM.html"/>
 	<mapID target="ERSCalibrationOp" url="operators/ERSCalibrationOp.html"/>
-	<mapID target="GCPSelectionOp" url="operators/GCPSelectionOp.html"/>
-	<mapID target="clusterAnalysisKMeans" url="operators/KMeans.html"/>
+	<mapID target="GCPSelectionOp" url="operators/GCPSelectionOp.html"/>	
 	<mapID target="MultilookOp" url="operators/MultilookOp.html"/>	
-	<mapID target="PCAOp" url="operators/PCAOp.html"/>
 	<mapID target="SpeckleFilterOp" url="operators/SpeckleFilterOp.html"/>	
 	<mapID target="WarpOp" url="operators/WarpOp.html"/>	
 	<mapID target="WSSDeburstOp" url="operators/WSSDeburstOp.html"/>
 	<mapID target="WSSMosaicOp" url="operators/WSSMosaicOp.html"/>
+	
+	<!--Analysis Operators-->
+	<mapID target="PCAOp" url="operators/PCAOp.html"/>
+	<mapID target="clusterAnalysisEM" url="operators/EM.html"/>
+	<mapID target="clusterAnalysisKMeans" url="operators/KMeans.html"/>
+	<mapID target="DataAnalysisOp" url="operators/DataAnalysisOp.html"/>
+	
+	<!--Utility Operators-->
+	<mapID target="CreateStackOp" url="operators/CollocateOp.html"/>
+	<mapID target="ConvertDatatypeOp" url="operators/ConvertDatatypeOp.html"/>
+	<mapID target="OverSampleOp" url="operators/OverSampleOp.html"/>
+	<mapID target="UnderSampleOp" url="operators/UnderSampleOp.html"/>
 	
 	<!--Geometry Operators-->
 	<mapID target="CreateElevationOp" url="operators/CreateElevationOp.html"/>
 	<mapID target="GeolocationGridGeocodingOp" url="operators/GeolocationGridGeocodingOp.html"/>
 	<mapID target="RangeDopplerGeocodingOp" url="operators/RangeDopplerGeocodingOp.html"/>
 	<mapID target="SRGROp" url="operators/SRGROp.html"/>
-	
-	<!--Utility Operators-->
-	<mapID target="CreateStackOp" url="operators/CollocateOp.html"/>
-	<mapID target="ConvertDatatypeOp" url="operators/ConvertDatatypeOp.html"/>
-	<mapID target="DataAnalysisOp" url="operators/DataAnalysisOp.html"/>
-	<mapID target="OverSampleOp" url="operators/OverSampleOp.html"/>
-	<mapID target="UnderSampleOp" url="operators/UnderSampleOp.html"/>
 	
 	<!--Tutorials-->
 	<mapID target="remote_sensing" url="tutorials/remote_sensing.html"/>
