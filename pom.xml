@@ -466,7 +466,7 @@
                     
                 </plugin>
 
-                <plugin>
+                <!--plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <configuration>
                         <links>
@@ -479,10 +479,10 @@
                         <excludePackageNames>
                             *.internal:com.bc.ceres.site:org.esa.beam.visat.toolviews:org.esa.beam.visat.actions:org.esa.beam.visat.dialogs:org.esa.beam.visat.plugins
                         </excludePackageNames>
-                        <maxmemory>256m</maxmemory>
+                        <maxmemory>1024m</maxmemory>
                         <quiet>false</quiet>
                     </configuration>
-                </plugin>
+                </plugin-->
 
                 <plugin>
                     <artifactId>maven-surefire-report-plugin</artifactId>
@@ -544,7 +544,12 @@
     <reporting>
         <plugins>
             <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<aggregate>true</aggregate>
+					<maxmemory>1024m</maxmemory>
+				</configuration>
             </plugin>
         </plugins>
     </reporting>
