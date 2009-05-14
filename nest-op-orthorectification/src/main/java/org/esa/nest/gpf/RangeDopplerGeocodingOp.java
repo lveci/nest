@@ -35,7 +35,6 @@ import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.MathUtils;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.Constants;
-import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.dataio.ReaderUtils;
 
 import java.awt.*;
@@ -104,8 +103,6 @@ public final class RangeDopplerGeocodingOp extends Operator {
     @Parameter(defaultValue="false", label="Save DEM as band")
     private boolean saveDEM = false;
 
-    private Band sourceBand = null;  // i band in case of complex product
-    private Band sourceBand2 = null; // q band in case of complex product
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
     private FileElevationModel fileElevationModel = null;
@@ -148,7 +145,9 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
 
     private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
-    private ResampleMethod imgResampling;
+    private ResampleMethod imgResampling = null;
+
+    private Map<String, ArrayList<Tile>> tileCache = new HashMap<String, ArrayList<Tile>>(2);
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -658,6 +657,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
             final TileData td = new TileData();
             td.targetTile = targetTiles.get(targetBand);
             td.tileDataBuffer = td.targetTile.getDataBuffer();
+            td.bandName = targetBand.getName();
             td.noDataValue = sourceProduct.getBand(srcBandNames[0]).getNoDataValue();
             trgTileList.add(td);
         }
@@ -700,7 +700,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
                         }
                     } else {
                         for(TileData tileData : trgTiles) {
-                            tileData.tileDataBuffer.setElemDoubleAt(index, getPixelValue(azimuthIndex, rangeIndex, tileData.targetTile));
+                            tileData.tileDataBuffer.setElemDoubleAt(index, getPixelValue(azimuthIndex, rangeIndex, tileData.bandName));
                         }
                     }
                 }
@@ -826,8 +826,6 @@ public final class RangeDopplerGeocodingOp extends Operator {
      */
     private double computeRangeIndex(final double zeroDopplerTime, final double slantRange) {
 
-        double rangeIndex = 0.0;
-
         if (zeroDopplerTime < firstLineUTC || zeroDopplerTime > lastLineUTC) {
             return -1.0;
         }
@@ -839,16 +837,14 @@ public final class RangeDopplerGeocodingOp extends Operator {
                 idx = i;
             }
             final double groundRange = computeGroundRange(slantRange, srgrConvParams[idx].coefficients);
-            rangeIndex = (groundRange - srgrConvParams[idx].ground_range_origin) / rangeSpacing;
+            return (groundRange - srgrConvParams[idx].ground_range_origin) / rangeSpacing;
 
         } else { // slant range image
 
             final int azimuthIndex = (int)((zeroDopplerTime - firstLineUTC) / lineTimeInterval);
             final double r0 = slantRangeTime.getPixelDouble(0, azimuthIndex) / 1000000000.0 * Constants.halfLightSpeed;
-            rangeIndex = (slantRange - r0) / rangeSpacing;
+            return (slantRange - r0) / rangeSpacing;
         }
-        
-        return rangeIndex;
     }
 
     /**
@@ -904,107 +900,151 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * Compute orthorectified pixel value for given pixel.
      * @param azimuthIndex The azimuth index for pixel in source image.
      * @param rangeIndex The range index for pixel in source image.
-     * @param targetTile the tile to get the data from
+     * @param bandName the name of the target band
      * @return The pixel value.
      * @throws IOException from readPixels
      */
-    private double getPixelValue(final double azimuthIndex, final double rangeIndex, final Tile targetTile) throws IOException {
+    private double getPixelValue(final double azimuthIndex, final double rangeIndex, final String bandName) throws IOException {
 
-        final String[] srcBandNames = targetBandNameToSourceBandName.get(targetTile.getRasterDataNode().getName());
-        if (srcBandNames.length == 1) {
-            sourceBand = sourceProduct.getBand(srcBandNames[0]);
-        } else {
-            sourceBand = sourceProduct.getBand(srcBandNames[0]);
-            sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
+        final String[] srcBandNames = targetBandNameToSourceBandName.get(bandName);
+        final String iBandName = srcBandNames[0];
+        String qBandName = null;
+        if (srcBandNames.length > 1) {
+            qBandName = srcBandNames[1];
         }
 
         if (imgResampling.equals(ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR)) {
-            return getPixelValueUsingNearestNeighbourInterp(azimuthIndex, rangeIndex);
+            final Tile sourceTile = getSrcTile(iBandName, (int)rangeIndex, (int)azimuthIndex, 1, 1);
+            final Tile sourceTile2 = getSrcTile(qBandName, (int)rangeIndex, (int)azimuthIndex, 1, 1);
+            return getPixelValueUsingNearestNeighbourInterp(azimuthIndex, rangeIndex, sourceTile, sourceTile2);
         } else if (imgResampling.equals(ResampleMethod.RESAMPLE_BILINEAR)) {
-            return getPixelValueUsingBilinearInterp(azimuthIndex, rangeIndex);
+            final Tile sourceTile = getSrcTile(iBandName, (int)rangeIndex, (int)azimuthIndex, 2, 2);
+            final Tile sourceTile2 = getSrcTile(qBandName, (int)rangeIndex, (int)azimuthIndex, 2, 2);
+            return getPixelValueUsingBilinearInterp(azimuthIndex, rangeIndex, sourceImageWidth, sourceImageHeight,
+                                                    sourceTile, sourceTile2);
         } else if (imgResampling.equals(ResampleMethod.RESAMPLE_CUBIC)) {
-            return getPixelValueUsingBicubicInterp(azimuthIndex, rangeIndex);
+            final Tile sourceTile = getSrcTile(iBandName, Math.max(0, (int)rangeIndex - 1),
+                                                Math.max(0, (int)azimuthIndex - 1), 4, 4);
+            final Tile sourceTile2 = getSrcTile(qBandName, Math.max(0, (int)rangeIndex - 1),
+                                                Math.max(0, (int)azimuthIndex - 1), 4, 4);
+            return getPixelValueUsingBicubicInterp(azimuthIndex, rangeIndex, sourceImageWidth, sourceImageHeight,
+                                                    sourceTile, sourceTile2);
         } else {
             throw new OperatorException("Unknown interpolation method");
         }
     }
 
+    private Tile getSrcTile(String bandName, int minX, int minY, int width, int height) {
+        if(bandName == null)
+            return null;
+
+        final Band sourceBand = sourceProduct.getBand(bandName);
+        final Rectangle srcRect = new Rectangle(minX, minY, width, height);
+        return getSourceTile(sourceBand, srcRect, ProgressMonitor.NULL);
+    }
+
+    /*
+    private Tile getSrcTile(String bandName, int minX, int minY, int width, int height) {
+        if(bandName == null)
+            return null;
+        
+        ArrayList<Tile> srcTiles = tileCache.get(bandName);
+        if(srcTiles == null) {
+            srcTiles = new ArrayList<Tile>();
+            tileCache.put(bandName, srcTiles);
+        }
+        for(Tile t : srcTiles) {
+            if(minX >= t.getMinX() && minY >= t.getMinY() &&
+               (minX+width) < t.getMaxX() && (minY+height) < t.getMaxY()) {
+                return t;
+            }
+        }
+
+        final int tileSize = 1024;
+        final Band sourceBand = sourceProduct.getBand(bandName);
+        final int x = Math.max(0,minX-tileSize/2);
+        final int y = Math.max(0, minY-tileSize/2);
+        final Rectangle srcRect = new Rectangle(x, y,
+                Math.min(tileSize, sourceImageWidth-x), Math.min(tileSize, sourceImageHeight-y));
+        final Tile sourceTile = getSourceTile(sourceBand, srcRect, ProgressMonitor.NULL);
+
+        srcTiles.clear();
+        srcTiles.add(sourceTile);
+
+        //if(srcTiles.size() > 3) {
+        //    srcTiles.remove(0);
+        //}
+
+        return sourceTile;
+    }     */
+
     /**
      * Get source image pixel value using nearest neighbot interpolation.
      * @param azimuthIndex The azimuth index for pixel in source image.
      * @param rangeIndex The range index for pixel in source image.
+     * @param sourceTile  i
+     * @param sourceTile2 q
      * @return The pixel value.
      */
-    private double getPixelValueUsingNearestNeighbourInterp(final double azimuthIndex, final double rangeIndex) {
+    private static double getPixelValueUsingNearestNeighbourInterp(final double azimuthIndex, final double rangeIndex,
+                                                                   final Tile sourceTile, final Tile sourceTile2) {
 
         final int x0 = (int)rangeIndex;
         final int y0 = (int)azimuthIndex;
 
-        final Rectangle srcRect = new Rectangle(x0, y0, 2, 2);
-        final Tile sourceRaster = getSourceTile(sourceBand, srcRect, ProgressMonitor.NULL);
-        final ProductData srcData = sourceRaster.getDataBuffer();
-
-        double v = 0.0;
-        if (sourceBand.getUnit().equals(Unit.REAL)) {
-
-            final Tile sourceRaster2 = getSourceTile(sourceBand2, srcRect, ProgressMonitor.NULL);
-            final ProductData srcData2 = sourceRaster2.getDataBuffer();
-            final double vi = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0));
-            final double vq = srcData2.getElemDoubleAt(sourceRaster2.getDataBufferIndex(x0, y0));
-            v = vi*vi + vq*vq;
-
+        if (sourceTile2 == null) {
+            return sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
         } else {
-
-            v = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0));
+            final double vi = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
+            final double vq = sourceTile2.getDataBuffer().getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y0));
+            return vi*vi + vq*vq;
         }
-
-        return v;
     }
 
     /**
      * Get source image pixel value using bilinear interpolation.
      * @param azimuthIndex The azimuth index for pixel in source image.
      * @param rangeIndex The range index for pixel in source image.
+     * @param sceneRasterWidth the product width
+     * @param sceneRasterHeight the product height
+     * @param sourceTile  i
+     * @param sourceTile2 q
      * @return The pixel value.
      */
-    private double getPixelValueUsingBilinearInterp(final double azimuthIndex, final double rangeIndex) {
+    private static double getPixelValueUsingBilinearInterp(final double azimuthIndex, final double rangeIndex,
+                                                           final int sceneRasterWidth, final int sceneRasterHeight,
+                                                           final Tile sourceTile, final Tile sourceTile2) {
 
         final int x0 = (int)rangeIndex;
         final int y0 = (int)azimuthIndex;
-        final int x1 = Math.min(x0 + 1, sourceImageWidth - 1);
-        final int y1 = Math.min(y0 + 1, sourceImageHeight - 1);
+        final int x1 = Math.min(x0 + 1, sceneRasterWidth - 1);
+        final int y1 = Math.min(y0 + 1, sceneRasterHeight - 1);
 
-        final Rectangle srcRect = new Rectangle(x0, y0, 2, 2);
-        final Tile sourceRaster = getSourceTile(sourceBand, srcRect, ProgressMonitor.NULL);
-        final ProductData srcData = sourceRaster.getDataBuffer();
+        final ProductData srcData = sourceTile.getDataBuffer();
 
         final double v00, v01, v10, v11;
-        if (sourceBand.getUnit().equals(Unit.REAL)) {
+        if (sourceTile2 == null) {
+            v00 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
+            v01 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y0));
+            v10 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y1));
+            v11 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y1));
+        } else {
+            final ProductData srcData2 = sourceTile2.getDataBuffer();
 
-            final Tile sourceRaster2 = getSourceTile(sourceBand2, srcRect, ProgressMonitor.NULL);
-            final ProductData srcData2 = sourceRaster2.getDataBuffer();
+            final double vi00 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
+            final double vi01 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y0));
+            final double vi10 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y1));
+            final double vi11 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y1));
 
-            final double vi00 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0));
-            final double vi01 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x1, y0));
-            final double vi10 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y1));
-            final double vi11 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x1, y1));
-
-            final double vq00 = srcData2.getElemDoubleAt(sourceRaster2.getDataBufferIndex(x0, y0));
-            final double vq01 = srcData2.getElemDoubleAt(sourceRaster2.getDataBufferIndex(x1, y0));
-            final double vq10 = srcData2.getElemDoubleAt(sourceRaster2.getDataBufferIndex(x0, y1));
-            final double vq11 = srcData2.getElemDoubleAt(sourceRaster2.getDataBufferIndex(x1, y1));
+            final double vq00 = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y0));
+            final double vq01 = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x1, y0));
+            final double vq10 = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y1));
+            final double vq11 = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x1, y1));
 
             v00 = vi00*vi00 + vq00*vq00;
             v01 = vi01*vi01 + vq01*vq01;
             v10 = vi10*vi10 + vq10*vq10;
             v11 = vi11*vi11 + vq11*vq11;
-
-        } else {
-
-            v00 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0));
-            v01 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x1, y0));
-            v10 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y1));
-            v11 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x1, y1));
         }
         return MathUtils.interpolationBiLinear(v00, v01, v10, v11, rangeIndex - x0, azimuthIndex - y0);
     }
@@ -1013,44 +1053,45 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * Get source image pixel value using bicubic interpolation.
      * @param azimuthIndex The azimuth index for pixel in source image.
      * @param rangeIndex The range index for pixel in source image.
+     * @param sceneRasterWidth the product width
+     * @param sceneRasterHeight the product height
+     * @param sourceTile  i
+     * @param sourceTile2 q
      * @return The pixel value.
      */
-    private double getPixelValueUsingBicubicInterp(final double azimuthIndex, final double rangeIndex) {
+    private static double getPixelValueUsingBicubicInterp(final double azimuthIndex, final double rangeIndex,
+                                                          final int sceneRasterWidth, final int sceneRasterHeight,
+                                                          final Tile sourceTile, final Tile sourceTile2) {
 
         final int [] x = new int[4];
         x[1] = (int)rangeIndex;
         x[0] = Math.max(0, x[1] - 1);
-        x[2] = Math.min(x[1] + 1, sourceImageWidth - 1);
-        x[3] = Math.min(x[1] + 2, sourceImageWidth - 1);
+        x[2] = Math.min(x[1] + 1, sceneRasterWidth - 1);
+        x[3] = Math.min(x[1] + 2, sceneRasterWidth - 1);
 
         final int [] y = new int[4];
         y[1] = (int)azimuthIndex;
         y[0] = Math.max(0, y[1] - 1);
-        y[2] = Math.min(y[1] + 1, sourceImageHeight - 1);
-        y[3] = Math.min(y[1] + 2, sourceImageHeight - 1);
+        y[2] = Math.min(y[1] + 1, sceneRasterHeight - 1);
+        y[3] = Math.min(y[1] + 2, sceneRasterHeight - 1);
 
-        final Rectangle srcRect = new Rectangle(x[0], y[0], 4, 4);
-        final Tile sourceRaster = getSourceTile(sourceBand, srcRect, ProgressMonitor.NULL);
-        final ProductData srcData = sourceRaster.getDataBuffer();
+        final ProductData srcData = sourceTile.getDataBuffer();
 
         final double[][] v = new double[4][4];
-        if (sourceBand.getUnit().equals(Unit.REAL)) {
-
-            final Tile sourceRaster2 = getSourceTile(sourceBand2, srcRect, ProgressMonitor.NULL);
-            final ProductData srcData2 = sourceRaster2.getDataBuffer();
+        if(sourceTile2 == null) {
             for (int i = 0; i < y.length; i++) {
                 for (int j = 0; j < x.length; j++) {
-                    final double vi = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x[j], y[i]));
-                    final double vq = srcData2.getElemDoubleAt(sourceRaster2.getDataBufferIndex(x[j], y[i]));
-                    v[i][j] = vi*vi + vq*vq;
+                    v[i][j] = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x[j], y[i]));
                 }
             }
-
         } else {
 
+            final ProductData srcData2 = sourceTile2.getDataBuffer();
             for (int i = 0; i < y.length; i++) {
                 for (int j = 0; j < x.length; j++) {
-                    v[i][j] = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x[j], y[i]));
+                    final double vi = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x[j], y[i]));
+                    final double vq = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x[j], y[i]));
+                    v[i][j] = vi*vi + vq*vq;
                 }
             }
         }
@@ -1061,6 +1102,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private static class TileData {
         Tile targetTile = null;
         ProductData tileDataBuffer = null;
+        String bandName = null;
         double noDataValue = 0;
     }
 

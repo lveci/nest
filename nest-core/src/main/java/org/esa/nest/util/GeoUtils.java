@@ -10,9 +10,8 @@ public final class GeoUtils
     private static final double EPS5 = 1e-5;
     private static final double EPS = 1e-10;
 
-    public static final String GRS80 = "GRS80";
-    public static final String WGS84 = "WGS84";
-    
+    public enum EarthModel { WGS84, GRS80 }
+
     private GeoUtils()
     {
     }
@@ -36,7 +35,7 @@ public final class GeoUtils
      * @param xyz The xyz coordinates of the given pixel.
      * @param geoSystem The geodetic system.
      */
-    public static void geo2xyz(GeoPos geoPos, double xyz[], String geoSystem) {
+    public static void geo2xyz(GeoPos geoPos, double xyz[], EarthModel geoSystem) {
 
         final double lat = ((double)geoPos.lat);
         final double lon = ((double)geoPos.lon);
@@ -52,7 +51,7 @@ public final class GeoUtils
      * @param xyz The xyz coordinates of the given pixel.
      */
     public static void geo2xyz(double latitude, double longitude, double altitude, double xyz[]) {
-        geo2xyz(latitude, longitude, altitude, xyz, WGS84);
+        geo2xyz(latitude, longitude, altitude, xyz, EarthModel.WGS84);
     }
 
     /**
@@ -63,28 +62,26 @@ public final class GeoUtils
      * @param xyz The xyz coordinates of the given pixel.
      * @param geoSystem The geodetic system.
      */
-    public static void geo2xyz(double latitude, double longitude, double altitude, double xyz[], String geoSystem) {
+    public static void geo2xyz(double latitude, double longitude, double altitude, double xyz[], EarthModel geoSystem) {
 
         double a = 0.0;
         double earthFlatCoef = 0.0;
 
-        if (geoSystem.contains(WGS84)) {
+        if (geoSystem == EarthModel.WGS84) {
 
-            WGS84 earthModel = new WGS84();
-            a = earthModel.a;
-            earthFlatCoef = earthModel.earthFlatCoef;
+            a = WGS84.a;
+            earthFlatCoef = WGS84.earthFlatCoef;
 
-        } else if (geoSystem.contains(GRS80)) {
+        } else if (geoSystem == EarthModel.GRS80) {
 
-            GRS80 earthModel = new GRS80();
-            a = earthModel.a;
-            earthFlatCoef = earthModel.earthFlatCoef;
+            a = GRS80.a;
+            earthFlatCoef = GRS80.earthFlatCoef;
 
         } else {
             throw new OperatorException("Incorrect geodetic system");
         }
 
-        final double e2 = 2 / earthFlatCoef - 1 / (earthFlatCoef * earthFlatCoef);
+        final double e2 = 2.0 / earthFlatCoef - 1.0 / (earthFlatCoef * earthFlatCoef);
 
         final double lat = latitude * org.esa.beam.util.math.MathUtils.DTOR;
         final double lon = longitude * org.esa.beam.util.math.MathUtils.DTOR;
@@ -104,7 +101,7 @@ public final class GeoUtils
      * @param geoPos The geodetic coordinate of the given pixel.
      */
     public static void xyz2geo(double xyz[], GeoPos geoPos) {
-        xyz2geo(xyz, geoPos, WGS84);
+        xyz2geo(xyz, geoPos, EarthModel.WGS84);
     }
 
     /**
@@ -113,31 +110,29 @@ public final class GeoUtils
      * @param geoPos The geodetic coordinate of the given pixel.
      * @param geoSystem The geodetic system.
      */
-    public static void xyz2geo(double xyz[], GeoPos geoPos, String geoSystem) {
+    public static void xyz2geo(double xyz[], GeoPos geoPos, EarthModel geoSystem) {
 
         double a = 0.0;
         double b = 0.0;
         double earthFlatCoef = 0.0;
 
-        if (geoSystem.contains(WGS84)) {
+        if (geoSystem == EarthModel.WGS84) {
 
-            WGS84 earthModel = new WGS84();
-            a = earthModel.a;
-            b = earthModel.b;
-            earthFlatCoef = earthModel.earthFlatCoef;
+            a = WGS84.a;
+            b = WGS84.b;
+            earthFlatCoef = WGS84.earthFlatCoef;
 
-        } else if (geoSystem.contains(GRS80)) {
+        } else if (geoSystem == EarthModel.GRS80) {
 
-            GRS80 earthModel = new GRS80();
-            a = earthModel.a;
-            b = earthModel.b;
-            earthFlatCoef = earthModel.earthFlatCoef;
+            a = GRS80.a;
+            b = GRS80.b;
+            earthFlatCoef = GRS80.earthFlatCoef;
 
         } else {
             throw new OperatorException("Incorrect geodetic system");
         }
 
-        final double e2 = 2 / earthFlatCoef - 1 / (earthFlatCoef * earthFlatCoef);
+        final double e2 = 2.0 / earthFlatCoef - 1.0 / (earthFlatCoef * earthFlatCoef);
         final double ep2 = e2 / (1 - e2);
 
         final double x = xyz[0];
@@ -345,15 +340,15 @@ public final class GeoUtils
         public double heading2;
     }
 
-    public static class WGS84 {
-        public final double a = 6378137; // m
-        public final double b = 6356752.314245; // m
-        public final double earthFlatCoef = 298.257223563;
+    public static interface WGS84 {
+        public static final double a = 6378137; // m
+        public static final double b = 6356752.314245; // m
+        public static final double earthFlatCoef = 298.257223563;
     }
 
-    public static class GRS80 {
-        public final double a = 6378137; // m
-        public final double b = 6356752.314140 ; // m
-        public final double earthFlatCoef = 298.257222101;
+    public static interface GRS80 {
+        public static final double a = 6378137; // m
+        public static final double b = 6356752.314140 ; // m
+        public static final double earthFlatCoef = 298.257222101;
     }
 }

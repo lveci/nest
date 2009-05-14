@@ -260,7 +260,7 @@ public final class OrbitalDataRecordReader {
         }
 
         final double[] xyz = new double[3];
-        GeoUtils.geo2xyz(lat, lon, alt, xyz, GeoUtils.GRS80);
+        GeoUtils.geo2xyz(lat, lon, alt, xyz, GeoUtils.EarthModel.GRS80);
 
         OrbitPositionRecord orbitPosition = new OrbitPositionRecord();
         orbitPosition.utcTime = utcTime;

@@ -11,14 +11,9 @@ import java.io.File;
 import java.util.ArrayList;
 
 import junit.framework.TestCase;
-
-import org.esa.beam.visat.plugins.pgrab.model.dataprovider.DataProvider;
-import org.esa.beam.visat.plugins.pgrab.model.dataprovider.ProductPropertiesProvider;
-import org.esa.beam.visat.plugins.pgrab.model.dataprovider.WorldMapProvider;
-import org.esa.beam.visat.plugins.pgrab.model.*;
-import org.esa.beam.visat.plugins.pgrab.model.RepositoryManager;
-import org.esa.beam.visat.plugins.pgrab.model.Repository;
-import org.esa.beam.visat.plugins.pgrab.model.RepositoryManagerListener;
+import org.esa.nest.dat.plugins.importbrowser.model.dataprovider.DataProvider;
+import org.esa.nest.dat.plugins.importbrowser.model.dataprovider.ProductPropertiesProvider;
+import org.esa.nest.dat.plugins.importbrowser.model.dataprovider.WorldMapProvider;
 
 public class RepositoryManagerTest extends TestCase {
 
@@ -32,9 +27,12 @@ public class RepositoryManagerTest extends TestCase {
         final CountingListener listener = new CountingListener();
         _repositoryManager.addListener(listener);
 
-        _repositoryManager.addRepository(new Repository(new File("c:\\data\\dummy")));
-        _repositoryManager.addRepository(new Repository(new File("c:\\data\\dummy2")));
-        _repositoryManager.addRepository(new Repository(new File("c:\\data\\dummy3")));
+        final File dir1 = new File("c:\\data\\dummy1");
+        final File dir2 = new File("c:\\data\\dummy2");
+        final File dir3 = new File("c:\\data\\dummy3");
+        _repositoryManager.addRepository(new Repository(dir1, dir1));
+        _repositoryManager.addRepository(new Repository(dir2, dir2));
+        _repositoryManager.addRepository(new Repository(dir3, dir3));
 
         assertEquals(3, _repositoryManager.getNumRepositories());
         assertEquals(3, listener.countedEvents);
@@ -46,8 +44,8 @@ public class RepositoryManagerTest extends TestCase {
         final CountingListener listener = new CountingListener();
         _repositoryManager.addListener(listener);
 
-        _repositoryManager.addRepository(new Repository(dir));
-        _repositoryManager.addRepository(new Repository(dir));
+        _repositoryManager.addRepository(new Repository(dir, dir));
+        _repositoryManager.addRepository(new Repository(dir, dir));
 
         assertEquals(1, _repositoryManager.getNumRepositories());
         assertEquals(1, listener.countedEvents);
@@ -60,10 +58,10 @@ public class RepositoryManagerTest extends TestCase {
         final File dir1 = new File("c:\\data\\dummy1");
         final File dir2 = new File("c:\\data\\dummy2");
         final File dir3 = new File("c:\\data\\dummy3");
-        final Repository repository = new Repository(dir1);
+        final Repository repository = new Repository(dir1, dir1);
         _repositoryManager.addRepository(repository);
-        _repositoryManager.addRepository(new Repository(dir2));
-        _repositoryManager.addRepository(new Repository(dir3));
+        _repositoryManager.addRepository(new Repository(dir2, dir2));
+        _repositoryManager.addRepository(new Repository(dir3, dir3));
 
         assertEquals(3, _repositoryManager.getNumRepositories());
         assertEquals(3, listener.countedEvents);
@@ -72,7 +70,7 @@ public class RepositoryManagerTest extends TestCase {
         assertEquals(2, _repositoryManager.getNumRepositories());
         assertEquals(4, listener.countedEvents);
 
-        _repositoryManager.removeRepository(new Repository(dir3));
+        _repositoryManager.removeRepository(new Repository(dir3, dir3));
         assertEquals(1, _repositoryManager.getNumRepositories());
         assertEquals(5, listener.countedEvents);
     }
@@ -81,7 +79,7 @@ public class RepositoryManagerTest extends TestCase {
         final ArrayList repList = new ArrayList();
         final int numReporitories = 3;
         for(int i = 0; i < numReporitories; i++) {
-            final Repository repository = new Repository(new File("c:\\data\\dummy" + i));
+            final Repository repository = new Repository(new File("c:\\data\\dummy" + i), new File("c:\\data\\dummy" + i));
             repList.add(repository);
             _repositoryManager.addRepository(repository);
         }
@@ -117,7 +115,7 @@ public class RepositoryManagerTest extends TestCase {
         final CountingListener listener = new CountingListener();
         _repositoryManager.addListener(listener);
 
-        _repositoryManager.addRepository(new Repository(new File("")));
+        _repositoryManager.addRepository(new Repository(new File(""), new File("")));
 
         assertEquals(1, listener.countedEvents);
     }
@@ -128,7 +126,7 @@ public class RepositoryManagerTest extends TestCase {
 
         _repositoryManager.removeListener(listener);
 
-        _repositoryManager.addRepository(new Repository(new File("")));
+        _repositoryManager.addRepository(new Repository(new File(""), new File("")));
 
         assertEquals(0, listener.countedEvents);
 
