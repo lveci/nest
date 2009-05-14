@@ -1,5 +1,5 @@
 /*
- * $Id: VisatApp.java,v 1.4 2009-05-11 16:17:37 lveci Exp $
+ * $Id: VisatApp.java,v 1.5 2009-05-14 12:28:26 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -136,7 +136,7 @@ import java.util.logging.Level;
  * @author Norman Fomferra
  * @author Marco Peters
  * @author Sabine Embacher
- * @version $Revision: 1.4 $ $Date: 2009-05-11 16:17:37 $
+ * @version $Revision: 1.5 $ $Date: 2009-05-14 12:28:26 $
  */
 public class VisatApp extends BasicApp implements AppContext {
 
@@ -2490,33 +2490,36 @@ public class VisatApp extends BasicApp implements AppContext {
             Cursor oldCursor = getMainFrame().getCursor();
             UIUtils.setRootFrameWaitCursor(getMainFrame());
 
-            StringBuilder msgBuffer = new StringBuilder();
-            for (File selectedFile : selectedFiles) {
-                if (getOpenProduct(selectedFile) != null) {
-                    msgBuffer.append(String.format("Product is already open: %s\n", selectedFile));
-                    continue;
+            try {
+                StringBuilder msgBuffer = new StringBuilder();
+                for (File selectedFile : selectedFiles) {
+                    if (getOpenProduct(selectedFile) != null) {
+                        msgBuffer.append(String.format("Product is already open: %s\n", selectedFile));
+                        continue;
+                    }
+
+                    ProductReader reader = getReader(selectedFile, selectedFileFilter);
+                    if (reader == null) {
+                        msgBuffer.append(String.format("No appropriate reader found: %s\n", selectedFile));  /*I18N*/
+                        continue;
+                    }
+
+                    setStatusBarMessage(String.format("Opening product %s...", selectedFile)); /*I18N*/
+                    Product product = loadProduct(reader, selectedFile);
+                    if (product == null) {
+                        msgBuffer.append(String.format("Not able to read file: %s\n", selectedFile));  /*I18N*/
+                        continue;
+                    }
+                    addProduct(product);
                 }
 
-                ProductReader reader = getReader(selectedFile, selectedFileFilter);
-                if (reader == null) {
-                    msgBuffer.append(String.format("No appropriate reader found: %s\n", selectedFile));  /*I18N*/
-                    continue;
+                if (msgBuffer.length() > 0) {
+                    showWarningDialog(msgBuffer.toString());
                 }
-
-                setStatusBarMessage(String.format("Opening product %s...", selectedFile)); /*I18N*/
-                Product product = loadProduct(reader, selectedFile);
-                if (product == null) {
-                    msgBuffer.append(String.format("Not able to read file: %s\n", selectedFile));  /*I18N*/
-                    continue;
-                }
-                addProduct(product);
+                updateState();
+            } finally {
+                UIUtils.setRootFrameCursor(getMainFrame(), oldCursor);
             }
-
-            if (msgBuffer.length() > 0) {
-                showWarningDialog(msgBuffer.toString());
-            }
-            updateState();
-            UIUtils.setRootFrameCursor(getMainFrame(), oldCursor);
         }
 
         private JFileChooser showOpenFileDialog() {
