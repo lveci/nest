@@ -59,6 +59,7 @@
                     <id>exportLegendImageFile</id>
                     <id>createXYDisplacementBandsAction</id>
                     <id>createElevationBand</id>
+                    <id>productGrabber</id>
                 </excludedActions>
                 <excludedToolViews>
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
@@ -305,6 +306,20 @@
             <smallIcon>icons/Export16.gif</smallIcon>
             <largeIcon>icons/Export24.gif</largeIcon>
             <helpId>export</helpId>
+        </action>
+
+        <action>
+            <parent>file</parent>
+            <placeAfter>loadProject</placeAfter>
+            <id>importBrowser</id>
+            <class>org.esa.nest.dat.actions.importbrowser.ImportBrowserAction</class>
+            <text>Import Browser</text>
+            <accelerator>shift control P</accelerator>
+            <shortDescr>Opens the Import Browser.</shortDescr>
+            <longDescr>Opens the Import Browser dialog to preview and open products.</longDescr>
+            <smallIcon>icons/import_browser16.png</smallIcon>
+            <largeIcon>icons/import_browser.png</largeIcon>
+            <helpID>productGrabber</helpID>
         </action>
 
         <action>

@@ -4,7 +4,7 @@ import org.esa.beam.framework.ui.PopupMenuFactory;
 import org.esa.beam.framework.ui.PopupMenuHandler;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.dat.plugins.importbrowser.ImportBrowserVPI;
+import org.esa.nest.dat.actions.importbrowser.ImportBrowserAction;
 
 import javax.swing.*;
 import javax.swing.tree.*;
@@ -218,7 +218,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
             final ProjectFile file = (ProjectFile) menuContext;
             project.importSubset(parentFolder, file.getFile());
         } else if(e.getActionCommand().equals("Import Datasets")) {
-            ImportBrowserVPI.getInstance().ShowImportBrowser();
+            ImportBrowserAction.getInstance().ShowImportBrowser();
         } else if(e.getActionCommand().equals("Clear")) {
             final ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
             project.clearFolder(subFolder);

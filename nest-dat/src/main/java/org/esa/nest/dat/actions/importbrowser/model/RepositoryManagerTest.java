@@ -1,4 +1,4 @@
-package org.esa.nest.dat.plugins.importbrowser.model;
+package org.esa.nest.dat.actions.importbrowser.model;
 
 /**
  * Created by IntelliJ IDEA.
@@ -11,9 +11,9 @@ import java.io.File;
 import java.util.ArrayList;
 
 import junit.framework.TestCase;
-import org.esa.nest.dat.plugins.importbrowser.model.dataprovider.DataProvider;
-import org.esa.nest.dat.plugins.importbrowser.model.dataprovider.ProductPropertiesProvider;
-import org.esa.nest.dat.plugins.importbrowser.model.dataprovider.WorldMapProvider;
+import org.esa.nest.dat.actions.importbrowser.model.dataprovider.DataProvider;
+import org.esa.nest.dat.actions.importbrowser.model.dataprovider.ProductPropertiesProvider;
+import org.esa.nest.dat.actions.importbrowser.model.dataprovider.WorldMapProvider;
 
 public class RepositoryManagerTest extends TestCase {
 
