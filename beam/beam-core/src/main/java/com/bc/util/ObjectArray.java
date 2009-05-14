@@ -1,5 +1,5 @@
 /*
- * $Id: ObjectArray.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: ObjectArray.java,v 1.2 2009-05-14 16:31:17 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -8,7 +8,7 @@ package com.bc.util;
 
 import java.util.Arrays;
 
-public class ObjectArray {
+public final class ObjectArray {
 
     private final int _minIndex;
     private final int _maxIndex;
@@ -23,28 +23,24 @@ public class ObjectArray {
         _objects = new Object[max - min + 1];
     }
 
-    public int getMinIndex() {
+    public final int getMinIndex() {
         return _minIndex;
     }
 
-    public int getMaxIndex() {
+    public final int getMaxIndex() {
         return _maxIndex;
     }
 
-    public Object getObject(int i) {
+    public final Object getObject(int i) {
         return _objects[i - _minIndex];
     }
 
-    public void setObject(int i, Object o) {
+    public final void setObject(int i, Object o) {
         _objects[i - _minIndex] = o;
     }
 
     public void clear() {
         Arrays.fill(_objects, 0, _objects.length, null);
-    }
-
-    private int getArrayIndex(int i) {
-        return i - _minIndex;
     }
 
     public void set(ObjectArray array) {

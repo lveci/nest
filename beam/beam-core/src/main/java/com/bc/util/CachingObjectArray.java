@@ -1,5 +1,5 @@
 /*
- * $Id: CachingObjectArray.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: CachingObjectArray.java,v 1.2 2009-05-14 16:31:17 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -39,22 +39,17 @@ public class CachingObjectArray {
         _objectArray = objectArray;
     }
 
-    public Object getObject(int index) throws Exception {
-        Object object;
+    public final Object getObject(int index) throws Exception {
         if (index < _objectArray.getMinIndex() || index > _objectArray.getMaxIndex()) {
-            object = _objectFactory.createObject(index);
+            return _objectFactory.createObject(index);
         } else {
-            object = _objectArray.getObject(index);
+            Object object = _objectArray.getObject(index);
             if (object == null) {
                 object = _objectFactory.createObject(index);
                 _objectArray.setObject(index, object);
             }
+            return object;
         }
-        return object;
-    }
-
-    private Object createObject(int index) throws Exception {
-        return _objectFactory.createObject(index);
     }
 
     public void clear() {

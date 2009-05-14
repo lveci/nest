@@ -1,5 +1,5 @@
 /*
- * $Id: ProductTest.java,v 1.2 2009-05-14 12:28:25 lveci Exp $
+ * $Id: ProductTest.java,v 1.3 2009-05-14 16:31:18 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -39,6 +39,7 @@ import org.esa.beam.util.ProductUtilsTest;
 import org.esa.beam.util.io.BeamFileFilter;
 
 import java.awt.Dimension;
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -803,6 +804,8 @@ public class ProductTest extends TestCase {
         final Product product = new Product("p", "t", 10, 10);
         final VirtualBand virtualBand = new VirtualBand("vb", ProductData.TYPE_FLOAT32, 10, 10,
                                                         "band1 + band2 - band3");
+        final File fileLocation = new File("dummy.dim");
+        product.setFileLocation(fileLocation);
         product.addBand(virtualBand);
         product.addBand("band1", ProductData.TYPE_FLOAT32);
         product.addBand("band2", ProductData.TYPE_FLOAT32);
@@ -812,6 +815,8 @@ public class ProductTest extends TestCase {
 
         assertEquals("Name 'band1' is not changed",
                      "b1 + band2 - band3", virtualBand.getExpression());
+
+        assertSame(fileLocation, product.getFileLocation());
     }
 
     public void testThatAddBandThrowExceptionIfNameIsNotUnique() {

@@ -1,5 +1,5 @@
 /*
- * $Id: ProductManager.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ProductManager.java,v 1.2 2009-05-14 16:31:18 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,6 +16,8 @@
  */
 package org.esa.beam.framework.datamodel;
 
+import org.esa.beam.framework.dataop.barithm.BandArithmetic;
+
 import java.util.EventObject;
 import java.util.Vector;
 
@@ -25,23 +27,25 @@ import java.util.Vector;
  * <code>Product</code> was added or removed.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-14 16:31:18 $
  */
 public class ProductManager {
 
-    private final static int _PRODUCT_ADDED = 1;
-    private final static int _PRODUCT_REMOVED = 2;
+    private static final int PRODUCT_ADDED = 1;
+    private static final int PRODUCT_REMOVED = 2;
 
     private Vector<Listener> listeners;
 
-    private final ProductNodeList<Product> products;
+    private final ProductNodeList<Product> productList;
+    private ProductManager.ProductNodeNamesListener productNodeNamesListener;
 
 
     /**
      * Constructs an product manager with an empty list of products.
      */
     public ProductManager() {
-        products = new ProductNodeList<Product>();
+        productList = new ProductNodeList<Product>();
+        productNodeNamesListener = new ProductNodeNamesListener();
     }
 
     /**
@@ -56,7 +60,7 @@ public class ProductManager {
      * @return The number of products in this product manager.
      */
     public int getProductCount() {
-        return products.size();
+        return productList.size();
     }
 
     /**
@@ -75,7 +79,7 @@ public class ProductManager {
      * @return The product at the given index.
      */
     public Product getProduct(int index) {
-        return products.getAt(index);
+        return productList.getAt(index);
     }
 
     /**
@@ -86,7 +90,7 @@ public class ProductManager {
      * @see ProductNode#getDisplayName()
      */
     public String[] getProductDisplayNames() {
-        return products.getDisplayNames();
+        return productList.getDisplayNames();
     }
 
     /**
@@ -95,7 +99,7 @@ public class ProductManager {
      * @return an array containing the names, never <code>null</code>, but the array can have zero length
      */
     public String[] getProductNames() {
-        return products.getNames();
+        return productList.getNames();
     }
 
     /**
@@ -104,7 +108,7 @@ public class ProductManager {
      * @return an array containing the products, never <code>null</code>, but the array can have zero length
      */
     public Product[] getProducts() {
-        return products.toArray(new Product[getProductCount()]);
+        return productList.toArray(new Product[getProductCount()]);
     }
 
     /**
@@ -116,7 +120,7 @@ public class ProductManager {
         if (displayName == null) {
             return null;
         }
-        return products.getByDisplayName(displayName);
+        return productList.getByDisplayName(displayName);
     }
 
     /**
@@ -140,11 +144,11 @@ public class ProductManager {
      * @return The product with the given name.
      */
     public Product getProduct(String name) {
-        return products.get(name);
+        return productList.get(name);
     }
 
     public int getProductIndex(Product product) {
-        return products.indexOf(product);
+        return productList.indexOf(product);
     }
 
     /**
@@ -155,7 +159,7 @@ public class ProductManager {
      * @return true, if so
      */
     public boolean containsProduct(String name) {
-        return products.contains(name);
+        return productList.contains(name);
     }
 
     /**
@@ -166,7 +170,7 @@ public class ProductManager {
      * @return {@code true} if so.
      */
     public boolean contains(final Product product) {
-        return products.contains(product);
+        return productList.contains(product);
     }
 
     /**
@@ -180,12 +184,25 @@ public class ProductManager {
             if (contains(product)) {
                 return;
             }
-            if (products.add(product)) {
+            if (productList.add(product)) {
                 setProductManager(product);
                 if (product.getRefNo() <= 0) {
                     product.setRefNo(getNextRefNo() + 1);
                 }
-                fireEvent(product, _PRODUCT_ADDED);
+                product.addProductNodeListener(productNodeNamesListener);
+                fireEvent(product, PRODUCT_ADDED);
+            }
+        }
+    }
+
+    private void updateExpressionToRenamedNode(ProductNode renamedNode, String oldName) {
+        final Product[] products = getProducts();
+        final String oldExternName = BandArithmetic.createExternalName(oldName);
+        final String newExternName = BandArithmetic.createExternalName(renamedNode.getName());
+
+        for (Product product : products) {
+            if (product != renamedNode.getProduct()) {
+                product.acceptVisitor(new ExpressionUpdaterVisitor(oldExternName, newExternName));
             }
         }
     }
@@ -199,13 +216,14 @@ public class ProductManager {
      */
     public boolean removeProduct(Product product) {
         if (product != null) {
-            int index = products.indexOf(product);
+            int index = productList.indexOf(product);
             if (index >= 0) {
-                if (products.remove(product)) {
-                    products.clearRemovedList();
+                if (productList.remove(product)) {
+                    productList.clearRemovedList();
+                    product.removeProductNodeListener(productNodeNamesListener);
                     product.resetRefNo();
                     clearProductManager(product);
-                    fireEvent(product, _PRODUCT_REMOVED);
+                    fireEvent(product, PRODUCT_REMOVED);
                     return true;
                 }
             }
@@ -326,10 +344,10 @@ public class ProductManager {
 
     private static void fireEvent(int eventId, Listener listener, Event event) {
         switch (eventId) {
-            case _PRODUCT_ADDED:
+            case PRODUCT_ADDED:
                 listener.productAdded(event);
                 break;
-            case _PRODUCT_REMOVED:
+            case PRODUCT_REMOVED:
                 listener.productRemoved(event);
                 break;
         }
@@ -395,6 +413,52 @@ public class ProductManager {
 
         public ProductManagerEvent(Product product) {
             super(product);
+        }
+    }
+
+    private static class ExpressionUpdaterVisitor extends ProductVisitorAdapter {
+
+        private final String oldExternName;
+        private final String newExternName;
+
+        public ExpressionUpdaterVisitor(String oldExternName, String newExternName) {
+            this.oldExternName = oldExternName;
+            this.newExternName = newExternName;
+        }
+
+        @Override
+        public void visit(TiePointGrid grid) {
+            grid.updateExpression(oldExternName, newExternName);
+        }
+
+        @Override
+        public void visit(Band band) {
+            band.updateExpression(oldExternName, newExternName);
+        }
+
+        @Override
+        public void visit(VirtualBand virtualBand) {
+            virtualBand.updateExpression(oldExternName, newExternName);
+        }
+
+        @Override
+        public void visit(BitmaskDef bitmaskDef) {
+            bitmaskDef.updateExpression(oldExternName, newExternName);
+        }
+
+        @Override
+        public void visit(ProductNodeGroup group) {
+            group.updateExpression(oldExternName, newExternName);
+        }
+    }
+
+    private class ProductNodeNamesListener extends ProductNodeListenerAdapter {
+
+        @Override
+        public void nodeChanged(ProductNodeEvent event) {
+            if (ProductNode.PROPERTY_NAME_NAME.equals(event.getPropertyName())) {
+                updateExpressionToRenamedNode(event.getSourceNode(), (String) event.getOldValue());
+            }
         }
     }
 }
