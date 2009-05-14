@@ -155,7 +155,7 @@
             <class>org.esa.nest.dat.actions.SaveProjectAsAction</class>
             <parent>file</parent>
             <text>Save Project As...</text>
-            <placeAfter>openProductGrabber</placeAfter>
+            <placeAfter>loadProject</placeAfter>
             <shortDescr>Save current project to a new location</shortDescr>
             <description>Save current project to a new location</description>
             <smallIcon>icons/Save16.gif</smallIcon>
@@ -189,6 +189,20 @@
       </action>
 
       <action>
+            <id>importBrowser</id>
+            <parent>file</parent>
+            <placeAfter>openRaster</placeAfter>
+            <class>org.esa.nest.dat.actions.importbrowser.ImportBrowserAction</class>
+            <text>Import Browser</text>
+            <accelerator>shift control P</accelerator>
+            <shortDescr>Opens the Import Browser.</shortDescr>
+            <longDescr>Opens the Import Browser dialog to preview and open products.</longDescr>
+            <smallIcon>icons/import_browser16.png</smallIcon>
+            <largeIcon>icons/import_browser.png</largeIcon>
+            <helpID>productGrabber</helpID>
+      </action>
+
+      <!--action>
             <id>openVector</id>
             <class>org.esa.nest.dat.actions.OpenVectorAction</class>
             <parent>file</parent>
@@ -201,7 +215,7 @@
             <smallIcon>icons/Open16.gif</smallIcon>
             <largeIcon>icons/Open24.gif</largeIcon>
             <helpId>open</helpId>
-      </action>
+      </action-->
 
         <action>
             <id>reopen</id>
@@ -209,7 +223,7 @@
             <parent>file</parent>
             <text>Reopen</text>
             <mnemonic>R</mnemonic>
-            <placeAfter>openVector</placeAfter>
+            <placeAfter>importBrowser</placeAfter>
             <shortDescr>Re-open a BEAM-DIMAP data product.</shortDescr>
             <longDescr>Re-open a BEAM-DIMAP data product.</longDescr>
             <smallIcon>icons/History16.gif</smallIcon>
@@ -218,42 +232,12 @@
         </action>
 
         <action>
-            <id>close</id>
-            <class>org.esa.beam.visat.actions.CloseAction</class>
-            <parent>file</parent>
-            <text>Close</text>
-            <mnemonic>C</mnemonic>
-            <accelerator>control W</accelerator>
-            <placeAfter>reopen</placeAfter>
-            <shortDescr>Close an open data product.</shortDescr>
-            <description>Close an open data product.</description>
-            <smallIcon>icons/Close16.gif</smallIcon>
-            <largeIcon>icons/Close24.gif</largeIcon>
-            <helpId>close</helpId>
-            <context>product</context>
-        </action>
-
-        <action>
-            <id>closeAll</id>
-            <class>org.esa.beam.visat.actions.CloseAllAction</class>
-            <parent>file</parent>
-            <text>Close All</text>
-            <placeAfter>close</placeAfter>
-            <shortDescr>Closes all opened data products.</shortDescr>
-            <description>Closes all opened data products.</description>
-            <smallIcon>icons/Close16.gif</smallIcon>
-            <largeIcon>icons/Close24.gif</largeIcon>
-            <helpId>closeAll</helpId>
-            <context>product</context>
-        </action>
-
-        <action>
             <id>save</id>
             <class>org.esa.beam.visat.actions.SaveAction</class>
             <parent>file</parent>
             <text>Save</text>
             <mnemonic>S</mnemonic>
-            <placeAfter>closeAll</placeAfter>
+            <placeAfter>Session</placeAfter>
             <separatorBefore>true</separatorBefore>
             <shortDescr>Save a BEAM-DIMAP data product.</shortDescr>
             <description>Save a BEAM-DIMAP data product.</description>
@@ -279,11 +263,41 @@
         </action>
 
         <action>
+            <id>close</id>
+            <class>org.esa.beam.visat.actions.CloseAction</class>
+            <parent>file</parent>
+            <text>Close</text>
+            <mnemonic>C</mnemonic>
+            <accelerator>control W</accelerator>
+            <placeAfter>saveAs</placeAfter>
+            <shortDescr>Close an open data product.</shortDescr>
+            <description>Close an open data product.</description>
+            <smallIcon>icons/Close16.gif</smallIcon>
+            <largeIcon>icons/Close24.gif</largeIcon>
+            <helpId>close</helpId>
+            <context>product</context>
+        </action>
+
+        <action>
+            <id>closeAll</id>
+            <class>org.esa.beam.visat.actions.CloseAllAction</class>
+            <parent>file</parent>
+            <text>Close All</text>
+            <placeAfter>close</placeAfter>
+            <shortDescr>Closes all opened data products.</shortDescr>
+            <description>Closes all opened data products.</description>
+            <smallIcon>icons/Close16.gif</smallIcon>
+            <largeIcon>icons/Close24.gif</largeIcon>
+            <helpId>closeAll</helpId>
+            <context>product</context>
+        </action>
+
+        <action>
             <id>import</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <parent>file</parent>
             <text>Product Readers</text>
-            <placeAfter>saveAs</placeAfter>
+            <placeAfter>closeAll</placeAfter>
             <mnemonic>I</mnemonic>
             <separatorBefore>true</separatorBefore>
             <shortDescr>Product Readers</shortDescr>
@@ -306,20 +320,6 @@
             <smallIcon>icons/Export16.gif</smallIcon>
             <largeIcon>icons/Export24.gif</largeIcon>
             <helpId>export</helpId>
-        </action>
-
-        <action>
-            <parent>file</parent>
-            <placeAfter>loadProject</placeAfter>
-            <id>importBrowser</id>
-            <class>org.esa.nest.dat.actions.importbrowser.ImportBrowserAction</class>
-            <text>Import Browser</text>
-            <accelerator>shift control P</accelerator>
-            <shortDescr>Opens the Import Browser.</shortDescr>
-            <longDescr>Opens the Import Browser dialog to preview and open products.</longDescr>
-            <smallIcon>icons/import_browser16.png</smallIcon>
-            <largeIcon>icons/import_browser.png</largeIcon>
-            <helpID>productGrabber</helpID>
         </action>
 
         <action>

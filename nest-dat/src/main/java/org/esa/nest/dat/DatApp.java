@@ -163,7 +163,7 @@ public final class DatApp extends VisatApp {
                 "importBrowser",
                 null,
                 "openRaster",
-                "openVector",
+                //"openVector",
                 "save",
         });
 

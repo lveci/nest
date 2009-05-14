@@ -491,8 +491,15 @@
         </action>
 
         <action>
+            <id>Session</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Session</text>
+            <placeAfter>reopen</placeAfter>
             <parent>file</parent>
-            <placeAfter>open</placeAfter>
+        </action>
+
+        <action>
+            <parent>Session</parent>
             <id>openSession</id>
             <class>org.esa.beam.visat.actions.session.OpenSessionAction</class>
             <text>Open Session...</text>
@@ -504,7 +511,6 @@
 
         <action>
             <parent>file</parent>
-            <placeAfter>openSession</placeAfter>
             <id>reopen</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>Reopen</text>
@@ -546,8 +552,7 @@
         </action>
 
         <action>
-            <parent>file</parent>
-            <placeAfter>close</placeAfter>
+            <parent>Session</parent>
             <id>closeSession</id>
             <class>org.esa.beam.visat.actions.session.CloseSessionAction</class>
             <text>Close Session</text>
@@ -589,8 +594,7 @@
         </action>
 
         <action>
-            <parent>file</parent>
-            <placeAfter>saveAs</placeAfter>
+            <parent>Session</parent>
             <id>saveSession</id>
             <class>org.esa.beam.visat.actions.session.SaveSessionAction</class>
             <text>Save Session</text>
@@ -601,7 +605,7 @@
         </action>
 
         <action>
-            <parent>file</parent>
+            <parent>Session</parent>
             <placeAfter>saveSession</placeAfter>
             <id>saveSessionAs</id>
             <class>org.esa.beam.visat.actions.session.SaveSessionAsAction</class>
