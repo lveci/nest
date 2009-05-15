@@ -55,7 +55,7 @@ import Jama.Matrix;
  * The method consis of the following major steps:
  * (1) Get state vectors from the metadata;
  * (2) Compute satellite position and velocity for each azimuth time by interpolating the state vectors;
- * (3) Get coner latitudes and longitudes for the source image;
+ * (3) Get corner latitudes and longitudes for the source image;
  * (4) Compute [LatMin, LatMax] and [LonMin, LonMax];
  * (5) Get the range and azimuth spacings for the source image;
  * (6) Compute DEM traversal sample intervals (delLat, delLon) based on source image pixel spacing;
@@ -68,7 +68,7 @@ import Jama.Matrix;
  * (8.5) Compute bias-corrected zero Doppler time tc(i,j) = t(i,j) + r(i,j)*2/c, where c is the light speed;
  * (8.6) Update satellite position s(tc(i,j)) and slant range r(tc(i,j)) = |s(tc(i,j)) - p| for time tc(i,j);
  * (8.7) Compute azimuth image index Ia using zero Doppler time tc(i,j);
- * (8.8) Compute range image index Ir using slant range r(tc(i,j)) or groung range;
+ * (8.8) Compute range image index Ir using slant range r(tc(i,j)) or ground range;
  * (8.9) Compute pixel value x(Ia,Ir) using interpolation and save it for current sample.
  *
  * Reference: Guide to ASAR Geocoding, Issue 1.0, 19.03.2008
@@ -143,6 +143,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private static final String BILINEAR = "Bilinear Interpolation";
     private static final String CUBIC = "Cubic Convolution";
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
+    private static final double NonValidZeroDopplerTime = -99999.0;
 
     private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
     private ResampleMethod imgResampling = null;
@@ -264,7 +265,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @throws Exception The exceptions.
      */
     private void computeImageGeoBoundary() throws Exception {
-
+        
         final GeoCoding geoCoding = sourceProduct.getGeoCoding();
         final GeoPos geoPosFirstNear = geoCoding.getGeoPos(new PixelPos(0,0), null);
         final GeoPos geoPosFirstFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth(),0), null);
@@ -673,14 +674,13 @@ public final class RangeDopplerGeocodingOp extends Operator {
                     final double lon = lonMin + x*delLon;
                     geoPos.setLocation((float)lat, (float)lon);
                     final double alt = getLocalElevation(geoPos);
-
                     if(saveDEM) {
                         demBuffer.setElemDoubleAt(index, alt);
                     }
 
                     GeoUtils.geo2xyz(lat, lon, alt, earthPoint);
                     final double zeroDopplerTime = getEarthPointZeroDopplerTime(earthPoint);
-                    if (zeroDopplerTime < 0.0) {
+                    if (Double.compare(zeroDopplerTime, NonValidZeroDopplerTime) == 0) {
                         for(TileData tileData : trgTiles) {
                             tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
                         }
@@ -752,7 +752,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
         } else if (Double.compare(upperBoundFreq, 0.0) == 0) {
             return firstLineUTC + upperBound*lineTimeInterval;
         } else if (lowerBoundFreq*upperBoundFreq > 0.0) {
-            return -1.0;
+            return NonValidZeroDopplerTime;
         }
 
         // start binary search
@@ -858,6 +858,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private static double computeGroundRange(final double slantRange, final double[] srgrCoeff) {
 
         // todo Can Newton's method be uaed in find zeros for the 4th order polynomial?
+        // todo Note for ASAR product here computes (Gr - Gr0), not Gr. Therefore not Gr0 should be subtracted later in computing range index.
         double x = slantRange;
         double y = computePolinomialValue(x, srgrCoeff) - slantRange;
         while (Math.abs(y) > 0.0001) {
