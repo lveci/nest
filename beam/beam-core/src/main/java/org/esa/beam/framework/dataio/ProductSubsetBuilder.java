@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetBuilder.java,v 1.7 2009-05-15 12:46:55 lveci Exp $
+ * $Id: ProductSubsetBuilder.java,v 1.8 2009-05-15 19:17:33 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +31,7 @@ import java.util.Arrays;
  * A special-purpose product reader used to build subsets of data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.7 $ $Date: 2009-05-15 12:46:55 $
+ * @version $Revision: 1.8 $ $Date: 2009-05-15 19:17:33 $
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
@@ -89,10 +89,6 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             setLatLongMetadata(product, absRoot, "last_far_lat", "last_far_long",
                     product.getSceneRasterWidth() - 1 + 0.5f, product.getSceneRasterHeight() - 1 + 0.5f);
 
-            final MetadataAttribute dataType = absRoot.getAttribute("data_type");
-            if(dataType != null)
-                dataType.getData().setElems(ProductData.getTypeString(product.getBandAt(0).getDataType()));
-
             final MetadataAttribute height = absRoot.getAttribute("num_output_lines");
             if(height != null)
                 height.getData().setElemUInt(product.getSceneRasterHeight());
@@ -100,6 +96,17 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             final MetadataAttribute width = absRoot.getAttribute("num_samples_per_line");
             if(width != null)
                 width.getData().setElemUInt(product.getSceneRasterWidth());
+
+            final MetadataAttribute slantRange = absRoot.getAttribute("slant_range_to_first_pixel");
+            if(slantRange != null) {
+                final TiePointGrid srTPG = product.getTiePointGrid("slant_range_time");
+                if(srTPG != null) {
+                    final double slantRangeTime = srTPG.getPixelDouble(0,0);
+                    final double halfLightSpeed = 299792458.0 / 2.0;
+                    final double slantRangeDist = slantRangeTime * halfLightSpeed;
+                    slantRange.getData().setElemDouble(slantRangeDist);
+                }
+            }
 
             setSubsetSRGRCoefficients(product, subsetDef, absRoot);
         } catch(Exception e) {

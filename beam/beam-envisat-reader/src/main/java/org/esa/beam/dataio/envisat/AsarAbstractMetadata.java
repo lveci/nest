@@ -152,8 +152,7 @@ public final class AsarAbstractMetadata {
                 final MetadataElement gg1 = gg.getElement("GEOLOCATION_GRID_ADS.1");
                 if(gg1 != null) {
                     final double slantRangeTime = gg1.getAttributeDouble("ASAR_Geo_Grid_ADSR.sd/first_line_tie_points.slant_range_times");
-                    final double lightSpeed = 299792458.0; //  m / s
-                    final double halfLightSpeed = lightSpeed / 2.0;
+                    final double halfLightSpeed = 299792458.0 / 2.0;
                     final double slantRangeDist = slantRangeTime * halfLightSpeed;
                     addAbstractedAttribute("slant_range_to_first_pixel", slantRangeDist, "m", absRoot, "Slant range to 1st data sample");
                 }
