@@ -122,9 +122,9 @@ public class NetCDFReader extends AbstractProductReader {
         NetCDFUtils.addGroups(_product.getMetadataRoot(), rootGroup);
         
         final MetadataElement root = _product.getMetadataRoot();
-        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        final MetadataElement absRoot = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
         if(absRoot == null) {
-            root.addElement(new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME));
+            root.addElement(new MetadataElement(AbstractMetadata.ABSTRACT_METADATA_ROOT));
             AbstractMetadata.addAbstractedMetadataHeader(root);
         }
     }

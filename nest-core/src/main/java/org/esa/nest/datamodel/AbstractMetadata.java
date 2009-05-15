@@ -20,6 +20,7 @@ public class AbstractMetadata {
     public static final short NO_METADATA_BYTE = 0;
     public static final String NO_METADATA_STRING = " ";
 
+    public static final String ABSTRACT_METADATA_ROOT = "Abstracted Metadata";
     public static final String SLAVE_METADATA_ROOT = "Slave Metadata";
 
     public static final String PRODUCT = "PRODUCT";
@@ -112,9 +113,9 @@ public class AbstractMetadata {
      * @return abstracted metadata root
      */
     public static MetadataElement addAbstractedMetadataHeader(MetadataElement root) {
-        MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        MetadataElement absRoot = root.getElement(ABSTRACT_METADATA_ROOT);
         if(absRoot == null) {
-            absRoot = new MetadataElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+            absRoot = new MetadataElement(ABSTRACT_METADATA_ROOT);
             root.addElementAt(absRoot, 0);
         }
 

@@ -12,6 +12,8 @@
     <changelog>
         <![CDATA[
         <p>Changes in 4.6:<br/>
+          [BEAM-996] Let user specify dimension of exported images<br/>
+          [BEAM-995] Exporting image yields out-of-memory error<br/>
           [BEAM-994] VISAT "Save As" command shall not close views anymore<br/>
           [BEAM-979] History of recent products incorrect<br/>
           [BEAM-967] PixelInfoView disregards pin movements if "Snap to selected pin" is selected<br/> 
@@ -142,6 +144,10 @@
         <layerEditor>
             <editor>org.esa.beam.visat.toolviews.layermanager.editors.ImageLayerEditor</editor>
             <layerType>com.bc.ceres.glayer.support.ImageLayer$Type</layerType>
+        </layerEditor>
+        <layerEditor>
+            <editor>org.esa.beam.visat.toolviews.layermanager.editors.BitmaskLayerEditor</editor>
+            <layerType>org.esa.beam.glayer.BitmaskLayerType</layerType>
         </layerEditor>
         <layerEditor>
             <editor>org.esa.beam.visat.toolviews.layermanager.editors.NoDataLayerEditor</editor>
@@ -697,8 +703,8 @@
             <class>org.esa.beam.visat.actions.ExportImageAction</class>
             <text>Export Displayed Image (bmp, jpg, png)...</text>
             <mnemonic>I</mnemonic>
-            <shortDescr>Export the currently displayed image.</shortDescr>
-            <description>Export the currently displayed image to a standard image format.</description>
+            <shortDescr>Export the current view as an image.</shortDescr>
+            <description>Export the current view as an image.</description>
             <helpId>exportImageFile</helpId>
         </action>
 
@@ -706,10 +712,10 @@
             <parent>export</parent>
             <id>exportKmzFile</id>
             <class>org.esa.beam.visat.actions.ExportKmzFileAction</class>
-            <text>Export Google Earth KMZ...</text>
+            <text>Export View as Google Earth KMZ...</text>
             <mnemonic>K</mnemonic>
-            <shortDescr>Export the currently displayed image as Google Earth KMZ file.</shortDescr>
-            <description>Export the currently displayed image as Google Earth KMZ file.</description>
+            <shortDescr>Export the current view as Google Earth KMZ file.</shortDescr>
+            <description>Export the current view as Google Earth KMZ file.</description>
             <helpId>exportKmzFile</helpId>
         </action>
 
@@ -717,10 +723,10 @@
             <parent>export</parent>
             <id>exportROIImageFile</id>
             <class>org.esa.beam.visat.actions.ExportRoiImageAction</class>
-            <text>Export ROI Overlay...</text>
+            <text>Export ROI Overlay as Image...</text>
             <mnemonic>O</mnemonic>
-            <shortDescr>Export the currently displayed ROI overlay.</shortDescr>
-            <description>Export the currently displayed ROI overlay to a standard image format.</description>
+            <shortDescr>Export the current ROI overlay as an image.</shortDescr>
+            <description>Export the current ROI overlay as an image.</description>
             <helpId>exportROIImageFile</helpId>
         </action>
 
@@ -737,10 +743,10 @@
             <parent>export</parent>
             <id>exportLegendImageFile</id>
             <class>org.esa.beam.visat.actions.ExportLegendImageAction</class>
-            <text>Export Colour Legend...</text>
+            <text>Export Colour Legend as Image...</text>
             <mnemonic>C</mnemonic>
-            <shortDescr>Export the colour legend.</shortDescr>
-            <description>Export the colour legend for the currently displayed image.</description>
+            <shortDescr>Export the colour legend as an image.</shortDescr>
+            <description>Export the colour legend of the current view as an image.</description>
             <helpId>exportLegendImageFile</helpId>
         </action>
 
@@ -748,10 +754,10 @@
             <parent>export</parent>
             <id>exportColorPalette</id>
             <class>org.esa.beam.visat.actions.ExportColorPaletteAction</class>
-            <text>Export Colour Palette...</text>
+            <text>Export Colour Palette as Image...</text>
             <mnemonic>a</mnemonic>
-            <shortDescr>Export the colour palette.</shortDescr>
-            <description>Export the colour palette for the currently displayed image.</description>
+            <shortDescr>Export the colour palette as an image.</shortDescr>
+            <description>Export the colour palette of the current view as an image.</description>
             <helpId>exportColorPalette</helpId>
         </action>
 

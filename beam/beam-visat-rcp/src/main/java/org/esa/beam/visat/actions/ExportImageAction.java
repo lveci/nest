@@ -1,5 +1,5 @@
 /*
- * $Id: ExportImageAction.java,v 1.3 2009-05-14 16:31:18 lveci Exp $
+ * $Id: ExportImageAction.java,v 1.4 2009-05-15 12:46:55 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -59,7 +59,7 @@ import java.beans.PropertyChangeListener;
  *
  * @author Marco Peters
  * @author Ralf Quast
- * @version $Revision: 1.3 $ $Date: 2009-05-14 16:31:18 $
+ * @version $Revision: 1.4 $ $Date: 2009-05-15 12:46:55 $
  */
 public class ExportImageAction extends AbstractExportImageAction {
 
@@ -115,12 +115,11 @@ public class ExportImageAction extends AbstractExportImageAction {
 
     @Override
     protected RenderedImage createImage(String imageFormat, ProductSceneView view) {
-        final boolean useAlpha = !"BMP".equals(imageFormat);
+        final boolean useAlpha = !"BMP".equals(imageFormat) && !"JPEG".equals(imageFormat);
         final boolean entireImage = isEntireImageSelected();
 
         return createImage(view, entireImage, sizeComponent.getDimension(), useAlpha);
     }
-
 
     static RenderedImage createImage(ProductSceneView view, boolean fullScene, Dimension dimension,
                                      boolean alphaChannel) {
@@ -172,7 +171,6 @@ public class ExportImageAction extends AbstractExportImageAction {
         vp2.setZoomFactor(vp1.getZoomFactor() * magnification, modelCenter.getX(), modelCenter.getY());
     }
 
-    // TODO: rename method into isEntireSceneSelected
     @Override
     protected boolean isEntireImageSelected() {
         return buttonFullScene.isSelected();

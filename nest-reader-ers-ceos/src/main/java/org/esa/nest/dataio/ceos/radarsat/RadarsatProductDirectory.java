@@ -210,7 +210,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
-        final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        final MetadataElement absRoot = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
         final BaseRecord mapProjRec = _leaderFile.getMapProjRecord();
         final BaseRecord radiometricRec = _leaderFile.getRadiometricRecord();
 

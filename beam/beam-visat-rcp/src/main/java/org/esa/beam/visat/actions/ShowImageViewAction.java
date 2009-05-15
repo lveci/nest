@@ -1,5 +1,5 @@
 /*
- * $Id: ShowImageViewAction.java,v 1.3 2009-05-12 12:56:42 lveci Exp $
+ * $Id: ShowImageViewAction.java,v 1.4 2009-05-15 12:46:55 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -19,12 +19,15 @@ package org.esa.beam.visat.actions;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
-import com.bc.ceres.glayer.swing.LayerCanvas;
+import com.bc.jexp.ParseException;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductManager;
 import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.framework.datamodel.ProductNodeEvent;
 import org.esa.beam.framework.datamodel.ProductNodeListenerAdapter;
 import org.esa.beam.framework.datamodel.RasterDataNode;
+import org.esa.beam.framework.datamodel.VirtualBand;
+import org.esa.beam.framework.dataop.barithm.BandArithmetic;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
@@ -38,18 +41,14 @@ import javax.swing.JInternalFrame;
 import javax.swing.SwingWorker;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.geom.Point2D;
-import java.awt.Container;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 
 /**
  * This action opens an image view of the currently selected raster.
  *
  * @author Marco Peters
- * @version $Revision: 1.3 $ $Date: 2009-05-12 12:56:42 $
+ * @version $Revision: 1.4 $ $Date: 2009-05-15 12:46:55 $
  */
 public class ShowImageViewAction extends ExecCommand {
 
@@ -65,6 +64,27 @@ public class ShowImageViewAction extends ExecCommand {
         final VisatApp visatApp = VisatApp.getApp();
         visatApp.setStatusBarMessage("Creating image view...");
         UIUtils.setRootFrameWaitCursor(visatApp.getMainFrame());
+        final ArrayList<String> expressionList = new ArrayList<String>();
+        expressionList.add(selectedProductNode.getValidPixelExpression());
+        if (selectedProductNode instanceof VirtualBand) {
+            expressionList.add(((VirtualBand) selectedProductNode).getExpression());
+        }
+        for (String expression : expressionList) {
+            if (expression != null) {
+                final ProductManager productManager = visatApp.getProductManager();
+                final int productIndex = productManager.getProductIndex(selectedProductNode.getProduct());
+                final Product[] products = productManager.getProducts();
+                try {
+                    BandArithmetic.parseExpression(expression, products, productIndex);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    VisatApp.getApp().showErrorDialog(MessageFormat.format("Failed to create image view.\n " +
+                                                                           "The expression ''{0}'' is invalid:\n\n{1}",
+                                                                           expression, e.getMessage()));
+                    return;
+                }
+            }
+        }
 
         final SwingWorker worker = new ProgressMonitorSwingWorker<ProductSceneImage, Object>(visatApp.getMainFrame(),
                                                                                              visatApp.getAppName() + " - Creating image for '" + selectedProductNode.getName() + "'") {

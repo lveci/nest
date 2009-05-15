@@ -7,12 +7,13 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.toolviews.Projects.Project;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 /**
  * This action to edit Metadata
  *
  * @author lveci
- * @version $Revision: 1.2 $ $Date: 2008-08-08 14:44:17 $
+ * @version $Revision: 1.3 $ $Date: 2009-05-15 12:46:55 $
  */
 public class EditMetadataAction extends ExecCommand {
 
@@ -21,7 +22,7 @@ public class EditMetadataAction extends ExecCommand {
 
         Product product = VisatApp.getApp().getSelectedProduct();
         MetadataElement root = product.getMetadataRoot();
-        MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        MetadataElement absRoot = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
 
         if(absRoot != null) {
             VisatApp.getApp().createProductMetadataView(absRoot);

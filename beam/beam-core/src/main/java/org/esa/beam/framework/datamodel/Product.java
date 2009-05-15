@@ -1,5 +1,5 @@
 /*
- * $Id: Product.java,v 1.3 2009-05-14 16:31:17 lveci Exp $
+ * $Id: Product.java,v 1.4 2009-05-15 12:46:55 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -72,13 +72,12 @@ import java.util.TreeSet;
  * necessarily store data in the same format. Furthermore, it is not mandatory for a product to have both of them.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-05-14 16:31:17 $
+ * @version $Revision: 1.4 $ $Date: 2009-05-15 12:46:55 $
  */
 public class Product extends ProductNode {
 
     public static final String METADATA_ROOT_NAME = "metadata";
     public static final String HISTORY_ROOT_NAME = "history";
-    public static final String ABSTRACTED_METADATA_ROOT_NAME = "Abstracted Metadata";
 
 
     public static final String PROPERTY_NAME_FILE_LOCATION = "fileLocation";

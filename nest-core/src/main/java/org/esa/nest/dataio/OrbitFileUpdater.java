@@ -28,7 +28,7 @@ public class OrbitFileUpdater {
     public OrbitFileUpdater(Product prod, OrbitType orbitType) throws IOException {
         product = prod;
 
-        final MetadataElement absRoot = product.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        final MetadataElement absRoot = product.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
         abs_orbit = absRoot.getAttributeInt(AbstractMetadata.ABS_ORBIT, 0);
 
         reader = new EnvisatOrbitReader();

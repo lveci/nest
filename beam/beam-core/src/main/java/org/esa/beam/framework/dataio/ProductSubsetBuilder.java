@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetBuilder.java,v 1.6 2009-05-01 19:54:38 lveci Exp $
+ * $Id: ProductSubsetBuilder.java,v 1.7 2009-05-15 12:46:55 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +31,7 @@ import java.util.Arrays;
  * A special-purpose product reader used to build subsets of data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.6 $ $Date: 2009-05-01 19:54:38 $
+ * @version $Revision: 1.7 $ $Date: 2009-05-15 12:46:55 $
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
@@ -61,7 +61,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         try {
             final MetadataElement root = product.getMetadataRoot();
             if(root == null) return;
-            final MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+            final MetadataElement absRoot = root.getElement("Abstracted Metadata");
             if(absRoot == null) return;
 
             final MetadataAttribute firstLineTime = absRoot.getAttribute("first_line_time");

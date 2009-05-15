@@ -60,7 +60,7 @@ public class TestUndersamplingOperator extends TestCase {
         assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
-        MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
@@ -100,7 +100,7 @@ public class TestUndersamplingOperator extends TestCase {
         assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
-        MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
@@ -140,7 +140,7 @@ public class TestUndersamplingOperator extends TestCase {
         assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
-        MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
@@ -180,7 +180,7 @@ public class TestUndersamplingOperator extends TestCase {
         assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
-        MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
@@ -220,7 +220,7 @@ public class TestUndersamplingOperator extends TestCase {
         assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
-        MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
@@ -260,7 +260,7 @@ public class TestUndersamplingOperator extends TestCase {
         assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
-        MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
@@ -300,7 +300,7 @@ public class TestUndersamplingOperator extends TestCase {
         assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
-        MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
@@ -340,7 +340,7 @@ public class TestUndersamplingOperator extends TestCase {
         assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
-        MetadataElement abs = targetProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
@@ -375,7 +375,7 @@ public class TestUndersamplingOperator extends TestCase {
         band1.setData(ProductData.createInstance(intValues));
 
         // create abstracted metadata
-        MetadataElement abs = testProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        MetadataElement abs = testProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
 
         AbstractMetadata.setAttribute(abs, AbstractMetadata.range_spacing, 2.0F);
         AbstractMetadata.setAttribute(abs, AbstractMetadata.azimuth_spacing, 1.5F);

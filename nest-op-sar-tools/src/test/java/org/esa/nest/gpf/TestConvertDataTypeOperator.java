@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import com.bc.ceres.core.ProgressMonitor;
 
@@ -190,7 +191,7 @@ public class TestConvertDataTypeOperator extends TestCase {
         //outputValues(band1.getName() + " values:", values);
 
         // create abstracted metadata
-        MetadataElement abs = testProduct.getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        MetadataElement abs = testProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
 
         return testProduct;
     }

@@ -1,5 +1,5 @@
 /*
- * $Id: ProductTree.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: ProductTree.java,v 1.2 2009-05-15 12:46:55 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -69,7 +69,7 @@ import java.io.File;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:17:18 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-15 12:46:55 $
  * @see org.esa.beam.framework.ui.product.ProductTreeListener
  * @see org.esa.beam.framework.datamodel.Product
  */
@@ -302,7 +302,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
 
     private static DefaultMutableTreeNode createIdentificationNodes(Product product) {
         final MetadataElement rootElement = product.getMetadataRoot();
-        final MetadataElement absRoot = rootElement.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        final MetadataElement absRoot = rootElement.getElement("Abstracted Metadata");
         if(absRoot == null) return null;
 
         final DefaultMutableTreeNode identNode = new DefaultMutableTreeNode("Identification");

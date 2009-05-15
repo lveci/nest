@@ -1,5 +1,5 @@
 /*
- * $Id: VisatApp.java,v 1.7 2009-05-14 16:31:18 lveci Exp $
+ * $Id: VisatApp.java,v 1.8 2009-05-15 12:46:55 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -72,6 +72,7 @@ import org.esa.beam.framework.ui.product.ProductTree;
 import org.esa.beam.framework.ui.product.ProductTreeListener;
 import org.esa.beam.framework.ui.tool.DrawingEditor;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
+import org.esa.beam.jai.BandOpImage;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.PropertyMap;
@@ -88,7 +89,6 @@ import org.esa.beam.visat.actions.ShowToolBarAction;
 import org.esa.beam.visat.actions.ToolAction;
 import org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView;
 import org.esa.beam.visat.toolviews.stat.StatisticsToolView;
-import org.esa.beam.jai.BandOpImage;
 
 import javax.media.jai.JAI;
 import javax.swing.AbstractButton;
@@ -137,7 +137,7 @@ import java.util.logging.Level;
  * @author Norman Fomferra
  * @author Marco Peters
  * @author Sabine Embacher
- * @version $Revision: 1.7 $ $Date: 2009-05-14 16:31:18 $
+ * @version $Revision: 1.8 $ $Date: 2009-05-15 12:46:55 $
  */
 public class VisatApp extends BasicApp implements AppContext {
 
@@ -1326,7 +1326,8 @@ public class VisatApp extends BasicApp implements AppContext {
             protected Object doInBackground() throws Exception {
                 boolean success = false;
                 try {
-                    boolean incremental = getPreferences().getPropertyBool(PROPERTY_KEY_SAVE_INCREMENTAL, DEFAULT_VALUE_SAVE_INCREMENTAL);
+                    boolean incremental = getPreferences().getPropertyBool(PROPERTY_KEY_SAVE_INCREMENTAL,
+                                                                           DEFAULT_VALUE_SAVE_INCREMENTAL);
                     success = saveProductImpl(product, incremental);
                 } finally {
                     if (success) {
@@ -1636,9 +1637,10 @@ public class VisatApp extends BasicApp implements AppContext {
         } catch (Exception e) {
             handleUnknownException(e);
         }
-
-        UIUtils.setRootFrameDefaultCursor(getMainFrame());
-        clearStatusBarMessage();
+        finally {
+            UIUtils.setRootFrameDefaultCursor(getMainFrame());
+            clearStatusBarMessage();
+        }
         return status;
     }
 
@@ -2457,7 +2459,8 @@ public class VisatApp extends BasicApp implements AppContext {
     }
 
     private void reopenProduct(Product product, File newFile) throws IOException {
-        DimapProductReader productReader = (DimapProductReader) ProductIO.getProductReader(DimapProductConstants.DIMAP_FORMAT_NAME);
+        DimapProductReader productReader = (DimapProductReader) ProductIO.getProductReader(
+                DimapProductConstants.DIMAP_FORMAT_NAME);
         productReader.bindProduct(newFile, product);
         product.setProductReader(productReader);
         Band[] bands = product.getBands();

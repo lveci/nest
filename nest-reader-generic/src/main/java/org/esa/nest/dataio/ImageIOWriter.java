@@ -65,7 +65,7 @@ public class ImageIOWriter extends AbstractProductWriter {
         _outputStream = ImageIO.createImageOutputStream(file);
         writer.setOutput(_outputStream);
 
-        final MetadataElement absRoot = getSourceProduct().getMetadataRoot().getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+        final MetadataElement absRoot = getSourceProduct().getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
         AbstractMetadata.saveExternalMetadata(getSourceProduct(), absRoot, file);
     }
 

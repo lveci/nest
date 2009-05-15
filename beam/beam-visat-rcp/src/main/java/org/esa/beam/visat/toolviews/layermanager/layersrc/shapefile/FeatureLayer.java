@@ -40,13 +40,10 @@ import java.util.Map;
  *
  * @author Marco Peters
  * @author Marco Zühlke
- * @version $Revision: 1.4 $ $Date: 2009-05-12 12:56:42 $
+ * @version $Revision: 1.5 $ $Date: 2009-05-15 12:46:55 $
  * @since BEAM 4.6
  */
 public class FeatureLayer extends Layer {
-
-    private static final FeatureLayerType LAYER_TYPE = (FeatureLayerType) LayerType.getLayerType(
-            FeatureLayerType.class.getName());
 
     private MapContext mapContext;
     private CoordinateReferenceSystem crs;
@@ -135,7 +132,7 @@ public class FeatureLayer extends Layer {
 
     @Override
     protected void fireLayerPropertyChanged(PropertyChangeEvent event) {
-        if (event.getPropertyName().equals(com.bc.ceres.glayer.Style.PROPERTY_NAME_OPACITY)) {
+        if ("transparency".equals(event.getPropertyName())) {
             applyOpacity();
         }
         super.fireLayerPropertyChanged(event);

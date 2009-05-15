@@ -1,16 +1,15 @@
 package org.esa.beam.visat.toolviews.layermanager.editors;
 
+import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueAccessor;
 import com.bc.ceres.binding.ValueContainer;
 import com.bc.ceres.binding.ValueDescriptor;
 import com.bc.ceres.binding.ValueModel;
-import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.accessors.MapEntryAccessor;
 import com.bc.ceres.binding.swing.Binding;
 import com.bc.ceres.binding.swing.BindingContext;
 import com.bc.ceres.binding.swing.ValueEditorsPane;
 import com.bc.ceres.glayer.Layer;
-import com.bc.ceres.glayer.Style;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.visat.toolviews.layermanager.LayerEditor;
 
@@ -24,7 +23,7 @@ import java.util.Map;
  * General Editor for layers using {@link ValueDescriptor ValueDescriptors}.
  *
  * @author Marco Zühlke
- * @version $Revision: 1.4 $ $Date: 2009-05-12 12:56:42 $
+ * @version $Revision: 1.5 $ $Date: 2009-05-15 12:46:55 $
  * @since BEAM 4.6
  */
 public abstract class AbstractBindingLayerEditor implements LayerEditor {
@@ -66,10 +65,12 @@ public abstract class AbstractBindingLayerEditor implements LayerEditor {
             Binding binding = bindingContext.getBinding(propertyName);
             ValueContainer configuration = layer.getConfiguration();
 
-            final Object value = configuration.getValue(propertyName);
-            final Object oldValue = binding.getPropertyValue();
-            if (oldValue != value && (oldValue == null || !oldValue.equals(value))) {
-                binding.setPropertyValue(value);
+            if (configuration.getModel(propertyName) != null) {
+                final Object value = configuration.getModel(propertyName).getValue();
+                final Object oldValue = binding.getPropertyValue();
+                if (oldValue != value && (oldValue == null || !oldValue.equals(value))) {
+                    binding.setPropertyValue(value);
+                }
             }
         }
     }
@@ -91,7 +92,10 @@ public abstract class AbstractBindingLayerEditor implements LayerEditor {
             String propertyName = evt.getPropertyName();
             if (layer != null) {
                 try {
-                    layer.getConfiguration().setValue(propertyName, evt.getNewValue());
+                    final ValueModel valueModel = layer.getConfiguration().getModel(propertyName);
+                    if (valueModel != null) {
+                        valueModel.setValue(evt.getNewValue());
+                    }
                 } catch (ValidationException e) {
                     throw new IllegalStateException(e.getMessage(), e);
                 }

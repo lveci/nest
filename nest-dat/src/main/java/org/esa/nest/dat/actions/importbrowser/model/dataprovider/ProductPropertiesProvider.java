@@ -109,7 +109,7 @@ public class ProductPropertiesProvider implements DataProvider {
             String pixelSizeStr = "unavailable";
             MetadataElement root = product.getMetadataRoot();
             if(root != null) {
-                MetadataElement absRoot = root.getElement(Product.ABSTRACTED_METADATA_ROOT_NAME);
+                MetadataElement absRoot = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
                 if(absRoot != null) {
                     MetadataAttribute rngSpacingAttrib = absRoot.getAttribute(AbstractMetadata.range_spacing);
                     MetadataAttribute azmSpacingAttrib = absRoot.getAttribute(AbstractMetadata.azimuth_spacing);
