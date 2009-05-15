@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetBuilder.java,v 1.8 2009-05-15 19:17:33 lveci Exp $
+ * $Id: ProductSubsetBuilder.java,v 1.9 2009-05-15 19:46:24 junlu Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +31,7 @@ import java.util.Arrays;
  * A special-purpose product reader used to build subsets of data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.8 $ $Date: 2009-05-15 19:17:33 $
+ * @version $Revision: 1.9 $ $Date: 2009-05-15 19:46:24 $
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
@@ -101,7 +101,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             if(slantRange != null) {
                 final TiePointGrid srTPG = product.getTiePointGrid("slant_range_time");
                 if(srTPG != null) {
-                    final double slantRangeTime = srTPG.getPixelDouble(0,0);
+                    final double slantRangeTime = srTPG.getPixelDouble(0,0) / 1000000000.0; // ns to s
                     final double halfLightSpeed = 299792458.0 / 2.0;
                     final double slantRangeDist = slantRangeTime * halfLightSpeed;
                     slantRange.getData().setElemDouble(slantRangeDist);
