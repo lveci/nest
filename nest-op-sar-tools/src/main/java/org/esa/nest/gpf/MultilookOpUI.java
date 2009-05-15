@@ -99,7 +99,7 @@ public class MultilookOpUI extends BaseOperatorUI {
 
         final JPanel contentPane = new JPanel();
         contentPane.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = GridBagUtils.createDefaultConstraints();
+        final GridBagConstraints gbc = GridBagUtils.createDefaultConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.insets.top = 1;

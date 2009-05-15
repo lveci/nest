@@ -5,6 +5,7 @@ import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.Settings;
+import org.esa.nest.util.DialogUtils;
 import org.jdom.Element;
 import org.jdom.Attribute;
 
@@ -28,8 +29,8 @@ public class SettingsDialog extends ModelessDialog {
     private SettingsTree settingsTree;
     private DefaultMutableTreeNode rootNode;
 
-    private JLabel editLabel;
-    private JTextField editField;
+    private JLabel editLabel = new JLabel("Value:");
+    private JTextField editField = new JTextField("");
 
     private boolean ok = false;
 
@@ -52,10 +53,16 @@ public class SettingsDialog extends ModelessDialog {
 
     private JPanel createEditPanel() {
         final JPanel editPanel = new JPanel();
-        editLabel = new JLabel("Value:");
-        editPanel.add(editLabel);
-        editField = new JTextField("");
-        editPanel.add(editField);
+        editPanel.setPreferredSize(new Dimension(320, 480));
+        editPanel.setLayout(new GridBagLayout());
+        final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
+
+        gbc.gridy = 20;
+        gbc.gridy++;
+        DialogUtils.addComponent(editPanel, gbc, editLabel, editField);
+        gbc.gridy++;
+
+        DialogUtils.fillPanel(editPanel, gbc);
 
         return editPanel;
     }
@@ -94,11 +101,11 @@ public class SettingsDialog extends ModelessDialog {
 
     private void selectSetting(Element elem) {
         final Attribute label = elem.getAttribute("label");
+        String labelText = elem.getName();
         if (label != null) {
-            editLabel.setText(label.getValue());
-        } else {
-            editLabel.setText(elem.getName());
+            labelText = label.getValue();
         }
+        editLabel.setText("  "+labelText+": ");
 
         final Attribute elemValue = elem.getAttribute("value");
         if (elemValue != null) {
