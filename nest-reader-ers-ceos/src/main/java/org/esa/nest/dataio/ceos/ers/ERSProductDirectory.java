@@ -319,6 +319,9 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency,
                 sceneRec.getAttributeDouble("Radar frequency") * 1000.0);
+        final double slantRangeTime = sceneRec.getAttributeDouble("Zero-doppler range time of first range pixel")*0.001; //s
+        final double lightSpeed = 299792458.0; //  m / s
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel, slantRangeTime*lightSpeed*0.5);
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
                 ReaderUtils.getLineTimeInterval(startTime, endTime, _sceneHeight));
