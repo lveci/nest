@@ -489,7 +489,7 @@ public class ASARCalibrationOperator extends Operator {
      * @return string
      */
     static String getDefaultAuxFile(Product sourceProduct) {
-        return Settings.instance().get("envisatAuxDataPath") + File.separator + getDefaultAuxFileName(sourceProduct);
+        return Settings.instance().get("AuxData/envisatAuxDataPath") + File.separator + getDefaultAuxFileName(sourceProduct);
     }
 
     /**

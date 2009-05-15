@@ -522,9 +522,9 @@ public final class ApplyOrbitFileOp extends Operator {
         // construct path to the orbit file folder
         String orbitPath = "";
         if(orbitType.contains(DORIS_VOR)) {
-            orbitPath = Settings.instance().get("dorisVOROrbitPath");
+            orbitPath = Settings.instance().get("OrbitFiles/dorisVOROrbitPath");
         } else if(orbitType.contains(DORIS_POR)) {
-            orbitPath = Settings.instance().get("dorisPOROrbitPath");
+            orbitPath = Settings.instance().get("OrbitFiles/dorisPOROrbitPath");
         }
 
         final Date startDate = sourceProduct.getStartTime().getAsDate();
@@ -600,11 +600,11 @@ public final class ApplyOrbitFileOp extends Operator {
         // construct path to the orbit file folder
         String orbitPath = "";
         if(orbitType.contains(DELFT_ENVISAT)) {
-            orbitPath = Settings.instance().get("delftEnvisatOrbitPath");
+            orbitPath = Settings.instance().get("OrbitFiles/delftEnvisatOrbitPath");
         } else if(orbitType.contains(DELFT_ERS_1)) {
-            orbitPath = Settings.instance().get("delftERS1OrbitPath");
+            orbitPath = Settings.instance().get("OrbitFiles/delftERS1OrbitPath");
         } else if(orbitType.contains(DELFT_ERS_2)) {
-            orbitPath = Settings.instance().get("delftERS2OrbitPath");
+            orbitPath = Settings.instance().get("OrbitFiles/delftERS2OrbitPath");
         }
 
         // get product start time
@@ -683,9 +683,9 @@ public final class ApplyOrbitFileOp extends Operator {
         // construct path to the orbit file folder
         String orbitPath = "";
         if(orbitType.contains(PRARE_ERS_1)) {
-            orbitPath = Settings.instance().get("prareERS1OrbitPath");
+            orbitPath = Settings.instance().get("OrbitFiles/prareERS1OrbitPath");
         } else if(orbitType.contains(PRARE_ERS_2)) {
-            orbitPath = Settings.instance().get("prareERS2OrbitPath");
+            orbitPath = Settings.instance().get("OrbitFiles/prareERS2OrbitPath");
         }
 
         // get product start time

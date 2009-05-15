@@ -35,9 +35,9 @@ public class OrbitFileUpdater {
 
         String orbitPath = "";
         if(orbitType == OrbitType.DORIS_VOR)
-            orbitPath = Settings.instance().get("dorisVOROrbitPath");
+            orbitPath = Settings.instance().get("DEM/dorisVOROrbitPath");
         else if(orbitType == OrbitType.DORIS_POR)
-            orbitPath = Settings.instance().get("dorisPOROrbitPath");
+            orbitPath = Settings.instance().get("DEM/dorisPOROrbitPath");
 
         final Date startDate = product.getStartTime().getAsDate();
         int month = startDate.getMonth()+1;

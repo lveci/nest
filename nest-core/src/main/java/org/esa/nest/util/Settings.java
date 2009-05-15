@@ -24,6 +24,8 @@ public final class Settings {
     private static final String settingsFile = "settings.xml";
     private final Map<String, String> settingMap = new HashMap<String, String>(100);
 
+    private Element rootXML = null;
+
     /**
     * @return The unique instance of this class.
     */
@@ -35,6 +37,10 @@ public final class Settings {
         Load();
     }
 
+    public Element getSettingsRootXML() {
+        return rootXML;
+    }
+
     public void Save() {
 
         final File userHomePath = SystemUtils.getUserHomeDir();
@@ -42,7 +48,7 @@ public final class Settings {
                 + System.getProperty("ceres.context", "nest")
                 + File.separator + settingsFile;
 
-        final Element root = new Element("DAT");
+        final Element root = new Element("Settings");
         final Document doc = new Document(root);
 
         final Set keys = settingMap.keySet();                           // The set of keys in the map.
@@ -70,19 +76,30 @@ public final class Settings {
 
         settingMap.clear();
 
-        final Element root = doc.getRootElement();
+        rootXML = doc.getRootElement();
+        recurseElements(rootXML.getContent(), "");
+    }
 
-        final List children = root.getContent();
+    private void recurseElements(final List children, final String id) {
         for (Object aChild : children) {
+            String newId = "";
             if (aChild instanceof Element) {
                 final Element child = (Element) aChild;
+                if(!id.isEmpty())
+                    newId = id + '/';
+                newId += child.getName();
                 final Attribute attrib = child.getAttribute("value");
                 if (attrib != null) {
 
                     String value = attrib.getValue();
-                    if(value.contains("$("))
+                    if(value.contains("${"))
                         value = resolve(value);
-                    settingMap.put(child.getName(), value);
+                    settingMap.put(newId, value);
+                }
+
+                final List grandChildren = child.getChildren();
+                if(!grandChildren.isEmpty()) {
+                    recurseElements(grandChildren, newId);
                 }
             }
         }
@@ -91,8 +108,8 @@ public final class Settings {
     private String resolve(String value)
     {
         String out;
-        final int idx1 = value.indexOf("$(");
-        final int idx2 = value.indexOf(')') + 1;
+        final int idx1 = value.indexOf("${");
+        final int idx2 = value.indexOf('}') + 1;
         final String keyWord = value.substring(idx1+2, idx2-1);
         final String fullKey = value.substring(idx1, idx2);
 
@@ -115,7 +132,7 @@ public final class Settings {
                 return file.getAbsolutePath();
         }
 
-        if(out.contains("$("))
+        if(out.contains("${"))
            out = resolve(out);
 
         return out;
@@ -124,5 +141,12 @@ public final class Settings {
     public String get(String key)
     {
         return settingMap.get(key);
+    }
+
+    public void set(String key, String value)
+    {
+        //rootXML
+
+        settingMap.put(key, value);
     }
 }

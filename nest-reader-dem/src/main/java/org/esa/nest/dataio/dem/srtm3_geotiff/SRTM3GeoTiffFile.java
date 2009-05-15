@@ -26,8 +26,8 @@ public class SRTM3GeoTiffFile {
     private ftpUtils ftp = null;
     private FTPFile[] remoteFileList = null;
 
-    private static final String remoteFTP = Settings.instance().get("srtm3GeoTiffDEM_FTP");
-    private static final String remotePath = getPath("srtm3GeoTiffDEM_remotePath");
+    private static final String remoteFTP = Settings.instance().get("DEM/srtm3GeoTiffDEM_FTP");
+    private static final String remotePath = getPath("DEM/srtm3GeoTiffDEM_remotePath");
 
     public SRTM3GeoTiffFile(SRTM3GeoTiffElevationModel model, File localFile, ProductReader reader) {
         this.demModel = model;

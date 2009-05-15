@@ -3,28 +3,21 @@ package org.esa.nest.dat.dialogs;
 import org.esa.beam.framework.ui.PopupMenuFactory;
 import org.esa.beam.framework.ui.PopupMenuHandler;
 import org.esa.beam.framework.ui.UIUtils;
-import org.esa.beam.visat.VisatApp;
-import org.esa.nest.dat.actions.importbrowser.ImportBrowserAction;
-import org.esa.nest.dat.toolviews.Projects.Project;
-import org.esa.nest.dat.toolviews.Projects.ProjectSubFolder;
-import org.esa.nest.dat.toolviews.Projects.ProjectFile;
-import org.esa.nest.dat.toolviews.Projects.ProductSet;
+import org.jdom.Element;
+import org.jdom.Attribute;
 
 import javax.swing.*;
 import javax.swing.tree.*;
 import java.awt.*;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Enumeration;
-import java.io.File;
+import java.util.*;
+import java.util.List;
 
 /**
- * A tree-view component for Projects
+ * A tree-view component for Settings
  */
 public class SettingsTree extends JTree implements PopupMenuFactory, ActionListener {
 
@@ -33,14 +26,14 @@ public class SettingsTree extends JTree implements PopupMenuFactory, ActionListe
     private TreePath selectedPath;
 
     /**
-     * Constructs a new single selection <code>ProductTree</code>.
+     * Constructs a new Tree.
      */
     public SettingsTree() {
         this(false);
     }
 
     /**
-     * Constructs a new <code>ProductTree</code> with the given selection mode.
+     * Constructs a new Tree with the given selection mode.
      *
      * @param multipleSelect whether or not the tree is multiple selection capable
      */
@@ -49,17 +42,13 @@ public class SettingsTree extends JTree implements PopupMenuFactory, ActionListe
         getSelectionModel().setSelectionMode(multipleSelect
                 ? TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION
                 : TreeSelectionModel.SINGLE_TREE_SELECTION);
-        addMouseListener(new PTMouseListener());
         setCellRenderer(new PTCellRenderer());
-        setRootVisible(false);
+        setRootVisible(true);
         setShowsRootHandles(true);
         setToggleClickCount(2);
         setExpandsSelectedPaths(true);
         setScrollsOnExpand(true);
         setAutoscrolls(true);
-        setDragEnabled(true);
-        setDropMode(DropMode.ON);
-        setTransferHandler(new TreeTransferHandler());
         putClientProperty("JTree.lineStyle", "Angled");
         ToolTipManager.sharedInstance().registerComponent(this);
 
@@ -153,9 +142,27 @@ public class SettingsTree extends JTree implements PopupMenuFactory, ActionListe
     }
 
 
-    public void populateTree(DefaultMutableTreeNode treeNode) {
+    public void populateTree(Element elem, DefaultMutableTreeNode treeNode) {
+        populateNode(elem, treeNode);
         setModel(new DefaultTreeModel(treeNode));
         expandAll();
+    }
+
+    private static void populateNode(Element elem, DefaultMutableTreeNode treeNode) {
+
+        final List children = elem.getContent();
+        for (Object aChild : children) {
+            if (aChild instanceof Element) {
+                final Element child = (Element) aChild;
+                final DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(child);
+                treeNode.add(newNode);
+
+                final List grandChildren = child.getChildren();
+                if(!grandChildren.isEmpty()) {
+                    populateNode(child, newNode);
+                }
+            }
+        }
     }
 
     /**
@@ -168,30 +175,6 @@ public class SettingsTree extends JTree implements PopupMenuFactory, ActionListe
         final TreePath path = findTreePathFor(toSelect);
         if (path != null) {
             setSelectionPath(path);
-        }
-    }
-
-    private class PTMouseListener extends MouseAdapter {
-
-        @Override
-        public void mousePressed(MouseEvent event) {
-            int selRow = getRowForLocation(event.getX(), event.getY());
-            if (selRow >= 0) {
-                int clickCount = event.getClickCount();
-                if (clickCount > 1) {
-                    final TreePath selPath = getPathForLocation(event.getX(), event.getY());
-                    final DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
-                    final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) node.getParent();
-
-                    final Object o = node.getUserObject();
-                    if (o instanceof ProjectFile) {
-                        final ProjectFile file = (ProjectFile) o;
-
-                        final ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
-                        Project.openFile(parentFolder, file.getFile());
-                    }
-                }
-            }
         }
     }
 
@@ -209,15 +192,10 @@ public class SettingsTree extends JTree implements PopupMenuFactory, ActionListe
 
     private static class PTCellRenderer extends DefaultTreeCellRenderer {
 
-        private final ImageIcon productIcon;
-        private final ImageIcon groupOpenIcon;
-        private final ImageIcon projectIcon;
+        private final ImageIcon prefIcon;
 
         public PTCellRenderer() {
-            productIcon = UIUtils.loadImageIcon("icons/RsProduct16.gif");
-            groupOpenIcon = UIUtils.loadImageIcon("icons/RsGroupOpen16.gif");
-            projectIcon = UIUtils.loadImageIcon("icons/RsGroupClosed16.gif");
-
+            prefIcon = UIUtils.loadImageIcon("icons/Properties16.gif");
         }
 
         @Override
@@ -231,87 +209,27 @@ public class SettingsTree extends JTree implements PopupMenuFactory, ActionListe
             super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
             final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) value;
-            value = treeNode.getUserObject();
+            final Object userObject = treeNode.getUserObject();
 
-            if (value instanceof ProjectFile) {
-                final ProjectFile file = (ProjectFile) value;
-                this.setText(file.getDisplayName());
-                this.setIcon(productIcon);
-                this.setToolTipText(leaf ? file.getToolTipText() : null);
-            } else if (value instanceof ProjectSubFolder) {
-                final ProjectSubFolder subFolder = (ProjectSubFolder) value;
-                this.setText(subFolder.getName());
-                this.setIcon(projectIcon);
-                this.setToolTipText(null);
+            if (userObject instanceof Element) {
+                final Element elem = (Element) userObject;
+                final Attribute label = elem.getAttribute("label");
+                if (label != null) {
+                    this.setText(label.getValue());
+                } else {
+                    this.setText(elem.getName());
+                }
+
+                final Attribute elemValue = elem.getAttribute("value");
+                if(elemValue != null) {
+                    this.setIcon(prefIcon);
+                    this.setToolTipText(elemValue.getValue());     
+                } else {
+                    this.setToolTipText(elem.getName());
+                }
             }
 
             return this;
-        }
-    }
-
-    public static class TreeTransferHandler extends TransferHandler {
-
-        public boolean canImport(TransferSupport info) {
-            return info.isDataFlavorSupported(DataFlavor.stringFlavor);
-        }
-
-        public int getSourceActions(JComponent c) {
-            return TransferHandler.COPY;
-        }
-
-        /**
-         * Bundle up the selected items in a single list for export.
-         * Each line is separated by a newline.
-         */
-        protected Transferable createTransferable(JComponent c) {
-            final JTree tree = (JTree)c;
-            final TreePath path = tree.getSelectionPath();
-
-            final DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-            final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) node.getParent();
-
-            final Object context = node.getUserObject();
-            if (context != null) {
-
-            }
-            return null;
-        }
-
-        /**
-         * Perform the actual import.  This only supports drag and drop.
-         */
-        public boolean importData(TransferSupport info) {
-            if (!info.isDrop()) {
-                return false;
-            }
-
-            final JTree tree = (JTree) info.getComponent();
-            final DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-
-            // Get the string that is being dropped.
-            final Transferable t = info.getTransferable();
-            String data;
-            try {
-                data = (String) t.getTransferData(DataFlavor.stringFlavor);
-            }
-            catch (Exception e) {
-                return false;
-            }
-
-            // Wherever there is a newline in the incoming data,
-            // break it into a separate item in the list.
-            final String[] values = data.split("\n");
-
-            // Perform the actual import.
-            for (String value : values) {
-                final TreePath dropPath = tree.getDropLocation().getPath();
-                final DefaultMutableTreeNode node = (DefaultMutableTreeNode) dropPath.getLastPathComponent();
-                final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) node.getParent();
-
-                final Object o = node.getUserObject();
-
-            }
-            return true;
         }
     }
 

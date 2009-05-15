@@ -227,7 +227,7 @@ public class ASARRetroCalibrationOperator extends Operator {
      */
     private void getOldAntennaPatternGain() {
 
-        final String defAuxFilePath = Settings.instance().get("envisatAuxDataPath") + File.separator + defAuxFileName;
+        final String defAuxFilePath = Settings.instance().get("AuxData/envisatAuxDataPath") + File.separator + defAuxFileName;
         if (swath.contains("WS")) {
 
             oldRefElevationAngle = new double[5]; // reference elevation angles for 5 sub swathes

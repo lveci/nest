@@ -4,11 +4,17 @@ import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.visat.VisatApp;
+import org.esa.nest.util.Settings;
+import org.jdom.Element;
+import org.jdom.Attribute;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import com.jidesoft.swing.JideScrollPane;
 import com.jidesoft.swing.JideSplitPane;
@@ -22,6 +28,9 @@ public class SettingsDialog extends ModelessDialog {
     private SettingsTree settingsTree;
     private DefaultMutableTreeNode rootNode;
 
+    private JLabel editLabel;
+    private JTextField editField;
+
     private boolean ok = false;
 
     public SettingsDialog(String title) {
@@ -34,23 +43,69 @@ public class SettingsDialog extends ModelessDialog {
         scrollPane.setBorder(null);
         scrollPane.setViewportBorder(null);
 
-        final JideSplitPane splitPane = new JideSplitPane(JideSplitPane.VERTICAL_SPLIT);
+        final JideSplitPane splitPane = new JideSplitPane(JideSplitPane.HORIZONTAL_SPLIT);
         splitPane.addPane(scrollPane);
+        splitPane.addPane(createEditPanel());
 
         setContent(splitPane);
+    }
+
+    private JPanel createEditPanel() {
+        final JPanel editPanel = new JPanel();
+        editLabel = new JLabel("Value:");
+        editPanel.add(editLabel);
+        editField = new JTextField("");
+        editPanel.add(editField);
+
+        return editPanel;
     }
 
     private SettingsTree createTree() {
         rootNode = new DefaultMutableTreeNode("");
         settingsTree = new SettingsTree(false);//rootNode);
-        settingsTree.populateTree(rootNode);
+        settingsTree.populateTree(Settings.instance().getSettingsRootXML(), rootNode);
         settingsTree.setRootVisible(false);
         settingsTree.setShowsRootHandles(true);
-        DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) settingsTree.getCellRenderer();
+        settingsTree.addMouseListener(new PTMouseListener());
+
+        final DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) settingsTree.getCellRenderer();
         renderer.setLeafIcon(IconsFactory.getImageIcon(BasicApp.class, "/org/esa/beam/resources/images/icons/RsBandAsSwath16.gif"));
         renderer.setClosedIcon(IconsFactory.getImageIcon(BasicApp.class, "/org/esa/beam/resources/images/icons/RsGroupClosed16.gif"));
         renderer.setOpenIcon(IconsFactory.getImageIcon(BasicApp.class, "/org/esa/beam/resources/images/icons/RsGroupOpen16.gif"));
         return settingsTree;
+    }
+
+    private class PTMouseListener extends MouseAdapter {
+
+        @Override
+        public void mousePressed(MouseEvent event) {
+            int selRow = settingsTree.getRowForLocation(event.getX(), event.getY());
+            if (selRow >= 0) {
+                final TreePath selPath = settingsTree.getPathForLocation(event.getX(), event.getY());
+                final DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
+
+                final Object o = node.getUserObject();
+                if (o instanceof Element) {
+                    selectSetting((Element)o);
+                }
+            }
+        }
+    }
+
+    private void selectSetting(Element elem) {
+        final Attribute label = elem.getAttribute("label");
+        if (label != null) {
+            editLabel.setText(label.getValue());
+        } else {
+            editLabel.setText(elem.getName());
+        }
+
+        final Attribute elemValue = elem.getAttribute("value");
+        if (elemValue != null) {
+            editField.setText(elemValue.getValue());
+        } else {
+            editField.setText("");
+        }
     }
 
     @Override

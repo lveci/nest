@@ -111,19 +111,19 @@ public class ResourceUtils {
      * @return the current user's application data directory
      */
     public static File getApplicationUserDir(boolean forceCreate) {
-        String contextId = null;
-        if (RuntimeActivator.getInstance() != null
-                && RuntimeActivator.getInstance().getModuleContext() != null) {
-            contextId = RuntimeActivator.getInstance().getModuleContext().getRuntimeConfig().getContextId();
-        }
-        if (contextId == null) {
-            contextId = System.getProperty("ceres.context", "nest");
-        }
-        final File dir = new File(SystemUtils.getUserHomeDir(), '.' + contextId);
+        final File dir = new File(SystemUtils.getUserHomeDir(), '.' + getContextID());
         if (forceCreate && !dir.exists()) {
             dir.mkdirs();
         }
         return dir;
+    }
+
+    public static String getContextID() {
+        if (RuntimeActivator.getInstance() != null
+                && RuntimeActivator.getInstance().getModuleContext() != null) {
+            return RuntimeActivator.getInstance().getModuleContext().getRuntimeConfig().getContextId();
+        }
+        return System.getProperty("ceres.context", "nest");
     }
 
     /**
@@ -149,7 +149,7 @@ public class ResourceUtils {
             return outFile;
 
         // next check config folder
-        final String homeDir = System.getProperty("nest.home");
+        final String homeDir = System.getProperty(getContextID()+".home");
         if (homeDir != null && homeDir.length() > 0) {
             final File homeDirFile = new File(homeDir);
 
@@ -173,7 +173,7 @@ public class ResourceUtils {
 
     public static File findHomeFolder()
     {
-        final String nestHome = System.getProperty("nest.home");
+        final String nestHome = System.getProperty(getContextID()+".home");
         File homePath;
         if(nestHome == null)
             homePath = SystemUtils.getBeamHomeDir();

@@ -800,7 +800,7 @@ public final class ERSCalibrationOperator extends Operator {
             } else { // PGS (CEOS or ENVISAT)
 
                 // get antenna pattern from ERS1 XCA file
-                String fileName = Settings.instance().get("ersAuxDataPath") + File.separator +
+                String fileName = Settings.instance().get("AuxData/ersAuxDataPath") + File.separator +
                                   "ER1_XCA_AXNXXX20050321_000000_19910101_000000_20100101_000000.txt";
 
                 getAntennaPatternGainFromAuxData(fileName);
@@ -818,7 +818,7 @@ public final class ERSCalibrationOperator extends Operator {
             } else { // PGS (CEOS or ENVISAT)
 
                 // get antenna pattern from ERS2 XCA file
-                String fileName = Settings.instance().get("ersAuxDataPath") + File.separator +
+                String fileName = Settings.instance().get("AuxData/ersAuxDataPath") + File.separator +
                                   "ER2_XCA_AXNXXX20050321_000000_19950101_000000_20100101_000000.txt";
 
                 getAntennaPatternGainFromAuxData(fileName);
