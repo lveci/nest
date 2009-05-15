@@ -106,6 +106,7 @@ public class AbstractMetadata {
     public static final String geo_ref_system = "geo_ref_system";
     public static final String lat_pixel_res = "lat_pixel_res";
     public static final String lon_pixel_res = "lon_pixel_res";
+    public static final String slant_range_to_first_pixel = "slant_range_to_first_pixel";
 
     /**
      * Abstract common metadata from products to be used uniformly by all operators
@@ -166,12 +167,14 @@ public class AbstractMetadata {
         // SRGR
         addAbstractedAttribute(absRoot, srgr_flag, ProductData.TYPE_UINT8, "flag", "SRGR applied");
         addAbstractedAttribute(absRoot, isMapProjected, ProductData.TYPE_UINT8, "flag", "Map projection applied");
+
         // orthorectification
         addAbstractedAttribute(absRoot, is_geocoded, ProductData.TYPE_UINT8, "flag", "orthorectification applied");
         addAbstractedAttribute(absRoot, DEM, ProductData.TYPE_ASCII, "", "Digital Elevation Model used");
         addAbstractedAttribute(absRoot, geo_ref_system, ProductData.TYPE_ASCII, "", "geographic reference system");
         addAbstractedAttribute(absRoot, lat_pixel_res, ProductData.TYPE_FLOAT64, "deg", "pixel resolution in geocoded image");
         addAbstractedAttribute(absRoot, lon_pixel_res, ProductData.TYPE_FLOAT64, "deg", "pixel resolution in geocoded image");
+        addAbstractedAttribute(absRoot, slant_range_to_first_pixel, ProductData.TYPE_FLOAT64, "m", "Slant range to 1st data sample");
 
         // calibration
         addAbstractedAttribute(absRoot, ant_elev_corr_flag, ProductData.TYPE_UINT8, "flag", "Antenna elevation applied");
