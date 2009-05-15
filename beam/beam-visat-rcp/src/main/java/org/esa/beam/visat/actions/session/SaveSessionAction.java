@@ -1,5 +1,5 @@
 /*
- * $Id: SaveSessionAction.java,v 1.5 2009-05-14 16:31:18 lveci Exp $
+ * $Id: SaveSessionAction.java,v 1.6 2009-05-15 19:08:42 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -34,7 +34,7 @@ import java.util.ArrayList;
  * Saves a VISAT session.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.5 $ $Date: 2009-05-14 16:31:18 $
+ * @version $Revision: 1.6 $ $Date: 2009-05-15 19:08:42 $
  * @since BEAM 4.6
  */
 public class SaveSessionAction extends ExecCommand {
@@ -80,6 +80,8 @@ public class SaveSessionAction extends ExecCommand {
         } catch (Exception e) {
             e.printStackTrace();
             app.showErrorDialog(TITLE, e.getMessage());
+        } finally {
+            app.updateState(); // to update menu entries e.g. 'Close Session'
         }
     }
 
@@ -90,9 +92,9 @@ public class SaveSessionAction extends ExecCommand {
             if (product.getFileLocation() == null) {
                 String message = MessageFormat.format(
                         "The following product has not been saved yet:\n" +
-                                "{0}.\n" +
-                                "Do you want to save it now?\n\n" +
-                                "Note: If you select 'No', the session cannot be saved.",
+                        "{0}.\n" +
+                        "Do you want to save it now?\n\n" +
+                        "Note: If you select 'No', the session cannot be saved.",
                         product.getDisplayName());
                 // Here: No == Cancel, its because we need a file location in the session XML
                 int i = app.showQuestionDialog(TITLE, message, false, null);
@@ -110,10 +112,10 @@ public class SaveSessionAction extends ExecCommand {
             if (product.isModified()) {
                 String message = MessageFormat.format(
                         "The following product has been modified:\n" +
-                                "{0}.\n" +
-                                "Do you want to save it now?\n\n" +
-                                "Note: It is recommended to save the product in order to \n" +
-                                "fully restore the session later.",
+                        "{0}.\n" +
+                        "Do you want to save it now?\n\n" +
+                        "Note: It is recommended to save the product in order to \n" +
+                        "fully restore the session later.",
                         product.getDisplayName());
                 // Here: Yes, No + Cancel, its because we have file location for the session XML
                 int i = app.showQuestionDialog(TITLE, message, true, null);

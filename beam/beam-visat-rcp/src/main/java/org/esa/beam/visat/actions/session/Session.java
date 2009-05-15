@@ -27,6 +27,7 @@ import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.framework.datamodel.RGBImageProfile;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.datamodel.VirtualBand;
+import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.product.ProductMetadataView;
 import org.esa.beam.framework.ui.product.ProductNodeView;
 import org.esa.beam.framework.ui.product.ProductSceneImage;
@@ -50,7 +51,7 @@ import java.util.List;
  *
  * @author Ralf Quast
  * @author Norman Fomferra
- * @version $Revision: 1.7 $ $Date: 2009-05-13 12:33:22 $
+ * @version $Revision: 1.8 $ $Date: 2009-05-15 19:08:42 $
  * @since BEAM 4.6
  */
 @XStreamAlias("session")
@@ -227,14 +228,17 @@ public class Session {
         return viewRefs[index];
     }
 
-    public RestoredSession restore(URI rootURI, ProgressMonitor pm, ProblemSolver problemSolver) throws
-                                                                                                 CanceledException {
+    public RestoredSession restore(AppContext appContext, URI rootURI, ProgressMonitor pm,
+                                   ProblemSolver problemSolver) throws
+                                                                CanceledException {
         try {
             pm.beginTask("Restoring session", 100);
             final ArrayList<Exception> problems = new ArrayList<Exception>();
             final ProductManager productManager = restoreProducts(rootURI, SubProgressMonitor.create(pm, 80),
                                                                   problemSolver, problems);
-            final ProductNodeView[] views = restoreViews(productManager, SubProgressMonitor.create(pm, 20), problems);
+            // Note: ProductManager is used for the SessionDomConverter
+            final ProductNodeView[] views = restoreViews(productManager, SubProgressMonitor.create(pm, 20), problems,
+                                                         appContext.getPreferences());
             return new RestoredSession(productManager.getProducts(),
                                        views,
                                        problems.toArray(new Exception[problems.size()]));
@@ -275,7 +279,8 @@ public class Session {
         return productManager;
     }
 
-    ProductNodeView[] restoreViews(ProductManager productManager, ProgressMonitor pm, List<Exception> problems) {
+    ProductNodeView[] restoreViews(ProductManager productManager, ProgressMonitor pm, List<Exception> problems,
+                                   PropertyMap applicationPreferences) {
         ArrayList<ProductNodeView> views = new ArrayList<ProductNodeView>();
         try {
             pm.beginTask("Restoring views", viewRefs.length);
@@ -289,7 +294,7 @@ public class Session {
                             if (viewRef.productNodeName != null) {
                                 RasterDataNode node = product.getRasterDataNode(viewRef.productNodeName);
                                 if (node != null) {
-                                    sceneImage = new ProductSceneImage(node, new PropertyMap(),
+                                    sceneImage = new ProductSceneImage(node, applicationPreferences,
                                                                        SubProgressMonitor.create(pm, 1));
                                 } else {
                                     throw new Exception("Unknown raster data source: " + viewRef.productNodeName);
@@ -302,7 +307,8 @@ public class Session {
                                 final Band bBand = getRgbBand(product, viewRef.expressionB,
                                                               RGBImageProfile.RGB_BAND_NAMES[2]);
                                 sceneImage = new ProductSceneImage(viewRef.viewName, rBand, gBand, bBand,
-                                                                   new PropertyMap(), SubProgressMonitor.create(pm, 1));
+                                                                   applicationPreferences,
+                                                                   SubProgressMonitor.create(pm, 1));
                             }
                             view = new ProductSceneView(sceneImage);
                             Rectangle bounds = viewRef.bounds;
@@ -321,6 +327,7 @@ public class Session {
                         } else {
                             throw new Exception("Unknown product reference number: " + viewRef.productRefNo);
                         }
+                        view.setLayerProperties(applicationPreferences);
                         for (int i = 0; i < viewRef.getLayerCount(); i++) {
                             final LayerRef ref = viewRef.getLayerRef(i);
                             if (!view.getBaseImageLayer().getId().equals(ref.id)) {
@@ -364,20 +371,20 @@ public class Session {
         return views.toArray(new ProductNodeView[views.size()]);
     }
 
-    private void addLayerRef(LayerContext layerContext, Layer parentLayer, LayerRef ref,
+    private void addLayerRef(LayerContext layerContext, Layer parentLayer, LayerRef layerRef,
                              ProductManager productManager) throws
                                                             ConversionException,
                                                             ValidationException {
-        final LayerType type = LayerType.getLayerType(ref.layerTypeName);
+        final LayerType type = LayerType.getLayerType(layerRef.layerTypeName);
         final SessionDomConverter converter = new SessionDomConverter(productManager);
         final ValueContainer template = type.getConfigurationTemplate();
-        converter.convertDomToValue(ref.configuration, template);
+        converter.convertDomToValue(layerRef.configuration, template);
         final Layer layer = type.createLayer(layerContext, template);
-        layer.setId(ref.id);
-        layer.setVisible(ref.visible);
-        layer.setName(ref.name);
-        parentLayer.getChildren().add(ref.zOrder, layer);
-        for (LayerRef child : ref.children) {
+        layer.setId(layerRef.id);
+        layer.setVisible(layerRef.visible);
+        layer.setName(layerRef.name);
+        parentLayer.getChildren().add(layerRef.zOrder, layer);
+        for (LayerRef child : layerRef.children) {
             addLayerRef(layerContext, layer, child, productManager);
         }
     }

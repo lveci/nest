@@ -1,5 +1,5 @@
 /*
- * $Id: ShowImageViewRGBAction.java,v 1.2 2009-05-11 16:17:37 lveci Exp $
+ * $Id: ShowImageViewRGBAction.java,v 1.3 2009-05-15 19:08:42 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -40,7 +40,7 @@ import java.io.IOException;
  * This action opens an RGB image view on the currently selected Product.
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2009-05-11 16:17:37 $
+ * @version $Revision: 1.3 $ $Date: 2009-05-15 19:08:42 $
  */
 public class ShowImageViewRGBAction extends ExecCommand {
 
@@ -119,10 +119,16 @@ public class ShowImageViewRGBAction extends ExecCommand {
         visatApp.getExecutorService().submit(worker);
     }
 
-    public JInternalFrame openInternalFrame(ProductSceneView view) {
+    public JInternalFrame openInternalFrame(final ProductSceneView view) {
+        return openInternalFrame(view, true);
+    }
+
+    public JInternalFrame openInternalFrame(ProductSceneView view, boolean configureByPreferences) {
         final VisatApp visatApp = VisatApp.getApp();
         view.setCommandUIFactory(visatApp.getCommandUIFactory());
-        view.setLayerProperties(visatApp.getPreferences());
+        if (configureByPreferences) {
+            view.setLayerProperties(visatApp.getPreferences());
+        }
 
         final String title = createUniqueInternalFrameTitle(view.getSceneName());
         final Icon icon = UIUtils.loadImageIcon("icons/RsBandAsSwath16.gif");

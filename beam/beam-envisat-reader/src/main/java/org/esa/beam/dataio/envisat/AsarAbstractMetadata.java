@@ -147,6 +147,18 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("lat_pixel_res", 0.0, "deg", absRoot, "pixel resolution in geocoded image");
             addAbstractedAttribute("lon_pixel_res", 0.0, "deg", absRoot, "pixel resolution in geocoded image");
 
+            final MetadataElement gg = root.getElement("GEOLOCATION_GRID_ADS");
+            if(gg != null) {
+                final MetadataElement gg1 = gg.getElement("GEOLOCATION_GRID_ADS.1");
+                if(gg1 != null) {
+                    final double slantRangeTime = gg1.getAttributeDouble("ASAR_Geo_Grid_ADSR.sd/first_line_tie_points.slant_range_times");
+                    final double lightSpeed = 299792458.0; //  m / s
+                    final double halfLightSpeed = lightSpeed / 2.0;
+                    final double slantRangeDist = slantRangeTime * halfLightSpeed;
+                    addAbstractedAttribute("slant_range_to_first_pixel", slantRangeDist, "m", absRoot, "Slant range to 1st data sample");
+                }
+            }
+
             addAbstractedAttribute(mppAds, "ant_elev_corr_flag", absRoot, "Antenna elevation applied");
             addAbstractedAttribute(mppAds, "range_spread_comp_flag", absRoot, "range spread compensation applied");
             addAbstractedAttribute("replica_power_corr_flag", ProductData.TYPE_UINT8, "flag",

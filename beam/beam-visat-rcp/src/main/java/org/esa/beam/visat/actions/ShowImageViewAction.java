@@ -1,5 +1,5 @@
 /*
- * $Id: ShowImageViewAction.java,v 1.4 2009-05-15 12:46:55 lveci Exp $
+ * $Id: ShowImageViewAction.java,v 1.5 2009-05-15 19:08:42 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -48,7 +48,7 @@ import java.util.ArrayList;
  * This action opens an image view of the currently selected raster.
  *
  * @author Marco Peters
- * @version $Revision: 1.4 $ $Date: 2009-05-15 12:46:55 $
+ * @version $Revision: 1.5 $ $Date: 2009-05-15 19:08:42 $
  */
 public class ShowImageViewAction extends ExecCommand {
 
@@ -124,10 +124,16 @@ public class ShowImageViewAction extends ExecCommand {
     }
 
     public JInternalFrame openInternalFrame(final ProductSceneView view) {
+        return openInternalFrame(view, true);
+    }
+    
+    public JInternalFrame openInternalFrame(final ProductSceneView view, boolean configureByPreferences) {
         final VisatApp visatApp = VisatApp.getApp();
         final RasterDataNode selectedProductNode = view.getRaster();
         view.setCommandUIFactory(visatApp.getCommandUIFactory());
-        view.setLayerProperties(visatApp.getPreferences());
+        if (configureByPreferences) {
+            view.setLayerProperties(visatApp.getPreferences());
+        }
 
         final String title = createInternalFrameTitle(selectedProductNode);
         final Icon icon = UIUtils.loadImageIcon("icons/RsBandAsSwath16.gif");

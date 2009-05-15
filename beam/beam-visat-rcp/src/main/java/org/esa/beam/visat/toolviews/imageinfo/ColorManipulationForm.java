@@ -1,5 +1,5 @@
 /*
- * $Id: ColorManipulationForm.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: ColorManipulationForm.java,v 1.2 2009-05-15 19:08:42 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -440,6 +440,7 @@ class ColorManipulationForm {
         }
     }
 
+    // todo - code duplication in all tool views with help support!!! (nf 200905)
     private void installHelp() {
         if (getToolViewDescriptor().getHelpId() != null) {
             HelpSys.enableHelpOnButton(helpButton, getToolViewDescriptor().getHelpId());
