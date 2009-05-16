@@ -250,9 +250,9 @@ public final class MultilookOp extends Operator {
 
         int k = 0;
         for (int j = 0; j < gridHeight; j++) {
-            float y = Math.min(j*subSamplingY, targetImageHeight - 1)*nAzLooks;
+            float y = (nAzLooks - 1)/2 + Math.min(j*subSamplingY, targetImageHeight - 1)*nAzLooks;
             for (int i = 0; i < gridWidth; i++) {
-                float x = Math.min(i*subSamplingX, targetImageWidth - 1)*nRgLooks;
+                float x = (nRgLooks - 1)/2 + Math.min(i*subSamplingX, targetImageWidth - 1)*nRgLooks;
                 newTiePointPos[k] = new PixelPos();
                 newTiePointPos[k].x = x;
                 newTiePointPos[k].y = y;
