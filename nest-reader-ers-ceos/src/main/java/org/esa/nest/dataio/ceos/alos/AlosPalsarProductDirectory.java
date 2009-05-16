@@ -410,7 +410,9 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
                 sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency, getRadarFrequency(sceneRec));
-
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
+                _imageFiles[0].getSlantRangeToFirstPixel(0));
+        
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
                 ReaderUtils.getLineTimeInterval(startTime, endTime, _sceneHeight));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
