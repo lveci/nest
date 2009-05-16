@@ -106,7 +106,6 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
     private FileElevationModel fileElevationModel = null;
-    private TiePointGrid slantRangeTime = null;
     private boolean srgrFlag = false;
 
     private int sourceImageWidth = 0;
@@ -120,6 +119,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private double firstLineUTC = 0.0; // in days
     private double lastLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
+    private double nearEdgeSlantRange = 0.0; // in m
     private double demNoDataValue = 0.0; // no data value for DEM
     private double latMin = 0.0;
     private double latMax = 0.0;
@@ -184,7 +184,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
             if (srgrFlag) {
                 getSrgrCoeff();
             } else {
-                slantRangeTime = OperatorUtils.getSlantRangeTime(sourceProduct);
+                getNearEdgeSlantRange();
             }
 
             computeImageGeoBoundary();
@@ -257,6 +257,14 @@ public final class RangeDopplerGeocodingOp extends Operator {
      */
     private void getSrgrCoeff() throws Exception {
         srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
+    }
+
+    /**
+     * Get near edge slant range (in m).
+     * @throws Exception The exceptions.
+     */
+    private void getNearEdgeSlantRange() throws Exception {
+        nearEdgeSlantRange = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.slant_range_to_first_pixel);
     }
 
     /**
@@ -841,9 +849,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
         } else { // slant range image
 
-            final int azimuthIndex = (int)((zeroDopplerTime - firstLineUTC) / lineTimeInterval);
-            final double r0 = slantRangeTime.getPixelDouble(0, azimuthIndex) / 1000000000.0 * Constants.halfLightSpeed;
-            return (slantRange - r0) / rangeSpacing;
+            return (slantRange - nearEdgeSlantRange) / rangeSpacing;
         }
     }
 
