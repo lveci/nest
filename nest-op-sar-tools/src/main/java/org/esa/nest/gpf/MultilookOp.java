@@ -287,6 +287,10 @@ public final class MultilookOp extends Operator {
         final float oldLineTimeInterval = (float)absTgt.getAttributeDouble(AbstractMetadata.line_time_interval);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.line_time_interval, oldLineTimeInterval*nAzLooks);
 
+        final double oldNearEdgeSlantRange = absTgt.getAttributeDouble(AbstractMetadata.slant_range_to_first_pixel);
+        final double newNearEdgeSlantRange = oldNearEdgeSlantRange + rangeSpacing*(nRgLooks - 1)/2.0;
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.slant_range_to_first_pixel, newNearEdgeSlantRange);
+
         final String oldFirstLineTime = absTgt.getAttributeString(AbstractMetadata.first_line_time);
         final int idx = oldFirstLineTime.lastIndexOf(':') + 1;
         final String oldSecondsStr = oldFirstLineTime.substring(idx);
