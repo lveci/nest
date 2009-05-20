@@ -277,6 +277,7 @@ public final class MultilookOp extends Operator {
     private void updateTargetProductMetadata() throws Exception {
 
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.multilook_flag, 1);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_looks, azimuthLooks*nAzLooks);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_looks, rangeLooks*nRgLooks);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_spacing, azimuthSpacing*nAzLooks);
