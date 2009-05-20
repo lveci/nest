@@ -162,6 +162,8 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                 sarProcessingInformation.getAttributeInt("numberOfRangeLooks", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
                 sarProcessingInformation.getAttributeInt("numberOfAzimuthLooks", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
+                sarProcessingInformation.getElement("slantRangeNearEdge").getAttributeDouble("slantRangeNearEdge"));
 
         // imageAttributes
         final MetadataElement imageAttributes = productElem.getElement("imageAttributes");
