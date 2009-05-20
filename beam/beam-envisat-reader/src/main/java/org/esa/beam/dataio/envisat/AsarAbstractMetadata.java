@@ -135,6 +135,7 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("num_output_lines", product.getSceneRasterHeight(), "", absRoot, "");
             addAbstractedAttribute("num_samples_per_line", product.getSceneRasterWidth(), "", absRoot, "");
             addAbstractedAttribute(mppAds, "srgr_flag", absRoot, "SRGR applied");
+            addAbstractedAttribute(mppAds, "avg_scene_height_ellpsoid", absRoot, "average scene height");
 
             int isMapProjected = 0;
             if (productType.contains("APG") || productType.contains("IMG")) {
@@ -169,6 +170,8 @@ public final class AsarAbstractMetadata {
                     "Calibration constant");
             addAbstractedAttribute("range_sampling_rate",
                 mppAds.getAttributeDouble("range_samp_rate", 0) / 1000000.0, "MHz", absRoot, "Range Sampling Rate");
+            addAbstractedAttribute("multilook_flag", ProductData.TYPE_UINT8, "flag",
+                    "Product multilooked", absRoot);
 
             addOrbitStateVectors(root, absRoot);
         }

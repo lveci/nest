@@ -77,7 +77,7 @@ public class AbstractMetadata {
     public static final String calibration_factor = "calibration_factor";
     public static final String replica_power_corr_flag = "replica_power_corr_flag";
     public static final String range_sampling_rate = "range_sampling_rate";
-    
+    public static final String avg_scene_height = "avg_scene_height";
     public static final String external_calibration_file = "external_calibration_file";
     public static final String orbit_state_vector_file = "orbit_state_vector_file";
 
@@ -107,6 +107,10 @@ public class AbstractMetadata {
     public static final String lat_pixel_res = "lat_pixel_res";
     public static final String lon_pixel_res = "lon_pixel_res";
     public static final String slant_range_to_first_pixel = "slant_range_to_first_pixel";
+
+    // multilook
+    public static final String multilook_flag = "multilook_flag";
+
 
     /**
      * Abstract common metadata from products to be used uniformly by all operators
@@ -182,6 +186,7 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, replica_power_corr_flag, ProductData.TYPE_UINT8, "flag", "Replica pulse power correction applied");
         addAbstractedAttribute(absRoot, abs_calibration_flag, ProductData.TYPE_UINT8, "flag", "Product calibrated");
         addAbstractedAttribute(absRoot, calibration_factor, ProductData.TYPE_FLOAT64, "", "Calibration constant");
+        addAbstractedAttribute(absRoot, avg_scene_height, ProductData.TYPE_FLOAT64, "", "average scene height");
 
         addAbstractedAttribute(absRoot, range_sampling_rate, ProductData.TYPE_FLOAT64, "MHz", "Range Sampling Rate");
 
@@ -190,6 +195,9 @@ public class AbstractMetadata {
 
         absRoot.addElement(new MetadataElement(orbit_state_vectors));
         absRoot.addElement(new MetadataElement(srgr_coefficients));
+
+        // Multilook
+        addAbstractedAttribute(absRoot, multilook_flag, ProductData.TYPE_UINT8, "flag", "Multilook applied");
 
         return absRoot;
     }
