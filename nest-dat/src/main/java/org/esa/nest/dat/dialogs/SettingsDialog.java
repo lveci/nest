@@ -16,6 +16,8 @@ import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
 
 import com.jidesoft.swing.JideScrollPane;
 import com.jidesoft.swing.JideSplitPane;
@@ -31,8 +33,7 @@ public class SettingsDialog extends ModelessDialog {
 
     private JLabel editLabel = new JLabel("Value:");
     private JTextField editField = new JTextField("");
-
-    private boolean ok = false;
+    private Element selectedElement = null;
 
     public SettingsDialog(String title) {
         super(VisatApp.getApp().getMainFrame(), title, ModalDialog.ID_OK_CANCEL, null);
@@ -48,18 +49,26 @@ public class SettingsDialog extends ModelessDialog {
         splitPane.addPane(scrollPane);
         splitPane.addPane(createEditPanel());
 
+        editLabel.setMinimumSize(new Dimension(500, 20));
+        editField.addKeyListener(new SettingsKeyListener());
+
         setContent(splitPane);
     }
 
     private JPanel createEditPanel() {
         final JPanel editPanel = new JPanel();
-        editPanel.setPreferredSize(new Dimension(320, 480));
+        editPanel.setPreferredSize(new Dimension(500, 480));
         editPanel.setLayout(new GridBagLayout());
         final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
         gbc.gridy = 20;
         gbc.gridy++;
-        DialogUtils.addComponent(editPanel, gbc, editLabel, editField);
+        gbc.gridx = 0;
+        editPanel.add(editLabel, gbc);
+        gbc.gridy++;
+        gbc.gridy++;
+        gbc.gridx = 0;
+        editPanel.add(editField, gbc);
         gbc.gridy++;
 
         DialogUtils.fillPanel(editPanel, gbc);
@@ -100,14 +109,15 @@ public class SettingsDialog extends ModelessDialog {
     }
 
     private void selectSetting(Element elem) {
-        final Attribute label = elem.getAttribute("label");
+        selectedElement = elem;
+        final Attribute label = elem.getAttribute(Settings.LABEL);
         String labelText = elem.getName();
         if (label != null) {
             labelText = label.getValue();
         }
         editLabel.setText("  "+labelText+": ");
 
-        final Attribute elemValue = elem.getAttribute("value");
+        final Attribute elemValue = elem.getAttribute(Settings.VALUE);
         if (elemValue != null) {
             editField.setText(elemValue.getValue());
         } else {
@@ -118,13 +128,38 @@ public class SettingsDialog extends ModelessDialog {
     @Override
     protected void onOK() {
 
+        Settings.instance().Save();
+        // reload settings
+        Settings.instance().Load();
 
-        ok = true;
         hide();
     }
 
-    public boolean IsOK() {
-        return ok;
-    }
+    private class SettingsKeyListener implements KeyListener {
+        /**
+         * Invoked when a key has been typed.
+         * See the class description for {@link java.awt.event.KeyEvent} for a definition of
+         * a key typed event.
+         */
+        public void keyTyped(KeyEvent e) {
+            selectedElement.getAttribute(Settings.VALUE).setValue(editField.getText());
+        }
 
+        /**
+         * Invoked when a key has been pressed.
+         * See the class description for {@link KeyEvent} for a definition of
+         * a key pressed event.
+         */
+        public void keyPressed(KeyEvent e) {
+        }
+
+        /**
+         * Invoked when a key has been released.
+         * See the class description for {@link KeyEvent} for a definition of
+         * a key released event.
+         */
+        public void keyReleased(KeyEvent e) {
+            selectedElement.getAttribute(Settings.VALUE).setValue(editField.getText());
+        }
+    }
 }

@@ -29,9 +29,9 @@ public class XMLSupport {
     public static void SaveXML(final Document doc, final String filePath) {
 
         try {
-            final Format xmlFormat = Format.getRawFormat().setIndent(" ").setLineSeparator("\n");
+            final Format xmlFormat = Format.getPrettyFormat();
             final XMLOutputter outputter = new XMLOutputter(xmlFormat);
-
+                             
             final FileWriter writer = new FileWriter(filePath);
             outputter.output(doc, writer);
             //outputter.output(doc, System.out);

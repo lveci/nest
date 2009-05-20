@@ -137,7 +137,7 @@ public class ResourceUtils {
         return tmpDir;
     }
 
-    public static File findSystemFile(String filename)
+    public static File findUserAppFile(String filename)
     {
         // check userhome/.nest first
         final File appHomePath = ResourceUtils.getApplicationUserDir(false);
@@ -149,6 +149,10 @@ public class ResourceUtils {
             return outFile;
 
         // next check config folder
+        return findConfigFile(filename);
+    }
+
+    public static File findConfigFile(String filename) {
         final String homeDir = System.getProperty(getContextID()+".home");
         if (homeDir != null && homeDir.length() > 0) {
             final File homeDirFile = new File(homeDir);

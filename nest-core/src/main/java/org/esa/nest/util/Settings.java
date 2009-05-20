@@ -1,14 +1,12 @@
 package org.esa.nest.util;
 
 import org.jdom.Element;
-import org.jdom.Document;
 import org.jdom.Attribute;
 import org.esa.beam.util.SystemUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
 import java.io.File;
 import java.io.IOException;
 
@@ -25,6 +23,11 @@ public final class Settings {
     private final Map<String, String> settingMap = new HashMap<String, String>(100);
 
     private Element rootXML = null;
+    org.jdom.Document doc = null;
+
+    public static final String SETTINGS = "Settings";
+    public static final String VALUE = "value";
+    public static final String LABEL = "label";
 
     /**
     * @return The unique instance of this class.
@@ -48,26 +51,13 @@ public final class Settings {
                 + System.getProperty("ceres.context", "nest")
                 + File.separator + settingsFile;
 
-        final Element root = new Element("Settings");
-        final Document doc = new Document(root);
-
-        final Set keys = settingMap.keySet();                           // The set of keys in the map.
-        for (Object key : keys) {
-            final Object value = settingMap.get(key);                   // Get the value for that key.
-            if (value == null) continue;
-
-            final Element projElem = new Element(key.toString()).setAttribute("value", value.toString());
-            root.addContent(projElem);
-        }
-
         XMLSupport.SaveXML(doc, filePath);
     }
 
     public void Load() {
 
-        final File filePath = ResourceUtils.findSystemFile(settingsFile);
+        final File filePath = ResourceUtils.findUserAppFile(settingsFile);
 
-        org.jdom.Document doc;
         try {
             doc = XMLSupport.LoadXML(filePath.getAbsolutePath());
         } catch(IOException e) {
@@ -88,7 +78,7 @@ public final class Settings {
                 if(!id.isEmpty())
                     newId = id + '/';
                 newId += child.getName();
-                final Attribute attrib = child.getAttribute("value");
+                final Attribute attrib = child.getAttribute(VALUE);
                 if (attrib != null) {
 
                     String value = attrib.getValue();
@@ -143,10 +133,10 @@ public final class Settings {
         return settingMap.get(key);
     }
 
-    public void set(String key, String value)
-    {
+    //public void set(String key, String value)
+    //{
         //rootXML
 
-        settingMap.put(key, value);
-    }
+        //settingMap.put(key, value);
+    //}
 }

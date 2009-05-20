@@ -3,6 +3,7 @@ package org.esa.nest.dat.dialogs;
 import org.esa.beam.framework.ui.PopupMenuFactory;
 import org.esa.beam.framework.ui.PopupMenuHandler;
 import org.esa.beam.framework.ui.UIUtils;
+import org.esa.nest.util.Settings;
 import org.jdom.Element;
 import org.jdom.Attribute;
 
@@ -213,14 +214,14 @@ public class SettingsTree extends JTree implements PopupMenuFactory, ActionListe
 
             if (userObject instanceof Element) {
                 final Element elem = (Element) userObject;
-                final Attribute label = elem.getAttribute("label");
+                final Attribute label = elem.getAttribute(Settings.LABEL);
                 if (label != null) {
                     this.setText(label.getValue());
                 } else {
                     this.setText(elem.getName());
                 }
 
-                final Attribute elemValue = elem.getAttribute("value");
+                final Attribute elemValue = elem.getAttribute(Settings.VALUE);
                 if(elemValue != null) {
                     this.setIcon(prefIcon);
                     this.setToolTipText(elemValue.getValue());     

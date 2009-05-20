@@ -10,9 +10,9 @@ public class OpenSettingsDialogAction extends ExecCommand {
 
     @Override
     public void actionPerformed(final CommandEvent event) {
-        if(dlg == null) {
+        //if(dlg == null) {
             dlg = new SettingsDialog("Settings");
-        }
+        //}
         dlg.show();
     }
 
