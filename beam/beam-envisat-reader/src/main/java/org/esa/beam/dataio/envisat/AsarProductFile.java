@@ -1,5 +1,5 @@
 /*
- * $Id: AsarProductFile.java,v 1.2 2009-04-28 17:38:56 lveci Exp $
+ * $Id: AsarProductFile.java,v 1.3 2009-05-21 19:43:20 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -34,7 +34,7 @@ import java.util.Arrays;
  * ASAR data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-04-28 17:38:56 $
+ * @version $Revision: 1.3 $ $Date: 2009-05-21 19:43:20 $
  * @see org.esa.beam.dataio.envisat.ProductFile
  */
 public class AsarProductFile extends ProductFile {
@@ -265,23 +265,25 @@ public class AsarProductFile extends ProductFile {
         sceneRasterHeight = mdsDsds[0].getNumRecords();
         final String productType = getProductType();
         boolean waveProduct = false;
-        if (productType.equals("ASA_WVI_1P")) {
-            waveProduct = true;
-
-            for(DSD dsd : mdsDsds) {
-                if(dsd.getNumRecords() > sceneRasterHeight)
-                    sceneRasterHeight = dsd.getNumRecords();
-                if(dsd.getRecordSize() > sceneRasterWidth)
-                    sceneRasterWidth = dsd.getRecordSize();
-            }
-        } else if(productType.equals("ASA_WVS_1P") || productType.equals("ASA_WVW_2P")) {
+        if(productType.equals("ASA_WVS_1P") || productType.equals("ASA_WVW_2P") || productType.equals("ASA_WVI_1P")) {
             waveProduct = true;
             final int numDirBins = getSPH().getParamInt("NUM_DIR_BINS");
             int numWlBins = getSPH().getParamInt("NUM_WL_BINS");
-            if(productType.equals("ASA_WVS_1P"))
+            if(productType.equals("ASA_WVS_1P") || productType.equals("ASA_WVI_1P"))
                 numWlBins /= 2;                     // only 0 to 180 needed
 
             sceneRasterWidth = numDirBins * numWlBins;
+            parameters.put("spectraWidth", sceneRasterWidth);
+
+            if(productType.equals("ASA_WVI_1P")) {
+                for(DSD dsd : mdsDsds) {
+                    if(dsd.getNumRecords() > sceneRasterHeight)
+                        sceneRasterHeight = dsd.getNumRecords();
+                    if(dsd.getRecordSize() > sceneRasterWidth)
+                        sceneRasterWidth = dsd.getRecordSize();
+                }
+            }
+
         } else {
             sceneRasterWidth = getSPH().getParamInt("LINE_LENGTH");
         }
