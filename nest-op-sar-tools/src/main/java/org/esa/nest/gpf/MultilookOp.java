@@ -443,26 +443,29 @@ public final class MultilookOp extends Operator {
                         Unit.UnitType bandUnit) {
 
         final int xStart = tx * nRgLooks;
-        final int yStart = (int)(ty * nAzLooks);
+        final int yStart = ty * nAzLooks;
         final int xEnd = xStart + nRgLooks;
-        final int yEnd = (int)(yStart + nAzLooks);
+        final int yEnd = yStart + nAzLooks;
 
         double meanValue = 0.0;
         int index;
 
-        if (bandUnit == Unit.UnitType.INTENSITY_DB || bandUnit == Unit.UnitType.AMPLITUDE_DB) {
+        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY) {
+            for (int y = yStart; y < yEnd; y++) {
+                for (int x = xStart; x < xEnd; x++) {
+                    meanValue += srcData1.getElemDoubleAt(sourceRaster1.getDataBufferIndex(x, y));
+                }
+            }
+        } else if (bandUnit == Unit.UnitType.INTENSITY_DB || bandUnit == Unit.UnitType.AMPLITUDE_DB) {
             for (int y = yStart; y < yEnd; y++) {
                 for (int x = xStart; x < xEnd; x++) {
                     index = sourceRaster1.getDataBufferIndex(x, y);
                     meanValue += Math.pow(10, srcData1.getElemDoubleAt(index) / 10.0); // dB to linear
                 }
             }
-        } else if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY) {
-            for (int y = yStart; y < yEnd; y++) {
-                for (int x = xStart; x < xEnd; x++) {
-                    meanValue += srcData1.getElemDoubleAt(sourceRaster1.getDataBufferIndex(x, y));
-                }
-            }
+
+            meanValue /= nAzRgLooks;
+            return 10.0*Math.log10(meanValue); // linear to dB
         } else { // COMPLEX
             for (int y = yStart; y < yEnd; y++) {
                 for (int x = xStart; x < xEnd; x++) {
@@ -474,12 +477,7 @@ public final class MultilookOp extends Operator {
             }
         }
 
-        meanValue /= nAzRgLooks;
-        if (bandUnit == Unit.UnitType.INTENSITY_DB || bandUnit == Unit.UnitType.AMPLITUDE_DB) {
-            meanValue = 10.0*Math.log10(meanValue); // linear to dB
-        }
-
-        return meanValue;
+        return meanValue / nAzRgLooks;
     }
 
     /**
