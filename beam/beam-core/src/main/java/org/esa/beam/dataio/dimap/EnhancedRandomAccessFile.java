@@ -70,14 +70,14 @@ import java.nio.channels.FileChannel;
  * @author Russ Rew
  * @author john caron
  * 
- * @version $Id: EnhancedRandomAccessFile.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * @version $Id: EnhancedRandomAccessFile.java,v 1.2 2009-05-21 19:44:00 lveci Exp $
  * @see DataInput
  * @see DataOutput
  * @see java.io.RandomAccessFile
  * @todo optimize {@link #readLine()}
  * @task {@link ByteOrder} is not respected with writing
  */
-public class EnhancedRandomAccessFile implements DataInput, DataOutput {
+public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 
 	/** _more_ */
 	static public final int BIG_ENDIAN = 0;
@@ -366,7 +366,7 @@ public class EnhancedRandomAccessFile implements DataInput, DataOutput {
 	 * Change the current endian mode. Subsequent reads of short, int, float,
 	 * double, long, char will use this. Does not currently effect writes.
 	 * 
-	 * @param endian
+	 * @param bo
 	 * 
 	 */
 	public void setByteOrder(final ByteOrder bo) {
