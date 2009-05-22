@@ -106,8 +106,10 @@ public class FlatEarthWWToolView extends AbstractToolView {
         if(productLayer != null)
             productLayer.setSelectedProduct(product);
 
-        gotoProduct(product);
-        getWwd().redrawNow();
+        if(isVisible()) {
+            gotoProduct(product);
+            getWwd().redrawNow();
+        }
     }
 
     public Product getSelectedProduct() {
@@ -127,7 +129,9 @@ public class FlatEarthWWToolView extends AbstractToolView {
                 }
             }
         }
-        getWwd().redrawNow();
+        if(isVisible()) {
+            getWwd().redrawNow();
+        }
     }
 
     public void removeProduct(Product product) {
@@ -135,7 +139,10 @@ public class FlatEarthWWToolView extends AbstractToolView {
             setSelectedProduct(null);
         if(productLayer != null)
             productLayer.removeProduct(product);
-        getWwd().redrawNow();
+
+        if(isVisible()) {
+            getWwd().redrawNow();
+        }
     }
 
     public static class AppPanel extends JPanel {

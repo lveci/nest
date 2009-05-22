@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataEvalEnv.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: RasterDataEvalEnv.java,v 1.2 2009-05-22 15:31:30 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -139,7 +139,7 @@ public class RasterDataEvalEnv implements EvalEnv {
      *
      * @param elemIndex the index of the current data element
      */
-    public void setElemIndex(int elemIndex) {
+    public final void setElemIndex(int elemIndex) {
         _elemIndex = elemIndex;
     }
 }

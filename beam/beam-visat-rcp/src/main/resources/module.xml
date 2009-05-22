@@ -1515,7 +1515,7 @@
             <text>Select</text>
             <shortDescr>Selection Tool</shortDescr>
             <largeIcon>icons/SelectTool24.gif</largeIcon>
-            <selected>true</selected>
+            <selected>false</selected>
             <helpId>selectTool</helpId>
         </action>
 
@@ -1557,7 +1557,7 @@
             <text>Pan</text>
             <shortDescr>Panner Tool</shortDescr>
             <largeIcon>icons/PannerTool24.gif</largeIcon>
-            <selected>false</selected>
+            <selected>true</selected>
             <context>image</context>
             <helpId>panTool</helpId>
         </action>

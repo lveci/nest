@@ -39,6 +39,17 @@
             <description>Import a ACE DEM tile or tile subset.</description>
             <helpId>importACEProduct</helpId>
         </action>
+
+        <action>
+            <id>importSRTMGeoTIFFDEMProduct</id>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <formatName>GeoTIFF</formatName>
+            <text>Import SRTM GeoTIFF DEM Tile...</text>
+            <parent>importDEM</parent>
+            <shortDescr>Import a SRTM DEM tile or tile subset.</shortDescr>
+            <description>Import a SRTM DEM tile or tile subset.</description>
+            <helpId>importSRTMProduct</helpId>
+        </action>
     </extension>
 
 </module>

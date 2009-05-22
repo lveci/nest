@@ -59,7 +59,7 @@ import java.net.URISyntaxException;
 /**
  * The window displaying the world map.
  *
- * @version $Revision: 1.13 $ $Date: 2009-05-12 16:21:01 $
+ * @version $Revision: 1.14 $ $Date: 2009-05-22 15:31:30 $
  */
 public class NestWWToolView extends AbstractToolView {
 
@@ -287,7 +287,9 @@ public class NestWWToolView extends AbstractToolView {
             productLayer.setSelectedProduct(product);
         if(productPanel != null)
             productPanel.update(getWwd());
-        getWwd().redrawNow();
+        if(isVisible()) {
+            getWwd().redrawNow();
+        }
     }
 
     public Product getSelectedProduct() {
@@ -309,7 +311,9 @@ public class NestWWToolView extends AbstractToolView {
         }
         if(productPanel != null)
             productPanel.update(getWwd());
-        getWwd().redrawNow();
+        if(isVisible()) {
+            getWwd().redrawNow();
+        }
     }
 
     public void removeProduct(Product product) {
@@ -319,7 +323,10 @@ public class NestWWToolView extends AbstractToolView {
             productLayer.removeProduct(product);
         if(productPanel != null)
             productPanel.update(getWwd());
-        getWwd().redrawNow();
+
+        if(isVisible()) {
+            getWwd().redrawNow();
+        }
     }
 
     private WMSLayersPanel addTab(int position, String server)

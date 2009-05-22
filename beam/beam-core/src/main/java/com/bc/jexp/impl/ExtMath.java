@@ -1,5 +1,5 @@
 /*
- * $Id: ExtMath.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: ExtMath.java,v 1.2 2009-05-22 15:31:30 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -9,7 +9,7 @@ package com.bc.jexp.impl;
 /**
  * An extension the the {@link java.lang.Math class}.
  */
-public class ExtMath {
+public final class ExtMath {
 
     private static final double INV_LN_10 = 1.0 / Math.log(10.0);
 
@@ -39,10 +39,8 @@ public class ExtMath {
      * @return true, if x1 and x2 are equal
      */
     public static boolean feq(final double x1, final double x2, final double eps) {
-        if (x1 == x2) { // allows to compare Double.NEGATIVE_INFINITY and Double.POSITIVE_INFINITY
-            return true;
-        }
-        return Math.abs(x1 - x2) <= eps;
+        // allows to compare Double.NEGATIVE_INFINITY and Double.POSITIVE_INFINITY
+        return x1 == x2 || Math.abs(x1 - x2) <= eps;
     }
 
     /**

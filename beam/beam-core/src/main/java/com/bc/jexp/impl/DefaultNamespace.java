@@ -1,5 +1,5 @@
 /*
- * $Id: DefaultNamespace.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: DefaultNamespace.java,v 1.2 2009-05-22 15:31:30 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -53,7 +53,7 @@ import com.bc.jexp.Term;
  * fneq(x).
  *
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-22 15:31:30 $
  */
 public final class DefaultNamespace extends NamespaceImpl {
 
@@ -253,42 +253,32 @@ public final class DefaultNamespace extends NamespaceImpl {
             }
         });
         registerFunction(new AbstractFunction.B("feq", 2) {
-            public boolean evalB(EvalEnv env, Term[] args) throws EvalException {
-                final double x1 = args[0].evalD(env);
-                final double x2 = args[1].evalD(env);
-                return ExtMath.feq(x1, x2, EPS);
+            public final boolean evalB(EvalEnv env, Term[] args) throws EvalException {
+                return ExtMath.feq(args[0].evalD(env), args[1].evalD(env), EPS);
             }
         });
         registerFunction(new AbstractFunction.B("feq", 3) {
-            public boolean evalB(EvalEnv env, Term[] args) throws EvalException {
-                final double x1 = args[0].evalD(env);
-                final double x2 = args[1].evalD(env);
-                final double eps = args[2].evalD(env);
-                return ExtMath.feq(x1, x2, eps);
+            public final boolean evalB(EvalEnv env, Term[] args) throws EvalException {
+                return ExtMath.feq(args[0].evalD(env), args[1].evalD(env), args[2].evalD(env));
             }
         });
         registerFunction(new AbstractFunction.B("fneq", 2) {
-            public boolean evalB(EvalEnv env, Term[] args) throws EvalException {
-                final double x1 = args[0].evalD(env);
-                final double x2 = args[1].evalD(env);
-                return ExtMath.fneq(x1, x2, EPS);
+            public final boolean evalB(EvalEnv env, Term[] args) throws EvalException {
+                return ExtMath.fneq(args[0].evalD(env), args[1].evalD(env), EPS);
             }
         });
         registerFunction(new AbstractFunction.B("fneq", 3) {
-            public boolean evalB(EvalEnv env, Term[] args) throws EvalException {
-                final double x1 = args[0].evalD(env);
-                final double x2 = args[1].evalD(env);
-                final double eps = args[2].evalD(env);
-                return ExtMath.fneq(x1, x2, eps);
+            public final boolean evalB(EvalEnv env, Term[] args) throws EvalException {
+                return ExtMath.fneq(args[0].evalD(env), args[1].evalD(env), args[2].evalD(env));
             }
         });
         registerFunction(new AbstractFunction.B("inf", 1) {
-            public boolean evalB(EvalEnv env, Term[] args) throws EvalException {
+            public final boolean evalB(EvalEnv env, Term[] args) throws EvalException {
                 return Double.isInfinite(args[0].evalD(env));
             }
         });
         registerFunction(new AbstractFunction.B("nan", 1) {
-            public boolean evalB(EvalEnv env, Term[] args) throws EvalException {
+            public final boolean evalB(EvalEnv env, Term[] args) throws EvalException {
                 return Double.isNaN(args[0].evalD(env));
             }
         });
