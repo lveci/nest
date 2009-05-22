@@ -21,6 +21,7 @@ public class PolarCanvas extends Container {
     private Point origin = new Point(0, 0);
 
     private Image colorBar = null;
+    private String axisLabel1 = "", axisLabel2 = "";
 
     public PolarCanvas() {
         this(new Axis(Axis.RADIAL), new Axis(Axis.RIGHT_Y));
@@ -38,6 +39,11 @@ public class PolarCanvas extends Container {
 
         enableEvents(16L);
         setBackground(Color.white);
+    }
+
+    public void setAxisNames(String name1, String name2) {
+        axisLabel1 = name1;
+        axisLabel2 = name2;
     }
 
     @Override
@@ -112,9 +118,9 @@ public class PolarCanvas extends Container {
     }
 
     private void drawColorBar(Graphics g, Axis cAxis) {
-        final Dimension cbSize = new Dimension((int) (graphSize.width * 0.03D),
-                (int) (Math.min(200, graphSize.height * 0.6D)));
-        final Point at = new Point(0, -100);
+        final Dimension cbSize = new Dimension((int) (graphSize.width * 0.03),
+                (int) (Math.min(200, graphSize.height * 0.6)));
+        final Point at = new Point(20, -100);
 
         g.translate(at.x, at.y);
         g.drawImage(colorBar, 0, 0, cbSize.width, cbSize.height, this);
@@ -222,7 +228,7 @@ public class PolarCanvas extends Container {
     }
 
     private void draw(Graphics g, Dimension size) {
-        final int annotationHeight = 100;//getAnnotationHeight(g);
+        final int annotationHeight = 100;
         final int x = Math.max((int) (size.height * 0.05), 10);
         final int y = Math.max((int) (size.width * 0.05), 10);
         final int bottom = Math.max((int) (size.height * 0.1) + annotationHeight, 20);
@@ -230,64 +236,91 @@ public class PolarCanvas extends Container {
         final Rectangle r = positionPlot(size, x, y, bottom, right);
         plotRadius = Math.min(r.width / 2, r.height / 2);
         final Dimension quadrantSize = new Dimension(plotRadius, plotRadius);
-        g.translate(origin.x, origin.y + r.height);
+        g.translate(0, origin.y + r.height);
         if (data != null) {
             loadColorBar(data.getColorScale());
             drawColorBar(g, colourAxis);
         }
-        g.translate(-origin.x, -origin.y - r.height);
+        g.translate(0, -origin.y - r.height);
 
         origin.y += r.height / 2;
         origin.x += r.width / 2;
-        final Graphics oGraphics = g.create();
-        oGraphics.translate(origin.x, origin.y);
+        final Graphics graphics = g.create();
+        graphics.translate(origin.x, origin.y);
         radialAxis.setSize(quadrantSize);
         if (data != null)
-            data.draw(oGraphics);
+            data.draw(graphics);
         if (rings != null) {
             int ri = 0;
             for (double ring : rings) {
                 final int rad = radialAxis.computeScreenPoint(ring);
                 final int rad2 = rad + rad;
-                oGraphics.setColor(Color.lightGray);
-                oGraphics.drawOval(-rad, -rad, rad2, rad2);
+                graphics.setColor(Color.lightGray);
+                graphics.drawOval(-rad, -rad, rad2, rad2);
                 if(ringText != null && ringText[ri] != null) {
-                    oGraphics.setColor(Color.black);
-                    oGraphics.drawString(ringText[ri], 0, -rad);
+                    graphics.setColor(Color.black);
+                    graphics.drawString(ringText[ri], 0, -rad);
                 }
                 ++ri;
             }
         } else {
-            radialAxis.draw(oGraphics);
+            radialAxis.draw(graphics);
         }
 
         // draw wind direction & speed
         if(showWindDirection)
-            drawWindDirection(oGraphics, plotRadius, windDirection-90);
+            drawWindDirection(graphics, plotRadius, windDirection-90);
 
-        oGraphics.translate(-origin.x, -origin.y);
-        oGraphics.dispose();
+        graphics.translate(-origin.x, -origin.y);
+
+        drawAxisLabels(graphics);
+        
+        graphics.dispose();
     }
 
-    private static void drawWindDirection(Graphics oGraphics, double radius, double theta) {
+    private static void drawWindDirection(Graphics graphics, double radius, double theta) {
         final double a = theta * MathUtils.DTOR;
         final int x1 = (int)(radius * Math.cos(a));
         final int y1 = (int)(radius * Math.sin(a));
         final int x2 = (int)((radius+50) * Math.cos(a));
         final int y2 = (int)((radius+50) * Math.sin(a));
 
-        oGraphics.setColor(Color.black);
-        oGraphics.drawLine(x1, y1, x2, y2);
+        graphics.setColor(Color.black);
+        graphics.drawLine(x1, y1, x2, y2);
 
+        drawArrowHead(graphics, x2, y2, theta, radius+40);
+    }
+
+    private void drawAxisLabels(Graphics graphics) {
+        final int x = 20;
+        final int y = origin.y;
+        final int d = 50;
+
+        graphics.setColor(Color.black);
+
+        final int y2 = y-d;
+        graphics.drawLine(x, y, x, y-d);
+        graphics.drawLine(x, y2, x-5, y2+5);
+        graphics.drawLine(x, y2, x+5, y2+5);
+        graphics.drawString(axisLabel1, x-15, y2-10);        
+
+        final int x2 = x+d;
+        graphics.drawLine(x, y, x2, y);
+        graphics.drawLine(x2, y, x2-5, y-5);
+        graphics.drawLine(x2, y, x2-5, y+5);
+        graphics.drawString(axisLabel2, x2-10, y+20);
+    }
+
+    private static void drawArrowHead(Graphics graphics, int x, int y, double theta, double length) {
         final double b = (theta + 1) * MathUtils.DTOR;
-        final int x3 = (int)((radius+40) * Math.cos(b));
-        final int y3 = (int)((radius+40) * Math.sin(b));
-        oGraphics.drawLine(x2, y2, x3, y3);
+        final int x3 = (int)(length * Math.cos(b));
+        final int y3 = (int)(length * Math.sin(b));
+        graphics.drawLine(x, y, x3, y3);
 
         final double c = (theta - 1) * MathUtils.DTOR;
-        final int x4 = (int)((radius+40) * Math.cos(c));
-        final int y4 = (int)((radius+40) * Math.sin(c));
-        oGraphics.drawLine(x2, y2, x4, y4);
+        final int x4 = (int)(length * Math.cos(c));
+        final int y4 = (int)(length * Math.sin(c));
+        graphics.drawLine(x, y, x4, y4);
     }
 
     public void setWindDirection(double dir) {

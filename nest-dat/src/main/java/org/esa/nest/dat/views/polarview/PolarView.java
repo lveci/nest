@@ -289,9 +289,12 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
         final PolarData data = new PolarData(spectrum, 90f + thFirst, thStep, radii);
 
         final PolarCanvas polarCanvas = polarPanel.getPolarCanvas();
+        polarCanvas.setAxisNames("Azimuth", "Range");
+
         if(waveProductType == WaveProductType.WAVE_SPECTRA) {
             polarCanvas.setWindDirection(windDirection);
             polarCanvas.showWindDirection(true);
+            polarCanvas.setAxisNames("North", "East");
         }
 
         final Axis colourAxis = polarCanvas.getColourAxis();
