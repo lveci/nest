@@ -14,6 +14,7 @@
  */
 package org.esa.nest.gpf;
 
+import Jama.Matrix;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.Operator;
@@ -21,9 +22,9 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
+import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.util.GeoUtils;
@@ -31,8 +32,6 @@ import org.esa.nest.util.MathUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
-
-import Jama.Matrix;
 /**
  * Calibration for ASAR data products.
  *

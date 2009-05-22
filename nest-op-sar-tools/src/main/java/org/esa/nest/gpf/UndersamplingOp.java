@@ -30,14 +30,13 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.util.ResourceUtils;
 
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 import java.util.HashMap;
+import java.util.StringTokenizer;
 
 /**
  * This operator down samples a real or complex image using sub-sampling method or kernel filtering method.

@@ -15,7 +15,9 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -27,11 +29,11 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.nest.util.ResourceUtils;
 
 import java.awt.*;
-import java.util.HashMap;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.util.HashMap;
 
 /**
  * The operator evaluates the following local statistics for the user selected area of the image, and produces

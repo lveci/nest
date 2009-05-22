@@ -14,32 +14,30 @@
  */
 package org.esa.nest.gpf;
 
+import Jama.Matrix;
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.beam.dataio.envisat.EnvisatOrbitReader;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
+import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.ProductUtils;
-import org.esa.beam.dataio.envisat.EnvisatOrbitReader;
-import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.gpf.OperatorUtils;
-import org.esa.nest.util.Settings;
-import org.esa.nest.util.GeoUtils;
-import org.esa.nest.util.Constants;
 import org.esa.nest.dataio.OrbitalDataRecordReader;
 import org.esa.nest.dataio.PrareOrbitReader;
+import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.util.Constants;
+import org.esa.nest.util.GeoUtils;
+import org.esa.nest.util.Settings;
 
-import java.util.Date;
 import java.io.File;
 import java.io.IOException;
-
-import Jama.Matrix;
+import java.util.Date;
 
 /**
  * This operator applies orbit file to a given product.

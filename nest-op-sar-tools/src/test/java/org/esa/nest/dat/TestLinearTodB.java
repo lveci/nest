@@ -1,9 +1,12 @@
 package org.esa.nest.dat;
 
 import junit.framework.TestCase;
-import org.esa.beam.framework.datamodel.*;
-import org.esa.nest.gpf.TestOperator;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.gpf.TestOperator;
 
 import java.util.Arrays;
 

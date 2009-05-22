@@ -1,14 +1,14 @@
 package org.esa.nest.dat;
 
-import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
+import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.visat.actions.AbstractVisatAction;
 
 /**
  * WSS Deburst action.
  *
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-02-05 21:27:58 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-22 18:48:48 $
  */
 public class WSSDeBurstOpAction extends AbstractVisatAction {
 

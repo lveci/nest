@@ -1,17 +1,16 @@
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
+import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.GridBagUtils;
 import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
-
-import java.util.Map;
 import java.awt.*;
-import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.

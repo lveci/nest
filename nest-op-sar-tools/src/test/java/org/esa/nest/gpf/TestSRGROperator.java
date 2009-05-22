@@ -1,14 +1,13 @@
 package org.esa.nest.gpf;
 
+import com.bc.ceres.core.ProgressMonitor;
 import junit.framework.TestCase;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.util.Arrays;
-
-import com.bc.ceres.core.ProgressMonitor;
 
 /**
  * Unit test for SRGROperator.

@@ -1,10 +1,13 @@
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.dataop.maptransf.Datum;
-import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.dataio.ReaderUtils;
 import junit.framework.TestCase;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.TiePointGeoCoding;
+import org.esa.beam.framework.datamodel.TiePointGrid;
+import org.esa.beam.framework.dataop.maptransf.Datum;
+import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 /**
  * Utilities for Operator unit tests

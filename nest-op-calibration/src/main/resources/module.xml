@@ -110,5 +110,25 @@
             <helpId>ALOSPALSARCalibrationOp</helpId>
         </action>
 
+        <action>
+            <id>Sigma0toGamma0</id>
+            <class>org.esa.nest.dat.Sigma0toGamma0Action</class>
+            <text>Sigma0 to Gamma0</text>
+            <shortDescr>Add a Gamma0 virtual band</shortDescr>
+            <parent>Calibration</parent>
+            <context>band</context>
+            <helpId>Sigma0toGamma0</helpId>
+        </action>
+
+        <action>
+            <id>Sigma0toBeta0</id>
+            <class>org.esa.nest.dat.Sigma0toBeta0Action</class>
+            <text>Sigma0 to Beta0</text>
+            <shortDescr>Add a Beta0 virtual band</shortDescr>
+            <parent>Calibration</parent>
+            <context>band</context>
+            <helpId>Sigma0toBeta0</helpId>
+        </action>
+
     </extension>
 </module>
