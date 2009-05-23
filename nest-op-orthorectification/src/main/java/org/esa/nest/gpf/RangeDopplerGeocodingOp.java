@@ -29,6 +29,9 @@ import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.framework.dataop.maptransf.Datum;
+import org.esa.beam.framework.dataop.maptransf.MapInfo;
+import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
+import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
@@ -547,6 +550,17 @@ public final class RangeDopplerGeocodingOp extends Operator {
         targetProduct.addTiePointGrid(latGrid);
         targetProduct.addTiePointGrid(lonGrid);
         targetProduct.setGeoCoding(tpGeoCoding);
+
+        final String[] srcBandNames = targetBandNameToSourceBandName.get(targetProduct.getBandAt(0).getName());
+
+        final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(targetProduct,
+                                                MapProjectionRegistry.getProjection(IdentityTransformDescriptor.NAME),
+                                                0.0,
+                                                sourceProduct.getBand(srcBandNames[0]).getNoDataValue());
+        mapInfo.setSceneWidth(targetProduct.getSceneRasterWidth());
+        mapInfo.setSceneHeight(targetProduct.getSceneRasterHeight());
+
+        targetProduct.setGeoCoding(new MapGeoCoding(mapInfo));
     }
 
     /**
