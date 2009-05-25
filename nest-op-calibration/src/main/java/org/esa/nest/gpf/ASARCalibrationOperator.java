@@ -31,6 +31,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Settings;
 import org.esa.nest.util.Constants;
+import org.esa.nest.util.GeoUtils;
 
 import java.awt.*;
 import java.io.File;
@@ -76,6 +77,8 @@ public class ASARCalibrationOperator extends Operator {
 
     protected TiePointGrid incidenceAngle = null;
     protected TiePointGrid slantRangeTime = null;
+    protected TiePointGrid latitude = null;
+    protected TiePointGrid longitude = null;
 
     private boolean extAuxFileAvailableFlag = false;
     private boolean antElevCorrFlag = false;
@@ -83,6 +86,7 @@ public class ASARCalibrationOperator extends Operator {
 
     private double firstLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
+    private double avgSceneHeight = 0.0; // in m
     private double rangeSpreadingCompPower; // power in range spreading loss compensation calculation
     private final double[] calibrationFactor = new double[2]; // calibration constants corresponding to 2 bands in product
     private double[] refElevationAngle = null; // reference elevation angles, in degree
@@ -150,6 +154,8 @@ public class ASARCalibrationOperator extends Operator {
                 getFirstLineTime();
 
                 getLineTimeInterval();
+
+                getAverageSceneHeight();
 
                 getOrbitStateVectors();
 
@@ -295,6 +301,8 @@ public class ASARCalibrationOperator extends Operator {
     private void getTiePointGridData(Product sourceProduct) {
         slantRangeTime = OperatorUtils.getSlantRangeTime(sourceProduct);
         incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
+        latitude = OperatorUtils.getLatitude(sourceProduct);
+        longitude = OperatorUtils.getLongitude(sourceProduct);
     }
 
     /**
@@ -303,7 +311,8 @@ public class ASARCalibrationOperator extends Operator {
     private void getCalibrationFactor() {
 
         if (extAuxFileAvailableFlag) {
-            getCalibrationFactorFromExternalAuxFile(externalAuxFile.getAbsolutePath());
+            getCalibrationFactorFromExternalAuxFile(
+                    externalAuxFile.getAbsolutePath(), swath, mdsPolar, productType, calibrationFactor);
         } else {
             getCalibrationFactorFromMetadata();
         }
@@ -312,8 +321,13 @@ public class ASARCalibrationOperator extends Operator {
     /**
      * Get calibration factor from user specified auxiliary data.
      * @param auxFilePath The absolute path to the aux file.
+     * @param swath The product swath.
+     * @param mdsPolar The product polarizations.
+     * @param productType The product type.
+     * @param calibrationFactor The calibration factors.
      */
-    private void getCalibrationFactorFromExternalAuxFile(String auxFilePath) {
+    public static void getCalibrationFactorFromExternalAuxFile(
+            String auxFilePath, String swath, String[] mdsPolar, String productType, double[] calibrationFactor) {
 
         final EnvisatAuxReader reader = new EnvisatAuxReader();
 
@@ -456,6 +470,14 @@ public class ASARCalibrationOperator extends Operator {
     }
 
     /**
+     * Get average scene height from abstracted metadata.
+     * @throws Exception The exceptions.
+     */
+    private void getAverageSceneHeight() throws Exception {
+        avgSceneHeight = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.avg_scene_height);
+    }
+
+    /**
      * Get antenna pattern from aux file for each band in the product.
      */
     private void getAntennaPatternGain() {
@@ -524,7 +546,7 @@ public class ASARCalibrationOperator extends Operator {
      * @param antPatArray The antenna pattern array.
      * @throws OperatorException The IO exception.
      */
-     static void getSingleSwathAntennaPatternGainFromAuxData(
+     public static void getSingleSwathAntennaPatternGainFromAuxData(
             String fileName, String swath, String[] pol, int numOfGains, double[] refElevAngle, float[][] antPatArray)
             throws OperatorException {
 
@@ -588,7 +610,7 @@ public class ASARCalibrationOperator extends Operator {
      * @param antPatArray The antenna pattern array.
      * @throws OperatorException The IO exception.
      */
-    static void getWideSwathAntennaPatternGainFromAuxData(
+    public static void getWideSwathAntennaPatternGainFromAuxData(
             String fileName, String pol, int numOfGains, double[] refElevAngle, float[][] antPatArray)
             throws OperatorException {
 
@@ -1051,12 +1073,15 @@ public class ASARCalibrationOperator extends Operator {
      */
     private void computeSingleSwathAntennaPatternForCurrentTile(int x0, int y0, int w, int h, int band) {
 
-        targetTileNewAntPat = new double[w];
-
         final int y = y0 + h / 2;
-        double rsat = computeSatalliteToEarthCentreDistance(y, firstLineUTC, lineTimeInterval, orbitStateVectors);
+        final double zeroDopplerTime = firstLineUTC + y*lineTimeInterval;
+        double satelitteHeight = computeSatelliteHeight(zeroDopplerTime, orbitStateVectors);
+
+        targetTileNewAntPat = new double[w];
         for (int x = x0; x < x0 + w; x++) {
-            final double theta = computeElevationAngle(x, y, rsat); // in degree
+            final double slantRange = computeSlantRange(x, y); // in m
+            final double earthRadius = computeEarthRadius(latitude.getPixelFloat(x,y), longitude.getPixelFloat(x,y)); // in m
+            final double theta = computeElevationAngle(slantRange, satelitteHeight, avgSceneHeight + earthRadius); // in degree
             targetTileNewAntPat[x - x0] = computeAntPatGain(theta, refElevationAngle[0], antennaPatternSingleSwath[band]);
         }
     }
@@ -1071,67 +1096,35 @@ public class ASARCalibrationOperator extends Operator {
      */
     private void computeWideSwathAntennaPatternForCurrentTile(int x0, int y0, int w, int h) {
 
-        targetTileNewAntPat = new double[w];
-
         final int y = y0 + h / 2;
-        double rsat = computeSatalliteToEarthCentreDistance(y, firstLineUTC, lineTimeInterval, orbitStateVectors);
+        final double zeroDopplerTime = firstLineUTC + y*lineTimeInterval;
+        double satelitteHeight = computeSatelliteHeight(zeroDopplerTime, orbitStateVectors);
+
+        targetTileNewAntPat = new double[w];
         for (int x = x0; x < x0 + w; x++) {
+            final double slantRange = computeSlantRange(x, y); // in m
+            final double earthRadius = computeEarthRadius(latitude.getPixelFloat(x,y), longitude.getPixelFloat(x,y)); // in m
+            final double theta = computeElevationAngle(slantRange, satelitteHeight, avgSceneHeight + earthRadius); // in degree
 
-            final double theta = computeElevationAngle(x, y, rsat); // in degree
-
-            int idx = findNearestRefElevAngle(theta, refElevationAngle);
-            targetTileNewAntPat[x - x0] = computeAntPatGain(theta, refElevationAngle[idx], antennaPatternWideSwath[idx]);
+            final int subSwathIndex = findSubSwath(theta, refElevationAngle);
+            targetTileNewAntPat[x - x0] = computeAntPatGain(
+                    theta, refElevationAngle[subSwathIndex], antennaPatternWideSwath[subSwathIndex]);
         }
     }
 
     /**
-     * Compute satellite to erath centre distance (in m).
-     * @param y The y coordinate of a range line.
-     * @return The distance.
-     */
-    static double computeSatalliteToEarthCentreDistance(
-           int y, double firstLineUTC, double lineTimeInterval, AbstractMetadata.OrbitStateVector[] orbitStateVectors) {
-
-        // todo should use the 3rd state vector as suggested by the doc?
-        final double time = firstLineUTC + y*lineTimeInterval;
-        double rsat = 0.0;
-        for (int i = 0; i < orbitStateVectors.length; i++) {
-            if (time <= orbitStateVectors[i].time.getMJD()) {
-                rsat = Math.sqrt(orbitStateVectors[i].x_pos*orbitStateVectors[i].x_pos +
-                                 orbitStateVectors[i].y_pos*orbitStateVectors[i].y_pos +
-                                 orbitStateVectors[i].z_pos*orbitStateVectors[i].z_pos); // m
-                break;
-            }
-        }
-        return rsat;
-    }
-
-    /**
-     * Compute elevation angle (in degree) for the given pixel.
-     *
-     * @param x The x coordinate of the given pixel.
-     * @param y The y coordinate of the given pixel.
-     * @param rsat The distance from satellite to the Earth center (in m).
-     * @return The elevation angle.
-     */
-    private double computeElevationAngle(int x, int y, double rsat) {
-
-        final double alpha = incidenceAngle.getPixelFloat((float)x, (float)y) * MathUtils.DTOR; // in radian
-        final double time = slantRangeTime.getPixelFloat((float)x, (float)y) / 1000000000.0; //convert ns to s
-        final double r = time * Constants.halfLightSpeed; // in m
-        return (alpha - (float) Math.asin(Math.sin(alpha) * r / rsat)) * MathUtils.RTOD; // in degree
-    }
-
-    /**
-     * Find the index of the nearest reference elevation angle to a given elevation angle.
+     * Find the sub swath index for given elevation angle.
      * @param theta The elevation angle.
      * @param refElevationAngle The reference elevation array.
-     * @return The index.
+     * @return The sub swath index.
      */
-    static int findNearestRefElevAngle(double theta, double[] refElevationAngle) {
+    public static int findSubSwath(double theta, double[] refElevationAngle) {
+        // The method below finds the nearest reference elevation angle to the given elevation angle theta.
+        // The method is equivalent to the one proposed by Romain in his email dated April 28, 2009, in which
+        // middle point of the overlapped area of two adjacent sub swathes is used as boundary of sub swath.
         int idx = -1;
         double min = 360.0;
-        for (int i = 0 ; i < refElevationAngle.length; i++) {
+        for (int i = 0 ; i < refElevationAngle.length-1; i++) {
             double d = Math.abs(theta - refElevationAngle[i]);
             if (d < min) {
                 min = d;
@@ -1149,7 +1142,7 @@ public class ASARCalibrationOperator extends Operator {
      * @param antPatArray The antenna pattern array.
      * @return The antenna pattern gain (in linear scale).
      */
-    static double computeAntPatGain(double elevAngle, double refElevationAngle, float[] antPatArray) {
+    public static double computeAntPatGain(double elevAngle, double refElevationAngle, float[] antPatArray) {
 
         final double delta = 0.05;
         int k0 = (int) ((elevAngle - refElevationAngle + 5.0) / delta);
@@ -1165,6 +1158,62 @@ public class ASARCalibrationOperator extends Operator {
         final double mu = (elevAngle - theta0) / (theta1 - theta0);
 
         return org.esa.nest.util.MathUtils.interpolationLinear(gain0, gain1, mu);
+    }
+
+    //============================================================================================================
+    /**
+     * Compute slant range for given pixel.
+     * @param x The x coordinate of the pixel in the source image.
+     * @param y The y coordinate of the pixel in the source image.
+     * @return The slant range (in meters).
+     */
+    private double computeSlantRange(int x, int y) {
+        final double time = slantRangeTime.getPixelFloat((float)x, (float)y) / 1000000000.0; //convert ns to s
+        return time * Constants.halfLightSpeed; // in m
+    }
+
+    /**
+     * Compute distance from satelitte to the Earth centre (in meters).
+     * @param zeroDopplerTime The zero Doppler time (in days).
+     * @param orbitStateVectors The orbit state vectors.
+     * @return The distance.
+     */
+    public static double computeSatelliteHeight(double zeroDopplerTime, AbstractMetadata.OrbitStateVector[] orbitStateVectors) {
+
+        // todo should use the 3rd state vector as suggested by the doc?
+        int idx = 0;
+        for (int i = 0; i < orbitStateVectors.length && zeroDopplerTime >= orbitStateVectors[i].time.getMJD(); i++) {
+            idx = i;
+        }
+        final double xPos = orbitStateVectors[idx].x_pos;
+        final double yPos = orbitStateVectors[idx].y_pos;
+        final double zPos = orbitStateVectors[idx].z_pos;
+        return Math.sqrt(xPos*xPos + yPos*yPos + zPos*zPos);
+    }
+
+    /**
+     * Compute Earth radius (in meters) for given pixel in source image.
+     * @param lat The latitude of a given pixel in source image.
+     * @param lon The longitude of a given pixel in source image.
+     * @return The Earth radius.
+     */
+    public static double computeEarthRadius(float lat, float lon) {
+        final double[] xyz = new double[3];
+        GeoUtils.geo2xyz(new GeoPos(lat, lon), xyz);
+        return Math.sqrt(xyz[0]*xyz[0] + xyz[1]*xyz[1] + xyz[2]*xyz[2]);
+    }
+
+    /**
+     * Compute elevation angle (in degree).
+     * @param slantRange The slant range (in meters).
+     * @param satelitteHeight The distance from satelitte to the Earth centre (in meters).
+     * @param sceneToEarthCentre The distance from the backscatter element to the Earth centre (in meters).
+     * @return The elevation angle.
+     */
+    public static double computeElevationAngle(double slantRange, double satelitteHeight, double sceneToEarthCentre) {
+
+        return Math.acos((slantRange*slantRange + satelitteHeight*satelitteHeight -
+               (sceneToEarthCentre)*(sceneToEarthCentre))/(2*slantRange*satelitteHeight))*MathUtils.RTOD;
     }
 
     /**
