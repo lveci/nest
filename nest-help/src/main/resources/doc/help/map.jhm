@@ -73,6 +73,7 @@
 	
     <mapID target="preferences" url="visat/PreferencesDialog.html"/>
     <mapID target="imageView" url="visat/ProductSceneView.html"/>
+	<mapID target="showLayerManagerWnd" url="visat/LayerManagerWindow.html"/>
     <mapID target="showNavigationWnd" url="visat/NavigationWindow.html"/>
     <mapID target="showColorManipulationWnd" url="visat/ColorManipulationWindow.html"/>
     <mapID target="showBitmaskOverlayWnd" url="visat/BitmaskOverlayWindow.html"/>
@@ -113,11 +114,8 @@
 	
 	
 	<!--SAR Operators-->
-	<mapID target="ALOSPALSARCalibrationOp" url="operators/ALOSPALSARCalibrationOp.html"/>
 	<mapID target="ApplyOrbitFileOp" url="operators/ApplyOrbitFileOp.html"/>
-	<mapID target="ASARCalibrationOp" url="operators/ASARCalibrationOp.html"/>
-	<mapID target="ASARRetroCalibrationOp" url="operators/ASARRetroCalibrationOp.html"/>	
-	<mapID target="ERSCalibrationOp" url="operators/ERSCalibrationOp.html"/>
+	<mapID target="CalibrationOp" url="operators/CalibrationOp.html"/>	
 	<mapID target="GCPSelectionOp" url="operators/GCPSelectionOp.html"/>	
 	<mapID target="MultilookOp" url="operators/MultilookOp.html"/>	
 	<mapID target="SpeckleFilterOp" url="operators/SpeckleFilterOp.html"/>	

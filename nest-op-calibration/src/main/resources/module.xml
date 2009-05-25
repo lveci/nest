@@ -53,7 +53,7 @@
             <text>ASAR Calibration</text>
             <shortDescr>Invoke the ASAR Calibration operator.</shortDescr>
             <parent>ASARCalibrationGroup</parent>
-            <helpId>ASARCalibrationOp</helpId>
+            <helpId>CalibrationOp</helpId>
         </action>
 
         <action>
@@ -63,7 +63,7 @@
             <shortDescr>Invoke the ASAR Retro-Calibration operator.</shortDescr>
             <parent>ASARCalibrationGroup</parent>
             <helpId>ASARRetroCalibrationOp</helpId>
-            <placeAfter>ASARCalibrationOp</placeAfter>
+            <placeAfter>CalibrationOp</placeAfter>
         </action>
 
         <action>
@@ -92,7 +92,7 @@
             <text>ERS Calibration</text>
             <shortDescr>Invoke the ERS Calibration operator.</shortDescr>
             <parent>ERSCalibration</parent>
-            <helpId>ERSCalibrationOp</helpId>
+            <helpId>CalibrationOp</helpId>
         </action>
 
         <action>
@@ -107,7 +107,7 @@
             <text>ALOS PALSAR Calibration</text>
             <shortDescr>Invoke the ALOS PALSAR Calibration operator.</shortDescr>
             <parent>ALOSPALSARCalibrationGroup</parent>
-            <helpId>ALOSPALSARCalibrationOp</helpId>
+            <helpId>CalibrationOp</helpId>
         </action>
 
         <action>

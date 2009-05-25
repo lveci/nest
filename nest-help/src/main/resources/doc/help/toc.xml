@@ -84,6 +84,7 @@
             
         <tocitem text="Imaging Tools">
             <tocitem text="RGB-Image Profile" target="rgbImageProfile"/>
+			<tocitem text="Layer Manager" target="showLayerManagerWnd"/>
             <tocitem text="No Data Overlay" target="noDataOverlay"/>
             <tocitem text="Bitmask Overlay" target="showBitmaskOverlayWnd"/>
             <tocitem text="Bitmask Editor" target="bitmaskEditor"/>
@@ -131,11 +132,8 @@
 		</tocitem>
 		
 		<tocitem text="SAR Operators">
-			<tocitem text="ALOS Palsar Calibration" target="ALOSPALSARCalibrationOp"/>
 			<tocitem text="Apply Orbit Correction" target="ApplyOrbitFileOp"/>
-			<tocitem text="ASAR Calibration" target="ASARCalibrationOp"/>
-			<tocitem text="ASAR Retro-Calibration" target="ASARRetroCalibrationOp"/>			
-			<tocitem text="ERS Calibration" target="ERSCalibrationOp"/>
+			<tocitem text="Calibration" target="CalibrationOp"/>
 			<tocitem text="GCP Selection" target="GCPSelectionOp"/>			
 			<tocitem text="Multilook" target="MultilookOp"/>			
 	        <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>			
