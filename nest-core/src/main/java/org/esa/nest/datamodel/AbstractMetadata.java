@@ -77,7 +77,7 @@ public class AbstractMetadata {
     public static final String calibration_factor = "calibration_factor";
     public static final String replica_power_corr_flag = "replica_power_corr_flag";
     public static final String range_sampling_rate = "range_sampling_rate";
-    public static final String avg_scene_height = "avg_scene_height";
+    public static final String avg_scene_height = "avg_scene_height_ellpsoid";
     public static final String external_calibration_file = "external_calibration_file";
     public static final String orbit_state_vector_file = "orbit_state_vector_file";
 
