@@ -27,6 +27,9 @@
     <dependency>
         <module>nest-graph-builder</module>
     </dependency>
+    <dependency>
+      <module>nest-op-calibration</module>
+    </dependency>
 
     <categories>Processing</categories>
 
