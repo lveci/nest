@@ -1206,14 +1206,14 @@ public class ASARCalibrationOperator extends Operator {
     /**
      * Compute elevation angle (in degree).
      * @param slantRange The slant range (in meters).
-     * @param satelitteHeight The distance from satelitte to the Earth centre (in meters).
+     * @param satelliteHeight The distance from satelitte to the Earth centre (in meters).
      * @param sceneToEarthCentre The distance from the backscatter element to the Earth centre (in meters).
      * @return The elevation angle.
      */
-    public static double computeElevationAngle(double slantRange, double satelitteHeight, double sceneToEarthCentre) {
+    public static double computeElevationAngle(double slantRange, double satelliteHeight, double sceneToEarthCentre) {
 
-        return Math.acos((slantRange*slantRange + satelitteHeight*satelitteHeight -
-               (sceneToEarthCentre)*(sceneToEarthCentre))/(2*slantRange*satelitteHeight))*MathUtils.RTOD;
+        return Math.acos((slantRange*slantRange + satelliteHeight*satelliteHeight -
+               (sceneToEarthCentre)*(sceneToEarthCentre))/(2*slantRange*satelliteHeight))*MathUtils.RTOD;
     }
 
     /**
