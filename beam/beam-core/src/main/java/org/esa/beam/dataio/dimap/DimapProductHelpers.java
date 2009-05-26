@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductHelpers.java,v 1.2 2009-05-14 16:31:17 lveci Exp $
+ * $Id: DimapProductHelpers.java,v 1.3 2009-05-26 19:44:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -65,7 +65,7 @@ import java.util.logging.Level;
  * @author Sabine Embacher
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2009-05-14 16:31:17 $
+ * @version $Revision: 1.3 $ $Date: 2009-05-26 19:44:50 $
  */
 public class DimapProductHelpers {
 
@@ -839,7 +839,7 @@ public class DimapProductHelpers {
                 final int type = ProductData.getType(attType);
 
                 final String attValue = attribElement.getTextTrim();
-                if (attValue == null || attValue.length() == 0) {
+                if (attValue == null) {           // allow blank attribute values
                     continue;
                 }
                 final ProductData data;
