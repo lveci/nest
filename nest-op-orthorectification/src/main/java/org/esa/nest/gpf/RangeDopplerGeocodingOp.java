@@ -114,12 +114,13 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
     private FileElevationModel fileElevationModel = null;
-    protected TiePointGrid latitude = null;
-    protected TiePointGrid longitude = null;
+    private TiePointGrid latitude = null;
+    private TiePointGrid longitude = null;
 
     private boolean srgrFlag = false;
     private boolean multilookFlag = false;
     private boolean retroCalibrationFlag = false;
+    private boolean wideSwathProductFlag = false;
 
     private String mission = null;
     private String swath = null;
@@ -147,6 +148,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private double lonMax= 0.0;
     private double delLat = 0.0;
     private double delLon = 0.0;
+    private double oldSatelliteHeight; // satellite to earth centre distance used in previous calibration, in m
 
     private double[][] sensorPosition = null; // sensor position for all range lines
     private double[][] sensorVelocity = null; // sensor velocity for all range lines
@@ -157,7 +159,9 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private double[] newCalibrationConstant = new double[2];
     private double[] oldRefElevationAngle = null; // reference elevation angle for given swath in old aux file, in degree
     private double[] newRefElevationAngle = null; // reference elevation angle for given swath in new aux file, in degree
+    private double[] srgrConvParamsTime = null;
 
+    private float[][] oldSlantRange = null; // old slant ranges for one range line, in m
     private float[][] oldAntennaPatternSingleSwath = null; // old antenna pattern gains for single swath product, in dB
     private float[][] oldAntennaPatternWideSwath = null; // old antenna pattern gains for single swath product, in dB
     private float[][] newAntennaPatternSingleSwath = null; // new antenna pattern gains for single swath product, in dB
@@ -202,10 +206,6 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
             getSRGRFlag();
 
-            if (applyRadiometricCalibration) {
-                prepareForRadiometricCalibration();
-            }
-
             getRadarFrequency();
 
             getRangeAzimuthSpacings();
@@ -246,6 +246,10 @@ public final class RangeDopplerGeocodingOp extends Operator {
                 throw new OperatorException("Unknown interpolation method");
             }
 
+            if (applyRadiometricCalibration) {
+                prepareForRadiometricCalibration();
+            }
+
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
@@ -278,6 +282,10 @@ public final class RangeDopplerGeocodingOp extends Operator {
             getAverageSceneHeight();
 
             getOldAntennaPattern();
+
+            computeOldSatelliteHeight();
+
+            computeOldSlantRange();
         }
 
         getNewAntennaPattern();
@@ -309,6 +317,11 @@ public final class RangeDopplerGeocodingOp extends Operator {
      */
     private void getProductSwath() throws Exception {
         swath = absRoot.getAttributeString(AbstractMetadata.SWATH);
+        if (swath.contains("WS")) {
+            wideSwathProductFlag = true;
+        } else {
+            wideSwathProductFlag = false;
+        }
     }
 
     /**
@@ -380,6 +393,30 @@ public final class RangeDopplerGeocodingOp extends Operator {
     }
 
     /**
+     * Compute satellite to Earth centre distance (in m) using the middle orbit state vector.
+     */
+    private void computeOldSatelliteHeight() {
+        final int mid = orbitStateVectors.length / 2;
+        oldSatelliteHeight = ASARCalibrationOperator.computeSatelliteHeight(
+                orbitStateVectors[mid].time.getMJD(), orbitStateVectors);
+    }
+
+    /**
+     * Compute slant range for a range line using SRGR coefficient and the equation below
+     * slant range = S0 + S1(GR-GR0) + S2 (GR-GR0)^2 + S3(GR-GR0)^3 + S4(GR-GR0)^4
+     */
+    private void computeOldSlantRange() {
+        srgrConvParamsTime = new double[srgrConvParams.length];
+        oldSlantRange = new float[srgrConvParams.length][sourceImageWidth];
+        for (int i = 0; i < srgrConvParams.length; i++) {
+            srgrConvParamsTime[i] = srgrConvParams[i].time.getMJD();
+            for (int x = 0; x < sourceImageWidth; x++) {
+                oldSlantRange[i][x] = (float)computePolinomialValue(x*rangeSpacing, srgrConvParams[i].coefficients);
+            }
+        }
+    }
+
+    /**
      * Get old antenna pattern 
      */
     private void getOldAntennaPattern() {
@@ -387,7 +424,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
         final String xcaFileName = absRoot.getAttributeString(AbstractMetadata.external_calibration_file);
         final String xcaFilePath = Settings.instance().get("AuxData/envisatAuxDataPath") + File.separator + xcaFileName;
         
-        if (swath.contains("WS")) {
+        if (wideSwathProductFlag) {
 
             oldRefElevationAngle = new double[5]; // reference elevation angles for 5 sub swathes
             oldAntennaPatternWideSwath = new float[5][numOfGains]; // antenna pattern gain for 5 sub swathes
@@ -416,7 +453,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
             throw new OperatorException("No proper XCA file has been found");
         }
 
-        if (swath.contains("WS")) {
+        if (wideSwathProductFlag) {
 
             newRefElevationAngle = new double[5]; // reference elevation angles for 5 sub swathes
             newAntennaPatternWideSwath = new float[5][numOfGains]; // antenna pattern gain for 5 sub swathes
@@ -923,10 +960,12 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
         final GeoPos geoPos = new GeoPos();
         final double[] earthPoint = new double[3];
+        double[] sensorPos = new double[3];
         final int srcMaxRange = sourceImageWidth - 1;
         final int srcMaxAzimuth = sourceImageHeight - 1;
         ProductData demBuffer = null;
         ProductData incidenceAngleBuffer = null;
+        final double halfLightSpeedInMetersPerDay = Constants.halfLightSpeed * 86400.0;
 
         final ArrayList<TileData> trgTileList = new ArrayList<TileData>();
         final Set<Band> keySet = targetTiles.keySet();
@@ -959,6 +998,12 @@ public final class RangeDopplerGeocodingOp extends Operator {
         }
         final TileData[] trgTiles = trgTileList.toArray(new TileData[trgTileList.size()]);
 
+        float[][] localDEM = null; // DEM for current tile for computing slope angle
+        if (saveLocalIncidenceAngle || applyRadiometricCalibration) {
+            localDEM = new float[h+2][w+2];
+            getLocalDEM(x0, y0, w, h, localDEM);
+        }
+
         try {
             for (int y = y0; y < y0 + h; y++) {
                 final double lat = latMax - y*delLat;
@@ -982,16 +1027,27 @@ public final class RangeDopplerGeocodingOp extends Operator {
                         continue;
                     }
 
-                    final double[] sensorPos = new double[3];
                     double slantRange = computeSlantRange(zeroDopplerTime, earthPoint, sensorPos);
-                    final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / Constants.halfLightSpeed / 86400.0;
+                    final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / halfLightSpeedInMetersPerDay;
                     final double azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
                     slantRange = computeSlantRange(zeroDopplerTimeWithoutBias, earthPoint, sensorPos);
 
                     double localIncidenceAngle = 0.0;
+                    double satelliteHeight = 0.0;
+                    double sceneToEarthCentre = 0.0;
                     if (saveLocalIncidenceAngle || applyRadiometricCalibration) {
-                        final double localSlopeAngle = computeLocalSlopeAngle(lat, lon); // in degrees
-                        localIncidenceAngle = computeLocalIncidenceAngle(sensorPos, earthPoint, localSlopeAngle); // in degree
+
+                        satelliteHeight = Math.sqrt(sensorPos[0]*sensorPos[0] + sensorPos[1]*sensorPos[1] +
+                                                    sensorPos[2]*sensorPos[2]);
+
+                        sceneToEarthCentre = Math.sqrt(earthPoint[0]*earthPoint[0] + earthPoint[1]*earthPoint[1] +
+                                                       earthPoint[2]*earthPoint[2]);
+
+                        final double localSlopeAngle = computeLocalSlopeAngle(lat, lon, x0, y0, x, y, localDEM); // in degrees
+
+                        localIncidenceAngle = computeLocalIncidenceAngle(
+                                slantRange, satelliteHeight, sceneToEarthCentre, localSlopeAngle); // in degree
+
                         if (saveLocalIncidenceAngle) {
                             incidenceAngleBuffer.setElemDoubleAt(index, localIncidenceAngle);
                         }
@@ -1009,9 +1065,12 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
                         for(TileData tileData : trgTiles) {
                             double v = getPixelValue(azimuthIndex, rangeIndex, tileData.bandName, tileData.bandPolar);
+
                             if (applyRadiometricCalibration) {
-                                v = applyCalibration(sensorPos, earthPoint, localIncidenceAngle, tileData.bandPolar, v);
+                                v = applyCalibration(slantRange, satelliteHeight, sceneToEarthCentre,
+                                                     localIncidenceAngle, tileData.bandPolar, v);
                             }
+                            
                             tileData.tileDataBuffer.setElemDoubleAt(index, v);
                         }
                     }
@@ -1019,6 +1078,30 @@ public final class RangeDopplerGeocodingOp extends Operator {
             }
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
+        }
+    }
+
+    /**
+     * Read DEM for current tile.
+     * @param x0 The x coordinate of the pixel at the upper left corner of current tile.
+     * @param y0 The y coordinate of the pixel at the upper left corner of current tile.
+     * @param tileHeight The tile height.
+     * @param tileWidth The tile width.
+     * @param localDEM The DEM for the tile.
+     */
+    private void getLocalDEM(
+            final int x0, final int y0, final int tileWidth, final int tileHeight, final float[][] localDEM) {
+
+        // Note: the localDEM covers current tile with 1 extra row above, 1 extra row below, 1 extra column to
+        //       the left and 1 extra column to the right of the tile.
+        final GeoPos geoPos = new GeoPos();
+        for (int y = y0 - 1; y < tileHeight + 1; y++) {
+            final double lat = latMax - y*delLat;
+            for (int x = x0 - 1; x < tileWidth + 1; x++) {
+                final double lon = lonMin + x*delLon;
+                geoPos.setLocation((float)lat, (float)lon);
+                localDEM[y - y0 + 1][x - x0 + 1] = (float)getLocalElevation(geoPos);
+            }
         }
     }
 
@@ -1481,18 +1564,16 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
         final double zeroDopplerTime = firstLineUTC + y*lineTimeInterval;
 
-        final double slantRange = computeOldSlantRange(x, zeroDopplerTime);
-
-        final double satelitteHeight = ASARCalibrationOperator.computeSatelliteHeight(zeroDopplerTime, orbitStateVectors);
+        final double slantRange = getOldSlantRange(x, zeroDopplerTime);
 
         final double earthRadius = ASARCalibrationOperator.computeEarthRadius(latitude.getPixelFloat(x, y),
                                                                               longitude.getPixelFloat(x, y));
 
         final double elevationAngle = ASARCalibrationOperator.computeElevationAngle(
-                                            slantRange, satelitteHeight, avgSceneHeight + earthRadius);
+                                            slantRange, oldSatelliteHeight, avgSceneHeight + earthRadius);
 
         double gain = 0.0;
-        if (swath.contains("WS")) {
+        if (wideSwathProductFlag) {
             gain = getAntennaPatternGain(elevationAngle, bandPolar, oldRefElevationAngle, oldAntennaPatternWideSwath);
         } else {
             gain = getAntennaPatternGain(elevationAngle, bandPolar, oldRefElevationAngle, oldAntennaPatternSingleSwath);
@@ -1502,20 +1583,17 @@ public final class RangeDopplerGeocodingOp extends Operator {
     }
 
     /**
-     * Compute slant range for given pixel using SRGR coefficient and the equation below
-     * slant range = S0 + S1(GR-GR0) + S2 (GR-GR0)^2 + S3(GR-GR0)^3 + S4(GR-GR0)^4
+     * Get old slant range for given pixel.
      * @param x The x coordinate of the pixel in the source image.
-     * @param zeroDopplerTime The zero Doppler time of the pixel in the source image.
+     * @param zeroDopplerTime The zero doppler time for the given pixel.
      * @return The slant range (in meters).
      */
-    private double computeOldSlantRange(int x, double zeroDopplerTime) {
-
+    private double getOldSlantRange(int x, double zeroDopplerTime) {
         int idx = 0;
-        for (int i = 0; i < srgrConvParams.length && zeroDopplerTime >= srgrConvParams[i].time.getMJD(); i++) {
+        for (int i = 0; i < srgrConvParams.length && zeroDopplerTime >= srgrConvParamsTime[i]; i++) {
             idx = i;
         }
-        final double groundRange = x*rangeSpacing;
-        return computePolinomialValue(groundRange, srgrConvParams[idx].coefficients);
+        return oldSlantRange[idx][x];
     }
 
     /**
@@ -1547,33 +1625,22 @@ public final class RangeDopplerGeocodingOp extends Operator {
     /**
      * Apply calibrations to the given point. The following calibrations are included: calibration constant,
      * antenna pattern compensation, range spreading loss correction and incidence angle correction.
-     * @param sensorPos The sensor position.
-     * @param earthPoint The given earth point coordinate.
+     * @param slantRange The slant range (in m).
+     * @param satelliteHeight The distance from the satellite to the Earth centre (in m).
+     * @param sceneToEarthCentre The distance from the local earth point to the Earth centre (in m).
      * @param localIncidenceAngle The local incidence angle (in degrees).
      * @param bandPolar The source band polarization index.
      * @param sigma Intensity of the pixel.
      * @return The calibrated pixel value.
      */
-    private double applyCalibration(final double[] sensorPos, final double[] earthPoint,
+    private double applyCalibration(final double slantRange, final double satelliteHeight, final double sceneToEarthCentre,
                                     final double localIncidenceAngle, final int bandPolar, final double sigma) {
 
-        final double slantRange = Math.sqrt((sensorPos[0] - earthPoint[0])*(sensorPos[0] - earthPoint[0]) +
-                                            (sensorPos[1] - earthPoint[1])*(sensorPos[1] - earthPoint[1]) +
-                                            (sensorPos[2] - earthPoint[2])*(sensorPos[2] - earthPoint[2]));
-
-        final double satelitteHeight = Math.sqrt(sensorPos[0]*sensorPos[0] +
-                                                 sensorPos[1]*sensorPos[1] +
-                                                 sensorPos[2]*sensorPos[2]);
-
-        final double sceneToEarthCentre = Math.sqrt(earthPoint[0]*earthPoint[0] +
-                                                    earthPoint[1]*earthPoint[1] +
-                                                    earthPoint[2]*earthPoint[2]);
-
         final double elevationAngle = ASARCalibrationOperator.computeElevationAngle(
-                                            slantRange, satelitteHeight, sceneToEarthCentre); // in degrees
+                                            slantRange, satelliteHeight, sceneToEarthCentre); // in degrees
 
         double gain = 0.0;
-        if (swath.contains("WS")) {
+        if (wideSwathProductFlag) {
             gain = getAntennaPatternGain(elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternWideSwath);
         } else {
             gain = getAntennaPatternGain(elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternSingleSwath);
@@ -1588,17 +1655,20 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * Compute local slope angle (in degree).
      * @param lat Latitude of the given point.
      * @param lon Longitude of the given point.
+     * @param x0 The x coordinate of the pixel at the upper left corner of current tile.
+     * @param y0 The y coordinate of the pixel at the upper left corner of current tile.
+     * @param x The x coordinate of the current pixel.
+     * @param y The y coordinate of the current pixel.
+     * @param localDEM The local DEM.
      * @return The slope angle.
      */
-    private double computeLocalSlopeAngle(double lat, double lon) {
+    private double computeLocalSlopeAngle(final double lat, final double lon, final int x0, final int y0,
+                                          final int x, final int y, final float[][] localDEM) {
 
-        final double[] lats = {lat + delLat, lat, lat - delLat};
-        final double[] lons = {lon - delLon, lon, lon + delLon};
         final double[][] h = new double[3][3];
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                GeoPos geoPos = new GeoPos((float)lats[i], (float)lons[j]);
-                h[i][j] = getLocalElevation(geoPos);
+                h[i][j] = localDEM[y - y0 + i][x - x0 + j];
             }
         }
 
@@ -1625,29 +1695,19 @@ public final class RangeDopplerGeocodingOp extends Operator {
     }
 
     /**
-     * Compute local incidence angle (in degree).
-     * @param sensorPos The sensor position.
-     * @param earthPoint The given earth point coordinate.
+     * Compute local incidence angle (in degrees).
+     * @param slantRange The slant range (in m).
+     * @param satelliteHeight The distance from the satellite to the Earth centre (in m).
+     * @param sceneToEarthCentre The distance from the local earth point to the Earth centre (in m).
      * @param localSlopeAngle The local slope angle (in degrees).
      * @return The local incidence angle.
      */
-    private double computeLocalIncidenceAngle(
-            final double[] sensorPos, final double[] earthPoint, final double localSlopeAngle) {
-
-        final double slantRange = Math.sqrt((sensorPos[0] - earthPoint[0])*(sensorPos[0] - earthPoint[0]) +
-                                            (sensorPos[1] - earthPoint[1])*(sensorPos[1] - earthPoint[1]) +
-                                            (sensorPos[2] - earthPoint[2])*(sensorPos[2] - earthPoint[2]));
-
-        final double satelitteHeight = Math.sqrt(sensorPos[0]*sensorPos[0] +
-                                                 sensorPos[1]*sensorPos[1] +
-                                                 sensorPos[2]*sensorPos[2]);
-
-        final double sceneToEarthCentre = Math.sqrt(earthPoint[0]*earthPoint[0] +
-                                                    earthPoint[1]*earthPoint[1] +
-                                                    earthPoint[2]*earthPoint[2]);
+    private double computeLocalIncidenceAngle(final double slantRange, final double satelliteHeight,
+                                              final double sceneToEarthCentre, final double localSlopeAngle) {
 
         final double phi = Math.acos((slantRange*slantRange + sceneToEarthCentre*sceneToEarthCentre -
-                satelitteHeight*satelitteHeight)/(2*slantRange*sceneToEarthCentre))*org.esa.beam.util.math.MathUtils.RTOD;
+                                     satelliteHeight*satelliteHeight)/(2*slantRange*sceneToEarthCentre)) *
+                           org.esa.beam.util.math.MathUtils.RTOD;
 
         return (180.0 - phi - localSlopeAngle);
     }
