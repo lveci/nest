@@ -1094,11 +1094,11 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
         // Note: the localDEM covers current tile with 1 extra row above, 1 extra row below, 1 extra column to
         //       the left and 1 extra column to the right of the tile.
-        final GeoPos geoPos = new GeoPos();
-        for (int y = y0 - 1; y < tileHeight + 1; y++) {
-            final double lat = latMax - y*delLat;
-            for (int x = x0 - 1; x < tileWidth + 1; x++) {
-                final double lon = lonMin + x*delLon;
+        GeoPos geoPos = new GeoPos();
+        for (int y = y0 - 1; y < y0 + tileHeight + 1; y++) {
+            double lat = latMax - y*delLat;
+            for (int x = x0 - 1; x < x0 + tileWidth + 1; x++) {
+                double lon = lonMin + x*delLon;
                 geoPos.setLocation((float)lat, (float)lon);
                 localDEM[y - y0 + 1][x - x0 + 1] = (float)getLocalElevation(geoPos);
             }
