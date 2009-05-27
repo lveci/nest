@@ -658,7 +658,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      */
     private void getElevationModel() throws Exception {
 
-        if(fileElevationModel == null) { // if external DEM file is specified by user
+        if(externalDemFile != null && fileElevationModel == null) { // if external DEM file is specified by user
 
             fileElevationModel = new FileElevationModel(externalDemFile, getResamplingMethod());
             demNoDataValue = fileElevationModel.getNoDataValue();
@@ -719,9 +719,19 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
         addGeoCoding();
 
+        updateTargetProductMetadata();
+
+        //addLayoverShadowBitmasks(targetProduct);
+
         // the tile width has to be the image width because otherwise sourceRaster.getDataBufferIndex(x, y)
         // returns incorrect index for the last tile on the right
         targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 20);
+    }
+
+    private static void addLayoverShadowBitmasks(Product product) {
+        final String expression = product.getBandAt(0).getName() + " < 100";
+        final BitmaskDef shadowMap = new BitmaskDef("shadow", "Shadow Map", expression, Color.RED, 0.5f);
+        product.addBitmaskDef(shadowMap);    
     }
 
     /**
@@ -1158,7 +1168,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @param index The pixel index in target image.
      * @param trgTiles The target tiles.
      */
-    private void saveNoDataValueToTarget(final int index, TileData[] trgTiles) {
+    private static void saveNoDataValueToTarget(final int index, TileData[] trgTiles) {
         for(TileData tileData : trgTiles) {
             tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
         }
