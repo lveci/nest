@@ -36,7 +36,6 @@
     <dependency>
       <groupId>org.esa.nest</groupId>
       <artifactId>nest-op-calibration</artifactId>
-	  <version>${nest.version}</version>
     </dependency>
   </dependencies>
   

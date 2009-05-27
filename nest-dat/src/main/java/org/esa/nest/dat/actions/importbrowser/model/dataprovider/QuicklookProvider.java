@@ -82,8 +82,8 @@ public class QuicklookProvider implements DataProvider {
 
     static BufferedImage average(BufferedImage image) {
 
-        final int rangeFactor = 2;
-        final int azimuthFactor = 2;
+        final int rangeFactor = 4;
+        final int azimuthFactor = 4;
         final int rangeAzimuth = rangeFactor * azimuthFactor;
         final Raster raster = image.getData();
 

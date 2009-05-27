@@ -16,8 +16,10 @@ import org.esa.nest.dat.actions.LoadTabbedLayoutAction;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.dat.views.polarview.PolarView;
 import org.esa.nest.util.ResourceUtils;
+import org.esa.nest.util.Settings;
 
 import javax.swing.*;
+import javax.media.jai.JAI;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -61,6 +63,10 @@ public final class DatApp extends VisatApp {
             HelpSys.showTheme("using_dat");
             VisatApp.getApp().getPreferences().setPropertyString("visat.showGettingStarted", "false");       
         }
+
+        final int tileSize = Integer.parseInt(Settings.instance().get("defaultJAITileSize"));
+        JAI.setDefaultTileSize(new Dimension(tileSize, tileSize));
+        
     }
 
     @Override
@@ -72,7 +78,7 @@ public final class DatApp extends VisatApp {
 
     private static void cleanTempFolder() {
         final File tempFolder = ResourceUtils.getApplicationUserTempDataDir();
-        final File[] fileList = tempFolder.listFiles();
+        File[] fileList = tempFolder.listFiles();
 
         long freeSpace = tempFolder.getFreeSpace() / 1024 / 1024 / 1024;
         int cutoff = 20;
@@ -89,7 +95,18 @@ public final class DatApp extends VisatApp {
             final long cutoffDate = dates[dates.length - cutoff];
 
             for(File file : fileList) {
-                if(file.lastModified() < cutoffDate)
+                if(file.lastModified() < cutoffDate) {
+                    file.delete();
+                }
+            }
+        }
+
+        fileList = tempFolder.listFiles();
+        for(File file : fileList) {
+            if(file.getName().startsWith("tmp_")) {
+                if(file.isDirectory())
+                    ResourceUtils.deleteDir(file);
+                else
                     file.delete();
             }
         }

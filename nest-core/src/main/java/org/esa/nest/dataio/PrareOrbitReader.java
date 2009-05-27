@@ -17,9 +17,9 @@ public final class PrareOrbitReader {
 
     private DataInputStream in = null;
 
-    private DataSetIdentificationRecord dataSetIdentificationRecord;
-    private DataHeaderRecord dataHeaderRecord;
-    private QualityParameterRecord[] qualityParameterRecords;
+    private DataSetIdentificationRecord dataSetIdentificationRecord = null;
+    private DataHeaderRecord dataHeaderRecord = null;
+    private QualityParameterRecord[] qualityParameterRecords = null;
 
     private OrbitVector[] orbitVectors = null;
     private double[] recordTimes = null;
@@ -44,7 +44,7 @@ public final class PrareOrbitReader {
      */
     public void readOrbitHeader(File file) throws IOException {
 
-        BufferedReader reader = getBufferedReader(file);
+        final BufferedReader reader = getBufferedReader(file);
 
         readDataSetIdentificationRecord(reader);
 
@@ -58,9 +58,9 @@ public final class PrareOrbitReader {
      * @param file The file.
      * @return The reader.
      */
-    private BufferedReader getBufferedReader(File file) {
+    private static BufferedReader getBufferedReader(File file) {
 
-        String fileName = file.getAbsolutePath();
+        final String fileName = file.getAbsolutePath();
         FileInputStream stream;
         try {
             stream = new FileInputStream(fileName);
@@ -78,9 +78,9 @@ public final class PrareOrbitReader {
      */
     private void readDataSetIdentificationRecord(BufferedReader reader) throws IOException {
 
-        char[] recKey = new char[6];
-        char[] prodID = new char[15];
-        char[] datTyp = new char[6];
+        final char[] recKey = new char[6];
+        final char[] prodID = new char[15];
+        final char[] datTyp = new char[6];
 
         reader.read(recKey, 0, 6);
         reader.read(prodID, 0, 15);
@@ -100,19 +100,19 @@ public final class PrareOrbitReader {
      */
     private void readDataHeaderRecord(BufferedReader reader) throws IOException {
 
-        char[] recKey = new char[6];
-        char[] start = new char[6]; // 0.1 days
-        char[] end = new char[6];   // 0.1 days
-        char[] obsTyp = new char[6];
-        char[] obsLev = new char[6];
-        char[] modID = new char[2]; // 0, 1, 2
-        char[] relID = new char[2];
-        char[] rmsFit = new char[4]; // mm
-        char[] sigPos = new char[4]; // mm
-        char[] sigVel = new char[4]; // micro meter / s
-        char[] qualit = new char[1];
-        char[] tdtUtc = new char[5]; // s
-        char[] cmmnt = new char[78];
+        final char[] recKey = new char[6];
+        final char[] start = new char[6]; // 0.1 days
+        final char[] end = new char[6];   // 0.1 days
+        final char[] obsTyp = new char[6];
+        final char[] obsLev = new char[6];
+        final char[] modID = new char[2]; // 0, 1, 2
+        final char[] relID = new char[2];
+        final char[] rmsFit = new char[4]; // mm
+        final char[] sigPos = new char[4]; // mm
+        final char[] sigVel = new char[4]; // micro meter / s
+        final char[] qualit = new char[1];
+        final char[] tdtUtc = new char[5]; // s
+        final char[] cmmnt = new char[78];
 
         reader.read(recKey, 0, 6);
         reader.read(start, 0, 6);
@@ -160,13 +160,13 @@ public final class PrareOrbitReader {
         final int numCharactersSkip = sizeOfDataSetIdentificationRecord + sizeOfDataHeaderRecord +
                                       numOfTrajectoryRecords * sizeOfTrajectoryRecord;
 
-        BufferedReader reader = getBufferedReader(file);
+        final BufferedReader reader = getBufferedReader(file);
 
         reader.skip((long)numCharactersSkip);
 
         for (int i = 0; i < numOfTrajectoryRecords; i++) {
 
-            TrajectoryRecord dataRecord = readTrajectoryRecord(reader);
+            final TrajectoryRecord dataRecord = readTrajectoryRecord(reader);
 
             orbitVectors[i] = new OrbitVector();
             // todo need to convert TDT time to UTC time
@@ -197,19 +197,19 @@ public final class PrareOrbitReader {
      */
     private void computeNumberOfRecords(File file) throws IOException {
 
-        int fileSize = (int)file.length();
+        final int fileSize = (int)file.length();
 
-        int numRecordsApprox = (fileSize - sizeOfDataSetIdentificationRecord - sizeOfDataHeaderRecord -
+        final int numRecordsApprox = (fileSize - sizeOfDataSetIdentificationRecord - sizeOfDataHeaderRecord -
                 maxNumOfQualityParameterRecords*sizeOfQualityParameterRecord) / (2*sizeOfTrajectoryRecord);
 
-        int numCharactersSkip = sizeOfDataSetIdentificationRecord + sizeOfDataHeaderRecord +
+        final int numCharactersSkip = sizeOfDataSetIdentificationRecord + sizeOfDataHeaderRecord +
                                 numRecordsApprox * sizeOfTrajectoryRecord;
 
-        BufferedReader reader = getBufferedReader(file);
+        final BufferedReader reader = getBufferedReader(file);
 
         reader.skip((long)numCharactersSkip);
 
-        char[] dataRecord = new char[sizeOfTrajectoryRecord];
+        final char[] dataRecord = new char[sizeOfTrajectoryRecord];
 
         int k = 0;
         while (true) {
@@ -233,26 +233,26 @@ public final class PrareOrbitReader {
      * @return The Trajectory Record.
      * @throws IOException The exceptions.
      */
-    private TrajectoryRecord readTrajectoryRecord(BufferedReader reader) throws IOException {
+    private static TrajectoryRecord readTrajectoryRecord(BufferedReader reader) throws IOException {
 
-        char[] recKey = new char[6];
-        char[] satID = new char[7];
+        final char[] recKey = new char[6];
+        final char[] satID = new char[7];
         char[] orbTyp = new char[1];
-        char[] tTagD = new char[6];   // 0.1 days
-        char[] tTagMs = new char[11]; // micro seconds
-        char[] xSat = new char[12];   // mm
-        char[] ySat = new char[12];   // mm
-        char[] zSat = new char[12];   // mm
-        char[] xDSat = new char[11];  // micro seconds / s
-        char[] yDSat = new char[11];  // micro seconds / s
-        char[] zDSat = new char[11];  // micro seconds / s
-        char[] roll = new char[6];    // 0.001 deg
-        char[] pitch = new char[6];   // 0.001 deg
-        char[] yaw = new char[6];     // 0.001 deg
-        char[] ascArc = new char[2];
-        char[] check = new char[3];
-        char[] quali = new char[1];
-        char[] radCor = new char[4];
+        final char[] tTagD = new char[6];   // 0.1 days
+        final char[] tTagMs = new char[11]; // micro seconds
+        final char[] xSat = new char[12];   // mm
+        final char[] ySat = new char[12];   // mm
+        final char[] zSat = new char[12];   // mm
+        final char[] xDSat = new char[11];  // micro seconds / s
+        final char[] yDSat = new char[11];  // micro seconds / s
+        final char[] zDSat = new char[11];  // micro seconds / s
+        final char[] roll = new char[6];    // 0.001 deg
+        final char[] pitch = new char[6];   // 0.001 deg
+        final char[] yaw = new char[6];     // 0.001 deg
+        final char[] ascArc = new char[2];
+        final char[] check = new char[3];
+        final char[] quali = new char[1];
+        final char[] radCor = new char[4];
 
         reader.read(recKey, 0, 6);
         reader.read(satID, 0, 7);
@@ -274,7 +274,7 @@ public final class PrareOrbitReader {
         reader.read(radCor, 0, 4);
         reader.skip(2);
 
-        TrajectoryRecord trajectoryRecord = new TrajectoryRecord();
+        final TrajectoryRecord trajectoryRecord = new TrajectoryRecord();
         trajectoryRecord.recKey = new String(recKey);
         trajectoryRecord.satID = Integer.parseInt(new String(satID).trim());
         trajectoryRecord.orbTyp = new String(orbTyp);
@@ -303,13 +303,13 @@ public final class PrareOrbitReader {
      * @return The Quality Parameter Record.
      * @throws IOException The exceptions.
      */
-    private QualityParameterRecord readQualityParameterRecord(BufferedReader reader) throws IOException {
+    private static QualityParameterRecord readQualityParameterRecord(BufferedReader reader) throws IOException {
 
-        char[] recKey = new char[6];
-        char[] qPName = new char[25];
-        char[] qPValue = new char[10];
-        char[] qPUnit = new char[26];
-        char[] qPRefVal = new char[10];
+        final char[] recKey = new char[6];
+        final char[] qPName = new char[25];
+        final char[] qPValue = new char[10];
+        final char[] qPUnit = new char[26];
+        final char[] qPRefVal = new char[10];
 
         reader.read(recKey, 0, 6);
         reader.read(qPName, 0, 25);
@@ -319,7 +319,7 @@ public final class PrareOrbitReader {
         reader.read(qPRefVal, 0, 10);
         reader.skip(50);
 
-        QualityParameterRecord qualityParameterRecord = new QualityParameterRecord();
+        final QualityParameterRecord qualityParameterRecord = new QualityParameterRecord();
         qualityParameterRecord.recKey = new String(recKey);
         qualityParameterRecord.qPName = new String(qPName);
         qualityParameterRecord.qPValue = new String(qPValue);
@@ -478,7 +478,7 @@ public final class PrareOrbitReader {
     }
 
     // PRC Trajectory Record (Inertial Frame or Terrestrial Frame)
-   public final  static class TrajectoryRecord {
+   public final static class TrajectoryRecord {
         String recKey;
         int satID;
         String orbTyp;

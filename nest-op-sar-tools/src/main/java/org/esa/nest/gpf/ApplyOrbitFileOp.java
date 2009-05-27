@@ -34,6 +34,8 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.Settings;
+import org.esa.nest.util.ftpUtils;
+import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,11 +81,11 @@ public final class ApplyOrbitFileOp extends Operator {
             defaultValue = DORIS_VOR, label="Orbit Type")
     private String orbitType = DORIS_VOR;
 
-    private MetadataElement absRoot;
-    private EnvisatOrbitReader dorisReader;
-    private OrbitalDataRecordReader delftReader;
-    private PrareOrbitReader prareReader;
-    private File orbitFile;
+    private MetadataElement absRoot = null;
+    private EnvisatOrbitReader dorisReader = null;
+    private OrbitalDataRecordReader delftReader = null;
+    private PrareOrbitReader prareReader = null;
+    private File orbitFile = null;
 
     private int absOrbit;
     private int sourceImageWidth;
@@ -94,21 +96,23 @@ public final class ApplyOrbitFileOp extends Operator {
     private int subSamplingY;
 
     private double firstLineUTC;
-    private double lastLineUTC;
     private double lineTimeInterval;
 
-    private TiePointGrid slantRangeTime;
-    private TiePointGrid incidenceAngle;
-    private TiePointGrid latitude;
-    private TiePointGrid longitude;
+    private TiePointGrid slantRangeTime = null;
+    private TiePointGrid incidenceAngle = null;
+    private TiePointGrid latitude = null;
+    private TiePointGrid longitude = null;
 
     public static final String DORIS_POR = "DORIS_POR";
     public static final String DORIS_VOR = "DORIS_VOR";
-    public static final String DELFT_ENVISAT = "DELFT_ENVISAT";
-    public static final String DELFT_ERS_1 = "DELFT_ERS_1";
-    public static final String DELFT_ERS_2 = "DELFT_ERS_2";
-    public static final String PRARE_ERS_1 = "PRARE_ERS_1";
-    public static final String PRARE_ERS_2 = "PRARE_ERS_2";
+    public static final String DELFT_ENVISAT = "DELFT_PRECISE_ENVISAT";
+    public static final String DELFT_ERS_1 = "DELFT_PRECISE_ERS_1";
+    public static final String DELFT_ERS_2 = "DELFT_PRECISE_ERS_2";
+    public static final String PRARE_ERS_1 = "PRARE_PRECISE_ERS_1";
+    public static final String PRARE_ERS_2 = "PRARE_PRECISE_ERS_2";
+
+    private ftpUtils ftp = null;
+    private FTPFile[] remoteFileList = null;
 
     /**
      * Default constructor. The graph processing framework
@@ -148,7 +152,7 @@ public final class ApplyOrbitFileOp extends Operator {
 
             getSourceImageDimension();
 
-            getFirstLastLineUTC();
+            getFirstLineUTC();
 
             createTargetProduct();
 
@@ -203,16 +207,14 @@ public final class ApplyOrbitFileOp extends Operator {
     }
 
     /**
-     * Get the first anf last line UTC in days.
+     * Get the first line UTC in days.
      * @throws Exception The exceptions.
      */
-    private void getFirstLastLineUTC() throws Exception {
+    private void getFirstLineUTC() throws Exception {
 
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
-        lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD();
         lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
         //System.out.println((new ProductData.UTC(firstLineUTC)).toString());
-        //System.out.println((new ProductData.UTC(lastLineUTC)).toString());
     }
 
     /**
@@ -243,7 +245,7 @@ public final class ApplyOrbitFileOp extends Operator {
             targetProduct.addBand(targetBand);
         }
 
-        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 50);
+        //targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 50);
     }
 
     /**
@@ -359,11 +361,11 @@ public final class ApplyOrbitFileOp extends Operator {
      */
     private OrbitData getOrbitData(double utc) throws Exception {
 
-        OrbitData orbitData = new OrbitData();
+        final OrbitData orbitData = new OrbitData();
 
         if (orbitType.contains("DORIS")) {
 
-            EnvisatOrbitReader.OrbitVector orb = dorisReader.getOrbitVector(utc);
+            final EnvisatOrbitReader.OrbitVector orb = dorisReader.getOrbitVector(utc);
             orbitData.xPos = orb.xPos;
             orbitData.yPos = orb.yPos;
             orbitData.zPos = orb.zPos;
@@ -373,7 +375,7 @@ public final class ApplyOrbitFileOp extends Operator {
 
         } else if (orbitType.contains("DELFT")) {
 
-            OrbitalDataRecordReader.OrbitVector orb = delftReader.getOrbitVector(utc);
+            final OrbitalDataRecordReader.OrbitVector orb = delftReader.getOrbitVector(utc);
             orbitData.xPos = orb.xPos;
             orbitData.yPos = orb.yPos;
             orbitData.zPos = orb.zPos;
@@ -383,7 +385,7 @@ public final class ApplyOrbitFileOp extends Operator {
 
         } else if (orbitType.contains("PRARE")) {
 
-            PrareOrbitReader.OrbitVector orb = prareReader.getOrbitVector(utc);
+            final PrareOrbitReader.OrbitVector orb = prareReader.getOrbitVector(utc);
             orbitData.xPos = orb.xPos;
             orbitData.yPos = orb.yPos;
             orbitData.zPos = orb.zPos;
@@ -405,7 +407,7 @@ public final class ApplyOrbitFileOp extends Operator {
      */
     private GeoPos computeLatLon(int x, int y, double slrgTime, OrbitData data) {
 
-        double[] xyz = new double[3];
+        final double[] xyz = new double[3];
         final float lat = latitude.getPixelFloat((float)x, (float)y);
         final float lon = longitude.getPixelFloat((float)x, (float)y);
         final GeoPos geoPos = new GeoPos(lat, lon);
@@ -428,7 +430,7 @@ public final class ApplyOrbitFileOp extends Operator {
      * @param xyz The xyz coordinate for the target.
      * @param time The slant range time in seconds.
      */
-    private void computeAccurateXYZ(OrbitData data, double[] xyz, double time) {
+    private static void computeAccurateXYZ(OrbitData data, double[] xyz, double time) {
 
         final double a = Constants.semiMajorAxis;
         final double b = Constants.semiMinorAxis;
@@ -436,8 +438,8 @@ public final class ApplyOrbitFileOp extends Operator {
         final int maxIter = 10;
 
         Matrix X = new Matrix(3, 1);
-        Matrix F = new Matrix(3, 1);
-        Matrix J = new Matrix(3, 3);
+        final Matrix F = new Matrix(3, 1);
+        final Matrix J = new Matrix(3, 3);
 
         X.set(0, 0, xyz[0]);
         X.set(1, 0, xyz[1]);
@@ -487,13 +489,13 @@ public final class ApplyOrbitFileOp extends Operator {
     private void updateOrbitStateVectors() throws Exception {
 
         // get original orbit state vectors
-        MetadataElement tgtAbsRoot = AbstractMetadata.getAbstractedMetadata(targetProduct);
-        AbstractMetadata.OrbitStateVector[] orbitStateVectors = AbstractMetadata.getOrbitStateVectors(tgtAbsRoot);
+        final MetadataElement tgtAbsRoot = AbstractMetadata.getAbstractedMetadata(targetProduct);
+        final AbstractMetadata.OrbitStateVector[] orbitStateVectors = AbstractMetadata.getOrbitStateVectors(tgtAbsRoot);
 
         // compute new orbit state vectors
         for (int i = 0; i< orbitStateVectors.length; i++) {
-            double time = orbitStateVectors[i].time.getMJD();
-            OrbitData orbitData = getOrbitData(time);
+            final double time = orbitStateVectors[i].time.getMJD();
+            final OrbitData orbitData = getOrbitData(time);
             orbitStateVectors[i].x_pos = orbitData.xPos; // m
             orbitStateVectors[i].y_pos = orbitData.yPos; // m
             orbitStateVectors[i].z_pos = orbitData.zPos; // m
@@ -526,7 +528,7 @@ public final class ApplyOrbitFileOp extends Operator {
         }
 
         final Date startDate = sourceProduct.getStartTime().getAsDate();
-        int month = startDate.getMonth()+1;
+        final int month = startDate.getMonth()+1;
         String folder = String.valueOf(startDate.getYear() + 1900);
         if(month < 10) {
             folder +='0';
@@ -595,61 +597,68 @@ public final class ApplyOrbitFileOp extends Operator {
 
         delftReader = new OrbitalDataRecordReader();
 
-        // construct path to the orbit file folder
-        String orbitPath = "";
-        if(orbitType.contains(DELFT_ENVISAT)) {
-            orbitPath = Settings.instance().get("OrbitFiles/delftEnvisatOrbitPath");
-        } else if(orbitType.contains(DELFT_ERS_1)) {
-            orbitPath = Settings.instance().get("OrbitFiles/delftERS1OrbitPath");
-        } else if(orbitType.contains(DELFT_ERS_2)) {
-            orbitPath = Settings.instance().get("OrbitFiles/delftERS2OrbitPath");
-        }
-
         // get product start time
         final Date startDate = sourceProduct.getStartTime().getAsDate();
 
         // find orbit file in the folder
-        orbitFile = FindDelftOrbitFile(delftReader, new File(orbitPath), startDate);
+        orbitFile = FindDelftOrbitFile(delftReader, startDate);
 
         if(orbitFile == null) {
-            throw new IOException("Unable to find suitable orbit file");
+            throw new IOException("Unable to find suitable orbit file.\n" +
+                    "Please refer to http://www.deos.tudelft.nl/ers/precorbs/orbits/ \n" +
+                    "ERS1 orbits are available until 1996\n" +
+                    "ERS2 orbits are available until 2003\n" +
+                    "ENVISAT orbits are available until 2008");
         }
     }
 
     /**
      * Find DELFT orbit file.
      * @param delftReader The DELFT oribit reader.
-     * @param path The path to the orbit file.
      * @param productDate The start date of the product.
      * @return The orbit file.
      * @throws Exception The exceptions.
      */
-    private static File FindDelftOrbitFile(OrbitalDataRecordReader delftReader, File path, Date productDate)
+    private File FindDelftOrbitFile(OrbitalDataRecordReader delftReader, Date productDate)
             throws Exception  {
 
-        final File[] list = path.listFiles();
-        if(list == null) {
-            return null;
+        // construct path to the orbit file folder
+        String orbitPathStr = "";
+        String delftFTPPath = "";
+        if(orbitType.contains(DELFT_ENVISAT)) {
+            orbitPathStr = Settings.instance().get("OrbitFiles/delftEnvisatOrbitPath");
+            delftFTPPath = Settings.instance().get("OrbitFiles/delftFTP_ENVISAT_precise_remotePath");
+        } else if(orbitType.contains(DELFT_ERS_1)) {
+            orbitPathStr = Settings.instance().get("OrbitFiles/delftERS1OrbitPath");
+            delftFTPPath = Settings.instance().get("OrbitFiles/delftFTP_ERS1_precise_remotePath");
+        } else if(orbitType.contains(DELFT_ERS_2)) {
+            orbitPathStr = Settings.instance().get("OrbitFiles/delftERS2OrbitPath");
+            delftFTPPath = Settings.instance().get("OrbitFiles/delftFTP_ERS2_precise_remotePath");
+        }
+        final File orbitPath = new File(orbitPathStr);
+        final String delftFTP = Settings.instance().get("OrbitFiles/delftFTP");
+
+        if(!orbitPath.exists())
+            orbitPath.mkdirs();
+
+        // find arclist file, then get the arc# of the orbit file
+        final File arclistFile = new File(orbitPath, "arclist");
+        if (!arclistFile.exists()) {
+            if(!getRemoteFile(delftFTP, delftFTPPath, arclistFile))
+                return null;
         }
 
-        // loop through all orbit files in the given folder to find arclist file, then get the arc# of the orbit file
-        int arcNum = OrbitalDataRecordReader.invalidArcNumber;
-        for(File f : list) {
-            if (f.getName().contains("arclist")) {
-                if (!f.exists()) {
-                    return null;
-                } else {
-                    arcNum = delftReader.getArcNumber(f, productDate);
-                    break;
-                }
-            }
-        }
-
+        int arcNum = OrbitalDataRecordReader.getArcNumber(arclistFile, productDate);
         if (arcNum == OrbitalDataRecordReader.invalidArcNumber) {
-            return null;
+            // force refresh of arclist file
+            if(!getRemoteFile(delftFTP, delftFTPPath, arclistFile))
+                return null;
+            arcNum = OrbitalDataRecordReader.getArcNumber(arclistFile, productDate);
+            if (arcNum == OrbitalDataRecordReader.invalidArcNumber)
+                return null;
         }
 
-        String orbitFileName = path.getAbsolutePath() + File.separator + "ODR.";
+        String orbitFileName = orbitPath.getAbsolutePath() + File.separator + "ODR.";
         if (arcNum < 10) {
             orbitFileName += "00" + arcNum;
         } else if (arcNum < 100) {
@@ -658,15 +667,44 @@ public final class ApplyOrbitFileOp extends Operator {
             orbitFileName += arcNum;
         }
 
-        File orbitFile = new File(orbitFileName);
+        final File orbitFile = new File(orbitFileName);
         if (!orbitFile.exists()) {
-            return null;
+            if(!getRemoteFile(delftFTP, delftFTPPath, orbitFile))
+                return null;
         }
 
         // read content of the orbit file
-        delftReader.readOrbitFile(orbitFileName);
+        delftReader.readOrbitFile(orbitFile.getAbsolutePath());
 
         return orbitFile;
+    }
+
+    private boolean getRemoteFile(String remoteFTP, String remotePath, File localFile) {
+        try {
+            if(ftp == null) {
+                ftp = new ftpUtils(remoteFTP);
+
+                remoteFileList = ftp.getRemoteFileList(remotePath);
+            }
+
+            if(remoteFileList == null)
+                throw new IOException("Unable to get remote file list from "+remoteFTP+'/'+remotePath);
+
+            final String remoteFileName = localFile.getName();
+            final long fileSize = ftpUtils.getFileSize(remoteFileList, remoteFileName);
+
+            final ftpUtils.FTPError result = ftp.retrieveFile(remotePath + localFile.getName(), localFile, fileSize);
+            if(result == ftpUtils.FTPError.OK) {
+                return true;
+            } else {
+                localFile.delete();
+            }
+
+            return false;
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return false;
     }
 
     // ====================================== PRARE ORBIT FILE ===============================================
@@ -689,7 +727,7 @@ public final class ApplyOrbitFileOp extends Operator {
         // get product start time
         // todo the startDate below is different from the start time in the metadata, why?
         final Date startDate = sourceProduct.getStartTime().getAsDate();
-        String folder = String.valueOf(startDate.getYear() + 1900);
+        final String folder = String.valueOf(startDate.getYear() + 1900);
         orbitPath += File.separator + folder;
 
         // find orbit file in the folder

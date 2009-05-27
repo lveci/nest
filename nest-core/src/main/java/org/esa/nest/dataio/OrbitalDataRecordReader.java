@@ -15,10 +15,7 @@ import java.text.SimpleDateFormat;
 import java.text.ParseException;
 
 /**
- * Created by IntelliJ IDEA.
- * User: lveci
- * Date: Feb 26, 2008
- * To change this template use File | Settings | File Templates.
+ * Reads Delft ODR format orbit files
  */
 public final class OrbitalDataRecordReader {
 
@@ -38,6 +35,8 @@ public final class OrbitalDataRecordReader {
     private OrbitPositionRecord[] orbitPositions = null;
     private double[] recordTimes = null;
     private double days1985To2000; // Days from Jan. 1, 1985 to Jan. 1, 2000
+
+    private static final double halfSecond = 0.5 / (24*3600); // in days
 
     public static final int invalidArcNumber = -1;
 
@@ -160,7 +159,7 @@ public final class OrbitalDataRecordReader {
     }
 
     OrbitDataRecord parseDataRecord() {
-        OrbitDataRecord data = new OrbitDataRecord();
+        final OrbitDataRecord data = new OrbitDataRecord();
 
         try {
             data.time = in.readInt();
@@ -262,7 +261,7 @@ public final class OrbitalDataRecordReader {
         final double[] xyz = new double[3];
         GeoUtils.geo2xyz(lat, lon, alt, xyz, GeoUtils.EarthModel.GRS80);
 
-        OrbitPositionRecord orbitPosition = new OrbitPositionRecord();
+        final OrbitPositionRecord orbitPosition = new OrbitPositionRecord();
         orbitPosition.utcTime = utcTime;
         orbitPosition.xPos = xyz[0];
         orbitPosition.yPos = xyz[1];
@@ -344,12 +343,11 @@ public final class OrbitalDataRecordReader {
      */
     public OrbitVector getOrbitVector(double utc) throws Exception {
 
-        double halfSecond = 0.5 / (24*3600); // in days
-        OrbitPositionRecord orbitPos = getOrbitPosition(utc);
-        OrbitPositionRecord orbitPosFw = getOrbitPosition(utc + halfSecond);
-        OrbitPositionRecord orbitPosBw = getOrbitPosition(utc - halfSecond);
+        final OrbitPositionRecord orbitPos = getOrbitPosition(utc);
+        final OrbitPositionRecord orbitPosFw = getOrbitPosition(utc + halfSecond);
+        final OrbitPositionRecord orbitPosBw = getOrbitPosition(utc - halfSecond);
 
-        OrbitVector orbitVector = new OrbitVector();
+        final OrbitVector orbitVector = new OrbitVector();
         orbitVector.utcTime = orbitPos.utcTime;
         orbitVector.xPos = orbitPos.xPos;
         orbitVector.yPos = orbitPos.yPos;
@@ -370,9 +368,9 @@ public final class OrbitalDataRecordReader {
      * @return The arc number.
      * @throws IOException The exceptions.
      */
-    public int getArcNumber(File file, Date productDate) throws IOException {
+    public static int getArcNumber(File file, Date productDate) throws IOException {
 
-        String fileName = file.getAbsolutePath();
+        final String fileName = file.getAbsolutePath();
 
         // get reader
         FileInputStream stream;
@@ -407,7 +405,7 @@ public final class OrbitalDataRecordReader {
                 st = new StringTokenizer(line);
 
                 // get arc number
-                int recordArcNum = Integer.parseInt(st.nextToken());
+                final int recordArcNum = Integer.parseInt(st.nextToken());
 
                 // get start date and start time
                 try {
@@ -417,7 +415,7 @@ public final class OrbitalDataRecordReader {
                 }
 
                 // get a hyphen (-)
-                String hyphen = st.nextToken();
+                final String hyphen = st.nextToken();
 
                 // get end date and end time
                 try {

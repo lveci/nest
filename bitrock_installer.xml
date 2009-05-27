@@ -2,6 +2,7 @@
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>2C</version>
+    <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <postInstallationActionList>
         <associateWindowsFileExtension>
@@ -12,6 +13,18 @@
             <progID></progID>
             <scope>user</scope>
         </associateWindowsFileExtension>
+        <addEnvironmentVariable>
+            <name>NEST_HOME</name>
+            <scope>system</scope>
+            <value> ${installdir}</value>
+        </addEnvironmentVariable>
+        <addLibraryToPath>
+            <path> ${installdir}</path>
+        </addLibraryToPath>
+        <changePermissions>
+            <files>*/*.sh;*/*.bin</files>
+            <permissions>755</permissions>
+        </changePermissions>
     </postInstallationActionList>
     <compressionAlgorithm>lzma</compressionAlgorithm>
     <enableRollback>1</enableRollback>
@@ -28,17 +41,17 @@
             <show>1</show>
             <desktopShortcutList>
                 <shortcut>
-                    <comment>Text that will appear on Tooltip</comment>
-                    <exec>nest_dat.sh</exec>
-                    <icon></icon>
+                    <comment>NEST Display and Analysis Tool</comment>
+                    <exec> ${installdir}/dat.sh</exec>
+                    <icon> ${installdir}/res/dat.png</icon>
                     <name>NEST 2C</name>
-                    <path></path>
+                    <path> ${installdir}</path>
                     <platforms>all</platforms>
                     <runInTerminal>0</runInTerminal>
-                    <windowsExec>nest_dat.exe</windowsExec>
+                    <windowsExec>${installdir}/nest-dat.exe</windowsExec>
                     <windowsExecArgs></windowsExecArgs>
                     <windowsIcon></windowsIcon>
-                    <windowsPath></windowsPath>
+                    <windowsPath>${installdir}</windowsPath>
                 </shortcut>
             </desktopShortcutList>
             <folderList>
@@ -69,8 +82,74 @@
                     <name>programfileslinux</name>
                     <platforms>linux</platforms>
                     <distributionFileList>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-linux.dir/VERSION.txt</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-linux.dir/CHANGELOG.txt</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-linux.dir/dat.sh</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-linux.dir/gpt.sh</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-linux.dir/libclib_jiio.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-linux.dir/libgluegen-rt.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-linux.dir/libjogl.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-linux.dir/libjogl_awt.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-linux.dir/libjogl_cg.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-linux.dir/libjogl_drihack.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-linux.dir/libmlib_jai.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-linux.dir/LICENSE.txt</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-linux.dir/readme.html</origin>
+                        </distributionFile>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-linux.dir</origin>
+                            <origin>target/nest-2C-bin-linux.dir/auxdata</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-linux.dir/bin</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-linux.dir/commandline</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-linux.dir/config</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-linux.dir/graphs</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-linux.dir/images</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-linux.dir/lib</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-linux.dir/licenses</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-linux.dir/modules</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-linux.dir/res</origin>
                         </distributionDirectory>
                     </distributionFileList>
                 </folder>
@@ -198,19 +277,12 @@
                     <comment>Next ESA SAR Toolbox</comment>
                     <name>NEST 2C</name>
                     <runInTerminal>0</runInTerminal>
-                    <windowsExec>nest_dat.exe</windowsExec>
+                    <windowsExec>${installdir}/nest-dat.exe</windowsExec>
                     <windowsExecArgs></windowsExecArgs>
                     <windowsIcon></windowsIcon>
-                    <windowsPath></windowsPath>
+                    <windowsPath>${installdir}</windowsPath>
                 </startMenuShortcut>
             </startMenuShortcutList>
-        </component>
-        <component>
-            <name>newcomponent</name>
-            <description>New Component</description>
-            <canBeEdited>1</canBeEdited>
-            <selected>1</selected>
-            <show>1</show>
         </component>
     </componentList>
     <parameterList>
