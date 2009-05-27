@@ -135,7 +135,8 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("num_output_lines", product.getSceneRasterHeight(), "", absRoot, "");
             addAbstractedAttribute("num_samples_per_line", product.getSceneRasterWidth(), "", absRoot, "");
             addAbstractedAttribute(mppAds, "srgr_flag", absRoot, "SRGR applied");
-            addAbstractedAttribute(mppAds, "avg_scene_height_ellpsoid", absRoot, "average scene height");
+            addAbstractedAttribute("avg_scene_height", mppAds.getAttributeDouble("avg_scene_height_ellpsoid", 0),
+                    "m", absRoot, "Average ccene height ellipsoid");
 
             int isMapProjected = 0;
             if (productType.contains("APG") || productType.contains("IMG")) {
