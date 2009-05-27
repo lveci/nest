@@ -42,10 +42,15 @@ public class FileElevationModel implements Resampling.Raster {
         RASTER_HEIGHT = product.getSceneRasterHeight();
         fileElevationTile = new FileElevationTile(product);
         tileGeocoding = product.getGeoCoding();
+        noDataValue = (float)product.getBandAt(0).getNoDataValue();
 
         _resampling = resamplingMethod;
         _resamplingIndex = _resampling.createIndex();
         _resamplingRaster = this;
+    }
+
+    public float getNoDataValue() {
+        return noDataValue;
     }
 
     /**

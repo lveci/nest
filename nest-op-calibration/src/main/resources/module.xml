@@ -126,6 +126,7 @@
             <text>Sigma0 to Beta0</text>
             <shortDescr>Add a Beta0 virtual band</shortDescr>
             <parent>Calibration</parent>
+            <placeAfter>Sigma0toGamma0</placeAfter>
             <context>band</context>
             <helpId>Sigma0toBeta0</helpId>
         </action>
