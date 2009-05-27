@@ -8,9 +8,9 @@ import com.bc.ceres.binding.ValueModel;
 import com.bc.ceres.binding.accessors.MapEntryAccessor;
 import com.bc.ceres.binding.swing.Binding;
 import com.bc.ceres.binding.swing.BindingContext;
-import com.bc.ceres.binding.swing.ValueEditorsPane;
 import com.bc.ceres.glayer.Layer;
 import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.framework.ui.ValueEditorsPane;
 import org.esa.beam.visat.toolviews.layermanager.LayerEditor;
 
 import javax.swing.JComponent;
@@ -23,7 +23,7 @@ import java.util.Map;
  * General Editor for layers using {@link ValueDescriptor ValueDescriptors}.
  *
  * @author Marco Zühlke
- * @version $Revision: 1.6 $ $Date: 2009-05-26 19:44:51 $
+ * @version $Revision: 1.7 $ $Date: 2009-05-27 13:12:23 $
  * @since BEAM 4.6
  */
 public abstract class AbstractBindingLayerEditor implements LayerEditor {

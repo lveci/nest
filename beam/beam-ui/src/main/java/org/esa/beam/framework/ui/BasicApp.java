@@ -1,5 +1,5 @@
 /*
- * $Id: BasicApp.java,v 1.2 2009-05-11 16:17:37 lveci Exp $
+ * $Id: BasicApp.java,v 1.3 2009-05-27 13:12:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -54,6 +54,7 @@ import org.esa.beam.util.io.FileChooserFactory;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 import org.esa.beam.util.logging.CacheHandler;
+import org.esa.beam.BeamUiActivator;
 
 import javax.help.HelpSet;
 import javax.help.HelpSetException;
@@ -124,7 +125,7 @@ import java.util.logging.Logger;
  * dialog boxes.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $  $Date: 2009-05-11 16:17:37 $
+ * @version $Revision: 1.3 $  $Date: 2009-05-27 13:12:23 $
  * @see org.esa.beam.framework.ui.command.Command
  * @see org.esa.beam.framework.ui.command.ExecCommand
  * @see org.esa.beam.framework.ui.command.CommandGroup
@@ -479,6 +480,10 @@ public class BasicApp {
     }
 
     private void initLogger() {
+        if (BeamUiActivator.getInstance() != null) {
+            final Logger logger = BeamUiActivator.getInstance().getModuleContext().getLogger();
+            BeamLogManager.setSystemLoggerName(logger.getName());
+        }
         _logFormatter = BeamLogManager.createFormatter(getAppName(), getAppVersion(), getAppCopyright());
         // todo - check logging, use Ceres logger! (nf - 05.05.2009)
         //BeamLogManager.configureSystemLogger(_logFormatter, false);
@@ -781,7 +786,7 @@ public class BasicApp {
     /**
      * Clears the status bar message. Simply calls <code>setStatusBarMessage(&quot; Ready.&quot;)</code>.
      */
-    public final void clearStatusBarMessage() {
+    public void clearStatusBarMessage() {
         setStatusBarMessage("Ready."); /*I18N*/
     }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: FileUtils.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: FileUtils.java,v 1.2 2009-05-27 13:12:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -21,6 +21,10 @@ import org.esa.beam.util.StringUtils;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -35,7 +39,7 @@ import com.bc.ceres.core.Assert;
  * @author Tom Block
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.1 $  $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $  $Date: 2009-05-27 13:12:23 $
  */
 public class FileUtils {
 
@@ -433,5 +437,25 @@ public class FileUtils {
             text = text.substring(pos);
         }
         return "..." + text;
+    }
+
+    public static String readText(File file) throws IOException {
+        final FileReader reader1 = new FileReader(file);
+        try {
+            return readText(reader1);
+        } finally {
+            reader1.close();
+        }
+    }
+
+    public static String readText(Reader reader) throws IOException {
+        final BufferedReader br = new BufferedReader(reader);
+        StringBuilder text = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            text.append(line);
+            text.append("\n");
+        }
+        return text.toString();
     }
 }

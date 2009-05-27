@@ -1,5 +1,5 @@
 /*
- * $Id: BeamLogManager.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: BeamLogManager.java,v 1.2 2009-05-27 13:12:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -189,8 +189,7 @@ public class BeamLogManager {
      */
     public static BeamFormatter createFormatter(String appName, String appVersion, String copyrightInfo) {
         final String logHeader = createLogHeader(appName, appVersion, copyrightInfo);
-        final BeamFormatter beamFormatter = new BeamFormatter(logHeader);
-        return beamFormatter;
+        return new BeamFormatter(logHeader);
     }
 
     /**
