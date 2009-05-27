@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetBuilder.java,v 1.9 2009-05-15 19:46:24 junlu Exp $
+ * $Id: ProductSubsetBuilder.java,v 1.10 2009-05-27 15:33:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +31,7 @@ import java.util.Arrays;
  * A special-purpose product reader used to build subsets of data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.9 $ $Date: 2009-05-15 19:46:24 $
+ * @version $Revision: 1.10 $ $Date: 2009-05-27 15:33:23 $
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
@@ -555,8 +555,9 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             if (isNodeAccepted(bandName)) {
                 Band destBand;
                 boolean treatVirtualBandsAsRealBands = false;
-                if(getSubsetDef() != null && getSubsetDef().getTreatVirtualBandsAsRealBands())
+                if (getSubsetDef() != null && getSubsetDef().getTreatVirtualBandsAsRealBands()) {
                     treatVirtualBandsAsRealBands = true;
+                }
 
                 //@todo 1 se/se - extract copy of a band or virtual band to create deep clone of band and virtual band
                 if (!treatVirtualBandsAsRealBands && sourceBand instanceof VirtualBand) {
@@ -566,7 +567,6 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                                                               getSceneRasterWidth(),
                                                               getSceneRasterHeight(),
                                                               virtualSource.getExpression());
-                    virtualBand.setCheckInvalids(virtualSource.getCheckInvalids());
                     destBand = virtualBand;
                 } else {
                     destBand = new Band(bandName,
@@ -597,12 +597,14 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                 if (sourceFlagCoding != null) {
                     String flagCodingName = sourceFlagCoding.getName();
                     FlagCoding destFlagCoding = product.getFlagCodingGroup().get(flagCodingName);
-                    Debug.assertNotNull(destFlagCoding); // should not happen because flag codings should be already in product
+                    Debug.assertNotNull(
+                            destFlagCoding); // should not happen because flag codings should be already in product
                     destBand.setSampleCoding(destFlagCoding);
                 } else if (sourceIndexCoding != null) {
                     String indexCodingName = sourceIndexCoding.getName();
                     IndexCoding destIndexCoding = product.getIndexCodingGroup().get(indexCodingName);
-                    Debug.assertNotNull(destIndexCoding); // should not happen because index codings should be already in product
+                    Debug.assertNotNull(
+                            destIndexCoding); // should not happen because index codings should be already in product
                     destBand.setSampleCoding(destIndexCoding);
                 } else {
                     destBand.setSampleCoding(null);
@@ -716,25 +718,25 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
     }
 
     private void createImageInfo(RasterDataNode sourceRaster, RasterDataNode targetRaster) {
-            final Stx sourceStx = sourceRaster.getStx();
-            final Stx targetStx = new Stx(sourceStx.getMin(), sourceStx.getMax(),
-                                          sourceStx.getMean(), sourceStx.getStandardDeviation(),
-                                          ProductData.isIntType(sourceRaster.getDataType()),
-                                          Arrays.copyOf(sourceStx.getHistogramBins(), sourceStx.getHistogramBins().length),
-                                          sourceStx.getResolutionLevel());
-            targetRaster.setStx(targetStx);
-            final ImageInfo imageInfo = targetRaster.createDefaultImageInfo(null, ProgressMonitor.NULL);
-            targetRaster.setImageInfo(imageInfo);
+        final Stx sourceStx = sourceRaster.getStx();
+        final Stx targetStx = new Stx(sourceStx.getMin(), sourceStx.getMax(),
+                                      sourceStx.getMean(), sourceStx.getStandardDeviation(),
+                                      ProductData.isIntType(sourceRaster.getDataType()),
+                                      Arrays.copyOf(sourceStx.getHistogramBins(), sourceStx.getHistogramBins().length),
+                                      sourceStx.getResolutionLevel());
+        targetRaster.setStx(targetStx);
+        final ImageInfo imageInfo = targetRaster.createDefaultImageInfo(null, ProgressMonitor.NULL);
+        targetRaster.setImageInfo(imageInfo);
     }
 
     private boolean isFullScene(ProductSubsetDef subsetDef) {
-        if(subsetDef == null) {
+        if (subsetDef == null) {
             return true;
         }
         final Rectangle sourceRegion = new Rectangle(0, 0, sourceProduct.getSceneRasterWidth(), getSceneRasterHeight());
         if (subsetDef.getRegion() == null || subsetDef.getRegion().equals(sourceRegion) &&
-            subsetDef.getSubSamplingX() == 1 &&
-            subsetDef.getSubSamplingY() == 1) {
+                                             subsetDef.getSubSamplingX() == 1 &&
+                                             subsetDef.getSubSamplingY() == 1) {
             return true;
         }
         return false;

@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductConstants.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: DimapProductConstants.java,v 1.2 2009-05-27 15:33:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -21,7 +21,7 @@ package org.esa.beam.dataio.dimap;
  *
  * @author Sabine Embacher
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-27 15:33:23 $
  */
 public final class DimapProductConstants {
 
@@ -324,9 +324,17 @@ public final class DimapProductConstants {
      * </pre>
      * </td>
      * </tr>
+     * <tr>
+     * <td valign="top">2.6.1</td>
+     * <td> No longer supporting
+     * <pre>
+     *   &lt;CHECK_INVALIDS&gt;true&lt;/CHECK_INVALIDS&gt;
+     * </pre>
+     * </td>
+     * </tr>
      * </table>
      */
-    public static final String DIMAP_CURRENT_VERSION = "2.6.0";
+    public static final String DIMAP_CURRENT_VERSION = "2.6.1";
 
     // BEAM-Dimap default text
     public static final String DIMAP_METADATA_PROFILE = "BEAM-DATAMODEL-V1";
