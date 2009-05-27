@@ -177,6 +177,32 @@
             <separatorAfter>true</separatorAfter>
         </action>
 
+        <action>
+            <id>SpeckleFilteringGroup</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Speckle Filtering</text>
+            <parent>sartools</parent>
+            <placeAfter>Calibration</placeAfter>
+        </action>
+
+        <action>
+            <id>SpeckleFilterOp</id>
+            <class>org.esa.nest.dat.filtering.SpeckleFilterOpAction</class>
+            <text>Single Product</text>
+            <shortDescr>Invoke the Speckle Filter operator on a single product.</shortDescr>
+            <parent>SpeckleFilteringGroup</parent>
+            <helpId>SpeckleFilterOp</helpId>
+        </action>
+
+        <action>
+            <id>MultiTemporalSpeckleFilterOp</id>
+            <class>org.esa.nest.dat.filtering.MultiTemporalSpeckleFilterOpAction</class>
+            <text>Multi-temporal Products (coming soon)</text>
+            <shortDescr>Invoke the Speckle Filter operator on multi-temporal products.</shortDescr>
+            <parent>SpeckleFilteringGroup</parent>
+            <helpId>SpeckleFilterOp</helpId>
+        </action>
+
         <!--action>
             <id>OceanTools</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
