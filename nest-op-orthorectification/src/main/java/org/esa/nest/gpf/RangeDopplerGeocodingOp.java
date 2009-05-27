@@ -654,25 +654,34 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
     /**
      * Get elevation model.
+     * @throws Exception The exceptions.
      */
-    private void getElevationModel() {
+    private void getElevationModel() throws Exception {
 
-        final ElevationModelRegistry elevationModelRegistry = ElevationModelRegistry.getInstance();
-        final ElevationModelDescriptor demDescriptor = elevationModelRegistry.getDescriptor(demName);
-        if (demDescriptor == null) {
-            throw new OperatorException("The DEM '" + demName + "' is not supported.");
+        if(fileElevationModel == null) { // if external DEM file is specified by user
+
+            fileElevationModel = new FileElevationModel(externalDemFile, getResamplingMethod());
+            demNoDataValue = fileElevationModel.getNoDataValue();
+
+        } else {
+
+            final ElevationModelRegistry elevationModelRegistry = ElevationModelRegistry.getInstance();
+            final ElevationModelDescriptor demDescriptor = elevationModelRegistry.getDescriptor(demName);
+            if (demDescriptor == null) {
+                throw new OperatorException("The DEM '" + demName + "' is not supported.");
+            }
+
+            if (demDescriptor.isInstallingDem()) {
+                throw new OperatorException("The DEM '" + demName + "' is currently being installed.");
+            }
+
+            dem = demDescriptor.createDem(getResamplingMethod());
+            if(dem == null) {
+                throw new OperatorException("The DEM '" + demName + "' has not been installed.");
+            }
+
+            demNoDataValue = dem.getDescriptor().getNoDataValue();
         }
-
-        if (demDescriptor.isInstallingDem()) {
-            throw new OperatorException("The DEM '" + demName + "' is currently being installed.");
-        }
-
-        dem = demDescriptor.createDem(getResamplingMethod());
-        if(dem == null) {
-            throw new OperatorException("The DEM '" + demName + "' has not been installed.");
-        }
-
-        demNoDataValue = dem.getDescriptor().getNoDataValue();
     }
 
     private Resampling getResamplingMethod() {
@@ -1022,18 +1031,28 @@ public final class RangeDopplerGeocodingOp extends Operator {
                     final int index = trgTiles[0].targetTile.getDataBufferIndex(x, y);
 
                     final double lon = lonMin + x*delLon;
-                    geoPos.setLocation((float)lat, (float)lon);
-                    final double alt = getLocalElevation(geoPos);
+
+                    double alt;
+                    if (saveLocalIncidenceAngle || applyRadiometricCalibration) { // localDEM is available
+                        alt = (double)localDEM[y-y0+1][x-x0+1];
+                    } else {
+                        geoPos.setLocation((float)lat, (float)lon);
+                        alt = getLocalElevation(geoPos);
+                    }
+
                     if(saveDEM) {
                         demBuffer.setElemDoubleAt(index, alt);
+                    }
+
+                    if (alt == demNoDataValue) {
+                        saveNoDataValueToTarget(index, trgTiles);
+                        continue;
                     }
 
                     GeoUtils.geo2xyz(lat, lon, alt, earthPoint, GeoUtils.EarthModel.WGS84);
                     final double zeroDopplerTime = getEarthPointZeroDopplerTime(earthPoint);
                     if (Double.compare(zeroDopplerTime, NonValidZeroDopplerTime) == 0) {
-                        for(TileData tileData : trgTiles) {
-                            tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
-                        }
+                        saveNoDataValueToTarget(index, trgTiles);
                         continue;
                     }
 
@@ -1067,9 +1086,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
                     if (rangeIndex < 0.0 || rangeIndex >= srcMaxRange ||
                             azimuthIndex < 0.0 || azimuthIndex >= srcMaxAzimuth) {
 
-                        for(TileData tileData : trgTiles) {
-                            tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
-                        }
+                        saveNoDataValueToTarget(index, trgTiles);
 
                     } else {
 
@@ -1127,16 +1144,24 @@ public final class RangeDopplerGeocodingOp extends Operator {
             if(externalDemFile == null) {
                 alt = dem.getElevation(geoPos);
             } else {
-                if(fileElevationModel == null) {
-                    fileElevationModel = new FileElevationModel(externalDemFile,
-                            getResamplingMethod());
-                }
                 alt = fileElevationModel.getElevation(geoPos);
             }
         } catch (Exception e) {
             alt = demNoDataValue;
         }
-        return alt == demNoDataValue ? 0.0 : alt;
+
+        return alt;
+    }
+
+    /**
+     * Save noDataValue to target pixel with given index.
+     * @param index The pixel index in target image.
+     * @param trgTiles The target tiles.
+     */
+    private void saveNoDataValueToTarget(final int index, TileData[] trgTiles) {
+        for(TileData tileData : trgTiles) {
+            tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
+        }
     }
 
     /**
