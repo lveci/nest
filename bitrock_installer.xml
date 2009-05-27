@@ -2,8 +2,8 @@
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>2C</version>
-    <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
+    <splashImage>beam/res/NEST_Splash.png</splashImage>
     <postInstallationActionList>
         <associateWindowsFileExtension>
             <extensions>N1 E1 E2</extensions>
@@ -257,8 +257,65 @@
                     <name>programfilesosx</name>
                     <platforms>osx</platforms>
                     <distributionFileList>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-mac.dir/VERSION.txt</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-mac.dir/CHANGELOG.txt</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-mac.dir/dat.command</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-mac.dir/gpt.command</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-mac.dir/libgluegen-rt.jnilib</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-mac.dir/libjogl.jnilib</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-mac.dir/libjogl_awt.jnilib</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-mac.dir/libjogl_cg.jnilib</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-mac.dir/LICENSE.txt</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-mac.dir/readme.html</origin>
+                        </distributionFile>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-mac.dir</origin>
+                            <origin>target/nest-2C-bin-mac.dir/auxdata</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-mac.dir/bin</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-mac.dir/commandline</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-mac.dir/config</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-mac.dir/graphs</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-mac.dir/images</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-mac.dir/lib</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-mac.dir/licenses</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-mac.dir/modules</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-2C-bin-mac.dir/res</origin>
                         </distributionDirectory>
                     </distributionFileList>
                 </folder>
