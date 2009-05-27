@@ -126,6 +126,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private String swath = null;
     private String productType = null;
     private String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
+    private String newXCAFileName = null; // XCA file for radiometric calibration
 
     private int sourceImageWidth = 0;
     private int sourceImageHeight = 0;
@@ -249,6 +250,8 @@ public final class RangeDopplerGeocodingOp extends Operator {
             if (applyRadiometricCalibration) {
                 prepareForRadiometricCalibration();
             }
+
+            updateTargetProductMetadata();
 
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
@@ -448,8 +451,13 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
         final Date startDate = sourceProduct.getStartTime().getAsDate();
         final Date endDate = sourceProduct.getEndTime().getAsDate();
-        final String xcaFilePath = findXCAFile(startDate, endDate);
-        if (xcaFilePath == null) {
+        final File xcaFileDir = new File(Settings.instance().get("AuxData/envisatAuxDataPath"));
+        newXCAFileName = findXCAFile(xcaFileDir, startDate, endDate);
+
+        String xcaFilePath;
+        if (newXCAFileName != null) {
+            xcaFilePath = xcaFileDir + File.separator + newXCAFileName;
+        } else {
             throw new OperatorException("No proper XCA file has been found");
         }
 
@@ -474,15 +482,15 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
     /**
      * Find the latest XVA file available.
+     * @param xcaFileDir The complete path to the XCA file directory.
      * @param productStartDate The product start date.
      * @param productEndDate The product end data.
-     * @return The complete path to the XCA file found.
+     * @return The name of the XCA file found.
      * @throws Exception The exceptions.
      */
-    private static String findXCAFile(Date productStartDate, Date productEndDate) throws Exception {
+    private static String findXCAFile(File xcaFileDir, Date productStartDate, Date productEndDate) throws Exception {
 
-        final File xcaFilePath = new File(Settings.instance().get("AuxData/envisatAuxDataPath"));
-        final File[] list = xcaFilePath.listFiles();
+        final File[] list = xcaFileDir.listFiles();
         if(list == null) {
             return null;
         }
@@ -508,12 +516,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
                 xcaFileName = fileName;
             }
         }
-
-        if (xcaFileName != null) {
-            return xcaFilePath + File.separator + xcaFileName;
-        } else {
-            return null;
-        }
+        return xcaFileName;
     }
 
     /**
@@ -707,8 +710,6 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
         addGeoCoding();
 
-        updateTargetProductMetadata();
-
         // the tile width has to be the image width because otherwise sourceRaster.getDataBufferIndex(x, y)
         // returns incorrect index for the last tile on the right
         targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 20);
@@ -896,6 +897,15 @@ public final class RangeDopplerGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.geo_ref_system, "WGS84");
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lat_pixel_res, delLat);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lon_pixel_res, delLon);
+
+        if (applyRadiometricCalibration) {
+            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
+            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.ant_elev_corr_flag, 1);
+            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_spread_comp_flag, 1);
+            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.abs_calibration_flag, 1);
+            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.external_calibration_file, newXCAFileName);
+            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.calibration_factor, newCalibrationConstant[0]);
+        }
     }
 
     /**
