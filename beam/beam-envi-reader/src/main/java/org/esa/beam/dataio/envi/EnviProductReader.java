@@ -43,17 +43,28 @@ public class EnviProductReader extends AbstractProductReader {
     public static File createEnviImageFile(File headerFile) {
         final String hdrName = headerFile.getName();
         final String imgName = hdrName.substring(0, hdrName.indexOf('.'));
-        String bandName = imgName + ".img";
-        File imgFile = new File(headerFile.getParent(), bandName);
-        if (!imgFile.exists()) {
-            bandName = imgName + ".bin";
-            imgFile = new File(headerFile.getParent(), bandName);
-        } else if (!imgFile.exists()) {
-            bandName = imgName + ".bip";
-            imgFile = new File(headerFile.getParent(), bandName);
-        } else if (!imgFile.exists()) {
-            bandName = imgName + ".bil";
-            imgFile = new File(headerFile.getParent(), bandName);
+        final File parentFolder = headerFile.getParentFile();
+        File imgFile = new File(parentFolder, imgName + ".img");
+        if (imgFile.exists())
+            return imgFile;
+        imgFile = new File(parentFolder, imgName + ".bin");
+        if (imgFile.exists())
+            return imgFile;
+        imgFile = new File(parentFolder, imgName + ".bip");
+        if (imgFile.exists())
+            return imgFile;
+        imgFile = new File(parentFolder, imgName + ".bil");
+        if (imgFile.exists())
+            return imgFile;
+        imgFile = new File(parentFolder, imgName + ".bsq");
+        if (imgFile.exists())
+            return imgFile;
+        
+        final File[] files = parentFolder.listFiles();
+        for(File f : files) {
+            if(f != headerFile && f.getName().startsWith(imgName)) {
+                return f;
+            }
         }
         return imgFile;
     }
