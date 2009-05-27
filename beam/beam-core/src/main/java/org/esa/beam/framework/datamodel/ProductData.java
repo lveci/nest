@@ -1,5 +1,5 @@
 /*
- * $Id: ProductData.java,v 1.2 2009-05-08 20:57:22 junlu Exp $
+ * $Id: ProductData.java,v 1.3 2009-05-27 14:56:55 junlu Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -57,7 +57,7 @@ import java.util.*;
  * <code>float</code>, <code>double</code> and <code>String</code>.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-05-08 20:57:22 $
+ * @version $Revision: 1.3 $ $Date: 2009-05-27 14:56:55 $
  */
 public abstract class ProductData implements Cloneable {
 
@@ -2562,10 +2562,14 @@ public abstract class ProductData implements Cloneable {
         public UTC(double mjd) {
             super(3);
 
-            final double microSeconds = (mjd * SECONDS_PER_DAY * MICROS_PER_SECOND) % MICROS_PER_SECOND;
-            final double seconds = (mjd * SECONDS_PER_DAY - microSeconds * MICROS_TO_SECONDS) % SECONDS_PER_DAY;
-            final double days = (int) mjd;
+            double microSeconds = (mjd * SECONDS_PER_DAY * MICROS_PER_SECOND) % MICROS_PER_SECOND;
+            double seconds = (mjd * SECONDS_PER_DAY - microSeconds * MICROS_TO_SECONDS) % SECONDS_PER_DAY;
+            double days = (int) mjd;
 
+            if (microSeconds < 0) {
+                microSeconds += MICROS_PER_SECOND;
+                seconds -= 1;
+            }
             setElemIntAt(0, (int) days);
             setElemIntAt(1, (int) seconds);
             setElemIntAt(2, (int) microSeconds);
