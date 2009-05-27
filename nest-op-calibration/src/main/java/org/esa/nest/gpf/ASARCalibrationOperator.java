@@ -1199,7 +1199,7 @@ public class ASARCalibrationOperator extends Operator {
      */
     public static double computeEarthRadius(float lat, float lon) {
         final double[] xyz = new double[3];
-        GeoUtils.geo2xyz(new GeoPos(lat, lon), xyz);
+        GeoUtils.geo2xyz(lat, lon, 0.0, xyz, GeoUtils.EarthModel.WGS84);
         return Math.sqrt(xyz[0]*xyz[0] + xyz[1]*xyz[1] + xyz[2]*xyz[2]);
     }
 

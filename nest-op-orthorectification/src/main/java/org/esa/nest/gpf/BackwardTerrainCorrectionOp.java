@@ -498,7 +498,7 @@ public final class BackwardTerrainCorrectionOp extends Operator {
         final double[] earthPoint = new double[3];
         final double lat = latitude.getPixelFloat((float)x, (float)y);
         final double lon = longitude.getPixelFloat((float)x, (float)y);
-        GeoUtils.geo2xyz(lat, lon, alt, earthPoint);
+        GeoUtils.geo2xyz(lat, lon, alt, earthPoint, GeoUtils.EarthModel.WGS84);
 
         return earthPoint;
     }

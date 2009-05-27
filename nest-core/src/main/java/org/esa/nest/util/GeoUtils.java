@@ -22,11 +22,7 @@ public final class GeoUtils
      * @param xyz The xyz coordinates of the given pixel.
      */
     public static void geo2xyz(GeoPos geoPos, double xyz[]) {
-
-        final double lat = ((double)geoPos.lat);
-        final double lon = ((double)geoPos.lon);
-        final double alt = 0.0;
-        geo2xyz(lat, lon, alt, xyz);
+        geo2xyz(geoPos.lat, geoPos.lon, 0.0, xyz, EarthModel.WGS84);
     }
 
     /**
@@ -36,22 +32,7 @@ public final class GeoUtils
      * @param geoSystem The geodetic system.
      */
     public static void geo2xyz(GeoPos geoPos, double xyz[], EarthModel geoSystem) {
-
-        final double lat = ((double)geoPos.lat);
-        final double lon = ((double)geoPos.lon);
-        final double alt = 0.0;
-        geo2xyz(lat, lon, alt, xyz, geoSystem);
-    }
-
-    /**
-     * Convert geodetic coordinate into cartesian XYZ coordinate (WGS84 geodetic system is used).
-     * @param latitude The latitude of a given pixel (in degree).
-     * @param longitude The longitude of the given pixel (in degree).
-     * @param altitude The altitude of the given pixel (in m)
-     * @param xyz The xyz coordinates of the given pixel.
-     */
-    public static void geo2xyz(double latitude, double longitude, double altitude, double xyz[]) {
-        geo2xyz(latitude, longitude, altitude, xyz, EarthModel.WGS84);
+        geo2xyz(geoPos.lat, geoPos.lon, 0.0, xyz, geoSystem);
     }
 
     /**

@@ -960,7 +960,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
         final GeoPos geoPos = new GeoPos();
         final double[] earthPoint = new double[3];
-        double[] sensorPos = new double[3];
+        final double[] sensorPos = new double[3];
         final int srcMaxRange = sourceImageWidth - 1;
         final int srcMaxAzimuth = sourceImageHeight - 1;
         ProductData demBuffer = null;
@@ -1018,7 +1018,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
                         demBuffer.setElemDoubleAt(index, alt);
                     }
 
-                    GeoUtils.geo2xyz(lat, lon, alt, earthPoint);
+                    GeoUtils.geo2xyz(lat, lon, alt, earthPoint, GeoUtils.EarthModel.WGS84);
                     final double zeroDopplerTime = getEarthPointZeroDopplerTime(earthPoint);
                     if (Double.compare(zeroDopplerTime, NonValidZeroDopplerTime) == 0) {
                         for(TileData tileData : trgTiles) {
@@ -1094,13 +1094,14 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
         // Note: the localDEM covers current tile with 1 extra row above, 1 extra row below, 1 extra column to
         //       the left and 1 extra column to the right of the tile.
-        GeoPos geoPos = new GeoPos();
+        final GeoPos geoPos = new GeoPos();
         for (int y = y0 - 1; y < y0 + tileHeight + 1; y++) {
-            double lat = latMax - y*delLat;
+            final double lat = latMax - y*delLat;
+            final int yy = y - y0 + 1;
             for (int x = x0 - 1; x < x0 + tileWidth + 1; x++) {
-                double lon = lonMin + x*delLon;
+                final double lon = lonMin + x*delLon;
                 geoPos.setLocation((float)lat, (float)lon);
-                localDEM[y - y0 + 1][x - x0 + 1] = (float)getLocalElevation(geoPos);
+                localDEM[yy][x - x0 + 1] = (float)getLocalElevation(geoPos);
             }
         }
     }
@@ -1366,7 +1367,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
         double sigma = 0.0;
         if (bandUnit == Unit.UnitType.AMPLITUDE) {
 
-            double dn = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
+            final double dn = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
             sigma = dn*dn;
 
         } else if (bandUnit == Unit.UnitType.INTENSITY) {
@@ -1463,7 +1464,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
             sigma11 = applyRetroCalibration(x1, y1, sigma11, bandPolar);
         }
 
-        double v = MathUtils.interpolationBiLinear(Math.sqrt(sigma00), Math.sqrt(sigma01),
+        final double v = MathUtils.interpolationBiLinear(Math.sqrt(sigma00), Math.sqrt(sigma01),
                                                    Math.sqrt(sigma10), Math.sqrt(sigma11),
                                                    rangeIndex - x0, azimuthIndex - y0);
         return v*v;
@@ -1500,7 +1501,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
         final ProductData srcData = sourceTile.getDataBuffer();
 
-        double[][] sigma = new double[4][4];
+        final double[][] sigma = new double[4][4];
         if (bandUnit == Unit.UnitType.AMPLITUDE) {
 
             for (int i = 0; i < y.length; i++) {
@@ -1541,7 +1542,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
             }
         }
 
-        double[][] v = new double[4][4];
+        final double[][] v = new double[4][4];
         for (int i = 0; i < y.length; i++) {
             for (int j = 0; j < x.length; j++) {
                 v[i][j] = Math.sqrt(sigma[i][j]);
@@ -1606,7 +1607,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      *                       contains five 201-length arrays with each for a sub swath.
      * @return The antenna pattern gain value.
      */
-    private double getAntennaPatternGain(double elevationAngle, int bandPolar,
+    private static double getAntennaPatternGain(double elevationAngle, int bandPolar,
                                          double[] refElevationAngle, float[][] antennaPattern) {
 
         if (refElevationAngle.length == 1) { // single swath
@@ -1639,7 +1640,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
         final double elevationAngle = ASARCalibrationOperator.computeElevationAngle(
                                             slantRange, satelliteHeight, sceneToEarthCentre); // in degrees
 
-        double gain = 0.0;
+        double gain;
         if (wideSwathProductFlag) {
             gain = getAntennaPatternGain(elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternWideSwath);
         } else {
@@ -1667,24 +1668,25 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
         final double[][] h = new double[3][3];
         for (int i = 0; i < 3; i++) {
+            final int yy = y - y0 + i;
             for (int j = 0; j < 3; j++) {
-                h[i][j] = localDEM[y - y0 + i][x - x0 + j];
+                h[i][j] = localDEM[yy][x - x0 + j];
             }
         }
 
-        double[] centrePoint = new double[3];
-        double[] rightPoint = new double[3];
-        double[] downPoint = new double[3];
+        final double[] centrePoint = new double[3];
+        final double[] rightPoint = new double[3];
+        final double[] downPoint = new double[3];
 
-        GeoUtils.geo2xyz(lat, lon, 0.0, centrePoint);
-        GeoUtils.geo2xyz(lat, lon + delLon, 0.0, rightPoint);
-        GeoUtils.geo2xyz(lat - delLat, lon, 0.0, downPoint);
+        GeoUtils.geo2xyz(lat, lon, 0.0, centrePoint, GeoUtils.EarthModel.WGS84);
+        GeoUtils.geo2xyz(lat, lon + delLon, 0.0, rightPoint, GeoUtils.EarthModel.WGS84);
+        GeoUtils.geo2xyz(lat - delLat, lon, 0.0, downPoint, GeoUtils.EarthModel.WGS84);
 
-        double latPixelSpacing = Math.sqrt((centrePoint[0] - downPoint[0])*(centrePoint[0] - downPoint[0]) +
+        final double latPixelSpacing = Math.sqrt((centrePoint[0] - downPoint[0])*(centrePoint[0] - downPoint[0]) +
                                            (centrePoint[1] - downPoint[1])*(centrePoint[1] - downPoint[1]) +
                                            (centrePoint[2] - downPoint[2])*(centrePoint[2] - downPoint[2]));
 
-        double lonPixelSpacing = Math.sqrt((centrePoint[0] - rightPoint[0])*(centrePoint[0] - rightPoint[0]) +
+        final double lonPixelSpacing = Math.sqrt((centrePoint[0] - rightPoint[0])*(centrePoint[0] - rightPoint[0]) +
                                            (centrePoint[1] - rightPoint[1])*(centrePoint[1] - rightPoint[1]) +
                                            (centrePoint[2] - rightPoint[2])*(centrePoint[2] - rightPoint[2]));
 
@@ -1702,7 +1704,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @param localSlopeAngle The local slope angle (in degrees).
      * @return The local incidence angle.
      */
-    private double computeLocalIncidenceAngle(final double slantRange, final double satelliteHeight,
+    private static double computeLocalIncidenceAngle(final double slantRange, final double satelliteHeight,
                                               final double sceneToEarthCentre, final double localSlopeAngle) {
 
         final double phi = Math.acos((slantRange*slantRange + sceneToEarthCentre*sceneToEarthCentre -
