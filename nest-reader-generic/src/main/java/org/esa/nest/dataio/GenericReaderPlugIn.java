@@ -33,26 +33,8 @@ public class GenericReaderPlugIn implements ProductReaderPlugIn {
      * @return true if this product reader can decode the given input, otherwise false.
      */
     public DecodeQualification getDecodeQualification(final Object input) {
-       /* final File file = ReaderUtils.getFileFromInput(input);
-        if (file == null) {
-            return DecodeQualification.UNABLE;
-        }
-        final String filename = FileUtils.getFilenameWithoutExtension(file).toUpperCase();
 
-
-        final File parentDir = file.getParentFile();
-        if (file.isFile() && parentDir.isDirectory()) {
-            final FilenameFilter filter = new FilenameFilter() {
-                public boolean accept(final File dir, final String name) {
-                    return true;
-                }
-            };
-            final File[] files = parentDir.listFiles(filter);
-            if (files != null) {
-                return checkProductQualification(file);
-            }
-        }    */
-        return DecodeQualification.SUITABLE;
+        return input != null ? DecodeQualification.SUITABLE : DecodeQualification.UNABLE;
     }
 
     /**
@@ -131,6 +113,7 @@ public class GenericReaderPlugIn implements ProductReaderPlugIn {
          *
          * @return <code>true</code> if given file is accepted by this filter
          */
+        @Override
         public boolean accept(final File file) {
             if (super.accept(file)) {
                 return true;
