@@ -1,5 +1,5 @@
 /*
- * $Id: BasicApp.java,v 1.3 2009-05-27 13:12:23 lveci Exp $
+ * $Id: BasicApp.java,v 1.4 2009-05-27 21:09:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -125,7 +125,7 @@ import java.util.logging.Logger;
  * dialog boxes.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $  $Date: 2009-05-27 13:12:23 $
+ * @version $Revision: 1.4 $  $Date: 2009-05-27 21:09:23 $
  * @see org.esa.beam.framework.ui.command.Command
  * @see org.esa.beam.framework.ui.command.ExecCommand
  * @see org.esa.beam.framework.ui.command.CommandGroup
@@ -1451,7 +1451,7 @@ public class BasicApp {
 
         getMainFrame().setCursor(Cursor.getDefaultCursor());
         setStatusBarMessage("Error.");
-        _logger.severe(message);
+        _logger.log(Level.SEVERE, message, e);
         showErrorDialog("Error", message);
         clearStatusBarMessage();
     }

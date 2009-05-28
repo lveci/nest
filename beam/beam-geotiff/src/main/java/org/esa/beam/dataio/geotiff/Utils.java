@@ -1,5 +1,5 @@
 /*
- * $Id: Utils.java,v 1.1 2009-04-28 14:37:14 lveci Exp $
+ * $Id: Utils.java,v 1.2 2009-05-27 21:09:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -175,8 +175,7 @@ public class Utils {
 
     public static boolean shouldWriteNode(ProductNode node) {
         if (node instanceof VirtualBand) {
-            VirtualBand virtualBand = (VirtualBand) node;
-            return virtualBand.getWriteData();
+            return false;
         } else if (node instanceof FilterBand) {
             return false;
         }

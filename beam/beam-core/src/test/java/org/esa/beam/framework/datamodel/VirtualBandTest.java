@@ -1,5 +1,5 @@
 /*
- * $Id: VirtualBandTest.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: VirtualBandTest.java,v 1.2 2009-05-27 21:09:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -111,14 +111,5 @@ public class VirtualBandTest extends AbstractRasterDataNodeTest {
     @Override
     protected RasterDataNode createRasterDataNode() {
         return new VirtualBand("vb", ProductData.TYPE_UINT16, 10, 10, "0");
-    }
-    
-    public void testHasWrittenData() {
-        final VirtualBand virtualBand = new VirtualBand("vb", ProductData.TYPE_FLOAT32, 10, 10, "1.0");
-        virtualBand.setWriteData(true);
-        virtualBand.setHasWrittenData(true);
-        virtualBand.setExpression("2.0");
-        assertEquals(false, virtualBand.hasWrittenData());
-        assertEquals(true, virtualBand.getWriteData());
     }
 }

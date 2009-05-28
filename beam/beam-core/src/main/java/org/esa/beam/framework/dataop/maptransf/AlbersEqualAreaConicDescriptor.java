@@ -1,5 +1,5 @@
 /*
- * $Id: AlbersEqualAreaConicDescriptor.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: AlbersEqualAreaConicDescriptor.java,v 1.2 2009-05-27 21:09:23 lveci Exp $
  *
  * Copyright (C) 2005 by Roman Gerlach (Friedrich-Schiller-University Jena, Germany)
  *
@@ -221,8 +221,6 @@ public class AlbersEqualAreaConicDescriptor implements MapTransformDescriptor {
         private double _rho0 = 0.0;
         private double e;
         private double _c;
-        private double _q;
-        private double _x0, _y0;
         private double es;
         private double _a;
         private double _lam0;
@@ -414,6 +412,21 @@ public class AlbersEqualAreaConicDescriptor implements MapTransformDescriptor {
             return geoPoint;
         }
 
+        public double getSemiMinor() {
+            return _parameterValues[SEMI_MINOR_INDEX];
+        }
+
+        public double getLatitudeOfOrigin() {
+            return _parameterValues[LATITUDE_OF_ORIGIN_INDEX];
+        }
+
+        public double getStandardParallel1() {
+            return _parameterValues[LATITUDE_OF_INTERSECTION_1_INDEX];
+        }
+
+        public double getStandardParallel2() {
+            return _parameterValues[LATITUDE_OF_INTERSECTION_2_INDEX];
+        }
     }
 
 }

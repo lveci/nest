@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductWriter.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: DimapProductWriter.java,v 1.2 2009-05-27 21:09:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -46,7 +46,7 @@ import java.util.Map;
  * The product writer for BEAM DIMAP products.
  *
  * @author Sabine Embacher
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-27 21:09:23 $
  */
 public class DimapProductWriter extends AbstractProductWriter {
 
@@ -391,8 +391,7 @@ public class DimapProductWriter extends AbstractProductWriter {
     @Override
     public boolean shouldWrite(ProductNode node) {
         if (node instanceof VirtualBand) {
-            VirtualBand virtualBand = (VirtualBand) node;
-            return virtualBand.getWriteData();
+            return false;
         }
         if (node instanceof FilterBand) {
             return false;

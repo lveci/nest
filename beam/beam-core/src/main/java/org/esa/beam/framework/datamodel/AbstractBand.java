@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractBand.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: AbstractBand.java,v 1.2 2009-05-27 21:09:23 lveci Exp $
  * Copyright (c) by Brockmann Consult 2003
  */
 
@@ -29,7 +29,7 @@ import java.io.IOException;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-27 21:09:23 $
  * @see #readRasterData
  * @see #writeRasterData
  */
@@ -768,19 +768,6 @@ public abstract class AbstractBand extends RasterDataNode {
         setRasterData(targetRasterData);
         fireProductNodeDataChanged();
         return numInvalids;
-    }
-
-    @Override
-    protected RenderedImage createSourceImage() {
-        final MultiLevelModel model = ImageManager.getInstance().getMultiLevelModel(this);
-        return new DefaultMultiLevelImage(new AbstractMultiLevelSource(model) {
-
-            @Override
-            public RenderedImage createImage(int level) {
-                return new BandOpImage(AbstractBand.this,
-                                       ResolutionLevel.create(getModel(), level));
-            }
-        });
     }
 
     //////////////////////////////////////////////////////////////////////////

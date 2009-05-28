@@ -1,5 +1,5 @@
 /*
- * $Id: GeoTiffProductReader.java,v 1.2 2009-04-28 17:38:56 lveci Exp $
+ * $Id: GeoTiffProductReader.java,v 1.3 2009-05-27 21:09:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -253,7 +253,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
         final Band[] bands = product.getBands();
         bandMap = new HashMap<Band, Integer>(bands.length);
         for (Band band : bands) {
-            if (!(band instanceof VirtualBand && !((VirtualBand) band).hasWrittenData() || band instanceof FilterBand)) {
+            if (!(band instanceof VirtualBand || band instanceof FilterBand)) {
                 bandMap.put(band, bandMap.size());
             }
         }

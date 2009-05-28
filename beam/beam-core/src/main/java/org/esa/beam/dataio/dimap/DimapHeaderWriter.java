@@ -1,5 +1,5 @@
 /*
- * $Id: DimapHeaderWriter.java,v 1.3 2009-05-27 15:33:23 lveci Exp $
+ * $Id: DimapHeaderWriter.java,v 1.4 2009-05-27 21:09:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -274,7 +274,6 @@ public final class DimapHeaderWriter extends XmlWriter {
                         final VirtualBand vb = (VirtualBand) band;
                         printLine(indent + 2, DimapProductConstants.TAG_VIRTUAL_BAND, true);
                         printLine(indent + 2, DimapProductConstants.TAG_VIRTUAL_BAND_EXPRESSION, vb.getExpression());
-                        printLine(indent + 2, DimapProductConstants.TAG_VIRTUAL_BAND_WRITE_DATA, vb.getWriteData());
                     }
                     final String validMaskExpression = band.getValidPixelExpression();
                     if (validMaskExpression != null) {
@@ -591,7 +590,7 @@ public final class DimapHeaderWriter extends XmlWriter {
             Band band;
             for (int i = 0; i < bands.length; i++) {
                 band = bands[i];
-                if (!((band instanceof VirtualBand && !((VirtualBand) band).getWriteData()) || band instanceof FilterBand)) {
+                if (!(band instanceof VirtualBand || band instanceof FilterBand)) {
                     final String[] dfTags = createTags(indent + 1, DimapProductConstants.TAG_DATA_FILE);
                     println(dfTags[0]);
                     final String href = _dataDirectory + "/" + band.getName() + EnviHeader.FILE_EXTENSION;

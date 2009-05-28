@@ -1,5 +1,5 @@
 /*
- * $Id: Hdf5ProductWriter.java,v 1.1 2009-04-28 14:37:14 lveci Exp $
+ * $Id: Hdf5ProductWriter.java,v 1.2 2009-05-27 21:09:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -56,7 +56,7 @@ import java.util.Map;
  * A product writer implementation for the HDF5 format.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:14 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-27 21:09:23 $
  */
 public class Hdf5ProductWriter extends AbstractProductWriter {
 
@@ -100,11 +100,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
      */
     @Override
     public boolean shouldWrite(ProductNode node) {
-        if (node instanceof VirtualBand) {
-            VirtualBand virtualBand = (VirtualBand) node;
-            return virtualBand.getWriteData();
-        }
-        return super.shouldWrite(node);
+        return !(node instanceof VirtualBand) && super.shouldWrite(node);
     }
 
     /**

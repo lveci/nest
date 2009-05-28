@@ -1,5 +1,5 @@
 /*
- * $Id: ProductIO.java,v 1.2 2009-05-15 12:46:55 lveci Exp $
+ * $Id: ProductIO.java,v 1.3 2009-05-27 21:09:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -47,7 +47,7 @@ import java.util.Iterator;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.2 $ $Date: 2009-05-15 12:46:55 $
+ * @version $Revision: 1.3 $ $Date: 2009-05-27 21:09:23 $
  */
 public class ProductIO {
 
@@ -438,11 +438,10 @@ public class ProductIO {
         if (bandsToWrite.size() > 0) {
             pm.beginTask("Writing bands of product '" + product.getName() + "'...", bandsToWrite.size());
             try {
-                for (int i = 0; i < bandsToWrite.size(); i++) {
+                for (Band band : bandsToWrite) {
                     if (pm.isCanceled()) {
                         break;
                     }
-                    Band band = bandsToWrite.get(i);
                     band.writeRasterDataFully(SubProgressMonitor.create(pm, 1));
                 }
             } finally {

@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductHelpers.java,v 1.4 2009-05-27 15:33:23 lveci Exp $
+ * $Id: DimapProductHelpers.java,v 1.5 2009-05-27 21:09:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -65,7 +65,7 @@ import java.util.logging.Level;
  * @author Sabine Embacher
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.4 $ $Date: 2009-05-27 15:33:23 $
+ * @version $Revision: 1.5 $ $Date: 2009-05-27 21:09:23 $
  */
 public class DimapProductHelpers {
 
@@ -1367,9 +1367,6 @@ public class DimapProductHelpers {
                 product.addBand(virtualBand);
                 virtualBand.setNoDataValue(getInvalidValue(element));
                 virtualBand.setNoDataValueUsed(getUseInvalidValue(element));
-                final boolean writeData = getWriteData(element);
-                virtualBand.setWriteData(writeData);
-                virtualBand.setHasWrittenData(writeData);
                 band = virtualBand;
             } else if (isFilterBand(element)) {
                 final DimapPersistable persistable = DimapPersistence.getPersistable(element);
@@ -1416,10 +1413,6 @@ public class DimapProductHelpers {
                 return element.getChildTextTrim(DimapProductConstants.TAG_VIRTUAL_BAND_EXPRESSION);
             }
             return null;
-        }
-
-        private static boolean getWriteData(Element element) {
-            return is(element, DimapProductConstants.TAG_VIRTUAL_BAND_WRITE_DATA);
         }
 
         private static boolean getUseInvalidValue(Element element) {

@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductReader.java,v 1.2 2009-05-14 16:31:17 lveci Exp $
+ * $Id: DimapProductReader.java,v 1.3 2009-05-27 21:09:23 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -54,7 +54,7 @@ import java.util.Map;
  *
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-05-14 16:31:17 $
+ * @version $Revision: 1.3 $ $Date: 2009-05-27 21:09:23 $
  * @see org.esa.beam.dataio.dimap.DimapProductReaderPlugIn
  */
 public class DimapProductReader extends AbstractProductReader {
@@ -169,7 +169,7 @@ public class DimapProductReader extends AbstractProductReader {
         bandDataFiles = DimapProductHelpers.getBandDataFiles(dom, product, getInputDir());
         final Band[] bands = product.getBands();
         for (final Band band : bands) {
-            if ((band instanceof VirtualBand && !((VirtualBand) band).hasWrittenData()) || band instanceof FilterBand) {
+            if (band instanceof VirtualBand || band instanceof FilterBand) {
                 continue;
             }
             final File dataFile = (File) bandDataFiles.get(band);
