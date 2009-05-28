@@ -1,14 +1,16 @@
-package org.esa.beam.framework.datamodel;
+package org.esa.beam.framework.dataop.maptransf.geotools;
 
 import junit.framework.TestCase;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.framework.dataop.maptransf.MapProjection;
 import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
+import org.esa.beam.framework.dataop.maptransf.geotools.CoordinateReferenceSystems;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.geotools.referencing.operation.DefaultMathTransformFactory;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CRSAuthorityFactory;
+import org.opengis.referencing.crs.ProjectedCRS;
 import org.opengis.referencing.operation.OperationMethod;
 import org.opengis.referencing.operation.Projection;
 import org.opengis.util.GenericName;
@@ -29,9 +31,11 @@ public class CoordinateReferenceSystemsTest extends TestCase {
                    CoordinateReferenceSystems.getCRS(gp, Datum.WGS_84));
 
         for (final MapProjection projection : MapProjectionRegistry.getProjections()) {
-            assertNotNull(CoordinateReferenceSystems.getCRS(projection, Datum.ITRF_97));
-            assertNotNull(CoordinateReferenceSystems.getCRS(projection, Datum.WGS_72));
-            assertNotNull(CoordinateReferenceSystems.getCRS(projection, Datum.WGS_84));
+            if (!(projection.getMapTransform().getDescriptor() instanceof IdentityTransformDescriptor)) {
+                assertTrue(CoordinateReferenceSystems.getCRS(projection, Datum.ITRF_97) instanceof ProjectedCRS);
+                assertTrue(CoordinateReferenceSystems.getCRS(projection, Datum.WGS_72) instanceof ProjectedCRS);
+                assertTrue(CoordinateReferenceSystems.getCRS(projection, Datum.WGS_84) instanceof ProjectedCRS);
+            }
         }
     }
 

@@ -23,7 +23,7 @@ import java.util.Map;
  * General Editor for layers using {@link ValueDescriptor ValueDescriptors}.
  *
  * @author Marco Zühlke
- * @version $Revision: 1.7 $ $Date: 2009-05-27 13:12:23 $
+ * @version $Revision: 1.8 $ $Date: 2009-05-28 14:17:58 $
  * @since BEAM 4.6
  */
 public abstract class AbstractBindingLayerEditor implements LayerEditor {
@@ -35,10 +35,15 @@ public abstract class AbstractBindingLayerEditor implements LayerEditor {
     @Override
     public JComponent createControl(AppContext appContext, Layer layer) {
         this.layer = layer;
+
+        // TODO - replace this code block with the following line (rq-20090528)
+        // bindingContext = new BindingContext(layer.getConfiguration());
         bindingContext = new BindingContext();
         ValueContainer valueContainer = bindingContext.getValueContainer();
         valueContainer.addPropertyChangeListener(new UpdateStylePropertyChangeListener());
         initializeBinding(appContext, bindingContext);
+        // ODOT
+
         ValueEditorsPane parametersPane = new ValueEditorsPane(bindingContext);
         return parametersPane.createPanel();
     }

@@ -1,5 +1,5 @@
 /*
- * $Id: DimapDocumentTest.java,v 1.2 2009-05-27 15:33:23 lveci Exp $
+ * $Id: DimapDocumentTest.java,v 1.3 2009-05-28 14:17:58 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -937,7 +937,6 @@ public class DimapDocumentTest extends TestCase {
         pw.println("            <NO_DATA_VALUE>3.0</NO_DATA_VALUE>");
         pw.println("            <VIRTUAL_BAND>true</VIRTUAL_BAND>");
         pw.println("            <EXPRESSION>radiance_8</EXPRESSION>");
-        pw.println("            <WRITE_DATA>false</WRITE_DATA>");
         pw.println("        </Spectral_Band_Info>");
         pw.println("    </Image_Interpretation>");
         pw.println("    <Dataset_Sources>");

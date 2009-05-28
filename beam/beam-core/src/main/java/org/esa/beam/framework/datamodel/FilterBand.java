@@ -1,5 +1,5 @@
 /*
- * $Id: FilterBand.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: FilterBand.java,v 1.2 2009-05-28 14:17:58 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -30,7 +30,7 @@ import java.io.IOException;
  * <p><i>Note that this class is not yet public API and may change in future releases.</i></p>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-28 14:17:58 $
  */
 public abstract class FilterBand extends Band {
 
@@ -48,23 +48,19 @@ public abstract class FilterBand extends Band {
     }
 
     @Override
-    public void readRasterData(int offsetX, int offsetY, int width, int height, ProductData rasterData,
-                               ProgressMonitor pm) throws IOException {
-        pm.beginTask("Reading data...", 2);
-        try {
-            final RenderedImage sourceImage = getSourceImage();
-            final Raster data = sourceImage.getData(new Rectangle(offsetX, offsetY, width, height));
-            pm.worked(1);
-            data.getDataElements(offsetX, offsetY, width, height, rasterData.getElems());
-            pm.worked(1);
-        } finally {
-            pm.done();
-        }
-    }
-
-    @Override
     public void dispose() {
         _source = null;
         super.dispose();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void writeRasterData(int offsetX, int offsetY,
+                                int width, int height,
+                                ProductData rasterData, ProgressMonitor pm) throws IOException {
+        throw new IllegalStateException("write not supported for filtered band");
+    }
+
 }

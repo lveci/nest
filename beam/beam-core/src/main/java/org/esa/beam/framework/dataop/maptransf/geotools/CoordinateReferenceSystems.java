@@ -1,4 +1,4 @@
-package org.esa.beam.framework.datamodel;
+package org.esa.beam.framework.dataop.maptransf.geotools;
 
 import org.esa.beam.framework.dataop.maptransf.*;
 import org.geotools.referencing.ReferencingFactoryFinder;
@@ -18,7 +18,7 @@ import org.opengis.referencing.operation.MathTransformFactory;
 
 import java.awt.geom.AffineTransform;
 
-class CoordinateReferenceSystems {
+public class CoordinateReferenceSystems {
 
     private static final GeocentricCRS ITRF97;
     private static final GeographicCRS WGS72;
@@ -48,7 +48,7 @@ class CoordinateReferenceSystems {
                 } else if (Datum.WGS_72.equals(datum)) {
                     result = WGS72;
                 }
-            } else if (projection instanceof UTMProjection) {
+            } else if (projection instanceof UTMProjection && !Datum.ITRF_97.equals(datum)) {
                 // 2. UTM map projections
                 final UTMProjection utmProjection = (UTMProjection) projection;
                 final int zone = utmProjection.getZone();

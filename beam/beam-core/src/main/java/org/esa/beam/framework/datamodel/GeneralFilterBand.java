@@ -1,5 +1,5 @@
 /*
- * $Id: GeneralFilterBand.java,v 1.2 2009-05-11 16:17:36 lveci Exp $
+ * $Id: GeneralFilterBand.java,v 1.3 2009-05-28 14:17:58 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -45,7 +45,7 @@ import java.util.Arrays;
  * <p><i>Note that this class is not yet public API and may change in future releases.</i></p>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-05-11 16:17:36 $
+ * @version $Revision: 1.3 $ $Date: 2009-05-28 14:17:58 $
  */
 public class GeneralFilterBand extends FilterBand {
 
@@ -101,16 +101,6 @@ public class GeneralFilterBand extends FilterBand {
         return new DefaultMultiLevelImage(new GeneralFilterMultiLevelSource(multiLevelModel, getSource(),
                                                                             BorderExtender.createInstance(
                                                                                     BorderExtenderCopy.BORDER_COPY)));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void writeRasterData(int offsetX, int offsetY,
-                                int width, int height,
-                                ProductData rasterData, ProgressMonitor pm) throws IOException {
-        throw new IllegalStateException("write not supported for filtered band");
     }
 
     /**

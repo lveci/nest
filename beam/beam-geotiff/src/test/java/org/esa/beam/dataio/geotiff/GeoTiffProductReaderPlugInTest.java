@@ -1,6 +1,7 @@
 package org.esa.beam.dataio.geotiff;
 
 import com.sun.media.jai.codec.ByteArraySeekableStream;
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.MapGeoCoding;
@@ -29,7 +30,7 @@ import java.util.Locale;
  * todo - add API doc
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:14 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-28 14:17:58 $
  * @since BEAM 4.2
  */
 public class GeoTiffProductReaderPlugInTest {
@@ -46,7 +47,6 @@ public class GeoTiffProductReaderPlugInTest {
         final Product product = new Product("p", "t", 20, 10);
         final Band band = product.addBand("band1", ProductData.TYPE_INT8);
         band.ensureRasterData();
-        band.setSynthetic(true);
         final ImageInputStream inputStream = writeToInputStream(product);
         final DecodeQualification decodeQualification = GeoTiffProductReaderPlugIn.getDecodeQualificationImpl(
                 inputStream);
@@ -59,7 +59,6 @@ public class GeoTiffProductReaderPlugInTest {
         final Product product = new Product("p", "t", 20, 10);
         final Band band = product.addBand("band1", ProductData.TYPE_INT8);
         band.ensureRasterData();
-        band.setSynthetic(true);
         final MapInfo mapInfo = new MapInfo(UTM.createProjection(26, true), 0, 0, 0, 0, 1, 1, Datum.WGS_84);
         mapInfo.setSceneWidth(product.getSceneRasterWidth());
         mapInfo.setSceneHeight(product.getSceneRasterHeight());
@@ -118,7 +117,7 @@ public class GeoTiffProductReaderPlugInTest {
         writer.writeGeoTIFFProduct(outputStream, product);
         final Band[] bands = product.getBands();
         for (Band band : bands) {
-            band.writeRasterDataFully();
+            band.writeRasterDataFully(ProgressMonitor.NULL);
         }
         outputStream.flush();
         return new MemoryCacheImageInputStream(new ByteArraySeekableStream(byteStream.toByteArray()));

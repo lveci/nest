@@ -1,5 +1,5 @@
 /*
- * $Id: DimapHeaderWriterTest.java,v 1.3 2009-05-27 15:33:23 lveci Exp $
+ * $Id: DimapHeaderWriterTest.java,v 1.4 2009-05-28 14:17:58 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -129,7 +129,6 @@ public class DimapHeaderWriterTest extends TestCase {
             "            <NO_DATA_VALUE>0.0</NO_DATA_VALUE>" + _ls +
             "            <VIRTUAL_BAND>true</VIRTUAL_BAND>" + _ls +
             "            <EXPRESSION>b1 * 0.4 + 1</EXPRESSION>" + _ls +
-            "            <WRITE_DATA>false</WRITE_DATA>" + _ls +
             "        </Spectral_Band_Info>" + _ls +
             "        <Spectral_Band_Info>" + _ls +
             "            <BAND_INDEX>3</BAND_INDEX>" + _ls +

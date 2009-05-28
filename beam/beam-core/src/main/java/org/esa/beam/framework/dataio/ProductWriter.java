@@ -1,5 +1,5 @@
 /*
- * $Id: ProductWriter.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: ProductWriter.java,v 1.2 2009-05-28 14:17:57 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -21,7 +21,6 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductNode;
-import org.esa.beam.framework.datamodel.ProgressListener;
 
 import java.io.IOException;
 
@@ -30,7 +29,7 @@ import java.io.IOException;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-05-28 14:17:57 $
  * @see ProductReader
  */
 public interface ProductWriter {
@@ -145,11 +144,15 @@ public interface ProductWriter {
 
     /**
      * Complete deletes the physical representation of the given product from the file system.
+     *
+     * @throws IOException if an I/O error occurs
      */
     void deleteOutput() throws IOException;
 
     /**
-     * Implement this method to physically delete a <code>Band</code> from a product writer's output.
+     * Physically deletes a <code>Band</code> in a product writer's output.
+     *
+     * @param band The band to delete.
      */
     void removeBand(Band band);
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: ProductDataUShortTest.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ProductDataUShortTest.java,v 1.2 2009-05-28 14:17:58 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -19,7 +19,6 @@ package org.esa.beam.framework.datamodel;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import org.esa.beam.GlobalTestConfig;
 import org.esa.beam.util.SystemUtils;
 
@@ -33,25 +32,14 @@ public class ProductDataUShortTest extends TestCase {
     private FileImageInputStream _inputStream;
     private FileImageOutputStream _outputStream;
 
-    public ProductDataUShortTest(String name) {
-        super(name);
-    }
-
-    public static Test suite() {
-        return new TestSuite(ProductDataUShortTest.class);
-    }
-
     @Override
-    protected void setUp() {
+    protected void setUp() throws IOException {
         File outputFile = GlobalTestConfig.getBeamTestDataOutputFile("ProductData");
         outputFile.mkdirs();
-        File streamFile = new File(outputFile, "stream.img");
-        try {
-            streamFile.createNewFile();
-            _inputStream = new FileImageInputStream(streamFile);
-            _outputStream = new FileImageOutputStream(streamFile);
-        } catch (IOException e) {
-        }
+        File streamFile = new File(outputFile, "ushort.img");
+        streamFile.createNewFile();
+        _inputStream = new FileImageInputStream(streamFile);
+        _outputStream = new FileImageOutputStream(streamFile);
         assertNotNull(_inputStream);
         assertNotNull(_outputStream);
     }
@@ -155,19 +143,20 @@ public class ProductDataUShortTest extends TestCase {
     public void testSetElemsAsString() {
         final ProductData pd = ProductData.createInstance(ProductData.TYPE_UINT16, 3);
         pd.setElems(new String[]{
-                String.valueOf(Short.MAX_VALUE  * 2 + 1),
+                String.valueOf(Short.MAX_VALUE * 2 + 1),
                 String.valueOf(Short.MAX_VALUE),
                 String.valueOf(0),
         });
 
-        assertEquals(Short.MAX_VALUE * 2 +1, pd.getElemIntAt(0));
+        assertEquals(Short.MAX_VALUE * 2 + 1, pd.getElemIntAt(0));
         assertEquals(Short.MAX_VALUE, pd.getElemIntAt(1));
         assertEquals(0, pd.getElemIntAt(2));
-}
+    }
+
     public void testSetElemsAsString_OutOfRange() {
         final ProductData pd1 = ProductData.createInstance(ProductData.TYPE_UINT16, 1);
         try {
-            pd1.setElems(new String[]{String.valueOf(Short.MAX_VALUE  * 2 + 2)});
+            pd1.setElems(new String[]{String.valueOf(Short.MAX_VALUE * 2 + 2)});
         } catch (Exception e) {
             assertEquals(NumberFormatException.class, e.getClass());
             assertEquals("Value out of range. The value:'65536' is not an unsigned short value.", e.getMessage());

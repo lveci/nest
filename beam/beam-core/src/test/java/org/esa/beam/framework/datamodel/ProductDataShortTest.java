@@ -1,5 +1,5 @@
 /*
- * $Id: ProductDataShortTest.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ProductDataShortTest.java,v 1.2 2009-05-28 14:17:58 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -19,7 +19,6 @@ package org.esa.beam.framework.datamodel;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
 import org.esa.beam.GlobalTestConfig;
 import org.esa.beam.util.SystemUtils;
 
@@ -33,25 +32,14 @@ public class ProductDataShortTest extends TestCase {
     private FileImageInputStream _inputStream;
     private FileImageOutputStream _outputStream;
 
-    public ProductDataShortTest(String name) {
-        super(name);
-    }
-
-    public static Test suite() {
-        return new TestSuite(ProductDataShortTest.class);
-    }
-
     @Override
-    protected void setUp() {
+    protected void setUp() throws IOException {
         File outputFile = GlobalTestConfig.getBeamTestDataOutputFile("ProductData");
         outputFile.mkdirs();
-        File streamFile = new File(outputFile, "stream.img");
-        try {
-            streamFile.createNewFile();
-            _inputStream = new FileImageInputStream(streamFile);
-            _outputStream = new FileImageOutputStream(streamFile);
-        } catch (IOException e) {
-        }
+        File streamFile = new File(outputFile, "short.img");
+        streamFile.createNewFile();
+        _inputStream = new FileImageInputStream(streamFile);
+        _outputStream = new FileImageOutputStream(streamFile);
         assertNotNull(_inputStream);
         assertNotNull(_outputStream);
     }
@@ -163,7 +151,8 @@ public class ProductDataShortTest extends TestCase {
         assertEquals(Short.MAX_VALUE, pd.getElemIntAt(0));
         assertEquals(0, pd.getElemIntAt(1));
         assertEquals(Short.MIN_VALUE, pd.getElemIntAt(2));
-}
+    }
+
     public void testSetElemsAsString_OutOfRange() {
         final ProductData pd1 = ProductData.createInstance(ProductData.TYPE_INT16, 1);
         try {

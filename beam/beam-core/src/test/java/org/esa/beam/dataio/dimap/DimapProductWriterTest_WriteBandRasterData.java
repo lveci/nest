@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductWriterTest_WriteBandRasterData.java,v 1.2 2009-05-13 12:33:22 lveci Exp $
+ * $Id: DimapProductWriterTest_WriteBandRasterData.java,v 1.3 2009-05-28 14:17:58 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -103,7 +103,8 @@ public class DimapProductWriterTest_WriteBandRasterData extends TestCase {
             _productWriter.writeBandRasterData(band, 0, 0, sceneWidth, sceneHeight, sourceBuffer, ProgressMonitor.NULL);
             fail("IllegalArgumentException expected because sourceBuffer is to small");
         } catch (IOException e) {
-            fail("IOException not expected");
+            fail("IOException not expected: " + e.getMessage());
+            e.printStackTrace();
         } catch (IllegalArgumentException e) {
         } finally {
             try {
@@ -128,7 +129,8 @@ public class DimapProductWriterTest_WriteBandRasterData extends TestCase {
             _productWriter.writeBandRasterData(band, 0, 0, sceneWidth, sceneHeight, sourceBuffer, ProgressMonitor.NULL);
             fail("IllegalArgumentException expected because sourceBuffer is to big");
         } catch (IOException e) {
-            fail("IOException not expected");
+            fail("IOException not expected: " + e.getMessage());
+            e.printStackTrace();
         } catch (IllegalArgumentException e) {
         } finally {
             try {

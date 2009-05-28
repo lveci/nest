@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractBand.java,v 1.2 2009-05-27 21:09:23 lveci Exp $
+ * $Id: AbstractBand.java,v 1.3 2009-05-28 14:17:58 lveci Exp $
  * Copyright (c) by Brockmann Consult 2003
  */
 
@@ -29,9 +29,7 @@ import java.io.IOException;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.2 $ $Date: 2009-05-27 21:09:23 $
- * @see #readRasterData
- * @see #writeRasterData
+ * @version $Revision: 1.3 $ $Date: 2009-05-28 14:17:58 $
  */
 public abstract class AbstractBand extends RasterDataNode {
 

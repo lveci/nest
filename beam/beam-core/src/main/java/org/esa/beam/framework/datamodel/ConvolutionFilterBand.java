@@ -25,7 +25,7 @@ import java.io.IOException;
  * <p><i>Note that this class is not yet public API. Interface may chhange in future releases.</i></p>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-05-11 16:17:36 $
+ * @version $Revision: 1.3 $ $Date: 2009-05-28 14:17:58 $
  */
 public class ConvolutionFilterBand extends FilterBand {
 
@@ -71,14 +71,5 @@ public class ConvolutionFilterBand extends FilterBand {
 
     public Kernel getKernel() {
         return kernel;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void writeRasterData(int offsetX, int offsetY, int width, int height, ProductData rasterData,
-                                ProgressMonitor pm) throws IOException {
-        throw new IllegalStateException("write not supported for filtered band");
     }
 }

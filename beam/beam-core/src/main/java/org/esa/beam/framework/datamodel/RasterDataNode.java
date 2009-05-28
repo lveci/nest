@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataNode.java,v 1.3 2009-05-27 15:33:23 lveci Exp $
+ * $Id: RasterDataNode.java,v 1.4 2009-05-28 14:17:58 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -1373,6 +1373,22 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
      */
     public abstract void readRasterDataFully(ProgressMonitor pm) throws IOException;
 
+    /**
+     * Reads raster data from the node's associated data source into the given data
+     * buffer.
+     *
+     * @param offsetX    the X-offset in the raster co-ordinates where reading starts
+     * @param offsetY    the Y-offset in the raster co-ordinates where reading starts
+     * @param width      the width of the raster data buffer
+     * @param height     the height of the raster data buffer
+     * @param rasterData a raster data buffer receiving the pixels to be read
+     *
+     * @throws java.io.IOException      if an I/O error occurs
+     * @throws IllegalArgumentException if the raster is null
+     * @throws IllegalStateException    if this product raster was not added to a product so far, or if the product to
+     *                                  which this product raster belongs to, has no associated product reader
+     * @see org.esa.beam.framework.dataio.ProductReader#readBandRasterData(Band,int,int,int,int,ProductData,com.bc.ceres.core.ProgressMonitor)
+     */
     public void readRasterData(int offsetX, int offsetY,
                                int width, int height,
                                ProductData rasterData) throws IOException {
@@ -1380,10 +1396,8 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
     }
 
     /**
-     * Reads raster data from this dataset into the user-supplied raster data buffer.
-     * <p/>
-     * <p>This method always directly (re-)reads this band's data from its associated data source into the given data
-     * buffer.
+     * The method behaves exactly as {@link #readRasterData(int, int, int, int, ProductData)},
+     * but clients can additionally pass a {@link ProgressMonitor}.
      *
      * @param offsetX    the X-offset in the raster co-ordinates where reading starts
      * @param offsetY    the Y-offset in the raster co-ordinates where reading starts
@@ -1396,7 +1410,6 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
      * @throws IllegalArgumentException if the raster is null
      * @throws IllegalStateException    if this product raster was not added to a product so far, or if the product to
      *                                  which this product raster belongs to, has no associated product reader
-     * @see org.esa.beam.framework.dataio.ProductReader#readBandRasterData(Band,int,int,int,int,ProductData,com.bc.ceres.core.ProgressMonitor)
      */
     public abstract void readRasterData(int offsetX, int offsetY,
                                         int width, int height,
@@ -1416,7 +1429,9 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
      * @throws IllegalArgumentException if the raster is null
      * @throws IllegalStateException    if this product raster was not added to a product so far, or if the product to
      *                                  which this product raster belongs to, has no associated product reader
+     * @deprecated since BEAM 4.6, use {@link #readRasterData(int, int, int, int, ProductData)} instead
      */
+    @Deprecated
     public void readRaster(Rectangle rectangle, ProductData rasterData, ProgressMonitor pm) throws IOException {
         readRasterData(rectangle.x, rectangle.y, rectangle.width, rectangle.height, rasterData, pm);
     }
@@ -2160,11 +2175,11 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
     }
 
     /**
-     * Returns wether the source image is set on this {@code RasterDataNode}.
+     * Returns whether the source image is set on this {@code RasterDataNode}.
      * <p/>
      * This method belongs to preliminary API and may be removed or changed in the future.
      *
-     * @return Wether the source image is set.
+     * @return whether the source image is set.
      *
      * @since BEAM 4.5
      */
@@ -2225,6 +2240,19 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
             this.sourceImage = sourceImage;
             fireProductNodeChanged("sourceImage", oldValue);
         }
+    }
+
+    /**
+     * Returns whether the geophysical image is set on this {@code RasterDataNode}.
+     * <p/>
+     * This method belongs to preliminary API and may be removed or changed in the future.
+     *
+     * @return whether the geophysical image is set.
+     *
+     * @since BEAM 4.6
+     */
+    public boolean isGeophysicalImageSet() {
+        return geophysicalImage != null;
     }
 
     /**

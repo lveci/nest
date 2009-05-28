@@ -1,5 +1,5 @@
 /*
- * $Id: Band.java,v 1.2 2009-05-27 21:09:23 lveci Exp $
+ * $Id: Band.java,v 1.3 2009-05-28 14:17:58 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,16 +17,17 @@
 package org.esa.beam.framework.datamodel;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelModel;
 import com.bc.ceres.glevel.support.AbstractMultiLevelSource;
 import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.dataio.ProductWriter;
 import org.esa.beam.jai.BandOpImage;
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.util.Guardian;
+import org.esa.beam.util.ImageUtils;
 
 import javax.media.jai.PlanarImage;
 import java.awt.Color;
@@ -57,7 +58,7 @@ import java.util.Random;
  * and <code>writePixel</code> perform the inverse operations in this case.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-05-27 21:09:23 $
+ * @version $Revision: 1.3 $ $Date: 2009-05-28 14:17:58 $
  * @see ProductData
  * @see #getPixels
  * @see #setPixels
@@ -282,20 +283,26 @@ public class Band extends AbstractBand {
     @Override
     protected RenderedImage createSourceImage() {
         final MultiLevelModel model = ImageManager.getInstance().getMultiLevelModel(this);
-        return new DefaultMultiLevelImage(new AbstractMultiLevelSource(model) {
 
-            @Override
-            public RenderedImage createImage(int level) {
-                return new BandOpImage(Band.this, ResolutionLevel.create(getModel(), level));
-            }
-        });
+        if (hasRasterData()) {
+            // This code is for backward compatibility only
+            final RenderedImage image = ImageUtils.createRenderedImage(getRasterWidth(),
+                                                                       getRasterHeight(),
+                                                                       getRasterData());
+            return new DefaultMultiLevelImage(new DefaultMultiLevelSource(image, model));
+        }   else {
+            return new DefaultMultiLevelImage(new AbstractMultiLevelSource(model) {
+
+                @Override
+                public RenderedImage createImage(int level) {
+                    return new BandOpImage(Band.this, ResolutionLevel.create(getModel(), level));
+                }
+            });
+        }
     }
 
     /**
-     * Reads raster data from this dataset into the user-supplied raster data buffer.
-     * <p/>
-     * <p>This method always directly (re-)reads this band's data from its associated data source into the given data
-     * buffer.
+     * Reads raster data from its associated data source into the given data buffer.
      *
      * @param offsetX    the X-offset in the band's pixel co-ordinates where reading starts
      * @param offsetY    the Y-offset in the band's pixel co-ordinates where reading starts
@@ -311,15 +318,20 @@ public class Band extends AbstractBand {
      * @see org.esa.beam.framework.dataio.ProductReader#readBandRasterData(Band, int, int, int, int, ProductData, com.bc.ceres.core.ProgressMonitor)
      */
     @Override
-    public void readRasterData(final int offsetX, final int offsetY, final int width, final int height,
-                               final ProductData rasterData, ProgressMonitor pm)
-            throws IOException {
+    public void readRasterData(final int offsetX, final int offsetY,
+                               final int width, final int height,
+                               final ProductData rasterData,
+                               ProgressMonitor pm) throws IOException {
         Guardian.assertNotNull("rasterData", rasterData);
-        if (hasRasterData()) {
-            readRasterDataFromRasterData(offsetX, offsetY, width, height, rasterData, pm);
+        if (isProductReaderDirectlyUsable()) {
+            // Don't go the long way round the source image.
+            getProductReader().readBandRasterData(this, offsetX, offsetY,
+                                                  width, height,
+                                                  rasterData,
+                                                  pm);
         } else {
             try {
-                pm.beginTask("Reading data...", 100);
+                pm.beginTask("Reading raster data...", 100);
                 final RenderedImage sourceImage = getSourceImage();
                 final Raster data = sourceImage.getData(new Rectangle(offsetX, offsetY, width, height));
                 pm.worked(90);
@@ -331,28 +343,9 @@ public class Band extends AbstractBand {
         }
     }
 
-    private void readRasterDataFromRasterData(int offsetX, int offsetY, int width, int height, ProductData rasterData,
-                                              ProgressMonitor pm) {
-        final ProductData srcRasterData = getRasterData();
-        int dstIndex;
-        int srcIndex;
-        int dstIndexOffset;
-        int srcIndexOffset;
-        pm.beginTask("Reading raster data...", height);
-        try {
-            for (int j = 0; j < height; j++) {
-                dstIndexOffset = j * width;
-                srcIndexOffset = (offsetY + j) * getSceneRasterWidth() + offsetX;
-                for (int i = 0; i < width; i++) {
-                    dstIndex = dstIndexOffset + i;
-                    srcIndex = srcIndexOffset + i;
-                    rasterData.setElemDoubleAt(dstIndex, srcRasterData.getElemDoubleAt(srcIndex));
-                }
-                pm.worked(1);
-            }
-        } finally {
-            pm.done();
-        }
+    private boolean isProductReaderDirectlyUsable() {
+        return getProductReader() != null
+                && isSourceImageSet() && getSourceImage().getImage(0) instanceof BandOpImage;
     }
 
     /**
@@ -383,6 +376,7 @@ public class Band extends AbstractBand {
         Product product = getProductSafe();
         ProductWriter writer = product.getProductWriterSafe();
         writer.writeBandRasterData(this, offsetX, offsetY, width, height, rasterData, pm);
+        removeCachedImageData();
     }
 
     /**
@@ -406,77 +400,13 @@ public class Band extends AbstractBand {
                         final Raster data = sourceImage.getData(rect);
                         final ProductData rasterData = createCompatibleRasterData(rect.width, rect.height);
                         data.getDataElements(rect.x, rect.y, rect.width, rect.height, rasterData.getElems());
-                        writeRasterData(rect.x, rect.y, rect.width, rect.height, rasterData);
+                        writeRasterData(rect.x, rect.y, rect.width, rect.height, rasterData, ProgressMonitor.NULL);
                     }
                     pm.worked(1);
                 }
             } finally {
                 pm.done();
             }
-
-            /*
-            try {
-                pm.beginTask("Writing raster data...", getRasterHeight() * 2);
-                final ProductData rasterData = createCompatibleRasterData(getRasterWidth(), 1);
-                for (int y = 0; y < getRasterHeight(); y++) {
-                    if (pm.isCanceled()) {
-                        break;
-                    }
-                    readRasterData(0, y, getRasterWidth(), 1, rasterData,
-                                   SubProgressMonitor.create(pm, 1));
-                    writeRasterData(0, y, getRasterWidth(), 1, rasterData,
-                                    SubProgressMonitor.create(pm, 1));
-                }
-            } finally {
-                pm.done();
-            }
-            */
-        }
-    }
-
-    // method for writing the source image of a band, might be used in the future (rq - 30.10.2008)
-    private static void writeSourceImage(Band band, int offsetX, int offsetY, int width, int height,
-                                         ProgressMonitor pm) throws IOException {
-        final RenderedImage image = band.getSourceImage();
-
-        final int minTileX = image.getMinTileX();
-        final int minTileY = image.getMinTileY();
-
-        final int numXTiles = image.getNumXTiles();
-        final int numYTiles = image.getNumYTiles();
-
-        final Rectangle targetRectangle = new Rectangle(offsetX, offsetY, width, height);
-        try {
-            pm.beginTask("Writing raster data...", numXTiles * numYTiles);
-
-            for (int tileX = minTileX; tileX < minTileX + numXTiles; ++tileX) {
-                for (int tileY = minTileY; tileY < minTileY + numYTiles; ++tileY) {
-                    if (pm.isCanceled()) {
-                        break;
-                    }
-                    final Rectangle tileRectangle = new Rectangle(
-                            image.getTileGridXOffset() + tileX * image.getTileWidth(),
-                            image.getTileGridYOffset() + tileY * image.getTileHeight(),
-                            image.getTileWidth(), image.getTileHeight());
-
-                    final Rectangle rectangle = targetRectangle.intersection(tileRectangle);
-                    if (!rectangle.isEmpty()) {
-                        final Raster raster = image.getData(rectangle);
-
-                        final int x = rectangle.x;
-                        final int y = rectangle.y;
-                        final int w = rectangle.width;
-                        final int h = rectangle.height;
-                        final ProductData rasterData = band.createCompatibleRasterData(w, h);
-
-                        raster.getDataElements(x, y, w, h, rasterData.getElems());
-                        band.writeRasterData(x, y, w, h, rasterData);
-                    }
-                    pm.worked(1);
-                }
-            }
-        } finally {
-            pm.done();
         }
     }
 
@@ -508,6 +438,18 @@ public class Band extends AbstractBand {
             size += ProductData.getElemSize(getDataType()) * numDataElems;
         }
         return size;
+    }
+
+    private void removeCachedImageData() {
+        if (isSourceImageSet()) {
+            getSourceImage().reset();
+        }
+        if (isGeophysicalImageSet()) {
+            getGeophysicalImage().reset();
+        }
+        if (isValidMaskImageSet()) {
+            getValidMaskImage().reset();
+        }
     }
 
     //////////////////////////////////////////////////////////////////////////
