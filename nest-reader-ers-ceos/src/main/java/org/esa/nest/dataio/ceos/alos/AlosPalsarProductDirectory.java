@@ -401,7 +401,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
                 sceneRec.getAttributeDouble("Pixel spacing"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
-                sceneRec.getAttributeDouble("Pixel spacing"));
+                sceneRec.getAttributeDouble("Line spacing"));
         }
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
                 sceneRec.getAttributeDouble("Nominal number of looks processed in azimuth"));
