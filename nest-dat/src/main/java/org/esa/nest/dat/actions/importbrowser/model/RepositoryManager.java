@@ -366,7 +366,7 @@ public class RepositoryManager {
                     stringBuilder.append("\n");
                 }
                 final String message = stringBuilder.toString();
-                final JFrame pgFrame = ImportBrowserAction.getInstance().getProductGrabber().getFrame();
+                final JFrame pgFrame = ImportBrowserAction.getInstance().getImportBrowser().getFrame();
                 //JOptionPane.showMessageDialog(pgFrame, message, "I/O Errors", JOptionPane.ERROR_MESSAGE);
             }
         }

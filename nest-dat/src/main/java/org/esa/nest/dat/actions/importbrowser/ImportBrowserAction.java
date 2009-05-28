@@ -21,12 +21,12 @@ import java.io.IOException;
  */
 public class ImportBrowserAction extends ExecCommand {
 
-    private static final String ID = "productGrabber";
+    private static final String ID = "importBrowser";
     private static final String HELP_ID = ID;
 
     private static ImportBrowserAction instance;
-    private RepositoryManager repositoryManager;
-    private ImportBrowser productGrabber;
+    private RepositoryManager repositoryManager = null;
+    private ImportBrowser importBrowser = null;
 
     public ImportBrowserAction() {
         super(ID);
@@ -51,29 +51,24 @@ public class ImportBrowserAction extends ExecCommand {
         return repositoryManager;
     }
 
-    /**
-     * Gets the product grabber.
-     *
-     * @return the product grabber
-     */
-    public ImportBrowser getProductGrabber() {
-        return productGrabber;
-    }
-
     public void ShowImportBrowser() {
         actionPerformed(null);  
     }
 
+    public ImportBrowser getImportBrowser() {
+        if (importBrowser == null) {
+            final VisatApp visatApp = VisatApp.getApp();
+            repositoryManager = new RepositoryManager();
+            importBrowser = new ImportBrowser(visatApp, repositoryManager, HELP_ID);
+            importBrowser.setProductOpenHandler(new MyProductOpenHandler(visatApp));
+            importBrowser.getFrame().setIconImage(visatApp.getMainFrame().getIconImage());
+        }
+        return importBrowser;
+    }
+
     @Override
     public void actionPerformed(final CommandEvent event) {
-        if (productGrabber == null) {
-            VisatApp visatApp = VisatApp.getApp();
-            repositoryManager = new RepositoryManager();
-            productGrabber = new ImportBrowser(visatApp, repositoryManager, HELP_ID);
-            productGrabber.setProductOpenHandler(new MyProductOpenHandler(visatApp));
-            productGrabber.getFrame().setIconImage(visatApp.getMainFrame().getIconImage());
-        }
-        productGrabber.getFrame().setVisible(true);
+        getImportBrowser().getFrame().setVisible(true);
     }
 
     @Override
@@ -88,8 +83,8 @@ public class ImportBrowserAction extends ExecCommand {
      */
     @Override
     public void updateComponentTreeUI() {
-        if (productGrabber != null) {
-            SwingUtilities.updateComponentTreeUI(productGrabber.getFrame());
+        if (importBrowser != null) {
+            SwingUtilities.updateComponentTreeUI(importBrowser.getFrame());
         }
     }
 

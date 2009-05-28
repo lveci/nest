@@ -13,8 +13,10 @@ import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView;
 import org.esa.beam.visat.toolviews.stat.StatisticsToolView;
 import org.esa.nest.dat.actions.LoadTabbedLayoutAction;
+import org.esa.nest.dat.actions.importbrowser.ImportBrowserAction;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.dat.views.polarview.PolarView;
+import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
 import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.Settings;
 
@@ -56,7 +58,7 @@ public final class DatApp extends VisatApp {
 
     @Override
     protected void postInit() {
-        String getStarted = VisatApp.getApp().getPreferences().getPropertyString("visat.showGettingStarted", "true");
+        final String getStarted = VisatApp.getApp().getPreferences().getPropertyString("visat.showGettingStarted", "true");
         if(getStarted == null || getStarted.equals("true")) {
             LoadTabbedLayoutAction.loadTabbedLayout();
 
@@ -66,7 +68,28 @@ public final class DatApp extends VisatApp {
 
         final int tileSize = Integer.parseInt(Settings.instance().get("defaultJAITileSize"));
         JAI.setDefaultTileSize(new Dimension(tileSize, tileSize));
-        
+
+        prefetchClasses();
+    }
+
+    private static void prefetchClasses() {
+        final SwingWorker worker = new SwingWorker() {
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                try {
+                    ImportBrowserAction.getInstance().getImportBrowser();
+
+                    final NestSingleTargetProductDialog dialog =
+                            new NestSingleTargetProductDialog("Multilook", VisatApp.getApp(), "Multilook", "");
+
+                } catch(Exception e) {
+                    VisatApp.getApp().showErrorDialog(e.getMessage());
+                }
+                return null;
+            }
+        };
+        worker.execute();
     }
 
     @Override
