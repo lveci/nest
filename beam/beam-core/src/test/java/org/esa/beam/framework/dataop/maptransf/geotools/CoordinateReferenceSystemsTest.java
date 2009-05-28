@@ -7,6 +7,8 @@ import org.esa.beam.framework.dataop.maptransf.MapProjection;
 import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.framework.dataop.maptransf.geotools.CoordinateReferenceSystems;
 import org.geotools.referencing.ReferencingFactoryFinder;
+import org.geotools.referencing.cs.DefaultEllipsoidalCS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.operation.DefaultMathTransformFactory;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CRSAuthorityFactory;
@@ -20,14 +22,9 @@ import java.util.Set;
 public class CoordinateReferenceSystemsTest extends TestCase {
 
     public void testCoordinateReferenceSystems() throws FactoryException {
-        final CRSAuthorityFactory factory = ReferencingFactoryFinder.getCRSAuthorityFactory("EPSG", null);
         final MapProjection gp = MapProjectionRegistry.getProjection(new IdentityTransformDescriptor().getName());
 
-        assertSame(factory.createCoordinateReferenceSystem("EPSG:4918"),
-                   CoordinateReferenceSystems.getCRS(gp, Datum.ITRF_97));
-        assertSame(factory.createCoordinateReferenceSystem("EPSG:4322"),
-                   CoordinateReferenceSystems.getCRS(gp, Datum.WGS_72));
-        assertSame(factory.createCoordinateReferenceSystem("EPSG:4326"),
+        assertSame(DefaultGeographicCRS.WGS84,
                    CoordinateReferenceSystems.getCRS(gp, Datum.WGS_84));
 
         for (final MapProjection projection : MapProjectionRegistry.getProjections()) {

@@ -19,7 +19,7 @@ import java.net.URL;
 
 /**
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2009-05-28 14:17:58 $
+ * @version $Revision: 1.3 $ $Date: 2009-05-28 14:55:40 $
  * @since BEAM 4.6
  */
 public class BlueMarbleLayerType extends ImageLayer.Type {
@@ -29,7 +29,7 @@ public class BlueMarbleLayerType extends ImageLayer.Type {
 
     @Override
     public String getName() {
-        return "Nasa Blue Marble";
+        return "NASA Blue Marble";
     }
 
     @Override
