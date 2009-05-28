@@ -462,7 +462,7 @@ public class ASARRetroCalibrationOperator extends Operator {
                 throw new OperatorException(adsName + "." + (i+1) + " not found");
             }
 
-            final MetadataAttribute swathAttr = record.getAttribute("ASAR_Antenna_ADSR.sd/swath");
+            final MetadataAttribute swathAttr = record.getAttribute("beam_id");
             if (swathAttr == null) {
                 throw new OperatorException("swath not found");
             }
@@ -503,9 +503,7 @@ public class ASARRetroCalibrationOperator extends Operator {
 
                 final double oldAEPElevationAngles = elevationAngleAttr.getData().getElemFloatAt(j);
                 double newGain = ASARCalibrationOperator.computeAntPatGain(
-                        oldAEPElevationAngles,
-                        newRefElevationAngle[subSwathIndex],
-                        newAntennaPatternSingleSwath[subSwathIndex]);
+                        oldAEPElevationAngles, newRefElevationAngle[subSwathIndex], newAntennaPatternWideSwath[subSwathIndex]);
                 if (newGain < underFlowFloat) {
                     newGain = -underFlowFloat;
                 } else {
