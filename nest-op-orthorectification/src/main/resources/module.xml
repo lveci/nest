@@ -53,14 +53,14 @@
             <helpId>GeolocationGridGeocodingOp</helpId>
         </action>
 
-        <action>
+        <!--action>
             <id>createElevationOp</id>
             <class>org.esa.nest.dat.CreateElevationOpAction</class>
             <text>Create Elevation</text>
             <shortDescr>Creates a new product with a DEM</shortDescr>
             <parent>geometry</parent>
             <helpId>CreateElevationOp</helpId>
-        </action>
+        </action-->
 
         <action>
             <id>nestCreateElevationBand</id>

@@ -21,6 +21,7 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.io.File;
 
 /**
     CreateElevationBandOp adds an elevation band to a product
@@ -41,6 +42,9 @@ public final class CreateElevationOp extends Operator {
     @Parameter(description = "The elevation band name.", defaultValue="elevation", label="Elevation Band Name")
     private String elevationBandName = "elevation";
 
+    @Parameter(description = "The external DEM file.", defaultValue=" ", label="External DEM")
+    private String externalDEM = " ";
+
     @Parameter(valueSet = { NEAREST_NEIGHBOUR, BILINEAR, CUBIC }, defaultValue = BILINEAR,
                 label="Resampling Method")
     private String resamplingMethod = BILINEAR;
@@ -49,8 +53,10 @@ public final class CreateElevationOp extends Operator {
     static final String BILINEAR = "Bilinear Interpolation";
     static final String CUBIC = "Cubic Convolution";
 
+    private FileElevationModel fileElevationModel = null;
     private ElevationModel dem = null;
     private Band elevationBand = null;
+    private float noDataValue = 0;
 
     private final Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
 
@@ -79,23 +85,30 @@ public final class CreateElevationOp extends Operator {
             if (demDescriptor.isInstallingDem())
                 throw new OperatorException("The DEM '" + demName + "' is currently being installed.");
 
-            Resampling resamplingMethod = Resampling.BILINEAR_INTERPOLATION;
+            Resampling resampling = Resampling.BILINEAR_INTERPOLATION;
             if(resamplingMethod.equals(NEAREST_NEIGHBOUR)) {
-                resamplingMethod = Resampling.NEAREST_NEIGHBOUR;
+                resampling = Resampling.NEAREST_NEIGHBOUR;
             } else if(resamplingMethod.equals(BILINEAR)) {
-                resamplingMethod = Resampling.BILINEAR_INTERPOLATION;
+                resampling = Resampling.BILINEAR_INTERPOLATION;
             } else if(resamplingMethod.equals(CUBIC)) {
-                resamplingMethod = Resampling.CUBIC_CONVOLUTION;
+                resampling = Resampling.CUBIC_CONVOLUTION;
             }
 
-            dem = demDescriptor.createDem(resamplingMethod);
-            if(dem == null)
-                throw new OperatorException("The DEM '" + demName + "' has not been installed.");
+            if(externalDEM != null && !externalDEM.trim().isEmpty()) {
+
+                fileElevationModel = new FileElevationModel(new File(externalDEM), resampling);
+                noDataValue = fileElevationModel.getNoDataValue();
+            } else {
+
+                dem = demDescriptor.createDem(resampling);
+                if(dem == null)
+                    throw new OperatorException("The DEM '" + demName + "' has not been installed.");
+                noDataValue = dem.getDescriptor().getNoDataValue();
+            }
             
             createTargetProduct();
 
-            final float noDataValue = dem.getDescriptor().getNoDataValue();
-            elevationBand = targetProduct.addBand(elevationBandName, ProductData.TYPE_INT16);
+            elevationBand = targetProduct.addBand(elevationBandName, ProductData.TYPE_FLOAT32);
             elevationBand.setSynthetic(true);
             elevationBand.setNoDataValue(noDataValue);
             elevationBand.setUnit(Unit.METERS);
@@ -155,7 +168,6 @@ public final class CreateElevationOp extends Operator {
         final int h = targetRectangle.height;
 
         final GeoCoding geoCoding = targetProduct.getGeoCoding();
-        final float noDataValue = dem.getDescriptor().getNoDataValue();
 
         final Set<Band> keys = targetTiles.keySet();
         for(Band targetBand : keys) {
@@ -176,7 +188,11 @@ public final class CreateElevationOp extends Operator {
                             pixelPos.setLocation(x + 0.5f, y + 0.5f);
                             geoCoding.getGeoPos(pixelPos, geoPos);
                             try {
-                                elevation = dem.getElevation(geoPos);
+                                if(fileElevationModel != null) {
+                                    elevation = fileElevationModel.getElevation(geoPos);
+                                } else {
+                                    elevation = dem.getElevation(geoPos);
+                                }
                             } catch (Exception e) {
                                 elevation = noDataValue;
                             }

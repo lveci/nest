@@ -28,6 +28,7 @@ public class CreateElevationOpUI extends BaseOperatorUI {
     private final JComboBox demName = new JComboBox(demValueSet);
 
     private final JTextField elevationBandName = new JTextField("");
+    private final JTextField externalDEM = new JTextField("");
 
     private final JComboBox resamplingMethod = new JComboBox(
             new String[] { CreateElevationOp.NEAREST_NEIGHBOUR, CreateElevationOp.BILINEAR, CreateElevationOp.CUBIC } );
@@ -47,6 +48,7 @@ public class CreateElevationOpUI extends BaseOperatorUI {
 
         demName.setSelectedItem(paramMap.get("demName"));
         elevationBandName.setText(String.valueOf(paramMap.get("elevationBandName")));
+        externalDEM.setText(String.valueOf(paramMap.get("externalDEM")));
         resamplingMethod.setSelectedItem(paramMap.get("resamplingMethod"));
     }
 
@@ -61,6 +63,7 @@ public class CreateElevationOpUI extends BaseOperatorUI {
 
         paramMap.put("demName", demName.getSelectedItem());
         paramMap.put("elevationBandName", elevationBandName.getText());
+        paramMap.put("externalDEM", externalDEM.getText());
         paramMap.put("resamplingMethod", resamplingMethod.getSelectedItem());
     }
 
@@ -72,6 +75,8 @@ public class CreateElevationOpUI extends BaseOperatorUI {
 
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Digital Elevation Model:", demName);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "External DEM:", externalDEM);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Elevation Band Name:", elevationBandName);
         gbc.gridy++;
