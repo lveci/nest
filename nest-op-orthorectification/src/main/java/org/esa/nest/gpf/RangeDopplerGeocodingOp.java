@@ -76,7 +76,7 @@ import Jama.Matrix;
  * Reference: Guide to ASAR Geocoding, Issue 1.0, 19.03.2008
  */
 
-@OperatorMetadata(alias="Range-Doppler-Geocoding", description="RD method for orthorectification")
+@OperatorMetadata(alias="Terrain-Correction", description="RD method for orthorectification")
 public final class RangeDopplerGeocodingOp extends Operator {
 
     @SourceProduct(alias="source")

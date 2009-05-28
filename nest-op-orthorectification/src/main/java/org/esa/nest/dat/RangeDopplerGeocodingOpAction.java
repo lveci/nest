@@ -17,7 +17,7 @@ public class RangeDopplerGeocodingOpAction extends AbstractVisatAction {
 
         if (dialog == null) {
             dialog = new NestSingleTargetProductDialog(
-                    "Range-Doppler-Geocoding", getAppContext(), "Range-Doppler-Geocoding", getHelpId());
+                    "Terrain-Correction", getAppContext(), "Terrain-Correction", getHelpId());
             dialog.setTargetProductNameSuffix("_TC");
         }
         dialog.show();
