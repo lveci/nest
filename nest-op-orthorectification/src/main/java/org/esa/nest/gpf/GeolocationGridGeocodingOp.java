@@ -68,7 +68,7 @@ import Jama.Matrix;
  * Reference: Guide to ASAR Geocoding, Issue 1.0, 19.03.2008
  */
 
-@OperatorMetadata(alias="Geolocation-Grid-Geocoding", description="GG method for orthorectification")
+@OperatorMetadata(alias="Ellipsoid-Correction", description="GG method for orthorectification")
 public final class GeolocationGridGeocodingOp extends Operator {
 
     @SourceProduct(alias="source")
@@ -591,7 +591,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * @return The slant range in meters.
      */
     private double computeSlantRange(PixelPos pixPos) {
-        // todo should use quadratic interpolation
+        /*
         final int i0 = (int)pixPos.x;
         final int j0 = (int)pixPos.y;
         final double r00 = slantRangeTime.getPixelDouble(i0, j0) / 1000000000.0 * Constants.halfLightSpeed;
@@ -599,6 +599,8 @@ public final class GeolocationGridGeocodingOp extends Operator {
         final double r10 = slantRangeTime.getPixelDouble(i0, j0+1) / 1000000000.0 * Constants.halfLightSpeed;
         final double r11 = slantRangeTime.getPixelDouble(i0+1, j0+1) / 1000000000.0 * Constants.halfLightSpeed;
         return MathUtils.interpolationBiLinear(r00, r01, r10, r11, pixPos.x - i0, pixPos.y - j0);
+        */
+        return slantRangeTime.getPixelDouble(pixPos.x, pixPos.y, TiePointGrid.BIQUADRATIC) / 1000000000.0 * Constants.halfLightSpeed;
     }
 
     /**
@@ -607,7 +609,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * @return The zero Doppler time in days.
      */
     private double computeZeroDopplerTime(PixelPos pixPos) {
-        // todo should use quadratic interpolation
+        // todo Guide requires using biquadratic interpolation, is it necessary?
         final int j0 = (int)pixPos.y;
         final double t0 = firstLineUTC + j0*lineTimeInterval;
         final double t1 = firstLineUTC + (j0 + 1)*lineTimeInterval;
