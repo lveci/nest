@@ -24,15 +24,10 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.framework.dataop.dem.ElevationModel;
-import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
-import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
-import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.MathUtils;
-import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.Constants;
 import org.esa.nest.gpf.OperatorUtils;
 
@@ -40,8 +35,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.IOException;
-
-import Jama.Matrix;
 
 /**
  * Raw SAR images usually contain significant geometric distortions. One of the factors that cause the
@@ -461,7 +454,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, lonMax);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE,
                 (int)(targetProduct.getRawStorageSize() / (1024.0f * 1024.0f)));
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_geocoded, 1);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_terrain_corrected, 1);
         //AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.geo_ref_system, "WGS84");
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lat_pixel_res, delLat);

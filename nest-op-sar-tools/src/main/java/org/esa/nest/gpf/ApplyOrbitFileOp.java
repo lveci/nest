@@ -40,6 +40,7 @@ import org.apache.commons.net.ftp.FTPFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Calendar;
 
 /**
  * This operator applies orbit file to a given product.
@@ -159,7 +160,7 @@ public final class ApplyOrbitFileOp extends Operator {
             updateTargetProductGEOCoding();
 
             updateOrbitStateVectors();
-
+  
         } catch(Exception e) {
             throw new OperatorException(e.getMessage());
         }
@@ -175,13 +176,13 @@ public final class ApplyOrbitFileOp extends Operator {
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs during computation of the target raster.
      */
-    @Override
+   /* @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
         // copy source data to target
         targetTile.setRawSamples(getSourceTile(sourceProduct.getBand(targetBand.getName()),
                                                targetTile.getRectangle(), pm).getRawSamples());
-    }
+    }   */
 
     /**
      * Get source product tie point grids for latitude, longitude, incidence angle and slant range time.
@@ -229,20 +230,13 @@ public final class ApplyOrbitFileOp extends Operator {
                                     sourceProduct.getSceneRasterHeight());
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
-
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
 
         for(Band band : sourceProduct.getBands()) {
-            final Band targetBand = new Band(band.getName(),
-                                             band.getDataType(),
-                                             band.getRasterWidth(),
-                                             band.getRasterHeight());
-
-            targetBand.setUnit(band.getUnit());
-            targetProduct.addBand(targetBand);
+            ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct);
         }
 
         //targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 50);
@@ -266,12 +260,12 @@ public final class ApplyOrbitFileOp extends Operator {
         for (int r = 0; r < targetTiePointGridHeight; r++) {
 
             // get the zero Doppler time for the rth line
-            int y = getLineIndex(r);
-            double curLineUTC = computeCurrentLineUTC(y);
+            final int y = getLineIndex(r);
+            final double curLineUTC = computeCurrentLineUTC(y);
             //System.out.println((new ProductData.UTC(curLineUTC)).toString());
             
             // compute the satellite position and velocity for the zero Doppler time using cubic interpolation
-            OrbitData data = getOrbitData(curLineUTC);
+            final OrbitData data = getOrbitData(curLineUTC);
 
             for (int c = 0; c < targetTiePointGridWidth; c++) {
 
@@ -300,6 +294,10 @@ public final class ApplyOrbitFileOp extends Operator {
                 0.0f, 0.0f, (float)subSamplingX, (float)subSamplingY, targetLonTiePoints, TiePointGrid.DISCONT_AT_180);
 
         final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
+
+        for(TiePointGrid tpg : targetProduct.getTiePointGrids()) {
+            targetProduct.removeTiePointGrid(tpg);
+        }
 
         targetProduct.addTiePointGrid(angleGrid);
         targetProduct.addTiePointGrid(slrgtGrid);
@@ -493,19 +491,22 @@ public final class ApplyOrbitFileOp extends Operator {
         final AbstractMetadata.OrbitStateVector[] orbitStateVectors = AbstractMetadata.getOrbitStateVectors(tgtAbsRoot);
 
         // compute new orbit state vectors
-        for (int i = 0; i< orbitStateVectors.length; i++) {
-            final double time = orbitStateVectors[i].time.getMJD();
+        for (AbstractMetadata.OrbitStateVector orbitStateVector : orbitStateVectors) {
+            final double time = orbitStateVector.time.getMJD();
             final OrbitData orbitData = getOrbitData(time);
-            orbitStateVectors[i].x_pos = orbitData.xPos; // m
-            orbitStateVectors[i].y_pos = orbitData.yPos; // m
-            orbitStateVectors[i].z_pos = orbitData.zPos; // m
-            orbitStateVectors[i].x_vel = orbitData.xVel; // m/s
-            orbitStateVectors[i].y_vel = orbitData.yVel; // m/s
-            orbitStateVectors[i].z_vel = orbitData.zVel; // m/s
+            orbitStateVector.x_pos = orbitData.xPos; // m
+            orbitStateVector.y_pos = orbitData.yPos; // m
+            orbitStateVector.z_pos = orbitData.zPos; // m
+            orbitStateVector.x_vel = orbitData.xVel; // m/s
+            orbitStateVector.y_vel = orbitData.yVel; // m/s
+            orbitStateVector.z_vel = orbitData.zVel; // m/s
         }
 
         // save new orbit state vectors
         AbstractMetadata.setOrbitStateVectors(tgtAbsRoot, orbitStateVectors);
+
+        // save orbit file name
+        tgtAbsRoot.setAttributeString(AbstractMetadata.orbit_state_vector_file, orbitFile.getName());
     }
     
     // ====================================== DORIS ORBIT FILE ===============================================

@@ -47,8 +47,6 @@ import java.io.IOException;
 import java.io.File;
 import java.text.SimpleDateFormat;
 
-import Jama.Matrix;
-
 /**
  * Raw SAR images usually contain significant geometric distortions. One of the factors that cause the
  * distortions is the ground elevation of the targets. This operator corrects the topographic distortion
@@ -662,6 +660,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
             fileElevationModel = new FileElevationModel(externalDemFile, getResamplingMethod());
             demNoDataValue = fileElevationModel.getNoDataValue();
+            demName = externalDemFile.getName();
 
         } else {
 
@@ -721,7 +720,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
         updateTargetProductMetadata();
 
-        //addLayoverShadowBitmasks(targetProduct);
+        addLayoverShadowBitmasks(targetProduct);
 
         // the tile width has to be the image width because otherwise sourceRaster.getDataBufferIndex(x, y)
         // returns incorrect index for the last tile on the right
@@ -729,9 +728,12 @@ public final class RangeDopplerGeocodingOp extends Operator {
     }
 
     private static void addLayoverShadowBitmasks(Product product) {
-        final String expression = product.getBandAt(0).getName() + " < 100";
-        final BitmaskDef shadowMap = new BitmaskDef("shadow", "Shadow Map", expression, Color.RED, 0.5f);
-        product.addBitmaskDef(shadowMap);    
+        for(Band band : product.getBands()) {
+            final String expression = band.getName() + " < 0";
+            final BitmaskDef nrv = new BitmaskDef(band.getName()+"_non_reliable_values",
+                    "Non reliable values where DN is negative", expression, Color.RED, 0.5f);
+            product.addBitmaskDef(nrv);
+        }
     }
 
     /**
@@ -911,8 +913,9 @@ public final class RangeDopplerGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, lonMax);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE,
                 (int)(targetProduct.getRawStorageSize() / (1024.0f * 1024.0f)));
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_geocoded, 1);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_terrain_corrected, 1);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
+        // map projection too
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.geo_ref_system, "WGS84");
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lat_pixel_res, delLat);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lon_pixel_res, delLon);

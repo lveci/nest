@@ -81,7 +81,7 @@ public final class DatApp extends VisatApp {
                     ImportBrowserAction.getInstance().getImportBrowser();
 
                     final NestSingleTargetProductDialog dialog =
-                            new NestSingleTargetProductDialog("Multilook", VisatApp.getApp(), "Multilook", "");
+                            new NestSingleTargetProductDialog("Multilook", VisatApp.getApp(), "Multilook", null);
 
                 } catch(Exception e) {
                     VisatApp.getApp().showErrorDialog(e.getMessage());

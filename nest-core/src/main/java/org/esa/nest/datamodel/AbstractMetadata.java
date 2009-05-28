@@ -101,7 +101,7 @@ public class AbstractMetadata {
     public static final String srgr_coef = "srgr_coef";
 
     // orthorectification
-    public static final String is_geocoded = "is_geocoded";
+    public static final String is_terrain_corrected = "is_terrain_corrected";
     public static final String DEM = "DEM";
     public static final String geo_ref_system = "geo_ref_system";
     public static final String lat_pixel_res = "lat_pixel_res";
@@ -173,7 +173,7 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, isMapProjected, ProductData.TYPE_UINT8, "flag", "Map projection applied");
 
         // orthorectification
-        addAbstractedAttribute(absRoot, is_geocoded, ProductData.TYPE_UINT8, "flag", "orthorectification applied");
+        addAbstractedAttribute(absRoot, is_terrain_corrected, ProductData.TYPE_UINT8, "flag", "orthorectification applied");
         addAbstractedAttribute(absRoot, DEM, ProductData.TYPE_ASCII, "", "Digital Elevation Model used");
         addAbstractedAttribute(absRoot, geo_ref_system, ProductData.TYPE_ASCII, "", "geographic reference system");
         addAbstractedAttribute(absRoot, lat_pixel_res, ProductData.TYPE_FLOAT64, "deg", "pixel resolution in geocoded image");
