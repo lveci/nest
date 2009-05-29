@@ -23,6 +23,7 @@
 		<tocitem text="Image View" target="imageView"/>
         <tocitem text="Navigation Window" target="showNavigationWnd"/>
         <tocitem text="Colour Manipulation" target="showColorManipulationWnd"/>
+		<tocitem text="Layer Manager" target="showLayerManagerWnd"/>
 		<tocitem text="Product World Map" target="showWorldMapWnd"/>
         <tocitem text="Preferences Dialog" target="preferences"/>
 		<tocitem text="Wave Mode Polar View" target="polarView"/>
@@ -84,7 +85,6 @@
             
         <tocitem text="Imaging Tools">
             <tocitem text="RGB-Image Profile" target="rgbImageProfile"/>
-			<tocitem text="Layer Manager" target="showLayerManagerWnd"/>
             <tocitem text="No Data Overlay" target="noDataOverlay"/>
             <tocitem text="Bitmask Overlay" target="showBitmaskOverlayWnd"/>
             <tocitem text="Bitmask Editor" target="bitmaskEditor"/>
