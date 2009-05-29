@@ -78,10 +78,10 @@ public final class DatApp extends VisatApp {
             @Override
             protected Object doInBackground() throws Exception {
                 try {
-                    ImportBrowserAction.getInstance().getImportBrowser();
-
                     final NestSingleTargetProductDialog dialog =
                             new NestSingleTargetProductDialog("Multilook", VisatApp.getApp(), "Multilook", null);
+
+                    ImportBrowserAction.getInstance().getImportBrowser();
 
                 } catch(Exception e) {
                     VisatApp.getApp().showErrorDialog(e.getMessage());

@@ -18,13 +18,14 @@
             <scope>system</scope>
             <value> ${installdir}</value>
         </addEnvironmentVariable>
-        <addLibraryToPath>
-            <path> ${installdir}</path>
-        </addLibraryToPath>
         <changePermissions>
-            <files>*/*.sh;*/*.bin</files>
+            <files>*/*.sh;*/*.bin;dat.sh;gpt.sh</files>
             <permissions>755</permissions>
         </changePermissions>
+        <addDirectoryToPath>
+            <insertAt>end</insertAt>
+            <path> ${installdir}</path>
+        </addDirectoryToPath>
     </postInstallationActionList>
     <compressionAlgorithm>lzma</compressionAlgorithm>
     <enableRollback>1</enableRollback>
@@ -339,6 +340,20 @@
                     <windowsIcon></windowsIcon>
                     <windowsPath>${installdir}</windowsPath>
                 </startMenuShortcut>
+                <startMenuLinkShortcut>
+                    <comment>NEST website</comment>
+                    <name>NEST HomePage</name>
+                    <runInTerminal>0</runInTerminal>
+                    <url>http://www.array.ca/nest</url>
+                    <windowsIcon></windowsIcon>
+                </startMenuLinkShortcut>
+                <startMenuLinkShortcut>
+                    <comment>NEST Documentation</comment>
+                    <name>Online Help</name>
+                    <runInTerminal>0</runInTerminal>
+                    <url> ${installdir}\modules\nest-help-2C\doc\help\index.html</url>
+                    <windowsIcon></windowsIcon>
+                </startMenuLinkShortcut>
             </startMenuShortcutList>
         </component>
     </componentList>

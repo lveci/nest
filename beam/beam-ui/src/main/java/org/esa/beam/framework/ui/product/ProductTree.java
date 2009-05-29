@@ -1,5 +1,5 @@
 /*
- * $Id: ProductTree.java,v 1.2 2009-05-15 12:46:55 lveci Exp $
+ * $Id: ProductTree.java,v 1.3 2009-05-28 20:47:45 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -69,7 +69,7 @@ import java.io.File;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.2 $ $Date: 2009-05-15 12:46:55 $
+ * @version $Revision: 1.3 $ $Date: 2009-05-28 20:47:45 $
  * @see org.esa.beam.framework.ui.product.ProductTreeListener
  * @see org.esa.beam.framework.datamodel.Product
  */
@@ -567,6 +567,13 @@ public class ProductTree extends JTree implements PopupMenuFactory {
                     this.setIcon(metadataIcon);
                 } else if (productNode instanceof Band) {
                     Band band = (Band) productNode;
+
+                    final String unit = band.getUnit();
+                    if(unit != null && unit.contains("amplitude")) {
+                        toolTipBuffer.append(" DN");
+                    } else if(unit != null && unit.contains("intensity")) {
+                        toolTipBuffer.append(" DN^2");
+                    }
 
                     if (band.getSpectralWavelength() > 0.0) {
                         toolTipBuffer.append(", wavelength = ");
