@@ -320,7 +320,9 @@ class JERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(product));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange());
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.isMapProjected, isMapProjected());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.map_projection, getMapProjection(mapProjRec));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.geo_ref_system,
+                mapProjRec.getAttributeString("Name of reference ellipsoid"));
         
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag,
                 facilityRec.getAttributeInt("Antenna pattern correction flag"));
@@ -343,11 +345,11 @@ class JERSProductDirectory extends CEOSProductDirectory {
         return 1;
     }
 
-    private int isMapProjected() {
+    private String getMapProjection(BaseRecord mapProjRec) {
         if(productType.contains("IMG") || productType.contains("GEC")) {
-            return 1;
+            return mapProjRec.getAttributeString("Map projection descriptor");
         }
-        return 0;
+        return "";
     }
 
     private String getProductName() {

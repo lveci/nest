@@ -86,7 +86,7 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("srgr_flag", sph.getAttributeInt("SR_GR", 0), "flag", absRoot, "SRGR applied");
             addAbstractedAttribute("ant_elev_corr_flag", sph.getAttributeInt("antenna_corr", 0), "flag", absRoot,
                                 "Antenna elevation applied");
-            addAbstractedAttribute("is_map_projected", 0, "flag", absRoot, "Map projection applied");
+            addAbstractedAttribute("map_projection", "", absRoot, "Map projection applied");
         } else {
             addAbstractedAttribute("first_line_time", sph.getAttributeUTC("first_line_time", new ProductData.UTC(0)), absRoot,
                     "First zero doppler azimuth time");
@@ -138,14 +138,18 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("avg_scene_height", mppAds.getAttributeDouble("avg_scene_height_ellpsoid", 0),
                     "m", absRoot, "Average ccene height ellipsoid");
 
-            int isMapProjected = 0;
+            String mapProjection = "";
+            String geoRefSystem = "";
             if (productType.contains("APG") || productType.contains("IMG")) {
-                isMapProjected = 1;
+                final MetadataElement mapGads = root.getElement("MAP_PROJECTION_GADS");
+                mapProjection = mapGads.getAttributeString("map_descriptor", "Geocoded");
+                geoRefSystem = mapGads.getAttributeString("ellipsoid_name", "WGS84");
             }
-            addAbstractedAttribute("is_map_projected", isMapProjected, "flag", absRoot, "Map projection applied");
-            addAbstractedAttribute("is_geocoded", 0, "flag", absRoot, "orthorectification applied");
+            addAbstractedAttribute("map_projection", mapProjection, absRoot, "Map projection applied");
+
+            addAbstractedAttribute("is_terrain_corrected", 0, "flag", absRoot, "orthorectification applied");
             addAbstractedAttribute("dem", "", absRoot, "Digital Elevation Model used");
-            addAbstractedAttribute("geo_ref_system", "", absRoot, "geographic reference system");
+            addAbstractedAttribute("geo_ref_system", geoRefSystem, absRoot, "geographic reference system");
             addAbstractedAttribute("lat_pixel_res", 0.0, "deg", absRoot, "pixel resolution in geocoded image");
             addAbstractedAttribute("lon_pixel_res", 0.0, "deg", absRoot, "pixel resolution in geocoded image");
 

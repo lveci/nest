@@ -52,7 +52,7 @@ public class ProjectionAction extends ExecCommand {
                 // set flag in metadata to show it's been projected
                 try {
                     final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-                    AbstractMetadata.setAttribute(absRoot, AbstractMetadata.isMapProjected, 1);
+                    AbstractMetadata.setAttribute(absRoot, AbstractMetadata.map_projection, 1);
                 } catch(Exception e) {
                     // continue
                 }
@@ -68,13 +68,14 @@ public class ProjectionAction extends ExecCommand {
     private static boolean checkMetadata(final VisatApp visatApp, final Product product) {
         try {
             final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+            if(absRoot == null)
+                return true;
             final int srgrApplied = absRoot.getAttributeInt(AbstractMetadata.srgr_flag);
             if(srgrApplied != 1) {
                 visatApp.showErrorDialog("Product is in slant range. Please first convert to ground range.");
                 return false;
             }
-            final int isMapProjected = absRoot.getAttributeInt(AbstractMetadata.isMapProjected);
-            if(isMapProjected == 1) {
+            if(!absRoot.getAttributeString("map_projection", "").isEmpty()) {
                 visatApp.showErrorDialog("Product is already map projected");
                 return false;
             }

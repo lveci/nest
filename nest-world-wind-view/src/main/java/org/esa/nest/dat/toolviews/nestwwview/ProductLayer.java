@@ -242,7 +242,7 @@ public class ProductLayer extends RenderableLayer {
         if(product.getGeoCoding() instanceof MapGeoCoding)
             return true;
         final MetadataElement absRoot = product.getMetadataRoot().getElement("Abstracted Metadata");
-        return absRoot != null && absRoot.getAttributeInt("isMapProjected", 0) == 1;
+        return absRoot != null && !absRoot.getAttributeString("map_projection", "").isEmpty();
     }
 
     private static Product createSubsampledProduct(final Product product) throws IOException {

@@ -68,7 +68,7 @@ public class AbstractMetadata {
 
     // SRGR
     public static final String srgr_flag = "srgr_flag";
-    public static final String isMapProjected = "is_map_projected";
+    public static final String map_projection = "map_projection";
 
     // calibration
     public static final String ant_elev_corr_flag = "ant_elev_corr_flag";
@@ -170,7 +170,7 @@ public class AbstractMetadata {
 
         // SRGR
         addAbstractedAttribute(absRoot, srgr_flag, ProductData.TYPE_UINT8, "flag", "SRGR applied");
-        addAbstractedAttribute(absRoot, isMapProjected, ProductData.TYPE_UINT8, "flag", "Map projection applied");
+        addAbstractedAttribute(absRoot, map_projection, ProductData.TYPE_ASCII, "", "Map projection applied");
 
         // orthorectification
         addAbstractedAttribute(absRoot, is_terrain_corrected, ProductData.TYPE_UINT8, "flag", "orthorectification applied");

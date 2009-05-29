@@ -24,6 +24,9 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.framework.gpf.annotations.Parameter;
+import org.esa.beam.framework.dataop.maptransf.MapInfo;
+import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
+import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
@@ -73,10 +76,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
             sourceProductId="source", label="Source Bands")
     String[] sourceBandNames = null;
 
-    //@Parameter(valueSet = {"ACE", "GETASSE30", "SRTM 3Sec GeoTiff"}, description = "The digital elevation model.",
-    //           defaultValue="SRTM 3Sec GeoTiff", label="Digital Elevation Model")
-    //private String demName = "SRTM 3Sec GeoTiff";
-
     private Band sourceBand = null;
     private Band sourceBand2 = null;
     private MetadataElement absRoot = null;
@@ -88,8 +87,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
     private int targetImageHeight = 0;
 
     private TiePointGrid slantRangeTime = null;
-    private TiePointGrid latitude = null;
-    private TiePointGrid longitude = null;
 
     private double rangeSpacing = 0.0;
     private double azimuthSpacing = 0.0;
@@ -134,6 +131,10 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
         try {
             absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+
+            if(OperatorUtils.isMapProjected(sourceProduct)) {
+                throw new OperatorException("Source product is already map projected");
+            }
 
             getSRGRFlag();
 
@@ -410,26 +411,37 @@ public final class GeolocationGridGeocodingOp extends Operator {
      */
     private void addGeoCoding() {
 
-        int gridWidth = 2;
-        int gridHeight = 2;
+        final int gridWidth = 2;
+        final int gridHeight = 2;
 
-        float subSamplingX = targetImageWidth;
-        float subSamplingY = targetImageHeight;
+        final float subSamplingX = targetImageWidth;
+        final float subSamplingY = targetImageHeight;
 
-        float[] latTiePoints = {(float)latMax, (float)latMax, (float)latMin, (float)latMin};
-        float[] lonTiePoints = {(float)lonMin, (float)lonMax, (float)lonMin, (float)lonMax};
+        final float[] latTiePoints = {(float)latMax, (float)latMax, (float)latMin, (float)latMin};
+        final float[] lonTiePoints = {(float)lonMin, (float)lonMax, (float)lonMin, (float)lonMax};
 
-        TiePointGrid latGrid = new TiePointGrid(
+        final TiePointGrid latGrid = new TiePointGrid(
                 "latitude", gridWidth, gridHeight, 0.0f, 0.0f, subSamplingX, subSamplingY, latTiePoints);
 
-        TiePointGrid lonGrid = new TiePointGrid(
+        final TiePointGrid lonGrid = new TiePointGrid(
                 "longitude", gridWidth, gridHeight, 0.0f, 0.0f, subSamplingX, subSamplingY, lonTiePoints);
 
         targetProduct.addTiePointGrid(latGrid);
         targetProduct.addTiePointGrid(lonGrid);
 
-        TiePointGeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
+        final TiePointGeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
         targetProduct.setGeoCoding(gc);
+
+        final String[] srcBandNames = targetBandNameToSourceBandName.get(targetProduct.getBandAt(0).getName());
+
+        final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(targetProduct,
+                                                MapProjectionRegistry.getProjection(IdentityTransformDescriptor.NAME),
+                                                0.0,
+                                                sourceProduct.getBand(srcBandNames[0]).getNoDataValue());
+        mapInfo.setSceneWidth(targetProduct.getSceneRasterWidth());
+        mapInfo.setSceneHeight(targetProduct.getSceneRasterHeight());
+
+        targetProduct.setGeoCoding(new MapGeoCoding(mapInfo));
     }
 
     /**
@@ -441,7 +453,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.srgr_flag, 1);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.isMapProjected, 1);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, IdentityTransformDescriptor.NAME);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetImageHeight);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_lat, latMax);
@@ -454,7 +466,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, lonMax);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE,
                 (int)(targetProduct.getRawStorageSize() / (1024.0f * 1024.0f)));
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_terrain_corrected, 1);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_terrain_corrected, 0);
         //AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.geo_ref_system, "WGS84");
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lat_pixel_res, delLat);
@@ -466,8 +478,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
      */
     private void getTiePointGrids() {
         slantRangeTime = OperatorUtils.getSlantRangeTime(sourceProduct);
-        latitude = OperatorUtils.getLatitude(sourceProduct);
-        longitude = OperatorUtils.getLongitude(sourceProduct);
     }
 
 

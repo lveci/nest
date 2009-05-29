@@ -203,6 +203,10 @@ public final class RangeDopplerGeocodingOp extends Operator {
         try {
             absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
+            if(OperatorUtils.isMapProjected(sourceProduct)) {
+                throw new OperatorException("Source product is already map projected");
+            }
+
             getSRGRFlag();
 
             getRadarFrequency();
@@ -576,6 +580,9 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private void computeImageGeoBoundary() throws Exception {
         
         final GeoCoding geoCoding = sourceProduct.getGeoCoding();
+        if(geoCoding == null) {
+            throw new OperatorException("Product does not contain a geocoding");
+        }
         final GeoPos geoPosFirstNear = geoCoding.getGeoPos(new PixelPos(0,0), null);
         final GeoPos geoPosFirstFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth(),0), null);
         final GeoPos geoPosLastNear = geoCoding.getGeoPos(new PixelPos(0,sourceProduct.getSceneRasterHeight()), null);
@@ -913,6 +920,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, lonMax);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE,
                 (int)(targetProduct.getRawStorageSize() / (1024.0f * 1024.0f)));
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, IdentityTransformDescriptor.NAME);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_terrain_corrected, 1);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
         // map projection too

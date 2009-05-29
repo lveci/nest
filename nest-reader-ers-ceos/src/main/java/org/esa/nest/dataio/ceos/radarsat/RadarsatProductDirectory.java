@@ -259,8 +259,19 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
                 radiometricRec.getAttributeDouble("Calibration constant"));
 
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.map_projection, getMapProjection(mapProjRec));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.geo_ref_system,
+                mapProjRec.getAttributeString("Name of reference ellipsoid"));
+
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.replica_power_corr_flag, 0);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
+    }
+
+    private String getMapProjection(BaseRecord mapProjRec) {
+        if(productType.contains("IMG") || productType.contains("GEC") || productType.contains("SSG")) {
+            return mapProjRec.getAttributeString("Map projection descriptor");
+        }
+        return "";
     }
 
     private String getProductName() {

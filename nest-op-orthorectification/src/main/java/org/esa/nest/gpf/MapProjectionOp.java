@@ -106,16 +106,9 @@ public final class MapProjectionOp extends Operator {
         }
     }
 
-    private static void updateMetadata(Product product) {
+    private void updateMetadata(Product product) {
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-        absRoot.setAttributeInt(AbstractMetadata.isMapProjected, 1);
-    }
-
-    private static boolean isMapProjected(Product product) {
-        if(product.getGeoCoding() instanceof MapGeoCoding)
-            return true;
-        final MetadataElement absRoot = product.getMetadataRoot().getElement("Abstracted Metadata");
-        return absRoot != null && absRoot.getAttributeInt("isMapProjected", 0) == 1;
+        absRoot.setAttributeString(AbstractMetadata.map_projection, projectionName);
     }
 
     private static Product createSubsampledProduct(final Product product, final String[] selectedBands,
@@ -127,7 +120,7 @@ public final class MapProjectionOp extends Operator {
         productSubsetDef.setNodeNames(selectedBands);
         Product productSubset = product.createSubset(productSubsetDef, product.getName(), null);
 
-        if(!isMapProjected(product)) {
+        if(!OperatorUtils.isMapProjected(product)) {
             final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(productSubset,
                                                 MapProjectionRegistry.getProjection(projectionName),
                                                 0.0,

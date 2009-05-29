@@ -119,7 +119,14 @@ public class OperatorUtils {
                                     DimapProductConstants.DIMAP_FORMAT_NAME);
     }
 
-        /**
+    public static boolean isMapProjected(Product product) {
+        if(product.getGeoCoding() instanceof MapGeoCoding)
+            return true;
+        final MetadataElement absRoot = product.getMetadataRoot().getElement("Abstracted Metadata");
+        return absRoot != null && !absRoot.getAttributeString("map_projection", "").isEmpty();
+    }
+
+    /**
      * Copy master GCPs to target product.
      * @param group input master GCP group
      * @param targetGCPGroup output master GCP group
@@ -141,7 +148,7 @@ public class OperatorUtils {
     }
 
     public static Product createDummyTargetProduct() {
-        Product targetProduct = new Product("tmp", "tmp", 1, 1);
+        final Product targetProduct = new Product("tmp", "tmp", 1, 1);
         targetProduct.addBand(new Band("tmp", ProductData.TYPE_INT8, 1, 1));
         AbstractMetadata.addAbstractedMetadataHeader(targetProduct.getMetadataRoot());
         return targetProduct;
@@ -168,20 +175,17 @@ public class OperatorUtils {
             float subSamplingY,
             PixelPos[] newTiePointPos) {
 
-        int targetImageWidth = targetProduct.getSceneRasterWidth();
-        int targetImageHeight = targetProduct.getSceneRasterHeight();
-
         TiePointGrid latGrid = null;
         TiePointGrid lonGrid = null;
 
         for(TiePointGrid srcTPG : sourceProduct.getTiePointGrids()) {
 
-            float[] tiePoints = new float[gridWidth*gridHeight];
+            final float[] tiePoints = new float[gridWidth*gridHeight];
             for (int k = 0; k < newTiePointPos.length; k++) {
                 tiePoints[k] = srcTPG.getPixelFloat(newTiePointPos[k].x, newTiePointPos[k].y);
             }
 
-            TiePointGrid tgtTPG = new TiePointGrid(srcTPG.getName(),
+            final TiePointGrid tgtTPG = new TiePointGrid(srcTPG.getName(),
                                                    gridWidth,
                                                    gridHeight,
                                                    0.0f,
@@ -199,7 +203,7 @@ public class OperatorUtils {
             }
         }
 
-        TiePointGeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
+        final TiePointGeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
 
         targetProduct.setGeoCoding(gc);
     }

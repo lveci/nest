@@ -422,7 +422,9 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(product));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange());
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.isMapProjected, isMapProjected());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.map_projection, getMapProjection());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.geo_ref_system,
+                sceneRec.getAttributeString("Ellipsoid designator"));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag, 1);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag, 1);        
@@ -452,13 +454,13 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         return 1;
     }
 
-    private int isMapProjected() {
-        if(_leaderFile.getMapProjRecord() == null) return 0;
+    private String getMapProjection() {
+        if(_leaderFile.getMapProjRecord() == null) return "";
         //final String projDesc = _leaderFile.getMapProjRecord().getAttributeString("Map projection descriptor").toLowerCase();
         //if(projDesc.contains("geo"))
         if(getProductType().contains("1.5G"))
-            return 1;
-        return 0;
+            return "Geocoded";
+        return "";
     }
 
     private static ProductData.UTC getStartEndTime(BaseRecord sceneRec, MetadataElement root, String tag) {
