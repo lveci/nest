@@ -1,5 +1,5 @@
 /*
- * $Id: MapProjectionDialog.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: MapProjectionDialog.java,v 1.2 2009-05-29 19:18:33 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -657,6 +657,14 @@ public class MapProjectionDialog extends ModalDialog {
             JTextComponent tc = (JTextComponent) jComponent;
             tc.setCaretPosition(caretPos);
         }
+    }
+
+    public String getProjectionName() {
+        return _outputMapInfo.getMapProjection().getName();
+    }
+
+    public String getDatumName() {
+        return _outputMapInfo.getDatum().getName();
     }
 
 }

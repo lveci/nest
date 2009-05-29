@@ -53,7 +53,8 @@ public class ProjectionAction extends ExecCommand {
                 // set flag in metadata to show it's been projected
                 try {
                     final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-                    AbstractMetadata.setAttribute(absRoot, AbstractMetadata.map_projection, 1);
+                    AbstractMetadata.setAttribute(absRoot, AbstractMetadata.map_projection, dialog.getProjectionName());
+                    AbstractMetadata.setAttribute(absRoot, AbstractMetadata.geo_ref_system, dialog.getDatumName());
                 } catch(Exception e) {
                     // continue
                 }
