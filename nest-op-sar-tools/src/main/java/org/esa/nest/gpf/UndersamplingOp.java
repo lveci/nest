@@ -697,8 +697,8 @@ public class UndersamplingOp extends Operator {
 
         final int x0 = (int)(tx0 * stepRange + 0.5f);
         final int y0 = (int)(ty0 * stepAzimuth + 0.5f);
-        final int w = (int)((tx0 + tw - 1)*stepRange + 0.5f) + filterWidth - (int)(tx0*stepRange + 0.5f) + 1;
-        final int h = (int)((ty0 + th - 1)*stepAzimuth + 0.5f) + filterHeight - (int)(ty0*stepAzimuth + 0.5f) + 1;
+        final int w = (int)((tx0 + tw - 1)*stepRange + 0.5f) + filterWidth - (int)(tx0*stepRange + 0.5f);
+        final int h = (int)((ty0 + th - 1)*stepAzimuth + 0.5f) + filterHeight - (int)(ty0*stepAzimuth + 0.5f);
         final Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
