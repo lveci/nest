@@ -1124,7 +1124,7 @@ public class ASARCalibrationOperator extends Operator {
         // middle point of the overlapped area of two adjacent sub swathes is used as boundary of sub swath.
         int idx = -1;
         double min = 360.0;
-        for (int i = 0 ; i < refElevationAngle.length-1; i++) {
+        for (int i = 0 ; i < refElevationAngle.length; i++) {
             double d = Math.abs(theta - refElevationAngle[i]);
             if (d < min) {
                 min = d;
