@@ -1,5 +1,5 @@
 /*
- * $Id: BandArithmetikDialog.java,v 1.8 2009-05-27 21:09:23 lveci Exp $
+ * $Id: BandArithmetikDialog.java,v 1.9 2009-06-01 19:52:04 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -115,7 +115,8 @@ public class BandArithmetikDialog extends ModalDialog {
         try {
             Product[] products = getCompatibleProducts();
             int defaultProductIndex = Arrays.asList(products).indexOf(targetProduct);
-            validMaskExpression = BandArithmetic.getValidMaskExpression(getExpression(), products, defaultProductIndex, null);
+            validMaskExpression = BandArithmetic.getValidMaskExpression(getExpression(), products, defaultProductIndex,
+                                                                        null);
         } catch (ParseException e) {
             String errorMessage = "The band could not be created.\nAn expression parse error occurred:\n" + e.getMessage(); /*I18N*/
             visatApp.showErrorDialog(errorMessage);
@@ -151,9 +152,9 @@ public class BandArithmetikDialog extends ModalDialog {
                 expression = "(" + validMaskExpression + ") ? (" + expression + ") : NaN";
             }
             band.setSourceImage(VirtualBand.createVirtualSourceImage(band, expression));
+        } else {
+            checkExpressionForExternalReferences(getExpression());
         }
-
-        checkExpressionForExternalReferences(getExpression());
 
         hide();
         band.setModified(true);
@@ -171,7 +172,7 @@ public class BandArithmetikDialog extends ModalDialog {
 
         if (isTargetBandReferencedInExpression()) {
             showErrorDialog("You cannot reference the target band '" + getBandName() +
-                    "' within the expression.");
+                            "' within the expression.");
             return false;
         }
         return super.verifyUserInput();
@@ -312,13 +313,15 @@ public class BandArithmetikDialog extends ModalDialog {
         context.addPropertyChangeListener(PROPERTY_NAME_SAVE_EXPRESSION_ONLY, new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                final boolean saveExpressionOnly = (Boolean) context.getBinding(PROPERTY_NAME_SAVE_EXPRESSION_ONLY).getPropertyValue();
+                final boolean saveExpressionOnly = (Boolean) context.getBinding(
+                        PROPERTY_NAME_SAVE_EXPRESSION_ONLY).getPropertyValue();
                 if (!saveExpressionOnly) {
                     context.getBinding(PROPERTY_NAME_NO_DATA_VALUE_USED).setPropertyValue(true);
                 }
             }
         });
-        context.bindEnabledState(PROPERTY_NAME_NO_DATA_VALUE_USED, false, PROPERTY_NAME_SAVE_EXPRESSION_ONLY, Boolean.FALSE);
+        context.bindEnabledState(PROPERTY_NAME_NO_DATA_VALUE_USED, false, PROPERTY_NAME_SAVE_EXPRESSION_ONLY,
+                                 Boolean.FALSE);
         context.bindEnabledState(PROPERTY_NAME_NO_DATA_VALUE, true, PROPERTY_NAME_NO_DATA_VALUE_USED, Boolean.TRUE);
 
         return context;
@@ -396,8 +399,8 @@ public class BandArithmetikDialog extends ModalDialog {
                 }
                 if (!externalProducts.isEmpty()) {
                     visatApp.showWarningDialog("The entered expression references multiple products.\n"
-                            + "It will cause problems unless the session is restored as is.\n\n"
-                            + "Note: You can save the session from the file menu.");
+                                               + "It will cause problems unless the session is restored as is.\n\n"
+                                               + "Note: You can save the session from the file menu.");
                 }
             }
         }
@@ -453,13 +456,14 @@ public class BandArithmetikDialog extends ModalDialog {
             final String name = (String) value;
             if (!ProductNode.isValidNodeName(name)) {
                 final String message = MessageFormat.format("The band name ''{0}'' is not valid.\n\n"
-                        + "Names must not start with a dot and must not\n"
-                        + "contain any of the following characters: \\/:*?\"<>|", name);
+                                                            + "Names must not start with a dot and must not\n"
+                                                            + "contain any of the following characters: \\/:*?\"<>|",
+                                                            name);
                 throw new ValidationException(message);
             }
             if (targetProduct.containsRasterDataNode(name)) {
                 throw new ValidationException("The band name must be unique within the product scope.\n"
-                        + "The scope comprises bands and tie-point grids.");
+                                              + "The scope comprises bands and tie-point grids.");
             }
         }
     }

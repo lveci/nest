@@ -7,7 +7,7 @@ import org.esa.beam.framework.datamodel.Product;
 
 import java.io.IOException;
 
-public class SRTM3GeoTiffElevationTile {
+public final class SRTM3GeoTiffElevationTile {
 
     private SRTM3GeoTiffElevationModel _dem;
     private CachingObjectArray _linesCache;
@@ -22,13 +22,12 @@ public class SRTM3GeoTiffElevationTile {
     }
 
     public float getSample(int pixelX, int pixelY) throws IOException {
-        final float[] line;
         try {
-            line = (float[]) _linesCache.getObject(pixelY);
+            final float[] line = (float[]) _linesCache.getObject(pixelY);
+            return line[pixelX];
         } catch (Exception e) {
             throw convertLineCacheException(e);
         }
-        return line[pixelX];
     }
 
     public void dispose() {

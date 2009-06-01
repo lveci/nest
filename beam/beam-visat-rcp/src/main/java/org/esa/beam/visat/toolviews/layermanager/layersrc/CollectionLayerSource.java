@@ -1,5 +1,5 @@
 /*
- * $Id: CollectionLayerSource.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: CollectionLayerSource.java,v 1.2 2009-06-01 19:52:04 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -20,9 +20,11 @@ import org.esa.beam.visat.toolviews.layermanager.LayerSource;
 
 /**
  * This layer source creates a new and empty collection layer.
- *
+ * <p/>
+ * <i>Note: This API is not public yet and may significantly change in the future. Use it at your own risk.</i>
+ * 
  * @author Marco Zuehlke
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2009-06-01 19:52:04 $
  * @since BEAM 4.6
  */
 public class CollectionLayerSource implements LayerSource {

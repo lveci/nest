@@ -1,5 +1,5 @@
 /*
- * $Id: ProductExpressionPane.java,v 1.2 2009-05-11 16:17:37 lveci Exp $
+ * $Id: ProductExpressionPane.java,v 1.3 2009-06-01 19:52:04 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -104,7 +104,7 @@ public class ProductExpressionPane extends ExpressionPane {
             inclBandsCheck.setSelected(true);
         }
 
-        inclGridsCheck = new JCheckBox("Show tie point grids"); /*I18N*/
+        inclGridsCheck = new JCheckBox("Show tie-point grids"); /*I18N*/
         inclGridsCheck.addActionListener(resetNodeListAL);
 
         inclFlagsCheck = new JCheckBox("Show single flags"); /*I18N*/
@@ -170,7 +170,7 @@ public class ProductExpressionPane extends ExpressionPane {
         setCurrentProduct();
         List<String> listEntries = new ArrayList<String>(64);
         if (currentProduct != null) {
-            String[] flagNames = currentProduct.getFlagCodingGroup().getNodeNames();
+            String[] flagNames = currentProduct.getAllFlagNames();
             boolean hasBands = currentProduct.getNumBands() > 0;
             boolean hasGrids = currentProduct.getNumTiePointGrids() > 0;
             boolean hasFlags = flagNames.length > 0;

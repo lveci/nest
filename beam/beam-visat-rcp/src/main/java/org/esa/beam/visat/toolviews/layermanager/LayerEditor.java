@@ -8,9 +8,11 @@ import javax.swing.JComponent;
 
 /**
  * An editor for a specific layer type.
+ * <p/>
+ * <i>Note: This API is not public yet and may significantly change in the future. Use it at your own risk.</i>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2009-06-01 19:52:04 $
  * @since BEAM 4.6
  */
 public interface LayerEditor {

@@ -5,11 +5,13 @@ import org.esa.beam.visat.toolviews.layermanager.layersrc.LayerSourcePageContext
 
 /**
  * A layer source can add one or more layers
- * to an already existing root layer. 
+ * to an already existing root layer.
+ * <p/>
+ * <i>Note: This API is not public yet and may significantly change in the future. Use it at your own risk.</i>
  *
  * @author Marco Peters
  * @author Marco Zühlke
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2009-06-01 19:52:04 $
  * @since BEAM 4.6
  */
 public interface LayerSource {

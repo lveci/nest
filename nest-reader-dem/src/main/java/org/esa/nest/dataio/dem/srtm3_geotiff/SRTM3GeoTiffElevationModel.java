@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 
-public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Raster {
+public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Raster {
 
     public static final int NUM_X_TILES = SRTM3GeoTiffElevationModelDescriptor.NUM_X_TILES;
     public static final int NUM_Y_TILES = SRTM3GeoTiffElevationModelDescriptor.NUM_Y_TILES;
@@ -28,6 +28,8 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
     public static final int NO_DATA_VALUE = SRTM3GeoTiffElevationModelDescriptor.NO_DATA_VALUE;
     public static final int RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
     public static final int RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
+
+    public static final float DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES * (1.0f/NUM_PIXELS_PER_TILE);
 
     private final SRTM3GeoTiffElevationModelDescriptor _descriptor;
     private final SRTM3GeoTiffFile[][] elevationFiles;
@@ -59,8 +61,8 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
     }
 
     public float getElevation(GeoPos geoPos) throws Exception {
-        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES * NUM_PIXELS_PER_TILE; 
-        float pixelY = RASTER_HEIGHT - (geoPos.lat + 60.0f) / DEGREE_RES * NUM_PIXELS_PER_TILE;
+        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // DEGREE_RES * NUM_PIXELS_PER_TILE;
+        float pixelY = RASTER_HEIGHT - (geoPos.lat + 60.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; //DEGREE_RES * NUM_PIXELS_PER_TILE;
 
         _resampling.computeIndex(pixelX, pixelY,
                                  RASTER_WIDTH,
@@ -127,8 +129,7 @@ public class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Ra
         _elevationTileCache.add(0, tile);
         while (_elevationTileCache.size() > 60) {
             final int index = _elevationTileCache.size() - 1;
-            final SRTM3GeoTiffElevationTile lastTile = _elevationTileCache.get(index);
-            lastTile.clearCache();
+            _elevationTileCache.get(index).clearCache();
             _elevationTileCache.remove(index);
         }
     }

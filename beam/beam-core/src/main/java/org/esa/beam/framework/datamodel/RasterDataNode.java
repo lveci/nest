@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataNode.java,v 1.4 2009-05-28 14:17:58 lveci Exp $
+ * $Id: RasterDataNode.java,v 1.5 2009-06-01 19:52:04 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -727,21 +727,24 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
         if (isValidPixelExpressionSet()) {
             dataMaskExpression = getValidPixelExpression();
             if (isNoDataValueUsed()) {
-                dataMaskExpression += " && " + createFuzzyNotEqualExpression();
+                final String dataMaskExpression2 = createValidMaskExpressionForNoDataValue();
+                if (!dataMaskExpression2.equals(dataMaskExpression)) {
+                    dataMaskExpression = "(" + dataMaskExpression + ") && " + dataMaskExpression2;
+                }
             }
         } else if (isNoDataValueUsed()) {
-            dataMaskExpression = createFuzzyNotEqualExpression();
+            dataMaskExpression = createValidMaskExpressionForNoDataValue();
         }
         return dataMaskExpression;
     }
 
-    private String createFuzzyNotEqualExpression() {
+    private String createValidMaskExpressionForNoDataValue() {
         final String ref = BandArithmetic.createExternalName(getName());
         final double noDataValue = getGeophysicalNoDataValue();
         if (Double.isNaN(noDataValue)) {
-            return "nan(" + ref + ")";
+            return "!nan(" + ref + ")";
         } else if (Double.isInfinite(noDataValue)) {
-            return "inf(" + ref + ")";
+            return "!inf(" + ref + ")";
         } else {
             return "fneq(" + ref + "," + noDataValue + ")";
         }

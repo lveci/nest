@@ -38,9 +38,8 @@ public final class MathUtils
         final double a0 = -0.5*y0 + 1.5*y1 - 1.5*y2 + 0.5*y3;
         final double a1 = y0 - 2.5*y1 + 2*y2 - 0.5*y3;
         final double a2 = -0.5*y0 + 0.5*y2;
-        final double a3 = y1;
 
-        return (a0*mu*mu2 + a1*mu2 + a2*mu + a3);
+        return (a0*mu*mu2 + a1*mu2 + a2*mu + y1);
     }
 
     /**
@@ -60,9 +59,8 @@ public final class MathUtils
         final double a0 = y3 - y2 - y0 + y1;
         final double a1 = y0 - y1 - a0;
         final double a2 = y2 - y0;
-        final double a3 = y1;
 
-        return (a0*mu*mu2 + a1*mu2 + a2*mu + a3);
+        return (a0*mu*mu2 + a1*mu2 + a2*mu + y1);
     }
 
     /**
@@ -104,9 +102,7 @@ public final class MathUtils
     public static double interpolationBiLinear(
             final double v00, final double v01, final double v10, final double v11, final double muX, final double muY) {
 
-        final double tmpV0 = interpolationLinear(v00, v01, muX);
-        final double tmpV1 = interpolationLinear(v10, v11, muX);
-        return interpolationLinear(tmpV0, tmpV1, muY);
+        return interpolationLinear(interpolationLinear(v00, v01, muX), interpolationLinear(v10, v11, muX), muY);
         //return (1 - muY)*((1 - muX)*v00 + muX*v01) + muY*((1 - muX)*v10 + muX*v11);
     }
 
@@ -123,11 +119,11 @@ public final class MathUtils
         if (v.length != 4 || v[0].length != 4 || v[1].length != 4 || v[2].length != 4 || v[3].length != 4) {
             throw new OperatorException("Incorrect sample array length");
         }
-        final double tmpV0 = interpolationCubic(v[0][0], v[0][1], v[0][2], v[0][3], muX);
-        final double tmpV1 = interpolationCubic(v[1][0], v[1][1], v[1][2], v[1][3], muX);
-        final double tmpV2 = interpolationCubic(v[2][0], v[2][1], v[2][2], v[2][3], muX);
-        final double tmpV3 = interpolationCubic(v[3][0], v[3][1], v[3][2], v[3][3], muX);
-        return interpolationCubic(tmpV0, tmpV1, tmpV2, tmpV3, muY);
+        return interpolationCubic(interpolationCubic(v[0][0], v[0][1], v[0][2], v[0][3], muX),
+                                interpolationCubic(v[1][0], v[1][1], v[1][2], v[1][3], muX),
+                                interpolationCubic(v[2][0], v[2][1], v[2][2], v[2][3], muX),
+                                interpolationCubic(v[3][0], v[3][1], v[3][2], v[3][3], muX),
+                                muY);
     }
 
     /**
