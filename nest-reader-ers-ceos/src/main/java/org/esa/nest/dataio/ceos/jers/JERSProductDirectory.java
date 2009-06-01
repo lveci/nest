@@ -339,7 +339,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
     }
 
     private int isGroundRange() {
-        String projDesc = _leaderFile.getMapProjRecord().getAttributeString("Map projection descriptor").toLowerCase();
+        final String projDesc = _leaderFile.getMapProjRecord().getAttributeString("Map projection descriptor").toLowerCase();
         if(projDesc.contains("slant"))
             return 0;
         return 1;
@@ -349,7 +349,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
         if(productType.contains("IMG") || productType.contains("GEC")) {
             return mapProjRec.getAttributeString("Map projection descriptor");
         }
-        return "";
+        return " ";
     }
 
     private String getProductName() {

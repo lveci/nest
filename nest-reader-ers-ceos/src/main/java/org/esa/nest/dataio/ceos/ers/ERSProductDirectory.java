@@ -394,7 +394,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         if(productType.contains("IMG") || productType.contains("GEC")) {
             return mapProjRec.getAttributeString("Map projection descriptor");
         }
-        return "";
+        return " ";
     }
 
     private int getCycle(final int absOrbit) {

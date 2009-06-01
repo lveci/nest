@@ -271,7 +271,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         if(productType.contains("IMG") || productType.contains("GEC") || productType.contains("SSG")) {
             return mapProjRec.getAttributeString("Map projection descriptor");
         }
-        return "";
+        return " ";
     }
 
     private String getProductName() {

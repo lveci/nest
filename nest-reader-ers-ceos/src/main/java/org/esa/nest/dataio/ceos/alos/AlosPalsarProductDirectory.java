@@ -460,7 +460,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         //if(projDesc.contains("geo"))
         if(getProductType().contains("1.5G"))
             return "Geocoded";
-        return "";
+        return " ";
     }
 
     private static ProductData.UTC getStartEndTime(BaseRecord sceneRec, MetadataElement root, String tag) {
