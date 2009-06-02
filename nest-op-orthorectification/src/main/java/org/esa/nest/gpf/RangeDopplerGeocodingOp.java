@@ -1304,7 +1304,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      *                  c0 + c1*x + c2*x^2 + ... + cn*x^n, where {c0, c1, ..., cn} are the SRGR coefficients.
      * @return The ground range in meters.
      */
-    private static double computeGroundRange(final double slantRange, final double[] srgrCoeff) {
+    public static double computeGroundRange(final double slantRange, final double[] srgrCoeff) {
 
         // todo Can Newton's method be uaed in find zeros for the 4th order polynomial?
         // todo Note for ASAR product here computes (Gr - Gr0), not Gr. Therefore not Gr0 should be subtracted later in computing range index.
