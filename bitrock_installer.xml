@@ -16,15 +16,15 @@
         <addEnvironmentVariable>
             <name>NEST_HOME</name>
             <scope>system</scope>
-            <value> ${installdir}</value>
+            <value>${installdir}</value>
         </addEnvironmentVariable>
         <changePermissions>
-            <files>*/*.sh;*/*.bin;dat.sh;gpt.sh</files>
+            <files>*/*.sh;*/*.bin;${InstallDir}/dat.sh;${InstallDir}/gpt.sh</files>
             <permissions>755</permissions>
         </changePermissions>
         <addDirectoryToPath>
             <insertAt>end</insertAt>
-            <path> ${installdir}</path>
+            <path>${installdir}</path>
         </addDirectoryToPath>
     </postInstallationActionList>
     <compressionAlgorithm>lzma</compressionAlgorithm>
@@ -363,9 +363,8 @@
             <description>Installer.Parameter.installdir.description</description>
             <explanation>Installer.Parameter.installdir.explanation</explanation>
             <value></value>
-            <default>${platform_install_prefix}/${product_shortname}-${product_version}</default>
+            <default>${platform_install_prefix}/${product_shortname}${product_version}</default>
             <allowEmptyValue>0</allowEmptyValue>
-            <ask>yes</ask>
             <cliOptionName>prefix</cliOptionName>
             <mustBeWritable>yes</mustBeWritable>
             <mustExist>0</mustExist>
