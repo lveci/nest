@@ -455,7 +455,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     }
 
     private String getMapProjection() {
-        if(_leaderFile.getMapProjRecord() == null) return "";
+        if(_leaderFile.getMapProjRecord() == null) return " ";
         //final String projDesc = _leaderFile.getMapProjRecord().getAttributeString("Map projection descriptor").toLowerCase();
         //if(projDesc.contains("geo"))
         if(getProductType().contains("1.5G"))
