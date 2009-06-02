@@ -148,7 +148,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
                 getSrgrCoeff();
             }
 
-            getImageCornerLatLon();
+            //getImageCornerLatLon();
 
             computeImageGeoBoundary();
 
@@ -173,11 +173,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
      */
     private void getSRGRFlag() throws Exception {
         srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
-        /*
-        if (!srgrFlag) {
-            throw new OperatorException("Slant range image currently cannot be handled.");
-        }
-        */
     }
 
     /**
@@ -201,6 +196,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * Get source image corner latitude and longitude (in degree).
      * @throws Exception The exceptions.
      */
+    /*
     private void getImageCornerLatLon() throws Exception {
 
         // note longitude is in given in range [-180, 180]
@@ -213,7 +209,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
         lastFarLat   = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.last_far_lat);
         lastFarLon   = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.last_far_long);
     }
-
+    */
     /**
      * Compute source image geodetic boundary (minimum/maximum latitude/longitude) from the its corner
      * latitude/longitude.
@@ -221,6 +217,40 @@ public final class GeolocationGridGeocodingOp extends Operator {
      */
     private void computeImageGeoBoundary() throws Exception {
 
+        final GeoCoding geoCoding = sourceProduct.getGeoCoding();
+        if(geoCoding == null) {
+            throw new OperatorException("Product does not contain a geocoding");
+        }
+        final GeoPos geoPosFirstNear = geoCoding.getGeoPos(new PixelPos(0,0), null);
+        final GeoPos geoPosFirstFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth(),0), null);
+        final GeoPos geoPosLastNear = geoCoding.getGeoPos(new PixelPos(0,sourceProduct.getSceneRasterHeight()), null);
+        final GeoPos geoPosLastFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth(),
+                                                                      sourceProduct.getSceneRasterHeight()), null);
+
+        final double[] lats  = {geoPosFirstNear.getLat(), geoPosFirstFar.getLat(), geoPosLastNear.getLat(), geoPosLastFar.getLat()};
+        final double[] lons  = {geoPosFirstNear.getLon(), geoPosFirstFar.getLon(), geoPosLastNear.getLon(), geoPosLastFar.getLon()};
+        latMin = 90.0;
+        latMax = -90.0;
+        for (double lat : lats) {
+            if (lat < latMin) {
+                latMin = lat;
+            }
+            if (lat > latMax) {
+                latMax = lat;
+            }
+        }
+
+        lonMin = 180.0;
+        lonMax = -180.0;
+        for (double lon : lons) {
+            if (lon < lonMin) {
+                lonMin = lon;
+            }
+            if (lon > lonMax) {
+                lonMax = lon;
+            }
+        }
+        /*
         final double[] lats  = {firstNearLat, firstFarLat, lastNearLat, lastFarLat};
         final double[] lons  = {firstNearLon, firstFarLon, lastNearLon, lastFarLon};
         latMin = 90.0;
@@ -244,6 +274,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
                 lonMax = lon;
             }
         }
+        */
     }
 
     /**
@@ -252,11 +283,24 @@ public final class GeolocationGridGeocodingOp extends Operator {
     private void computeDEMTraversalSampleInterval() {
 
         final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
+        double minAbsLat;
+        if (latMin*latMax > 0) {
+            minAbsLat = Math.min(Math.abs(latMin), Math.abs(latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
+        } else {
+            minAbsLat = 0.0;
+        }
+        delLat = minSpacing / MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
+        delLon = minSpacing / (MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
+        delLat = Math.min(delLat, delLon);
+        delLon = delLat;
+        /*
+        final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
         final double minAbsLat = Math.min(Math.abs(latMin), Math.abs(latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
         delLat = minSpacing / MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
         delLon = minSpacing / (MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
         delLat = Math.min(delLat, delLon);
         delLon = delLat;
+        */
     }
 
     /**
@@ -537,25 +581,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
                         trgData.setElemDoubleAt(index, srcBandNoDataValue);
                         continue;
                     }
-                    /*
-                    int i0 = (int)pixPos.x;
-                    int i1 = i0 + 1;
-                    int j0 = (int)pixPos.y;
-                    int j1 = j0 + 1;
-                    float lat00 = latitude.getPixelFloat(i0, j0);
-                    float lat01 = latitude.getPixelFloat(i1, j0);
-                    float lat10 = latitude.getPixelFloat(i0, j1);
-                    float lat11 = latitude.getPixelFloat(i1, j1);
-                    float lon00 = longitude.getPixelFloat(i0, j0);
-                    float lon01 = longitude.getPixelFloat(i1, j0);
-                    float lon10 = longitude.getPixelFloat(i0, j1);
-                    float lon11 = longitude.getPixelFloat(i1, j1);
-                    System.out.println("lat = " + lat + ", lon = " + lon);
-                    System.out.println("lat00 = " + lat00 + ", lon00 = " + lon00);
-                    System.out.println("lat01 = " + lat01 + ", lon01 = " + lon01);
-                    System.out.println("lat10 = " + lat10 + ", lon10 = " + lon10);
-                    System.out.println("lat11 = " + lat11 + ", lon11 = " + lon11);
-                    */
+
                     final double slantRange = computeSlantRange(pixPos);
                     final double zeroDopplerTime = computeZeroDopplerTime(pixPos);
                     final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / Constants.halfLightSpeed / 86400.0;
@@ -594,16 +620,8 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * @return The slant range in meters.
      */
     private double computeSlantRange(PixelPos pixPos) {
-        /*
-        final int i0 = (int)pixPos.x;
-        final int j0 = (int)pixPos.y;
-        final double r00 = slantRangeTime.getPixelDouble(i0, j0) / 1000000000.0 * Constants.halfLightSpeed;
-        final double r01 = slantRangeTime.getPixelDouble(i0+1, j0) / 1000000000.0 * Constants.halfLightSpeed;
-        final double r10 = slantRangeTime.getPixelDouble(i0, j0+1) / 1000000000.0 * Constants.halfLightSpeed;
-        final double r11 = slantRangeTime.getPixelDouble(i0+1, j0+1) / 1000000000.0 * Constants.halfLightSpeed;
-        return MathUtils.interpolationBiLinear(r00, r01, r10, r11, pixPos.x - i0, pixPos.y - j0);
-        */
-        return slantRangeTime.getPixelDouble(pixPos.x, pixPos.y, TiePointGrid.BIQUADRATIC) / 1000000000.0 * Constants.halfLightSpeed;
+        return slantRangeTime.getPixelDouble(pixPos.x, pixPos.y, TiePointGrid.BIQUADRATIC) /
+                1000000000.0 * Constants.halfLightSpeed;
     }
 
     /**
@@ -631,13 +649,12 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
         if (srgrFlag) { // ground detected image
 
-            int i;
-            for (i = 0; i < srgrConvParams.length; i++) {
-                if (zeroDopplerTime < srgrConvParams[i].time.getMJD()) {
-                    break;
-                }
+            int idx = 0;
+            for (int i = 0; i < srgrConvParams.length && zeroDopplerTime >= srgrConvParams[i].time.getMJD(); i++) {
+                idx = i;
             }
-            rangeIndex = computeGroundRange(slantRange, srgrConvParams[i-1].coefficients) / rangeSpacing;
+            final double groundRange = RangeDopplerGeocodingOp.computeGroundRange(slantRange, srgrConvParams[idx].coefficients);
+            rangeIndex = (groundRange - srgrConvParams[idx].ground_range_origin) / rangeSpacing;
 
         } else { // slant range image
 
@@ -647,33 +664,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
         }
 
         return rangeIndex;
-    }
-
-    /**
-     * Compute ground range for given slant range.
-     * @param slantRange The salnt range in meters.
-     * @param srgrCoeff The SRGR coefficients for converting ground range to slant range.
-     * @return The ground range in meters.
-     */
-    private static double computeGroundRange(double slantRange, double[] srgrCoeff) {
-
-        // todo Can Newton's method be uaed in find zeros for the 4th order polynomial?
-        final double s0 = srgrCoeff[0];
-        final double s1 = srgrCoeff[1];
-        final double s2 = srgrCoeff[2];
-        final double s3 = srgrCoeff[3];
-        final double s4 = srgrCoeff[4];
-        double x = slantRange;
-        double x2 = x*x;
-        double y = s4*x2*x2 + s3*x2*x + s2*x2 + s1*x + s0 - slantRange;
-        while (Math.abs(y) > 0.0001) {
-
-            final double derivative = 4*s4*x2*x + 3*s3*x2 + 2*s2*x + s1;
-            x -= y / derivative;
-            x2 = x*x;
-            y = s4*x2*x2 + s3*x2*x + s2*x2 + s1*x + s0 - slantRange;
-        }
-        return x;
     }
 
     /**
