@@ -310,7 +310,11 @@ public final class RangeDopplerGeocodingOp extends Operator {
         }
 
         if (mission.contains("TSX1")) {
-            throw new OperatorException("TerraSar-X is currently not supported");
+            throw new OperatorException("TerraSar-X product is not supported yet");
+        }
+
+        if (mission.contains("ALOS")) {
+            throw new OperatorException("ALOS PALSAR product is not supported yet");
         }
     }
 

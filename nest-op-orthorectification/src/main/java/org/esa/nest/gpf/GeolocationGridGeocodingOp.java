@@ -176,7 +176,11 @@ public final class GeolocationGridGeocodingOp extends Operator {
         String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
 
         if (mission.contains("TSX1")) {
-            throw new OperatorException("TerraSar-X is currently not supported");
+            throw new OperatorException("TerraSar-X product is not supported yet");
+        }
+
+        if (mission.contains("ALOS")) {
+            throw new OperatorException("ALOS PALSAR product is not supported yet");
         }
     }
 
