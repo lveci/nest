@@ -207,6 +207,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
             if(OperatorUtils.isMapProjected(sourceProduct)) {
                 throw new OperatorException("Source product is already map projected");
             }
+            getMissionType();
 
             getSRGRFlag();
 
@@ -267,7 +268,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
      */
     private void prepareForRadiometricCalibration() throws Exception {
 
-        getMissionType();
+        //getMissionType();
 
         getMultilookFlag();
 
@@ -304,8 +305,12 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private void getMissionType() throws Exception {
         mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
 
-        if (!mission.contains("ENVISAT")) {
+        if (applyRadiometricCalibration && !mission.contains("ENVISAT")) {
             throw new OperatorException("Radiometric calibration applies to ASAR product only");
+        }
+
+        if (mission.contains("TSX1")) {
+            throw new OperatorException("TerraSar-X is currently not supported");
         }
     }
 

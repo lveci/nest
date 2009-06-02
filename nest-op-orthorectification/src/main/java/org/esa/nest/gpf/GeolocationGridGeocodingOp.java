@@ -136,6 +136,8 @@ public final class GeolocationGridGeocodingOp extends Operator {
                 throw new OperatorException("Source product is already map projected");
             }
 
+            getMissionType();
+            
             getSRGRFlag();
 
             getRangeAzimuthSpacings();
@@ -164,6 +166,17 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
         } catch(Exception e) {
             throw new OperatorException(e);
+        }
+    }
+    /**
+     * Get the mission type.
+     * @throws Exception The exceptions.
+     */
+    private void getMissionType() throws Exception {
+        String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
+
+        if (mission.contains("TSX1")) {
+            throw new OperatorException("TerraSar-X is currently not supported");
         }
     }
 
