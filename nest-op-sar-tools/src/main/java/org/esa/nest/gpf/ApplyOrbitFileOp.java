@@ -15,7 +15,6 @@
 package org.esa.nest.gpf;
 
 import Jama.Matrix;
-import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.dataio.envisat.EnvisatOrbitReader;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
@@ -40,7 +39,10 @@ import org.apache.commons.net.ftp.FTPFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
-import java.util.Calendar;
+import java.util.Map;
+import java.awt.*;
+
+import com.bc.ceres.core.ProgressMonitor;
 
 /**
  * This operator applies orbit file to a given product.
@@ -141,6 +143,23 @@ public final class ApplyOrbitFileOp extends Operator {
         try {
             absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
+            final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
+            if(mission.contains("ENVISAT")) {
+                if(!orbitType.equals(DELFT_ENVISAT) && !orbitType.equals(DORIS_POR) && !orbitType.equals(DORIS_VOR)) {
+                    throw new OperatorException(orbitType + " is not suitable for an ENVISAT product");
+                }
+            } else if(mission.contains("ERS1")) {
+                if(!orbitType.equals(DELFT_ERS_1) && !orbitType.equals(PRARE_ERS_1)) {
+                    throw new OperatorException(orbitType + " is not suitable for an ERS1 product");
+                }
+            } else if(mission.contains("ERS2")) {
+                if(!orbitType.equals(DELFT_ERS_2) && !orbitType.equals(PRARE_ERS_2)) {
+                    throw new OperatorException(orbitType + " is not suitable for an ERS2 product");
+                }
+            } else {
+                throw new OperatorException(orbitType + " is not suitable for a "+mission+" product");
+            }
+
             if (orbitType.contains("DORIS")) {
                 getDorisOrbitFile();
             } else if (orbitType.contains("DELFT")) {
@@ -165,24 +184,6 @@ public final class ApplyOrbitFileOp extends Operator {
             throw new OperatorException(e.getMessage());
         }
     }
-
-    /**
-     * Called by the framework in order to compute a tile for the given target band.
-     * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
-     *
-     * @param targetBand The target band.
-     * @param targetTile The current tile associated with the target band to be computed.
-     * @param pm         A progress monitor which should be used to determine computation cancelation requests.
-     * @throws org.esa.beam.framework.gpf.OperatorException
-     *          If an error occurs during computation of the target raster.
-     */
-   /* @Override
-    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-
-        // copy source data to target
-        targetTile.setRawSamples(getSourceTile(sourceProduct.getBand(targetBand.getName()),
-                                               targetTile.getRectangle(), pm).getRawSamples());
-    }   */
 
     /**
      * Get source product tie point grids for latitude, longitude, incidence angle and slant range time.
@@ -235,11 +236,14 @@ public final class ApplyOrbitFileOp extends Operator {
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
 
-        for(Band band : sourceProduct.getBands()) {
-            ProductUtils.copyBand(band.getName(), sourceProduct, targetProduct);
+        for(Band srcBand : sourceProduct.getBands()) {
+            if(srcBand instanceof VirtualBand) {
+                OperatorUtils.copyVirtualBand(targetProduct, (VirtualBand)srcBand);
+            } else {
+                final Band targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct);
+                targetBand.setSourceImage(srcBand.getSourceImage());
+            }
         }
-
-        //targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 50);
     }
 
     /**
@@ -552,6 +556,7 @@ public final class ApplyOrbitFileOp extends Operator {
      * @param productDate The start date of the product.
      * @param absOrbit The absolute orbit number.
      * @return The orbit file.
+     * @throws IOException
      */
     private static File FindDorisOrbitFile(EnvisatOrbitReader dorisReader, File path, Date productDate, int absOrbit)
             throws IOException {

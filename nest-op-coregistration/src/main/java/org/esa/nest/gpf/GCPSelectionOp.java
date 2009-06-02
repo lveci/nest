@@ -252,8 +252,6 @@ public class GCPSelectionOp extends Operator {
         }
 
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
-
-        //targetProduct.setPreferredTileSize(sourceImageWidth, 50);  // 256
     }
 
     /**

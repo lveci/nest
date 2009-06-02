@@ -16,9 +16,9 @@ public class ReaderUtils {
 
 
     public static void createVirtualPhaseBand(Product product, Band bandI, Band bandQ, String countStr) {
-        String expression = "atan2("+bandQ.getName()+ ',' +bandI.getName()+ ')';
+        final String expression = "atan2("+bandQ.getName()+ ',' +bandI.getName()+ ')';
 
-        VirtualBand virtBand = new VirtualBand("Phase" + countStr,
+        final VirtualBand virtBand = new VirtualBand("Phase" + countStr,
                 ProductData.TYPE_FLOAT32,
                 product.getSceneRasterWidth(),
                 product.getSceneRasterHeight(),
@@ -30,10 +30,10 @@ public class ReaderUtils {
     }
 
     public static void createVirtualIntensityBand(Product product, Band bandI, Band bandQ, String countStr) {
-        String expression = bandI.getName() + " * " + bandI.getName() + " + " +
+        final String expression = bandI.getName() + " * " + bandI.getName() + " + " +
                 bandQ.getName() + " * " + bandQ.getName();
 
-        VirtualBand virtBand = new VirtualBand("Intensity" + countStr,
+        final VirtualBand virtBand = new VirtualBand("Intensity" + countStr,
                 ProductData.TYPE_FLOAT32,
                 product.getSceneRasterWidth(),
                 product.getSceneRasterHeight(),
@@ -48,9 +48,9 @@ public class ReaderUtils {
     }
 
     public static void createVirtualIntensityBand(Product product, Band band, String countStr) {
-        String expression = band.getName() + " * " + band.getName();
+        final String expression = band.getName() + " * " + band.getName();
 
-        VirtualBand virtBand = new VirtualBand("Intensity" + countStr,
+        final VirtualBand virtBand = new VirtualBand("Intensity" + countStr,
                 ProductData.TYPE_FLOAT32,
                 product.getSceneRasterWidth(),
                 product.getSceneRasterHeight(),

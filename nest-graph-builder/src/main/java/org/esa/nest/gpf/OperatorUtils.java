@@ -6,6 +6,7 @@ import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
 
 import java.text.DateFormat;
 
@@ -112,6 +113,21 @@ public class OperatorUtils {
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
+    }
+
+    public static void copyVirtualBand(final Product product, final VirtualBand srcBand) {
+
+        final VirtualBand virtBand = new VirtualBand(srcBand.getName(),
+                srcBand.getDataType(),
+                srcBand.getSceneRasterWidth(),
+                srcBand.getSceneRasterHeight(),
+                srcBand.getExpression());
+        virtBand.setSynthetic(true);
+        virtBand.setUnit(srcBand.getUnit());
+        virtBand.setDescription(srcBand.getDescription());
+        virtBand.setNoDataValue(srcBand.getNoDataValue());
+        virtBand.setNoDataValueUsed(srcBand.isNoDataValueUsed());
+        product.addBand(virtBand);
     }
 
     public static boolean isDIMAP(Product prod) {
