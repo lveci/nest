@@ -1,5 +1,5 @@
 /*
- * $Id: ProductTree.java,v 1.3 2009-05-28 20:47:45 lveci Exp $
+ * $Id: ProductTree.java,v 1.4 2009-06-03 14:30:18 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -69,7 +69,7 @@ import java.io.File;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.3 $ $Date: 2009-05-28 20:47:45 $
+ * @version $Revision: 1.4 $ $Date: 2009-06-03 14:30:18 $
  * @see org.esa.beam.framework.ui.product.ProductTreeListener
  * @see org.esa.beam.framework.datamodel.Product
  */
@@ -568,12 +568,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
                 } else if (productNode instanceof Band) {
                     Band band = (Band) productNode;
 
-                    final String unit = band.getUnit();
-                    if(unit != null && unit.contains("amplitude")) {
-                        toolTipBuffer.append(" DN");
-                    } else if(unit != null && unit.contains("intensity")) {
-                        toolTipBuffer.append(" DN^2");
-                    }
+                    addDN(band, toolTipBuffer);
 
                     if (band.getSpectralWavelength() > 0.0) {
                         toolTipBuffer.append(", wavelength = ");
@@ -632,6 +627,23 @@ public class ProductTree extends JTree implements PopupMenuFactory {
             }
 
             return this;
+        }
+    }
+
+    private static void addDN(Band band, StringBuffer toolTipBuffer) {
+        final Product product = band.getProduct();
+        final MetadataElement absRoot = product.getMetadataRoot().getElement("Abstracted Metadata");
+        boolean calibrated = false;
+        if(absRoot != null) {
+            calibrated = absRoot.getAttributeInt("abs_calibration_flag", 0) == 1;
+        }
+        if(!calibrated) {
+            final String unit = band.getUnit();
+            if(unit != null && unit.contains("amplitude")) {
+                toolTipBuffer.append(" DN");
+            } else if(unit != null && unit.contains("intensity")) {
+                toolTipBuffer.append(" DN^2");
+            }
         }
     }
 
