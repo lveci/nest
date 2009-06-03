@@ -112,9 +112,16 @@ public class CreateStackOp extends Operator {
             for (final Band srcBand : slaveBandList) {
                 if(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1])) {
                     suffix = "_mst_" + getBandTimeStamp(srcBand.getProduct());
-                    final Band targetBand = targetProduct.addBand(srcBand.getName() + suffix, srcBand.getDataType());
+
+                    final Band targetBand = new Band(srcBand.getName() + suffix,
+                            srcBand.getDataType(),
+                            masterProduct.getSceneRasterWidth(),
+                            masterProduct.getSceneRasterHeight());
                     ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
+                    targetBand.setSourceImage(srcBand.getSourceImage());
+
                     sourceRasterMap.put(targetBand, srcBand);
+                    targetProduct.addBand(targetBand);
                 }
             }
             // then add slave bands
@@ -125,9 +132,19 @@ public class CreateStackOp extends Operator {
                     } else {
                         suffix = "_slv" + cnt++ + "_" + getBandTimeStamp(srcBand.getProduct());
                     }
-                    final Band targetBand = targetProduct.addBand(srcBand.getName() + suffix, srcBand.getDataType());
+
+                    final Product srcProduct = srcBand.getProduct();
+                    final Band targetBand = new Band(srcBand.getName() + suffix,
+                            srcBand.getDataType(),
+                            masterProduct.getSceneRasterWidth(),
+                            masterProduct.getSceneRasterHeight());
                     ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
+                    if (srcProduct == masterProduct || srcProduct.isCompatibleProduct(masterProduct, 1.0e-3f)) {
+                        targetBand.setSourceImage(srcBand.getSourceImage());
+                    }
+
                     sourceRasterMap.put(targetBand, srcBand);
+                    targetProduct.addBand(targetBand);
                 }
             }
 
@@ -352,12 +369,15 @@ public class CreateStackOp extends Operator {
             final Resampling.Index resamplingIndex = resampling.createIndex();
             final float noDataValue = (float) targetBand.getGeophysicalNoDataValue();
 
+            final int maxX = targetRectangle.x + targetRectangle.width;
+            final int maxY = targetRectangle.y + targetRectangle.height;
+
             if (sourceRectangle != null) {
                 final Tile sourceTile = getSourceTile(sourceBand, sourceRectangle, pm);
                 final ResamplingRaster resamplingRaster = new ResamplingRaster(sourceTile);
 
-                for (int y = targetRectangle.y, index = 0; y < targetRectangle.y + targetRectangle.height; ++y) {
-                    for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; ++x, ++index) {
+                for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
+                    for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
                         checkForCancelation(pm);
                         final PixelPos sourcePixelPos = sourcePixelPositions[index];
 
@@ -381,8 +401,8 @@ public class CreateStackOp extends Operator {
                     pm.worked(1);
                 }
             } else {
-                for (int y = targetRectangle.y, index = 0; y < targetRectangle.y + targetRectangle.height; ++y) {
-                    for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; ++x, ++index) {
+                for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
+                    for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
                         checkForCancelation(pm);
                         trgBuffer.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), noDataValue);
                     }
@@ -444,14 +464,19 @@ public class CreateStackOp extends Operator {
 
         private final Tile tile;
         private final boolean usesNoData;
-        private final RasterDataNode rasterDataNode;
+        private final boolean scalingApplied;
+        private final double noDataValue;
+        private final double geophysicalNoDataValue;
         private final ProductData dataBuffer;
 
         public ResamplingRaster(final Tile tile) {
             this.tile = tile;
             this.dataBuffer = tile.getDataBuffer();
-            this.rasterDataNode = tile.getRasterDataNode();
+            final RasterDataNode rasterDataNode = tile.getRasterDataNode();
             this.usesNoData = rasterDataNode.isNoDataValueUsed();
+            this.noDataValue = rasterDataNode.getNoDataValue();
+            this.geophysicalNoDataValue = rasterDataNode.getGeophysicalNoDataValue();
+            this.scalingApplied = rasterDataNode.isScalingApplied();
         }
 
         public final int getWidth() {
@@ -465,17 +490,14 @@ public class CreateStackOp extends Operator {
         public final float getSample(final int x, final int y) throws Exception {
             final double sample = dataBuffer.getElemDoubleAt(tile.getDataBufferIndex(x, y));
 
-            if (usesNoData && isNoDataValue(rasterDataNode, sample)) {
-                return Float.NaN;
+            if (usesNoData) {
+                if(scalingApplied && geophysicalNoDataValue == sample)
+                    return Float.NaN;
+                else if(noDataValue == sample)
+                    return Float.NaN;
             }
 
             return (float) sample;
-        }
-
-        private static boolean isNoDataValue(final RasterDataNode rasterDataNode, final double sample) {
-            if (rasterDataNode.isScalingApplied())
-                return rasterDataNode.getGeophysicalNoDataValue() == sample;
-            return rasterDataNode.getNoDataValue() == sample;
         }
     }
 

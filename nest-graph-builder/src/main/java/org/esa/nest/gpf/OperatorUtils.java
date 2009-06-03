@@ -115,9 +115,9 @@ public class OperatorUtils {
         targetProduct.setEndTime(sourceProduct.getEndTime());
     }
 
-    public static void copyVirtualBand(final Product product, final VirtualBand srcBand) {
+    public static void copyVirtualBand(final Product product, final VirtualBand srcBand, final String name) {
 
-        final VirtualBand virtBand = new VirtualBand(srcBand.getName(),
+        final VirtualBand virtBand = new VirtualBand(name,
                 srcBand.getDataType(),
                 srcBand.getSceneRasterWidth(),
                 srcBand.getSceneRasterHeight(),
