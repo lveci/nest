@@ -1,5 +1,5 @@
 /*
- * $Id: AsarProductFile.java,v 1.3 2009-05-21 19:43:20 lveci Exp $
+ * $Id: AsarProductFile.java,v 1.4 2009-06-03 19:59:44 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -34,7 +34,7 @@ import java.util.Arrays;
  * ASAR data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-05-21 19:43:20 $
+ * @version $Revision: 1.4 $ $Date: 2009-06-03 19:59:44 $
  * @see org.esa.beam.dataio.envisat.ProductFile
  */
 public class AsarProductFile extends ProductFile {
@@ -352,8 +352,13 @@ public class AsarProductFile extends ProductFile {
             firstMDSName = firstMDSName.replace(' ', '_');
         }
         if(!waveProduct) {
-            sceneRasterStartTime = getRecordTime(firstMDSName, "zero_doppler_time", 0);
-            sceneRasterStopTime = getRecordTime(firstMDSName, "zero_doppler_time", sceneRasterHeight - 1);
+            try {
+                sceneRasterStartTime = getSPH().getParamUTC("FIRST_LINE_TIME");
+                sceneRasterStopTime  = getSPH().getParamUTC("LAST_LINE_TIME");
+            } catch(HeaderParseException e) {
+                sceneRasterStartTime = getRecordTime(firstMDSName, "zero_doppler_time", 0);
+                sceneRasterStopTime = getRecordTime(firstMDSName, "zero_doppler_time", sceneRasterHeight - 1);
+            }
         }
     }
 

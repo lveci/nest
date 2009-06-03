@@ -1,5 +1,5 @@
 /*
- * $Id: MapGeoCoding.java,v 1.4 2009-05-28 14:17:58 lveci Exp $
+ * $Id: MapGeoCoding.java,v 1.5 2009-06-03 19:59:44 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -37,7 +37,7 @@ import java.awt.geom.Point2D;
  * A geo-coding based on a cartographical map.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2009-05-28 14:17:58 $
+ * @version $Revision: 1.5 $ $Date: 2009-06-03 19:59:44 $
  */
 public class MapGeoCoding extends AbstractGeoCoding {
 
@@ -144,9 +144,7 @@ public class MapGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public final PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
-        final GeoPos geoPosNorm = normGeoPos(geoPos, new GeoPos());
-        final Point2D mapPos = geoToMap(geoPosNorm, new Point2D.Double());
-        return mapToPixel(mapPos, pixelPos);
+        return mapToPixel(geoToMap(normGeoPos(geoPos, new GeoPos()), new Point2D.Double()), pixelPos);
     }
 
     /**
@@ -160,9 +158,7 @@ public class MapGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public final GeoPos getGeoPos(PixelPos pixelPos, GeoPos geoPos) {
-        final Point2D mapPos = pixelToMap(pixelPos, new Point2D.Double());
-        final GeoPos geoPosNorm = mapToGeo(mapPos, new GeoPos());
-        return denormGeoPos(geoPosNorm, geoPos);
+        return denormGeoPos(mapToGeo(pixelToMap(pixelPos, new Point2D.Double()), new GeoPos()), geoPos);
     }
 
     /**
@@ -208,7 +204,7 @@ public class MapGeoCoding extends AbstractGeoCoding {
             modelToImageTransform.transform(mapPos, pixelPos);
             return pixelPos;
         } else {
-            Point2D point2D = modelToImageTransform.transform(mapPos, pixelPos);
+            final Point2D point2D = modelToImageTransform.transform(mapPos, pixelPos);
             return new PixelPos((float) point2D.getX(), (float) point2D.getY());
         }
     }
@@ -227,7 +223,7 @@ public class MapGeoCoding extends AbstractGeoCoding {
         return geoPosNorm;
     }
 
-    private GeoPos denormGeoPos(final GeoPos geoPosNorm, GeoPos geoPos) {
+    private static GeoPos denormGeoPos(final GeoPos geoPosNorm, GeoPos geoPos) {
         if (geoPos == null) {
             geoPos = new GeoPos();
         }

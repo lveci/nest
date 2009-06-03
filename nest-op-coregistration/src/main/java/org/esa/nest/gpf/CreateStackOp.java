@@ -18,11 +18,9 @@ import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.awt.*;
 import java.text.MessageFormat;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Date;
 
 /**
  * The CreateStack operator.
@@ -58,6 +56,7 @@ public class CreateStackOp extends Operator {
                defaultValue = NEAREST_NEIGHBOUR, description = "The method to be used when resampling the slave grid onto the master grid.",
                label="Resampling Type")
     private String resamplingType = NEAREST_NEIGHBOUR;
+    private Resampling selectedResampling = Resampling.NEAREST_NEIGHBOUR;
 
     private final static Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
 
@@ -156,6 +155,14 @@ public class CreateStackOp extends Operator {
             if (masterGCPgroup.getNodeCount() > 0) {
                 OperatorUtils.copyGCPsToTarget(masterGCPgroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
             }
+
+            if(resamplingType.equals(NEAREST_NEIGHBOUR))
+                selectedResampling = Resampling.NEAREST_NEIGHBOUR;
+            else if(resamplingType.equals(BILINEAR_INTERPOLATION))
+                selectedResampling = Resampling.BILINEAR_INTERPOLATION;
+            else
+                selectedResampling = (Resampling.CUBIC_CONVOLUTION);
+
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
@@ -359,12 +366,7 @@ public class CreateStackOp extends Operator {
             if (isFlagBand(sourceBand) || isValidPixelExpressionUsed(sourceBand)) {
                 resampling = Resampling.NEAREST_NEIGHBOUR;
             } else {
-                if(resamplingType.equals(NEAREST_NEIGHBOUR))
-                    resampling = Resampling.NEAREST_NEIGHBOUR;
-                else if(resamplingType.equals(BILINEAR_INTERPOLATION))
-                    resampling = Resampling.BILINEAR_INTERPOLATION;
-                else
-                    resampling = (Resampling.CUBIC_CONVOLUTION);
+                resampling = selectedResampling;
             }
             final Resampling.Index resamplingIndex = resampling.createIndex();
             final float noDataValue = (float) targetBand.getGeophysicalNoDataValue();
