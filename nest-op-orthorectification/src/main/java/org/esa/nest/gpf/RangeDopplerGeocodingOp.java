@@ -430,7 +430,8 @@ public final class RangeDopplerGeocodingOp extends Operator {
         for (int i = 0; i < srgrConvParams.length; i++) {
             srgrConvParamsTime[i] = srgrConvParams[i].time.getMJD();
             for (int x = 0; x < sourceImageWidth; x++) {
-                oldSlantRange[i][x] = (float)computePolinomialValue(x*rangeSpacing, srgrConvParams[i].coefficients);
+                oldSlantRange[i][x] = (float)computePolinomialValue(
+                        x*rangeSpacing + srgrConvParams[i].ground_range_origin, srgrConvParams[i].coefficients);
             }
         }
     }
