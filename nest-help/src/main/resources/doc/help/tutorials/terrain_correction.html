@@ -1,20 +1,35 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head><title>NEST Help - Terrain Correction</title>
 
-<link rel="stylesheet" href="../style.css">
-</head>
+<link rel="stylesheet" href="../style.css"></head>
 <body>
 <table class="header">
 <tbody>
 <tr class="header">
-<td class="header">&nbsp; Terrain Correction
+<td class="header">&nbsp; Orthorectification
 Tutorial</td>
 <td class="header" align="right"><a href="../general/BeamOverview.html"><img src="../images/BeamHeader.jpg" border="0"></a></td>
 </tr>
 </tbody>
 </table>
 <h3>Terrain Correction</h3>
-<br>
+<br><p>1. From the Geometry menu select Terrain Correction. This will call up the dialog for the <a href="../operators/RangeDopplerGeocodingOp.html">Range-Doppler Terrain Correction</a> Operator.</p><p>2. Select your source bands.</p><p>3.
+Select the Digital Elevation Model (DEM) to use. You can select 30
+second GETASSE30 or ACE DEMs if they are installed on your computer.</p><p>&nbsp;&nbsp;&nbsp;
+Preferably, select the SRTM 3 second DEM which has much better
+resolution and can be downloaded as need automaticaly by NEST if you
+have an internet connection.</p><p>&nbsp;&nbsp;&nbsp; Alternatively,
+you could also browse for an External DEM tile in any file format
+readable by NEST (GeoTIFF, HDF, NetCDF, GTOPO30, ...)</p><p>4. Select the interpolation methods to use for the DEM resampling and the target image resampling.</p><p>5. Optionally select to save the DEM as a band and the local incidence angle.</p><p>6.
+Optionlly select to apply Radiometric Correction to do a retro
+calibration of the resulting product. Note: Radiometric Correction
+is&nbsp;currently only supported for ASAR and ERS products.</p><br><div style="text-align: center;"><img style="width: 432px; height: 477px;" alt="" src="images/TC_dialog.jpg"><br></div><br><p>7. Press Run to process the data.</p><p><br>Below
+are two images of an ASAR IMP product. The first is in the original SAR
+geometry. The second has been Terrain Corrected and Radiometric
+Corrected.</p><br><div style="text-align: center;"><img style="width: 606px; height: 590px;" alt="" src="images/IMP_orig.jpg"><br><span style="font-weight: bold;">ASAR IMP in original SAR Geometry</span><br></div><br><br><br><div style="text-align: center;"><img style="width: 606px; height: 589px;" alt="" src="images/IMP_RTC.jpg"><br><span style="font-weight: bold;">ASAR IMP after Terrain Correction with Radiometric Correction</span><br></div><br><br><p>After
+Terrain Correction your SAR data will be closer to the real world
+geometry and you will be able to overlay layers from other sources
+correctly.</p><p><br></p><br>
 <h3>Terrain Correction from the Command Line</h3>
 <br>
 <br>
