@@ -156,7 +156,7 @@
 		</tocitem>	
 		<tocitem text="Geometry Operators">
 			<tocitem text="CreateElevation" target="CreateElevationOp"/>
-			<tocitem text="Geolocation Grid Terrain Correction" url="GeolocationGridGeocodingOp"/>
+			<tocitem text="Geolocation Grid Ellipsoid Correction" url="GeolocationGridGeocodingOp"/>
 			<tocitem text="Range Doppler Terrain Correction" url="RangeDopplerGeocodingOp"/>
 			<tocitem text="Slant Range to Ground Range" target="SRGROp"/>
 		</tocitem>	
