@@ -47,10 +47,19 @@
         <action>
             <id>GeolocationGridGeocodingOp</id>
             <class>org.esa.nest.dat.GeolocationGridGeocodingOpAction</class>
-            <text>Ellipsoid Correction</text>
+            <text>Ellipsoid Correction GG</text>
             <shortDescr>Ellipsoid Correction Geolocation-Grid Method</shortDescr>
             <parent>geometry</parent>
             <helpId>GeolocationGridGeocodingOp</helpId>
+        </action>
+
+        <action>
+            <id>EllipsoidCorrectionRDOp</id>
+            <class>org.esa.nest.dat.EllipsoidCorrectionRDOpAction</class>
+            <text>Ellipsoid Correction RD</text>
+            <shortDescr>Ellipsoid Correction Range-Doppler Method</shortDescr>
+            <parent>geometry</parent>
+            <helpId>EllipsoidCorrectionRDOp</helpId>
         </action>
 
         <!--action>
