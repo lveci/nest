@@ -45,20 +45,28 @@
         </action>
 
         <action>
+            <id>EllipsoidCorrection</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Ellipsoid Correction</text>
+            <parent>geometry</parent>
+            <placeAfter>RangeDopplerGeocodingOp</placeAfter>
+        </action>
+
+        <action>
             <id>GeolocationGridGeocodingOp</id>
             <class>org.esa.nest.dat.GeolocationGridGeocodingOpAction</class>
-            <text>Ellipsoid Correction GG</text>
+            <text>Geolocation-Grid</text>
             <shortDescr>Ellipsoid Correction Geolocation-Grid Method</shortDescr>
-            <parent>geometry</parent>
+            <parent>EllipsoidCorrection</parent>
             <helpId>GeolocationGridGeocodingOp</helpId>
         </action>
 
         <action>
             <id>EllipsoidCorrectionRDOp</id>
             <class>org.esa.nest.dat.EllipsoidCorrectionRDOpAction</class>
-            <text>Ellipsoid Correction RD</text>
-            <shortDescr>Ellipsoid Correction Range-Doppler Method</shortDescr>
-            <parent>geometry</parent>
+            <text>Average Height Range-Doppler</text>
+            <shortDescr>Ellipsoid Correction Range-Doppler Method Assuming Average Height</shortDescr>
+            <parent>EllipsoidCorrection</parent>
             <helpId>EllipsoidCorrectionRDOp</helpId>
         </action>
 
