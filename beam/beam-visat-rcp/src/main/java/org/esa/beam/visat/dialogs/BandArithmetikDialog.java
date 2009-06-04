@@ -1,5 +1,5 @@
 /*
- * $Id: BandArithmetikDialog.java,v 1.9 2009-06-01 19:52:04 lveci Exp $
+ * $Id: BandArithmetikDialog.java,v 1.10 2009-06-04 16:55:59 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -295,7 +295,7 @@ public class BandArithmetikDialog extends ModalDialog {
         descriptor.setNotEmpty(true);
 
         descriptor = container.getDescriptor(PROPERTY_NAME_SAVE_EXPRESSION_ONLY);
-        descriptor.setDisplayName("Virtual (safe expression only, don't write data)");
+        descriptor.setDisplayName("Virtual (save expression only, don't write data)");
         descriptor.setDefaultValue(Boolean.TRUE);
 
         descriptor = container.getDescriptor(PROPERTY_NAME_NO_DATA_VALUE_USED);
