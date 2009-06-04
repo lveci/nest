@@ -106,6 +106,9 @@ public final class RangeDopplerGeocodingOp extends Operator {
     @Parameter(defaultValue="false", label="Save local incidence angle as band")
     private boolean saveLocalIncidenceAngle = false;
 
+    @Parameter(defaultValue="false", label="Save projected local incidence angle as band")
+    private boolean saveProjectedLocalIncidenceAngle = false;
+
     @Parameter(defaultValue="false", label="Apply radiometric calibration")
     private boolean applyRadiometricCalibration = false;
 
@@ -207,6 +210,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
             if(OperatorUtils.isMapProjected(sourceProduct)) {
                 throw new OperatorException("Source product is already map projected");
             }
+
             getMissionType();
 
             getSRGRFlag();
@@ -735,8 +739,6 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
         addGeoCoding();
 
-        updateTargetProductMetadata();
-
         addLayoverShadowBitmasks(targetProduct);
 
         // the tile width has to be the image width because otherwise sourceRaster.getDataBufferIndex(x, y)
@@ -860,6 +862,15 @@ public final class RangeDopplerGeocodingOp extends Operator {
                                                      targetImageHeight);
             incidenceAngleBand.setUnit(Unit.DEGREES);
             targetProduct.addBand(incidenceAngleBand);
+        }
+
+        if(saveProjectedLocalIncidenceAngle) {
+            final Band projectedIncidenceAngleBand = new Band("projectedIncidenceAngle",
+                                                     ProductData.TYPE_FLOAT32,
+                                                     targetImageWidth,
+                                                     targetImageHeight);
+            projectedIncidenceAngleBand.setUnit(Unit.DEGREES);
+            targetProduct.addBand(projectedIncidenceAngleBand);
         }
     }
 
@@ -1015,6 +1026,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
         final int srcMaxAzimuth = sourceImageHeight - 1;
         ProductData demBuffer = null;
         ProductData incidenceAngleBuffer = null;
+        ProductData projectedIncidenceAngleBuffer = null;
         final double halfLightSpeedInMetersPerDay = Constants.halfLightSpeed * 86400.0;
 
         final ArrayList<TileData> trgTileList = new ArrayList<TileData>();
@@ -1028,6 +1040,11 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
             if(targetBand.getName().equals("incidenceAngle")) {
                 incidenceAngleBuffer = targetTiles.get(targetBand).getDataBuffer();
+                continue;
+            }
+
+            if(targetBand.getName().equals("projectedIncidenceAngle")) {
+                projectedIncidenceAngleBuffer = targetTiles.get(targetBand).getDataBuffer();
                 continue;
             }
 
@@ -1049,7 +1066,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
         final TileData[] trgTiles = trgTileList.toArray(new TileData[trgTileList.size()]);
 
         float[][] localDEM = null; // DEM for current tile for computing slope angle
-        if (saveLocalIncidenceAngle || applyRadiometricCalibration) {
+        if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) {
             localDEM = new float[h+2][w+2];
             getLocalDEM(x0, y0, w, h, localDEM);
         }
@@ -1064,7 +1081,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
                     final double lon = lonMin + x*delLon;
 
                     double alt;
-                    if (saveLocalIncidenceAngle || applyRadiometricCalibration) { // localDEM is available
+                    if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) { // localDEM is available
                         alt = (double)localDEM[y-y0+1][x-x0+1];
                     } else {
                         geoPos.setLocation((float)lat, (float)lon);
@@ -1092,14 +1109,18 @@ public final class RangeDopplerGeocodingOp extends Operator {
                     final double azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
                     slantRange = computeSlantRange(zeroDopplerTimeWithoutBias, earthPoint, sensorPos);
 
-                    double localIncidenceAngle = 0.0;
-                    if (saveLocalIncidenceAngle || applyRadiometricCalibration) {
+                    double[] localIncidenceAngles = {0.0, 0.0};
+                    if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) {
 
-                        localIncidenceAngle = computeLocalIncidenceAngle(
-                                sensorPos, earthPoint, lat, lon, x0, y0, x, y, localDEM); // in degrees
+                        computeLocalIncidenceAngle(
+                                sensorPos, earthPoint, lat, lon, x0, y0, x, y, localDEM, localIncidenceAngles); // in degrees
 
                         if (saveLocalIncidenceAngle) {
-                            incidenceAngleBuffer.setElemDoubleAt(index, localIncidenceAngle);
+                            incidenceAngleBuffer.setElemDoubleAt(index, localIncidenceAngles[0]);
+                        }
+
+                        if (saveProjectedLocalIncidenceAngle) {
+                            projectedIncidenceAngleBuffer.setElemDoubleAt(index, localIncidenceAngles[1]);
                         }
                     }
 
@@ -1120,8 +1141,8 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
                             if (applyRadiometricCalibration) {
 
-                                v = applyCalibration(slantRange, sensorPos, earthPoint,
-                                                     localIncidenceAngle, tileData.bandPolar, v, bandUnit, subSwathIndex);
+                                v = applyCalibration(slantRange, sensorPos, earthPoint, localIncidenceAngles[1],
+                                        tileData.bandPolar, v, bandUnit, subSwathIndex); // use projected incidence angle
                             }
                             
                             tileData.tileDataBuffer.setElemDoubleAt(index, v);
@@ -1775,7 +1796,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
     }
 
     /**
-     * Compute local incidence angle (in degree).
+     * Compute projected local incidence angle (in degree).
      * @param sensorPos The satellite position.
      * @param centrePoint The backscattering element position.
      * @param lat Latitude of the given point.
@@ -1785,14 +1806,16 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @param x The x coordinate of the current pixel.
      * @param y The y coordinate of the current pixel.
      * @param localDEM The local DEM.
-     * @return The local incidence angle.
+     * @param localIncidenceAngles The local incidence angle and projected local incidence angle.
      */
-    private double computeLocalIncidenceAngle(final double[] sensorPos, final double[] centrePoint,
-                                              final double lat, final double lon, final int x0, final int y0,
-                                              final int x, final int y, final float[][] localDEM) {
+    private void computeLocalIncidenceAngle(final double[] sensorPos, final double[] centrePoint,
+                                            final double lat, final double lon, final int x0, final int y0,
+                                            final int x, final int y, final float[][] localDEM,
+                                            double[] localIncidenceAngles) {
 
         // Note: For algorithm and notation of the following implementation, please see Andrea's email dated
-        //       May 29, 2009, or see Eq (14.10) on page 321 in "SAR Geocoding - Data and Systems".
+        //       May 29, 2009 and Marcus' email dated June 3, 2009, or see Eq (14.10) and Eq (14.11) on page
+        //       321 and 323 in "SAR Geocoding - Data and Systems".
         //       The Cartesian coordinate (x, y, z) is represented here by a length-3 array with element[0]
         //       representing x, element[1] representing y and element[2] representing z.
 
@@ -1809,16 +1832,38 @@ public final class RangeDopplerGeocodingOp extends Operator {
         GeoUtils.geo2xyz(lat, lon + delLon, rightPointHeight, rightPoint, GeoUtils.EarthModel.WGS84);
         GeoUtils.geo2xyz(lat - delLat, lon, downPointHeight, downPoint, GeoUtils.EarthModel.WGS84);
 
-        final double[] s = {centrePoint[0] - sensorPos[0], centrePoint[1] - sensorPos[1], centrePoint[2] - sensorPos[2]};
         final double[] a = {rightPoint[0] - centrePoint[0], rightPoint[1] - centrePoint[1], rightPoint[2] - centrePoint[2]};
         final double[] b = {downPoint[0] - centrePoint[0], downPoint[1] - centrePoint[1], downPoint[2] - centrePoint[2]};
-        final double[] n = {a[1]*b[2] - a[2]*b[1], a[2]*b[0] - a[0]*b[2], a[0]*b[1] - a[1]*b[0]}; // normal
 
-        return Math.acos((n[0]*s[0] + n[1]*s[1] + n[2]*s[2]) /
-                         Math.sqrt((n[0]*n[0] + n[1]*n[1] + n[2]*n[2]) * (s[0]*s[0] + s[1]*s[1] + s[2]*s[2]))) *
-                         org.esa.beam.util.math.MathUtils.RTOD;
+        double[] n = {a[1]*b[2] - a[2]*b[1], a[2]*b[0] - a[0]*b[2], a[0]*b[1] - a[1]*b[0]}; // normal
+        normalizeVector(n);
+
+        double[] s = {centrePoint[0] - sensorPos[0], centrePoint[1] - sensorPos[1], centrePoint[2] - sensorPos[2]};
+        normalizeVector(s);
+
+        final double nsInnerProduct = innerProduct(n, s);
+
+        if (saveLocalIncidenceAngle) { // local incidence angle
+            localIncidenceAngles[0] = Math.acos(nsInnerProduct) * org.esa.beam.util.math.MathUtils.RTOD;
+        }
+
+        if (saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) { // projected local incidence angle
+            double[] p = {s[0] - n[0]*nsInnerProduct, s[1] - n[1]*nsInnerProduct, s[2] - n[2]*nsInnerProduct};
+            normalizeVector(p);
+            localIncidenceAngles[1] = 90.0 - Math.acos(innerProduct(p, s)) * org.esa.beam.util.math.MathUtils.RTOD;
+        }
     }
 
+    private static void normalizeVector(double[] v) {
+        final double norm = Math.sqrt(innerProduct(v, v));
+        v[0] = v[0] / norm;
+        v[1] = v[1] / norm;
+        v[2] = v[2] / norm;
+    }
+
+    private static double innerProduct(final double[] a, final double[] b) {
+        return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+    }
 
     private static class TileData {
         Tile targetTile = null;
