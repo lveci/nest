@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetBuilder.java,v 1.10 2009-05-27 15:33:23 lveci Exp $
+ * $Id: ProductSubsetBuilder.java,v 1.11 2009-06-03 21:24:57 junlu Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +31,7 @@ import java.util.Arrays;
  * A special-purpose product reader used to build subsets of data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.10 $ $Date: 2009-05-27 15:33:23 $
+ * @version $Revision: 1.11 $ $Date: 2009-06-03 21:24:57 $
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
@@ -134,8 +134,8 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                         if(itemBeforeStart == null) {
                             itemBeforeStart = srgrList;
                         } else {
-                            final ProductData.UTC minTimeSoFar = itemBeforeStart.getAttributeUTC("zero_doppler_time");
-                            if(startTime - minTimeSoFar.getMJD() < startTime - time.getMJD()) {
+                            final ProductData.UTC maxTimeSoFar = itemBeforeStart.getAttributeUTC("zero_doppler_time");
+                            if(maxTimeSoFar.getMJD() < time.getMJD()) {
                                 itemBeforeStart = srgrList;
                             }
                         }
