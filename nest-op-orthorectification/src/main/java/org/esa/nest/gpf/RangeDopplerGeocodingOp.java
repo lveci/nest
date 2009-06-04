@@ -75,12 +75,13 @@ import java.text.SimpleDateFormat;
  */
 
 @OperatorMetadata(alias="Terrain-Correction", description="RD method for orthorectification")
-public final class RangeDopplerGeocodingOp extends Operator {
+//public final class RangeDopplerGeocodingOp extends Operator {
+public class RangeDopplerGeocodingOp extends Operator {
 
     @SourceProduct(alias="source")
-    private Product sourceProduct;
+    protected Product sourceProduct;
     @TargetProduct
-    private Product targetProduct;
+    protected Product targetProduct;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
@@ -173,9 +174,9 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
 
-    private static final String NEAREST_NEIGHBOUR = "Nearest Neighbour";
-    private static final String BILINEAR = "Bilinear Interpolation";
-    private static final String CUBIC = "Cubic Convolution";
+    static final String NEAREST_NEIGHBOUR = "Nearest Neighbour";
+    static final String BILINEAR = "Bilinear Interpolation";
+    static final String CUBIC = "Cubic Convolution";
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
     private static final double refSlantRange = 800000.0; //  m
     private static final double NonValidZeroDopplerTime = -99999.0;
@@ -187,6 +188,8 @@ public final class RangeDopplerGeocodingOp extends Operator {
     private ResampleMethod imgResampling = null;
 
     private Map<String, ArrayList<Tile>> tileCache = new HashMap<String, ArrayList<Tile>>(2);
+
+    boolean useAvgSceneHeight = false;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -231,13 +234,23 @@ public final class RangeDopplerGeocodingOp extends Operator {
                 getNearEdgeSlantRange();
             }
 
+            getAverageSceneHeight(); // used for retro-calibration or when useAvgSceneHeight is true
+
             computeImageGeoBoundary();
 
             computeDEMTraversalSampleInterval();
 
             computedTargetImageDimension();
 
-            getElevationModel();
+            if (useAvgSceneHeight) {
+                applyRadiometricCalibration = false;
+                retroCalibrationFlag = false;
+                saveDEM = false;
+                saveLocalIncidenceAngle = false;
+                saveProjectedLocalIncidenceAngle = false;
+            } else {
+                getElevationModel();
+            }
 
             getSourceImageDimension();
 
@@ -290,7 +303,7 @@ public final class RangeDopplerGeocodingOp extends Operator {
 
             getTiePointGrid(sourceProduct);
 
-            getAverageSceneHeight();
+            //getAverageSceneHeight();
 
             getOldAntennaPattern();
 
@@ -1085,15 +1098,19 @@ public final class RangeDopplerGeocodingOp extends Operator {
                     if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) { // localDEM is available
                         alt = (double)localDEM[y-y0+1][x-x0+1];
                     } else {
-                        geoPos.setLocation((float)lat, (float)lon);
-                        alt = getLocalElevation(geoPos);
+                        if (useAvgSceneHeight) {
+                            alt = avgSceneHeight;
+                        } else {
+                            geoPos.setLocation((float)lat, (float)lon);
+                            alt = getLocalElevation(geoPos);
+                        }
                     }
 
                     if(saveDEM) {
                         demBuffer.setElemDoubleAt(index, alt);
                     }
 
-                    if (alt == demNoDataValue) {
+                    if (!useAvgSceneHeight && alt == demNoDataValue) {
                         saveNoDataValueToTarget(index, trgTiles);
                         continue;
                     }
@@ -1728,11 +1745,12 @@ public final class RangeDopplerGeocodingOp extends Operator {
      * @param antennaPattern The antenna pattern array. For single swath product, it contains two 201-length arrays
      *                       corresponding to the two bands of different polarizations. For wide swath product, it
      *                       contains five 201-length arrays with each for a sub swath.
+     * @param compSubSwathIdx The boolean flag indicating if sub swath index should be computed.
      * @param subSwathIndex The sub swath index for current pixel for wide swath product case.
      * @return The antenna pattern gain value.
      */
-    private double getAntennaPatternGain(double elevationAngle, int bandPolar,
-                                         double[] refElevationAngle, float[][] antennaPattern, boolean compSubSwathIdx, int[] subSwathIndex) {
+    private double getAntennaPatternGain(double elevationAngle, int bandPolar, double[] refElevationAngle,
+                                         float[][] antennaPattern, boolean compSubSwathIdx, int[] subSwathIndex) {
 
         if (refElevationAngle.length == 1) { // single swath
 
