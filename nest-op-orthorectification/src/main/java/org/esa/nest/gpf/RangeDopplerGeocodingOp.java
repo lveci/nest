@@ -482,11 +482,11 @@ public class RangeDopplerGeocodingOp extends Operator {
         final Date startDate = sourceProduct.getStartTime().getAsDate();
         final Date endDate = sourceProduct.getEndTime().getAsDate();
         final File xcaFileDir = new File(Settings.instance().get("AuxData/envisatAuxDataPath"));
-        newXCAFileName = findXCAFile(xcaFileDir, startDate, endDate);
+        newXCAFileName = ASARCalibrationOperator.findXCAFile(xcaFileDir, startDate, endDate);
 
         String xcaFilePath;
         if (newXCAFileName != null) {
-            xcaFilePath = xcaFileDir + File.separator + newXCAFileName;
+            xcaFilePath = xcaFileDir.toString() + File.separator + newXCAFileName;
         } else {
             throw new OperatorException("No proper XCA file has been found");
         }
@@ -508,45 +508,6 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         ASARCalibrationOperator.getCalibrationFactorFromExternalAuxFile(
                 xcaFilePath, swath, mdsPolar, productType, newCalibrationConstant);
-    }
-
-    /**
-     * Find the latest XVA file available.
-     * @param xcaFileDir The complete path to the XCA file directory.
-     * @param productStartDate The product start date.
-     * @param productEndDate The product end data.
-     * @return The name of the XCA file found.
-     * @throws Exception The exceptions.
-     */
-    private static String findXCAFile(File xcaFileDir, Date productStartDate, Date productEndDate) throws Exception {
-
-        final File[] list = xcaFileDir.listFiles();
-        if(list == null) {
-            return null;
-        }
-
-        final SimpleDateFormat dateformat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-        Date latestCreationDate = dateformat.parse("19000101_000000");
-        String xcaFileName = null;
-
-        for(File f : list) {
-
-            final String fileName = f.getName();
-            if (fileName.length() < 61 || !fileName.substring(0,10).equals("ASA_XCA_AX")) {
-                continue;
-            }
-            final Date creationDate = dateformat.parse(fileName.substring(14, 29));
-            final Date validStartDate = dateformat.parse(fileName.substring(30, 45));
-            final Date validStopDate = dateformat.parse(fileName.substring(46, 61));
-
-            if (productStartDate.after(validStartDate) && productEndDate.before(validStopDate) &&
-                latestCreationDate.before(creationDate)) {
-
-                latestCreationDate = creationDate;
-                xcaFileName = fileName;
-            }
-        }
-        return xcaFileName;
     }
 
     /**
