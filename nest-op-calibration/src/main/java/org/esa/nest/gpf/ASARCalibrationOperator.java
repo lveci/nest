@@ -38,6 +38,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
 /**
  * Calibration for ASAR data products.
@@ -73,6 +75,8 @@ public class ASARCalibrationOperator extends Operator {
 
     private String productType = null;
     private String sampleType = null;
+    private String xcaFileName = null; // XCA file for radiometric calibration
+    private String xcaFilePath = null; // absolute path for XCA file
     protected final String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
 
     protected TiePointGrid incidenceAngle = null;
@@ -146,6 +150,8 @@ public class ASARCalibrationOperator extends Operator {
             numMPPRecords = getNumOfRecordsInMainProcParam(sourceProduct);  //???
 
             getTiePointGridData(sourceProduct);
+
+            getXCAFile();
 
             getCalibrationFactor();
 
@@ -305,14 +311,70 @@ public class ASARCalibrationOperator extends Operator {
         longitude = OperatorUtils.getLongitude(sourceProduct);
     }
 
+    private void getXCAFile() throws Exception {
+
+        if (extAuxFileAvailableFlag && externalAuxFile.exists()) {
+            xcaFileName = externalAuxFile.getName();
+            xcaFilePath = externalAuxFile.getAbsolutePath();
+        } else {
+            final Date startDate = sourceProduct.getStartTime().getAsDate();
+            final Date endDate = sourceProduct.getEndTime().getAsDate();
+            final File xcaFileDir = new File(Settings.instance().get("AuxData/envisatAuxDataPath"));
+            xcaFileName = findXCAFile(xcaFileDir, startDate, endDate);
+            xcaFilePath = xcaFileDir.toString() + File.separator + xcaFileName;
+        }
+
+        if (xcaFileName == null) {
+            throw new OperatorException("No proper XCA file has been found");
+        }
+    }
+
+    /**
+     * Find the latest XVA file available.
+     * @param xcaFileDir The complete path to the XCA file directory.
+     * @param productStartDate The product start date.
+     * @param productEndDate The product end data.
+     * @return The name of the XCA file found.
+     * @throws Exception The exceptions.
+     */
+    public static String findXCAFile(File xcaFileDir, Date productStartDate, Date productEndDate) throws Exception {
+
+        final File[] list = xcaFileDir.listFiles();
+        if(list == null) {
+            return null;
+        }
+
+        final SimpleDateFormat dateformat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        Date latestCreationDate = dateformat.parse("19000101_000000");
+        String xcaFileName = null;
+
+        for(File f : list) {
+
+            final String fileName = f.getName();
+            if (fileName.length() < 61 || !fileName.substring(0,10).equals("ASA_XCA_AX")) {
+                continue;
+            }
+            final Date creationDate = dateformat.parse(fileName.substring(14, 29));
+            final Date validStartDate = dateformat.parse(fileName.substring(30, 45));
+            final Date validStopDate = dateformat.parse(fileName.substring(46, 61));
+
+            if (productStartDate.after(validStartDate) && productEndDate.before(validStopDate) &&
+                latestCreationDate.before(creationDate)) {
+
+                latestCreationDate = creationDate;
+                xcaFileName = fileName;
+            }
+        }
+        return xcaFileName;
+    }
+
     /**
      * Get calibration factor.
      */
     private void getCalibrationFactor() {
 
-        if (extAuxFileAvailableFlag) {
-            getCalibrationFactorFromExternalAuxFile(
-                    externalAuxFile.getAbsolutePath(), swath, mdsPolar, productType, calibrationFactor);
+        if (xcaFilePath != null) {
+            getCalibrationFactorFromExternalAuxFile(xcaFilePath, swath, mdsPolar, productType, calibrationFactor);
         } else {
             getCalibrationFactorFromMetadata();
         }
@@ -486,54 +548,17 @@ public class ASARCalibrationOperator extends Operator {
             throw new OperatorException("Found ground detected product without antenna pattern correction.");
         }
 
-        String fileName;
-        if (extAuxFileAvailableFlag) {
-            fileName = externalAuxFile.getAbsolutePath();
-        } else {
-            fileName = getDefaultAuxFile(sourceProduct);
-        }
-
         if (swath.contains("WS")) {
             refElevationAngle = new double[5]; // reference elevation angles for 5 sub swathes
             antennaPatternWideSwath = new float[5][numOfGains]; // antenna pattern gain for 5 sub swathes
             getWideSwathAntennaPatternGainFromAuxData(
-                    fileName, mdsPolar[0], numOfGains, refElevationAngle, antennaPatternWideSwath);
+                    xcaFilePath, mdsPolar[0], numOfGains, refElevationAngle, antennaPatternWideSwath);
         } else {
             refElevationAngle = new double[1]; // reference elevation angle for 1 swath
             antennaPatternSingleSwath = new float[2][numOfGains];  // antenna pattern gain for 2 bands
             getSingleSwathAntennaPatternGainFromAuxData(
-                    fileName, swath, mdsPolar, numOfGains, refElevationAngle, antennaPatternSingleSwath);
+                    xcaFilePath, swath, mdsPolar, numOfGains, refElevationAngle, antennaPatternSingleSwath);
         }
-    }
-
-    /**
-     * Get default aux file name.
-     * @return string
-     */
-    static String getDefaultAuxFile(Product sourceProduct) {
-        return Settings.instance().get("AuxData/envisatAuxDataPath") + File.separator + getDefaultAuxFileName(sourceProduct);
-    }
-
-    /**
-     * Get default aux file name for the external calibration auxiliary data from DSD in the SPH.
-     *
-     * @return auxFileName The default auxiliary data file name.
-     */
-    static String getDefaultAuxFileName(Product sourceProduct) {
-
-        MetadataElement dsd = sourceProduct.getMetadataRoot().getElement("DSD").getElement("DSD.17");
-        if (dsd == null) {
-            throw new OperatorException("DSD not found");
-        }
-
-        MetadataAttribute auxFileNameAttr = dsd.getAttribute("file_name");
-        if (auxFileNameAttr == null) {
-            throw new OperatorException("file_name not found");
-        }
-        String auxFileName = auxFileNameAttr.getData().getElemString();
-        //System.out.println("aux file name is " + auxFileName);
-
-        return auxFileName;
     }
 
     /**
@@ -883,8 +908,10 @@ public class ASARCalibrationOperator extends Operator {
                 final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
                 if (pol != null) {
                     targetBandName = "Sigma0_" + pol.toUpperCase();  
-                } else
+                } else {
                     targetBandName = "Sigma0";
+                }
+
                 if(outputImageScaleInDb) {
                     targetBandName += "_dB";
                 }
@@ -930,10 +957,7 @@ public class ASARCalibrationOperator extends Operator {
 
         AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.abs_calibration_flag, 1);
 
-        if (extAuxFileAvailableFlag) {
-            AbstractMetadata.setAttribute(
-                tgtAbsRoot, AbstractMetadata.external_calibration_file, externalAuxFile.getName());
-        }
+        AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.external_calibration_file, xcaFileName);
     }
 
     /**
