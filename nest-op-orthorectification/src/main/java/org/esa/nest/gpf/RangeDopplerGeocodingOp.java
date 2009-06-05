@@ -932,8 +932,11 @@ public class RangeDopplerGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE,
                 (int)(targetProduct.getRawStorageSize() / (1024.0f * 1024.0f)));
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, IdentityTransformDescriptor.NAME);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_terrain_corrected, 1);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
+        if (!useAvgSceneHeight) {
+            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_terrain_corrected, 1);
+            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
+        }
+
         // map projection too
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.geo_ref_system, "WGS84");
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lat_pixel_res, delLat);
@@ -1822,22 +1825,40 @@ public class RangeDopplerGeocodingOp extends Operator {
                                          localDEM[y - y0 + 1][x - x0 + 2] +
                                          localDEM[y - y0 + 2][x - x0 + 2]) / 3.0;
 
+        final double leftPointHeight = (localDEM[y - y0][x - x0] +
+                                         localDEM[y - y0 + 1][x - x0] +
+                                         localDEM[y - y0 + 2][x - x0]) / 3.0;
+
+        final double upPointHeight = (localDEM[y - y0][x - x0] +
+                                        localDEM[y - y0][x - x0 + 1] +
+                                        localDEM[y - y0][x - x0 + 2]) / 3.0;
+
         final double downPointHeight = (localDEM[y - y0 + 2][x - x0] +
                                         localDEM[y - y0 + 2][x - x0 + 1] +
                                         localDEM[y - y0 + 2][x - x0 + 2]) / 3.0;
 
         final double[] rightPoint = new double[3];
+        final double[] leftPoint = new double[3];
+        final double[] upPoint = new double[3];
         final double[] downPoint = new double[3];
         GeoUtils.geo2xyz(lat, lon + delLon, rightPointHeight, rightPoint, GeoUtils.EarthModel.WGS84);
+        GeoUtils.geo2xyz(lat, lon - delLon, leftPointHeight, leftPoint, GeoUtils.EarthModel.WGS84);
+        GeoUtils.geo2xyz(lat + delLat, lon, upPointHeight, upPoint, GeoUtils.EarthModel.WGS84);
         GeoUtils.geo2xyz(lat - delLat, lon, downPointHeight, downPoint, GeoUtils.EarthModel.WGS84);
 
-        final double[] a = {rightPoint[0] - centrePoint[0], rightPoint[1] - centrePoint[1], rightPoint[2] - centrePoint[2]};
-        final double[] b = {downPoint[0] - centrePoint[0], downPoint[1] - centrePoint[1], downPoint[2] - centrePoint[2]};
+        final double[] a = {rightPoint[0] - leftPoint[0], rightPoint[1] - leftPoint[1], rightPoint[2] - leftPoint[2]};
+        final double[] b = {downPoint[0] - upPoint[0], downPoint[1] - upPoint[1], downPoint[2] - upPoint[2]};
+        final double[] c = {centrePoint[0], centrePoint[1], centrePoint[2]};
 
-        double[] n = {a[1]*b[2] - a[2]*b[1], a[2]*b[0] - a[0]*b[2], a[0]*b[1] - a[1]*b[0]}; // normal
+        double[] n = {a[1]*b[2] - a[2]*b[1], a[2]*b[0] - a[0]*b[2], a[0]*b[1] - a[1]*b[0]}; // ground plane normal
         normalizeVector(n);
+        if (innerProduct(n, c) < 0) {
+            n[0] = -n[0];
+            n[1] = -n[1];
+            n[2] = -n[2];
+        }
 
-        double[] s = {centrePoint[0] - sensorPos[0], centrePoint[1] - sensorPos[1], centrePoint[2] - sensorPos[2]};
+        double[] s = {sensorPos[0] - centrePoint[0], sensorPos[1] - centrePoint[1], sensorPos[2] - centrePoint[2]};
         normalizeVector(s);
 
         final double nsInnerProduct = innerProduct(n, s);
@@ -1847,9 +1868,12 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
 
         if (saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) { // projected local incidence angle
-            double[] p = {s[0] - n[0]*nsInnerProduct, s[1] - n[1]*nsInnerProduct, s[2] - n[2]*nsInnerProduct};
-            normalizeVector(p);
-            localIncidenceAngles[1] = 90.0 - Math.acos(innerProduct(p, s)) * org.esa.beam.util.math.MathUtils.RTOD;
+            double[] m = {s[1]*c[2] - s[2]*c[1], s[2]*c[0] - s[0]*c[2], s[0]*c[1] - s[1]*c[0]}; // range plane normal
+            normalizeVector(m);
+            final double mnInnerProduct = innerProduct(m, n);
+            double[] n1 = {n[0] - m[0]*mnInnerProduct, n[1] - m[1]*mnInnerProduct, n[2] - m[2]*mnInnerProduct};
+            normalizeVector(n1);
+            localIncidenceAngles[1] = Math.acos(innerProduct(n1, s)) * org.esa.beam.util.math.MathUtils.RTOD;
         }
     }
 
