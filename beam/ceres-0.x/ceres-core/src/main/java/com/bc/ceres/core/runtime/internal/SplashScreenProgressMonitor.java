@@ -175,6 +175,7 @@ public class SplashScreenProgressMonitor extends NullProgressMonitor {
     public void setSubTaskName(String subTaskName) {
         this.subTaskName = subTaskName;
         this.message = createMessage();
+        System.out.println(message);
         update();
     }
 
@@ -381,7 +382,7 @@ public class SplashScreenProgressMonitor extends NullProgressMonitor {
                                              image.getHeight());
             bufferImage = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_INT_ARGB);
             bufferGraphics = bufferImage.createGraphics();
-            bufferGraphics.drawImage(backgroundImage, null, 0, 0);
+            //bufferGraphics.drawImage(backgroundImage, null, 0, 0);
             setBounds(bounds);
             setFocusable(false);
             setAlwaysOnTop(false);
@@ -413,7 +414,7 @@ public class SplashScreenProgressMonitor extends NullProgressMonitor {
 
         @Override
         public void update(Graphics g) {
-            //bufferGraphics.drawImage(backgroundImage, null, 0, 0);
+            bufferGraphics.drawImage(backgroundImage, null, 0, 0);
             if (updateImage != null) {
                 bufferGraphics.drawImage(updateImage, null, 0, 0);
             }

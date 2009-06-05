@@ -1,5 +1,5 @@
 /*
- * $Id: BeamCoreActivator.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: BeamCoreActivator.java,v 1.2 2009-06-04 20:29:34 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -41,7 +41,7 @@ import java.util.logging.Level;
  * It is invoked by the {@link ModuleRuntime ceres runtime} to activate the {@code beam-core} module.</i>
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-06-04 20:29:34 $
  */
 public class BeamCoreActivator implements Activator {
 
@@ -87,17 +87,18 @@ public class BeamCoreActivator implements Activator {
                                                        String extensionPointId,
                                                        String elementName,
                                                        Class<T> extensionType) {
-        Module module = moduleContext.getModule();
-        ExtensionPoint extensionPoint = module.getExtensionPoint(extensionPointId);
-        ConfigurationElement[] configurationElements = extensionPoint.getConfigurationElements();
-        List<T> executableExtensions = new ArrayList<T>(32);
+        final Module module = moduleContext.getModule();
+        final ExtensionPoint extensionPoint = module.getExtensionPoint(extensionPointId);
+        final ConfigurationElement[] configurationElements = extensionPoint.getConfigurationElements();
+        final List<T> executableExtensions = new ArrayList<T>(32);
         for (ConfigurationElement configurationElement : configurationElements) {
-            ConfigurationElement[] children = configurationElement.getChildren(elementName);
+            final ConfigurationElement[] children = configurationElement.getChildren(elementName);
             for (ConfigurationElement child : children) {
                 try {
-                    ModuleState moduleState = child.getDeclaringExtension().getDeclaringModule().getState();
+                    final ModuleState moduleState = child.getDeclaringExtension().getDeclaringModule().getState();
                     if (moduleState.isOneOf(ModuleState.STARTING, ModuleState.RESOLVED)) {
-                        T executableExtension = child.createExecutableExtension(extensionType);
+                        final T executableExtension = child.createExecutableExtension(extensionType);
+                        //System.out.println("loading extension "+child.getName() + " " + executableExtension.toString());
                         executableExtensions.add(executableExtension);
                     }
                 } catch (CoreException e) {

@@ -450,9 +450,9 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
-                        <skip>false</skip>
+                        <skip>true</skip>
                         <printSummary>true</printSummary>
-			<workingDirectory>../beam</workingDirectory>
+						<workingDirectory>../beam</workingDirectory>
                         <excludes>
                             <exclude>**/TestRaster.java</exclude>
                             <exclude>**/TestHelper$1.java</exclude>

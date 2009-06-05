@@ -79,6 +79,7 @@ public class RuntimeActivator implements Activator {
                             final String[] providerImplClassNames = getProviderImplClassNames(serviceRegistration);
                             if (providerImplClassNames != null) {
                                 for (String providerImplClassName : providerImplClassNames) {
+                                    //System.out.println("loading "+providerImplClassName);
                                     final Class<?> providerImplClass = getProviderImplClass(serviceRegistration, providerImplClassName);
                                     if (providerImplClass != null) {
                                         registerProviderImpl(serviceRegistration, providerImplClass);
