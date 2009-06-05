@@ -37,7 +37,7 @@
     <extension point="beam-ui:applicationDescriptors">
             <applicationDescriptor>
                 <applicationId>DatMain</applicationId>
-                <displayName>DAT</displayName>
+                <displayName>NEST DAT</displayName>
                 <frameIcon>/org/esa/nest/dat/icons/dat.png</frameIcon>
                 <image>/org/esa/nest/dat/icons/nest_splash.png</image>
                 <excludedActions>
