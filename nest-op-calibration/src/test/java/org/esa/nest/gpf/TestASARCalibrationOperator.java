@@ -6,8 +6,10 @@ import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.util.Settings;
 
 import java.util.Arrays;
+import java.io.File;
 
 import com.bc.ceres.core.ProgressMonitor;
 
@@ -32,9 +34,10 @@ public class TestASARCalibrationOperator extends TestCase {
     public void testOperator() throws Exception {
         Product sourceProduct = createTestProduct(4, 4);
 
-        Operator op = spi.createOperator();
+        ASARCalibrationOperator op = (ASARCalibrationOperator)spi.createOperator();
         assertNotNull(op);
         op.setSourceProduct(sourceProduct);
+        op.setExternalAntennaPatternFile("ASA_XCA_AXVIEC20021217_150852_20020413_000000_20031231_000000.zip");
 
         // get targetProduct gets initialize to be executed
         Product targetProduct = op.getTargetProduct();
@@ -48,8 +51,8 @@ public class TestASARCalibrationOperator extends TestCase {
         band.readPixels(0, 0, 4, 4, floatValues, ProgressMonitor.NULL);
 
         // compare with expected outputs
-        float[] expectedValues = {0.5f,2.828427f,7.7942286f,15.454813f,12.5f,25.455845f,42.435246f,
-                61.819252f,40.5f,70.71068f,104.78907f,139.09332f,84.5f,138.59293f,194.85571f,247.27701f};
+        float[] expectedValues = {0.50000006f, 2.8284273f, 7.7942286f, 15.454814f, 12.5f, 25.455845f, 42.435246f,
+                61.819256f, 40.499996f, 70.71068f, 104.78907f, 139.09332f, 84.49999f, 138.59294f, 194.85571f, 247.27702f};
         assertTrue(Arrays.equals(expectedValues, floatValues));
     }
 
@@ -59,14 +62,15 @@ public class TestASARCalibrationOperator extends TestCase {
         Product testProduct = new Product("p", "ASA_APG_1P", w, h);
 
         // create a Band: band1
-        Band band1 = testProduct.addBand("band1", ProductData.TYPE_INT32);
+        double calibrationFactor = 518800.03125;
+        Band band1 = testProduct.addBand("band1", ProductData.TYPE_FLOAT32);
         band1.setUnit("amplitude");
         band1.setSynthetic(true);
-        int[] intValues = new int[w * h];
+        float [] values = new float[w * h];
         for (int i = 0; i < w * h; i++) {
-            intValues[i] = i + 1;
+            values[i] = (float)((i + 1)*Math.sqrt(calibrationFactor));
         }
-        band1.setData(ProductData.createInstance(intValues));
+        band1.setData(ProductData.createInstance(values));
 
         // create 2 TiePointGrid for band1: incidence_angle and slant_rage_time
         float[] incidence_angle = {30F,45F,60F,75F,30F,45F,60F,75F,30F,45F,60F,75F,30F,45F,60F,75F};
