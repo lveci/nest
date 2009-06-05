@@ -1456,7 +1456,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         final int y0 = (int)azimuthIndex;
 
         double v = 0.0;
-        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY) {
+        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.INTENSITY_DB) {
 
             v = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
 
@@ -1505,7 +1505,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         final ProductData srcData = sourceTile.getDataBuffer();
 
         double v00, v01, v10, v11;
-        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY) {
+        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.INTENSITY_DB) {
 
             v00 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
             v01 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y0));
@@ -1605,7 +1605,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         final ProductData srcData = sourceTile.getDataBuffer();
 
         final double[][] v = new double[4][4];
-        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY) {
+        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.INTENSITY_DB) {
 
             for (int i = 0; i < y.length; i++) {
                 for (int j = 0; j < x.length; j++) {
@@ -1694,6 +1694,8 @@ public class RangeDopplerGeocodingOp extends Operator {
             return v*gain*Math.pow(refSlantRange / slantRange, rangeSpreadingCompPower/2); // amplitude
         } else if (bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
             return v*gain*gain*Math.pow(refSlantRange / slantRange, rangeSpreadingCompPower); // intensity
+        } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
+            return 10.0*Math.log10(Math.pow(10, v/10.0)*gain*gain*Math.pow(refSlantRange/slantRange, rangeSpreadingCompPower));
         } else {
             throw new OperatorException("Uknown band unit");
         }
@@ -1781,6 +1783,8 @@ public class RangeDopplerGeocodingOp extends Operator {
             sigma = v*v; 
         } else if (bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
             sigma = v;
+        } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
+            sigma = Math.pow(10, v/10.0); // convert dB to linear scale
         } else {
             throw new OperatorException("Uknown band unit");
         }
