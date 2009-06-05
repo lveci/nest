@@ -1241,6 +1241,20 @@ public class ASARCalibrationOperator extends Operator {
     }
 
     /**
+    * Set the XCA file name.
+    * This function is used by unit test only.
+    * @param xcaFileName The XCA file name.
+    */
+    public void setExternalAntennaPatternFile(String xcaFileName) {
+
+        String path = Settings.instance().get("AuxData/envisatAuxDataPath") + File.separator + xcaFileName;
+        externalAuxFile = new File(path);
+        if (!externalAuxFile.exists()) {
+            throw new OperatorException("External antenna pattern file for unit test does not exist");
+        }
+    }
+
+    /**
      * The SPI is used to register this operator in the graph processing framework
      * via the SPI configuration file
      * {@code META-INF/services/org.esa.beam.framework.gpf.OperatorSpi}.
