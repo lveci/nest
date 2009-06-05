@@ -36,6 +36,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Retro-Calibration for ASAR data products.
@@ -55,7 +56,7 @@ public class ASARRetroCalibrationOperator extends Operator {
     String[] sourceBandNames;
 
     @Parameter(description = "The antenne elevation pattern gain auxiliary data file.")
-    private File externalAntennaPatternFile = null;
+    private File externalXCAFile = null;
 
     @Parameter(description = "Output image scale", defaultValue = "false")
     private boolean outputImageScaleInDb = false;
@@ -66,7 +67,9 @@ public class ASARRetroCalibrationOperator extends Operator {
     private TiePointGrid latitude;
     private TiePointGrid longitude;
 
-    private String defAuxFileName;
+    private String oldXCAFileName = null; // the old XCA file
+    private String newXCAFileName = null; // the new XCA file
+    private String newXCAFilePath = null; // absolute path to the new XCA file
     private String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
 
     private boolean antElevCorrFlag;
@@ -124,7 +127,9 @@ public class ASARRetroCalibrationOperator extends Operator {
 
             getProductSwath();
 
-            getDefaultAuxFile();
+            getOldXCAFile();
+
+            getNewXCAFile();
 
             getOrbitStateVectors();
 
@@ -189,10 +194,29 @@ public class ASARRetroCalibrationOperator extends Operator {
     }
 
     /**
-     * Get default aux file name for the external calibration auxiliary data.
+     * Get XCA file used for the original radiometric calibration.
+     * @throws Exception The exceptions.
      */
-    private void getDefaultAuxFile() throws Exception {
-        defAuxFileName = absRoot.getAttributeString(AbstractMetadata.external_calibration_file);
+    private void getOldXCAFile() throws Exception {
+        oldXCAFileName = absRoot.getAttributeString(AbstractMetadata.external_calibration_file);
+    }
+
+    /**
+     * Get the latest XCA file for the radiometric calibration.
+     * @throws Exception The exceptions.
+     */
+    private void getNewXCAFile() throws Exception {
+
+        if (externalXCAFile != null && externalXCAFile.exists()) {
+            newXCAFileName = externalXCAFile.getName();
+            newXCAFilePath = externalXCAFile.getAbsolutePath();
+        } else {
+            final Date startDate = sourceProduct.getStartTime().getAsDate();
+            final Date endDate = sourceProduct.getEndTime().getAsDate();
+            final File xcaFileDir = new File(Settings.instance().get("AuxData/envisatAuxDataPath"));
+            newXCAFileName = ASARCalibrationOperator.findXCAFile(xcaFileDir, startDate, endDate);
+            newXCAFilePath = xcaFileDir.toString() + File.separator + newXCAFileName;
+        }
     }
 
     /**
@@ -242,20 +266,20 @@ public class ASARRetroCalibrationOperator extends Operator {
      */
     private void getOldAntennaPatternGain() {
 
-        final String defAuxFilePath = Settings.instance().get("AuxData/envisatAuxDataPath") + File.separator + defAuxFileName;
+        final String oldXCAFilePath = Settings.instance().get("AuxData/envisatAuxDataPath") + File.separator + oldXCAFileName;
         if (swath.contains("WS")) {
 
             oldRefElevationAngle = new double[5]; // reference elevation angles for 5 sub swathes
             oldAntennaPatternWideSwath = new float[5][numOfGains]; // antenna pattern gain for 5 sub swathes
             ASARCalibrationOperator.getWideSwathAntennaPatternGainFromAuxData(
-                    defAuxFilePath, mdsPolar[0], numOfGains, oldRefElevationAngle, oldAntennaPatternWideSwath);
+                    oldXCAFilePath, mdsPolar[0], numOfGains, oldRefElevationAngle, oldAntennaPatternWideSwath);
 
         } else {
 
             oldRefElevationAngle = new double[1]; // reference elevation angle for 1 swath
             oldAntennaPatternSingleSwath = new float[2][numOfGains]; // antenna pattern gain for 2 bands
             ASARCalibrationOperator.getSingleSwathAntennaPatternGainFromAuxData(
-                    defAuxFilePath, swath, mdsPolar, numOfGains, oldRefElevationAngle, oldAntennaPatternSingleSwath);
+                    oldXCAFilePath, swath, mdsPolar, numOfGains, oldRefElevationAngle, oldAntennaPatternSingleSwath);
         }
     }
 
@@ -264,20 +288,19 @@ public class ASARRetroCalibrationOperator extends Operator {
      */
     private void getNewAntennaPatternGain() {
 
-        final String extAuxFilePath = externalAntennaPatternFile.getAbsolutePath();
         if (swath.contains("WS")) {
 
             newRefElevationAngle = new double[5]; // reference elevation angles for 5 sub swathes
             newAntennaPatternWideSwath = new float[5][numOfGains]; // antenna pattern gain for 5 sub swathes
             ASARCalibrationOperator.getWideSwathAntennaPatternGainFromAuxData(
-                    extAuxFilePath, mdsPolar[0], numOfGains, newRefElevationAngle, newAntennaPatternWideSwath);
+                    newXCAFilePath, mdsPolar[0], numOfGains, newRefElevationAngle, newAntennaPatternWideSwath);
 
         } else {
 
             newRefElevationAngle = new double[1]; // reference elevation angle for 1 swath
             newAntennaPatternSingleSwath = new float[2][numOfGains];  // antenna pattern gain for 2 bands
             ASARCalibrationOperator.getSingleSwathAntennaPatternGainFromAuxData(
-                    extAuxFilePath,  swath, mdsPolar, numOfGains, newRefElevationAngle, newAntennaPatternSingleSwath);
+                    newXCAFilePath,  swath, mdsPolar, numOfGains, newRefElevationAngle, newAntennaPatternSingleSwath);
         }
     }
 
@@ -375,8 +398,7 @@ public class ASARRetroCalibrationOperator extends Operator {
      */
     private void updateAuxFileName() {
         final MetadataElement tgtAbsRoot = targetProduct.getMetadataRoot().getElement("Abstracted Metadata");
-        AbstractMetadata.setAttribute(
-                tgtAbsRoot, AbstractMetadata.external_calibration_file, externalAntennaPatternFile.getName());
+        AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.external_calibration_file, newXCAFileName);
     }
 
     /**
@@ -708,8 +730,8 @@ public class ASARRetroCalibrationOperator extends Operator {
     */
     public void setExternalAntennaPatternFile(String path) {
 
-        externalAntennaPatternFile = new File(path);
-        if (!externalAntennaPatternFile.exists()) {
+        externalXCAFile = new File(path);
+        if (!externalXCAFile.exists()) {
             throw new OperatorException("External antenna pattern file for unit test does not exist");
         }
     }
