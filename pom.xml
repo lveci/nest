@@ -515,6 +515,7 @@
                 <configuration>
                     <descriptors>
 						<descriptor>src/main/assembly/bin-windows.xml</descriptor>
+						<descriptor>src/main/assembly/bin-windows64.xml</descriptor>
 						<descriptor>src/main/assembly/bin-linux.xml</descriptor>
 						<descriptor>src/main/assembly/bin-mac.xml</descriptor>
 						<descriptor>src/main/assembly/bin.xml</descriptor>

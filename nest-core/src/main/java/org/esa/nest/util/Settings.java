@@ -108,11 +108,17 @@ public final class Settings {
             out = value.replace(fullKey, property);
         } else {
 
-            final String settingStr = get(keyWord);
-            if(settingStr != null) {
-                out = value.replace(fullKey, settingStr);
+            final String env = System.getenv(keyWord);
+            if (env != null && env.length() > 0) {
+                out = value.replace(fullKey, env);
             } else {
-                out = value.substring(0, idx1) + value.substring(idx2, value.length());
+
+                final String settingStr = get(keyWord);
+                if(settingStr != null) {
+                    out = value.replace(fullKey, settingStr);
+                } else {
+                    out = value.substring(0, idx1) + value.substring(idx2, value.length());
+                }
             }
         }
 

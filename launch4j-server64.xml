@@ -1,0 +1,27 @@
+<launch4jConfig>
+  <dontWrapJar>false</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>C:\build\nest\target\nest-2C-bin.dir\bin\ceres-launcher.jar</jar>
+  <outfile>C:\build\nest\target\nest-2C-bin.dir\nest-dat64.exe</outfile>
+  <errTitle></errTitle>
+  <cmdLine></cmdLine>
+  <chdir></chdir>
+  <priority>normal</priority>
+  <downloadUrl>http://java.com/download</downloadUrl>
+  <supportUrl></supportUrl>
+  <customProcName>true</customProcName>
+  <stayAlive>false</stayAlive>
+  <manifest></manifest>
+  <icon>C:\build\nest\src\main\assembly\dat.ico</icon>
+  <jre>
+    <path>jre</path>
+    <minVersion>1.5.0</minVersion>
+    <maxVersion></maxVersion>
+    <jdkPreference>jdkOnly</jdkPreference>
+    <initialHeapSize>512</initialHeapSize>
+    <maxHeapSize>4096</maxHeapSize>
+    <opt>-server -Dceres.context=nest</opt>
+    <opt>-Xverify:none -XX:+UseParallelGC -XX:CompileThreshold=100</opt>
+    <opt>-XX:+AggressiveOpts -XX:+UseFastAccessorMethods -Xconcurrentio</opt>
+  </jre>
+</launch4jConfig>
