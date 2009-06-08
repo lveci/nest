@@ -1,10 +1,11 @@
 package org.esa.nest.dataio;
 
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.VirtualBand;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataop.maptransf.MapInfo;
+import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
+import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.util.math.MathUtils;
+import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.Unit;
 
 import java.io.File;
@@ -119,6 +120,17 @@ public class ReaderUtils {
                                                            coarseTiePoints[i1 + j1 * coarseGridWidth]);
             }
         }
+    }
+
+    public static void createMapGeocoding(final Product targetProduct, final double noDataValue) {
+        final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(targetProduct,
+                                                MapProjectionRegistry.getProjection(IdentityTransformDescriptor.NAME),
+                                                0.0,
+                                                noDataValue);
+        mapInfo.setSceneWidth(targetProduct.getSceneRasterWidth());
+        mapInfo.setSceneHeight(targetProduct.getSceneRasterHeight());
+
+        targetProduct.setGeoCoding(new MapGeoCoding(mapInfo));
     }
 
     public static double getLineTimeInterval(ProductData.UTC startUTC, ProductData.UTC endUTC, int sceneHeight) {

@@ -900,14 +900,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         final String[] srcBandNames = targetBandNameToSourceBandName.get(targetProduct.getBandAt(0).getName());
 
-        final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(targetProduct,
-                                                MapProjectionRegistry.getProjection(IdentityTransformDescriptor.NAME),
-                                                0.0,
-                                                sourceProduct.getBand(srcBandNames[0]).getNoDataValue());
-        mapInfo.setSceneWidth(targetProduct.getSceneRasterWidth());
-        mapInfo.setSceneHeight(targetProduct.getSceneRasterHeight());
-
-        targetProduct.setGeoCoding(new MapGeoCoding(mapInfo));
+        ReaderUtils.createMapGeocoding(targetProduct, sourceProduct.getBand(srcBandNames[0]).getNoDataValue());
     }
 
     /**

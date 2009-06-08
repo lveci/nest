@@ -77,10 +77,10 @@ public class ProjectionAction extends ExecCommand {
                 visatApp.showErrorDialog("Product is in slant range. Please first convert to ground range.");
                 return false;
             }
-            if(OperatorUtils.isMapProjected(product)) {
-                visatApp.showErrorDialog("Product is already map projected");
-                return false;
-            }
+            //if(OperatorUtils.isMapProjected(product)) {
+                //visatApp.showErrorDialog("Product is already map projected");
+                //return false;
+            //}
         } catch(Exception e) {
             return true;
         }
