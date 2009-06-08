@@ -32,12 +32,7 @@ import org.esa.nest.util.MathUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
-/**
- * Calibration for ASAR data products.
- *
- * @todo should use user selected interpolation methods
- * @todo add virtual band in target product (see createVirtualIntensityBand() in WSSDeBuestOp.java)
- */
+
 /**
  * Slant Range to Ground Range Conversion.
  */
@@ -65,8 +60,10 @@ public class SRGROp extends Operator {
     @Parameter(valueSet = {NEAREST_NEIGHBOR, LINEAR, CUBIC, CUBIC2, SINC}, defaultValue = LINEAR, label="Interpolation Method")
     private String interpolationMethod = LINEAR;
 
-    private GeoCoding geoCoding;
-    private boolean srgrFlag;
+    private MetadataElement absRoot = null;
+    private GeoCoding geoCoding = null;
+    private boolean srgrFlag = false;
+    private boolean imageFlipped = false;
     private double slantRangeSpacing; // in m
     private double groundRangeSpacing; // in m
     private double nearRangeIncidenceAngle; // in degree
@@ -106,33 +103,56 @@ public class SRGROp extends Operator {
                 throw new OperatorException("numRangePoints must be greater than warpPolynomialOrder");
             }
 
-            final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+            absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
-            srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
+            getSRGRFlag();
 
-            if (srgrFlag) {
-                throw new OperatorException("Slant range to ground range conversion has already been applied");
-            }
+            getSlantRangePixelSpacing();
 
-            slantRangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
+            getSourceImageDimension();
 
-            sourceImageWidth = sourceProduct.getSceneRasterWidth();
-            sourceImageHeight = sourceProduct.getSceneRasterHeight();
             geoCoding = sourceProduct.getGeoCoding();
 
             computeSlantRangeDistanceArray();
 
             getNearRangeIncidenceAngle();
 
-            groundRangeSpacing = slantRangeSpacing / Math.sin(nearRangeIncidenceAngle*Math.PI/180.0);
+            computeGroundRangeSpacing();
 
-            computeWarpPolynomial(sourceImageHeight / 2);
+            computeWarpPolynomial();
 
             createTargetProduct();
 
         } catch(Exception e) {
             throw new OperatorException("SRGR:"+e.getMessage());
         }
+    }
+
+    /**
+     * Get SRGR flag.
+     * @throws Exception The exceptions.
+     */
+    private void getSRGRFlag() throws Exception {
+        srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
+        if (srgrFlag) {
+            throw new OperatorException("Slant range to ground range conversion has already been applied");
+        }
+    }
+
+    /**
+     * Get slant range pixel spacing.
+     * @throws Exception The exceptions.
+     */
+    private void getSlantRangePixelSpacing() throws Exception {
+        slantRangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
+    }
+
+    /**
+     * Get source image dimension.
+     */
+    private void getSourceImageDimension() {
+        sourceImageWidth = sourceProduct.getSceneRasterWidth();
+        sourceImageHeight = sourceProduct.getSceneRasterHeight();
     }
 
     /**
@@ -265,30 +285,29 @@ public class SRGROp extends Operator {
     private void getNearRangeIncidenceAngle() {
 
         final TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
-
         final double alphaFirst = incidenceAngle.getPixelFloat(0.5f, 0.5f);
         final double alphaLast = incidenceAngle.getPixelFloat(sourceImageWidth - 0.5f, 0.5f);
-        nearRangeIncidenceAngle = Math.min(alphaFirst, alphaLast);
-
-        /*
-        final MetadataAttribute passAttr = absRoot.getAttribute(AbstractMetadata.PASS);
-        if (passAttr == null) {
-            throw new OperatorException(AbstractMetadata.PASS + " not found");
-        }
-        final String pass = passAttr.getData().getElemString();
-
-        if (pass.contains("DESCENDING")) {
-            nearRangeIncidenceAngle = incidenceAngle.getPixelFloat(sourceImageWidth - 0.5f, 0.5f);
+        if (alphaFirst < alphaLast) {
+            imageFlipped = false;
+            nearRangeIncidenceAngle = alphaFirst;
         } else {
-            nearRangeIncidenceAngle = incidenceAngle.getPixelFloat(0.5f, 0.5f);
+            imageFlipped = true;
+            nearRangeIncidenceAngle = alphaLast;
         }
-        */
     }
-    
+
+    /**
+     * Compute ground range spacing.
+     */
+    private void computeGroundRangeSpacing() {
+        groundRangeSpacing = slantRangeSpacing / Math.sin(nearRangeIncidenceAngle*Math.PI/180.0);
+    }
+
     /**
      * Create target product.
+     * @throws Exception The exceptions.
      */
-    private void createTargetProduct() {
+    private void createTargetProduct() throws Exception {
 
         computeTargetImageDimension();
 
@@ -302,9 +321,7 @@ public class SRGROp extends Operator {
         targetProduct.setPreferredTileSize(targetImageWidth, 256);
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        //ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-        //ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
 
@@ -313,6 +330,9 @@ public class SRGROp extends Operator {
         updateTargetProductMetadata();
     }
 
+    /**
+     * Compute target image dimension.
+     */
     private void computeTargetImageDimension() {
 
         final double[] xyz = new double[3];
@@ -342,14 +362,63 @@ public class SRGROp extends Operator {
 
     /**
      * Update metadata in the target product.
+     * @throws Exception The exceptions.
      */
-    private void updateTargetProductMetadata() {
+    private void updateTargetProductMetadata() throws Exception {
 
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.srgr_flag, 1);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_spacing, groundRangeSpacing);
+        addSRGRCoefficients(absTgt);
     }
 
+    /**
+     * Add SRGR Coefficients to the abstract metadata.
+     * @param absTgt The root of the target abstract metadata.
+     * @throws Exception The exceptions.
+     */
+    private void addSRGRCoefficients(MetadataElement absTgt) throws Exception {
+
+        final MetadataElement srgrCoefficientsElem = new MetadataElement(AbstractMetadata.srgr_coefficients);
+
+        final MetadataElement srgrListElem = new MetadataElement("srgr_coef_list");
+        srgrCoefficientsElem.addElement(srgrListElem);
+
+        final ProductData.UTC utcTime = absTgt.getAttributeUTC(AbstractMetadata.first_line_time, new ProductData.UTC(0));
+        srgrListElem.setAttributeUTC(AbstractMetadata.srgr_coef_time, utcTime);
+
+        AbstractMetadata.addAbstractedAttribute(srgrListElem, AbstractMetadata.ground_range_origin,
+                ProductData.TYPE_FLOAT64, "m", "Ground Range Origin");
+        AbstractMetadata.setAttribute(srgrListElem, AbstractMetadata.ground_range_origin, 0.0);
+
+        final double r0 = AbstractMetadata.getAttributeDouble(absTgt, AbstractMetadata.slant_range_to_first_pixel);
+        for (int i = 0; i < warpPolynomialCoef.length; i++) {
+            if (i == 0) {
+                addSRGRCoef(srgrListElem, warpPolynomialCoef[i] + r0);
+            } else {
+                addSRGRCoef(srgrListElem, warpPolynomialCoef[i]);
+            }
+        }
+
+        absTgt.addElement(srgrCoefficientsElem);
+    }
+
+    /**
+     * Add a SRGR coefficient to the SRGR list.
+     * @param srgrListElem The SRGR coefficients list.
+     * @param srgrCoefficient The SRGR coefficient.
+     */
+    private static void addSRGRCoef(final MetadataElement srgrListElem, final double srgrCoefficient) {
+        final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient);
+        srgrListElem.addElement(coefElem);
+        AbstractMetadata.addAbstractedAttribute(coefElem, AbstractMetadata.srgr_coef,
+                ProductData.TYPE_FLOAT64, "", "SRGR Coefficient");
+        AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, srgrCoefficient);
+    }
+
+    /**
+     * Add user selected bands to the target product.
+     */
     private void addSelectedBands() {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) {
@@ -376,7 +445,7 @@ public class SRGROp extends Operator {
                 continue;
             }
             final Band targetBand = new Band(srcBand.getName(),
-                                       ProductData.TYPE_FLOAT32, //srcBand.getDataType(),
+                                       ProductData.TYPE_FLOAT32,
                                        targetImageWidth,
                                        targetImageHeight);
             targetBand.setUnit(srcBand.getUnit());
@@ -384,6 +453,9 @@ public class SRGROp extends Operator {
         }
     }
 
+    /**
+     * Add Geo coding to the target product.
+     */
     private void addGeoCoding() {
 
         TiePointGrid lat = OperatorUtils.getLatitude(sourceProduct);
@@ -427,53 +499,51 @@ public class SRGROp extends Operator {
 
     /**
      * Compute WARP polynomial coefficients.
-     *
-     * @param y0 The y coordinate of the upper left pixel in the current tile.
      */
-    private void computeWarpPolynomial(int y0) {
+    private void computeWarpPolynomial() {
 
-        computeGroundRangeDistanceArray(y0);
+        final int y = sourceImageHeight / 2;
+        computeGroundRangeDistanceArray(y);
         final Matrix A = MathUtils.createVandermondeMatrix(groundRangeDistanceArray, warpPolynomialOrder);
         final Matrix b = new Matrix(slantRangeDistanceArray, numRangePoints - 1);
         final Matrix x = A.solve(b);
         warpPolynomialCoef = x.getColumnPackedCopy();
-
-        /*
-        for (double c : warpPolynomialCoef) {
-            System.out.print(c + ", ");
-        }
-        System.out.println();
-        */
     }
 
     /**
      * Compute ground range distance from each selected range point to the 1st one (in m).
-     *
-     * @param y0 The y coordinate of the upper left pixel in the current tile.
+     * @param y The y coordinate of a given range line.
      */
-    private void computeGroundRangeDistanceArray(int y0) {
+    private void computeGroundRangeDistanceArray(int y) {
 
         groundRangeDistanceArray = new double[numRangePoints - 1];
         final double[] xyz = new double[3];
         final int pixelsBetweenPoints = sourceImageWidth / numRangePoints;
 
-        // geomatic geo = new geomatic();
-        // MxVector3 xyz1 = new MxVector3();
-        // xyz1 = geo.GeoCordToXYZ( xyz1, t1*geo.R2D, -t3*geo.R2D+180, 0);
+        GeoPos geoPos;
+        if (imageFlipped) {
+            geoPos = geoCoding.getGeoPos(new PixelPos(sourceImageWidth-1, y), null);
+        } else {
+            geoPos = geoCoding.getGeoPos(new PixelPos(0, y), null);
+        }
 
-        GeoPos geoPos = geoCoding.getGeoPos(new PixelPos(0, y0), null);
         GeoUtils.geo2xyz(geoPos, xyz);
-        double xP0 = xyz[0];
-        double yP0 = xyz[1];
-        double zP0 = xyz[2];
+        double xPos0 = xyz[0];
+        double yPos0 = xyz[1];
+        double zPos0 = xyz[2];
 
         for (int i = 0; i < numRangePoints - 1; i++) {
 
-            geoPos = geoCoding.getGeoPos(new PixelPos(pixelsBetweenPoints*(i+1), y0), null);
+            if (imageFlipped) {
+                geoPos = geoCoding.getGeoPos(new PixelPos(sourceImageWidth - 1 - pixelsBetweenPoints*(i+1), y), null);
+            } else {
+                geoPos = geoCoding.getGeoPos(new PixelPos(pixelsBetweenPoints*(i+1), y), null);
+            }
+
             GeoUtils.geo2xyz(geoPos, xyz);
-            final double pointToPointDistance = Math.sqrt(Math.pow(xP0 - xyz[0], 2) +
-                                                          Math.pow(yP0 - xyz[1], 2) +
-                                                          Math.pow(zP0 - xyz[2], 2));
+            final double pointToPointDistance = Math.sqrt((xPos0 - xyz[0])*(xPos0 - xyz[0]) +
+                                                          (yPos0 - xyz[1])*(yPos0 - xyz[1]) +
+                                                          (zPos0 - xyz[2])*(zPos0 - xyz[2]) );
 
             if (i == 0) {
                 groundRangeDistanceArray[i] = pointToPointDistance;
@@ -481,27 +551,35 @@ public class SRGROp extends Operator {
                 groundRangeDistanceArray[i] = groundRangeDistanceArray[i-1] + pointToPointDistance;
             }
 
-            xP0 = xyz[0];
-            yP0 = xyz[1];
-            zP0 = xyz[2];
+            xPos0 = xyz[0];
+            yPos0 = xyz[1];
+            zPos0 = xyz[2];
         }
     }
 
     /**
      * Set the number of range points used for creating warp function.
      * This function is used for unit test only.
-     *
      * @param numPoints The number of range points.
      */
     public void setNumOfRangePoints(int numPoints) {
         numRangePoints = numPoints;
     }
 
+    /**
+     * Set source band name.
+     * This function is used for unit test only.
+     * @param name The source band name.
+     */
     public void setSourceBandName(String name) {
         sourceBandNames = new String[1];
         sourceBandNames[0] = name;
     }
 
+    /**
+     * Get SRGR coefficients.
+     * @return The SRGR coefficients.
+     */
     public double[] getWarpPolynomialCoef() {
         return warpPolynomialCoef;
     }
