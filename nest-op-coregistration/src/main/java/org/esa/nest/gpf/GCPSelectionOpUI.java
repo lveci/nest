@@ -12,6 +12,8 @@ import javax.swing.*;
 
 import java.util.Map;
 import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 /**
  * User interface for GCPSelectionOp
@@ -39,6 +41,8 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
 
     private final JTextField coherenceWindowSize = new JTextField("");
     private final JTextField coherenceThreshold = new JTextField("");
+
+    private final JRadioButton useSlidingWindow = new JRadioButton("Compute Coherence with Sliding Window");
 
     private boolean isComplex = false;
 
@@ -107,8 +111,13 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
         if(isComplex) {
             paramMap.put("fineRegistrationWindowWidth", fineRegistrationWindowWidth.getSelectedItem());
             paramMap.put("fineRegistrationWindowHeight", fineRegistrationWindowHeight.getSelectedItem());
-            paramMap.put("coherenceWindowSize", Integer.parseInt(coherenceWindowSize.getText()));
             paramMap.put("coherenceThreshold", Double.parseDouble(coherenceThreshold.getText()));
+            if(useSlidingWindow.isSelected()) {
+                paramMap.put("useSlidingWindow", true);
+                paramMap.put("coherenceWindowSize", Integer.parseInt(coherenceWindowSize.getText()));
+            } else {
+                paramMap.put("useSlidingWindow", false);
+            }
         }
     }
 
@@ -143,7 +152,15 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
         DialogUtils.addComponent(contentPane, gbc, "Fine Registration Window Height:", fineRegistrationWindowHeight);
         gbc.gridy++;
 
+        gbc.gridx = 0;
+        contentPane.add(useSlidingWindow, gbc);
+
         enableComplexFields();
+
+        useSlidingWindow.setSelected(true);
+        useSlidingWindow.setActionCommand("Use Sliding Window:");
+        RadioListener myListener = new RadioListener();
+        useSlidingWindow.addActionListener(myListener);
 
         DialogUtils.fillPanel(contentPane, gbc);
 
@@ -155,5 +172,21 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
         fineRegistrationWindowHeight.setEnabled(isComplex);
         coherenceWindowSize.setEnabled(isComplex);
         coherenceThreshold.setEnabled(isComplex);
+        useSlidingWindow.setEnabled(isComplex);
     }
+
+
+    class RadioListener implements ActionListener {
+
+        public void actionPerformed(ActionEvent e) {
+
+            if (useSlidingWindow.isSelected()) {
+                coherenceWindowSize.setEditable(true);
+            } else {
+                //coherenceWindowSize.setText("");
+                coherenceWindowSize.setEditable(false);
+            }
+        }
+    }
+
 }

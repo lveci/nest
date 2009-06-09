@@ -96,6 +96,10 @@ public class GCPSelectionOp extends Operator {
     @Parameter(description = "The coherence threshold", interval = "(0, *)", defaultValue = "0.6",
                 label="Coherence Threshold")
     private double coherenceThreshold = 0.6;
+    @Parameter(description = "Use sliding window for coherence calculation", defaultValue = "true",
+                label="Compute coherence with sliding window")
+    private boolean useSlidingWindow = true;
+
 //    @Parameter(description = "The coherence function tolerance", interval = "(0, *)", defaultValue = "1.e-6",
 //                label="Coherence Function Tolerance")
     private double coherenceFuncToler = 1.e-5;
@@ -927,6 +931,10 @@ public class GCPSelectionOp extends Operator {
 
         getComplexSlaveImagette(compleData, point);
         /*
+        System.out.println("Real part of master imagette:");
+        outputRealImage(compleData.mII);
+        System.out.println("Imaginary part of master imagette:");
+        outputRealImage(compleData.mIQ);
         System.out.println("Real part of slave imagette:");
         outputRealImage(compleData.sII);
         System.out.println("Imaginary part of slave imagette:");
@@ -934,13 +942,19 @@ public class GCPSelectionOp extends Operator {
         */
 
         double coherence = 0.0;
-        for (int r = 0; r <= fWindowHeight - coherenceWindowSize; r++) {
-            for (int c = 0; c <= fWindowWidth - coherenceWindowSize; c++) {
-                coherence += getCoherence(compleData, r, c);
-            }
-        }
+        if (useSlidingWindow) {
 
-        coherence /= (fWindowHeight - coherenceWindowSize + 1)*(fWindowWidth - coherenceWindowSize + 1);
+            for (int r = 0; r <= fWindowHeight - coherenceWindowSize; r++) {
+                for (int c = 0; c <= fWindowWidth - coherenceWindowSize; c++) {
+                    coherence += getCoherence(compleData, r, c, coherenceWindowSize, coherenceWindowSize);
+                }
+            }
+
+            coherence /= (fWindowHeight - coherenceWindowSize + 1)*(fWindowWidth - coherenceWindowSize + 1);
+
+        } else {
+            coherence = getCoherence(compleData, 0, 0, fWindowWidth, fWindowHeight);
+        }
         //System.out.println("coherence = " + coherence);
 
         return 1 - coherence;
@@ -1047,7 +1061,8 @@ public class GCPSelectionOp extends Operator {
         }
     }
 
-    private double getCoherence(final ComplexCoregData compleData, final int row, final int col) {
+    private static double getCoherence(final ComplexCoregData compleData, final int row, final int col,
+                                       final int coherenceWindowWidth, final int coherenceWindowHeight) {
 
         // Compute coherence of master and slave imagettes by creating a coherence image
         double sum1 = 0.0;
@@ -1057,13 +1072,13 @@ public class GCPSelectionOp extends Operator {
         double mr, mi, sr, si;
         double[] mII, mIQ, sII, sIQ;
         int rIdx;
-        for (int r = 0; r < coherenceWindowSize; r++) {
+        for (int r = 0; r < coherenceWindowHeight; r++) {
             rIdx = row + r;
             mII = compleData.mII[rIdx];
             mIQ = compleData.mIQ[rIdx];
             sII = compleData.sII[rIdx];
             sIQ = compleData.sIQ[rIdx];
-            for (int c = 0; c < coherenceWindowSize; c++) {
+            for (int c = 0; c < coherenceWindowWidth; c++) {
                 mr = mII[col+c];
                 mi = mIQ[col+c];
                 sr = sII[col+c];
