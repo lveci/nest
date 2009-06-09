@@ -123,6 +123,7 @@ public final class Settings {
         }
 
         if(keyWord.equalsIgnoreCase("nest.home") || keyWord.equalsIgnoreCase("NEST_HOME")) {
+            out = value.substring(0, idx1) + value.substring(idx2, value.length());
             final File file = ResourceUtils.findInHomeFolder(out);
             if(file != null)
                 return file.getAbsolutePath();
