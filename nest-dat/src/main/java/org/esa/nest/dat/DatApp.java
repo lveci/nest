@@ -169,6 +169,7 @@ public final class DatApp extends VisatApp {
         excludedIds.add("org.esa.beam.visat.toolviews.placemark.pin.PinManagerToolView");
         excludedIds.add("org.esa.beam.visat.toolviews.placemark.gcp.GcpManagerToolView");
         excludedIds.add("org.esa.beam.visat.toolviews.roi.RoiManagerToolView");
+        excludedIds.add("org.esa.nest.dat.toolviews.worldmap.NestWorldMapToolView");
 
         return excludedIds;
     }
