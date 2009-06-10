@@ -65,8 +65,9 @@
             <tocitem text="Open GETASSE30 Tile" target="importGETASSE30"/>
 			<tocitem text="Open GTOPO30 Tile" target="importGTOPO30"/>
 			<tocitem text="Open ACE DEM Tile" target="importACE"/>
-			<tocitem text="Open Transect Data" target="importTransectData"/>
+			<tocitem text="Open SRTM DEM Tile" target="importSRTM"/>
 			
+			<tocitem text="Open Transect Data" target="importTransectData"/>
 			<tocitem text="Product Subset Dialog" target="subsetDialog"/>
             <tocitem text="Import Browser" target="productGrabber"/>
 		</tocitem>
@@ -140,7 +141,7 @@
 	        <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>			
 			<tocitem text="Warp" target="WarpOp"/>
 			<tocitem text="WSS Deburst" target="WSSDeburstOp"/>
-			<tocitem text="WSS Mosaic" target="WSSMosaicOp"/>
+			<!--tocitem text="WSS Mosaic" target="WSSMosaicOp"/-->
 		</tocitem>	
 		<tocitem text="Analysis Operators">
 			<tocitem text="Principle Component Analysis" target="PCAOp"/>	

@@ -57,6 +57,7 @@
     <mapID target="importGETASSE30" url="visat/GETASSE30ElevationModel.html"/>
 	<mapID target="importGTOPO30" url="readers/ImportGTOPO30.html"/>
 	<mapID target="importACE" url="readers/ImportACE.html"/>
+	<mapID target="importSRTM" url="readers/ImportSRTM.html"/>
     <mapID target="importTransectData" url="readers/ImportTransectData.html"/>
     <mapID target="importLandsatTMProduct" url="readers/ImportLandsatTM.html"/>
 	
@@ -122,7 +123,7 @@
 	<mapID target="SpeckleFilterOp" url="operators/SpeckleFilterOp.html"/>	
 	<mapID target="WarpOp" url="operators/WarpOp.html"/>	
 	<mapID target="WSSDeburstOp" url="operators/WSSDeburstOp.html"/>
-	<mapID target="WSSMosaicOp" url="operators/WSSMosaicOp.html"/>
+	<!--mapID target="WSSMosaicOp" url="operators/WSSMosaicOp.html"/-->
 	
 	<!--Analysis Operators-->
 	<mapID target="PCAOp" url="operators/PCAOp.html"/>
