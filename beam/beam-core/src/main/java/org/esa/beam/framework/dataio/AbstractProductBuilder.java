@@ -155,7 +155,7 @@ public abstract class AbstractProductBuilder extends AbstractProductReader {
     }
 
     protected void addMetadataToProduct(Product product) {
-        cloneMetadataElementsAndAttributes(getSourceProduct().getMetadataRoot(), product.getMetadataRoot(), 0);
+        cloneMetadataElementsAndAttributes(getSourceProduct().getMetadataRoot(), product.getMetadataRoot(), 1);
     }
 
     protected void cloneMetadataElementsAndAttributes(MetadataElement sourceRoot, MetadataElement destRoot, int level) {

@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetBuilder.java,v 1.11 2009-06-03 21:24:57 junlu Exp $
+ * $Id: ProductSubsetBuilder.java,v 1.12 2009-06-09 21:15:00 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +31,7 @@ import java.util.Arrays;
  * A special-purpose product reader used to build subsets of data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.11 $ $Date: 2009-06-03 21:24:57 $
+ * @version $Revision: 1.12 $ $Date: 2009-06-09 21:15:00 $
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
@@ -50,11 +50,8 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
 
     public static Product createProductSubset(Product sourceProduct, boolean sourceProductOwner,
                                               ProductSubsetDef subsetDef, String name, String desc) throws IOException {
-        ProductSubsetBuilder productSubsetBuilder = new ProductSubsetBuilder(sourceProductOwner);
-        final Product resultingProduct = productSubsetBuilder.readProductNodes(sourceProduct, subsetDef, name, desc);
-
-        updateMetadata(resultingProduct, subsetDef);
-        return resultingProduct;
+        final ProductSubsetBuilder productSubsetBuilder = new ProductSubsetBuilder(sourceProductOwner);
+        return productSubsetBuilder.readProductNodes(sourceProduct, subsetDef, name, desc);
     }
 
     private static void updateMetadata(final Product product, ProductSubsetDef subsetDef) throws IOException {
@@ -194,7 +191,10 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             sceneRasterWidth = s.width;
             sceneRasterHeight = s.height;
         }
-        return createProduct();
+        final Product targetProduct = createProduct();
+        updateMetadata(targetProduct, getSubsetDef());
+
+        return targetProduct;
     }
 
     /**
