@@ -349,11 +349,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      */
     private void getProductSwath() throws Exception {
         swath = absRoot.getAttributeString(AbstractMetadata.SWATH);
-        if (swath.contains("WS")) {
-            wideSwathProductFlag = true;
-        } else {
-            wideSwathProductFlag = false;
-        }
+        wideSwathProductFlag = swath.contains("WS");
     }
 
     /**
@@ -1162,11 +1158,10 @@ public class RangeDopplerGeocodingOp extends Operator {
         final int maxY = y0 + tileHeight + 1;
         final int maxX = x0 + tileWidth + 1;
         for (int y = y0 - 1; y < maxY; y++) {
-            final double lat = latMax - y*delLat;
+            final float lat = (float)(latMax - y*delLat);
             final int yy = y - y0 + 1;
             for (int x = x0 - 1; x < maxX; x++) {
-                final double lon = lonMin + x*delLon;
-                geoPos.setLocation((float)lat, (float)lon);
+                geoPos.setLocation(lat, (float)(lonMin + x*delLon));
                 localDEM[yy][x - x0 + 1] = (float)getLocalElevation(geoPos);
             }
         }
@@ -1723,7 +1718,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param subSwathIndex The sub swath index for current pixel for wide swath product case.
      * @return The antenna pattern gain value.
      */
-    private double getAntennaPatternGain(double elevationAngle, int bandPolar, double[] refElevationAngle,
+    private static double getAntennaPatternGain(double elevationAngle, int bandPolar, double[] refElevationAngle,
                                          float[][] antennaPattern, boolean compSubSwathIdx, int[] subSwathIndex) {
 
         if (refElevationAngle.length == 1) { // single swath

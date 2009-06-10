@@ -21,24 +21,24 @@ import java.util.concurrent.ExecutionException;
 
 public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Raster {
 
-    public static final int NUM_X_TILES = SRTM3GeoTiffElevationModelDescriptor.NUM_X_TILES;
-    public static final int NUM_Y_TILES = SRTM3GeoTiffElevationModelDescriptor.NUM_Y_TILES;
-    public static final int DEGREE_RES = SRTM3GeoTiffElevationModelDescriptor.DEGREE_RES;
-    public static final int NUM_PIXELS_PER_TILE = SRTM3GeoTiffElevationModelDescriptor.PIXEL_RES;
-    public static final int NO_DATA_VALUE = SRTM3GeoTiffElevationModelDescriptor.NO_DATA_VALUE;
-    public static final int RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
-    public static final int RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
+    private static final int NUM_X_TILES = SRTM3GeoTiffElevationModelDescriptor.NUM_X_TILES;
+    private static final int NUM_Y_TILES = SRTM3GeoTiffElevationModelDescriptor.NUM_Y_TILES;
+    private static final int DEGREE_RES = SRTM3GeoTiffElevationModelDescriptor.DEGREE_RES;
+    private static final int NUM_PIXELS_PER_TILE = SRTM3GeoTiffElevationModelDescriptor.PIXEL_RES;
+    private static final int NO_DATA_VALUE = SRTM3GeoTiffElevationModelDescriptor.NO_DATA_VALUE;
+    private static final int RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
+    private static final int RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
 
-    public static final float DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES * (1.0f/NUM_PIXELS_PER_TILE);
+    private static final float DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES * (1.0f/NUM_PIXELS_PER_TILE);
 
     private final SRTM3GeoTiffElevationModelDescriptor _descriptor;
     private final SRTM3GeoTiffFile[][] elevationFiles;
-    private final ArrayList<SRTM3GeoTiffElevationTile> _elevationTileCache = new ArrayList<SRTM3GeoTiffElevationTile>();
     private Resampling _resampling;
     private Resampling.Index _resamplingIndex;
     private final Resampling.Raster _resamplingRaster;
+    private final float noDataValue;
 
-    final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn();
+    private final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn();
 
     public SRTM3GeoTiffElevationModel(SRTM3GeoTiffElevationModelDescriptor descriptor, Resampling resamplingMethod) throws IOException {
         _descriptor = descriptor;
@@ -46,6 +46,7 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
         _resamplingIndex = _resampling.createIndex();
         _resamplingRaster = this;
         elevationFiles = createElevationFiles();
+        noDataValue = _descriptor.getNoDataValue();
     }
 
     /**
@@ -71,16 +72,15 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
 
         final float elevation = _resampling.resample(_resamplingRaster, _resamplingIndex);
         if (Float.isNaN(elevation)) {
-            return _descriptor.getNoDataValue();
+            return noDataValue;
         }
         return elevation;
     }
 
     public void dispose() {
-        _elevationTileCache.clear();
-        for (int i = 0; i < elevationFiles.length; i++) {
-            for (int j = 0; j < elevationFiles[i].length; j++) {
-                elevationFiles[i][j].dispose();
+        for (SRTM3GeoTiffFile[] elevationFile : elevationFiles) {
+            for (SRTM3GeoTiffFile anElevationFile : elevationFile) {
+                anElevationFile.dispose();
             }
         }
     }
@@ -103,7 +103,7 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
         final int tileX = pixelX - tileXIndex * NUM_PIXELS_PER_TILE;
         final int tileY = pixelY - tileYIndex * NUM_PIXELS_PER_TILE;
         final float sample = tile.getSample(tileX, tileY);    
-        if (sample == _descriptor.getNoDataValue()) {
+        if (sample == noDataValue) {
             return Float.NaN;
         }
         return sample;
@@ -122,16 +122,6 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
             }
         }             
         return elevationFiles;
-    }
-
-    public void updateCache(SRTM3GeoTiffElevationTile tile) {
-        _elevationTileCache.remove(tile);
-        _elevationTileCache.add(0, tile);
-        while (_elevationTileCache.size() > 60) {
-            final int index = _elevationTileCache.size() - 1;
-            _elevationTileCache.get(index).clearCache();
-            _elevationTileCache.remove(index);
-        }
     }
 
     private static ProductReaderPlugIn getReaderPlugIn() {

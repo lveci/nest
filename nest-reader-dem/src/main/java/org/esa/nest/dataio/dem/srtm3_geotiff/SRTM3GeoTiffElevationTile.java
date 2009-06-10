@@ -49,7 +49,6 @@ public final class SRTM3GeoTiffElevationTile {
         final int width = _product.getSceneRasterWidth();
         return new CachingObjectArray.ObjectFactory() {
             public Object createObject(int index) throws Exception {
-                _dem.updateCache(SRTM3GeoTiffElevationTile.this);
                 return band.readPixels(0, index, width, 1, new float[width], ProgressMonitor.NULL);
             }
         };
