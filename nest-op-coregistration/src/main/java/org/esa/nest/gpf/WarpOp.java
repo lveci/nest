@@ -69,7 +69,7 @@ public class WarpOp extends Operator {
     private Product targetProduct;
 
     @Parameter(description = "The RMS threshold for eliminating invalid GCPs", interval = "(0, *)", defaultValue = "1.0",
-                label="RMS Pixel Threshold")
+                label="RMS Threshold")
     private float rmsThreshold = 1.0f;
 
     @Parameter(description = "The order of WARP polynomial function", valueSet = {"1", "2", "3"}, defaultValue = "2",
