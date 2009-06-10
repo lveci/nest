@@ -1,101 +1,135 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head>
+<html><head><title>NEST Help - Build the Source</title>
 
-    
-    
-  
-  <title>NEST Help - Speckle Filter</title><link rel="stylesheet" href="../style.css"></head>
+<link rel="stylesheet" href="../style.css">
+</head>
 <body>
-
 <table class="header">
-
-    <tbody>
-    <tr class="header">
-
-        <td class="header">&nbsp; Building NEST</td>
-
-        
-    <td class="header" align="right"><a href="../general/BeamOverview.html"><img src="../images/BeamHeader.jpg" border="0"></a></td>
-
-    </tr>
-
-  </tbody>
+<tbody>
+<tr class="header">
+<td class="header">&nbsp; Building NEST</td>
+<td class="header" align="right"><a href="../general/BeamOverview.html"><img src="../images/BeamHeader.jpg" border="0"></a></td>
+</tr>
+</tbody>
 </table>
-
-
 <h1>Building NEST from the source</h1>
-
 <br>
-
-1.  Download and install the required build tools<br>
-
+<p>1. Download and install the required build tools</p>
 <ul>
-  <li> Install <a class="wiki" target="_blank" href="http://java.sun.com/javase/downloads/index.jsp">J2SE 1.6 JDK</a> and set JAVA_HOME accordingly.
-  </li>
-  <li> Install <a class="wiki" target="_blank" href="http://maven.apache.org/">Maven</a> and set MAVEN_HOME accordingly.
-  </li>
-  
-  <li> Install <a class="wiki" target="_blank" href="https://jai.dev.java.net/binary-builds.html">Java Advanced Imaging</a> JDK &amp; JRE
-  </li>
-  <li> Install <a class="wiki" target="_blank" href="https://jai-imageio.dev.java.net/binary-builds.html">JAI Image I/O</a> JDK &amp; JRE
-  </li>
+<li>
+<p> Install <a class="wiki" target="_blank" href="http://java.sun.com/javase/downloads/index.jsp">J2SE
+1.6 JDK</a> and set JAVA_HOME accordingly. </p>
+</li>
+<li>
+<p> Install <a class="wiki" target="_blank" href="http://maven.apache.org/">Maven</a> and set
+MAVEN_HOME accordingly. </p>
+</li>
+<li>
+<p> Install <a class="wiki" target="_blank" href="https://jai.dev.java.net/binary-builds.html">Java
+Advanced Imaging</a> JDK &amp; JRE </p>
+</li>
+<li>
+<p> Install <a class="wiki" target="_blank" href="https://jai-imageio.dev.java.net/binary-builds.html">JAI
+Image I/O</a> JDK &amp; JRE </p>
+</li>
 </ul>
-
-2. Add $JAVA_HOME/bin and $MAVEN_HOME/bin&nbsp;to your PATH.<br>
-
-<br>
-
-3. Download the NEST source code and unpack into $MY_PROJECTS/nest.<br>4.
+<p>
+2. Add $JAVA_HOME/bin and $MAVEN_HOME/bin&nbsp;to your PATH.</p>
+<p>3. Download the NEST source code and unpack into
+$MY_PROJECTS/nest.</p>
+<p>4.
 Copy 3rd-party folder found
 in&nbsp;nest-developer-tools\maven-dependencies into your Maven
-repository, which is by default ~/.m2/repository.<br>
-
-5. Cd into $MY_PROJECTS/nest<br>
-
-6. Build NEST from source: Type mvn compile or mvn package<br>
-
-7. Open project in&nbsp;your IDE. IntelliJ IDEA users:<br>
-
-<ul>
-  <li> Build IDEA project files for NEST: Type mvn compile idea:idea
-  </li>
-  <li> In IDEA, go to the IDEA Main Menu/File/Open Project and open the created project file $MY_PROJECTS/nest/nest.ipr
-  </li>
-</ul>
-
-8. Open project in your IDE. Eclipse users:<br>
-
-<ul>
-  <li> Build IDEA project files for NEST: Type mvn compile eclipse:eclipse</li><li> Click Main Menu/File/Import
-  </li><li> Select General/Existing Project into Workspace
-  </li><li> Select Root Directory $MY_PROJECTS/nest</li>
-  <li> Make sure that M2_REPO classpath variable is set:
-  </li>
-</ul>
-
-<pre>        1. Open Window/Preferences..., then select Java/Build Path/Classpath Variables<br>        2. Select New... and add variable M2_REPO<br>        3. Select Folder... and choose the location of your Maven local repository, e.g ~/.m2/repository</pre>
+repository, which is by default ~/.m2/repository on Linux and
+C:\Documents and Settings\user_name\.m2\repository on Windows.</p>
+<p>5. Open a Command Prompt or Terminal and CD into
+$MY_PROJECTS/nest</p>
+<p>6. To build NEST from source: Type mvn compile or mvn package</p>
+<p>7. To build a release of the software type msn package
+assembly:assembly</p>
 <br>
-
-9. Use the following configuration to run DAT:<br>
-
-<ul>
-  <li> Main class: com.bc.ceres.launcher.Launcher
-  </li>
-  <li> VM parameters: -Xmx1024M -Dceres.context=nest
-  </li>
-  <li> Program parameters: none
-  </li>
-  <li> Working directory: $MY_PROJECTS/nest/beam
-  </li>
-  <li> Use classpath of module (project in Eclipse): nest-bootstrap
-  </li>
-</ul>
-<h3></h3>
-
-
-
-
+<h2>Using NEST source with an Integrated Development
+Environment(IDE)</h2>
 <br>
-
+<p>IntelliJ IDEA users:</p>
+<ul>
+</ul>
+<ol>
+<li>
+<p> Build IDEA project files for NEST: Type mvn compile
+idea:idea </p>
+</li>
+<li>
+<p> In IDEA, go to the IDEA Main Menu/File/Open Project and
+open the created project file $MY_PROJECTS/nest/nest.ipr </p>
+</li>
+</ol>
+<ul>
+</ul>
+<p>Eclipse users:</p>
+<ul>
+</ul>
+<ol>
+<li>
+<p> Build IDEA project files for NEST: Type mvn compile
+eclipse:eclipse</p>
+</li>
+<li>
+<p>From Eclipse, click on Main Menu/File/Import </p>
+</li>
+<li>
+<p> Select General/Existing Project into Workspace </p>
+</li>
+<li>
+<p> Select Root Directory $MY_PROJECTS/nest</p>
+</li>
+<li>
+<p> Set the M2_REPO classpath variable: </p>
+</li>
+</ol>
+<ul>
+</ul>
+<ul>
+<ul>
+<li> Open Window/Preferences..., then select Java/Build
+Path/Classpath Variables</li>
+</ul>
+<ul>
+<li>Select New... and add variable M2_REPO</li>
+</ul>
+<ul>
+<li>Select Folder... and choose the location of your Maven
+local repository, e.g ~/.m2/repository</li>
+</ul>
+</ul>
+&nbsp;&nbsp; &nbsp;Note: In Eclipse, some purposely
+malformed XML in a unit test may prevent you from building the source.<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; &nbsp; Simply delete these files
+module-no-xml.xml and module-malformed-xml.xml in<br>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;
+$MY_PROJECTS/nest/beam/ceres-0.x/ceres-core/src/test/resources/com/bc/ceres/core/runtime/internal/xml<br>
+<p class="MsoNormal" style=""><span style="font-size: 9pt; font-family: &quot;Tms Rmn&quot;; color: black;" lang="EN-GB"><o:p></o:p></span></p>
+<p><br>For both IDEA and Eclipse, use the following configuration to run DAT as an Application:</p>
+<ul>
+<li>
+<p> Main class: com.bc.ceres.launcher.Launcher&nbsp;</p>
+</li>
+<li>
+<p>VM parameters: -Xmx1024M -Dceres.context=nest&nbsp;</p>
+</li>
+<li>
+<p>Program parameters: none&nbsp;</p>
+</li>
+<li>
+<p>Working directory:
+$MY_PROJECTS/nest/beam&nbsp;</p>
+</li>
+<li>
+<p>Use classpath of module
+nest-bootstrap (For eclipse click on user entry, press the button add project and select nest-bootstrap) </p>
+</li>
+</ul>
+<br>
 <hr>
 </body></html>
