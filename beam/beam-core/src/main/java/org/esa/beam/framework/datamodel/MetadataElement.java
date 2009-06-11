@@ -1,5 +1,5 @@
 /*
- * $Id: MetadataElement.java,v 1.2 2009-04-28 17:38:56 lveci Exp $
+ * $Id: MetadataElement.java,v 1.3 2009-06-11 18:24:06 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,7 +27,7 @@ import java.text.ParseException;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.2 $ $Date: 2009-04-28 17:38:56 $
+ * @version $Revision: 1.3 $ $Date: 2009-06-11 18:24:06 $
  */
 public class MetadataElement extends ProductNode {
 
@@ -620,13 +620,13 @@ public class MetadataElement extends ProductNode {
     }
 
     public MetadataElement createDeepClone() {
-        MetadataElement clone = new MetadataElement(getName());
+        final MetadataElement clone = new MetadataElement(getName());
         clone.setDescription(getDescription());
-        MetadataAttribute[] attributes = getAttributes();
+        final MetadataAttribute[] attributes = getAttributes();
         for (MetadataAttribute attribute : attributes) {
-            clone.addAttribute(attribute.createDeepClone());
+            clone.addAttributeFast(attribute.createDeepClone());
         }
-        MetadataElement[] elements = getElements();
+        final MetadataElement[] elements = getElements();
         for (MetadataElement element : elements) {
             clone.addElement(element.createDeepClone());
         }

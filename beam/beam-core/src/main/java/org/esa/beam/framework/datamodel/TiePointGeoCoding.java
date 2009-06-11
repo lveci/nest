@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGeoCoding.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: TiePointGeoCoding.java,v 1.2 2009-06-11 18:24:06 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -225,11 +225,11 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         return pixelPos;
     }
 
-    private double rescaleLongitude(double lon, double centerLon) {
+    private static double rescaleLongitude(double lon, double centerLon) {
         return  (lon - centerLon)/90.0;
     }
 
-    private double rescaleLatitude(double lat) {
+    private static double rescaleLatitude(double lat) {
         return  lat/90.0;
     }
 
