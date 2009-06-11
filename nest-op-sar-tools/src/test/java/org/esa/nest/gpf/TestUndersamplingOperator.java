@@ -37,7 +37,7 @@ public class TestUndersamplingOperator extends TestCase {
     public void testUndersamplingWithSubSampling() throws Exception {
 
         Product sourceProduct = createTestProduct(12, 6);
-
+        
         UndersamplingOp op = (UndersamplingOp)spi.createOperator();
         assertNotNull(op);
         op.setSourceProduct(sourceProduct);
@@ -48,7 +48,7 @@ public class TestUndersamplingOperator extends TestCase {
         // get targetProduct: execute initialize()
         Product targetProduct = op.getTargetProduct();
         TestOperator.verifyProduct(targetProduct);
-
+        
         Band band = targetProduct.getBandAt(0);
         assertNotNull(band);
 
@@ -65,7 +65,8 @@ public class TestUndersamplingOperator extends TestCase {
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
-        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.885684");
+
+        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.890683");
     }
 
     /**
@@ -105,7 +106,7 @@ public class TestUndersamplingOperator extends TestCase {
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
-        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.895683");        
+        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
     }
 
     /**
@@ -145,7 +146,7 @@ public class TestUndersamplingOperator extends TestCase {
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
-        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.895683");
+        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
     }
 
     /**
@@ -185,7 +186,7 @@ public class TestUndersamplingOperator extends TestCase {
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
-        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.895683");
+        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
     }
 
     /**
@@ -225,7 +226,7 @@ public class TestUndersamplingOperator extends TestCase {
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
-        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.895683");
+        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
     }
 
     /**
@@ -265,7 +266,7 @@ public class TestUndersamplingOperator extends TestCase {
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
-        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.895683");
+        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
     }
 
     /**
@@ -305,7 +306,7 @@ public class TestUndersamplingOperator extends TestCase {
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
-        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.895683");
+        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
     }
 
     /**
@@ -345,7 +346,7 @@ public class TestUndersamplingOperator extends TestCase {
         TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
         TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
         TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
-        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.895683");
+        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
     }
 
 
@@ -382,7 +383,7 @@ public class TestUndersamplingOperator extends TestCase {
         AbstractMetadata.setAttribute(abs, AbstractMetadata.azimuth_spacing, 1.5F);
         AbstractMetadata.setAttribute(abs, AbstractMetadata.line_time_interval, 0.01F);
         AbstractMetadata.setAttribute(abs, AbstractMetadata.first_line_time,
-                AbstractMetadata.parseUTC("10-MAY-2008 20:32:46.885684"));
+                AbstractMetadata.parseUTC("10-MAY-2008 20:30:46.890683"));
 
         return testProduct;
     }
