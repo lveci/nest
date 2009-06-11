@@ -108,6 +108,9 @@ public class TestSRGROperator extends TestCase {
         abs.addAttribute(new MetadataAttribute(AbstractMetadata.azimuth_spacing,
                 ProductData.createInstance(new float[] {4.0F}), false));
 
+        abs.addAttribute(new MetadataAttribute(AbstractMetadata.slant_range_to_first_pixel,
+                ProductData.createInstance(new float[] {800000.0F}), false));
+        
         // create incidence angle tie point grid
         float[] incidence_angle = new float[w*h];
         Arrays.fill(incidence_angle, 30.0f);
