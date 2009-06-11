@@ -35,7 +35,7 @@ public class NetCDFReaderPlugIn implements ProductReaderPlugIn {
         }
 
         final File parentDir = file.getParentFile();
-        if (file.isFile() && parentDir.isDirectory()) {
+        if (file.isFile() && parentDir!=null && parentDir.isDirectory()) {
             final FilenameFilter filter = new FilenameFilter() {
                 public boolean accept(final File dir, final String name) {
                     return true;//name.contains(constants.getIndicationKey());

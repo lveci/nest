@@ -76,7 +76,7 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
         }
 
         final File parentDir = file.getParentFile();
-        if (file.isFile() && parentDir.isDirectory()) {
+        if (file.isFile() && parentDir!=null && parentDir.isDirectory()) {
             return checkProductQualification(file);
         }
         return DecodeQualification.UNABLE;

@@ -822,12 +822,14 @@ public class RangeDopplerGeocodingOp extends Operator {
             if(targetProduct.getBand(targetBandName) == null) {
 
                 final Band targetBand = new Band(targetBandName,
-                                                 //srcBand.getDataType(),
                                                  ProductData.TYPE_FLOAT32,
                                                  targetImageWidth,
                                                  targetImageHeight);
 
                 targetBand.setUnit(targetUnit);
+                targetBand.setDescription(srcBand.getDescription());
+                targetBand.setNoDataValue(srcBand.getNoDataValue());
+                targetBand.setNoDataValueUsed(true);
                 targetProduct.addBand(targetBand);
             }
         }
