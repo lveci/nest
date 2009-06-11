@@ -2,6 +2,7 @@
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>2C</version>
+    <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>beam/res/NEST_Splash.png</splashImage>
     <postInstallationActionList>
@@ -354,6 +355,15 @@
                     <url> ${installdir}\modules\nest-help-2C\doc\help\index.html</url>
                     <windowsIcon></windowsIcon>
                 </startMenuLinkShortcut>
+                <startMenuShortcut>
+                    <comment>Command Prompt for the GPT</comment>
+                    <name>GPT Command Line Interface</name>
+                    <runInTerminal>0</runInTerminal>
+                    <windowsExec>${installdir}/cli.bat</windowsExec>
+                    <windowsExecArgs></windowsExecArgs>
+                    <windowsIcon></windowsIcon>
+                    <windowsPath>${installdir}</windowsPath>
+                </startMenuShortcut>
             </startMenuShortcutList>
         </component>
     </componentList>
