@@ -353,7 +353,7 @@ public class ASARRetroCalibrationOperator extends Operator {
         for (Band srcBand : sourceBands) {
 
             String targetBandName = srcBand.getName();
-            String targetUnit = "intensity";
+            String targetUnit = srcBand.getUnit();
 
             final String unit = srcBand.getUnit();
             if (unit != null && unit.contains("phase")) {
@@ -607,34 +607,44 @@ public class ASARRetroCalibrationOperator extends Operator {
             computeSingleSwathAntennaPatternForCurrentTile(x0, y0, w, h, prodBand);
         }
 
-        double sigma;
+        double v = 0.0;
         for (int x = x0; x < x0 + w; x++) {
 
             for (int y = y0; y < y0 + h; y++) {
 
-                sigma = sourceRaster.getSampleDouble(x, y);
+                v = sourceRaster.getSampleDouble(x, y);
 
                 if (bandUnit == Unit.UnitType.INTENSITY_DB) {
-                    sigma = Math.pow(10, sigma / 10.0); // convert dB to linear scale
+
+                    v = Math.pow(10, v / 10.0); // convert dB to linear scale
+                    v *= targetTileOldAntPat[x - x0] * targetTileOldAntPat[x - x0];
+                    v /= targetTileNewAntPat[x - x0] * targetTileNewAntPat[x - x0];
+
+                } else if (bandUnit == Unit.UnitType.INTENSITY) {
+
+                    v *= targetTileOldAntPat[x - x0] * targetTileOldAntPat[x - x0];
+                    v /= targetTileNewAntPat[x - x0] * targetTileNewAntPat[x - x0];
+
                 } else if (bandUnit == Unit.UnitType.AMPLITUDE) {
-                    sigma *= sigma;
+
+                    v *= targetTileOldAntPat[x - x0];
+                    v /= targetTileNewAntPat[x - x0];
                 }
 
-                // remove old antenna elevation pattern gain
-                sigma *= targetTileOldAntPat[x - x0] * targetTileOldAntPat[x - x0];
-
-                // apply new antenna elevation pattern gain
-                sigma /= targetTileNewAntPat[x - x0] * targetTileNewAntPat[x - x0];
-
                 if (outputImageScaleInDb) { // convert calibration result to dB
-                    if (sigma < underFlowFloat) {
-                        sigma = -underFlowFloat;
+
+                    if (bandUnit == Unit.UnitType.AMPLITUDE) {
+                        v *= v;
+                    }
+                    
+                    if (v < underFlowFloat) {
+                        v = -underFlowFloat;
                     } else {
-                        sigma = 10.0 * Math.log10(sigma);
+                        v = 10.0 * Math.log10(v);
                     }
                 }
 
-                targetTile.setSample(x, y, sigma);
+                targetTile.setSample(x, y, v);
             }
         }
     }
