@@ -34,7 +34,8 @@ public class GenericReaderPlugIn implements ProductReaderPlugIn {
      */
     public DecodeQualification getDecodeQualification(final Object input) {
 
-        return input != null ? DecodeQualification.SUITABLE : DecodeQualification.UNABLE;
+        //return input != null ? DecodeQualification.SUITABLE : DecodeQualification.UNABLE;
+        return DecodeQualification.UNABLE;
     }
 
     /**

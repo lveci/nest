@@ -82,13 +82,13 @@
 
         <action>
             <id>importGenericBinary</id>
-            <text>Import Generic Binary... (work in progress)</text>
-            <class>org.esa.beam.visat.actions.ProductImportAction</class>
-            <readerPlugin>org.esa.nest.dataio.GenericReaderPlugIn</readerPlugin>
+            <class>org.esa.nest.dat.actions.GenericReaderAction</class>
+            <text>Open Generic Binary... (work in progress)</text>
             <formatName>Generic Binary</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import Generic Binary</shortDescr>
             <placeAfter>importPolsarPro</placeAfter>
+            <parent>import</parent>
             <helpId>importGenericBinary</helpId>
         </action>
 
