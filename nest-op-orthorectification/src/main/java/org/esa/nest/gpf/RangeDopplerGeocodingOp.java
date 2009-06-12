@@ -1300,6 +1300,13 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         if (srgrFlag) { // ground detected image
 
+            double groundRange = 0.0;
+
+            if (srgrConvParams.length == 1) {
+                groundRange = computeGroundRange(slantRange, srgrConvParams[0].coefficients);
+                return (groundRange - srgrConvParams[0].ground_range_origin) / rangeSpacing;
+            }
+            
             int idx = 0;
             for (int i = 0; i < srgrConvParams.length && zeroDopplerTime >= srgrConvParams[i].time.getMJD(); i++) {
                 idx = i;
@@ -1316,7 +1323,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 srgrCoefficients[i] = MathUtils.interpolationLinear(srgrConvParams[idx].coefficients[i],
                                                                     srgrConvParams[idx+1].coefficients[i], mu);
             }
-            final double groundRange = computeGroundRange(slantRange, srgrCoefficients);
+            groundRange = computeGroundRange(slantRange, srgrCoefficients);
             return (groundRange - srgrConvParams[idx].ground_range_origin) / rangeSpacing;
 
         } else { // slant range image
