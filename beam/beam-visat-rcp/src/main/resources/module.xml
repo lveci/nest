@@ -1401,7 +1401,7 @@
             <description>Opens the VISAT help browser.</description>
             <smallIcon>icons/Help16.gif</smallIcon>
             <largeIcon>icons/Help24.gif</largeIcon>
-            <helpId>visat</helpId>
+            <helpId>top</helpId>
         </action>
 
         <action>

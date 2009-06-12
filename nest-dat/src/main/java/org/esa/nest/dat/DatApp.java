@@ -62,7 +62,7 @@ public final class DatApp extends VisatApp {
         if(getStarted == null || getStarted.equals("true")) {
             LoadTabbedLayoutAction.loadTabbedLayout();
 
-            HelpSys.showTheme("using_dat");
+            HelpSys.showTheme("top");
             VisatApp.getApp().getPreferences().setPropertyString("visat.showGettingStarted", "false");       
         }
 
