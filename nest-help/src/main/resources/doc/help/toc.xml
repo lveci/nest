@@ -27,6 +27,7 @@
 		<tocitem text="Product World Map" target="showWorldMapWnd"/>
 		<tocitem text="WorldWind View" target="WorldWind"/>
         <tocitem text="Preferences Dialog" target="preferences"/>
+		<tocitem text="Settings Dialog" target="settings"/>
 		<tocitem text="Wave Mode Polar View" target="polarView"/>
         
 		<tocitem text="Menus">

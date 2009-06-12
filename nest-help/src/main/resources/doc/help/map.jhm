@@ -73,6 +73,7 @@
     <mapID target="exportColorPalette" url="writers/ExportColorPalette.html"/>
 	
     <mapID target="preferences" url="visat/PreferencesDialog.html"/>
+	<mapID target="settings" url="visat/SettingsDialog.html"/>
     <mapID target="imageView" url="visat/ProductSceneView.html"/>
 	<mapID target="showLayerManagerWnd" url="visat/LayerManagerWindow.html"/>
     <mapID target="showNavigationWnd" url="visat/NavigationWindow.html"/>
