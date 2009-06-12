@@ -186,7 +186,8 @@ public class AbstractMetadata {
         addAbstractedAttribute(absRoot, replica_power_corr_flag, ProductData.TYPE_UINT8, "flag", "Replica pulse power correction applied");
         addAbstractedAttribute(absRoot, abs_calibration_flag, ProductData.TYPE_UINT8, "flag", "Product calibrated");
         addAbstractedAttribute(absRoot, calibration_factor, ProductData.TYPE_FLOAT64, "", "Calibration constant");
-        addAbstractedAttribute(absRoot, avg_scene_height, ProductData.TYPE_FLOAT64, "", "average scene height");
+        MetadataAttribute att = addAbstractedAttribute(absRoot, avg_scene_height, ProductData.TYPE_FLOAT64, "", "average scene height");
+        att.getData().setElemInt(0);
 
         addAbstractedAttribute(absRoot, range_sampling_rate, ProductData.TYPE_FLOAT64, "MHz", "Range Sampling Rate");
 
@@ -209,8 +210,9 @@ public class AbstractMetadata {
      * @param dataType the ProductData type
      * @param unit The unit
      * @param desc The description
+     * @return the newly created attribute
      */
-    public static void addAbstractedAttribute(final MetadataElement dest, final String tag, final int dataType,
+    public static MetadataAttribute addAbstractedAttribute(final MetadataElement dest, final String tag, final int dataType,
                                                final String unit, final String desc) {
         final MetadataAttribute attribute = new MetadataAttribute(tag, dataType, 1);
         if(dataType == ProductData.TYPE_ASCII) {
@@ -224,6 +226,7 @@ public class AbstractMetadata {
         attribute.setDescription(desc);
         attribute.setReadOnly(false);
         dest.addAttributeFast(attribute);
+        return attribute;
     }
 
     /**
