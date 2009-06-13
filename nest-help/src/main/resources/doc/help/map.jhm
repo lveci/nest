@@ -13,6 +13,7 @@
     <mapID target="NestOverview" url="general/NestOverview.html"/>
     <mapID target="beamDefinitions" url="general/BeamDefinitions.html"/>
 	<mapID target="SupportedProducts" url="general/SupportedProducts.html"/>
+	<mapID target="AbstractedMetadata" url="general/AbstractedMetadata.html"/>
     <mapID target="beamDataSources" url="general/BeamDataSources.html"/>
 
     <mapID target="visat" url="visat/dat.html"/>
