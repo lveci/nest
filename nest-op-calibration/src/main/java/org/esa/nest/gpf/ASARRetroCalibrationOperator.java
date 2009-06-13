@@ -355,9 +355,20 @@ public class ASARRetroCalibrationOperator extends Operator {
             String targetBandName = srcBand.getName();
             String targetUnit = srcBand.getUnit();
 
-            final String unit = srcBand.getUnit();
-            if (unit != null && unit.contains("phase")) {
-                targetUnit = "phase";
+            if (targetUnit != null) {
+                if (targetUnit.equals(Unit.AMPLITUDE_DB)) {
+                    targetUnit = Unit.AMPLITUDE;
+                } else if (targetUnit.equals(Unit.INTENSITY_DB)) {
+                    targetUnit = Unit.INTENSITY;
+                }
+
+                if (outputImageScaleInDb) {
+                    if (targetUnit.equals(Unit.AMPLITUDE)) {
+                        targetUnit = Unit.AMPLITUDE_DB;
+                    } else if (targetUnit.equals(Unit.INTENSITY)) {
+                        targetUnit = Unit.INTENSITY_DB;
+                    }
+                }
             }
 
             // add band only if it doean't already exist
@@ -367,9 +378,6 @@ public class ASARRetroCalibrationOperator extends Operator {
                                            sourceProduct.getSceneRasterWidth(),
                                            sourceProduct.getSceneRasterHeight());
 
-                if (outputImageScaleInDb && !targetUnit.equals("phase")) {
-                    targetUnit = "intensity_db";
-                }
                 targetBand.setUnit(targetUnit);
                 targetProduct.addBand(targetBand);
             }
@@ -614,7 +622,17 @@ public class ASARRetroCalibrationOperator extends Operator {
 
                 v = sourceRaster.getSampleDouble(x, y);
 
-                if (bandUnit == Unit.UnitType.INTENSITY_DB) {
+                if (bandUnit == Unit.UnitType.AMPLITUDE_DB) {
+                    v = Math.pow(10, v / 10.0); // convert dB to linear scale
+                    v *= targetTileOldAntPat[x - x0];
+                    v /= targetTileNewAntPat[x - x0];
+
+                }  else if (bandUnit == Unit.UnitType.AMPLITUDE) {
+
+                    v *= targetTileOldAntPat[x - x0];
+                    v /= targetTileNewAntPat[x - x0];
+
+                } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
 
                     v = Math.pow(10, v / 10.0); // convert dB to linear scale
                     v *= targetTileOldAntPat[x - x0] * targetTileOldAntPat[x - x0];
@@ -625,18 +643,9 @@ public class ASARRetroCalibrationOperator extends Operator {
                     v *= targetTileOldAntPat[x - x0] * targetTileOldAntPat[x - x0];
                     v /= targetTileNewAntPat[x - x0] * targetTileNewAntPat[x - x0];
 
-                } else if (bandUnit == Unit.UnitType.AMPLITUDE) {
-
-                    v *= targetTileOldAntPat[x - x0];
-                    v /= targetTileNewAntPat[x - x0];
                 }
 
                 if (outputImageScaleInDb) { // convert calibration result to dB
-
-                    if (bandUnit == Unit.UnitType.AMPLITUDE) {
-                        v *= v;
-                    }
-                    
                     if (v < underFlowFloat) {
                         v = -underFlowFloat;
                     } else {
