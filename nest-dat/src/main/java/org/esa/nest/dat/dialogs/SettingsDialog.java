@@ -51,7 +51,8 @@ public class SettingsDialog extends ModelessDialog {
 
         editLabel.setMinimumSize(new Dimension(500, 20));
         editField.addKeyListener(new SettingsKeyListener());
-
+        editField.setMargin(new Insets(2, 5, 2, 5));
+        
         setContent(splitPane);
     }
 
@@ -60,7 +61,8 @@ public class SettingsDialog extends ModelessDialog {
         editPanel.setPreferredSize(new Dimension(500, 480));
         editPanel.setLayout(new GridBagLayout());
         final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
-
+        gbc.ipady = 5;
+        
         gbc.gridy = 20;
         gbc.gridy++;
         gbc.gridx = 0;
