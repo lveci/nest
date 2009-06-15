@@ -153,15 +153,18 @@
 		</tocitem>	
 		<tocitem text="Utility Operators">
 			<tocitem text="Create Stack" target="CreateStackOp"/>
+			<tocitem text="Create Subset" target="SubsetOp"/>
+			<tocitem text="Band Arithmetic" target="BandArithmeticOp"/>
 			<tocitem text="Convert Datatype" target="ConvertDatatypeOp"/>
 			<tocitem text="Over Sample" target="OverSampleOp"/>	
 			<tocitem text="Under Sample" target="UnderSampleOp"/>
 		</tocitem>	
 		<tocitem text="Geometry Operators">
 			<tocitem text="CreateElevation" target="CreateElevationOp"/>
+			<tocitem text="Range Doppler Terrain Correction" target="RangeDopplerGeocodingOp"/>
 			<tocitem text="Geolocation Grid Ellipsoid Correction" target="GeolocationGridGeocodingOp"/>
 			<tocitem text="Average Height RD Ellipsoid Correction" target="EllipsoidCorrectionRDOp"/>
-			<tocitem text="Range Doppler Terrain Correction" target="RangeDopplerGeocodingOp"/>
+			<tocitem text="Map Projection" target="MapProjectionOp"/>
 			<tocitem text="Slant Range to Ground Range" target="SRGROp"/>
 		</tocitem>	
 	</tocitem>
