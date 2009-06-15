@@ -142,6 +142,7 @@
 	<!--Geometry Operators-->
 	<mapID target="CreateElevationOp" url="operators/CreateElevationOp.html"/>
 	<mapID target="GeolocationGridGeocodingOp" url="operators/GeolocationGridGeocodingOp.html"/>
+	<mapID target="EllipsoidCorrectionRDOp" url="operators/EllipsoidCorrectionRDOp.html"/>
 	<mapID target="RangeDopplerGeocodingOp" url="operators/RangeDopplerGeocodingOp.html"/>
 	<mapID target="SRGROp" url="operators/SRGROp.html"/>
 	
