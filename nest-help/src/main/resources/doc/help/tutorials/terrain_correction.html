@@ -13,6 +13,34 @@ Tutorial</td>
 </tbody>
 </table>
 <h3>Terrain Correction</h3>
+<p>Geocoding is the process of resampling the data to conform to a standard
+map projection with known coordinates. There are various levels of geocoding</p>
+<ul>
+<li>Geocoded Ellipsoid Corrected (GEC)</li>
+</ul>
+<div style="margin-left: 40px;">The GEC product is a multi-look (speckle-reduced),
+ground range, system corrected image. It is precisely located and rectified
+onto a map projection, but not corrected for terrain distortion</div>
+<ul>
+<li>Geocoded Terrain Corrected (GTC)</li>
+</ul>
+<div style="margin-left: 40px;">The GTC product is precisely located, corrected
+for terrain variations and rectified onto a map projection. </div>
+<ul>
+<li>Radiometric Terrain Corrected (RTC)</li>
+</ul>
+<div style="margin-left: 40px;">The RTC product is precisely located, corrected
+for terrain variations, rectified onto a map projection and retro calibrated. <br></div>
+<br>
+<p>The <a href="RangeDopplerGeocodingOp.html">Terrain Correction</a> Operator will
+produce GTC and optionally RTC products.
+The <a href="EllipsoidCorrectionRDOp.html">Ellipsoid Correction RD</a> and 
+<a href="GeolocationGridGeocodingOp.html">Ellipsoid Correction GG</a> Operators will
+product GEC products.</p>
+
+<p>The Terrain Correction Operator should be used whenever DEM is available. The 
+Ellipsoid Correction (RD and GG) should be used only when DEM is not available.</p>
+
 <br><p>1. From the Geometry menu select Terrain Correction. This will call up the dialog for the <a href="../operators/RangeDopplerGeocodingOp.html">Range-Doppler Terrain Correction</a> Operator.</p><p>2. Select your source bands.</p><p>3.
 Select the Digital Elevation Model (DEM) to use. You can select 30
 second GETASSE30 or ACE DEMs if they are installed on your computer.</p><p>&nbsp;&nbsp;&nbsp;
