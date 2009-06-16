@@ -32,9 +32,6 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
     @Override
     protected void addBands(final Product product) {
 
-        if(productType.contains("SLC"))
-            isSLC = true;
-
         String bandName;
         boolean real = true;
         Band lastRealBand = null;
@@ -129,6 +126,9 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         final MetadataElement generalProcessingInformation = imageGenerationParameters.getElement("generalProcessingInformation");
 
         productType = generalProcessingInformation.getAttributeString("productType", defStr);
+        if(productType.contains("SLC"))
+            isSLC = true;
+
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
         productName = getMission() +'-'+ productType + '-' + productElem.getAttributeString("productId", defStr);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, productName);
