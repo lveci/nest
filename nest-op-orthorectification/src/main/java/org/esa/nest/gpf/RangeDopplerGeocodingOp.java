@@ -1303,8 +1303,12 @@ public class RangeDopplerGeocodingOp extends Operator {
             double groundRange = 0.0;
 
             if (srgrConvParams.length == 1) {
-                groundRange = computeGroundRange(slantRange, srgrConvParams[0].coefficients);
-                return (groundRange - srgrConvParams[0].ground_range_origin) / rangeSpacing;
+                groundRange = computeGroundRange(sourceImageWidth, rangeSpacing, slantRange, srgrConvParams[0].coefficients);
+                if (groundRange < 0.0) {
+                    return -1.0;
+                } else {
+                    return (groundRange - srgrConvParams[0].ground_range_origin) / rangeSpacing;
+                }
             }
             
             int idx = 0;
@@ -1323,8 +1327,12 @@ public class RangeDopplerGeocodingOp extends Operator {
                 srgrCoefficients[i] = MathUtils.interpolationLinear(srgrConvParams[idx].coefficients[i],
                                                                     srgrConvParams[idx+1].coefficients[i], mu);
             }
-            groundRange = computeGroundRange(slantRange, srgrCoefficients);
-            return (groundRange - srgrConvParams[idx].ground_range_origin) / rangeSpacing;
+            groundRange = computeGroundRange(sourceImageWidth, rangeSpacing, slantRange, srgrCoefficients);
+            if (groundRange < 0.0) {
+                return -1.0;
+            } else {
+                return (groundRange - srgrConvParams[idx].ground_range_origin) / rangeSpacing;
+            }
 
         } else { // slant range image
 
@@ -1334,14 +1342,17 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     /**
      * Compute ground range for given slant range.
+     * @param sourceImageWidth The source image width.
+     * @param rangeSpacing The range spacing.
      * @param slantRange The salnt range in meters.
      * @param srgrCoeff The SRGR coefficients for converting ground range to slant range.
      *                  Here it is assumed that the polinomial is given by
      *                  c0 + c1*x + c2*x^2 + ... + cn*x^n, where {c0, c1, ..., cn} are the SRGR coefficients.
      * @return The ground range in meters.
      */
-    public static double computeGroundRange(final double slantRange, final double[] srgrCoeff) {
-
+    public static double computeGroundRange(
+            final int sourceImageWidth, final double rangeSpacing, final double slantRange, final double[] srgrCoeff) {
+        /*
         // todo Can Newton's method be uaed in find zeros for the 4th order polynomial?
         // todo Note for ASAR product here computes (Gr - Gr0), not Gr. Therefore not Gr0 should be subtracted later in computing range index.
         double x = slantRange;
@@ -1352,6 +1363,36 @@ public class RangeDopplerGeocodingOp extends Operator {
             y = computePolinomialValue(x, srgrCoeff) - slantRange;
         }
         return x;
+        */
+
+        // binary search is used in finding the zero doppler time
+        double lowerBound = 0;
+        double upperBound = sourceImageWidth*rangeSpacing;
+        double lowerBoundSlantRange = computePolinomialValue(lowerBound, srgrCoeff);
+        double upperBoundSlantRange = computePolinomialValue(upperBound, srgrCoeff);
+
+        if (slantRange < lowerBoundSlantRange || slantRange > upperBoundSlantRange) {
+            return -1.0;
+        }
+
+        // start binary search
+        double midSlantRange;
+        while(upperBound - lowerBound > 0.0) {
+
+            final double mid = (lowerBound + upperBound)/2.0;
+            midSlantRange = computePolinomialValue(mid, srgrCoeff);
+            if (Math.abs(midSlantRange - slantRange) < 0.1) {
+                return mid;
+            } else if (midSlantRange < slantRange) {
+                lowerBound = mid;
+                lowerBoundSlantRange = midSlantRange;
+            } else if (midSlantRange > slantRange) {
+                upperBound = mid;
+                upperBoundSlantRange = midSlantRange;
+            }
+        }
+
+        return -1.0;
     }
 
     /**

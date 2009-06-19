@@ -670,8 +670,14 @@ public final class GeolocationGridGeocodingOp extends Operator {
             for (int i = 0; i < srgrConvParams.length && zeroDopplerTime >= srgrConvParams[i].time.getMJD(); i++) {
                 idx = i;
             }
-            final double groundRange = RangeDopplerGeocodingOp.computeGroundRange(slantRange, srgrConvParams[idx].coefficients);
-            rangeIndex = (groundRange - srgrConvParams[idx].ground_range_origin) / rangeSpacing;
+            final double groundRange = RangeDopplerGeocodingOp.computeGroundRange(
+                    sourceImageWidth, rangeSpacing, slantRange, srgrConvParams[idx].coefficients);
+
+            if (groundRange < 0.0) {
+                return -1.0;
+            } else {
+                rangeIndex = (groundRange - srgrConvParams[idx].ground_range_origin) / rangeSpacing;
+            }
 
         } else { // slant range image
 
