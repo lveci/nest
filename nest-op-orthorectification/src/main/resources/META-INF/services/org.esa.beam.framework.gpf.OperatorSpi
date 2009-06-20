@@ -3,3 +3,4 @@ org.esa.nest.gpf.RangeDopplerGeocodingOp$Spi
 org.esa.nest.gpf.GeolocationGridGeocodingOp$Spi
 org.esa.nest.gpf.EllipsoidCorrectionRDOp$Spi
 org.esa.nest.gpf.MapProjectionOp$Spi
+org.esa.nest.gpf.SARSimulationOp$Spi

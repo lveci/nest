@@ -70,6 +70,15 @@
             <helpId>EllipsoidCorrectionRDOp</helpId>
         </action>
 
+        <action>
+            <id>SARSimulationOp</id>
+            <class>org.esa.nest.dat.SARSimulationOpAction</class>
+            <text>SAR Simulation</text>
+            <shortDescr>SAR simulation method</shortDescr>
+            <parent>geometry</parent>
+            <helpId>SARSimulationOp</helpId>
+        </action>
+
         <!--action>
             <id>createElevationOp</id>
             <class>org.esa.nest.dat.CreateElevationOpAction</class>
@@ -91,7 +100,7 @@
             <placeAfter>createElevationOp</placeAfter>
         </action>
 
-		<action>
+        <action>
             <id>MosaicOp</id>
             <class>org.esa.nest.dat.MosaicOpAction</class>
             <text>Mosaic (coming soon)</text>
