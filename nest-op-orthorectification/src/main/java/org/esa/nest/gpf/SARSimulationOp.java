@@ -388,6 +388,7 @@ public final class SARSimulationOp extends Operator {
         final int h  = targetTileRectangle.height;
         final ProductData trgData = targetTile.getDataBuffer();
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+        final double halfLightSpeedInMetersPerDay = Constants.halfLightSpeed * 86400.0;
 
         int ymin = y0;
         int nh = h;
@@ -395,9 +396,6 @@ public final class SARSimulationOp extends Operator {
             ymin = ny0;
             nh += y0 - ny0;
             ny0Updated = false;
-            System.out.println("ny0Updated is true, ny0 = " + ny0);
-        } else {
-            System.out.println("ny0Updated is false, ny0 = " + ny0);
         }
 
         float[][] localDEM = new float[nh+2][w+2];
@@ -413,9 +411,11 @@ public final class SARSimulationOp extends Operator {
                 }
                 GeoUtils.geo2xyz(latitude.getPixelFloat(x, y), longitude.getPixelFloat(x, y), alt, earthPoint, GeoUtils.EarthModel.WGS84);
                 final double zeroDopplerTime = getEarthPointZeroDopplerTime(earthPoint);
-                final int azimuthIndex = (int)((zeroDopplerTime - firstLineUTC) / lineTimeInterval + 0.5);
-                final double slantRange = computeSlantRange(zeroDopplerTime, earthPoint, sensorPos);
-                final int rangeIndex = (int)(computeRangeIndex(zeroDopplerTime, slantRange) + 0.5);
+                double slantRange = computeSlantRange(zeroDopplerTime, earthPoint, sensorPos);
+                final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / halfLightSpeedInMetersPerDay;
+                final int azimuthIndex = (int)((zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval + 0.5);
+                slantRange = computeSlantRange(zeroDopplerTimeWithoutBias, earthPoint, sensorPos);
+                final int rangeIndex = (int)(computeRangeIndex(zeroDopplerTimeWithoutBias, slantRange) + 0.5);
                 final double localIncidenceAngle = computeLocalIncidenceAngle(sensorPos, earthPoint, x0, ymin, x, y, localDEM);
                 final double v = computeBackscatteredPower(localIncidenceAngle);
                 final int index = targetTile.getDataBufferIndex(rangeIndex, azimuthIndex);
