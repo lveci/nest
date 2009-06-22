@@ -123,6 +123,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private boolean multilookFlag = false;
     private boolean retroCalibrationFlag = false;
     private boolean wideSwathProductFlag = false;
+    private boolean listedASARProductFlag = false;
 
     private String mission = null;
     private String swath = null;
@@ -312,7 +313,11 @@ public class RangeDopplerGeocodingOp extends Operator {
             computeOldSlantRange();
         }
 
-        getNewAntennaPattern();
+        if (listedASARProductFlag) {
+            getNewAntennaPattern();
+        } else {
+            getCalibrationConstant();
+        }
     }
 
     /**
@@ -321,10 +326,6 @@ public class RangeDopplerGeocodingOp extends Operator {
      */
     private void getMissionType() throws Exception {
         mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
-
-        if (applyRadiometricCalibration && !mission.contains("ENVISAT")) {
-            throw new OperatorException("Radiometric calibration applies to ASAR product only");
-        }
 
         if (mission.contains("TSX1")) {
             throw new OperatorException("TerraSar-X product is not supported yet");
@@ -383,13 +384,30 @@ public class RangeDopplerGeocodingOp extends Operator {
      * Set retro-calibration flag.
      */
     private void setRetroCalibrationFlag() {
-        if (srgrFlag) {
-            if (multilookFlag) {
-                retroCalibrationFlag = false;
-                System.out.println("Only constant and incidence angle corrections will be performed for radiometric calibration");
-            } else {
-                retroCalibrationFlag = true;
+
+        if (productType.contains("ASA_IMP_1P") || productType.contains("ASA_IMM_1P") ||
+            productType.contains("ASA_APP_1P") || productType.contains("ASA_APM_1P") ||
+            productType.contains("ASA_WSM_1P") || productType.contains("ASA_IMG_1P") ||
+            productType.contains("ASA_APG_1P") || productType.contains("ASA_IMS_1P") ||
+            productType.contains("ASA_APS_1P")) {
+
+            if (srgrFlag) {
+                if (multilookFlag) {
+                    retroCalibrationFlag = false;
+                    System.out.println("Only constant and incidence angle corrections will be performed for radiometric calibration");
+                } else {
+                    retroCalibrationFlag = true;
+                }
             }
+            listedASARProductFlag = true;
+
+        } else if (mission.contains("ENVISAT") || (mission.contains("ERS") && productType.contains("SAR"))) {
+
+            retroCalibrationFlag = false;
+            listedASARProductFlag = false;
+
+        } else {
+            throw new OperatorException("Radiometric calibration cannot be applied to the selected product");
         }
     }
 
@@ -504,6 +522,14 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         ASARCalibrationOperator.getCalibrationFactorFromExternalAuxFile(
                 xcaFilePath, swath, mdsPolar, productType, newCalibrationConstant);
+    }
+
+    /**
+     * Get calibration constant from the metadata.
+     * @throws Exception The exceptions.
+     */
+    private void getCalibrationConstant() throws Exception {
+        newCalibrationConstant[0] = absRoot.getAttributeDouble(AbstractMetadata.calibration_factor, 1.0);
     }
 
     /**
@@ -934,11 +960,13 @@ public class RangeDopplerGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lon_pixel_res, delLon);
 
         if (applyRadiometricCalibration) {
-            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
-            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.ant_elev_corr_flag, 1);
-            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_spread_comp_flag, 1);
+            if (listedASARProductFlag && !multilookFlag) {
+                AbstractMetadata.setAttribute(absTgt, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
+                AbstractMetadata.setAttribute(absTgt, AbstractMetadata.ant_elev_corr_flag, 1);
+                AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_spread_comp_flag, 1);
+                AbstractMetadata.setAttribute(absTgt, AbstractMetadata.external_calibration_file, newXCAFileName);
+            }
             AbstractMetadata.setAttribute(absTgt, AbstractMetadata.abs_calibration_flag, 1);
-            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.external_calibration_file, newXCAFileName);
             AbstractMetadata.setAttribute(absTgt, AbstractMetadata.calibration_factor, newCalibrationConstant[0]);
         }
     }
@@ -1385,10 +1413,8 @@ public class RangeDopplerGeocodingOp extends Operator {
                 return mid;
             } else if (midSlantRange < slantRange) {
                 lowerBound = mid;
-                lowerBoundSlantRange = midSlantRange;
             } else if (midSlantRange > slantRange) {
                 upperBound = mid;
-                upperBoundSlantRange = midSlantRange;
             }
         }
 
@@ -1815,6 +1841,22 @@ public class RangeDopplerGeocodingOp extends Operator {
                                     final double localIncidenceAngle, final int bandPolar, final double v,
                                     final Unit.UnitType bandUnit, int[] subSwathIndex) {
 
+        double sigma = 0.0;
+        if (bandUnit == Unit.UnitType.AMPLITUDE) {
+            sigma = v*v;
+        } else if (bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+            sigma = v;
+        } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
+            sigma = Math.pow(10, v/10.0); // convert dB to linear scale
+        } else {
+            throw new OperatorException("Uknown band unit");
+        }
+
+        if (!listedASARProductFlag || multilookFlag) { // calibration constant and incidence angle corrections only
+            return sigma / newCalibrationConstant[bandPolar] *
+                   Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
+        }
+
         final double satelliteHeight = Math.sqrt(
                 sensorPos[0]*sensorPos[0] + sensorPos[1]*sensorPos[1] + sensorPos[2]*sensorPos[2]);
 
@@ -1826,20 +1868,11 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         double gain;
         if (wideSwathProductFlag) {
-            gain = getAntennaPatternGain(elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternWideSwath, false, subSwathIndex);
+            gain = getAntennaPatternGain(
+                    elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternWideSwath, false, subSwathIndex);
         } else {
-            gain = getAntennaPatternGain(elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternSingleSwath, false, subSwathIndex);
-        }
-
-        double sigma = 0.0;
-        if (bandUnit == Unit.UnitType.AMPLITUDE) {
-            sigma = v*v; 
-        } else if (bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
-            sigma = v;
-        } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
-            sigma = Math.pow(10, v/10.0); // convert dB to linear scale
-        } else {
-            throw new OperatorException("Uknown band unit");
+            gain = getAntennaPatternGain(
+                    elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternSingleSwath, false, subSwathIndex);
         }
 
         return sigma / newCalibrationConstant[bandPolar] / (gain*gain) *
