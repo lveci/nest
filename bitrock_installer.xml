@@ -2,7 +2,6 @@
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>2C</version>
-    <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>beam/res/NEST_Splash.png</splashImage>
     <postInstallationActionList>
@@ -153,6 +152,12 @@
                         <distributionDirectory>
                             <origin>target/nest-2C-bin-linux.dir/res</origin>
                         </distributionDirectory>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-linux.dir/libjhdf.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-linux.dir/libjhdf5.so</origin>
+                        </distributionFile>
                     </distributionFileList>
                 </folder>
                 <folder>
@@ -250,6 +255,15 @@
                         </distributionFile>
                         <distributionFile>
                             <origin>target/nest-2C-bin-win.dir/readme.html</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-win.dir/jhdf5.dll</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-win.dir/jhdf.dll</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-2C-bin-win.dir/clean-nest.bat</origin>
                         </distributionFile>
                     </distributionFileList>
                 </folder>
@@ -383,6 +397,7 @@
     </parameterList>
     <platformOptionsList>
         <platformOptions>
+            <postInstallationScript>${installdir}/clean-nest.bat</postInstallationScript>
             <platform>windows</platform>
         </platformOptions>
     </platformOptionsList>
