@@ -223,7 +223,7 @@ public abstract class CEOSProductDirectory {
     protected static void addSRGRCoefficients(final MetadataElement absRoot, final BaseRecord facilityRec) {
         final MetadataElement srgrCoefficientsElem = absRoot.getElement(AbstractMetadata.srgr_coefficients);
 
-        final MetadataElement srgrListElem = new MetadataElement("srgr_coef_list");
+        final MetadataElement srgrListElem = new MetadataElement(AbstractMetadata.srgr_coef_list);
         srgrCoefficientsElem.addElement(srgrListElem);
 
         final ProductData.UTC utcTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time, new ProductData.UTC(0));
@@ -233,17 +233,17 @@ public abstract class CEOSProductDirectory {
         AbstractMetadata.setAttribute(srgrListElem, AbstractMetadata.ground_range_origin, 0.0);
 
         addSRGRCoef(srgrListElem, facilityRec,
-                "coefficients of the ground range to slant range conversion polynomial 1");
+                "coefficients of the ground range to slant range conversion polynomial 1", 1);
         addSRGRCoef(srgrListElem, facilityRec,
-                "coefficients of the ground range to slant range conversion polynomial 2");
+                "coefficients of the ground range to slant range conversion polynomial 2", 2);
         addSRGRCoef(srgrListElem, facilityRec,
-                "coefficients of the ground range to slant range conversion polynomial 3");
+                "coefficients of the ground range to slant range conversion polynomial 3", 3);
         addSRGRCoef(srgrListElem, facilityRec,
-                "coefficients of the ground range to slant range conversion polynomial 4");
+                "coefficients of the ground range to slant range conversion polynomial 4", 4);
     }
 
-    private static void addSRGRCoef(final MetadataElement srgrListElem, final BaseRecord facilityRec, final String tag) {
-        final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient);
+    private static void addSRGRCoef(final MetadataElement srgrListElem, final BaseRecord facilityRec, final String tag, int cnt) {
+        final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient+'.'+cnt);
         srgrListElem.addElement(coefElem);
 
         AbstractMetadata.addAbstractedAttribute(coefElem, AbstractMetadata.srgr_coef,

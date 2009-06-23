@@ -442,7 +442,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         final MetadataElement slantToGroundRangeProjection = projectedImageInfo.getElement("slantToGroundRangeProjection");
         final MetadataElement srgrCoefficientsElem = absRoot.getElement(AbstractMetadata.srgr_coefficients);
 
-        final MetadataElement srgrListElem = new MetadataElement("srgr_coef_list");
+        final MetadataElement srgrListElem = new MetadataElement(AbstractMetadata.srgr_coef_list);
         srgrCoefficientsElem.addElement(srgrListElem);
 
         final ProductData.UTC utcTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time, new ProductData.UTC(0));
@@ -451,13 +451,14 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
                 ProductData.TYPE_FLOAT64, "m", "Ground Range Origin");
         AbstractMetadata.setAttribute(srgrListElem, AbstractMetadata.ground_range_origin, 0.0);
 
+        int cnt = 1;
         for (MetadataElement elem : slantToGroundRangeProjection.getElements()) {
 
             final double coefValue = elem.getAttributeDouble("coefficient", 0);
 
-            final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient);
+            final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient+'.'+cnt);
             srgrListElem.addElement(coefElem);
-
+            ++cnt;
             AbstractMetadata.addAbstractedAttribute(coefElem, AbstractMetadata.srgr_coef,
                     ProductData.TYPE_FLOAT64, "", "SRGR Coefficient");
             AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, coefValue);

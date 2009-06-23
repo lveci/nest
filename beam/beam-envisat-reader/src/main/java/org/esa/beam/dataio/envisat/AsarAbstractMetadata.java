@@ -379,17 +379,18 @@ public final class AsarAbstractMetadata {
         final MetadataElement srgrListElem = new MetadataElement("SRGR_Coefficients");
         dest.addElement(srgrListElem);
 
+        int listCnt = 1;
         if(srgrAds.getNumElements() == 0) {
-            addCoefficients(srgrAds, srgrListElem);
+            addCoefficients(srgrAds, srgrListElem, listCnt);
         } else {
             for(MetadataElement srgrSrc : srgrAds.getElements()) {
 
-                addCoefficients(srgrSrc, srgrListElem);
+                addCoefficients(srgrSrc, srgrListElem, listCnt++);
             }
         }
     }
 
-    private static void addCoefficients(MetadataElement srgrSrc, MetadataElement srgrListElem) {
+    private static void addCoefficients(MetadataElement srgrSrc, MetadataElement srgrListElem, int listCnt) {
         final ArrayList<Double> coefList = new ArrayList<Double>(5);
         ProductData.UTC utcTime;
         double origin;
@@ -407,13 +408,15 @@ public final class AsarAbstractMetadata {
             return;
         }
 
-        final MetadataElement srgrElem = new MetadataElement("srgr_coef_list");
+        final MetadataElement srgrElem = new MetadataElement("srgr_coef_list."+listCnt);
         srgrListElem.addElement(srgrElem);
         addAbstractedAttribute("zero_doppler_time", utcTime, srgrElem, "");
         addAbstractedAttribute("ground_range_origin", origin, "m", srgrElem, "");
 
+        int coefCnt = 1;
         for(Double value : coefList) {
-            final MetadataElement coefElem = new MetadataElement("coefficient");
+            final MetadataElement coefElem = new MetadataElement("coefficient."+coefCnt);
+            ++coefCnt;
             srgrElem.addElement(coefElem);
             addAbstractedAttribute("srgr_coef", value, "", coefElem, "");
         }

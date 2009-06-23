@@ -381,7 +381,7 @@ public class SRGROp extends Operator {
 
         final MetadataElement srgrCoefficientsElem = new MetadataElement(AbstractMetadata.srgr_coefficients);
 
-        final MetadataElement srgrListElem = new MetadataElement("srgr_coef_list");
+        final MetadataElement srgrListElem = new MetadataElement(AbstractMetadata.srgr_coef_list);
         srgrCoefficientsElem.addElement(srgrListElem);
 
         final ProductData.UTC utcTime = absTgt.getAttributeUTC(AbstractMetadata.first_line_time, new ProductData.UTC(0));
@@ -394,9 +394,9 @@ public class SRGROp extends Operator {
         final double r0 = AbstractMetadata.getAttributeDouble(absTgt, AbstractMetadata.slant_range_to_first_pixel);
         for (int i = 0; i < warpPolynomialCoef.length; i++) {
             if (i == 0) {
-                addSRGRCoef(srgrListElem, warpPolynomialCoef[i] + r0);
+                addSRGRCoef(srgrListElem, warpPolynomialCoef[i] + r0, i+1);
             } else {
-                addSRGRCoef(srgrListElem, warpPolynomialCoef[i]);
+                addSRGRCoef(srgrListElem, warpPolynomialCoef[i], i+1);
             }
         }
 
@@ -407,9 +407,10 @@ public class SRGROp extends Operator {
      * Add a SRGR coefficient to the SRGR list.
      * @param srgrListElem The SRGR coefficients list.
      * @param srgrCoefficient The SRGR coefficient.
+     * @param cnt the number to append to the coef name
      */
-    private static void addSRGRCoef(final MetadataElement srgrListElem, final double srgrCoefficient) {
-        final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient);
+    private static void addSRGRCoef(final MetadataElement srgrListElem, final double srgrCoefficient, int cnt) {
+        final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient+'.'+cnt);
         srgrListElem.addElement(coefElem);
         AbstractMetadata.addAbstractedAttribute(coefElem, AbstractMetadata.srgr_coef,
                 ProductData.TYPE_FLOAT64, "", "SRGR Coefficient");

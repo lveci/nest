@@ -296,10 +296,12 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
     private static void addSRGRCoefficients(final MetadataElement absRoot, final MetadataElement imageGenerationParameters) {
         final MetadataElement srgrCoefficientsElem = absRoot.getElement(AbstractMetadata.srgr_coefficients);
 
+        int listCnt = 1;
         for(MetadataElement elem : imageGenerationParameters.getElements()) {
             if(elem.getName().equalsIgnoreCase("slantRangeToGroundRange")) {
-                final MetadataElement srgrListElem = new MetadataElement("srgr_coef_list");
+                final MetadataElement srgrListElem = new MetadataElement(AbstractMetadata.srgr_coef_list+'.'+listCnt);
                 srgrCoefficientsElem.addElement(srgrListElem);
+                ++listCnt;
 
                 final ProductData.UTC utcTime = getTime(elem, "zeroDopplerAzimuthTime");
                 srgrListElem.setAttributeUTC(AbstractMetadata.srgr_coef_time, utcTime);
@@ -312,12 +314,13 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                 final String coeffStr = elem.getAttributeString("groundToSlantRangeCoefficients", "");
                 if(!coeffStr.isEmpty()) {
                     final StringTokenizer st = new StringTokenizer(coeffStr);
+                    int cnt = 1;
                     while(st.hasMoreTokens()) {
                         final double coefValue = Double.parseDouble(st.nextToken());
 
-                        final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient);
+                        final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient+'.'+cnt);
                         srgrListElem.addElement(coefElem);
-
+                        ++cnt;
                         AbstractMetadata.addAbstractedAttribute(coefElem, AbstractMetadata.srgr_coef,
                                 ProductData.TYPE_FLOAT64, "", "SRGR Coefficient");
                         AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, coefValue);
