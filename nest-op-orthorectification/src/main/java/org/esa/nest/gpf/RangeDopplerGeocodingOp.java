@@ -138,6 +138,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     private double avgSceneHeight = 0.0; // in m
     private double rangeSpreadingCompPower = 0.0;
+    private double halfRangeSpreadingCompPower = 0.0;
     private double wavelength = 0.0; // in m
     private double rangeSpacing = 0.0;
     private double azimuthSpacing = 0.0;
@@ -419,6 +420,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         if (productType.contains("ASA_APS_1P")) {
             rangeSpreadingCompPower = 4.0;
         }
+        halfRangeSpreadingCompPower = rangeSpreadingCompPower / 2.0;
     }
 
     /**
@@ -1766,11 +1768,12 @@ public class RangeDopplerGeocodingOp extends Operator {
         if (wideSwathProductFlag) {
             gain = getAntennaPatternGain(elevationAngle, bandPolar, oldRefElevationAngle, oldAntennaPatternWideSwath, true, subSwathIndex);
         } else {
-            gain = getAntennaPatternGain(elevationAngle, bandPolar, oldRefElevationAngle, oldAntennaPatternSingleSwath, true, subSwathIndex);
+            //gain = getAntennaPatternGain(elevationAngle, bandPolar, oldRefElevationAngle, oldAntennaPatternSingleSwath, true, subSwathIndex);
+            gain = ASARCalibrationOperator.computeAntPatGain(elevationAngle, oldRefElevationAngle[0], oldAntennaPatternSingleSwath[bandPolar]);
         }
 
         if (bandUnit == Unit.UnitType.AMPLITUDE) {
-            return v*gain*Math.pow(refSlantRange / slantRange, rangeSpreadingCompPower/2); // amplitude
+            return v*gain*Math.pow(refSlantRange / slantRange, halfRangeSpreadingCompPower); // amplitude
         } else if (bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
             return v*gain*gain*Math.pow(refSlantRange / slantRange, rangeSpreadingCompPower); // intensity
         } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
@@ -1871,8 +1874,9 @@ public class RangeDopplerGeocodingOp extends Operator {
             gain = getAntennaPatternGain(
                     elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternWideSwath, false, subSwathIndex);
         } else {
-            gain = getAntennaPatternGain(
-                    elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternSingleSwath, false, subSwathIndex);
+            //gain = getAntennaPatternGain(
+            //        elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternSingleSwath, false, subSwathIndex);
+            gain = ASARCalibrationOperator.computeAntPatGain(elevationAngle, newRefElevationAngle[0], newAntennaPatternSingleSwath[bandPolar]);
         }
 
         return sigma / newCalibrationConstant[bandPolar] / (gain*gain) *

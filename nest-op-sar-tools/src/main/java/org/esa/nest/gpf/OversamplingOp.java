@@ -163,6 +163,10 @@ public class OversamplingOp extends Operator {
     void getPRF() throws Exception {
 
         prf = abs.getAttributeDouble(AbstractMetadata.pulse_repetition_frequency);
+        if(prf == 0) {
+            System.out.println("PRF is 0");
+            prf = 100;
+        }
         //System.out.println("PRF is " + prf);
     }
 
