@@ -1,10 +1,6 @@
-package org.esa.nest.gpf;
+package org.esa.nest.util;
 
-import junit.framework.TestCase;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.TiePointGeoCoding;
-import org.esa.beam.framework.datamodel.TiePointGrid;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
@@ -12,21 +8,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 /**
  * Utilities for Operator unit tests
  */
-public class TestOperator extends TestCase {
-
-    public TestOperator(String name) {
-        super(name);
-    }
-
-    public void setUp() throws Exception {
-    }
-
-    public void tearDown() throws Exception {
-    }
-
-    public void testOp() {
-        
-    }
+public class TestUtils {
 
     public static Product createProduct(String type, int w, int h) {
         Product product = new Product("name", type, w, h);
@@ -75,6 +57,26 @@ public class TestOperator extends TestCase {
         String val = elem.getAttributeString(name, "");
         if(!val.equals(trueValue))
             throwErr(name + " is " + val + ", expecting " + trueValue);
+    }
+
+    public static void compareMetadata(Product testProduct, Product expectedProduct) throws Exception {
+        final MetadataElement testAbsRoot = testProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+        if(testAbsRoot == null)
+            throwErr("Metadata is null");
+        final MetadataElement expectedAbsRoot = expectedProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+        if(expectedAbsRoot == null)
+            throwErr("Metadata is null");
+
+        final MetadataAttribute[] attribList = expectedAbsRoot.getAttributes();
+        for(MetadataAttribute expectedAttrib : attribList) {
+            final MetadataAttribute result = testAbsRoot.getAttribute(expectedAttrib.getName());
+            if(result == null)
+                throwErr("Metadata attribute "+expectedAttrib.getName()+" is missing");
+
+            if(!result.getData().equalElems(expectedAttrib.getData()))
+                throwErr("Metadata attribute "+expectedAttrib.getName()+" expecting "+expectedAttrib.getData().toString()
+                        +" got "+ result.getData().toString());
+        }
     }
 
     static void throwErr(String description) throws Exception {

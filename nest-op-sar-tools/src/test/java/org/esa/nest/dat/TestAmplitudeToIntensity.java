@@ -6,7 +6,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.gpf.TestOperator;
+import org.esa.nest.util.TestUtils;
 
 import java.util.Arrays;
 
@@ -58,7 +58,7 @@ public class TestAmplitudeToIntensity extends TestCase {
      */
     private static Product createTestProduct(String name, String unit, int w, int h) {
 
-        final Product testProduct = TestOperator.createProduct("ASA_APG_1P", w, h);
+        final Product testProduct = TestUtils.createProduct("ASA_APG_1P", w, h);
 
         // create a Band: band1
         final Band band1 = testProduct.addBand(name, ProductData.TYPE_INT32);

@@ -6,6 +6,7 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.util.TestUtils;
 
 import java.util.Arrays;
 
@@ -45,7 +46,7 @@ public class TestMultilookOperator extends TestCase {
 
         // get targetProduct: execute initialize()
         final Product targetProduct = op.getTargetProduct();
-        TestOperator.verifyProduct(targetProduct);
+        TestUtils.verifyProduct(targetProduct);
 
         final Band band = targetProduct.getBandAt(0);
         assertNotNull(band);
@@ -61,12 +62,12 @@ public class TestMultilookOperator extends TestCase {
         // compare updated metadata
         final MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
 
-        TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_looks, 2.0);
-        TestOperator.attributeEquals(abs, AbstractMetadata.range_looks, 4.0);
-        TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.0);
-        TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 2.0);
-        TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.02);
-        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.890683");
+        TestUtils.attributeEquals(abs, AbstractMetadata.azimuth_looks, 2.0);
+        TestUtils.attributeEquals(abs, AbstractMetadata.range_looks, 4.0);
+        TestUtils.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.0);
+        TestUtils.attributeEquals(abs, AbstractMetadata.range_spacing, 2.0);
+        TestUtils.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.02);
+        TestUtils.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.890683");
     }
 
 
@@ -82,7 +83,7 @@ public class TestMultilookOperator extends TestCase {
      */
     private static Product createTestProduct(final int w, final int h) {
 
-        final Product testProduct = TestOperator.createProduct("ASA_APG_1P", w, h);
+        final Product testProduct = TestUtils.createProduct("ASA_APG_1P", w, h);
 
         // create a Band: band1
         final Band band1 = testProduct.addBand("band1", ProductData.TYPE_INT32);

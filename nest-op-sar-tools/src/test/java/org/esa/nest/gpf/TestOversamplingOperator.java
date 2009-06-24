@@ -9,6 +9,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.util.TestUtils;
 
 import java.util.Arrays;
 
@@ -50,7 +51,7 @@ public class TestOversamplingOperator extends TestCase {
 
         // get targetProduct: execute initialize()
         Product targetProduct = op.getTargetProduct();
-        TestOperator.verifyProduct(targetProduct);
+        TestUtils.verifyProduct(targetProduct);
 
         Band band = targetProduct.getBandAt(0);
         assertNotNull(band);
@@ -81,7 +82,7 @@ public class TestOversamplingOperator extends TestCase {
      */
     private static Product createTestProduct(int w, int h) {
 
-        Product testProduct = TestOperator.createProduct("ASA_APG_1P", w, h);
+        Product testProduct = TestUtils.createProduct("ASA_APG_1P", w, h);
 
         // create a Band: band1
         Band band1 = testProduct.addBand("band1", ProductData.TYPE_FLOAT32);

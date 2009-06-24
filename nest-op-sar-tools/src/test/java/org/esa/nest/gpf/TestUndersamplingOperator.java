@@ -9,6 +9,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.util.TestUtils;
 
 import java.util.Arrays;
 
@@ -47,7 +48,7 @@ public class TestUndersamplingOperator extends TestCase {
 
         // get targetProduct: execute initialize()
         Product targetProduct = op.getTargetProduct();
-        TestOperator.verifyProduct(targetProduct);
+        TestUtils.verifyProduct(targetProduct);
         
         Band band = targetProduct.getBandAt(0);
         assertNotNull(band);
@@ -62,11 +63,11 @@ public class TestUndersamplingOperator extends TestCase {
 
         // compare updated metadata
         MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
-        TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
-        TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
-        TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
+        TestUtils.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
+        TestUtils.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
+        TestUtils.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
 
-        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.890683");
+        TestUtils.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.890683");
     }
 
     /**
@@ -88,7 +89,7 @@ public class TestUndersamplingOperator extends TestCase {
 
         // get targetProduct: execute initialize()
         Product targetProduct = op.getTargetProduct();
-        TestOperator.verifyProduct(targetProduct);
+        TestUtils.verifyProduct(targetProduct);
 
         Band band = targetProduct.getBandAt(0);
         assertNotNull(band);
@@ -103,10 +104,10 @@ public class TestUndersamplingOperator extends TestCase {
 
         // compare updated metadata
         MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
-        TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
-        TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
-        TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
-        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
+        TestUtils.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
+        TestUtils.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
+        TestUtils.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
+        TestUtils.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
     }
 
     /**
@@ -128,7 +129,7 @@ public class TestUndersamplingOperator extends TestCase {
 
         // get targetProduct: execute initialize()
         Product targetProduct = op.getTargetProduct();
-        TestOperator.verifyProduct(targetProduct);
+        TestUtils.verifyProduct(targetProduct);
 
         Band band = targetProduct.getBandAt(0);
         assertNotNull(band);
@@ -143,10 +144,10 @@ public class TestUndersamplingOperator extends TestCase {
 
         // compare updated metadata
         MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
-        TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
-        TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
-        TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
-        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
+        TestUtils.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
+        TestUtils.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
+        TestUtils.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
+        TestUtils.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
     }
 
     /**
@@ -168,7 +169,7 @@ public class TestUndersamplingOperator extends TestCase {
 
         // get targetProduct: execute initialize()
         Product targetProduct = op.getTargetProduct();
-        TestOperator.verifyProduct(targetProduct);
+        TestUtils.verifyProduct(targetProduct);
 
         Band band = targetProduct.getBandAt(0);
         assertNotNull(band);
@@ -183,10 +184,10 @@ public class TestUndersamplingOperator extends TestCase {
 
         // compare updated metadata
         MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
-        TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
-        TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
-        TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
-        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
+        TestUtils.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
+        TestUtils.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
+        TestUtils.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
+        TestUtils.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
     }
 
     /**
@@ -208,7 +209,7 @@ public class TestUndersamplingOperator extends TestCase {
 
         // get targetProduct: execute initialize()
         Product targetProduct = op.getTargetProduct();
-        TestOperator.verifyProduct(targetProduct);
+        TestUtils.verifyProduct(targetProduct);
 
         Band band = targetProduct.getBandAt(0);
         assertNotNull(band);
@@ -223,10 +224,10 @@ public class TestUndersamplingOperator extends TestCase {
 
         // compare updated metadata
         MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
-        TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
-        TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
-        TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
-        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
+        TestUtils.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
+        TestUtils.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
+        TestUtils.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
+        TestUtils.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
     }
 
     /**
@@ -248,7 +249,7 @@ public class TestUndersamplingOperator extends TestCase {
 
         // get targetProduct: execute initialize()
         Product targetProduct = op.getTargetProduct();
-        TestOperator.verifyProduct(targetProduct);
+        TestUtils.verifyProduct(targetProduct);
 
         Band band = targetProduct.getBandAt(0);
         assertNotNull(band);
@@ -263,10 +264,10 @@ public class TestUndersamplingOperator extends TestCase {
 
         // compare updated metadata
         MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
-        TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
-        TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
-        TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
-        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
+        TestUtils.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
+        TestUtils.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
+        TestUtils.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
+        TestUtils.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
     }
 
     /**
@@ -288,7 +289,7 @@ public class TestUndersamplingOperator extends TestCase {
 
         // get targetProduct: execute initialize()
         Product targetProduct = op.getTargetProduct();
-        TestOperator.verifyProduct(targetProduct);
+        TestUtils.verifyProduct(targetProduct);
 
         Band band = targetProduct.getBandAt(0);
         assertNotNull(band);
@@ -303,10 +304,10 @@ public class TestUndersamplingOperator extends TestCase {
 
         // compare updated metadata
         MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
-        TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
-        TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
-        TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
-        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
+        TestUtils.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
+        TestUtils.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
+        TestUtils.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
+        TestUtils.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
     }
 
     /**
@@ -328,7 +329,7 @@ public class TestUndersamplingOperator extends TestCase {
 
         // get targetProduct: execute initialize()
         Product targetProduct = op.getTargetProduct();
-        TestOperator.verifyProduct(targetProduct);
+        TestUtils.verifyProduct(targetProduct);
 
         Band band = targetProduct.getBandAt(0);
         assertNotNull(band);
@@ -342,11 +343,11 @@ public class TestUndersamplingOperator extends TestCase {
         assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
-        MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
-        TestOperator.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
-        TestOperator.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
-        TestOperator.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
-        TestOperator.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
+        final MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+        TestUtils.attributeEquals(abs, AbstractMetadata.azimuth_spacing, 4.5);
+        TestUtils.attributeEquals(abs, AbstractMetadata.range_spacing, 6.0);
+        TestUtils.attributeEquals(abs, AbstractMetadata.line_time_interval, 0.03);
+        TestUtils.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:30:46.900682");
     }
 
 
@@ -364,7 +365,7 @@ public class TestUndersamplingOperator extends TestCase {
      */
     private static Product createTestProduct(int w, int h) {
 
-        Product testProduct = TestOperator.createProduct("ASA_APG_1P", w, h);
+        Product testProduct = TestUtils.createProduct("ASA_APG_1P", w, h);
 
         // create a Band: band1
         Band band1 = testProduct.addBand("band1", ProductData.TYPE_INT32);
