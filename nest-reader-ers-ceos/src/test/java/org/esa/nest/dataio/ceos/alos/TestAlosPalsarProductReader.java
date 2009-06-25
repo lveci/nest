@@ -6,6 +6,7 @@ import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.util.TestUtils;
 
 import java.io.File;
 
@@ -19,7 +20,6 @@ public class TestAlosPalsarProductReader extends TestCase {
     private AlosPalsarProductReaderPlugIn readerPlugin;
     private ProductReader reader;
 
-    private final static String rootPath = "P:\\nest\\nest\\ESA Data\\RADAR\\ALOS PALSAR";
     private final static String filePath = "P:\\nest\\nest\\ESA Data\\RADAR\\ALOS PALSAR\\acres\\solomon_islands_tsunami\\04651_03_PALSAR_WB1_west_PRE\\scene01\\VOL-ALPSRS042143750-W1.5GUD";
 
     public TestAlosPalsarProductReader(String name) {
@@ -51,13 +51,16 @@ public class TestAlosPalsarProductReader extends TestCase {
         ReaderUtils.verifyProduct(product, true);
     }
 
+    /**
+     * Open all files in a folder recursively
+     * @throws Exception anything
+     */
     public void testOpenAll() throws Exception
     {
-        final File folder = new File(rootPath);
+        final File folder = new File(TestUtils.rootPathALOS);
         if(!folder.exists()) return;
 
-        final String testAllProducts = System.getProperty("nest.testReadersOnAllProducts");
-        if(testAllProducts != null && testAllProducts.equalsIgnoreCase("true"))
+        if(TestUtils.canTestReadersOnAllProducts())
             recurseFolder(folder);
     }
 

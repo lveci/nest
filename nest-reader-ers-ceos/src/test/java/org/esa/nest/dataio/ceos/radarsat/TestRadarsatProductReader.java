@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.nest.util.TestUtils;
 
 import java.io.File;
 
@@ -18,7 +19,6 @@ public class TestRadarsatProductReader extends TestCase {
     private RadarsatProductReaderPlugIn readerPlugin;
     private ProductReader reader;
 
-    private final static String rootPath = "P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat1";
     private final static String filePath = "P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat1\\acres\\std\\SCENE01\\VDF_DAT.001";
 
     public TestRadarsatProductReader(String name) {
@@ -50,15 +50,18 @@ public class TestRadarsatProductReader extends TestCase {
         //ReaderUtils.verifyProduct(product);
     }
 
+    /**
+     * Open all files in a folder recursively
+     * @throws Exception anything
+     */
     public void testOpenAll() throws Exception
     {
-        final File folder = new File(rootPath);
+        final File folder = new File(TestUtils.rootPathRadarsat1);
         if(!folder.exists()) return;
 
-        final String testAllProducts = System.getProperty("nest.testReadersOnAllProducts");
-        if(testAllProducts != null && testAllProducts.equalsIgnoreCase("true"))
+        if(TestUtils.canTestReadersOnAllProducts())
             recurseFolder(folder);
-    }
+    }            
 
     private void recurseFolder(File folder) throws Exception {
         for(File file : folder.listFiles()) {

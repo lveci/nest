@@ -3,6 +3,8 @@ package org.esa.nest.util;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.framework.dataio.DecodeQualification;
+import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.gpf.Operator;
@@ -14,12 +16,23 @@ import java.util.Arrays;
 
 /**
  * Utilities for Operator unit tests
+ * In order to test the datasets at Array add this to the VM arguements
+ * -Dnest.testReadersOnAllProducts=true -Dnest.testProcessingOnAllProducts=true
  */
 public class TestUtils {
 
     public final static String rootPathTerraSarX = "P:\\nest\\nest\\ESA Data\\RADAR\\TerraSarX";
     public final static String rootPathASAR= "P:\\nest\\nest\\ESA Data\\RADAR\\ASAR";
+    public final static String rootPathRadarsat2 = "P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat2";
+    public final static String rootPathRadarsat1 = "P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat1";
+    public final static String rootPathERS = "P:\\nest\\nest\\ESA Data\\RADAR\\ERS_products";
+    public final static String rootPathJERS = "P:\\nest\\nest\\ESA Data\\RADAR\\JERS";
+    public final static String rootPathALOS = "P:\\nest\\nest\\ESA Data\\RADAR\\ALOS PALSAR";
 
+    public static boolean canTestReadersOnAllProducts() {
+        final String testAllProducts = System.getProperty("nest.testReadersOnAllProducts");
+        return testAllProducts != null && testAllProducts.equalsIgnoreCase("true");
+    }
 
     public static boolean canTestProcessingOnAllProducts() {
         final String testAllProducts = System.getProperty("nest.testProcessingOnAllProducts");
@@ -152,6 +165,23 @@ public class TestUtils {
         // readPixels: execute computeTiles()
         final float[] floatValues = new float[10000];
         targetBand.readPixels(100, 100, 100, 100, floatValues, ProgressMonitor.NULL);
+    }
+
+    public static void recurseReadFolder(File folder, ProductReaderPlugIn readerPlugin, ProductReader reader) throws Exception {
+        for(File file : folder.listFiles()) {
+            if(file.isDirectory()) {
+                recurseReadFolder(file, readerPlugin, reader);
+            } else if(readerPlugin.getDecodeQualification(file) == DecodeQualification.INTENDED) {
+
+                try {
+                    final Product product = reader.readProductNodes(file, null);
+                    ReaderUtils.verifyProduct(product, true);
+                } catch(Exception e) {
+                    System.out.println("Failed to read "+ file.toString());
+                    throw e;
+                }
+            }
+        }
     }
 
     static void throwErr(String description) throws Exception {

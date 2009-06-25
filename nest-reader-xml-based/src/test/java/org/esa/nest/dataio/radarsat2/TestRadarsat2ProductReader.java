@@ -5,6 +5,7 @@ import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.util.TestUtils;
 
 import java.io.File;
 
@@ -18,7 +19,6 @@ public class TestRadarsat2ProductReader extends TestCase {
     private Radarsat2ProductReaderPlugIn readerPlugin;
     private ProductReader reader;
 
-    private final static String rootPath = "P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat2";
     private final static String filePath = "P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat2\\Vancouver\\RS2_OK871_PK6636_DK3211_SCNA_20080422_143357_VV_VH_SGF\\product.xml";
 
     public TestRadarsat2ProductReader(String name) {
@@ -50,30 +50,18 @@ public class TestRadarsat2ProductReader extends TestCase {
         ReaderUtils.verifyProduct(product, true);
     }
 
+    /**
+     * Open all files in a folder recursively
+     * @throws Exception anything
+     */
     public void testOpenAll() throws Exception
     {
-        final File folder = new File(rootPath);
+        final File folder = new File(TestUtils.rootPathRadarsat2);
         if(!folder.exists()) return;
 
-        final String testAllProducts = System.getProperty("nest.testReadersOnAllProducts");
-        if(testAllProducts != null && testAllProducts.equalsIgnoreCase("true"))
-            recurseFolder(folder);
+        if(TestUtils.canTestReadersOnAllProducts())
+            TestUtils.recurseReadFolder(folder, readerPlugin, reader);
     }
 
-    private void recurseFolder(File folder) throws Exception {
-        for(File file : folder.listFiles()) {
-            if(file.isDirectory()) {
-                recurseFolder(file);
-            } else if(readerPlugin.getDecodeQualification(file) == DecodeQualification.INTENDED) {
 
-                try {
-                    final Product product = reader.readProductNodes(file, null);
-                    ReaderUtils.verifyProduct(product, true);
-                } catch(Exception e) {
-                    System.out.println("Failed to read "+ file.toString());
-                    throw e;
-                }
-            }
-        }
-    }
 }
