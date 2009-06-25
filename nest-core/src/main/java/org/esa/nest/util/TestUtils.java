@@ -2,13 +2,30 @@ package org.esa.nest.util;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
+import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.gpf.Operator;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+
+import java.util.Arrays;
+import java.io.File;
+
+import com.bc.ceres.core.ProgressMonitor;
 
 /**
  * Utilities for Operator unit tests
  */
 public class TestUtils {
+
+    public final static String rootPathTerraSarX = "P:\\nest\\nest\\ESA Data\\RADAR\\TerraSarX";
+    public final static String rootPathASAR= "P:\\nest\\nest\\ESA Data\\RADAR\\ASAR";
+
+
+    public static boolean canTestProcessingOnAllProducts() {
+        final String testAllProducts = System.getProperty("nest.testProcessingOnAllProducts");
+        return testAllProducts != null && testAllProducts.equalsIgnoreCase("true");
+    }
 
     public static Product createProduct(String type, int w, int h) {
         Product product = new Product("name", type, w, h);
@@ -41,8 +58,8 @@ public class TestUtils {
     }
 
 
-    public static void verifyProduct(Product product) throws Exception {
-        ReaderUtils.verifyProduct(product);
+    public static void verifyProduct(Product product, boolean verifyTimes) throws Exception {
+        ReaderUtils.verifyProduct(product, verifyTimes);
     }
 
     public static void attributeEquals(MetadataElement elem, String name, double trueValue) throws Exception {
@@ -59,7 +76,7 @@ public class TestUtils {
             throwErr(name + " is " + val + ", expecting " + trueValue);
     }
 
-    public static void compareMetadata(Product testProduct, Product expectedProduct) throws Exception {
+    public static void compareMetadata(Product testProduct, Product expectedProduct, String[] excemptionList) throws Exception {
         final MetadataElement testAbsRoot = testProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
         if(testAbsRoot == null)
             throwErr("Metadata is null");
@@ -67,16 +84,75 @@ public class TestUtils {
         if(expectedAbsRoot == null)
             throwErr("Metadata is null");
 
+        if(excemptionList != null) {
+            Arrays.sort(excemptionList);
+        }
+
         final MetadataAttribute[] attribList = expectedAbsRoot.getAttributes();
         for(MetadataAttribute expectedAttrib : attribList) {
-            final MetadataAttribute result = testAbsRoot.getAttribute(expectedAttrib.getName());
-            if(result == null)
-                throwErr("Metadata attribute "+expectedAttrib.getName()+" is missing");
+            if(excemptionList != null && Arrays.binarySearch(excemptionList, expectedAttrib.getName()) >= 0)
+                continue;
 
-            if(!result.getData().equalElems(expectedAttrib.getData()))
-                throwErr("Metadata attribute "+expectedAttrib.getName()+" expecting "+expectedAttrib.getData().toString()
+            final MetadataAttribute result = testAbsRoot.getAttribute(expectedAttrib.getName());
+            if(result == null) {
+                throwErr("Metadata attribute "+expectedAttrib.getName()+" is missing");
+            }
+            if(!result.getData().equalElems(expectedAttrib.getData())) {
+                if(expectedAttrib.getData().toString().trim().equalsIgnoreCase(result.getData().toString().trim())) {
+
+                } else {
+                    throwErr("Metadata attribute "+expectedAttrib.getName()+" expecting "+expectedAttrib.getData().toString()
                         +" got "+ result.getData().toString());
+                }
+            }
         }
+    }
+
+    public static void compareProducts(Operator op, String expectedPath, String[] excemptionList) throws Exception {
+        // get targetProduct: execute initialize()
+        final Product targetProduct = op.getTargetProduct();
+        TestUtils.verifyProduct(targetProduct, false);
+
+        final Band targetBand = targetProduct.getBandAt(0);
+        if(targetBand == null)
+            throwErr("targetBand at 0 is null");
+
+        // readPixels: execute computeTiles()
+        final float[] floatValues = new float[10000];
+        targetBand.readPixels(100, 100, 100, 100, floatValues, ProgressMonitor.NULL);
+
+        // compare with expected outputs:
+        final File expectedFile = new File(expectedPath);
+        if(!expectedFile.exists()) {
+            throwErr("Expected file not found "+expectedFile.toString());
+        }
+
+        final ProductReader reader2 = ProductIO.getProductReaderForFile(expectedFile);
+
+        final Product expectedProduct = reader2.readProductNodes(expectedFile, null);
+        final Band expectedBand = expectedProduct.getBandAt(0);
+
+        final float[] expectedValues = new float[10000];
+        expectedBand.readPixels(100, 100, 100, 100, expectedValues, ProgressMonitor.NULL);
+        if(!Arrays.equals(floatValues, expectedValues))
+                throwErr("Pixels are different");
+
+        // compare updated metadata
+        compareMetadata(targetProduct, expectedProduct, excemptionList);
+    }
+
+    public static void executeOperator(Operator op) throws Exception {
+        // get targetProduct: execute initialize()
+        final Product targetProduct = op.getTargetProduct();
+        TestUtils.verifyProduct(targetProduct, false);
+
+        final Band targetBand = targetProduct.getBandAt(0);
+        if(targetBand == null)
+            throwErr("targetBand at 0 is null");
+
+        // readPixels: execute computeTiles()
+        final float[] floatValues = new float[10000];
+        targetBand.readPixels(100, 100, 100, 100, floatValues, ProgressMonitor.NULL);
     }
 
     static void throwErr(String description) throws Exception {

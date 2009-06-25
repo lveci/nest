@@ -1966,13 +1966,17 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     private static void normalizeVector(double[] v) {
         final double norm = Math.sqrt(innerProduct(v, v));
-        v[0] = v[0] / norm;
-        v[1] = v[1] / norm;
-        v[2] = v[2] / norm;
+        v[0] /= norm;
+        v[1] /= norm;
+        v[2] /= norm;
     }
 
     private static double innerProduct(final double[] a, final double[] b) {
         return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+    }
+
+    void setApplyRadiometricCalibration(boolean flag) {
+        applyRadiometricCalibration = flag;
     }
 
     private static class TileData {

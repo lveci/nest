@@ -11,19 +11,19 @@ import org.esa.nest.util.TestUtils;
 import java.io.File;
 
 /**
- * Unit test for Range Doppler.
+ * Unit test for Geolocation Grid.
  */
-public class TestRangeDopplerOp extends TestCase {
+public class TestGeolocationGridOp extends TestCase {
 
     private OperatorSpi spi;
     private final static String inputPathWSM =     "P:\\nest\\nest\\test\\input\\ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1";
-    private final static String expectedPathWSM =  "P:\\nest\\nest\\test\\expected\\ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1_TC.dim";
+    private final static String expectedPathWSM =  "P:\\nest\\nest\\test\\expected\\ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1_EC.dim";
     private final static String asarLazioPath = "P:\\nest\\nest\\ESA Data\\NestBox\\GTC_dataset\\ASAR_LAZIO";
     private final static String ersLazioPath =  "P:\\nest\\nest\\ESA Data\\NestBox\\GTC_dataset\\ERS_LAZIO";
 
     @Override
     protected void setUp() throws Exception {
-        spi = new RangeDopplerGeocodingOp.Spi();
+        spi = new GeolocationGridGeocodingOp.Spi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(spi);
     }
 
@@ -44,12 +44,12 @@ public class TestRangeDopplerOp extends TestCase {
         final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
         final Product sourceProduct = reader.readProductNodes(inputFile, null);
 
-        final RangeDopplerGeocodingOp op = (RangeDopplerGeocodingOp)spi.createOperator();
+        final GeolocationGridGeocodingOp op = (GeolocationGridGeocodingOp)spi.createOperator();
         assertNotNull(op);
         op.setSourceProduct(sourceProduct);
-        op.setApplyRadiometricCalibration(true);
 
-        TestUtils.compareProducts(op, expectedPathWSM, null);
+        final String[] excemptionList = { "total_size" };
+        TestUtils.compareProducts(op, expectedPathWSM, excemptionList);
     }
 
     /**
@@ -90,10 +90,9 @@ public class TestRangeDopplerOp extends TestCase {
 
                         final Product sourceProduct = reader.readProductNodes(file, null);
 
-                        final RangeDopplerGeocodingOp op = (RangeDopplerGeocodingOp)spi.createOperator();
+                        final GeolocationGridGeocodingOp op = (GeolocationGridGeocodingOp)spi.createOperator();
                         assertNotNull(op);
                         op.setSourceProduct(sourceProduct);
-                        op.setApplyRadiometricCalibration(true);
 
                         TestUtils.executeOperator(op);
                     }

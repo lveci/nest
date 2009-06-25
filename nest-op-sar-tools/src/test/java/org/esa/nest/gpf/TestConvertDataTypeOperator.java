@@ -145,7 +145,7 @@ public class TestConvertDataTypeOperator extends TestCase {
 
         // get targetProduct: execute initialize()
         final Product targetProduct = op.getTargetProduct();
-        TestUtils.verifyProduct(targetProduct);
+        TestUtils.verifyProduct(targetProduct, true);
 
         final Band band = targetProduct.getBandAt(0);
         assertNotNull(band);

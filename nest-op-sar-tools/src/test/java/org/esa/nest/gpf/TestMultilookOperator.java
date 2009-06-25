@@ -5,10 +5,13 @@ import junit.framework.TestCase;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.util.TestUtils;
 
 import java.util.Arrays;
+import java.io.File;
 
 /**
  * Unit test for MultilookOperator.
@@ -16,6 +19,9 @@ import java.util.Arrays;
 public class TestMultilookOperator extends TestCase {
 
     private OperatorSpi spi;
+    private final static String inputPathWSM =     "P:\\nest\\nest\\test\\input\\ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1";
+    private final static String expectedPathWSM =  "P:\\nest\\nest\\test\\expected\\ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1_ML.dim";
+
 
     @Override
     protected void setUp() throws Exception {
@@ -46,7 +52,7 @@ public class TestMultilookOperator extends TestCase {
 
         // get targetProduct: execute initialize()
         final Product targetProduct = op.getTargetProduct();
-        TestUtils.verifyProduct(targetProduct);
+        TestUtils.verifyProduct(targetProduct, true);
 
         final Band band = targetProduct.getBandAt(0);
         assertNotNull(band);
@@ -70,6 +76,24 @@ public class TestMultilookOperator extends TestCase {
         TestUtils.attributeEquals(abs, AbstractMetadata.first_line_time, "10-MAY-2008 20:32:46.890683");
     }
 
+    /**
+     * Processes a product and compares it to processed product known to be correct
+     * @throws Exception general exception
+     */
+    public void testProcessing() throws Exception {
+
+        final File inputFile = new File(inputPathWSM);
+        if(!inputFile.exists()) return;
+
+        final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
+        final Product sourceProduct = reader.readProductNodes(inputFile, null);
+
+        final MultilookOp op = (MultilookOp)spi.createOperator();
+        assertNotNull(op);
+        op.setSourceProduct(sourceProduct);
+
+        TestUtils.compareProducts(op, expectedPathWSM, null);
+    }
 
     /**
      * Creates a 4-by-16 test product as shown below:

@@ -48,7 +48,7 @@ public class TestAlosPalsarProductReader extends TestCase {
         if(!file.exists()) return;
 
         final Product product = reader.readProductNodes(file, null);
-        ReaderUtils.verifyProduct(product);
+        ReaderUtils.verifyProduct(product, true);
     }
 
     public void testOpenAll() throws Exception

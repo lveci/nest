@@ -143,7 +143,7 @@ public class ReaderUtils {
         return (int)(product.getRawStorageSize() / (1024.0f * 1024.0f));
     }
 
-    public static void verifyProduct(Product product) throws Exception {
+    public static void verifyProduct(Product product, boolean verifyTimes) throws Exception {
         if(product == null)
             throw new Exception("product is null");
         if(product.getGeoCoding() == null)
@@ -154,9 +154,12 @@ public class ReaderUtils {
             throw new Exception("numbands is zero");
         if(product.getProductType() == null || product.getProductType().isEmpty())
             throw new Exception("productType is null");
-        if(product.getStartTime() == null)
-            throw new Exception("startTime is null");
-
+        if(verifyTimes) {
+            if(product.getStartTime() == null)
+                throw new Exception("startTime is null");
+             if(product.getEndTime() == null)
+                throw new Exception("endTime is null");
+        }
         for(Band b : product.getBands()) {
             if(b.getUnit() == null || b.getUnit().isEmpty())
                 throw new Exception("band " + b.getName() + " has null unit");

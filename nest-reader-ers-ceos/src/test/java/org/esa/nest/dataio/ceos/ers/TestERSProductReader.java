@@ -47,7 +47,7 @@ public class TestERSProductReader extends TestCase {
         if(!file.exists()) return;
 
         final Product product = reader.readProductNodes(file, null);
-        ReaderUtils.verifyProduct(product);
+        ReaderUtils.verifyProduct(product, true);
     }
 
     public void testOpenAll() throws Exception
@@ -68,7 +68,7 @@ public class TestERSProductReader extends TestCase {
 
                 try {
                     final Product product = reader.readProductNodes(file, null);
-                    ReaderUtils.verifyProduct(product);
+                    ReaderUtils.verifyProduct(product, true);
                 } catch(Exception e) {
                     System.out.println("Failed to read "+ file.toString());
                     throw e;
