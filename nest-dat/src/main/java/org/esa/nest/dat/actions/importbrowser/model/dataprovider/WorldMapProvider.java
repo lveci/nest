@@ -12,24 +12,11 @@ import org.esa.nest.dat.actions.importbrowser.util.WorldMapPainter;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.FileImageOutputStream;
-import javax.swing.AbstractCellEditor;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JViewport;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
@@ -44,7 +31,7 @@ import java.util.Comparator;
  * Description of WorldMapProvider
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-05-14 17:32:50 $
+ * @version $Revision: 1.2 $ $Date: 2009-06-25 17:24:03 $
  */
 public class WorldMapProvider implements DataProvider {
 

@@ -1,24 +1,26 @@
 package org.esa.nest.gpf;
 
+import com.bc.ceres.core.ProgressMonitor;
 import junit.framework.TestCase;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.util.Settings;
+import org.esa.nest.util.TestUtils;
 
 import java.util.Arrays;
 import java.io.File;
 
-import com.bc.ceres.core.ProgressMonitor;
-
 /**
- * Unit test for SingleTileOperator.
+ * Unit test for ASARCalibrationOp.
  */
 public class TestASARCalibrationOperator extends TestCase {
 
     private OperatorSpi spi;
+    private final static String inputPathWSM =     "P:\\nest\\nest\\test\\input\\ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1";
+    private final static String expectedPathWSM =  "P:\\nest\\nest\\test\\expected\\ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1_Calib.dim";
 
     @Override
     protected void setUp() throws Exception {
@@ -32,49 +34,48 @@ public class TestASARCalibrationOperator extends TestCase {
     }
 
     public void testOperator() throws Exception {
-        Product sourceProduct = createTestProduct(4, 4);
+        final Product sourceProduct = createTestProduct(4, 4);
 
-        ASARCalibrationOperator op = (ASARCalibrationOperator)spi.createOperator();
+        final ASARCalibrationOperator op = (ASARCalibrationOperator)spi.createOperator();
         assertNotNull(op);
         op.setSourceProduct(sourceProduct);
         op.setExternalAntennaPatternFile("ASA_XCA_AXVIEC20021217_150852_20020413_000000_20031231_000000.zip");
 
         // get targetProduct gets initialize to be executed
-        Product targetProduct = op.getTargetProduct();
-        assertNotNull(targetProduct);
+        final Product targetProduct = op.getTargetProduct();
+        TestUtils.verifyProduct(targetProduct, true);
 
-        Band band = targetProduct.getBandAt(0);
+        final Band band = targetProduct.getBandAt(0);
         assertNotNull(band);
 
         // readPixels gets computeTiles to be executed
-        float[] floatValues = new float[16];
+        final float[] floatValues = new float[16];
         band.readPixels(0, 0, 4, 4, floatValues, ProgressMonitor.NULL);
 
         // compare with expected outputs
-        float[] expectedValues = {0.50000006f, 2.8284273f, 7.7942286f, 15.454814f, 12.5f, 25.455845f, 42.435246f,
+        final float[] expectedValues = {0.50000006f, 2.8284273f, 7.7942286f, 15.454814f, 12.5f, 25.455845f, 42.435246f,
                 61.819256f, 40.499996f, 70.71068f, 104.78907f, 139.09332f, 84.49999f, 138.59294f, 194.85571f, 247.27702f};
         assertTrue(Arrays.equals(expectedValues, floatValues));
     }
 
+    private static Product createTestProduct(int w, int h) {
 
-    private Product createTestProduct(int w, int h) {
-
-        Product testProduct = new Product("p", "ASA_APG_1P", w, h);
+        final Product testProduct = TestUtils.createProduct("ASA_APG_1P", w, h);
 
         // create a Band: band1
-        double calibrationFactor = 518800.03125;
-        Band band1 = testProduct.addBand("band1", ProductData.TYPE_FLOAT32);
+        final double calibrationFactor = 518800.03125;
+        final Band band1 = testProduct.addBand("band1", ProductData.TYPE_FLOAT32);
         band1.setUnit("amplitude");
         band1.setSynthetic(true);
-        float [] values = new float[w * h];
+        final float [] values = new float[w * h];
         for (int i = 0; i < w * h; i++) {
             values[i] = (float)((i + 1)*Math.sqrt(calibrationFactor));
         }
         band1.setData(ProductData.createInstance(values));
 
         // create 2 TiePointGrid for band1: incidence_angle and slant_rage_time
-        float[] incidence_angle = {30F,45F,60F,75F,30F,45F,60F,75F,30F,45F,60F,75F,30F,45F,60F,75F};
-        float[] slant_rage_time = {0.005337F,0.006535F,0.009244F,0.017858F,
+        final float[] incidence_angle = {30F,45F,60F,75F,30F,45F,60F,75F,30F,45F,60F,75F,30F,45F,60F,75F};
+        final float[] slant_rage_time = {0.005337F,0.006535F,0.009244F,0.017858F,
                                    0.005337F,0.006535F,0.009244F,0.017858F,
                                    0.005337F,0.006535F,0.009244F,0.017858F,
                                    0.005337F,0.006535F,0.009244F,0.017858F};
@@ -82,28 +83,18 @@ public class TestASARCalibrationOperator extends TestCase {
         testProduct.addTiePointGrid(new TiePointGrid("incident_angle", 4, 4, 0, 0, 1, 1, incidence_angle));
         testProduct.addTiePointGrid(new TiePointGrid("slant_range_time", 4, 4, 0, 0, 1, 1, slant_rage_time));
 
-        MetadataElement abs = new MetadataElement("Abstracted Metadata");
-        abs.addAttribute(new MetadataAttribute(AbstractMetadata.PRODUCT_TYPE,
-                ProductData.createInstance("ASA_APG_1P"), false));
-        abs.addAttribute(new MetadataAttribute(AbstractMetadata.SAMPLE_TYPE,
-                ProductData.createInstance("DETECTED"), false));
-        abs.addAttribute(new MetadataAttribute(AbstractMetadata.mds1_tx_rx_polar,
-                ProductData.createInstance("HH"), false));
-        abs.addAttribute(new MetadataAttribute(AbstractMetadata.mds2_tx_rx_polar,
-                ProductData.createInstance(""), false));
-        abs.addAttribute(new MetadataAttribute(AbstractMetadata.SWATH,
-                ProductData.createInstance("IS1"), false));
-        abs.addAttribute(new MetadataAttribute(AbstractMetadata.ant_elev_corr_flag,
-                ProductData.createInstance(new byte[] {1}), false));
-        abs.addAttribute(new MetadataAttribute(AbstractMetadata.range_spread_comp_flag,
-                ProductData.createInstance(new byte[] {1}), false));
-        abs.addAttribute(new MetadataAttribute(AbstractMetadata.abs_calibration_flag,
-                ProductData.createInstance(new byte[] {0}), false));
-
-        testProduct.getMetadataRoot().addElement(abs);
+        final MetadataElement abs = testProduct.getMetadataRoot().getElement("Abstracted Metadata");
+        AbstractMetadata.setAttribute(abs, AbstractMetadata.PRODUCT_TYPE, "ASA_APG_1P");
+        AbstractMetadata.setAttribute(abs, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
+        AbstractMetadata.setAttribute(abs, AbstractMetadata.mds1_tx_rx_polar, "HH");
+        AbstractMetadata.setAttribute(abs, AbstractMetadata.mds2_tx_rx_polar, " ");
+        AbstractMetadata.setAttribute(abs, AbstractMetadata.SWATH, "IS1");
+        AbstractMetadata.setAttribute(abs, AbstractMetadata.ant_elev_corr_flag, 1);
+        AbstractMetadata.setAttribute(abs, AbstractMetadata.range_spread_comp_flag, 1);
+        AbstractMetadata.setAttribute(abs, AbstractMetadata.abs_calibration_flag, 0);
 
         // create MAIN_PROCESSING_PARAMS_ADS MetadataElement with attributes: ant_elev_corr_flag, range_spread_comp_flag and ext_cal_fact
-        MetadataElement ads = new MetadataElement("MAIN_PROCESSING_PARAMS_ADS");
+        final MetadataElement ads = new MetadataElement("MAIN_PROCESSING_PARAMS_ADS");
         ads.addAttribute(new MetadataAttribute("first_zero_doppler_time",
                 ProductData.createInstance(new int[] {0, 0, 0}), false));
         ads.addAttribute(new MetadataAttribute("detected_flag",
@@ -123,27 +114,46 @@ public class TestASARCalibrationOperator extends TestCase {
         testProduct.getMetadataRoot().addElement(ads);
 
         // create DSD with attribute num_records
-        MetadataElement dsd3 = new MetadataElement("DSD.3");
+        final MetadataElement dsd3 = new MetadataElement("DSD.3");
         dsd3.addAttribute(new MetadataAttribute("num_records",
                 ProductData.createInstance(new int[] {1}), false));
-        MetadataElement dsd = new MetadataElement("DSD");
+        final MetadataElement dsd = new MetadataElement("DSD");
         dsd.addElement(dsd3);
         testProduct.getMetadataRoot().addElement(dsd);
 
-        Band band2 = testProduct.addBand("band2", ProductData.TYPE_FLOAT32);
+        final Band band2 = testProduct.addBand("band2", ProductData.TYPE_FLOAT32);
         band2.setSynthetic(true);
         band2.setUnit("amplitude");
-        float[] floatValues = new float[w * h];
+        final float[] floatValues = new float[w * h];
         Arrays.fill(floatValues, 2.5f);
         band2.setData(ProductData.createInstance(floatValues));
 
-        Band band3 = testProduct.addBand("band3", ProductData.TYPE_INT16);
+        final Band band3 = testProduct.addBand("band3", ProductData.TYPE_INT16);
         band3.setScalingFactor(0.5);
         band3.setSynthetic(true);
         band3.setUnit("amplitude");
-        short[] shortValues = new short[w * h];
+        final short[] shortValues = new short[w * h];
         Arrays.fill(shortValues, (short) 6);
         band3.setData(ProductData.createInstance(shortValues));
         return testProduct;
+    }
+
+    /**
+     * Processes a product and compares it to processed product known to be correct
+     * @throws Exception general exception
+     */
+    public void testProcessing() throws Exception {
+
+        final File inputFile = new File(inputPathWSM);
+        if(!inputFile.exists()) return;
+
+        final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
+        final Product sourceProduct = reader.readProductNodes(inputFile, null);
+
+        final ASARCalibrationOperator op = (ASARCalibrationOperator)spi.createOperator();
+        assertNotNull(op);
+        op.setSourceProduct(sourceProduct);
+
+        TestUtils.compareProducts(op, expectedPathWSM, null);
     }
 }

@@ -29,17 +29,17 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.util.Settings;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
+import org.esa.nest.util.Settings;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 
 /**
  * Calibration for ASAR data products.
@@ -208,7 +208,7 @@ public class ASARCalibrationOperator extends Operator {
      */
     private void getProductType() throws Exception {
 
-        productType = absRoot.getAttributeString(AbstractMetadata.PRODUCT_TYPE);
+        productType = sourceProduct.getProductType();
         if (!productType.equals("ASA_IMP_1P") && !productType.equals("ASA_IMM_1P") &&
             !productType.equals("ASA_APP_1P") && !productType.equals("ASA_APM_1P") &&
             !productType.equals("ASA_WSM_1P") && !productType.equals("ASA_IMG_1P") &&

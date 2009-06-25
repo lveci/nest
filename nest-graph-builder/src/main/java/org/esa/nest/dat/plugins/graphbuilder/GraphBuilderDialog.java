@@ -10,8 +10,8 @@ import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.visat.dialogs.PromptDialog;
-import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.DialogUtils;
+import org.esa.nest.util.ResourceUtils;
 
 import javax.media.jai.JAI;
 import javax.swing.*;
@@ -22,7 +22,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Observer;
 
 /**
  *  Provides the User Interface for creating, loading and saving Graphs

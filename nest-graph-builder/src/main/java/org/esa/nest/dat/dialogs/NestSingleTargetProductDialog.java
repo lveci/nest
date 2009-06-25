@@ -1,35 +1,33 @@
 package org.esa.nest.dat.dialogs;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.border.EmptyBorder;
-
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductFilter;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.OperatorUI;
-import org.esa.beam.framework.gpf.ui.*;
-import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
-import org.esa.beam.framework.gpf.annotations.SourceProduct;
-import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.application.SelectionChangeEvent;
-import org.esa.beam.framework.ui.application.SelectionChangeListener;
-
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueContainer;
 import com.bc.ceres.binding.ValueDescriptor;
 import com.bc.ceres.binding.ValueModel;
 import com.bc.ceres.binding.swing.ValueEditor;
 import com.bc.ceres.swing.TableLayout;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductFilter;
+import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.OperatorUI;
+import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
+import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.esa.beam.framework.gpf.ui.SingleTargetProductDialog;
+import org.esa.beam.framework.gpf.ui.SourceProductSelector;
+import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
+import org.esa.beam.framework.gpf.ui.ValueSetUpdater;
+import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.framework.ui.application.SelectionChangeEvent;
+import org.esa.beam.framework.ui.application.SelectionChangeListener;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  */

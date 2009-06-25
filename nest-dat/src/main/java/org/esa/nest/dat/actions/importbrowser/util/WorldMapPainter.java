@@ -1,13 +1,6 @@
 
 package org.esa.nest.dat.actions.importbrowser.util;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.PixelPos;
@@ -15,6 +8,11 @@ import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.ProductUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
+import java.awt.image.BufferedImage;
 
 public class WorldMapPainter {
 

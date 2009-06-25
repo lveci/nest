@@ -1,11 +1,10 @@
 package org.esa.nest.dataio;
 
-import org.esa.nest.util.MathUtils;
 import org.esa.beam.framework.gpf.OperatorException;
-
-import java.util.Arrays;
+import org.esa.nest.util.MathUtils;
 
 import java.io.*;
+import java.util.Arrays;
 
 /**
  * Created by IntelliJ IDEA.

@@ -7,13 +7,13 @@ package org.esa.nest.dat.actions.importbrowser.model;
  * Time: 11:17:58
  */
 
-import java.io.File;
-import java.util.ArrayList;
-
 import junit.framework.TestCase;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.DataProvider;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.ProductPropertiesProvider;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.WorldMapProvider;
+
+import java.io.File;
+import java.util.ArrayList;
 
 public class RepositoryManagerTest extends TestCase {
 

@@ -1,8 +1,8 @@
 package org.esa.nest.dataio;
 
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.dataio.envisat.EnvisatOrbitReader;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.util.Settings;
 

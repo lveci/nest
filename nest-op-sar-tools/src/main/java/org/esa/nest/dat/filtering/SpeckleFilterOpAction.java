@@ -1,8 +1,8 @@
 package org.esa.nest.dat.filtering;
 
 import org.esa.beam.framework.ui.command.CommandEvent;
-import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
 import org.esa.beam.visat.actions.AbstractVisatAction;
+import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
 
 /**
  * Speckle Filter action.

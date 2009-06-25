@@ -1,15 +1,14 @@
 package org.esa.nest.dat.actions;
 
-import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
-import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.dialogs.MapProjectionDialog;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.gpf.OperatorUtils;
 
 public class ProjectionAction extends ExecCommand {
 

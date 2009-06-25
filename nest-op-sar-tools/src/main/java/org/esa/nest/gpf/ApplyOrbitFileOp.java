@@ -15,13 +15,13 @@
 package org.esa.nest.gpf;
 
 import Jama.Matrix;
+import org.apache.commons.net.ftp.FTPFile;
 import org.esa.beam.dataio.envisat.EnvisatOrbitReader;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
@@ -34,15 +34,10 @@ import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.Settings;
 import org.esa.nest.util.ftpUtils;
-import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
-import java.util.Map;
-import java.awt.*;
-
-import com.bc.ceres.core.ProgressMonitor;
 
 /**
  * This operator applies orbit file to a given product.

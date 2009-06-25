@@ -1,11 +1,10 @@
 package org.esa.nest.dat.toolviews.Projects;
 
 import junit.framework.TestCase;
+import org.esa.beam.util.SystemUtils;
+import org.esa.nest.util.ResourceUtils;
 
 import java.io.File;
-
-import org.esa.nest.util.ResourceUtils;
-import org.esa.beam.util.SystemUtils;
 
 
 /**

@@ -1,19 +1,18 @@
 package org.esa.nest.dat.toolviews.Projects;
 
-import org.jdom.Element;
-import org.jdom.Document;
-import org.jdom.Attribute;
-import org.esa.nest.util.XMLSupport;
-import org.esa.nest.dat.dialogs.ProductSetDialog;
-import org.esa.beam.visat.VisatApp;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.visat.VisatApp;
+import org.esa.nest.dat.dialogs.ProductSetDialog;
+import org.esa.nest.util.XMLSupport;
+import org.jdom.Attribute;
+import org.jdom.Document;
+import org.jdom.Element;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Vector;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Defines a list of Products

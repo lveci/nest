@@ -5,9 +5,11 @@ import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.util.StringUtils;
 
 import java.awt.*;
-import java.net.URI;
 import java.io.IOException;
-import java.util.*;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Properties;
 
 /**
  * This action emails a problem to Array

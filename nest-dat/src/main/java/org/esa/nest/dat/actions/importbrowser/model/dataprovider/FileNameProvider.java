@@ -5,17 +5,15 @@
  */
 package org.esa.nest.dat.actions.importbrowser.model.dataprovider;
 
+import org.esa.nest.dat.actions.importbrowser.model.Repository;
+import org.esa.nest.dat.actions.importbrowser.model.RepositoryEntry;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.io.IOException;
 import java.util.Comparator;
-
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableColumn;
-
-import org.esa.nest.dat.actions.importbrowser.model.Repository;
-import org.esa.nest.dat.actions.importbrowser.model.RepositoryEntry;
 
 public class FileNameProvider implements DataProvider {
 

@@ -16,7 +16,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.io.IOException;
 
 @OperatorMetadata(alias = "SubsetOp", description = "Create a spatial subset of the source product.")

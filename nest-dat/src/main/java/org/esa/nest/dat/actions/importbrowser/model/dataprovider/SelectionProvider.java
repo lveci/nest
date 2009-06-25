@@ -1,19 +1,18 @@
 
 package org.esa.nest.dat.actions.importbrowser.model.dataprovider;
 
-import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.io.IOException;
-import java.util.Comparator;
+import org.esa.nest.dat.actions.importbrowser.model.Repository;
+import org.esa.nest.dat.actions.importbrowser.model.RepositoryEntry;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableCellEditor;
-
-import org.esa.nest.dat.actions.importbrowser.model.Repository;
-import org.esa.nest.dat.actions.importbrowser.model.RepositoryEntry;
+import javax.swing.table.TableColumn;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.Comparator;
 
 public class SelectionProvider implements DataProvider {
 

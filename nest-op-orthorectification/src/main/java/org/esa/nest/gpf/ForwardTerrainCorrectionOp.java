@@ -21,18 +21,15 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
+import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.MathUtils;
-import org.esa.nest.gpf.OperatorUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Raw SAR images usually contain significant geometric distortions. One of the factors that cause the

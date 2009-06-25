@@ -1,10 +1,9 @@
 package org.esa.nest.dataio.polsarpro;
 
 import org.esa.beam.dataio.envi.EnviProductReaderPlugIn;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.DecodeQualification;
+import org.esa.beam.framework.dataio.ProductReader;
 
-import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 
 public class PolsarProProductReaderPlugIn extends EnviProductReaderPlugIn {

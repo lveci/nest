@@ -1,9 +1,9 @@
 package org.esa.nest.dat.actions.importbrowser.model.dataprovider;
 
 import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData.UTC;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.PropertyMap;
@@ -11,20 +11,12 @@ import org.esa.nest.dat.actions.importbrowser.model.Repository;
 import org.esa.nest.dat.actions.importbrowser.model.RepositoryEntry;
 import org.esa.nest.datamodel.AbstractMetadata;
 
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.FontMetrics;
+import java.awt.*;
 import java.io.IOException;
 import java.util.Comparator;
 

@@ -1,18 +1,17 @@
 package org.esa.nest.gpf.filtering;
 
-import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
+import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
 
 import javax.swing.*;
-import javax.swing.tree.TreeSelectionModel;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreePath;
 import javax.swing.tree.DefaultTreeCellRenderer;
-
-import java.util.Map;
-import java.util.Enumeration;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.util.Enumeration;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.

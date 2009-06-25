@@ -16,12 +16,16 @@ package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
-import org.esa.beam.framework.gpf.annotations.*;
+import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
+import org.esa.beam.framework.gpf.annotations.Parameter;
+import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.beam.visat.toolviews.placemark.PlacemarkNameFactory;
@@ -33,11 +37,9 @@ import java.awt.*;
 import java.awt.image.*;
 import java.awt.image.DataBufferDouble;
 import java.awt.image.renderable.ParameterBlock;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.HashMap;
-
-import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 
 /**
  * Image co-registration is fundamental for Interferometry SAR (InSAR) imaging and its applications, such as

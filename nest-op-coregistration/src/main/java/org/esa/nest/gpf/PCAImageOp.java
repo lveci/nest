@@ -32,11 +32,11 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.nest.util.ResourceUtils;
 
 import java.awt.*;
-import java.util.Map;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Map;
 
 /**
  * The operator performs the following perations for all master/slave pairs that user selected:

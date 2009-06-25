@@ -8,9 +8,7 @@ import org.esa.nest.dat.actions.importbrowser.model.dataprovider.FileNameProvide
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.SelectionProvider;
 import org.esa.nest.dat.actions.importbrowser.util.Callback;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;

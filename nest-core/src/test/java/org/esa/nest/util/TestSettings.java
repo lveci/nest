@@ -2,11 +2,6 @@ package org.esa.nest.util;
 
 import junit.framework.TestCase;
 
-import java.util.Map;
-import java.util.Properties;
-
-import org.esa.beam.visat.VisatApp;
-
 /**
  * Settings Tester.
  *

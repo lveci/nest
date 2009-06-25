@@ -1,13 +1,13 @@
 package org.esa.nest.dat.actions.importbrowser.model;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by IntelliJ IDEA. User: marco Date: 01.07.2005 Time: 08:26:16

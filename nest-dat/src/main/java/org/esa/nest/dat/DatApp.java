@@ -14,21 +14,21 @@ import org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView;
 import org.esa.beam.visat.toolviews.stat.StatisticsToolView;
 import org.esa.nest.dat.actions.LoadTabbedLayoutAction;
 import org.esa.nest.dat.actions.importbrowser.ImportBrowserAction;
+import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.dat.views.polarview.PolarView;
-import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
 import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.Settings;
 
-import javax.swing.*;
 import javax.media.jai.JAI;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Arrays;
 
 public final class DatApp extends VisatApp {
     public DatApp(ApplicationDescriptor applicationDescriptor) {

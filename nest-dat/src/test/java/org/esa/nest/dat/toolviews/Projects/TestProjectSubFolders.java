@@ -1,11 +1,10 @@
 package org.esa.nest.dat.toolviews.Projects;
 
 import junit.framework.TestCase;
+import org.jdom.Element;
 
 import java.io.File;
 import java.util.Vector;
-
-import org.jdom.Element;
 
 
 /**

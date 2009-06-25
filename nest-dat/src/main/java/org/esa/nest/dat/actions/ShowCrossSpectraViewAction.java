@@ -1,23 +1,22 @@
 
 package org.esa.nest.dat.actions;
 
+import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
-import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.product.ProductSceneImage;
 import org.esa.beam.framework.ui.product.ProductSceneView;
-import org.esa.beam.visat.VisatApp;
 import org.esa.beam.util.Debug;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.views.polarview.PolarView;
 
 import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-
-import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
-import com.bc.ceres.core.*;
-import com.bc.ceres.core.ProgressMonitor;
 
 /**
  * This action opens a polar wave view for the currently selected wave product.

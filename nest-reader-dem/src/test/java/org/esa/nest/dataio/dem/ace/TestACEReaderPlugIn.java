@@ -1,8 +1,8 @@
 package org.esa.nest.dataio.dem.ace;
 
 import junit.framework.TestCase;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.DecodeQualification;
+import org.esa.beam.framework.dataio.ProductReader;
 
 import java.io.File;
 import java.net.MalformedURLException;

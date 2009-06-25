@@ -1,17 +1,12 @@
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.nest.gpf.ProductSetReaderOpUI;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.dataio.ProductIO;
-
-import java.io.File;
-import java.io.IOException;
 
 /**
  * ProductSet Operator to be replaced by ReadOp

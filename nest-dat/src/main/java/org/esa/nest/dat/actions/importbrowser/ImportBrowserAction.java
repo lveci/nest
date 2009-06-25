@@ -9,7 +9,7 @@ import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dat.actions.importbrowser.model.RepositoryManager;
 import org.esa.nest.dat.actions.importbrowser.ui.ImportBrowser;
 
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 

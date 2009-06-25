@@ -1,8 +1,8 @@
 package org.esa.nest.dat.filtering;
 
+import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.command.CommandEvent;
-import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.beam.visat.actions.AbstractVisatAction;
 
 /**

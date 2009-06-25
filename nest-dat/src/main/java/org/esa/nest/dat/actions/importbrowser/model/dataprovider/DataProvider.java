@@ -1,13 +1,12 @@
 
 package org.esa.nest.dat.actions.importbrowser.model.dataprovider;
 
-import java.io.IOException;
-import java.util.Comparator;
-
-import javax.swing.table.TableColumn;
-
 import org.esa.nest.dat.actions.importbrowser.model.Repository;
 import org.esa.nest.dat.actions.importbrowser.model.RepositoryEntry;
+
+import javax.swing.table.TableColumn;
+import java.io.IOException;
+import java.util.Comparator;
 
 /**
  * This interface shall be implemented to provide new data to a {@link RepositoryEntry}.

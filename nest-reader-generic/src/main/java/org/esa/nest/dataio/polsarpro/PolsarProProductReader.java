@@ -1,19 +1,14 @@
 package org.esa.nest.dataio.polsarpro;
 
-import org.esa.beam.dataio.envi.EnviProductReader;
-import org.esa.beam.dataio.envi.EnviProductReaderPlugIn;
 import org.esa.beam.dataio.envi.Header;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.envi.NestEnviProductReader;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 

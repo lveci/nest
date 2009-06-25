@@ -1,11 +1,11 @@
 package org.esa.nest.gpf;
 
 import junit.framework.TestCase;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.nest.util.TestUtils;
 
 import java.io.File;

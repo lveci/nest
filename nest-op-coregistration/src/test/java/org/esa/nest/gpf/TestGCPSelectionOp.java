@@ -1,10 +1,10 @@
 package org.esa.nest.gpf;
 
+import com.bc.ceres.core.ProgressMonitor;
 import junit.framework.TestCase;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.GPF;
-import com.bc.ceres.core.ProgressMonitor;
+import org.esa.beam.framework.gpf.OperatorSpi;
 
 /**
  * Unit test for GCPSelectionOp.

@@ -1,17 +1,12 @@
 package org.esa.nest.dataio;
 
+import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.util.io.BeamFileFilter;
-import org.esa.beam.util.io.FileUtils;
 
-import javax.imageio.ImageIO;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.Locale;
-import java.util.Arrays;
-import java.util.ArrayList;
 
 /**
  * The ReaderPlugIn for generic binary images.

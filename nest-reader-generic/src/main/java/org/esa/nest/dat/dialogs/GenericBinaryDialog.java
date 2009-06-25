@@ -1,16 +1,15 @@
 package org.esa.nest.dat.dialogs;
 
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.ui.ModalDialog;
+import org.esa.nest.util.DialogUtils;
+
+import javax.swing.*;
 import java.awt.*;
-import java.text.NumberFormat;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.nio.ByteOrder;
-import javax.swing.*;
-
-import org.esa.beam.framework.ui.GridBagUtils;
-import org.esa.beam.framework.ui.ModalDialog;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.nest.util.DialogUtils;
+import java.text.NumberFormat;
 
 public class GenericBinaryDialog extends ModalDialog {
 

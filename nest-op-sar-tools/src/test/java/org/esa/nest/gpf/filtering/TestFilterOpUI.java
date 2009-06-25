@@ -1,12 +1,11 @@
 package org.esa.nest.gpf.filtering;
 
 import junit.framework.TestCase;
+import org.esa.beam.framework.gpf.GPF;
 
 import javax.swing.*;
-import java.util.Map;
 import java.util.HashMap;
-
-import org.esa.beam.framework.gpf.GPF;
+import java.util.Map;
 
 /**
  * Unit test for SingleTileOperator.

@@ -1,29 +1,17 @@
 
 package org.esa.nest.dat;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+import com.bc.ceres.core.Assert;
+import org.esa.beam.framework.ui.ModalDialog;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
+import java.util.*;
 import java.util.List;
-import java.util.Properties;
-
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-
-import org.esa.beam.framework.ui.ModalDialog;
-
-import com.bc.ceres.core.Assert;
 
 /**
  * This class pertains to the "about" dialog box for the VISAT application.

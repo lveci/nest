@@ -14,13 +14,12 @@
  */
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.gpf.annotations.Parameter;
 
 /**
  * This operator performs the same terrain correction as RangeDopplerGeocodingOp does except that it uses average

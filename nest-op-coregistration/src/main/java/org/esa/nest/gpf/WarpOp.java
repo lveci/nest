@@ -20,20 +20,30 @@ import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
-import org.esa.beam.framework.gpf.annotations.*;
+import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
+import org.esa.beam.framework.gpf.annotations.Parameter;
+import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
-import org.esa.nest.util.ResourceUtils;
-import org.esa.nest.datamodel.Unit;
 import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.datamodel.Unit;
+import org.esa.nest.util.ResourceUtils;
 
-import javax.media.jai.*;
+import javax.media.jai.Interpolation;
+import javax.media.jai.JAI;
+import javax.media.jai.RenderedOp;
+import javax.media.jai.WarpPolynomial;
 import java.awt.*;
-import java.awt.image.*;
+import java.awt.image.DataBuffer;
+import java.awt.image.RenderedImage;
 import java.awt.image.renderable.ParameterBlock;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
-import java.io.*;
+import java.util.Map;
 
 /**
  * Image co-registration is fundamental for Interferometry SAR (InSAR) imaging and its applications, such as

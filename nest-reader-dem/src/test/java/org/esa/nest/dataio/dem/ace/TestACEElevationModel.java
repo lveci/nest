@@ -1,10 +1,8 @@
 package org.esa.nest.dataio.dem.ace;
 
 import junit.framework.TestCase;
-import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.datamodel.GeoPos;
-
-import java.util.Arrays;
+import org.esa.beam.framework.dataop.dem.ElevationModel;
 
 /**
  * Created by IntelliJ IDEA.

@@ -4,8 +4,8 @@ import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
 
 import java.awt.*;
-import java.net.URI;
 import java.io.IOException;
+import java.net.URI;
 
 /**
  * This action emails a problem to Array

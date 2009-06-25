@@ -1,8 +1,8 @@
 package org.esa.nest.dat.plugins.graphbuilder;
 
-import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.binding.dom.Xpp3DomElement;
 import com.bc.ceres.binding.dom.DomElement;
+import com.bc.ceres.binding.dom.Xpp3DomElement;
+import com.bc.ceres.core.ProgressMonitor;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -12,14 +12,17 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.graph.*;
 import org.esa.beam.framework.gpf.operators.common.ReadOp;
 import org.esa.beam.framework.gpf.operators.common.WriteOp;
-import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.gpf.ProductSetReaderOp;
+import org.esa.nest.util.ResourceUtils;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 public class GraphExecuter extends Observable {
 

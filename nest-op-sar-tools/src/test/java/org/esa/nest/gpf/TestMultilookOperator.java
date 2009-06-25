@@ -2,16 +2,16 @@ package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import junit.framework.TestCase;
+import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.util.TestUtils;
 
-import java.util.Arrays;
 import java.io.File;
+import java.util.Arrays;
 
 /**
  * Unit test for MultilookOperator.

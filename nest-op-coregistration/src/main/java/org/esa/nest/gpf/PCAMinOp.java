@@ -14,7 +14,6 @@
  */
 package org.esa.nest.gpf;
 
-import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
 import Jama.SingularValueDecomposition;
 import com.bc.ceres.core.ProgressMonitor;
@@ -34,7 +33,6 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
-import javax.media.jai.JAI;
 import java.awt.*;
 import java.util.Map;
 

@@ -2,15 +2,21 @@ package org.esa.nest.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.sun.media.imageioimpl.plugins.tiff.TIFFImageReader;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.ColorPaletteDef;
+import org.esa.beam.framework.datamodel.ImageInfo;
+import org.esa.beam.framework.datamodel.IndexCoding;
+import org.esa.beam.framework.datamodel.ProductData;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.ImageTypeSpecifier;
+import javax.imageio.stream.ImageInputStream;
+import java.awt.*;
+import java.awt.image.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
-import java.awt.*;
-import java.awt.image.*;
-import javax.imageio.*;
-import javax.imageio.stream.ImageInputStream;
 
 /**
  * Reader for ImageIO File

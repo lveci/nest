@@ -1,18 +1,17 @@
 package org.esa.nest.util;
 
+import com.bc.ceres.core.runtime.internal.RuntimeActivator;
+import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.visat.VisatApp;
-import org.esa.beam.util.SystemUtils;
 
 import javax.swing.*;
 import java.io.File;
-import java.io.InputStream;
-import java.io.IOException;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
-
-import com.bc.ceres.core.runtime.internal.RuntimeActivator;
 
 /**
  * Look up paths to resources

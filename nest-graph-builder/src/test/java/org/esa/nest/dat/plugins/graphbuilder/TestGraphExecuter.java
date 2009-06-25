@@ -1,15 +1,11 @@
 package org.esa.nest.dat.plugins.graphbuilder;
 
 import junit.framework.TestCase;
-
-import java.util.Vector;
-import java.util.Set;
-import java.util.Observer;
-import java.util.ArrayList;
-
 import org.esa.beam.framework.gpf.graph.GraphException;
-import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
-import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
+
+import java.util.ArrayList;
+import java.util.Observer;
+import java.util.Set;
 
 /**
  * GraphExecuter Tester.

@@ -1,10 +1,9 @@
 package org.esa.nest.dataio.geotiff;
 
-import org.esa.beam.dataio.envi.EnviProductReader;
 import org.esa.beam.dataio.geotiff.GeoTiffProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.File;

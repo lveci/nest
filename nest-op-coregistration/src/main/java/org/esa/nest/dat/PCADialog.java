@@ -4,7 +4,6 @@ import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.nest.dat.dialogs.MultiGraphDialog;
-import org.esa.nest.dat.dialogs.IOPanel;
 import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
 import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
 

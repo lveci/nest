@@ -1,17 +1,16 @@
 package org.esa.nest.util;
 
+import com.bc.ceres.core.ProgressMonitor;
+import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
-import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
-import java.util.Arrays;
 import java.io.File;
-
-import com.bc.ceres.core.ProgressMonitor;
+import java.util.Arrays;
 
 /**
  * Utilities for Operator unit tests

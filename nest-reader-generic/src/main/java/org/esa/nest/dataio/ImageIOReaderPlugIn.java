@@ -1,15 +1,15 @@
 package org.esa.nest.dataio;
 
+import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.util.io.BeamFileFilter;
 
 import javax.imageio.ImageIO;
 import java.io.File;
-import java.util.Locale;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * The ReaderPlugIn for ImageIO products.

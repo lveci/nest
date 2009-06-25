@@ -1,11 +1,11 @@
 package org.esa.nest.dat.actions.importbrowser.model;
 
-import java.awt.Rectangle;
-import java.io.File;
-import java.util.ArrayList;
-
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.PropertyMap;
+
+import java.awt.*;
+import java.io.File;
+import java.util.ArrayList;
 
 /**
  * This class handles the configuration of the ProductGrabber.

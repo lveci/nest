@@ -1,32 +1,32 @@
 package org.esa.nest.dat.actions;
 
-import org.esa.beam.framework.ui.command.ExecCommand;
-import org.esa.beam.framework.ui.command.CommandEvent;
-import org.esa.beam.framework.ui.GridBagUtils;
-import org.esa.beam.framework.ui.NewProductDialog;
-import org.esa.beam.framework.ui.product.ProductSubsetDialog;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
+import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNodeList;
 import org.esa.beam.framework.help.HelpSys;
-import org.esa.beam.visat.VisatApp;
+import org.esa.beam.framework.ui.GridBagUtils;
+import org.esa.beam.framework.ui.NewProductDialog;
+import org.esa.beam.framework.ui.command.CommandEvent;
+import org.esa.beam.framework.ui.command.ExecCommand;
+import org.esa.beam.framework.ui.product.ProductSubsetDialog;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.SystemUtils;
-import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.BeamFileChooser;
+import org.esa.beam.util.io.BeamFileFilter;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.GenericReaderPlugIn;
 
 import javax.swing.*;
-import java.io.File;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.util.Iterator;
-import java.beans.PropertyChangeListener;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.util.Iterator;
 
 /**
 

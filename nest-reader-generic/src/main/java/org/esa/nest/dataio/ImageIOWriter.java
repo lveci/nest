@@ -7,20 +7,19 @@ import org.esa.beam.framework.dataio.ProductWriterPlugIn;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.nest.datamodel.AbstractMetadata;
 
-import javax.imageio.stream.FileImageOutputStream;
-import javax.imageio.stream.ImageOutputStream;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriter;
-import javax.imageio.ImageWriteParam;
 import javax.imageio.IIOImage;
-import javax.media.jai.RasterFactory;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
 import javax.media.jai.PlanarImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Hashtable;
+import javax.media.jai.RasterFactory;
 import java.awt.*;
 import java.awt.image.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Iterator;
 
 
 public class ImageIOWriter extends AbstractProductWriter {

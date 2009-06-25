@@ -1,11 +1,14 @@
 package org.esa.nest.datamodel;
 
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.MetadataAttribute;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.OperatorException;
 
-import java.text.ParseException;
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 
 /**
  * Created by IntelliJ IDEA.

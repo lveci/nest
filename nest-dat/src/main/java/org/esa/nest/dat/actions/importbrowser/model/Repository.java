@@ -1,16 +1,16 @@
 package org.esa.nest.dat.actions.importbrowser.model;
 
+import org.esa.beam.util.PropertyMap;
+import org.esa.beam.util.SystemUtils;
+import org.esa.beam.util.io.FileUtils;
+import org.esa.nest.dat.actions.importbrowser.model.dataprovider.DataProvider;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.esa.beam.util.PropertyMap;
-import org.esa.beam.util.SystemUtils;
-import org.esa.beam.util.io.FileUtils;
-import org.esa.nest.dat.actions.importbrowser.model.dataprovider.DataProvider;
 
 public class Repository {
 

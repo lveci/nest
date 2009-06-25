@@ -1,27 +1,26 @@
 package org.esa.nest.dat.dialogs;
 
+import com.jidesoft.icons.IconsFactory;
+import com.jidesoft.swing.JideScrollPane;
+import com.jidesoft.swing.JideSplitPane;
+import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.ModelessDialog;
-import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.util.Settings;
 import org.esa.nest.util.DialogUtils;
-import org.jdom.Element;
+import org.esa.nest.util.Settings;
 import org.jdom.Attribute;
+import org.jdom.Element;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.KeyEvent;
-
-import com.jidesoft.swing.JideScrollPane;
-import com.jidesoft.swing.JideSplitPane;
-import com.jidesoft.icons.IconsFactory;
 
 /**
  * Display the Settings

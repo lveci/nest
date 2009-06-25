@@ -1,27 +1,20 @@
 package org.esa.nest.dat.plugins;
 
-import java.awt.Container;
-import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.HashMap;
-
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
-
-import org.esa.beam.framework.datamodel.Product;
+import com.bc.ceres.glayer.support.ImageLayer;
+import com.jidesoft.status.LabelStatusBarItem;
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.framework.ui.PixelPositionListener;
 import org.esa.beam.framework.ui.product.ProductSceneView;
-import org.esa.beam.util.PropertyMap;
-import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.AbstractVisatPlugIn;
+import org.esa.beam.visat.VisatApp;
 
-import com.bc.ceres.glayer.support.ImageLayer;
-import com.jidesoft.status.LabelStatusBarItem;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.util.HashMap;
 
 public class StatusBarVPI extends AbstractVisatPlugIn {
 

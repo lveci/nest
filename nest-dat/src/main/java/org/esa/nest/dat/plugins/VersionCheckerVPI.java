@@ -1,5 +1,5 @@
 /*
- * $Id: VersionCheckerVPI.java,v 1.3 2009-05-12 16:21:01 lveci Exp $
+ * $Id: VersionCheckerVPI.java,v 1.4 2009-06-25 17:24:03 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -17,15 +17,12 @@ import org.esa.beam.visat.AbstractVisatPlugIn;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.ResourceUtils;
 
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.SwingWorker;
-import javax.swing.Timer;
-import java.awt.Color;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;

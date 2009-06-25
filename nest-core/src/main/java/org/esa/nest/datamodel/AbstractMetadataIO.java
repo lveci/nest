@@ -2,17 +2,17 @@ package org.esa.nest.datamodel;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
-import org.esa.nest.util.XMLSupport;
 import org.esa.nest.dataio.ReaderUtils;
-import org.jdom.Element;
-import org.jdom.Document;
+import org.esa.nest.util.XMLSupport;
 import org.jdom.Attribute;
+import org.jdom.Document;
+import org.jdom.Element;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.ArrayList;
 
 /**
  * Created by IntelliJ IDEA.

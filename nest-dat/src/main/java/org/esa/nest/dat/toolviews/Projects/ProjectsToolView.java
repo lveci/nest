@@ -3,8 +3,8 @@ package org.esa.nest.dat.toolviews.Projects;
 import com.jidesoft.icons.IconsFactory;
 import com.jidesoft.swing.JideScrollPane;
 import com.jidesoft.swing.JideSplitPane;
-import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.framework.ui.BasicApp;
+import org.esa.beam.framework.ui.application.support.AbstractToolView;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;

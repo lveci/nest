@@ -1,25 +1,16 @@
 
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.GeoCoding;
+import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.dataop.dem.ElevationModel;
-import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.dataop.resamp.Resampling;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Iterator;
-import java.util.concurrent.ExecutionException;
 
 public class FileElevationModel implements Resampling.Raster {
 

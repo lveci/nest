@@ -1,12 +1,11 @@
 package org.esa.nest.dat.toolviews.Projects;
 
+import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 import org.esa.beam.framework.gpf.graph.Graph;
 import org.esa.beam.framework.gpf.graph.GraphIO;
 
 import java.io.File;
 import java.io.FileReader;
-
-import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
 
 /**
  * Defines a File in a Project

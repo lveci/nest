@@ -1,15 +1,18 @@
 package org.esa.nest.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.beam.dataio.dimap.FileImageInputStreamExtImpl;
 import org.esa.beam.framework.dataio.AbstractProductReader;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.visat.VisatApp;
-import org.esa.beam.dataio.dimap.FileImageInputStreamExtImpl;
-import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.dat.dialogs.GenericBinaryDialog;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;

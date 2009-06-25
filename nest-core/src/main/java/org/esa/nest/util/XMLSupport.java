@@ -1,21 +1,20 @@
 package org.esa.nest.util;
 
+import com.sun.org.apache.xerces.internal.parsers.DOMParser;
+import org.esa.beam.framework.datamodel.MetadataAttribute;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.jdom.Attribute;
+import org.jdom.Document;
+import org.jdom.Element;
 import org.jdom.input.DOMBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.Attribute;
 import org.xml.sax.SAXException;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.MetadataAttribute;
-import org.esa.beam.framework.datamodel.ProductData;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
-
-import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 
 /**
  * Created by IntelliJ IDEA.

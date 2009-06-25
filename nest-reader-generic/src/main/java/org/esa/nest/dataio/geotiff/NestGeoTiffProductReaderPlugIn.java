@@ -1,7 +1,7 @@
 package org.esa.nest.dataio.geotiff;
 
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.dataio.geotiff.GeoTiffProductReaderPlugIn;
+import org.esa.beam.framework.dataio.ProductReader;
 
 public class NestGeoTiffProductReaderPlugIn extends GeoTiffProductReaderPlugIn {
 

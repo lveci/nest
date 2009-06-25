@@ -1,19 +1,18 @@
 
 package org.esa.nest.dat.actions;
 
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.dat.toolviews.Projects.Project;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 /**
  * This action to edit Metadata
  *
  * @author lveci
- * @version $Revision: 1.3 $ $Date: 2009-05-15 12:46:55 $
+ * @version $Revision: 1.4 $ $Date: 2009-06-25 17:24:03 $
  */
 public class EditMetadataAction extends ExecCommand {
 

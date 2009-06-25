@@ -2,8 +2,8 @@ package org.esa.nest.dataio;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
 /**
  * A reader for reading binary files 

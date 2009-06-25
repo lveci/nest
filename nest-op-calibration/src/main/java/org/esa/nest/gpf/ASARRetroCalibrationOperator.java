@@ -15,25 +15,22 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.dataio.envisat.EnvisatAuxReader;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
+import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.math.MathUtils;
-import org.esa.nest.util.Settings;
-import org.esa.nest.util.Constants;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.util.Constants;
+import org.esa.nest.util.Settings;
 
 import java.awt.*;
-import java.io.IOException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;

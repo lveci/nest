@@ -5,19 +5,16 @@
  */
 package org.esa.nest.dat.actions.importbrowser.model.dataprovider;
 
-import java.awt.Component;
-import java.awt.Font;
-import java.io.IOException;
-import java.util.Comparator;
-
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableColumn;
-
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.dat.actions.importbrowser.model.Repository;
 import org.esa.nest.dat.actions.importbrowser.model.RepositoryEntry;
-import org.esa.beam.framework.datamodel.Product;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableColumn;
+import java.awt.*;
+import java.io.IOException;
+import java.util.Comparator;
 
 public class ProductSizeProvider implements DataProvider {
 

@@ -18,10 +18,10 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.Unit;
 
 import java.awt.*;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.io.File;
 
 /**
     CreateElevationBandOp adds an elevation band to a product

@@ -1,15 +1,15 @@
 package org.esa.nest.util;
 
-import org.apache.commons.net.ftp.FTPClient;
+import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
 import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPListParseEngine;
+import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.esa.beam.visat.VisatApp;
 
-import java.io.*;
-import java.nio.Buffer;
-
-import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 
 public class ftpUtils {

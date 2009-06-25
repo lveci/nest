@@ -1,40 +1,29 @@
 package org.esa.nest.gpf;
 
-import com.bc.ceres.binding.swing.BindingContext;
-import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
-import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.BasicApp;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.util.io.FileChooserFactory;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.util.DialogUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
-import java.awt.dnd.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
-import java.util.Vector;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Stack Reader Operator User Interface

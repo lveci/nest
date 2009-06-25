@@ -1,14 +1,17 @@
 package org.esa.nest.dataio.dem.srtm3_geotiff;
 
-import org.esa.beam.util.io.FileUtils;
+import org.apache.commons.net.ftp.FTPFile;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.nest.util.ftpUtils;
+import org.esa.beam.util.io.FileUtils;
 import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.util.Settings;
-import org.apache.commons.net.ftp.FTPFile;
+import org.esa.nest.util.ftpUtils;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 

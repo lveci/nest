@@ -1,14 +1,14 @@
 package org.esa.nest.util;
 
-import org.jdom.Element;
-import org.jdom.Attribute;
 import org.esa.beam.util.SystemUtils;
+import org.jdom.Attribute;
+import org.jdom.Element;
 
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.

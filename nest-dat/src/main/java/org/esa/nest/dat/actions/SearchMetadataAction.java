@@ -1,12 +1,11 @@
 
 package org.esa.nest.dat.actions;
 
+import org.esa.beam.framework.datamodel.MetadataAttribute;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
-import org.esa.beam.framework.ui.product.ProductMetadataView;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.MetadataAttribute;
-import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.dialogs.PromptDialog;
 
@@ -14,7 +13,7 @@ import org.esa.beam.visat.dialogs.PromptDialog;
  * This action to searches the Metadata
  *
  * @author lveci
- * @version $Revision: 1.3 $ $Date: 2008-12-04 21:37:31 $
+ * @version $Revision: 1.4 $ $Date: 2009-06-25 17:24:03 $
  */
 public class SearchMetadataAction extends ExecCommand {
 

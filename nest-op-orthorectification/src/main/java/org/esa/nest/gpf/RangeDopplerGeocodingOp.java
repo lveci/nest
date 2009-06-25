@@ -16,36 +16,33 @@ package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataop.dem.ElevationModel;
+import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
+import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
+import org.esa.beam.framework.dataop.maptransf.Datum;
+import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
+import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
+import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.framework.dataop.dem.ElevationModel;
-import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
-import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
-import org.esa.beam.framework.dataop.resamp.Resampling;
-import org.esa.beam.framework.dataop.maptransf.Datum;
-import org.esa.beam.framework.dataop.maptransf.MapInfo;
-import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
-import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.util.ProductUtils;
+import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.util.MathUtils;
-import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.Constants;
+import org.esa.nest.util.GeoUtils;
+import org.esa.nest.util.MathUtils;
 import org.esa.nest.util.Settings;
-import org.esa.nest.dataio.ReaderUtils;
 
 import java.awt.*;
-import java.util.*;
-import java.io.IOException;
 import java.io.File;
-import java.text.SimpleDateFormat;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Raw SAR images usually contain significant geometric distortions. One of the factors that cause the

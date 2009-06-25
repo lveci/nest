@@ -1,18 +1,17 @@
 package org.esa.nest.dataio;
 
-import org.esa.nest.util.ResourceUtils;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.MathUtils;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.datamodel.ProductData;
-
-import java.util.Date;
-import java.util.StringTokenizer;
-import java.util.Arrays;
+import org.esa.nest.util.ResourceUtils;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.StringTokenizer;
 
 /**
  * Reads Delft ODR format orbit files

@@ -1,20 +1,19 @@
 package org.esa.nest.gpf.filtering;
 
+import com.bc.ceres.core.ProgressMonitor;
 import junit.framework.TestCase;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.TestUtils;
 
-import java.util.Arrays;
 import java.io.File;
-
-import com.bc.ceres.core.ProgressMonitor;
+import java.util.Arrays;
 
 /**
  * Unit test for SpeckleFilterOperator.
