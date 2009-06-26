@@ -162,6 +162,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private double[] oldRefElevationAngle = null; // reference elevation angle for given swath in old aux file, in degree
     private double[] newRefElevationAngle = null; // reference elevation angle for given swath in new aux file, in degree
     private double[] srgrConvParamsTime = null;
+    private double[] earthRadius = null; // Earth radius for all range lines, in m
 
     private float[][] oldSlantRange = null; // old slant ranges for one range line, in m
     private float[][] oldAntennaPatternSingleSwath = null; // old antenna pattern gains for single swath product, in dB
@@ -302,13 +303,13 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             getTiePointGrid(sourceProduct);
 
-            //getAverageSceneHeight();
-
             getOldAntennaPattern();
 
             computeOldSatelliteHeight();
 
             computeOldSlantRange();
+
+            computeEarthRadius();
         }
 
         if (listedASARProductFlag) {
@@ -462,6 +463,16 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
     }
 
+    /**
+     * Compute earth radius for all range lines (in m).
+     */
+    private void computeEarthRadius() {
+        earthRadius = new double[targetImageHeight];
+        for (int i = 0; i < targetImageHeight; i++) {
+            earthRadius[i] = ASARCalibrationOperator.computeEarthRadius((float)(latMin + i*delLat), 0.0f);
+        }
+    }
+    
     /**
      * Get old antenna pattern 
      */
@@ -1755,17 +1766,18 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         final double slantRange = getOldSlantRange(x, zeroDopplerTime);
 
-        final double earthRadius = ASARCalibrationOperator.computeEarthRadius(latitude.getPixelFloat(x, y),
-                                                                              longitude.getPixelFloat(x, y));
+        //final double earthRadius = ASARCalibrationOperator.computeEarthRadius(latitude.getPixelFloat(x, y),
+        //                                                                      longitude.getPixelFloat(x, y));
+
+        int i = (int)((latitude.getPixelFloat(x, y) - latMin)/delLat + 0.5);
 
         final double elevationAngle = ASARCalibrationOperator.computeElevationAngle(
-                                            slantRange, oldSatelliteHeight, avgSceneHeight + earthRadius);
+                                            slantRange, oldSatelliteHeight, avgSceneHeight + earthRadius[i]);
 
         double gain = 0.0;
         if (wideSwathProductFlag) {
             gain = getAntennaPatternGain(elevationAngle, bandPolar, oldRefElevationAngle, oldAntennaPatternWideSwath, true, subSwathIndex);
         } else {
-            //gain = getAntennaPatternGain(elevationAngle, bandPolar, oldRefElevationAngle, oldAntennaPatternSingleSwath, true, subSwathIndex);
             gain = ASARCalibrationOperator.computeAntPatGain(elevationAngle, oldRefElevationAngle[0], oldAntennaPatternSingleSwath[bandPolar]);
         }
 

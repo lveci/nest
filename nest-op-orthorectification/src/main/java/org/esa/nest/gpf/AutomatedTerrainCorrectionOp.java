@@ -174,6 +174,7 @@ public class AutomatedTerrainCorrectionOp extends Operator {
     private double[] oldRefElevationAngle = null; // reference elevation angle for given swath in old aux file, in degree
     private double[] newRefElevationAngle = null; // reference elevation angle for given swath in new aux file, in degree
     private double[] srgrConvParamsTime = null;
+    private double[] earthRadius = null; // Earth radius for all range lines, in m
 
     private float[][] oldSlantRange = null; // old slant ranges for one range line, in m
     private float[][] oldAntennaPatternSingleSwath = null; // old antenna pattern gains for single swath product, in dB
@@ -316,13 +317,13 @@ public class AutomatedTerrainCorrectionOp extends Operator {
 
             getTiePointGrid(sourceProduct);
 
-            //getAverageSceneHeight();
-
             getOldAntennaPattern();
 
             computeOldSatelliteHeight();
 
             computeOldSlantRange();
+
+            computeEarthRadius();
         }
 
         if (listedASARProductFlag) {
@@ -473,6 +474,16 @@ public class AutomatedTerrainCorrectionOp extends Operator {
                 oldSlantRange[i][x] = (float)computePolinomialValue(
                         x*rangeSpacing + srgrConvParams[i].ground_range_origin, srgrConvParams[i].coefficients);
             }
+        }
+    }
+
+    /**
+     * Compute earth radius for all range lines (in m).
+     */
+    private void computeEarthRadius() {
+        earthRadius = new double[targetImageHeight];
+        for (int i = 0; i < targetImageHeight; i++) {
+            earthRadius[i] = ASARCalibrationOperator.computeEarthRadius((float)(latMin + i*delLat), 0.0f);
         }
     }
 
@@ -1370,7 +1381,7 @@ public class AutomatedTerrainCorrectionOp extends Operator {
             double groundRange = 0.0;
 
             if (srgrConvParams.length == 1) {
-                groundRange = computeGroundRange(sourceImageWidth, rangeSpacing, slantRange, srgrConvParams[0].coefficients);
+                groundRange = RangeDopplerGeocodingOp.computeGroundRange(sourceImageWidth, rangeSpacing, slantRange, srgrConvParams[0].coefficients);
                 if (groundRange < 0.0) {
                     return -1.0;
                 } else {
@@ -1394,7 +1405,7 @@ public class AutomatedTerrainCorrectionOp extends Operator {
                 srgrCoefficients[i] = MathUtils.interpolationLinear(srgrConvParams[idx].coefficients[i],
                                                                     srgrConvParams[idx+1].coefficients[i], mu);
             }
-            groundRange = computeGroundRange(sourceImageWidth, rangeSpacing, slantRange, srgrCoefficients);
+            groundRange = RangeDopplerGeocodingOp.computeGroundRange(sourceImageWidth, rangeSpacing, slantRange, srgrCoefficients);
             if (groundRange < 0.0) {
                 return -1.0;
             } else {
@@ -1405,47 +1416,6 @@ public class AutomatedTerrainCorrectionOp extends Operator {
 
             return (slantRange - nearEdgeSlantRange) / rangeSpacing;
         }
-    }
-
-    /**
-     * Compute ground range for given slant range.
-     * @param sourceImageWidth The source image width.
-     * @param rangeSpacing The range spacing.
-     * @param slantRange The salnt range in meters.
-     * @param srgrCoeff The SRGR coefficients for converting ground range to slant range.
-     *                  Here it is assumed that the polinomial is given by
-     *                  c0 + c1*x + c2*x^2 + ... + cn*x^n, where {c0, c1, ..., cn} are the SRGR coefficients.
-     * @return The ground range in meters.
-     */
-    public static double computeGroundRange(
-            final int sourceImageWidth, final double rangeSpacing, final double slantRange, final double[] srgrCoeff) {
-
-        // binary search is used in finding the zero doppler time
-        double lowerBound = 0;
-        double upperBound = sourceImageWidth*rangeSpacing;
-        double lowerBoundSlantRange = computePolinomialValue(lowerBound, srgrCoeff);
-        double upperBoundSlantRange = computePolinomialValue(upperBound, srgrCoeff);
-
-        if (slantRange < lowerBoundSlantRange || slantRange > upperBoundSlantRange) {
-            return -1.0;
-        }
-
-        // start binary search
-        double midSlantRange;
-        while(upperBound - lowerBound > 0.0) {
-
-            final double mid = (lowerBound + upperBound)/2.0;
-            midSlantRange = computePolinomialValue(mid, srgrCoeff);
-            if (Math.abs(midSlantRange - slantRange) < 0.1) {
-                return mid;
-            } else if (midSlantRange < slantRange) {
-                lowerBound = mid;
-            } else if (midSlantRange > slantRange) {
-                upperBound = mid;
-            }
-        }
-
-        return -1.0;
     }
 
     /**
@@ -1460,20 +1430,6 @@ public class AutomatedTerrainCorrectionOp extends Operator {
             v = (v + srgrCoeff[i])*x;
         }
         return v + srgrCoeff[0];
-    }
-
-    /**
-     * Compute polynomial derivative value.
-     * @param x The variable.
-     * @param srgrCoeff The polynomial coefficients.
-     * @return The function derivative value.
-     */
-    private static double computePolinomialDerivativeValue(final double x, final double[] srgrCoeff) {
-        double v = 0.0;
-        for (int i = srgrCoeff.length-1; i > 1; i--) {
-            v = (v + i*srgrCoeff[i])*x;
-        }
-        return v + srgrCoeff[1];
     }
 
     /**
@@ -1783,17 +1739,18 @@ public class AutomatedTerrainCorrectionOp extends Operator {
 
         final double slantRange = getOldSlantRange(x, zeroDopplerTime);
 
-        final double earthRadius = ASARCalibrationOperator.computeEarthRadius(latitude.getPixelFloat(x, y),
-                                                                              longitude.getPixelFloat(x, y));
+        //final double earthRadius = ASARCalibrationOperator.computeEarthRadius(latitude.getPixelFloat(x, y),
+        //                                                                      longitude.getPixelFloat(x, y));
+
+        int i = (int)((latitude.getPixelFloat(x, y) - latMin)/delLat + 0.5);
 
         final double elevationAngle = ASARCalibrationOperator.computeElevationAngle(
-                                            slantRange, oldSatelliteHeight, avgSceneHeight + earthRadius);
+                                            slantRange, oldSatelliteHeight, avgSceneHeight + earthRadius[i]);
 
         double gain = 0.0;
         if (wideSwathProductFlag) {
             gain = getAntennaPatternGain(elevationAngle, bandPolar, oldRefElevationAngle, oldAntennaPatternWideSwath, true, subSwathIndex);
         } else {
-            //gain = getAntennaPatternGain(elevationAngle, bandPolar, oldRefElevationAngle, oldAntennaPatternSingleSwath, true, subSwathIndex);
             gain = ASARCalibrationOperator.computeAntPatGain(elevationAngle, oldRefElevationAngle[0], oldAntennaPatternSingleSwath[bandPolar]);
         }
 
