@@ -61,11 +61,11 @@ public final class SARSimulationOp extends Operator {
     private Product sourceProduct;
     @TargetProduct
     private Product targetProduct;
-
+    /*
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
     String[] sourceBandNames;
-
+    */
     @Parameter(valueSet = {"ACE", "GETASSE30", "SRTM 3Sec GeoTiff"}, description = "The digital elevation model.",
                defaultValue="SRTM 3Sec GeoTiff", label="Digital Elevation Model")
     private String demName = "SRTM 3Sec GeoTiff";
@@ -152,7 +152,6 @@ public final class SARSimulationOp extends Operator {
             getSourceImageDimension();
 
             computeSensorPositionsAndVelocities();
-            //computeStateVectorModelingCoefficients();
 
             createTargetProduct();
 
@@ -346,15 +345,18 @@ public final class SARSimulationOp extends Operator {
                                     sourceImageWidth,
                                     sourceImageHeight);
 
-        final Band targetBand = new Band("amplitude_sim",
+        final Band targetBand = new Band("intensity_mst",
                                    ProductData.TYPE_FLOAT32,
                                    sourceImageWidth,
                                    sourceImageHeight);
 
-        targetBand.setUnit(Unit.AMPLITUDE);
+        targetBand.setUnit(Unit.INTENSITY);
         targetProduct.addBand(targetBand);
 
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
+
+        final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
 
         // the tile width has to be the image width because otherwise sourceRaster.getDataBufferIndex(x, y)
         // returns incorrect index for the last tile on the right
