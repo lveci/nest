@@ -187,25 +187,23 @@ public class WarpOp extends Operator {
                 warpDataMap.put(srcBand, warpData);
 
                 int parseIdex = 0;
-                computeWARPPolynomial(warpData); // compute initial warp polynomial
+                computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute initial warp polynomial
                 outputCoRegistrationInfo(warpData, false, 0.0f, parseIdex);
 
-                //============
                 if (warpData.rmsMean > rmsThreshold && eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
                     final float threshold = (float)warpData.rmsMean;
-                    computeWARPPolynomial(warpData); // compute 2nd warp polynomial
+                    computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 2nd warp polynomial
                     outputCoRegistrationInfo(warpData, true, threshold, ++parseIdex);
                 }
 
                 if (warpData.rmsMean > rmsThreshold && eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
                     final float threshold = (float)warpData.rmsMean;
-                    computeWARPPolynomial(warpData); // compute 3rd warp polynomial
+                    computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 3rd warp polynomial
                     outputCoRegistrationInfo(warpData, true, threshold, ++parseIdex);
                 }
-                //============
 
                 eliminateGCPsBasedOnRMS(warpData, rmsThreshold);
-                computeWARPPolynomial(warpData); // compute final warp polynomial
+                computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute final warp polynomial
                 outputCoRegistrationInfo(warpData, true, rmsThreshold, ++parseIdex);
             }
 
@@ -227,6 +225,9 @@ public class WarpOp extends Operator {
         }
     }
 
+    /**
+     * Create target product.
+     */
     private void createTargetProduct() {
 
         targetProduct = new Product(sourceProduct.getName(),
@@ -332,20 +333,30 @@ public class WarpOp extends Operator {
 
     /**
      * Compute WARP polynomial function using master and slave GCP pairs.
-     * @param warpData stores the warp information per band
+     * @param warpData Stores the warp information per band.
+     * @param warpPolynomialOrder The WARP polynimal order.
+     * @param masterGCPGroup The master GCPs.
      */
-    private void computeWARPPolynomial(final WarpData warpData) {
+    public static void computeWARPPolynomial(
+            final WarpData warpData, final int warpPolynomialOrder, final ProductNodeGroup<Pin> masterGCPGroup) {
 
-        getNumOfValidGCPs(warpData);
+        getNumOfValidGCPs(warpData, warpPolynomialOrder);
 
-        getMasterAndSlaveGCPCoordinates(warpData);
+        getMasterAndSlaveGCPCoordinates(warpData, masterGCPGroup);
 
-        computeWARP(warpData);
+        computeWARP(warpData, warpPolynomialOrder);
 
-        computeRMS(warpData);
+        computeRMS(warpData, warpPolynomialOrder);
     }
 
-    private void getNumOfValidGCPs(final WarpData warpData) throws OperatorException {
+    /**
+     * Get the number of valid GCPs.
+     * @param warpData Stores the warp information per band.
+     * @param warpPolynomialOrder The WARP polynimal order.
+     * @throws OperatorException The exceptions.
+     */
+    private static void getNumOfValidGCPs(
+            final WarpData warpData, final int warpPolynomialOrder) throws OperatorException {
 
         warpData.numValidGCPs = warpData.slaveGCPGroup.getNodeCount();
         final int requiredGCPs = (warpPolynomialOrder + 2)*(warpPolynomialOrder + 1) / 2;
@@ -355,7 +366,13 @@ public class WarpOp extends Operator {
         }
     }
 
-    private void getMasterAndSlaveGCPCoordinates(final WarpData warpData) {
+    /**
+     * Get GCP coordinates for master and slave bands.
+     * @param warpData Stores the warp information per band.
+     * @param masterGCPGroup The master GCPs.
+     */
+    private static void getMasterAndSlaveGCPCoordinates(
+            final WarpData warpData, final ProductNodeGroup<Pin> masterGCPGroup) {
 
         warpData.masterGCPCoords = new float[2*warpData.numValidGCPs];
         warpData.slaveGCPCoords = new float[2*warpData.numValidGCPs];
@@ -378,7 +395,12 @@ public class WarpOp extends Operator {
         }
     }
 
-    private void computeWARP(final WarpData warpData) {
+    /**
+     * Compute WARP function using master and slave GCPs.
+     * @param warpData Stores the warp information per band.
+     * @param warpPolynomialOrder The WARP polynimal order.
+     */
+    private static void computeWARP(final WarpData warpData, final int warpPolynomialOrder) {
 
         warpData.warp = WarpPolynomial.createWarp(warpData.slaveGCPCoords, //source
                                          0,
@@ -392,7 +414,12 @@ public class WarpOp extends Operator {
                                          warpPolynomialOrder);
     }
 
-    private void computeRMS(final WarpData warpData) {
+    /**
+     * Compute root mean square error of the warped GCPs for given WARP function and given GCPs.
+     * @param warpData Stores the warp information per band.
+     * @param warpPolynomialOrder The WARP polynimal order.
+     */
+    private static void computeRMS(final WarpData warpData, final int warpPolynomialOrder) {
 
         // compute RMS for all valid GCPs
         warpData.rms = new float[warpData.numValidGCPs];
@@ -401,7 +428,11 @@ public class WarpOp extends Operator {
         final PixelPos slavePos = new PixelPos(0.0f,0.0f);
         for (int i = 0; i < warpData.rms.length; i++) {
             final int i2 = 2*i;
-            getWarpedCoords(warpData.warp, warpData.masterGCPCoords[i2], warpData.masterGCPCoords[i2+1], slavePos);
+            getWarpedCoords(warpData.warp,
+                            warpPolynomialOrder,
+                            warpData.masterGCPCoords[i2],
+                            warpData.masterGCPCoords[i2+1],
+                            slavePos);
             final double dX = slavePos.x - warpData.slaveGCPCoords[i2];
             final double dY = slavePos.y - warpData.slaveGCPCoords[i2+1];
             warpData.colResiduals[i] = (float)dX;
@@ -437,7 +468,13 @@ public class WarpOp extends Operator {
         warpData.colResidualStd = Math.sqrt(colResidual2Mean - warpData.colResidualMean*warpData.colResidualMean);
     }
 
-    private static boolean eliminateGCPsBasedOnRMS(final WarpData warpData, final float threshold) {
+    /**
+     * Eliminate master and slave GCP pairs that have root mean square error greater than given threshold.
+     * @param warpData Stores the warp information per band.
+     * @param threshold Threshold for eliminating GCPs.
+     * @return Boolean flag that is true if the GCP list is not empty after elimination, false otherwise.
+     */
+    public static boolean eliminateGCPsBasedOnRMS(final WarpData warpData, final float threshold) {
 
         final ArrayList<Pin> pinList = new ArrayList<Pin>();
         for (int i = 0; i < warpData.rms.length; i++) {
@@ -454,7 +491,17 @@ public class WarpOp extends Operator {
         return !pinList.isEmpty();
     }
 
-    private void getWarpedCoords(final WarpPolynomial warp, final float mX, final float mY, final PixelPos slavePos)
+    /**
+     * Compute warped GCPs.
+     * @param warp The WARP polynomial.
+     * @param warpPolynomialOrder The WARP polynomial order.
+     * @param mX The x coordinate of master GCP.
+     * @param mY The y coordinate of master GCP.
+     * @param slavePos The warped GCP position.
+     * @throws OperatorException The exceptions.
+     */
+    public static void getWarpedCoords(final WarpPolynomial warp, final int warpPolynomialOrder,
+                                       final float mX, final float mY, final PixelPos slavePos)
                                 throws OperatorException {
 
         final float[] xCoeffs = warp.getXCoeffs();
@@ -511,6 +558,14 @@ public class WarpOp extends Operator {
         }
     }
 
+    /**
+     * Output co-registration information to file.
+     * @param warpData Stores the warp information per band.
+     * @param appendFlag Boolean flag indicating if the information is output to file in appending mode.
+     * @param threshold The threshold for elinimating GCPs.
+     * @param parseIndex Index for parsing GCPs.
+     * @throws OperatorException The exceptions.
+     */
     private void outputCoRegistrationInfo(final WarpData warpData, final boolean appendFlag,
                                           final float threshold, final int parseIndex) throws OperatorException {
 
@@ -612,6 +667,12 @@ public class WarpOp extends Operator {
         return new File(appUserDir.toString(), fileName);
     }
 
+    /**
+     * Create warped image.
+     * @param warp The WARP polynomial.
+     * @param srcImage The source image.
+     * @return The warped image.
+     */
     private RenderedOp createWarpImage(WarpPolynomial warp, final RenderedImage srcImage) {
 
         // reformat source image by casting pixel values from ushort to float
@@ -628,25 +689,25 @@ public class WarpOp extends Operator {
         return JAI.create("warp", pb2);
     }
 
-    private static class WarpData {
-        final ProductNodeGroup<Pin> slaveGCPGroup;
-        WarpPolynomial warp = null;
+    public static class WarpData {
+        public final ProductNodeGroup<Pin> slaveGCPGroup;
+        public WarpPolynomial warp = null;
 
-        int numValidGCPs = 0;
-        float[] rms = null;
-        float[] rowResiduals = null;
-        float[] colResiduals = null;
-        float[] masterGCPCoords = null;
-        float[] slaveGCPCoords = null;
+        public int numValidGCPs = 0;
+        public float[] rms = null;
+        public float[] rowResiduals = null;
+        public float[] colResiduals = null;
+        public float[] masterGCPCoords = null;
+        public float[] slaveGCPCoords = null;
 
-        double rmsStd = 0;
-        double rmsMean = 0;
-        double rowResidualStd = 0;
-        double rowResidualMean = 0;
-        double colResidualStd = 0;
-        double colResidualMean = 0;
+        public double rmsStd = 0;
+        public double rmsMean = 0;
+        public double rowResidualStd = 0;
+        public double rowResidualMean = 0;
+        public double colResidualStd = 0;
+        public double colResidualMean = 0;
 
-        WarpData(ProductNodeGroup<Pin> slaveGCPGroup) {
+        public WarpData(ProductNodeGroup<Pin> slaveGCPGroup) {
             this.slaveGCPGroup = slaveGCPGroup;
         }
     }
