@@ -30,6 +30,9 @@
     <dependency>
       <module>nest-op-calibration</module>
     </dependency>
+    <dependency>
+      <module>nest-op-coregistration</module>
+    </dependency>
 
     <categories>Processing</categories>
 
@@ -77,6 +80,15 @@
             <shortDescr>SAR simulation method</shortDescr>
             <parent>geometry</parent>
             <helpId>SARSimulationOp</helpId>
+        </action>
+
+        <action>
+            <id>AutomatedTerrainCorrectionOp</id>
+            <class>org.esa.nest.dat.AutomatedTerrainCorrectionOpAction</class>
+            <text>Automated Terrain Correction</text>
+            <shortDescr>Orthorectification with SAR simulation</shortDescr>
+            <parent>geometry</parent>
+            <helpId>AutomatedTerrainCorrectionOp</helpId>
         </action>
 
         <!--action>
