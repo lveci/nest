@@ -38,19 +38,40 @@ import java.awt.*;
 import java.io.File;
 
 /**
- * Raw SAR images usually contain significant geometric distortions. One of the factors that cause the
- * distortions is the ground elevation of the targets. This operator corrects the topographic distortion
- * in the raw image caused by this factor. The operator implements the direct (forward) orthorectification
- * method.
+ * This operator generates simulated SAR image using DEM, the Geocoding and orbit state vectors from a given
+ * SAR image, and mathematical modeling of SAR imaging geometry. The simulated SAR image will have the same
+ * dimension and resolution as the original SAR image.
  *
- * The method consis of the following major steps:
- * (1) For each pixel (i,j) in the orthorectified image, get the local incidence angle alpha(i,j) and
- *     slant range distance R(i,j);
- * (2) Get local elevation h(i,j), which is computed by AddElevationBandOp from DEM given local latitude
- *     lat(i,j) and longitude lon(i,j);
- * (3) Compute ground range displacement delta(i,j) with the equation given in ADD using alpha(i,j), R(i,j)
- *     and h(i,j);
- * (4) Compoute pixel value X(i,j) = X_raw(i,j - delt(i,j)) using interpolation.
+ * The simulation algorithm first create a DEM image from the original SAR image. The DEM image has the same
+ * dimension as the original SAR image. The value of each pixel in the DEM image is the elevation of the same
+ * pixel in the original SAR image. Then, for each cell in the DEM image, its corresponding pixel position
+ * (row/column indices) in the simulated SAR image is computed based on the SAR model. Finally, the backscattered
+ * power ? for the pixel is computed using backscattering model.
+ *
+ * Detailed procedure is as the follows:
+ * 1. Get the following parameters from the metadata of the SAR image product:
+ * (1.1) radar wave length
+ * (1.2) range spacing
+ * (1.3) first_line_time
+ * (1.4) line_time_interval
+ * (1.5) slant range to 1st pixel
+ * (1.6) orbit state vectors
+ * (1.7) slant range to ground range conversion coefficients
+ *
+ * 2. Compute satellite position and velocity for each azimuth time by interpolating the state vectors;
+ *
+ * 3. Repeat the following steps for each cell in the DEM image:
+ * (3.1) Get latitude, longitude and elevation for the cell;
+ * (3.2) Convert (latitude, longitude, elevation) to Cartesian coordinate P(X, Y, Z);
+ * (3.3) Compute zero Doppler time t for point P(x, y, z) using Doppler frequency function;
+ * (3.3) Compute SAR sensor position S(X, Y, Z) at time t;
+ * (3.4) Compute slant range r = |S - P|;
+ * (3.5) Compute bias-corrected zero Doppler time tc = t + r*2/c, where c is the light speed;
+ * (3.6) Update satellite position S(tc) and slant range r(tc) = |S(tc) – P| for the bias-corrected zero Doppler time tc;
+ * (3.7) Compute azimuth index Ia in the source image using zero Doppler time tc;
+ * (3.8) Compute range index Ir in the source image using slant range r(tc);
+ * (3.9) Compute local incidence angle;
+ * (3.10)Compute backscattered power and save it as value for pixel ((int)Ia, (int)Ir);
  */
 
 @OperatorMetadata(alias="SAR-Simulation",
