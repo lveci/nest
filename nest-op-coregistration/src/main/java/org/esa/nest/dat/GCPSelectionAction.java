@@ -15,7 +15,7 @@ public class GCPSelectionAction extends AbstractVisatAction {
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "GCP Selection", "GCPSelection", false);
+        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "GCP Selection", "GCPSelectionOp", false);
         dialog.show();
 
         final File graphPath = GraphBuilderDialog.getInternalGraphFolder();
