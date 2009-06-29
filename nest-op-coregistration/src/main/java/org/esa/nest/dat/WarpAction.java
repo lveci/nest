@@ -15,7 +15,7 @@ public class WarpAction extends AbstractVisatAction {
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "Warp", "Warp", false);
+        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "Warp", "WarpOp", false);
         dialog.show();
 
         final File graphPath = GraphBuilderDialog.getInternalGraphFolder();
