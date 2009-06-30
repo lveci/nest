@@ -457,7 +457,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         for (int i = 0; i < srgrConvParams.length; i++) {
             srgrConvParamsTime[i] = srgrConvParams[i].time.getMJD();
             for (int x = 0; x < sourceImageWidth; x++) {
-                oldSlantRange[i][x] = (float)computePolinomialValue(
+                oldSlantRange[i][x] = (float)computePolynomialValue(
                         x*rangeSpacing + srgrConvParams[i].ground_range_origin, srgrConvParams[i].coefficients);
             }
         }
@@ -1390,24 +1390,12 @@ public class RangeDopplerGeocodingOp extends Operator {
      */
     public static double computeGroundRange(
             final int sourceImageWidth, final double rangeSpacing, final double slantRange, final double[] srgrCoeff) {
-        /*
-        // todo Can Newton's method be uaed in find zeros for the 4th order polynomial?
-        // todo Note for ASAR product here computes (Gr - Gr0), not Gr. Therefore not Gr0 should be subtracted later in computing range index.
-        double x = slantRange;
-        double y = computePolinomialValue(x, srgrCoeff) - slantRange;
-        while (Math.abs(y) > 0.0001) {
-            final double derivative = computePolinomialDerivativeValue(x, srgrCoeff);
-            x -= y / derivative;
-            y = computePolinomialValue(x, srgrCoeff) - slantRange;
-        }
-        return x;
-        */
 
         // binary search is used in finding the zero doppler time
         double lowerBound = 0;
         double upperBound = sourceImageWidth*rangeSpacing;
-        double lowerBoundSlantRange = computePolinomialValue(lowerBound, srgrCoeff);
-        double upperBoundSlantRange = computePolinomialValue(upperBound, srgrCoeff);
+        double lowerBoundSlantRange = computePolynomialValue(lowerBound, srgrCoeff);
+        double upperBoundSlantRange = computePolynomialValue(upperBound, srgrCoeff);
 
         if (slantRange < lowerBoundSlantRange || slantRange > upperBoundSlantRange) {
             return -1.0;
@@ -1418,7 +1406,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         while(upperBound - lowerBound > 0.0) {
 
             final double mid = (lowerBound + upperBound)/2.0;
-            midSlantRange = computePolinomialValue(mid, srgrCoeff);
+            midSlantRange = computePolynomialValue(mid, srgrCoeff);
             if (Math.abs(midSlantRange - slantRange) < 0.1) {
                 return mid;
             } else if (midSlantRange < slantRange) {
@@ -1437,7 +1425,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param srgrCoeff The polynomial coefficients.
      * @return The function value.
      */
-    private static double computePolinomialValue(final double x, final double[] srgrCoeff) {
+    private static double computePolynomialValue(final double x, final double[] srgrCoeff) {
         double v = 0.0;
         for (int i = srgrCoeff.length-1; i > 0; i--) {
             v = (v + srgrCoeff[i])*x;
