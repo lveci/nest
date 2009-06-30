@@ -74,6 +74,16 @@
         </action>
 
         <action>
+            <id>openOrthorectificationDialog</id>
+            <class>org.esa.nest.dat.OrthorectificationAction</class>
+            <parent>geometry</parent>
+            <text>Full Orthorectification</text>
+            <shortDescr>Perform Automated Orthorectification</shortDescr>
+            <separatorAfter>true</separatorAfter>
+            <helpId>Orthorectification</helpId>
+        </action>
+
+        <action>
             <id>SARSimulationOp</id>
             <class>org.esa.nest.dat.SARSimulationOpAction</class>
             <text>SAR Simulation</text>
