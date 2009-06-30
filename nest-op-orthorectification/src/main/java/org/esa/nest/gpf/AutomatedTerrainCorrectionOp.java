@@ -82,17 +82,6 @@ public class AutomatedTerrainCorrectionOp extends Operator {
     @TargetProduct
     protected Product targetProduct;
 
-    @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            sourceProductId="source", label="Source Bands")
-    String[] sourceBandNames = null;
-    /*
-    @Parameter(valueSet = {"ACE", "GETASSE30", "SRTM 3Sec GeoTiff"}, description = "The digital elevation model.",
-               defaultValue="SRTM 3Sec GeoTiff", label="Digital Elevation Model")
-    private String demName = "SRTM 3Sec GeoTiff";
-
-    @Parameter(label="External DEM")
-    private File externalDemFile = null;
-    */
     @Parameter(description = "The RMS threshold for eliminating invalid GCPs", interval = "(0, *)", defaultValue = "1.0",
                 label="RMS Threshold")
     private float rmsThreshold = 1.0f;
@@ -298,8 +287,6 @@ public class AutomatedTerrainCorrectionOp extends Operator {
      * @throws Exception The exceptions.
      */
     private void prepareForRadiometricCalibration() throws Exception {
-
-        //getMissionType();
 
         getMultilookFlag();
 
@@ -774,27 +761,13 @@ public class AutomatedTerrainCorrectionOp extends Operator {
      */
     private void addSelectedBands() throws OperatorException {
 
-        if (sourceBandNames == null || sourceBandNames.length == 0) {
-            final Band[] bands = sourceProduct.getBands();
-            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
-            for (Band band : bands) {
-                bandNameList.add(band.getName());
-            }
-            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
-        }
-
-        final Band[] sourceBands = new Band[sourceBandNames.length];
-        for (int i = 0; i < sourceBandNames.length; i++) {
-            final String sourceBandName = sourceBandNames[i];
-            final Band sourceBand = sourceProduct.getBand(sourceBandName);
-            if (sourceBand == null) {
-                throw new OperatorException("Source band not found: " + sourceBandName);
-            }
-            sourceBands[i] = sourceBand;
+        final Band[] sourceBands = sourceProduct.getBands();
+        if (sourceBands.length == 1) {
+            throw new OperatorException("Source product should have more than one band");
         }
 
         String targetBandName;
-        for (int i = 0; i < sourceBands.length; i++) {
+        for (int i = 1; i < sourceBands.length; i++) { // skip master band (i=0, simulated image)
 
             final Band srcBand = sourceBands[i];
             final String unit = srcBand.getUnit();
@@ -802,78 +775,24 @@ public class AutomatedTerrainCorrectionOp extends Operator {
                 throw new OperatorException("band " + srcBand.getName() + " requires a unit");
             }
 
-            String targetUnit = "";
-
-            if (unit.contains(Unit.PHASE) || srcBand.getName().contains("_mst")) {
-
-                continue;
-
-            } else if (unit.contains(Unit.IMAGINARY)) {
-
-                throw new OperatorException("Real and imaginary bands should be selected in pairs");
-
-            } else if (unit.contains(Unit.REAL)) {
-
-                if (i == sourceBands.length - 1) {
-                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
-                }
-                final String nextUnit = sourceBands[i+1].getUnit();
-                if (nextUnit == null || !nextUnit.contains(Unit.IMAGINARY)) {
-                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
-                }
-                final String[] srcBandNames = new String[2];
-                srcBandNames[0] = srcBand.getName();
-                srcBandNames[1] = sourceBands[i+1].getName();
-                final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
-
-                if (applyRadiometricCalibration) {
-                    targetBandName = "Sigma0";
-                } else {
-                    targetBandName = "Intensity";
-                }
-                if (pol != null) {
-                    targetBandName = targetBandName + "_" + pol.toUpperCase();
-                }
-
-                ++i;
-                if(targetProduct.getBand(targetBandName) == null) {
-                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
-                    targetUnit = Unit.INTENSITY;
-                }
-
-            } else {
-
-                final String[] srcBandNames = {srcBand.getName()};
-                final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
-                if (applyRadiometricCalibration) {
-                    if (pol != null) {
-                        targetBandName = "Sigma0_" + pol.toUpperCase();
-                    } else {
-                        targetBandName = "Sigma0";
-                    }
-                } else {
-                    targetBandName = srcBand.getName();
-                }
-
-                if(targetProduct.getBand(targetBandName) == null) {
-                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
-                    targetUnit = unit;
-                }
+            if (unit.contains(Unit.PHASE) || unit.contains(Unit.REAL) || unit.contains(Unit.IMAGINARY)) {
+                throw new OperatorException("Only amplitude or intensity band should be used for orthorectification");
             }
 
-            if(targetProduct.getBand(targetBandName) == null) {
+            targetBandName = srcBand.getName();
+            final String[] srcBandNames = {srcBand.getName()};
+            targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
 
-                final Band targetBand = new Band(targetBandName,
-                                                 ProductData.TYPE_FLOAT32,
-                                                 targetImageWidth,
-                                                 targetImageHeight);
+            final Band targetBand = new Band(targetBandName,
+                                             ProductData.TYPE_FLOAT32,
+                                             targetImageWidth,
+                                             targetImageHeight);
 
-                targetBand.setUnit(targetUnit);
-                targetBand.setDescription(srcBand.getDescription());
-                targetBand.setNoDataValue(srcBand.getNoDataValue());
-                targetBand.setNoDataValueUsed(true);
-                targetProduct.addBand(targetBand);
-            }
+            targetBand.setUnit(unit);
+            targetBand.setDescription(srcBand.getDescription());
+            targetBand.setNoDataValue(srcBand.getNoDataValue());
+            targetBand.setNoDataValueUsed(true);
+            targetProduct.addBand(targetBand);
         }
 
         if(saveDEM) {
