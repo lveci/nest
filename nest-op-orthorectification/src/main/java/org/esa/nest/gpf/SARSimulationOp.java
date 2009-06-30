@@ -28,6 +28,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
@@ -36,6 +37,7 @@ import org.esa.nest.util.MathUtils;
 
 import java.awt.*;
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * This operator generates simulated SAR image using DEM, the Geocoding and orbit state vectors from a given
@@ -82,11 +84,11 @@ public final class SARSimulationOp extends Operator {
     private Product sourceProduct;
     @TargetProduct
     private Product targetProduct;
-    /*
+
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
     String[] sourceBandNames;
-    */
+
     @Parameter(valueSet = {"ACE", "GETASSE30", "SRTM 3Sec GeoTiff"}, description = "The digital elevation model.",
                defaultValue="SRTM 3Sec GeoTiff", label="Digital Elevation Model")
     private String demName = "SRTM 3Sec GeoTiff";
@@ -366,7 +368,22 @@ public final class SARSimulationOp extends Operator {
                                     sourceImageWidth,
                                     sourceImageHeight);
 
-        final Band targetBand = new Band("intensity_mst",
+        addSelectedBands();
+
+        OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
+
+        final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
+        
+        // the tile width has to be the image width because otherwise sourceRaster.getDataBufferIndex(x, y)
+        // returns incorrect index for the last tile on the right
+        targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 50);
+    }
+
+    private void addSelectedBands() {
+
+        // add master band first
+        Band targetBand = new Band("intensity_mst",
                                    ProductData.TYPE_FLOAT32,
                                    sourceImageWidth,
                                    sourceImageHeight);
@@ -374,14 +391,39 @@ public final class SARSimulationOp extends Operator {
         targetBand.setUnit(Unit.INTENSITY);
         targetProduct.addBand(targetBand);
 
-        OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
+        // add selected slave bands
+        if (sourceBandNames == null || sourceBandNames.length == 0) {
+            final Band[] bands = sourceProduct.getBands();
+            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            for (Band band : bands) {
+                bandNameList.add(band.getName());
+            }
+            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
+        }
 
-        final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
+        final Band[] sourceBands = new Band[sourceBandNames.length];
+        for (int i = 0; i < sourceBandNames.length; i++) {
+            final String sourceBandName = sourceBandNames[i];
+            final Band sourceBand = sourceProduct.getBand(sourceBandName);
+            if (sourceBand == null) {
+                throw new OperatorException("Source band not found: " + sourceBandName);
+            }
+            sourceBands[i] = sourceBand;
+        }
 
-        // the tile width has to be the image width because otherwise sourceRaster.getDataBufferIndex(x, y)
-        // returns incorrect index for the last tile on the right
-        targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 50);
+        for (Band srcBand : sourceBands) {
+            final String unit = srcBand.getUnit();
+            if(unit == null) {
+                throw new OperatorException("band " + srcBand.getName() + " requires a unit");
+            }
+
+            if (unit.contains(Unit.IMAGINARY) || unit.contains(Unit.REAL) || unit.contains(Unit.PHASE)) {
+                throw new OperatorException("Please select amplitude or intensity band for co-registration");
+            }
+
+            targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct);
+            targetBand.setSourceImage(srcBand.getSourceImage());
+        }
     }
 
     /**
@@ -559,7 +601,8 @@ public final class SARSimulationOp extends Operator {
         final double zDiff = earthPoint[2] - sensorPosition[y][2];
         final double distance = Math.sqrt(xDiff*xDiff + yDiff*yDiff + zDiff*zDiff);
 
-        return 2.0 * (xVel*xDiff + yVel*yDiff + zVel*zDiff) / (distance*wavelength);
+//        return 2.0 * (xVel*xDiff + yVel*yDiff + zVel*zDiff) / (distance*wavelength);
+        return (xVel*xDiff + yVel*yDiff + zVel*zDiff) / distance;
     }
 
     /**
