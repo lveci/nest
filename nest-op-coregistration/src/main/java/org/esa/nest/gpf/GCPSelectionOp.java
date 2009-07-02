@@ -317,9 +317,9 @@ public class GCPSelectionOp extends Operator {
                                    final Rectangle targetRectangle, final ProgressMonitor pm) {
      try {
         final ProductNodeGroup<Pin> targetGCPGroup = targetProduct.getGcpGroup(targetBand);
-
-        pm.beginTask("computeSlaveGCPs ", masterGcpGroup.getNodeCount());
-        for(int i = 0; i < masterGcpGroup.getNodeCount(); ++i) {
+        final int numberOfMasterGCPs = masterGcpGroup.getNodeCount();
+        pm.beginTask("computeSlaveGCPs ", numberOfMasterGCPs);
+        for(int i = 0; i < numberOfMasterGCPs; ++i) {
 
             final Pin mPin = masterGcpGroup.get(i);
             final PixelPos mGCPPixelPos = mPin.getPixelPos();
@@ -535,11 +535,12 @@ public class GCPSelectionOp extends Operator {
         final PlanarImage crossCorrelatedImage = computeCrossCorrelatedImage(mI, sI);
 
         // check peak validity
+        /*
         final double mean = getMean(crossCorrelatedImage);
         if (Double.compare(mean, 0.0) == 0) {
             return false;
         }
-        /*
+        
         double max = getMax(crossCorrelatedImage);
         double qualityParam = max / mean;
         if (qualityParam <= qualityThreshold) {
