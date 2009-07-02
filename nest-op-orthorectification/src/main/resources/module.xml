@@ -125,7 +125,7 @@
         <action>
             <id>MosaicOp</id>
             <class>org.esa.nest.dat.MosaicOpAction</class>
-            <text>Mosaic (coming soon)</text>
+            <text>Mosaic</text>
             <shortDescr>Mosaic various images together</shortDescr>
             <parent>geometry</parent>
         </action>

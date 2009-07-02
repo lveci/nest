@@ -1,30 +1,27 @@
 package org.esa.nest.dat;
 
-import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
-import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.visat.actions.AbstractVisatAction;
+import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
+
+import java.io.File;
 
 /**
- * Object Tracker action.
+ * Mosaic action.
  *
  */
 public class MosaicOpAction extends AbstractVisatAction {
 
-    private ModelessDialog dialog;
-
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("Object-Tracker", getAppContext(), "Object-Tracker", getHelpId());
-        }
+        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "Mosaic", "MosaicOp", false);
         dialog.show();
 
-    }
+        final File graphPath = GraphBuilderDialog.getInternalGraphFolder();
+        final File graphFile =  new File(graphPath, "MosaicGraph.xml");
 
-    @Override
-    public void updateState(final CommandEvent event) {
-        setEnabled(false);
+        dialog.LoadGraph(graphFile);
+
     }
 }

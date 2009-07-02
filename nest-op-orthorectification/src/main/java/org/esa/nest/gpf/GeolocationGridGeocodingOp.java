@@ -666,7 +666,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
         if (srgrFlag) { // ground detected image
 
             int idx = 0;
-            for (int i = 0; i < srgrConvParams.length && zeroDopplerTime >= srgrConvParams[i].time.getMJD(); i++) {
+            for (int i = 0; i < srgrConvParams.length && zeroDopplerTime >= srgrConvParams[i].timeMJD; i++) {
                 idx = i;
             }
             final double groundRange = RangeDopplerGeocodingOp.computeGroundRange(

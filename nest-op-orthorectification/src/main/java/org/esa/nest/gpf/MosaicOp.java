@@ -3,6 +3,7 @@ package org.esa.nest.gpf;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.resamp.Resampling;
+import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -12,8 +13,10 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.util.Guardian;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.dataio.ReaderUtils;
 
 import java.awt.*;
 import java.text.MessageFormat;
@@ -37,16 +40,9 @@ public class MosaicOp extends Operator {
     @SourceProducts
     private Product[] sourceProduct;
 
-    @Parameter(description = "The list of source bands.", alias = "masterBands", itemAlias = "band",
-            sourceProductId="source", label="Master Band")
-    private String[] masterBandNames = null;
-
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            sourceProductId="sourceProduct", label="Slave Bands")
-    private String[] slaveBandNames = null;
-
-    private Product masterProduct = null;
-    private final Band[] masterBands = new Band[2];
+            sourceProductId="source", label="Source Bands")
+    private String[] sourceBandNames = null;
 
     @TargetProduct
     private Product targetProduct = null;
@@ -56,173 +52,116 @@ public class MosaicOp extends Operator {
                label="Resampling Type")
     private String resamplingType = NEAREST_NEIGHBOUR;
 
-    private final static Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
+    private final static Map<Product, double[]> srcCornerLatitudeMap = new HashMap<Product, double[]>(10);
+    private final static Map<Product, double[]> srcCornerLongitudeMap = new HashMap<Product, double[]>(10);
+    private final static Map<Product, Band> srcBandMap = new HashMap<Product, Band>(10);
+
+    private int targetImageWidth = 0;
+    private int targetImageHeight = 0;
+
+    private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
+
+    private double latMin = 0.0;
+    private double latMax = 0.0;
+    private double lonMin = 0.0;
+    private double lonMax = 0.0;
 
     @Override
     public void initialize() throws OperatorException {
-
-        for(final Product prod : sourceProduct) {
-            if (prod.getGeoCoding() == null) {
-                throw new OperatorException(
-                        MessageFormat.format("Product ''{0}'' has no geo-coding.", prod.getName()));
-            }
-        }
-
-        if(masterBandNames.length == 0) {
-            targetProduct = new Product("tmp", "tmp", 1, 1);
-            targetProduct.addBand(new Band("tmp", ProductData.TYPE_INT8, 1, 1));
-            return;
-        }
-
-        masterProduct = getMasterProduct(masterBandNames[0]);
-
-        final Band[] slaveBandList = getSlaveBands();
-        if(masterProduct == null || slaveBandList.length == 0 || slaveBandList[0] == null) {
-            targetProduct = new Product("tmp", "tmp", 1, 1);
-            targetProduct.addBand(new Band("tmp", ProductData.TYPE_INT8, 1, 1));
-            return;
-        }
-
-
-        targetProduct = new Product(masterProduct.getName(),
-                                    masterProduct.getProductType(),
-                                    masterProduct.getSceneRasterWidth(),
-                                    masterProduct.getSceneRasterHeight());
-
-        OperatorUtils.copyProductNodes(masterProduct, targetProduct);
-
-        String suffix = "_mst";
-        // add master bands first
-        for (final Band srcBand : slaveBandList) {
-            if(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1])) {
-                suffix = "_mst";
-                final Band targetBand = targetProduct.addBand(srcBand.getName() + suffix, srcBand.getDataType());
-                ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
-                sourceRasterMap.put(targetBand, srcBand);
-            }
-        }
-        // then add slave bands
-        int cnt = 1;
-        suffix = "_slv";
-        for (final Band srcBand : slaveBandList) {
-            if(!(srcBand == masterBands[0] || (masterBands.length > 1 && srcBand == masterBands[1]))) {
-                if(srcBand.getUnit() != null && srcBand.getUnit().equals(Unit.IMAGINARY)) {
-                } else {
-                    suffix = "_slv" + cnt++;
+        try {
+            for(final Product prod : sourceProduct) {
+                if (prod.getGeoCoding() == null) {
+                    throw new OperatorException(
+                            MessageFormat.format("Product ''{0}'' has no geo-coding.", prod.getName()));
                 }
-                final Band targetBand = targetProduct.addBand(srcBand.getName() + suffix, srcBand.getDataType());
-                ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
-                sourceRasterMap.put(targetBand, srcBand);
             }
-        }
 
-        // copy slave abstracted metadata
-        copySlaveMetadata();
+            final Band[] srcBands = getSourceBands();
+            for(Band srcBand : srcBands) {
+                srcBandMap.put(srcBand.getProduct(), srcBand);
+            }
 
-        // copy GCPs if found to master band
-        final ProductNodeGroup<Pin> masterGCPgroup = masterProduct.getGcpGroup();
-        if (masterGCPgroup.getNodeCount() > 0) {
-            OperatorUtils.copyGCPsToTarget(masterGCPgroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
+            final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct[0]);
+
+            double rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
+            double azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
+
+            computeImageGeoBoundary();
+
+            final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
+            double minAbsLat;
+            if (latMin*latMax > 0) {
+                minAbsLat = Math.min(Math.abs(latMin), Math.abs(latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
+            } else {
+                minAbsLat = 0.0;
+            }
+            double delLat = minSpacing / MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
+            double delLon = minSpacing / (MeanEarthRadius * Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
+            delLat = Math.min(delLat, delLon);
+            delLon = delLat;
+
+            targetImageWidth = (int)((lonMax - lonMin)/ delLon) + 1;
+            targetImageHeight = (int)((latMax - latMin)/ delLat) + 1;
+
+            targetImageWidth /= 4;
+            targetImageHeight /= 4;
+
+            targetProduct = new Product("mosiac", "mosiac",
+                                        targetImageWidth,
+                                        targetImageHeight);
+
+            addGeoCoding();
+
+            final Band targetBand = new Band("mosaic",
+                                                 ProductData.TYPE_FLOAT32,
+                                                 targetImageWidth,
+                                                 targetImageHeight);
+
+            targetBand.setUnit(sourceProduct[0].getBandAt(0).getUnit());
+            targetBand.setNoDataValue(0);
+            targetBand.setNoDataValueUsed(true);
+            targetProduct.addBand(targetBand);
+
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
-    private void copySlaveMetadata() {
-        final MetadataElement targetRoot = targetProduct.getMetadataRoot();
-        MetadataElement targetSlaveMetadataRoot = targetRoot.getElement("Slave Metadata");
-        if(targetSlaveMetadataRoot == null) {
-            targetSlaveMetadataRoot = new MetadataElement("Slave Metadata");
-            targetRoot.addElement(targetSlaveMetadataRoot);
-        }
-        for(Product prod : sourceProduct) {
-            if(prod != masterProduct) {
-                final MetadataElement targetSlaveMetadata = new MetadataElement(prod.getName());
-                targetSlaveMetadataRoot.addElement(targetSlaveMetadata);
-                ProductUtils.copyMetadata(AbstractMetadata.getAbstractedMetadata(prod), targetSlaveMetadata);
-            }
-        }
-    }
-
-    private Product getMasterProduct(final String name) {
-        final String masterName = getProductName(name);
-        for(Product prod : sourceProduct) {
-            if(prod.getName().equals(masterName)) {
-                return prod;
-            }
-        }
-        return null;
-    }
-
-    private Band[] getSlaveBands() throws OperatorException {
+    private Band[] getSourceBands() throws OperatorException {
         final ArrayList<Band> bandList = new ArrayList<Band>(5);
 
-        // add master band
-        if(masterProduct == null) {
-            throw new OperatorException("masterProduct is null");
-        }
-        if(masterBandNames.length > 2) {
-            throw new OperatorException("Master band should be one real band or a real and imaginary band");
-        }
-        masterBands[0] = masterProduct.getBand(getBandName(masterBandNames[0]));
-        bandList.add(masterBands[0]);
+        if(sourceBandNames.length == 0) {
+            for(Product slvProduct : sourceProduct) {
 
-        final String unit = masterBands[0].getUnit();
-        if(unit == null) {
-            throw new OperatorException("band " + masterBands[0].getName() + " requires a unit");
-        } else if (unit.contains(Unit.PHASE)) {
-            throw new OperatorException("Phase band should not be selected for co-registration");
-        } else if (unit.contains(Unit.IMAGINARY)) {
-            throw new OperatorException("Real and imaginary master bands should be selected in pairs");
-        } else if (unit.contains(Unit.REAL)) {
-            if(masterBandNames.length < 2) {
-                throw new OperatorException("Real and imaginary master bands should be selected in pairs");
-            } else {
-                Product prod = getMasterProduct(masterBandNames[1]);
-                if(prod != masterProduct) {
-                    throw new OperatorException("Please select master bands from the same product");
+                for(Band band : slvProduct.getBands()) {
+                    if(band.getUnit() != null && band.getUnit().equals(Unit.PHASE))
+                        continue;
+                    if(band instanceof VirtualBand)
+                        continue;
+                    bandList.add(band);
+                    break;
                 }
-                masterBands[1] = masterProduct.getBand(getBandName(masterBandNames[1]));
-                if(!masterBands[1].getUnit().equals(Unit.IMAGINARY))
-                    throw new OperatorException("For complex products select a real and an imaginary band");
-                bandList.add(masterBands[1]);
             }
+        } else {
 
-        }
+            for (final String name : sourceBandNames) {
+                final String bandName = getBandName(name);
+                final String productName = getProductName(name);
 
-        // add slave bands
-        for(int i = 0; i < slaveBandNames.length; i++) {
-            final String name = slaveBandNames[i];
-            if(contains(masterBandNames, name)) {
-                continue;
-            }
-            final String bandName = getBandName(name);
-            final String productName = getProductName(name);
-
-            final Product prod = getProduct(productName);
-            final Band band = prod.getBand(bandName);
-            final String bandUnit = band.getUnit();
-            if(bandUnit == null) {
-                throw new OperatorException("band " + bandName + " requires a unit");
-            } else if (bandUnit.contains(Unit.PHASE)) {
-                throw new OperatorException("Phase band should not be selected for co-registration");
-            } else if (bandUnit.contains(Unit.IMAGINARY)) {
-                throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
-            } else if (bandUnit.contains(Unit.REAL)) {
-                if (slaveBandNames.length < 2) {
-                    throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
+                final Product prod = getProduct(productName);
+                final Band band = prod.getBand(bandName);
+                final String bandUnit = band.getUnit();
+                if (bandUnit != null) {
+                    if (bandUnit.contains(Unit.PHASE)) {
+                        throw new OperatorException("Phase bands not handled");
+                    } else if (bandUnit.contains(Unit.IMAGINARY) || bandUnit.contains(Unit.REAL)) {
+                        throw new OperatorException("Real and imaginary bands not handled");
+                    } else {
+                        bandList.add(band);
+                    }
+                } else {
+                    bandList.add(band);
                 }
-                final String nextBandName = getBandName(slaveBandNames[i+1]);
-                if (!getProductName(nextBandName).contains(productName)){
-                    throw new OperatorException("Real and imaginary slave bands should be selected from the same product in pairs");
-                }
-                final Band nextBand = prod.getBand(nextBandName);
-                if (!nextBand.getUnit().contains(Unit.IMAGINARY)) {
-                    throw new OperatorException("Real and imaginary slave bands should be selected in pairs");
-                }
-                bandList.add(band);
-                bandList.add(nextBand);
-                i++;
-            } else {
-                bandList.add(band);
             }
         }
         return bandList.toArray(new Band[bandList.size()]);
@@ -237,14 +176,6 @@ public class MosaicOp extends Operator {
         return null;
     }
 
-    private static boolean contains(final String[] nameList, final String name) {
-        for(String nameInList : nameList) {
-            if(name.equals(nameInList))
-                return true;
-        }
-        return false;
-    }
-
     private static String getBandName(final String name) {
         if(name.contains("::"))
             return name.substring(0, name.indexOf("::"));
@@ -257,34 +188,201 @@ public class MosaicOp extends Operator {
         return sourceProduct[0].getName();
     }
 
+    /**
+     * Compute source image geodetic boundary (minimum/maximum latitude/longitude) from the its corner
+     * latitude/longitude.
+     */
+    private void computeImageGeoBoundary() {
+
+        latMin = 90.0;
+        latMax = -90.0;
+        lonMin = 180.0;
+        lonMax = -180.0;
+
+        for(final Product srcProd : sourceProduct) {
+            final GeoCoding geoCoding = srcProd.getGeoCoding();
+            final GeoPos geoPosFirstNear = geoCoding.getGeoPos(new PixelPos(0,0), null);
+            final GeoPos geoPosFirstFar = geoCoding.getGeoPos(new PixelPos(srcProd.getSceneRasterWidth(),0), null);
+            final GeoPos geoPosLastNear = geoCoding.getGeoPos(new PixelPos(0,srcProd.getSceneRasterHeight()), null);
+            final GeoPos geoPosLastFar = geoCoding.getGeoPos(new PixelPos(srcProd.getSceneRasterWidth(),
+                                                                          srcProd.getSceneRasterHeight()), null);
+
+            final double[] lats  = {geoPosFirstNear.getLat(), geoPosFirstFar.getLat(), geoPosLastNear.getLat(), geoPosLastFar.getLat()};
+            final double[] lons  = {geoPosFirstNear.getLon(), geoPosFirstFar.getLon(), geoPosLastNear.getLon(), geoPosLastFar.getLon()};
+            srcCornerLatitudeMap.put(srcProd, lats);
+            srcCornerLongitudeMap.put(srcProd, lons);
+
+            for (double lat : lats) {
+                if (lat < latMin) {
+                    latMin = lat;
+                }
+                if (lat > latMax) {
+                    latMax = lat;
+                }
+            }
+
+            for (double lon : lons) {
+                if (lon < lonMin) {
+                    lonMin = lon;
+                }
+                if (lon > lonMax) {
+                    lonMax = lon;
+                }
+            }
+        }
+    }
+
+    /**
+     * Add geocoding to the target product.
+     */
+    private void addGeoCoding() {
+
+        final float[] latTiePoints = {(float)latMax, (float)latMax, (float)latMin, (float)latMin};
+        final float[] lonTiePoints = {(float)lonMin, (float)lonMax, (float)lonMin, (float)lonMax};
+
+        final int gridWidth = 10;
+        final int gridHeight = 10;
+
+        final float[] fineLatTiePoints = new float[gridWidth*gridHeight];
+        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latTiePoints, fineLatTiePoints);
+
+        float subSamplingX = (float)targetImageWidth / (gridWidth - 1);
+        float subSamplingY = (float)targetImageHeight / (gridHeight - 1);
+
+        final TiePointGrid latGrid = new TiePointGrid("latitude", gridWidth, gridHeight, 0.5f, 0.5f,
+                subSamplingX, subSamplingY, fineLatTiePoints);
+        latGrid.setUnit(Unit.DEGREES);
+
+        final float[] fineLonTiePoints = new float[gridWidth*gridHeight];
+        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonTiePoints, fineLonTiePoints);
+
+        final TiePointGrid lonGrid = new TiePointGrid("longitude", gridWidth, gridHeight, 0.5f, 0.5f,
+                subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
+        lonGrid.setUnit(Unit.DEGREES);
+
+        final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
+
+        targetProduct.addTiePointGrid(latGrid);
+        targetProduct.addTiePointGrid(lonGrid);
+        targetProduct.setGeoCoding(tpGeoCoding);
+
+        ReaderUtils.createMapGeocoding(targetProduct, 0);
+    }
+
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-        final Band sourceRaster = sourceRasterMap.get(targetBand);
-        final Product srcProduct = sourceRaster.getProduct();
 
-        if (srcProduct == masterProduct || srcProduct.isCompatibleProduct(masterProduct, 1.0e-3f)) {
-            targetTile.setRawSamples(getSourceTile(sourceRaster, targetTile.getRectangle(), pm).getRawSamples());
-        } else {
-            final PixelPos[] sourcePixelPositions = ProductUtils.computeSourcePixelCoordinates(
-                    srcProduct.getGeoCoding(),
-                    srcProduct.getSceneRasterWidth(),
-                    srcProduct.getSceneRasterHeight(),
-                    masterProduct.getGeoCoding(),
-                    targetTile.getRectangle());
+        final Rectangle targetRect = targetTile.getRectangle();
+        final GeoCoding targetGeoCoding = targetProduct.getGeoCoding();
+        final ArrayList<Product> validProducts = new ArrayList<Product>(sourceProduct.length);
+        
+        for (final Product srcProduct : sourceProduct) {
+            if(!isWithinTile(srcProduct, targetRect, targetGeoCoding)) {
+                continue;
+            }
+            validProducts.add(srcProduct);
+        }
+        if(validProducts.isEmpty())
+            return;
+
+        final ArrayList<PixelPos[]> srcPixelCoords = new ArrayList<PixelPos[]>(validProducts.size());
+        for (Product validProduct : validProducts) {
+            srcPixelCoords.add(new PixelPos[targetRect.width * targetRect.height]);
+        }
+        
+        final GeoPos geoPos = new GeoPos();
+        final PixelPos pixelPos = new PixelPos();
+        final int minX = targetRect.x;
+        final int minY = targetRect.y;
+        final int maxX = minX + targetRect.width - 1;
+        final int maxY = minY + targetRect.height - 1;        
+
+        int coordIndex = 0;
+        for (int y = minY; y <= maxY; ++y) {
+            for (int x = minX; x <= maxX; ++x) {
+                pixelPos.x = x + 0.5f;
+                pixelPos.y = y + 0.5f;
+                targetGeoCoding.getGeoPos(pixelPos, geoPos);
+
+                int index = 0;
+                for(Product srcProduct : validProducts) {
+                    srcProduct.getGeoCoding().getPixelPos(geoPos, pixelPos);
+                    if (pixelPos.x >= 0.0f && pixelPos.y >= 0.0f &&
+                        pixelPos.x < srcProduct.getSceneRasterWidth() &&
+                        pixelPos.y < srcProduct.getSceneRasterHeight()) {
+
+                        srcPixelCoords.get(index)[coordIndex] = new PixelPos(pixelPos.x, pixelPos.y);
+                    } else {
+                        srcPixelCoords.get(index)[coordIndex] = null;
+                    }
+                    ++index;
+                }
+                ++coordIndex;
+            }
+        }
+
+        int index = 0;
+        for(Product srcProduct : validProducts) {
             final Rectangle sourceRectangle = getBoundingBox(
-                    sourcePixelPositions,
+                    srcPixelCoords.get(index), 0, 0,
                     srcProduct.getSceneRasterWidth(),
                     srcProduct.getSceneRasterHeight());
 
-            collocateSourceBand(sourceRaster, sourceRectangle, sourcePixelPositions, targetTile, pm);
+            if(sourceRectangle != null) {
+                final Band srcBand = srcBandMap.get(srcProduct);
+                collocateSourceBand(srcBand, sourceRectangle, srcPixelCoords.get(index), targetTile, pm);
+            }
+            ++index;
         }
+    }
+
+    private static boolean isWithinTile(final Product srcProduct, final Rectangle destArea, final GeoCoding destGeoCoding) {
+
+        final double[] lats = srcCornerLatitudeMap.get(srcProduct);
+        final double[] lons = srcCornerLongitudeMap.get(srcProduct);
+
+        double srcLatMin = 90.0;
+        double srcLatMax = -90.0;
+        double srcLonMin = 180.0;
+        double srcLonMax = -180.0;
+
+        for (double lat : lats) {
+            if (lat < srcLatMin) {
+                srcLatMin = lat;
+            }
+            if (lat > srcLatMax) {
+                srcLatMax = lat;
+            }
+        }
+
+        for (double lon : lons) {
+            if (lon < srcLonMin) {
+                srcLonMin = lon;
+            }
+            if (lon > srcLonMax) {
+                srcLonMax = lon;
+            }
+        }
+
+        final GeoPos geoPos = new GeoPos();
+        final PixelPos[] pixelPos = new PixelPos[4];
+        geoPos.setLocation((float)srcLatMin, (float)srcLonMin);
+        pixelPos[0] = destGeoCoding.getPixelPos(geoPos, null);
+        geoPos.setLocation((float)srcLatMin, (float)srcLonMax);
+        pixelPos[1] = destGeoCoding.getPixelPos(geoPos, null);
+        geoPos.setLocation((float)srcLatMax, (float)srcLonMax);
+        pixelPos[2] = destGeoCoding.getPixelPos(geoPos, null);
+        geoPos.setLocation((float)srcLatMax, (float)srcLonMin);
+        pixelPos[3] = destGeoCoding.getPixelPos(geoPos, null);
+        final Rectangle srcRect = getBoundingBox(pixelPos, 0, 0,
+                                                Integer.MAX_VALUE, Integer.MAX_VALUE);
+        return srcRect != null && srcRect.intersects(destArea);
     }
 
     private void collocateSourceBand(RasterDataNode sourceBand, Rectangle sourceRectangle, PixelPos[] sourcePixelPositions,
                                      Tile targetTile, ProgressMonitor pm) throws OperatorException {
         pm.beginTask(MessageFormat.format("collocating band {0}", sourceBand.getName()), targetTile.getHeight());
         try {
-            final RasterDataNode targetBand = targetTile.getRasterDataNode();
             final Rectangle targetRectangle = targetTile.getRectangle();
 
             final Product srcProduct = sourceBand.getProduct();
@@ -304,51 +402,38 @@ public class MosaicOp extends Operator {
                     resampling = (Resampling.CUBIC_CONVOLUTION);
             }
             final Resampling.Index resamplingIndex = resampling.createIndex();
-            final float noDataValue = (float) targetBand.getGeophysicalNoDataValue();
 
-            if (sourceRectangle != null) {
-                final Tile sourceTile = getSourceTile(sourceBand, sourceRectangle, pm);
-                final ResamplingRaster resamplingRaster = new ResamplingRaster(sourceTile);
+            final Tile sourceTile = getSourceTile(sourceBand, sourceRectangle, pm);
+            final ResamplingRaster resamplingRaster = new ResamplingRaster(sourceTile);
+            float sample;
 
-                for (int y = targetRectangle.y, index = 0; y < targetRectangle.y + targetRectangle.height; ++y) {
-                    for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; ++x, ++index) {
-                        checkForCancelation(pm);
-                        final PixelPos sourcePixelPos = sourcePixelPositions[index];
+            for (int y = targetRectangle.y, index = 0; y < targetRectangle.y + targetRectangle.height; ++y) {
+                checkForCancelation(pm);
+                for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; ++x, ++index) {
+                    final PixelPos sourcePixelPos = sourcePixelPositions[index];
 
-                        final int trgIndex = targetTile.getDataBufferIndex(x, y);
-                        if (sourcePixelPos != null) {
-                            resampling.computeIndex(sourcePixelPos.x, sourcePixelPos.y,
-                                                    sourceRasterWidth, sourceRasterHeight, resamplingIndex);
-                            try {
-                                float sample = resampling.resample(resamplingRaster, resamplingIndex);
-                                if (Float.isNaN(sample)) {
-                                    sample = noDataValue;
-                                }
-                                trgBuffer.setElemDoubleAt(trgIndex, sample);
-                            } catch (Exception e) {
-                                throw new OperatorException(e.getMessage());
-                            }
-                        } else {
-                            trgBuffer.setElemDoubleAt(trgIndex, noDataValue);
+                    if (sourcePixelPos != null) {
+                        resampling.computeIndex(sourcePixelPos.x, sourcePixelPos.y,
+                                sourceRasterWidth, sourceRasterHeight, resamplingIndex);
+
+                        sample = resampling.resample(resamplingRaster, resamplingIndex);
+                        if (!Float.isNaN(sample)) {
+                            final int trgIndex = targetTile.getDataBufferIndex(x, y);
+                            trgBuffer.setElemDoubleAt(trgIndex, sample);
                         }
                     }
-                    pm.worked(1);
                 }
-            } else {
-                for (int y = targetRectangle.y, index = 0; y < targetRectangle.y + targetRectangle.height; ++y) {
-                    for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; ++x, ++index) {
-                        checkForCancelation(pm);
-                        trgBuffer.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), noDataValue);
-                    }
-                    pm.worked(1);
-                }
+                pm.worked(1);
             }
+        } catch (Exception e) {
+            throw new OperatorException(e.getMessage());
         } finally {
             pm.done();
         }
     }
 
-    private static Rectangle getBoundingBox(PixelPos[] pixelPositions, int maxWidth, int maxHeight) {
+    private static Rectangle getBoundingBox(PixelPos[] pixelPositions,
+                                            int minOffsetX, int minOffsetY, int maxWidth, int maxHeight) {
         int minX = Integer.MAX_VALUE;
         int maxX = Integer.MIN_VALUE;
         int minY = Integer.MAX_VALUE;
@@ -377,9 +462,9 @@ public class MosaicOp extends Operator {
             return null;
         }
 
-        minX = Math.max(minX - 2, 0);
+        minX = Math.max(minX - 2, minOffsetX);
         maxX = Math.min(maxX + 2, maxWidth - 1);
-        minY = Math.max(minY - 2, 0);
+        minY = Math.max(minY - 2, minOffsetY);
         maxY = Math.min(maxY + 2, maxHeight - 1);
 
         return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);

@@ -455,7 +455,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         srgrConvParamsTime = new double[srgrConvParams.length];
         oldSlantRange = new float[srgrConvParams.length][sourceImageWidth];
         for (int i = 0; i < srgrConvParams.length; i++) {
-            srgrConvParamsTime[i] = srgrConvParams[i].time.getMJD();
+            srgrConvParamsTime[i] = srgrConvParams[i].timeMJD;
             for (int x = 0; x < sourceImageWidth; x++) {
                 oldSlantRange[i][x] = (float)computePolynomialValue(
                         x*rangeSpacing + srgrConvParams[i].ground_range_origin, srgrConvParams[i].coefficients);
@@ -1350,7 +1350,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             }
             
             int idx = 0;
-            for (int i = 0; i < srgrConvParams.length && zeroDopplerTime >= srgrConvParams[i].time.getMJD(); i++) {
+            for (int i = 0; i < srgrConvParams.length && zeroDopplerTime >= srgrConvParams[i].timeMJD; i++) {
                 idx = i;
             }
 
@@ -1359,8 +1359,8 @@ public class RangeDopplerGeocodingOp extends Operator {
                 idx--;
             }
 
-            final double mu = (zeroDopplerTime - srgrConvParams[idx].time.getMJD()) /
-                              (srgrConvParams[idx+1].time.getMJD() - srgrConvParams[idx].time.getMJD());
+            final double mu = (zeroDopplerTime - srgrConvParams[idx].timeMJD) /
+                              (srgrConvParams[idx+1].timeMJD - srgrConvParams[idx].timeMJD);
             for (int i = 0; i < srgrCoefficients.length; i++) {
                 srgrCoefficients[i] = MathUtils.interpolationLinear(srgrConvParams[idx].coefficients[i],
                                                                     srgrConvParams[idx+1].coefficients[i], mu);

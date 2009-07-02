@@ -1,5 +1,5 @@
 /*
- * $Id: MapGeoCoding.java,v 1.5 2009-06-03 19:59:44 lveci Exp $
+ * $Id: MapGeoCoding.java,v 1.6 2009-07-02 15:03:13 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -37,7 +37,7 @@ import java.awt.geom.Point2D;
  * A geo-coding based on a cartographical map.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.5 $ $Date: 2009-06-03 19:59:44 $
+ * @version $Revision: 1.6 $ $Date: 2009-07-02 15:03:13 $
  */
 public class MapGeoCoding extends AbstractGeoCoding {
 
@@ -158,7 +158,8 @@ public class MapGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public final GeoPos getGeoPos(PixelPos pixelPos, GeoPos geoPos) {
-        return denormGeoPos(mapToGeo(pixelToMap(pixelPos, new Point2D.Double()), new GeoPos()), geoPos);
+        geoPos = denormGeoPos(mapToGeo(pixelToMap(pixelPos, new Point2D.Double()), geoPos));
+        return geoPos;
     }
 
     /**
@@ -229,6 +230,16 @@ public class MapGeoCoding extends AbstractGeoCoding {
         }
         geoPos.lat = geoPosNorm.lat;
         geoPos.lon = geoPosNorm.lon;
+        while (geoPos.lon > 180.0f) {
+            geoPos.lon -= 360.0f;
+        }
+        while (geoPos.lon < -180.0f) {
+            geoPos.lon += 360.0f;
+        }
+        return geoPos;
+    }
+
+    private static GeoPos denormGeoPos(final GeoPos geoPos) {
         while (geoPos.lon > 180.0f) {
             geoPos.lon -= 360.0f;
         }

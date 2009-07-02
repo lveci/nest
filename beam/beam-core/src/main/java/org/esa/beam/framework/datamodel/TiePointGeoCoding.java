@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGeoCoding.java,v 1.2 2009-06-11 18:24:06 lveci Exp $
+ * $Id: TiePointGeoCoding.java,v 1.3 2009-07-02 15:03:13 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -191,7 +191,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      * @return the pixel co-ordinates as x/y
      */
     public PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
-        Approximation[] approximations = _approximations;
+        final Approximation[] approximations = _approximations;
         if (approximations != null) {
             float lat = normalizeLat(geoPos.lat);
             float lon = normalizeLon(geoPos.lon);
@@ -655,7 +655,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
     private static Approximation getBestApproximation(final Approximation[] approximations, float lat, float lon) {
         Approximation approximation = null;
         if (approximations.length == 1) {
-            Approximation a = approximations[0];
+            final Approximation a = approximations[0];
             final float squareDistance = a.getSquareDistance(lat, lon);
             if (squareDistance < a.getMinSquareDistance()) {
                 approximation = a;

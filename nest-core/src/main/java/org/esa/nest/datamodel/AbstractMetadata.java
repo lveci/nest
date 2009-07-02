@@ -460,6 +460,7 @@ public class AbstractMetadata {
         for (MetadataElement listElem : srgr_coef_listElem) {
             final SRGRCoefficientList srgrList = new SRGRCoefficientList();
             srgrList.time  = listElem.getAttributeUTC(srgr_coef_time);
+            srgrList.timeMJD = srgrList.time.getMJD();
             srgrList.ground_range_origin = listElem.getAttributeDouble(ground_range_origin);
 
             final int numSubElems = listElem.getNumElements();
@@ -486,6 +487,7 @@ public class AbstractMetadata {
 
     public static class SRGRCoefficientList {
         public ProductData.UTC time = null;
+        public double timeMJD = 0;
         public double ground_range_origin = 0.0;
         public double[] coefficients = null;
     }

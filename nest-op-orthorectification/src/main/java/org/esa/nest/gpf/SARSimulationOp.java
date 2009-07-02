@@ -111,7 +111,6 @@ public final class SARSimulationOp extends Operator {
     private boolean srgrFlag = false;
     private boolean ny0Updated = false;
 
-    private double wavelength = 0.0; // in m
     private double rangeSpacing = 0.0;
     private double firstLineUTC = 0.0; // in days
     private double lastLineUTC = 0.0; // in days
@@ -198,7 +197,7 @@ public final class SARSimulationOp extends Operator {
     private void getRadarFrequency() throws Exception {
         final double radarFreq = AbstractMetadata.getAttributeDouble(absRoot,
                                                     AbstractMetadata.radar_frequency)* Constants.oneMillion; // Hz
-        wavelength = Constants.lightSpeed / radarFreq;
+        double wavelength = Constants.lightSpeed / radarFreq;
     }
 
     /**
@@ -213,7 +212,7 @@ public final class SARSimulationOp extends Operator {
      * Get first line time from the abstracted metadata (in days).
      * @throws Exception The exceptions.
      */
-    private void getFirstLastLineTimes() throws Exception {
+    private void getFirstLastLineTimes() {
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
         lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD(); // in days
     }
@@ -222,7 +221,7 @@ public final class SARSimulationOp extends Operator {
      * Get line time interval from the abstracted metadata (in days).
      * @throws Exception The exceptions.
      */
-    private void getLineTimeInterval() throws Exception {
+    private void getLineTimeInterval() {
         lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
     }
 
@@ -361,7 +360,7 @@ public final class SARSimulationOp extends Operator {
      * Create target product.
      * @throws Exception The exception.
      */
-    private void createTargetProduct() throws Exception {
+    private void createTargetProduct() {
 
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),
@@ -639,8 +638,7 @@ public final class SARSimulationOp extends Operator {
 
         if (srgrFlag) { // ground detected image
 
-            double groundRange = 0.0;
-
+            double groundRange;
             if (srgrConvParams.length == 1) {
                 groundRange = RangeDopplerGeocodingOp.computeGroundRange(sourceImageWidth, rangeSpacing, slantRange, srgrConvParams[0].coefficients);
                 if (groundRange < 0.0) {
@@ -651,17 +649,17 @@ public final class SARSimulationOp extends Operator {
             }
 
             int idx = 0;
-            for (int i = 0; i < srgrConvParams.length && zeroDopplerTime >= srgrConvParams[i].time.getMJD(); i++) {
+            for (int i = 0; i < srgrConvParams.length && zeroDopplerTime >= srgrConvParams[i].timeMJD; i++) {
                 idx = i;
             }
 
-            double[] srgrCoefficients = new double[srgrConvParams[idx].coefficients.length];
+            final double[] srgrCoefficients = new double[srgrConvParams[idx].coefficients.length];
             if (idx == srgrConvParams.length - 1) {
                 idx--;
             }
 
-            final double mu = (zeroDopplerTime - srgrConvParams[idx].time.getMJD()) /
-                              (srgrConvParams[idx+1].time.getMJD() - srgrConvParams[idx].time.getMJD());
+            final double mu = (zeroDopplerTime - srgrConvParams[idx].timeMJD) /
+                              (srgrConvParams[idx+1].timeMJD - srgrConvParams[idx].timeMJD);
             for (int i = 0; i < srgrCoefficients.length; i++) {
                 srgrCoefficients[i] = MathUtils.interpolationLinear(srgrConvParams[idx].coefficients[i],
                                                                     srgrConvParams[idx+1].coefficients[i], mu);
@@ -739,9 +737,9 @@ public final class SARSimulationOp extends Operator {
 
     private static void normalizeVector(double[] v) {
         final double norm = Math.sqrt(innerProduct(v, v));
-        v[0] = v[0] / norm;
-        v[1] = v[1] / norm;
-        v[2] = v[2] / norm;
+        v[0] /= norm;
+        v[1] /= norm;
+        v[2] /= norm;
     }
 
     private static double innerProduct(final double[] a, final double[] b) {
@@ -753,9 +751,10 @@ public final class SARSimulationOp extends Operator {
      * @param localIncidenceAngle The local incidence angle (in degree).
      * @return The backscattered power.
      */
-    private double computeBackscatteredPower(final double localIncidenceAngle) {
+    private static double computeBackscatteredPower(final double localIncidenceAngle) {
         final double alpha = localIncidenceAngle*org.esa.beam.util.math.MathUtils.DTOR;
-        return (0.0118*Math.cos(alpha) / Math.pow(Math.sin(alpha) + 0.111*Math.cos(alpha), 3));
+        final double cosAlpha = Math.cos(alpha);
+        return (0.0118*cosAlpha / Math.pow(Math.sin(alpha) + 0.111*cosAlpha, 3));
     }
 
 

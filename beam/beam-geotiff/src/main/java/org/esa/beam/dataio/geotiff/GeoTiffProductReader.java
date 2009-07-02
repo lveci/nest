@@ -1,5 +1,5 @@
 /*
- * $Id: GeoTiffProductReader.java,v 1.3 2009-05-27 21:09:23 lveci Exp $
+ * $Id: GeoTiffProductReader.java,v 1.4 2009-07-02 15:03:13 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -127,16 +127,16 @@ public class GeoTiffProductReader extends AbstractProductReader {
         final int destSize = destWidth * destHeight;
         pm.beginTask("Reading data...", 3);
         try {
-            TIFFImageReadParam readParam = (TIFFImageReadParam) imageReader.getDefaultReadParam();
+            final TIFFImageReadParam readParam = (TIFFImageReadParam) imageReader.getDefaultReadParam();
             readParam.setSourceSubsampling(sourceStepX, sourceStepY,
                                            sourceOffsetX % sourceStepX,
                                            sourceOffsetY % sourceStepY);
-            TIFFRenderedImage subsampledImage = (TIFFRenderedImage) imageReader.readAsRenderedImage(0, readParam);
+            final TIFFRenderedImage subsampledImage = (TIFFRenderedImage) imageReader.readAsRenderedImage(0, readParam);
             pm.worked(1);
 
             final Raster data = subsampledImage.getData(new Rectangle(destOffsetX, destOffsetY,
                                                                       destWidth, destHeight));
-            double[] dArray = new double[destSize];
+            final double[] dArray = new double[destSize];
             Integer bandIdx = bandMap.get(destBand);
             if (bandIdx == null) {
                 bandIdx = 0;
@@ -146,7 +146,8 @@ public class GeoTiffProductReader extends AbstractProductReader {
             sampleModel.getSamples(0, 0, destWidth, destHeight, bandIdx, dArray, dataBuffer);
             pm.worked(1);
 
-            for (int i = 0; i < dArray.length; i++) {
+            final int length = dArray.length;
+            for (int i = 0; i < length; ++i) {
                 destBuffer.setElemDoubleAt(i, dArray[i]);
             }
             pm.worked(1);
