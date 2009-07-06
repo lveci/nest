@@ -939,40 +939,16 @@ public class AutomatedTerrainCorrectionOp extends Operator {
      */
     private void computeSensorPositionsAndVelocities() {
 
-        final int numVectors = orbitStateVectors.length;
-        final int numVectorsUsed = Math.min(numVectors, 5);
-        final int d = numVectors / numVectorsUsed;
-
+        final int numVectorsUsed = Math.min(orbitStateVectors.length, 5);
         timeArray = new double[numVectorsUsed];
         xPosArray = new double[numVectorsUsed];
         yPosArray = new double[numVectorsUsed];
         zPosArray = new double[numVectorsUsed];
-        final double[] xVelArray = new double[numVectorsUsed];
-        final double[] yVelArray = new double[numVectorsUsed];
-        final double[] zVelArray = new double[numVectorsUsed];
-
-        for (int i = 0; i < numVectorsUsed; i++) {
-            timeArray[i] = orbitStateVectors[i*d].time.getMJD();
-            xPosArray[i] = orbitStateVectors[i*d].x_pos; // m
-            yPosArray[i] = orbitStateVectors[i*d].y_pos; // m
-            zPosArray[i] = orbitStateVectors[i*d].z_pos; // m
-            xVelArray[i] = orbitStateVectors[i*d].x_vel; // m/s
-            yVelArray[i] = orbitStateVectors[i*d].y_vel; // m/s
-            zVelArray[i] = orbitStateVectors[i*d].z_vel; // m/s
-        }
-
-        // Lagrange polynomial interpolation
         sensorPosition = new double[sourceImageHeight][3]; // xPos, yPos, zPos
         sensorVelocity = new double[sourceImageHeight][3]; // xVel, yVel, zVel
-        for (int i = 0; i < sourceImageHeight; i++) {
-            final double time = firstLineUTC + i*lineTimeInterval; // zero Doppler time (in days) for each range line
-            sensorPosition[i][0] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, xPosArray, time);
-            sensorPosition[i][1] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, yPosArray, time);
-            sensorPosition[i][2] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, zPosArray, time);
-            sensorVelocity[i][0] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, xVelArray, time);
-            sensorVelocity[i][1] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, yVelArray, time);
-            sensorVelocity[i][2] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, zVelArray, time);
-        }
+
+        RangeDopplerGeocodingOp.computeSensorPositionsAndVelocities(orbitStateVectors, timeArray, xPosArray, yPosArray, zPosArray,
+                sensorPosition, sensorVelocity, firstLineUTC, lineTimeInterval, sourceImageHeight);
     }
 
     /**
@@ -1076,22 +1052,33 @@ public class AutomatedTerrainCorrectionOp extends Operator {
                     }
 
                     GeoUtils.geo2xyz(lat, lon, alt, earthPoint, GeoUtils.EarthModel.WGS84);
+
                     final double zeroDopplerTime = getEarthPointZeroDopplerTime(earthPoint);
+
                     if (Double.compare(zeroDopplerTime, NonValidZeroDopplerTime) == 0) {
                         saveNoDataValueToTarget(index, trgTiles);
                         continue;
                     }
 
-                    double slantRange = computeSlantRange(zeroDopplerTime, earthPoint, sensorPos);
+                    double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
+                            zeroDopplerTime, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
+
                     final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / halfLightSpeedInMetersPerDay;
+
                     final double azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
-                    slantRange = computeSlantRange(zeroDopplerTimeWithoutBias, earthPoint, sensorPos);
+
+                    slantRange = RangeDopplerGeocodingOp.computeSlantRange(
+                            zeroDopplerTimeWithoutBias, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
                     double[] localIncidenceAngles = {0.0, 0.0};
                     if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) {
 
-                        computeLocalIncidenceAngle(
-                                sensorPos, earthPoint, lat, lon, x0, y0, x, y, localDEM, localIncidenceAngles); // in degrees
+                        final RangeDopplerGeocodingOp.LocalGeometry localGeometry = new RangeDopplerGeocodingOp.LocalGeometry();
+                        RangeDopplerGeocodingOp.setLocalGeometry(lat, lon, delLat, delLon, earthPoint, sensorPos, localGeometry);
+
+                        RangeDopplerGeocodingOp.computeLocalIncidenceAngle(
+                                localGeometry, saveLocalIncidenceAngle, saveProjectedLocalIncidenceAngle,
+                                applyRadiometricCalibration, x0, y0, x, y, localDEM, localIncidenceAngles); // in degrees
 
                         if (saveLocalIncidenceAngle) {
                             incidenceAngleBuffer.setElemDoubleAt(index, localIncidenceAngles[0]);
@@ -1102,7 +1089,10 @@ public class AutomatedTerrainCorrectionOp extends Operator {
                         }
                     }
 
-                    final double rangeIndex = computeRangeIndex(zeroDopplerTimeWithoutBias, slantRange);
+                    final double rangeIndex = RangeDopplerGeocodingOp.computeRangeIndex(
+                            srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC, rangeSpacing,
+                            zeroDopplerTimeWithoutBias, slantRange, nearEdgeSlantRange, srgrConvParams);
+
                     if (rangeIndex < 0.0 || rangeIndex >= srcMaxRange ||
                             azimuthIndex < 0.0 || azimuthIndex >= srcMaxAzimuth) {
 
@@ -1261,80 +1251,6 @@ public class AutomatedTerrainCorrectionOp extends Operator {
         final double distance = Math.sqrt(xDiff*xDiff + yDiff*yDiff + zDiff*zDiff);
 
         return 2.0 * (xVel*xDiff + yVel*yDiff + zVel*zDiff) / (distance*wavelength);
-    }
-
-    /**
-     * Compute slant range distance for given earth point and given time.
-     * @param time The given time in days.
-     * @param earthPoint The earth point in xyz coordinate.
-     * @param sensorPos The sensor position.
-     * @return The slant range distance in meters.
-     */
-    private double computeSlantRange(final double time, final double[] earthPoint, double[] sensorPos) {
-
-        sensorPos[0] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, xPosArray, time);
-        sensorPos[1] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, yPosArray, time);
-        sensorPos[2] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, zPosArray, time);
-
-        final double xDiff = sensorPos[0] - earthPoint[0];
-        final double yDiff = sensorPos[1] - earthPoint[1];
-        final double zDiff = sensorPos[2] - earthPoint[2];
-
-        return Math.sqrt(xDiff*xDiff + yDiff*yDiff + zDiff*zDiff);
-    }
-
-    /**
-     * Compute range index in source image for earth point with given zero Doppler time and slant range.
-     * @param zeroDopplerTime The zero Doppler time in MJD.
-     * @param slantRange The slant range in meters.
-     * @return The range index.
-     */
-    private double computeRangeIndex(final double zeroDopplerTime, final double slantRange) {
-
-        if (zeroDopplerTime < firstLineUTC || zeroDopplerTime > lastLineUTC) {
-            return -1.0;
-        }
-
-        if (srgrFlag) { // ground detected image
-
-            double groundRange = 0.0;
-
-            if (srgrConvParams.length == 1) {
-                groundRange = RangeDopplerGeocodingOp.computeGroundRange(sourceImageWidth, rangeSpacing, slantRange, srgrConvParams[0].coefficients);
-                if (groundRange < 0.0) {
-                    return -1.0;
-                } else {
-                    return (groundRange - srgrConvParams[0].ground_range_origin) / rangeSpacing;
-                }
-            }
-            
-            int idx = 0;
-            for (int i = 0; i < srgrConvParams.length && zeroDopplerTime >= srgrConvParams[i].timeMJD; i++) {
-                idx = i;
-            }
-
-            double[] srgrCoefficients = new double[srgrConvParams[idx].coefficients.length];
-            if (idx == srgrConvParams.length - 1) {
-                idx--;
-            }
-
-            final double mu = (zeroDopplerTime - srgrConvParams[idx].timeMJD) /
-                              (srgrConvParams[idx+1].timeMJD - srgrConvParams[idx].timeMJD);
-            for (int i = 0; i < srgrCoefficients.length; i++) {
-                srgrCoefficients[i] = MathUtils.interpolationLinear(srgrConvParams[idx].coefficients[i],
-                                                                    srgrConvParams[idx+1].coefficients[i], mu);
-            }
-            groundRange = RangeDopplerGeocodingOp.computeGroundRange(sourceImageWidth, rangeSpacing, slantRange, srgrCoefficients);
-            if (groundRange < 0.0) {
-                return -1.0;
-            } else {
-                return (groundRange - srgrConvParams[idx].ground_range_origin) / rangeSpacing;
-            }
-
-        } else { // slant range image
-
-            return (slantRange - nearEdgeSlantRange) / rangeSpacing;
-        }
     }
 
     /**
@@ -1775,105 +1691,13 @@ public class AutomatedTerrainCorrectionOp extends Operator {
             gain = getAntennaPatternGain(
                     elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternWideSwath, false, subSwathIndex);
         } else {
-            //gain = getAntennaPatternGain(
-            //        elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternSingleSwath, false, subSwathIndex);
-            gain = ASARCalibrationOperator.computeAntPatGain(elevationAngle, newRefElevationAngle[0], newAntennaPatternSingleSwath[bandPolar]);
+            gain = ASARCalibrationOperator.computeAntPatGain(
+                    elevationAngle, newRefElevationAngle[0], newAntennaPatternSingleSwath[bandPolar]);
         }
 
         return sigma / newCalibrationConstant[bandPolar] / (gain*gain) *
                Math.pow(slantRange/refSlantRange, rangeSpreadingCompPower) *
                Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
-    }
-
-    /**
-     * Compute projected local incidence angle (in degree).
-     * @param sensorPos The satellite position.
-     * @param centrePoint The backscattering element position.
-     * @param lat Latitude of the given point.
-     * @param lon Longitude of the given point.
-     * @param x0 The x coordinate of the pixel at the upper left corner of current tile.
-     * @param y0 The y coordinate of the pixel at the upper left corner of current tile.
-     * @param x The x coordinate of the current pixel.
-     * @param y The y coordinate of the current pixel.
-     * @param localDEM The local DEM.
-     * @param localIncidenceAngles The local incidence angle and projected local incidence angle.
-     */
-    private void computeLocalIncidenceAngle(final double[] sensorPos, final double[] centrePoint,
-                                            final double lat, final double lon, final int x0, final int y0,
-                                            final int x, final int y, final float[][] localDEM,
-                                            double[] localIncidenceAngles) {
-
-        // Note: For algorithm and notation of the following implementation, please see Andrea's email dated
-        //       May 29, 2009 and Marcus' email dated June 3, 2009, or see Eq (14.10) and Eq (14.11) on page
-        //       321 and 323 in "SAR Geocoding - Data and Systems".
-        //       The Cartesian coordinate (x, y, z) is represented here by a length-3 array with element[0]
-        //       representing x, element[1] representing y and element[2] representing z.
-
-        final double rightPointHeight = (localDEM[y - y0][x - x0 + 2] +
-                                         localDEM[y - y0 + 1][x - x0 + 2] +
-                                         localDEM[y - y0 + 2][x - x0 + 2]) / 3.0;
-
-        final double leftPointHeight = (localDEM[y - y0][x - x0] +
-                                         localDEM[y - y0 + 1][x - x0] +
-                                         localDEM[y - y0 + 2][x - x0]) / 3.0;
-
-        final double upPointHeight = (localDEM[y - y0][x - x0] +
-                                        localDEM[y - y0][x - x0 + 1] +
-                                        localDEM[y - y0][x - x0 + 2]) / 3.0;
-
-        final double downPointHeight = (localDEM[y - y0 + 2][x - x0] +
-                                        localDEM[y - y0 + 2][x - x0 + 1] +
-                                        localDEM[y - y0 + 2][x - x0 + 2]) / 3.0;
-
-        final double[] rightPoint = new double[3];
-        final double[] leftPoint = new double[3];
-        final double[] upPoint = new double[3];
-        final double[] downPoint = new double[3];
-        GeoUtils.geo2xyz(lat, lon + delLon, rightPointHeight, rightPoint, GeoUtils.EarthModel.WGS84);
-        GeoUtils.geo2xyz(lat, lon - delLon, leftPointHeight, leftPoint, GeoUtils.EarthModel.WGS84);
-        GeoUtils.geo2xyz(lat + delLat, lon, upPointHeight, upPoint, GeoUtils.EarthModel.WGS84);
-        GeoUtils.geo2xyz(lat - delLat, lon, downPointHeight, downPoint, GeoUtils.EarthModel.WGS84);
-
-        final double[] a = {rightPoint[0] - leftPoint[0], rightPoint[1] - leftPoint[1], rightPoint[2] - leftPoint[2]};
-        final double[] b = {downPoint[0] - upPoint[0], downPoint[1] - upPoint[1], downPoint[2] - upPoint[2]};
-        final double[] c = {centrePoint[0], centrePoint[1], centrePoint[2]};
-
-        double[] n = {a[1]*b[2] - a[2]*b[1], a[2]*b[0] - a[0]*b[2], a[0]*b[1] - a[1]*b[0]}; // ground plane normal
-        normalizeVector(n);
-        if (innerProduct(n, c) < 0) {
-            n[0] = -n[0];
-            n[1] = -n[1];
-            n[2] = -n[2];
-        }
-
-        double[] s = {sensorPos[0] - centrePoint[0], sensorPos[1] - centrePoint[1], sensorPos[2] - centrePoint[2]};
-        normalizeVector(s);
-
-        final double nsInnerProduct = innerProduct(n, s);
-
-        if (saveLocalIncidenceAngle) { // local incidence angle
-            localIncidenceAngles[0] = Math.acos(nsInnerProduct) * org.esa.beam.util.math.MathUtils.RTOD;
-        }
-
-        if (saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) { // projected local incidence angle
-            double[] m = {s[1]*c[2] - s[2]*c[1], s[2]*c[0] - s[0]*c[2], s[0]*c[1] - s[1]*c[0]}; // range plane normal
-            normalizeVector(m);
-            final double mnInnerProduct = innerProduct(m, n);
-            double[] n1 = {n[0] - m[0]*mnInnerProduct, n[1] - m[1]*mnInnerProduct, n[2] - m[2]*mnInnerProduct};
-            normalizeVector(n1);
-            localIncidenceAngles[1] = Math.acos(innerProduct(n1, s)) * org.esa.beam.util.math.MathUtils.RTOD;
-        }
-    }
-
-    private static void normalizeVector(double[] v) {
-        final double norm = Math.sqrt(innerProduct(v, v));
-        v[0] = v[0] / norm;
-        v[1] = v[1] / norm;
-        v[2] = v[2] / norm;
-    }
-
-    private static double innerProduct(final double[] a, final double[] b) {
-        return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
     }
 
     private static class TileData {

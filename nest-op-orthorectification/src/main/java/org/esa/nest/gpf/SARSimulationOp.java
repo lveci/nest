@@ -116,6 +116,7 @@ public final class SARSimulationOp extends Operator {
     private double lastLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
     private double nearEdgeSlantRange = 0.0; // in m
+    private double wavelength = 0.0; // in m
     private double demNoDataValue = 0.0; // no data value for DEM
     private double[][] sensorPosition = null; // sensor position for all range lines
     private double[][] sensorVelocity = null; // sensor velocity for all range lines
@@ -197,7 +198,7 @@ public final class SARSimulationOp extends Operator {
     private void getRadarFrequency() throws Exception {
         final double radarFreq = AbstractMetadata.getAttributeDouble(absRoot,
                                                     AbstractMetadata.radar_frequency)* Constants.oneMillion; // Hz
-        double wavelength = Constants.lightSpeed / radarFreq;
+        wavelength = Constants.lightSpeed / radarFreq;
     }
 
     /**
@@ -320,40 +321,16 @@ public final class SARSimulationOp extends Operator {
      */
     private void computeSensorPositionsAndVelocities() {
 
-        final int numVectors = orbitStateVectors.length;
-        final int numVectorsUsed = Math.min(numVectors, 5);
-        final int d = numVectors / numVectorsUsed;
-
+        final int numVectorsUsed = Math.min(orbitStateVectors.length, 5);
         timeArray = new double[numVectorsUsed];
         xPosArray = new double[numVectorsUsed];
         yPosArray = new double[numVectorsUsed];
         zPosArray = new double[numVectorsUsed];
-        final double[] xVelArray = new double[numVectorsUsed];
-        final double[] yVelArray = new double[numVectorsUsed];
-        final double[] zVelArray = new double[numVectorsUsed];
-
-        for (int i = 0; i < numVectorsUsed; i++) {
-            timeArray[i] = orbitStateVectors[i*d].time.getMJD();
-            xPosArray[i] = orbitStateVectors[i*d].x_pos; // m
-            yPosArray[i] = orbitStateVectors[i*d].y_pos; // m
-            zPosArray[i] = orbitStateVectors[i*d].z_pos; // m
-            xVelArray[i] = orbitStateVectors[i*d].x_vel; // m/s
-            yVelArray[i] = orbitStateVectors[i*d].y_vel; // m/s
-            zVelArray[i] = orbitStateVectors[i*d].z_vel; // m/s
-        }
-
-        // Lagrange polynomial interpolation
         sensorPosition = new double[sourceImageHeight][3]; // xPos, yPos, zPos
         sensorVelocity = new double[sourceImageHeight][3]; // xVel, yVel, zVel
-        for (int i = 0; i < sourceImageHeight; i++) {
-            final double time = firstLineUTC + i*lineTimeInterval; // zero Doppler time (in days) for each range line
-            sensorPosition[i][0] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, xPosArray, time);
-            sensorPosition[i][1] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, yPosArray, time);
-            sensorPosition[i][2] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, zPosArray, time);
-            sensorVelocity[i][0] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, xVelArray, time);
-            sensorVelocity[i][1] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, yVelArray, time);
-            sensorVelocity[i][2] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, zVelArray, time);
-        }
+
+        RangeDopplerGeocodingOp.computeSensorPositionsAndVelocities(orbitStateVectors, timeArray, xPosArray, yPosArray, zPosArray,
+                sensorPosition, sensorVelocity, firstLineUTC, lineTimeInterval, sourceImageHeight);
     }
 
     /**
@@ -462,20 +439,45 @@ public final class SARSimulationOp extends Operator {
         final double[] sensorPos = new double[3];
         for (int y = ymin; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
+
                 final double alt = localDEM[y-ymin+1][x-x0+1];
                 if (alt == demNoDataValue) {
                     continue;
                 }
+
                 GeoUtils.geo2xyz(latitude.getPixelFloat(x, y), longitude.getPixelFloat(x, y), alt, earthPoint, GeoUtils.EarthModel.WGS84);
-                final double zeroDopplerTime = getEarthPointZeroDopplerTime(earthPoint);
-                double slantRange = computeSlantRange(zeroDopplerTime, earthPoint, sensorPos);
+
+                final double zeroDopplerTime = RangeDopplerGeocodingOp.getEarthPointZeroDopplerTime(sourceImageHeight,
+                        firstLineUTC, lineTimeInterval, wavelength, earthPoint, sensorPosition, sensorVelocity);
+
+                double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
+                        zeroDopplerTime,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
+
                 final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / halfLightSpeedInMetersPerDay;
+
                 final int azimuthIndex = (int)((zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval + 0.5);
-                slantRange = computeSlantRange(zeroDopplerTimeWithoutBias, earthPoint, sensorPos);
-                final int rangeIndex = (int)(computeRangeIndex(zeroDopplerTimeWithoutBias, slantRange) + 0.5);
-                final double localIncidenceAngle = computeLocalIncidenceAngle(sensorPos, earthPoint, x0, ymin, x, y, localDEM);
-                final double v = computeBackscatteredPower(localIncidenceAngle);
+
+                slantRange = RangeDopplerGeocodingOp.computeSlantRange(
+                        zeroDopplerTimeWithoutBias,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
+
+                final int rangeIndex = (int)(RangeDopplerGeocodingOp.computeRangeIndex(
+                        srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC, rangeSpacing, zeroDopplerTimeWithoutBias,
+                        slantRange, nearEdgeSlantRange, srgrConvParams) + 0.5);
+
+
+                final RangeDopplerGeocodingOp.LocalGeometry localGeometry = new RangeDopplerGeocodingOp.LocalGeometry();
+                setLocalGeometry(x, y, earthPoint, sensorPos, localGeometry);
+
+                double[] localIncidenceAngles = {0.0, 0.0};
+                RangeDopplerGeocodingOp.computeLocalIncidenceAngle(
+                        localGeometry, true, false, false, x0, ymin, x, y, localDEM, localIncidenceAngles); // in degrees
+
+                //final double localIncidenceAngle = computeLocalIncidenceAngle(sensorPos, earthPoint, x0, ymin, x, y, localDEM);
+
+                final double v = computeBackscatteredPower(localIncidenceAngles[0]);
+
                 final int index = targetTile.getDataBufferIndex(rangeIndex, azimuthIndex);
+
                 if (rangeIndex >= x0 && rangeIndex < x0+w && azimuthIndex >= y0 && azimuthIndex < y0+h) {
                     trgData.setElemDoubleAt(index, v + trgData.getElemDoubleAt(index));
                 } else {
@@ -537,213 +539,18 @@ public final class SARSimulationOp extends Operator {
         return alt;
     }
 
-    /**
-     * Compute zero Doppler time for given erath point.
-     * @param earthPoint The earth point in xyz cooordinate.
-     * @return The zero Doppler time in days if it is found, -1 otherwise.
-     * @throws OperatorException The operator exception.
-     */
-    private double getEarthPointZeroDopplerTime(final double[] earthPoint) throws OperatorException {
-
-        // binary search is used in finding the zero doppler time
-        int lowerBound = 0;
-        int upperBound = sensorPosition.length - 1;
-        double lowerBoundFreq = getDopplerFrequency(lowerBound, earthPoint);
-        double upperBoundFreq = getDopplerFrequency(upperBound, earthPoint);
-
-        if (Double.compare(lowerBoundFreq, 0.0) == 0) {
-            return firstLineUTC + lowerBound*lineTimeInterval;
-        } else if (Double.compare(upperBoundFreq, 0.0) == 0) {
-            return firstLineUTC + upperBound*lineTimeInterval;
-        } else if (lowerBoundFreq*upperBoundFreq > 0.0) {
-            return NonValidZeroDopplerTime;
-        }
-
-        // start binary search
-        double midFreq;
-        while(upperBound - lowerBound > 1) {
-
-            final int mid = (int)((lowerBound + upperBound)/2.0);
-            midFreq = getDopplerFrequency(mid, earthPoint);
-            if (Double.compare(midFreq, 0.0) == 0) {
-                return firstLineUTC + mid*lineTimeInterval;
-            } else if (midFreq*lowerBoundFreq > 0.0) {
-                lowerBound = mid;
-                lowerBoundFreq = midFreq;
-            } else if (midFreq*upperBoundFreq > 0.0) {
-                upperBound = mid;
-                upperBoundFreq = midFreq;
-            }
-        }
-
-        final double y0 = lowerBound - lowerBoundFreq*(upperBound - lowerBound)/(upperBoundFreq - lowerBoundFreq);
-        return firstLineUTC + y0*lineTimeInterval;
-    }
-
-    /**
-     * Compute Doppler frequency for given earthPoint and sensor position.
-     * @param y The index for given range line.
-     * @param earthPoint The earth point in xyz coordinate.
-     * @return The Doppler frequency in Hz.
-     */
-    private double getDopplerFrequency(final int y, final double[] earthPoint) {
-
-        if (y < 0 || y > sourceImageHeight - 1) {
-            throw new OperatorException("Invalid range line index: " + y);
-        }
-
-        final double xVel = sensorVelocity[y][0];
-        final double yVel = sensorVelocity[y][1];
-        final double zVel = sensorVelocity[y][2];
-        final double xDiff = earthPoint[0] - sensorPosition[y][0];
-        final double yDiff = earthPoint[1] - sensorPosition[y][1];
-        final double zDiff = earthPoint[2] - sensorPosition[y][2];
-        final double distance = Math.sqrt(xDiff*xDiff + yDiff*yDiff + zDiff*zDiff);
-
-//        return 2.0 * (xVel*xDiff + yVel*yDiff + zVel*zDiff) / (distance*wavelength);
-        return (xVel*xDiff + yVel*yDiff + zVel*zDiff) / distance;
-    }
-
-    /**
-     * Compute slant range distance for given earth point and given time.
-     * @param time The given time in days.
-     * @param earthPoint The earth point in xyz coordinate.
-     * @param sensorPos The sensor position.
-     * @return The slant range distance in meters.
-     */
-    private double computeSlantRange(final double time, final double[] earthPoint, double[] sensorPos) {
-
-        sensorPos[0] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, xPosArray, time);
-        sensorPos[1] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, yPosArray, time);
-        sensorPos[2] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, zPosArray, time);
-
-        final double xDiff = sensorPos[0] - earthPoint[0];
-        final double yDiff = sensorPos[1] - earthPoint[1];
-        final double zDiff = sensorPos[2] - earthPoint[2];
-
-        return Math.sqrt(xDiff*xDiff + yDiff*yDiff + zDiff*zDiff);
-    }
-
-    /**
-     * Compute range index in source image for earth point with given zero Doppler time and slant range.
-     * @param zeroDopplerTime The zero Doppler time in MJD.
-     * @param slantRange The slant range in meters.
-     * @return The range index.
-     */
-    private double computeRangeIndex(final double zeroDopplerTime, final double slantRange) {
-
-        if (zeroDopplerTime < firstLineUTC || zeroDopplerTime > lastLineUTC) {
-            return -1.0;
-        }
-
-        if (srgrFlag) { // ground detected image
-
-            double groundRange;
-            if (srgrConvParams.length == 1) {
-                groundRange = RangeDopplerGeocodingOp.computeGroundRange(sourceImageWidth, rangeSpacing, slantRange, srgrConvParams[0].coefficients);
-                if (groundRange < 0.0) {
-                    return -1.0;
-                } else {
-                    return (groundRange - srgrConvParams[0].ground_range_origin) / rangeSpacing;
-                }
-            }
-
-            int idx = 0;
-            for (int i = 0; i < srgrConvParams.length && zeroDopplerTime >= srgrConvParams[i].timeMJD; i++) {
-                idx = i;
-            }
-
-            final double[] srgrCoefficients = new double[srgrConvParams[idx].coefficients.length];
-            if (idx == srgrConvParams.length - 1) {
-                idx--;
-            }
-
-            final double mu = (zeroDopplerTime - srgrConvParams[idx].timeMJD) /
-                              (srgrConvParams[idx+1].timeMJD - srgrConvParams[idx].timeMJD);
-            for (int i = 0; i < srgrCoefficients.length; i++) {
-                srgrCoefficients[i] = MathUtils.interpolationLinear(srgrConvParams[idx].coefficients[i],
-                                                                    srgrConvParams[idx+1].coefficients[i], mu);
-            }
-            groundRange = RangeDopplerGeocodingOp.computeGroundRange(sourceImageWidth, rangeSpacing, slantRange, srgrCoefficients);
-            if (groundRange < 0.0) {
-                return -1.0;
-            } else {
-                return (groundRange - srgrConvParams[idx].ground_range_origin) / rangeSpacing;
-            }
-
-        } else { // slant range image
-
-            return (slantRange - nearEdgeSlantRange) / rangeSpacing;
-        }
-    }
-
-    /**
-     * Compute projected local incidence angle (in degree).
-     * @param sensorPos The satellite position.
-     * @param centrePoint The backscattering element position.
-     * @param x0 The x coordinate of the pixel at the upper left corner of current tile.
-     * @param y0 The y coordinate of the pixel at the upper left corner of current tile.
-     * @param x The x coordinate of the current pixel.
-     * @param y The y coordinate of the current pixel.
-     * @param localDEM The local DEM.
-     * @return The local incidence angle.
-     */
-    private double computeLocalIncidenceAngle(final double[] sensorPos, final double[] centrePoint,
-                                              final int x0, final int y0,
-                                              final int x, final int y, final float[][] localDEM) {
-
-        final double rightPointHeight = (localDEM[y - y0][x - x0 + 2] +
-                                         localDEM[y - y0 + 1][x - x0 + 2] +
-                                         localDEM[y - y0 + 2][x - x0 + 2]) / 3.0;
-
-        final double leftPointHeight = (localDEM[y - y0][x - x0] +
-                                         localDEM[y - y0 + 1][x - x0] +
-                                         localDEM[y - y0 + 2][x - x0]) / 3.0;
-
-        final double upPointHeight = (localDEM[y - y0][x - x0] +
-                                        localDEM[y - y0][x - x0 + 1] +
-                                        localDEM[y - y0][x - x0 + 2]) / 3.0;
-
-        final double downPointHeight = (localDEM[y - y0 + 2][x - x0] +
-                                        localDEM[y - y0 + 2][x - x0 + 1] +
-                                        localDEM[y - y0 + 2][x - x0 + 2]) / 3.0;
-
-        final double[] rightPoint = new double[3];
-        final double[] leftPoint = new double[3];
-        final double[] upPoint = new double[3];
-        final double[] downPoint = new double[3];
-        GeoUtils.geo2xyz(latitude.getPixelFloat(x+1, y), longitude.getPixelFloat(x+1, y), rightPointHeight, rightPoint, GeoUtils.EarthModel.WGS84);
-        GeoUtils.geo2xyz(latitude.getPixelFloat(x-1, y), longitude.getPixelFloat(x-1, y), leftPointHeight, leftPoint, GeoUtils.EarthModel.WGS84);
-        GeoUtils.geo2xyz(latitude.getPixelFloat(x, y-1), longitude.getPixelFloat(x, y-1), upPointHeight, upPoint, GeoUtils.EarthModel.WGS84);
-        GeoUtils.geo2xyz(latitude.getPixelFloat(x, y+1), longitude.getPixelFloat(x, y+1), downPointHeight, downPoint, GeoUtils.EarthModel.WGS84);
-
-        final double[] a = {rightPoint[0] - leftPoint[0], rightPoint[1] - leftPoint[1], rightPoint[2] - leftPoint[2]};
-        final double[] b = {downPoint[0] - upPoint[0], downPoint[1] - upPoint[1], downPoint[2] - upPoint[2]};
-        final double[] c = {centrePoint[0], centrePoint[1], centrePoint[2]};
-
-        double[] n = {a[1]*b[2] - a[2]*b[1], a[2]*b[0] - a[0]*b[2], a[0]*b[1] - a[1]*b[0]}; // ground plane normal
-        normalizeVector(n);
-        if (innerProduct(n, c) < 0) {
-            n[0] = -n[0];
-            n[1] = -n[1];
-            n[2] = -n[2];
-        }
-
-        double[] s = {sensorPos[0] - centrePoint[0], sensorPos[1] - centrePoint[1], sensorPos[2] - centrePoint[2]};
-        normalizeVector(s);
-
-        return Math.acos(innerProduct(n, s)) * org.esa.beam.util.math.MathUtils.RTOD;
-    }
-
-    private static void normalizeVector(double[] v) {
-        final double norm = Math.sqrt(innerProduct(v, v));
-        v[0] /= norm;
-        v[1] /= norm;
-        v[2] /= norm;
-    }
-
-    private static double innerProduct(final double[] a, final double[] b) {
-        return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+    private void setLocalGeometry(final int x, final int y, final double[] earthPoint, final double[] sensorPos,
+                                  RangeDopplerGeocodingOp.LocalGeometry localGeometry) {
+        localGeometry.leftPointLat  = latitude.getPixelFloat(x-1, y);
+        localGeometry.leftPointLon  = longitude.getPixelFloat(x-1, y);
+        localGeometry.rightPointLat = latitude.getPixelFloat(x+1, y);
+        localGeometry.rightPointLon = longitude.getPixelFloat(x+1, y);
+        localGeometry.upPointLat    = latitude.getPixelFloat(x, y-1);
+        localGeometry.upPointLon    = longitude.getPixelFloat(x, y-1);
+        localGeometry.downPointLat  = latitude.getPixelFloat(x, y+1);
+        localGeometry.downPointLon  = longitude.getPixelFloat(x, y+1);
+        localGeometry.centrePoint   = earthPoint;
+        localGeometry.sensorPos     = sensorPos;
     }
 
     /**

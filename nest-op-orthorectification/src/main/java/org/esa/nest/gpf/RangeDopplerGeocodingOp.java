@@ -982,19 +982,48 @@ public class RangeDopplerGeocodingOp extends Operator {
     }
 
     /**
-     * Compute sensor position and velocity for each range line from the orbit state vectors using
-     * cubic WARP polynomial.
+     * Compute sensor position and velocity for each range line from the orbit state vectors.
      */
     private void computeSensorPositionsAndVelocities() {
-
-        final int numVectors = orbitStateVectors.length;
-        final int numVectorsUsed = Math.min(numVectors, 5);
-        final int d = numVectors / numVectorsUsed;
-
+        
+        final int numVectorsUsed = Math.min(orbitStateVectors.length, 5);
         timeArray = new double[numVectorsUsed];
         xPosArray = new double[numVectorsUsed];
         yPosArray = new double[numVectorsUsed];
         zPosArray = new double[numVectorsUsed];
+        sensorPosition = new double[sourceImageHeight][3]; // xPos, yPos, zPos
+        sensorVelocity = new double[sourceImageHeight][3]; // xVel, yVel, zVel
+
+        computeSensorPositionsAndVelocities(
+                orbitStateVectors, timeArray, xPosArray, yPosArray, zPosArray,
+                sensorPosition, sensorVelocity, firstLineUTC, lineTimeInterval, sourceImageHeight);
+    }
+
+    /**
+     * Compute sensor position and velocity for each range line from the orbit state vectors using
+     * cubic WARP polynomial.
+     * @param orbitStateVectors The orbit state vectors.
+     * @param timeArray Array holding zeros Doppler times for all state vectors.
+     * @param xPosArray Array holding x coordinates for sensor positions in all state vectors.
+     * @param yPosArray Array holding y coordinates for sensor positions in all state vectors.
+     * @param zPosArray Array holding z coordinates for sensor positions in all state vectors.
+     * @param sensorPosition Sensor positions for all range lines.
+     * @param sensorVelocity Sensor velocities for all range lines.
+     * @param firstLineUTC The zero Doppler time for the first range line.
+     * @param lineTimeInterval The line time interval.
+     * @param sourceImageHeight The source image height.
+     */
+    public static void computeSensorPositionsAndVelocities(AbstractMetadata.OrbitStateVector[] orbitStateVectors,
+                                                           double[] timeArray, double[] xPosArray,
+                                                           double[] yPosArray, double[] zPosArray,
+                                                           double[][] sensorPosition, double[][] sensorVelocity,
+                                                           double firstLineUTC, double lineTimeInterval,
+                                                           int sourceImageHeight) {
+
+        final int numVectors = orbitStateVectors.length;
+        final int numVectorsUsed = timeArray.length;
+        final int d = numVectors / numVectorsUsed;
+
         final double[] xVelArray = new double[numVectorsUsed];
         final double[] yVelArray = new double[numVectorsUsed];
         final double[] zVelArray = new double[numVectorsUsed];
@@ -1010,8 +1039,6 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
 
         // Lagrange polynomial interpolation
-        sensorPosition = new double[sourceImageHeight][3]; // xPos, yPos, zPos
-        sensorVelocity = new double[sourceImageHeight][3]; // xVel, yVel, zVel
         for (int i = 0; i < sourceImageHeight; i++) {
             final double time = firstLineUTC + i*lineTimeInterval; // zero Doppler time (in days) for each range line
             sensorPosition[i][0] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, xPosArray, time);
@@ -1124,22 +1151,34 @@ public class RangeDopplerGeocodingOp extends Operator {
                     }
 
                     GeoUtils.geo2xyz(lat, lon, alt, earthPoint, GeoUtils.EarthModel.WGS84);
-                    final double zeroDopplerTime = getEarthPointZeroDopplerTime(earthPoint);
+
+                    final double zeroDopplerTime = getEarthPointZeroDopplerTime(sourceImageHeight, firstLineUTC,
+                            lineTimeInterval, wavelength, earthPoint, sensorPosition, sensorVelocity);
+
                     if (Double.compare(zeroDopplerTime, NonValidZeroDopplerTime) == 0) {
                         saveNoDataValueToTarget(index, trgTiles);
                         continue;
                     }
 
-                    double slantRange = computeSlantRange(zeroDopplerTime, earthPoint, sensorPos);
+                    double slantRange = computeSlantRange(
+                            zeroDopplerTime, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
+
                     final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / halfLightSpeedInMetersPerDay;
+
                     final double azimuthIndex = (zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval;
-                    slantRange = computeSlantRange(zeroDopplerTimeWithoutBias, earthPoint, sensorPos);
+
+                    slantRange = computeSlantRange(
+                            zeroDopplerTimeWithoutBias,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
                     double[] localIncidenceAngles = {0.0, 0.0};
                     if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) {
 
+                        final LocalGeometry localGeometry = new LocalGeometry();
+                        setLocalGeometry(lat, lon, delLat, delLon, earthPoint, sensorPos, localGeometry);
+
                         computeLocalIncidenceAngle(
-                                sensorPos, earthPoint, lat, lon, x0, y0, x, y, localDEM, localIncidenceAngles); // in degrees
+                                localGeometry, saveLocalIncidenceAngle, saveProjectedLocalIncidenceAngle,
+                                applyRadiometricCalibration, x0, y0, x, y, localDEM, localIncidenceAngles); // in degrees
 
                         if (saveLocalIncidenceAngle) {
                             incidenceAngleBuffer.setElemDoubleAt(index, localIncidenceAngles[0]);
@@ -1150,7 +1189,9 @@ public class RangeDopplerGeocodingOp extends Operator {
                         }
                     }
 
-                    final double rangeIndex = computeRangeIndex(zeroDopplerTimeWithoutBias, slantRange);
+                    final double rangeIndex = computeRangeIndex(srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC,
+                            rangeSpacing, zeroDopplerTimeWithoutBias, slantRange, nearEdgeSlantRange, srgrConvParams);
+
                     if (rangeIndex < 0.0 || rangeIndex >= srcMaxRange ||
                             azimuthIndex < 0.0 || azimuthIndex >= srcMaxAzimuth) {
 
@@ -1240,17 +1281,28 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     /**
      * Compute zero Doppler time for given erath point.
+     * @param sourceImageHeight The source image height.
+     * @param firstLineUTC The zero Doppler time for the first range line.
+     * @param lineTimeInterval The line time interval.
+     * @param wavelength The ragar wavelength.
      * @param earthPoint The earth point in xyz cooordinate.
+     * @param sensorPosition Array of sensor positions for all range lines.
+     * @param sensorVelocity Array of sensor velocities for all range lines.
      * @return The zero Doppler time in days if it is found, -1 otherwise.
      * @throws OperatorException The operator exception.
      */
-    private double getEarthPointZeroDopplerTime(final double[] earthPoint) throws OperatorException {
+    public static double getEarthPointZeroDopplerTime(final int sourceImageHeight, final double firstLineUTC,
+                                                      final double lineTimeInterval, final double wavelength,
+                                                      final double[] earthPoint, final double[][] sensorPosition,
+                                                      final double[][] sensorVelocity) throws OperatorException {
 
         // binary search is used in finding the zero doppler time
         int lowerBound = 0;
         int upperBound = sensorPosition.length - 1;
-        double lowerBoundFreq = getDopplerFrequency(lowerBound, earthPoint);
-        double upperBoundFreq = getDopplerFrequency(upperBound, earthPoint);
+        double lowerBoundFreq = getDopplerFrequency(
+                lowerBound, sourceImageHeight, earthPoint, sensorPosition, sensorVelocity, wavelength);
+        double upperBoundFreq = getDopplerFrequency(
+                upperBound, sourceImageHeight, earthPoint, sensorPosition, sensorVelocity, wavelength);
 
         if (Double.compare(lowerBoundFreq, 0.0) == 0) {
             return firstLineUTC + lowerBound*lineTimeInterval;
@@ -1265,7 +1317,8 @@ public class RangeDopplerGeocodingOp extends Operator {
         while(upperBound - lowerBound > 1) {
 
             final int mid = (int)((lowerBound + upperBound)/2.0);
-            midFreq = getDopplerFrequency(mid, earthPoint);
+            midFreq = getDopplerFrequency(
+                    mid, sourceImageHeight, earthPoint, sensorPosition, sensorVelocity, wavelength);
             if (Double.compare(midFreq, 0.0) == 0) {
                 return firstLineUTC + mid*lineTimeInterval;
             } else if (midFreq*lowerBoundFreq > 0.0) {
@@ -1284,10 +1337,16 @@ public class RangeDopplerGeocodingOp extends Operator {
     /**
      * Compute Doppler frequency for given earthPoint and sensor position.
      * @param y The index for given range line.
+     * @param sourceImageHeight The source image height.
      * @param earthPoint The earth point in xyz coordinate.
+     * @param sensorPosition Array of sensor positions for all range lines.
+     * @param sensorVelocity Array of sensor velocities for all range lines.
+     * @param wavelength The ragar wavelength.
      * @return The Doppler frequency in Hz.
      */
-    private double getDopplerFrequency(final int y, final double[] earthPoint) {
+    private static double getDopplerFrequency(
+            final int y, final int sourceImageHeight, final double[] earthPoint, final double[][] sensorPosition,
+            final double[][] sensorVelocity, final double wavelength) {
 
         if (y < 0 || y > sourceImageHeight - 1) {
             throw new OperatorException("Invalid range line index: " + y);
@@ -1307,11 +1366,17 @@ public class RangeDopplerGeocodingOp extends Operator {
     /**
      * Compute slant range distance for given earth point and given time.
      * @param time The given time in days.
+     * @param timeArray Array holding zeros Doppler times for all state vectors.
+     * @param xPosArray Array holding x coordinates for sensor positions in all state vectors.
+     * @param yPosArray Array holding y coordinates for sensor positions in all state vectors.
+     * @param zPosArray Array holding z coordinates for sensor positions in all state vectors.
      * @param earthPoint The earth point in xyz coordinate.
      * @param sensorPos The sensor position.
      * @return The slant range distance in meters.
      */
-    private double computeSlantRange(final double time, final double[] earthPoint, double[] sensorPos) {
+    public static double computeSlantRange(final double time, final double[] timeArray, final double[] xPosArray,
+                                           final double[] yPosArray, final double[] zPosArray,
+                                           final double[] earthPoint, double[] sensorPos) {
 
         sensorPos[0] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, xPosArray, time);
         sensorPos[1] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, yPosArray, time);
@@ -1330,7 +1395,10 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param slantRange The slant range in meters.
      * @return The range index.
      */
-    private double computeRangeIndex(final double zeroDopplerTime, final double slantRange) {
+    public static double computeRangeIndex(
+            final boolean srgrFlag, final int sourceImageWidth, final double firstLineUTC, final double lastLineUTC,
+            final double rangeSpacing, final double zeroDopplerTime, final double slantRange,
+            final double nearEdgeSlantRange, final AbstractMetadata.SRGRCoefficientList[] srgrConvParams) {
 
         if (zeroDopplerTime < firstLineUTC || zeroDopplerTime > lastLineUTC) {
             return -1.0;
@@ -1871,9 +1939,8 @@ public class RangeDopplerGeocodingOp extends Operator {
             gain = getAntennaPatternGain(
                     elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternWideSwath, false, subSwathIndex);
         } else {
-            //gain = getAntennaPatternGain(
-            //        elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternSingleSwath, false, subSwathIndex);
-            gain = ASARCalibrationOperator.computeAntPatGain(elevationAngle, newRefElevationAngle[0], newAntennaPatternSingleSwath[bandPolar]);
+            gain = ASARCalibrationOperator.computeAntPatGain(
+                    elevationAngle, newRefElevationAngle[0], newAntennaPatternSingleSwath[bandPolar]);
         }
 
         return sigma / newCalibrationConstant[bandPolar] / (gain*gain) *
@@ -1882,11 +1949,35 @@ public class RangeDopplerGeocodingOp extends Operator {
     }
 
     /**
+     * Set local geometry information for computing local incidence angle.
+     * @param lat The latitude of current DEM cell.
+     * @param lon The longitude of current DEM cell.
+     * @param delLat The DEM traversal interval for latitude.
+     * @param delLon The DEM traversal interval for longitude.
+     * @param earthPoint The XYZ coordinate for current DEM cell.
+     * @param sensorPos The XYZ coordinate for current sensor position.
+     * @param localGeometry The object holding the local geometry information.
+     */
+    public static void setLocalGeometry(final double lat, final double lon, final double delLat, final double delLon,
+                                        final double[] earthPoint, final double[] sensorPos, LocalGeometry localGeometry) {
+        localGeometry.leftPointLat = lat;
+        localGeometry.leftPointLon = lon - delLon;
+        localGeometry.rightPointLat = lat;
+        localGeometry.rightPointLon = lon + delLon;
+        localGeometry.upPointLat = lat + delLat;
+        localGeometry.upPointLon = lon;
+        localGeometry.downPointLat = lat - delLat;
+        localGeometry.downPointLon = lon;
+        localGeometry.centrePoint = earthPoint;
+        localGeometry.sensorPos = sensorPos;
+    }
+
+    /**
      * Compute projected local incidence angle (in degree).
-     * @param sensorPos The satellite position.
-     * @param centrePoint The backscattering element position.
-     * @param lat Latitude of the given point.
-     * @param lon Longitude of the given point.
+     * @param lg Object holding local geometry information.
+     * @param saveLocalIncidenceAngle Boolean flag indicating saving local incidence angle.
+     * @param saveProjectedLocalIncidenceAngle Boolean flag indicating saving projected local incidence angle.
+     * @param applyRadiometricCalibration Boolean flag indicating applying radiometric calibration.
      * @param x0 The x coordinate of the pixel at the upper left corner of current tile.
      * @param y0 The y coordinate of the pixel at the upper left corner of current tile.
      * @param x The x coordinate of the current pixel.
@@ -1894,10 +1985,10 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param localDEM The local DEM.
      * @param localIncidenceAngles The local incidence angle and projected local incidence angle.
      */
-    private void computeLocalIncidenceAngle(final double[] sensorPos, final double[] centrePoint,
-                                            final double lat, final double lon, final int x0, final int y0,
-                                            final int x, final int y, final float[][] localDEM,
-                                            double[] localIncidenceAngles) {
+    public static void computeLocalIncidenceAngle(
+            final LocalGeometry lg, final boolean saveLocalIncidenceAngle,
+            final boolean saveProjectedLocalIncidenceAngle, final boolean applyRadiometricCalibration, final int x0,
+            final int y0, final int x, final int y, final float[][] localDEM, double[] localIncidenceAngles) {
 
         // Note: For algorithm and notation of the following implementation, please see Andrea's email dated
         //       May 29, 2009 and Marcus' email dated June 3, 2009, or see Eq (14.10) and Eq (14.11) on page
@@ -1925,14 +2016,15 @@ public class RangeDopplerGeocodingOp extends Operator {
         final double[] leftPoint = new double[3];
         final double[] upPoint = new double[3];
         final double[] downPoint = new double[3];
-        GeoUtils.geo2xyz(lat, lon + delLon, rightPointHeight, rightPoint, GeoUtils.EarthModel.WGS84);
-        GeoUtils.geo2xyz(lat, lon - delLon, leftPointHeight, leftPoint, GeoUtils.EarthModel.WGS84);
-        GeoUtils.geo2xyz(lat + delLat, lon, upPointHeight, upPoint, GeoUtils.EarthModel.WGS84);
-        GeoUtils.geo2xyz(lat - delLat, lon, downPointHeight, downPoint, GeoUtils.EarthModel.WGS84);
+
+        GeoUtils.geo2xyz(lg.rightPointLat, lg.rightPointLon, rightPointHeight, rightPoint, GeoUtils.EarthModel.WGS84);
+        GeoUtils.geo2xyz(lg.leftPointLat, lg.leftPointLon, leftPointHeight, leftPoint, GeoUtils.EarthModel.WGS84);
+        GeoUtils.geo2xyz(lg.upPointLat, lg.upPointLon, upPointHeight, upPoint, GeoUtils.EarthModel.WGS84);
+        GeoUtils.geo2xyz(lg.downPointLat, lg.downPointLon, downPointHeight, downPoint, GeoUtils.EarthModel.WGS84);
 
         final double[] a = {rightPoint[0] - leftPoint[0], rightPoint[1] - leftPoint[1], rightPoint[2] - leftPoint[2]};
         final double[] b = {downPoint[0] - upPoint[0], downPoint[1] - upPoint[1], downPoint[2] - upPoint[2]};
-        final double[] c = {centrePoint[0], centrePoint[1], centrePoint[2]};
+        final double[] c = {lg.centrePoint[0], lg.centrePoint[1], lg.centrePoint[2]};
 
         double[] n = {a[1]*b[2] - a[2]*b[1], a[2]*b[0] - a[0]*b[2], a[0]*b[1] - a[1]*b[0]}; // ground plane normal
         normalizeVector(n);
@@ -1942,7 +2034,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             n[2] = -n[2];
         }
 
-        double[] s = {sensorPos[0] - centrePoint[0], sensorPos[1] - centrePoint[1], sensorPos[2] - centrePoint[2]};
+        double[] s = {lg.sensorPos[0] - lg.centrePoint[0], lg.sensorPos[1] - lg.centrePoint[1], lg.sensorPos[2] - lg.centrePoint[2]};
         normalizeVector(s);
 
         final double nsInnerProduct = innerProduct(n, s);
@@ -1982,6 +2074,19 @@ public class RangeDopplerGeocodingOp extends Operator {
         String bandName = null;
         int bandPolar = 0;
         double noDataValue = 0;
+    }
+
+    public static class LocalGeometry {
+        public double leftPointLat = 0;
+        public double leftPointLon = 0;
+        public double rightPointLat = 0;
+        public double rightPointLon = 0;
+        public double upPointLat = 0;
+        public double upPointLon = 0;
+        public double downPointLat = 0;
+        public double downPointLon = 0;
+        public double[] sensorPos = null;
+        public double[] centrePoint = null;
     }
 
     /**
