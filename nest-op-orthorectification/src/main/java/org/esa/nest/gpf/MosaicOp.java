@@ -1,6 +1,7 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.framework.dataop.maptransf.Datum;
@@ -52,6 +53,10 @@ public class MosaicOp extends Operator {
                label="Resampling Type")
     private String resamplingType = NEAREST_NEIGHBOUR;
 
+    @Parameter(defaultValue = "false", description = "Average the overlapping areas",
+               label="Average Overlap")
+    private boolean average = false;
+
     private final static Map<Product, double[]> srcCornerLatitudeMap = new HashMap<Product, double[]>(10);
     private final static Map<Product, double[]> srcCornerLongitudeMap = new HashMap<Product, double[]>(10);
     private final static Map<Product, Band> srcBandMap = new HashMap<Product, Band>(10);
@@ -65,6 +70,9 @@ public class MosaicOp extends Operator {
     private double latMax = 0.0;
     private double lonMin = 0.0;
     private double lonMax = 0.0;
+
+    private Resampling resampling;
+    private Resampling.Index resamplingIndex;
 
     @Override
     public void initialize() throws OperatorException {
@@ -80,6 +88,14 @@ public class MosaicOp extends Operator {
             for(Band srcBand : srcBands) {
                 srcBandMap.put(srcBand.getProduct(), srcBand);
             }
+     
+            if (resamplingType.equals(NEAREST_NEIGHBOUR))
+                resampling = Resampling.NEAREST_NEIGHBOUR;
+            else if (resamplingType.equals(BILINEAR_INTERPOLATION))
+                resampling = Resampling.BILINEAR_INTERPOLATION;
+            else
+                resampling = (Resampling.CUBIC_CONVOLUTION);
+            resamplingIndex = resampling.createIndex();
 
             final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct[0]);
 
@@ -322,6 +338,7 @@ public class MosaicOp extends Operator {
         }
 
         int index = 0;
+        pm.beginTask("Mosaicking...", validProducts.size());
         for(Product srcProduct : validProducts) {
             final Rectangle sourceRectangle = getBoundingBox(
                     srcPixelCoords.get(index), 0, 0,
@@ -330,10 +347,12 @@ public class MosaicOp extends Operator {
 
             if(sourceRectangle != null) {
                 final Band srcBand = srcBandMap.get(srcProduct);
-                collocateSourceBand(srcBand, sourceRectangle, srcPixelCoords.get(index), targetTile, pm);
+                collocateSourceBand(srcBand, sourceRectangle, srcPixelCoords.get(index), targetTile,
+                                    SubProgressMonitor.create(pm, 1));
             }
             ++index;
         }
+        pm.done();
     }
 
     private static boolean isWithinTile(final Product srcProduct, final Rectangle destArea, final GeoCoding destGeoCoding) {
@@ -390,22 +409,11 @@ public class MosaicOp extends Operator {
             final int sourceRasterWidth = srcProduct.getSceneRasterWidth();
             final ProductData trgBuffer = targetTile.getDataBuffer();
 
-            final Resampling resampling;
-            if (isFlagBand(sourceBand) || isValidPixelExpressionUsed(sourceBand)) {
-                resampling = Resampling.NEAREST_NEIGHBOUR;
-            } else {
-                if(resamplingType.equals(NEAREST_NEIGHBOUR))
-                    resampling = Resampling.NEAREST_NEIGHBOUR;
-                else if(resamplingType.equals(BILINEAR_INTERPOLATION))
-                    resampling = Resampling.BILINEAR_INTERPOLATION;
-                else
-                    resampling = (Resampling.CUBIC_CONVOLUTION);
-            }
-            final Resampling.Index resamplingIndex = resampling.createIndex();
-
             final Tile sourceTile = getSourceTile(sourceBand, sourceRectangle, pm);
             final ResamplingRaster resamplingRaster = new ResamplingRaster(sourceTile);
+            final double nodataValue = sourceBand.getNoDataValue();
             float sample;
+            double targetVal;
 
             for (int y = targetRectangle.y, index = 0; y < targetRectangle.y + targetRectangle.height; ++y) {
                 checkForCancelation(pm);
@@ -419,7 +427,15 @@ public class MosaicOp extends Operator {
                         sample = resampling.resample(resamplingRaster, resamplingIndex);
                         if (!Float.isNaN(sample)) {
                             final int trgIndex = targetTile.getDataBufferIndex(x, y);
-                            trgBuffer.setElemDoubleAt(trgIndex, sample);
+                            if(average) {
+                                targetVal = trgBuffer.getElemDoubleAt(trgIndex);
+                                if(targetVal != nodataValue) {
+                                    sample = (float)((sample+targetVal) / 2f);    
+                                }
+                                trgBuffer.setElemDoubleAt(trgIndex, sample);
+                            } else {
+                                trgBuffer.setElemDoubleAt(trgIndex, sample);
+                            }
                         }
                     }
                 }
