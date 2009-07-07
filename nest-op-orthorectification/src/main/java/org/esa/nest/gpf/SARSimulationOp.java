@@ -162,11 +162,13 @@ public final class SARSimulationOp extends Operator {
 
             getLineTimeInterval();
 
-            getNearEdgeSlantRange();
-
             getOrbitStateVectors();
 
-            getSrgrCoeff();
+            if (srgrFlag) {
+                getSrgrCoeff();
+            } else {
+                getNearEdgeSlantRange();
+            }
 
             getElevationModel();
 
@@ -368,6 +370,7 @@ public final class SARSimulationOp extends Operator {
         targetProduct.addBand(targetBand);
 
         // add selected slave bands
+        boolean bandSlected = false;
         if (sourceBandNames == null || sourceBandNames.length == 0) {
             final Band[] bands = sourceProduct.getBands();
             final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
@@ -375,6 +378,9 @@ public final class SARSimulationOp extends Operator {
                 bandNameList.add(band.getName());
             }
             sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
+            bandSlected = false;
+        } else {
+            bandSlected = true;
         }
 
         final Band[] sourceBands = new Band[sourceBandNames.length];
@@ -393,7 +399,7 @@ public final class SARSimulationOp extends Operator {
                 throw new OperatorException("band " + srcBand.getName() + " requires a unit");
             }
 
-            if (unit.contains(Unit.IMAGINARY) || unit.contains(Unit.REAL) || unit.contains(Unit.PHASE)) {
+            if (bandSlected && (unit.contains(Unit.IMAGINARY) || unit.contains(Unit.REAL) || unit.contains(Unit.PHASE))) {
                 throw new OperatorException("Please select amplitude or intensity band for co-registration");
             }
 
