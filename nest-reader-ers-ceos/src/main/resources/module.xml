@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-reader-ers-ceos</symbolicName>
-    <version>2C</version>
+    <version>3A</version>
     <name>ERS 1 and 2 CEOS Product Reader</name>
 
     <description>

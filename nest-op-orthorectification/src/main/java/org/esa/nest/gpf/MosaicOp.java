@@ -119,9 +119,6 @@ public class MosaicOp extends Operator {
             targetImageWidth = (int)((lonMax - lonMin)/ delLon) + 1;
             targetImageHeight = (int)((latMax - latMin)/ delLat) + 1;
 
-            targetImageWidth /= 4;
-            targetImageHeight /= 4;
-
             targetProduct = new Product("mosiac", "mosiac",
                                         targetImageWidth,
                                         targetImageHeight);
@@ -218,10 +215,10 @@ public class MosaicOp extends Operator {
         for(final Product srcProd : sourceProduct) {
             final GeoCoding geoCoding = srcProd.getGeoCoding();
             final GeoPos geoPosFirstNear = geoCoding.getGeoPos(new PixelPos(0,0), null);
-            final GeoPos geoPosFirstFar = geoCoding.getGeoPos(new PixelPos(srcProd.getSceneRasterWidth(),0), null);
-            final GeoPos geoPosLastNear = geoCoding.getGeoPos(new PixelPos(0,srcProd.getSceneRasterHeight()), null);
-            final GeoPos geoPosLastFar = geoCoding.getGeoPos(new PixelPos(srcProd.getSceneRasterWidth(),
-                                                                          srcProd.getSceneRasterHeight()), null);
+            final GeoPos geoPosFirstFar = geoCoding.getGeoPos(new PixelPos(srcProd.getSceneRasterWidth()-1,0), null);
+            final GeoPos geoPosLastNear = geoCoding.getGeoPos(new PixelPos(0,srcProd.getSceneRasterHeight()-1), null);
+            final GeoPos geoPosLastFar = geoCoding.getGeoPos(new PixelPos(srcProd.getSceneRasterWidth()-1,
+                                                                          srcProd.getSceneRasterHeight()-1), null);
 
             final double[] lats  = {geoPosFirstNear.getLat(), geoPosFirstFar.getLat(), geoPosLastNear.getLat(), geoPosLastFar.getLat()};
             final double[] lons  = {geoPosFirstNear.getLon(), geoPosFirstFar.getLon(), geoPosLastNear.getLon(), geoPosLastFar.getLon()};
@@ -484,15 +481,6 @@ public class MosaicOp extends Operator {
         maxY = Math.min(maxY + 2, maxHeight - 1);
 
         return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
-    }
-
-    private static boolean isFlagBand(final RasterDataNode sourceRaster) {
-        return (sourceRaster instanceof Band && ((Band) sourceRaster).isFlagBand());
-    }
-
-    private static boolean isValidPixelExpressionUsed(final RasterDataNode sourceRaster) {
-        final String validPixelExpression = sourceRaster.getValidPixelExpression();
-        return validPixelExpression != null && !validPixelExpression.trim().isEmpty();
     }
 
     private static class ResamplingRaster implements Resampling.Raster {

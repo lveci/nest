@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
 	<properties>
-		<nest.version>2C</nest.version>
+		<nest.version>3A</nest.version>
 	</properties>
 	
     <name>NEST Project</name>
@@ -336,27 +336,27 @@
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-dock</artifactId>
-                <version>2.2.7</version>
+                <version>2.6.7</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-action</artifactId>
-                <version>2.2.7</version>
+                <version>2.6.7</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-grids</artifactId>
-                <version>2.2.7</version>
+                <version>2.6.7</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-components</artifactId>
-                <version>2.2.7</version>
+                <version>2.6.7</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-common</artifactId>
-                <version>2.2.7</version>
+                <version>2.6.7</version>
             </dependency>
 
             <!-- xStream Libraries ############################################# -->
