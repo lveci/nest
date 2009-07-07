@@ -1,5 +1,5 @@
 /*
- * $Id: DateTimeUtils.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: DateTimeUtils.java,v 1.2 2009-07-07 00:27:41 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -25,7 +25,7 @@ import java.util.Date;
  * This utility class provides some date/time related methods.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2009-07-07 00:27:41 $
  * @see java.util.Date
  */
 public class DateTimeUtils {
@@ -54,7 +54,7 @@ public class DateTimeUtils {
     /**
      * The number of seconds per day.
      */
-    public static final double SECONDS_PER_DAY = 60.0 * HOURS_PER_DAY;
+    public static final double SECONDS_PER_DAY = 3600.0 * HOURS_PER_DAY;
     /**
      * The number of milli-seconds per day.
      */

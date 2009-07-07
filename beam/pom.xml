@@ -8,7 +8,7 @@
     <url>http://www.brockmann-consult.de/beam-wiki</url>
     <groupId>org.esa.beam</groupId>
     <artifactId>beam</artifactId>
-    <version>4.6</version>
+    <version>4.7-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -39,7 +39,7 @@
 
     <repositories>
         <repository>
-            <id>bc-public</id>
+            <id>bc-mvn-repo</id>
             <name>Public Maven Repository at Brockmann-Consult</name>
             <url>http://www.brockmann-consult.de/mvn/os</url>
             <releases>
@@ -60,7 +60,7 @@
 
     <pluginRepositories>
         <pluginRepository>
-            <id>bc-public</id>
+            <id>bc-mvn-repo</id>
             <name>Public Maven Repository at Brockmann-Consult</name>
             <url>http://www.brockmann-consult.de/mvn/os</url>
             <releases>
@@ -84,6 +84,20 @@
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
+
+    <distributionManagement>
+        <repository>
+            <id>bc-mvn-repo</id>
+            <name>Public Maven Repository at Brockmann Consult</name>
+            <url>scp://apache.bc.local/bc-mvn-repo/os</url>
+        </repository>
+        <snapshotRepository>
+            <id>bc-mvn-repo</id>
+            <name>Public Maven Repository at Brockmann Consult</name>
+            <url>scp://apache.bc.local/bc-mvn-repo/os</url>
+        </snapshotRepository>
+    </distributionManagement>
+
 
     <modules>
         <module>ceres-0.x</module>
@@ -130,6 +144,7 @@
         <module>beam-landsat-reader</module>
         <module>beam-geotiff</module>
         <module>beam-hdf5-writer</module>
+        <module>beam-rtp-codec</module>
 
         <module>lib-hdf</module>
         <!--module>lib-netcdf</module-->
@@ -146,37 +161,37 @@
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-launcher</artifactId>
-                <version>0.9</version>
+                <version>0.10-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-core</artifactId>
-                <version>0.9</version>
+                <version>0.10-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-binding</artifactId>
-                <version>0.9</version>
+                <version>0.10-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-ui</artifactId>
-                <version>0.9</version>
+                <version>0.10-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-binio</artifactId>
-                <version>0.9</version>
+                <version>0.10-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-glayer</artifactId>
-                <version>0.9</version>
+                <version>0.10-SNAPSHOT</version>
             </dependency>
 
             <!-- BEAM System Level Modules ############################################# -->
@@ -184,32 +199,32 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-core</artifactId>
-                <version>4.6</version>
+                <version>4.7-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-gpf</artifactId>
-                <version>4.6</version>
+                <version>4.7-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-ui</artifactId>
-                <version>4.6</version>
+                <version>4.7-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-processing</artifactId>
-                <version>4.6</version>
+                <version>4.7-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-visat-rcp</artifactId>
-                <version>4.6</version>
+                <version>4.7-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-visat</artifactId>
-                <version>4.6</version>
+                <version>4.7-SNAPSHOT</version>
             </dependency>
 
             <!-- BEAM Modules ############################################# -->
@@ -229,7 +244,7 @@
             <!--dependency>
                 <groupId>ucar.netcdf</groupId>
                 <artifactId>lib-netcdf</artifactId>
-                <version>2.2.16</version>
+                <version>4.0</version>
             </dependency-->
 
             <!-- GeoTools Libraries ############################################# -->
@@ -327,27 +342,27 @@
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-dock</artifactId>
-                <version>2.2.7</version>
+                <version>2.6.7</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-action</artifactId>
-                <version>2.2.7</version>
+                <version>2.6.7</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-grids</artifactId>
-                <version>2.2.7</version>
+                <version>2.6.7</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-components</artifactId>
-                <version>2.2.7</version>
+                <version>2.6.7</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-common</artifactId>
-                <version>2.2.7</version>
+                <version>2.6.7</version>
             </dependency>
 
             <!-- XStream Libraries ############################################# -->
@@ -390,9 +405,9 @@
     </dependencies>
 
     <!--
-       In version 2.1 of Maven the sourceEncoding property will be embedded in the
+       In version 3.0 of Maven the sourceEncoding property will be embedded in the
        build tag. For now the convention is to that it as property.
-       TODO: Move the sourceEncoding property to the build tag if version 2.1 is released
+       TODO: Move the sourceEncoding property to the build tag if version 3.0 is released
        -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -430,7 +445,7 @@
                     <artifactId>maven-source-plugin</artifactId>
                     <executions>
                         <execution>
-                            <phase>package</phase>
+                            <phase>verify</phase>
                             <goals>
                                 <goal>jar</goal>
                             </goals>
@@ -499,6 +514,10 @@
                 <plugin>
                     <artifactId>maven-eclipse-plugin</artifactId>
                     <version>2.3-bc</version>
+                    <configuration>
+                        <downloadSources>true</downloadSources>
+                        <downloadJavadocs>true</downloadJavadocs>
+                    </configuration>
                 </plugin>
 
                 <plugin>
@@ -512,10 +531,18 @@
                     </configuration>
                 </plugin>
 
+                <plugin>
+                	<artifactId>maven-clean-plugin</artifactId>
+                	<version>2.3</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
@@ -525,6 +552,20 @@
                         <descriptor>src/main/assembly/bin.xml</descriptor>
                         <descriptor>src/main/assembly/src.xml</descriptor>
                     </descriptors>
+                </configuration>
+            </plugin>
+            
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>modules</directory>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </fileset>
+                    </filesets>                        
                 </configuration>
             </plugin>
         </plugins>

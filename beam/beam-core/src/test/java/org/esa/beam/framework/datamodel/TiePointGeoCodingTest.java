@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGeoCodingTest.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: TiePointGeoCodingTest.java,v 1.2 2009-07-07 00:27:41 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,14 +27,24 @@ public class TiePointGeoCodingTest extends TestCase {
         TiePointGeoCoding gc = createTestGeoCoding();
         assertTrue(gc.isCrossingMeridianAt180());
         gc.getPixelPos(new GeoPos(31.25f, -177.5f), pixelPos);
-        assertEquals(4.5f, pixelPos.y, 1e-5f);
-        assertEquals(7.5f, pixelPos.x, 1e-5f);
+        assertEquals(4.5f, pixelPos.y, 1.0e-5f);
+        assertEquals(7.5f, pixelPos.x, 1.0e-5f);
     }
 
     public void testThatReturnedPositionsNotNull() {
         TiePointGeoCoding gc = createTestGeoCoding();
         assertNotNull(gc.getPixelPos(new GeoPos(31.25f, -177.5f), null));
-        assertNotNull(gc.getGeoPos(new PixelPos(2,2), null));
+        assertNotNull(gc.getGeoPos(new PixelPos(2, 2), null));
+    }
+
+    public void testGetGeoPosWithPixePosOutOfBounds() {
+        TiePointGeoCoding gc = createTestGeoCoding();
+        final int px = gc.getLatGrid().getSceneRasterWidth() + 2;
+        final int py = gc.getLatGrid().getSceneRasterHeight() + 2;
+        final PixelPos pixelPos = new PixelPos(px, py);
+        final GeoPos geoPos = gc.getGeoPos(pixelPos, null);
+        assertNotNull(geoPos);
+        assertEquals("geoPos is not invalid", true, !geoPos.isValid());
     }
 
     public void testTransferGeoCodingWithoutSubset() {

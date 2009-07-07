@@ -27,6 +27,7 @@ import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.datamodel.Scene;
 import org.esa.beam.framework.datamodel.SceneFactory;
 import org.esa.beam.framework.datamodel.Stx;
+import org.esa.beam.framework.dataop.barithm.BandArithmetic;
 import org.esa.beam.framework.draw.Figure;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.ImageUtils;
@@ -271,8 +272,8 @@ public class ImageManager {
         Assert.notNull(rasterDataNodes,
                        "rasterDataNodes");
         Assert.state(rasterDataNodes.length == 1
-                || rasterDataNodes.length == 3
-                || rasterDataNodes.length == 4,
+                     || rasterDataNodes.length == 3
+                     || rasterDataNodes.length == 4,
                      "invalid number of bands");
 
         prepareImageInfos(rasterDataNodes, ProgressMonitor.NULL);
@@ -615,7 +616,7 @@ public class ImageManager {
             for (int i = 1; i < binCount; i++) {
                 double deviation = i - mu;
                 normCDF[b][i] = normCDF[b][i - 1] +
-                        (float) Math.exp(-deviation * deviation / twoSigmaSquared);
+                                (float) Math.exp(-deviation * deviation / twoSigmaSquared);
             }
         }
 
@@ -823,8 +824,13 @@ public class ImageManager {
 
         // Step 2:  insert ROI pixels within value range
         if (roiDefinition.isValueRangeEnabled()) {
-            String rangeExpr = rasterDataNode.getName() + " >= " + roiDefinition.getValueRangeMin() + " && "
-                    + rasterDataNode.getName() + " <= " + roiDefinition.getValueRangeMax();
+            final String escapedName = BandArithmetic.createExternalName(rasterDataNode.getName());
+            String rangeExpr = escapedName + " >= " + roiDefinition.getValueRangeMin() + " && "
+                               + escapedName + " <= " + roiDefinition.getValueRangeMax();
+            final String validMaskExpression = rasterDataNode.getValidMaskExpression();
+            if (validMaskExpression != null) {
+                rangeExpr += " && " + validMaskExpression;
+            }
             roiImages.add(getMaskImage(rangeExpr, rasterDataNode.getProduct(), level));
         }
 

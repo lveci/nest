@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataLoop.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: RasterDataLoop.java,v 1.2 2009-07-07 00:27:41 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -142,10 +142,8 @@ public class RasterDataLoop {
                     break;
                 }
                 readRegion(y, 1, SubProgressMonitor.create(pm, 1));
-                env.setPixelY(y);
                 for (int x = 0; x < width; x++) {
                     env.setElemIndex(x);
-                    env.setPixelX(offsetX + x);
                     body.eval(env, pixelIndex);
                     pixelIndex++;
                 }

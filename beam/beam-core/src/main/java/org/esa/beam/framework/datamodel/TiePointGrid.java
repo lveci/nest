@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGrid.java,v 1.3 2009-07-02 15:03:13 lveci Exp $
+ * $Id: TiePointGrid.java,v 1.4 2009-07-07 00:27:41 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -44,7 +44,7 @@ import Jama.Matrix;
  * Usually, tie-point grids are a sub-sampling of a data product's scene resolution.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-07-02 15:03:13 $
+ * @version $Revision: 1.4 $ $Date: 2009-07-07 00:27:41 $
  */
 public class TiePointGrid extends RasterDataNode {
 
@@ -806,15 +806,17 @@ public class TiePointGrid extends RasterDataNode {
         final float[] srcTiePoints = this.getTiePoints();
         final float[] destTiePoints = new float[srcTiePoints.length];
         System.arraycopy(srcTiePoints, 0, destTiePoints, 0, srcTiePoints.length);
-        return new TiePointGrid(this.getName(),
-                                this.getRasterWidth(),
-                                this.getRasterHeight(),
-                                this.getOffsetX(),
-                                this.getOffsetY(),
-                                this.getSubSamplingX(),
-                                this.getSubSamplingY(),
-                                destTiePoints,
-                                this.getDiscontinuity());
+        TiePointGrid clone = new TiePointGrid(this.getName(),
+                                              this.getRasterWidth(),
+                                              this.getRasterHeight(),
+                                              this.getOffsetX(),
+                                              this.getOffsetY(),
+                                              this.getSubSamplingX(),
+                                              this.getSubSamplingY(),
+                                              destTiePoints,
+                                              this.getDiscontinuity());
+        clone.setDescription(getDescription());
+        return clone;
 
     }
 
