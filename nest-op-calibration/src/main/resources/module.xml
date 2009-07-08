@@ -48,6 +48,15 @@
         </action>
 
         <action>
+            <id>CalibrationOp</id>
+            <class>org.esa.nest.dat.CalibrationOpAction</class>
+            <text>Calibrate</text>
+            <shortDescr>Invoke the Calibration operator.</shortDescr>
+            <parent>Calibration</parent>
+            <helpId>CalibrationOp</helpId>
+        </action>
+
+        <action>
             <id>ASARCalibrationOp</id>
             <class>org.esa.nest.dat.ASARCalibrationOpAction</class>
             <text>ASAR Calibration</text>

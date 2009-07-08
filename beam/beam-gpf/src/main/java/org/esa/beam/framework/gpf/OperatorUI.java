@@ -13,9 +13,6 @@ import com.bc.ceres.binding.dom.Xpp3DomElement;
 * The abstract base class for all operator user interfaces intended to be extended by clients.
  * The following methods are intended to be implemented or overidden:
  * CreateOpTab() must be implemented in order to create the operator user interface component
- * User: lveci
- * Date: Feb 12, 2008
- * To change this template use File | Settings | File Templates.
  */
 public interface OperatorUI {
 
