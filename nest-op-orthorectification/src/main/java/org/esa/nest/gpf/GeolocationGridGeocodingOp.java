@@ -75,6 +75,9 @@ public final class GeolocationGridGeocodingOp extends Operator {
             sourceProductId="source", label="Source Bands")
     String[] sourceBandNames = null;
 
+    @Parameter(valueSet = {NEAREST_NEIGHBOUR, BILINEAR, CUBIC}, defaultValue = BILINEAR, label="Image Resampling Method")
+    private String imgResamplingMethod = BILINEAR;
+
     private Band sourceBand = null;
     private Band sourceBand2 = null;
     private MetadataElement absRoot = null;
@@ -92,14 +95,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
     private double firstLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
     private double srcBandNoDataValue = 0.0; // no data value for source band
-    private double firstNearLat = 0.0;
-    private double firstFarLat = 0.0;
-    private double lastNearLat = 0.0;
-    private double lastFarLat = 0.0;
-    private double firstNearLon = 0.0;
-    private double firstFarLon = 0.0;
-    private double lastNearLon = 0.0;
-    private double lastFarLon = 0.0;
     private double latMin = 0.0;
     private double latMax = 0.0;
     private double lonMin = 0.0;
@@ -111,6 +106,11 @@ public final class GeolocationGridGeocodingOp extends Operator {
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
 
+    static final String NEAREST_NEIGHBOUR = "Nearest Neighbour";
+    static final String BILINEAR = "Bilinear Interpolation";
+    static final String CUBIC = "Cubic Convolution";
+    private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
+    private ResampleMethod imgResampling = null;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -149,8 +149,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
                 getSrgrCoeff();
             }
 
-            //getImageCornerLatLon();
-
             computeImageGeoBoundary();
 
             computeDEMTraversalSampleInterval();
@@ -162,6 +160,16 @@ public final class GeolocationGridGeocodingOp extends Operator {
             createTargetProduct();
 
             getTiePointGrids();
+
+            if (imgResamplingMethod.equals(NEAREST_NEIGHBOUR)) {
+                imgResampling = ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR;
+            } else if (imgResamplingMethod.contains(BILINEAR)) {
+                imgResampling = ResampleMethod.RESAMPLE_BILINEAR;
+            } else if (imgResamplingMethod.contains(CUBIC)) {
+                imgResampling = ResampleMethod.RESAMPLE_CUBIC;
+            } else {
+                throw new OperatorException("Unknown interpolation method");
+            }
 
         } catch(Exception e) {
             throw new OperatorException(e);
@@ -209,24 +217,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
     }
 
     /**
-     * Get source image corner latitude and longitude (in degree).
-     * @throws Exception The exceptions.
-     */
-    /*
-    private void getImageCornerLatLon() throws Exception {
-
-        // note longitude is in given in range [-180, 180]
-        firstNearLat = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.first_near_lat);
-        firstNearLon = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.first_near_long);
-        firstFarLat  = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.first_far_lat);
-        firstFarLon  = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.first_far_long);
-        lastNearLat  = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.last_near_lat);
-        lastNearLon  = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.last_near_long);
-        lastFarLat   = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.last_far_lat);
-        lastFarLon   = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.last_far_long);
-    }
-    */
-    /**
      * Compute source image geodetic boundary (minimum/maximum latitude/longitude) from the its corner
      * latitude/longitude.
      * @throws Exception The exceptions.
@@ -266,31 +256,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
                 lonMax = lon;
             }
         }
-        /*
-        final double[] lats  = {firstNearLat, firstFarLat, lastNearLat, lastFarLat};
-        final double[] lons  = {firstNearLon, firstFarLon, lastNearLon, lastFarLon};
-        latMin = 90.0;
-        latMax = -90.0;
-        for (double lat : lats) {
-            if (lat < latMin) {
-                latMin = lat;
-            }
-            if (lat > latMax) {
-                latMax = lat;
-            }
-        }
-
-        lonMin = 180.0;
-        lonMax = -180.0;
-        for (double lon : lons) {
-            if (lon < lonMin) {
-                lonMin = lon;
-            }
-            if (lon > lonMax) {
-                lonMax = lon;
-            }
-        }
-        */
     }
 
     /**
@@ -695,9 +660,9 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * @return The pixel value.
      * @throws IOException from readPixels
      */
+    /*
     private double getPixelValue(double azimuthIndex, double rangeIndex) throws IOException {
 
-        // todo should use the same function in RD method
         final int x0 = (int)rangeIndex;
         final int y0 = (int)azimuthIndex;
 
@@ -735,6 +700,201 @@ public final class GeolocationGridGeocodingOp extends Operator {
         }
 
         return MathUtils.interpolationBiLinear(v00, v01, v10, v11, rangeIndex - x0, azimuthIndex - y0);
+    }
+    */
+    /**
+     * Compute orthorectified pixel value for given pixel.
+     * @param azimuthIndex The azimuth index for pixel in source image.
+     * @param rangeIndex The range index for pixel in source image.
+     * @return The pixel value.
+     * @throws IOException from readPixels
+     */
+
+    private double getPixelValue(final double azimuthIndex, final double rangeIndex) throws IOException {
+
+        Unit.UnitType bandUnit = Unit.getUnitType(sourceBand);
+        if (imgResampling.equals(ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR)) {
+
+            final Tile sourceTile = getSrcTile(sourceBand, (int)rangeIndex, (int)azimuthIndex, 1, 1);
+            final Tile sourceTile2 = getSrcTile(sourceBand2, (int)rangeIndex, (int)azimuthIndex, 1, 1);
+            return getPixelValueUsingNearestNeighbourInterp(
+                    azimuthIndex, rangeIndex, bandUnit, sourceTile, sourceTile2);
+
+        } else if (imgResampling.equals(ResampleMethod.RESAMPLE_BILINEAR)) {
+
+            final Tile sourceTile = getSrcTile(sourceBand, (int)rangeIndex, (int)azimuthIndex, 2, 2);
+            final Tile sourceTile2 = getSrcTile(sourceBand2, (int)rangeIndex, (int)azimuthIndex, 2, 2);
+            return getPixelValueUsingBilinearInterp(azimuthIndex, rangeIndex,
+                    bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2);
+
+        } else if (imgResampling.equals(ResampleMethod.RESAMPLE_CUBIC)) {
+
+            final Tile sourceTile = getSrcTile(sourceBand, Math.max(0, (int)rangeIndex - 1),
+                                                Math.max(0, (int)azimuthIndex - 1), 4, 4);
+            final Tile sourceTile2 = getSrcTile(sourceBand2, Math.max(0, (int)rangeIndex - 1),
+                                                Math.max(0, (int)azimuthIndex - 1), 4, 4);
+            return getPixelValueUsingBicubicInterp(azimuthIndex, rangeIndex,
+                    bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2);
+        } else {
+            throw new OperatorException("Unknown interpolation method");
+        }
+    }
+
+    private Tile getSrcTile(Band sourceBand, int minX, int minY, int width, int height) {
+        if(sourceBand == null)
+            return null;
+
+        final Rectangle srcRect = new Rectangle(minX, minY, width, height);
+        return getSourceTile(sourceBand, srcRect, ProgressMonitor.NULL);
+    }
+    
+    /**
+     * Get source image pixel value using nearest neighbot interpolation.
+     * @param azimuthIndex The azimuth index for pixel in source image.
+     * @param rangeIndex The range index for pixel in source image.
+     * @param bandUnit The source band unit.
+     * @param sourceTile  i
+     * @param sourceTile2 q
+     * @return The pixel value.
+     */
+    private double getPixelValueUsingNearestNeighbourInterp(final double azimuthIndex, final double rangeIndex,
+            final Unit.UnitType bandUnit, final Tile sourceTile, final Tile sourceTile2) {
+
+        final int x0 = (int)rangeIndex;
+        final int y0 = (int)azimuthIndex;
+
+        double v = 0.0;
+        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.INTENSITY_DB) {
+
+            v = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
+
+        } else if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+
+            final double vi = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
+            final double vq = sourceTile2.getDataBuffer().getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y0));
+            v = vi*vi + vq*vq;
+
+        } else {
+            throw new OperatorException("Uknown band unit");
+        }
+
+        return v;
+    }
+
+    /**
+     * Get source image pixel value using bilinear interpolation.
+     * @param azimuthIndex The azimuth index for pixel in source image.
+     * @param rangeIndex The range index for pixel in source image.
+     * @param bandUnit The source band unit.
+     * @param sceneRasterWidth the product width
+     * @param sceneRasterHeight the product height
+     * @param sourceTile  i
+     * @param sourceTile2 q
+     * @return The pixel value.
+     */
+    private double getPixelValueUsingBilinearInterp(final double azimuthIndex, final double rangeIndex,
+                                                    final Unit.UnitType bandUnit,
+                                                    final int sceneRasterWidth, final int sceneRasterHeight,
+                                                    final Tile sourceTile, final Tile sourceTile2) {
+
+        final int x0 = (int)rangeIndex;
+        final int y0 = (int)azimuthIndex;
+        final int x1 = Math.min(x0 + 1, sceneRasterWidth - 1);
+        final int y1 = Math.min(y0 + 1, sceneRasterHeight - 1);
+        final double dx = rangeIndex - x0;
+        final double dy = azimuthIndex - y0;
+
+        final ProductData srcData = sourceTile.getDataBuffer();
+
+        double v00, v01, v10, v11;
+        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.INTENSITY_DB) {
+
+            v00 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
+            v01 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y0));
+            v10 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y1));
+            v11 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y1));
+
+        } else if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+
+            final ProductData srcData2 = sourceTile2.getDataBuffer();
+
+            final double vi00 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
+            final double vi01 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y0));
+            final double vi10 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y1));
+            final double vi11 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y1));
+
+            final double vq00 = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y0));
+            final double vq01 = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x1, y0));
+            final double vq10 = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y1));
+            final double vq11 = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x1, y1));
+
+            v00 = vi00*vi00 + vq00*vq00;
+            v01 = vi01*vi01 + vq01*vq01;
+            v10 = vi10*vi10 + vq10*vq10;
+            v11 = vi11*vi11 + vq11*vq11;
+
+        } else {
+            throw new OperatorException("Uknown band unit");
+        }
+
+        return MathUtils.interpolationBiLinear(v00, v01, v10, v11, dx, dy);
+    }
+
+    /**
+     * Get source image pixel value using bicubic interpolation.
+     * @param azimuthIndex The azimuth index for pixel in source image.
+     * @param rangeIndex The range index for pixel in source image.
+     * @param bandUnit The source band unit.
+     * @param sceneRasterWidth the product width
+     * @param sceneRasterHeight the product height
+     * @param sourceTile  i
+     * @param sourceTile2 q
+     * @return The pixel value.
+     */
+    private double getPixelValueUsingBicubicInterp(final double azimuthIndex, final double rangeIndex,
+                                                   final Unit.UnitType bandUnit,
+                                                   final int sceneRasterWidth, final int sceneRasterHeight,
+                                                   final Tile sourceTile, final Tile sourceTile2) {
+
+        final int [] x = new int[4];
+        x[1] = (int)rangeIndex;
+        x[0] = Math.max(0, x[1] - 1);
+        x[2] = Math.min(x[1] + 1, sceneRasterWidth - 1);
+        x[3] = Math.min(x[1] + 2, sceneRasterWidth - 1);
+
+        final int [] y = new int[4];
+        y[1] = (int)azimuthIndex;
+        y[0] = Math.max(0, y[1] - 1);
+        y[2] = Math.min(y[1] + 1, sceneRasterHeight - 1);
+        y[3] = Math.min(y[1] + 2, sceneRasterHeight - 1);
+
+        final ProductData srcData = sourceTile.getDataBuffer();
+
+        final double[][] v = new double[4][4];
+        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.INTENSITY_DB) {
+
+            for (int i = 0; i < y.length; i++) {
+                for (int j = 0; j < x.length; j++) {
+                    v[i][j] = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x[j], y[i]));
+                }
+            }
+
+        } else if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+
+            final ProductData srcData2 = sourceTile2.getDataBuffer();
+            for (int i = 0; i < y.length; i++) {
+                for (int j = 0; j < x.length; j++) {
+                    final double vi = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x[j], y[i]));
+                    final double vq = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x[j], y[i]));
+                    v[i][j] = vi*vi + vq*vq;
+                }
+            }
+
+        } else {
+            throw new OperatorException("Uknown band unit");
+        }
+
+        return MathUtils.interpolationBiCubic(v, rangeIndex - x[1], azimuthIndex - y[1]);
     }
 
     /**
