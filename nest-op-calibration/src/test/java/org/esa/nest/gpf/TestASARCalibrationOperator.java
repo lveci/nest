@@ -21,6 +21,7 @@ public class TestASARCalibrationOperator extends TestCase {
     private OperatorSpi spi;
     private final static String inputPathWSM =     "P:\\nest\\nest\\test\\input\\ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1";
     private final static String expectedPathWSM =  "P:\\nest\\nest\\test\\expected\\ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1_Calib.dim";
+    private final static String asarLazioPath =    "P:\\nest\\nest\\ESA Data\\NestBox\\GTC_dataset\\ASAR_LAZIO";
 
     @Override
     protected void setUp() throws Exception {
@@ -155,5 +156,44 @@ public class TestASARCalibrationOperator extends TestCase {
         op.setSourceProduct(sourceProduct);
 
         TestUtils.compareProducts(op, expectedPathWSM, null);
+    }
+
+    /**
+     * Processes all products in a folder
+     * @throws Exception general exception
+     */
+    public void testProcessAllASAR() throws Exception
+    {
+        final File folder = new File(asarLazioPath);
+        if(!folder.exists()) return;
+
+        if(TestUtils.canTestProcessingOnAllProducts())
+            recurseFolder(folder);
+    }
+
+    private void recurseFolder(File folder) throws Exception {
+        for(File file : folder.listFiles()) {
+            if(file.isDirectory()) {
+                recurseFolder(file);
+            } else {
+                try {
+                    final ProductReader reader = ProductIO.getProductReaderForFile(file);
+                    if(reader != null) {
+                        System.out.println("Processing "+ file.toString());
+
+                        final Product sourceProduct = reader.readProductNodes(file, null);
+
+                        final ASARCalibrationOperator op = (ASARCalibrationOperator)spi.createOperator();
+                        assertNotNull(op);
+                        op.setSourceProduct(sourceProduct);
+
+                        TestUtils.executeOperator(op);
+                    }
+                } catch(Exception e) {
+                    System.out.println("Failed to process "+ file.toString());
+                    throw e;
+                }
+            }
+        }
     }
 }
