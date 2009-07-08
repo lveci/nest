@@ -131,7 +131,7 @@ public class TestUtils {
 
         // readPixels: execute computeTiles()
         final float[] floatValues = new float[10000];
-        targetBand.readPixels(100, 100, 100, 100, floatValues, ProgressMonitor.NULL);
+        targetBand.readPixels(100, 101, 100, 99, floatValues, ProgressMonitor.NULL);
 
         // compare with expected outputs:
         final File expectedFile = new File(expectedPath);
@@ -145,7 +145,7 @@ public class TestUtils {
         final Band expectedBand = expectedProduct.getBandAt(0);
 
         final float[] expectedValues = new float[10000];
-        expectedBand.readPixels(100, 100, 100, 100, expectedValues, ProgressMonitor.NULL);
+        expectedBand.readPixels(100, 101, 100, 99, expectedValues, ProgressMonitor.NULL);
         if(!Arrays.equals(floatValues, expectedValues))
                 throwErr("Pixels are different");
 
