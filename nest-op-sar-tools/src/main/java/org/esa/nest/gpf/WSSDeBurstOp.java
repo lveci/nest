@@ -134,8 +134,6 @@ public class WSSDeBurstOp extends Operator {
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
-
-        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 512);
     }
 
     private static void copyMetaData(final MetadataElement source, final MetadataElement target) {
@@ -144,7 +142,7 @@ public class WSSDeBurstOp extends Operator {
                 target.addElement(element.createDeepClone());
         }
         for (final MetadataAttribute attribute : source.getAttributes()) {
-            target.addAttribute(attribute.createDeepClone());
+            target.addAttributeFast(attribute.createDeepClone());
         }
     }
 
@@ -203,7 +201,7 @@ public class WSSDeBurstOp extends Operator {
 
                 Band srcBandI, srcBandQ;
                 if (produceIntensitiesOnly) {
-                    Band tgtBand = targetProduct.getBandAt(index);
+                    final Band tgtBand = targetProduct.getBandAt(index);
                     targetTileIntensity = targetTiles.get(tgtBand);
                     final ComplexBand cBand = bandMap.get(tgtBand);
                     srcBandI = cBand.i;
@@ -225,7 +223,7 @@ public class WSSDeBurstOp extends Operator {
                 if (srcRectWidth < 1) continue;
 
                 try {
-                    synchronized(this) {
+                    //synchronized(this) {
                         if (lineTimeList.size() <= index) {
                             sortLineTimes(sourceProduct, srcBandI);
                         } else {
@@ -234,7 +232,7 @@ public class WSSDeBurstOp extends Operator {
                             //    lt.visited = false;
                             //}
                         }
-                    }
+                   // }
                 } catch (Exception e) {
                     System.out.print("getImageRecord " + e.toString());
                     System.out.println();
@@ -335,8 +333,8 @@ public class WSSDeBurstOp extends Operator {
 
         double Ival, Qval, intensity;
 
-        Vector<short[]> srcDataListI = new Vector<short[]>(3);
-        Vector<short[]> srcDataListQ = new Vector<short[]>(3);
+        final Vector<short[]> srcDataListI = new Vector<short[]>(3);
+        final Vector<short[]> srcDataListQ = new Vector<short[]>(3);
 
         try {
             // get all burst lines
@@ -345,8 +343,7 @@ public class WSSDeBurstOp extends Operator {
             if(srcDataListI.isEmpty())
                 return false;
 
-            int dataListSize = srcDataListI.size();
-
+            final int dataListSize = srcDataListI.size();
             // for all x peakpick or average from the bursts
             for (int x = startX, i = 0; x < endX; ++x, ++i) {
 
@@ -422,7 +419,7 @@ public class WSSDeBurstOp extends Operator {
         return false;
     }
 
-    private void getBurstLines(final Integer[] burstLineList, final Band srcBandI, final Band srcBandQ,
+    private static void getBurstLines(final Integer[] burstLineList, final Band srcBandI, final Band srcBandQ,
                                final int startX, final int endX,
                                final Vector<short[]> srcDataListI, final Vector<short[]> srcDataListQ,
                                final ProgressMonitor pm) {
@@ -441,7 +438,7 @@ public class WSSDeBurstOp extends Operator {
 
             int invalidCount = 0;
             int total = 0;
-            int max = Math.min(srcBandWidth, srcDataI.length);
+            final int max = Math.min(srcBandWidth, srcDataI.length);
             for(int i=500; i < max; i+= 50) {
                 if(isInvalid(srcDataI[i], srcDataQ[i], zeroThreshold))
                     ++invalidCount;
