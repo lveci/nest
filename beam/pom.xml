@@ -125,7 +125,7 @@
         <!--module>beam-meris-ndvi</module-->
         <!--module>beam-aatsr-sst</module-->
         <!--module>beam-flhmci</module-->
-        <!--module>beam-mosaic</module-->
+        <module>beam-mosaic</module>
         <!--module>beam-binning</module-->
         <!--module>beam-unmix</module-->
         <module>beam-cluster-analysis</module>

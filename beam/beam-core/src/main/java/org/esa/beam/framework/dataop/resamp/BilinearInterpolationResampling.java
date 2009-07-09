@@ -21,8 +21,10 @@ final class BilinearInterpolationResampling implements Resampling {
         index.width = width;
         index.height = height;
 
-        final int i0 = (int) Math.floor(x);
-        final int j0 = (int) Math.floor(y);
+        //final int i0 = (int) Math.floor(x);
+        //final int j0 = (int) Math.floor(y);
+        final int i0 = (int)x;
+        final int j0 = (int)y;
 /*
         final float di = x - (i0 + .5f);
         final float dj = y - (j0 + .5f);
@@ -56,12 +58,16 @@ final class BilinearInterpolationResampling implements Resampling {
         index.j0 = j0;
         
         index.i[0] = i0;
-        index.i[1] = Index.crop(i0 + 1, width - 1);
+        index.i[1] = crop(i0 + 1, width - 1);
         index.ki[0] = x - i0;
 
         index.j[0] = j0;
         index.j[1] = Index.crop(j0 + 1, height - 1);
         index.kj[0] = y - j0;        
+    }
+
+    private static int crop(final int i, final int max) {
+        return (i < 0) ? 0 : (i > max) ? max : i;
     }
 
     public final float resample(final Raster raster,

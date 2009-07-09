@@ -1081,7 +1081,7 @@ public class ASARCalibrationOperator extends Operator {
                     }
                 }
 
-                trgData.setElemDoubleAt(index, sigma);
+                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), sigma);
             }
         }
     }

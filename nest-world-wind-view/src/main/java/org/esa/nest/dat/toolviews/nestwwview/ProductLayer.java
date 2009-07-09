@@ -119,8 +119,8 @@ public class ProductLayer extends RenderableLayer {
                                            com.bc.ceres.core.ProgressMonitor.NULL);
 
                 final GeoPos geoPos1 = newProduct.getGeoCoding().getGeoPos(new PixelPos(0, 0), null);
-                final GeoPos geoPos2 = newProduct.getGeoCoding().getGeoPos(new PixelPos(newProduct.getSceneRasterWidth(),
-                                                                                        newProduct.getSceneRasterHeight()),
+                final GeoPos geoPos2 = newProduct.getGeoCoding().getGeoPos(new PixelPos(newProduct.getSceneRasterWidth()-1,
+                                                                                        newProduct.getSceneRasterHeight()-1),
                                                                            null);
 
                 final Sector sector = new Sector(Angle.fromDegreesLatitude(geoPos1.getLat()),
@@ -152,10 +152,10 @@ public class ProductLayer extends RenderableLayer {
 
     private void addOutline(final Product product) {
         final GeoPos geoPos1 = product.getGeoCoding().getGeoPos(new PixelPos(0, 0), null);
-        final GeoPos geoPos2 = product.getGeoCoding().getGeoPos(new PixelPos(product.getSceneRasterWidth(), 0), null);
-        final GeoPos geoPos3 = product.getGeoCoding().getGeoPos(new PixelPos(product.getSceneRasterWidth(),
-                product.getSceneRasterHeight()), null);
-        final GeoPos geoPos4 = product.getGeoCoding().getGeoPos(new PixelPos(0, product.getSceneRasterHeight()), null);
+        final GeoPos geoPos2 = product.getGeoCoding().getGeoPos(new PixelPos(product.getSceneRasterWidth()-1, 0), null);
+        final GeoPos geoPos3 = product.getGeoCoding().getGeoPos(new PixelPos(product.getSceneRasterWidth()-1,
+                product.getSceneRasterHeight()-1), null);
+        final GeoPos geoPos4 = product.getGeoCoding().getGeoPos(new PixelPos(0, product.getSceneRasterHeight()-1), null);
 
         final ArrayList<Position> positions = new ArrayList<Position>(4);
         positions.add(new Position(Angle.fromDegreesLatitude(geoPos1.getLat()),

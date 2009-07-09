@@ -195,8 +195,8 @@ public class FlatEarthWWToolView extends AbstractToolView {
         }
 
         public void productAdded(final Product product) {
-            setSelectedProduct(product);
             setProducts(datApp.getProductManager().getProducts());
+            setSelectedProduct(product);
         }
 
         public void productRemoved(final Product product) {

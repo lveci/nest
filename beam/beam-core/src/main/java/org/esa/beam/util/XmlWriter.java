@@ -1,5 +1,5 @@
 /*
- * $Id: XmlWriter.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: XmlWriter.java,v 1.2 2009-07-09 17:59:52 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -164,7 +164,7 @@ public class XmlWriter {
     public void printLine(String[] tags, String text) {
         if (text != null && text.trim().length() > 0) {
             _pWriter.print(tags[0]);
-            _pWriter.print(encode(text));
+            _pWriter.print(_xmlOutputter.outputString(new Text(text.trim())));
             _pWriter.println(tags[1].trim());
         } else {
             _pWriter.println(tags[0].substring(0, tags[0].length() - 1).concat(" />"));

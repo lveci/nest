@@ -393,7 +393,7 @@ public final class ERSCalibrationOperator extends Operator {
                     }
                 }
 
-                trgData.setElemDoubleAt(index, sigma);
+                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), sigma);
             }
         }
     } catch(Exception e) {

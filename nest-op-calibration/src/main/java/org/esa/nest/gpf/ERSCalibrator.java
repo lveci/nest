@@ -362,7 +362,7 @@ public final class ERSCalibrator implements Calibrator {
                     }
                 }
 
-                trgData.setElemDoubleAt(index, sigma);
+                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), sigma);
             }
         }
     } catch(Exception e) {

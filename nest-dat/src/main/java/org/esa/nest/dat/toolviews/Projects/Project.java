@@ -41,12 +41,19 @@ public class Project extends Observable {
     private ProjectPTL productTreeListener = null;
     private ProjectSubFolder projectSubFolders = null;
     private final static boolean SAVE_PROJECT = true;
+    private final Timer timer = new Timer();
 
     /**
     * @return The unique instance of this class.
     */
     public static Project instance() {
         return _instance;
+    }
+
+    @Override
+    public void finalize() throws Throwable {
+        timer.cancel();
+        super.finalize();
     }
 
     void notifyEvent(boolean saveProject) {
@@ -198,7 +205,6 @@ public class Project extends Observable {
 
     private void startUpdateTimer() {
 
-        final Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
                 public void run() {
                     if(IsProjectOpen()) {

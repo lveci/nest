@@ -195,7 +195,7 @@ public class ALOSCalibrator implements Calibrator {
                     }
                 }
 
-                trgData.setElemDoubleAt(index, sigma);
+                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), sigma);
             }
         }
     }

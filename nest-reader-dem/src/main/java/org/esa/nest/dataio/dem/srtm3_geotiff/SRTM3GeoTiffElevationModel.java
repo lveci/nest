@@ -55,8 +55,10 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
     }
 
     public float getElevation(GeoPos geoPos) throws Exception {
-        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // DEGREE_RES * NUM_PIXELS_PER_TILE;
         float pixelY = RASTER_HEIGHT - (geoPos.lat + 60.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; //DEGREE_RES * NUM_PIXELS_PER_TILE;
+        if(pixelY < 0)
+            return noDataValue;
+        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // DEGREE_RES * NUM_PIXELS_PER_TILE;
 
         _resampling.computeIndex(pixelX, pixelY,
                                  RASTER_WIDTH,

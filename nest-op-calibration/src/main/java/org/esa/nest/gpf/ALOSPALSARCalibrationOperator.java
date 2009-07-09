@@ -359,7 +359,7 @@ public class ALOSPALSARCalibrationOperator extends Operator {
                     }
                 }
 
-                trgData.setElemDoubleAt(index, sigma);
+                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), sigma);
             }
         }
     }
