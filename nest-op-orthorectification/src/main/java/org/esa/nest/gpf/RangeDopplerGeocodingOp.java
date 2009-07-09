@@ -467,9 +467,9 @@ public class RangeDopplerGeocodingOp extends Operator {
      * Compute earth radius for all range lines (in m).
      */
     private void computeEarthRadius() {
-        earthRadius = new double[targetImageHeight];
-        for (int i = 0; i < targetImageHeight; i++) {
-            earthRadius[i] = ASARCalibrationOperator.computeEarthRadius((float)(latMin + i*delLat), 0.0f);
+        earthRadius = new double[targetImageHeight + 1];
+        for (int i = 0; i <= targetImageHeight; i++) {
+            earthRadius[i] = ASARCalibrationOperator.computeEarthRadius((float)(latMax - i*delLat), 0.0f);
         }
     }
     
@@ -1824,8 +1824,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         //final double earthRadius = ASARCalibrationOperator.computeEarthRadius(latitude.getPixelFloat(x, y),
         //                                                                      longitude.getPixelFloat(x, y));
-
-        int i = (int)((latitude.getPixelFloat(x, y) - latMin)/delLat + 0.5);
+        int i = (int)((latMax - latitude.getPixelFloat(x, y))/delLat + 0.5);
 
         final double elevationAngle = ASARCalibrationOperator.computeElevationAngle(
                                             slantRange, oldSatelliteHeight, avgSceneHeight + earthRadius[i]);
