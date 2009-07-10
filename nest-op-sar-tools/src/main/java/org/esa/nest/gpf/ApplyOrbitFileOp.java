@@ -225,11 +225,7 @@ public final class ApplyOrbitFileOp extends Operator {
                                     sourceProduct.getSceneRasterWidth(),
                                     sourceProduct.getSceneRasterHeight());
 
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        targetProduct.setStartTime(sourceProduct.getStartTime());
-        targetProduct.setEndTime(sourceProduct.getEndTime());
+        OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
         for(Band srcBand : sourceProduct.getBands()) {
             if(srcBand instanceof VirtualBand) {
@@ -431,6 +427,8 @@ public final class ApplyOrbitFileOp extends Operator {
 
         final double a = Constants.semiMajorAxis;
         final double b = Constants.semiMinorAxis;
+        final double a2 = a*a;
+        final double b2 = b*b;
         final double del = 0.001;
         final int maxIter = 10;
 
@@ -458,14 +456,14 @@ public final class ApplyOrbitFileOp extends Operator {
 
             F.set(0, 0, data.xVel*dx + data.yVel*dy + data.zVel*dz);
             F.set(1, 0, dx*dx + dy*dy + dz*dz - Math.pow(time*Constants.halfLightSpeed, 2.0));
-            F.set(2, 0, x*x/(a*a) + y*y/(a*a) + z*z/(b*b) - 1);
+            F.set(2, 0, x*x/a2 + y*y/a2 + z*z/b2 - 1);
 
             J.set(1, 0, 2.0*dx);
             J.set(1, 1, 2.0*dy);
             J.set(1, 2, 2.0*dz);
-            J.set(2, 0, 2.0*x/(a*a));
-            J.set(2, 1, 2.0*y/(a*a));
-            J.set(2, 2, 2.0*z/(b*b));
+            J.set(2, 0, 2.0*x/a2);
+            J.set(2, 1, 2.0*y/a2);
+            J.set(2, 2, 2.0*z/b2);
 
             X = X.minus(J.inverse().times(F));
 

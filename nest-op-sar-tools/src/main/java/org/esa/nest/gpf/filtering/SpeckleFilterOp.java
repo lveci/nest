@@ -28,6 +28,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.gpf.OperatorUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -77,7 +78,7 @@ public class SpeckleFilterOp extends Operator {
     static final String GAMMA_MAP_SPECKLE_FILTER = "Gamma Map";
     static final String LEE_SPECKLE_FILTER = "Lee";
 
-    private transient Map<Band, Band> bandMap;
+    private final transient Map<Band, Band> bandMap = new HashMap<Band, Band>(3);
     private int halfSizeX;
     private int halfSizeY;
     private int sourceImageWidth;
@@ -130,18 +131,9 @@ public class SpeckleFilterOp extends Operator {
                                     sourceProduct.getProductType(),
                                     sourceProduct.getSceneRasterWidth(),
                                     sourceProduct.getSceneRasterHeight());
-
-        bandMap = new HashMap<Band, Band>(3);
+        OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
         addSelectedBands();
-
-        // copy meta data from source to target
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        targetProduct.setStartTime(sourceProduct.getStartTime());
-        targetProduct.setEndTime(sourceProduct.getEndTime());
 
         halfSizeX = filterSizeX / 2;
         halfSizeY = filterSizeY / 2;
@@ -150,18 +142,18 @@ public class SpeckleFilterOp extends Operator {
     private void addSelectedBands() {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) {
-            Band[] bands = sourceProduct.getBands();
-            ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            final Band[] bands = sourceProduct.getBands();
+            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
                 bandNameList.add(band.getName());
             }
             sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
         }
 
-        Band[] sourceBands = new Band[sourceBandNames.length];
+        final Band[] sourceBands = new Band[sourceBandNames.length];
         for (int i = 0; i < sourceBandNames.length; i++) {
-            String sourceBandName = sourceBandNames[i];
-            Band sourceBand = sourceProduct.getBand(sourceBandName);
+            final String sourceBandName = sourceBandNames[i];
+            final Band sourceBand = sourceProduct.getBand(sourceBandName);
             if (sourceBand == null) {
                 throw new OperatorException("Source band not found: " + sourceBandName);
             }
@@ -179,7 +171,7 @@ public class SpeckleFilterOp extends Operator {
                 throw new OperatorException("For complex product please select intensity band only");
             }
 
-            Band targetBand = new Band(srcBand.getName(),
+            final Band targetBand = new Band(srcBand.getName(),
                                        ProductData.TYPE_FLOAT32,
                                        sourceProduct.getSceneRasterWidth(),
                                        sourceProduct.getSceneRasterHeight());
@@ -204,14 +196,14 @@ public class SpeckleFilterOp extends Operator {
 
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
-        Rectangle targetTileRectangle = targetTile.getRectangle();
-        int x0 = targetTileRectangle.x;
-        int y0 = targetTileRectangle.y;
-        int w = targetTileRectangle.width;
-        int h = targetTileRectangle.height;
+        final Rectangle targetTileRectangle = targetTile.getRectangle();
+        final int x0 = targetTileRectangle.x;
+        final int y0 = targetTileRectangle.y;
+        final int w = targetTileRectangle.width;
+        final int h = targetTileRectangle.height;
 
-        Rectangle sourceTileRectangle = getSourceTileRectangle(x0, y0, w, h);
-        Tile sourceRaster = getSourceTile(bandMap.get(targetBand), sourceTileRectangle, pm);
+        final Rectangle sourceTileRectangle = getSourceTileRectangle(x0, y0, w, h);
+        final Tile sourceRaster = getSourceTile(bandMap.get(targetBand), sourceTileRectangle, pm);
 
         if(filter.equals(MEAN_SPECKLE_FILTER)) {
 
@@ -283,8 +275,10 @@ public class SpeckleFilterOp extends Operator {
         neighborValues = new double[filterSizeX*filterSizeY];
         final ProductData trgData = targetTile.getDataBuffer();
 
-        for (int y = y0; y < y0 + h; y++) {
-            for (int x = x0; x < x0 + w; x++) {
+        final int maxY = y0 + h;
+        final int maxX = x0 + w;
+        for (int y = y0; y < maxY; ++y) {
+            for (int x = x0; x < maxX; ++x) {
 
                 getNeighborValues(x, y, sourceRaster);
 
@@ -312,8 +306,10 @@ public class SpeckleFilterOp extends Operator {
         neighborValues = new double[filterSizeX*filterSizeY];
         final ProductData trgData = targetTile.getDataBuffer();
 
-        for (int y = y0; y < y0 + h; y++) {
-            for (int x = x0; x < x0 + w; x++) {
+        final int maxY = y0 + h;
+        final int maxX = x0 + w;
+        for (int y = y0; y < maxY; ++y) {
+            for (int x = x0; x < maxX; ++x) {
 
                 getNeighborValues(x, y, sourceRaster);
 
@@ -343,8 +339,10 @@ public class SpeckleFilterOp extends Operator {
 
         getFrostMask();
 
-        for (int y = y0; y < y0 + h; y++) {
-            for (int x = x0; x < x0 + w; x++) {
+        final int maxY = y0 + h;
+        final int maxX = x0 + w;
+        for (int y = y0; y < maxY; ++y) {
+            for (int x = x0; x < maxX; ++x) {
 
                 getNeighborValues(x, y, sourceRaster);
 
@@ -374,8 +372,10 @@ public class SpeckleFilterOp extends Operator {
 
         getFrostMask();
 
-        for (int y = y0; y < y0 + h; y++) {
-            for (int x = x0; x < x0 + w; x++) {
+        final int maxY = y0 + h;
+        final int maxX = x0 + w;
+        for (int y = y0; y < maxY; ++y) {
+            for (int x = x0; x < maxX; ++x) {
 
                 getNeighborValues(x, y, sourceRaster);
 
@@ -402,8 +402,10 @@ public class SpeckleFilterOp extends Operator {
         neighborValues = new double[filterSizeX*filterSizeY];
         final ProductData trgData = targetTile.getDataBuffer();
 
-        for (int y = y0; y < y0 + h; y++) {
-            for (int x = x0; x < x0 + w; x++) {
+        final int maxY = y0 + h;
+        final int maxX = x0 + w;
+        for (int y = y0; y < maxY; ++y) {
+            for (int x = x0; x < maxX; ++x) {
 
                 getNeighborValues(x, y, sourceRaster);
 
@@ -424,8 +426,7 @@ public class SpeckleFilterOp extends Operator {
     private void getNeighborValues(final int x, final int y, final Tile sourceRaster) {
 
         final ProductData srcData = sourceRaster.getDataBuffer();
-
-        for (int i = 0; i < filterSizeX; i++) {
+        for (int i = 0; i < filterSizeX; ++i) {
 
             int xi = x - halfSizeX + i;
             if (xi < 0) {
@@ -435,8 +436,7 @@ public class SpeckleFilterOp extends Operator {
             }
 
             final int stride = i*filterSizeY;
-
-            for (int j = 0; j < filterSizeY; j++) {
+            for (int j = 0; j < filterSizeY; ++j) {
 
                 int yj = y - halfSizeY + j;
                 if (yj < 0) {
@@ -578,19 +578,21 @@ public class SpeckleFilterOp extends Operator {
             return mean;
         }
 
-        final double cp = neighborValues[(neighborValues.length/2)];
-
         final double ci = Math.sqrt(var) / mean;
         if (Double.compare(ci, cu) <= 0) {
             return mean;
         }
 
-        final double cmax = Math.sqrt(2)*cu;
-        if (cu < ci && ci < cmax) {
-            final double alpha = (1 + cu2) / (ci*ci - cu2);
-            final double b = alpha - enl - 1;
-            final double d = mean*mean*b*b + 4*alpha*enl*mean*cp;
-            return (b*mean + Math.sqrt(d)) / (2*alpha);
+        final double cp = neighborValues[(neighborValues.length/2)];
+
+        if (cu < ci) {
+            final double cmax = Math.sqrt(2)*cu;
+            if(ci < cmax) {
+                final double alpha = (1 + cu2) / (ci*ci - cu2);
+                final double b = alpha - enl - 1;
+                final double d = mean*mean*b*b + 4*alpha*enl*mean*cp;
+                return (b*mean + Math.sqrt(d)) / (2*alpha);
+            }
         }
 
         return cp;
