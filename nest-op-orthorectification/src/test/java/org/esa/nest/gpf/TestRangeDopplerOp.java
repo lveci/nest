@@ -18,6 +18,13 @@ public class TestRangeDopplerOp extends TestCase {
     private OperatorSpi spi;
     private final static String inputPathWSM =     "P:\\nest\\nest\\test\\input\\ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1";
     private final static String expectedPathWSM =  "P:\\nest\\nest\\test\\expected\\ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1_TC.dim";
+
+    private final static String inputPathIMS =     "P:\\nest\\nest\\test\\input\\ENVISAT-ASA_IMS_1PNDPA20050405_211952_000000162036_00115_16201_8523.dim";
+    private final static String expectedPathIMS =  "P:\\nest\\nest\\test\\expected\\ENVISAT-ASA_IMS_1PNDPA20050405_211952_000000162036_00115_16201_8523_TC.dim";
+
+    private final static String inputPathAPM =     "P:\\nest\\nest\\test\\input\\ASA_APM_1PNIPA20030327_091853_000000152015_00036_05601_5422.N1";
+    private final static String expectedPathAPM =  "P:\\nest\\nest\\test\\expected\\ENVISAT-ASA_APM_1PNIPA20030327_091853_000000152015_00036_05601_5422.N1_TC.dim";
+
     private final static String asarLazioPath = "P:\\nest\\nest\\ESA Data\\NestBox\\GTC_dataset\\ASAR_LAZIO";
     private final static String ersLazioPath =  "P:\\nest\\nest\\ESA Data\\NestBox\\GTC_dataset\\ERS_LAZIO";
 
@@ -33,10 +40,10 @@ public class TestRangeDopplerOp extends TestCase {
     }
 
     /**
-     * Processes a product and compares it to processed product known to be correct
+     * Processes a WSM product and compares it to processed product known to be correct
      * @throws Exception general exception
      */
-    public void testProcessing() throws Exception {
+    public void testProcessWSM() throws Exception {
 
         final File inputFile = new File(inputPathWSM);
         if(!inputFile.exists()) return;
@@ -50,6 +57,48 @@ public class TestRangeDopplerOp extends TestCase {
         op.setApplyRadiometricCalibration(true);
 
         TestUtils.compareProducts(op, expectedPathWSM, null);
+    }
+
+    /**
+     * Processes a IMS product and compares it to processed product known to be correct
+     * @throws Exception general exception
+     */
+    public void testProcessIMS() throws Exception {
+
+        final File inputFile = new File(inputPathIMS);
+        if(!inputFile.exists()) return;
+
+        final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
+        final Product sourceProduct = reader.readProductNodes(inputFile, null);
+
+        final RangeDopplerGeocodingOp op = (RangeDopplerGeocodingOp)spi.createOperator();
+        assertNotNull(op);
+        op.setSourceProduct(sourceProduct);
+        op.setApplyRadiometricCalibration(true);
+
+        TestUtils.compareProducts(op, expectedPathIMS, null);
+    }
+
+    /**
+     * Processes a APM product and compares it to processed product known to be correct
+     * @throws Exception general exception
+     */
+    public void testProcessAPM() throws Exception {
+
+        final File inputFile = new File(inputPathAPM);
+        if(!inputFile.exists()) return;
+
+        final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
+        final Product sourceProduct = reader.readProductNodes(inputFile, null);
+
+        final RangeDopplerGeocodingOp op = (RangeDopplerGeocodingOp)spi.createOperator();
+        assertNotNull(op);
+        op.setSourceProduct(sourceProduct);
+        op.setApplyRadiometricCalibration(true);
+        String[] bandNames = {sourceProduct.getBandAt(0).getName()};
+        op.setSourceBandNames(bandNames);
+
+        TestUtils.compareProducts(op, expectedPathAPM, null);
     }
 
     /**
