@@ -8,7 +8,7 @@ import com.bc.ceres.glayer.support.ImageLayer;
  * Provides a world map layer for the SMOS-Box.
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2009-05-28 14:17:58 $
+ * @version $Revision: 1.3 $ $Date: 2009-07-10 18:36:55 $
  * @since BEAM 4.6
  */
 public class BlueMarbleWorldMapLayer extends ImageLayer {
@@ -20,5 +20,10 @@ public class BlueMarbleWorldMapLayer extends ImageLayer {
 
         setName(WORLD_MAP_LAYER_NAME);
         setVisible(true);
+    }
+
+    @Override
+    public ValueContainer getConfiguration() {
+        return new ValueContainer();
     }
 }

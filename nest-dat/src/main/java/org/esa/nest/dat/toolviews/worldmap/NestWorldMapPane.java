@@ -17,6 +17,6 @@ public class NestWorldMapPane extends WorldMapPane {
 
     @Override
     protected final void paintComponent(final Graphics g) {
-        getPainter().paint(g);
+       // getPainter().paint(g);
     }
 }

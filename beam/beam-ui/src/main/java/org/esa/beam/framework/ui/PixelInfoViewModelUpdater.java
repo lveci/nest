@@ -1,5 +1,5 @@
 /*
- * $Id: PixelInfoViewModelUpdater.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: PixelInfoViewModelUpdater.java,v 1.2 2009-07-10 18:36:55 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -47,7 +47,7 @@ import java.util.Vector;
 
 /**
  * @author Marco Zuehlke
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:17:18 $
+ * @version $Revision: 1.2 $ $Date: 2009-07-10 18:36:55 $
  * @since BEAM 4.5.2
  */
 class PixelInfoViewModelUpdater {
@@ -323,8 +323,13 @@ class PixelInfoViewModelUpdater {
             }
             if (geoCoding != null) {
                 GeoPos geoPos = geoCoding.getGeoPos(pixelPos, null);
-                tgx = geoPos.getLonString();
-                tgy = geoPos.getLatString();
+                if (pixelInfoView.showGeoPosDecimal()) {
+                    tgx = String.valueOf(geoPos.getLon());
+                    tgy = String.valueOf(geoPos.getLat());
+                } else {
+                    tgx = geoPos.getLonString();
+                    tgy = geoPos.getLatString();
+                }
                 if (geoCoding instanceof MapGeoCoding) {
                     final MapGeoCoding mapGeoCoding = (MapGeoCoding) geoCoding;
                     final MapTransform mapTransform = mapGeoCoding.getMapInfo().getMapProjection().getMapTransform();

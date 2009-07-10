@@ -1,5 +1,5 @@
 /*
- * $Id: DateTimeUtils.java,v 1.2 2009-07-07 00:27:41 lveci Exp $
+ * $Id: DateTimeUtils.java,v 1.3 2009-07-10 18:36:55 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -25,7 +25,7 @@ import java.util.Date;
  * This utility class provides some date/time related methods.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-07-07 00:27:41 $
+ * @version $Revision: 1.3 $ $Date: 2009-07-10 18:36:55 $
  * @see java.util.Date
  */
 public class DateTimeUtils {
@@ -36,13 +36,13 @@ public class DateTimeUtils {
     public static final SimpleDateFormat ISO_8601_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
 
     /**
-     * The number of days from Jan 1, 4713 BC (Proleptic Julian) to 1/1/1970 AD (Gregorian).  1/1/1970 is time zero for
-     * a java.util.Date.
+     * The number of days from noon Jan 1, 4713 BC (Proleptic Julian) to midnight 1/1/1970 AD (Gregorian).
+     * 1/1/1970 is time zero for a java.util.Date.
      */
-    public static final double JD_OFFSET = 2440588.0;
+    public static final double JD_OFFSET = 2440587.5;
     /**
-     * The Modified Julian Day (MJD) gives the number of days since midnight on November 17, 1858. This date corresponds
-     * to <code>MJD_OFFSET = 2400000.5</code> days after day zero of the Julian calendar.
+     * The Modified Julian Day (MJD) gives the number of days since midnight on November 17, 1858. This date
+     * corresponds to <code>MJD_OFFSET = 2400000.5</code> days after day zero of the Julian calendar.
      */
     public static final double MJD_OFFSET = 2400000.5;
 
