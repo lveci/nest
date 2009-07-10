@@ -25,6 +25,7 @@ import org.esa.nest.datamodel.Unit;
 
 import java.awt.*;
 import java.util.HashMap;
+import java.io.File;
 
 /**
  * Calibration for ALOS PALSAR data products.
@@ -36,6 +37,7 @@ public class ALOSCalibrator implements Calibrator {
     private Product targetProduct;
 
     private boolean outputImageScaleInDb = false;
+    private File externalAuxFile = null;
 
     protected MetadataElement abstractedMetadata = null;
     private String sampleType = null;
@@ -48,6 +50,22 @@ public class ALOSCalibrator implements Calibrator {
      * requires that an operator has a default constructor.
      */
     public ALOSCalibrator() {
+    }
+
+    /**
+     * Set flag indicating if target image is output in dB scale.
+     */
+    @Override
+    public void setOutputImageIndB(boolean flag) {
+        outputImageScaleInDb = flag;
+    }
+
+    /**
+     * Set external auxiliary file.
+     */
+    @Override
+    public void setExternalAuxFile(File file) {
+        externalAuxFile = file;
     }
 
     /**

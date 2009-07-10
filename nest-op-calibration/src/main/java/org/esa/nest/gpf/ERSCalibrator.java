@@ -65,6 +65,7 @@ public final class ERSCalibrator implements Calibrator {
     private Product targetProduct;
 
     private boolean outputImageScaleInDb = false;
+    private File externalAuxFile = null;
 
     private Band sourceBand1;
     private Band sourceBand2;
@@ -171,6 +172,22 @@ public final class ERSCalibrator implements Calibrator {
     public ERSCalibrator() {
     }
 
+    /**
+     * Set flag indicating if target image is output in dB scale.
+     */
+    @Override
+    public void setOutputImageIndB(boolean flag) {
+        outputImageScaleInDb = flag;
+    }
+
+    /**
+     * Set external auxiliary file.
+     */
+    @Override
+    public void setExternalAuxFile(File file) {
+        externalAuxFile = file;
+    }
+    
     /**
 
      */

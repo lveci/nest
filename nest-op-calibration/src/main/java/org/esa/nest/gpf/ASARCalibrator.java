@@ -90,6 +90,22 @@ public class ASARCalibrator implements Calibrator {
     }
 
     /**
+     * Set flag indicating if target image is output in dB scale.
+     */
+    @Override
+    public void setOutputImageIndB(boolean flag) {
+        outputImageScaleInDb = flag;
+    }
+
+    /**
+     * Set external auxiliary file.
+     */
+    @Override
+    public void setExternalAuxFile(File file) {
+        externalAuxFile = file;
+    }
+
+    /**
 
      */
     @Override

@@ -6,6 +6,7 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
 
 import java.util.HashMap;
+import java.io.File;
 
 /**
 * The abstract base class for all calibration operators intended to be extended by clients.
@@ -18,5 +19,8 @@ public interface Calibrator {
     public void computeTile(Band targetBand, Tile targetTile,
                             HashMap<String, String[]> targetBandNameToSourceBandName,
                             com.bc.ceres.core.ProgressMonitor pm) throws OperatorException;
-    
+
+    public void setOutputImageIndB(boolean flag);
+
+    public void setExternalAuxFile(File file);
 }

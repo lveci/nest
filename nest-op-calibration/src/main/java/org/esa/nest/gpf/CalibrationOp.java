@@ -95,6 +95,8 @@ public class CalibrationOp extends Operator {
             createTargetProduct();
 
             calibrator = CalibrationFactory.createCalibrator(sourceProduct);
+            calibrator.setExternalAuxFile(externalAuxFile);
+            calibrator.setOutputImageIndB(outputImageScaleInDb);
             calibrator.initialize(sourceProduct, targetProduct);
 
             if(createGammaBand) {
