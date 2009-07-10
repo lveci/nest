@@ -44,7 +44,7 @@ public class TestASARCalibrationOperator extends TestCase {
 
         // get targetProduct gets initialize to be executed
         final Product targetProduct = op.getTargetProduct();
-        TestUtils.verifyProduct(targetProduct, true);
+        TestUtils.verifyProduct(targetProduct, true, true);
 
         final Band band = targetProduct.getBandAt(0);
         assertNotNull(band);
@@ -155,7 +155,10 @@ public class TestASARCalibrationOperator extends TestCase {
         assertNotNull(op);
         op.setSourceProduct(sourceProduct);
 
-        TestUtils.compareProducts(op, expectedPathWSM, null);
+        // get targetProduct: execute initialize()
+        final Product targetProduct = op.getTargetProduct();
+        TestUtils.verifyProduct(targetProduct, false, false);
+        TestUtils.compareProducts(op, targetProduct, expectedPathWSM, null);
     }
 
     /**

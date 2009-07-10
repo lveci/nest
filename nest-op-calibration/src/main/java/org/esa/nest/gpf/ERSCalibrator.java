@@ -336,6 +336,7 @@ public final class ERSCalibrator implements Calibrator {
         int index;
         int adcJ=0;
         for (int x = x0; x < x0 + w; x++) {
+            OperatorContext.checkForCancelation(pm);
 
             final double sinIncidenceAngleByK = Math.sin(incidenceAngles[x]) / k;
             if (applyADCSaturationCorrection)

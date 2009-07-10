@@ -350,6 +350,7 @@ public final class ERSCalibrationOperator extends Operator {
         int index;
         int adcJ=0;
         for (int x = x0; x < x0 + w; x++) {
+            checkForCancelation(pm);
 
             final double sinIncidenceAngleByK = Math.sin(incidenceAngles[x]) / k;
             if (applyADCSaturationCorrection)
@@ -1379,7 +1380,7 @@ public final class ERSCalibrationOperator extends Operator {
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
 
-        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 512);
+        //targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 512);
 
         updateTargetProductMetadata();
     }

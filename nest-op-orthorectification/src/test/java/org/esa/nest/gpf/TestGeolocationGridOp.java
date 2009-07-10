@@ -49,7 +49,10 @@ public class TestGeolocationGridOp extends TestCase {
         op.setSourceProduct(sourceProduct);
 
         final String[] excemptionList = { "total_size" };
-        TestUtils.compareProducts(op, expectedPathWSM, excemptionList);
+        // get targetProduct: execute initialize()
+        final Product targetProduct = op.getTargetProduct();
+        TestUtils.verifyProduct(targetProduct, false, false);
+        TestUtils.compareProducts(op, targetProduct, expectedPathWSM, excemptionList);
     }
 
     /**

@@ -56,7 +56,10 @@ public class TestRangeDopplerOp extends TestCase {
         op.setSourceProduct(sourceProduct);
         op.setApplyRadiometricCalibration(true);
 
-        TestUtils.compareProducts(op, expectedPathWSM, null);
+        // get targetProduct: execute initialize()
+        final Product targetProduct = op.getTargetProduct();
+        TestUtils.verifyProduct(targetProduct, false, false);
+        TestUtils.compareProducts(op, targetProduct, expectedPathWSM, null);
     }
 
     /**
@@ -76,7 +79,10 @@ public class TestRangeDopplerOp extends TestCase {
         op.setSourceProduct(sourceProduct);
         op.setApplyRadiometricCalibration(true);
 
-        TestUtils.compareProducts(op, expectedPathIMS, null);
+        // get targetProduct: execute initialize()
+        final Product targetProduct = op.getTargetProduct();
+        TestUtils.verifyProduct(targetProduct, false, false);
+        TestUtils.compareProducts(op, targetProduct, expectedPathIMS, null);
     }
 
     /**
@@ -98,7 +104,10 @@ public class TestRangeDopplerOp extends TestCase {
         String[] bandNames = {sourceProduct.getBandAt(0).getName()};
         op.setSourceBandNames(bandNames);
 
-        TestUtils.compareProducts(op, expectedPathAPM, null);
+        // get targetProduct: execute initialize()
+        final Product targetProduct = op.getTargetProduct();
+        TestUtils.verifyProduct(targetProduct, false, false);
+        TestUtils.compareProducts(op, targetProduct, expectedPathAPM, null);
     }
 
     /**

@@ -51,7 +51,7 @@ public class TestOversamplingOperator extends TestCase {
 
         // get targetProduct: execute initialize()
         Product targetProduct = op.getTargetProduct();
-        TestUtils.verifyProduct(targetProduct, true);
+        TestUtils.verifyProduct(targetProduct, true, true);
 
         Band band = targetProduct.getBandAt(0);
         assertNotNull(band);

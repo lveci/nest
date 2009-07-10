@@ -144,9 +144,13 @@ public class ReaderUtils {
     }
 
     public static void verifyProduct(Product product, boolean verifyTimes) throws Exception {
+        verifyProduct(product, verifyTimes, true);    
+    }
+
+    public static void verifyProduct(Product product, boolean verifyTimes, boolean verifyGeoCoding) throws Exception {
         if(product == null)
             throw new Exception("product is null");
-        if(product.getGeoCoding() == null)
+        if(verifyGeoCoding && product.getGeoCoding() == null)
             throw new Exception("geocoding is null");
         if(product.getMetadataRoot() == null)
             throw new Exception("metadataroot is null");

@@ -69,9 +69,8 @@ public class TestUtils {
         product.setGeoCoding(tpGeoCoding);
     }
 
-
-    public static void verifyProduct(Product product, boolean verifyTimes) throws Exception {
-        ReaderUtils.verifyProduct(product, verifyTimes);
+    public static void verifyProduct(Product product, boolean verifyTimes, boolean verifyGeoCoding) throws Exception {
+        ReaderUtils.verifyProduct(product, verifyTimes, verifyGeoCoding);
     }
 
     public static void attributeEquals(MetadataElement elem, String name, double trueValue) throws Exception {
@@ -120,10 +119,8 @@ public class TestUtils {
         }
     }
 
-    public static void compareProducts(Operator op, String expectedPath, String[] excemptionList) throws Exception {
-        // get targetProduct: execute initialize()
-        final Product targetProduct = op.getTargetProduct();
-        TestUtils.verifyProduct(targetProduct, false);
+    public static void compareProducts(Operator op, Product targetProduct,
+                                       String expectedPath, String[] excemptionList) throws Exception {
 
         final Band targetBand = targetProduct.getBandAt(0);
         if(targetBand == null)
@@ -156,7 +153,7 @@ public class TestUtils {
     public static void executeOperator(Operator op) throws Exception {
         // get targetProduct: execute initialize()
         final Product targetProduct = op.getTargetProduct();
-        TestUtils.verifyProduct(targetProduct, false);
+        TestUtils.verifyProduct(targetProduct, false, true);
 
         final Band targetBand = targetProduct.getBandAt(0);
         if(targetBand == null)

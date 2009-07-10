@@ -13,8 +13,6 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.Guardian;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.dataio.ReaderUtils;
@@ -33,36 +31,40 @@ import java.util.Map;
                   description = "Mosaics two or more products based on their geo-codings.")
 public class MosaicOp extends Operator {
 
-    private static final String NEAREST_NEIGHBOUR = "NEAREST_NEIGHBOUR";
-    private static final String BILINEAR_INTERPOLATION = "BILINEAR_INTERPOLATION";
-    private static final String CUBIC_CONVOLUTION = "CUBIC_CONVOLUTION";
-    private static final String NONE = "NONE";
+    static final String NEAREST_NEIGHBOUR = "NEAREST_NEIGHBOUR";
+    static final String BILINEAR_INTERPOLATION = "BILINEAR_INTERPOLATION";
+    static final String CUBIC_CONVOLUTION = "CUBIC_CONVOLUTION";
+    static final String NONE = "NONE";
 
     @SourceProducts
     private Product[] sourceProduct;
+    @TargetProduct
+    private Product targetProduct = null;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
     private String[] sourceBandNames = null;
 
-    @TargetProduct
-    private Product targetProduct = null;
-
     @Parameter(valueSet = {NEAREST_NEIGHBOUR, BILINEAR_INTERPOLATION, CUBIC_CONVOLUTION},
                defaultValue = NEAREST_NEIGHBOUR, description = "The method to be used when resampling the slave grid onto the master grid.",
                label="Resampling Type")
-    private String resamplingType = NEAREST_NEIGHBOUR;
+    private String resamplingMethod = NEAREST_NEIGHBOUR;
 
-    @Parameter(defaultValue = "false", description = "Average the overlapping areas",
-               label="Average Overlap")
+    @Parameter(defaultValue = "false", description = "Average the overlapping areas", label="Average Overlap")
     private boolean average = false;
+
+    @Parameter(defaultValue = "0", description = "Pixel Size X (deg)", label="Pixel Size X (deg)")
+    private float pixelSizeX = 0;
+    @Parameter(defaultValue = "0", description = "Pixel Size Y (deg)", label="Pixel Size Y (deg)")
+    private float pixelSizeY = 0;
+    @Parameter(defaultValue = "0", description = "Target width", label="Scene Width")
+    private int sceneWidth = 0;
+    @Parameter(defaultValue = "0", description = "Target height", label="Scene Height")
+    private int sceneHeight = 0;
 
     private final static Map<Product, double[]> srcCornerLatitudeMap = new HashMap<Product, double[]>(10);
     private final static Map<Product, double[]> srcCornerLongitudeMap = new HashMap<Product, double[]>(10);
     private final static Map<Product, Band> srcBandMap = new HashMap<Product, Band>(10);
-
-    private int targetImageWidth = 0;
-    private int targetImageHeight = 0;
 
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
 
@@ -71,8 +73,8 @@ public class MosaicOp extends Operator {
     private double lonMin = 0.0;
     private double lonMax = 0.0;
 
-    private Resampling resampling;
-    private Resampling.Index resamplingIndex;
+    private Resampling resampling = null;
+    private Resampling.Index resamplingIndex = null;
 
     @Override
     public void initialize() throws OperatorException {
@@ -89,9 +91,9 @@ public class MosaicOp extends Operator {
                 srcBandMap.put(srcBand.getProduct(), srcBand);
             }
      
-            if (resamplingType.equals(NEAREST_NEIGHBOUR))
+            if (resamplingMethod.equals(NEAREST_NEIGHBOUR))
                 resampling = Resampling.NEAREST_NEIGHBOUR;
-            else if (resamplingType.equals(BILINEAR_INTERPOLATION))
+            else if (resamplingMethod.equals(BILINEAR_INTERPOLATION))
                 resampling = Resampling.BILINEAR_INTERPOLATION;
             else
                 resampling = (Resampling.CUBIC_CONVOLUTION);
@@ -116,19 +118,22 @@ public class MosaicOp extends Operator {
             delLat = Math.min(delLat, delLon);
             delLon = delLat;
 
-            targetImageWidth = (int)((lonMax - lonMin)/ delLon) + 1;
-            targetImageHeight = (int)((latMax - latMin)/ delLat) + 1;
+            sceneWidth = (int)((lonMax - lonMin)/ delLon) + 1;
+            sceneHeight = (int)((latMax - latMin)/ delLat) + 1;
 
+            sceneWidth /= 2;
+            sceneHeight /= 2;
+            
             targetProduct = new Product("mosiac", "mosiac",
-                                        targetImageWidth,
-                                        targetImageHeight);
+                    sceneWidth,
+                    sceneHeight);
 
             addGeoCoding();
 
             final Band targetBand = new Band("mosaic",
                                                  ProductData.TYPE_FLOAT32,
-                                                 targetImageWidth,
-                                                 targetImageHeight);
+                    sceneWidth,
+                    sceneHeight);
 
             targetBand.setUnit(sourceProduct[0].getBandAt(0).getUnit());
             targetBand.setNoDataValue(0);
@@ -259,8 +264,8 @@ public class MosaicOp extends Operator {
         final float[] fineLatTiePoints = new float[gridWidth*gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latTiePoints, fineLatTiePoints);
 
-        float subSamplingX = (float)targetImageWidth / (gridWidth - 1);
-        float subSamplingY = (float)targetImageHeight / (gridHeight - 1);
+        float subSamplingX = (float) sceneWidth / (gridWidth - 1);
+        float subSamplingY = (float) sceneHeight / (gridHeight - 1);
 
         final TiePointGrid latGrid = new TiePointGrid("latitude", gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, fineLatTiePoints);
@@ -529,6 +534,7 @@ public class MosaicOp extends Operator {
 
         public Spi() {
             super(MosaicOp.class);
+            super.setOperatorUI(MosaicOpUI.class);
         }
     }
 }

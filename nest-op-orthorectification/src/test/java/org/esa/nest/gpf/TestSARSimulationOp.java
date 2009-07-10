@@ -48,7 +48,10 @@ public class TestSARSimulationOp extends TestCase {
         assertNotNull(op);
         op.setSourceProduct(sourceProduct);
 
-        TestUtils.compareProducts(op, expectedPathWSM, null);
+        // get targetProduct: execute initialize()
+        final Product targetProduct = op.getTargetProduct();
+        TestUtils.verifyProduct(targetProduct, false, false);
+        TestUtils.compareProducts(op, targetProduct, expectedPathWSM, null);
     }
 
     /**

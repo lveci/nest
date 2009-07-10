@@ -55,6 +55,9 @@ public class TestALOSCalibrationOperator extends TestCase {
         assertNotNull(op);
         op.setSourceProduct(sourceProduct);
 
-        TestUtils.compareProducts(op, expectedPath, null);
+        // get targetProduct: execute initialize()
+        final Product targetProduct = op.getTargetProduct();
+        TestUtils.verifyProduct(targetProduct, false, false);
+        TestUtils.compareProducts(op, targetProduct, expectedPath, null);
     }    
 }
