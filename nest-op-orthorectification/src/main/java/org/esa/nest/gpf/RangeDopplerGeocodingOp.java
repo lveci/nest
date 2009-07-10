@@ -750,7 +750,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         // the tile width has to be the image width because otherwise sourceRaster.getDataBufferIndex(x, y)
         // returns incorrect index for the last tile on the right
-        targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 20);
+        //targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 20);
     }
 
     private static void addLayoverShadowBitmasks(Product product) {
@@ -2063,8 +2063,16 @@ public class RangeDopplerGeocodingOp extends Operator {
         return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
     }
 
+    /**
+     * Set flag for radiometric correction. This function is for unit test only.
+     * @param flag The flag.
+     */
     void setApplyRadiometricCalibration(boolean flag) {
         applyRadiometricCalibration = flag;
+    }
+
+    void setSourceBandNames(String[] names) {
+        sourceBandNames = names;
     }
 
     private static class TileData {
