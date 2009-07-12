@@ -50,7 +50,7 @@
                     <path> ${installdir}</path>
                     <platforms>all</platforms>
                     <runInTerminal>0</runInTerminal>
-                    <windowsExec>${installdir}/nest-dat.exe</windowsExec>
+                    <windowsExec>${installdir}/nest-dat64.exe</windowsExec>
                     <windowsExecArgs></windowsExecArgs>
                     <windowsIcon></windowsIcon>
                     <windowsPath>${installdir}</windowsPath>
@@ -197,7 +197,7 @@
                     <comment>Next ESA SAR Toolbox</comment>
                     <name>NEST 2C</name>
                     <runInTerminal>0</runInTerminal>
-                    <windowsExec>${installdir}/nest-dat.exe</windowsExec>
+                    <windowsExec>${installdir}/nest-dat64.exe</windowsExec>
                     <windowsExecArgs></windowsExecArgs>
                     <windowsIcon></windowsIcon>
                     <windowsPath>${installdir}</windowsPath>
