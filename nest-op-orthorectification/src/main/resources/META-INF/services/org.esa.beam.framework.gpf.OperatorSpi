@@ -4,5 +4,5 @@ org.esa.nest.gpf.GeolocationGridGeocodingOp$Spi
 org.esa.nest.gpf.EllipsoidCorrectionRDOp$Spi
 org.esa.nest.gpf.MapProjectionOp$Spi
 org.esa.nest.gpf.SARSimulationOp$Spi
-org.esa.nest.gpf.AutomatedTerrainCorrectionOp$Spi
+org.esa.nest.gpf.SARSimTerrainCorrectionOp$Spi
 org.esa.nest.gpf.MosaicOp$Spi

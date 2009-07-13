@@ -86,7 +86,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
 
         getButton(ID_APPLY).setText("Run");
 
-        super.getJDialog().setMinimumSize(new Dimension(400, 300));
+        super.getJDialog().setMinimumSize(new Dimension(500, 300));
     }
 
     @Override

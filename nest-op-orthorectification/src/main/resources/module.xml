@@ -39,20 +39,58 @@
     <extension point="beam-ui:actions">
 
         <action>
+            <id>TerrainCorrection</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Terrain Correction</text>
+            <parent>geometry</parent>
+        </action>
+
+        <action>
             <id>RangeDopplerGeocodingOp</id>
             <class>org.esa.nest.dat.RangeDopplerGeocodingOpAction</class>
-            <text>Terrain Correction</text>
+            <text>Range-Doppler Terrain Correction</text>
             <shortDescr>Terrain Correction Range-Doppler Method</shortDescr>
-            <parent>geometry</parent>
+            <parent>TerrainCorrection</parent>
+            <separatorAfter>true</separatorAfter>
             <helpId>RangeDopplerGeocodingOp</helpId>
         </action>
+
+        <action>
+            <id>openOrthorectificationDialog</id>
+            <class>org.esa.nest.dat.SARSimTerrainCorrectionAction</class>
+            <parent>TerrainCorrection</parent>
+            <text>SAR-Simulation Terrain Correction</text>
+            <shortDescr>Perform Orthorectification using a simulated SAR image</shortDescr>
+            <placeAfter>RangeDopplerGeocodingOp</placeAfter>
+            <helpId>Orthorectification</helpId>
+        </action>
+
+        <action>
+            <id>SARSimulationOp</id>
+            <class>org.esa.nest.dat.SARSimulationOpAction</class>
+            <text>SAR Simulation</text>
+            <shortDescr>SAR simulation method</shortDescr>
+            <parent>TerrainCorrection</parent>
+            <placeAfter>openOrthorectificationDialog</placeAfter>
+            <helpId>SARSimulationOp</helpId>
+        </action>
+
+        <!--action>
+            <id>SARSimTerrainCorrectionOp</id>
+            <class>org.esa.nest.dat.SARSimTerrainCorrectionOpAction</class>
+            <text>SAR Sim Terrain Correction</text>
+            <shortDescr>Orthorectification with SAR simulation</shortDescr>
+            <parent>TerrainCorrection</parent>
+            <placeAfter>SARSimulationOp</placeAfter>
+            <helpId>SARSimTerrainCorrectionOp</helpId>
+        </action-->
 
         <action>
             <id>EllipsoidCorrection</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>Ellipsoid Correction</text>
             <parent>geometry</parent>
-            <placeAfter>RangeDopplerGeocodingOp</placeAfter>
+            <placeAfter>TerrainCorrection</placeAfter>
         </action>
 
         <action>
@@ -71,34 +109,6 @@
             <shortDescr>Ellipsoid Correction Range-Doppler Method Assuming Average Height</shortDescr>
             <parent>EllipsoidCorrection</parent>
             <helpId>EllipsoidCorrectionRDOp</helpId>
-        </action>
-
-        <action>
-            <id>openOrthorectificationDialog</id>
-            <class>org.esa.nest.dat.OrthorectificationAction</class>
-            <parent>geometry</parent>
-            <text>Full Orthorectification</text>
-            <shortDescr>Perform Automated Orthorectification</shortDescr>
-            <separatorAfter>true</separatorAfter>
-            <helpId>Orthorectification</helpId>
-        </action>
-
-        <action>
-            <id>SARSimulationOp</id>
-            <class>org.esa.nest.dat.SARSimulationOpAction</class>
-            <text>SAR Simulation</text>
-            <shortDescr>SAR simulation method</shortDescr>
-            <parent>geometry</parent>
-            <helpId>SARSimulationOp</helpId>
-        </action>
-
-        <action>
-            <id>AutomatedTerrainCorrectionOp</id>
-            <class>org.esa.nest.dat.AutomatedTerrainCorrectionOpAction</class>
-            <text>Automated Terrain Correction</text>
-            <shortDescr>Orthorectification with SAR simulation</shortDescr>
-            <parent>geometry</parent>
-            <helpId>AutomatedTerrainCorrectionOp</helpId>
         </action>
 
         <!--action>

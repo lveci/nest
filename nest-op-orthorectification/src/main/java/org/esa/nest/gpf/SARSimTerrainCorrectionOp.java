@@ -29,8 +29,6 @@ import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.framework.dataop.maptransf.Datum;
-import org.esa.beam.framework.dataop.maptransf.MapInfo;
-import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
@@ -45,7 +43,6 @@ import java.awt.*;
 import java.util.*;
 import java.io.IOException;
 import java.io.File;
-import java.text.SimpleDateFormat;
 
 /**
  * Raw SAR images usually contain significant geometric distortions. One of the factors that cause the
@@ -74,8 +71,8 @@ import java.text.SimpleDateFormat;
  * Reference: Guide to ASAR Geocoding, Issue 1.0, 19.03.2008
  */
 
-@OperatorMetadata(alias="Automated-Terrain-Correction", description="Orthorectification with SAR simulation")
-public class AutomatedTerrainCorrectionOp extends Operator {
+@OperatorMetadata(alias="SARSim-Terrain-Correction", description="Orthorectification with SAR simulation")
+public class SARSimTerrainCorrectionOp extends Operator {
 
     @SourceProduct(alias="source")
     protected Product sourceProduct;
@@ -1718,7 +1715,7 @@ public class AutomatedTerrainCorrectionOp extends Operator {
      */
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(AutomatedTerrainCorrectionOp.class);
+            super(SARSimTerrainCorrectionOp.class);
         }
     }
 }

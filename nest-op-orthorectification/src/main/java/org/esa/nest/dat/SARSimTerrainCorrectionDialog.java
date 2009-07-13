@@ -14,7 +14,7 @@ import java.io.File;
 /**
  *  Provides the User Interface for Automated Terrain Correction
  */
-public class OrthorectificationDialog extends MultiGraphDialog {
+public class SARSimTerrainCorrectionDialog extends MultiGraphDialog {
 
     private final static String homeUrl = System.getProperty("nest.home", ".");
     private final static File graphPath = new File(homeUrl, File.separator + "graphs" + File.separator + "internal");
@@ -24,7 +24,7 @@ public class OrthorectificationDialog extends MultiGraphDialog {
     private final static File tmpFile1 = new File(tmpFolder, TMP_FILENAME + ".dim");
     private final static File tmpDataFile1 = new File(tmpFolder, TMP_FILENAME + ".data");
 
-    public OrthorectificationDialog(final AppContext theAppContext, final String title, final String helpID) {
+    public SARSimTerrainCorrectionDialog(final AppContext theAppContext, final String title, final String helpID) {
         super(theAppContext, title, helpID, true);
 
         getIOPanel().setTargetProductName("gcp_selected_TC");
@@ -34,7 +34,7 @@ public class OrthorectificationDialog extends MultiGraphDialog {
     protected void createGraphs() throws GraphException {
         try {
             addGraph(new File(graphPath, "SARSimulationGraph.xml"), "", true);
-            addGraph(new File(graphPath, "AutomatedTerrainCorrectionGraph.xml"), "", true);
+            addGraph(new File(graphPath, "SARSimTerrainCorrectionGraph.xml"), "", true);
 
             //placeTargetProductTabAtEnd();
 

@@ -8,7 +8,7 @@ import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
  * Automated-Terrain-Correction action.
  *
  */
-public class AutomatedTerrainCorrectionOpAction extends AbstractVisatAction {
+public class SARSimTerrainCorrectionOpAction extends AbstractVisatAction {
 
     private NestSingleTargetProductDialog dialog = null;
 
@@ -17,7 +17,7 @@ public class AutomatedTerrainCorrectionOpAction extends AbstractVisatAction {
 
         if (dialog == null) {
             dialog = new NestSingleTargetProductDialog(
-                    "Automated-Terrain-Correction", getAppContext(), "Automated-Terrain-Correction", getHelpId());
+                    "SARSim-Terrain-Correction", getAppContext(), "SARSim-Terrain-Correction", getHelpId());
             dialog.setTargetProductNameSuffix("_TC");
         }
         dialog.show();
