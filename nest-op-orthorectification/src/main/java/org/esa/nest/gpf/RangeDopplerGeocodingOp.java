@@ -457,7 +457,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         for (int i = 0; i < srgrConvParams.length; i++) {
             srgrConvParamsTime[i] = srgrConvParams[i].timeMJD;
             for (int x = 0; x < sourceImageWidth; x++) {
-                oldSlantRange[i][x] = (float)computePolynomialValue(
+                oldSlantRange[i][x] = (float)org.esa.nest.util.MathUtils.computePolynomialValue(
                         x*rangeSpacing + srgrConvParams[i].ground_range_origin, srgrConvParams[i].coefficients);
             }
         }
@@ -1462,8 +1462,8 @@ public class RangeDopplerGeocodingOp extends Operator {
         // binary search is used in finding the zero doppler time
         double lowerBound = 0;
         double upperBound = sourceImageWidth*rangeSpacing;
-        double lowerBoundSlantRange = computePolynomialValue(lowerBound, srgrCoeff);
-        double upperBoundSlantRange = computePolynomialValue(upperBound, srgrCoeff);
+        double lowerBoundSlantRange = org.esa.nest.util.MathUtils.computePolynomialValue(lowerBound, srgrCoeff);
+        double upperBoundSlantRange = org.esa.nest.util.MathUtils.computePolynomialValue(upperBound, srgrCoeff);
 
         if (slantRange < lowerBoundSlantRange || slantRange > upperBoundSlantRange) {
             return -1.0;
@@ -1474,7 +1474,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         while(upperBound - lowerBound > 0.0) {
 
             final double mid = (lowerBound + upperBound)/2.0;
-            midSlantRange = computePolynomialValue(mid, srgrCoeff);
+            midSlantRange = org.esa.nest.util.MathUtils.computePolynomialValue(mid, srgrCoeff);
             if (Math.abs(midSlantRange - slantRange) < 0.1) {
                 return mid;
             } else if (midSlantRange < slantRange) {
@@ -1485,20 +1485,6 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
 
         return -1.0;
-    }
-
-    /**
-     * Compute polynomial value.
-     * @param x The variable.
-     * @param srgrCoeff The polynomial coefficients.
-     * @return The function value.
-     */
-    private static double computePolynomialValue(final double x, final double[] srgrCoeff) {
-        double v = 0.0;
-        for (int i = srgrCoeff.length-1; i > 0; i--) {
-            v = (v + srgrCoeff[i])*x;
-        }
-        return v + srgrCoeff[0];
     }
 
     /**
