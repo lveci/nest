@@ -71,6 +71,7 @@ public class ASARCalibrator implements Calibrator {
     private double firstLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
     private double avgSceneHeight = 0.0; // in m
+    private double rangeSpacing = 0.0; // in m
     private double rangeSpreadingCompPower; // power in range spreading loss compensation calculation
 
     private double[] newCalibrationConstant = new double[2];
@@ -147,6 +148,8 @@ public class ASARCalibrator implements Calibrator {
             if (retroCalibrationFlag) {
 
                 getSrgrCoeff();
+
+                getRangeSpacing();
 
                 getOldXCAFile();
 
@@ -266,6 +269,14 @@ public class ASARCalibrator implements Calibrator {
      */
     private void getSrgrCoeff() throws Exception {
         srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
+    }
+
+    /**
+     * Get range spacing from the abstracted metadata.
+     * @throws Exception The exceptions.
+     */
+    private void getRangeSpacing() throws Exception {
+        rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
     }
 
     /**
@@ -908,12 +919,18 @@ public class ASARCalibrator implements Calibrator {
             targetTileOldAntPat = new double[w];
         }
 
+        AbstractMetadata.SRGRCoefficientList srgrConvParam = null;
+        if (srgrFlag) {
+            srgrConvParam = getSRGRCoefficientsForARangeLine(zeroDopplerTime);
+        }
+
         for (int x = x0; x < x0 + w; x++) {
 
-            final double slantRange = computeSlantRange(x, y); // in m
+            final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
 
             final double earthRadius = computeEarthRadius(
-                                            latitude.getPixelFloat(x,y), longitude.getPixelFloat(x,y)); // in m
+                    latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC),
+                    longitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC)); // in m
 
             final double theta = computeElevationAngle(
                                             slantRange, satelitteHeight, avgSceneHeight + earthRadius); // in degree
@@ -947,12 +964,18 @@ public class ASARCalibrator implements Calibrator {
             targetTileOldAntPat = new double[w];
         }
 
+        AbstractMetadata.SRGRCoefficientList srgrConvParam = null;
+        if (srgrFlag) {
+            srgrConvParam = getSRGRCoefficientsForARangeLine(zeroDopplerTime);
+        }
+
         for (int x = x0; x < x0 + w; x++) {
 
-            final double slantRange = computeSlantRange(x, y); // in m
+            final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
 
             final double earthRadius = computeEarthRadius(
-                                            latitude.getPixelFloat(x,y), longitude.getPixelFloat(x,y)); // in m
+                    latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC),
+                    longitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC)); // in m
 
             final double theta = computeElevationAngle(
                                             slantRange, satelitteHeight, avgSceneHeight + earthRadius); // in degree
@@ -1022,16 +1045,58 @@ public class ASARCalibrator implements Calibrator {
     //============================================================================================================
 
     /**
+     * Get the SRGR coefficients for given zero Doppler time.
+     * @param zeroDopplerTime The zero Doppler time in MJD.
+     * @return The SRGR coefficients.
+     */
+    private AbstractMetadata.SRGRCoefficientList getSRGRCoefficientsForARangeLine(final double zeroDopplerTime) {
+
+        if (srgrConvParams.length == 1) {
+            return srgrConvParams[0];
+        }
+
+        int idx = 0;
+        for (int i = 0; i < srgrConvParams.length && zeroDopplerTime >= srgrConvParams[i].timeMJD; i++) {
+            idx = i;
+        }
+
+        if (idx == srgrConvParams.length - 1) {
+            idx--;
+        }
+
+        AbstractMetadata.SRGRCoefficientList srgrConvParam = new AbstractMetadata.SRGRCoefficientList();
+        srgrConvParam.timeMJD = zeroDopplerTime;
+        srgrConvParam.ground_range_origin = srgrConvParams[idx].ground_range_origin;
+
+        final double mu = (zeroDopplerTime - srgrConvParams[idx].timeMJD) /
+                          (srgrConvParams[idx+1].timeMJD - srgrConvParams[idx].timeMJD);
+
+        for (int i = 0; i < srgrConvParam.coefficients.length; i++) {
+            srgrConvParam.coefficients[i] = org.esa.nest.util.MathUtils.interpolationLinear(
+                    srgrConvParams[idx].coefficients[i], srgrConvParams[idx+1].coefficients[i], mu);
+        }
+        return srgrConvParam;
+    }
+
+    /**
      * Compute slant range for given pixel.
      * @param x The x coordinate of the pixel in the source image.
      * @param y The y coordinate of the pixel in the source image.
      * @return The slant range (in meters).
      */
-    private double computeSlantRange(int x, int y) {
-        final double time = slantRangeTime.getPixelFloat((float)x, (float)y) / 1000000000.0; //convert ns to s
-        return time * Constants.halfLightSpeed; // in m
-    }
+    private double computeSlantRange(int x, int y, AbstractMetadata.SRGRCoefficientList srgrConvParam) {
 
+        if (srgrFlag) { // for ground detected product, compute slant range from SRGR coefficients
+            return org.esa.nest.util.MathUtils.computePolynomialValue(
+                        x*rangeSpacing + srgrConvParam.ground_range_origin, srgrConvParam.coefficients);
+
+        } else { // for slant range product, compute slant range from slant range time
+
+            final double time = slantRangeTime.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC) / 1000000000.0; //convert ns to s
+            return time * Constants.halfLightSpeed; // in m
+        }
+    }
+    
     /**
      * Compute distance from satelitte to the Earth centre (in meters).
      * @param zeroDopplerTime The zero Doppler time (in days).
