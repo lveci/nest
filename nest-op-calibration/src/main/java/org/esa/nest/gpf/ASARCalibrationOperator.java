@@ -182,7 +182,7 @@ public class ASARCalibrationOperator extends Operator {
                 createBetaVirtualBand(targetProduct, outputImageScaleInDb);
             }
 
-            targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 5);
+            //targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 5);
 
         } catch(Exception e) {
             throw new OperatorException(getId() + ": " + e.getMessage());
@@ -1043,7 +1043,7 @@ public class ASARCalibrationOperator extends Operator {
             }
             
             for (int x = x0, xx = 0; x < maxX; ++x, ++xx) {
-
+                
                 index = sourceRaster1.getDataBufferIndex(x, y);
 
                 if (bandUnit == Unit.UnitType.AMPLITUDE) {
