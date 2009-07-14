@@ -51,9 +51,9 @@ public class ASARCalibrator implements Calibrator {
     protected MetadataElement absRoot = null;
 
     private String productType = null;
-    private String sampleType = null;
-    private String xcaFileName = null; // XCA file for radiometric calibration
-    private String xcaFilePath = null; // absolute path for XCA file
+    private String oldXCAFileName = null; // the old XCA file
+    private String newXCAFileName = null; // XCA file for radiometric calibration
+    private String newXCAFilePath = null; // absolute path for XCA file
     protected final String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
 
     protected TiePointGrid incidenceAngle = null;
@@ -61,24 +61,34 @@ public class ASARCalibrator implements Calibrator {
     protected TiePointGrid latitude = null;
     protected TiePointGrid longitude = null;
 
-    private boolean extAuxFileAvailableFlag = false;
-    private boolean antElevCorrFlag = false;
-    private boolean rangeSpreadCompFlag = false;
+    private boolean srgrFlag = false;
+    private boolean multilookFlag = false;
+    private boolean wideSwathProductFlag = false;
+    private boolean retroCalibrationFlag = false;
+    private boolean applyAntennaPatternCorr = false;
+    private boolean applyRangeSpreadingCorr = false;
 
     private double firstLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
     private double avgSceneHeight = 0.0; // in m
     private double rangeSpreadingCompPower; // power in range spreading loss compensation calculation
-    private final double[] calibrationFactor = new double[2]; // calibration constants corresponding to 2 bands in product
-    private double[] refElevationAngle = null; // reference elevation angles, in degree
-    private double[] targetTileNewAntPat = null; // antenna pattern for a given tile, in linear scale
-    private float[][] antennaPatternSingleSwath = null; // antenna pattern for two bands for single swath product, in dB
-    private float[][] antennaPatternWideSwath = null; // antenna patterm for 5 sub swathes for wide swath product, in dB
+
+    private double[] newCalibrationConstant = new double[2];
+    private double[] targetTileOldAntPat = null; // old antenna pattern gains for row pixels in a tile, in linear scale
+    private double[] targetTileNewAntPat = null; // new antenna pattern gains for row pixels in a tile, in linear scale
+    private double[] oldRefElevationAngle = null; // reference elevation angle for given swath in old aux file, in degree
+    private double[] newRefElevationAngle = null; // reference elevation angle for given swath in new aux file, in degree
+
+    private float[][] oldAntennaPatternSingleSwath = null; // old antenna pattern gains for single swath product, in dB
+    private float[][] oldAntennaPatternWideSwath = null; // old antenna pattern gains for single swath product, in dB
+    private float[][] newAntennaPatternSingleSwath = null; // new antenna pattern gains for single swath product, in dB
+    private float[][] newAntennaPatternWideSwath = null; // new antenna pattern gains for single swath product, in dB
 
     protected int numMPPRecords; // number of MPP ADSR records
     protected int[] lastLineIndex = null; // the index of the last line covered by each MPP ADSR record
     protected String swath;
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
+    private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
 
     private static final int numOfGains = 201; // number of antenna pattern gain values for a given swath and
                                                // polarization in the aux file
@@ -114,29 +124,36 @@ public class ASARCalibrator implements Calibrator {
             sourceProduct = srcProduct;
             targetProduct = tgtProduct;
 
-            setExternalAuxFileAvailableFlag();
-
             absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
             getProductType();
 
-            getSampleType();
+            getSRGRFlag();
+
+            getCalibrationFlags();
+
+            getMultilookFlag();
 
             getProductSwath();
 
-            getProductPolarization();
+            setCalibrationFlags();
 
-            getCalibrationFlags();
+            getProductPolarization();
 
             numMPPRecords = getNumOfRecordsInMainProcParam(sourceProduct);  //???
 
             getTiePointGridData(sourceProduct);
 
-            getXCAFile();
+            if (retroCalibrationFlag) {
 
-            getCalibrationFactor();
+                getSrgrCoeff();
 
-            if (!antElevCorrFlag) {
+                getOldXCAFile();
+
+                getOldAntennaPattern();
+            }
+
+            if (applyAntennaPatternCorr) {
 
                 getFirstLineTime();
 
@@ -146,30 +163,21 @@ public class ASARCalibrator implements Calibrator {
 
                 getOrbitStateVectors();
 
-                getAntennaPatternGain();
+                getNewXCAFile();
+
+                getNewAntennaPattern();
+
+                getNewCalibrationFactor();
             }
 
-            if (sampleType.contains("COMPLEX")) {
-                setPowerInRangeSpreadingLossComp();
+            if (applyRangeSpreadingCorr) {
+                setRangeSpreadingLossCompPower();
             }
 
             updateTargetProductMetadata();
 
         } catch(Exception e) {
             throw new OperatorException(e);
-        }
-    }
-
-    /**
-     * Check if user specified aux data is available and set flag accordingly.
-     */
-    private void setExternalAuxFileAvailableFlag() {
-
-        if (externalAuxFile != null) {
-            if (!externalAuxFile.getName().contains("ASA_XCA")) {
-                throw new OperatorException("Invalid XCA file for ASAR product");
-            }
-            extAuxFileAvailableFlag = true;
         }
     }
 
@@ -191,11 +199,38 @@ public class ASARCalibrator implements Calibrator {
     }
 
     /**
-     * Get sample type.
+     * Get antenna elevation correction flag and range spreading compensation flag from Metadata.
      * @throws Exception The exceptions.
      */
-    private void getSampleType() throws Exception {
-        sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
+    private void getCalibrationFlags() throws Exception {
+
+        if (AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.abs_calibration_flag)) {
+            throw new OperatorException("The product has already been calibrated.");
+        }
+
+        if (AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.ant_elev_corr_flag) != srgrFlag) {
+            throw new OperatorException("The ant_elev_corr_flag is not consistent with srgr_flag in metadata.");
+        }
+
+        if (AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.range_spread_comp_flag) != srgrFlag) {
+            throw new OperatorException("The range_spread_comp_flag is not consistent with srgr_flag in metadata.");
+        }
+    }
+
+    /**
+     * Get SRGR flag from the abstracted metadata.
+     * @throws Exception The exceptions.
+     */
+    private void getSRGRFlag() throws Exception {
+        srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
+    }
+
+    /**
+     * Get multilook flag from the abstracted metadata.
+     * @throws Exception The exceptions.
+     */
+    private void getMultilookFlag() throws Exception {
+        multilookFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.multilook_flag);
     }
 
     /**
@@ -204,6 +239,33 @@ public class ASARCalibrator implements Calibrator {
      */
     private void getProductSwath() throws Exception {
         swath = absRoot.getAttributeString(AbstractMetadata.SWATH);
+        wideSwathProductFlag = swath.contains("WS");
+    }
+
+    /**
+     * Set calibration flags.
+     */
+    private void setCalibrationFlags() {
+
+        if (srgrFlag) {
+            if (multilookFlag) {
+                retroCalibrationFlag = false;
+                System.out.println("Only constant and incidence angle corrections will be performed for radiometric calibration");
+            } else {
+                retroCalibrationFlag = true;
+            }
+        }
+
+        applyAntennaPatternCorr = !srgrFlag || retroCalibrationFlag;
+        applyRangeSpreadingCorr = !srgrFlag;
+    }
+
+    /**
+     * Get SRGR conversion parameters.
+     * @throws Exception The exceptions.
+     */
+    private void getSrgrCoeff() throws Exception {
+        srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
     }
 
     /**
@@ -225,24 +287,35 @@ public class ASARCalibrator implements Calibrator {
         }
     }
 
+
     /**
-     * Get antenna elevation correction flag and range spreading compensation flag from Metadata.
+     * Get XCA file used for the original radiometric calibration.
      * @throws Exception The exceptions.
      */
-    private void getCalibrationFlags() throws Exception {
+    private void getOldXCAFile() throws Exception {
+        oldXCAFileName = absRoot.getAttributeString(AbstractMetadata.external_calibration_file);
+    }
 
-        if (AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.abs_calibration_flag)) {
-            throw new OperatorException("The product has already been calibrated.");
-        }
+    /**
+     * Get old antenna pattern gains.
+     */
+    private void getOldAntennaPattern() {
 
-        antElevCorrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.ant_elev_corr_flag);
-        rangeSpreadCompFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.range_spread_comp_flag);
+        final String xcaFilePath = Settings.instance().get("AuxData/envisatAuxDataPath") + File.separator + oldXCAFileName;
 
-        if (!antElevCorrFlag || !rangeSpreadCompFlag) {
-            if (!productType.equals("ASA_IMS_1P") && !productType.equals("ASA_APS_1P")) {
-                throw new OperatorException("Antenna pattern correction or range spreading compensation" +
-                        " has not been applied to the ground detected source product.");
-            }
+        if (wideSwathProductFlag) {
+
+            oldRefElevationAngle = new double[5]; // reference elevation angles for 5 sub swathes
+            oldAntennaPatternWideSwath = new float[5][numOfGains]; // antenna pattern gain for 5 sub swathes
+            getWideSwathAntennaPatternGainFromAuxData(
+                    xcaFilePath, mdsPolar[0], numOfGains, oldRefElevationAngle, oldAntennaPatternWideSwath);
+
+        } else {
+
+            oldRefElevationAngle = new double[1]; // reference elevation angle for 1 swath
+            oldAntennaPatternSingleSwath = new float[2][numOfGains]; // antenna pattern gain for 2 bands
+            getSingleSwathAntennaPatternGainFromAuxData(
+                    xcaFilePath, swath, mdsPolar, numOfGains, oldRefElevationAngle, oldAntennaPatternSingleSwath);
         }
     }
 
@@ -282,20 +355,26 @@ public class ASARCalibrator implements Calibrator {
         longitude = OperatorUtils.getLongitude(sourceProduct);
     }
 
-    private void getXCAFile() throws Exception {
+    private void getNewXCAFile() throws Exception {
 
-        if (extAuxFileAvailableFlag && externalAuxFile.exists()) {
-            xcaFileName = externalAuxFile.getName();
-            xcaFilePath = externalAuxFile.getAbsolutePath();
+        if (externalAuxFile != null && externalAuxFile.exists()) {
+
+            if (!externalAuxFile.getName().contains("ASA_XCA")) {
+                throw new OperatorException("Invalid XCA file for ASAR product");
+            }
+            newXCAFileName = externalAuxFile.getName();
+            newXCAFilePath = externalAuxFile.getAbsolutePath();
+
         } else {
+
             final Date startDate = sourceProduct.getStartTime().getAsDate();
             final Date endDate = sourceProduct.getEndTime().getAsDate();
             final File xcaFileDir = new File(Settings.instance().get("AuxData/envisatAuxDataPath"));
-            xcaFileName = findXCAFile(xcaFileDir, startDate, endDate);
-            xcaFilePath = xcaFileDir.toString() + File.separator + xcaFileName;
+            newXCAFileName = findXCAFile(xcaFileDir, startDate, endDate);
+            newXCAFilePath = xcaFileDir.toString() + File.separator + newXCAFileName;
         }
 
-        if (xcaFileName == null) {
+        if (newXCAFileName == null) {
             throw new OperatorException("No proper XCA file has been found");
         }
     }
@@ -342,10 +421,10 @@ public class ASARCalibrator implements Calibrator {
     /**
      * Get calibration factor.
      */
-    private void getCalibrationFactor() {
+    private void getNewCalibrationFactor() {
 
-        if (xcaFilePath != null) {
-            getCalibrationFactorFromExternalAuxFile(xcaFilePath, swath, mdsPolar, productType, calibrationFactor);
+        if (newXCAFilePath != null) {
+            getCalibrationFactorFromExternalAuxFile(newXCAFilePath, swath, mdsPolar, productType, newCalibrationConstant);
         } else {
             getCalibrationFactorFromMetadata();
         }
@@ -461,7 +540,7 @@ public class ASARCalibrator implements Calibrator {
             throw new OperatorException("calibration_factors.1.ext_cal_fact not found");
         }
 
-        calibrationFactor[0] = (double) calibrationFactorsAttr.getData().getElemFloat();
+        newCalibrationConstant[0] = (double) calibrationFactorsAttr.getData().getElemFloat();
 
         calibrationFactorsAttr = ads.getAttribute("ASAR_Main_ADSR.sd/calibration_factors.2.ext_cal_fact");
 
@@ -469,9 +548,9 @@ public class ASARCalibrator implements Calibrator {
             throw new OperatorException("calibration_factors.2.ext_cal_fact not found");
         }
 
-        calibrationFactor[1] = (double) calibrationFactorsAttr.getData().getElemFloat();
+        newCalibrationConstant[1] = (double) calibrationFactorsAttr.getData().getElemFloat();
 
-        if (Double.compare(calibrationFactor[0], 0.0) == 0 && Double.compare(calibrationFactor[1], 0.0) == 0) {
+        if (Double.compare(newCalibrationConstant[0], 0.0) == 0 && Double.compare(newCalibrationConstant[1], 0.0) == 0) {
             throw new OperatorException("Calibration factors in metadata are zero");
         }
         //System.out.println("calibration factor for band 1 is " + calibrationFactor[0]);
@@ -511,24 +590,24 @@ public class ASARCalibrator implements Calibrator {
     }
 
     /**
-     * Get antenna pattern from aux file for each band in the product.
+     * Get the new antenna pattern gain from the latest XCA file available.
+     * @throws Exception The exceptions.
      */
-    private void getAntennaPatternGain() {
+    private void getNewAntennaPattern() throws Exception {
 
-        if (!productType.equals("ASA_IMS_1P") && !productType.equals("ASA_APS_1P")) {
-            throw new OperatorException("Found ground detected product without antenna pattern correction.");
-        }
+        if (wideSwathProductFlag) {
 
-        if (swath.contains("WS")) {
-            refElevationAngle = new double[5]; // reference elevation angles for 5 sub swathes
-            antennaPatternWideSwath = new float[5][numOfGains]; // antenna pattern gain for 5 sub swathes
+            newRefElevationAngle = new double[5]; // reference elevation angles for 5 sub swathes
+            newAntennaPatternWideSwath = new float[5][numOfGains]; // antenna pattern gain for 5 sub swathes
             getWideSwathAntennaPatternGainFromAuxData(
-                    xcaFilePath, mdsPolar[0], numOfGains, refElevationAngle, antennaPatternWideSwath);
+                    newXCAFilePath, mdsPolar[0], numOfGains, newRefElevationAngle, newAntennaPatternWideSwath);
+
         } else {
-            refElevationAngle = new double[1]; // reference elevation angle for 1 swath
-            antennaPatternSingleSwath = new float[2][numOfGains];  // antenna pattern gain for 2 bands
+
+            newRefElevationAngle = new double[1]; // reference elevation angle for 1 swath
+            newAntennaPatternSingleSwath = new float[2][numOfGains];  // antenna pattern gain for 2 bands
             getSingleSwathAntennaPatternGainFromAuxData(
-                    xcaFilePath, swath, mdsPolar, numOfGains, refElevationAngle, antennaPatternSingleSwath);
+                    newXCAFilePath,  swath, mdsPolar, numOfGains, newRefElevationAngle, newAntennaPatternSingleSwath);
         }
     }
 
@@ -649,12 +728,9 @@ public class ASARCalibrator implements Calibrator {
     /**
      * Set power coefficient used in range spreading loss compensation computation for slant range images.
      */
-    private void setPowerInRangeSpreadingLossComp() {
-
-        rangeSpreadingCompPower = 0.0;
-        if (productType.contains("ASA_IMS_1P")) {
-            rangeSpreadingCompPower = 3.0;
-        } else if (productType.contains("ASA_APS_1P")) {
+    private void setRangeSpreadingLossCompPower() {
+        rangeSpreadingCompPower = 3.0;
+        if (productType.contains("ASA_APS_1P")) {
             rangeSpreadingCompPower = 4.0;
         }
     }
@@ -666,21 +742,21 @@ public class ASARCalibrator implements Calibrator {
 
         final MetadataElement tgtAbsRoot = AbstractMetadata.getAbstractedMetadata(targetProduct);
 
-        if (sampleType.contains("COMPLEX")) {
+        if (!srgrFlag) {
             AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
         }
 
-        if (!antElevCorrFlag) {
+        if (applyAntennaPatternCorr) {
             AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.ant_elev_corr_flag, 1);
         }
 
-        if (!rangeSpreadCompFlag) {
+        if (applyRangeSpreadingCorr) {
             AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.range_spread_comp_flag, 1);
         }
 
         AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.abs_calibration_flag, 1);
 
-        AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.external_calibration_file, xcaFileName);
+        AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.external_calibration_file, newXCAFileName);
     }
 
     /**
@@ -747,8 +823,8 @@ public class ASARCalibrator implements Calibrator {
         final float[] incidenceAnglesArray = new float[w];
         final float[] slantRangeTimeArray = new float[w];
 
-        if (!antElevCorrFlag) {
-            if (swath.contains("WS")) {
+        if (applyAntennaPatternCorr) {
+            if (wideSwathProductFlag) {
                 computeWideSwathAntennaPatternForCurrentTile(x0, y0, w, h);
             } else {
                 computeSingleSwathAntennaPatternForCurrentTile(x0, y0, w, h, prodBand);
@@ -756,19 +832,18 @@ public class ASARCalibrator implements Calibrator {
         }
 
         double sigma, dn, i, q, time;
-        final double theCalibrationFactor = calibrationFactor[prodBand];
+        final double theCalibrationFactor = newCalibrationConstant[prodBand];
 
         int index;
         for (int y = y0; y < maxY; ++y) {
 
             incidenceAngle.getPixels(x0, y, w, 1,incidenceAnglesArray, pm, TiePointGrid.QUADRATIC);
 
-            if (!rangeSpreadCompFlag) {
+            if (applyRangeSpreadingCorr) {
                 slantRangeTime.getPixels(x0, y, w, 1,slantRangeTimeArray, pm, TiePointGrid.QUADRATIC);
             }
 
             for (int x = x0, xx = 0; x < maxX; ++x, ++xx) {
-
                 index = sourceRaster1.getDataBufferIndex(x, y);
 
                 if (bandUnit == Unit.UnitType.AMPLITUDE) {
@@ -784,17 +859,19 @@ public class ASARCalibrator implements Calibrator {
                     throw new OperatorException("ASAR Calibration: unhandled unit");
                 }
 
+                if (retroCalibrationFlag) { // remove old antenna pattern gain
+                    sigma *= targetTileOldAntPat[xx] * targetTileOldAntPat[xx];
+                }
+
                 // apply calibration constant and incidence angle corrections
                 sigma *= Math.sin(incidenceAnglesArray[xx] * MathUtils.DTOR) / theCalibrationFactor;
 
-                if (!rangeSpreadCompFlag) { // apply range spreading loss compensation
+                if (applyRangeSpreadingCorr) { // apply range spreading loss compensation
                     time = slantRangeTimeArray[xx] / 1000000000.0; //convert ns to s
                     sigma *= Math.pow(time * halfLightSpeedByRefSlantRange, rangeSpreadingCompPower);
                 }
 
-                if (!antElevCorrFlag) { // apply antenna pattern correction
-                    //gain = targetTileNewAntPat[xx];
-                    //sigma /= gain * gain;
+                if (applyAntennaPatternCorr) { // apply antenna pattern correction
                     sigma /= targetTileNewAntPat[xx] * targetTileNewAntPat[xx];
                 }
 
@@ -827,11 +904,27 @@ public class ASARCalibrator implements Calibrator {
         double satelitteHeight = computeSatelliteHeight(zeroDopplerTime, orbitStateVectors);
 
         targetTileNewAntPat = new double[w];
+        if (retroCalibrationFlag) {
+            targetTileOldAntPat = new double[w];
+        }
+
         for (int x = x0; x < x0 + w; x++) {
+
             final double slantRange = computeSlantRange(x, y); // in m
-            final double earthRadius = computeEarthRadius(latitude.getPixelFloat(x,y), longitude.getPixelFloat(x,y)); // in m
-            final double theta = computeElevationAngle(slantRange, satelitteHeight, avgSceneHeight + earthRadius); // in degree
-            targetTileNewAntPat[x - x0] = computeAntPatGain(theta, refElevationAngle[0], antennaPatternSingleSwath[band]);
+
+            final double earthRadius = computeEarthRadius(
+                                            latitude.getPixelFloat(x,y), longitude.getPixelFloat(x,y)); // in m
+
+            final double theta = computeElevationAngle(
+                                            slantRange, satelitteHeight, avgSceneHeight + earthRadius); // in degree
+
+            targetTileNewAntPat[x - x0] = computeAntPatGain(
+                    theta, newRefElevationAngle[0], newAntennaPatternSingleSwath[band]);
+
+            if (retroCalibrationFlag) {
+                targetTileOldAntPat[x - x0] = computeAntPatGain(
+                        theta, oldRefElevationAngle[0], oldAntennaPatternSingleSwath[band]);
+            }
         }
     }
 
@@ -850,14 +943,31 @@ public class ASARCalibrator implements Calibrator {
         double satelitteHeight = computeSatelliteHeight(zeroDopplerTime, orbitStateVectors);
 
         targetTileNewAntPat = new double[w];
-        for (int x = x0; x < x0 + w; x++) {
-            final double slantRange = computeSlantRange(x, y); // in m
-            final double earthRadius = computeEarthRadius(latitude.getPixelFloat(x,y), longitude.getPixelFloat(x,y)); // in m
-            final double theta = computeElevationAngle(slantRange, satelitteHeight, avgSceneHeight + earthRadius); // in degree
+        if (retroCalibrationFlag) {
+            targetTileOldAntPat = new double[w];
+        }
 
-            final int subSwathIndex = findSubSwath(theta, refElevationAngle);
+        for (int x = x0; x < x0 + w; x++) {
+
+            final double slantRange = computeSlantRange(x, y); // in m
+
+            final double earthRadius = computeEarthRadius(
+                                            latitude.getPixelFloat(x,y), longitude.getPixelFloat(x,y)); // in m
+
+            final double theta = computeElevationAngle(
+                                            slantRange, satelitteHeight, avgSceneHeight + earthRadius); // in degree
+
+            int subSwathIndex = findSubSwath(theta, newRefElevationAngle);
+
             targetTileNewAntPat[x - x0] = computeAntPatGain(
-                    theta, refElevationAngle[subSwathIndex], antennaPatternWideSwath[subSwathIndex]);
+                    theta, newRefElevationAngle[subSwathIndex], newAntennaPatternWideSwath[subSwathIndex]);
+
+            if (retroCalibrationFlag) {
+                subSwathIndex = findSubSwath(theta, oldRefElevationAngle);
+
+                targetTileOldAntPat[x - x0] = computeAntPatGain(
+                        theta, oldRefElevationAngle[subSwathIndex], oldAntennaPatternWideSwath[subSwathIndex]);
+            }
         }
     }
 
@@ -910,6 +1020,7 @@ public class ASARCalibrator implements Calibrator {
     }
 
     //============================================================================================================
+
     /**
      * Compute slant range for given pixel.
      * @param x The x coordinate of the pixel in the source image.
