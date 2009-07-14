@@ -240,4 +240,20 @@ public final class MathUtils
             return 0.0;
         }
     }
+
+    /**
+     * Compute polynomial value. Given variable x and polynomial coefficients c[0], c[1], ..., c[n], this
+     * function returns f(x) = c[0] + c[1]*x + ... + c[n]*x^n.
+     * @param x The variable.
+     * @param coeff The polynomial coefficients.
+     * @return The function value.
+     */
+    public static double computePolynomialValue(final double x, final double[] coeff) {
+        double v = 0.0;
+        for (int i = coeff.length-1; i > 0; i--) {
+            v = (v + coeff[i])*x;
+        }
+        return v + coeff[0];
+    }
+
 }
