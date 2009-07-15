@@ -75,10 +75,10 @@ public class ASARCalibrator implements Calibrator {
     private double rangeSpreadingCompPower; // power in range spreading loss compensation calculation
 
     private double[] newCalibrationConstant = new double[2];
-    private double[] targetTileOldAntPat = null; // old antenna pattern gains for row pixels in a tile, in linear scale
-    private double[] targetTileNewAntPat = null; // new antenna pattern gains for row pixels in a tile, in linear scale
     private double[] oldRefElevationAngle = null; // reference elevation angle for given swath in old aux file, in degree
     private double[] newRefElevationAngle = null; // reference elevation angle for given swath in new aux file, in degree
+    private double[][] targetTileOldAntPat = null; // old antenna pattern gains for row pixels in a tile, in linear scale
+    private double[][] targetTileNewAntPat = null; // new antenna pattern gains for row pixels in a tile, in linear scale
 
     private float[][] oldAntennaPatternSingleSwath = null; // old antenna pattern gains for single swath product, in dB
     private float[][] oldAntennaPatternWideSwath = null; // old antenna pattern gains for single swath product, in dB
@@ -846,7 +846,7 @@ public class ASARCalibrator implements Calibrator {
         final double theCalibrationFactor = newCalibrationConstant[prodBand];
 
         int index;
-        for (int y = y0; y < maxY; ++y) {
+        for (int y = y0, yy = 0; y < maxY; ++y, ++yy) {
 
             incidenceAngle.getPixels(x0, y, w, 1,incidenceAnglesArray, pm, TiePointGrid.QUADRATIC);
 
@@ -871,7 +871,7 @@ public class ASARCalibrator implements Calibrator {
                 }
 
                 if (retroCalibrationFlag) { // remove old antenna pattern gain
-                    sigma *= targetTileOldAntPat[xx] * targetTileOldAntPat[xx];
+                    sigma *= targetTileOldAntPat[yy][xx] * targetTileOldAntPat[yy][xx];
                 }
 
                 // apply calibration constant and incidence angle corrections
@@ -883,7 +883,7 @@ public class ASARCalibrator implements Calibrator {
                 }
 
                 if (applyAntennaPatternCorr) { // apply antenna pattern correction
-                    sigma /= targetTileNewAntPat[xx] * targetTileNewAntPat[xx];
+                    sigma /= targetTileNewAntPat[yy][xx] * targetTileNewAntPat[yy][xx];
                 }
 
                 if (outputImageScaleInDb) { // convert calibration result to dB
@@ -910,37 +910,40 @@ public class ASARCalibrator implements Calibrator {
      */
     private void computeSingleSwathAntennaPatternForCurrentTile(int x0, int y0, int w, int h, int band) {
 
-        final int y = y0 + h / 2;
-        final double zeroDopplerTime = firstLineUTC + y*lineTimeInterval;
-        double satelitteHeight = computeSatelliteHeight(zeroDopplerTime, orbitStateVectors);
-
-        targetTileNewAntPat = new double[w];
+        targetTileNewAntPat = new double[h][w];
         if (retroCalibrationFlag) {
-            targetTileOldAntPat = new double[w];
+            targetTileOldAntPat = new double[h][w];
         }
 
-        AbstractMetadata.SRGRCoefficientList srgrConvParam = null;
-        if (srgrFlag) {
-            srgrConvParam = getSRGRCoefficientsForARangeLine(zeroDopplerTime);
-        }
+        for (int y = y0; y < y0 + h; y++) {
 
-        for (int x = x0; x < x0 + w; x++) {
+            final double zeroDopplerTime = firstLineUTC + y*lineTimeInterval;
 
-            final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
+            double satelitteHeight = computeSatelliteHeight(zeroDopplerTime, orbitStateVectors);
 
-            final double earthRadius = computeEarthRadius(
-                    latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC),
-                    longitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC)); // in m
+            AbstractMetadata.SRGRCoefficientList srgrConvParam = null;
+            if (srgrFlag) {
+                srgrConvParam = getSRGRCoefficientsForARangeLine(zeroDopplerTime);
+            }
 
-            final double theta = computeElevationAngle(
-                                            slantRange, satelitteHeight, avgSceneHeight + earthRadius); // in degree
+            for (int x = x0; x < x0 + w; x++) {
 
-            targetTileNewAntPat[x - x0] = computeAntPatGain(
-                    theta, newRefElevationAngle[0], newAntennaPatternSingleSwath[band]);
+                final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
 
-            if (retroCalibrationFlag) {
-                targetTileOldAntPat[x - x0] = computeAntPatGain(
-                        theta, oldRefElevationAngle[0], oldAntennaPatternSingleSwath[band]);
+                final double earthRadius = computeEarthRadius(
+                        latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC),
+                        longitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC)); // in m
+
+                final double theta = computeElevationAngle(
+                        slantRange, satelitteHeight, avgSceneHeight + earthRadius); // in degree
+
+                targetTileNewAntPat[y - y0][x - x0] = computeAntPatGain(
+                        theta, newRefElevationAngle[0], newAntennaPatternSingleSwath[band]);
+
+                if (retroCalibrationFlag) {
+                    targetTileOldAntPat[y - y0][x - x0] = computeAntPatGain(
+                            theta, oldRefElevationAngle[0], oldAntennaPatternSingleSwath[band]);
+                }
             }
         }
     }
@@ -955,41 +958,44 @@ public class ASARCalibrator implements Calibrator {
      */
     private void computeWideSwathAntennaPatternForCurrentTile(int x0, int y0, int w, int h) {
 
-        final int y = y0 + h / 2;
-        final double zeroDopplerTime = firstLineUTC + y*lineTimeInterval;
-        double satelitteHeight = computeSatelliteHeight(zeroDopplerTime, orbitStateVectors);
-
-        targetTileNewAntPat = new double[w];
+        targetTileNewAntPat = new double[h][w];
         if (retroCalibrationFlag) {
-            targetTileOldAntPat = new double[w];
+            targetTileOldAntPat = new double[h][w];
         }
 
-        AbstractMetadata.SRGRCoefficientList srgrConvParam = null;
-        if (srgrFlag) {
-            srgrConvParam = getSRGRCoefficientsForARangeLine(zeroDopplerTime);
-        }
+        for (int y = y0; y < y0 + h; y++) {
 
-        for (int x = x0; x < x0 + w; x++) {
+            final double zeroDopplerTime = firstLineUTC + y*lineTimeInterval;
 
-            final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
+            double satelitteHeight = computeSatelliteHeight(zeroDopplerTime, orbitStateVectors);
 
-            final double earthRadius = computeEarthRadius(
-                    latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC),
-                    longitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC)); // in m
+            AbstractMetadata.SRGRCoefficientList srgrConvParam = null;
+            if (srgrFlag) {
+                srgrConvParam = getSRGRCoefficientsForARangeLine(zeroDopplerTime);
+            }
 
-            final double theta = computeElevationAngle(
-                                            slantRange, satelitteHeight, avgSceneHeight + earthRadius); // in degree
+            for (int x = x0; x < x0 + w; x++) {
 
-            int subSwathIndex = findSubSwath(theta, newRefElevationAngle);
+                final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
 
-            targetTileNewAntPat[x - x0] = computeAntPatGain(
-                    theta, newRefElevationAngle[subSwathIndex], newAntennaPatternWideSwath[subSwathIndex]);
+                final double earthRadius = computeEarthRadius(
+                        latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC),
+                        longitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC)); // in m
 
-            if (retroCalibrationFlag) {
-                subSwathIndex = findSubSwath(theta, oldRefElevationAngle);
+                final double theta = computeElevationAngle(
+                                                slantRange, satelitteHeight, avgSceneHeight + earthRadius); // in degree
 
-                targetTileOldAntPat[x - x0] = computeAntPatGain(
-                        theta, oldRefElevationAngle[subSwathIndex], oldAntennaPatternWideSwath[subSwathIndex]);
+                int subSwathIndex = findSubSwath(theta, newRefElevationAngle);
+
+                targetTileNewAntPat[y - y0][x - x0] = computeAntPatGain(
+                        theta, newRefElevationAngle[subSwathIndex], newAntennaPatternWideSwath[subSwathIndex]);
+
+                if (retroCalibrationFlag) {
+                    subSwathIndex = findSubSwath(theta, oldRefElevationAngle);
+
+                    targetTileOldAntPat[y - y0][x - x0] = computeAntPatGain(
+                            theta, oldRefElevationAngle[subSwathIndex], oldAntennaPatternWideSwath[subSwathIndex]);
+                }
             }
         }
     }
@@ -1067,7 +1073,7 @@ public class ASARCalibrator implements Calibrator {
         AbstractMetadata.SRGRCoefficientList srgrConvParam = new AbstractMetadata.SRGRCoefficientList();
         srgrConvParam.timeMJD = zeroDopplerTime;
         srgrConvParam.ground_range_origin = srgrConvParams[idx].ground_range_origin;
-
+        srgrConvParam.coefficients = new double[srgrConvParams[idx].coefficients.length];
         final double mu = (zeroDopplerTime - srgrConvParams[idx].timeMJD) /
                           (srgrConvParams[idx+1].timeMJD - srgrConvParams[idx].timeMJD);
 
