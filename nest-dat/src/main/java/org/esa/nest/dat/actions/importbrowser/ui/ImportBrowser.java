@@ -8,10 +8,14 @@ import com.jidesoft.swing.JideSplitPane;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.framework.ui.UIUtils;
+import org.esa.beam.framework.ui.WorldMapPaneDataModel;
+import org.esa.beam.framework.ui.WorldMapPane;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.dat.actions.importbrowser.model.*;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.ProductPropertiesProvider;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.QuicklookProvider;
+import org.esa.nest.dat.actions.importbrowser.model.dataprovider.WorldMapProvider;
 import org.esa.nest.dat.actions.importbrowser.util.Callback;
 import org.esa.nest.dat.toolviews.Projects.Project;
 
@@ -37,6 +41,7 @@ public class ImportBrowser {
     private static final ImageIcon updateRolloverIcon = ToolButtonFactory.createRolloverIcon(updateIcon);
     private static final ImageIcon stopIcon = UIUtils.loadImageIcon("icons/Stop24.gif");
     private static final ImageIcon stopRolloverIcon = ToolButtonFactory.createRolloverIcon(stopIcon);
+
     private JPanel mainPanel;
     private JComboBox repositoryListCombo;
     private JTable repositoryTable;
@@ -58,8 +63,10 @@ public class ImportBrowser {
     private final String helpId;
     private JFrame mainFrame;
 
-    private RepositoryTree repositoryTree;
-    private DefaultMutableTreeNode rootNode;
+    private WorldMapPaneDataModel worldMapDataModel;
+
+    private RepositoryTree repositoryTree = null;
+    private DefaultMutableTreeNode rootNode = null;
 
     public ImportBrowser(final BasicApp basicApp, final RepositoryManager repositoryManager, final String helpId) {
         pgConfig = new ProductGrabberConfig(basicApp.getPreferences());
@@ -130,6 +137,18 @@ public class ImportBrowser {
         } else if (repositoryManager.getNumRepositories() > 0) {
             repositoryListCombo.setSelectedItem(repositoryManager.getRepository(0));
         }   */
+    }
+
+    private void performSelectAction() {
+        final Repository repository = repositoryManager.getRepositoryShown();
+        if (repository == null) {
+            return;
+        }
+        final int[] selectedRows = getSelectedRows();
+        if(repository.getEntryCount() > selectedRows[0]) {
+            final RepositoryEntry entry = repository.getEntry(selectedRows[0]);
+            worldMapDataModel.setSelectedProduct(entry.getProduct());
+        }
     }
 
     private void performOpenAction() {
@@ -374,10 +393,23 @@ public class ImportBrowser {
         southPanel.add(openPanel, BorderLayout.WEST);
         southPanel.add(progressPanel, BorderLayout.EAST);
 
-        final JideSplitPane splitPane = new JideSplitPane(JideSplitPane.HORIZONTAL_SPLIT);
-        splitPane.addPane(createRepositoryTreeControl());
-        splitPane.addPane(new JScrollPane(repositoryTable));
-        centerPanel.add(splitPane, BorderLayout.CENTER);
+        final JideSplitPane splitPaneVert = new JideSplitPane(JideSplitPane.VERTICAL_SPLIT);
+
+        final JideSplitPane splitPane1 = new JideSplitPane(JideSplitPane.HORIZONTAL_SPLIT);
+        splitPane1.addPane(createRepositoryTreeControl());
+        splitPane1.addPane(new JScrollPane(repositoryTable));
+
+        final JideSplitPane splitPane2 = new JideSplitPane(JideSplitPane.HORIZONTAL_SPLIT);
+
+        worldMapDataModel = new WorldMapPaneDataModel();
+        final WorldMapPane mapPane = new WorldMapPane(worldMapDataModel);
+        splitPane2.addPane(mapPane);
+         splitPane2.addPane(mapPane);
+
+        splitPaneVert.addPane(splitPane1);
+        splitPaneVert.addPane(splitPane2);
+
+        centerPanel.add(splitPaneVert, BorderLayout.CENTER);
 
         mainPanel.add(northPanel, BorderLayout.NORTH);
         mainPanel.add(centerPanel, BorderLayout.CENTER);
@@ -400,6 +432,8 @@ public class ImportBrowser {
                 final int clickCount = e.getClickCount();
                 if (clickCount == 2) {
                     performOpenAction();
+                } else if(clickCount == 1) {
+                    performSelectAction();
                 }
             }
         });
@@ -429,7 +463,7 @@ public class ImportBrowser {
         repositoryTree.populateTree(rootNode);
         repositoryTree.setRootVisible(false);
         repositoryTree.setShowsRootHandles(true);
-        DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) repositoryTree.getCellRenderer();
+        final DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) repositoryTree.getCellRenderer();
         renderer.setLeafIcon(IconsFactory.getImageIcon(ImportBrowser.class, "/org/esa/beam/resources/images/icons/RsBandAsSwath16.gif"));
         renderer.setClosedIcon(IconsFactory.getImageIcon(ImportBrowser.class, "/org/esa/beam/resources/images/icons/RsGroupClosed16.gif"));
         renderer.setOpenIcon(IconsFactory.getImageIcon(ImportBrowser.class, "/org/esa/beam/resources/images/icons/RsGroupOpen16.gif"));
@@ -511,7 +545,7 @@ public class ImportBrowser {
         //repositoryManager.addDataProvider(new WorldMapProvider(false));
     }
 
-    void ShowRepository(Repository repository) {
+    public void ShowRepository(Repository repository) {
         repositoryManager.setRepositoryShown(repository);
         pgConfig.setLastSelectedRepository(repository);
         final RepositoryTableModel tableModel = new RepositoryTableModel(repository);
@@ -521,6 +555,12 @@ public class ImportBrowser {
         repositoryManager.startUpdateRepository(repository,
                 new ProgressBarProgressMonitor(progressBar, statusLabel),
                 uiCallBack);
+
+        Product[] productList = new Product[repository.getEntryCount()];
+        for(int i=0; i < repository.getEntryCount(); ++i) {
+            productList[i] = repository.getEntry(i).getProduct();
+        }
+        worldMapDataModel.setProducts(productList);
     }
     
     private class RepositoryChangeHandler implements ItemListener {
@@ -797,7 +837,7 @@ public class ImportBrowser {
             pm.beginTask("Collecting repositories...", dirList.size());
             final ArrayList<Repository> repositoryList = new ArrayList<Repository>();
             try {
-                RepositoryScanner.ProductFileFilter filter = new RepositoryScanner.ProductFileFilter();
+                final RepositoryScanner.ProductFileFilter filter = new RepositoryScanner.ProductFileFilter();
                 for (File subDir : dirList) {
                     final File[] subDirFiles = subDir.listFiles(filter);
                     if (subDirFiles.length > 0) {

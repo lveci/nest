@@ -2,12 +2,14 @@ package org.esa.nest.dat.dialogs;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
+import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
 import org.esa.nest.dat.plugins.graphbuilder.ProgressBarProgressMonitor;
 
 import javax.media.jai.JAI;
@@ -29,8 +31,12 @@ import java.util.Date;
 public class BatchGraphDialog extends ModelessDialog {
 
     protected final AppContext appContext;
-    protected final IOPanel ioPanel;
+    protected final ProductSetPanel productSetPanel;
     protected final ArrayList<GraphExecuter> graphExecuterList = new ArrayList<GraphExecuter>(3);
+
+    private final static String homeUrl = System.getProperty("nest.home", ".");
+    private final static File graphPath = new File(homeUrl, File.separator + "graphs" + File.separator + "internal");
+    private final static String internalFormat = DimapProductConstants.DIMAP_FORMAT_NAME;
 
     private final JPanel mainPanel;
     protected final JTabbedPane tabbedPane;
@@ -58,7 +64,7 @@ public class BatchGraphDialog extends ModelessDialog {
         });
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
 
-        ioPanel = new IOPanel(appContext, tabbedPane, false);
+        productSetPanel = new ProductSetPanel(appContext, tabbedPane);
 
         // status
         statusLabel = new JLabel("");
@@ -90,15 +96,16 @@ public class BatchGraphDialog extends ModelessDialog {
 
     @Override
     public int show() {
-        ioPanel.initProducts();
+        productSetPanel.initProducts();
         setContent(mainPanel);
         initGraphs();
+        addGraphTabs("", true);
         return super.show();
     }
 
     @Override
     public void hide() {
-        ioPanel.releaseProducts();
+        productSetPanel.releaseProducts();
         super.hide();
     }
 
@@ -107,7 +114,7 @@ public class BatchGraphDialog extends ModelessDialog {
 
         if(isProcessing) return;
 
-        ioPanel.onApply();
+        productSetPanel.onApply();
 
         try {
             DoProcessing();
@@ -126,7 +133,7 @@ public class BatchGraphDialog extends ModelessDialog {
     void initGraphs() {
         try {
             deleteGraphs();
-           // createGraphs();
+            createGraphs();
         } catch(Exception e) {
             statusLabel.setText(e.getMessage());
         }
@@ -182,13 +189,15 @@ public class BatchGraphDialog extends ModelessDialog {
 
     private boolean ValidateAllNodes() {
         if(isProcessing) return false;
-        if(ioPanel == null || graphExecuterList.isEmpty())
+        if(productSetPanel == null)
             return false;
 
         boolean result;
         statusLabel.setText("");
         try {
-           // assignParameters();
+            initGraphs();
+            
+            assignParameters();
             // first graph must pass
             result = graphExecuterList.get(0).InitGraph();
 
@@ -215,12 +224,81 @@ public class BatchGraphDialog extends ModelessDialog {
         }
     }
 
-    protected IOPanel getIOPanel() {
-        return ioPanel;
+    protected ProductSetPanel getProductSetPanel() {
+        return productSetPanel;
     }
 
     public void setTargetProductNameSuffix(final String suffix) {
-        ioPanel.setTargetProductNameSuffix(suffix);
+        productSetPanel.setTargetProductNameSuffix(suffix);
+    }
+
+    protected void createGraphs() throws GraphException {
+        try {
+            final GraphExecuter graphEx = new GraphExecuter();
+            LoadGraph(graphEx, new File(graphPath, "importGraph.xml"));
+            graphExecuterList.add(graphEx);
+        } catch(Exception e) {
+            throw new GraphException(e.getMessage());
+        }
+    }
+
+    private void addGraphTabs(final String title, final boolean addUI) {
+
+        if(graphExecuterList.isEmpty()) {
+            return;
+        }
+        final GraphExecuter graphEx = graphExecuterList.get(0);
+        for(GraphNode n : graphEx.GetGraphNodes()) {
+            if(n.GetOperatorUI() == null)
+                continue;
+            if(n.getNode().getOperatorName().equals("Read") || n.getNode().getOperatorName().equals("Write")) {
+                n.setOperatorUI(null);
+                continue;
+            }
+
+            if(addUI) {
+                String tabTitle = title;
+                if(tabTitle.isEmpty())
+                    tabTitle = n.getOperatorName();
+                tabbedPane.addTab(tabTitle, null,
+                        n.GetOperatorUI().CreateOpTab(n.getOperatorName(), n.getParameterMap(), appContext),
+                        n.getID() + " Operator");
+            }
+        }
+    }
+
+    protected void assignParameters() throws GraphException {
+        final File[] fileList = productSetPanel.getFileList();
+        int graphIndex = 0;
+        for(File f : fileList) {
+            final File targetFile = new File(productSetPanel.getTargetFolder(), f.getName());
+            setIO(graphExecuterList.get(graphIndex),
+                "1-Read", f,
+                "3-Write", targetFile, internalFormat);
+            ++graphIndex;
+        }    
+    }
+
+    private static void setIO(final GraphExecuter graphEx,
+                              final String readID, final File readPath,
+                              final String writeID, final File writePath,
+                              final String format) {
+        final GraphNode readNode = graphEx.findGraphNode(readID);
+        if (readNode != null) {
+            graphEx.setOperatorParam(readNode.getID(), "file", readPath.getAbsolutePath());
+        }
+
+        if (writeID != null) {
+            final GraphNode writeNode = graphEx.findGraphNode(writeID);
+            if (writeNode != null) {
+                graphEx.setOperatorParam(writeNode.getID(), "formatName", format);
+                graphEx.setOperatorParam(writeNode.getID(), "file", writePath.getAbsolutePath());
+            }
+        }
+    }
+
+    protected void cleanUpTempFiles() {
+
     }
 
     /////
@@ -280,12 +358,12 @@ public class BatchGraphDialog extends ModelessDialog {
                     statusLabel.setText("Processing completed in " + diff + " seconds");
                 }
 
-                if(ioPanel.isOpenInAppSelected()) {
-                    final GraphExecuter graphEx = graphExecuterList.get(graphExecuterList.size()-1);
-                    openTargetProducts(graphEx.getProductsToOpenInDAT());
-                }
+                //if(productSetPanel.isOpenInAppSelected()) {
+                //    final GraphExecuter graphEx = graphExecuterList.get(graphExecuterList.size()-1);
+                //    openTargetProducts(graphEx.getProductsToOpenInDAT());
+                //}
             }
-           // cleanUpTempFiles();
+            cleanUpTempFiles();
         }
 
     }

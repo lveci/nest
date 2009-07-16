@@ -1,5 +1,5 @@
 /*
- * $Id: GeneralFilterBandPersistable.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: GeneralFilterBandPersistable.java,v 1.2 2009-07-15 20:04:37 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,7 +32,7 @@ import java.util.List;
  * <p><i>Note that this class is not yet public API. Interface may chhange in future releases.</i></p>
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-07-15 20:04:37 $
  */
 class GeneralFilterBandPersistable implements DimapPersistable {
     static final String VERSION_1_0 = "1.0";
@@ -56,10 +56,10 @@ class GeneralFilterBandPersistable implements DimapPersistable {
         final GeneralFilterBand.Operator operator = GeneralFilterBand.createOperator(
                 filterBandInfo.getChildTextTrim(DimapProductConstants.TAG_FILTER_OPERATOR_CLASS_NAME));
 
-        if(operator instanceof GeneralFilterBand.StandardDeviation || operator instanceof GeneralFilterBand.RootMeanSquare) {
+        if(operator == null || operator instanceof GeneralFilterBand.StandardDeviation || operator instanceof GeneralFilterBand.RootMeanSquare) {
             // TODO - (mp, se: 10.10.2008):
             // Currently the operator GeneralFilterBand.STDDEV or GeneralFilterBand.RMS are not supported.            
-            // They have to be implementedas JAI operator
+            // They have to be implemented as JAI operator
             return null;
         }
         final String sourceName = filterBandInfo.getChildTextTrim(DimapProductConstants.TAG_FILTER_SOURCE);

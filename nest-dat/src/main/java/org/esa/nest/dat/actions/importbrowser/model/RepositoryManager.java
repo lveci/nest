@@ -300,6 +300,10 @@ public class RepositoryManager {
                             }
                         } else {
                             try {
+                                if (entry.getProduct() == null) {
+                                    entry.openProduct();
+                                }
+
                                 // start at product properties, we already have name and size
                                 for (int j = 2; j <= maxProvider; j++) {
                                     if (pm.isCanceled()) {
@@ -331,7 +335,7 @@ public class RepositoryManager {
                             }
                         }
                     } finally {
-                        entry.closeProduct();
+                        //entry.closeProduct();
                         repository.savePropertyMap();
                         SwingUtilities.invokeLater(uiRunnable);
                     }

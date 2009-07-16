@@ -4,7 +4,9 @@ import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.GridBagUtils;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.util.DialogUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,6 +31,7 @@ public class MosaicOpUI extends BaseOperatorUI {
     private final JTextField sceneWidth = new JTextField("");
     private final JTextField sceneHeight = new JTextField("");
     private final JCheckBox averageCheckBox = new JCheckBox("Average Overlap");
+    private boolean changedByUser = false;
 
     private boolean average = false;
 
@@ -45,6 +48,16 @@ public class MosaicOpUI extends BaseOperatorUI {
                 }
         });
 
+        sceneWidth.addKeyListener(new KeyListener() {
+             public void keyPressed(KeyEvent e) {
+             }
+             public void keyReleased(KeyEvent e) {
+             }
+             public void keyTyped(KeyEvent e) {
+                changedByUser = true;
+             }
+        });
+
         return new JScrollPane(panel);
     }
 
@@ -54,7 +67,29 @@ public class MosaicOpUI extends BaseOperatorUI {
         OperatorUIUtils.initBandList(bandList, getBandNames());
 
         resamplingMethod.setSelectedItem(paramMap.get("resamplingMethod"));
-        pixelSizeX.setText(String.valueOf(paramMap.get("nRgLooks")));
+
+        int width = (Integer)paramMap.get("sceneWidth");
+        int height = (Integer)paramMap.get("sceneHeight");
+        if(!changedByUser) {
+            try {
+                MosaicOp.SceneProperties scnProp = new MosaicOp.SceneProperties();
+                MosaicOp.computeImageGeoBoundary(sourceProducts, scnProp);
+
+                final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProducts[0]);
+                final double rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
+                final double azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
+
+                MosaicOp.getSceneDimensions(rangeSpacing, azimuthSpacing, scnProp);
+
+                width = scnProp.sceneWidth;
+                height = scnProp.sceneHeight;
+            } catch(Exception e) {
+                width = 0;
+                height = 0;
+            }
+        }
+        sceneWidth.setText(String.valueOf(width));
+        sceneHeight.setText(String.valueOf(height));
 
         average = (Boolean)paramMap.get("average");
         averageCheckBox.getModel().setPressed(average);
@@ -72,6 +107,8 @@ public class MosaicOpUI extends BaseOperatorUI {
 
         OperatorUIUtils.updateBandList(bandList, paramMap);
         paramMap.put("resamplingMethod", resamplingMethod.getSelectedItem());
+        paramMap.put("sceneWidth", Integer.parseInt(sceneWidth.getText()));
+        paramMap.put("sceneHeight", Integer.parseInt(sceneWidth.getText()));
 
         paramMap.put("average", average);
     }
@@ -101,6 +138,10 @@ public class MosaicOpUI extends BaseOperatorUI {
         contentPane.add(resamplingMethodLabel, gbc);
         gbc.gridx = 1;
         contentPane.add(resamplingMethod, gbc);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "Scene Width (pixels)", sceneWidth);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "Scene Height (pixels)", sceneHeight);
 
         gbc.gridy++;
         gbc.gridx = 0;

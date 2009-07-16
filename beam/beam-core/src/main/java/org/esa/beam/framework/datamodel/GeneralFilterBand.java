@@ -1,5 +1,5 @@
 /*
- * $Id: GeneralFilterBand.java,v 1.3 2009-05-28 14:17:58 lveci Exp $
+ * $Id: GeneralFilterBand.java,v 1.4 2009-07-15 20:04:37 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,7 +16,6 @@
  */
 package org.esa.beam.framework.datamodel;
 
-import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelModel;
 import com.bc.ceres.glevel.support.AbstractMultiLevelSource;
 import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
@@ -35,7 +34,6 @@ import javax.media.jai.operator.MinFilterDescriptor;
 import javax.media.jai.operator.MinFilterShape;
 import java.awt.RenderingHints;
 import java.awt.image.RenderedImage;
-import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -45,7 +43,7 @@ import java.util.Arrays;
  * <p><i>Note that this class is not yet public API and may change in future releases.</i></p>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-05-28 14:17:58 $
+ * @version $Revision: 1.4 $ $Date: 2009-07-15 20:04:37 $
  */
 public class GeneralFilterBand extends FilterBand {
 
@@ -55,6 +53,8 @@ public class GeneralFilterBand extends FilterBand {
     public static final Operator MEAN = new Mean();              // JAI: ConvolveDescriptor
     public static final Operator STDDEV = new StandardDeviation();     // TODO - Write JAI Operator
     public static final Operator RMS = new RootMeanSquare();           // TODO - Write JAI Operator
+    
+    private static final Operator[] operators = {MIN, MAX, MEDIAN, MEAN, STDDEV, RMS};
 
     private final int subWindowSize;
     private final Operator operator;
@@ -110,18 +110,12 @@ public class GeneralFilterBand extends FilterBand {
      * @return instance of {@link Operator}
      */
     public static Operator createOperator(String operatorClassName) {
-        Operator operator = null;
-        try {
-            final Class operatorClass = Class.forName(operatorClassName);
-            operator = (Operator) operatorClass.newInstance();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
+        for (Operator operator : operators) {
+            if (operator.getClass().getName().equals(operatorClassName)) {
+                return operator;
+            }
         }
-        return operator;
+        return null;
     }
 
     public int getSubWindowSize() {

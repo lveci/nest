@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductHelpers.java,v 1.5 2009-05-27 21:09:23 lveci Exp $
+ * $Id: DimapProductHelpers.java,v 1.6 2009-07-15 20:04:37 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -65,7 +65,7 @@ import java.util.logging.Level;
  * @author Sabine Embacher
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.5 $ $Date: 2009-05-27 21:09:23 $
+ * @version $Revision: 1.6 $ $Date: 2009-07-15 20:04:37 $
  */
 public class DimapProductHelpers {
 
@@ -1374,7 +1374,7 @@ public class DimapProductHelpers {
                     band = (Band) persistable.createObjectFromXml(element, product);
                     // currently it can be null if the operator of filtered band is of type
                     // GeneralFilterBand.STDDEV or GeneralFilterBand.RMS
-                    if (band == null) {
+                    if (band != null) {
                         product.addBand(band);
                     }
                 }

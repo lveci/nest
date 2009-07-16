@@ -14,6 +14,8 @@ import org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView;
 import org.esa.beam.visat.toolviews.stat.StatisticsToolView;
 import org.esa.nest.dat.actions.LoadTabbedLayoutAction;
 import org.esa.nest.dat.actions.importbrowser.ImportBrowserAction;
+import org.esa.nest.dat.actions.importbrowser.model.Repository;
+import org.esa.nest.dat.actions.importbrowser.ui.ImportBrowser;
 import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.dat.views.polarview.PolarView;
@@ -81,7 +83,11 @@ public final class DatApp extends VisatApp {
                     final NestSingleTargetProductDialog dialog =
                             new NestSingleTargetProductDialog("Multilook", VisatApp.getApp(), "Multilook", null);
 
-                    ImportBrowserAction.getInstance().getImportBrowser();
+                    final ImportBrowser ib = ImportBrowserAction.getInstance().getImportBrowser();
+                    final Repository rep = ib.getRepositoryManager().getRepository(0);
+                    if(rep != null) {
+                        ib.ShowRepository(rep);
+                    }
 
                 } catch(Exception e) {
                     VisatApp.getApp().showErrorDialog(e.getMessage());

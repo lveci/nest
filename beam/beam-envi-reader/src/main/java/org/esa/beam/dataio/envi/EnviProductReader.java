@@ -9,12 +9,10 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.MapGeoCoding;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.dataop.maptransf.Datum;
-import org.esa.beam.framework.dataop.maptransf.MapInfo;
-import org.esa.beam.framework.dataop.maptransf.MapProjection;
-import org.esa.beam.framework.dataop.maptransf.MapTransform;
+import org.esa.beam.framework.dataop.maptransf.*;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.TreeNode;
+import org.esa.beam.util.geotiff.GeoTIFFCodes;
 
 import javax.imageio.stream.FileCacheImageInputStream;
 import javax.imageio.stream.FileImageInputStream;
@@ -274,16 +272,24 @@ public class EnviProductReader extends AbstractProductReader {
 
     public static void initGeocoding(final Product product, final Header header) throws IOException {
         final EnviMapInfo enviMapInfo = header.getMapInfo();
+        MapTransform transform;
 
         // @todo tb/tb 2 this variable might be null, if so the projection is UTM.
         // The EnviMapInfo contains the parameters needed to set up the UTM projection for the product.
         final EnviProjectionInfo projectionInfo = header.getProjectionInfo();
-        if (projectionInfo == null) {
+        if (projectionInfo != null) {
+                transform = EnviMapTransformFactory.create(projectionInfo.getProjectionNumber(),
+                                                            projectionInfo.getParameter());
+        } else if(enviMapInfo != null) {
+                final MapTransformDescriptor descriptor = MapProjectionRegistry.getDescriptor(
+                                                            TransverseMercatorDescriptor.TYPE_ID);
+                final double[] values = descriptor.getParameterDefaultValues();
+
+                transform = descriptor.createTransform(values);
+        } else {
             return;
         }
 
-        final MapTransform transform = EnviMapTransformFactory.create(projectionInfo.getProjectionNumber(),
-                projectionInfo.getParameter());
         final MapProjection projection = new MapProjection(transform.getDescriptor().getName(), transform);
         final MapInfo mapInfo = new MapInfo(projection,
                 (float) enviMapInfo.getReferencePixelX(),

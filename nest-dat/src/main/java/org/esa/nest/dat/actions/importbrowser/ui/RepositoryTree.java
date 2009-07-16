@@ -362,11 +362,11 @@ public class RepositoryTree extends JTree implements PopupMenuFactory, ActionLis
 
     private void openSubFolders(RepoTreeNode repoNode) {
 
-        Repository[] allRepositories = importBrowser.getRepositoryManager().getRepositories();
+        final Repository[] allRepositories = importBrowser.getRepositoryManager().getRepositories();
 
-        Repository totalRepo = new Repository(repoNode.getBaseDir(), repoNode.getBaseDir());
+        final Repository totalRepo = new Repository(repoNode.getBaseDir(), repoNode.getBaseDir());
         totalRepo.setDataProviders(importBrowser.getRepositoryManager().getDataProviders());
-        String prefix = repoNode.getBaseDir().toString();
+        final String prefix = repoNode.getBaseDir().toString();
         for(Repository rep : allRepositories) {
             if(rep.getBaseDir().toString().startsWith(prefix)) {
                 for(int i=0; i < rep.getEntryCount(); ++i) {

@@ -53,25 +53,15 @@ public class MosaicOp extends Operator {
     @Parameter(defaultValue = "false", description = "Average the overlapping areas", label="Average Overlap")
     private boolean average = false;
 
-    @Parameter(defaultValue = "0", description = "Pixel Size X (deg)", label="Pixel Size X (deg)")
-    private float pixelSizeX = 0;
-    @Parameter(defaultValue = "0", description = "Pixel Size Y (deg)", label="Pixel Size Y (deg)")
-    private float pixelSizeY = 0;
-    @Parameter(defaultValue = "0", description = "Target width", label="Scene Width")
+    @Parameter(defaultValue = "0", description = "Target width", label="Scene Width (pixels)")
     private int sceneWidth = 0;
-    @Parameter(defaultValue = "0", description = "Target height", label="Scene Height")
+    @Parameter(defaultValue = "0", description = "Target height", label="Scene Height (pixels)")
     private int sceneHeight = 0;
 
-    private final static Map<Product, double[]> srcCornerLatitudeMap = new HashMap<Product, double[]>(10);
-    private final static Map<Product, double[]> srcCornerLongitudeMap = new HashMap<Product, double[]>(10);
+    private final SceneProperties scnProp = new SceneProperties();
     private final static Map<Product, Band> srcBandMap = new HashMap<Product, Band>(10);
 
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
-
-    private double latMin = 0.0;
-    private double latMax = 0.0;
-    private double lonMin = 0.0;
-    private double lonMax = 0.0;
 
     private Resampling resampling = null;
     private Resampling.Index resamplingIndex = null;
@@ -99,39 +89,28 @@ public class MosaicOp extends Operator {
                 resampling = (Resampling.CUBIC_CONVOLUTION);
             resamplingIndex = resampling.createIndex();
 
-            final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct[0]);
+            computeImageGeoBoundary(sourceProduct, scnProp);
 
-            double rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
-            double azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
+            if(sceneWidth == 0 || sceneHeight == 0) {
 
-            computeImageGeoBoundary();
+                final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct[0]);
+                final double rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
+                final double azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
 
-            final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
-            double minAbsLat;
-            if (latMin*latMax > 0) {
-                minAbsLat = Math.min(Math.abs(latMin), Math.abs(latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
-            } else {
-                minAbsLat = 0.0;
+                getSceneDimensions(rangeSpacing, azimuthSpacing, scnProp);
+
+                sceneWidth = scnProp.sceneWidth;
+                sceneHeight = scnProp.sceneHeight;
             }
-            double delLat = minSpacing / MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
-            double delLon = minSpacing / (MeanEarthRadius * Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
-            delLat = Math.min(delLat, delLon);
-            delLon = delLat;
 
-            sceneWidth = (int)((lonMax - lonMin)/ delLon) + 1;
-            sceneHeight = (int)((latMax - latMin)/ delLat) + 1;
-
-            sceneWidth /= 2;
-            sceneHeight /= 2;
-            
             targetProduct = new Product("mosiac", "mosiac",
                     sceneWidth,
                     sceneHeight);
 
-            addGeoCoding();
+            addGeoCoding(scnProp);
 
             final Band targetBand = new Band("mosaic",
-                                                 ProductData.TYPE_FLOAT32,
+                    ProductData.TYPE_FLOAT32,
                     sceneWidth,
                     sceneHeight);
 
@@ -210,14 +189,14 @@ public class MosaicOp extends Operator {
      * Compute source image geodetic boundary (minimum/maximum latitude/longitude) from the its corner
      * latitude/longitude.
      */
-    private void computeImageGeoBoundary() {
+    public static void computeImageGeoBoundary(final Product[] sourceProducts, final SceneProperties scnProp) {
 
-        latMin = 90.0;
-        latMax = -90.0;
-        lonMin = 180.0;
-        lonMax = -180.0;
+        scnProp.latMin = 90.0;
+        scnProp.latMax = -90.0;
+        scnProp.lonMin = 180.0;
+        scnProp.lonMax = -180.0;
 
-        for(final Product srcProd : sourceProduct) {
+        for(final Product srcProd : sourceProducts) {
             final GeoCoding geoCoding = srcProd.getGeoCoding();
             final GeoPos geoPosFirstNear = geoCoding.getGeoPos(new PixelPos(0,0), null);
             final GeoPos geoPosFirstFar = geoCoding.getGeoPos(new PixelPos(srcProd.getSceneRasterWidth()-1,0), null);
@@ -227,36 +206,56 @@ public class MosaicOp extends Operator {
 
             final double[] lats  = {geoPosFirstNear.getLat(), geoPosFirstFar.getLat(), geoPosLastNear.getLat(), geoPosLastFar.getLat()};
             final double[] lons  = {geoPosFirstNear.getLon(), geoPosFirstFar.getLon(), geoPosLastNear.getLon(), geoPosLastFar.getLon()};
-            srcCornerLatitudeMap.put(srcProd, lats);
-            srcCornerLongitudeMap.put(srcProd, lons);
+            scnProp.srcCornerLatitudeMap.put(srcProd, lats);
+            scnProp.srcCornerLongitudeMap.put(srcProd, lons);
 
             for (double lat : lats) {
-                if (lat < latMin) {
-                    latMin = lat;
+                if (lat < scnProp.latMin) {
+                    scnProp.latMin = lat;
                 }
-                if (lat > latMax) {
-                    latMax = lat;
+                if (lat > scnProp.latMax) {
+                    scnProp.latMax = lat;
                 }
             }
 
             for (double lon : lons) {
-                if (lon < lonMin) {
-                    lonMin = lon;
+                if (lon < scnProp.lonMin) {
+                    scnProp.lonMin = lon;
                 }
-                if (lon > lonMax) {
-                    lonMax = lon;
+                if (lon > scnProp.lonMax) {
+                    scnProp.lonMax = lon;
                 }
             }
         }
     }
 
+    public static void getSceneDimensions(double rangeSpacing, double azimuthSpacing,
+                                          SceneProperties scnProp) {
+        final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
+        double minAbsLat;
+        if (scnProp.latMin*scnProp.latMax > 0) {
+            minAbsLat = Math.min(Math.abs(scnProp.latMin), Math.abs(scnProp.latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
+        } else {
+            minAbsLat = 0.0;
+        }
+        double delLat = minSpacing / MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
+        double delLon = minSpacing / (MeanEarthRadius * Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
+        delLat = Math.min(delLat, delLon);
+        delLon = delLat;
+
+        scnProp.sceneWidth = (int)((scnProp.lonMax - scnProp.lonMin)/ delLon) + 1;
+        scnProp.sceneHeight = (int)((scnProp.latMax - scnProp.latMin)/ delLat) + 1;
+    }
+
     /**
      * Add geocoding to the target product.
      */
-    private void addGeoCoding() {
+    private void addGeoCoding(SceneProperties scnProp) {
 
-        final float[] latTiePoints = {(float)latMax, (float)latMax, (float)latMin, (float)latMin};
-        final float[] lonTiePoints = {(float)lonMin, (float)lonMax, (float)lonMin, (float)lonMax};
+        final float[] latTiePoints = {(float)scnProp.latMax, (float)scnProp.latMax,
+                                      (float)scnProp.latMin, (float)scnProp.latMin};
+        final float[] lonTiePoints = {(float)scnProp.lonMin, (float)scnProp.lonMax,
+                                      (float)scnProp.lonMin, (float)scnProp.lonMax};
 
         final int gridWidth = 10;
         final int gridHeight = 10;
@@ -295,7 +294,9 @@ public class MosaicOp extends Operator {
         final ArrayList<Product> validProducts = new ArrayList<Product>(sourceProduct.length);
         
         for (final Product srcProduct : sourceProduct) {
-            if(!isWithinTile(srcProduct, targetRect, targetGeoCoding)) {
+            final double[] lats = scnProp.srcCornerLatitudeMap.get(srcProduct);
+            final double[] lons = scnProp.srcCornerLongitudeMap.get(srcProduct);
+            if(!isWithinTile(srcProduct, targetRect, targetGeoCoding, lats, lons)) {
                 continue;
             }
             validProducts.add(srcProduct);
@@ -357,10 +358,8 @@ public class MosaicOp extends Operator {
         pm.done();
     }
 
-    private static boolean isWithinTile(final Product srcProduct, final Rectangle destArea, final GeoCoding destGeoCoding) {
-
-        final double[] lats = srcCornerLatitudeMap.get(srcProduct);
-        final double[] lons = srcCornerLongitudeMap.get(srcProduct);
+    private static boolean isWithinTile(final Product srcProduct, final Rectangle destArea, final GeoCoding destGeoCoding,
+                                        final double[] lats, final double[]lons) {
 
         double srcLatMin = 90.0;
         double srcLatMax = -90.0;
@@ -525,6 +524,14 @@ public class MosaicOp extends Operator {
                 return rasterDataNode.getGeophysicalNoDataValue() == sample;
             return rasterDataNode.getNoDataValue() == sample;
         }
+    }
+
+    public static class SceneProperties {
+        int sceneWidth, sceneHeight;
+        double latMin, lonMin, latMax, lonMax;
+
+        final Map<Product, double[]> srcCornerLatitudeMap = new HashMap<Product, double[]>(10);
+        final Map<Product, double[]> srcCornerLongitudeMap = new HashMap<Product, double[]>(10);
     }
 
     /**
