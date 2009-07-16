@@ -99,8 +99,6 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         return fileListPanel;
     }
 
-
-
     private static void initButtonPanel(final JPanel panel, final JTable table, final FileModel fileModel) {
         panel.setLayout(new GridLayout(10, 1));
 
@@ -174,8 +172,15 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
                 75, 10, 20, 5, 5
         };
 
-        private Object data[][] = new Object[0][titles.length];
+        private class FileStats {
+            Object data[] = new Object[titles.length];
+            FileStats(File file) {
+                data[0] = file.getName();
+            }
+        }
+
         private final ArrayList<File> fileList = new ArrayList<File>(10);
+        private final ArrayList<FileStats> dataList = new ArrayList<FileStats>(10);
 
         public FileModel() {
             addBlankFile();
@@ -188,12 +193,20 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         public void addFile(final File file) {
             fileList.add(file);
             clearBlankFile();
-            setFileStats();
+
+            FileStats fstat = new FileStats(file);
+            dataList.add(fstat);
+            fireTableDataChanged();
+
+            updateProductData(fstat, file);
         }
 
         public void removeFile(final int index) {
             fileList.remove(index);
-            setFileStats();
+            dataList.get(index).data = null;
+            dataList.remove(index);
+
+            fireTableDataChanged();
         }
 
         /**
@@ -204,21 +217,24 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         }
 
         private void clearBlankFile() {
-            if(fileList.size() > 1 && fileList.get(0).getName().isEmpty())
+            if(fileList.size() > 1 && fileList.get(0).getName().isEmpty()) {
                 removeFile(0);
+            }
         }
 
         public void clear() {
             fileList.clear();
-            setFileStats();
+            dataList.clear();
             addBlankFile();
+
+            fireTableDataChanged();
         }
 
         // Implement the methods of the TableModel interface we're interested
         // in.  Only getRowCount(), getColumnCount() and getValueAt() are
         // required.  The other methods tailor the look of the table.
         public int getRowCount() {
-            return data.length;
+            return dataList.size();
         }
 
         public int getColumnCount() {
@@ -236,7 +252,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         }
 
         public Object getValueAt(int r, int c) {
-            return data[r][c];
+            return dataList.get(r).data[c];
         }
 
         void setColumnWidths(TableColumnModel columnModel) {
@@ -247,43 +263,28 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
             }
         }
 
-        // Our own method for setting/changing the current directory
-        // being displayed.  This method fills the data set with file info
-        // from the given directory.  It also fires an update event so this
-        // method could also be called after the table is on display.
-        public void setFileStats() {
-
-            data = new Object[fileList.size()][titles.length];
-
-            updateProductData(data, fileList);
-        }
-
-        private void updateProductData(final Object[][] data, final ArrayList<File> fileList) {
+        private void updateProductData(final FileStats fstat, final File file) {
 
             final SwingWorker worker = new SwingWorker() {
                 @Override
                 protected Object doInBackground() throws Exception {
                     try {
-                        for(int i=0; i < fileList.size(); ++i) {
-                            final File file = fileList.get(i);
+                        if(!file.getName().isEmpty()) {
+                            try {
+                                final Product product = ProductIO.readProduct(file, null);
+                                final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
 
-                            if(!file.getName().isEmpty()) {
-                                try {
-                                    final Product product = ProductIO.readProduct(file, null);
-                                    final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-
-                                    data[i][0] = product.getName();
-                                    data[i][1] = product.getProductType();
-                                    data[i][2] = OperatorUtils.getAcquisitionDate(absRoot);
-                                    data[i][3] = absRoot.getAttributeInt(AbstractMetadata.REL_ORBIT, 0);
-                                    data[i][4] = absRoot.getAttributeInt(AbstractMetadata.ABS_ORBIT, 0);
-                                } catch(Exception ex) {
-                                    data[i][0] = file.getName();
-                                    data[i][1] = "";
-                                    data[i][2] = "";
-                                    data[i][3] = 0;
-                                    data[i][4] = 0;
-                                }
+                                fstat.data[0] = product.getName();
+                                fstat.data[1] = product.getProductType();
+                                fstat.data[2] = OperatorUtils.getAcquisitionDate(absRoot);
+                                fstat.data[3] = absRoot.getAttributeInt(AbstractMetadata.REL_ORBIT, 0);
+                                fstat.data[4] = absRoot.getAttributeInt(AbstractMetadata.ABS_ORBIT, 0);
+                            } catch(Exception ex) {
+                                fstat.data[0] = file.getName();
+                                fstat.data[1] = "";
+                                fstat.data[2] = "";
+                                fstat.data[3] = 0;
+                                fstat.data[4] = 0;
                             }
                         }
                     } finally {
