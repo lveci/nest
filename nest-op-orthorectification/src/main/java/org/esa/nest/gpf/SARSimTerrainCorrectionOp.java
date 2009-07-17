@@ -33,6 +33,8 @@ import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.datamodel.Calibrator;
+import org.esa.nest.datamodel.CalibrationFactory;
 import org.esa.nest.util.MathUtils;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.Constants;
@@ -42,7 +44,6 @@ import org.esa.nest.dataio.ReaderUtils;
 import java.awt.*;
 import java.util.*;
 import java.io.IOException;
-import java.io.File;
 
 /**
  * Raw SAR images usually contain significant geometric distortions. One of the factors that cause the
@@ -108,22 +109,12 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private ProductNodeGroup<Pin> masterGCPGroup = null;
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
-    private FileElevationModel fileElevationModel = null;
-    private TiePointGrid latitude = null;
-    private TiePointGrid longitude = null;
     private WarpOp.WarpData warpData = null;
 
     private boolean srgrFlag = false;
-    private boolean multilookFlag = false;
-    private boolean retroCalibrationFlag = false;
-    private boolean wideSwathProductFlag = false;
-    private boolean listedASARProductFlag = false;
 
     private String mission = null;
-    private String swath = null;
-    private String productType = null;
     private String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
-    private String newXCAFileName = null; // XCA file for radiometric calibration
     private String demName = null;
 
     private int sourceImageWidth = 0;
@@ -132,8 +123,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private int targetImageHeight = 0;
 
     private double avgSceneHeight = 0.0; // in m
-    private double rangeSpreadingCompPower = 0.0;
-    private double halfRangeSpreadingCompPower = 0.0;
     private double wavelength = 0.0; // in m
     private double rangeSpacing = 0.0;
     private double azimuthSpacing = 0.0;
@@ -148,7 +137,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private double lonMax= 0.0;
     private double delLat = 0.0;
     private double delLon = 0.0;
-    private double oldSatelliteHeight; // satellite to earth centre distance used in previous calibration, in m
 
     private double[][] sensorPosition = null; // sensor position for all range lines
     private double[][] sensorVelocity = null; // sensor velocity for all range lines
@@ -156,17 +144,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private double[] xPosArray = null;
     private double[] yPosArray = null;
     private double[] zPosArray = null;
-    private double[] newCalibrationConstant = new double[2];
-    private double[] oldRefElevationAngle = null; // reference elevation angle for given swath in old aux file, in degree
-    private double[] newRefElevationAngle = null; // reference elevation angle for given swath in new aux file, in degree
-    private double[] srgrConvParamsTime = null;
-    private double[] earthRadius = null; // Earth radius for all range lines, in m
-
-    private float[][] oldSlantRange = null; // old slant ranges for one range line, in m
-    private float[][] oldAntennaPatternSingleSwath = null; // old antenna pattern gains for single swath product, in dB
-    private float[][] oldAntennaPatternWideSwath = null; // old antenna pattern gains for single swath product, in dB
-    private float[][] newAntennaPatternSingleSwath = null; // new antenna pattern gains for single swath product, in dB
-    private float[][] newAntennaPatternWideSwath = null; // new antenna pattern gains for single swath product, in dB
 
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
@@ -176,10 +153,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     static final String BILINEAR = "Bilinear Interpolation";
     static final String CUBIC = "Cubic Convolution";
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
-    private static final double refSlantRange = 800000.0; //  m
     private static final double NonValidZeroDopplerTime = -99999.0;
-    private static final int numOfGains = 201; // number of antenna pattern gain values for a given swath and
-                                               // polarization in the aux file
     private static final int INVALID_SUB_SWATH_INDEX = -1;
     
     private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
@@ -188,6 +162,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private Map<String, ArrayList<Tile>> tileCache = new HashMap<String, ArrayList<Tile>>(2);
 
     boolean useAvgSceneHeight = false;
+    Calibrator calibrator = null;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -242,7 +217,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             if (useAvgSceneHeight) {
                 applyRadiometricCalibration = false;
-                retroCalibrationFlag = false;
                 saveDEM = false;
                 saveLocalIncidenceAngle = false;
                 saveProjectedLocalIncidenceAngle = false;
@@ -269,51 +243,15 @@ public class SARSimTerrainCorrectionOp extends Operator {
             }
 
             if (applyRadiometricCalibration) {
-                prepareForRadiometricCalibration();
+                calibrator = CalibrationFactory.createCalibrator(sourceProduct);
+                calibrator.initialize(sourceProduct, targetProduct);
+                getProductPolarization();
             }
 
             updateTargetProductMetadata();
 
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
-        }
-    }
-
-    /**
-     * Get all information needed for retro-calibration.
-     * @throws Exception The exceptions.
-     */
-    private void prepareForRadiometricCalibration() throws Exception {
-
-        getMultilookFlag();
-
-        getProductSwath();
-
-        getProductType();
-
-        getProductPolarization();
-
-        setRetroCalibrationFlag();
-
-        setRangeSpreadingLossCompPower();
-
-        if (retroCalibrationFlag) {
-
-            getTiePointGrid(sourceProduct);
-
-            getOldAntennaPattern();
-
-            computeOldSatelliteHeight();
-
-            computeOldSlantRange();
-
-            computeEarthRadius();
-        }
-
-        if (listedASARProductFlag) {
-            getNewAntennaPattern();
-        } else {
-            getCalibrationConstant();
         }
     }
 
@@ -331,31 +269,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
         if (mission.contains("ALOS")) {
             throw new OperatorException("ALOS PALSAR product is not supported yet");
         }
-    }
-
-    /**
-     * Get multilook flag from the abstracted metadata.
-     * @throws Exception The exceptions.
-     */
-    private void getMultilookFlag() throws Exception {
-        multilookFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.multilook_flag);
-    }
-
-    /**
-     * Get product swath.
-     * @throws Exception The exceptions.
-     */
-    private void getProductSwath() throws Exception {
-        swath = absRoot.getAttributeString(AbstractMetadata.SWATH);
-        wideSwathProductFlag = swath.contains("WS");
-    }
-
-    /**
-     * Get Product ID from MPH.
-     * @throws Exception The exceptions.
-     */
-    private void getProductType() throws Exception {
-        productType = absRoot.getAttributeString(AbstractMetadata.PRODUCT_TYPE);
     }
 
     /**
@@ -378,166 +291,11 @@ public class SARSimTerrainCorrectionOp extends Operator {
     }
 
     /**
-     * Set retro-calibration flag.
-     */
-    private void setRetroCalibrationFlag() {
-
-        if (productType.contains("ASA_IMP_1P") || productType.contains("ASA_IMM_1P") ||
-            productType.contains("ASA_APP_1P") || productType.contains("ASA_APM_1P") ||
-            productType.contains("ASA_WSM_1P") || productType.contains("ASA_IMG_1P") ||
-            productType.contains("ASA_APG_1P") || productType.contains("ASA_IMS_1P") ||
-            productType.contains("ASA_APS_1P")) {
-
-            if (srgrFlag) {
-                if (multilookFlag) {
-                    retroCalibrationFlag = false;
-                    System.out.println("Only constant and incidence angle corrections will be performed for radiometric calibration");
-                } else {
-                    retroCalibrationFlag = true;
-                }
-            }
-            listedASARProductFlag = true;
-
-        } else if (mission.contains("ENVISAT") || (mission.contains("ERS") && productType.contains("SAR"))) {
-
-            retroCalibrationFlag = false;
-            listedASARProductFlag = false;
-
-        } else {
-            throw new OperatorException("Radiometric calibration cannot be applied to the selected product");
-        }
-    }
-
-    /**
-     * Set power coefficient used in range spreading loss compensation computation.
-     */
-    private void setRangeSpreadingLossCompPower() {
-        rangeSpreadingCompPower = 3.0;
-        if (productType.contains("ASA_APS_1P")) {
-            rangeSpreadingCompPower = 4.0;
-        }
-        halfRangeSpreadingCompPower = rangeSpreadingCompPower / 2.0;
-    }
-
-    /**
-     * Get incidence angle and slant range time tie point grids.
-     * @param sourceProduct the source
-     */
-    private void getTiePointGrid(Product sourceProduct) {
-        latitude = OperatorUtils.getLatitude(sourceProduct);
-        longitude = OperatorUtils.getLongitude(sourceProduct);
-    }
-
-    /**
      * Get average scene height from abstracted metadata.
      * @throws Exception The exceptions.
      */
     private void getAverageSceneHeight() throws Exception {
         avgSceneHeight = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.avg_scene_height);
-    }
-
-    /**
-     * Compute satellite to Earth centre distance (in m) using the middle orbit state vector.
-     */
-    private void computeOldSatelliteHeight() {
-        final int mid = orbitStateVectors.length / 2;
-        oldSatelliteHeight = ASARCalibrationOperator.computeSatelliteHeight(
-                orbitStateVectors[mid].time.getMJD(), orbitStateVectors);
-    }
-
-    /**
-     * Compute slant range for a range line using SRGR coefficient and the equation below
-     * slant range = S0 + S1(GR-GR0) + S2 (GR-GR0)^2 + S3(GR-GR0)^3 + S4(GR-GR0)^4
-     */
-    private void computeOldSlantRange() {
-        srgrConvParamsTime = new double[srgrConvParams.length];
-        oldSlantRange = new float[srgrConvParams.length][sourceImageWidth];
-        for (int i = 0; i < srgrConvParams.length; i++) {
-            srgrConvParamsTime[i] = srgrConvParams[i].timeMJD;
-            for (int x = 0; x < sourceImageWidth; x++) {
-                oldSlantRange[i][x] = (float)computePolinomialValue(
-                        x*rangeSpacing + srgrConvParams[i].ground_range_origin, srgrConvParams[i].coefficients);
-            }
-        }
-    }
-
-    /**
-     * Compute earth radius for all range lines (in m).
-     */
-    private void computeEarthRadius() {
-        earthRadius = new double[targetImageHeight];
-        for (int i = 0; i < targetImageHeight; i++) {
-            earthRadius[i] = ASARCalibrationOperator.computeEarthRadius((float)(latMin + i*delLat), 0.0f);
-        }
-    }
-
-    /**
-     * Get old antenna pattern 
-     */
-    private void getOldAntennaPattern() {
-        
-        final String xcaFileName = absRoot.getAttributeString(AbstractMetadata.external_calibration_file);
-        final String xcaFilePath = Settings.instance().get("AuxData/envisatAuxDataPath") + File.separator + xcaFileName;
-        
-        if (wideSwathProductFlag) {
-
-            oldRefElevationAngle = new double[5]; // reference elevation angles for 5 sub swathes
-            oldAntennaPatternWideSwath = new float[5][numOfGains]; // antenna pattern gain for 5 sub swathes
-            ASARCalibrationOperator.getWideSwathAntennaPatternGainFromAuxData(
-                    xcaFilePath, mdsPolar[0], numOfGains, oldRefElevationAngle, oldAntennaPatternWideSwath);
-
-        } else {
-
-            oldRefElevationAngle = new double[1]; // reference elevation angle for 1 swath
-            oldAntennaPatternSingleSwath = new float[2][numOfGains]; // antenna pattern gain for 2 bands
-            ASARCalibrationOperator.getSingleSwathAntennaPatternGainFromAuxData(
-                    xcaFilePath, swath, mdsPolar, numOfGains, oldRefElevationAngle, oldAntennaPatternSingleSwath);
-        }
-    }
-
-    /**
-     * Get the new antenna pattern gain from the latest XCA file available.
-     * @throws Exception The exceptions.
-     */
-    private void getNewAntennaPattern() throws Exception {
-
-        final Date startDate = sourceProduct.getStartTime().getAsDate();
-        final Date endDate = sourceProduct.getEndTime().getAsDate();
-        final File xcaFileDir = new File(Settings.instance().get("AuxData/envisatAuxDataPath"));
-        newXCAFileName = ASARCalibrationOperator.findXCAFile(xcaFileDir, startDate, endDate);
-
-        String xcaFilePath;
-        if (newXCAFileName != null) {
-            xcaFilePath = xcaFileDir.toString() + File.separator + newXCAFileName;
-        } else {
-            throw new OperatorException("No proper XCA file has been found");
-        }
-
-        if (wideSwathProductFlag) {
-
-            newRefElevationAngle = new double[5]; // reference elevation angles for 5 sub swathes
-            newAntennaPatternWideSwath = new float[5][numOfGains]; // antenna pattern gain for 5 sub swathes
-            ASARCalibrationOperator.getWideSwathAntennaPatternGainFromAuxData(
-                    xcaFilePath, mdsPolar[0], numOfGains, newRefElevationAngle, newAntennaPatternWideSwath);
-
-        } else {
-
-            newRefElevationAngle = new double[1]; // reference elevation angle for 1 swath
-            newAntennaPatternSingleSwath = new float[2][numOfGains];  // antenna pattern gain for 2 bands
-            ASARCalibrationOperator.getSingleSwathAntennaPatternGainFromAuxData(
-                    xcaFilePath,  swath, mdsPolar, numOfGains, newRefElevationAngle, newAntennaPatternSingleSwath);
-        }
-
-        ASARCalibrationOperator.getCalibrationFactorFromExternalAuxFile(
-                xcaFilePath, swath, mdsPolar, productType, newCalibrationConstant);
-    }
-
-    /**
-     * Get calibration constant from the metadata.
-     * @throws Exception The exceptions.
-     */
-    private void getCalibrationConstant() throws Exception {
-        newCalibrationConstant[0] = absRoot.getAttributeDouble(AbstractMetadata.calibration_factor, 1.0);
     }
 
     /**
@@ -736,11 +494,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         addGeoCoding();
 
-        addLayoverShadowBitmasks(targetProduct);
+        ProductUtils.copyMetadata(sourceProduct, targetProduct);
 
-        // the tile width has to be the image width because otherwise sourceRaster.getDataBufferIndex(x, y)
-        // returns incorrect index for the last tile on the right
-        targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 20);
+        addLayoverShadowBitmasks(targetProduct);
     }
 
     private static void addLayoverShadowBitmasks(Product product) {
@@ -865,7 +621,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
      */
     private void updateTargetProductMetadata() throws OperatorException {
 
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.srgr_flag, 1);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetImageHeight);
@@ -890,17 +645,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.geo_ref_system, "WGS84");
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lat_pixel_res, delLat);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lon_pixel_res, delLon);
-
-        if (applyRadiometricCalibration) {
-            if (listedASARProductFlag && !multilookFlag) {
-                AbstractMetadata.setAttribute(absTgt, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
-                AbstractMetadata.setAttribute(absTgt, AbstractMetadata.ant_elev_corr_flag, 1);
-                AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_spread_comp_flag, 1);
-                AbstractMetadata.setAttribute(absTgt, AbstractMetadata.external_calibration_file, newXCAFileName);
-            }
-            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.abs_calibration_flag, 1);
-            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.calibration_factor, newCalibrationConstant[0]);
-        }
     }
 
     private void computeWARPFunction() {
@@ -1116,8 +860,15 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
                                 if (applyRadiometricCalibration) {
 
-                                    v = applyCalibration(slantRange, sensorPos, earthPoint, localIncidenceAngles[1],
-                                            tileData.bandPolar, v, bandUnit, subSwathIndex); // use projected incidence angle
+                                    final double satelliteHeight = Math.sqrt(
+                                            sensorPos[0]*sensorPos[0] + sensorPos[1]*sensorPos[1] + sensorPos[2]*sensorPos[2]);
+
+                                    final double sceneToEarthCentre = Math.sqrt(
+                                            earthPoint[0]*earthPoint[0] + earthPoint[1]*earthPoint[1] + earthPoint[2]*earthPoint[2]);
+
+                                    v = calibrator.applyCalibration(
+                                            v, slantRange, satelliteHeight, sceneToEarthCentre, localIncidenceAngles[1],
+                                            tileData.bandPolar, bandUnit, subSwathIndex); // use projected incidence angle
                                 }
 
                                 tileData.tileDataBuffer.setElemDoubleAt(index, v);
@@ -1251,20 +1002,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
     }
 
     /**
-     * Compute polynomial value.
-     * @param x The variable.
-     * @param srgrCoeff The polynomial coefficients.
-     * @return The function value.
-     */
-    private static double computePolinomialValue(final double x, final double[] srgrCoeff) {
-        double v = 0.0;
-        for (int i = srgrCoeff.length-1; i > 0; i--) {
-            v = (v + srgrCoeff[i])*x;
-        }
-        return v + srgrCoeff[0];
-    }
-
-    /**
      * Get unit for the source band corresponding to the given target band.
      * @param bandName The target band name.
      * @return The source band unit.
@@ -1281,6 +1018,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * @param bandName The name of the target band.
      * @param bandPolar The source band polarization index.
      * @param bandUnit The corresponding source band unit.
+     * @param subSwathIndex The subswath index.
      * @return The pixel value.
      * @throws IOException from readPixels
      */
@@ -1364,8 +1102,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
             throw new OperatorException("Uknown band unit");
         }
 
-        if (retroCalibrationFlag) {
-            v = applyRetroCalibration(x0, y0, v, bandPolar, bandUnit, subSwathIndex);
+        if (applyRadiometricCalibration) {
+            v = calibrator.applyRetroCalibration(x0, y0, v, bandPolar, bandUnit, subSwathIndex);
         }
 
         return v;
@@ -1435,12 +1173,12 @@ public class SARSimTerrainCorrectionOp extends Operator {
         int[] subSwathIndex11 = {0};
         double v = 0;
 
-        if (retroCalibrationFlag) {
+        if (applyRadiometricCalibration) {
 
-            v00 = applyRetroCalibration(x0, y0, v00, bandPolar, bandUnit, subSwathIndex00);
-            v01 = applyRetroCalibration(x1, y0, v01, bandPolar, bandUnit, subSwathIndex01);
-            v10 = applyRetroCalibration(x0, y1, v10, bandPolar, bandUnit, subSwathIndex10);
-            v11 = applyRetroCalibration(x1, y1, v11, bandPolar, bandUnit, subSwathIndex11);
+            v00 = calibrator.applyRetroCalibration(x0, y0, v00, bandPolar, bandUnit, subSwathIndex00);
+            v01 = calibrator.applyRetroCalibration(x1, y0, v01, bandPolar, bandUnit, subSwathIndex01);
+            v10 = calibrator.applyRetroCalibration(x0, y1, v10, bandPolar, bandUnit, subSwathIndex10);
+            v11 = calibrator.applyRetroCalibration(x1, y1, v11, bandPolar, bandUnit, subSwathIndex11);
 
             if (dx <= 0.5 && dy <= 0.5) {
                 subSwathIndex[0] = subSwathIndex00[0];
@@ -1523,10 +1261,10 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
 
         int[][][] ss = new int[4][4][1];
-        if (retroCalibrationFlag) {
+        if (applyRadiometricCalibration) {
             for (int i = 0; i < y.length; i++) {
                 for (int j = 0; j < x.length; j++) {
-                    v[i][j] = applyRetroCalibration(x[j], y[i], v[i][j], bandPolar, bandUnit, ss[i][j]);
+                    v[i][j] = calibrator.applyRetroCalibration(x[j], y[i], v[i][j], bandPolar, bandUnit, ss[i][j]);
                 }
             }
         }
@@ -1553,148 +1291,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
         } else {
             return vv;
         }
-    }
-
-    /**
-     * Remove the antenna pattern compensation and range spreading loss applied to the pixel.
-     * @param x The x coordinate of the pixel in the source image.
-     * @param y The y coordinate of the pixel in the source image.
-     * @param v The pixel value.
-     * @param bandPolar The polarization of the source band.
-     * @param bandUnit The source band unit.
-     * @param subSwathIndex The sub swath index for current pixel for wide swath product case.
-     * @return The pixel value with antenna pattern compensation and range spreading loss correction removed.
-     */
-    private double applyRetroCalibration(int x, int y, double v, int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
-
-        final double zeroDopplerTime = firstLineUTC + y*lineTimeInterval;
-
-        final double slantRange = getOldSlantRange(x, zeroDopplerTime);
-
-        //final double earthRadius = ASARCalibrationOperator.computeEarthRadius(latitude.getPixelFloat(x, y),
-        //                                                                      longitude.getPixelFloat(x, y));
-
-        int i = (int)((latitude.getPixelFloat(x, y) - latMin)/delLat + 0.5);
-
-        final double elevationAngle = ASARCalibrationOperator.computeElevationAngle(
-                                            slantRange, oldSatelliteHeight, avgSceneHeight + earthRadius[i]);
-
-        double gain = 0.0;
-        if (wideSwathProductFlag) {
-            gain = getAntennaPatternGain(elevationAngle, bandPolar, oldRefElevationAngle, oldAntennaPatternWideSwath, true, subSwathIndex);
-        } else {
-            gain = ASARCalibrationOperator.computeAntPatGain(elevationAngle, oldRefElevationAngle[0], oldAntennaPatternSingleSwath[bandPolar]);
-        }
-
-        if (bandUnit == Unit.UnitType.AMPLITUDE) {
-            return v*gain*Math.pow(refSlantRange / slantRange, halfRangeSpreadingCompPower); // amplitude
-        } else if (bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
-            return v*gain*gain*Math.pow(refSlantRange / slantRange, rangeSpreadingCompPower); // intensity
-        } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
-            return 10.0*Math.log10(Math.pow(10, v/10.0)*gain*gain*Math.pow(refSlantRange/slantRange, rangeSpreadingCompPower));
-        } else {
-            throw new OperatorException("Uknown band unit");
-        }
-    }
-
-    /**
-     * Get old slant range for given pixel.
-     * @param x The x coordinate of the pixel in the source image.
-     * @param zeroDopplerTime The zero doppler time for the given pixel.
-     * @return The slant range (in meters).
-     */
-    private double getOldSlantRange(int x, double zeroDopplerTime) {
-        int idx = 0;
-        for (int i = 0; i < srgrConvParams.length && zeroDopplerTime >= srgrConvParamsTime[i]; i++) {
-            idx = i;
-        }
-        return oldSlantRange[idx][x];
-    }
-
-    /**
-     * Get antenna pattern gain value for given elevation angle.
-     * @param elevationAngle The elevation angle (in degree).
-     * @param bandPolar The source band polarization index.
-     * @param refElevationAngle The reference elevation angles for different swathes or sub swathes.
-     * @param antennaPattern The antenna pattern array. For single swath product, it contains two 201-length arrays
-     *                       corresponding to the two bands of different polarizations. For wide swath product, it
-     *                       contains five 201-length arrays with each for a sub swath.
-     * @param compSubSwathIdx The boolean flag indicating if sub swath index should be computed.
-     * @param subSwathIndex The sub swath index for current pixel for wide swath product case.
-     * @return The antenna pattern gain value.
-     */
-    private static double getAntennaPatternGain(double elevationAngle, int bandPolar, double[] refElevationAngle,
-                                         float[][] antennaPattern, boolean compSubSwathIdx, int[] subSwathIndex) {
-
-        if (refElevationAngle.length == 1) { // single swath
-
-            return ASARCalibrationOperator.computeAntPatGain(elevationAngle, refElevationAngle[0], antennaPattern[bandPolar]);
-
-        } else { // wide swath
-
-            if (compSubSwathIdx || subSwathIndex[0] == INVALID_SUB_SWATH_INDEX) {
-                subSwathIndex[0] = ASARCalibrationOperator.findSubSwath(elevationAngle, refElevationAngle);
-            }
-
-            return ASARCalibrationOperator.computeAntPatGain(
-                    elevationAngle, refElevationAngle[subSwathIndex[0]], antennaPattern[subSwathIndex[0]]);
-        }
-    }
-
-    /**
-     * Apply calibrations to the given point. The following calibrations are included: calibration constant,
-     * antenna pattern compensation, range spreading loss correction and incidence angle correction.
-     * @param slantRange The slant range (in m).
-     * @param sensorPos The satellite position.
-     * @param earthPoint The backscattering element position.
-     * @param localIncidenceAngle The local incidence angle (in degrees).
-     * @param bandPolar The source band polarization index.
-     * @param v The pixel value.
-     * @param bandUnit The source band unit.
-     * @param subSwathIndex The sub swath index for current pixel for wide swath product case.
-     * @return The calibrated pixel value.
-     */
-    private double applyCalibration(final double slantRange, final double[] sensorPos, final double[] earthPoint,
-                                    final double localIncidenceAngle, final int bandPolar, final double v,
-                                    final Unit.UnitType bandUnit, int[] subSwathIndex) {
-
-        double sigma = 0.0;
-        if (bandUnit == Unit.UnitType.AMPLITUDE) {
-            sigma = v*v;
-        } else if (bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
-            sigma = v;
-        } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
-            sigma = Math.pow(10, v/10.0); // convert dB to linear scale
-        } else {
-            throw new OperatorException("Uknown band unit");
-        }
-
-        if (!listedASARProductFlag || multilookFlag) { // calibration constant and incidence angle corrections only
-            return sigma / newCalibrationConstant[bandPolar] *
-                   Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
-        }
-
-        final double satelliteHeight = Math.sqrt(
-                sensorPos[0]*sensorPos[0] + sensorPos[1]*sensorPos[1] + sensorPos[2]*sensorPos[2]);
-
-        final double sceneToEarthCentre = Math.sqrt(
-                earthPoint[0]*earthPoint[0] + earthPoint[1]*earthPoint[1] + earthPoint[2]*earthPoint[2]);
-
-        final double elevationAngle = ASARCalibrationOperator.computeElevationAngle(
-                slantRange, satelliteHeight, sceneToEarthCentre); // in degrees
-
-        double gain;
-        if (wideSwathProductFlag) {
-            gain = getAntennaPatternGain(
-                    elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternWideSwath, false, subSwathIndex);
-        } else {
-            gain = ASARCalibrationOperator.computeAntPatGain(
-                    elevationAngle, newRefElevationAngle[0], newAntennaPatternSingleSwath[bandPolar]);
-        }
-
-        return sigma / newCalibrationConstant[bandPolar] / (gain*gain) *
-               Math.pow(slantRange/refSlantRange, rangeSpreadingCompPower) *
-               Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
     }
 
     private static class TileData {
