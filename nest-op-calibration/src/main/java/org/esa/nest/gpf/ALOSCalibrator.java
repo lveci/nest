@@ -233,4 +233,14 @@ public class ALOSCalibrator implements Calibrator {
     public static Tile getSourceTile(RasterDataNode rasterDataNode, Rectangle rectangle, ProgressMonitor pm) throws OperatorException {
         return OperatorContext.getSourceTile(rasterDataNode, rectangle, pm);
     }
+
+    public double applyCalibration(
+            final double v, final double slantRange, final double satelliteHeight, final double sceneToEarthCentre,
+            final double localIncidenceAngle, final int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
+        return 0.0;
+    }
+
+    public double applyRetroCalibration(int x, int y, double v, int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
+        return 0.0;
+    }
 }

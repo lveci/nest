@@ -2413,4 +2413,28 @@ public final class ERSCalibrator implements Calibrator {
     public static Tile getSourceTile(RasterDataNode rasterDataNode, Rectangle rectangle, ProgressMonitor pm) throws OperatorException {
         return OperatorContext.getSourceTile(rasterDataNode, rectangle, pm);
     }
+
+    public double applyCalibration(
+            final double v, final double slantRange, final double satelliteHeight, final double sceneToEarthCentre,
+            final double localIncidenceAngle, final int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
+
+        double sigma = 0.0;
+        if (bandUnit == Unit.UnitType.AMPLITUDE) {
+            sigma = v*v;
+        } else if (bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+            sigma = v;
+        } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
+            sigma = Math.pow(10, v/10.0); // convert dB to linear scale
+        } else {
+            throw new OperatorException("Uknown band unit");
+        }
+
+        return sigma / calibrationConstant *
+               Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
+    }
+
+    public double applyRetroCalibration(int x, int y, double v, int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
+        return 0.0;
+    }
+    
 }

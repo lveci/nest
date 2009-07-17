@@ -37,8 +37,6 @@ import java.util.HashMap;
 
 /**
  * Calibration for ASAR data products.
- *
- * @todo automatically search aux file in local repository using time period
  */
 public class ASARCalibrator implements Calibrator {
 
@@ -72,8 +70,14 @@ public class ASARCalibrator implements Calibrator {
     private double lineTimeInterval = 0.0; // in days
     private double avgSceneHeight = 0.0; // in m
     private double rangeSpacing = 0.0; // in m
-    private double rangeSpreadingCompPower; // power in range spreading loss compensation calculation
+    private double azimuthSpacing = 0.0; // in m
+    private double rangeSpreadingCompPower = 0.0; // power in range spreading loss compensation calculation
+    private double halfRangeSpreadingCompPower = 0.0;
+    private double latMin = 0.0;
+    private double latMax = 0.0;
+    private double delLat = 0.0;
 
+    private double[] earthRadius = null; // Earth radius for all range lines, in m
     private double[] newCalibrationConstant = new double[2];
     private double[] oldRefElevationAngle = null; // reference elevation angle for given swath in old aux file, in degree
     private double[] newRefElevationAngle = null; // reference elevation angle for given swath in new aux file, in degree
@@ -96,6 +100,8 @@ public class ASARCalibrator implements Calibrator {
     private static final double refSlantRange = 800000.0; //  m
     protected static final double halfLightSpeedByRefSlantRange = Constants.halfLightSpeed / refSlantRange;
     protected static final double underFlowFloat = 1.0e-30;
+    private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
+    private static final int INVALID_SUB_SWATH_INDEX = -1;
 
     public ASARCalibrator() {
     }
@@ -141,6 +147,8 @@ public class ASARCalibrator implements Calibrator {
 
             getProductPolarization();
 
+            getRangeAzimuthSpacing();
+            
             numMPPRecords = getNumOfRecordsInMainProcParam(sourceProduct);  //???
 
             getTiePointGridData(sourceProduct);
@@ -148,8 +156,6 @@ public class ASARCalibrator implements Calibrator {
             if (retroCalibrationFlag) {
 
                 getSrgrCoeff();
-
-                getRangeSpacing();
 
                 getOldXCAFile();
 
@@ -171,11 +177,11 @@ public class ASARCalibrator implements Calibrator {
                 getNewAntennaPattern();
 
                 getNewCalibrationFactor();
+
+                computeEarthRadius();
             }
 
-            if (applyRangeSpreadingCorr) {
-                setRangeSpreadingLossCompPower();
-            }
+            setRangeSpreadingLossCompPower();
 
             updateTargetProductMetadata();
 
@@ -275,8 +281,9 @@ public class ASARCalibrator implements Calibrator {
      * Get range spacing from the abstracted metadata.
      * @throws Exception The exceptions.
      */
-    private void getRangeSpacing() throws Exception {
+    private void getRangeAzimuthSpacing() throws Exception {
         rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
+        azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
     }
 
     /**
@@ -744,6 +751,7 @@ public class ASARCalibrator implements Calibrator {
         if (productType.contains("ASA_APS_1P")) {
             rangeSpreadingCompPower = 4.0;
         }
+        halfRangeSpreadingCompPower = rangeSpreadingCompPower / 2.0;
     }
 
     /**
@@ -766,8 +774,8 @@ public class ASARCalibrator implements Calibrator {
         }
 
         AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.abs_calibration_flag, 1);
-
         AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.external_calibration_file, newXCAFileName);
+        AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.calibration_factor, newCalibrationConstant[0]);
     }
 
     /**
@@ -929,13 +937,15 @@ public class ASARCalibrator implements Calibrator {
             for (int x = x0; x < x0 + w; x++) {
 
                 final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
-
+                /*
                 final double earthRadius = computeEarthRadius(
                         latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC),
                         longitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC)); // in m
+                */
+                int i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC))/delLat + 0.5);
 
                 final double theta = computeElevationAngle(
-                        slantRange, satelitteHeight, avgSceneHeight + earthRadius); // in degree
+                        slantRange, satelitteHeight, avgSceneHeight + earthRadius[i]); // in degree
 
                 targetTileNewAntPat[y - y0][x - x0] = computeAntPatGain(
                         theta, newRefElevationAngle[0], newAntennaPatternSingleSwath[band]);
@@ -977,13 +987,15 @@ public class ASARCalibrator implements Calibrator {
             for (int x = x0; x < x0 + w; x++) {
 
                 final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
-
+                /*
                 final double earthRadius = computeEarthRadius(
                         latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC),
                         longitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC)); // in m
+                */
+                int i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC))/delLat + 0.5);
 
                 final double theta = computeElevationAngle(
-                                                slantRange, satelitteHeight, avgSceneHeight + earthRadius); // in degree
+                                                slantRange, satelitteHeight, avgSceneHeight + earthRadius[i]); // in degree
 
                 int subSwathIndex = findSubSwath(theta, newRefElevationAngle);
 
@@ -1088,6 +1100,7 @@ public class ASARCalibrator implements Calibrator {
      * Compute slant range for given pixel.
      * @param x The x coordinate of the pixel in the source image.
      * @param y The y coordinate of the pixel in the source image.
+     * @param srgrConvParam The SRGR coefficients.
      * @return The slant range (in meters).
      */
     private double computeSlantRange(int x, int y, AbstractMetadata.SRGRCoefficientList srgrConvParam) {
@@ -1123,16 +1136,63 @@ public class ASARCalibrator implements Calibrator {
     }
 
     /**
+     * Compute earth radius for all range lines (in m).
+     */
+    private void computeEarthRadius() {
+
+        final GeoCoding geoCoding = sourceProduct.getGeoCoding();
+        if(geoCoding == null) {
+            throw new OperatorException("Product does not contain a geocoding");
+        }
+        final GeoPos geoPosFirstNear = geoCoding.getGeoPos(new PixelPos(0,0), null);
+        final GeoPos geoPosFirstFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth()-1,0), null);
+        final GeoPos geoPosLastNear = geoCoding.getGeoPos(new PixelPos(0,sourceProduct.getSceneRasterHeight()-1), null);
+        final GeoPos geoPosLastFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth()-1,
+                                                                      sourceProduct.getSceneRasterHeight()-1), null);
+
+        final double[] lats  = {geoPosFirstNear.getLat(), geoPosFirstFar.getLat(), geoPosLastNear.getLat(), geoPosLastFar.getLat()};
+        latMin = 90.0;
+        latMax = -90.0;
+        for (double lat : lats) {
+            if (lat < latMin) {
+                latMin = lat;
+            }
+            if (lat > latMax) {
+                latMax = lat;
+            }
+        }
+
+        final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
+        double minAbsLat;
+        if (latMin*latMax > 0) {
+            minAbsLat = Math.min(Math.abs(latMin), Math.abs(latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
+        } else {
+            minAbsLat = 0.0;
+        }
+        delLat = minSpacing / MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
+        double delLon = minSpacing / (MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
+        delLat = Math.min(delLat, delLon);
+
+        final int h = (int)((latMax - latMin)/delLat) + 1;
+
+        earthRadius = new double[h + 1];
+        for (int i = 0; i <= h; i++) {
+            earthRadius[i] = computeEarthRadius((float)(latMax - i*delLat), 0.0f);
+        }
+    }
+
+    /**
      * Compute Earth radius (in meters) for given pixel in source image.
      * @param lat The latitude of a given pixel in source image.
      * @param lon The longitude of a given pixel in source image.
      * @return The Earth radius.
      */
-    public static double computeEarthRadius(float lat, float lon) {
+    private static double computeEarthRadius(float lat, float lon) {
         final double[] xyz = new double[3];
         GeoUtils.geo2xyz(lat, lon, 0.0, xyz, GeoUtils.EarthModel.WGS84);
         return Math.sqrt(xyz[0]*xyz[0] + xyz[1]*xyz[1] + xyz[2]*xyz[2]);
     }
+
 
     /**
      * Compute elevation angle (in degree).
@@ -1176,4 +1236,133 @@ public class ASARCalibrator implements Calibrator {
     public static Tile getSourceTile(RasterDataNode rasterDataNode, Rectangle rectangle, ProgressMonitor pm) throws OperatorException {
         return OperatorContext.getSourceTile(rasterDataNode, rectangle, pm);
     }
+
+    //==================================== pixel calibration used by RD ======================================
+
+    /**
+     * Remove the antenna pattern compensation and range spreading loss applied to the pixel.
+     * @param x The x coordinate of the pixel in the source image.
+     * @param y The y coordinate of the pixel in the source image.
+     * @param v The pixel value.
+     * @param bandPolar The polarization of the source band.
+     * @param bandUnit The source band unit.
+     * @param subSwathIndex The sub swath index for current pixel for wide swath product case.
+     * @return The pixel value with antenna pattern compensation and range spreading loss correction removed.
+     */
+    public double applyRetroCalibration(int x, int y, double v, int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
+
+        if (!retroCalibrationFlag) {
+            return v;
+        }
+        
+        final double zeroDopplerTime = firstLineUTC + y*lineTimeInterval;
+
+        double satelitteHeight = computeSatelliteHeight(zeroDopplerTime, orbitStateVectors);
+
+        AbstractMetadata.SRGRCoefficientList srgrConvParam = getSRGRCoefficientsForARangeLine(zeroDopplerTime);
+
+        final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
+
+        int i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC))/delLat + 0.5);
+
+        final double elevationAngle = computeElevationAngle(slantRange, satelitteHeight, avgSceneHeight+earthRadius[i]);
+
+        double gain = 0.0;
+        if (wideSwathProductFlag) {
+            gain = getAntennaPatternGain(
+                    elevationAngle, bandPolar, oldRefElevationAngle, oldAntennaPatternWideSwath, true, subSwathIndex);
+        } else {
+            gain = computeAntPatGain(elevationAngle, oldRefElevationAngle[0], oldAntennaPatternSingleSwath[bandPolar]);
+        }
+
+        if (bandUnit == Unit.UnitType.AMPLITUDE) {
+            return v*gain*Math.pow(refSlantRange / slantRange, halfRangeSpreadingCompPower); // amplitude
+        } else if (bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+            return v*gain*gain*Math.pow(refSlantRange / slantRange, rangeSpreadingCompPower); // intensity
+        } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
+            return 10.0*Math.log10(Math.pow(10, v/10.0)*gain*gain*Math.pow(refSlantRange/slantRange, rangeSpreadingCompPower));
+        } else {
+            throw new OperatorException("Uknown band unit");
+        }
+    }
+
+    /**
+     * Get antenna pattern gain value for given elevation angle.
+     * @param elevationAngle The elevation angle (in degree).
+     * @param bandPolar The source band polarization index.
+     * @param refElevationAngle The reference elevation angles for different swathes or sub swathes.
+     * @param antennaPattern The antenna pattern array. For single swath product, it contains two 201-length arrays
+     *                       corresponding to the two bands of different polarizations. For wide swath product, it
+     *                       contains five 201-length arrays with each for a sub swath.
+     * @param compSubSwathIdx The boolean flag indicating if sub swath index should be computed.
+     * @param subSwathIndex The sub swath index for current pixel for wide swath product case.
+     * @return The antenna pattern gain value.
+     */
+    private static double getAntennaPatternGain(double elevationAngle, int bandPolar, double[] refElevationAngle,
+                                         float[][] antennaPattern, boolean compSubSwathIdx, int[] subSwathIndex) {
+
+        if (refElevationAngle.length == 1) { // single swath
+
+            return computeAntPatGain(elevationAngle, refElevationAngle[0], antennaPattern[bandPolar]);
+
+        } else { // wide swath
+
+            if (compSubSwathIdx || subSwathIndex[0] == INVALID_SUB_SWATH_INDEX) {
+                subSwathIndex[0] = findSubSwath(elevationAngle, refElevationAngle);
+            }
+
+            return computeAntPatGain(
+                    elevationAngle, refElevationAngle[subSwathIndex[0]], antennaPattern[subSwathIndex[0]]);
+        }
+    }
+
+    /**
+     * Apply calibrations to the given point. The following calibrations are included: calibration constant,
+     * antenna pattern compensation, range spreading loss correction and incidence angle correction.
+     * @param v The pixel value.
+     * @param slantRange The slant range (in m).
+     * @param satelliteHeight The distance from satellite to earth centre (in m).
+     * @param sceneToEarthCentre The distance from the backscattering element position to earth centre (in m).
+     * @param localIncidenceAngle The local incidence angle (in degrees).
+     * @param bandPolar The source band polarization index.
+     * @param bandUnit The source band unit.
+     * @param subSwathIndex The sub swath index for current pixel for wide swath product case.
+     * @return The calibrated pixel value.
+     */
+    public double applyCalibration(
+            final double v, final double slantRange, final double satelliteHeight, final double sceneToEarthCentre,
+            final double localIncidenceAngle, final int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
+
+        double sigma = 0.0;
+        if (bandUnit == Unit.UnitType.AMPLITUDE) {
+            sigma = v*v;
+        } else if (bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+            sigma = v;
+        } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
+            sigma = Math.pow(10, v/10.0); // convert dB to linear scale
+        } else {
+            throw new OperatorException("Uknown band unit");
+        }
+
+        if (multilookFlag) { // calibration constant and incidence angle corrections only
+            return sigma / newCalibrationConstant[bandPolar] *
+                   Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
+        }
+
+        final double elevationAngle = computeElevationAngle(slantRange, satelliteHeight, sceneToEarthCentre); // in degrees
+
+        double gain;
+        if (wideSwathProductFlag) {
+            gain = getAntennaPatternGain(
+                    elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternWideSwath, false, subSwathIndex);
+        } else {
+            gain = computeAntPatGain(
+                    elevationAngle, newRefElevationAngle[0], newAntennaPatternSingleSwath[bandPolar]);
+        }
+
+        return sigma / newCalibrationConstant[bandPolar] / (gain*gain) *
+               Math.pow(slantRange/refSlantRange, rangeSpreadingCompPower) *
+               Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
+    }
+
 }
