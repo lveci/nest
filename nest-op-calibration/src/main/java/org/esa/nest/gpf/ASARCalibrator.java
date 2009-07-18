@@ -1264,6 +1264,9 @@ public class ASARCalibrator implements Calibrator {
         final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
 
         int i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC))/delLat + 0.5);
+        if (i < 0) {
+            i = 0;
+        }
 
         final double elevationAngle = computeElevationAngle(slantRange, satelitteHeight, avgSceneHeight+earthRadius[i]);
 
