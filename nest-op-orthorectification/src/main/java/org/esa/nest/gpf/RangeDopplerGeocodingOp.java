@@ -115,20 +115,11 @@ public class RangeDopplerGeocodingOp extends Operator {
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
     private FileElevationModel fileElevationModel = null;
-    private TiePointGrid latitude = null;
-    private TiePointGrid longitude = null;
 
     private boolean srgrFlag = false;
-    private boolean multilookFlag = false;
-//    private boolean retroCalibrationFlag = false;
-    private boolean wideSwathProductFlag = false;
-    private boolean listedASARProductFlag = false;
 
     private String mission = null;
-    private String swath = null;
-    private String productType = null;
     private String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
-    private String newXCAFileName = null; // XCA file for radiometric calibration
 
     private int sourceImageWidth = 0;
     private int sourceImageHeight = 0;
@@ -136,8 +127,6 @@ public class RangeDopplerGeocodingOp extends Operator {
     private int targetImageHeight = 0;
 
     private double avgSceneHeight = 0.0; // in m
-    private double rangeSpreadingCompPower = 0.0;
-    private double halfRangeSpreadingCompPower = 0.0;
     private double wavelength = 0.0; // in m
     private double rangeSpacing = 0.0;
     private double azimuthSpacing = 0.0;
@@ -152,7 +141,6 @@ public class RangeDopplerGeocodingOp extends Operator {
     private double lonMax= 0.0;
     private double delLat = 0.0;
     private double delLon = 0.0;
-    private double oldSatelliteHeight; // satellite to earth centre distance used in previous calibration, in m
 
     private double[][] sensorPosition = null; // sensor position for all range lines
     private double[][] sensorVelocity = null; // sensor velocity for all range lines
@@ -160,17 +148,6 @@ public class RangeDopplerGeocodingOp extends Operator {
     private double[] xPosArray = null;
     private double[] yPosArray = null;
     private double[] zPosArray = null;
-    private double[] newCalibrationConstant = new double[2];
-    private double[] oldRefElevationAngle = null; // reference elevation angle for given swath in old aux file, in degree
-    private double[] newRefElevationAngle = null; // reference elevation angle for given swath in new aux file, in degree
-    private double[] srgrConvParamsTime = null;
-    private double[] earthRadius = null; // Earth radius for all range lines, in m
-
-    private float[][] oldSlantRange = null; // old slant ranges for one range line, in m
-    private float[][] oldAntennaPatternSingleSwath = null; // old antenna pattern gains for single swath product, in dB
-    private float[][] oldAntennaPatternWideSwath = null; // old antenna pattern gains for single swath product, in dB
-    private float[][] newAntennaPatternSingleSwath = null; // new antenna pattern gains for single swath product, in dB
-    private float[][] newAntennaPatternWideSwath = null; // new antenna pattern gains for single swath product, in dB
 
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
@@ -180,16 +157,11 @@ public class RangeDopplerGeocodingOp extends Operator {
     static final String BILINEAR = "Bilinear Interpolation";
     static final String CUBIC = "Cubic Convolution";
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
-    private static final double refSlantRange = 800000.0; //  m
     private static final double NonValidZeroDopplerTime = -99999.0;
-    private static final int numOfGains = 201; // number of antenna pattern gain values for a given swath and
-                                               // polarization in the aux file
     private static final int INVALID_SUB_SWATH_INDEX = -1;
     
     private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
     private ResampleMethod imgResampling = null;
-
-    private Map<String, ArrayList<Tile>> tileCache = new HashMap<String, ArrayList<Tile>>(2);
 
     boolean useAvgSceneHeight = false;
     Calibrator calibrator = null;
