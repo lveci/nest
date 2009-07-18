@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGrid.java,v 1.4 2009-07-07 00:27:41 lveci Exp $
+ * $Id: TiePointGrid.java,v 1.5 2009-07-17 20:44:47 junlu Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -44,7 +44,7 @@ import Jama.Matrix;
  * Usually, tie-point grids are a sub-sampling of a data product's scene resolution.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2009-07-07 00:27:41 $
+ * @version $Revision: 1.5 $ $Date: 2009-07-17 20:44:47 $
  */
 public class TiePointGrid extends RasterDataNode {
 
@@ -963,7 +963,8 @@ public class TiePointGrid extends RasterDataNode {
 
         final double[][] sampleIndexArray = new double[width][numCoeff];
         for (int c = 0; c < width; c++) {
-            final int x = Math.min((int)(c*_subSamplingX), getSceneRasterWidth() - 1);
+//            final int x = Math.min((int)(c*_subSamplingX), getSceneRasterWidth() - 1);
+            final int x = (int)(c*_subSamplingX);
             sampleIndexArray[c][0] = 1.0;
             sampleIndexArray[c][1] = (double)(x);
             sampleIndexArray[c][2] = (double)(x*x);
@@ -1000,8 +1001,10 @@ public class TiePointGrid extends RasterDataNode {
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                 final int k = i*w + j;
-                final int x = Math.min((int)(j*_subSamplingX), getSceneRasterWidth() - 1);
-                final int y = Math.min((int)(i*_subSamplingY), getSceneRasterHeight() - 1);
+//                final int x = Math.min((int)(j*_subSamplingX), getSceneRasterWidth() - 1);
+//                final int y = Math.min((int)(i*_subSamplingY), getSceneRasterHeight() - 1);
+                final int x = (int)(j*_subSamplingX);
+                final int y = (int)(i*_subSamplingY);
                 sampleIndexArray[k][0] = 1.0;
                 sampleIndexArray[k][1] = (double)(x);
                 sampleIndexArray[k][2] = (double)(y);
