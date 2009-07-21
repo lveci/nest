@@ -1,7 +1,7 @@
 <project>
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
-    <version>2C</version>
+    <version>3A</version>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>beam/res/NEST_Splash.png</splashImage>
     <postInstallationActionList>
@@ -45,7 +45,7 @@
                     <comment>NEST Display and Analysis Tool</comment>
                     <exec> ${installdir}/dat.sh</exec>
                     <icon> ${installdir}/res/dat.png</icon>
-                    <name>NEST 2C</name>
+                    <name>NEST 3A</name>
                     <path> ${installdir}</path>
                     <platforms>all</platforms>
                     <runInTerminal>0</runInTerminal>
@@ -84,80 +84,80 @@
                     <platforms>linux</platforms>
                     <distributionFileList>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-linux.dir/VERSION.txt</origin>
+                            <origin>target/nest-3A-bin-linux.dir/VERSION.txt</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-linux.dir/CHANGELOG.txt</origin>
+                            <origin>target/nest-3A-bin-linux.dir/CHANGELOG.txt</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-linux.dir/dat.sh</origin>
+                            <origin>target/nest-3A-bin-linux.dir/dat.sh</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-linux.dir/gpt.sh</origin>
+                            <origin>target/nest-3A-bin-linux.dir/gpt.sh</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-linux.dir/libclib_jiio.so</origin>
+                            <origin>target/nest-3A-bin-linux.dir/libclib_jiio.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-linux.dir/libgluegen-rt.so</origin>
+                            <origin>target/nest-3A-bin-linux.dir/libgluegen-rt.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-linux.dir/libjogl.so</origin>
+                            <origin>target/nest-3A-bin-linux.dir/libjhdf5.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-linux.dir/libjogl_awt.so</origin>
+                            <origin>target/nest-3A-bin-linux.dir/libjhdf.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-linux.dir/libjogl_cg.so</origin>
+                            <origin>target/nest-3A-bin-linux.dir/libjogl.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-linux.dir/libjogl_drihack.so</origin>
+                            <origin>target/nest-3A-bin-linux.dir/libjogl_awt.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-linux.dir/libmlib_jai.so</origin>
+                            <origin>target/nest-3A-bin-linux.dir/libjogl_cg.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-linux.dir/LICENSE.txt</origin>
+                            <origin>target/nest-3A-bin-linux.dir/libjogl_drihack.so</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-linux.dir/readme.html</origin>
+                            <origin>target/nest-3A-bin-linux.dir/libmlib_jai.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3A-bin-linux.dir/LICENSE.txt</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3A-bin-linux.dir/readme.html</origin>
                         </distributionFile>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-linux.dir/auxdata</origin>
+                            <origin>target/nest-3A-bin-linux.dir/auxdata</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-linux.dir/bin</origin>
+                            <origin>target/nest-3A-bin-linux.dir/bin</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-linux.dir/commandline</origin>
+                            <origin>target/nest-3A-bin-linux.dir/commandline</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-linux.dir/config</origin>
+                            <origin>target/nest-3A-bin-linux.dir/config</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-linux.dir/graphs</origin>
+                            <origin>target/nest-3A-bin-linux.dir/images</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-linux.dir/images</origin>
+                            <origin>target/nest-3A-bin-linux.dir/graphs</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-linux.dir/lib</origin>
+                            <origin>target/nest-3A-bin-linux.dir/lib</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-linux.dir/licenses</origin>
+                            <origin>target/nest-3A-bin-linux.dir/licenses</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-linux.dir/modules</origin>
+                            <origin>target/nest-3A-bin-linux.dir/modules</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-linux.dir/res</origin>
+                            <origin>target/nest-3A-bin-linux.dir/res</origin>
                         </distributionDirectory>
-                        <distributionFile>
-                            <origin>target/nest-2C-bin-linux.dir/libjhdf.so</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-2C-bin-linux.dir/libjhdf5.so</origin>
-                        </distributionFile>
                     </distributionFileList>
                 </folder>
                 <folder>
@@ -170,169 +170,101 @@
                             <origin>../dist/jre</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/auxdata</origin>
+                            <origin>target/nest-3A-bin-win.dir/auxdata</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/bin</origin>
+                            <origin>target/nest-3A-bin-win.dir/bin</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/commandline</origin>
+                            <origin>target/nest-3A-bin-win.dir/commandline</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/config</origin>
+                            <origin>target/nest-3A-bin-win.dir/config</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/graphs</origin>
+                            <origin>target/nest-3A-bin-win.dir/graphs</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/images</origin>
+                            <origin>target/nest-3A-bin-win.dir/images</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/lib</origin>
+                            <origin>target/nest-3A-bin-win.dir/lib</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/licenses</origin>
+                            <origin>target/nest-3A-bin-win.dir/licenses</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/modules</origin>
+                            <origin>target/nest-3A-bin-win.dir/modules</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-2C-bin-win.dir/res</origin>
+                            <origin>target/nest-3A-bin-win.dir/res</origin>
                         </distributionDirectory>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/VERSION.txt</origin>
+                            <origin>target/nest-3A-bin-win.dir/VERSION.txt</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/CHANGELOG.txt</origin>
+                            <origin>target/nest-3A-bin-win.dir/CHANGELOG.txt</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/cli.bat</origin>
+                            <origin>target/nest-3A-bin-win.dir/clean-nest.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/clib_jiio.dll</origin>
+                            <origin>target/nest-3A-bin-win.dir/cli.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/clib_jiio_sse2.dll</origin>
+                            <origin>target/nest-3A-bin-win.dir/clib_jiio.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/clib_jiio_util.dll</origin>
+                            <origin>target/nest-3A-bin-win.dir/clib_jiio_sse2.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/dat.bat</origin>
+                            <origin>target/nest-3A-bin-win.dir/clib_jiio_util.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/gluegen-rt.dll</origin>
+                            <origin>target/nest-3A-bin-win.dir/dat.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/gpt.bat</origin>
+                            <origin>target/nest-3A-bin-win.dir/gluegen-rt.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/jogl.dll</origin>
+                            <origin>target/nest-3A-bin-win.dir/gpt.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/jogl_awt.dll</origin>
+                            <origin>target/nest-3A-bin-win.dir/jhdf5.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/jogl_cg.dll</origin>
+                            <origin>target/nest-3A-bin-win.dir/jhdf.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/LICENSE.txt</origin>
+                            <origin>target/nest-3A-bin-win.dir/jogl.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/mlib_jai.dll</origin>
+                            <origin>target/nest-3A-bin-win.dir/jogl_awt.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/mlib_jai_mmx.dll</origin>
+                            <origin>target/nest-3A-bin-win.dir/jogl_cg.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/mlib_jai_util.dll</origin>
+                            <origin>target/nest-3A-bin-win.dir/LICENSE.txt</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/nest-dat.exe</origin>
+                            <origin>target/nest-3A-bin-win.dir/mlib_jai.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/post-uninstall.bat</origin>
+                            <origin>target/nest-3A-bin-win.dir/mlib_jai_mmx.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/readme.html</origin>
+                            <origin>target/nest-3A-bin-win.dir/mlib_jai_util.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/jhdf5.dll</origin>
+                            <origin>target/nest-3A-bin-win.dir/nest-dat.exe</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/jhdf.dll</origin>
+                            <origin>target/nest-3A-bin-win.dir/post-uninstall.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-2C-bin-win.dir/clean-nest.bat</origin>
+                            <origin>target/nest-3A-bin-win.dir/readme.html</origin>
                         </distributionFile>
-                    </distributionFileList>
-                </folder>
-                <folder>
-                    <description>Program Files</description>
-                    <destination>${installdir}</destination>
-                    <name>programfilesosx</name>
-                    <platforms>osx</platforms>
-                    <distributionFileList>
-                        <distributionFile>
-                            <origin>target/nest-2C-bin-mac.dir/VERSION.txt</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-2C-bin-mac.dir/CHANGELOG.txt</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-2C-bin-mac.dir/dat.command</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-2C-bin-mac.dir/gpt.command</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-2C-bin-mac.dir/libgluegen-rt.jnilib</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-2C-bin-mac.dir/libjogl.jnilib</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-2C-bin-mac.dir/libjogl_awt.jnilib</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-2C-bin-mac.dir/libjogl_cg.jnilib</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-2C-bin-mac.dir/LICENSE.txt</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-2C-bin-mac.dir/readme.html</origin>
-                        </distributionFile>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-mac.dir/auxdata</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-mac.dir/bin</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-mac.dir/commandline</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-mac.dir/config</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-mac.dir/graphs</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-mac.dir/images</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-mac.dir/lib</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-mac.dir/licenses</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-mac.dir/modules</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-2C-bin-mac.dir/res</origin>
-                        </distributionDirectory>
                     </distributionFileList>
                 </folder>
             </folderList>
@@ -348,7 +280,7 @@
                 </startMenuShortcut>
                 <startMenuShortcut>
                     <comment>Next ESA SAR Toolbox</comment>
-                    <name>NEST 2C</name>
+                    <name>NEST 3A</name>
                     <runInTerminal>0</runInTerminal>
                     <windowsExec>${installdir}/nest-dat.exe</windowsExec>
                     <windowsExecArgs></windowsExecArgs>
