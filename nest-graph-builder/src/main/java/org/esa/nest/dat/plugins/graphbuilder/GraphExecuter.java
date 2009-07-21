@@ -165,8 +165,9 @@ public class GraphExecuter extends Observable {
         presentationXML.addChild(descXML);
 
         for(GraphNode n : nodeList) {
-            if(n.GetOperatorUI() != null)
+            if(n.GetOperatorUI() != null) {
                 n.AssignParameters(presentationXML);
+            }
         }
 
         graph.setAppData("Presentation", presentationXML);

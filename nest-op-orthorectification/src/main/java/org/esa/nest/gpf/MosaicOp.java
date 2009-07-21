@@ -101,6 +101,12 @@ public class MosaicOp extends Operator {
 
                 sceneWidth = scnProp.sceneWidth;
                 sceneHeight = scnProp.sceneHeight;
+                long dim = (long)sceneWidth*(long)sceneHeight;
+                while(sceneWidth > 0 && sceneHeight > 0 && dim > Integer.MAX_VALUE) {
+                    sceneWidth -= 1000;
+                    sceneHeight -= 1000;
+                    dim = (long)sceneWidth*(long)sceneHeight;
+                }
             }
 
             targetProduct = new Product("mosiac", "mosiac",

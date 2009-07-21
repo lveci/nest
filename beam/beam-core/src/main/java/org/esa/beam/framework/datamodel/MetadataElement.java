@@ -1,5 +1,5 @@
 /*
- * $Id: MetadataElement.java,v 1.3 2009-06-11 18:24:06 lveci Exp $
+ * $Id: MetadataElement.java,v 1.4 2009-07-21 14:09:28 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,7 +27,7 @@ import java.text.ParseException;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.3 $ $Date: 2009-06-11 18:24:06 $
+ * @version $Revision: 1.4 $ $Date: 2009-07-21 14:09:28 $
  */
 public class MetadataElement extends ProductNode {
 
@@ -593,7 +593,7 @@ public class MetadataElement extends ProductNode {
         MetadataAttribute attribute = getAttribute(name);
         if (attribute == null) {
             attribute = new MetadataAttribute(name, type, numElems);
-            addAttribute(attribute);
+            addAttributeFast(attribute);
         }
         return attribute;
     }

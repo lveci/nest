@@ -1,5 +1,5 @@
 /*
- * $Id: ProductUtils.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ProductUtils.java,v 1.2 2009-07-21 14:09:28 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -1996,7 +1996,7 @@ public class ProductUtils {
             target.addElement(element.createDeepClone());
         }
         for (final MetadataAttribute attribute : source.getAttributes()) {
-            target.addAttribute(attribute.createDeepClone());
+            target.addAttributeFast(attribute.createDeepClone());
         }
     }
 

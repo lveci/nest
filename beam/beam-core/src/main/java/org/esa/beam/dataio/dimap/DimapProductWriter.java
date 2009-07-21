@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductWriter.java,v 1.2 2009-05-27 21:09:23 lveci Exp $
+ * $Id: DimapProductWriter.java,v 1.3 2009-07-21 14:09:28 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -46,7 +46,7 @@ import java.util.Map;
  * The product writer for BEAM DIMAP products.
  *
  * @author Sabine Embacher
- * @version $Revision: 1.2 $ $Date: 2009-05-27 21:09:23 $
+ * @version $Revision: 1.3 $ $Date: 2009-07-21 14:09:28 $
  */
 public class DimapProductWriter extends AbstractProductWriter {
 
@@ -162,8 +162,10 @@ public class DimapProductWriter extends AbstractProductWriter {
         long outputPos = sourceOffsetY * sourceBandWidth + sourceOffsetX;
         pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
         try {
-            for (int sourcePos = 0; sourcePos < sourceHeight * sourceWidth; sourcePos += sourceWidth) {
-                sourceBuffer.writeTo(sourcePos, sourceWidth, outputStream, outputPos);
+            final long max = sourceHeight * sourceWidth;
+            final int size = sourceBuffer.getElemSize();
+            for (int sourcePos = 0; sourcePos < max; sourcePos += sourceWidth) {
+                sourceBuffer.writeTo(sourcePos, sourceWidth, size, outputStream, outputPos);
                 outputPos += sourceBandWidth;
                 pm.worked(1);
                 if (pm.isCanceled()) {
@@ -338,8 +340,7 @@ public class DimapProductWriter extends AbstractProductWriter {
     }
 
     private ImageOutputStream createImageOutputStream(Band band) throws IOException {
-        return FileImageOutputStreamExtImpl.createOutputStream(getValidImageFile(band));
-        //return new FileImageOutputStream(getValidImageFile(band));
+        return new FileImageOutputStream(getValidImageFile(band));
     }
 
     private ImageOutputStream createImageOutputStream(TiePointGrid tiePointGrid) throws IOException {

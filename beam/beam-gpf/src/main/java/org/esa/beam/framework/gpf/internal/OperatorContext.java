@@ -1,5 +1,5 @@
 /*
- * $Id: OperatorContext.java,v 1.5 2009-06-01 19:52:04 lveci Exp $
+ * $Id: OperatorContext.java,v 1.6 2009-07-21 14:09:28 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -401,8 +401,8 @@ public class OperatorContext {
         final String opName = OperatorSpi.getOperatorAlias(context.operator.getClass());
         MetadataElement targetNodeME = new MetadataElement(String.format("node.%d", nodeElementCount));
         targetGraphME.addElement(targetNodeME);
-        targetNodeME.addAttribute(new MetadataAttribute("id", ProductData.createInstance(opId), false));
-        targetNodeME.addAttribute(new MetadataAttribute("operator", ProductData.createInstance(opName), false));
+        targetNodeME.addAttributeFast(new MetadataAttribute("id", ProductData.createInstance(opId), false));
+        targetNodeME.addAttributeFast(new MetadataAttribute("operator", ProductData.createInstance(opName), false));
         final MetadataElement targetSourcesME = new MetadataElement("sources");
         for (String sourceId : context.sourceProductMap.keySet()) {
             final Product sourceProduct = context.sourceProductMap.get(sourceId);
@@ -419,7 +419,7 @@ public class OperatorContext {
             final MetadataAttribute sourceAttribute = new MetadataAttribute(sourceId,
                                                                             ProductData.createInstance(sourceNodeId),
                                                                             false);
-            targetSourcesME.addAttribute(sourceAttribute);
+            targetSourcesME.addAttributeFast(sourceAttribute);
         }
         targetNodeME.addElement(targetSourcesME);
 
@@ -474,7 +474,7 @@ public class OperatorContext {
                     String attributeValue = childDE.getAttribute(attributeName);
                     final ProductData valueMEAtrr = ProductData.createInstance(attributeValue);
                     final MetadataAttribute mdAttribute = new MetadataAttribute(attributeName, valueMEAtrr, true);
-                    childME.addAttribute(mdAttribute);
+                    childME.addAttributeFast(mdAttribute);
                 }
             }
         } else {
@@ -484,7 +484,7 @@ public class OperatorContext {
             }
             final ProductData valueME = ProductData.createInstance(valueDE);
             final MetadataAttribute attribute = new MetadataAttribute(name, valueME, true);
-            parentME.addAttribute(attribute);
+            parentME.addAttributeFast(attribute);
         }
     }
 

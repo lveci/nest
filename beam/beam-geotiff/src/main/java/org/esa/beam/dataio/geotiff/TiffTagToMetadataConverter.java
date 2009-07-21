@@ -19,7 +19,7 @@ import java.util.SortedMap;
  * Intentionally no API doc
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:14 $
+ * @version $Revision: 1.2 $ $Date: 2009-07-21 14:09:28 $
  * @since BEAM 4.5
  */
 class TiffTagToMetadataConverter {
@@ -48,7 +48,7 @@ class TiffTagToMetadataConverter {
             // ignore BEAM metadata & ignore GeoTIFF tags - are already processed
             if (tagNumber != Utils.PRIVATE_BEAM_TIFF_TAG_NUMBER && !isGeoTiffTag(tagNumber)) {
                 final MetadataAttribute attribute = generateMetadataAttribute(tiffField);
-                tiffMetadata.addAttribute(attribute);
+                tiffMetadata.addAttributeFast(attribute);
             }
         }
         metadataElem.addElement(tiffMetadata);
@@ -74,7 +74,7 @@ class TiffTagToMetadataConverter {
             final ProductData data = getGeoKeyValue(geoKeyEntry);
             if (data != null) {
                 final MetadataAttribute attribute = new MetadataAttribute(name, data, true);
-                geoKeyDirMetadata.addAttribute(attribute);
+                geoKeyDirMetadata.addAttributeFast(attribute);
             }
         }
 
@@ -82,7 +82,7 @@ class TiffTagToMetadataConverter {
             final TIFFField tiffField = tiffInfo.getField(tagNunmber);
             if (tiffField != null) {
                 final MetadataAttribute attribute = generateMetadataAttribute(tiffField);
-                geoTiffMetadata.addAttribute(attribute);
+                geoTiffMetadata.addAttributeFast(attribute);
             }
         }
 

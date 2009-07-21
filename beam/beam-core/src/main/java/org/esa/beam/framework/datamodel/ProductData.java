@@ -1,5 +1,5 @@
 /*
- * $Id: ProductData.java,v 1.3 2009-05-27 14:56:55 junlu Exp $
+ * $Id: ProductData.java,v 1.4 2009-07-21 14:09:28 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -57,7 +57,7 @@ import java.util.*;
  * <code>float</code>, <code>double</code> and <code>String</code>.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-05-27 14:56:55 $
+ * @version $Revision: 1.4 $ $Date: 2009-07-21 14:09:28 $
  */
 public abstract class ProductData implements Cloneable {
 
@@ -885,6 +885,11 @@ public abstract class ProductData implements Cloneable {
      */
     public void writeTo(int startPos, int numElems, ImageOutputStream output, long outputPos) throws IOException {
         output.seek(getElemSize() * outputPos);
+        writeTo(startPos, numElems, output);
+    }
+
+    public void writeTo(int startPos, int numElems, int size, ImageOutputStream output, long outputPos) throws IOException {
+        output.seek(size * outputPos);
         writeTo(startPos, numElems, output);
     }
 

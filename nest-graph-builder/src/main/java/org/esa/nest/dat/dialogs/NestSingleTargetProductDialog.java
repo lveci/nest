@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.awt.*;
 
 /**
  */
@@ -35,14 +36,10 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
     private String operatorName;
     private List<SourceProductSelector> sourceProductSelectorList;
     private Map<Field, SourceProductSelector> sourceProductSelectorMap;
-    private Map<String, Object> parameterMap;
+    private final Map<String, Object> parameterMap = new HashMap<String, Object>(17);
     private JTabbedPane form;
     private String targetProductNameSuffix;
     private final OperatorUI opUI;
-
-    public static SingleTargetProductDialog createDefaultDialog(String operatorName, AppContext appContext) {
-        return new NestSingleTargetProductDialog(operatorName, appContext, operatorName, null);
-    }
 
     public NestSingleTargetProductDialog(String operatorName, AppContext appContext, String title, String helpID) {
         super(appContext, title, helpID);
@@ -90,8 +87,8 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
         this.form.add("I/O Parameters", ioParametersPanel);
 
         final ParameterDescriptorFactory parameterDescriptorFactory = new ParameterDescriptorFactory();
-        parameterMap = new HashMap<String, Object>(17);
-        final ValueContainer valueContainer = ValueContainer.createMapBacked(parameterMap, operatorSpi.getOperatorClass(), parameterDescriptorFactory);
+        final ValueContainer valueContainer = ValueContainer.createMapBacked(parameterMap,
+                                                operatorSpi.getOperatorClass(), parameterDescriptorFactory);
         try {
             valueContainer.setDefaultValues();
         } catch (ValidationException e) {
@@ -123,6 +120,7 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
             }
         }
 
+        getJDialog().setMinimumSize(new Dimension(500, 400));
     }
 
     private void initSourceProductSelectors(OperatorSpi operatorSpi) {

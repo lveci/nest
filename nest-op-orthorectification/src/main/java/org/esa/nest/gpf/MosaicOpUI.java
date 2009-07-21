@@ -70,7 +70,8 @@ public class MosaicOpUI extends BaseOperatorUI {
 
         int width = (Integer)paramMap.get("sceneWidth");
         int height = (Integer)paramMap.get("sceneHeight");
-        if(!changedByUser) {
+
+        if(!changedByUser && sourceProducts != null) {
             try {
                 MosaicOp.SceneProperties scnProp = new MosaicOp.SceneProperties();
                 MosaicOp.computeImageGeoBoundary(sourceProducts, scnProp);
@@ -83,11 +84,18 @@ public class MosaicOpUI extends BaseOperatorUI {
 
                 width = scnProp.sceneWidth;
                 height = scnProp.sceneHeight;
+                long dim = (long)width*(long)height;
+                while(dim > Integer.MAX_VALUE) {
+                    width -= 1000;
+                    height -= 1000;
+                    dim = (long)width*(long)height;
+                }
             } catch(Exception e) {
                 width = 0;
                 height = 0;
             }
         }
+
         sceneWidth.setText(String.valueOf(width));
         sceneHeight.setText(String.valueOf(height));
 
@@ -108,7 +116,7 @@ public class MosaicOpUI extends BaseOperatorUI {
         OperatorUIUtils.updateBandList(bandList, paramMap);
         paramMap.put("resamplingMethod", resamplingMethod.getSelectedItem());
         paramMap.put("sceneWidth", Integer.parseInt(sceneWidth.getText()));
-        paramMap.put("sceneHeight", Integer.parseInt(sceneWidth.getText()));
+        paramMap.put("sceneHeight", Integer.parseInt(sceneHeight.getText()));
 
         paramMap.put("average", average);
     }
