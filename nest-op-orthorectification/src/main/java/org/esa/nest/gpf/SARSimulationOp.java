@@ -438,7 +438,7 @@ public final class SARSimulationOp extends Operator {
             ny0Updated = false;
         }
 
-        float[][] localDEM = new float[nh+2][w+2];
+        double[][] localDEM = new double[nh+2][w+2];
         getLocalDEM(x0, ymin, w, nh, localDEM);
 
         final double[] earthPoint = new double[3];
@@ -509,7 +509,7 @@ public final class SARSimulationOp extends Operator {
      * @param localDEM The DEM for the tile.
      */
     private void getLocalDEM(
-            final int x0, final int y0, final int tileWidth, final int tileHeight, final float[][] localDEM) {
+            final int x0, final int y0, final int tileWidth, final int tileHeight, final double[][] localDEM) {
 
         // Note: the localDEM covers current tile with 1 extra row above, 1 extra row below, 1 extra column to
         //       the left and 1 extra column to the right of the tile.
@@ -520,7 +520,7 @@ public final class SARSimulationOp extends Operator {
             final int yy = y - y0 + 1;
             for (int x = x0 - 1; x < maxX; x++) {
                 geoPos.setLocation(latitude.getPixelFloat(x, y), longitude.getPixelFloat(x, y));
-                localDEM[yy][x - x0 + 1] = (float)getLocalElevation(geoPos);
+                localDEM[yy][x - x0 + 1] = getLocalElevation(geoPos);
             }
         }
     }

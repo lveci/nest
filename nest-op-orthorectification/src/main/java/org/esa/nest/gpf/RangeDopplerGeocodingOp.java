@@ -142,6 +142,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private double delLat = 0.0;
     private double delLon = 0.0;
 
+
     private double[][] sensorPosition = null; // sensor position for all range lines
     private double[][] sensorVelocity = null; // sensor velocity for all range lines
     private double[] timeArray = null;
@@ -158,6 +159,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     static final String CUBIC = "Cubic Convolution";
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
     private static final double NonValidZeroDopplerTime = -99999.0;
+    private static final double halfLightSpeedInMetersPerDay = Constants.halfLightSpeed * 86400.0;
     private static final int INVALID_SUB_SWATH_INDEX = -1;
     
     private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
@@ -811,6 +813,14 @@ public class RangeDopplerGeocodingOp extends Operator {
         final int h  = targetRectangle.height;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
+        double[][] localDEM = null; // DEM for current tile for computing slope angle
+        if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) {
+            localDEM = new double[h+2][w+2];
+            final boolean valid = getLocalDEM(x0, y0, w, h, localDEM);
+            if(!valid && !useAvgSceneHeight && !saveDEM)
+                return;
+        }
+
         final GeoPos geoPos = new GeoPos();
         final double[] earthPoint = new double[3];
         final double[] sensorPos = new double[3];
@@ -819,7 +829,6 @@ public class RangeDopplerGeocodingOp extends Operator {
         ProductData demBuffer = null;
         ProductData incidenceAngleBuffer = null;
         ProductData projectedIncidenceAngleBuffer = null;
-        final double halfLightSpeedInMetersPerDay = Constants.halfLightSpeed * 86400.0;
 
         final ArrayList<TileData> trgTileList = new ArrayList<TileData>();
         final Set<Band> keySet = targetTiles.keySet();
@@ -857,24 +866,21 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
         final TileData[] trgTiles = trgTileList.toArray(new TileData[trgTileList.size()]);
 
-        float[][] localDEM = null; // DEM for current tile for computing slope angle
-        if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) {
-            localDEM = new float[h+2][w+2];
-            getLocalDEM(x0, y0, w, h, localDEM);
-        }
-
         try {
-            for (int y = y0; y < y0 + h; y++) {
+            final int maxY = y0 + h;
+            final int maxX = x0 + w;
+            for (int y = y0; y < maxY; y++) {
                 final double lat = latMax - y*delLat;
+                final int yy = y-y0+1;
 
-                for (int x = x0; x < x0 + w; x++) {
+                for (int x = x0; x < maxX; x++) {
                     final int index = trgTiles[0].targetTile.getDataBufferIndex(x, y);
 
                     final double lon = lonMin + x*delLon;
 
                     double alt;
                     if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) { // localDEM is available
-                        alt = (double)localDEM[y-y0+1][x-x0+1];
+                        alt = (double)localDEM[yy][x-x0+1];
                     } else {
                         if (useAvgSceneHeight) {
                             alt = avgSceneHeight;
@@ -967,6 +973,9 @@ public class RangeDopplerGeocodingOp extends Operator {
                     }
                 }
             }
+
+            localDEM = null;
+            
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
@@ -979,23 +988,38 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param tileHeight The tile height.
      * @param tileWidth The tile width.
      * @param localDEM The DEM for the tile.
+     * @return true if all dem values are valid
      */
-    private void getLocalDEM(
-            final int x0, final int y0, final int tileWidth, final int tileHeight, final float[][] localDEM) {
+    private boolean getLocalDEM(
+            final int x0, final int y0, final int tileWidth, final int tileHeight, final double[][] localDEM) {
 
         // Note: the localDEM covers current tile with 1 extra row above, 1 extra row below, 1 extra column to
         //       the left and 1 extra column to the right of the tile.
         final GeoPos geoPos = new GeoPos();
         final int maxY = y0 + tileHeight + 1;
         final int maxX = x0 + tileWidth + 1;
+        if(demName.equals("SRTM 3Sec GeoTiff")) {
+            double maxLat = (latMax - maxY*delLat);
+            double minLat = (latMax - y0*delLat);
+            if(maxLat > 60 && minLat > 60) {
+                return false;
+            }
+        }
+
+        double alt;
+        boolean valid = false;
         for (int y = y0 - 1; y < maxY; y++) {
             final float lat = (float)(latMax - y*delLat);
             final int yy = y - y0 + 1;
             for (int x = x0 - 1; x < maxX; x++) {
                 geoPos.setLocation(lat, (float)(lonMin + x*delLon));
-                localDEM[yy][x - x0 + 1] = (float)getLocalElevation(geoPos);
+                alt = getLocalElevation(geoPos);
+                localDEM[yy][x - x0 + 1] = alt;
+                if(alt != demNoDataValue)
+                    valid = true;
             }
         }
+        return valid;
     }
 
     /**
@@ -1004,18 +1028,15 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @return The elevation in meter.
      */
     private double getLocalElevation(final GeoPos geoPos) {
-        double alt;
         try {
             if(externalDemFile == null) {
-                alt = dem.getElevation(geoPos);
-            } else {
-                alt = fileElevationModel.getElevation(geoPos);
+                return dem.getElevation(geoPos);
             }
+            return fileElevationModel.getElevation(geoPos);
         } catch (Exception e) {
-            alt = demNoDataValue;
+           //
         }
-
-        return alt;
+        return demNoDataValue;
     }
 
     /**
@@ -1023,7 +1044,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param index The pixel index in target image.
      * @param trgTiles The target tiles.
      */
-    private static void saveNoDataValueToTarget(final int index, TileData[] trgTiles) {
+    private static void saveNoDataValueToTarget(final int index, final TileData[] trgTiles) {
         for(TileData tileData : trgTiles) {
             tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
         }
@@ -1569,7 +1590,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     public static void computeLocalIncidenceAngle(
             final LocalGeometry lg, final boolean saveLocalIncidenceAngle,
             final boolean saveProjectedLocalIncidenceAngle, final boolean applyRadiometricCalibration, final int x0,
-            final int y0, final int x, final int y, final float[][] localDEM, double[] localIncidenceAngles) {
+            final int y0, final int x, final int y, final double[][] localDEM, double[] localIncidenceAngles) {
 
         // Note: For algorithm and notation of the following implementation, please see Andrea's email dated
         //       May 29, 2009 and Marcus' email dated June 3, 2009, or see Eq (14.10) and Eq (14.11) on page
@@ -1577,21 +1598,23 @@ public class RangeDopplerGeocodingOp extends Operator {
         //       The Cartesian coordinate (x, y, z) is represented here by a length-3 array with element[0]
         //       representing x, element[1] representing y and element[2] representing z.
 
-        final double rightPointHeight = (localDEM[y - y0][x - x0 + 2] +
-                                         localDEM[y - y0 + 1][x - x0 + 2] +
-                                         localDEM[y - y0 + 2][x - x0 + 2]) / 3.0;
+        final int yy = y - y0;
+        final int xx = x - x0;
+        final double rightPointHeight = (localDEM[yy][xx + 2] +
+                                         localDEM[yy + 1][xx + 2] +
+                                         localDEM[yy + 2][xx + 2]) / 3.0;
 
-        final double leftPointHeight = (localDEM[y - y0][x - x0] +
-                                         localDEM[y - y0 + 1][x - x0] +
-                                         localDEM[y - y0 + 2][x - x0]) / 3.0;
+        final double leftPointHeight = (localDEM[yy][xx] +
+                                         localDEM[yy + 1][xx] +
+                                         localDEM[yy + 2][xx]) / 3.0;
 
-        final double upPointHeight = (localDEM[y - y0][x - x0] +
-                                        localDEM[y - y0][x - x0 + 1] +
-                                        localDEM[y - y0][x - x0 + 2]) / 3.0;
+        final double upPointHeight = (localDEM[yy][xx] +
+                                        localDEM[yy][xx + 1] +
+                                        localDEM[yy][xx + 2]) / 3.0;
 
-        final double downPointHeight = (localDEM[y - y0 + 2][x - x0] +
-                                        localDEM[y - y0 + 2][x - x0 + 1] +
-                                        localDEM[y - y0 + 2][x - x0 + 2]) / 3.0;
+        final double downPointHeight = (localDEM[yy + 2][xx] +
+                                        localDEM[yy + 2][xx + 1] +
+                                        localDEM[yy + 2][xx + 2]) / 3.0;
 
         final double[] rightPoint = new double[3];
         final double[] leftPoint = new double[3];
@@ -1607,7 +1630,9 @@ public class RangeDopplerGeocodingOp extends Operator {
         final double[] b = {downPoint[0] - upPoint[0], downPoint[1] - upPoint[1], downPoint[2] - upPoint[2]};
         final double[] c = {lg.centrePoint[0], lg.centrePoint[1], lg.centrePoint[2]};
 
-        double[] n = {a[1]*b[2] - a[2]*b[1], a[2]*b[0] - a[0]*b[2], a[0]*b[1] - a[1]*b[0]}; // ground plane normal
+        final double[] n = {a[1]*b[2] - a[2]*b[1],
+                            a[2]*b[0] - a[0]*b[2],
+                            a[0]*b[1] - a[1]*b[0]}; // ground plane normal
         normalizeVector(n);
         if (innerProduct(n, c) < 0) {
             n[0] = -n[0];
@@ -1615,7 +1640,9 @@ public class RangeDopplerGeocodingOp extends Operator {
             n[2] = -n[2];
         }
 
-        double[] s = {lg.sensorPos[0] - lg.centrePoint[0], lg.sensorPos[1] - lg.centrePoint[1], lg.sensorPos[2] - lg.centrePoint[2]};
+        final double[] s = {lg.sensorPos[0] - lg.centrePoint[0],
+                            lg.sensorPos[1] - lg.centrePoint[1],
+                            lg.sensorPos[2] - lg.centrePoint[2]};
         normalizeVector(s);
 
         final double nsInnerProduct = innerProduct(n, s);
@@ -1625,16 +1652,16 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
 
         if (saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) { // projected local incidence angle
-            double[] m = {s[1]*c[2] - s[2]*c[1], s[2]*c[0] - s[0]*c[2], s[0]*c[1] - s[1]*c[0]}; // range plane normal
+            final double[] m = {s[1]*c[2] - s[2]*c[1], s[2]*c[0] - s[0]*c[2], s[0]*c[1] - s[1]*c[0]}; // range plane normal
             normalizeVector(m);
             final double mnInnerProduct = innerProduct(m, n);
-            double[] n1 = {n[0] - m[0]*mnInnerProduct, n[1] - m[1]*mnInnerProduct, n[2] - m[2]*mnInnerProduct};
+            final double[] n1 = {n[0] - m[0]*mnInnerProduct, n[1] - m[1]*mnInnerProduct, n[2] - m[2]*mnInnerProduct};
             normalizeVector(n1);
             localIncidenceAngles[1] = Math.acos(innerProduct(n1, s)) * org.esa.beam.util.math.MathUtils.RTOD;
         }
     }
 
-    private static void normalizeVector(double[] v) {
+    private static void normalizeVector(final double[] v) {
         final double norm = Math.sqrt(innerProduct(v, v));
         v[0] /= norm;
         v[1] /= norm;
