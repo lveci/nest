@@ -1180,7 +1180,8 @@ public class RangeDopplerGeocodingOp extends Operator {
             double groundRange = 0.0;
 
             if (srgrConvParams.length == 1) {
-                groundRange = computeGroundRange(sourceImageWidth, rangeSpacing, slantRange, srgrConvParams[0].coefficients);
+                groundRange = computeGroundRange(sourceImageWidth, rangeSpacing, slantRange,
+                                                 srgrConvParams[0].coefficients, srgrConvParams[0].ground_range_origin);
                 if (groundRange < 0.0) {
                     return -1.0;
                 } else {
@@ -1204,7 +1205,8 @@ public class RangeDopplerGeocodingOp extends Operator {
                 srgrCoefficients[i] = MathUtils.interpolationLinear(srgrConvParams[idx].coefficients[i],
                                                                     srgrConvParams[idx+1].coefficients[i], mu);
             }
-            groundRange = computeGroundRange(sourceImageWidth, rangeSpacing, slantRange, srgrCoefficients);
+            groundRange = computeGroundRange(sourceImageWidth, rangeSpacing, slantRange,
+                                             srgrCoefficients, srgrConvParams[idx].ground_range_origin);
             if (groundRange < 0.0) {
                 return -1.0;
             } else {
@@ -1227,12 +1229,13 @@ public class RangeDopplerGeocodingOp extends Operator {
      *                  c0 + c1*x + c2*x^2 + ... + cn*x^n, where {c0, c1, ..., cn} are the SRGR coefficients.
      * @return The ground range in meters.
      */
-    public static double computeGroundRange(
-            final int sourceImageWidth, final double rangeSpacing, final double slantRange, final double[] srgrCoeff) {
+    public static double computeGroundRange(final int sourceImageWidth, final double rangeSpacing,
+                                            final double slantRange, final double[] srgrCoeff,
+                                            final double ground_range_origin) {
 
         // binary search is used in finding the zero doppler time
-        double lowerBound = 0;
-        double upperBound = sourceImageWidth*rangeSpacing;
+        double lowerBound = ground_range_origin;
+        double upperBound = ground_range_origin + sourceImageWidth*rangeSpacing;
         double lowerBoundSlantRange = org.esa.nest.util.MathUtils.computePolynomialValue(lowerBound, srgrCoeff);
         double upperBoundSlantRange = org.esa.nest.util.MathUtils.computePolynomialValue(upperBound, srgrCoeff);
 

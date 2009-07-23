@@ -635,7 +635,8 @@ public final class GeolocationGridGeocodingOp extends Operator {
                 idx = i;
             }
             final double groundRange = RangeDopplerGeocodingOp.computeGroundRange(
-                    sourceImageWidth, rangeSpacing, slantRange, srgrConvParams[idx].coefficients);
+                    sourceImageWidth, rangeSpacing, slantRange, srgrConvParams[idx].coefficients,
+                    srgrConvParams[idx].ground_range_origin);
 
             if (groundRange < 0.0) {
                 return -1.0;
