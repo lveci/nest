@@ -82,6 +82,7 @@ public class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
 
     }
 
+    @Override
     public int read() throws IOException {
         checkClosed();
         bitOffset = 0;
@@ -92,6 +93,7 @@ public class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
         return val;
     }
 
+    @Override
     public int read(byte[] b, int off, int len) throws IOException {
         checkClosed();
         bitOffset = 0;
@@ -102,6 +104,7 @@ public class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
         return nbytes;
     }
 
+    @Override
     public void write(int b) throws IOException {
         checkClosed();
         flushBits();
@@ -109,13 +112,15 @@ public class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
         ++streamPos;
     }
 
+    @Override
     public void write(byte[] b, int off, int len) throws IOException {
         checkClosed();
         flushBits();
-        eraf.write(b, off, len);
+        eraf.writeBytes(b, off, len);
         streamPos += len;
     }
 
+    @Override
     public long length() {
         try {
             checkClosed();
@@ -137,14 +142,14 @@ public class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
      * @exception IOException
      *                    if any other I/O error occurs.
      */
+    @Override
     public void seek(long pos) throws IOException {
         checkClosed();
         if (pos < flushedPos) {
             throw new IndexOutOfBoundsException("pos < flushedPos!");
         }
         bitOffset = 0;
-        eraf.seek(pos);
-        streamPos = eraf.getFilePointer();
+        streamPos = eraf.seek(pos);
     }
 
     /**
@@ -153,6 +158,7 @@ public class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
      * @throws IOException
      *                 in case something bad happens.
      */
+    @Override
     public void close() throws IOException {
     	try{
 	    	if(!isClosed){
@@ -181,7 +187,7 @@ public class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
         try {
             close();
         } catch (IOException e) {
-
+            //
         }
     }
 
@@ -190,6 +196,7 @@ public class FileImageOutputStreamExtImpl extends ImageOutputStreamImpl
      * 
      * @return a simple description for this {@link ImageOutputStream}.
      */
+    @Override
     public String toString() {
 
         return new StringBuffer("FileImageOutputStreamExtImpl which points to ")

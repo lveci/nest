@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductWriter.java,v 1.3 2009-07-21 14:09:28 lveci Exp $
+ * $Id: DimapProductWriter.java,v 1.4 2009-07-22 20:30:52 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -33,7 +33,6 @@ import org.esa.beam.util.Guardian;
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.FileUtils;
 
-import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +45,7 @@ import java.util.Map;
  * The product writer for BEAM DIMAP products.
  *
  * @author Sabine Embacher
- * @version $Revision: 1.3 $ $Date: 2009-07-21 14:09:28 $
+ * @version $Revision: 1.4 $ $Date: 2009-07-22 20:30:52 $
  */
 public class DimapProductWriter extends AbstractProductWriter {
 
@@ -160,18 +159,19 @@ public class DimapProductWriter extends AbstractProductWriter {
                                           sourceOffsetY);
         final ImageOutputStream outputStream = getOrCreateImageOutputStream(sourceBand);
         long outputPos = sourceOffsetY * sourceBandWidth + sourceOffsetX;
-        pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
+        pm.beginTask("Writing band '" + sourceBand.getName() + "'...", 1);//sourceHeight);
         try {
             final long max = sourceHeight * sourceWidth;
             final int size = sourceBuffer.getElemSize();
             for (int sourcePos = 0; sourcePos < max; sourcePos += sourceWidth) {
                 sourceBuffer.writeTo(sourcePos, sourceWidth, size, outputStream, outputPos);
                 outputPos += sourceBandWidth;
-                pm.worked(1);
-                if (pm.isCanceled()) {
-                    break;
-                }
+                //pm.worked(1);
+                //if (pm.isCanceled()) {
+                //    break;
+                //}
             }
+            pm.worked(1);
         } finally {
             pm.done();
         }
@@ -340,11 +340,11 @@ public class DimapProductWriter extends AbstractProductWriter {
     }
 
     private ImageOutputStream createImageOutputStream(Band band) throws IOException {
-        return new FileImageOutputStream(getValidImageFile(band));
+        return new FileImageOutputStreamExtImpl(getValidImageFile(band));
     }
 
     private ImageOutputStream createImageOutputStream(TiePointGrid tiePointGrid) throws IOException {
-        return new FileImageOutputStream(getValidImageFile(tiePointGrid));
+        return new FileImageOutputStreamExtImpl(getValidImageFile(tiePointGrid));
     }
 
     private static long getImageFileSize(RasterDataNode band) {

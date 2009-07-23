@@ -70,7 +70,7 @@ import java.nio.channels.FileChannel;
  * @author Russ Rew
  * @author john caron
  * 
- * @version $Id: EnhancedRandomAccessFile.java,v 1.2 2009-05-21 19:44:00 lveci Exp $
+ * @version $Id: EnhancedRandomAccessFile.java,v 1.3 2009-07-22 20:30:52 lveci Exp $
  * @see DataInput
  * @see DataOutput
  * @see java.io.RandomAccessFile
@@ -88,7 +88,7 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 	// debug leaks - keep track of open files
 
 	/** The default buffer size, in bytes. */
-	public static final int DEFAULT_BUFFER_SIZE = 8096;
+	public static final int DEFAULT_BUFFER_SIZE = 32768;
 
 	/** _more_ */
 	protected File file;
@@ -139,14 +139,6 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 
 	/** make sure eraf is this long when closed */
 	protected long minLength = 0;
-
-	/**
-	 * stupid extendMode for truncated, yet valid files - old code allowed
-	 * NOFILL to do this
-	 */
-	boolean extendMode = false;
-
-	// for HTTPRandomAccessFile
 
 	/**
 	 * _more_
@@ -295,12 +287,12 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 	 * @exception IOException
 	 *                if an I/O error occurrs.
 	 */
-	public void seek(long pos) throws IOException {
+	public long seek(long pos) throws IOException {
 
 		// If the seek is into the buffer, just update the eraf pointer.
 		if ((pos >= bufferStart) && (pos < dataEnd)) {
 			filePosition = pos;
-			return;
+			return filePosition;
 		}
 
 		// If the current buffer is modified, write it to disk.
@@ -312,8 +304,13 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 		bufferStart = pos;
 		filePosition = pos;
 
-		dataSize = read_(pos, buffer, 0, buffer.length);
-		if (dataSize <= 0) {
+        eraf.seek(pos);
+        if(readonly)
+            dataSize = eraf.read(buffer, 0, buffer.length);
+        else
+            dataSize = eraf.read(buffer, 0, 1);
+
+        if (dataSize <= 0) {
 			dataSize = 0;
 			endOfFile = true;
 		} else {
@@ -322,7 +319,8 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 
 		// Cache the position of the buffer end.
 		dataEnd = bufferStart + dataSize;
-	}
+        return filePosition;
+    }
 
 	/**
 	 * Returns the current position in the eraf, where the next read or write
@@ -414,14 +412,6 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 		this.minLength = minLength;
 	}
 
-	/**
-	 * Set extendMode for truncated, yet valid files - old NetCDF code allowed
-	 * this when NOFILL on, and user doesnt write all variables.
-	 */
-	public void setExtendMode() {
-		this.extendMode = true;
-	}
-
 	// ////////////////////////////////////////////////////////////////////////////////////////////
 	// Read primitives.
 	//
@@ -437,7 +427,7 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 
 		// If the eraf position is within the data, return the byte...
 		if (filePosition < dataEnd) {
-			int pos = (int) (filePosition - bufferStart);
+			final int pos = (int) (filePosition - bufferStart);
 			filePosition++;
 			return (buffer[pos] & 0xff);
 
@@ -467,7 +457,7 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 	 * @exception IOException
 	 *                if an I/O error occurrs.
 	 */
-	protected int readBytes(byte b[], int off, int len) throws IOException {
+	public int readBytes(byte b[], int off, int len) throws IOException {
 
 		// Check for end of eraf.
 		if (endOfFile) {
@@ -476,16 +466,15 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 
 		// See how many bytes are available in the buffer - if none,
 		// seek to the eraf position to update the buffer and try again.
-		int bytesAvailable = (int) (dataEnd - filePosition);
+		final int bytesAvailable = (int) (dataEnd - filePosition);
 		if (bytesAvailable < 1) {
 			seek(filePosition);
 			return readBytes(b, off, len);
 		}
 
 		// Copy as much as we can.
-		int copyLength = (bytesAvailable >= len) ? len : bytesAvailable;
-		System.arraycopy(buffer, (int) (filePosition - bufferStart), b, off,
-				copyLength);
+		final int copyLength = (bytesAvailable >= len) ? len : bytesAvailable;
+		System.arraycopy(buffer, (int) (filePosition - bufferStart), b, off, copyLength);
 		filePosition += copyLength;
 
 		// If there is more to copy...
@@ -495,8 +484,8 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 			// If the amount remaining is more than a buffer's length, read it
 			// directly from the eraf.
 			if (extraCopy > buffer.length) {
-				extraCopy = read_(filePosition, b, off + copyLength, len
-						- copyLength);
+                eraf.seek(filePosition);
+		        extraCopy = eraf.read(b, off + copyLength, len - copyLength);
 
 				// ...or read a new buffer full, and copy as much as possible...
 			} else {
@@ -538,16 +527,11 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 	 * @throws IOException
 	 *             _more_
 	 */
-	protected int read_(long pos, byte[] b, int offset, int len)
+	private int read_(long pos, byte[] b, int offset, int len)
 			throws IOException {
 
 		eraf.seek(pos);
-		int n = eraf.read(b, offset, len);
-
-		if (extendMode && (n < len)) {
-			n = len;
-		}
-		return n;
+		return eraf.read(b, offset, len);
 	}
 
 	/**
@@ -750,7 +734,7 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 				System.arraycopy(b, off, buffer,
 						(int) (filePosition - bufferStart), copyLength);
 				bufferModified = true;
-				long myDataEnd = filePosition + copyLength;
+				final long myDataEnd = filePosition + copyLength;
 				dataEnd = (myDataEnd > dataEnd) ? myDataEnd : dataEnd;
 				dataSize = (int) (dataEnd - bufferStart);
 				filePosition += copyLength;
@@ -767,7 +751,7 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 				System.arraycopy(b, off + copyLength, buffer,
 						(int) (filePosition - bufferStart), len - copyLength);
 				bufferModified = true;
-				long myDataEnd = filePosition + (len - copyLength);
+				final long myDataEnd = filePosition + (len - copyLength);
 				dataEnd = (myDataEnd > dataEnd) ? myDataEnd : dataEnd;
 				dataSize = (int) (dataEnd - bufferStart);
 				filePosition += (len - copyLength);
@@ -837,7 +821,7 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 	 *                if an I/O error occurs.
 	 */
 	public boolean readBoolean() throws IOException {
-		int ch = this.read();
+		final int ch = this.read();
 		if (ch < 0) {
 			throw new EOFException();
 		}
@@ -865,7 +849,7 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 	 *                if an I/O error occurs.
 	 */
 	public byte readByte() throws IOException {
-		int ch = this.read();
+		final int ch = this.read();
 		if (ch < 0) {
 			throw new EOFException();
 		}
@@ -887,7 +871,7 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 	 *                if an I/O error occurs.
 	 */
 	public int readUnsignedByte() throws IOException {
-		int ch = this.read();
+		final int ch = this.read();
 		if (ch < 0) {
 			throw new EOFException();
 		}
@@ -970,7 +954,7 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 	 *                if an I/O error occurs.
 	 */
 	public int readUnsignedShort() throws IOException {
-		byte b[] = new byte[2];
+		final byte b[] = new byte[2];
 		if (read(b, 0, 2) < 0) {
 			throw new EOFException();
 		}
@@ -1064,12 +1048,12 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 	 * @throws IOException
 	 */
 	public int readIntUnbuffered(long pos) throws IOException {
-		byte[] bb = new byte[4];
+		final byte[] bb = new byte[4];
 		read_(pos, bb, 0, 4);
-		int ch1 = bb[0] & 0xFF;
-		int ch2 = bb[1] & 0xFF;
-		int ch3 = bb[2] & 0xFF;
-		int ch4 = bb[3] & 0xFF;
+		final int ch1 = bb[0] & 0xFF;
+		final int ch2 = bb[1] & 0xFF;
+		final int ch3 = bb[2] & 0xFF;
+		final int ch4 = bb[3] & 0xFF;
 		if ((ch1 | ch2 | ch3 | ch4) < 0) {
 			throw new EOFException();
 		}
@@ -1287,7 +1271,7 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 	 * @task we can optimize this
 	 */
 	public String readLine() throws IOException {
-		StringBuffer input = new StringBuffer();
+		final StringBuffer input = new StringBuffer();
 		int c;
 
 		while (((c = read()) != -1) && (c != '\n')) {
@@ -1659,7 +1643,7 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 	 * @see java.io.RandomAccessFile#writeChar(int)
 	 */
 	public void writeChars(String s) throws IOException {
-		int len = s.length();
+		final int len = s.length();
 		for (int i = 0; i < len; i++) {
 			final int v = s.charAt(i);
 			write((v >>> 8) & 0xFF);
@@ -1687,7 +1671,7 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 		int utflen = 0;
 
 		for (int i = 0; i < strlen; i++) {
-			int c = str.charAt(i);
+			final int c = str.charAt(i);
 			if ((c >= 0x0001) && (c <= 0x007F)) {
 				utflen++;
 			} else if (c > 0x07FF) {
@@ -1703,7 +1687,7 @@ public final class EnhancedRandomAccessFile implements DataInput, DataOutput {
 		write((utflen >>> 8) & 0xFF);
 		write((utflen >>> 0) & 0xFF);
 		for (int i = 0; i < strlen; i++) {
-			int c = str.charAt(i);
+			final int c = str.charAt(i);
 			if ((c >= 0x0001) && (c <= 0x007F)) {
 				write(c);
 			} else if (c > 0x07FF) {

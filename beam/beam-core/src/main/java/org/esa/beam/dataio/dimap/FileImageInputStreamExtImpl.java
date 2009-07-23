@@ -48,104 +48,125 @@ public final class FileImageInputStreamExtImpl extends ImageInputStreamImpl
         //return new FileImageInputStream(file);
     }
 
+    @Override
     public byte readByte() throws IOException {
 
         return eraf.readByte();
     }
 
+    @Override
     public char readChar() throws IOException {
 
         return eraf.readChar();
     }
 
+    @Override
     public double readDouble() throws IOException {
 
         return eraf.readDouble();
     }
 
+    @Override
     public float readFloat() throws IOException {
 
         return eraf.readFloat();
     }
 
+    @Override
     public void readFully(byte[] b, int off, int len) throws IOException {
 
         eraf.readFully(b, off, len);
     }
 
+    @Override
     public void readFully(byte[] b) throws IOException {
 
         eraf.readFully(b);
     }
 
+    @Override
     public int readInt() throws IOException {
 
         return eraf.readInt();
     }
 
+    @Override
     public String readLine() throws IOException {
 
         return eraf.readLine();
     }
 
+    @Override
     public ByteOrder getByteOrder() {
 
         return eraf.getByteOrder();
     }
 
+    @Override
     public long getStreamPosition() throws IOException {
         return eraf.getFilePointer();
     }
 
+    @Override
     public boolean isCached() {
         return eraf.isCached();
     }
 
+    @Override
     public int read(byte[] b) throws IOException {
         return eraf.read(b);
     }
 
+    @Override
     public long skipBytes(long n) throws IOException {
 
         return eraf.skipBytes(n);
     }
 
+    @Override
     public long readLong() throws IOException {
 
         return eraf.readLong();
     }
 
+    @Override
     public short readShort() throws IOException {
 
         return eraf.readShort();
     }
 
+    @Override
     public int readUnsignedByte() throws IOException {
 
         return eraf.readUnsignedByte();
     }
 
+    @Override
     public long readUnsignedInt() throws IOException {
 
         return eraf.readUnsignedInt();
     }
 
+    @Override
     public int readUnsignedShort() throws IOException {
 
         return eraf.readUnsignedShort();
     }
 
+    @Override
     public String readUTF() throws IOException {
 
         return eraf.readUTF();
     }
 
+    @Override
     public void setByteOrder(ByteOrder byteOrder) {
 
         eraf.setByteOrder(byteOrder);
         super.setByteOrder(byteOrder);
     }
 
+    @Override
     public int skipBytes(int n) throws IOException {
 
         return eraf.skipBytes(n);
@@ -234,6 +255,7 @@ public final class FileImageInputStreamExtImpl extends ImageInputStreamImpl
     /**
      * Reads an int from the underlying {@link EnhancedRandomAccessFile}.
      */
+    @Override
     public int read() throws IOException {
         checkClosed();
         bitOffset = 0;
@@ -257,10 +279,11 @@ public final class FileImageInputStreamExtImpl extends ImageInputStreamImpl
      * @return the actual number of bytes read, or -1 if there is not more data
      *         due to the end of the eraf being reached.
      */
+    @Override
     public int read(byte[] b, int off, int len) throws IOException {
         checkClosed();
         bitOffset = 0;
-        int nbytes = eraf.read(b, off, len);
+        int nbytes = eraf.readBytes(b, off, len);
         if (nbytes != -1) {
             streamPos += nbytes;
         }
@@ -273,6 +296,7 @@ public final class FileImageInputStreamExtImpl extends ImageInputStreamImpl
      * 
      * @return the eraf length as a <code>long</code>, or <code>-1</code>.
      */
+    @Override
     public long length() {
         try {
             checkClosed();
@@ -285,24 +309,14 @@ public final class FileImageInputStreamExtImpl extends ImageInputStreamImpl
     /**
      * Seeks the current position to pos.
      */
+    @Override
     public void seek(long pos) throws IOException {
         checkClosed();
         if (pos < flushedPos) {
             throw new IllegalArgumentException("pos < flushedPos!");
         }
         bitOffset = 0;
-        eraf.seek(pos);
-        streamPos = eraf.getFilePointer();
-
-    /*    checkClosed();
-
-        // This test also covers pos < 0
-        if (pos < flushedPos) {
-            throw new IndexOutOfBoundsException("pos < flushedPos!");
-        }
-
-        this.streamPos = pos;
-        this.bitOffset = 0;  */
+        streamPos = eraf.seek(pos);
     }
 
     /**
@@ -311,6 +325,7 @@ public final class FileImageInputStreamExtImpl extends ImageInputStreamImpl
      * @throws IOException
      *                 in case something bad happens.
      */
+    @Override
     public void close() throws IOException {
     	try{
 	    	if(!isClosed){
@@ -339,7 +354,7 @@ public final class FileImageInputStreamExtImpl extends ImageInputStreamImpl
         try {
             close();
         } catch (IOException e) {
-
+            //
         }
     }
 
@@ -348,6 +363,7 @@ public final class FileImageInputStreamExtImpl extends ImageInputStreamImpl
      * 
      * @return a simple description for this {@link ImageInputStream}.
      */
+    @Override
     public String toString() {
 
         return new StringBuffer("FileImageInputStreamExtImpl which points to ")

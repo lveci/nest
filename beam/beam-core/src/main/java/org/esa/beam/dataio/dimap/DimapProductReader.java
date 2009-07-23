@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductReader.java,v 1.4 2009-07-21 14:09:28 lveci Exp $
+ * $Id: DimapProductReader.java,v 1.5 2009-07-22 20:30:52 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -54,7 +54,7 @@ import java.util.Map;
  *
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2009-07-21 14:09:28 $
+ * @version $Revision: 1.5 $ $Date: 2009-07-22 20:30:52 $
  * @see org.esa.beam.dataio.dimap.DimapProductReaderPlugIn
  */
 public class DimapProductReader extends AbstractProductReader {
@@ -189,9 +189,9 @@ public class DimapProductReader extends AbstractProductReader {
             final TiePointGrid tiePointGrid = product.getTiePointGrid(tiePointGridName);
             String dataFile = DimapProductHelpers.getTiePointDataFile(jDomDocument, tiePointGrid.getName());
             dataFile = FileUtils.exchangeExtension(dataFile, DimapProductConstants.IMAGE_FILE_EXTENSION);
-            FileImageInputStream inputStream = null;
+            FileImageInputStreamExtImpl inputStream = null;
             try {
-                inputStream = new FileImageInputStream(new File(inputDir, dataFile));
+                inputStream = new FileImageInputStreamExtImpl(new File(inputDir, dataFile));
                 final float[] floats = ((float[]) tiePointGrid.getData().getElems());
                 inputStream.seek(0);
                 inputStream.readFully(floats, 0, floats.length);
@@ -294,12 +294,13 @@ public class DimapProductReader extends AbstractProductReader {
         pm.beginTask("Reading band '" + destBand.getName() + "'...", sourceMaxY - sourceMinY);
         // For each scan in the data source
         try {
+          synchronized (inputStream) {
             for (int sourceY = sourceMinY; sourceY <= sourceMaxY; sourceY += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
                 }
                 final int sourcePosY = sourceY * sourceRasterWidth;
-                synchronized (inputStream) {
+
                     if (sourceStepX == 1) {
                         destBuffer.readFrom(destPos, destWidth, inputStream, sourcePosY + sourceMinX);
                         destPos += destWidth;
@@ -309,9 +310,10 @@ public class DimapProductReader extends AbstractProductReader {
                             destPos++;
                         }
                     }
-                }
+
                 pm.worked(1);
             }
+          }
         } finally {
             pm.done();
         }
@@ -344,7 +346,7 @@ public class DimapProductReader extends AbstractProductReader {
     private ImageInputStream getOrCreateImageInputStream(Band band, File file) throws IOException {
         ImageInputStream inputStream = getImageInputStream(band);
         if (inputStream == null) {
-            inputStream = new FileImageInputStream(file);
+            inputStream = new FileImageInputStreamExtImpl(file);
             if (bandInputStreams == null) {
                 bandInputStreams = new Hashtable<Band, ImageInputStream>();
             }

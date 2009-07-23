@@ -60,11 +60,11 @@ public class MosaicOp extends Operator {
 
     private final SceneProperties scnProp = new SceneProperties();
     private final static Map<Product, Band> srcBandMap = new HashMap<Product, Band>(10);
+    private final static Map<Product, Rectangle> srcRectMap = new HashMap<Product, Rectangle>(10);
 
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
 
     private Resampling resampling = null;
-    private Resampling.Index resamplingIndex = null;
 
     @Override
     public void initialize() throws OperatorException {
@@ -87,7 +87,6 @@ public class MosaicOp extends Operator {
                 resampling = Resampling.BILINEAR_INTERPOLATION;
             else
                 resampling = (Resampling.CUBIC_CONVOLUTION);
-            resamplingIndex = resampling.createIndex();
 
             computeImageGeoBoundary(sourceProduct, scnProp);
 
@@ -124,6 +123,13 @@ public class MosaicOp extends Operator {
             targetBand.setNoDataValue(0);
             targetBand.setNoDataValueUsed(true);
             targetProduct.addBand(targetBand);
+
+            for(Product srcProduct : sourceProduct) {
+                final Rectangle srcRect = getSrcRect(targetProduct.getGeoCoding(),
+                                                    scnProp.srcCornerLatitudeMap.get(srcProduct),
+                                                    scnProp.srcCornerLongitudeMap.get(srcProduct));
+                srcRectMap.put(srcProduct, srcRect);
+            }
 
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
@@ -295,14 +301,13 @@ public class MosaicOp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
+      try {
         final Rectangle targetRect = targetTile.getRectangle();
-        final GeoCoding targetGeoCoding = targetProduct.getGeoCoding();
         final ArrayList<Product> validProducts = new ArrayList<Product>(sourceProduct.length);
         
         for (final Product srcProduct : sourceProduct) {
-            final double[] lats = scnProp.srcCornerLatitudeMap.get(srcProduct);
-            final double[] lons = scnProp.srcCornerLongitudeMap.get(srcProduct);
-            if(!isWithinTile(srcProduct, targetRect, targetGeoCoding, lats, lons)) {
+            final Rectangle srcRect = srcRectMap.get(srcProduct);
+            if(srcRect == null || !srcRect.intersects(targetRect)) {
                 continue;
             }
             validProducts.add(srcProduct);
@@ -314,17 +319,16 @@ public class MosaicOp extends Operator {
         for (Product validProduct : validProducts) {
             srcPixelCoords.add(new PixelPos[targetRect.width * targetRect.height]);
         }
-        
+
+        final GeoCoding targetGeoCoding = targetProduct.getGeoCoding();
         final GeoPos geoPos = new GeoPos();
         final PixelPos pixelPos = new PixelPos();
-        final int minX = targetRect.x;
-        final int minY = targetRect.y;
-        final int maxX = minX + targetRect.width - 1;
-        final int maxY = minY + targetRect.height - 1;        
+        final int maxX = targetRect.x + targetRect.width - 1;
+        final int maxY = targetRect.y + targetRect.height - 1;
 
         int coordIndex = 0;
-        for (int y = minY; y <= maxY; ++y) {
-            for (int x = minX; x <= maxX; ++x) {
+        for (int y = targetRect.y; y <= maxY; ++y) {
+            for (int x = targetRect.x; x <= maxX; ++x) {
                 pixelPos.x = x + 0.5f;
                 pixelPos.y = y + 0.5f;
                 targetGeoCoding.getGeoPos(pixelPos, geoPos);
@@ -347,7 +351,7 @@ public class MosaicOp extends Operator {
         }
 
         int index = 0;
-        pm.beginTask("Mosaicking...", validProducts.size());
+        pm.beginTask("Mosaicking...", validProducts.size() * targetTile.getHeight());
         for(Product srcProduct : validProducts) {
             final Rectangle sourceRectangle = getBoundingBox(
                     srcPixelCoords.get(index), 0, 0,
@@ -356,15 +360,18 @@ public class MosaicOp extends Operator {
 
             if(sourceRectangle != null) {
                 final Band srcBand = srcBandMap.get(srcProduct);
-                collocateSourceBand(srcBand, sourceRectangle, srcPixelCoords.get(index), targetTile,
-                                    SubProgressMonitor.create(pm, 1));
+                collocateSourceBand(srcBand, sourceRectangle, srcPixelCoords.get(index), targetTile, pm);
             }
             ++index;
         }
-        pm.done();
+      } catch (Exception e) {
+        OperatorUtils.catchOperatorException(getId(), e);
+      } finally {
+          pm.done();
+      }
     }
 
-    private static boolean isWithinTile(final Product srcProduct, final Rectangle destArea, final GeoCoding destGeoCoding,
+    private static Rectangle getSrcRect(final GeoCoding destGeoCoding,
                                         final double[] lats, final double[]lons) {
 
         double srcLatMin = 90.0;
@@ -400,59 +407,8 @@ public class MosaicOp extends Operator {
         pixelPos[2] = destGeoCoding.getPixelPos(geoPos, null);
         geoPos.setLocation((float)srcLatMax, (float)srcLonMin);
         pixelPos[3] = destGeoCoding.getPixelPos(geoPos, null);
-        final Rectangle srcRect = getBoundingBox(pixelPos, 0, 0,
-                                                Integer.MAX_VALUE, Integer.MAX_VALUE);
-        return srcRect != null && srcRect.intersects(destArea);
-    }
 
-    private void collocateSourceBand(RasterDataNode sourceBand, Rectangle sourceRectangle, PixelPos[] sourcePixelPositions,
-                                     Tile targetTile, ProgressMonitor pm) throws OperatorException {
-        pm.beginTask(MessageFormat.format("collocating band {0}", sourceBand.getName()), targetTile.getHeight());
-        try {
-            final Rectangle targetRectangle = targetTile.getRectangle();
-
-            final Product srcProduct = sourceBand.getProduct();
-            final int sourceRasterHeight = srcProduct.getSceneRasterHeight();
-            final int sourceRasterWidth = srcProduct.getSceneRasterWidth();
-            final ProductData trgBuffer = targetTile.getDataBuffer();
-
-            final Tile sourceTile = getSourceTile(sourceBand, sourceRectangle, pm);
-            final ResamplingRaster resamplingRaster = new ResamplingRaster(sourceTile);
-            final double nodataValue = sourceBand.getNoDataValue();
-            float sample;
-            double targetVal;
-
-            for (int y = targetRectangle.y, index = 0; y < targetRectangle.y + targetRectangle.height; ++y) {
-                checkForCancelation(pm);
-                for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; ++x, ++index) {
-                    final PixelPos sourcePixelPos = sourcePixelPositions[index];
-
-                    if (sourcePixelPos != null) {
-                        resampling.computeIndex(sourcePixelPos.x, sourcePixelPos.y,
-                                sourceRasterWidth, sourceRasterHeight, resamplingIndex);
-
-                        sample = resampling.resample(resamplingRaster, resamplingIndex);
-                        if (!Float.isNaN(sample)) {
-                            final int trgIndex = targetTile.getDataBufferIndex(x, y);
-                            if(average) {
-                                targetVal = trgBuffer.getElemDoubleAt(trgIndex);
-                                if(targetVal != nodataValue) {
-                                    sample = (float)((sample+targetVal) / 2f);    
-                                }
-                                trgBuffer.setElemDoubleAt(trgIndex, sample);
-                            } else {
-                                trgBuffer.setElemDoubleAt(trgIndex, sample);
-                            }
-                        }
-                    }
-                }
-                pm.worked(1);
-            }
-        } catch (Exception e) {
-            throw new OperatorException(e.getMessage());
-        } finally {
-            pm.done();
-        }
+        return getBoundingBox(pixelPos, 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE);
     }
 
     private static Rectangle getBoundingBox(PixelPos[] pixelPositions,
@@ -493,18 +449,84 @@ public class MosaicOp extends Operator {
         return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
     }
 
+    private void collocateSourceBand(RasterDataNode sourceBand, Rectangle sourceRectangle, PixelPos[] sourcePixelPositions,
+                                     Tile targetTile, ProgressMonitor pm) throws OperatorException {
+        try {
+            final Rectangle targetRectangle = targetTile.getRectangle();
+
+            final Product srcProduct = sourceBand.getProduct();
+            final int sourceRasterHeight = srcProduct.getSceneRasterHeight();
+            final int sourceRasterWidth = srcProduct.getSceneRasterWidth();
+            final ProductData trgBuffer = targetTile.getDataBuffer();
+
+            final Tile sourceTile = getSourceTile(sourceBand, sourceRectangle, pm);
+            final ResamplingRaster resamplingRaster = new ResamplingRaster(sourceTile);
+            final Resampling.Index resamplingIndex = resampling.createIndex();
+            final double nodataValue = sourceBand.getNoDataValue();
+            float sample = 0;
+            double targetVal;
+
+            final int maxY = targetRectangle.y + targetRectangle.height;
+            final int maxX = targetRectangle.x + targetRectangle.width;
+
+            for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
+                checkForCancelation(pm);
+                for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
+                    final PixelPos sourcePixelPos = sourcePixelPositions[index];
+
+                    if (sourcePixelPos != null) {
+                        try {
+                        resampling.computeIndex(sourcePixelPos.x, sourcePixelPos.y,
+                                sourceRasterWidth, sourceRasterHeight, resamplingIndex);
+                        } catch (Exception e) {
+                            OperatorUtils.catchOperatorException(getId()+" computeIndex", e);
+                        }
+                        try {
+                        sample = resampling.resample(resamplingRaster, resamplingIndex);
+                        } catch (Exception e) {
+                            OperatorUtils.catchOperatorException(getId()+" resample", e);
+                        }
+                        if (!Float.isNaN(sample)) {
+                            final int trgIndex = targetTile.getDataBufferIndex(x, y);
+                            if(average) {
+                                targetVal = trgBuffer.getElemDoubleAt(trgIndex);
+                                if(targetVal != nodataValue) {
+                                    sample = (float)((sample+targetVal) / 2f);    
+                                }
+                                trgBuffer.setElemDoubleAt(trgIndex, sample);
+                            } else {
+                                trgBuffer.setElemDoubleAt(trgIndex, sample);
+                            }
+                        }
+                    }
+                }
+                pm.worked(1);
+            }
+
+            sourceTile.getDataBuffer().dispose();
+                        
+        } catch (Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
+        }
+    }
+
     private static class ResamplingRaster implements Resampling.Raster {
 
         private final Tile tile;
         private final boolean usesNoData;
-        private final RasterDataNode rasterDataNode;
+        private final boolean scalingApplied;
+        private final double noDataValue;
+        private final double geophysicalNoDataValue;
         private final ProductData dataBuffer;
 
         public ResamplingRaster(final Tile tile) {
             this.tile = tile;
             this.dataBuffer = tile.getDataBuffer();
-            this.rasterDataNode = tile.getRasterDataNode();
+            final RasterDataNode rasterDataNode = tile.getRasterDataNode();
             this.usesNoData = rasterDataNode.isNoDataValueUsed();
+            this.noDataValue = rasterDataNode.getNoDataValue();
+            this.geophysicalNoDataValue = rasterDataNode.getGeophysicalNoDataValue();
+            this.scalingApplied = rasterDataNode.isScalingApplied();
         }
 
         public final int getWidth() {
@@ -518,17 +540,13 @@ public class MosaicOp extends Operator {
         public final float getSample(final int x, final int y) throws Exception {
             final double sample = dataBuffer.getElemDoubleAt(tile.getDataBufferIndex(x, y));
 
-            if (usesNoData && isNoDataValue(rasterDataNode, sample)) {
-                return Float.NaN;
+            if (usesNoData) {
+                if(scalingApplied && geophysicalNoDataValue == sample)
+                    return Float.NaN;
+                else if(noDataValue == sample)
+                    return Float.NaN;
             }
-
             return (float) sample;
-        }
-
-        private static boolean isNoDataValue(final RasterDataNode rasterDataNode, final double sample) {
-            if (rasterDataNode.isScalingApplied())
-                return rasterDataNode.getGeophysicalNoDataValue() == sample;
-            return rasterDataNode.getNoDataValue() == sample;
         }
     }
 

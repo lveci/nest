@@ -87,7 +87,7 @@
             <parent>Calibration</parent>
             <largeIcon>icons/Import24.gif</largeIcon>
             <separatorBefore>true</separatorBefore>
-            <placeAfter>ASARRetroCalibrationOpTool</placeAfter>
+            <placeAfter>CalibrationOp</placeAfter>
         </action>
 
         <!--action>
@@ -126,6 +126,7 @@
             <text>Sigma0 to Gamma0</text>
             <shortDescr>Add a Gamma0 virtual band</shortDescr>
             <parent>Calibration</parent>
+            <placeAfter>CalibrationOp</placeAfter>
             <context>band</context>
             <helpId>Sigma0toGamma0</helpId>
         </action>

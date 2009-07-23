@@ -16,7 +16,8 @@ final class Functions {
     static final class FX_X4 implements FX {
 
         public final double f(double x) {
-            return (x * x * x * x);
+            final double x2 = (x*x);
+            return (x2 * x2);
         }
         public String getCCodeExpr() {
             return "pow(x, 4)";

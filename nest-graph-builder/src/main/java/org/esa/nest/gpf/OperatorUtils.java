@@ -226,9 +226,13 @@ public class OperatorUtils {
     public static void catchOperatorException(String opName, Exception e) throws OperatorException {
         if(opName.contains("$"))
             opName = opName.substring(0, opName.indexOf('$'));
+        String message = opName + ":";
         if(e.getMessage() != null)
-            throw new OperatorException(opName + ":" + e.getMessage());
+            message += e.getMessage();
         else
-            throw new OperatorException(opName + ":" + e.toString());
+            message += e.toString();
+
+        System.out.println(message);
+        throw new OperatorException(message);
     }
 }
