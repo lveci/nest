@@ -15,7 +15,6 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.dat.actions.importbrowser.model.*;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.ProductPropertiesProvider;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.QuicklookProvider;
-import org.esa.nest.dat.actions.importbrowser.model.dataprovider.WorldMapProvider;
 import org.esa.nest.dat.actions.importbrowser.util.Callback;
 import org.esa.nest.dat.toolviews.Projects.Project;
 
@@ -63,7 +62,7 @@ public class ImportBrowser {
     private final String helpId;
     private JFrame mainFrame;
 
-    private WorldMapPaneDataModel worldMapDataModel;
+    private WorldMapPaneDataModel worldMapDataModel = null;
 
     private RepositoryTree repositoryTree = null;
     private DefaultMutableTreeNode rootNode = null;
@@ -403,8 +402,8 @@ public class ImportBrowser {
 
         worldMapDataModel = new WorldMapPaneDataModel();
         final WorldMapPane mapPane = new WorldMapPane(worldMapDataModel);
+        //splitPane2.addPane();
         splitPane2.addPane(mapPane);
-         splitPane2.addPane(mapPane);
 
         splitPaneVert.addPane(splitPane1);
         splitPaneVert.addPane(splitPane2);
@@ -556,11 +555,16 @@ public class ImportBrowser {
                 new ProgressBarProgressMonitor(progressBar, statusLabel),
                 uiCallBack);
 
-        Product[] productList = new Product[repository.getEntryCount()];
+        final ArrayList<Product> productList = new ArrayList<Product>(repository.getEntryCount());
         for(int i=0; i < repository.getEntryCount(); ++i) {
-            productList[i] = repository.getEntry(i).getProduct();
+            final Product prod = repository.getEntry(i).getProduct();
+            if(prod != null) {
+                productList.add(prod);
+            }
         }
-        worldMapDataModel.setProducts(productList);
+        if(worldMapDataModel != null && !productList.isEmpty()) {
+            worldMapDataModel.setProducts(productList.toArray(new Product[productList.size()]));
+        }
     }
     
     private class RepositoryChangeHandler implements ItemListener {

@@ -84,9 +84,10 @@ public final class DatApp extends VisatApp {
                             new NestSingleTargetProductDialog("Multilook", VisatApp.getApp(), "Multilook", null);
 
                     final ImportBrowser ib = ImportBrowserAction.getInstance().getImportBrowser();
+                    ib.getFrame().setVisible(false);
                     final Repository rep = ib.getRepositoryManager().getRepository(0);
                     if(rep != null) {
-                        ib.ShowRepository(rep);
+                        //ib.ShowRepository(rep);
                     }
 
                 } catch(Exception e) {
