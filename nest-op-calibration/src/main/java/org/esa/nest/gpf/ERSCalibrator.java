@@ -65,7 +65,6 @@ public final class ERSCalibrator implements Calibrator {
     private Product targetProduct;
 
     private boolean outputImageScaleInDb = false;
-    private File externalAuxFile = null;
 
     private Band sourceBand1;
     private Band sourceBand2;
@@ -184,8 +183,10 @@ public final class ERSCalibrator implements Calibrator {
      * Set external auxiliary file.
      */
     @Override
-    public void setExternalAuxFile(File file) {
-        externalAuxFile = file;
+    public void setExternalAuxFile(File file) throws OperatorException {
+        if (file != null) {
+            throw new OperatorException("No external auxiliary file should be selected for ERS product");
+        }
     }
     
     /**

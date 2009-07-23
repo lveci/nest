@@ -64,8 +64,11 @@ public class ALOSCalibrator implements Calibrator {
      * Set external auxiliary file.
      */
     @Override
-    public void setExternalAuxFile(File file) {
-        externalAuxFile = file;
+    public void setExternalAuxFile(File file) throws OperatorException {
+        if (file != null) {
+            throw new OperatorException("No external auxiliary file should be selected for ALOS PALSAR product");
+        }
+
     }
 
     /**
