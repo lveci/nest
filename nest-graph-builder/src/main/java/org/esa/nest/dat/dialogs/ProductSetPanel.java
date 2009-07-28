@@ -71,4 +71,11 @@ public class ProductSetPanel {
         final ArrayList<File> fileList = fileModel.getFileList();
         return fileList.toArray(new File[fileList.size()]);
     }
+
+    public void setFileList(final File[] files) {
+        fileModel.clear();
+        for(File f : files) {
+            fileModel.addFile(f);
+        }
+    }
 }

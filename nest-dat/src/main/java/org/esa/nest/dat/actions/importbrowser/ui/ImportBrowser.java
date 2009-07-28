@@ -54,6 +54,7 @@ public class ImportBrowser {
     private JButton openButton;
     private JButton addToProjectButton;
     private JButton openAllSelectedButton;
+    private JButton batchProcessButton;
     private JButton removeButton;
     private JButton updateButton;
     private JProgressBar progressBar;
@@ -213,6 +214,20 @@ public class ImportBrowser {
         }
     }
 
+    private void performBatchProcessSelectedAction() {
+        final Vector<File> fileList = getSelectedFiles();
+
+        if(!fileList.isEmpty()) {
+            final File[] productFiles = new File[fileList.size()];
+            fileList.toArray(productFiles);
+
+            final BatchGraphDialog batchDlg = new BatchGraphDialog(new DatContext(""),
+                        "Batch Processing", "batchProcessing");
+            batchDlg.setInputFiles(productFiles);
+            batchDlg.show();
+        }
+    }
+
     private void performAddToProjectAction() {
         final Vector<File> fileList = getSelectedFiles();
 
@@ -293,6 +308,7 @@ public class ImportBrowser {
         openButton.setEnabled(enable);
         addToProjectButton.setEnabled(enable);
         openAllSelectedButton.setEnabled(enable);
+        batchProcessButton.setEnabled(enable);
         removeButton.setEnabled(enable);
         updateButton.setEnabled(enable);
         repositoryListCombo.setEnabled(enable);
@@ -389,8 +405,19 @@ public class ImportBrowser {
             }
         });
 
+        batchProcessButton = new JButton();
+        setComponentName(batchProcessButton, "batchProcessButton");
+        batchProcessButton.setText("Batch Process");
+        batchProcessButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(final ActionEvent e) {
+                performBatchProcessSelectedAction();
+            }
+        });
+
         openPanel.add(addToProjectButton, BorderLayout.WEST);
-        openPanel.add(openAllSelectedButton, BorderLayout.EAST);
+        openPanel.add(openAllSelectedButton, BorderLayout.CENTER);
+        openPanel.add(batchProcessButton, BorderLayout.EAST);
 
         northPanel.add(headerPanel, BorderLayout.CENTER);
         southPanel.add(statusLabel, BorderLayout.CENTER);
