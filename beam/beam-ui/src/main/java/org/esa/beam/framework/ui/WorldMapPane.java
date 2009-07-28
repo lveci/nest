@@ -1,5 +1,5 @@
 /*
- * $Id: WorldMapPane.java,v 1.2 2009-07-10 18:36:55 lveci Exp $
+ * $Id: WorldMapPane.java,v 1.3 2009-07-28 15:31:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -54,7 +54,7 @@ import java.util.List;
  * This class displays a world map specified by the {@link WorldMapPaneDataModel}.
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2009-07-10 18:36:55 $
+ * @version $Revision: 1.3 $ $Date: 2009-07-28 15:31:56 $
  */
 public class WorldMapPane extends JPanel {
 
@@ -407,7 +407,7 @@ public class WorldMapPane extends JPanel {
 
             final Product selectedProduct = dataModel.getSelectedProduct();
             for (final Product product : dataModel.getProducts()) {
-                if (selectedProduct != product) {
+                if (product != null && selectedProduct != product) {
                     drawProduct(graphics, product, false);
                 }
             }

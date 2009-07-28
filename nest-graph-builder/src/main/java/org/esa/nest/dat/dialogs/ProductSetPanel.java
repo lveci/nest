@@ -1,15 +1,7 @@
 package org.esa.nest.dat.dialogs;
 
 import com.bc.ceres.swing.TableLayout;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.ui.SourceProductSelector;
-import org.esa.beam.framework.gpf.ui.TargetProductSelector;
-import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.BasicApp;
-import org.esa.beam.framework.ui.application.SelectionChangeEvent;
-import org.esa.beam.framework.ui.application.SelectionChangeListener;
-import org.esa.beam.util.SystemUtils;
 import org.esa.nest.gpf.ProductSetReaderOpUI;
 
 import javax.swing.*;
@@ -32,14 +24,13 @@ public class ProductSetPanel {
     ProductSetPanel(final AppContext theAppContext, final JTabbedPane tabbedPane) {
         this.appContext = theAppContext;
 
-
         final TableLayout tableLayout = new TableLayout(1);
         tableLayout.setTableAnchor(TableLayout.Anchor.NORTHWEST);
         tableLayout.setTableWeightX(1.0);
         tableLayout.setTableFill(TableLayout.Fill.BOTH);
         tableLayout.setTablePadding(1, 1);
 
-        final JComponent content =  ProductSetReaderOpUI.createComponent(productSetTable, fileModel);
+        final JComponent content = ProductSetReaderOpUI.createComponent(productSetTable, fileModel);
         final JPanel ioParametersPanel = new JPanel(tableLayout);
 
         ioParametersPanel.add(content);

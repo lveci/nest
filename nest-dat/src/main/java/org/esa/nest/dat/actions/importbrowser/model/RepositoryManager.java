@@ -80,6 +80,8 @@ public class RepositoryManager {
      * @return the repository at the given index.
      */
     public Repository getRepository(final int index) {
+        if(repositoryList.isEmpty())
+            return null;
         return repositoryList.get(index);
     }
 

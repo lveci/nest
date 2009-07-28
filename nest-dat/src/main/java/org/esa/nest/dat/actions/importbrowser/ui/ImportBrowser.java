@@ -12,11 +12,15 @@ import org.esa.beam.framework.ui.WorldMapPaneDataModel;
 import org.esa.beam.framework.ui.WorldMapPane;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.visat.actions.AbstractVisatAction;
 import org.esa.nest.dat.actions.importbrowser.model.*;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.ProductPropertiesProvider;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.QuicklookProvider;
 import org.esa.nest.dat.actions.importbrowser.util.Callback;
 import org.esa.nest.dat.toolviews.Projects.Project;
+import org.esa.nest.dat.dialogs.BatchGraphPanel;
+import org.esa.nest.dat.dialogs.BatchGraphDialog;
+import org.esa.nest.dat.DatContext;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -278,7 +282,8 @@ public class ImportBrowser {
             final boolean repositoryListIsNotEmpty = repositoryManager.getNumRepositories() > 0;
             if (repositoryListIsNotEmpty) {
                 final Repository firstElement = repositoryManager.getRepository(0);
-                repositoryListCombo.setSelectedItem(firstElement);
+                if(firstElement != null)
+                    repositoryListCombo.setSelectedItem(firstElement);
             }
             setUIComponentsEnabled(repositoryListIsNotEmpty);
         }
@@ -345,7 +350,7 @@ public class ImportBrowser {
     private void initUI() {
         mainPanel = new JPanel(new BorderLayout(4, 4));
         final JPanel southPanel = new JPanel(new BorderLayout(4, 4));
-        final JPanel centerPanel = new JPanel(new BorderLayout(4, 4));
+
         final JPanel northPanel = new JPanel(new BorderLayout(4, 4));
         repositoryListCombo = new JComboBox();
         setComponentName(repositoryListCombo, "repositoryListCombo");
@@ -392,26 +397,8 @@ public class ImportBrowser {
         southPanel.add(openPanel, BorderLayout.WEST);
         southPanel.add(progressPanel, BorderLayout.EAST);
 
-        final JideSplitPane splitPaneVert = new JideSplitPane(JideSplitPane.VERTICAL_SPLIT);
-
-        final JideSplitPane splitPane1 = new JideSplitPane(JideSplitPane.HORIZONTAL_SPLIT);
-        splitPane1.addPane(createRepositoryTreeControl());
-        splitPane1.addPane(new JScrollPane(repositoryTable));
-
-        final JideSplitPane splitPane2 = new JideSplitPane(JideSplitPane.HORIZONTAL_SPLIT);
-
-        worldMapDataModel = new WorldMapPaneDataModel();
-        final WorldMapPane mapPane = new WorldMapPane(worldMapDataModel);
-        //splitPane2.addPane();
-        splitPane2.addPane(mapPane);
-
-        splitPaneVert.addPane(splitPane1);
-        splitPaneVert.addPane(splitPane2);
-
-        centerPanel.add(splitPaneVert, BorderLayout.CENTER);
-
         mainPanel.add(northPanel, BorderLayout.NORTH);
-        mainPanel.add(centerPanel, BorderLayout.CENTER);
+        mainPanel.add(createCentrePanel(), BorderLayout.CENTER);
         mainPanel.add(southPanel, BorderLayout.SOUTH);
         mainPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
@@ -437,6 +424,24 @@ public class ImportBrowser {
             }
         });
         initHeaderPanel(headerPanel);
+    }
+
+    private JPanel createCentrePanel() {
+        final JideSplitPane splitPane1 = new JideSplitPane(JideSplitPane.HORIZONTAL_SPLIT);
+        splitPane1.add(createRepositoryTreeControl());
+        splitPane1.add(new JScrollPane(repositoryTable));
+
+    /*    final JPanel panel2 = new JPanel(new BorderLayout(4, 4));
+        final BatchGraphPanel batchPanel = new BatchGraphPanel(new DatContext(""));
+        panel2.add(batchPanel.createPanel(), BorderLayout.WEST);
+        worldMapDataModel = new WorldMapPaneDataModel();
+        panel2.add(new WorldMapPane(worldMapDataModel), BorderLayout.EAST);    */
+
+        //final JPanel centerPanel = new JPanel(new BorderLayout(4, 4));
+        //centerPanel.add(splitPane1, BorderLayout.NORTH);
+        //centerPanel.add(panel2, BorderLayout.SOUTH);
+
+        return splitPane1;
     }
 
     private void setComponentName(JComponent button, String name) {
