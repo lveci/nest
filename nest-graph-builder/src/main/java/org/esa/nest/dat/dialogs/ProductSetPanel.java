@@ -2,6 +2,10 @@ package org.esa.nest.dat.dialogs;
 
 import com.bc.ceres.swing.TableLayout;
 import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.framework.ui.BasicApp;
+import org.esa.beam.framework.gpf.ui.TargetProductSelector;
+import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
+import org.esa.beam.util.SystemUtils;
 import org.esa.nest.gpf.ProductSetReaderOpUI;
 
 import javax.swing.*;
@@ -18,6 +22,7 @@ public class ProductSetPanel {
     private final AppContext appContext;
     private final ProductSetReaderOpUI.FileModel fileModel = new ProductSetReaderOpUI.FileModel();
     private final JTable productSetTable = new JTable(fileModel);
+    private final TargetFolderSelector targetProductSelector;
 
     private String targetProductNameSuffix = "";
 
@@ -30,16 +35,24 @@ public class ProductSetPanel {
         tableLayout.setTableFill(TableLayout.Fill.BOTH);
         tableLayout.setTablePadding(1, 1);
 
-        final JComponent content = ProductSetReaderOpUI.createComponent(productSetTable, fileModel);
+        final JComponent productSetContent = ProductSetReaderOpUI.createComponent(productSetTable, fileModel);
         final JPanel ioParametersPanel = new JPanel(tableLayout);
+        ioParametersPanel.add(productSetContent);
 
-        ioParametersPanel.add(content);
+        targetProductSelector = new TargetFolderSelector();
+        String homeDirPath = SystemUtils.getUserHomeDir().getPath();
+        String saveDir = appContext.getPreferences().getPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, homeDirPath);
+        targetProductSelector.getModel().setProductDir(new File(saveDir));
+        targetProductSelector.getOpenInAppCheckBox().setText("Open in " + appContext.getApplicationName());
+
+        ioParametersPanel.add(targetProductSelector.createPanel());
+
         tabbedPane.add("I/O Parameters", ioParametersPanel);
     }
 
     public void setTargetProductName(final String name) {
-        //final TargetProductSelectorModel targetProductSelectorModel = targetProductSelector.getModel();
-        //targetProductSelectorModel.setProductName(name + getTargetProductNameSuffix());
+        final TargetProductSelectorModel targetProductSelectorModel = targetProductSelector.getModel();
+        targetProductSelectorModel.setProductName(name + getTargetProductNameSuffix());
     }
 
     public void initProducts() {
@@ -64,7 +77,9 @@ public class ProductSetPanel {
     }
 
     public File getTargetFolder() {
-        return new File("C:\\data\\output");
+        final TargetProductSelectorModel targetProductSelectorModel = targetProductSelector.getModel();
+
+        return targetProductSelectorModel.getProductDir();
     }
 
     public File[] getFileList() {

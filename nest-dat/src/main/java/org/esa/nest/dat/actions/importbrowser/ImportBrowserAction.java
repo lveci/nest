@@ -55,7 +55,7 @@ public class ImportBrowserAction extends ExecCommand {
         actionPerformed(null);  
     }
 
-    public ImportBrowser getImportBrowser() {
+    public synchronized ImportBrowser getImportBrowser() {
         if (importBrowser == null) {
             final VisatApp visatApp = VisatApp.getApp();
             repositoryManager = new RepositoryManager();

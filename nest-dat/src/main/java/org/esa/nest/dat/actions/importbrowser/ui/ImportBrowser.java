@@ -12,13 +12,11 @@ import org.esa.beam.framework.ui.WorldMapPaneDataModel;
 import org.esa.beam.framework.ui.WorldMapPane;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.visat.actions.AbstractVisatAction;
 import org.esa.nest.dat.actions.importbrowser.model.*;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.ProductPropertiesProvider;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.QuicklookProvider;
 import org.esa.nest.dat.actions.importbrowser.util.Callback;
 import org.esa.nest.dat.toolviews.Projects.Project;
-import org.esa.nest.dat.dialogs.BatchGraphPanel;
 import org.esa.nest.dat.dialogs.BatchGraphDialog;
 import org.esa.nest.dat.DatContext;
 
@@ -96,7 +94,7 @@ public class ImportBrowser {
         openHandler = handler;
     }
 
-    public JFrame getFrame() {
+    public synchronized JFrame getFrame() {
         if (mainFrame == null) {
             mainFrame = new JFrame("Import Browser");
             mainFrame.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
@@ -454,9 +452,15 @@ public class ImportBrowser {
     }
 
     private JPanel createCentrePanel() {
-        final JideSplitPane splitPane1 = new JideSplitPane(JideSplitPane.HORIZONTAL_SPLIT);
-        splitPane1.add(createRepositoryTreeControl());
-        splitPane1.add(new JScrollPane(repositoryTable));
+        final JideSplitPane splitPane1H = new JideSplitPane(JideSplitPane.HORIZONTAL_SPLIT);
+
+        final JideSplitPane splitPane11 = new JideSplitPane(JideSplitPane.VERTICAL_SPLIT);
+        splitPane11.add(createRepositoryTreeControl());
+        worldMapDataModel = new WorldMapPaneDataModel();
+        splitPane11.add(new WorldMapPane(worldMapDataModel));
+
+        splitPane1H.add(splitPane11);
+        splitPane1H.add(new JScrollPane(repositoryTable));
 
     /*    final JPanel panel2 = new JPanel(new BorderLayout(4, 4));
         final BatchGraphPanel batchPanel = new BatchGraphPanel(new DatContext(""));
@@ -468,7 +472,7 @@ public class ImportBrowser {
         //centerPanel.add(splitPane1, BorderLayout.NORTH);
         //centerPanel.add(panel2, BorderLayout.SOUTH);
 
-        return splitPane1;
+        return splitPane1H;
     }
 
     private void setComponentName(JComponent button, String name) {
