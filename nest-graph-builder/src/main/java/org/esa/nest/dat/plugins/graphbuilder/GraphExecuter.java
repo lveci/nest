@@ -67,6 +67,15 @@ public class GraphExecuter extends Observable {
         return null;
     }
 
+    public GraphNode findGraphNodeByOperator(String operatorName) {
+        for(GraphNode n : nodeList) {
+            if(n.getOperatorName().equals(operatorName)) {
+                return n;
+            }
+        }
+        return null;
+    }
+
     public void setSelectedNode(GraphNode node) {
         if(node == null) return;
         setChanged();

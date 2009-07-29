@@ -10,6 +10,7 @@ import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.util.io.FileChooserFactory;
+import org.esa.beam.util.io.FileUtils;
 import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
 import org.esa.nest.dat.plugins.graphbuilder.GraphNode;
 import org.esa.nest.dat.plugins.graphbuilder.ProgressBarProgressMonitor;
@@ -37,7 +38,7 @@ public class BatchGraphDialog extends ModelessDialog {
     protected final ArrayList<GraphExecuter> graphExecuterList = new ArrayList<GraphExecuter>(3);
 
     private final static String homeUrl = System.getProperty("nest.home", ".");
-    private final static File graphPath = new File(homeUrl, File.separator + "graphs" + File.separator + "internal");
+    private final static File graphPath = new File(homeUrl, File.separator + "graphs");
     private final static String internalFormat = DimapProductConstants.DIMAP_FORMAT_NAME;
 
     private final JPanel mainPanel;
@@ -285,9 +286,12 @@ public class BatchGraphDialog extends ModelessDialog {
         if(graphExecuterList.isEmpty()) {
             return;
         }
+
+        tabbedPane.setSelectedIndex(0);
         while(tabbedPane.getTabCount() > 1) {
             tabbedPane.remove(tabbedPane.getTabCount()-1);
         }
+        
         final GraphExecuter graphEx = graphExecuterList.get(0);
         for(GraphNode n : graphEx.GetGraphNodes()) {
             if(n.GetOperatorUI() == null)
@@ -312,10 +316,12 @@ public class BatchGraphDialog extends ModelessDialog {
         final File[] fileList = productSetPanel.getFileList();
         int graphIndex = 0;
         for(File f : fileList) {
-            final File targetFile = new File(productSetPanel.getTargetFolder(), f.getName()+graphIndex);
+            final String ext = FileUtils.getExtension(f);
+            final String name = FileUtils.getFilenameWithoutExtension(f);
+            final File targetFile = new File(productSetPanel.getTargetFolder(), name+'_'+graphIndex+ext);
             setIO(graphExecuterList.get(graphIndex),
-                "1-Read", f,
-                "3-Write", targetFile, internalFormat);
+                "Read", f,
+                "Write", targetFile, internalFormat);
             ++graphIndex;
         }
     }
@@ -330,7 +336,7 @@ public class BatchGraphDialog extends ModelessDialog {
         }
 
         if (writeID != null) {
-            final GraphNode writeNode = graphEx.findGraphNode(writeID);
+            final GraphNode writeNode = graphEx.findGraphNodeByOperator(writeID);
             if (writeNode != null) {
                 graphEx.setOperatorParam(writeNode.getID(), "formatName", format);
                 graphEx.setOperatorParam(writeNode.getID(), "file", writePath.getAbsolutePath());
@@ -389,7 +395,8 @@ public class BatchGraphDialog extends ModelessDialog {
                 final File[] fileList = productSetPanel.getFileList();
                 int graphIndex = 0;
                 for(GraphExecuter graphEx : graphExecuterList) {
-                    statusLabel.setText("Processing "+ fileList[graphIndex].getName());
+                    final String nOfm = String.valueOf(graphIndex+1)+" of "+fileList.length + ' ';
+                    statusLabel.setText("Processing "+ nOfm +fileList[graphIndex].getName());
 
                     graphEx.InitGraph();
 
