@@ -152,6 +152,10 @@ public final class SARSimulationOp extends Operator {
         try {
             absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
+            if(OperatorUtils.isMapProjected(sourceProduct)) {
+                throw new OperatorException("SAR simulation cannot be performed for map projected source product");
+            }
+
             getSRGRFlag();
 
             getRadarFrequency();
