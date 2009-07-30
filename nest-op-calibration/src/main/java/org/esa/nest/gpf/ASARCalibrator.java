@@ -483,7 +483,7 @@ public class ASARCalibrator implements Calibrator {
                 } else if (productType.contains("ASA_WSM_1")) {
                     calibrationFactorName = "ext_cal_ws_" + mdsPolar[i];
                 } else if (productType.contains("ASA_GM1_1")) {
-                    calibrationFactorName = "ext_cal_ws_" + mdsPolar[i];
+                    calibrationFactorName = "ext_cal_gm_" + mdsPolar[i];
                 } else if (productType.contains("ASA_IMG_1")) {
                     calibrationFactorName = "ext_cal_im_geo_" + mdsPolar[i];
                 } else if (productType.contains("ASA_APG_1")) {
