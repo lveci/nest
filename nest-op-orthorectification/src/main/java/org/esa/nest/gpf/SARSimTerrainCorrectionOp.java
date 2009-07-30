@@ -532,7 +532,12 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 throw new OperatorException("Only amplitude or intensity band should be used for orthorectification");
             }
 
-            targetBandName = srcBand.getName();
+            if (applyRadiometricCalibration) {
+                targetBandName = "Sigma0";
+            } else {
+                targetBandName = srcBand.getName();
+            }
+
             final String[] srcBandNames = {srcBand.getName()};
             targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
 
