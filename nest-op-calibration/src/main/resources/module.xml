@@ -87,7 +87,7 @@
             <parent>Calibration</parent>
             <largeIcon>icons/Import24.gif</largeIcon>
             <separatorBefore>true</separatorBefore>
-            <placeAfter>CalibrationOp</placeAfter>
+            <placeAfter>Sigma0toBeta0</placeAfter>
         </action>
 
         <!--action>

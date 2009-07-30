@@ -94,7 +94,7 @@ public class BatchGraphDialog extends ModelessDialog {
         getButton(ID_APPLY).setText("Run");
         getButton(ID_YES).setText("Load");
 
-        graphFile = new File(graphPath, "importGraph.xml");
+        graphFile = new File(graphPath+File.separator+"internal", "importGraph.xml");
         super.getJDialog().setMinimumSize(new Dimension(400, 300));
     }
 
@@ -330,7 +330,7 @@ public class BatchGraphDialog extends ModelessDialog {
                               final String readID, final File readPath,
                               final String writeID, final File writePath,
                               final String format) {
-        final GraphNode readNode = graphEx.findGraphNode(readID);
+        final GraphNode readNode = graphEx.findGraphNodeByOperator(readID);
         if (readNode != null) {
             graphEx.setOperatorParam(readNode.getID(), "file", readPath.getAbsolutePath());
         }
@@ -395,12 +395,20 @@ public class BatchGraphDialog extends ModelessDialog {
                 final File[] fileList = productSetPanel.getFileList();
                 int graphIndex = 0;
                 for(GraphExecuter graphEx : graphExecuterList) {
-                    final String nOfm = String.valueOf(graphIndex+1)+" of "+fileList.length + ' ';
-                    statusLabel.setText("Processing "+ nOfm +fileList[graphIndex].getName());
+                    try {
+                        final String nOfm = String.valueOf(graphIndex+1)+" of "+fileList.length + ' ';
+                        statusLabel.setText("Processing "+ nOfm +fileList[graphIndex].getName());
 
-                    graphEx.InitGraph();
+                        JAI.getDefaultInstance().getTileCache().flush();
+                        System.gc();
 
-                    graphEx.executeGraph(new SubProgressMonitor(pm, 100));
+                        graphEx.InitGraph();
+
+                        graphEx.executeGraph(new SubProgressMonitor(pm, 100));
+
+                    } catch(Exception e) {
+                        System.out.print(e.getMessage());
+                    }
                     graphEx.disposeGraphContext();
                     ++graphIndex;
                 }

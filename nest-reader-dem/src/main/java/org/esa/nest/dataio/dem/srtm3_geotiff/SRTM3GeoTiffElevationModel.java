@@ -11,6 +11,8 @@ import org.esa.beam.framework.dataop.resamp.Resampling;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
 
 public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampling.Raster {
 
@@ -31,6 +33,7 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
     private final Resampling.Raster _resamplingRaster;
     private final float noDataValue;
 
+    private final List<SRTM3GeoTiffElevationTile> elevationTileCache;
     private final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn();
 
     public SRTM3GeoTiffElevationModel(SRTM3GeoTiffElevationModelDescriptor descriptor, Resampling resamplingMethod) throws IOException {
@@ -40,6 +43,7 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
         _resamplingRaster = this;
         elevationFiles = createElevationFiles();
         noDataValue = _descriptor.getNoDataValue();
+        this.elevationTileCache = new ArrayList<SRTM3GeoTiffElevationTile>();
     }
 
     /**
@@ -73,6 +77,7 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
     }
 
     public void dispose() {
+        elevationTileCache.clear();
         for (SRTM3GeoTiffFile[] elevationFile : elevationFiles) {
             for (SRTM3GeoTiffFile anElevationFile : elevationFile) {
                 anElevationFile.dispose();
@@ -117,6 +122,17 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
             }
         }             
         return elevationFiles;
+    }
+
+    public void updateCache(SRTM3GeoTiffElevationTile tile) {
+        elevationTileCache.remove(tile);
+        elevationTileCache.add(0, tile);
+        while (elevationTileCache.size() > 5) {
+            final int index = elevationTileCache.size() - 1;
+            final SRTM3GeoTiffElevationTile lastTile = elevationTileCache.get(index);
+            lastTile.clearCache();
+            elevationTileCache.remove(index);
+        }
     }
 
     private static ProductReaderPlugIn getReaderPlugIn() {

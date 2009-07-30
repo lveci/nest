@@ -197,13 +197,14 @@ public class ASARCalibrator implements Calibrator {
     private void getProductType() throws OperatorException {
 
         productType = sourceProduct.getProductType();
-        if (!productType.equals("ASA_IMP_1P") && !productType.equals("ASA_IMM_1P") &&
-            !productType.equals("ASA_APP_1P") && !productType.equals("ASA_APM_1P") &&
-            !productType.equals("ASA_WSM_1P") && !productType.equals("ASA_IMG_1P") &&
-            !productType.equals("ASA_APG_1P") && !productType.equals("ASA_IMS_1P") &&
-            !productType.equals("ASA_APS_1P")) {
+        // product type could be 1P or 1C
+        if (!productType.contains("ASA_IMP_1") && !productType.contains("ASA_IMM_1") &&
+            !productType.contains("ASA_APP_1") && !productType.contains("ASA_APM_1") &&
+            !productType.contains("ASA_WSM_1") && !productType.contains("ASA_IMG_1") &&
+            !productType.contains("ASA_APG_1") && !productType.contains("ASA_IMS_1") &&
+            !productType.contains("ASA_APS_1") && !productType.contains("ASA_GM")) {
 
-            throw new OperatorException(productType + " is not a valid product ID.");
+            throw new OperatorException(productType + " is not a valid ASAR product type for calibration.");
         }
     }
 
@@ -471,32 +472,34 @@ public class ASARCalibrator implements Calibrator {
 
                 calibrationFactor[i] = 0;
 
-                if (productType.contains("ASA_IMP_1P")) {
+                if (productType.contains("ASA_IMP_1")) {
                     calibrationFactorName = "ext_cal_im_pri_" + mdsPolar[i];
-                } else if (productType.contains("ASA_IMM_1P")) {
+                } else if (productType.contains("ASA_IMM_1")) {
                     calibrationFactorName = "ext_cal_im_med_" + mdsPolar[i];
-                } else if (productType.contains("ASA_APP_1P")) {
+                } else if (productType.contains("ASA_APP_1")) {
                     calibrationFactorName = "ext_cal_ap_pri_" + mdsPolar[i];
-                } else if (productType.contains("ASA_APM_1P")) {
+                } else if (productType.contains("ASA_APM_1")) {
                     calibrationFactorName = "ext_cal_ap_med_" + mdsPolar[i];
-                } else if (productType.contains("ASA_WSM_1P")) {
+                } else if (productType.contains("ASA_WSM_1")) {
                     calibrationFactorName = "ext_cal_ws_" + mdsPolar[i];
-                } else if (productType.contains("ASA_IMG_1P")) {
+                } else if (productType.contains("ASA_GM1_1")) {
+                    calibrationFactorName = "ext_cal_ws_" + mdsPolar[i];
+                } else if (productType.contains("ASA_IMG_1")) {
                     calibrationFactorName = "ext_cal_im_geo_" + mdsPolar[i];
-                } else if (productType.contains("ASA_APG_1P")) {
+                } else if (productType.contains("ASA_APG_1")) {
                     calibrationFactorName = "ext_cal_ap_geo_" + mdsPolar[i];
-                } else if (productType.contains("ASA_IMS_1P")) {
+                } else if (productType.contains("ASA_IMS_1")) {
                     calibrationFactorName = "ext_cal_im_" + mdsPolar[i];
-                } else if (productType.contains("ASA_APS_1P")) {
+                } else if (productType.contains("ASA_APS_1")) {
                     calibrationFactorName = "ext_cal_ap_" + mdsPolar[i];
                 } else {
-                    throw new OperatorException("Invalid product ID.");
+                    throw new OperatorException("Invalid ASAR product type.");
                 }
 
                 final ProductData factorData = reader.getAuxData(calibrationFactorName);
                 final float[] factors = (float[]) factorData.getElems();
 
-                if (productType.contains("ASA_WSM_1P")) {
+                if (productType.contains("ASA_WSM_1") || productType.contains("ASA_GM1")) {
                     calibrationFactor[i] = factors[0];
                 } else {
                     if (factors.length != numOfSwaths) {
@@ -748,7 +751,7 @@ public class ASARCalibrator implements Calibrator {
      */
     private void setRangeSpreadingLossCompPower() {
         rangeSpreadingCompPower = 3.0;
-        if (productType.contains("ASA_APS_1P")) {
+        if (productType.contains("ASA_APS_1")) {
             rangeSpreadingCompPower = 4.0;
         }
         halfRangeSpreadingCompPower = rangeSpreadingCompPower / 2.0;
@@ -1170,7 +1173,7 @@ public class ASARCalibrator implements Calibrator {
             minAbsLat = 0.0;
         }
         delLat = minSpacing / MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
-        double delLon = minSpacing / (MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
+        final double delLon = minSpacing / (MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
         delLat = Math.min(delLat, delLon);
 
         final int h = (int)((latMax - latMin)/delLat) + 1;

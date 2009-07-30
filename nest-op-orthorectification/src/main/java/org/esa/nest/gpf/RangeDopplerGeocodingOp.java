@@ -257,6 +257,11 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
     }
 
+    @Override
+    public void dispose() {
+        dem.dispose();
+    }
+
     /**
      * Get the mission type.
      * @throws Exception The exceptions.
@@ -948,6 +953,17 @@ public class RangeDopplerGeocodingOp extends Operator {
 
                     } else {
 
+                        double satelliteHeight = 0;
+                        double sceneToEarthCentre = 0;
+                        if (applyRadiometricCalibration) {
+
+                                satelliteHeight = Math.sqrt(
+                                        sensorPos[0]*sensorPos[0] + sensorPos[1]*sensorPos[1] + sensorPos[2]*sensorPos[2]);
+
+                                sceneToEarthCentre = Math.sqrt(
+                                        earthPoint[0]*earthPoint[0] + earthPoint[1]*earthPoint[1] + earthPoint[2]*earthPoint[2]);
+                        }
+
                         for(TileData tileData : trgTiles) {
 
                             Unit.UnitType bandUnit = getBandUnit(tileData.bandName);
@@ -956,13 +972,6 @@ public class RangeDopplerGeocodingOp extends Operator {
                                     azimuthIndex, rangeIndex, tileData.bandName, tileData.bandPolar, bandUnit, subSwathIndex);
 
                             if (applyRadiometricCalibration) {
-
-                                final double satelliteHeight = Math.sqrt(
-                                        sensorPos[0]*sensorPos[0] + sensorPos[1]*sensorPos[1] + sensorPos[2]*sensorPos[2]);
-
-                                final double sceneToEarthCentre = Math.sqrt(
-                                        earthPoint[0]*earthPoint[0] + earthPoint[1]*earthPoint[1] + earthPoint[2]*earthPoint[2]);
-
                                 v = calibrator.applyCalibration(
                                         v, slantRange, satelliteHeight, sceneToEarthCentre, localIncidenceAngles[1],
                                         tileData.bandPolar, bandUnit, subSwathIndex); // use projected incidence angle
@@ -1287,46 +1296,45 @@ public class RangeDopplerGeocodingOp extends Operator {
             throws IOException {
 
         final String[] srcBandNames = targetBandNameToSourceBandName.get(bandName);
-        final String iBandName = srcBandNames[0];
-        String qBandName = null;
-        if (srcBandNames.length > 1) {
-            qBandName = srcBandNames[1];
-        }
+        final Band iSrcBand = sourceProduct.getBand(srcBandNames[0]);
+        Tile sourceTile2 = null;
 
         if (imgResampling.equals(ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR)) {
 
-            final Tile sourceTile = getSrcTile(iBandName, (int)rangeIndex, (int)azimuthIndex, 1, 1);
-            final Tile sourceTile2 = getSrcTile(qBandName, (int)rangeIndex, (int)azimuthIndex, 1, 1);
+            final Rectangle srcRect = new Rectangle((int)rangeIndex, (int)azimuthIndex, 1, 1);
+            final Tile sourceTile = getSourceTile(iSrcBand, srcRect, ProgressMonitor.NULL);
+            if (srcBandNames.length > 1) {
+                sourceTile2 = getSourceTile(sourceProduct.getBand(srcBandNames[1]),
+                                         srcRect, ProgressMonitor.NULL);
+            }
             return getPixelValueUsingNearestNeighbourInterp(
                     azimuthIndex, rangeIndex, bandPolar, bandUnit, sourceTile, sourceTile2, subSwathIndex);
 
         } else if (imgResampling.equals(ResampleMethod.RESAMPLE_BILINEAR)) {
 
-            final Tile sourceTile = getSrcTile(iBandName, (int)rangeIndex, (int)azimuthIndex, 2, 2);
-            final Tile sourceTile2 = getSrcTile(qBandName, (int)rangeIndex, (int)azimuthIndex, 2, 2);
+            final Rectangle srcRect = new Rectangle((int)rangeIndex, (int)azimuthIndex, 2, 2);
+            final Tile sourceTile = getSourceTile(iSrcBand, srcRect, ProgressMonitor.NULL);
+            if (srcBandNames.length > 1) {
+                sourceTile2 = getSourceTile(sourceProduct.getBand(srcBandNames[1]),
+                                         srcRect, ProgressMonitor.NULL);
+            }
             return getPixelValueUsingBilinearInterp(azimuthIndex, rangeIndex,
                     bandPolar, bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2, subSwathIndex);
 
         } else if (imgResampling.equals(ResampleMethod.RESAMPLE_CUBIC)) {
 
-            final Tile sourceTile = getSrcTile(iBandName, Math.max(0, (int)rangeIndex - 1),
-                                                Math.max(0, (int)azimuthIndex - 1), 4, 4);
-            final Tile sourceTile2 = getSrcTile(qBandName, Math.max(0, (int)rangeIndex - 1),
-                                                Math.max(0, (int)azimuthIndex - 1), 4, 4);
+            final Rectangle srcRect = new Rectangle(Math.max(0, (int)rangeIndex - 1),
+                                         Math.max(0, (int)azimuthIndex - 1), 4, 4);
+            final Tile sourceTile = getSourceTile(iSrcBand, srcRect, ProgressMonitor.NULL);
+            if (srcBandNames.length > 1) {
+                sourceTile2 = getSourceTile(sourceProduct.getBand(srcBandNames[1]),
+                                         srcRect, ProgressMonitor.NULL);
+            }
             return getPixelValueUsingBicubicInterp(azimuthIndex, rangeIndex,
                     bandPolar, bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2, subSwathIndex);
         } else {
             throw new OperatorException("Unknown interpolation method");
         }
-    }
-
-    private Tile getSrcTile(String bandName, int minX, int minY, int width, int height) {
-        if(bandName == null)
-            return null;
-
-        final Band sourceBand = sourceProduct.getBand(bandName);
-        final Rectangle srcRect = new Rectangle(minX, minY, width, height);
-        return getSourceTile(sourceBand, srcRect, ProgressMonitor.NULL);
     }
 
     /**
