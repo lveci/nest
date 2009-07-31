@@ -274,7 +274,8 @@ public final class SARSimulationOp extends Operator {
 
             fileElevationModel = new FileElevationModel(externalDemFile, getResamplingMethod());
             demNoDataValue = fileElevationModel.getNoDataValue();
-            demName = externalDemFile.getName();
+            demName = externalDemFile.getPath();
+//            demName = externalDemFile.getName();
 
         } else {
 
