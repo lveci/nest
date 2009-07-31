@@ -43,6 +43,7 @@ import org.esa.nest.dataio.ReaderUtils;
 
 import java.awt.*;
 import java.util.*;
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -110,8 +111,10 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
     private WarpOp.WarpData warpData = null;
+    private FileElevationModel fileElevationModel = null;
 
     private boolean srgrFlag = false;
+    private boolean useExternalDEMFile = false;
 
     private String mission = null;
     private String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
@@ -443,20 +446,28 @@ public class SARSimTerrainCorrectionOp extends Operator {
         demName = absRoot.getAttributeString(AbstractMetadata.DEM);
         final ElevationModelRegistry elevationModelRegistry = ElevationModelRegistry.getInstance();
         final ElevationModelDescriptor demDescriptor = elevationModelRegistry.getDescriptor(demName);
-        if (demDescriptor == null) {
-            throw new OperatorException("The DEM '" + demName + "' is not supported.");
-        }
 
-        if (demDescriptor.isInstallingDem()) {
-            throw new OperatorException("The DEM '" + demName + "' is currently being installed.");
-        }
+        if (demDescriptor != null) {
 
-        dem = demDescriptor.createDem(getResamplingMethod());
-        if(dem == null) {
-            throw new OperatorException("The DEM '" + demName + "' has not been installed.");
-        }
+            if (demDescriptor.isInstallingDem()) {
+                throw new OperatorException("The DEM '" + demName + "' is currently being installed.");
+            }
 
-        demNoDataValue = dem.getDescriptor().getNoDataValue();
+            dem = demDescriptor.createDem(getResamplingMethod());
+            if(dem == null) {
+                throw new OperatorException("The DEM '" + demName + "' has not been installed.");
+            }
+
+            demNoDataValue = dem.getDescriptor().getNoDataValue();
+
+        } else { // then demName is user selected DEM file name
+            
+            File externalDemFile = new File(demName);
+            fileElevationModel = new FileElevationModel(externalDemFile, getResamplingMethod());
+            demNoDataValue = fileElevationModel.getNoDataValue();
+            demName = externalDemFile.getName();
+            useExternalDEMFile = true;
+        }
     }
 
     private Resampling getResamplingMethod() {
@@ -919,14 +930,15 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * @return The elevation in meter.
      */
     private double getLocalElevation(final GeoPos geoPos) {
-        double alt;
         try {
-            alt = dem.getElevation(geoPos);
+            if (!useExternalDEMFile) {
+                return dem.getElevation(geoPos);
+            }
+            return fileElevationModel.getElevation(geoPos);
         } catch (Exception e) {
-            alt = demNoDataValue;
+            //
         }
-
-        return alt;
+        return demNoDataValue;
     }
 
     /**
