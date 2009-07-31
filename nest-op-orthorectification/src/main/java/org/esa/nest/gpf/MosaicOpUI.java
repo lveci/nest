@@ -31,9 +31,11 @@ public class MosaicOpUI extends BaseOperatorUI {
     private final JTextField sceneWidth = new JTextField("");
     private final JTextField sceneHeight = new JTextField("");
     private final JCheckBox averageCheckBox = new JCheckBox("Average Overlap");
+    private final JCheckBox normalizeByMaxCheckBox = new JCheckBox("Normalize By Max");
     private boolean changedByUser = false;
 
     private boolean average = false;
+    private boolean normalizeByMax = false;
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -45,6 +47,12 @@ public class MosaicOpUI extends BaseOperatorUI {
         averageCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
                     average = (e.getStateChange() == ItemEvent.SELECTED);
+                }
+        });
+
+        normalizeByMaxCheckBox.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    normalizeByMax = (e.getStateChange() == ItemEvent.SELECTED);
                 }
         });
 
@@ -102,6 +110,9 @@ public class MosaicOpUI extends BaseOperatorUI {
         average = (Boolean)paramMap.get("average");
         averageCheckBox.getModel().setPressed(average);
 
+        normalizeByMax = (Boolean)paramMap.get("normalizeByMax");
+        normalizeByMaxCheckBox.getModel().setPressed(normalizeByMax);
+
     }
 
     @Override
@@ -119,6 +130,7 @@ public class MosaicOpUI extends BaseOperatorUI {
         paramMap.put("sceneHeight", Integer.parseInt(sceneHeight.getText()));
 
         paramMap.put("average", average);
+        paramMap.put("normalizeByMax", normalizeByMax);
     }
 
     private JComponent createPanel() {
@@ -152,8 +164,9 @@ public class MosaicOpUI extends BaseOperatorUI {
         DialogUtils.addComponent(contentPane, gbc, "Scene Height (pixels)", sceneHeight);
 
         gbc.gridy++;
-        gbc.gridx = 0;
         contentPane.add(averageCheckBox, gbc);
+        gbc.gridy++;
+        contentPane.add(normalizeByMaxCheckBox, gbc);
 
         DialogUtils.fillPanel(contentPane, gbc);
 

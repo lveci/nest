@@ -1,8 +1,8 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>C:\build\nest\target\nest-2C-bin.dir\bin\ceres-launcher.jar</jar>
-  <outfile>C:\build\nest\target\nest-2C-bin.dir\nest-dat.exe</outfile>
+  <jar>C:\build\nest\target\nest-3A-bin.dir\bin\ceres-launcher.jar</jar>
+  <outfile>C:\build\nest\target\nest-3A-bin.dir\nest-dat.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir></chdir>
@@ -18,8 +18,8 @@
     <minVersion>1.5.0</minVersion>
     <maxVersion></maxVersion>
     <jdkPreference>jdkOnly</jdkPreference>
-    <initialHeapSize>128</initialHeapSize>
-    <maxHeapSize>1024</maxHeapSize>
+    <initialHeapPercent>5</initialHeapPercent>
+    <maxHeapPercent>90</maxHeapPercent>
     <opt>-server -Dceres.context=nest</opt>
     <opt>-Xverify:none -XX:+UseParallelGC -XX:CompileThreshold=100</opt>
     <opt>-XX:+AggressiveOpts -XX:+UseFastAccessorMethods -Xconcurrentio</opt>

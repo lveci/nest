@@ -94,9 +94,9 @@ public class RuntimeActivator implements Activator {
     }
 
     private void registerProviderImpl(ServiceRegistration serviceRegistration, Class<?> providerImplClass) {
-        Class<?> providerClass = serviceRegistration.serviceRegistry.getServiceType();
+        final Class<?> providerClass = serviceRegistration.serviceRegistry.getServiceType();
         if (providerClass.isAssignableFrom(providerImplClass)) {
-            Object providerImpl = getProviderImpl(providerImplClass);
+            final Object providerImpl = getProviderImpl(providerImplClass);
             if (providerImpl != null) {
                 serviceRegistration.serviceRegistry.addService(providerImpl);
                 serviceRegistration.providerImpl = providerImpl;
@@ -111,15 +111,14 @@ public class RuntimeActivator implements Activator {
     }
 
     private Object getProviderImpl(Class<?> providerImplClass) {
-        Object providerImpl = null;
         try {
-            providerImpl = providerImplClass.newInstance();
+            return providerImplClass.newInstance();
         } catch (Throwable t) {
             moduleContext.getLogger().log(Level.SEVERE,
                                           String.format("Failed to instantiate service of type [%s]",
                                                         providerImplClass.toString()), t);
         }
-        return providerImpl;
+        return null;
     }
 
     private Class<?> getProviderImplClass(ServiceRegistration serviceRegistration, String providerImplClassName) {
