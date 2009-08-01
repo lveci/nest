@@ -405,15 +405,16 @@ public class AbstractMetadata {
         final int numElems = elemRoot.getNumElements();
         final OrbitStateVector[] orbitStateVectors = new OrbitStateVector[numElems];
         for (int i = 0; i < numElems; i++) {
-            final OrbitStateVector vector = new OrbitStateVector();
+
             final MetadataElement subElemRoot = elemRoot.getElement(orbit_vector + (i+1));
-            vector.time  = subElemRoot.getAttributeUTC(orbit_vector_time);
-            vector.x_pos = subElemRoot.getAttributeDouble(orbit_vector_x_pos);
-            vector.y_pos = subElemRoot.getAttributeDouble(orbit_vector_y_pos);
-            vector.z_pos = subElemRoot.getAttributeDouble(orbit_vector_z_pos);
-            vector.x_vel = subElemRoot.getAttributeDouble(orbit_vector_x_vel);
-            vector.y_vel = subElemRoot.getAttributeDouble(orbit_vector_y_vel);
-            vector.z_vel = subElemRoot.getAttributeDouble(orbit_vector_z_vel);
+            final OrbitStateVector vector = new OrbitStateVector(
+                        subElemRoot.getAttributeUTC(orbit_vector_time),
+                        subElemRoot.getAttributeDouble(orbit_vector_x_pos),
+                        subElemRoot.getAttributeDouble(orbit_vector_y_pos),
+                        subElemRoot.getAttributeDouble(orbit_vector_z_pos),
+                        subElemRoot.getAttributeDouble(orbit_vector_x_vel),
+                        subElemRoot.getAttributeDouble(orbit_vector_y_vel),
+                        subElemRoot.getAttributeDouble(orbit_vector_z_vel));
             orbitStateVectors[i] = vector;
         }
         return orbitStateVectors;
@@ -476,13 +477,22 @@ public class AbstractMetadata {
 
     public static class OrbitStateVector {
 
-        public ProductData.UTC time = null;
-        public double x_pos = 0.0;
-        public double y_pos = 0.0;
-        public double z_pos = 0.0;
-        public double x_vel = 0.0;
-        public double y_vel = 0.0;
-        public double z_vel = 0.0;
+        public final ProductData.UTC time;
+        public final double time_mjd;
+        public double x_pos, y_pos, z_pos;
+        public double x_vel, y_vel, z_vel;
+        public OrbitStateVector(final ProductData.UTC t,
+                                final double xpos, final double ypos, final double zpos,
+                                final double xvel, final double yvel, final double zvel) {
+            this.time = t;
+            time_mjd = t.getMJD();
+            this.x_pos = xpos;
+            this.y_pos = ypos;
+            this.z_pos = zpos;
+            this.x_vel = xvel;
+            this.y_vel = yvel;
+            this.z_vel = zvel;
+        }
     }
 
     public static class SRGRCoefficientList {

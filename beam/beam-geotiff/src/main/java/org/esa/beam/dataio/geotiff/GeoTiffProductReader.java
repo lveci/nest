@@ -1,5 +1,5 @@
 /*
- * $Id: GeoTiffProductReader.java,v 1.4 2009-07-02 15:03:13 lveci Exp $
+ * $Id: GeoTiffProductReader.java,v 1.5 2009-07-31 20:28:48 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -136,19 +136,37 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
             final Raster data = subsampledImage.getData(new Rectangle(destOffsetX, destOffsetY,
                                                                       destWidth, destHeight));
-            final double[] dArray = new double[destSize];
             Integer bandIdx = bandMap.get(destBand);
             if (bandIdx == null) {
                 bandIdx = 0;
             }
             final DataBuffer dataBuffer = data.getDataBuffer();
             final SampleModel sampleModel = data.getSampleModel();
-            sampleModel.getSamples(0, 0, destWidth, destHeight, bandIdx, dArray, dataBuffer);
-            pm.worked(1);
+            if(sampleModel.getDataType() == DataBuffer.TYPE_INT && destBuffer.getElems() instanceof int[]) {
+                final int[] iArray = new int[destSize];
+                sampleModel.getSamples(0, 0, destWidth, destHeight, bandIdx, iArray, dataBuffer);
+                pm.worked(1);
 
-            final int length = dArray.length;
-            for (int i = 0; i < length; ++i) {
-                destBuffer.setElemDoubleAt(i, dArray[i]);
+                System.arraycopy(destBuffer.getElems(), 0, iArray, 0, iArray.length);
+            } else if(sampleModel.getDataType() == DataBuffer.TYPE_FLOAT && destBuffer.getElems() instanceof float[]) {
+                final float[] iArray = new float[destSize];
+                sampleModel.getSamples(0, 0, destWidth, destHeight, bandIdx, iArray, dataBuffer);
+                pm.worked(1);
+
+                System.arraycopy(destBuffer.getElems(), 0, iArray, 0, iArray.length);
+            } else {
+                final double[] dArray = new double[destSize];
+                sampleModel.getSamples(0, 0, destWidth, destHeight, bandIdx, dArray, dataBuffer);
+                pm.worked(1);
+
+                final int length = dArray.length;
+                if(destBuffer.getElems() instanceof double[]) {
+                        System.arraycopy(destBuffer.getElems(), 0, dArray, 0, length);
+                } else {
+                    for (int i = 0; i < length; ++i) {
+                        destBuffer.setElemDoubleAt(i, dArray[i]);
+                    }
+                }
             }
             pm.worked(1);
 

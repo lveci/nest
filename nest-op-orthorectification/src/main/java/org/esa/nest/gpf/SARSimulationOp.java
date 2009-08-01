@@ -117,7 +117,7 @@ public final class SARSimulationOp extends Operator {
     private double lineTimeInterval = 0.0; // in days
     private double nearEdgeSlantRange = 0.0; // in m
     private double wavelength = 0.0; // in m
-    private double demNoDataValue = 0.0; // no data value for DEM
+    private float demNoDataValue = 0; // no data value for DEM
     private double[][] sensorPosition = null; // sensor position for all range lines
     private double[][] sensorVelocity = null; // sensor velocity for all range lines
     private double[] timeArray = null;
@@ -443,7 +443,7 @@ public final class SARSimulationOp extends Operator {
             ny0Updated = false;
         }
 
-        double[][] localDEM = new double[nh+2][w+2];
+        float[][] localDEM = new float[nh+2][w+2];
         getLocalDEM(x0, ymin, w, nh, localDEM);
 
         final double[] earthPoint = new double[3];
@@ -514,7 +514,7 @@ public final class SARSimulationOp extends Operator {
      * @param localDEM The DEM for the tile.
      */
     private void getLocalDEM(
-            final int x0, final int y0, final int tileWidth, final int tileHeight, final double[][] localDEM) {
+            final int x0, final int y0, final int tileWidth, final int tileHeight, final float[][] localDEM) {
 
         // Note: the localDEM covers current tile with 1 extra row above, 1 extra row below, 1 extra column to
         //       the left and 1 extra column to the right of the tile.
@@ -535,8 +535,8 @@ public final class SARSimulationOp extends Operator {
      * @param geoPos The latitude and longitude in degrees.
      * @return The elevation in meter.
      */
-    private double getLocalElevation(final GeoPos geoPos) {
-        double alt;
+    private float getLocalElevation(final GeoPos geoPos) {
+        float alt;
         try {
             if(externalDemFile == null) {
                 alt = dem.getElevation(geoPos);

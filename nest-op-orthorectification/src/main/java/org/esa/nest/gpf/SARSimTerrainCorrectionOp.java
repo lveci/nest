@@ -133,7 +133,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private double lastLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
     private double nearEdgeSlantRange = 0.0; // in m
-    private double demNoDataValue = 0.0; // no data value for DEM
+    private float demNoDataValue = 0; // no data value for DEM
     private double latMin = 0.0;
     private double latMax = 0.0;
     private double lonMin = 0.0;
@@ -772,9 +772,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
         final TileData[] trgTiles = trgTileList.toArray(new TileData[trgTileList.size()]);
 
-        double[][] localDEM = null; // DEM for current tile for computing slope angle
+        float[][] localDEM = null; // DEM for current tile for computing slope angle
         if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) {
-            localDEM = new double[h+2][w+2];
+            localDEM = new float[h+2][w+2];
             getLocalDEM(x0, y0, w, h, localDEM);
         }
 
@@ -830,8 +830,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
                     double[] localIncidenceAngles = {0.0, 0.0};
                     if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) {
 
-                        final RangeDopplerGeocodingOp.LocalGeometry localGeometry = new RangeDopplerGeocodingOp.LocalGeometry();
-                        RangeDopplerGeocodingOp.setLocalGeometry(lat, lon, delLat, delLon, earthPoint, sensorPos, localGeometry);
+                        final RangeDopplerGeocodingOp.LocalGeometry localGeometry =
+                                new RangeDopplerGeocodingOp.LocalGeometry(lat, lon, delLat, delLon, earthPoint, sensorPos);
 
                         RangeDopplerGeocodingOp.computeLocalIncidenceAngle(
                                 localGeometry, saveLocalIncidenceAngle, saveProjectedLocalIncidenceAngle,
@@ -907,7 +907,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * @param localDEM The DEM for the tile.
      */
     private void getLocalDEM(
-            final int x0, final int y0, final int tileWidth, final int tileHeight, final double[][] localDEM) {
+            final int x0, final int y0, final int tileWidth, final int tileHeight, final float[][] localDEM) {
 
         // Note: the localDEM covers current tile with 1 extra row above, 1 extra row below, 1 extra column to
         //       the left and 1 extra column to the right of the tile.
@@ -929,7 +929,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * @param geoPos The latitude and longitude in degrees.
      * @return The elevation in meter.
      */
-    private double getLocalElevation(final GeoPos geoPos) {
+    private float getLocalElevation(final GeoPos geoPos) {
         try {
             if (!useExternalDEMFile) {
                 return dem.getElevation(geoPos);

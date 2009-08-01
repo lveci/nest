@@ -1206,7 +1206,7 @@ public class ASARCalibrationOperator extends Operator {
 
         // todo should use the 3rd state vector as suggested by the doc?
         int idx = 0;
-        for (int i = 0; i < orbitStateVectors.length && zeroDopplerTime >= orbitStateVectors[i].time.getMJD(); i++) {
+        for (int i = 0; i < orbitStateVectors.length && zeroDopplerTime >= orbitStateVectors[i].time_mjd; i++) {
             idx = i;
         }
         final double xPos = orbitStateVectors[idx].x_pos;

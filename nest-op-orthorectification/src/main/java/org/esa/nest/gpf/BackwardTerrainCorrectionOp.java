@@ -319,7 +319,7 @@ public final class BackwardTerrainCorrectionOp extends Operator {
         final double[] zVelArray = new double[numVerctors];
 
         for (int i = 0; i < numVerctors; i++) {
-            timeArray[i] = orbitStateVectors[i].time.getMJD();
+            timeArray[i] = orbitStateVectors[i].time_mjd;
             xPosArray[i] = orbitStateVectors[i].x_pos / 100.0; // 10^-2 m to m
             yPosArray[i] = orbitStateVectors[i].y_pos / 100.0; // 10^-2 m to m
             zPosArray[i] = orbitStateVectors[i].z_pos / 100.0; // 10^-2 m to m

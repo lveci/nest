@@ -21,9 +21,9 @@ public final class SRTM3GeoTiffElevationTile {
         _linesCache.setCachedRange(0, product.getSceneRasterHeight());
     }
 
-    public float getSample(int pixelX, int pixelY) throws IOException {
+    public int getSample(int pixelX, int pixelY) throws IOException {
         try {
-            final float[] line = (float[]) _linesCache.getObject(pixelY);
+            final int[] line = (int[]) _linesCache.getObject(pixelY);
             return line[pixelX];
         } catch (Exception e) {
             throw convertLineCacheException(e);
@@ -49,8 +49,7 @@ public final class SRTM3GeoTiffElevationTile {
         final int width = _product.getSceneRasterWidth();
         return new CachingObjectArray.ObjectFactory() {
             public Object createObject(int index) throws Exception {
-                _dem.updateCache(SRTM3GeoTiffElevationTile.this);
-                return band.readPixels(0, index, width, 1, new float[width], ProgressMonitor.NULL);
+                return band.readPixels(0, index, width, 1, new int[width], ProgressMonitor.NULL);
             }
         };
     }

@@ -39,7 +39,6 @@ import org.esa.nest.datamodel.CalibrationFactory;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.MathUtils;
-import org.esa.nest.util.Settings;
 
 import java.awt.*;
 import java.io.File;
@@ -134,7 +133,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private double lastLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
     private double nearEdgeSlantRange = 0.0; // in m
-    private double demNoDataValue = 0.0; // no data value for DEM
+    private float demNoDataValue = 0; // no data value for DEM
     private double latMin = 0.0;
     private double latMax = 0.0;
     private double lonMin = 0.0;
@@ -779,7 +778,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         final double[] zVelArray = new double[numVectorsUsed];
 
         for (int i = 0; i < numVectorsUsed; i++) {
-            timeArray[i] = orbitStateVectors[i*d].time.getMJD();
+            timeArray[i] = orbitStateVectors[i*d].time_mjd;
             xPosArray[i] = orbitStateVectors[i*d].x_pos; // m
             yPosArray[i] = orbitStateVectors[i*d].y_pos; // m
             zPosArray[i] = orbitStateVectors[i*d].z_pos; // m
@@ -818,9 +817,9 @@ public class RangeDopplerGeocodingOp extends Operator {
         final int h  = targetRectangle.height;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        double[][] localDEM = null; // DEM for current tile for computing slope angle
+        float[][] localDEM = null; // DEM for current tile for computing slope angle
         if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) {
-            localDEM = new double[h+2][w+2];
+            localDEM = new float[h+2][w+2];
             final boolean valid = getLocalDEM(x0, y0, w, h, localDEM);
             if(!valid && !useAvgSceneHeight && !saveDEM)
                 return;
@@ -927,8 +926,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                     double[] localIncidenceAngles = {0.0, 0.0};
                     if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) {
 
-                        final LocalGeometry localGeometry = new LocalGeometry();
-                        setLocalGeometry(lat, lon, delLat, delLon, earthPoint, sensorPos, localGeometry);
+                        final LocalGeometry localGeometry = new LocalGeometry(lat, lon, delLat, delLon, earthPoint, sensorPos);
 
                         computeLocalIncidenceAngle(
                                 localGeometry, saveLocalIncidenceAngle, saveProjectedLocalIncidenceAngle,
@@ -1000,11 +998,10 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @return true if all dem values are valid
      */
     private boolean getLocalDEM(
-            final int x0, final int y0, final int tileWidth, final int tileHeight, final double[][] localDEM) {
+            final int x0, final int y0, final int tileWidth, final int tileHeight, final float[][] localDEM) {
 
         // Note: the localDEM covers current tile with 1 extra row above, 1 extra row below, 1 extra column to
-        //       the left and 1 extra column to the right of the tile.
-        final GeoPos geoPos = new GeoPos();
+        //       the left and 1 extra column to the right of the tile.            
         final int maxY = y0 + tileHeight + 1;
         final int maxX = x0 + tileWidth + 1;
         if(demName.equals("SRTM 3Sec GeoTiff")) {
@@ -1015,7 +1012,8 @@ public class RangeDopplerGeocodingOp extends Operator {
             }
         }
 
-        double alt;
+        final GeoPos geoPos = new GeoPos();
+        float alt;
         boolean valid = false;
         for (int y = y0 - 1; y < maxY; y++) {
             final float lat = (float)(latMax - y*delLat);
@@ -1036,7 +1034,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param geoPos The latitude and longitude in degrees.
      * @return The elevation in meter.
      */
-    private double getLocalElevation(final GeoPos geoPos) {
+    private float getLocalElevation(final GeoPos geoPos) {
         try {
             if(externalDemFile == null) {
                 return dem.getElevation(geoPos);
@@ -1562,30 +1560,6 @@ public class RangeDopplerGeocodingOp extends Operator {
     }
 
     /**
-     * Set local geometry information for computing local incidence angle.
-     * @param lat The latitude of current DEM cell.
-     * @param lon The longitude of current DEM cell.
-     * @param delLat The DEM traversal interval for latitude.
-     * @param delLon The DEM traversal interval for longitude.
-     * @param earthPoint The XYZ coordinate for current DEM cell.
-     * @param sensorPos The XYZ coordinate for current sensor position.
-     * @param localGeometry The object holding the local geometry information.
-     */
-    public static void setLocalGeometry(final double lat, final double lon, final double delLat, final double delLon,
-                                        final double[] earthPoint, final double[] sensorPos, LocalGeometry localGeometry) {
-        localGeometry.leftPointLat = lat;
-        localGeometry.leftPointLon = lon - delLon;
-        localGeometry.rightPointLat = lat;
-        localGeometry.rightPointLon = lon + delLon;
-        localGeometry.upPointLat = lat + delLat;
-        localGeometry.upPointLon = lon;
-        localGeometry.downPointLat = lat - delLat;
-        localGeometry.downPointLon = lon;
-        localGeometry.centrePoint = earthPoint;
-        localGeometry.sensorPos = sensorPos;
-    }
-
-    /**
      * Compute projected local incidence angle (in degree).
      * @param lg Object holding local geometry information.
      * @param saveLocalIncidenceAngle Boolean flag indicating saving local incidence angle.
@@ -1601,7 +1575,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     public static void computeLocalIncidenceAngle(
             final LocalGeometry lg, final boolean saveLocalIncidenceAngle,
             final boolean saveProjectedLocalIncidenceAngle, final boolean applyRadiometricCalibration, final int x0,
-            final int y0, final int x, final int y, final double[][] localDEM, double[] localIncidenceAngles) {
+            final int y0, final int x, final int y, final float[][] localDEM, double[] localIncidenceAngles) {
 
         // Note: For algorithm and notation of the following implementation, please see Andrea's email dated
         //       May 29, 2009 and Marcus' email dated June 3, 2009, or see Eq (14.10) and Eq (14.11) on page
@@ -1704,16 +1678,33 @@ public class RangeDopplerGeocodingOp extends Operator {
     }
 
     public static class LocalGeometry {
-        public double leftPointLat = 0;
-        public double leftPointLon = 0;
-        public double rightPointLat = 0;
-        public double rightPointLon = 0;
-        public double upPointLat = 0;
-        public double upPointLon = 0;
-        public double downPointLat = 0;
-        public double downPointLon = 0;
-        public double[] sensorPos = null;
-        public double[] centrePoint = null;
+        public double leftPointLat;
+        public double leftPointLon;
+        public double rightPointLat;
+        public double rightPointLon;
+        public double upPointLat;
+        public double upPointLon;
+        public double downPointLat;
+        public double downPointLon;
+        public double[] sensorPos;
+        public double[] centrePoint;
+
+        public LocalGeometry() {
+        }
+
+        public LocalGeometry(final double lat, final double lon, final double delLat, final double delLon,
+                             final double[] earthPoint, final double[] sensorPos) {
+            this.leftPointLat = lat;
+            this.leftPointLon = lon - delLon;
+            this.rightPointLat = lat;
+            this.rightPointLon = lon + delLon;
+            this.upPointLat = lat + delLat;
+            this.upPointLon = lon;
+            this.downPointLat = lat - delLat;
+            this.downPointLon = lon;
+            this.centrePoint = earthPoint;
+            this.sensorPos = sensorPos;
+        }
     }
 
     /**

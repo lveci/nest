@@ -76,6 +76,7 @@ public class SRTM3GeoTiffFile {
                         tile = new SRTM3GeoTiffElevationTile(demModel, product);
                     }
                 }
+                demModel.updateCache(tile);
             } catch(Exception e) {
                 System.out.println(e.getMessage());
                 tile = null;

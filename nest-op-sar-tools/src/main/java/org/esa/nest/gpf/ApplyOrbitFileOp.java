@@ -489,7 +489,7 @@ public final class ApplyOrbitFileOp extends Operator {
 
         // compute new orbit state vectors
         for (AbstractMetadata.OrbitStateVector orbitStateVector : orbitStateVectors) {
-            final double time = orbitStateVector.time.getMJD();
+            final double time = orbitStateVector.time_mjd;
             final OrbitData orbitData = getOrbitData(time);
             orbitStateVector.x_pos = orbitData.xPos; // m
             orbitStateVector.y_pos = orbitData.yPos; // m
