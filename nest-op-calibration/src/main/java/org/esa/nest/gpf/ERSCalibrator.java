@@ -2435,7 +2435,7 @@ public final class ERSCalibrator implements Calibrator {
     }
 
     public double applyRetroCalibration(int x, int y, double v, int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
-        return 0.0;
+        return v;
     }
     
 }
