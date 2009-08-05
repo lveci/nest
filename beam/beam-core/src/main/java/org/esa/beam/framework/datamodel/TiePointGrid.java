@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGrid.java,v 1.5 2009-07-17 20:44:47 junlu Exp $
+ * $Id: TiePointGrid.java,v 1.6 2009-08-05 14:02:09 junlu Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -44,7 +44,7 @@ import Jama.Matrix;
  * Usually, tie-point grids are a sub-sampling of a data product's scene resolution.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.5 $ $Date: 2009-07-17 20:44:47 $
+ * @version $Revision: 1.6 $ $Date: 2009-08-05 14:02:09 $
  */
 public class TiePointGrid extends RasterDataNode {
 
@@ -964,7 +964,7 @@ public class TiePointGrid extends RasterDataNode {
         final double[][] sampleIndexArray = new double[width][numCoeff];
         for (int c = 0; c < width; c++) {
 //            final int x = Math.min((int)(c*_subSamplingX), getSceneRasterWidth() - 1);
-            final int x = (int)(c*_subSamplingX);
+            final int x = (int)(_offsetX + c*_subSamplingX);
             sampleIndexArray[c][0] = 1.0;
             sampleIndexArray[c][1] = (double)(x);
             sampleIndexArray[c][2] = (double)(x*x);
@@ -1055,7 +1055,7 @@ public class TiePointGrid extends RasterDataNode {
             if (_quadraticInterpCoeffs == null) {
                 computeQuadraticInterpCoeffs();
             }
-            final int r = (int) (y / _subSamplingY);
+            final int r = (int) ((y - _offsetY) / _subSamplingY);
             return (float)(_quadraticInterpCoeffs[r][0] + _quadraticInterpCoeffs[r][1]*x + _quadraticInterpCoeffs[r][2]*x*x);
 
         } else if (interpMethod.equals(BIQUADRATIC)) {
