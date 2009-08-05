@@ -999,6 +999,9 @@ public class ASARCalibrator implements Calibrator {
                         longitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC)); // in m
                 */
                 int i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC))/delLat + 0.5);
+                if (i < 0) {
+                    i = 0;
+                }
 
                 final double theta = computeElevationAngle(
                                                 slantRange, satelitteHeight, avgSceneHeight + earthRadius[i]); // in degree
