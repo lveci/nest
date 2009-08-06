@@ -18,7 +18,7 @@ import java.util.zip.ZipFile;
 /**
  * Holds information about a dem file.
  */
-public class SRTM3GeoTiffFile {
+public final class SRTM3GeoTiffFile {
 
     private final SRTM3GeoTiffElevationModel demModel;
     private final File localFile;

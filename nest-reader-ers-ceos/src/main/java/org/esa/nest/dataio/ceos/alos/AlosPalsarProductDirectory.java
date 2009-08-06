@@ -350,9 +350,9 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
                 Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim()));
 
-        final ProductData.UTC startTime = getStartEndTime(sceneRec, root, "StartDateTime");
-        final ProductData.UTC endTime = getStartEndTime(sceneRec, root, "EndDateTime");
+        final ProductData.UTC startTime = getStartTime(sceneRec, root, "StartDateTime", "Brs_SceneStartDateTime");
         product.setStartTime(startTime);
+        final ProductData.UTC endTime = getEndTime(sceneRec, root, "EndDateTime", "Brs_SceneCenterDateTime", startTime);
         product.setEndTime(endTime);
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
@@ -463,21 +463,69 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         return " ";
     }
 
-    private static ProductData.UTC getStartEndTime(BaseRecord sceneRec, MetadataElement root, String tag) {
+    private static ProductData.UTC getStartTime(BaseRecord sceneRec, MetadataElement root,
+                                                   String tagInSummary, String tagInWorkReport) {
         ProductData.UTC time = getUTCScanStartTime(sceneRec);
         if(time.equalElems(new ProductData.UTC(0))) {
             try {
                 final MetadataElement summaryElem = root.getElement("Summary Information");
                 if(summaryElem != null) {
                     for(MetadataAttribute sum : summaryElem.getAttributes()) {
-                        if(sum.getName().contains(tag)) {
+                        if(sum.getName().contains(tagInSummary)) {
                             return AbstractMetadata.parseUTC(summaryElem.getAttributeString(sum.getName().trim()),
+                                    "yyyyMMdd HH:mm:ss");
+                        }
+                    }
+                }
+                final MetadataElement workReportElem = root.getElement("Work Report");
+                if(workReportElem != null) {
+                    for(MetadataAttribute workRep : workReportElem.getAttributes()) {
+                        if(workRep.getName().contains(tagInWorkReport)) {
+                            return AbstractMetadata.parseUTC(workReportElem.getAttributeString(workRep.getName().trim()),
                                     "yyyyMMdd HH:mm:ss");
                         }
                     }
                 }
                 final String centreTimeStr = sceneRec.getAttributeString("Scene centre time");
                 return AbstractMetadata.parseUTC(centreTimeStr.trim(), "yyyyMMddHHmmssSSS");
+            } catch(Exception e) {
+                time = new ProductData.UTC(0);
+            }
+        }
+        return time;
+    }
+
+    private static ProductData.UTC getEndTime(BaseRecord sceneRec, MetadataElement root,
+                                                   String tagInSummary, String tagInWorkReport,
+                                                   ProductData.UTC startTime) {
+        ProductData.UTC time = getUTCScanStartTime(sceneRec);
+        if(time.equalElems(new ProductData.UTC(0))) {
+            try {
+                final MetadataElement summaryElem = root.getElement("Summary Information");
+                if(summaryElem != null) {
+                    for(MetadataAttribute sum : summaryElem.getAttributes()) {
+                        if(sum.getName().contains(tagInSummary)) {
+                            return AbstractMetadata.parseUTC(summaryElem.getAttributeString(sum.getName().trim()),
+                                    "yyyyMMdd HH:mm:ss");
+                        }
+                    }
+                }
+                final MetadataElement workReportElem = root.getElement("Work Report");
+                if(workReportElem != null) {
+                    for(MetadataAttribute workRep : workReportElem.getAttributes()) {
+                        if(workRep.getName().contains(tagInWorkReport)) {
+                            final ProductData.UTC centreTime = AbstractMetadata.parseUTC(
+                                    workReportElem.getAttributeString(workRep.getName().trim()),
+                                    "yyyyMMdd HH:mm:ss");
+                            final double diff = centreTime.getMJD() - startTime.getMJD();
+                            return new ProductData.UTC(startTime.getMJD() + (diff *2.0));
+                        }
+                    }
+                }
+                final String centreTimeStr = sceneRec.getAttributeString("Scene centre time");
+                final ProductData.UTC centreTime =  AbstractMetadata.parseUTC(centreTimeStr.trim(), "yyyyMMddHHmmssSSS");
+                final double diff = centreTime.getMJD() - startTime.getMJD();
+                return new ProductData.UTC(startTime.getMJD() + (diff *2.0));
             } catch(Exception e) {
                 time = new ProductData.UTC(0);
             }
