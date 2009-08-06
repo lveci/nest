@@ -322,7 +322,7 @@ public class UndersamplingOp extends Operator {
 
         } else if (outputImageBy.equals(RATIO)) {
 
-            if (widthRatio <= 0 || widthRatio >= 1 || heightRatio <= 0 || heightRatio >= 1) {
+            if (widthRatio <= 0 || widthRatio > 1 || heightRatio <= 0 || heightRatio > 1) {
                 throw new OperatorException("The width or height ratio must be within range (0, 1)");
             }
 
