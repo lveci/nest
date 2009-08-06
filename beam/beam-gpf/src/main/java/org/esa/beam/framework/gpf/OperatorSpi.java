@@ -170,7 +170,7 @@ public abstract class OperatorSpi {
     }
 
     public static String getOperatorAlias(Class<? extends Operator> operatorClass) {
-        OperatorMetadata annotation = operatorClass.getAnnotation(OperatorMetadata.class);
+        final OperatorMetadata annotation = operatorClass.getAnnotation(OperatorMetadata.class);
         if (annotation != null && !annotation.alias().isEmpty()) {
             return annotation.alias();
         }

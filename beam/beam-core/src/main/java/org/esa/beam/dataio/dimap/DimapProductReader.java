@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductReader.java,v 1.5 2009-07-22 20:30:52 lveci Exp $
+ * $Id: DimapProductReader.java,v 1.6 2009-08-06 15:21:21 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -54,7 +54,7 @@ import java.util.Map;
  *
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.5 $ $Date: 2009-07-22 20:30:52 $
+ * @version $Revision: 1.6 $ $Date: 2009-08-06 15:21:21 $
  * @see org.esa.beam.dataio.dimap.DimapProductReaderPlugIn
  */
 public class DimapProductReader extends AbstractProductReader {
@@ -160,7 +160,7 @@ public class DimapProductReader extends AbstractProductReader {
             final Band lonBand = product.getBand("longitude");
             final Band latBand = product.getBand("latitude");
             if (latBand != null && lonBand != null) {
-                product.setGeoCoding(new PixelGeoCoding(latBand, lonBand, null, 6, ProgressMonitor.NULL));
+                product.setGeoCoding(new PixelGeoCoding(latBand, lonBand, null, 6));
             }
         }
     }

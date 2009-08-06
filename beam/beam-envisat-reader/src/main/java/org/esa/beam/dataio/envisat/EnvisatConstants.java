@@ -1,5 +1,5 @@
 /*
- * $Id: EnvisatConstants.java,v 1.1 2009-04-28 14:37:13 lveci Exp $
+ * $Id: EnvisatConstants.java,v 1.2 2009-08-06 15:21:21 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  * This interface is a container for constants specific for ENVISAT-products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:13 $
+ * @version $Revision: 1.2 $ $Date: 2009-08-06 15:21:21 $
  */
 public interface EnvisatConstants {
 
@@ -72,6 +72,10 @@ public interface EnvisatConstants {
      * Product type ID for MERIS reduced resolution L2 products.
      */
     String MERIS_RR_L2_PRODUCT_TYPE_NAME = "MER_RR__2P";
+    /**
+     * Product type ID for MERIS full resolution full swath L2 products.
+     */
+    String MERIS_FRS_L2_PRODUCT_TYPE_NAME = "MER_FRS_2P";
     /**
      * Product type ID for AATSR L1b products.
      */
@@ -210,6 +214,13 @@ public interface EnvisatConstants {
             MERIS_DETECTOR_INDEX_DS_NAME // 16
     };
     int MERIS_L1B_NUM_NON_SPECTRAL_BANDS = MERIS_L1B_NON_SPECTRAL_BAND_NAMES.length;
+
+    /**
+     * The addtional names of non spectral bands of FSG and FRG added by AMORGOS.
+     */
+    String MERIS_AMORGOS_L1B_CORR_LATITUDE_BAND_NAME = "corr_latitude";
+    String MERIS_AMORGOS_L1B_CORR_LONGITUDE_BAND_NAME = "corr_longitude";
+    String MERIS_AMORGOS_L1B_ALTIUDE_BAND_NAME = "altitude";
 
     /**
      * The names of the Meris Level 1 MDS.

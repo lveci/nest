@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
-public class RuntimeActivator implements Activator {
+public final class RuntimeActivator implements Activator {
 
     private static RuntimeActivator instance;
 

@@ -15,7 +15,7 @@ import java.util.List;
  * The {@link Module} default implementation.
  * Instances of this class can only be created via the {@link ModuleManifestParser}.
  */
-public class ModuleImpl implements Module {
+public final class ModuleImpl implements Module {
 
     public static final ModuleImpl[] EMPTY_ARRAY = new ModuleImpl[0];
 
@@ -156,23 +156,23 @@ public class ModuleImpl implements Module {
     }
 
     public Class<?> loadClass(String name) throws ClassNotFoundException {
-        checkClassLoader();
-        return getClassLoader().loadClass(name);
+        //checkClassLoader();
+        return classLoader.loadClass(name);
     }
 
     public URL getResource(String name) {
-        checkClassLoader();
-        return getClassLoader().getResource(name);
+        //checkClassLoader();
+        return classLoader.getResource(name);
     }
 
     public InputStream getResourceAsStream(String name) {
-        checkClassLoader();
-        return getClassLoader().getResourceAsStream(name);
+        //checkClassLoader();
+        return classLoader.getResourceAsStream(name);
     }
 
     public Enumeration<URL> getResources(String name) throws IOException {
-        checkClassLoader();
-        return getClassLoader().getResources(name);
+        //checkClassLoader();
+        return classLoader.getResources(name);
     }
 
 // Introduce not before usage of JRE 1.6 is agreed.

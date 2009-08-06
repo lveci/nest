@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGrid.java,v 1.6 2009-08-05 14:02:09 junlu Exp $
+ * $Id: TiePointGrid.java,v 1.7 2009-08-06 15:21:21 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -44,7 +44,7 @@ import Jama.Matrix;
  * Usually, tie-point grids are a sub-sampling of a data product's scene resolution.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.6 $ $Date: 2009-08-05 14:02:09 $
+ * @version $Revision: 1.7 $ $Date: 2009-08-06 15:21:21 $
  */
 public class TiePointGrid extends RasterDataNode {
 
@@ -359,6 +359,19 @@ public class TiePointGrid extends RasterDataNode {
     @Override
     public int getPixelInt(int x, int y) {
         return Math.round(getPixelFloat(x, y));
+    }
+
+    @Override
+    public void dispose() {
+        if (_cosGrid != null) {
+            _cosGrid.dispose();
+            _cosGrid = null;
+        }
+        if (_sinGrid != null) {
+            _sinGrid.dispose();
+            _sinGrid = null;
+        }
+        super.dispose();
     }
 
     /**

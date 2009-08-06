@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractProcessorUI.java,v 1.1 2009-04-28 14:19:06 lveci Exp $
+ * $Id: AbstractProcessorUI.java,v 1.2 2009-08-06 15:21:21 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -18,13 +18,11 @@ package org.esa.beam.framework.processor.ui;
 
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.util.Vector;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.esa.beam.framework.processor.Processor;
-import org.esa.beam.framework.processor.ProcessorException;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.UIUtils;
 
