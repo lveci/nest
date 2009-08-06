@@ -410,8 +410,13 @@ public class BatchGraphDialog extends ModelessDialog {
                         System.out.print(e.getMessage());
                     }
                     graphEx.disposeGraphContext();
+                    graphEx = null;
                     ++graphIndex;
                 }
+                graphExecuterList.clear();
+
+                JAI.getDefaultInstance().getTileCache().flush();
+                System.gc();
 
             } catch(Exception e) {
                 System.out.print(e.getMessage());
