@@ -68,18 +68,34 @@ public class SRTM3GeoTiffFile {
         if(tile == null) {
             try {
                 if(localFileExists) {
-                    final Product product = productReader.readProductNodes(getFileFromZip(localFile), null);
-                    tile = new SRTM3GeoTiffElevationTile(demModel, product);
-                } else {
-                    if(remoteFileExists && getRemoteFile()) {
-                        final Product product = productReader.readProductNodes(getFileFromZip(localFile), null);
-                        tile = new SRTM3GeoTiffElevationTile(demModel, product);
+                    final File dataFile = getFileFromZip(localFile);
+                    if(dataFile != null) {
+                        final Product product = productReader.readProductNodes(dataFile, null);
+                        if(product != null) {
+                            tile = new SRTM3GeoTiffElevationTile(demModel, product);
+                        }
+                    }
+                } else if(remoteFileExists && getRemoteFile()) {
+                    final File dataFile = getFileFromZip(localFile);
+                    if(dataFile != null) {
+                        final Product product = productReader.readProductNodes(dataFile, null);
+                        if(product != null) {
+                            tile = new SRTM3GeoTiffElevationTile(demModel, product);
+                        }
                     }
                 }
-                demModel.updateCache(tile);
+                if(tile != null) {
+                    demModel.updateCache(tile);
+                } else {
+                    if(!remoteFileExists && localFileExists) {
+                        System.out.println("SRTM unable to reader product "+localFile.getAbsolutePath());
+                    }
+                    localFileExists = false;
+                }
             } catch(Exception e) {
                 System.out.println(e.getMessage());
                 tile = null;
+                localFileExists = false;
             }
         }
         return tile;
@@ -93,6 +109,10 @@ public class SRTM3GeoTiffFile {
                 remoteFileList = ftp.getRemoteFileList(remotePath);
             }
 
+            if(remoteFileList == null && ftp != null) {
+                remoteFileList = ftp.getRemoteFileList(remotePath);
+            }
+
             if(remoteFileList == null)
                 throw new IOException("Unable to get remote file list");
 
@@ -103,14 +123,18 @@ public class SRTM3GeoTiffFile {
             if(result == ftpUtils.FTPError.OK) {
                 return true;
             } else {
-                if(result == ftpUtils.FTPError.FILE_NOT_FOUND)
+                if(result == ftpUtils.FTPError.FILE_NOT_FOUND) {
                     remoteFileExists = false;
+                } else {
+                    dispose();   
+                }
                 localFile.delete();
             }
 
             return false;
         } catch(Exception e) {
             System.out.println(e.getMessage());
+            dispose();
         }
         return false;
     }
@@ -123,9 +147,12 @@ public class SRTM3GeoTiffFile {
             if(newFile.exists())
                 return newFile;
 
-            final ZipFile zipFile = new ZipFile(dataFile);
-            final FileOutputStream fileoutputstream = new FileOutputStream(newFile);
+            ZipFile zipFile = null;
+            FileOutputStream fileoutputstream = null;
             try {
+                zipFile = new ZipFile(dataFile);
+                fileoutputstream = new FileOutputStream(newFile);
+
                 final ZipEntry zipEntry = zipFile.getEntry(baseName);
                 if (zipEntry == null) {
                     localFileExists = false;
@@ -142,10 +169,14 @@ public class SRTM3GeoTiffFile {
 
                 return newFile;
             } catch(Exception e) {
-                System.out.println(e.getMessage());   
+                System.out.println(e.getMessage());
+                dataFile.delete();
+                return null;
             } finally {
-                zipFile.close();
-                fileoutputstream.close();
+                if(zipFile != null)
+                    zipFile.close();
+                if(fileoutputstream != null)
+                    fileoutputstream.close();
             }
         }
         return dataFile;

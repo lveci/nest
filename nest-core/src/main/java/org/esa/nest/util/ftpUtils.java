@@ -28,7 +28,7 @@ public class ftpUtils {
 
         ftpClient.enterLocalPassiveMode();
         ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-        ftpClient.setDataTimeout(60000);
+        ftpClient.setDataTimeout(30000);
     }
 
     public void disconnect() throws IOException {
@@ -39,19 +39,24 @@ public class ftpUtils {
         FileOutputStream fos = null;
         InputStream fis = null;
         try {
+            System.out.println("ftp retrieving "+remotePath);
+            
             fis = ftpClient.retrieveFileStream(remotePath);
             if(fis == null) {
                 final int code = ftpClient.getReplyCode();
                 System.out.println("error code:"+code + " on " + remotePath);
-                return FTPError.FILE_NOT_FOUND;
+                if(code == 550)
+                    return FTPError.FILE_NOT_FOUND;
+                else
+                    return FTPError.READ_ERROR;
             }
 
             fos = new FileOutputStream(localFile.getAbsolutePath());
 
-            if(VisatApp.getApp() != null) {
+            if(false) { //VisatApp.getApp() != null) {
                 readFile(fis, fos, localFile.getName(), fileSize);
             } else {
-                final int size = 1024;//8192;
+                final int size = 81920;
                 final byte[] buf = new byte[size];
                 int n;
                 while ((n = fis.read(buf, 0, size)) > -1)
@@ -62,7 +67,7 @@ public class ftpUtils {
             return FTPError.OK;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             return FTPError.READ_ERROR;
         } finally {
             try {
@@ -88,12 +93,12 @@ public class ftpUtils {
     }
 
     private static void readFile(final InputStream fis, final FileOutputStream fos,
-                                 final String fileName, final long fileSize) {
+                                 final String fileName, final long fileSize) throws Exception {
 
         final ProgressMonitorSwingWorker worker = new ProgressMonitorSwingWorker(VisatApp.getApp().getMainFrame(), "Downloading...") {
             @Override
             protected Object doInBackground(com.bc.ceres.core.ProgressMonitor pm) throws Exception {
-                final int size = 1024;//8192;
+                final int size = 8192;
                 final byte[] buf = new byte[size];
 
                 pm.beginTask("Downloading "+fileName, (int)(fileSize/size) + 200);
@@ -105,11 +110,14 @@ public class ftpUtils {
 
                         pm.worked(1);
                     }
+                } catch(Exception e) {
+                    System.out.println(e.getMessage());
                 } finally {
                     pm.done();
                 }
                 return null;
             }
+
         };
         worker.executeWithBlocking();
     }
