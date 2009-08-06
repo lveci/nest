@@ -95,6 +95,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
     @Parameter(valueSet = {NEAREST_NEIGHBOUR, BILINEAR, CUBIC}, defaultValue = BILINEAR, label="Image Resampling Method")
     private String imgResamplingMethod = BILINEAR;
 
+    @Parameter(description = "The pixel spacing", defaultValue = "", label="Pixel Spacing (m)")
+    private String pixelSpacingStr = null;
+
     @Parameter(defaultValue="false", label="Save DEM as band")
     private boolean saveDEM = false;
 
@@ -115,6 +118,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
     private boolean srgrFlag = false;
     private boolean useExternalDEMFile = false;
+    private boolean applyUserSelectedPixelSpacing = false;
 
     private String mission = null;
     private String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
@@ -140,6 +144,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private double lonMax= 0.0;
     private double delLat = 0.0;
     private double delLon = 0.0;
+    private double pixelSpacing = 0.0;
 
     private double[][] sensorPosition = null; // sensor position for all range lines
     private double[][] sensorVelocity = null; // sensor velocity for all range lines
@@ -188,6 +193,10 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             if(OperatorUtils.isMapProjected(sourceProduct)) {
                 throw new OperatorException("Source product is already map projected");
+            }
+
+            if (pixelSpacingStr != null) {
+                getUserSelectedPixelSpacing();
             }
 
             getMissionType();
@@ -256,6 +265,18 @@ public class SARSimTerrainCorrectionOp extends Operator {
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
+    }
+
+    /**
+     * Get user selected pixel spacing (in m).
+     */
+    private void getUserSelectedPixelSpacing() {
+
+        pixelSpacing = Double.parseDouble(pixelSpacingStr);
+        if (pixelSpacing <= 0.0) {
+            throw new OperatorException("Invalid value for pixel spacing: " + pixelSpacingStr);
+        }
+        applyUserSelectedPixelSpacing = true;
     }
 
     /**
@@ -399,15 +420,21 @@ public class SARSimTerrainCorrectionOp extends Operator {
      */
     private void computeDEMTraversalSampleInterval() {
 
-        final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
+        double spacing = 0.0;
+        if (applyUserSelectedPixelSpacing) {
+            spacing = pixelSpacing;
+        } else {
+            spacing = Math.min(rangeSpacing, azimuthSpacing);
+        }
+
         double minAbsLat;
         if (latMin*latMax > 0) {
             minAbsLat = Math.min(Math.abs(latMin), Math.abs(latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
         } else {
             minAbsLat = 0.0;
         }
-        delLat = minSpacing / MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
-        delLon = minSpacing / (MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
+        delLat = spacing / MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
+        delLon = spacing / (MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
         delLat = Math.min(delLat, delLon);
         delLon = delLat;
     }
