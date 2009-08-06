@@ -28,7 +28,7 @@ public class UndersamplingOpUI extends BaseOperatorUI {
 
     private final JTextField subSamplingX = new JTextField("");
     private final JTextField subSamplingY = new JTextField("");
-
+    /*
     private final JComboBox filterType = new JComboBox(new String[] {   UndersamplingOp.SUMMARY,
                                                                         UndersamplingOp.EDGE_DETECT,
                                                                         UndersamplingOp.EDGE_ENHANCEMENT,
@@ -37,7 +37,7 @@ public class UndersamplingOpUI extends BaseOperatorUI {
                                                                         UndersamplingOp.HORIZONTAL,
                                                                         UndersamplingOp.VERTICAL,
                                                                         UndersamplingOp.USER_DEFINED } );
-
+    */
     private final JComboBox filterSize = new JComboBox(new String[] {   UndersamplingOp.FILTER_SIZE_3x3,
                                                                         UndersamplingOp.FILTER_SIZE_5x5,
                                                                         UndersamplingOp.FILTER_SIZE_7x7 } );
@@ -55,7 +55,7 @@ public class UndersamplingOpUI extends BaseOperatorUI {
 
     private final JLabel subSamplingXLabel = new JLabel("Sub-Sampling in X:");
     private final JLabel subSamplingYLabel = new JLabel("Sub-Sampling in Y:");
-    private final JLabel filterTypeLabel = new JLabel("Filter Type:");
+//    private final JLabel filterTypeLabel = new JLabel("Filter Type:");
     private final JLabel filterSizeLabel = new JLabel("Filter Size:");
     private final JLabel targetImageHeightLabel = new JLabel("Rows:");
     private final JLabel targetImageWidthLabel = new JLabel("Columns:");
@@ -65,8 +65,8 @@ public class UndersamplingOpUI extends BaseOperatorUI {
     private final JLabel azimuthSpacingLabel = new JLabel("Azimuth Spacing (m):");
     private final JLabel outputImageByLabel = new JLabel("Output Image By:");
 
-    private final JLabel kernelFileLabel = new JLabel("Kernel File:");
-    private final JTextField kernelFile = new JTextField("");
+//    private final JLabel kernelFileLabel = new JLabel("Kernel File:");
+//    private final JTextField kernelFile = new JTextField("");
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -87,11 +87,11 @@ public class UndersamplingOpUI extends BaseOperatorUI {
         subSamplingX.setText(String.valueOf(paramMap.get("subSamplingX")));
         subSamplingY.setText(String.valueOf(paramMap.get("subSamplingY")));
 
-        filterType.setSelectedItem(paramMap.get("filterType"));
+//        filterType.setSelectedItem(paramMap.get("filterType"));
         filterSize.setSelectedItem(paramMap.get("filterSize"));
-        File kFile = (File)paramMap.get("kernelFile");
-        if(kFile != null)
-            kernelFile.setText(kFile.getAbsolutePath());
+//        File kFile = (File)paramMap.get("kernelFile");
+//        if(kFile != null)
+//            kernelFile.setText(kFile.getAbsolutePath());
 
         outputImageBy.setSelectedItem(paramMap.get("outputImageBy"));
         targetImageHeight.setText(String.valueOf(paramMap.get("targetImageHeight")));
@@ -117,9 +117,9 @@ public class UndersamplingOpUI extends BaseOperatorUI {
         paramMap.put("subSamplingX", Integer.parseInt(subSamplingX.getText()));
         paramMap.put("subSamplingY", Integer.parseInt(subSamplingY.getText()));
 
-        paramMap.put("filterType", filterType.getSelectedItem());
+//        paramMap.put("filterType", filterType.getSelectedItem());
         paramMap.put("filterSize", filterSize.getSelectedItem());
-        paramMap.put("kernelFile", new File(kernelFile.getText()));
+//        paramMap.put("kernelFile", new File(kernelFile.getText()));
 
         paramMap.put("outputImageBy", outputImageBy.getSelectedItem());
         paramMap.put("targetImageHeight", Integer.parseInt(targetImageHeight.getText()));
@@ -174,6 +174,7 @@ public class UndersamplingOpUI extends BaseOperatorUI {
 
         _gbc.gridy = savedY;
         _gbc.gridx = 0;
+        /*
         contentPane.add(filterTypeLabel, _gbc);
         _gbc.gridx = 1;
         contentPane.add(filterType, _gbc);
@@ -192,15 +193,16 @@ public class UndersamplingOpUI extends BaseOperatorUI {
 
         savedY = ++_gbc.gridy;
         _gbc.gridx = 0;
+        */
         contentPane.add(filterSizeLabel, _gbc);
         _gbc.gridx = 1;
         contentPane.add(filterSize, _gbc);
         enableKernelFiltering(false);
-
+        /*
         _gbc.gridy = savedY;
         DialogUtils.addComponent(contentPane, _gbc, kernelFileLabel, kernelFile);
         DialogUtils.enableComponents(kernelFileLabel, kernelFile, false);
-
+        */
         _gbc.gridy++;
         _gbc.gridx = 0;
         contentPane.add(outputImageByLabel, _gbc);
@@ -238,10 +240,10 @@ public class UndersamplingOpUI extends BaseOperatorUI {
     }
 
     private void enableKernelFiltering(boolean flag) {
-        DialogUtils.enableComponents(filterTypeLabel, filterType, flag);
+//        DialogUtils.enableComponents(filterTypeLabel, filterType, flag);
         DialogUtils.enableComponents(filterSizeLabel, filterSize, flag);
-        if(!flag)
-            DialogUtils.enableComponents(kernelFileLabel, kernelFile, flag);
+//        if(!flag)
+//            DialogUtils.enableComponents(kernelFileLabel, kernelFile, flag);
     }
 
     private void enableRowColumn(boolean flag) {

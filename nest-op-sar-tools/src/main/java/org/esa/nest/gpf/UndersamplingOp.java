@@ -91,15 +91,15 @@ public class UndersamplingOp extends Operator {
     @Parameter(valueSet = {SUB_SAMPLING, KERNEL_FILTERING}, defaultValue = KERNEL_FILTERING, label="Under-Sampling Method")
     private String method = KERNEL_FILTERING;
 
-    @Parameter(valueSet = {SUMMARY, EDGE_DETECT, EDGE_ENHANCEMENT, LOW_PASS, HIGH_PASS, HORIZONTAL, VERTICAL, USER_DEFINED},
-               defaultValue = LOW_PASS, label="Filter Type")
+//    @Parameter(valueSet = {SUMMARY, EDGE_DETECT, EDGE_ENHANCEMENT, LOW_PASS, HIGH_PASS, HORIZONTAL, VERTICAL, USER_DEFINED},
+//               defaultValue = LOW_PASS, label="Filter Type")
     private String filterType = LOW_PASS;
 
     @Parameter(valueSet = {FILTER_SIZE_3x3, FILTER_SIZE_5x5, FILTER_SIZE_7x7},
                defaultValue = FILTER_SIZE_3x3, label="Filter Size")
     private String filterSize = FILTER_SIZE_3x3;
 
-    @Parameter(description = "The kernel file", label="Kernel File")
+//    @Parameter(description = "The kernel file", label="Kernel File")
     private File kernelFile = null;
 
     @Parameter(defaultValue = "2", label="Sub-Sampling in X")
@@ -743,13 +743,14 @@ public class UndersamplingOp extends Operator {
         ProductData srcData2 = null;
         if(sourceRaster2 != null)
             srcData2 = sourceRaster2.getDataBuffer();
-        
+
+        float numPixels = filterWidth*filterHeight;
         double filteredValue = 0.0;
         for (int y = y0; y < maxY; y++) {
             for (int x = x0; x < maxX; x++) {
 
                 final int index = sourceRaster1.getDataBufferIndex(x, y);
-                final float weight = kernel[maxY - 1 - y][maxX - 1 - x];
+                final float weight = kernel[maxY - 1 - y][maxX - 1 - x] / numPixels;
 
                 if (bandUnitType == Unit.UnitType.INTENSITY_DB || bandUnitType == Unit.UnitType.AMPLITUDE_DB) {
 
