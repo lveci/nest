@@ -47,6 +47,8 @@ public class SRTM3GeoTiffFile {
             if(ftp != null)
                 ftp.disconnect();
             ftp = null;
+            tile.dispose();
+            tile = null;
         } catch(Exception e) {
             //
         }

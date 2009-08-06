@@ -77,6 +77,9 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
     }
 
     public void dispose() {
+        for(SRTM3GeoTiffElevationTile tile : elevationTileCache) {
+            tile.dispose();
+        }
         elevationTileCache.clear();
         for (SRTM3GeoTiffFile[] elevationFile : elevationFiles) {
             for (SRTM3GeoTiffFile anElevationFile : elevationFile) {
@@ -127,7 +130,7 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
     public void updateCache(SRTM3GeoTiffElevationTile tile) {
         elevationTileCache.remove(tile);
         elevationTileCache.add(0, tile);
-        while (elevationTileCache.size() > 3) {
+        while (elevationTileCache.size() > 6) {
             final int index = elevationTileCache.size() - 1;
             final SRTM3GeoTiffElevationTile lastTile = elevationTileCache.get(index);
             lastTile.clearCache();

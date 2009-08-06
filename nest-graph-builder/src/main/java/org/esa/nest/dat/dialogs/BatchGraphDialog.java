@@ -35,7 +35,7 @@ public class BatchGraphDialog extends ModelessDialog {
 
     protected final AppContext appContext;
     protected final ProductSetPanel productSetPanel;
-    protected final ArrayList<GraphExecuter> graphExecuterList = new ArrayList<GraphExecuter>(3);
+    protected final ArrayList<GraphExecuter> graphExecuterList = new ArrayList<GraphExecuter>(10);
 
     private final static String homeUrl = System.getProperty("nest.home", ".");
     private final static File graphPath = new File(homeUrl, File.separator + "graphs");

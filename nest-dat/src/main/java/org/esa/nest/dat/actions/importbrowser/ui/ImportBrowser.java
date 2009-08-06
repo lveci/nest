@@ -462,16 +462,6 @@ public class ImportBrowser {
         splitPane1H.add(splitPane11);
         splitPane1H.add(new JScrollPane(repositoryTable));
 
-    /*    final JPanel panel2 = new JPanel(new BorderLayout(4, 4));
-        final BatchGraphPanel batchPanel = new BatchGraphPanel(new DatContext(""));
-        panel2.add(batchPanel.createPanel(), BorderLayout.WEST);
-        worldMapDataModel = new WorldMapPaneDataModel();
-        panel2.add(new WorldMapPane(worldMapDataModel), BorderLayout.EAST);    */
-
-        //final JPanel centerPanel = new JPanel(new BorderLayout(4, 4));
-        //centerPanel.add(splitPane1, BorderLayout.NORTH);
-        //centerPanel.add(panel2, BorderLayout.SOUTH);
-
         return splitPane1H;
     }
 
