@@ -898,8 +898,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
                                 Unit.UnitType bandUnit = getBandUnit(tileData.bandName);
                                 int[] subSwathIndex = {INVALID_SUB_SWATH_INDEX};
-                                double v = getPixelValue(
-                                        pixelPos.y, pixelPos.x, tileData.bandName, tileData.bandPolar, bandUnit, subSwathIndex);
+                                double v = getPixelValue(pixelPos.y, pixelPos.x, tileData, bandUnit, subSwathIndex);
 
                                 if (applyRadiometricCalibration) {
 
@@ -1059,18 +1058,17 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * Compute orthorectified pixel value for given pixel.
      * @param azimuthIndex The azimuth index for pixel in source image.
      * @param rangeIndex The range index for pixel in source image.
-     * @param bandName The name of the target band.
-     * @param bandPolar The source band polarization index.
+     * @param tileData The source tile information.
      * @param bandUnit The corresponding source band unit.
      * @param subSwathIndex The subswath index.
      * @return The pixel value.
      * @throws IOException from readPixels
      */
     private double getPixelValue(final double azimuthIndex, final double rangeIndex,
-                                 final String bandName, final int bandPolar, Unit.UnitType bandUnit, int[] subSwathIndex)
+                                 final TileData tileData, Unit.UnitType bandUnit, int[] subSwathIndex)
             throws IOException {
 
-        final String[] srcBandNames = targetBandNameToSourceBandName.get(bandName);
+        final String[] srcBandNames = targetBandNameToSourceBandName.get(tileData.bandName);
         final String iBandName = srcBandNames[0];
         String qBandName = null;
         if (srcBandNames.length > 1) {
@@ -1082,14 +1080,14 @@ public class SARSimTerrainCorrectionOp extends Operator {
             final Tile sourceTile = getSrcTile(iBandName, (int)rangeIndex, (int)azimuthIndex, 1, 1);
             final Tile sourceTile2 = getSrcTile(qBandName, (int)rangeIndex, (int)azimuthIndex, 1, 1);
             return getPixelValueUsingNearestNeighbourInterp(
-                    azimuthIndex, rangeIndex, bandPolar, bandUnit, sourceTile, sourceTile2, subSwathIndex);
+                    azimuthIndex, rangeIndex, tileData, bandUnit, sourceTile, sourceTile2, subSwathIndex);
 
         } else if (imgResampling.equals(ResampleMethod.RESAMPLE_BILINEAR)) {
 
             final Tile sourceTile = getSrcTile(iBandName, (int)rangeIndex, (int)azimuthIndex, 2, 2);
             final Tile sourceTile2 = getSrcTile(qBandName, (int)rangeIndex, (int)azimuthIndex, 2, 2);
             return getPixelValueUsingBilinearInterp(azimuthIndex, rangeIndex,
-                    bandPolar, bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2, subSwathIndex);
+                    tileData, bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2, subSwathIndex);
 
         } else if (imgResampling.equals(ResampleMethod.RESAMPLE_CUBIC)) {
 
@@ -1098,7 +1096,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             final Tile sourceTile2 = getSrcTile(qBandName, Math.max(0, (int)rangeIndex - 1),
                                                 Math.max(0, (int)azimuthIndex - 1), 4, 4);
             return getPixelValueUsingBicubicInterp(azimuthIndex, rangeIndex,
-                    bandPolar, bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2, subSwathIndex);
+                    tileData, bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2, subSwathIndex);
         } else {
             throw new OperatorException("Unknown interpolation method");
         }
@@ -1117,7 +1115,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * Get source image pixel value using nearest neighbot interpolation.
      * @param azimuthIndex The azimuth index for pixel in source image.
      * @param rangeIndex The range index for pixel in source image.
-     * @param bandPolar The source band polarization index.
+     * @param tileData The source tile information.
      * @param bandUnit The source band unit.
      * @param sourceTile  i
      * @param sourceTile2 q
@@ -1125,7 +1123,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * @return The pixel value.
      */
     private double getPixelValueUsingNearestNeighbourInterp(final double azimuthIndex, final double rangeIndex,
-            final int bandPolar, final Unit.UnitType bandUnit, final Tile sourceTile, final Tile sourceTile2,
+            final TileData tileData, final Unit.UnitType bandUnit, final Tile sourceTile, final Tile sourceTile2,
             int[] subSwathIndex) {
 
         final int x0 = (int)rangeIndex;
@@ -1135,11 +1133,17 @@ public class SARSimTerrainCorrectionOp extends Operator {
         if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.INTENSITY_DB) {
 
             v = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
+            if (v == tileData.noDataValue) {
+                return tileData.noDataValue;
+            }
 
         } else if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
 
             final double vi = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
             final double vq = sourceTile2.getDataBuffer().getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y0));
+            if (vi == tileData.noDataValue || vq == tileData.noDataValue) {
+                return tileData.noDataValue;
+            }
             v = vi*vi + vq*vq;
 
         } else {
@@ -1147,7 +1151,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
 
         if (applyRadiometricCalibration) {
-            v = calibrator.applyRetroCalibration(x0, y0, v, bandPolar, bandUnit, subSwathIndex);
+            v = calibrator.applyRetroCalibration(x0, y0, v, tileData.bandPolar, bandUnit, subSwathIndex);
         }
 
         return v;
@@ -1157,7 +1161,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * Get source image pixel value using bilinear interpolation.
      * @param azimuthIndex The azimuth index for pixel in source image.
      * @param rangeIndex The range index for pixel in source image.
-     * @param bandPolar The polarization of the source band.
+     * @param tileData The source tile information.
      * @param bandUnit The source band unit.
      * @param sceneRasterWidth the product width
      * @param sceneRasterHeight the product height
@@ -1167,7 +1171,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * @return The pixel value.
      */
     private double getPixelValueUsingBilinearInterp(final double azimuthIndex, final double rangeIndex,
-                                                    final int bandPolar, final Unit.UnitType bandUnit,
+                                                    final TileData tileData, final Unit.UnitType bandUnit,
                                                     final int sceneRasterWidth, final int sceneRasterHeight,
                                                     final Tile sourceTile, final Tile sourceTile2, int[] subSwathIndex) {
 
@@ -1188,6 +1192,12 @@ public class SARSimTerrainCorrectionOp extends Operator {
             v10 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y1));
             v11 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y1));
 
+            if (v00 == tileData.noDataValue || v01 == tileData.noDataValue ||
+                v10 == tileData.noDataValue || v11 == tileData.noDataValue) {
+                return tileData.noDataValue;
+            }
+
+
         } else if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
 
             final ProductData srcData2 = sourceTile2.getDataBuffer();
@@ -1201,6 +1211,13 @@ public class SARSimTerrainCorrectionOp extends Operator {
             final double vq01 = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x1, y0));
             final double vq10 = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y1));
             final double vq11 = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x1, y1));
+
+            if (vi00 == tileData.noDataValue || vi01 == tileData.noDataValue ||
+                vi10 == tileData.noDataValue || vi11 == tileData.noDataValue ||
+                vq00 == tileData.noDataValue || vq01 == tileData.noDataValue ||
+                vq10 == tileData.noDataValue || vq11 == tileData.noDataValue) {
+                return tileData.noDataValue;
+            }
 
             v00 = vi00*vi00 + vq00*vq00;
             v01 = vi01*vi01 + vq01*vq01;
@@ -1219,10 +1236,10 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         if (applyRadiometricCalibration) {
 
-            v00 = calibrator.applyRetroCalibration(x0, y0, v00, bandPolar, bandUnit, subSwathIndex00);
-            v01 = calibrator.applyRetroCalibration(x1, y0, v01, bandPolar, bandUnit, subSwathIndex01);
-            v10 = calibrator.applyRetroCalibration(x0, y1, v10, bandPolar, bandUnit, subSwathIndex10);
-            v11 = calibrator.applyRetroCalibration(x1, y1, v11, bandPolar, bandUnit, subSwathIndex11);
+            v00 = calibrator.applyRetroCalibration(x0, y0, v00, tileData.bandPolar, bandUnit, subSwathIndex00);
+            v01 = calibrator.applyRetroCalibration(x1, y0, v01, tileData.bandPolar, bandUnit, subSwathIndex01);
+            v10 = calibrator.applyRetroCalibration(x0, y1, v10, tileData.bandPolar, bandUnit, subSwathIndex10);
+            v11 = calibrator.applyRetroCalibration(x1, y1, v11, tileData.bandPolar, bandUnit, subSwathIndex11);
 
             if (dx <= 0.5 && dy <= 0.5) {
                 subSwathIndex[0] = subSwathIndex00[0];
@@ -1252,7 +1269,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * Get source image pixel value using bicubic interpolation.
      * @param azimuthIndex The azimuth index for pixel in source image.
      * @param rangeIndex The range index for pixel in source image.
-     * @param bandPolar The polarization of the source band.
+     * @param tileData The source tile information.
      * @param bandUnit The source band unit.
      * @param sceneRasterWidth the product width
      * @param sceneRasterHeight the product height
@@ -1262,7 +1279,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * @return The pixel value.
      */
     private double getPixelValueUsingBicubicInterp(final double azimuthIndex, final double rangeIndex,
-                                                   final int bandPolar, final Unit.UnitType bandUnit,
+                                                   final TileData tileData, final Unit.UnitType bandUnit,
                                                    final int sceneRasterWidth, final int sceneRasterHeight,
                                                    final Tile sourceTile, final Tile sourceTile2, int[] subSwathIndex) {
 
@@ -1286,6 +1303,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
             for (int i = 0; i < y.length; i++) {
                 for (int j = 0; j < x.length; j++) {
                     v[i][j] = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x[j], y[i]));
+                    if (v[i][j] == tileData.noDataValue) {
+                        return tileData.noDataValue;
+                    }
                 }
             }
 
@@ -1296,6 +1316,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 for (int j = 0; j < x.length; j++) {
                     final double vi = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x[j], y[i]));
                     final double vq = srcData2.getElemDoubleAt(sourceTile2.getDataBufferIndex(x[j], y[i]));
+                    if (vi == tileData.noDataValue || vq == tileData.noDataValue) {
+                        return tileData.noDataValue;
+                    }
                     v[i][j] = vi*vi + vq*vq;
                 }
             }
@@ -1308,7 +1331,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         if (applyRadiometricCalibration) {
             for (int i = 0; i < y.length; i++) {
                 for (int j = 0; j < x.length; j++) {
-                    v[i][j] = calibrator.applyRetroCalibration(x[j], y[i], v[i][j], bandPolar, bandUnit, ss[i][j]);
+                    v[i][j] = calibrator.applyRetroCalibration(x[j], y[i], v[i][j], tileData.bandPolar, bandUnit, ss[i][j]);
                 }
             }
         }
