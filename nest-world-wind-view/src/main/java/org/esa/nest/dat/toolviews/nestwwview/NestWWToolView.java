@@ -11,7 +11,6 @@ import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.examples.ClickAndGoSelectListener;
-import gov.nasa.worldwind.examples.StatisticsPanel;
 import gov.nasa.worldwind.examples.WMSLayersPanel;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.globes.Earth;
@@ -26,7 +25,7 @@ import gov.nasa.worldwind.terrain.CompoundElevationModel;
 import gov.nasa.worldwind.terrain.WMSBasicElevationModel;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.StatusBar;
-import gov.nasa.worldwind.view.BasicOrbitView;
+import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import gov.nasa.worldwind.wms.Capabilities;
 import gov.nasa.worldwind.wms.CapabilitiesRequest;
 import org.esa.beam.framework.datamodel.Band;
@@ -59,7 +58,7 @@ import java.net.URISyntaxException;
 /**
  * The window displaying the world map.
  *
- * @version $Revision: 1.14 $ $Date: 2009-05-22 15:31:30 $
+ * @version $Revision: 1.15 $ $Date: 2009-08-07 14:25:03 $
  */
 public class NestWWToolView extends AbstractToolView {
 
@@ -72,7 +71,6 @@ public class NestWWToolView extends AbstractToolView {
     private AppPanel wwjPanel = null;
     private LayerPanel layerPanel = null;
     private ProductPanel productPanel = null;
-    private StatisticsPanel statsPanel = null;
 
     private JSlider opacitySlider = null;
     private final ProductLayer productLayer = new ProductLayer(true);
@@ -84,7 +82,6 @@ public class NestWWToolView extends AbstractToolView {
 
     private static final boolean includeStatusBar = true;
     private static final boolean includeLayerPanel = false;
-    private static final boolean includeStatsPanel = false;
     private static final boolean includeProductPanel = true;
     private static final boolean includeWMSPanel = false;
 
@@ -203,21 +200,6 @@ public class NestWWToolView extends AbstractToolView {
             productPanel.add(makeControlPanel(), BorderLayout.SOUTH);
             productPanel.update(getWwd());
         }
-        if (includeStatsPanel) {
-            statsPanel = new StatisticsPanel(wwjPanel.getWwd(), new Dimension(250, canvasSize.height));
-            mainPane.add(statsPanel, BorderLayout.EAST);
-            wwjPanel.getWwd().addRenderingListener(new RenderingListener() {
-                public void stageChanged(RenderingEvent event) {
-                    if (event.getSource() instanceof WorldWindow) {
-                        EventQueue.invokeLater(new Runnable() {
-                            public void run() {
-                                statsPanel.update(wwjPanel.getWwd());
-                            }
-                        });
-                    }
-                }
-            });
-        }           
         if(includeWMSPanel) {
             tabbedPane.add(new JPanel());
             tabbedPane.setTitleAt(0, "+");

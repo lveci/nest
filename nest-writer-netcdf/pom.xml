@@ -34,10 +34,10 @@
             <groupId>org.esa.nest</groupId>
             <artifactId>nest-core</artifactId>
         </dependency>
-        <dependency>
+		<dependency>
             <groupId>ucar.netcdf</groupId>
-            <artifactId>netcdf-java</artifactId>
-            <version>4.0</version>
+            <artifactId>lib-netcdf</artifactId>
+			<version>4.0</version>
         </dependency>
     </dependencies>
 </project>

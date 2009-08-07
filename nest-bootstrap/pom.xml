@@ -124,17 +124,17 @@
 		<dependency>
             <groupId>gov.nasa</groupId>
             <artifactId>worldwind</artifactId>
-			<version>0.6</version>
+			<version>0.6.199</version>
         </dependency>
 		<dependency>
             <groupId>javax.media</groupId>
             <artifactId>jogl</artifactId>
-		    <version>1.1.1</version>
+		    <version>1.2</version>
         </dependency>
 		<dependency>
             <groupId>javax.media</groupId>
             <artifactId>gluegen-rt</artifactId>
-			<version>1.1.1</version>
+			<version>1.2</version>
         </dependency>
 		<dependency>
 			<groupId>edu.emory.mathcs</groupId>
@@ -143,9 +143,10 @@
 		</dependency>
 		<dependency>
 			<groupId>ucar.netcdf</groupId>
-			<artifactId>netcdf-java</artifactId>
+			<artifactId>lib-netcdf</artifactId>
 			<version>4.0</version>
 		</dependency>
+
         <!--dependency>
             <groupId>it.geosolutions.imageio-ext</groupId>
             <artifactId>imageio-ext-gdal</artifactId>

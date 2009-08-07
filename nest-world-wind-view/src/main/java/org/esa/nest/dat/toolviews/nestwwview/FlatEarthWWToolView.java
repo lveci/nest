@@ -12,7 +12,7 @@ import gov.nasa.worldwind.layers.*;
 import gov.nasa.worldwind.layers.Earth.LandsatI3WMSLayer;
 import gov.nasa.worldwind.layers.Earth.MSVirtualEarthLayer;
 import gov.nasa.worldwind.util.StatusBar;
-import gov.nasa.worldwind.view.FlatOrbitView;
+import gov.nasa.worldwind.view.orbit.FlatOrbitView;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.framework.ui.product.ProductSceneView;
