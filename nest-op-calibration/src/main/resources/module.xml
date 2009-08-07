@@ -50,32 +50,6 @@
             <helpId>CalibrationOp</helpId>
         </action>
 
-		<!--action>
-	            <id>ASARCalibrationGroup</id>
-	            <class>org.esa.beam.visat.actions.ActionGroup</class>
-	            <text>ENVISAT ASAR</text>
-	            <parent>Calibration</parent>
-	        </action-->
-		
-        <!--action>
-            <id>ASARCalibrationOp</id>
-            <class>org.esa.nest.dat.ASARCalibrationOpAction</class>
-            <text>ASAR Calibration</text>
-            <shortDescr>Invoke the ASAR Calibration operator.</shortDescr>
-            <parent>ASARCalibrationGroup</parent>
-            <helpId>CalibrationOp</helpId>
-        </action-->
-
-        <!--action>
-            <id>ASARRetroCalibrationOpTool</id>
-            <class>org.esa.nest.dat.ASARRetroCalibrationOpAction</class>
-            <text>ASAR Retro-Calibration</text>
-            <shortDescr>Invoke the ASAR Retro-Calibration operator.</shortDescr>
-            <parent>ASARCalibrationGroup</parent>
-            <helpId>ASARRetroCalibrationOp</helpId>
-            <placeAfter>CalibrationOp</placeAfter>
-        </action-->
-
         <action>
             <id>importXCAProduct</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
@@ -89,36 +63,6 @@
             <separatorBefore>true</separatorBefore>
             <placeAfter>Sigma0toBeta0</placeAfter>
         </action>
-
-        <!--action>
-            <id>ERSCalibration</id>
-            <class>org.esa.beam.visat.actions.ActionGroup</class>
-            <text>ERS 1/2</text>
-            <parent>Calibration</parent>
-        </action-->
-        <!--action>
-            <id>ERSCalibrationOpTool</id>
-            <class>org.esa.nest.dat.ERSCalibrationOpAction</class>
-            <text>ERS Calibration</text>
-            <shortDescr>Invoke the ERS Calibration operator.</shortDescr>
-            <parent>ERSCalibration</parent>
-            <helpId>CalibrationOp</helpId>
-        </action-->
-
-        <!--action>
-            <id>ALOSPALSARCalibrationGroup</id>
-            <class>org.esa.beam.visat.actions.ActionGroup</class>
-            <text>ALOS PALSAR</text>
-            <parent>Calibration</parent>
-        </action-->
-        <!--action>
-            <id>ALOSPALSARCalibrationOp</id>
-            <class>org.esa.nest.dat.ALOSPALSARCalibrationOpAction</class>
-            <text>ALOS PALSAR Calibration</text>
-            <shortDescr>Invoke the ALOS PALSAR Calibration operator.</shortDescr>
-            <parent>ALOSPALSARCalibrationGroup</parent>
-            <helpId>CalibrationOp</helpId>
-        </action-->
 
         <action>
             <id>Sigma0toGamma0</id>

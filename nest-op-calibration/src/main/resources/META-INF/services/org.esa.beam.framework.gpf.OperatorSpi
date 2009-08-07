@@ -1,5 +1,1 @@
 org.esa.nest.gpf.CalibrationOp$Spi
-org.esa.nest.gpf.ASARCalibrationOperator$Spi
-org.esa.nest.gpf.ASARRetroCalibrationOperator$Spi
-org.esa.nest.gpf.ERSCalibrationOperator$Spi
-org.esa.nest.gpf.ALOSPALSARCalibrationOperator$Spi
