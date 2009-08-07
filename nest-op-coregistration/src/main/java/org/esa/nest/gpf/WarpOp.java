@@ -70,6 +70,7 @@ import java.util.Map;
  */
 
 @OperatorMetadata(alias="Warp",
+                  category = "SAR Tools",
                   description = "Create Warp Function And Get Co-registrated Images")
 public class WarpOp extends Operator {
 

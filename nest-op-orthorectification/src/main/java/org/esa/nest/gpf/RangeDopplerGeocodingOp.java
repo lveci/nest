@@ -72,7 +72,7 @@ import java.util.*;
  * Reference: Guide to ASAR Geocoding, Issue 1.0, 19.03.2008
  */
 
-@OperatorMetadata(alias="Terrain-Correction", description="RD method for orthorectification")
+@OperatorMetadata(alias="Terrain-Correction", category = "Geometry", description="RD method for orthorectification")
 //public final class RangeDopplerGeocodingOp extends Operator {
 public class RangeDopplerGeocodingOp extends Operator {
 

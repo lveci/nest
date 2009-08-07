@@ -63,7 +63,9 @@ import java.util.HashMap;
  * Reference: Guide to ASAR Geocoding, Issue 1.0, 19.03.2008
  */
 
-@OperatorMetadata(alias="Ellipsoid-Correction", description="GG method for orthorectification")
+@OperatorMetadata(alias="Ellipsoid-Correction",
+        category = "Geometry",
+        description="GG method for orthorectification")
 public final class GeolocationGridGeocodingOp extends Operator {
 
     @SourceProduct(alias="source")

@@ -37,12 +37,13 @@ import java.util.Map;
  * Operator for cluster analysis.
  *
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:13 $
+ * @version $Revision: 1.2 $ $Date: 2009-08-07 19:30:15 $
  */
 @OperatorMetadata(alias = "EMClusterAnalysis",
                   version = "1.0",
                   authors = "Ralf Quast",
                   copyright = "(c) 2007 by Brockmann Consult",
+                  category = "Analysis",
                   description = "Performs an expectation-maximization (EM) cluster analysis.")
 public class EMClusterOp extends Operator {
 

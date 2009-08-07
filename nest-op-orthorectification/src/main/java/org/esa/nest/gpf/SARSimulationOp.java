@@ -77,6 +77,7 @@ import java.util.ArrayList;
  */
 
 @OperatorMetadata(alias="SAR-Simulation",
+        category = "Geometry",
         description="Rigorous SAR Simulation")
 public final class SARSimulationOp extends Operator {
 

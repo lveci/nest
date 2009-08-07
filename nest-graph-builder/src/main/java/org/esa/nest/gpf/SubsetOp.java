@@ -19,7 +19,9 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import java.awt.*;
 import java.io.IOException;
 
-@OperatorMetadata(alias = "SubsetOp", description = "Create a spatial subset of the source product.")
+@OperatorMetadata(alias = "SubsetOp",
+        category = "Utilities",
+        description = "Create a spatial subset of the source product.")
 public class SubsetOp extends Operator {
 
     @SourceProduct

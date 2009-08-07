@@ -44,7 +44,8 @@ import java.util.Map;
  * @todo complex data
  */
 @OperatorMetadata(alias="Speckle-Filter",
-                  description = "Speckle Reduction")
+        category = "SAR Tools",
+        description = "Speckle Reduction")
 public class SpeckleFilterOp extends Operator {
 
     @SourceProduct(alias="source")

@@ -73,7 +73,8 @@ import java.io.IOException;
  * Reference: Guide to ASAR Geocoding, Issue 1.0, 19.03.2008
  */
 
-@OperatorMetadata(alias="SARSim-Terrain-Correction", description="Orthorectification with SAR simulation")
+@OperatorMetadata(alias="SARSim-Terrain-Correction", category = "Geometry",
+        description="Orthorectification with SAR simulation")
 public class SARSimTerrainCorrectionOp extends Operator {
 
     @SourceProduct(alias="source")

@@ -26,7 +26,9 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
  * scene height from metadata instead of scene height from DEM.
  */
 
-@OperatorMetadata(alias="Ellipsoid-Correction-RD", description="Ellipsoid correction with RD method and average scene height")
+@OperatorMetadata(alias="Ellipsoid-Correction-RD",
+        category = "Geometry",
+        description="Ellipsoid correction with RD method and average scene height")
 public final class EllipsoidCorrectionRDOp extends RangeDopplerGeocodingOp {
 
     @SourceProduct(alias="source")

@@ -67,7 +67,9 @@ import java.util.Date;
  *    3) Save the new orbit state vector in the target product.
  */
 
-@OperatorMetadata(alias="Apply-Orbit-File", description="Apply orbit file")
+@OperatorMetadata(alias="Apply-Orbit-File",
+        category = "SAR Tools",
+        description="Apply orbit file")
 public final class ApplyOrbitFileOp extends Operator {
 
     @SourceProduct(alias="source")

@@ -37,7 +37,9 @@ import java.util.ArrayList;
  * Slant Range to Ground Range Conversion.
  */
 
-@OperatorMetadata(alias="SRGR", description="Converts Slant Range to Ground Range")
+@OperatorMetadata(alias="SRGR",
+        category = "Geometry",
+        description="Converts Slant Range to Ground Range")
 public class SRGROp extends Operator {
 
     @SourceProduct(alias="source")

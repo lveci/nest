@@ -60,6 +60,7 @@ import java.util.Map;
  */
 
 @OperatorMetadata(alias="GCP-Selection",
+                  category = "SAR Tools",
                   description = "Automatic Selection of Ground Control Points")
 public class GCPSelectionOp extends Operator {
 

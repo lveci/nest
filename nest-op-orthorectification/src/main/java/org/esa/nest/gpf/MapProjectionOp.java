@@ -26,7 +26,7 @@ import java.io.IOException;
 
  */
 
-@OperatorMetadata(alias="MapProjection", description="Applies a map projection")
+@OperatorMetadata(alias="MapProjection", category = "Geometry", description="Applies a map projection")
 public final class MapProjectionOp extends Operator {
 
     @SourceProduct(alias="source")

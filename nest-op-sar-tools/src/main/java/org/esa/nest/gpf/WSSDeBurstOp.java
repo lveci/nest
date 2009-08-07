@@ -18,7 +18,9 @@ import java.util.*;
 /**
  * De-Burst a WSS product
  */
-@OperatorMetadata(alias = "WSS-Deburst", description="Merges the bursts of an ASAR WSS product")
+@OperatorMetadata(alias = "WSS-Deburst",
+        category = "SAR Tools",
+        description="Merges the bursts of an ASAR WSS product")
 public class WSSDeBurstOp extends Operator {
 
     @SourceProduct(alias="source")

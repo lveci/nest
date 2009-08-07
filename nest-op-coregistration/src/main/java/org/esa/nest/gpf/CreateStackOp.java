@@ -27,6 +27,7 @@ import java.util.Map;
  *
  */
 @OperatorMetadata(alias = "CreateStack",
+                  category = "Utilities",
                   description = "Collocates two or more products based on their geo-codings.")
 public class CreateStackOp extends Operator {
 

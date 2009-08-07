@@ -27,7 +27,9 @@ import java.util.Set;
     CreateElevationBandOp adds an elevation band to a product
  */
 
-@OperatorMetadata(alias="CreateElevation", description="Creates a DEM band")
+@OperatorMetadata(alias="CreateElevation",
+        category = "Geometry",
+        description="Creates a DEM band")
 public final class CreateElevationOp extends Operator {
 
     @SourceProduct(alias="source")

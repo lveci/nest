@@ -40,7 +40,12 @@ public @interface OperatorMetadata {
      */
     String description() default "";
 
-
+    /**
+     * @return A Category to group the operator in.
+     *         Defaults to the empty string (= not set).
+     */
+    String category() default "";
+    
     /**
      * @return If {@code true}, this operator is considered for internal use onlyand thus
      *         may not be exposed in user interfaces.

@@ -36,7 +36,9 @@ import java.util.ArrayList;
  * Format-Change
  */
 
-@OperatorMetadata(alias="Convert-Datatype", description="Convert product data type")
+@OperatorMetadata(alias="Convert-Datatype",
+        category = "Utilities",
+        description="Convert product data type")
 public class ConvertDataTypeOp extends Operator {
 
     @SourceProduct(alias="source")

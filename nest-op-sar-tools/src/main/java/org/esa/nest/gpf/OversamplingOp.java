@@ -37,7 +37,9 @@ import java.util.Map;
  * Oversample
  */
 
-@OperatorMetadata(alias="Oversample", description="Oversample the datset")
+@OperatorMetadata(alias="Oversample",
+        category = "Utilities",
+        description="Oversample the datset")
 public class OversamplingOp extends Operator {
 
     @SourceProduct(alias="source")

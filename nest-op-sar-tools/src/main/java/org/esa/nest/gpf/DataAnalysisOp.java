@@ -51,7 +51,9 @@ import java.util.HashMap;
  * The sample operator implementation for an algorithm
  * that can compute bands independently of each other.
  */
-@OperatorMetadata(alias="Data-Analysis", description="Computes statistics")
+@OperatorMetadata(alias="Data-Analysis",
+        category = "Analysis",
+        description="Computes statistics")
 public class DataAnalysisOp extends Operator {
 
     @SourceProduct

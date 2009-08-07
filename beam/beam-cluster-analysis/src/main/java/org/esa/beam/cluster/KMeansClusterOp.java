@@ -37,12 +37,13 @@ import java.io.IOException;
  * Operator for k-means cluster analysis.
  *
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:13 $
+ * @version $Revision: 1.2 $ $Date: 2009-08-07 19:30:15 $
  */
 @OperatorMetadata(alias = "KMeansClusterAnalysis",
                   version = "1.0",
                   authors = "Ralf Quast, Marco Zuehlke",
                   copyright = "(c) 2008 by Brockmann Consult",
+                  category = "Analysis",
                   description = "Performs a K-Means cluster analysis.")
 public class KMeansClusterOp extends Operator {
 

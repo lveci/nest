@@ -98,6 +98,15 @@ public class GraphExecuter extends Observable {
         return !(operatorMetadata != null && !operatorMetadata.internal());
     }
 
+    public String getOperatorCategory(String alias) {
+        final OperatorSpiRegistry registry = gpf.getOperatorSpiRegistry();
+        final OperatorSpi operatorSpi = registry.getOperatorSpi(alias);
+        final OperatorMetadata operatorMetadata = operatorSpi.getOperatorClass().getAnnotation(OperatorMetadata.class);
+        if(operatorMetadata != null)
+            return operatorMetadata.category();
+        return "";
+    }
+
     public GraphNode addOperator(final String opName) {
 
         final String id = "" + ++idCount + '-' + opName;

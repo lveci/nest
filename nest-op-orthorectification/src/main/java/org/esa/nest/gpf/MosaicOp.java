@@ -26,6 +26,7 @@ import java.util.Map;
  * The Mosaic operator.
  */
 @OperatorMetadata(alias = "Mosaic",
+        category = "Geometry",
         description = "Mosaics two or more products based on their geo-codings.")
 public class MosaicOp extends Operator {
 
