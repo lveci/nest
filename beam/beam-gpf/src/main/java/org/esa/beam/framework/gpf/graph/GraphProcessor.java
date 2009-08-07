@@ -170,7 +170,8 @@ public class GraphProcessor {
         int percentComplete;
         final int percentStep = 10;
         int lastPercentComplete = percentStep;
-
+        int cnt=0;
+        
         try {
             pm.beginTask("Computing raster data...", numPmTicks);
             for (Dimension dimension : dimList) {
@@ -227,6 +228,7 @@ public class GraphProcessor {
                                 }
                             }
 
+                            System.out.println("Tile "+(cnt++)+" of "+ numYTiles*numXTiles);
                             pm.worked(1);
                         }
                         fireTileStopped(graphContext, tileRectangle);
