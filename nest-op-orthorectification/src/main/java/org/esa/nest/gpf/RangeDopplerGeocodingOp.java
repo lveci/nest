@@ -293,7 +293,9 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
 
         if (mission.contains("ALOS")) {
-            throw new OperatorException("ALOS PALSAR product is not supported yet");
+            if(!absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE).contains("COMPLEX")) {
+                throw new OperatorException("Only level 1.1 ALOS PALSAR product is supported");
+            }
         }
     }
 
@@ -395,6 +397,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         
         final double[] lats  = {geoPosFirstNear.getLat(), geoPosFirstFar.getLat(), geoPosLastNear.getLat(), geoPosLastFar.getLat()};
         final double[] lons  = {geoPosFirstNear.getLon(), geoPosFirstFar.getLon(), geoPosLastNear.getLon(), geoPosLastFar.getLon()};
+
         latMin = 90.0;
         latMax = -90.0;
         for (double lat : lats) {
@@ -457,6 +460,9 @@ public class RangeDopplerGeocodingOp extends Operator {
     private void getFirstLastLineTimes() throws Exception {
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
         lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD(); // in days
+        if (firstLineUTC >= lastLineUTC) {
+            throw new OperatorException("First line time should be smaller than the last line time");
+        }
     }
 
     /**
