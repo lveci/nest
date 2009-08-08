@@ -240,10 +240,22 @@ public class ALOSCalibrator implements Calibrator {
     public double applyCalibration(
             final double v, final double slantRange, final double satelliteHeight, final double sceneToEarthCentre,
             final double localIncidenceAngle, final int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
-        return 0.0;
+
+        double sigma = 0.0;
+        if (bandUnit == Unit.UnitType.AMPLITUDE) {
+            sigma = v*v;
+        } else if (bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+            sigma = v;
+        } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
+            sigma = Math.pow(10, v/10.0); // convert dB to linear scale
+        } else {
+            throw new OperatorException("Uknown band unit");
+        }
+
+        return sigma*calibrationFactor;
     }
 
     public double applyRetroCalibration(int x, int y, double v, int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
-        return 0.0;
+        return v;
     }
 }
