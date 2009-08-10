@@ -97,8 +97,10 @@ public class ASARCalibrator implements Calibrator {
 
     private static final int numOfGains = 201; // number of antenna pattern gain values for a given swath and
                                                // polarization in the aux file
-    private static final double refSlantRange = 800000.0; //  m
-    protected static final double halfLightSpeedByRefSlantRange = Constants.halfLightSpeed / refSlantRange;
+    private double refSlantRange = 800000.0; //  m
+    private double halfLightSpeedByRefSlantRange = Constants.halfLightSpeed / refSlantRange;
+    private double refSlantRange800km = 800000.0; //  m
+    protected double halfLightSpeedByRefSlantRange800km = Constants.halfLightSpeed / refSlantRange800km;
     protected static final double underFlowFloat = 1.0e-30;
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
     private static final int INVALID_SUB_SWATH_INDEX = -1;
@@ -375,6 +377,13 @@ public class ASARCalibrator implements Calibrator {
         incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
         latitude = OperatorUtils.getLatitude(sourceProduct);
         longitude = OperatorUtils.getLongitude(sourceProduct);
+
+	if (productType.contains("ASA_GM")) {
+        	final double centreSlandRangeNS = slantRangeTime.getPixelDouble(sourceProduct.getSceneRasterWidth()/2,
+                                                                        sourceProduct.getSceneRasterHeight()/2);
+        	refSlantRange = Constants.halfLightSpeed * (centreSlandRangeNS/ 1000000000.0); // ns to s;
+        	halfLightSpeedByRefSlantRange = Constants.halfLightSpeed / refSlantRange;
+	}
     }
 
     private void getNewXCAFile() throws Exception {
@@ -758,6 +767,10 @@ public class ASARCalibrator implements Calibrator {
             rangeSpreadingCompPower = 4.0;
         }
         halfRangeSpreadingCompPower = rangeSpreadingCompPower / 2.0;
+
+        if (productType.contains("ASA_GM")) {
+            rangeSpreadingCompPower = 5.0;
+        }
     }
 
     /**
@@ -1288,11 +1301,11 @@ public class ASARCalibrator implements Calibrator {
         }
 
         if (bandUnit == Unit.UnitType.AMPLITUDE) {
-            return v*gain*Math.pow(refSlantRange / slantRange, halfRangeSpreadingCompPower); // amplitude
+            return v*gain*Math.pow(refSlantRange800km / slantRange, halfRangeSpreadingCompPower); // amplitude
         } else if (bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
-            return v*gain*gain*Math.pow(refSlantRange / slantRange, rangeSpreadingCompPower); // intensity
+            return v*gain*gain*Math.pow(refSlantRange800km / slantRange, rangeSpreadingCompPower); // intensity
         } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
-            return 10.0*Math.log10(Math.pow(10, v/10.0)*gain*gain*Math.pow(refSlantRange/slantRange, rangeSpreadingCompPower));
+            return 10.0*Math.log10(Math.pow(10, v/10.0)*gain*gain*Math.pow(refSlantRange800km/slantRange, rangeSpreadingCompPower));
         } else {
             throw new OperatorException("Uknown band unit");
         }
