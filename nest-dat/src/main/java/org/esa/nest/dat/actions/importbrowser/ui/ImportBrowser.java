@@ -35,7 +35,7 @@ import java.util.Vector;
 
 public class ImportBrowser {
 
-    private static final int quickLookWidth = 1000;
+    private static final int quickLookWidth = 500;
     private static final String stopCommand = "stop";
     private static final String updateCommand = "update";
     private static final ImageIcon updateIcon = UIUtils.loadImageIcon("icons/Update24.gif");

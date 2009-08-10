@@ -5,6 +5,8 @@ import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.GridBagUtils;
 import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.dataop.maptransf.MapProjection;
+import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.nest.util.DialogUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
@@ -12,6 +14,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Map;
+import java.util.Arrays;
 
 /**
  * User interface for GCPSelectionOp
@@ -25,17 +28,18 @@ public class MosaicOpUI extends BaseOperatorUI {
                                                                               MosaicOp.CUBIC_CONVOLUTION});
 
     private final JLabel resamplingMethodLabel = new JLabel("Resampling method:");
+    private final JComboBox projectionName = new JComboBox();
 
     private final JTextField pixelSizeX = new JTextField("");
     private final JTextField pixelSizeY = new JTextField("");
     private final JTextField sceneWidth = new JTextField("");
     private final JTextField sceneHeight = new JTextField("");
     private final JCheckBox averageCheckBox = new JCheckBox("Average Overlap");
-    private final JCheckBox normalizeByMaxCheckBox = new JCheckBox("Normalize By Max");
+    private final JCheckBox normalizeByMeanCheckBox = new JCheckBox("Normalize By Mean");
     private boolean changedByUser = false;
 
     private boolean average = false;
-    private boolean normalizeByMax = false;
+    private boolean normalizeByMean = false;
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -44,15 +48,21 @@ public class MosaicOpUI extends BaseOperatorUI {
         final JComponent panel = createPanel();
         initParameters();
 
+        final String[] projectionsValueSet = getProjectionsValueSet();
+        Arrays.sort(projectionsValueSet);
+        for(String name : projectionsValueSet) {
+            projectionName.addItem(name);
+        }
+
         averageCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
                     average = (e.getStateChange() == ItemEvent.SELECTED);
                 }
         });
 
-        normalizeByMaxCheckBox.addItemListener(new ItemListener() {
+        normalizeByMeanCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
-                    normalizeByMax = (e.getStateChange() == ItemEvent.SELECTED);
+                    normalizeByMean = (e.getStateChange() == ItemEvent.SELECTED);
                 }
         });
 
@@ -75,6 +85,7 @@ public class MosaicOpUI extends BaseOperatorUI {
         OperatorUIUtils.initBandList(bandList, getBandNames());
 
         resamplingMethod.setSelectedItem(paramMap.get("resamplingMethod"));
+        projectionName.setSelectedItem(paramMap.get("projectionName"));
 
         int width = (Integer)paramMap.get("sceneWidth");
         int height = (Integer)paramMap.get("sceneHeight");
@@ -110,8 +121,8 @@ public class MosaicOpUI extends BaseOperatorUI {
         average = (Boolean)paramMap.get("average");
         averageCheckBox.getModel().setPressed(average);
 
-        normalizeByMax = (Boolean)paramMap.get("normalizeByMax");
-        normalizeByMaxCheckBox.getModel().setPressed(normalizeByMax);
+        normalizeByMean = (Boolean)paramMap.get("normalizeByMean");
+        normalizeByMeanCheckBox.getModel().setPressed(normalizeByMean);
 
     }
 
@@ -126,11 +137,12 @@ public class MosaicOpUI extends BaseOperatorUI {
 
         OperatorUIUtils.updateBandList(bandList, paramMap);
         paramMap.put("resamplingMethod", resamplingMethod.getSelectedItem());
+        paramMap.put("projectionName", projectionName.getSelectedItem());
         paramMap.put("sceneWidth", Integer.parseInt(sceneWidth.getText()));
         paramMap.put("sceneHeight", Integer.parseInt(sceneHeight.getText()));
 
         paramMap.put("average", average);
-        paramMap.put("normalizeByMax", normalizeByMax);
+        paramMap.put("normalizeByMean", normalizeByMean);
     }
 
     private JComponent createPanel() {
@@ -159,6 +171,8 @@ public class MosaicOpUI extends BaseOperatorUI {
         gbc.gridx = 1;
         contentPane.add(resamplingMethod, gbc);
         gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "Map Projection:", projectionName);
+        gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Scene Width (pixels)", sceneWidth);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Scene Height (pixels)", sceneHeight);
@@ -166,10 +180,19 @@ public class MosaicOpUI extends BaseOperatorUI {
         gbc.gridy++;
         contentPane.add(averageCheckBox, gbc);
         gbc.gridy++;
-        contentPane.add(normalizeByMaxCheckBox, gbc);
+        contentPane.add(normalizeByMeanCheckBox, gbc);
 
         DialogUtils.fillPanel(contentPane, gbc);
 
         return contentPane;
+    }
+
+    private static String[] getProjectionsValueSet() {
+        final MapProjection[] projections = MapProjectionRegistry.getProjections();
+        final String[] projectionsValueSet = new String[projections.length];
+        for (int i = 0; i < projectionsValueSet.length; i++) {
+            projectionsValueSet[i] = projections[i].getName();
+        }
+        return projectionsValueSet;
     }
 }

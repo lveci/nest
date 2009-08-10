@@ -4,9 +4,11 @@ package org.esa.nest.dat.actions.importbrowser.model.dataprovider;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.dat.actions.importbrowser.model.Repository;
 import org.esa.nest.dat.actions.importbrowser.model.RepositoryEntry;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.imageio.ImageIO;
 import javax.media.jai.JAI;
@@ -48,12 +50,26 @@ public class QuicklookProvider implements DataProvider {
             quickLookFile.createNewFile();
             final BufferedImage bufferedImage = createQuickLook(product);
 
-            ImageIO.write(average(bufferedImage), "JPG", quickLookFile);
+            if(isComplex(product)) {
+                ImageIO.write(average(bufferedImage), "JPG", quickLookFile);
+            } else {   // detected
+                ImageIO.write(bufferedImage, "JPG", quickLookFile);
+            }
             //ImageIO.write(downSampleImage(bufferedImage), "JPG", quickLookFile);
         } catch(Exception e) {
             System.out.println("Quicklook create data failed :"+e.getMessage());
             throw new IOException(e);
         }
+    }
+
+    private static boolean isComplex(Product product) {
+        final MetadataElement root = product.getMetadataRoot();
+        if(root != null) {
+            final MetadataElement absRoot = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+            if(absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE, "").equals("COMPLEX"))
+                return true;
+        }
+        return false;
     }
 
     static BufferedImage averageWithJAI(BufferedImage image) {
@@ -162,9 +178,11 @@ public class QuicklookProvider implements DataProvider {
             scaleFactor = 1;
         }
         productSubsetDef.setSubSampling(scaleFactor, scaleFactor);
+
+        final String quicklookBandName = ProductUtils.findSuitableQuicklookBandName(product);
+        productSubsetDef.setNodeNames(new String[]{quicklookBandName});
         final Product productSubset = product.createSubset(productSubsetDef, null, null);
 
-        final String quicklookBandName = ProductUtils.findSuitableQuicklookBandName(productSubset);
         return ProductUtils.createColorIndexedImage(productSubset.getBand(quicklookBandName), ProgressMonitor.NULL);
     }
 

@@ -122,9 +122,9 @@ public class ReaderUtils {
         }
     }
 
-    public static void createMapGeocoding(final Product targetProduct, final double noDataValue) {
+    public static void createMapGeocoding(final Product targetProduct, final String projectionName, final double noDataValue) {
         final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(targetProduct,
-                                                MapProjectionRegistry.getProjection(IdentityTransformDescriptor.NAME),
+                                                MapProjectionRegistry.getProjection(projectionName),
                                                 0.0,
                                                 noDataValue);
         mapInfo.setSceneWidth(targetProduct.getSceneRasterWidth());

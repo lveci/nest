@@ -727,7 +727,8 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         final String[] srcBandNames = targetBandNameToSourceBandName.get(targetProduct.getBandAt(0).getName());
 
-        ReaderUtils.createMapGeocoding(targetProduct, sourceProduct.getBand(srcBandNames[0]).getNoDataValue());
+        ReaderUtils.createMapGeocoding(targetProduct, IdentityTransformDescriptor.NAME,
+                sourceProduct.getBand(srcBandNames[0]).getNoDataValue());
     }
 
     /**

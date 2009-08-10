@@ -3,6 +3,7 @@ package org.esa.nest.gpf;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
+import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -49,10 +50,13 @@ public class MosaicOp extends Operator {
             label = "Resampling Type")
     private String resamplingMethod = NEAREST_NEIGHBOUR;
 
+    @Parameter(description = "The projection name", defaultValue = IdentityTransformDescriptor.NAME)
+    private String projectionName = IdentityTransformDescriptor.NAME;
+
     @Parameter(defaultValue = "false", description = "Average the overlapping areas", label = "Average Overlap")
     private boolean average = false;
-    @Parameter(defaultValue = "false", description = "Normalize by Maximum", label = "Normalize by Maximum")
-    private boolean normalizeByMax = false;
+    @Parameter(defaultValue = "false", description = "Normalize by Mean", label = "Normalize by Mean")
+    private boolean normalizeByMean = false;
 
     @Parameter(defaultValue = "0", description = "Target width", label = "Scene Width (pixels)")
     private int sceneWidth = 0;
@@ -296,7 +300,7 @@ public class MosaicOp extends Operator {
         targetProduct.addTiePointGrid(lonGrid);
         targetProduct.setGeoCoding(tpGeoCoding);
 
-        ReaderUtils.createMapGeocoding(targetProduct, 0);
+        ReaderUtils.createMapGeocoding(targetProduct, projectionName, 0);
     }
 
     private static Rectangle getSrcRect(final GeoCoding destGeoCoding,
@@ -431,7 +435,6 @@ public class MosaicOp extends Operator {
 
             final ArrayList<SourceData> validSourceData = new ArrayList<SourceData>(validProducts.size());
             int index = 0;
-            double overallMax = Float.MIN_VALUE;
             for (Product srcProduct : validProducts) {
                 final PixelPos[] pixPos = srcPixelCoords.get(index);
                 final Rectangle sourceRectangle = getBoundingBox(
@@ -441,21 +444,22 @@ public class MosaicOp extends Operator {
 
                 if (sourceRectangle != null) {
                     final Band srcBand = srcBandMap.get(srcProduct);
-
-                    validSourceData.add(new SourceData(srcBand, sourceRectangle, pixPos, resampling));
-
-                    if(normalizeByMax) {                  // get stat values
+                    double min = 0, max = 0, mean = 0;
+                    if(normalizeByMean) {                  // get stat values
                         final Stx stats = srcBand.getStx();
-                        final double max = stats.getMax();
-                        if (max > overallMax)
-                            overallMax = max;
+                        mean = stats.getMean();
+                        min = stats.getMin();
+                        max = stats.getMax();
                     }
+
+                    validSourceData.add(new SourceData(srcBand, sourceRectangle, pixPos, resampling,
+                                                        min, max, mean));
                 }
                 ++index;
             }
 
             if(!validSourceData.isEmpty()) {
-                collocateSourceBand(validSourceData, targetTile, overallMax, pm);
+                collocateSourceBand(validSourceData, targetTile, pm);
             }
         } catch (Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
@@ -465,7 +469,7 @@ public class MosaicOp extends Operator {
     }
 
     private void collocateSourceBand(ArrayList<SourceData> validSourceData,
-                                     Tile targetTile, double overallMax, ProgressMonitor pm) throws OperatorException {
+                                     Tile targetTile, ProgressMonitor pm) throws OperatorException {
         try {
             final Rectangle targetRectangle = targetTile.getRectangle();
             final ProductData trgBuffer = targetTile.getDataBuffer();
@@ -474,12 +478,23 @@ public class MosaicOp extends Operator {
             final int maxY = targetRectangle.y + targetRectangle.height;
             final int maxX = targetRectangle.x + targetRectangle.width;
 
+            int cnt = 0;
+            double overalMean = 0;
+            if (normalizeByMean) {
+                double sum = 0;
+                for(SourceData srcDat : validSourceData) {
+                    sum += srcDat.srcMean;
+                    ++cnt;
+                }
+                overalMean = sum / cnt;
+            }
+
             for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
                 checkForCancelation(pm);
                 for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
                     final int trgIndex = targetTile.getDataBufferIndex(x, y);
 
-                    int cnt = 0;
+                    cnt = 0;
                     double targetVal = 0;
                     for(SourceData srcDat : validSourceData) {
                         final PixelPos sourcePixelPos = srcDat.srcPixPos[index];
@@ -492,8 +507,8 @@ public class MosaicOp extends Operator {
 
                         if (!Float.isNaN(sample) && sample != srcDat.nodataValue) {
 
-                            if (normalizeByMax) {
-                                sample /= overallMax;
+                            if (normalizeByMean) {
+                                sample /= srcDat.srcMean;
                             }
                             if (average) {
                                 targetVal += sample;
@@ -506,6 +521,9 @@ public class MosaicOp extends Operator {
                     if(targetVal != 0) {
                         if (average) {
                             targetVal /= cnt;
+                        }
+                        if(normalizeByMean) {
+                            targetVal *= overalMean;
                         }
                         trgBuffer.setElemDoubleAt(trgIndex, targetVal);
                     }
@@ -575,8 +593,12 @@ public class MosaicOp extends Operator {
         final PixelPos[] srcPixPos;
         final int srcRasterHeight;
         final int srcRasterWidth;
+        final double srcMean;
+        final double srcMax;
+        final double srcMin;
 
-        public SourceData(Band sourceBand, Rectangle sourceRectangle, PixelPos[] pixPos, Resampling resampling) {
+        public SourceData(Band sourceBand, Rectangle sourceRectangle, PixelPos[] pixPos, Resampling resampling,
+                          double min, double max, double mean) {
             srcBand = sourceBand;
             srcTile = getSourceTile(sourceBand, sourceRectangle, ProgressMonitor.NULL);
             resamplingRaster = new ResamplingRaster(srcTile);
@@ -587,6 +609,9 @@ public class MosaicOp extends Operator {
             final Product srcProduct = sourceBand.getProduct();
             srcRasterHeight = srcProduct.getSceneRasterHeight();
             srcRasterWidth = srcProduct.getSceneRasterWidth();
+            srcMin = min;
+            srcMax = max;
+            srcMean = mean;
         }
     }
 
