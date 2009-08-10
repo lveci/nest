@@ -1,5 +1,5 @@
 /*
- * $Id: AsarProductFile.java,v 1.5 2009-06-08 14:30:48 lveci Exp $
+ * $Id: AsarProductFile.java,v 1.6 2009-08-10 19:18:35 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -34,7 +34,7 @@ import java.util.Arrays;
  * ASAR data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.5 $ $Date: 2009-06-08 14:30:48 $
+ * @version $Revision: 1.6 $ $Date: 2009-08-10 19:18:35 $
  * @see org.esa.beam.dataio.envisat.ProductFile
  */
 public class AsarProductFile extends ProductFile {
@@ -105,6 +105,11 @@ public class AsarProductFile extends ProductFile {
      * Product type suffix for IODD-4B backward compatibility
      */
     private static final String IODD4B_SUFFIX = "_IODD_4B";
+
+    /**
+     * The product type plus the IODD suffix
+     */
+    private String fullProductType = null;
 
     /**
      * Constructs a <code>MerisProductFile</code> for the given seekable data input stream. Attaches the
@@ -476,9 +481,10 @@ public class AsarProductFile extends ProductFile {
      */
     @Override
     protected String getDddbProductType() {
-        // Debug.trace("MerisProductFile.getDddbProductType: IODD version still unknown");
-        final String productType = getDddbProductTypeReplacement(getProductType(), getIODDVersion());
-        return productType != null ? productType : super.getDddbProductType();
+        if(fullProductType == null) {
+            fullProductType = getDddbProductTypeReplacement(getProductType(), getIODDVersion());
+        }
+        return fullProductType != null ? fullProductType : super.getDddbProductType();
     }
 
     static String getDddbProductTypeReplacement(final String productType, final IODD ioddVersion) {

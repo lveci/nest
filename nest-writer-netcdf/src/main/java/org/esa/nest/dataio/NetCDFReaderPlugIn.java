@@ -34,19 +34,7 @@ public class NetCDFReaderPlugIn implements ProductReaderPlugIn {
             return DecodeQualification.UNABLE;
         }
 
-        final File parentDir = file.getParentFile();
-        if (file.isFile() && parentDir!=null && parentDir.isDirectory()) {
-            final FilenameFilter filter = new FilenameFilter() {
-                public boolean accept(final File dir, final String name) {
-                    return true;//name.contains(constants.getIndicationKey());
-                }
-            };
-            final File[] files = parentDir.listFiles(filter);
-            if (files != null) {
-                return checkProductQualification(file);
-            }
-        }
-        return DecodeQualification.UNABLE;
+        return checkProductQualification(file);
     }
 
     DecodeQualification checkProductQualification(final File file) {

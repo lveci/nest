@@ -1,5 +1,5 @@
 /*
- * $Id: ProductFile.java,v 1.1 2009-04-28 14:37:13 lveci Exp $
+ * $Id: ProductFile.java,v 1.2 2009-08-10 19:18:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -40,7 +40,7 @@ import java.util.logging.Logger;
  * product files which have been opened for <i>read-only</i> access.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:13 $
+ * @version $Revision: 1.2 $ $Date: 2009-08-10 19:18:36 $
  */
 public abstract class ProductFile {
 
@@ -511,8 +511,14 @@ public abstract class ProductFile {
      * @return the DSD for the dataset with the specified name or <code>null</code> if the DSD does not exist
      */
     public DSD getDSD(String datasetName) {
-        int index = getDSDIndex(datasetName);
-        return index >= 0 ? getDSDAt(index) : null;
+        final String dsdName = DDDB.getInstance().getDSDName(getDddbProductType(), datasetName);
+
+        for (DSD theDSD : dsdArray) {
+            if (theDSD.getDatasetName().equalsIgnoreCase(dsdName)) {
+                return theDSD;
+            }
+        }
+        return null;
     }
 
     /**
@@ -529,7 +535,8 @@ public abstract class ProductFile {
         // to the product-internal DSD name
         final String dsdName = DDDB.getInstance().getDSDName(getDddbProductType(), datasetName);
 
-        for (int i = 0; i < getNumDSDs(); i++) {
+        final int numDSDs = getNumDSDs();
+        for (int i = 0; i < numDSDs; i++) {
             if (getDSDAt(i).getDatasetName().equalsIgnoreCase(dsdName)) {
                 return i;
             }

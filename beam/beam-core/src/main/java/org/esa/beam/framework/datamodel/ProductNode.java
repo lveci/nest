@@ -1,5 +1,5 @@
 /*
- * $Id: ProductNode.java,v 1.4 2009-08-06 15:21:21 lveci Exp $
+ * $Id: ProductNode.java,v 1.5 2009-08-10 19:18:35 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,7 +27,7 @@ import org.esa.beam.util.ObjectUtils;
  * product itself.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2009-08-06 15:21:21 $
+ * @version $Revision: 1.5 $ $Date: 2009-08-10 19:18:35 $
  */
 public abstract class ProductNode {
 
@@ -64,9 +64,9 @@ public abstract class ProductNode {
      * @throws IllegalArgumentException if the given name is not a valid node identifier
      */
     protected ProductNode(String name, String description) {
-        Guardian.assertNotNull("name", name);
+        //Guardian.assertNotNull("name", name);
         name = name.trim();
-        Guardian.assertNotNullOrEmpty("name", name);
+        //Guardian.assertNotNullOrEmpty("name", name);
         this.name = name;
         this.description = description;
     }

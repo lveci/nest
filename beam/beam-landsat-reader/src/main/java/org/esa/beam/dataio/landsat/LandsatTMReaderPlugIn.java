@@ -1,5 +1,5 @@
 /*
- * $Id: LandsatTMReaderPlugIn.java,v 1.1 2009-04-28 14:37:15 lveci Exp $
+ * $Id: LandsatTMReaderPlugIn.java,v 1.2 2009-08-10 19:18:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -49,13 +49,18 @@ public final class LandsatTMReaderPlugIn implements ProductReaderPlugIn {
         LandsatTMFile file = null;
         try {
             if (input instanceof String) {
-                file = new LandsatTMFile((String) input);
+                if(isValidExtension((String) input)) {
+                    file = new LandsatTMFile((String) input);
+                }
             } else if (input instanceof File) {
-                file = new LandsatTMFile((File) input);
+                final File inputFile = (File) input;
+                if(isValidExtension(inputFile.getName())) {
+                    file = new LandsatTMFile(inputFile);
+                }
             } else {
                 return DecodeQualification.UNABLE;
             }
-            if(file.canDecodeInput()) {
+            if(file != null && file.canDecodeInput()) {
                 return DecodeQualification.INTENDED;
             }
         } catch (Throwable e) {
@@ -66,6 +71,13 @@ public final class LandsatTMReaderPlugIn implements ProductReaderPlugIn {
             }
         }
         return DecodeQualification.UNABLE;
+    }
+
+    private static boolean isValidExtension(String name) {
+        for(String ext : LandsatConstants.LANDSAT_EXTENSIONS) {
+
+        }
+        return false;
     }
 
     /**

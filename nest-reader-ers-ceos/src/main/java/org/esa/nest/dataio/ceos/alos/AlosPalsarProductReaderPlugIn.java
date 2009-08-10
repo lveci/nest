@@ -43,8 +43,7 @@ public class AlosPalsarProductReaderPlugIn extends CEOSProductReaderPlugIn {
         if (file == null) {
             return DecodeQualification.UNABLE;
         }
-        final String filename = FileUtils.getFilenameWithoutExtension(file).toUpperCase();
-        if (!filename.startsWith(constants.getVolumeFilePrefix())) {
+        if (!file.getName().toUpperCase().startsWith(constants.getVolumeFilePrefix())) {
             return DecodeQualification.UNABLE; // not the volume file
         }
 
