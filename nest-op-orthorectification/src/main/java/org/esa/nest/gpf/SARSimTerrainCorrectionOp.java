@@ -292,7 +292,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
 
         if (mission.contains("ALOS")) {
-            throw new OperatorException("ALOS PALSAR product is not supported yet");
+            if(!absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE).contains("COMPLEX")) {
+                throw new OperatorException("Only level 1.1 ALOS PALSAR product is supported");
+            }
         }
     }
 
@@ -455,6 +457,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private void getFirstLastLineTimes() throws Exception {
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
         lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD(); // in days
+        if (firstLineUTC >= lastLineUTC) {
+            throw new OperatorException("First line time should be smaller than the last line time");
+        }
     }
 
     /**
