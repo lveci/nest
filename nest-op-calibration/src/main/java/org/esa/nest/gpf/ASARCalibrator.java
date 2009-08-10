@@ -956,15 +956,11 @@ public class ASARCalibrator implements Calibrator {
             for (int x = x0; x < x0 + w; x++) {
 
                 final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
-                /*
-                final double earthRadius = computeEarthRadius(
-                        latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC),
-                        longitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC)); // in m
-                */
-                int i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC))/delLat + 0.5);
+
+                final double localEarthRadius = getEarthRadius(x, y);
 
                 final double theta = computeElevationAngle(
-                        slantRange, satelitteHeight, avgSceneHeight + earthRadius[i]); // in degree
+                        slantRange, satelitteHeight, avgSceneHeight + localEarthRadius); // in degree
 
                 targetTileNewAntPat[y - y0][x - x0] = computeAntPatGain(
                         theta, newRefElevationAngle[0], newAntennaPatternSingleSwath[band]);
@@ -1006,18 +1002,11 @@ public class ASARCalibrator implements Calibrator {
             for (int x = x0; x < x0 + w; x++) {
 
                 final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
-                /*
-                final double earthRadius = computeEarthRadius(
-                        latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC),
-                        longitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC)); // in m
-                */
-                int i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC))/delLat + 0.5);
-                if (i < 0) {
-                    i = 0;
-                }
+
+                final double localEarthRadius = getEarthRadius(x, y);
 
                 final double theta = computeElevationAngle(
-                                                slantRange, satelitteHeight, avgSceneHeight + earthRadius[i]); // in degree
+                                                slantRange, satelitteHeight, avgSceneHeight + localEarthRadius); // in degree
 
                 int subSwathIndex = findSubSwath(theta, newRefElevationAngle);
 
@@ -1032,6 +1021,35 @@ public class ASARCalibrator implements Calibrator {
                 }
             }
         }
+    }
+
+    /**
+     * Get Earth radius (in m) for given pixel.
+     * @param x The x coordinate of the given pixel.
+     * @param y The y coordinate of the given pixel.
+     * @return The earth radius.
+     */
+    private double getEarthRadius(final int x, final int y) {
+        /*
+        return computeEarthRadius(
+                latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC),
+                longitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC)); // in m
+        */
+
+        // use linear rather than quadratic interpolation for subset because quadratic interpolation
+        // does not give accurate result in this case
+        int i = 0;
+        if (latitude.getRasterWidth() < 10) { // subset case
+            i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y))/delLat + 0.5);
+        } else {
+            i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC))/delLat + 0.5);
+        }
+
+        if (i < 0) {
+            i = 0;
+        }
+
+        return earthRadius[i];
     }
 
     /**
