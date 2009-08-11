@@ -367,6 +367,15 @@
         </action>
 
         <action>
+            <id>testConnectivity</id>
+            <parent>help</parent>
+            <class>org.esa.nest.dat.actions.TestConnectivityAction</class>
+            <text>Test Connectivity</text>
+            <shortDescr>Test FTP connection for automatic downloads of DEMs</shortDescr>
+            <placeAfter>helpTopics</placeAfter>
+        </action>
+
+        <action>
             <id>ReportABug</id>
             <parent>help</parent>
             <class>org.esa.nest.dat.actions.ReportABugAction</class>

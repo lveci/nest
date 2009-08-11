@@ -30,7 +30,7 @@ public final class SRTM3GeoTiffFile {
     private FTPFile[] remoteFileList = null;
 
     private static final String remoteFTP = Settings.instance().get("DEM/srtm3GeoTiffDEM_FTP");
-    private static final String remotePath = getPath("DEM/srtm3GeoTiffDEM_remotePath");
+    private static final String remotePath = ftpUtils.getPathFromSettings("DEM/srtm3GeoTiffDEM_remotePath");
 
     public SRTM3GeoTiffFile(SRTM3GeoTiffElevationModel model, File localFile, ProductReader reader) {
         this.demModel = model;
@@ -52,14 +52,6 @@ public final class SRTM3GeoTiffFile {
         } catch(Exception e) {
             //
         }
-    }
-
-    private static String getPath(String tag) {
-        String path = Settings.instance().get(tag);
-        path = path.replace("\\", "/");
-        if(!path.endsWith("/"))
-            path += "/";
-        return path;
     }
 
     public String getFileName() {

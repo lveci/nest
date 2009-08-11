@@ -1,5 +1,5 @@
 /*
- * $Id: GeoTiffProductReaderPlugIn.java,v 1.2 2009-04-28 17:38:56 lveci Exp $
+ * $Id: GeoTiffProductReaderPlugIn.java,v 1.3 2009-08-11 17:31:40 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -23,6 +23,7 @@ import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.util.io.BeamFileFilter;
+import org.esa.beam.util.io.FileUtils;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -39,6 +40,10 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
     public DecodeQualification getDecodeQualification(Object input) {
         try {
             final File file = Utils.getFile(input);
+            final String ext = FileUtils.getExtension(file);
+            if(ext.equalsIgnoreCase(".tif") || ext.equalsIgnoreCase(".tiff"))
+                return DecodeQualification.INTENDED;
+
             final ImageInputStream stream = ImageIO.createImageInputStream(file);
 
             try {

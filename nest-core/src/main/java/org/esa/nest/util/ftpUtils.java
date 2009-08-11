@@ -125,4 +125,12 @@ public class ftpUtils {
     public FTPFile[] getRemoteFileList(String path) throws IOException {
         return ftpClient.listFiles(path);
     }
+
+    public static String getPathFromSettings(String tag) {
+        String path = Settings.instance().get(tag);
+        path = path.replace("\\", "/");
+        if(!path.endsWith("/"))
+            path += "/";
+        return path;
+    }
 }
