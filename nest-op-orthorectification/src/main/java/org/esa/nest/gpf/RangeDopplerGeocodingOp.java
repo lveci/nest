@@ -852,60 +852,60 @@ public class RangeDopplerGeocodingOp extends Operator {
         final int h  = targetRectangle.height;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        float[][] localDEM = null; // DEM for current tile for computing slope angle
-        if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) {
-            localDEM = new float[h+2][w+2];
-            final boolean valid = getLocalDEM(x0, y0, w, h, localDEM);
-            if(!valid && !useAvgSceneHeight && !saveDEM)
-                return;
-        }
-
-        final GeoPos geoPos = new GeoPos();
-        final double[] earthPoint = new double[3];
-        final double[] sensorPos = new double[3];
-        final int srcMaxRange = sourceImageWidth - 1;
-        final int srcMaxAzimuth = sourceImageHeight - 1;
-        ProductData demBuffer = null;
-        ProductData incidenceAngleBuffer = null;
-        ProductData projectedIncidenceAngleBuffer = null;
-
-        final ArrayList<TileData> trgTileList = new ArrayList<TileData>();
-        final Set<Band> keySet = targetTiles.keySet();
-        for(Band targetBand : keySet) {
-
-            if(targetBand.getName().equals("elevation")) {
-                demBuffer = targetTiles.get(targetBand).getDataBuffer();
-                continue;
-            }
-
-            if(targetBand.getName().equals("incidenceAngle")) {
-                incidenceAngleBuffer = targetTiles.get(targetBand).getDataBuffer();
-                continue;
-            }
-
-            if(targetBand.getName().equals("projectedIncidenceAngle")) {
-                projectedIncidenceAngleBuffer = targetTiles.get(targetBand).getDataBuffer();
-                continue;
-            }
-
-            final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
-
-            final TileData td = new TileData();
-            td.targetTile = targetTiles.get(targetBand);
-            td.tileDataBuffer = td.targetTile.getDataBuffer();
-            td.bandName = targetBand.getName();
-            td.noDataValue = sourceProduct.getBand(srcBandNames[0]).getNoDataValue();
-
-            final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
-            td.bandPolar = 0;
-            if (pol != null && mdsPolar[1] != null && pol.contains(mdsPolar[1])) {
-                td.bandPolar = 1;
-            }
-            trgTileList.add(td);
-        }
-        final TileData[] trgTiles = trgTileList.toArray(new TileData[trgTileList.size()]);
-
         try {
+            float[][] localDEM = null; // DEM for current tile for computing slope angle
+            if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) {
+                localDEM = new float[h+2][w+2];
+                final boolean valid = getLocalDEM(x0, y0, w, h, localDEM);
+                if(!valid && !useAvgSceneHeight && !saveDEM)
+                    return;
+            }
+
+            final GeoPos geoPos = new GeoPos();
+            final double[] earthPoint = new double[3];
+            final double[] sensorPos = new double[3];
+            final int srcMaxRange = sourceImageWidth - 1;
+            final int srcMaxAzimuth = sourceImageHeight - 1;
+            ProductData demBuffer = null;
+            ProductData incidenceAngleBuffer = null;
+            ProductData projectedIncidenceAngleBuffer = null;
+
+            final ArrayList<TileData> trgTileList = new ArrayList<TileData>();
+            final Set<Band> keySet = targetTiles.keySet();
+            for(Band targetBand : keySet) {
+
+                if(targetBand.getName().equals("elevation")) {
+                    demBuffer = targetTiles.get(targetBand).getDataBuffer();
+                    continue;
+                }
+
+                if(targetBand.getName().equals("incidenceAngle")) {
+                    incidenceAngleBuffer = targetTiles.get(targetBand).getDataBuffer();
+                    continue;
+                }
+
+                if(targetBand.getName().equals("projectedIncidenceAngle")) {
+                    projectedIncidenceAngleBuffer = targetTiles.get(targetBand).getDataBuffer();
+                    continue;
+                }
+
+                final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
+
+                final TileData td = new TileData();
+                td.targetTile = targetTiles.get(targetBand);
+                td.tileDataBuffer = td.targetTile.getDataBuffer();
+                td.bandName = targetBand.getName();
+                td.noDataValue = sourceProduct.getBand(srcBandNames[0]).getNoDataValue();
+
+                final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
+                td.bandPolar = 0;
+                if (pol != null && mdsPolar[1] != null && pol.contains(mdsPolar[1])) {
+                    td.bandPolar = 1;
+                }
+                trgTileList.add(td);
+            }
+            final TileData[] trgTiles = trgTileList.toArray(new TileData[trgTileList.size()]);
+
             final int maxY = y0 + h;
             final int maxX = x0 + w;
             for (int y = y0; y < maxY; y++) {
@@ -1031,8 +1031,9 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param localDEM The DEM for the tile.
      * @return true if all dem values are valid
      */
-    private boolean getLocalDEM(
-            final int x0, final int y0, final int tileWidth, final int tileHeight, final float[][] localDEM) {
+    private boolean getLocalDEM(final int x0, final int y0,
+                                final int tileWidth, final int tileHeight,
+                                final float[][] localDEM) throws Exception {
 
         // Note: the localDEM covers current tile with 1 extra row above, 1 extra row below, 1 extra column to
         //       the left and 1 extra column to the right of the tile.            
@@ -1068,16 +1069,12 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param geoPos The latitude and longitude in degrees.
      * @return The elevation in meter.
      */
-    private float getLocalElevation(final GeoPos geoPos) {
-        try {
-            if(externalDemFile == null) {
-                return dem.getElevation(geoPos);
-            }
-            return fileElevationModel.getElevation(geoPos);
-        } catch (Exception e) {
-           //
+    private float getLocalElevation(final GeoPos geoPos) throws Exception {
+
+        if(externalDemFile == null) {
+            return dem.getElevation(geoPos);
         }
-        return demNoDataValue;
+        return fileElevationModel.getElevation(geoPos);
     }
 
     /**

@@ -133,4 +133,23 @@ public class ftpUtils {
             path += "/";
         return path;
     }
+
+    public static boolean testFTP(String remoteFTP, String remotePath) {
+        try {
+            final ftpUtils ftp = new ftpUtils(remoteFTP);
+
+            final FTPFile[] remoteFileList = ftp.getRemoteFileList(remotePath);
+            ftp.disconnect();
+
+            return (remoteFileList != null);
+
+        } catch(Exception e) {
+            final String errMsg = "Error connecting via FTP: "+e.getMessage();
+            System.out.println(errMsg);
+            if(VisatApp.getApp() != null) {
+                VisatApp.getApp().showErrorDialog(errMsg);
+            }
+        }
+        return false;
+    }
 }

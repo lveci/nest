@@ -28,6 +28,7 @@ public final class SRTM3GeoTiffFile {
     private SRTM3GeoTiffElevationTile tile = null;
     private ftpUtils ftp = null;
     private FTPFile[] remoteFileList = null;
+    private boolean unrecoverableError = false;
 
     private static final String remoteFTP = Settings.instance().get("DEM/srtm3GeoTiffDEM_FTP");
     private static final String remotePath = ftpUtils.getPathFromSettings("DEM/srtm3GeoTiffDEM_remotePath");
@@ -58,7 +59,7 @@ public final class SRTM3GeoTiffFile {
         return localFile.getName();
     }
 
-    public SRTM3GeoTiffElevationTile getTile() {
+    public SRTM3GeoTiffElevationTile getTile() throws IOException {
         if(tile == null) {
             try {
                 if(localFileExists) {
@@ -90,12 +91,15 @@ public final class SRTM3GeoTiffFile {
                 System.out.println(e.getMessage());
                 tile = null;
                 localFileExists = false;
+                if(unrecoverableError) {
+                    throw new IOException(e);
+                }
             }
         }
         return tile;
     }
 
-    private boolean getRemoteFile() {
+    private boolean getRemoteFile() throws IOException {
         try {
             if(ftp == null) {
                 ftp = new ftpUtils(remoteFTP);
@@ -128,6 +132,11 @@ public final class SRTM3GeoTiffFile {
             return false;
         } catch(Exception e) {
             System.out.println(e.getMessage());
+            if(ftp == null) {
+                unrecoverableError = true;
+                remoteFileExists = false;
+                throw new IOException("Failed to connect to FTP "+ remoteFTP);
+            }
             dispose();
         }
         return false;
