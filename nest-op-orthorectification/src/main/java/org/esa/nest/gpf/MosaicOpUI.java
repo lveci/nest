@@ -27,7 +27,7 @@ public class MosaicOpUI extends BaseOperatorUI {
                                                                               MosaicOp.BILINEAR_INTERPOLATION,
                                                                               MosaicOp.CUBIC_CONVOLUTION});
 
-    private final JLabel resamplingMethodLabel = new JLabel("Resampling method:");
+    private final JLabel resamplingMethodLabel = new JLabel("Resampling Method:");
     private final JComboBox projectionName = new JComboBox();
 
     private final JTextField pixelSizeX = new JTextField("");
@@ -53,6 +53,7 @@ public class MosaicOpUI extends BaseOperatorUI {
         for(String name : projectionsValueSet) {
             projectionName.addItem(name);
         }
+        projectionName.setSelectedItem(paramMap.get("projectionName"));
 
         averageCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {

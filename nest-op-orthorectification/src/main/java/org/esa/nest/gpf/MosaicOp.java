@@ -54,7 +54,7 @@ public class MosaicOp extends Operator {
     private String projectionName = IdentityTransformDescriptor.NAME;
 
     @Parameter(defaultValue = "false", description = "Average the overlapping areas", label = "Average Overlap")
-    private boolean average = false;
+    private boolean average = true;
     @Parameter(defaultValue = "false", description = "Normalize by Mean", label = "Normalize by Mean")
     private boolean normalizeByMean = false;
 

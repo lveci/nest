@@ -62,7 +62,7 @@
             <text>SAR-Simulation Terrain Correction</text>
             <shortDescr>Perform Orthorectification using a simulated SAR image</shortDescr>
             <placeAfter>RangeDopplerGeocodingOp</placeAfter>
-            <helpId>Orthorectification</helpId>
+            <helpId>SARSimGeocodingOp</helpId>
         </action>
 
         <action>
@@ -72,18 +72,8 @@
             <shortDescr>SAR simulation method</shortDescr>
             <parent>TerrainCorrection</parent>
             <placeAfter>openOrthorectificationDialog</placeAfter>
-            <helpId>SARSimulationOp</helpId>
+            <helpId>SARSimOp</helpId>
         </action>
-
-        <!--action>
-            <id>SARSimTerrainCorrectionOp</id>
-            <class>org.esa.nest.dat.SARSimTerrainCorrectionOpAction</class>
-            <text>SAR Sim Terrain Correction</text>
-            <shortDescr>Orthorectification with SAR simulation</shortDescr>
-            <parent>TerrainCorrection</parent>
-            <placeAfter>SARSimulationOp</placeAfter>
-            <helpId>SARSimTerrainCorrectionOp</helpId>
-        </action-->
 
         <action>
             <id>EllipsoidCorrection</id>
@@ -111,15 +101,6 @@
             <helpId>EllipsoidCorrectionRDOp</helpId>
         </action>
 
-        <!--action>
-            <id>createElevationOp</id>
-            <class>org.esa.nest.dat.CreateElevationOpAction</class>
-            <text>Create Elevation</text>
-            <shortDescr>Creates a new product with a DEM</shortDescr>
-            <parent>geometry</parent>
-            <helpId>CreateElevationOp</helpId>
-        </action-->
-
         <action>
             <id>nestCreateElevationBand</id>
             <class>org.esa.beam.visat.actions.CreateElevationBandAction</class>
@@ -138,6 +119,7 @@
             <text>Mosaic</text>
             <shortDescr>Mosaic various images together</shortDescr>
             <parent>geometry</parent>
+            <helpId>MosaicOp</helpId>
         </action>
 		
     </extension>

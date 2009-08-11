@@ -8,7 +8,7 @@ public class SARSimTerrainCorrectionAction extends AbstractVisatAction {
     @Override
     public void actionPerformed(final CommandEvent event) {
         SARSimTerrainCorrectionDialog dialog = new SARSimTerrainCorrectionDialog(getAppContext(),
-                "SAR Sim Terrain Correction", "Orthorectifying-product");
+                "SAR Sim Terrain Correction", "SARSimGeocodingOp");
         dialog.setTargetProductNameSuffix("_TC");
         dialog.show();
     }
