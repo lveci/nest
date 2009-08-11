@@ -266,7 +266,9 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     @Override
     public void dispose() {
-        dem.dispose();
+        if (dem != null) {
+            dem.dispose();
+        }
     }
 
     /**
