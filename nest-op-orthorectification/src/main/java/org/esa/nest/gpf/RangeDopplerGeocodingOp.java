@@ -194,7 +194,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 throw new OperatorException("Source product is already map projected");
             }
 
-            if (pixelSpacingStr != null) {
+            if (pixelSpacingStr != null && !pixelSpacingStr.equals("")) {
                 getUserSelectedPixelSpacing();
             }
 
