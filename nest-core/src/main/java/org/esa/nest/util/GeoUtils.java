@@ -123,10 +123,11 @@ public final class GeoUtils
         final double theta = Math.atan(z*a/(s*b));
 
         geoPos.lon = (float)(Math.atan(y/x) * org.esa.beam.util.math.MathUtils.RTOD);
+        /*
         if (geoPos.lon < 0.0) {
             geoPos.lon += 180.0;
         }
-
+        */
         geoPos.lat = (float)(Math.atan((z + ep2*b*Math.pow(Math.sin(theta), 3)) /
                                        (s - e2*a*Math.pow(Math.cos(theta), 3))) *
                                        org.esa.beam.util.math.MathUtils.RTOD);
