@@ -5,6 +5,7 @@ import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
+import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.DialogUtils;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.io.File;
 
 /**
- * User interface for GCPSelectionOp
+ * User interface for RangeDopplerGeocodingOp
  */
 public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
@@ -172,7 +173,11 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         final String extFileStr = externalDEMFile.getText();
         if(!extFileStr.isEmpty()) {
             paramMap.put("externalDEMFile", new File(extFileStr));
-            paramMap.put("externalDEMNoDataValue", Double.parseDouble(externalDEMNoDataValue.getText()));
+            if (externalDEMNoDataValue.getText().isEmpty()) {
+                throw new OperatorException("Please enter DEM No Data Value");
+            } else {
+                paramMap.put("externalDEMNoDataValue", Double.parseDouble(externalDEMNoDataValue.getText()));
+            }
         }
 
         paramMap.put("saveDEM", saveDEM);
