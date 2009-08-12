@@ -125,7 +125,11 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
         double pix = (Double)paramMap.get("pixelSpacing");
         if(!changedByUser && sourceProducts != null) {
-                // calculate pixel spacing
+            try {
+                pix = RangeDopplerGeocodingOp.getPixelSpacing(sourceProducts[0]);
+            } catch (Exception e) {
+                pix = 0.0;
+            }
         }
         pixelSpacing.setText(String.valueOf(pix));
 
