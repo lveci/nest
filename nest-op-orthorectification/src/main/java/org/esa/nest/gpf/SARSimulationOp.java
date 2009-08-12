@@ -19,7 +19,7 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
-import org.esa.beam.framework.dataop.resamp.Resampling;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -94,11 +94,16 @@ public final class SARSimulationOp extends Operator {
                defaultValue="SRTM 3Sec GeoTiff", label="Digital Elevation Model")
     private String demName = "SRTM 3Sec GeoTiff";
 
-    @Parameter(valueSet = {NEAREST_NEIGHBOUR, BILINEAR, CUBIC}, defaultValue = BILINEAR, label="DEM Resampling Method")
-    private String demResamplingMethod = BILINEAR;
+    @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+            ResamplingFactory.BILINEAR_INTERPOLATION_NAME, ResamplingFactory.CUBIC_CONVOLUTION_NAME},
+            defaultValue = ResamplingFactory.BILINEAR_INTERPOLATION_NAME, label="DEM Resampling Method")
+    private String demResamplingMethod = ResamplingFactory.BILINEAR_INTERPOLATION_NAME;
 
     @Parameter(label="External DEM")
-    private File externalDemFile = null;
+    private File externalDEMFile = null;
+
+    @Parameter(label="DEM No Data Value", defaultValue = "0")
+    private double externalDEMNoDataValue = 0;
 
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
@@ -130,9 +135,6 @@ public final class SARSimulationOp extends Operator {
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
 
     private static final double NonValidZeroDopplerTime = -99999.0;
-    static final String NEAREST_NEIGHBOUR = "Nearest Neighbour";
-    static final String BILINEAR = "Bilinear Interpolation";
-    static final String CUBIC = "Cubic Convolution";
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -271,11 +273,14 @@ public final class SARSimulationOp extends Operator {
      */
     private void getElevationModel() throws Exception {
 
-        if(externalDemFile != null && fileElevationModel == null) { // if external DEM file is specified by user
+        if(externalDEMFile != null && fileElevationModel == null) { // if external DEM file is specified by user
 
-            fileElevationModel = new FileElevationModel(externalDemFile, getResamplingMethod());
+            fileElevationModel = new FileElevationModel(externalDEMFile, ResamplingFactory.createResampling(demResamplingMethod));
             demNoDataValue = fileElevationModel.getNoDataValue();
-            demName = externalDemFile.getPath();
+            if(externalDEMNoDataValue != 0)
+                demNoDataValue = (float) externalDEMNoDataValue;
+
+            demName = externalDEMFile.getPath();
 //            demName = externalDemFile.getName();
 
         } else {
@@ -290,29 +295,13 @@ public final class SARSimulationOp extends Operator {
                 throw new OperatorException("The DEM '" + demName + "' is currently being installed.");
             }
 
-            dem = demDescriptor.createDem(getResamplingMethod());
+            dem = demDescriptor.createDem(ResamplingFactory.createResampling(demResamplingMethod));
             if(dem == null) {
                 throw new OperatorException("The DEM '" + demName + "' has not been installed.");
             }
 
             demNoDataValue = dem.getDescriptor().getNoDataValue();
         }
-    }
-
-    /**
-     * Get resampling method.
-     * @return The resampling method.
-     */
-    private Resampling getResamplingMethod() {
-        Resampling resamplingMethod = Resampling.BILINEAR_INTERPOLATION;
-        if(demResamplingMethod.equals(NEAREST_NEIGHBOUR)) {
-            resamplingMethod = Resampling.NEAREST_NEIGHBOUR;
-        } else if(demResamplingMethod.equals(BILINEAR)) {
-            resamplingMethod = Resampling.BILINEAR_INTERPOLATION;
-        } else if(demResamplingMethod.equals(CUBIC)) {
-            resamplingMethod = Resampling.CUBIC_CONVOLUTION;
-        }
-        return resamplingMethod;
     }
 
     /**
@@ -539,7 +528,7 @@ public final class SARSimulationOp extends Operator {
     private float getLocalElevation(final GeoPos geoPos) {
         float alt;
         try {
-            if(externalDemFile == null) {
+            if(externalDEMFile == null) {
                 alt = dem.getElevation(geoPos);
             } else {
                 alt = fileElevationModel.getElevation(geoPos);
@@ -588,6 +577,7 @@ public final class SARSimulationOp extends Operator {
     public static class Spi extends OperatorSpi {
         public Spi() {
             super(SARSimulationOp.class);
+            setOperatorUI(SARSimulationOpUI.class);
         }
     }
 }
