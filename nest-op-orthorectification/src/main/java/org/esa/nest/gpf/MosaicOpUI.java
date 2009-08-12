@@ -7,8 +7,10 @@ import org.esa.beam.framework.ui.GridBagUtils;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.dataop.maptransf.MapProjection;
 import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.nest.util.DialogUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,11 +25,10 @@ public class MosaicOpUI extends BaseOperatorUI {
 
     private final JList bandList = new JList();
 
-    private final JComboBox resamplingMethod = new JComboBox(new String[] {MosaicOp.NEAREST_NEIGHBOUR,
-                                                                              MosaicOp.BILINEAR_INTERPOLATION,
-                                                                              MosaicOp.CUBIC_CONVOLUTION});
+    private final JComboBox resamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+                                                                           ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
+                                                                           ResamplingFactory.CUBIC_CONVOLUTION_NAME});
 
-    private final JLabel resamplingMethodLabel = new JLabel("Resampling Method:");
     private final JComboBox projectionName = new JComboBox();
 
     private final JTextField pixelSizeX = new JTextField("");
@@ -36,24 +37,24 @@ public class MosaicOpUI extends BaseOperatorUI {
     private final JTextField sceneHeight = new JTextField("");
     private final JCheckBox averageCheckBox = new JCheckBox("Average Overlap");
     private final JCheckBox normalizeByMeanCheckBox = new JCheckBox("Normalize By Mean");
-    private boolean changedByUser = false;
 
+    private boolean changedByUser = false;
     private boolean average = false;
     private boolean normalizeByMean = false;
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
-        initializeOperatorUI(operatorName, parameterMap);
-        final JComponent panel = createPanel();
-        initParameters();
-
         final String[] projectionsValueSet = getProjectionsValueSet();
         Arrays.sort(projectionsValueSet);
         for(String name : projectionsValueSet) {
             projectionName.addItem(name);
         }
-        projectionName.setSelectedItem(paramMap.get("projectionName"));
+        projectionName.setSelectedItem(parameterMap.get("projectionName"));
+
+        initializeOperatorUI(operatorName, parameterMap);
+        final JComponent panel = createPanel();
+        initParameters();
 
         averageCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
@@ -67,15 +68,8 @@ public class MosaicOpUI extends BaseOperatorUI {
                 }
         });
 
-        sceneWidth.addKeyListener(new KeyListener() {
-             public void keyPressed(KeyEvent e) {
-             }
-             public void keyReleased(KeyEvent e) {
-             }
-             public void keyTyped(KeyEvent e) {
-                changedByUser = true;
-             }
-        });
+        sceneWidth.addKeyListener(new TextAreaKeyListener());
+        sceneHeight.addKeyListener(new TextAreaKeyListener());
 
         return new JScrollPane(panel);
     }
@@ -93,7 +87,7 @@ public class MosaicOpUI extends BaseOperatorUI {
 
         if(!changedByUser && sourceProducts != null) {
             try {
-                MosaicOp.SceneProperties scnProp = new MosaicOp.SceneProperties();
+                final MosaicOp.SceneProperties scnProp = new MosaicOp.SceneProperties();
                 MosaicOp.computeImageGeoBoundary(sourceProducts, scnProp);
 
                 final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProducts[0]);
@@ -150,17 +144,9 @@ public class MosaicOpUI extends BaseOperatorUI {
 
         final JPanel contentPane = new JPanel();
         contentPane.setLayout(new GridBagLayout());
-        final GridBagConstraints gbc = GridBagUtils.createDefaultConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.insets.top = 1;
-        gbc.insets.bottom = 1;
-        gbc.insets.right = 1;
-        gbc.insets.left = 1;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        contentPane.add(new JLabel("Source Bands:"), gbc);
+        final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
+        contentPane.add(new JLabel("Source Bands:"), gbc);
         gbc.fill = GridBagConstraints.BOTH;
         gbc.gridx = 1;
         contentPane.add(new JScrollPane(bandList), gbc);
@@ -168,9 +154,7 @@ public class MosaicOpUI extends BaseOperatorUI {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy++;
-        contentPane.add(resamplingMethodLabel, gbc);
-        gbc.gridx = 1;
-        contentPane.add(resamplingMethod, gbc);
+        DialogUtils.addComponent(contentPane, gbc, "Resampling Method:", resamplingMethod);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Map Projection:", projectionName);
         gbc.gridy++;
@@ -195,5 +179,15 @@ public class MosaicOpUI extends BaseOperatorUI {
             projectionsValueSet[i] = projections[i].getName();
         }
         return projectionsValueSet;
+    }
+
+    private class TextAreaKeyListener implements KeyListener {
+        public void keyPressed(KeyEvent e) {
+        }
+        public void keyReleased(KeyEvent e) {
+        }
+        public void keyTyped(KeyEvent e) {
+            changedByUser = true;
+        }
     }
 }

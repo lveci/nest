@@ -120,7 +120,7 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
             }
         }
 
-        getJDialog().setMinimumSize(new Dimension(500, 400));
+        getJDialog().setMinimumSize(new Dimension(500, 500));
     }
 
     private void initSourceProductSelectors(OperatorSpi operatorSpi) {

@@ -22,6 +22,7 @@ import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.framework.dataop.resamp.Resampling;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -89,18 +90,24 @@ public class RangeDopplerGeocodingOp extends Operator {
                defaultValue="SRTM 3Sec GeoTiff", label="Digital Elevation Model")
     private String demName = "SRTM 3Sec GeoTiff";
 
-
     @Parameter(label="External DEM")
     private File externalDemFile = null;
 
-    @Parameter(valueSet = {NEAREST_NEIGHBOUR, BILINEAR, CUBIC}, defaultValue = BILINEAR, label="DEM Resampling Method")
-    private String demResamplingMethod = BILINEAR;
+    @Parameter(label="DEM No Data Value", defaultValue = "0")
+    private double externalDemNoDataValue = 0;
 
-    @Parameter(valueSet = {NEAREST_NEIGHBOUR, BILINEAR, CUBIC}, defaultValue = BILINEAR, label="Image Resampling Method")
-    private String imgResamplingMethod = BILINEAR;
+    @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+            ResamplingFactory.BILINEAR_INTERPOLATION_NAME, ResamplingFactory.CUBIC_CONVOLUTION_NAME},
+            defaultValue = ResamplingFactory.BILINEAR_INTERPOLATION_NAME, label="DEM Resampling Method")
+    private String demResamplingMethod = ResamplingFactory.BILINEAR_INTERPOLATION_NAME;
 
-    @Parameter(description = "The pixel spacing", defaultValue = "", label="Pixel Spacing (m)")
-    private String pixelSpacingStr = null;
+    @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+            ResamplingFactory.BILINEAR_INTERPOLATION_NAME, ResamplingFactory.CUBIC_CONVOLUTION_NAME},
+            defaultValue = ResamplingFactory.BILINEAR_INTERPOLATION_NAME, label="Image Resampling Method")
+    private String imgResamplingMethod = ResamplingFactory.BILINEAR_INTERPOLATION_NAME;
+
+    @Parameter(description = "The pixel spacing", defaultValue = "0", label="Pixel Spacing (m)")
+    private double pixelSpacing = 0;
 
     @Parameter(defaultValue="false", label="Save DEM as band")
     private boolean saveDEM = false;
@@ -144,7 +151,6 @@ public class RangeDopplerGeocodingOp extends Operator {
     private double lonMax= 0.0;
     private double delLat = 0.0;
     private double delLon = 0.0;
-    private double pixelSpacing = 0.0;
 
     private double[][] sensorPosition = null; // sensor position for all range lines
     private double[][] sensorVelocity = null; // sensor velocity for all range lines
@@ -157,9 +163,6 @@ public class RangeDopplerGeocodingOp extends Operator {
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
 
-    static final String NEAREST_NEIGHBOUR = "Nearest Neighbour";
-    static final String BILINEAR = "Bilinear Interpolation";
-    static final String CUBIC = "Cubic Convolution";
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
     private static final double NonValidZeroDopplerTime = -99999.0;
     private static final double halfLightSpeedInMetersPerDay = Constants.halfLightSpeed * 86400.0;
@@ -194,9 +197,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 throw new OperatorException("Source product is already map projected");
             }
 
-            if (pixelSpacingStr != null && !pixelSpacingStr.equals("")) {
-                getUserSelectedPixelSpacing();
-            }
+            getUserSelectedPixelSpacing();
 
             getMissionType();
 
@@ -241,11 +242,11 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             computeSensorPositionsAndVelocities();
 
-            if (imgResamplingMethod.equals(NEAREST_NEIGHBOUR)) {
+            if (imgResamplingMethod.equals(ResamplingFactory.NEAREST_NEIGHBOUR_NAME)) {
                 imgResampling = ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR;
-            } else if (imgResamplingMethod.contains(BILINEAR)) {
+            } else if (imgResamplingMethod.contains(ResamplingFactory.BILINEAR_INTERPOLATION_NAME)) {
                 imgResampling = ResampleMethod.RESAMPLE_BILINEAR;
-            } else if (imgResamplingMethod.contains(CUBIC)) {
+            } else if (imgResamplingMethod.contains(ResamplingFactory.CUBIC_CONVOLUTION_NAME)) {
                 imgResampling = ResampleMethod.RESAMPLE_CUBIC;
             } else {
                 throw new OperatorException("Unknown interpolation method");
@@ -276,9 +277,8 @@ public class RangeDopplerGeocodingOp extends Operator {
      */
     private void getUserSelectedPixelSpacing() {
 
-        pixelSpacing = Double.parseDouble(pixelSpacingStr);
         if (pixelSpacing <= 0.0) {
-            throw new OperatorException("Invalid value for pixel spacing: " + pixelSpacingStr);
+            throw new OperatorException("Invalid value for pixel spacing: " + pixelSpacing);
         }
         applyUserSelectedPixelSpacing = true;
     }
@@ -483,8 +483,10 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         if(externalDemFile != null && fileElevationModel == null) { // if external DEM file is specified by user
 
-            fileElevationModel = new FileElevationModel(externalDemFile, getResamplingMethod());
+            fileElevationModel = new FileElevationModel(externalDemFile, ResamplingFactory.createResampling(demResamplingMethod));
             demNoDataValue = fileElevationModel.getNoDataValue();
+            if(externalDemNoDataValue != 0)
+                demNoDataValue = (float)externalDemNoDataValue;
             demName = externalDemFile.getName();
 
         } else {
@@ -499,25 +501,13 @@ public class RangeDopplerGeocodingOp extends Operator {
                 throw new OperatorException("The DEM '" + demName + "' is currently being installed.");
             }
 
-            dem = demDescriptor.createDem(getResamplingMethod());
+            dem = demDescriptor.createDem(ResamplingFactory.createResampling(demResamplingMethod));
             if(dem == null) {
                 throw new OperatorException("The DEM '" + demName + "' has not been installed.");
             }
 
             demNoDataValue = dem.getDescriptor().getNoDataValue();
         }
-    }
-
-    private Resampling getResamplingMethod() {
-        Resampling resamplingMethod = Resampling.BILINEAR_INTERPOLATION;
-        if(demResamplingMethod.equals(NEAREST_NEIGHBOUR)) {
-            resamplingMethod = Resampling.NEAREST_NEIGHBOUR;
-        } else if(demResamplingMethod.equals(BILINEAR)) {
-            resamplingMethod = Resampling.BILINEAR_INTERPOLATION;
-        } else if(demResamplingMethod.equals(CUBIC)) {
-            resamplingMethod = Resampling.CUBIC_CONVOLUTION;
-        }
-        return resamplingMethod;
     }
 
     /**
@@ -1772,6 +1762,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     public static class Spi extends OperatorSpi {
         public Spi() {
             super(RangeDopplerGeocodingOp.class);
+            setOperatorUI(RangeDopplerGeocodingOpUI.class);
         }
     }
 }

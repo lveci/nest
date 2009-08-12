@@ -4,6 +4,7 @@ import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.GridBagUtils;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
@@ -17,11 +18,9 @@ public class EllipsoidCorrectionRDOpUI extends BaseOperatorUI {
 
     private final JList bandList = new JList();
 
-    private final JComboBox imgResamplingMethod = new JComboBox(new String[] {EllipsoidCorrectionRDOp.NEAREST_NEIGHBOUR,
-                                                                              EllipsoidCorrectionRDOp.BILINEAR,
-                                                                              EllipsoidCorrectionRDOp.CUBIC});
-
-    private final JLabel imgResamplingMethodLabel = new JLabel("Image resampling method:");
+    private final JComboBox imgResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+                                                                           ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
+                                                                           ResamplingFactory.CUBIC_CONVOLUTION_NAME});
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -57,15 +56,7 @@ public class EllipsoidCorrectionRDOpUI extends BaseOperatorUI {
 
         final JPanel contentPane = new JPanel();
         contentPane.setLayout(new GridBagLayout());
-        final GridBagConstraints gbc = GridBagUtils.createDefaultConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.insets.top = 1;
-        gbc.insets.bottom = 1;
-        gbc.insets.right = 1;
-        gbc.insets.left = 1;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
+        final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
         contentPane.add(new JLabel("Source Bands:"), gbc);
 
         gbc.fill = GridBagConstraints.BOTH;
@@ -75,9 +66,7 @@ public class EllipsoidCorrectionRDOpUI extends BaseOperatorUI {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy++;
-        contentPane.add(imgResamplingMethodLabel, gbc);
-        gbc.gridx = 1;
-        contentPane.add(imgResamplingMethod, gbc);
+        DialogUtils.addComponent(contentPane, gbc, "Image Resampling Method:", imgResamplingMethod);
 
         DialogUtils.fillPanel(contentPane, gbc);
 

@@ -5,6 +5,7 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.framework.dataop.resamp.Resampling;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -31,11 +32,6 @@ import java.util.Map;
         description = "Mosaics two or more products based on their geo-codings.")
 public class MosaicOp extends Operator {
 
-    static final String NEAREST_NEIGHBOUR = "NEAREST_NEIGHBOUR";
-    static final String BILINEAR_INTERPOLATION = "BILINEAR_INTERPOLATION";
-    static final String CUBIC_CONVOLUTION = "CUBIC_CONVOLUTION";
-    static final String NONE = "NONE";
-
     @SourceProducts
     private Product[] sourceProduct;
     @TargetProduct
@@ -45,10 +41,12 @@ public class MosaicOp extends Operator {
             sourceProductId = "source", label = "Source Bands")
     private String[] sourceBandNames = null;
 
-    @Parameter(valueSet = {NEAREST_NEIGHBOUR, BILINEAR_INTERPOLATION, CUBIC_CONVOLUTION},
-            defaultValue = NEAREST_NEIGHBOUR, description = "The method to be used when resampling the slave grid onto the master grid.",
+    @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+            ResamplingFactory.BILINEAR_INTERPOLATION_NAME, ResamplingFactory.CUBIC_CONVOLUTION_NAME},
+            defaultValue = ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+            description = "The method to be used when resampling the slave grid onto the master grid.",
             label = "Resampling Type")
-    private String resamplingMethod = NEAREST_NEIGHBOUR;
+    private String resamplingMethod = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
 
     @Parameter(description = "The projection name", defaultValue = IdentityTransformDescriptor.NAME)
     private String projectionName = IdentityTransformDescriptor.NAME;
@@ -86,12 +84,7 @@ public class MosaicOp extends Operator {
                 srcBandMap.put(srcBand.getProduct(), srcBand);
             }
 
-            if (resamplingMethod.equals(NEAREST_NEIGHBOUR))
-                resampling = Resampling.NEAREST_NEIGHBOUR;
-            else if (resamplingMethod.equals(BILINEAR_INTERPOLATION))
-                resampling = Resampling.BILINEAR_INTERPOLATION;
-            else
-                resampling = (Resampling.CUBIC_CONVOLUTION);
+            resampling = ResamplingFactory.createResampling(resamplingMethod);
 
             computeImageGeoBoundary(sourceProduct, scnProp);
 
