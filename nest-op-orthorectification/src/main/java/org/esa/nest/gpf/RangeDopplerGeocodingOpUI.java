@@ -168,7 +168,11 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         paramMap.put("demResamplingMethod", demResamplingMethod.getSelectedItem());
         paramMap.put("imgResamplingMethod", imgResamplingMethod.getSelectedItem());
 
-        paramMap.put("pixelSpacing", Double.parseDouble(pixelSpacing.getText()));
+        if (pixelSpacing.getText().isEmpty()) {
+            throw new OperatorException("Please enter Pixel Spacing");
+        } else {
+            paramMap.put("pixelSpacing", Double.parseDouble(pixelSpacing.getText()));
+        }
 
         final String extFileStr = externalDEMFile.getText();
         if(!extFileStr.isEmpty()) {
@@ -178,6 +182,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
             } else {
                 paramMap.put("externalDEMNoDataValue", Double.parseDouble(externalDEMNoDataValue.getText()));
             }
+        } else {
+            throw new OperatorException("Please enter External DEM");
         }
 
         paramMap.put("saveDEM", saveDEM);

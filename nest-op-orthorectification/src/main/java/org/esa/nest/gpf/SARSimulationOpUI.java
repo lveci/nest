@@ -114,6 +114,8 @@ public class SARSimulationOpUI extends BaseOperatorUI {
             } else {
                 paramMap.put("externalDEMNoDataValue", Double.parseDouble(externalDEMNoDataValue.getText()));
             }
+        } else {
+            throw new OperatorException("Please enter External DEM");
         }
     }
 
