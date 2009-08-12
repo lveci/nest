@@ -21,7 +21,6 @@ import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
-import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -91,10 +90,10 @@ public class RangeDopplerGeocodingOp extends Operator {
     private String demName = "SRTM 3Sec GeoTiff";
 
     @Parameter(label="External DEM")
-    private File externalDemFile = null;
+    private File externalDEMFile = null;
 
     @Parameter(label="DEM No Data Value", defaultValue = "0")
-    private double externalDemNoDataValue = 0;
+    private double externalDEMNoDataValue = 0;
 
     @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
             ResamplingFactory.BILINEAR_INTERPOLATION_NAME, ResamplingFactory.CUBIC_CONVOLUTION_NAME},
@@ -481,13 +480,13 @@ public class RangeDopplerGeocodingOp extends Operator {
      */
     private void getElevationModel() throws Exception {
 
-        if(externalDemFile != null && fileElevationModel == null) { // if external DEM file is specified by user
+        if(externalDEMFile != null && fileElevationModel == null) { // if external DEM file is specified by user
 
-            fileElevationModel = new FileElevationModel(externalDemFile, ResamplingFactory.createResampling(demResamplingMethod));
+            fileElevationModel = new FileElevationModel(externalDEMFile, ResamplingFactory.createResampling(demResamplingMethod));
             demNoDataValue = fileElevationModel.getNoDataValue();
-            if(externalDemNoDataValue != 0)
-                demNoDataValue = (float)externalDemNoDataValue;
-            demName = externalDemFile.getName();
+            if(externalDEMNoDataValue != 0)
+                demNoDataValue = (float) externalDEMNoDataValue;
+            demName = externalDEMFile.getName();
 
         } else {
 
@@ -1061,7 +1060,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      */
     private float getLocalElevation(final GeoPos geoPos) throws Exception {
 
-        if(externalDemFile == null) {
+        if(externalDEMFile == null) {
             return dem.getElevation(geoPos);
         }
         return fileElevationModel.getElevation(geoPos);

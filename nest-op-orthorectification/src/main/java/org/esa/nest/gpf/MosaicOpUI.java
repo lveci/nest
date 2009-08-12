@@ -7,6 +7,7 @@ import org.esa.beam.framework.ui.GridBagUtils;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.dataop.maptransf.MapProjection;
 import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
+import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.nest.util.DialogUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
@@ -50,12 +51,12 @@ public class MosaicOpUI extends BaseOperatorUI {
         for(String name : projectionsValueSet) {
             projectionName.addItem(name);
         }
-        projectionName.setSelectedItem(parameterMap.get("projectionName"));
 
         initializeOperatorUI(operatorName, parameterMap);
         final JComponent panel = createPanel();
         initParameters();
 
+        projectionName.setSelectedItem(IdentityTransformDescriptor.NAME);
         averageCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
                     average = (e.getStateChange() == ItemEvent.SELECTED);
