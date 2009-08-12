@@ -1701,6 +1701,19 @@ public class RangeDopplerGeocodingOp extends Operator {
     }
 
     /**
+     * Compute pixel spacing (in m).
+     * @param srcProduct The source product.
+     * @return The pixel spacing.
+     * @throws Exception The exception.
+     */
+    public static double getPixelSpacing(Product srcProduct) throws Exception {
+        final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(srcProduct);
+        final double rangeSpacing = AbstractMetadata.getAttributeDouble(abs, AbstractMetadata.range_spacing);
+        final double azimuthSpacing = AbstractMetadata.getAttributeDouble(abs, AbstractMetadata.azimuth_spacing);
+        return Math.min(rangeSpacing, azimuthSpacing);
+    }
+
+    /**
      * Set flag for radiometric correction. This function is for unit test only.
      * @param flag The flag.
      */
