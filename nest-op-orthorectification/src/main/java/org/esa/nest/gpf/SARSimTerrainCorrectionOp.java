@@ -47,28 +47,24 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Raw SAR images usually contain significant geometric distortions. One of the factors that cause the
- * distortions is the ground elevation of the targets. This operator corrects the topographic distortion
- * in the raw image caused by this factor. The operator implements the Range-Doppler (RD) geocoding method.
+ * The operator generates orthorectified image using rigorous SAR simulation.
  *
- * The method consis of the following major steps:
- * (1) Get state vectors from the metadata;
- * (2) Compute satellite position and velocity for each azimuth time by interpolating the state vectors;
- * (3) Get corner latitudes and longitudes for the source image;
- * (4) Compute [LatMin, LatMax] and [LonMin, LonMax];
- * (5) Get the range and azimuth spacings for the source image;
- * (6) Compute DEM traversal sample intervals (delLat, delLon) based on source image pixel spacing;
- * (7) Compute target geocoded image dimension;
- * (8) Repeat the following steps for each sample in the target raster [LatMax:-delLat:LatMin]x[LonMin:delLon:LonMax]:
- * (8.1) Get local elevation h(i,j) for current sample given local latitude lat(i,j) and longitude lon(i,j);
- * (8.2) Convert (lat(i,j), lon(i,j), h(i,j)) to global Cartesian coordinates p(Px, Py, Pz);
- * (8.3) Compute zero Doppler time t(i,j) for point p(Px, Py, Pz) using Doppler frequency function;
- * (8.4) Compute satellite position s(i,j) and slant range r(i,j) = |s(i,j) - p| for zero Doppler time t(i,j);
- * (8.5) Compute bias-corrected zero Doppler time tc(i,j) = t(i,j) + r(i,j)*2/c, where c is the light speed;
- * (8.6) Update satellite position s(tc(i,j)) and slant range r(tc(i,j)) = |s(tc(i,j)) - p| for time tc(i,j);
- * (8.7) Compute azimuth image index Ia using zero Doppler time tc(i,j);
- * (8.8) Compute range image index Ir using slant range r(tc(i,j)) or ground range;
- * (8.9) Compute pixel value x(Ia,Ir) using interpolation and save it for current sample.
+ * Some major steps of the procedure are given below:
+ *
+ * 1. SAR simulation: Generate simulated SAR image using DEM, the geocoding and orbit state vectors from the
+ *    original SAR image, and mathematical modeling of SAR imaging geometry. The simulated SAR image will have
+ *    the same dimension and resolution as the original image. For detailed steps and parameters used in SAR
+ *    simulation, the reader is refered to NEST help for SAR Simulation Operator.
+ *
+ * 2. Co-registration: The simulated SAR image (master) and the original SAR image (slave) are co-registered
+ *    and a WARP function is produced. The WARP function maps each pixel in the simulated SAR image to its
+ *    corresponding position in the original SAR image. For detailed steps and parameters used in co-registration,
+ *    the reader is refered to NEST help for GCP Selection Operator.
+ *
+ * 3. Terrain correction: Traverse DEM grid that covers the imaging area. For each cell in the DEM grid, compute
+ *    its corresponding pixel position in the simulated SAR image using SAR model. Then its corresponding pixel
+ *    position in the original SAR image can be found with the help of the WARP function. Finally the pixel
+ *    value can be obtained for the orthorectified image.
  *
  * Reference: Guide to ASAR Geocoding, Issue 1.0, 19.03.2008
  */
