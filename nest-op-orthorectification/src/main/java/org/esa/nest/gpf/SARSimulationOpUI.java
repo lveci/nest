@@ -5,7 +5,6 @@ import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
-import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.DialogUtils;
@@ -109,13 +108,7 @@ public class SARSimulationOpUI extends BaseOperatorUI {
         final String extFileStr = externalDEMFile.getText();
         if(!extFileStr.isEmpty()) {
             paramMap.put("externalDEMFile", new File(extFileStr));
-            if (externalDEMNoDataValue.getText().isEmpty()) {
-                throw new OperatorException("Please enter DEM No Data Value");
-            } else {
-                paramMap.put("externalDEMNoDataValue", Double.parseDouble(externalDEMNoDataValue.getText()));
-            }
-        } else {
-            throw new OperatorException("Please enter External DEM");
+            paramMap.put("externalDEMNoDataValue", Double.parseDouble(externalDEMNoDataValue.getText()));
         }
     }
 

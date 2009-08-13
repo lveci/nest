@@ -5,7 +5,6 @@ import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
-import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.DialogUtils;
@@ -167,23 +166,12 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         paramMap.put("demName", demName.getSelectedItem());
         paramMap.put("demResamplingMethod", demResamplingMethod.getSelectedItem());
         paramMap.put("imgResamplingMethod", imgResamplingMethod.getSelectedItem());
-
-        if (pixelSpacing.getText().isEmpty()) {
-            throw new OperatorException("Please enter Pixel Spacing");
-        } else {
-            paramMap.put("pixelSpacing", Double.parseDouble(pixelSpacing.getText()));
-        }
+        paramMap.put("pixelSpacing", Double.parseDouble(pixelSpacing.getText()));
 
         final String extFileStr = externalDEMFile.getText();
         if(!extFileStr.isEmpty()) {
             paramMap.put("externalDEMFile", new File(extFileStr));
-            if (externalDEMNoDataValue.getText().isEmpty()) {
-                throw new OperatorException("Please enter DEM No Data Value");
-            } else {
-                paramMap.put("externalDEMNoDataValue", Double.parseDouble(externalDEMNoDataValue.getText()));
-            }
-        } else {
-            throw new OperatorException("Please enter External DEM");
+            paramMap.put("externalDEMNoDataValue", Double.parseDouble(externalDEMNoDataValue.getText()));
         }
 
         paramMap.put("saveDEM", saveDEM);
