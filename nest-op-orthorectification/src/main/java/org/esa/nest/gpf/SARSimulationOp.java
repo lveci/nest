@@ -346,7 +346,7 @@ public final class SARSimulationOp extends Operator {
 
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
-        if(externalDEMNoDataValue != 0) {
+        if(externalDEMFile != null) {
             absTgt.setAttributeDouble("external DEM no data value", externalDEMNoDataValue);
         }
 
