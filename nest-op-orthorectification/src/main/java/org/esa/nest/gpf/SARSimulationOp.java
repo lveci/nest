@@ -347,7 +347,10 @@ public final class SARSimulationOp extends Operator {
 
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
-        
+        if(externalDEMNoDataValue != 0) {
+            absTgt.setAttributeDouble("external DEM no data value", externalDEMNoDataValue);
+        }
+
         // the tile width has to be the image width because otherwise sourceRaster.getDataBufferIndex(x, y)
         // returns incorrect index for the last tile on the right
         targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 50);
