@@ -490,15 +490,10 @@ public class SARSimTerrainCorrectionOp extends Operator {
             demNoDataValue = dem.getDescriptor().getNoDataValue();
 
         } else { // then demName is user selected DEM file name
-            
+
+            demNoDataValue = (float)absRoot.getAttributeDouble("external DEM no data value");
             File externalDemFile = new File(demName);
-            fileElevationModel = new FileElevationModel(externalDemFile, getResamplingMethod());
-            final MetadataAttribute attribute = absRoot.getAttribute("external DEM no data value");
-            if (attribute != null) {
-                demNoDataValue = (float)attribute.getData().getElemDouble();
-            } else {
-                demNoDataValue = fileElevationModel.getNoDataValue();
-            }
+            fileElevationModel = new FileElevationModel(externalDemFile, getResamplingMethod(), demNoDataValue);
             demName = externalDemFile.getName();
             useExternalDEMFile = true;
         }
