@@ -48,7 +48,7 @@ public class MosaicOp extends Operator {
             label = "Resampling Type")
     private String resamplingMethod = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
 
-    @Parameter(description = "The projection name", defaultValue = IdentityTransformDescriptor.NAME)
+    //@Parameter(description = "The projection name", defaultValue = IdentityTransformDescriptor.NAME)
     private String projectionName = IdentityTransformDescriptor.NAME;
 
     @Parameter(defaultValue = "false", description = "Average the overlapping areas", label = "Average Overlap")
@@ -98,24 +98,20 @@ public class MosaicOp extends Operator {
 
                 sceneWidth = scnProp.sceneWidth;
                 sceneHeight = scnProp.sceneHeight;
+                final double ratio = sceneWidth / (double)sceneHeight;
                 long dim = (long) sceneWidth * (long) sceneHeight;
                 while (sceneWidth > 0 && sceneHeight > 0 && dim > Integer.MAX_VALUE) {
                     sceneWidth -= 1000;
-                    sceneHeight -= 1000;
+                    sceneHeight = (int)(sceneWidth / ratio);
                     dim = (long) sceneWidth * (long) sceneHeight;
                 }
             }
 
-            targetProduct = new Product("mosiac", "mosiac",
-                    sceneWidth,
-                    sceneHeight);
+            targetProduct = new Product("mosiac", "mosiac", sceneWidth, sceneHeight);
 
             addGeoCoding(scnProp);
 
-            final Band targetBand = new Band("mosaic",
-                    ProductData.TYPE_FLOAT32,
-                    sceneWidth,
-                    sceneHeight);
+            final Band targetBand = new Band("mosaic", ProductData.TYPE_FLOAT32, sceneWidth, sceneHeight);
 
             targetBand.setUnit(sourceProduct[0].getBandAt(0).getUnit());
             targetBand.setNoDataValue(0);

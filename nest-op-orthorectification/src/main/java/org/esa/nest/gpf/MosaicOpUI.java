@@ -30,7 +30,7 @@ public class MosaicOpUI extends BaseOperatorUI {
                                                                            ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
                                                                            ResamplingFactory.CUBIC_CONVOLUTION_NAME});
 
-    private final JComboBox projectionName = new JComboBox();
+    //private final JComboBox projectionName = new JComboBox();
 
     private final JTextField pixelSizeX = new JTextField("");
     private final JTextField pixelSizeY = new JTextField("");
@@ -46,17 +46,17 @@ public class MosaicOpUI extends BaseOperatorUI {
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
-        final String[] projectionsValueSet = getProjectionsValueSet();
-        Arrays.sort(projectionsValueSet);
-        for(String name : projectionsValueSet) {
-            projectionName.addItem(name);
-        }
+        //final String[] projectionsValueSet = getProjectionsValueSet();
+        //Arrays.sort(projectionsValueSet);
+        //for(String name : projectionsValueSet) {
+        //    projectionName.addItem(name);
+        //}
 
         initializeOperatorUI(operatorName, parameterMap);
         final JComponent panel = createPanel();
         initParameters();
 
-        projectionName.setSelectedItem(IdentityTransformDescriptor.NAME);
+        //projectionName.setSelectedItem(IdentityTransformDescriptor.NAME);
         averageCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
                     average = (e.getStateChange() == ItemEvent.SELECTED);
@@ -81,7 +81,7 @@ public class MosaicOpUI extends BaseOperatorUI {
         OperatorUIUtils.initBandList(bandList, getBandNames());
 
         resamplingMethod.setSelectedItem(paramMap.get("resamplingMethod"));
-        projectionName.setSelectedItem(paramMap.get("projectionName"));
+        //projectionName.setSelectedItem(paramMap.get("projectionName"));
 
         int width = (Integer)paramMap.get("sceneWidth");
         int height = (Integer)paramMap.get("sceneHeight");
@@ -99,10 +99,11 @@ public class MosaicOpUI extends BaseOperatorUI {
 
                 width = scnProp.sceneWidth;
                 height = scnProp.sceneHeight;
+                final double ratio = width / (double)height;
                 long dim = (long)width*(long)height;
                 while(dim > Integer.MAX_VALUE) {
                     width -= 1000;
-                    height -= 1000;
+                    height = (int)(width / ratio);
                     dim = (long)width*(long)height;
                 }
             } catch(Exception e) {
@@ -133,7 +134,7 @@ public class MosaicOpUI extends BaseOperatorUI {
 
         OperatorUIUtils.updateBandList(bandList, paramMap);
         paramMap.put("resamplingMethod", resamplingMethod.getSelectedItem());
-        paramMap.put("projectionName", projectionName.getSelectedItem());
+        //paramMap.put("projectionName", projectionName.getSelectedItem());
         paramMap.put("sceneWidth", Integer.parseInt(sceneWidth.getText()));
         paramMap.put("sceneHeight", Integer.parseInt(sceneHeight.getText()));
 
@@ -156,8 +157,8 @@ public class MosaicOpUI extends BaseOperatorUI {
         gbc.gridx = 0;
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Resampling Method:", resamplingMethod);
-        gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "Map Projection:", projectionName);
+        //gbc.gridy++;
+        //DialogUtils.addComponent(contentPane, gbc, "Map Projection:", projectionName);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Scene Width (pixels)", sceneWidth);
         gbc.gridy++;
@@ -188,7 +189,7 @@ public class MosaicOpUI extends BaseOperatorUI {
         public void keyReleased(KeyEvent e) {
         }
         public void keyTyped(KeyEvent e) {
-            changedByUser = true;
+            changedByUser = true;   
         }
     }
 }
