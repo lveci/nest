@@ -40,6 +40,13 @@ public class FileElevationModel implements Resampling.Raster {
         _resamplingRaster = this;
     }
 
+    public FileElevationModel(File file, Resampling resamplingMethod, float demNoDataValue) throws IOException {
+
+        this(file, resamplingMethod);
+
+        noDataValue = demNoDataValue;
+    }
+
     public float getNoDataValue() {
         return noDataValue;
     }

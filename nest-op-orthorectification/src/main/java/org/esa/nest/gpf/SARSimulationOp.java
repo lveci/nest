@@ -275,13 +275,12 @@ public final class SARSimulationOp extends Operator {
 
         if(externalDEMFile != null && fileElevationModel == null) { // if external DEM file is specified by user
 
-            fileElevationModel = new FileElevationModel(externalDEMFile, ResamplingFactory.createResampling(demResamplingMethod));
-            demNoDataValue = fileElevationModel.getNoDataValue();
-            if(externalDEMNoDataValue != 0)
-                demNoDataValue = (float) externalDEMNoDataValue;
+            fileElevationModel = new FileElevationModel(externalDEMFile,
+                                                        ResamplingFactory.createResampling(demResamplingMethod),
+                                                        (float)externalDEMNoDataValue);
 
+            demNoDataValue = (float) externalDEMNoDataValue;
             demName = externalDEMFile.getPath();
-//            demName = externalDemFile.getName();
 
         } else {
 
