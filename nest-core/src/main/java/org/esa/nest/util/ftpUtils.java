@@ -5,11 +5,16 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.esa.beam.visat.VisatApp;
+import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
+import org.esa.beam.framework.datamodel.Product;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
+import java.util.Calendar;
+import java.util.concurrent.ExecutionException;
 
 
 public class ftpUtils {
@@ -53,10 +58,12 @@ public class ftpUtils {
 
             fos = new FileOutputStream(localFile.getAbsolutePath());
 
-            if(false) { //VisatApp.getApp() != null) {
-                readFile(fis, fos, localFile.getName(), fileSize);
+            if(VisatApp.getApp() != null) {
+                if(!readFile(fis, fos, localFile.getName(), fileSize)) {
+                    return FTPError.READ_ERROR;    
+                }
             } else {
-                final int size = 81920;
+                final int size = 8192;
                 final byte[] buf = new byte[size];
                 int n;
                 while ((n = fis.read(buf, 0, size)) > -1)
@@ -92,18 +99,17 @@ public class ftpUtils {
         return 0;
     }
 
-    private static void readFile(final InputStream fis, final FileOutputStream fos,
+    private static boolean readFile(final InputStream fis, final FileOutputStream fos,
                                  final String fileName, final long fileSize) throws Exception {
 
         final ProgressMonitorSwingWorker worker = new ProgressMonitorSwingWorker(VisatApp.getApp().getMainFrame(), "Downloading...") {
             @Override
             protected Object doInBackground(com.bc.ceres.core.ProgressMonitor pm) throws Exception {
-                final int size = 8192;
+                final int size = 4096;
                 final byte[] buf = new byte[size];
 
                 pm.beginTask("Downloading "+fileName, (int)(fileSize/size) + 200);
                 try {
-
                     int n;
                     while ((n = fis.read(buf, 0, size)) > -1) {
                         fos.write(buf, 0, n);
@@ -112,14 +118,16 @@ public class ftpUtils {
                     }
                 } catch(Exception e) {
                     System.out.println(e.getMessage());
+                    return false;
                 } finally {
                     pm.done();
                 }
-                return null;
+                return true;
             }
-
         };
         worker.executeWithBlocking();
+
+        return (Boolean)worker.get();
     }
 
     public FTPFile[] getRemoteFileList(String path) throws IOException {
