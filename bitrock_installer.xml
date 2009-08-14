@@ -298,7 +298,7 @@
                     <comment>NEST Documentation</comment>
                     <name>Online Help</name>
                     <runInTerminal>0</runInTerminal>
-                    <url> ${installdir}\modules\nest-help-2C\doc\help\index.html</url>
+                    <url> ${installdir}\modules\nest-help-3A\doc\help\index.html</url>
                     <windowsIcon></windowsIcon>
                 </startMenuLinkShortcut>
                 <startMenuShortcut>
