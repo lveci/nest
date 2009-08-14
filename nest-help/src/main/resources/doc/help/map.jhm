@@ -144,8 +144,8 @@
 	<!--Geometry Operators-->
 	<mapID target="CreateElevationOp" url="operators/CreateElevationOp.html"/>
 	<mapID target="RangeDopplerGeocodingOp" url="operators/RangeDopplerGeocodingOp.html"/>
-	<mapID target="SARSimGeocodingOp" url="operators/SARSimGeocodingOp.html"/>
-	<mapID target="SARSimOp" url="operators/SARSimOp.html"/>
+	<mapID target="SARSimGeocodingOp" url="operators/SARSimTerrainCorrectionOp.html"/>
+	<mapID target="SARSimOp" url="operators/SARSimulationOp.html"/>
 	<mapID target="GeolocationGridGeocodingOp" url="operators/GeolocationGridGeocodingOp.html"/>
 	<mapID target="EllipsoidCorrectionRDOp" url="operators/EllipsoidCorrectionRDOp.html"/>
 	<mapID target="MapProjectionOp" url="operators/MapProjectionOp.html"/>
