@@ -125,7 +125,6 @@ public class RangeDopplerGeocodingOp extends Operator {
     private FileElevationModel fileElevationModel = null;
 
     private boolean srgrFlag = false;
-    private boolean applyUserSelectedPixelSpacing = false;
 
     private String mission = null;
     private String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
@@ -195,8 +194,6 @@ public class RangeDopplerGeocodingOp extends Operator {
             if(OperatorUtils.isMapProjected(sourceProduct)) {
                 throw new OperatorException("Source product is already map projected");
             }
-
-            getUserSelectedPixelSpacing();
 
             getMissionType();
 
@@ -272,17 +269,6 @@ public class RangeDopplerGeocodingOp extends Operator {
         if(fileElevationModel != null) {
             fileElevationModel.dispose();
         }
-    }
-
-    /**
-     * Get user selected pixel spacing (in m).
-     */
-    private void getUserSelectedPixelSpacing() {
-
-        if (pixelSpacing <= 0.0) {
-            throw new OperatorException("Invalid value for pixel spacing: " + pixelSpacing);
-        }
-        applyUserSelectedPixelSpacing = true;
     }
 
     /**
@@ -431,7 +417,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private void computeDEMTraversalSampleInterval() {
 
         double spacing = 0.0;
-        if (applyUserSelectedPixelSpacing) {
+        if (pixelSpacing > 0.0) {
             spacing = pixelSpacing;
         } else {
             spacing = Math.min(rangeSpacing, azimuthSpacing);
