@@ -110,16 +110,7 @@ public final class CreateCoherenceImageOp extends Operator {
 
         addSelectedBands();
 
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        targetProduct.setStartTime(sourceProduct.getStartTime());
-        targetProduct.setEndTime(sourceProduct.getEndTime());
-
-        // The tile width must be set to the image width because otherwise the last tile may have different
-        // tile width than other tiles, and getDataBufferIndex() cannot return the correct index in this case.
-        targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 20);
+        OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
     }
 
     /**

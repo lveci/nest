@@ -269,6 +269,9 @@ public class RangeDopplerGeocodingOp extends Operator {
         if (dem != null) {
             dem.dispose();
         }
+        if(fileElevationModel != null) {
+            fileElevationModel.dispose();
+        }
     }
 
     /**
@@ -1032,7 +1035,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         if(demName.equals("SRTM 3Sec GeoTiff")) {
             double maxLat = (latMax - maxY*delLat);
             double minLat = (latMax - y0*delLat);
-            if(maxLat > 60 && minLat > 60) {
+            if((maxLat > 60 && minLat > 60) || (maxLat < -60 && minLat < -60)) {
                 return false;
             }
         }

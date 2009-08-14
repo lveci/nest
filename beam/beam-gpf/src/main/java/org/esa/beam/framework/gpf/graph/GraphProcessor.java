@@ -228,7 +228,7 @@ public class GraphProcessor {
                                 }
                             }
 
-                            System.out.println("Tile "+(cnt++)+" of "+ numYTiles*numXTiles);
+                            //System.out.println("Tile "+(cnt++)+" of "+ numYTiles*numXTiles);
                             pm.worked(1);
                         }
                         fireTileStopped(graphContext, tileRectangle);

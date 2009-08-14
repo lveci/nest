@@ -24,6 +24,7 @@ public class FileElevationModel implements Resampling.Raster {
     private final int RASTER_WIDTH;
     private final int RASTER_HEIGHT;
     private float noDataValue = 0;
+    private PixelPos pix = new PixelPos();
 
     public FileElevationModel(File file, Resampling resamplingMethod) throws IOException {
 
@@ -47,6 +48,14 @@ public class FileElevationModel implements Resampling.Raster {
         noDataValue = demNoDataValue;
     }
 
+    public void dispose() {
+        fileElevationTile.dispose();
+    }
+
+    public void clearCache() {
+        fileElevationTile.clearCache();   
+    }
+
     public float getNoDataValue() {
         return noDataValue;
     }
@@ -61,7 +70,7 @@ public class FileElevationModel implements Resampling.Raster {
 
     public float getElevation(GeoPos geoPos) throws Exception {
 
-        final PixelPos pix = tileGeocoding.getPixelPos(geoPos, null);
+        tileGeocoding.getPixelPos(geoPos, pix);
         if(!pix.isValid() || pix.x < 0 || pix.y < 0 || pix.x > RASTER_WIDTH || pix.y > RASTER_HEIGHT)
             return noDataValue;
         
@@ -84,10 +93,6 @@ public class FileElevationModel implements Resampling.Raster {
             return Float.NaN;
         }
         return sample;
-    }
-
-    public void dispose() {
-        fileElevationTile.dispose();
     }
 
     public int getWidth() {

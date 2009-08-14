@@ -135,6 +135,7 @@ public final class SARSimulationOp extends Operator {
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
 
     private static final double NonValidZeroDopplerTime = -99999.0;
+    private static final double halfLightSpeedInMetersPerDay = Constants.halfLightSpeed * 86400.0;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -189,6 +190,16 @@ public final class SARSimulationOp extends Operator {
 
         } catch(Exception e) {
             throw new OperatorException(e);
+        }
+    }
+
+    @Override
+    public void dispose() {
+        if (dem != null) {
+            dem.dispose();
+        }
+        if(fileElevationModel != null) {
+            fileElevationModel.dispose();
         }
     }
 
@@ -425,75 +436,82 @@ public final class SARSimulationOp extends Operator {
         final int h  = targetTileRectangle.height;
         final ProductData trgData = targetTile.getDataBuffer();
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
-        final double halfLightSpeedInMetersPerDay = Constants.halfLightSpeed * 86400.0;
 
         int ymin = y0;
         int nh = h;
-        if (ny0Updated) {
+        if(ny0Updated) {
             ymin = ny0;
             nh += y0 - ny0;
             ny0Updated = false;
         }
 
-        float[][] localDEM = new float[nh+2][w+2];
-        getLocalDEM(x0, ymin, w, nh, localDEM);
+        if(nh < 0) {
+            System.out.println("dem w "+w+" nh "+nh);
+        }
+        final float[][] localDEM = new float[nh+2][w+2];
+        try {
+            final boolean valid = getLocalDEM(x0, ymin, w, nh, localDEM);
+            if(!valid)
+                return;
 
-        final double[] earthPoint = new double[3];
-        final double[] sensorPos = new double[3];
-        for (int y = ymin; y < y0 + h; y++) {
-            for (int x = x0; x < x0 + w; x++) {
+            final double[] earthPoint = new double[3];
+            final double[] sensorPos = new double[3];
+            for (int y = ymin; y < y0 + h; y++) {
+                for (int x = x0; x < x0 + w; x++) {
 
-                final double alt = localDEM[y-ymin+1][x-x0+1];
-                if (alt == demNoDataValue) {
-                    continue;
-                }
+                    final double alt = localDEM[y-ymin+1][x-x0+1];
+                    if (alt == demNoDataValue) {
+                        continue;
+                    }
 
-                GeoUtils.geo2xyz(latitude.getPixelFloat(x, y), longitude.getPixelFloat(x, y), alt, earthPoint, GeoUtils.EarthModel.WGS84);
+                    GeoUtils.geo2xyz(latitude.getPixelFloat(x, y), longitude.getPixelFloat(x, y), alt, earthPoint, GeoUtils.EarthModel.WGS84);
 
-                final double zeroDopplerTime = RangeDopplerGeocodingOp.getEarthPointZeroDopplerTime(sourceImageHeight,
-                        firstLineUTC, lineTimeInterval, wavelength, earthPoint, sensorPosition, sensorVelocity);
+                    final double zeroDopplerTime = RangeDopplerGeocodingOp.getEarthPointZeroDopplerTime(sourceImageHeight,
+                            firstLineUTC, lineTimeInterval, wavelength, earthPoint, sensorPosition, sensorVelocity);
 
-                double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
-                        zeroDopplerTime,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
+                    double slantRange = RangeDopplerGeocodingOp.computeSlantRange(
+                            zeroDopplerTime,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / halfLightSpeedInMetersPerDay;
+                    final double zeroDopplerTimeWithoutBias = zeroDopplerTime + slantRange / halfLightSpeedInMetersPerDay;
 
-                final int azimuthIndex = (int)((zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval + 0.5);
+                    final int azimuthIndex = (int)((zeroDopplerTimeWithoutBias - firstLineUTC) / lineTimeInterval + 0.5);
 
-                slantRange = RangeDopplerGeocodingOp.computeSlantRange(
-                        zeroDopplerTimeWithoutBias,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
+                    slantRange = RangeDopplerGeocodingOp.computeSlantRange(
+                            zeroDopplerTimeWithoutBias,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                final int rangeIndex = (int)(RangeDopplerGeocodingOp.computeRangeIndex(
-                        srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC, rangeSpacing, zeroDopplerTimeWithoutBias,
-                        slantRange, nearEdgeSlantRange, srgrConvParams) + 0.5);
+                    final int rangeIndex = (int)(RangeDopplerGeocodingOp.computeRangeIndex(
+                            srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC, rangeSpacing, zeroDopplerTimeWithoutBias,
+                            slantRange, nearEdgeSlantRange, srgrConvParams) + 0.5);
 
 
-                final RangeDopplerGeocodingOp.LocalGeometry localGeometry = new RangeDopplerGeocodingOp.LocalGeometry();
-                setLocalGeometry(x, y, earthPoint, sensorPos, localGeometry);
+                    final RangeDopplerGeocodingOp.LocalGeometry localGeometry = new RangeDopplerGeocodingOp.LocalGeometry();
+                    setLocalGeometry(x, y, earthPoint, sensorPos, localGeometry);
 
-                double[] localIncidenceAngles = {0.0, 0.0};
-                RangeDopplerGeocodingOp.computeLocalIncidenceAngle(
-                        localGeometry, true, false, false, x0, ymin, x, y, localDEM, localIncidenceAngles); // in degrees
+                    double[] localIncidenceAngles = {0.0, 0.0};
+                    RangeDopplerGeocodingOp.computeLocalIncidenceAngle(
+                            localGeometry, true, false, false, x0, ymin, x, y, localDEM, localIncidenceAngles); // in degrees
 
-                //final double localIncidenceAngle = computeLocalIncidenceAngle(sensorPos, earthPoint, x0, ymin, x, y, localDEM);
+                    final double v = computeBackscatteredPower(localIncidenceAngles[0]);
 
-                final double v = computeBackscatteredPower(localIncidenceAngles[0]);
+                    final int index = targetTile.getDataBufferIndex(rangeIndex, azimuthIndex);
 
-                final int index = targetTile.getDataBufferIndex(rangeIndex, azimuthIndex);
-
-                if (rangeIndex >= x0 && rangeIndex < x0+w && azimuthIndex >= y0 && azimuthIndex < y0+h) {
-                    trgData.setElemDoubleAt(index, v + trgData.getElemDoubleAt(index));
-                } else {
-                    if (azimuthIndex >= y0+h) {
-                        if (!ny0Updated) {
-                            ny0 = y;
-                            ny0Updated = true;
-                        } else {
-                            ny0 = Math.min(ny0, y);
+                    if (rangeIndex >= x0 && rangeIndex < x0+w && azimuthIndex >= y0 && azimuthIndex < y0+h) {
+                        trgData.setElemDoubleAt(index, v + trgData.getElemDoubleAt(index));
+                    } else {
+                        if (azimuthIndex >= y0+h) {
+                            if (!ny0Updated) {
+                                ny0 = y;
+                                ny0Updated = true;
+                            } else {
+                                ny0 = Math.min(ny0, y);
+                            }
                         }
                     }
                 }
             }
+
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
@@ -505,41 +523,35 @@ public final class SARSimulationOp extends Operator {
      * @param tileWidth The tile width.
      * @param localDEM The DEM for the tile.
      */
-    private void getLocalDEM(
-            final int x0, final int y0, final int tileWidth, final int tileHeight, final float[][] localDEM) {
+    private boolean getLocalDEM(final int x0, final int y0, final int tileWidth, final int tileHeight,
+                             final float[][] localDEM) throws Exception {
 
         // Note: the localDEM covers current tile with 1 extra row above, 1 extra row below, 1 extra column to
         //       the left and 1 extra column to the right of the tile.
         final GeoPos geoPos = new GeoPos();
         final int maxY = y0 + tileHeight + 1;
         final int maxX = x0 + tileWidth + 1;
+        float alt;
+        boolean valid = false;
         for (int y = y0 - 1; y < maxY; y++) {
             final int yy = y - y0 + 1;
             for (int x = x0 - 1; x < maxX; x++) {
                 geoPos.setLocation(latitude.getPixelFloat(x, y), longitude.getPixelFloat(x, y));
-                localDEM[yy][x - x0 + 1] = getLocalElevation(geoPos);
+                if(externalDEMFile == null) {
+                    alt = dem.getElevation(geoPos);
+                } else {
+                    alt = fileElevationModel.getElevation(geoPos);
+                }
+                localDEM[yy][x - x0 + 1] = alt;
+                if(alt != demNoDataValue)
+                    valid = true;
             }
         }
-    }
-
-    /**
-     * Get local elevation (in meter) for given latitude and longitude.
-     * @param geoPos The latitude and longitude in degrees.
-     * @return The elevation in meter.
-     */
-    private float getLocalElevation(final GeoPos geoPos) {
-        float alt;
-        try {
-            if(externalDEMFile == null) {
-                alt = dem.getElevation(geoPos);
-            } else {
-                alt = fileElevationModel.getElevation(geoPos);
-            }
-        } catch (Exception e) {
-            alt = demNoDataValue;
+        if(fileElevationModel != null) {
+            //fileElevationModel.clearCache();
         }
 
-        return alt;
+        return valid;
     }
 
     private void setLocalGeometry(final int x, final int y, final double[] earthPoint, final double[] sensorPos,

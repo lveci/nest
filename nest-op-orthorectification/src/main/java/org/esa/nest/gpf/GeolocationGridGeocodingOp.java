@@ -334,12 +334,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
         addGeoCoding();
 
         updateTargetProductMetadata();
-
-        //OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
-
-        // the tile width has to be the image width because otherwise sourceRaster.getDataBufferIndex(x, y)
-        // returns incorrect index for the last tile on the right
-        targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 20);
     }
 
     /**

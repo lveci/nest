@@ -28,6 +28,7 @@ import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.resamp.Resampling;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.util.ProductUtils;
@@ -86,11 +87,15 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 label="Warp Polynomial Order")
     private int warpPolynomialOrder = 1;
 
-    @Parameter(valueSet = {NEAREST_NEIGHBOUR, BILINEAR, CUBIC}, defaultValue = BILINEAR, label="DEM Resampling Method")
-    private String demResamplingMethod = BILINEAR;
+    @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+            ResamplingFactory.BILINEAR_INTERPOLATION_NAME, ResamplingFactory.CUBIC_CONVOLUTION_NAME},
+            defaultValue = ResamplingFactory.BILINEAR_INTERPOLATION_NAME, label="DEM Resampling Method")
+    private String demResamplingMethod = ResamplingFactory.BILINEAR_INTERPOLATION_NAME;
 
-    @Parameter(valueSet = {NEAREST_NEIGHBOUR, BILINEAR, CUBIC}, defaultValue = BILINEAR, label="Image Resampling Method")
-    private String imgResamplingMethod = BILINEAR;
+    @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+            ResamplingFactory.BILINEAR_INTERPOLATION_NAME, ResamplingFactory.CUBIC_CONVOLUTION_NAME},
+            defaultValue = ResamplingFactory.BILINEAR_INTERPOLATION_NAME, label="Image Resampling Method")
+    private String imgResamplingMethod = ResamplingFactory.BILINEAR_INTERPOLATION_NAME;
 
     @Parameter(description = "The pixel spacing", defaultValue = "", label="Pixel Spacing (m)")
     private String pixelSpacingStr = null;
@@ -154,9 +159,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
 
-    static final String NEAREST_NEIGHBOUR = "Nearest Neighbour";
-    static final String BILINEAR = "Bilinear Interpolation";
-    static final String CUBIC = "Cubic Convolution";
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
     private static final double NonValidZeroDopplerTime = -99999.0;
     private static final int INVALID_SUB_SWATH_INDEX = -1;
@@ -241,11 +243,11 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             computeSensorPositionsAndVelocities();
 
-            if (imgResamplingMethod.equals(NEAREST_NEIGHBOUR)) {
+            if (imgResamplingMethod.equals(ResamplingFactory.NEAREST_NEIGHBOUR_NAME)) {
                 imgResampling = ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR;
-            } else if (imgResamplingMethod.contains(BILINEAR)) {
+            } else if (imgResamplingMethod.contains(ResamplingFactory.BILINEAR_INTERPOLATION_NAME)) {
                 imgResampling = ResampleMethod.RESAMPLE_BILINEAR;
-            } else if (imgResamplingMethod.contains(CUBIC)) {
+            } else if (imgResamplingMethod.contains(ResamplingFactory.CUBIC_CONVOLUTION_NAME)) {
                 imgResampling = ResampleMethod.RESAMPLE_CUBIC;
             } else {
                 throw new OperatorException("Unknown interpolation method");
@@ -261,6 +263,16 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
+        }
+    }
+
+    @Override
+    public void dispose() {
+        if (dem != null) {
+            dem.dispose();
+        }
+        if(fileElevationModel != null) {
+            fileElevationModel.dispose();
         }
     }
 
@@ -482,7 +494,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 throw new OperatorException("The DEM '" + demName + "' is currently being installed.");
             }
 
-            dem = demDescriptor.createDem(getResamplingMethod());
+            dem = demDescriptor.createDem(ResamplingFactory.createResampling(demResamplingMethod));
             if(dem == null) {
                 throw new OperatorException("The DEM '" + demName + "' has not been installed.");
             }
@@ -492,23 +504,12 @@ public class SARSimTerrainCorrectionOp extends Operator {
         } else { // then demName is user selected DEM file name
 
             demNoDataValue = (float)absRoot.getAttributeDouble("external DEM no data value");
-            File externalDemFile = new File(demName);
-            fileElevationModel = new FileElevationModel(externalDemFile, getResamplingMethod(), demNoDataValue);
+            final File externalDemFile = new File(demName);
+            fileElevationModel = new FileElevationModel(externalDemFile, 
+		    ResamplingFactory.createResampling(demResamplingMethod), demNoDataValue);
             demName = externalDemFile.getName();
             useExternalDEMFile = true;
         }
-    }
-
-    private Resampling getResamplingMethod() {
-        Resampling resamplingMethod = Resampling.BILINEAR_INTERPOLATION;
-        if(demResamplingMethod.equals(NEAREST_NEIGHBOUR)) {
-            resamplingMethod = Resampling.NEAREST_NEIGHBOUR;
-        } else if(demResamplingMethod.equals(BILINEAR)) {
-            resamplingMethod = Resampling.BILINEAR_INTERPOLATION;
-        } else if(demResamplingMethod.equals(CUBIC)) {
-            resamplingMethod = Resampling.CUBIC_CONVOLUTION;
-        }
-        return resamplingMethod;
     }
 
     /**
