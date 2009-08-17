@@ -27,6 +27,7 @@
 		<tocitem text="Layer Manager" target="showLayerManagerWnd"/>
 		<tocitem text="World Map" target="showWorldMapWnd"/>
 		<tocitem text="WorldWind View" target="WorldWind"/>
+		<tocitem text="Import Browser" target="productGrabber"/>
         <tocitem text="Preferences Dialog" target="preferences"/>
 		<tocitem text="Settings Dialog" target="settings"/>
 		<tocitem text="Wave Mode Polar View" target="polarView"/>
@@ -71,7 +72,6 @@
 			
 			<tocitem text="Open Transect Data" target="importTransectData"/>
 			<tocitem text="Product Subset Dialog" target="subsetDialog"/>
-            <tocitem text="Import Browser" target="productGrabber"/>
 		</tocitem>
 		
 		<tocitem text="Product Writers">
@@ -127,12 +127,10 @@
 	<tocitem text="Graph Processing">
         <tocitem text="Introduction" target="introduction"/>
 		
-		<tocitem text="GPT">
+		<tocitem text="Graph Tools">
 	        <tocitem text="Graph Processing Tool" target="gpt"/>			
-		</tocitem>
-		
-		<tocitem text="Graph Builder">
 	        <tocitem text="Graph Builder Tool" target="graph_builder"/>
+			<tocitem text="Batch Processing" target="batch_processing"/>
 		</tocitem>
 		
 		<tocitem text="SAR Operators">

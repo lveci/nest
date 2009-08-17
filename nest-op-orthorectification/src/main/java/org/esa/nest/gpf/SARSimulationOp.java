@@ -33,7 +33,6 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
-import org.esa.nest.util.MathUtils;
 
 import java.awt.*;
 import java.io.File;

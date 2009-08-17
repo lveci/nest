@@ -16,36 +16,37 @@ package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataop.dem.ElevationModel;
+import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
+import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
+import org.esa.beam.framework.dataop.maptransf.Datum;
+import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
+import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.framework.dataop.dem.ElevationModel;
-import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
-import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
-import org.esa.beam.framework.dataop.resamp.Resampling;
-import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
-import org.esa.beam.framework.dataop.maptransf.Datum;
-import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.util.ProductUtils;
-import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.datamodel.Unit;
-import org.esa.nest.datamodel.Calibrator;
-import org.esa.nest.datamodel.CalibrationFactory;
-import org.esa.nest.util.MathUtils;
-import org.esa.nest.util.GeoUtils;
-import org.esa.nest.util.Constants;
-import org.esa.nest.util.Settings;
 import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.CalibrationFactory;
+import org.esa.nest.datamodel.Calibrator;
+import org.esa.nest.datamodel.Unit;
+import org.esa.nest.util.Constants;
+import org.esa.nest.util.GeoUtils;
+import org.esa.nest.util.MathUtils;
 
 import java.awt.*;
-import java.util.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The operator generates orthorectified image using rigorous SAR simulation.
@@ -97,8 +98,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
             defaultValue = ResamplingFactory.BILINEAR_INTERPOLATION_NAME, label="Image Resampling Method")
     private String imgResamplingMethod = ResamplingFactory.BILINEAR_INTERPOLATION_NAME;
 
-    @Parameter(description = "The pixel spacing", defaultValue = "", label="Pixel Spacing (m)")
-    private String pixelSpacingStr = null;
+    @Parameter(description = "The pixel spacing", defaultValue = "0", label="Pixel Spacing (m)")
+    private double pixelSpacing = 0;
 
     @Parameter(defaultValue="false", label="Save DEM as band")
     private boolean saveDEM = false;
@@ -120,7 +121,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
     private boolean srgrFlag = false;
     private boolean useExternalDEMFile = false;
-    private boolean applyUserSelectedPixelSpacing = false;
 
     private String mission = null;
     private String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
@@ -146,7 +146,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private double lonMax= 0.0;
     private double delLat = 0.0;
     private double delLon = 0.0;
-    private double pixelSpacing = 0.0;
 
     private double[][] sensorPosition = null; // sensor position for all range lines
     private double[][] sensorVelocity = null; // sensor velocity for all range lines
@@ -192,10 +191,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             if(OperatorUtils.isMapProjected(sourceProduct)) {
                 throw new OperatorException("Source product is already map projected");
-            }
-
-            if (pixelSpacingStr != null && !pixelSpacingStr.equals("")) {
-                getUserSelectedPixelSpacing();
             }
 
             getMissionType();
@@ -274,18 +269,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
         if(fileElevationModel != null) {
             fileElevationModel.dispose();
         }
-    }
-
-    /**
-     * Get user selected pixel spacing (in m).
-     */
-    private void getUserSelectedPixelSpacing() {
-
-        pixelSpacing = Double.parseDouble(pixelSpacingStr);
-        if (pixelSpacing <= 0.0) {
-            throw new OperatorException("Invalid value for pixel spacing: " + pixelSpacingStr);
-        }
-        applyUserSelectedPixelSpacing = true;
     }
 
     /**
@@ -432,7 +415,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private void computeDEMTraversalSampleInterval() {
 
         double spacing = 0.0;
-        if (applyUserSelectedPixelSpacing) {
+        if (pixelSpacing > 0.0) {
             spacing = pixelSpacing;
         } else {
             spacing = Math.min(rangeSpacing, azimuthSpacing);

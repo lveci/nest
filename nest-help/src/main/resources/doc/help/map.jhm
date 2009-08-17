@@ -33,7 +33,6 @@
     <mapID target="productBrowser" url="visat/ProductBrowser.html"/>
     <mapID target="pixelInfoView" url="visat/ProductBrowser.html#pixelView"/>
     <mapID target="propertyEditor" url="visat/PropertyEditor.html"/>
-    <mapID target="productGrabber" url="visat/ProductGrabber.html"/>
     <mapID target="subsetDialog" url="visat/ProductSubsetDialog.html"/>
 	<mapID target="polarView" url="visat/PolarView.html"/>
 	
@@ -83,6 +82,7 @@
     <mapID target="showROIDefWnd" url="visat/ShapeAndROIHandling.html"/>
     <mapID target="showWorldMapWnd" url="visat/WorldMap.html"/>
 	<mapID target="WorldWind" url="visat/WorldWind.html"/>
+	<mapID target="productGrabber" url="visat/ProductGrabber.html"/>
     <mapID target="showGcpManagerWnd" url="visat/GcpManagement.html"/>
     <mapID target="showPinManagerWnd" url="visat/PinManagement.html"/>
     <mapID target="noDataOverlay" url="visat/NoDataOverlay.html"/>
@@ -115,7 +115,7 @@
 	<mapID target="introduction" url="operators/introduction.html"/>
 	<mapID target="gpt" url="operators/gpt.html"/>
 	<mapID target="graph_builder" url="operators/graph_builder.html"/>
-	
+	<mapID target="batch_processing" url="operators/batch_processing.html"/>
 	
 	<!--SAR Operators-->
 	<mapID target="ApplyOrbitFileOp" url="operators/ApplyOrbitFileOp.html"/>

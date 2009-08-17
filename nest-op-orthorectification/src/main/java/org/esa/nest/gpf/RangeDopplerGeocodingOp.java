@@ -33,9 +33,9 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.datamodel.Unit;
-import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.CalibrationFactory;
+import org.esa.nest.datamodel.Calibrator;
+import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.MathUtils;
@@ -43,7 +43,10 @@ import org.esa.nest.util.MathUtils;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Raw SAR images usually contain significant geometric distortions. One of the factors that cause the

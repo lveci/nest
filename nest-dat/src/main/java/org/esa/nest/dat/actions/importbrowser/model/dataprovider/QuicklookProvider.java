@@ -180,7 +180,6 @@ public class QuicklookProvider implements DataProvider {
         productSubsetDef.setSubSampling(scaleFactor, scaleFactor);
 
         final String quicklookBandName = ProductUtils.findSuitableQuicklookBandName(product);
-        productSubsetDef.setNodeNames(new String[]{quicklookBandName});
         final Product productSubset = product.createSubset(productSubsetDef, null, null);
 
         return ProductUtils.createColorIndexedImage(productSubset.getBand(quicklookBandName), ProgressMonitor.NULL);

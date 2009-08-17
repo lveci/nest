@@ -178,10 +178,10 @@ public class ASARCalibrator implements Calibrator {
 
                 getNewAntennaPattern();
 
-                getNewCalibrationFactor();
-
                 computeEarthRadius();
             }
+
+            getNewCalibrationFactor();
 
             setRangeSpreadingLossCompPower();
 

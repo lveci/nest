@@ -1,20 +1,19 @@
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
-import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
+import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.DialogUtils;
-import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Map;
 import java.io.File;
+import java.util.Map;
 
 /**
  * User interface for RangeDopplerGeocodingOp
@@ -124,7 +123,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         imgResamplingMethod.setSelectedItem(paramMap.get("imgResamplingMethod"));
 
         double pix = (Double)paramMap.get("pixelSpacing");
-        if(!changedByUser && sourceProducts != null) {
+        if((!changedByUser || pixelSpacing.getText().isEmpty()) && sourceProducts != null) {
             try {
                 pix = RangeDopplerGeocodingOp.getPixelSpacing(sourceProducts[0]);
             } catch (Exception e) {
@@ -166,7 +165,11 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         paramMap.put("demName", demName.getSelectedItem());
         paramMap.put("demResamplingMethod", demResamplingMethod.getSelectedItem());
         paramMap.put("imgResamplingMethod", imgResamplingMethod.getSelectedItem());
-        paramMap.put("pixelSpacing", Double.parseDouble(pixelSpacing.getText()));
+        if(pixelSpacing.getText().isEmpty()) {
+            paramMap.put("pixelSpacing", 0.0);    
+        } else {
+            paramMap.put("pixelSpacing", Double.parseDouble(pixelSpacing.getText()));
+        }
 
         final String extFileStr = externalDEMFile.getText();
         if(!extFileStr.isEmpty()) {

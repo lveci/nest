@@ -8,7 +8,7 @@ public class BatchProcessingAction extends AbstractVisatAction {
 
     @Override
     public void actionPerformed(final CommandEvent event) {
-        final BatchGraphDialog dialog = new BatchGraphDialog(getAppContext(), "Batch Processing", "batchProcessing");
+        final BatchGraphDialog dialog = new BatchGraphDialog(getAppContext(), "Batch Processing", "batch_processing");
         dialog.show();
     }
 

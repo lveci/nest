@@ -1,23 +1,22 @@
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
-import org.esa.beam.framework.gpf.ui.UIValidation;
-import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.GridBagUtils;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.dataop.maptransf.MapProjection;
 import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
-import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
-import org.esa.nest.util.DialogUtils;
+import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
+import org.esa.beam.framework.gpf.ui.UIValidation;
+import org.esa.beam.framework.ui.AppContext;
 import org.esa.nest.datamodel.AbstractMetadata;
-
+import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.Map;
-import java.util.Arrays;
 
 /**
  * User interface for GCPSelectionOp
