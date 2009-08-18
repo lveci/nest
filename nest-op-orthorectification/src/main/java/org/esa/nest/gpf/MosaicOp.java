@@ -56,6 +56,8 @@ public class MosaicOp extends Operator {
     @Parameter(defaultValue = "false", description = "Normalize by Mean", label = "Normalize by Mean")
     private boolean normalizeByMean = false;
 
+    @Parameter(defaultValue = "0", description = "Pixel Size (m)", label = "Pixel Size (m)")
+    private double pixelSize = 0;
     @Parameter(defaultValue = "0", description = "Target width", label = "Scene Width (pixels)")
     private int sceneWidth = 0;
     @Parameter(defaultValue = "0", description = "Target height", label = "Scene Height (pixels)")
@@ -91,10 +93,15 @@ public class MosaicOp extends Operator {
             if (sceneWidth == 0 || sceneHeight == 0) {
 
                 final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct[0]);
-                final double rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
-                final double azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
 
-                getSceneDimensions(rangeSpacing, azimuthSpacing, scnProp);
+                if(pixelSize == 0) {
+                    final double rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
+                    final double azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
+                    final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
+                    getSceneDimensions(minSpacing, scnProp);
+                } else {
+                    getSceneDimensions(pixelSize, scnProp);
+                }
 
                 sceneWidth = scnProp.sceneWidth;
                 sceneHeight = scnProp.sceneHeight;
@@ -235,9 +242,7 @@ public class MosaicOp extends Operator {
         }
     }
 
-    public static void getSceneDimensions(double rangeSpacing, double azimuthSpacing,
-                                          SceneProperties scnProp) {
-        final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
+    public static void getSceneDimensions(double minSpacing, SceneProperties scnProp) {
         double minAbsLat;
         if (scnProp.latMin * scnProp.latMax > 0) {
             minAbsLat = Math.min(Math.abs(scnProp.latMin), Math.abs(scnProp.latMax)) * org.esa.beam.util.math.MathUtils.DTOR;

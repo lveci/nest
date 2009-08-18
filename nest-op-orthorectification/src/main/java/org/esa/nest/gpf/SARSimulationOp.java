@@ -153,29 +153,11 @@ public final class SARSimulationOp extends Operator {
     public void initialize() throws OperatorException {
 
         try {
-            absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
-
             if(OperatorUtils.isMapProjected(sourceProduct)) {
                 throw new OperatorException("SAR simulation cannot be performed for map projected source product");
             }
 
-            getSRGRFlag();
-
-            getRadarFrequency();
-
-            getRangeSpacing();
-
-            getFirstLastLineTimes();
-
-            getLineTimeInterval();
-
-            getOrbitStateVectors();
-
-            if (srgrFlag) {
-                getSrgrCoeff();
-            } else {
-                getNearEdgeSlantRange();
-            }
+            getMetadata();
 
             getElevationModel();
 
@@ -203,70 +185,30 @@ public final class SARSimulationOp extends Operator {
     }
 
     /**
-     * Get SRGR flag from the abstracted metadata.
-     * @throws Exception The exceptions.
+     * Retrieve required data from Abstracted Metadata
+     * @throws Exception if metadata not found
      */
-    private void getSRGRFlag() throws Exception {
+    private void getMetadata() throws Exception {
+        absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+
         srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
-    }
 
-    /**
-     * Get radar frequency from the abstracted metadata (in Hz).
-     * @throws Exception The exceptions.
-     */
-    private void getRadarFrequency() throws Exception {
-        final double radarFreq = AbstractMetadata.getAttributeDouble(absRoot,
-                                                    AbstractMetadata.radar_frequency)* Constants.oneMillion; // Hz
-        wavelength = Constants.lightSpeed / radarFreq;
-    }
+        wavelength = RangeDopplerGeocodingOp.getRadarFrequency(absRoot);
 
-    /**
-     * Get range spacing from the abstracted metadata.
-     * @throws Exception The exceptions.
-     */
-    private void getRangeSpacing() throws Exception {
         rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
-    }
 
-    /**
-     * Get first line time from the abstracted metadata (in days).
-     * @throws Exception The exceptions.
-     */
-    private void getFirstLastLineTimes() {
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
         lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD(); // in days
-    }
 
-    /**
-     * Get line time interval from the abstracted metadata (in days).
-     * @throws Exception The exceptions.
-     */
-    private void getLineTimeInterval() {
         lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
-    }
 
-    /**
-     * Get near edge slant range (in m).
-     * @throws Exception The exceptions.
-     */
-    private void getNearEdgeSlantRange() throws Exception {
-        nearEdgeSlantRange = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.slant_range_to_first_pixel);
-    }
-
-    /**
-     * Get orbit state vectors from the abstracted metadata.
-     * @throws Exception The exceptions.
-     */
-    private void getOrbitStateVectors() throws Exception {
         orbitStateVectors = AbstractMetadata.getOrbitStateVectors(absRoot);
-    }
 
-    /**
-     * Get SRGR conversion parameters.
-     * @throws Exception The exceptions.
-     */
-    private void getSrgrCoeff() throws Exception {
-        srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
+        if (srgrFlag) {
+            srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
+        } else {
+            nearEdgeSlantRange = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.slant_range_to_first_pixel);
+        }
     }
 
     /**
@@ -341,7 +283,6 @@ public final class SARSimulationOp extends Operator {
 
     /**
      * Create target product.
-     * @throws Exception The exception.
      */
     private void createTargetProduct() {
 
@@ -444,9 +385,6 @@ public final class SARSimulationOp extends Operator {
             ny0Updated = false;
         }
 
-        if(nh < 0) {
-            System.out.println("dem w "+w+" nh "+nh);
-        }
         final float[][] localDEM = new float[nh+2][w+2];
         try {
             final boolean valid = getLocalDEM(x0, ymin, w, nh, localDEM);
@@ -521,6 +459,8 @@ public final class SARSimulationOp extends Operator {
      * @param tileHeight The tile height.
      * @param tileWidth The tile width.
      * @param localDEM The DEM for the tile.
+     * @return false if all values are no data
+     * @throws Exception from dem
      */
     private boolean getLocalDEM(final int x0, final int y0, final int tileWidth, final int tileHeight,
                              final float[][] localDEM) throws Exception {

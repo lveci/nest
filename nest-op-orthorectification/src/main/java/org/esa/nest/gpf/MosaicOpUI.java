@@ -31,8 +31,7 @@ public class MosaicOpUI extends BaseOperatorUI {
 
     //private final JComboBox projectionName = new JComboBox();
 
-    private final JTextField pixelSizeX = new JTextField("");
-    private final JTextField pixelSizeY = new JTextField("");
+    private final JTextField pixelSize = new JTextField("");
     private final JTextField sceneWidth = new JTextField("");
     private final JTextField sceneHeight = new JTextField("");
     private final JCheckBox averageCheckBox = new JCheckBox("Average Overlap");
@@ -41,6 +40,10 @@ public class MosaicOpUI extends BaseOperatorUI {
     private boolean changedByUser = false;
     private boolean average = false;
     private boolean normalizeByMean = false;
+
+    private double widthHeightRatio = 1;
+    private double pixelSizeHeightRatio = 1;
+    private final MosaicOp.SceneProperties scnProp = new MosaicOp.SceneProperties();
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -68,6 +71,7 @@ public class MosaicOpUI extends BaseOperatorUI {
                 }
         });
 
+        pixelSize.addKeyListener(new TextAreaKeyListener());
         sceneWidth.addKeyListener(new TextAreaKeyListener());
         sceneHeight.addKeyListener(new TextAreaKeyListener());
 
@@ -82,27 +86,31 @@ public class MosaicOpUI extends BaseOperatorUI {
         resamplingMethod.setSelectedItem(paramMap.get("resamplingMethod"));
         //projectionName.setSelectedItem(paramMap.get("projectionName"));
 
+        double pixSize = (Double)paramMap.get("pixelSize");
         int width = (Integer)paramMap.get("sceneWidth");
         int height = (Integer)paramMap.get("sceneHeight");
 
         if(!changedByUser && sourceProducts != null) {
             try {
-                final MosaicOp.SceneProperties scnProp = new MosaicOp.SceneProperties();
                 MosaicOp.computeImageGeoBoundary(sourceProducts, scnProp);
 
                 final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProducts[0]);
                 final double rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
                 final double azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
-
-                MosaicOp.getSceneDimensions(rangeSpacing, azimuthSpacing, scnProp);
+                final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
+                pixSize = minSpacing;
+                
+                MosaicOp.getSceneDimensions(minSpacing, scnProp);
 
                 width = scnProp.sceneWidth;
                 height = scnProp.sceneHeight;
-                final double ratio = width / (double)height;
+                widthHeightRatio = width / (double)height;
+                pixelSizeHeightRatio = pixSize / (double) height;
+
                 long dim = (long)width*(long)height;
                 while(dim > Integer.MAX_VALUE) {
                     width -= 1000;
-                    height = (int)(width / ratio);
+                    height = (int)(width / widthHeightRatio);
                     dim = (long)width*(long)height;
                 }
             } catch(Exception e) {
@@ -111,6 +119,7 @@ public class MosaicOpUI extends BaseOperatorUI {
             }
         }
 
+        pixelSize.setText(String.valueOf(pixSize));
         sceneWidth.setText(String.valueOf(width));
         sceneHeight.setText(String.valueOf(height));
 
@@ -134,6 +143,7 @@ public class MosaicOpUI extends BaseOperatorUI {
         OperatorUIUtils.updateBandList(bandList, paramMap);
         paramMap.put("resamplingMethod", resamplingMethod.getSelectedItem());
         //paramMap.put("projectionName", projectionName.getSelectedItem());
+        paramMap.put("pixelSize", Double.parseDouble(pixelSize.getText()));
         paramMap.put("sceneWidth", Integer.parseInt(sceneWidth.getText()));
         paramMap.put("sceneHeight", Integer.parseInt(sceneHeight.getText()));
 
@@ -158,6 +168,8 @@ public class MosaicOpUI extends BaseOperatorUI {
         DialogUtils.addComponent(contentPane, gbc, "Resampling Method:", resamplingMethod);
         //gbc.gridy++;
         //DialogUtils.addComponent(contentPane, gbc, "Map Projection:", projectionName);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "Pixel Size (m):", pixelSize);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Scene Width (pixels)", sceneWidth);
         gbc.gridy++;
@@ -186,9 +198,28 @@ public class MosaicOpUI extends BaseOperatorUI {
         public void keyPressed(KeyEvent e) {
         }
         public void keyReleased(KeyEvent e) {
+            try {
+                changedByUser = true;
+                if(e.getComponent() == pixelSize) {
+                    final double pixSize = Double.parseDouble(pixelSize.getText());
+                    MosaicOp.getSceneDimensions(pixSize, scnProp);
+
+                    sceneWidth.setText(String.valueOf(scnProp.sceneWidth));
+                    sceneHeight.setText(String.valueOf(scnProp.sceneHeight));
+                } else if(e.getComponent() == sceneWidth) {
+                    final int height = (int)(Integer.parseInt(sceneWidth.getText()) / widthHeightRatio);
+                    sceneHeight.setText(String.valueOf(height));
+                    pixelSize.setText(String.valueOf(height * pixelSizeHeightRatio));
+                } else if(e.getComponent() == sceneHeight) {
+                    final int width = (int)(Integer.parseInt(sceneHeight.getText()) / widthHeightRatio);
+                    sceneWidth.setText(String.valueOf(width));
+                    pixelSize.setText(String.valueOf(width * pixelSizeHeightRatio));
+                }
+            } catch(Exception ex) {
+                //
+            }
         }
         public void keyTyped(KeyEvent e) {
-            changedByUser = true;   
         }
     }
 }

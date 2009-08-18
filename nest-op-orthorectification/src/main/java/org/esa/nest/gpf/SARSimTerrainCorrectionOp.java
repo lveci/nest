@@ -122,7 +122,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private boolean srgrFlag = false;
     private boolean useExternalDEMFile = false;
 
-    private String mission = null;
     private String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
     private String demName = null;
 
@@ -140,10 +139,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private double lineTimeInterval = 0.0; // in days
     private double nearEdgeSlantRange = 0.0; // in m
     private float demNoDataValue = 0; // no data value for DEM
-    private double latMin = 0.0;
-    private double latMax = 0.0;
-    private double lonMin = 0.0;
-    private double lonMax= 0.0;
+    private final RangeDopplerGeocodingOp.ImageGeoBoundary imageGeoBoundary = new RangeDopplerGeocodingOp.ImageGeoBoundary();
     private double delLat = 0.0;
     private double delLon = 0.0;
 
@@ -165,10 +161,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
     private ResampleMethod imgResampling = null;
 
-    private Map<String, ArrayList<Tile>> tileCache = new HashMap<String, ArrayList<Tile>>(2);
-
-    boolean useAvgSceneHeight = false;
-    Calibrator calibrator = null;
+    private boolean useAvgSceneHeight = false;
+    private Calibrator calibrator = null;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -187,35 +181,13 @@ public class SARSimTerrainCorrectionOp extends Operator {
     public void initialize() throws OperatorException {
 
         try {
-            absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
-
             if(OperatorUtils.isMapProjected(sourceProduct)) {
                 throw new OperatorException("Source product is already map projected");
             }
 
-            getMissionType();
+            getMetadata();
 
-            getSRGRFlag();
-
-            getRadarFrequency();
-
-            getRangeAzimuthSpacings();
-
-            getFirstLastLineTimes();
-
-            getLineTimeInterval();
-
-            getOrbitStateVectors();
-
-            if (srgrFlag) {
-                getSrgrCoeff();
-            } else {
-                getNearEdgeSlantRange();
-            }
-
-            getAverageSceneHeight(); // used for retro-calibration or when useAvgSceneHeight is true
-
-            computeImageGeoBoundary();
+            RangeDopplerGeocodingOp.computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
 
             computeDEMTraversalSampleInterval();
 
@@ -251,7 +223,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             if (applyRadiometricCalibration) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
                 calibrator.initialize(sourceProduct, targetProduct);
-                getProductPolarization();
+                OperatorUtils.getProductPolarization(absRoot, mdsPolar);
             }
 
             updateTargetProductMetadata();
@@ -272,141 +244,39 @@ public class SARSimTerrainCorrectionOp extends Operator {
     }
 
     /**
-     * Get the mission type.
-     * @throws Exception The exceptions.
+     * Retrieve required data from Abstracted Metadata
+     * @throws Exception if metadata not found
      */
-    private void getMissionType() throws Exception {
-        mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
+    private void getMetadata() throws Exception {
+        absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
-        if (mission.contains("TSX1")) {
-            throw new OperatorException("TerraSar-X product is not supported yet");
-        }
+        RangeDopplerGeocodingOp.getMissionType(absRoot);
 
-        if (mission.contains("ALOS")) {
-            if(!absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE).contains("COMPLEX")) {
-                throw new OperatorException("Only level 1.1 ALOS PALSAR product is supported");
-            }
-        }
-    }
-
-    /**
-     * Get product polarizations for each band in the product.
-     * @throws Exception The exceptions.
-     */
-    private void getProductPolarization() throws Exception {
-
-        String polarName = absRoot.getAttributeString(AbstractMetadata.mds1_tx_rx_polar);
-        mdsPolar[0] = null;
-        if (polarName.contains("HH") || polarName.contains("HV") || polarName.contains("VH") || polarName.contains("VV")) {
-            mdsPolar[0] = polarName.toLowerCase();
-        }
-
-        mdsPolar[1] = null;
-        polarName = absRoot.getAttributeString(AbstractMetadata.mds2_tx_rx_polar);
-        if (polarName.contains("HH") || polarName.contains("HV") || polarName.contains("VH") || polarName.contains("VV")) {
-            mdsPolar[1] = polarName.toLowerCase();
-        }
-    }
-
-    /**
-     * Get average scene height from abstracted metadata.
-     * @throws Exception The exceptions.
-     */
-    private void getAverageSceneHeight() throws Exception {
-        avgSceneHeight = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.avg_scene_height);
-    }
-
-    /**
-     * Get SRGR flag from the abstracted metadata.
-     * @throws Exception The exceptions.
-     */
-    private void getSRGRFlag() throws Exception {
         srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
-    }
 
-    /**
-     * Get radar frequency from the abstracted metadata (in Hz).
-     * @throws Exception The exceptions.
-     */
-    private void getRadarFrequency() throws Exception {
-        final double radarFreq = AbstractMetadata.getAttributeDouble(absRoot,
-                                                    AbstractMetadata.radar_frequency)*Constants.oneMillion; // Hz
-        wavelength = Constants.lightSpeed / radarFreq;
-    }
+        wavelength = RangeDopplerGeocodingOp.getRadarFrequency(absRoot);
 
-    /**
-     * Get range and azimuth spacings from the abstracted metadata.
-     * @throws Exception The exceptions.
-     */
-    private void getRangeAzimuthSpacings() throws Exception {
         rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
         azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
-    }
 
-    /**
-     * Get orbit state vectors from the abstracted metadata.
-     * @throws Exception The exceptions.
-     */
-    private void getOrbitStateVectors() throws Exception {
+        firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
+        lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD(); // in days
+        if (firstLineUTC >= lastLineUTC) {
+            throw new OperatorException("First line time should be smaller than the last line time");
+        }
+
+        lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
+
         orbitStateVectors = AbstractMetadata.getOrbitStateVectors(absRoot);
-    }
 
-    /**
-     * Get SRGR conversion parameters.
-     * @throws Exception The exceptions.
-     */
-    private void getSrgrCoeff() throws Exception {
-        srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
-    }
-
-    /**
-     * Get near edge slant range (in m).
-     * @throws Exception The exceptions.
-     */
-    private void getNearEdgeSlantRange() throws Exception {
-        nearEdgeSlantRange = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.slant_range_to_first_pixel);
-    }
-
-    /**
-     * Compute source image geodetic boundary (minimum/maximum latitude/longitude) from the its corner
-     * latitude/longitude.
-     * @throws Exception The exceptions.
-     */
-    private void computeImageGeoBoundary() throws Exception {
-        
-        final GeoCoding geoCoding = sourceProduct.getGeoCoding();
-        if(geoCoding == null) {
-            throw new OperatorException("Product does not contain a geocoding");
-        }
-        final GeoPos geoPosFirstNear = geoCoding.getGeoPos(new PixelPos(0,0), null);
-        final GeoPos geoPosFirstFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth()-1,0), null);
-        final GeoPos geoPosLastNear = geoCoding.getGeoPos(new PixelPos(0,sourceProduct.getSceneRasterHeight()-1), null);
-        final GeoPos geoPosLastFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth()-1,
-                                                                      sourceProduct.getSceneRasterHeight()-1), null);
-        
-        final double[] lats  = {geoPosFirstNear.getLat(), geoPosFirstFar.getLat(), geoPosLastNear.getLat(), geoPosLastFar.getLat()};
-        final double[] lons  = {geoPosFirstNear.getLon(), geoPosFirstFar.getLon(), geoPosLastNear.getLon(), geoPosLastFar.getLon()};
-        latMin = 90.0;
-        latMax = -90.0;
-        for (double lat : lats) {
-            if (lat < latMin) {
-                latMin = lat;
-            }
-            if (lat > latMax) {
-                latMax = lat;
-            }
+        if (srgrFlag) {
+            srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
+        } else {
+            nearEdgeSlantRange = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.slant_range_to_first_pixel);
         }
 
-        lonMin = 180.0;
-        lonMax = -180.0;
-        for (double lon : lons) {
-            if (lon < lonMin) {
-                lonMin = lon;
-            }
-            if (lon > lonMax) {
-                lonMax = lon;
-            }
-        }
+        // used for retro-calibration or when useAvgSceneHeight is true
+        avgSceneHeight = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.avg_scene_height);
     }
 
     /**
@@ -422,8 +292,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
 
         double minAbsLat;
-        if (latMin*latMax > 0) {
-            minAbsLat = Math.min(Math.abs(latMin), Math.abs(latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
+        if (imageGeoBoundary.latMin*imageGeoBoundary.latMax > 0) {
+            minAbsLat = Math.min(Math.abs(imageGeoBoundary.latMin),
+                    Math.abs(imageGeoBoundary.latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
         } else {
             minAbsLat = 0.0;
         }
@@ -437,28 +308,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * Compute target image dimension.
      */
     private void computedTargetImageDimension() {
-        targetImageWidth = (int)((lonMax - lonMin)/delLon) + 1;
-        targetImageHeight = (int)((latMax - latMin)/delLat) + 1;
-    }
-
-    /**
-     * Get first line time from the abstracted metadata (in days).
-     * @throws Exception The exceptions.
-     */
-    private void getFirstLastLineTimes() throws Exception {
-        firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
-        lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD(); // in days
-        if (firstLineUTC >= lastLineUTC) {
-            throw new OperatorException("First line time should be smaller than the last line time");
-        }
-    }
-
-    /**
-     * Get line time interval from the abstracted metadata (in days).
-     * @throws Exception The exceptions.
-     */
-    private void getLineTimeInterval() throws Exception {
-        lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
+        targetImageWidth = (int)((imageGeoBoundary.lonMax - imageGeoBoundary.lonMin)/delLon) + 1;
+        targetImageHeight = (int)((imageGeoBoundary.latMax - imageGeoBoundary.latMin)/delLat) + 1;
     }
 
     /**
@@ -610,8 +461,10 @@ public class SARSimTerrainCorrectionOp extends Operator {
      */
     private void addGeoCoding() {
 
-        final float[] latTiePoints = {(float)latMax, (float)latMax, (float)latMin, (float)latMin};
-        final float[] lonTiePoints = {(float)lonMin, (float)lonMax, (float)lonMin, (float)lonMax};
+        final float[] latTiePoints = {(float)imageGeoBoundary.latMax, (float)imageGeoBoundary.latMax,
+                                      (float)imageGeoBoundary.latMin, (float)imageGeoBoundary.latMin};
+        final float[] lonTiePoints = {(float)imageGeoBoundary.lonMin, (float)imageGeoBoundary.lonMax,
+                                      (float)imageGeoBoundary.lonMin, (float)imageGeoBoundary.lonMax};
 
         final int gridWidth = 10;
         final int gridHeight = 10;
@@ -655,14 +508,14 @@ public class SARSimTerrainCorrectionOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.srgr_flag, 1);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetImageHeight);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_lat, latMax);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_lat, latMax);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_lat, latMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_lat, latMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_long, lonMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_long, lonMax);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, lonMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, lonMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_lat, imageGeoBoundary.latMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_lat, imageGeoBoundary.latMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_lat, imageGeoBoundary.latMin);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_lat, imageGeoBoundary.latMin);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_long, imageGeoBoundary.lonMin);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_long, imageGeoBoundary.lonMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, imageGeoBoundary.lonMin);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, imageGeoBoundary.lonMax);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE,
                 (int)(targetProduct.getRawStorageSize() / (1024.0f * 1024.0f)));
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, IdentityTransformDescriptor.NAME);
@@ -794,12 +647,12 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         try {
             for (int y = y0; y < y0 + h; y++) {
-                final double lat = latMax - y*delLat;
+                final double lat = imageGeoBoundary.latMax - y*delLat;
 
                 for (int x = x0; x < x0 + w; x++) {
                     final int index = trgTiles[0].targetTile.getDataBufferIndex(x, y);
 
-                    final double lon = lonMin + x*delLon;
+                    final double lon = imageGeoBoundary.lonMin + x*delLon;
 
                     double alt;
                     if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) { // localDEM is available
@@ -928,10 +781,10 @@ public class SARSimTerrainCorrectionOp extends Operator {
         final int maxY = y0 + tileHeight + 1;
         final int maxX = x0 + tileWidth + 1;
         for (int y = y0 - 1; y < maxY; y++) {
-            final float lat = (float)(latMax - y*delLat);
+            final float lat = (float)(imageGeoBoundary.latMax - y*delLat);
             final int yy = y - y0 + 1;
             for (int x = x0 - 1; x < maxX; x++) {
-                geoPos.setLocation(lat, (float)(lonMin + x*delLon));
+                geoPos.setLocation(lat, (float)(imageGeoBoundary.lonMin + x*delLon));
                 localDEM[yy][x - x0 + 1] = getLocalElevation(geoPos);
             }
         }

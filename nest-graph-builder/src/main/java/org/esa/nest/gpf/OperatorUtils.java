@@ -89,6 +89,30 @@ public class OperatorUtils {
         }
     }
 
+    /**
+     * Get product polarizations for each band in the product.
+     * @param absRoot the AbstractMetadata
+     * @param mdsPolar the string array to hold the polarization names
+     * @throws Exception The exceptions.
+     */
+    public static void getProductPolarization(final MetadataElement absRoot, final String[] mdsPolar) throws Exception {
+
+        if(mdsPolar == null || mdsPolar.length < 2) {
+            throw new Exception("mdsPolar is not valid");
+        }
+        String polarName = absRoot.getAttributeString(AbstractMetadata.mds1_tx_rx_polar);
+        mdsPolar[0] = null;
+        if (polarName.contains("HH") || polarName.contains("HV") || polarName.contains("VH") || polarName.contains("VV")) {
+            mdsPolar[0] = polarName.toLowerCase();
+        }
+
+        mdsPolar[1] = null;
+        polarName = absRoot.getAttributeString(AbstractMetadata.mds2_tx_rx_polar);
+        if (polarName.contains("HH") || polarName.contains("HV") || polarName.contains("VH") || polarName.contains("VV")) {
+            mdsPolar[1] = polarName.toLowerCase();
+        }
+    }
+
     public static String getSuffixFromBandName(final String bandName) {
 
         final int idx1 = bandName.lastIndexOf('_');

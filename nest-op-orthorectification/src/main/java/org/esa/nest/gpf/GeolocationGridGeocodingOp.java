@@ -96,11 +96,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
     private double azimuthSpacing = 0.0;
     private double firstLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
-    private double srcBandNoDataValue = 0.0; // no data value for source band
-    private double latMin = 0.0;
-    private double latMax = 0.0;
-    private double lonMin = 0.0;
-    private double lonMax= 0.0;
+    private final RangeDopplerGeocodingOp.ImageGeoBoundary imageGeoBoundary = new RangeDopplerGeocodingOp.ImageGeoBoundary();
     private double delLat = 0.0;
     private double delLon = 0.0;
 
@@ -131,27 +127,13 @@ public final class GeolocationGridGeocodingOp extends Operator {
     public void initialize() throws OperatorException {
 
         try {
-            absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
-
             if(OperatorUtils.isMapProjected(sourceProduct)) {
                 throw new OperatorException("Source product is already map projected");
             }
 
-            getMissionType();
-            
-            getSRGRFlag();
+            getMetadata();
 
-            getRangeAzimuthSpacings();
-
-            getFirstLineTime();
-
-            getLineTimeInterval();
-
-            if (srgrFlag) {
-                getSrgrCoeff();
-            }
-
-            computeImageGeoBoundary();
+            RangeDopplerGeocodingOp.computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
 
             computeDEMTraversalSampleInterval();
 
@@ -177,86 +159,27 @@ public final class GeolocationGridGeocodingOp extends Operator {
             throw new OperatorException(e);
         }
     }
-    /**
-     * Get the mission type.
-     * @throws Exception The exceptions.
-     */
-    private void getMissionType() throws Exception {
-        String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
-
-        if (mission.contains("TSX1")) {
-            throw new OperatorException("TerraSar-X product is not supported yet");
-        }
-
-        if (mission.contains("ALOS")) {
-            throw new OperatorException("ALOS PALSAR product is not supported yet");
-        }
-    }
 
     /**
-     * Get SRGR flag from the abstracted metadata.
-     * @throws Exception The exceptions.
+     * Retrieve required data from Abstracted Metadata
+     * @throws Exception if metadata not found
      */
-    private void getSRGRFlag() throws Exception {
+    private void getMetadata() throws Exception {
+        absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+
+        RangeDopplerGeocodingOp.getMissionType(absRoot);
+
         srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
-    }
 
-    /**
-     * Get range and azimuth spacings from the abstracted metadata.
-     * @throws Exception The exceptions.
-     */
-    private void getRangeAzimuthSpacings() throws Exception {
         rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
         azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
-    }
 
-    /**
-     * Get SRGR conversion parameters.
-     * @throws Exception The exceptions.
-     */
-    private void getSrgrCoeff() throws Exception {
-        srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
-    }
+        firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
 
-    /**
-     * Compute source image geodetic boundary (minimum/maximum latitude/longitude) from the its corner
-     * latitude/longitude.
-     * @throws Exception The exceptions.
-     */
-    private void computeImageGeoBoundary() throws Exception {
+        lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
 
-        final GeoCoding geoCoding = sourceProduct.getGeoCoding();
-        if(geoCoding == null) {
-            throw new OperatorException("Product does not contain a geocoding");
-        }
-        final GeoPos geoPosFirstNear = geoCoding.getGeoPos(new PixelPos(0,0), null);
-        final GeoPos geoPosFirstFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth()-1,0), null);
-        final GeoPos geoPosLastNear = geoCoding.getGeoPos(new PixelPos(0,sourceProduct.getSceneRasterHeight()-1), null);
-        final GeoPos geoPosLastFar = geoCoding.getGeoPos(new PixelPos(sourceProduct.getSceneRasterWidth()-1,
-                                                                      sourceProduct.getSceneRasterHeight()-1), null);
-
-        final double[] lats  = {geoPosFirstNear.getLat(), geoPosFirstFar.getLat(), geoPosLastNear.getLat(), geoPosLastFar.getLat()};
-        final double[] lons  = {geoPosFirstNear.getLon(), geoPosFirstFar.getLon(), geoPosLastNear.getLon(), geoPosLastFar.getLon()};
-        latMin = 90.0;
-        latMax = -90.0;
-        for (double lat : lats) {
-            if (lat < latMin) {
-                latMin = lat;
-            }
-            if (lat > latMax) {
-                latMax = lat;
-            }
-        }
-
-        lonMin = 180.0;
-        lonMax = -180.0;
-        for (double lon : lons) {
-            if (lon < lonMin) {
-                lonMin = lon;
-            }
-            if (lon > lonMax) {
-                lonMax = lon;
-            }
+        if (srgrFlag) {
+            srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
         }
     }
 
@@ -267,8 +190,8 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
         final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
         double minAbsLat;
-        if (latMin*latMax > 0) {
-            minAbsLat = Math.min(Math.abs(latMin), Math.abs(latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
+        if (imageGeoBoundary.latMin*imageGeoBoundary.latMax > 0) {
+            minAbsLat = Math.min(Math.abs(imageGeoBoundary.latMin), Math.abs(imageGeoBoundary.latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
         } else {
             minAbsLat = 0.0;
         }
@@ -290,24 +213,8 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * Compute target image dimension.
      */
     private void computedTargetImageDimension() {
-        targetImageWidth = (int)((lonMax - lonMin)/delLon) + 1;
-        targetImageHeight = (int)((latMax - latMin)/delLat) + 1;
-    }
-
-    /**
-     * Get first line time from the abstracted metadata (in days).
-     * @throws Exception The exceptions.
-     */
-    private void getFirstLineTime() throws Exception {
-        firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
-    }
-
-    /**
-     * Get line time interval from the abstracted metadata (in days).
-     * @throws Exception The exceptions.
-     */
-    private void getLineTimeInterval() throws Exception {
-        lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
+        targetImageWidth = (int)((imageGeoBoundary.lonMax - imageGeoBoundary.lonMin)/delLon) + 1;
+        targetImageHeight = (int)((imageGeoBoundary.latMax - imageGeoBoundary.latMin)/delLat) + 1;
     }
 
     /**
@@ -438,8 +345,10 @@ public final class GeolocationGridGeocodingOp extends Operator {
         final float subSamplingX = targetImageWidth;
         final float subSamplingY = targetImageHeight;
 
-        final float[] latTiePoints = {(float)latMax, (float)latMax, (float)latMin, (float)latMin};
-        final float[] lonTiePoints = {(float)lonMin, (float)lonMax, (float)lonMin, (float)lonMax};
+        final float[] latTiePoints = {(float)imageGeoBoundary.latMax, (float)imageGeoBoundary.latMax,
+                                      (float)imageGeoBoundary.latMin, (float)imageGeoBoundary.latMin};
+        final float[] lonTiePoints = {(float)imageGeoBoundary.lonMin, (float)imageGeoBoundary.lonMax,
+                                      (float)imageGeoBoundary.lonMin, (float)imageGeoBoundary.lonMax};
 
         final TiePointGrid latGrid = new TiePointGrid(
                 "latitude", gridWidth, gridHeight, 0.0f, 0.0f, subSamplingX, subSamplingY, latTiePoints);
@@ -477,14 +386,14 @@ public final class GeolocationGridGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, IdentityTransformDescriptor.NAME);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetImageHeight);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_lat, latMax);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_lat, latMax);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_lat, latMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_lat, latMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_long, lonMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_long, lonMax);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, lonMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, lonMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_lat, imageGeoBoundary.latMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_lat, imageGeoBoundary.latMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_lat, imageGeoBoundary.latMin);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_lat, imageGeoBoundary.latMin);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_long, imageGeoBoundary.lonMin);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_long, imageGeoBoundary.lonMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, imageGeoBoundary.lonMin);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, imageGeoBoundary.lonMax);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE,
                 (int)(targetProduct.getRawStorageSize() / (1024.0f * 1024.0f)));
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_terrain_corrected, 0);
@@ -539,7 +448,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
             sourceBand = sourceProduct.getBand(srcBandNames[0]);
             sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
         }
-        srcBandNoDataValue = sourceBand.getNoDataValue();
+        final double srcBandNoDataValue = sourceBand.getNoDataValue();
 
         try {
             final ProductData trgData = targetTile.getDataBuffer();
@@ -547,12 +456,12 @@ public final class GeolocationGridGeocodingOp extends Operator {
             final int srcMaxAzimuth = sourceImageHeight - 1;
 
             for (int y = y0; y < y0 + h; y++) {
-                final double lat = latMax - y*delLat;
+                final double lat = imageGeoBoundary.latMax - y*delLat;
 
                 for (int x = x0; x < x0 + w; x++) {
 
                     final int index = targetTile.getDataBufferIndex(x, y);
-                    final double lon = lonMin + x*delLon;
+                    final double lon = imageGeoBoundary.lonMin + x*delLon;
                     final PixelPos pixPos = computePixelPosition(lat, lon);
                     if (pixPos.x < 0 || pixPos.y < 0) {
                         trgData.setElemDoubleAt(index, srcBandNoDataValue);
@@ -587,8 +496,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
         // todo the following method is not accurate, should use point-in-polygon test
         final GeoPos geoPos = new GeoPos((float)lat, (float)lon);
         return sourceBand.getGeoCoding().getPixelPos(geoPos, null);
-
-        
     }
 
     /**
@@ -737,7 +644,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
         }
     }
 
-    private Tile getSrcTile(Band sourceBand, int minX, int minY, int width, int height) {
+    private static Tile getSrcTile(Band sourceBand, int minX, int minY, int width, int height) {
         if(sourceBand == null)
             return null;
 
@@ -754,7 +661,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * @param sourceTile2 q
      * @return The pixel value.
      */
-    private double getPixelValueUsingNearestNeighbourInterp(final double azimuthIndex, final double rangeIndex,
+    private static double getPixelValueUsingNearestNeighbourInterp(final double azimuthIndex, final double rangeIndex,
             final Unit.UnitType bandUnit, final Tile sourceTile, final Tile sourceTile2) {
 
         final int x0 = (int)rangeIndex;
@@ -789,7 +696,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * @param sourceTile2 q
      * @return The pixel value.
      */
-    private double getPixelValueUsingBilinearInterp(final double azimuthIndex, final double rangeIndex,
+    private static double getPixelValueUsingBilinearInterp(final double azimuthIndex, final double rangeIndex,
                                                     final Unit.UnitType bandUnit,
                                                     final int sceneRasterWidth, final int sceneRasterHeight,
                                                     final Tile sourceTile, final Tile sourceTile2) {
@@ -848,7 +755,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * @param sourceTile2 q
      * @return The pixel value.
      */
-    private double getPixelValueUsingBicubicInterp(final double azimuthIndex, final double rangeIndex,
+    private static double getPixelValueUsingBicubicInterp(final double azimuthIndex, final double rangeIndex,
                                                    final Unit.UnitType bandUnit,
                                                    final int sceneRasterWidth, final int sceneRasterHeight,
                                                    final Tile sourceTile, final Tile sourceTile2) {

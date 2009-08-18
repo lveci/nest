@@ -129,7 +129,6 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     private boolean srgrFlag = false;
 
-    private String mission = null;
     private String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
 
     private int sourceImageWidth = 0;
@@ -146,10 +145,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private double lineTimeInterval = 0.0; // in days
     private double nearEdgeSlantRange = 0.0; // in m
     private float demNoDataValue = 0.0f; // no data value for DEM
-    private double latMin = 0.0;
-    private double latMax = 0.0;
-    private double lonMin = 0.0;
-    private double lonMax= 0.0;
+    private final ImageGeoBoundary imageGeoBoundary = new ImageGeoBoundary();
     private double delLat = 0.0;
     private double delLon = 0.0;
 
@@ -192,35 +188,13 @@ public class RangeDopplerGeocodingOp extends Operator {
     public void initialize() throws OperatorException {
 
         try {
-            absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
-
             if(OperatorUtils.isMapProjected(sourceProduct)) {
                 throw new OperatorException("Source product is already map projected");
             }
 
-            getMissionType();
+            getMetadata();
 
-            getSRGRFlag();
-
-            getRadarFrequency();
-
-            getRangeAzimuthSpacings();
-
-            getFirstLastLineTimes();
-
-            getLineTimeInterval();
-
-            getOrbitStateVectors();
-
-            if (srgrFlag) {
-                getSrgrCoeff();
-            } else {
-                getNearEdgeSlantRange();
-            }
-
-            getAverageSceneHeight(); // used for retro-calibration or when useAvgSceneHeight is true
-
-            computeImageGeoBoundary();
+            computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
 
             computeDEMTraversalSampleInterval();
 
@@ -254,7 +228,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             if (applyRadiometricCalibration) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
                 calibrator.initialize(sourceProduct, targetProduct);
-                getProductPolarization();
+                OperatorUtils.getProductPolarization(absRoot, mdsPolar);
             }
 
             updateTargetProductMetadata();
@@ -275,11 +249,49 @@ public class RangeDopplerGeocodingOp extends Operator {
     }
 
     /**
+     * Retrieve required data from Abstracted Metadata
+     * @throws Exception if metadata not found
+     */
+    private void getMetadata() throws Exception {
+        absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+
+        getMissionType(absRoot);
+
+        srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
+
+        wavelength = getRadarFrequency(absRoot);
+
+        rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
+        azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
+
+        firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
+        lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD(); // in days
+        if (firstLineUTC >= lastLineUTC) {
+            throw new OperatorException("First line time should be smaller than the last line time");
+        }
+
+        lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
+
+        orbitStateVectors = AbstractMetadata.getOrbitStateVectors(absRoot);
+
+        if (srgrFlag) {
+            srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
+        } else {
+            nearEdgeSlantRange = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.slant_range_to_first_pixel);
+        }
+
+        // used for retro-calibration or when useAvgSceneHeight is true
+        avgSceneHeight = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.avg_scene_height);
+    }
+
+    /**
      * Get the mission type.
+     * @param absRoot the AbstractMetadata
+     * @return the mission string
      * @throws Exception The exceptions.
      */
-    private void getMissionType() throws Exception {
-        mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
+    public static String getMissionType(final MetadataElement absRoot) throws Exception {
+        String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
 
         if (mission.contains("TSX1")) {
             throw new OperatorException("TerraSar-X product is not supported yet");
@@ -290,93 +302,30 @@ public class RangeDopplerGeocodingOp extends Operator {
                 throw new OperatorException("Only level 1.1 ALOS PALSAR product is supported");
             }
         }
-    }
-
-    /**
-     * Get product polarizations for each band in the product.
-     * @throws Exception The exceptions.
-     */
-
-    private void getProductPolarization() throws Exception {
-
-        String polarName = absRoot.getAttributeString(AbstractMetadata.mds1_tx_rx_polar);
-        mdsPolar[0] = null;
-        if (polarName.contains("HH") || polarName.contains("HV") || polarName.contains("VH") || polarName.contains("VV")) {
-            mdsPolar[0] = polarName.toLowerCase();
-        }
-
-        mdsPolar[1] = null;
-        polarName = absRoot.getAttributeString(AbstractMetadata.mds2_tx_rx_polar);
-        if (polarName.contains("HH") || polarName.contains("HV") || polarName.contains("VH") || polarName.contains("VV")) {
-            mdsPolar[1] = polarName.toLowerCase();
-        }
-    }
-
-    /**
-     * Get average scene height from abstracted metadata.
-     * @throws Exception The exceptions.
-     */
-    private void getAverageSceneHeight() throws Exception {
-        avgSceneHeight = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.avg_scene_height);
-    }
-
-    /**
-     * Get SRGR flag from the abstracted metadata.
-     * @throws Exception The exceptions.
-     */
-    private void getSRGRFlag() throws Exception {
-        srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
+        return mission;
     }
 
     /**
      * Get radar frequency from the abstracted metadata (in Hz).
+     * @param absRoot the AbstractMetadata
+     * @return wavelength
      * @throws Exception The exceptions.
      */
-    private void getRadarFrequency() throws Exception {
+    public static double getRadarFrequency(final MetadataElement absRoot) throws Exception {
         final double radarFreq = AbstractMetadata.getAttributeDouble(absRoot,
                                                     AbstractMetadata.radar_frequency)*Constants.oneMillion; // Hz
-        wavelength = Constants.lightSpeed / radarFreq;
-    }
-
-    /**
-     * Get range and azimuth spacings from the abstracted metadata.
-     * @throws Exception The exceptions.
-     */
-    private void getRangeAzimuthSpacings() throws Exception {
-        rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
-        azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
-    }
-
-    /**
-     * Get orbit state vectors from the abstracted metadata.
-     * @throws Exception The exceptions.
-     */
-    private void getOrbitStateVectors() throws Exception {
-        orbitStateVectors = AbstractMetadata.getOrbitStateVectors(absRoot);
-    }
-
-    /**
-     * Get SRGR conversion parameters.
-     * @throws Exception The exceptions.
-     */
-    private void getSrgrCoeff() throws Exception {
-        srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
-    }
-
-    /**
-     * Get near edge slant range (in m).
-     * @throws Exception The exceptions.
-     */
-    private void getNearEdgeSlantRange() throws Exception {
-        nearEdgeSlantRange = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.slant_range_to_first_pixel);
+        return Constants.lightSpeed / radarFreq;
     }
 
     /**
      * Compute source image geodetic boundary (minimum/maximum latitude/longitude) from the its corner
      * latitude/longitude.
+     * @param sourceProduct the input product
+     * @param geoBoundary to pass back the max/min lat/lon
      * @throws Exception The exceptions.
      */
-    private void computeImageGeoBoundary() throws Exception {
+    public static void computeImageGeoBoundary(final Product sourceProduct,
+                                               final ImageGeoBoundary geoBoundary) throws Exception {
         
         final GeoCoding geoCoding = sourceProduct.getGeoCoding();
         if(geoCoding == null) {
@@ -391,25 +340,25 @@ public class RangeDopplerGeocodingOp extends Operator {
         final double[] lats  = {geoPosFirstNear.getLat(), geoPosFirstFar.getLat(), geoPosLastNear.getLat(), geoPosLastFar.getLat()};
         final double[] lons  = {geoPosFirstNear.getLon(), geoPosFirstFar.getLon(), geoPosLastNear.getLon(), geoPosLastFar.getLon()};
 
-        latMin = 90.0;
-        latMax = -90.0;
+        geoBoundary.latMin = 90.0;
+        geoBoundary.latMax = -90.0;
         for (double lat : lats) {
-            if (lat < latMin) {
-                latMin = lat;
+            if (lat < geoBoundary.latMin) {
+                geoBoundary.latMin = lat;
             }
-            if (lat > latMax) {
-                latMax = lat;
+            if (lat > geoBoundary.latMax) {
+                geoBoundary.latMax = lat;
             }
         }
 
-        lonMin = 180.0;
-        lonMax = -180.0;
+        geoBoundary.lonMin = 180.0;
+        geoBoundary.lonMax = -180.0;
         for (double lon : lons) {
-            if (lon < lonMin) {
-                lonMin = lon;
+            if (lon < geoBoundary.lonMin) {
+                geoBoundary.lonMin = lon;
             }
-            if (lon > lonMax) {
-                lonMax = lon;
+            if (lon > geoBoundary.lonMax) {
+                geoBoundary.lonMax = lon;
             }
         }
     }
@@ -427,8 +376,9 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
 
         double minAbsLat;
-        if (latMin*latMax > 0) {
-            minAbsLat = Math.min(Math.abs(latMin), Math.abs(latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
+        if (imageGeoBoundary.latMin*imageGeoBoundary.latMax > 0) {
+            minAbsLat = Math.min(Math.abs(imageGeoBoundary.latMin),
+                    Math.abs(imageGeoBoundary.latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
         } else {
             minAbsLat = 0.0;
         }
@@ -442,28 +392,8 @@ public class RangeDopplerGeocodingOp extends Operator {
      * Compute target image dimension.
      */
     private void computedTargetImageDimension() {
-        targetImageWidth = (int)((lonMax - lonMin)/delLon) + 1;
-        targetImageHeight = (int)((latMax - latMin)/delLat) + 1;
-    }
-
-    /**
-     * Get first line time from the abstracted metadata (in days).
-     * @throws Exception The exceptions.
-     */
-    private void getFirstLastLineTimes() throws Exception {
-        firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
-        lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD(); // in days
-        if (firstLineUTC >= lastLineUTC) {
-            throw new OperatorException("First line time should be smaller than the last line time");
-        }
-    }
-
-    /**
-     * Get line time interval from the abstracted metadata (in days).
-     * @throws Exception The exceptions.
-     */
-    private void getLineTimeInterval() throws Exception {
-        lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
+        targetImageWidth = (int)((imageGeoBoundary.lonMax - imageGeoBoundary.lonMin)/delLon) + 1;
+        targetImageHeight = (int)((imageGeoBoundary.latMax - imageGeoBoundary.latMin)/delLat) + 1;
     }
 
     /**
@@ -680,8 +610,10 @@ public class RangeDopplerGeocodingOp extends Operator {
      */
     private void addGeoCoding() {
 
-        final float[] latTiePoints = {(float)latMax, (float)latMax, (float)latMin, (float)latMin};
-        final float[] lonTiePoints = {(float)lonMin, (float)lonMax, (float)lonMin, (float)lonMax};
+        final float[] latTiePoints = {(float)imageGeoBoundary.latMax, (float)imageGeoBoundary.latMax,
+                                      (float)imageGeoBoundary.latMin, (float)imageGeoBoundary.latMin};
+        final float[] lonTiePoints = {(float)imageGeoBoundary.lonMin, (float)imageGeoBoundary.lonMax,
+                                      (float)imageGeoBoundary.lonMin, (float)imageGeoBoundary.lonMax};
 
         final int gridWidth = 10;
         final int gridHeight = 10;
@@ -725,14 +657,14 @@ public class RangeDopplerGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.srgr_flag, 1);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetImageHeight);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_lat, latMax);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_lat, latMax);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_lat, latMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_lat, latMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_long, lonMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_long, lonMax);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, lonMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, lonMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_lat, imageGeoBoundary.latMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_lat, imageGeoBoundary.latMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_lat, imageGeoBoundary.latMin);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_lat, imageGeoBoundary.latMin);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_long, imageGeoBoundary.lonMin);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_long, imageGeoBoundary.lonMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, imageGeoBoundary.lonMin);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, imageGeoBoundary.lonMax);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE,
                 (int)(targetProduct.getRawStorageSize() / (1024.0f * 1024.0f)));
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, IdentityTransformDescriptor.NAME);
@@ -891,13 +823,13 @@ public class RangeDopplerGeocodingOp extends Operator {
             final int maxY = y0 + h;
             final int maxX = x0 + w;
             for (int y = y0; y < maxY; y++) {
-                final double lat = latMax - y*delLat;
+                final double lat = imageGeoBoundary.latMax - y*delLat;
                 final int yy = y-y0+1;
 
                 for (int x = x0; x < maxX; x++) {
                     final int index = trgTiles[0].targetTile.getDataBufferIndex(x, y);
 
-                    final double lon = lonMin + x*delLon;
+                    final double lon = imageGeoBoundary.lonMin + x*delLon;
 
                     double alt;
                     if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) { // localDEM is available
@@ -1012,6 +944,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param tileWidth The tile width.
      * @param localDEM The DEM for the tile.
      * @return true if all dem values are valid
+     * @throws Exception from DEM
      */
     private boolean getLocalDEM(final int x0, final int y0,
                                 final int tileWidth, final int tileHeight,
@@ -1022,8 +955,8 @@ public class RangeDopplerGeocodingOp extends Operator {
         final int maxY = y0 + tileHeight + 1;
         final int maxX = x0 + tileWidth + 1;
         if(demName.equals("SRTM 3Sec GeoTiff")) {
-            double maxLat = (latMax - maxY*delLat);
-            double minLat = (latMax - y0*delLat);
+            double maxLat = (imageGeoBoundary.latMax - maxY*delLat);
+            double minLat = (imageGeoBoundary.latMax - y0*delLat);
             if((maxLat > 60 && minLat > 60) || (maxLat < -60 && minLat < -60)) {
                 return false;
             }
@@ -1033,10 +966,10 @@ public class RangeDopplerGeocodingOp extends Operator {
         float alt;
         boolean valid = false;
         for (int y = y0 - 1; y < maxY; y++) {
-            final float lat = (float)(latMax - y*delLat);
+            final float lat = (float)(imageGeoBoundary.latMax - y*delLat);
             final int yy = y - y0 + 1;
             for (int x = x0 - 1; x < maxX; x++) {
-                geoPos.setLocation(lat, (float)(lonMin + x*delLon));
+                geoPos.setLocation(lat, (float)(imageGeoBoundary.lonMin + x*delLon));
                 alt = getLocalElevation(geoPos);
                 localDEM[yy][x - x0 + 1] = alt;
                 if(alt != demNoDataValue)
@@ -1050,6 +983,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * Get local elevation (in meter) for given latitude and longitude.
      * @param geoPos The latitude and longitude in degrees.
      * @return The elevation in meter.
+     * @throws Exception from DEM
      */
     private float getLocalElevation(final GeoPos geoPos) throws Exception {
 
@@ -1214,7 +1148,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 idx = i;
             }
 
-            double[] srgrCoefficients = new double[srgrConvParams[idx].coefficients.length];
+            final double[] srgrCoefficients = new double[srgrConvParams[idx].coefficients.length];
             if (idx == srgrConvParams.length - 1) {
                 idx--;
             }
@@ -1754,6 +1688,11 @@ public class RangeDopplerGeocodingOp extends Operator {
             this.centrePoint = earthPoint;
             this.sensorPos = sensorPos;
         }
+    }
+
+    public static class ImageGeoBoundary {
+        public double latMin = 0.0, latMax = 0.0;
+        public double lonMin = 0.0, lonMax= 0.0;
     }
 
     /**
