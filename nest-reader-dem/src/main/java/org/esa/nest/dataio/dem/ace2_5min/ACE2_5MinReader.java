@@ -1,4 +1,4 @@
-package org.esa.nest.dataio.dem.ace;
+package org.esa.nest.dataio.dem.ace2_5min;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
@@ -32,14 +32,14 @@ import java.util.zip.ZipFile;
  *
  * @author Norman Fomferra
  */
-public class ACEReader extends AbstractProductReader {
+public class ACE2_5MinReader extends AbstractProductReader {
 
     private ZipFile _zipFile = null;
     private ImageInputStream _imageInputStream = null;
-    private ACEFileInfo _fileInfo = null;
+    private ACE2_5MinFileInfo _fileInfo = null;
     private Product _product = null;
 
-    public ACEReader(final ACEReaderPlugIn readerPlugIn) {
+    public ACE2_5MinReader(final ACE2_5MinReaderPlugIn readerPlugIn) {
         super(readerPlugIn);
     }
 
@@ -56,7 +56,7 @@ public class ACEReader extends AbstractProductReader {
         initReader();
 
         final File dataFile = ReaderUtils.getFileFromInput(getInput());
-        _fileInfo = ACEFileInfo.create(dataFile);
+        _fileInfo = ACE2_5MinFileInfo.create(dataFile);
 
         final String fileName;
         try {
@@ -81,7 +81,7 @@ public class ACEReader extends AbstractProductReader {
             throw e;
         }
 
-        initProduct(ACEReaderPlugIn.FORMAT_NAME + '_' + fileName);
+        initProduct(ACE2_5MinReaderPlugIn.FORMAT_NAME + '_' + fileName);
         _product.setFileLocation(dataFile);
         return _product;
     }
@@ -120,10 +120,9 @@ public class ACEReader extends AbstractProductReader {
                                           ProgressMonitor pm) throws IOException {
         pm.beginTask("Reading DEM Data...", 1);
         try {
-            final short[] elems = (short[]) destBuffer.getElems();
+            final float[] elems = (float[]) destBuffer.getElems();
             readRasterDataImpl(elems, sourceOffsetY, sourceOffsetX, sourceStepX, sourceStepY, destWidth, destHeight,
                                SubProgressMonitor.create(pm, 1));
-            maskInt32Extrema(elems);
         } finally {
             pm.done();
         }
@@ -181,7 +180,7 @@ public class ACEReader extends AbstractProductReader {
     private void initProduct(final String productName) {
         final int width = _fileInfo.getWidth();
         final int height = _fileInfo.getHeight();
-        _product = new Product(productName, ACEReaderPlugIn.FORMAT_NAME, width, height, this);
+        _product = new Product(productName, ACE2_5MinReaderPlugIn.FORMAT_NAME, width, height, this);
         final MapInfo mapInfo = new MapInfo(MapProjectionRegistry.getProjection(IdentityTransformDescriptor.NAME),
                                             0.5F, 0.5F,
                                             _fileInfo.getEasting(),
@@ -192,17 +191,17 @@ public class ACEReader extends AbstractProductReader {
         mapInfo.setSceneWidth(width);
         mapInfo.setSceneHeight(height);
         _product.setGeoCoding(new MapGeoCoding(mapInfo));
-        _product.setDescription("ACE DEM");
-        final Band elevationBand = new Band("elevation", ProductData.TYPE_INT16, width, height);
+        _product.setDescription("ACE2 DEM");
+        final Band elevationBand = new Band("elevation", ProductData.TYPE_FLOAT32, width, height);
         elevationBand.setUnit("m");
-        elevationBand.setDescription("ACE Elevation");
+        elevationBand.setDescription("ACE2 Elevation");
         // setting geo-physical no-data value to prevent for scaling
         elevationBand.setGeophysicalNoDataValue(_fileInfo.getNoDataValue());
         _product.addBand(elevationBand);
     }
 
 
-    private void readRasterDataImpl(final short[] elems,
+    private void readRasterDataImpl(final float[] elems,
                                     final int sourceOffsetY,
                                     final int sourceOffsetX,
                                     final int sourceStepX,
@@ -221,10 +220,9 @@ public class ACEReader extends AbstractProductReader {
                     }
                     final long sourcePos = sourceY * sceneWidth + sourceOffsetX;
                     final int destPos = destY * destWidth;
-                    _imageInputStream.seek(2 * sourcePos);      // 2 byte
+                    _imageInputStream.seek(4 * sourcePos);      // 4 byte
                     _imageInputStream.readFully(elems, destPos, destWidth);
                     sourceY += sourceStepY;
-//                    _pc.fireProcessInProgress(destY);
                     pm.worked(sourceStepY);
                 }
             } else {
@@ -237,26 +235,16 @@ public class ACEReader extends AbstractProductReader {
                     for (int destX = 0; destX < destWidth; destX++) {
                         final long sourcePos = sourceY * sceneWidth + sourceX;
                         final int destPos = destY * destWidth + destX;
-                        _imageInputStream.seek(2 * sourcePos);
-                        elems[destPos] = _imageInputStream.readShort();
+                        _imageInputStream.seek(4 * sourcePos);
+                        elems[destPos] = _imageInputStream.readFloat();
                         sourceX += sourceStepX;
                     }
                     sourceY += sourceStepY;
-//                    _pc.fireProcessInProgress(destY);
                     pm.worked(sourceStepY);
                 }
             }
         } finally {
             pm.done();
-        }
-    }
-
-    private void maskInt32Extrema(final short[] elems) {
-        final short noDataValue = (short) _fileInfo.getNoDataValue();
-        for (int i = 0; i < elems.length; i++) {
-            if (elems[i] == Short.MIN_VALUE || elems[i] == Short.MAX_VALUE) {
-                elems[i] = noDataValue;
-            }
         }
     }
 

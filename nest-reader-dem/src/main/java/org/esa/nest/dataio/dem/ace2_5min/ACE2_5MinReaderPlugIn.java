@@ -1,4 +1,4 @@
-package org.esa.nest.dataio.dem.ace;
+package org.esa.nest.dataio.dem.ace2_5min;
 
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
@@ -13,19 +13,18 @@ import java.util.Locale;
 /**
  * A plugin for a product reader for ACE data.
  *
- * @author Norman Fomferra
  */
-public class ACEReaderPlugIn implements ProductReaderPlugIn {
+public class ACE2_5MinReaderPlugIn implements ProductReaderPlugIn {
 
-    public static final String FORMAT_NAME = "ACE";
-    public static final String[] FILE_EXTENSIONS = new String[]{ ".ACE" };
+    public static final String FORMAT_NAME = "ACE2";
+    public static final String[] FILE_EXTENSIONS = new String[]{ ".ACE2" };
     public static final Class[] INPUT_TYPES = new Class[]{
             String.class,
             File.class,
     };
-    public static final String DESCRIPTION = "ACE Data Product Tile";
+    public static final String DESCRIPTION = "ACE2 Data Product Tile";
 
-    public ACEReaderPlugIn() {
+    public ACE2_5MinReaderPlugIn() {
     }
 
     /**
@@ -65,7 +64,7 @@ public class ACEReaderPlugIn implements ProductReaderPlugIn {
      * @return a new reader instance, never <code>null</code>
      */
     public ProductReader createReaderInstance() {
-        return new ACEReader(this);
+        return new ACE2_5MinReader(this);
     }
 
     public BeamFileFilter getProductFileFilter() {

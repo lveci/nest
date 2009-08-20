@@ -237,12 +237,8 @@ public final class DatApp extends VisatApp {
         menuBar.add(createJMenu("sartools", "SAR Tools", 'S')); /*I18N*/
         menuBar.add(createJMenu("graphs", "Graphs", 'R')); /*I18N*/
         menuBar.add(createJMenu("geometry", "Geometry", 'G')); /*I18N*/
-        //JMenu insar = createJMenu("insar", "InSAR", 'I');
-        //insar.setEnabled(false);
-        //menuBar.add(insar); /*I18N*/
-        //JMenu exploit = createJMenu("exploitation", "Exploitation", 'E');
-        //exploit.setEnabled(false);
-        //menuBar.add(exploit); /*I18N*/
+        menuBar.add(createJMenu("insar", "InSAR", 'I')); /*I18N*/
+        menuBar.add(createJMenu("oceanTools", "Ocean Tools", 'O')); /*I18N*/
         menuBar.add(createJMenu("window", "Window", 'W')); /*I18N*/
         menuBar.add(createJMenu("help", "Help", 'H')); /*I18N*/
 

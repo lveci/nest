@@ -8,3 +8,4 @@ org.esa.nest.gpf.WSSDeBurstOp$Spi
 org.esa.nest.gpf.ApplyOrbitFileOp$Spi
 org.esa.nest.gpf.filtering.FilterOperator$Spi
 org.esa.nest.gpf.filtering.SpeckleFilterOp$Spi
+org.esa.nest.gpf.oceantools.CreateLandMaskOp$Spi

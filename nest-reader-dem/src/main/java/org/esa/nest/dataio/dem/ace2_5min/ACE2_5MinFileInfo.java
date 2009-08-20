@@ -1,4 +1,4 @@
-package org.esa.nest.dataio.dem.ace;
+package org.esa.nest.dataio.dem.ace2_5min;
 
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.io.FileUtils;
@@ -15,7 +15,7 @@ import java.util.zip.ZipFile;
  *
  * @author Norman Fomferra
  */
-public class ACEFileInfo {
+public class ACE2_5MinFileInfo {
 
     private static final EastingNorthingParser PARSER = new EastingNorthingParser();
 
@@ -29,7 +29,7 @@ public class ACEFileInfo {
     private int _height;
     private float _noDataValue;
 
-    private ACEFileInfo() {
+    private ACE2_5MinFileInfo() {
     }
 
     public String getFileName() {
@@ -68,12 +68,12 @@ public class ACEFileInfo {
         return _noDataValue;
     }
 
-    public static ACEFileInfo create(final File file) throws IOException {
+    public static ACE2_5MinFileInfo create(final File file) throws IOException {
         return createFromDataFile(file);
     }
 
-    private static ACEFileInfo createFromDataFile(final File dataFile) throws IOException {
-        final ACEFileInfo fileInfo = new ACEFileInfo();
+    private static ACE2_5MinFileInfo createFromDataFile(final File dataFile) throws IOException {
+        final ACE2_5MinFileInfo fileInfo = new ACE2_5MinFileInfo();
         fileInfo.setFromData(dataFile);
         return fileInfo;
     }
@@ -121,16 +121,16 @@ public class ACEFileInfo {
         _easting = eastingNorthing[0];
         _northing = eastingNorthing[1];
 
-        _width = (int) Math.sqrt(fileSize / 2);
+        _width = (int) Math.sqrt(fileSize / 4);
         _height = _width;
-        if (_width * _height * 2L != fileSize) {
-            throw new IOException("Illegal file size: " + fileSize);
-        }
+        //if (_width * _height * 2L != fileSize) {
+        ///    throw new IOException("Illegal file size: " + fileSize);
+        //}
 
-        _pixelSizeX = 30.0F / (60.0F * 60.0F);  // 30 arcsecond product
+        _pixelSizeX = 300.0F / (60.0F * 60.0F);  // 300 arcsecond product
         _pixelSizeY = _pixelSizeX;
 
-        _noDataValue = ACEElevationModelDescriptor.NO_DATA_VALUE;
+        _noDataValue = ACE2_5MinElevationModelDescriptor.NO_DATA_VALUE;
     }
 
     public static int[] parseEastingNorthing(final String text) throws ParseException {
@@ -139,16 +139,6 @@ public class ACEFileInfo {
             return null;
         }
         return PARSER.parse(text);
-    }
-
-    public static boolean isValidFileSize(final long size) {
-        if (size > 0 && size % 2 == 0) {
-            final long w = (long) Math.sqrt(size / 2);
-            if (2 * w * w == size) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static class EastingNorthingParser {
@@ -198,7 +188,7 @@ public class ACEFileInfo {
 
         private void validateCorrectSuffix() throws ParseException {
             final String suffix = text.substring(++pos);
-            if (!suffix.matches("\\..+")) {
+            if (!suffix.matches("_5M.ACE2")) {
                 throw new ParseException("Illegal string format.", pos);
             }
         }

@@ -9,6 +9,7 @@ import org.esa.beam.visat.VisatApp;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 
 /**
  * Helper methods for working with Operators
@@ -246,6 +247,34 @@ public class OperatorUtils {
         final TiePointGeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
 
         targetProduct.setGeoCoding(gc);
+    }
+
+    /** get the selected bands
+     * @param sourceProduct the input product
+     * @param sourceBandNames the select band names
+     * @return band list
+     */
+    public static Band[] getSourceBands(final Product sourceProduct, String[] sourceBandNames) {
+
+        if (sourceBandNames == null || sourceBandNames.length == 0) {
+            final Band[] bands = sourceProduct.getBands();
+            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            for (Band band : bands) {
+                bandNameList.add(band.getName());
+            }
+            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
+        }
+
+        final Band[] sourceBands = new Band[sourceBandNames.length];
+        for (int i = 0; i < sourceBandNames.length; i++) {
+            final String sourceBandName = sourceBandNames[i];
+            final Band sourceBand = sourceProduct.getBand(sourceBandName);
+            if (sourceBand == null) {
+                throw new OperatorException("Source band not found: " + sourceBandName);
+            }
+            sourceBands[i] = sourceBand;
+        }
+        return sourceBands;
     }
 
     public static void catchOperatorException(String opName, Exception e) throws OperatorException {

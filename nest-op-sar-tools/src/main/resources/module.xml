@@ -203,11 +203,14 @@
             <helpId>SpeckleFilterOp</helpId>
         </action>
 
-        <!--action>
-            <id>OceanTools</id>
-            <class>org.esa.beam.visat.actions.ActionGroup</class>
-            <text>Ocean Tools</text>
-            <parent>exploitation</parent>
+
+        <action>
+            <id>createLandMaskOp</id>
+            <class>org.esa.nest.dat.oceantools.CreateLandMaskOpAction</class>
+            <text>Create Land Mask</text>
+            <shortDescr>Creates a Land/Sea Mask</shortDescr>
+            <parent>oceanTools</parent>
+            <helpId>createLandMaskOp</helpId>
         </action>
 
         <action>
@@ -215,15 +218,7 @@
             <class>org.esa.nest.dat.oceantools.OilSpillDetectionOpAction</class>
             <text>Oil Spill Detection</text>
             <shortDescr>Oil Spill Detection</shortDescr>
-            <parent>OceanTools</parent>
-        </action>
-
-        <action>
-            <id>WindFieldEstimationOp</id>
-            <class>org.esa.nest.dat.oceantools.WindFieldEstimationOpAction</class>
-            <text>Wind Field Estimation</text>
-            <shortDescr>Wind Field Estimation</shortDescr>
-            <parent>OceanTools</parent>
+            <parent>oceanTools</parent>
         </action>
 
 		<action>
@@ -231,8 +226,8 @@
             <class>org.esa.nest.dat.oceantools.ObjectTrackerOpAction</class>
             <text>Object Tracker</text>
             <shortDescr>Object Tracker</shortDescr>
-            <parent>OceanTools</parent>
-        </action-->
+            <parent>oceanTools</parent>
+        </action>
 
     </extension>
 
