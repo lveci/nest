@@ -288,7 +288,11 @@ public class SARSimTerrainCorrectionOp extends Operator {
         if (pixelSpacing > 0.0) {
             spacing = pixelSpacing;
         } else {
-            spacing = Math.min(rangeSpacing, azimuthSpacing);
+            if (srgrFlag) {
+                spacing = Math.min(rangeSpacing, azimuthSpacing);
+            } else {
+                spacing = Math.min(rangeSpacing/Math.sin(getIncidenceAngleAtCentreRangePixel(sourceProduct)), azimuthSpacing);
+            }
         }
 
         double minAbsLat;
@@ -304,6 +308,25 @@ public class SARSimTerrainCorrectionOp extends Operator {
         delLon = delLat;
     }
 
+    /**
+     * Get incidence angle at centre range pixel (in radian).
+     * @param srcProduct The source product.
+     * @throws OperatorException The exceptions.
+     * @return The incidence angle.
+     */
+    private static double getIncidenceAngleAtCentreRangePixel(Product srcProduct) throws OperatorException {
+
+        final int sourceImageWidth = srcProduct.getSceneRasterWidth();
+        final int sourceImageHeight = srcProduct.getSceneRasterHeight();
+        final int x = sourceImageWidth / 2;
+        final int y = sourceImageHeight / 2;
+        final TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(srcProduct);
+        if(incidenceAngle == null) {
+            throw new OperatorException("incidence_angle tie point grid not found in product");
+        }
+        return incidenceAngle.getPixelFloat((float)x, (float)y)*org.esa.beam.util.math.MathUtils.DTOR;
+    }
+    
     /**
      * Compute target image dimension.
      */
