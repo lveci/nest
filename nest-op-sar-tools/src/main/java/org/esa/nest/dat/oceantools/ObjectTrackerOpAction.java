@@ -25,6 +25,6 @@ public class ObjectTrackerOpAction extends AbstractVisatAction {
 
     @Override
     public void updateState(final CommandEvent event) {
-        setEnabled(false);
+        setEnabled(true);
     }
 }
