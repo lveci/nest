@@ -17,7 +17,7 @@ public class OilSpillDetectionOpAction extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("OilSpillDetectionOp", getAppContext(), "OilSpillDetectionOp", getHelpId());
+            dialog = new DefaultSingleTargetProductDialog("Oil-Spill-Detection", getAppContext(), "Oil-Spill-Detection", getHelpId());
         }
         dialog.show();
 
@@ -25,6 +25,6 @@ public class OilSpillDetectionOpAction extends AbstractVisatAction {
 
     @Override
     public void updateState(final CommandEvent event) {
-        setEnabled(false);
+        setEnabled(true);
     }
 }
