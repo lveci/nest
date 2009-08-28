@@ -221,11 +221,19 @@
             <parent>oceanTools</parent>
         </action>
 
-		<action>
+	  <action>
             <id>ObjectTrackerOp</id>
             <class>org.esa.nest.dat.oceantools.ObjectTrackerOpAction</class>
             <text>Object Tracker</text>
             <shortDescr>Object Tracker</shortDescr>
+            <parent>oceanTools</parent>
+        </action>
+
+	  <action>
+            <id>ObjectTrackerDiscriminationOp</id>
+            <class>org.esa.nest.dat.oceantools.ObjectTrackerDiscriminationOpAction</class>
+            <text>Object Tracker Discrimination</text>
+            <shortDescr>Object Tracker Discrimination</shortDescr>
             <parent>oceanTools</parent>
         </action>
 
