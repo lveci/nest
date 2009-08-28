@@ -372,7 +372,11 @@ public class RangeDopplerGeocodingOp extends Operator {
         if (pixelSpacing > 0.0) {
             spacing = pixelSpacing;
         } else {
-            spacing = Math.min(rangeSpacing, azimuthSpacing);
+            if (srgrFlag) {
+                spacing = Math.min(rangeSpacing, azimuthSpacing);
+            } else {
+                spacing = Math.min(rangeSpacing/Math.sin(getIncidenceAngleAtCentreRangePixel(sourceProduct)), azimuthSpacing);
+            }
         }
 
         double minAbsLat;
@@ -386,6 +390,25 @@ public class RangeDopplerGeocodingOp extends Operator {
         delLon = spacing / (MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
         delLat = Math.min(delLat, delLon);
         delLon = delLat;
+    }
+
+    /**
+     * Get incidence angle at centre range pixel (in radian).
+     * @param srcProduct The source product.
+     * @throws OperatorException The exceptions.
+     * @return The incidence angle.
+     */
+    private static double getIncidenceAngleAtCentreRangePixel(Product srcProduct) throws OperatorException {
+
+        final int sourceImageWidth = srcProduct.getSceneRasterWidth();
+        final int sourceImageHeight = srcProduct.getSceneRasterHeight();
+        final int x = sourceImageWidth / 2;
+        final int y = sourceImageHeight / 2;
+        final TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(srcProduct);
+        if(incidenceAngle == null) {
+            throw new OperatorException("incidence_angle tie point grid not found in product");
+        }
+        return incidenceAngle.getPixelFloat((float)x, (float)y)*org.esa.beam.util.math.MathUtils.DTOR;
     }
 
     /**
@@ -1617,7 +1640,12 @@ public class RangeDopplerGeocodingOp extends Operator {
         final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(srcProduct);
         final double rangeSpacing = AbstractMetadata.getAttributeDouble(abs, AbstractMetadata.range_spacing);
         final double azimuthSpacing = AbstractMetadata.getAttributeDouble(abs, AbstractMetadata.azimuth_spacing);
-        return Math.min(rangeSpacing, azimuthSpacing);
+        final boolean srgrFlag = AbstractMetadata.getAttributeBoolean(abs, AbstractMetadata.srgr_flag);
+        if (srgrFlag) {
+            return Math.min(rangeSpacing, azimuthSpacing);
+        } else {
+            return Math.min(rangeSpacing/Math.sin(getIncidenceAngleAtCentreRangePixel(srcProduct)), azimuthSpacing);
+        }
     }
 
     /**
