@@ -173,7 +173,7 @@ public final class ApplyOrbitFileOp extends Operator {
 
             createTargetProduct();
 
-            updateTargetProductGEOCoding();
+//            updateTargetProductGEOCoding();
 
             updateOrbitStateVectors();
   
