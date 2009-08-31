@@ -9,6 +9,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.framework.dataop.maptransf.MapInfo;
 import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -42,6 +43,11 @@ public final class MapProjectionOp extends Operator {
     @Parameter(description = "The projection name", defaultValue = IdentityTransformDescriptor.NAME)
     private String projectionName = IdentityTransformDescriptor.NAME;
 
+    @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+            ResamplingFactory.BILINEAR_INTERPOLATION_NAME, ResamplingFactory.CUBIC_CONVOLUTION_NAME},
+            defaultValue = ResamplingFactory.NEAREST_NEIGHBOUR_NAME, label="Resampling Method")
+    private String resamplingMethod = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
+
     /**
      * Initializes this operator and sets the one and only target product.
      * <p>The target product can be either defined by a field of type {@link org.esa.beam.framework.datamodel.Product} annotated with the
@@ -59,7 +65,8 @@ public final class MapProjectionOp extends Operator {
     public void initialize() throws OperatorException {
 
         try {
-            projectedProduct = createSubsampledProduct(sourceProduct, sourceBandNames, projectionName);
+            projectedProduct = createSubsampledProduct(sourceProduct, sourceBandNames,
+                                                       projectionName, resamplingMethod);
 
             targetProduct = new Product(sourceProduct.getName(),
                                         sourceProduct.getProductType(),
@@ -114,7 +121,7 @@ public final class MapProjectionOp extends Operator {
     }
 
     private static Product createSubsampledProduct(final Product product, final String[] selectedBands,
-                                                   final String projectionName) throws IOException {
+                                                   final String projectionName, final String resmaplingName) throws IOException {
 
         final String quicklookBandName = ProductUtils.findSuitableQuicklookBandName(product);
         final ProductSubsetDef productSubsetDef = new ProductSubsetDef("subset");
@@ -127,6 +134,7 @@ public final class MapProjectionOp extends Operator {
                                                 MapProjectionRegistry.getProjection(projectionName),
                                                 0.0,
                                                 product.getBand(quicklookBandName).getNoDataValue());
+            mapInfo.setResampling(ResamplingFactory.createResampling(resmaplingName));
             productSubset = productSubset.createProjectedProduct(mapInfo, quicklookBandName, null);
         }
 

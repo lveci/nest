@@ -1,5 +1,5 @@
 /*
- * $Id: CachingObjectArray.java,v 1.2 2009-05-14 16:31:17 lveci Exp $
+ * $Id: CachingObjectArray.java,v 1.3 2009-08-31 14:51:20 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -49,6 +49,13 @@ public class CachingObjectArray {
                 _objectArray.setObject(index, object);
             }
             return object;
+        }
+    }
+
+    public final void setObject(int index, Object o) {
+        final Object object = _objectArray.getObject(index);
+        if (object == null) {
+             _objectArray.setObject(index, o);
         }
     }
 

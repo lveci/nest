@@ -6,6 +6,9 @@ import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.DialogUtils;
 
@@ -48,6 +51,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     private boolean saveProjectedLocalIncidenceAngle = false;
     private boolean applyRadiometricCalibration = false;
     private boolean changedByUser = false;
+    private double extNoDataValue = 0;
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -84,6 +88,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
             public void actionPerformed(ActionEvent e) {
                 final File file = VisatApp.getApp().showFileOpenDialog("External DEM File", false, null);
                 externalDEMFile.setText(file.getAbsolutePath());
+                extNoDataValue = OperatorUIUtils.getNoDataValue(file);
+                externalDEMNoDataValue.setText(String.valueOf(extNoDataValue));
             }
         });
 
@@ -135,6 +141,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         final File extFile = (File)paramMap.get("externalDEMFile");
         if(extFile != null) {
             externalDEMFile.setText(extFile.getAbsolutePath());
+            externalDEMNoDataValue.setText(String.valueOf(extNoDataValue));
+        } else {
             externalDEMNoDataValue.setText(String.valueOf(paramMap.get("externalDEMNoDataValue")));
         }
 

@@ -1,9 +1,14 @@
 package org.esa.nest.gpf;
 
+import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.datamodel.Product;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Map;
+import java.io.File;
 
 /**
  * Created by IntelliJ IDEA.
@@ -54,4 +59,14 @@ public class OperatorUIUtils {
         paramMap.put("sourceBandNames", bandNames);
     }
 
+    public static double getNoDataValue(File extFile) {
+        try {
+            final ProductReader productReader = ProductIO.getProductReaderForFile(extFile);
+            final Product product = productReader.readProductNodes(extFile, null);
+            return product.getBandAt(0).getNoDataValue();
+        } catch(Exception e) {
+            //
+        }
+        return 0;
+    }
 }

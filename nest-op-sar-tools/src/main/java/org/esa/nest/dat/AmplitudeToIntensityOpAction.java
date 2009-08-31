@@ -22,7 +22,7 @@ public class AmplitudeToIntensityOpAction extends AbstractVisatAction {
             final Product product = visatApp.getSelectedProduct();
             final Band band = (Band) node;
             String bandName = band.getName();
-            String unit = band.getUnit();
+            final String unit = band.getUnit();
 
             if(unit.contains(Unit.DB)) {
                 visatApp.showWarningDialog("Please convert band " + bandName + " from dB to linear first");
@@ -30,9 +30,10 @@ public class AmplitudeToIntensityOpAction extends AbstractVisatAction {
             }
 
             if(unit.contains(Unit.AMPLITUDE)) {
-                bandName = bandName.replace("Amplitude", "Intensity");
+
+                bandName = replaceName(bandName, "Amplitude", "Intensity");
                 if(product.getBand(bandName) != null) {
-                    visatApp.showWarningDialog(product.getName() + " already contains a dB "
+                    visatApp.showWarningDialog(product.getName() + " already contains an "
                         + bandName + " band");
                     return;
                 }
@@ -43,9 +44,9 @@ public class AmplitudeToIntensityOpAction extends AbstractVisatAction {
                 }
             } else if(unit.contains(Unit.INTENSITY)) {
 
-                bandName = bandName.replace("Intensity", "Amplitude");
+                bandName = replaceName(bandName, "Intensity", "Amplitude");
                 if(product.getBand(bandName) != null) {
-                    visatApp.showWarningDialog(product.getName() + " already contains a linear "
+                    visatApp.showWarningDialog(product.getName() + " already contains an "
                         + bandName + " band");
                     return;
                 }
@@ -71,6 +72,14 @@ public class AmplitudeToIntensityOpAction extends AbstractVisatAction {
         event.getCommand().setEnabled(false);
     }
 
+    private static String replaceName(String bandName, final String fromName, final String toName) {
+        bandName = bandName.replace(fromName, toName);
+        if(bandName.equals("Sigma0") || bandName.equals("Gamma0") || bandName.equals("Beta0")) {
+            bandName = toName;
+        }
+        return bandName;
+    }
+
     static void convert(Product product, Band band, boolean toAmplitude) {
         String bandName = band.getName();
         String unit;
@@ -78,11 +87,11 @@ public class AmplitudeToIntensityOpAction extends AbstractVisatAction {
         String expression;
         if(toAmplitude) {
             expression = "sqrt(" + bandName + ')';
-            bandName = bandName.replace("Intensity", "Amplitude");
+            bandName = replaceName(bandName, "Intensity", "Amplitude");
             unit = Unit.AMPLITUDE;
         } else {
             expression = bandName + " * "+bandName;
-            bandName = bandName.replace("Amplitude", "Intensity");
+            bandName = replaceName(bandName, "Amplitude", "Intensity");
             unit = Unit.INTENSITY;
         }
 
@@ -93,7 +102,7 @@ public class AmplitudeToIntensityOpAction extends AbstractVisatAction {
                 expression);
         virtBand.setSynthetic(true);
         virtBand.setUnit(unit);
-        virtBand.setDescription("");
+        virtBand.setDescription(band.getDescription());
         product.addBand(virtBand);
     }
 

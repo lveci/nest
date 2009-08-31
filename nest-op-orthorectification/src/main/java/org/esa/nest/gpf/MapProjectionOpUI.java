@@ -2,6 +2,7 @@ package org.esa.nest.gpf;
 
 import org.esa.beam.framework.dataop.maptransf.MapProjection;
 import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
@@ -20,6 +21,9 @@ public class MapProjectionOpUI extends BaseOperatorUI {
     private final JList bandList = new JList();
     private final JComboBox projectionName = new JComboBox();
 
+    private final JComboBox resamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+                                                                           ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
+                                                                           ResamplingFactory.CUBIC_CONVOLUTION_NAME});
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -44,6 +48,7 @@ public class MapProjectionOpUI extends BaseOperatorUI {
         OperatorUIUtils.initBandList(bandList, getBandNames());
 
         projectionName.setSelectedItem(paramMap.get("projectionName"));
+        resamplingMethod.setSelectedItem(paramMap.get("resamplingMethod"));
     }
 
     @Override
@@ -58,6 +63,7 @@ public class MapProjectionOpUI extends BaseOperatorUI {
         OperatorUIUtils.updateBandList(bandList, paramMap);
 
         paramMap.put("projectionName", projectionName.getSelectedItem());
+        paramMap.put("resamplingMethod", resamplingMethod.getSelectedItem());
     }
 
     private JComponent createPanel() {
@@ -74,6 +80,8 @@ public class MapProjectionOpUI extends BaseOperatorUI {
 
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Map Projection:", projectionName);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "Resampling Method:", resamplingMethod);
         gbc.gridy++;
 
         DialogUtils.fillPanel(contentPane, gbc);

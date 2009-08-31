@@ -37,6 +37,8 @@ public class SARSimulationOpUI extends BaseOperatorUI {
     private final JLabel externalDEMFileLabel = new JLabel("External DEM:");
     private final JLabel externalDEMNoDataValueLabel = new JLabel("DEM No Data Value:");
 
+    private double extNoDataValue = 0;
+
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
@@ -72,6 +74,8 @@ public class SARSimulationOpUI extends BaseOperatorUI {
             public void actionPerformed(ActionEvent e) {
                 final File file = VisatApp.getApp().showFileOpenDialog("External DEM File", false, null);
                 externalDEMFile.setText(file.getAbsolutePath());
+                extNoDataValue = OperatorUIUtils.getNoDataValue(file);
+                externalDEMNoDataValue.setText(String.valueOf(extNoDataValue));
             }
         });
 
@@ -89,6 +93,8 @@ public class SARSimulationOpUI extends BaseOperatorUI {
         final File extFile = (File)paramMap.get("externalDEMFile");
         if(extFile != null) {
             externalDEMFile.setText(extFile.getAbsolutePath());
+            externalDEMNoDataValue.setText(String.valueOf(extNoDataValue));
+        } else {
             externalDEMNoDataValue.setText(String.valueOf(paramMap.get("externalDEMNoDataValue")));
         }
     }
