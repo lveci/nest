@@ -1,13 +1,17 @@
 
 package org.esa.nest.dataio.dem.ace2_5min;
 
+import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
+import com.bc.io.FileDownloader;
+import com.bc.io.FileUnpacker;
 import org.esa.beam.framework.dataop.dem.AbstractElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.dataop.resamp.Resampling;
-import org.esa.beam.util.SystemUtils;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.Settings;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -17,7 +21,7 @@ public class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDes
 
     public static final String NAME = "ACE2_5Min";
     public static final String DB_FILE_SUFFIX = "_5M.ACE2";
-    public static final String ARCHIVE_URL_PATH = SystemUtils.BEAM_HOME_PAGE + "data/ACE2.zip";
+    public static final String ARCHIVE_URL_PATH = "http://nest.s3.amazonaws.com/data/5M_HEIGHTS.zip";
     public static final int NUM_X_TILES = 24;
     public static final int NUM_Y_TILES = 12;
     public static final int DEGREE_RES = 15;
@@ -69,6 +73,9 @@ public class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDes
     @Deprecated
     public ElevationModel createDem() {
         try {
+            if(!isDemInstalled()) {
+                installDemFiles(null);
+            }
             return new ACE2_5MinElevationModel(this, Resampling.NEAREST_NEIGHBOUR);
         } catch (IOException e) {
             return null;
@@ -77,6 +84,9 @@ public class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDes
 
     public ElevationModel createDem(Resampling resamplingMethod) {
         try {
+            if(!isDemInstalled()) {
+                installDemFiles(null);
+            }
             return new ACE2_5MinElevationModel(this, resamplingMethod);
         } catch (IOException e) {
             return null;
@@ -99,4 +109,63 @@ public class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDes
         return latString + lonString + DB_FILE_SUFFIX;
     }
 
+    @Override
+    public boolean installDemFiles(Object uiComponent) {
+        if (isDemInstalled()) {
+            return true;
+        }
+        if (isInstallingDem()) {
+            return true;
+        }
+        final Component parent = uiComponent instanceof Component ? (Component) uiComponent : null;
+
+        final File demInstallDir = getDemInstallDir();
+        if (!demInstallDir.exists()) {
+            final boolean success = demInstallDir.mkdirs();
+            if (!success) {
+                return false;
+            }
+        }
+
+        try {
+            if(VisatApp.getApp() != null) {
+                installWithProgressMonitor(parent);
+            } else {
+                final File archiveFile = FileDownloader.downloadFile(getDemArchiveUrl(), demInstallDir, parent);
+                FileUnpacker.unpackZip(archiveFile, demInstallDir, parent);
+            }
+        } catch(Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    private void installWithProgressMonitor(final Component parent) {
+        final ProgressMonitorSwingWorker worker = new ProgressMonitorSwingWorker(VisatApp.getApp().getMainFrame(),
+                "Installing Ace2 5min DEM...") {
+            @Override
+            protected Object doInBackground(com.bc.ceres.core.ProgressMonitor pm) throws Exception {
+
+                pm.beginTask("Installing Ace2 5min DEM", 3);
+                try {
+                    final URL archiveUrl = getDemArchiveUrl();
+                    final File demInstallDir = getDemInstallDir();
+
+                    final File archiveFile = FileDownloader.downloadFile(archiveUrl, demInstallDir, parent);
+                    pm.worked(1);
+                    FileUnpacker.unpackZip(archiveFile, demInstallDir, parent);
+                    pm.worked(1);
+                    archiveFile.delete();
+                    pm.worked(1);
+                } catch(Exception e) {
+                    System.out.println(e.getMessage());
+                    return false;
+                } finally {
+                    pm.done();
+                }
+                return true;
+            }
+        };
+        worker.executeWithBlocking();
+    }
 }

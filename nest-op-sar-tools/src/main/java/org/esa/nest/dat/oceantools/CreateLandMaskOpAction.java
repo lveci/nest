@@ -15,6 +15,7 @@ public class CreateLandMaskOpAction extends AbstractVisatAction {
 
         final NestSingleTargetProductDialog dialog = new NestSingleTargetProductDialog("Create-LandMask", 
                 getAppContext(), "Create-LandMask", getHelpId());
+        dialog.setTargetProductNameSuffix("_msk");
         dialog.show();
 
     }

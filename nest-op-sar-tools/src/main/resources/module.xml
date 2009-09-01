@@ -203,7 +203,6 @@
             <helpId>SpeckleFilterOp</helpId>
         </action>
 
-
         <action>
             <id>createLandMaskOp</id>
             <class>org.esa.nest.dat.oceantools.CreateLandMaskOpAction</class>
@@ -221,19 +220,11 @@
             <parent>oceanTools</parent>
         </action>
 
-	  <action>
-            <id>ObjectTrackerOp</id>
-            <class>org.esa.nest.dat.oceantools.ObjectTrackerOpAction</class>
-            <text>Object Tracker</text>
-            <shortDescr>Object Tracker</shortDescr>
-            <parent>oceanTools</parent>
-        </action>
-
-	  <action>
-            <id>ObjectTrackerDiscriminationOp</id>
-            <class>org.esa.nest.dat.oceantools.ObjectTrackerDiscriminationOpAction</class>
-            <text>Object Tracker Discrimination</text>
-            <shortDescr>Object Tracker Discrimination</shortDescr>
+        <action>
+            <id>ObjectDetection</id>
+            <class>org.esa.nest.dat.oceantools.ObjectDetectionAction</class>
+            <text>Object Detection</text>
+            <shortDescr>Ocean Object Detection</shortDescr>
             <parent>oceanTools</parent>
         </action>
 

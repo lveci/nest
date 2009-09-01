@@ -20,7 +20,6 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
     private static final int NUM_Y_TILES = SRTM3GeoTiffElevationModelDescriptor.NUM_Y_TILES;
     private static final int DEGREE_RES = SRTM3GeoTiffElevationModelDescriptor.DEGREE_RES;
     private static final int NUM_PIXELS_PER_TILE = SRTM3GeoTiffElevationModelDescriptor.PIXEL_RES;
-    private static final int NO_DATA_VALUE = SRTM3GeoTiffElevationModelDescriptor.NO_DATA_VALUE;
     private static final int RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
     private static final int RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
 

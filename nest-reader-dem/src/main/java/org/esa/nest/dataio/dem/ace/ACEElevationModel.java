@@ -26,6 +26,8 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
     public static final int RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
     public static final int RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
 
+    private static final float DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES * (1.0f/NUM_PIXELS_PER_TILE);
+
     private final ACEElevationModelDescriptor _descriptor;
     private final ACEElevationTile[][] _elevationTiles;
     private final List _elevationTileCache;
@@ -55,8 +57,8 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
     }
 
     public float getElevation(GeoPos geoPos) throws Exception {
-        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES * NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5
-        float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES * NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5, y = (90 - lon) / DEGREE_RES * NUM_PIXELS_PER_TILE;
+        float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5
+        float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5, y = (90 - lon) / DEGREE_RES * NUM_PIXELS_PER_TILE;
         _resampling.computeIndex(pixelX, pixelY,
                                  RASTER_WIDTH,
                                  RASTER_HEIGHT,
@@ -64,7 +66,7 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
 
         final float elevation = _resampling.resample(_resamplingRaster, _resamplingIndex);
         if (Float.isNaN(elevation)) {
-            return _descriptor.getNoDataValue();
+            return NO_DATA_VALUE;
         }
         return elevation;
     }
@@ -96,7 +98,7 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
         final int tileX = pixelX - tileXIndex * NUM_PIXELS_PER_TILE;
         final int tileY = pixelY - tileYIndex * NUM_PIXELS_PER_TILE;
         final float sample = tile.getSample(tileX, tileY);
-        if (sample == _descriptor.getNoDataValue()) {
+        if (sample == NO_DATA_VALUE) {
             return Float.NaN;
         }
         return sample;
@@ -112,7 +114,7 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
                 final ProductReader productReader = ACEReaderPlugIn.createReaderInstance();
                 final int minLat = j * DEGREE_RES - 90;
 
-                File file = _descriptor.getTileFile(minLon, minLat);
+                final File file = _descriptor.getTileFile(minLon, minLat);
                 if (file != null && file.exists() && file.isFile()) {
                     final Product product = productReader.readProductNodes(file, null);
                     elevationTiles[i][NUM_Y_TILES - 1 - j] = new ACEElevationTile(this, product);
