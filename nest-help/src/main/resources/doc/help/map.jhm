@@ -168,4 +168,8 @@
 	<mapID target="developing_writer" url="development/developing_writer.html"/>
 	<mapID target="developing_operator" url="development/developing_operator.html"/>
 	
+	<!--FAQ-->
+	<mapID target="faq_installation" url="faq/faq_installation.html"/>
+	<mapID target="faq_general" url="faq/faq_general.html"/>
+	
 </map>

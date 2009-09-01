@@ -187,5 +187,10 @@
 		<tocitem text="Developing a Writer" target="developing_writer"/>
 		<tocitem text="Developing an Operator" target="developing_operator"/>
 	</tocitem>
+	
+	<tocitem text="F.A.Q.">
+        <tocitem text="Installation" target="faq_installation"/>
+		<tocitem text="General" target="faq_general"/>
+	</tocitem>
 		
 </toc>
