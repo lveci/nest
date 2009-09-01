@@ -504,7 +504,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * @return The slant range in meters.
      */
     private double computeSlantRange(PixelPos pixPos) {
-        return slantRangeTime.getPixelDouble(pixPos.x, pixPos.y, TiePointGrid.BIQUADRATIC) /
+        return slantRangeTime.getPixelDouble(pixPos.x, pixPos.y, TiePointGrid.InterpMode.BIQUADRATIC) /
                 1000000000.0 * Constants.halfLightSpeed;
     }
 

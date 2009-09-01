@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGeoCoding.java,v 1.4 2009-07-07 00:27:41 lveci Exp $
+ * $Id: TiePointGeoCoding.java,v 1.5 2009-09-01 18:13:54 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -39,6 +39,9 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
     private TiePointGrid _lonGrid;
     private Datum _datum;
     private final boolean _swathResampling = true;
+
+    private final int sceneRasterWidth;
+    private final int sceneRasterHeight;
 
     private boolean _normalized;
     private float _normalizedLonMin;
@@ -84,6 +87,9 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         _latGrid = latGrid;
         _lonGrid = lonGrid;
         _datum = datum;
+        sceneRasterWidth = _latGrid.getSceneRasterWidth();
+        sceneRasterHeight = _latGrid.getSceneRasterHeight();
+
         initNormalizedLonGrid();
         initLatLonMinMax();
         // detection disabled, mz,mp 18.03.2008
@@ -181,8 +187,8 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         if (geoPos == null) {
             geoPos = new GeoPos();
         }
-        if (pixelPos.x < 0 || pixelPos.x >= _latGrid.getSceneRasterWidth() ||
-            pixelPos.y < 0 || pixelPos.y >= _latGrid.getSceneRasterHeight()) {
+        if (pixelPos.x < 0 || pixelPos.x >= sceneRasterWidth ||
+            pixelPos.y < 0 || pixelPos.y >= sceneRasterHeight) {
             geoPos.setInvalid();
         } else {
             geoPos.lat = _latGrid.getPixelFloat(pixelPos.x, pixelPos.y);

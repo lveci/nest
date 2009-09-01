@@ -875,10 +875,10 @@ public class ASARCalibrator implements Calibrator {
         int index;
         for (int y = y0, yy = 0; y < maxY; ++y, ++yy) {
 
-            incidenceAngle.getPixels(x0, y, w, 1,incidenceAnglesArray, pm, TiePointGrid.QUADRATIC);
+            incidenceAngle.getPixels(x0, y, w, 1,incidenceAnglesArray, pm, TiePointGrid.InterpMode.QUADRATIC);
 
             if (applyRangeSpreadingCorr) {
-                slantRangeTime.getPixels(x0, y, w, 1,slantRangeTimeArray, pm, TiePointGrid.QUADRATIC);
+                slantRangeTime.getPixels(x0, y, w, 1,slantRangeTimeArray, pm, TiePointGrid.InterpMode.QUADRATIC);
             }
 
             for (int x = x0, xx = 0; x < maxX; ++x, ++xx) {
@@ -1042,7 +1042,7 @@ public class ASARCalibrator implements Calibrator {
         if (latitude.getRasterWidth() < 10) { // subset case
             i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y))/delLat + 0.5);
         } else {
-            i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC))/delLat + 0.5);
+            i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y, TiePointGrid.InterpMode.QUADRATIC))/delLat + 0.5);
         }
 
         if (i < 0) {
@@ -1151,7 +1151,7 @@ public class ASARCalibrator implements Calibrator {
 
         } else { // for slant range product, compute slant range from slant range time
 
-            final double time = slantRangeTime.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC) / 1000000000.0; //convert ns to s
+            final double time = slantRangeTime.getPixelFloat((float)x, (float)y, TiePointGrid.InterpMode.QUADRATIC) / 1000000000.0; //convert ns to s
             return time * Constants.halfLightSpeed; // in m
         }
     }
@@ -1303,7 +1303,7 @@ public class ASARCalibrator implements Calibrator {
 
         final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
 
-        int i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y, TiePointGrid.QUADRATIC))/delLat + 0.5);
+        int i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y, TiePointGrid.InterpMode.QUADRATIC))/delLat + 0.5);
         if (i < 0) {
             i = 0;
         }

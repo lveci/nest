@@ -1036,10 +1036,10 @@ public class ASARCalibrationOperator extends Operator {
         int index;
         for (int y = y0; y < maxY; ++y) {
 
-            incidenceAngle.getPixels(x0, y, w, 1,incidenceAnglesArray, pm, TiePointGrid.QUADRATIC);
+            incidenceAngle.getPixels(x0, y, w, 1,incidenceAnglesArray, pm, TiePointGrid.InterpMode.QUADRATIC);
 
             if (!rangeSpreadCompFlag) {
-                slantRangeTime.getPixels(x0, y, w, 1,slantRangeTimeArray, pm, TiePointGrid.QUADRATIC);
+                slantRangeTime.getPixels(x0, y, w, 1,slantRangeTimeArray, pm, TiePointGrid.InterpMode.QUADRATIC);
             }
             
             for (int x = x0, xx = 0; x < maxX; ++x, ++xx) {

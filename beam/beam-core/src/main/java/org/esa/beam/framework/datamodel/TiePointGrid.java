@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGrid.java,v 1.7 2009-08-06 15:21:21 lveci Exp $
+ * $Id: TiePointGrid.java,v 1.8 2009-09-01 18:13:54 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -44,7 +44,7 @@ import Jama.Matrix;
  * Usually, tie-point grids are a sub-sampling of a data product's scene resolution.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.7 $ $Date: 2009-08-06 15:21:21 $
+ * @version $Revision: 1.8 $ $Date: 2009-09-01 18:13:54 $
  */
 public class TiePointGrid extends RasterDataNode {
 
@@ -69,6 +69,9 @@ public class TiePointGrid extends RasterDataNode {
     private final float _offsetY;
     private final float _subSamplingX;
     private final float _subSamplingY;
+    private final int _rasterWidth;
+    private final int _rasterWidthMinus2;
+    private final int _rasterHeightMinus2;
 
     private int _discontinuity;
     private TiePointGrid _sinGrid;
@@ -77,9 +80,8 @@ public class TiePointGrid extends RasterDataNode {
 
     private double[][] _quadraticInterpCoeffs = null; // 2 order quadratic polynomial coefficients
     private double[] _biquadraticInterpCoeffs = null; // 2 order biquadratic polynomial coefficients
-    public static final String BILINEAR = "bilinear";
-    public static final String QUADRATIC = "quadratic";
-    public static final String BIQUADRATIC = "biquadratic";
+
+    public enum InterpMode { BILINEAR, QUADRATIC, BIQUADRATIC }
 
     /**
      * Constructs a new <code>TiePointGrid</code> with the given tie point grid properties.
@@ -152,6 +154,9 @@ public class TiePointGrid extends RasterDataNode {
         _offsetY = offsetY;
         _subSamplingX = subSamplingX;
         _subSamplingY = subSamplingY;
+        _rasterWidth = gridWidth;
+        _rasterWidthMinus2 = gridWidth - 2;
+        _rasterHeightMinus2 = gridHeight - 2;
 
         setData(ProductData.createInstance(tiePoints));
     }
@@ -418,8 +423,8 @@ public class TiePointGrid extends RasterDataNode {
         }
         final float fi = (x - _offsetX) / _subSamplingX;
         final float fj = (y - _offsetY) / _subSamplingY;
-        final int i = MathUtils.crop((int) StrictMath.floor(fi), 0, getRasterWidth() - 2);
-        final int j = MathUtils.crop((int) StrictMath.floor(fj), 0, getRasterHeight() - 2);
+        final int i = MathUtils.crop((int) StrictMath.floor(fi), 0, _rasterWidthMinus2);
+        final int j = MathUtils.crop((int) StrictMath.floor(fj), 0, _rasterHeightMinus2);
         return interpolate(fi - i, fj - j, i, j);
     }
 
@@ -521,9 +526,9 @@ public class TiePointGrid extends RasterDataNode {
             final int y1 = y;
             final int x2 = x + w - 1;
             final int y2 = y + h - 1;
-            final int rw = getRasterWidth();
+            final int rw = _rasterWidth;
             final int ni = rw-2;
-            final int nj = getRasterHeight()-2;
+            final int nj = _rasterHeightMinus2;
             int i, j;
             float fi, fj;
             float wj;
@@ -870,15 +875,14 @@ public class TiePointGrid extends RasterDataNode {
     private float interpolate(float wi, float wj, int i0, int j0) {
         if(_tiePoints == null)
             _tiePoints = getTiePoints();
-        final int w = getRasterWidth();
         final int i1 = i0 + 1;
         final int j1 = j0 + 1;
         return MathUtils.interpolate2D(wi,
                                        wj,
-                                       _tiePoints[i0 + j0 * w],
-                                       _tiePoints[i1 + j0 * w],
-                                       _tiePoints[i0 + j1 * w],
-                                       _tiePoints[i1 + j1 * w]);
+                                       _tiePoints[i0 + j0 * _rasterWidth],
+                                       _tiePoints[i1 + j0 * _rasterWidth],
+                                       _tiePoints[i0 + j1 * _rasterWidth],
+                                       _tiePoints[i1 + j1 * _rasterWidth]);
 
     }
 
@@ -1057,13 +1061,13 @@ public class TiePointGrid extends RasterDataNode {
      * @return The interpolated sample value.
      * @throws ArrayIndexOutOfBoundsException if the co-ordinates are not in bounds
      */
-    public float getPixelFloat(float x, float y, String interpMethod) {
+    public float getPixelFloat(float x, float y, InterpMode interpMethod) {
 
-        if (interpMethod.equals(BILINEAR)) {
+        if (interpMethod == InterpMode.BILINEAR) {
 
             return getPixelFloat(x, y);
 
-        } else if (interpMethod.equals(QUADRATIC)) {
+        } else if (interpMethod == InterpMode.QUADRATIC) {
 
             if (_quadraticInterpCoeffs == null) {
                 computeQuadraticInterpCoeffs();
@@ -1071,7 +1075,7 @@ public class TiePointGrid extends RasterDataNode {
             final int r = (int) ((y - _offsetY) / _subSamplingY);
             return (float)(_quadraticInterpCoeffs[r][0] + _quadraticInterpCoeffs[r][1]*x + _quadraticInterpCoeffs[r][2]*x*x);
 
-        } else if (interpMethod.equals(BIQUADRATIC)) {
+        } else if (interpMethod == InterpMode.BIQUADRATIC) {
 
             if (_biquadraticInterpCoeffs == null) {
                 computeBiquadraticInterpCoeffs();
@@ -1080,7 +1084,6 @@ public class TiePointGrid extends RasterDataNode {
                     + _biquadraticInterpCoeffs[3]*x*x + _biquadraticInterpCoeffs[4]*x*y + _biquadraticInterpCoeffs[5]*y*y);
 
         } else {
-
             throw new IllegalArgumentException("unsupported interpolation method");
         }
     }
@@ -1099,7 +1102,7 @@ public class TiePointGrid extends RasterDataNode {
      * @return The interpolated sample value.
      * @throws ArrayIndexOutOfBoundsException if the co-ordinates are not in bounds
      */
-    public double getPixelDouble(float x, float y, String interpMethod) {
+    public double getPixelDouble(float x, float y, InterpMode interpMethod) {
         return getPixelFloat(x, y, interpMethod);
     }
 
@@ -1118,14 +1121,14 @@ public class TiePointGrid extends RasterDataNode {
      * @return Array of interpolated sample values.
      * @throws IllegalArgumentException if the length of the given array is less than <code>w*h</code>.
      */
-    public float[] getPixels(int x0, int y0, int w, int h, float[] pixels, ProgressMonitor pm, String interpMethod) {
+    public float[] getPixels(int x0, int y0, int w, int h, float[] pixels, ProgressMonitor pm, InterpMode interpMethod) {
 
         pixels = ensureMinLengthArray(pixels, w * h);
-        if (interpMethod.equals(BILINEAR)) {
+        if (interpMethod == InterpMode.BILINEAR) {
 
             return getPixels(x0, y0, w, h, pixels, pm);
 
-        } else if (interpMethod.equals(QUADRATIC) || interpMethod.equals(BIQUADRATIC)) {
+        } else if (interpMethod == InterpMode.QUADRATIC || interpMethod == InterpMode.BIQUADRATIC) {
 
             int k = 0;
             for (int y = y0; y < y0 + h; y++) {
