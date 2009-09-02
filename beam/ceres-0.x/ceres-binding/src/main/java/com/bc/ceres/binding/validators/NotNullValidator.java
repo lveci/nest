@@ -7,9 +7,10 @@ import com.bc.ceres.binding.ValueModel;
 import java.text.MessageFormat;
 
 public class NotNullValidator implements Validator {
+    @Override
     public void validateValue(ValueModel valueModel, Object value) throws ValidationException {
         if (value == null) {
-            throw new ValidationException(MessageFormat.format("No value for ''{0}'' specified.", 
+            throw new ValidationException(MessageFormat.format("Value for ''{0}'' must be given.", 
                                                                valueModel.getDescriptor().getDisplayName()));
         }
     }

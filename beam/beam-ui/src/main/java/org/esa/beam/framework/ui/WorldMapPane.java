@@ -1,5 +1,5 @@
 /*
- * $Id: WorldMapPane.java,v 1.3 2009-07-28 15:31:56 lveci Exp $
+ * $Id: WorldMapPane.java,v 1.4 2009-09-01 20:27:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -54,7 +54,7 @@ import java.util.List;
  * This class displays a world map specified by the {@link WorldMapPaneDataModel}.
  *
  * @author Marco Peters
- * @version $Revision: 1.3 $ $Date: 2009-07-28 15:31:56 $
+ * @version $Revision: 1.4 $ $Date: 2009-09-01 20:27:12 $
  */
 public class WorldMapPane extends JPanel {
 
@@ -119,7 +119,7 @@ public class WorldMapPane extends JPanel {
     }
 
     public void zoomToProduct(Product product) {
-        if (product.getGeoCoding() == null) {
+        if (product == null || product.getGeoCoding() == null) {
             return;
         }
         final GeneralPath[] generalPaths = getGeoBoundaryPaths(product);

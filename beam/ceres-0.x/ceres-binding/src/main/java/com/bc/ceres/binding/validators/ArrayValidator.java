@@ -1,5 +1,5 @@
 /*
- * $Id: ArrayValidator.java,v 1.1 2009-04-09 17:06:18 lveci Exp $
+ * $Id: ArrayValidator.java,v 1.2 2009-09-01 20:27:12 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -30,6 +30,7 @@ public class ArrayValidator implements Validator {
         this.validator = validator;
     }
 
+    @Override
     public void validateValue(ValueModel valueModel, Object value) throws ValidationException {
         final int length = Array.getLength(value);
         for (int i = 0; i < length; i++) {

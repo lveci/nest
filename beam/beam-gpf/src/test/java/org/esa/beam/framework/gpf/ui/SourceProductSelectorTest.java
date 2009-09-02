@@ -8,7 +8,7 @@ import java.io.File;
 
 /**
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:14 $
+ * @version $Revision: 1.2 $ $Date: 2009-09-01 20:27:12 $
  */
 public class SourceProductSelectorTest extends TestCase {
 
@@ -87,6 +87,34 @@ public class SourceProductSelectorTest extends TestCase {
             selectedProduct = selector.getSelectedProduct();
             assertSame(newProduct, selectedProduct);
             assertNull(oldProduct.getFileLocation()); // assert that old product is disposed
+        } catch (HeadlessException e) {
+            warnHeadless();
+        }
+    }
+
+    public void testSelectedProductIsRemoved() {
+        if (appContext == null) {
+            return;
+        }
+        try {
+            SourceProductSelector selector = new SourceProductSelector(appContext, "Source");
+            selector.initProducts();
+            appContext.getProductManager().removeProduct(defaultProducts[0]);
+            assertEquals(defaultProducts.length - 1, selector.getProductCount());
+        } catch (HeadlessException e) {
+            warnHeadless();
+        }
+    }
+
+    public void testNotSelectedProductIsRemoved() {
+        if (appContext == null) {
+            return;
+        }
+        try {
+            SourceProductSelector selector = new SourceProductSelector(appContext, "Source");
+            selector.initProducts();
+            appContext.getProductManager().removeProduct(defaultProducts[2]);
+            assertEquals(defaultProducts.length - 1, selector.getProductCount());
         } catch (HeadlessException e) {
             warnHeadless();
         }

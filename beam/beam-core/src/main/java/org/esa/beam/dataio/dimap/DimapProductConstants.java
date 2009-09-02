@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductConstants.java,v 1.3 2009-08-06 15:21:21 lveci Exp $
+ * $Id: DimapProductConstants.java,v 1.4 2009-09-01 20:27:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -21,7 +21,7 @@ package org.esa.beam.dataio.dimap;
  *
  * @author Sabine Embacher
  * @author Marco Peters
- * @version $Revision: 1.3 $ $Date: 2009-08-06 15:21:21 $
+ * @version $Revision: 1.4 $ $Date: 2009-09-01 20:27:12 $
  */
 public final class DimapProductConstants {
 
@@ -348,9 +348,24 @@ public final class DimapProductConstants {
      * </pre>
      * </td>
      * </tr>
+     * <tr>
+     * <td valign="top">2.8.0</td>
+     * <td> Since version 4.7 BEAM DIMAP supports CrsGeoCoding.
+     * <pre>
+     *    &lt;Coordinate_Reference_System&gt;
+     *        &lt;WKT&gt;
+     *            wktString
+     *        &lt;/WKT&gt;
+     *    &lt;/Coordinate_Reference_System&gt;
+     *    &lt;Geoposition&gt;
+     *        &lt;IMAGE_TO_MODEL_TRANSFORM&gt;matrix values&lt;/IMAGE_TO_MODEL_TRANSFORM&gt;
+     *    &lt;/Geoposition&gt;
+     * </pre>
+     * </td>
+     * </tr>
      * </table>
      */
-    public static final String DIMAP_CURRENT_VERSION = "2.7.0";
+    public static final String DIMAP_CURRENT_VERSION = "2.8.0";
 
     // BEAM-Dimap default text
     public static final String DIMAP_METADATA_PROFILE = "BEAM-DATAMODEL-V1";
@@ -399,6 +414,8 @@ public final class DimapProductConstants {
     public static final String TAG_VALID_MASK_EXPRESSION = "VALID_MASK_EXPRESSION";
     public static final String TAG_SEARCH_RADIUS = "SEARCH_RADIUS";
     public static final String TAG_PIXEL_POSITION_ESTIMATOR = "Pixel_Position_Estimator";
+    public static final String TAG_WKT = "WKT";
+    public static final String TAG_IMAGE_TO_MODEL_TRANSFORM = "IMAGE_TO_MODEL_TRANSFORM";
 
     //  -since version 2.0.0
     public static final String TAG_HORIZONTAL_CS_TYPE = "HORIZONTAL_CS_TYPE";

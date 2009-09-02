@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductHelpers.java,v 1.7 2009-08-06 15:21:21 lveci Exp $
+ * $Id: DimapProductHelpers.java,v 1.8 2009-09-01 20:27:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -36,11 +36,15 @@ import org.esa.beam.util.XmlWriter;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 import org.esa.beam.util.math.FXYSum;
+import org.geotools.referencing.CRS;
 import org.jdom.Content;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Attribute;
 import org.jdom.input.DOMBuilder;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.TransformException;
 import org.xml.sax.SAXException;
 
 import javax.swing.filechooser.FileFilter;
@@ -48,6 +52,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.Color;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,7 +72,7 @@ import java.util.logging.Level;
  * @author Sabine Embacher
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.7 $ $Date: 2009-08-06 15:21:21 $
+ * @version $Revision: 1.8 $ $Date: 2009-09-01 20:27:12 $
  */
 public class DimapProductHelpers {
 
@@ -206,11 +212,19 @@ public class DimapProductHelpers {
     static GeoCoding[] createGeoCoding(Document dom, Product product) {
         Debug.assertNotNull(dom);
         Debug.assertNotNull(product);
-        if (dom.getRootElement().getChild(DimapProductConstants.TAG_GEOPOSITION) != null) {
-
+        final Element rootElem = dom.getRootElement();
+        final Element geopositionElem = rootElem.getChild(DimapProductConstants.TAG_GEOPOSITION);
+        final Element coordRefSysElem = rootElem.getChild(DimapProductConstants.TAG_COORDINATE_REFERENCE_SYSTEM);
+        if (geopositionElem != null) {
+            if (coordRefSysElem != null) {
+                final Element wktElem = coordRefSysElem.getChild(DimapProductConstants.TAG_WKT);
+                if (wktElem != null) {
+                    return createCrsGeoCoding(product, geopositionElem, wktElem);
+                }
+            }
             final Datum datum = createDatum(dom);
 
-            final List geoPosElems = dom.getRootElement().getChildren(DimapProductConstants.TAG_GEOPOSITION);
+            final List geoPosElems = rootElem.getChildren(DimapProductConstants.TAG_GEOPOSITION);
             final GeoCoding[] geoCodings = new GeoCoding[geoPosElems.size()];
 
             for (int i = 0; i < geoPosElems.size(); i++) {
@@ -233,7 +247,6 @@ public class DimapProductHelpers {
         }
 
         final String tagCoordRefSys = DimapProductConstants.TAG_COORDINATE_REFERENCE_SYSTEM;
-        final Element coordRefSysElem = dom.getRootElement().getChild(tagCoordRefSys);
         if (coordRefSysElem != null) {
             final String tagHorizontalCs = DimapProductConstants.TAG_HORIZONTAL_CS;
             final Element hCsElem = coordRefSysElem.getChild(tagHorizontalCs);
@@ -292,9 +305,7 @@ public class DimapProductHelpers {
                         final MapProjection projection; // new MapProjection(projectionName, transform);
                         projection = MapProjectionRegistry.getProjection(projectionName);
                         if (projection != null) {
-                            Datum datum;
                             if (Datum.WGS_84.getName().equalsIgnoreCase(datumName)) {
-                                datum = Datum.WGS_84;
                                 final float refPixelX = Float.parseFloat(strings[1]);
                                 final float refPixelY = Float.parseFloat(strings[2]);
                                 final float refPixelEasting = Float.parseFloat(strings[3]);
@@ -308,7 +319,7 @@ public class DimapProductHelpers {
                                                                     refPixelNorthing,
                                                                     refPixelWidth,
                                                                     refPixelHeight,
-                                                                    datum);
+                                                                    Datum.WGS_84);
                                 if (strings.length == 9) {
                                     mapInfo.setSceneWidth(product.getSceneRasterWidth());
                                     mapInfo.setSceneHeight(product.getSceneRasterHeight());
@@ -350,11 +361,36 @@ public class DimapProductHelpers {
         if (tiePointGridLat != null && tiePointGridLon != null) {
             // TODO - parse datum!!!
             return new GeoCoding[]{new TiePointGeoCoding(tiePointGridLat, tiePointGridLon/*, Datum.WGS_84*/)};
-        } else {
-            Debug.trace(
-                    "DimapProductHelpers.ProductBuilder.createGeoCoding(): can't find 'latitude' or 'longitude'"); /*I18N*/
         }
 
+        Debug.trace("DimapProductHelpers.ProductBuilder.createGeoCoding(): can't find 'latitude' or 'longitude'");
+        return null;
+    }
+
+    private static GeoCoding[] createCrsGeoCoding(Product product, Element geopositionElem, Element wktElem) {
+        try {
+            final CoordinateReferenceSystem crs = CRS.parseWKT(wktElem.getTextTrim());
+            final Element i2mElem = geopositionElem.getChild(
+                    DimapProductConstants.TAG_IMAGE_TO_MODEL_TRANSFORM);
+            if (i2mElem != null) {
+                final String[] parameters = StringUtils.csvToArray(i2mElem.getTextTrim());
+                double[] matrix = new double[parameters.length];
+                for (int i = 0; i < matrix.length; i++) {
+                    matrix[i] = Double.valueOf(parameters[i]);
+                }
+                final AffineTransform i2m = new AffineTransform(matrix);
+                Rectangle2D imageBounds = new Rectangle2D.Double(0, 0, product.getSceneRasterWidth(),
+                                                                 product.getSceneRasterHeight());
+                try {
+                    final CrsGeoCoding geoCoding = new CrsGeoCoding(crs, imageBounds, i2m);
+                    return new GeoCoding[]{geoCoding};
+                } catch (TransformException e) {
+                    Debug.trace(e);
+                }
+            }
+        } catch (FactoryException e) {
+            Debug.trace(e);
+        }
         return null;
     }
 
@@ -429,18 +465,20 @@ public class DimapProductHelpers {
                 DimapProductConstants.TAG_COORDINATE_REFERENCE_SYSTEM);
         if (crsElem != null) {
             final Element hcsElem = crsElem.getChild(DimapProductConstants.TAG_HORIZONTAL_CS);
-            final Element gcsElem = hcsElem.getChild(DimapProductConstants.TAG_GEOGRAPHIC_CS);
-            final Element horizDatumElem = gcsElem.getChild(DimapProductConstants.TAG_HORIZONTAL_DATUM);
-            final String datumName = horizDatumElem.getChildTextTrim(DimapProductConstants.TAG_HORIZONTAL_DATUM_NAME);
-            final Element ellipsoidElem = horizDatumElem.getChild(DimapProductConstants.TAG_ELLIPSOID);
-            final String ellipsoidName = ellipsoidElem.getChildTextTrim(DimapProductConstants.TAG_ELLIPSOID_NAME);
-            final Element ellipsoidParamElem = ellipsoidElem.getChild(DimapProductConstants.TAG_ELLIPSOID_PARAMETERS);
-            final Element majorAxisElem = ellipsoidParamElem.getChild(DimapProductConstants.TAG_ELLIPSOID_MAJ_AXIS);
-            final double majorAxis = Double.parseDouble(majorAxisElem.getTextTrim());
-            final Element minorAxisElem = ellipsoidParamElem.getChild(DimapProductConstants.TAG_ELLIPSOID_MIN_AXIS);
-            final double minorAxis = Double.parseDouble(minorAxisElem.getTextTrim());
+            if (hcsElem != null) {
+                final Element gcsElem = hcsElem.getChild(DimapProductConstants.TAG_GEOGRAPHIC_CS);
+                final Element horizDatumElem = gcsElem.getChild(DimapProductConstants.TAG_HORIZONTAL_DATUM);
+                final String datumName = horizDatumElem.getChildTextTrim(DimapProductConstants.TAG_HORIZONTAL_DATUM_NAME);
+                final Element ellipsoidElem = horizDatumElem.getChild(DimapProductConstants.TAG_ELLIPSOID);
+                final String ellipsoidName = ellipsoidElem.getChildTextTrim(DimapProductConstants.TAG_ELLIPSOID_NAME);
+                final Element ellipsoidParamElem = ellipsoidElem.getChild(DimapProductConstants.TAG_ELLIPSOID_PARAMETERS);
+                final Element majorAxisElem = ellipsoidParamElem.getChild(DimapProductConstants.TAG_ELLIPSOID_MAJ_AXIS);
+                final double majorAxis = Double.parseDouble(majorAxisElem.getTextTrim());
+                final Element minorAxisElem = ellipsoidParamElem.getChild(DimapProductConstants.TAG_ELLIPSOID_MIN_AXIS);
+                final double minorAxis = Double.parseDouble(minorAxisElem.getTextTrim());
 
-            return new Datum(datumName, new Ellipsoid(ellipsoidName, minorAxis, majorAxis), 0, 0, 0);
+                return new Datum(datumName, new Ellipsoid(ellipsoidName, minorAxis, majorAxis), 0, 0, 0);
+            }
         }
         return Datum.WGS_84;
     }

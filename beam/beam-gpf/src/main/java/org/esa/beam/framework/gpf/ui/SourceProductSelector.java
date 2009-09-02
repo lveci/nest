@@ -41,7 +41,7 @@ import com.bc.ceres.swing.TableLayout;
  * todo - add capability to specify optional sources
  *
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:14 $
+ * @version $Revision: 1.2 $ $Date: 2009-09-01 20:27:12 $
  */
 public class SourceProductSelector {
 
@@ -77,6 +77,7 @@ public class SourceProductSelector {
         productNameComboBox.setTransferHandler(new ComboBoxTransferHandler());
         
         productNameComboBox.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 final Product product = (Product) productNameComboBox.getSelectedItem();
                 if (product != null) {
@@ -96,16 +97,18 @@ public class SourceProductSelector {
         selectionListeners = new ArrayList<SelectionChangeListener>(7);
 
         productManagerListener = new ProductManager.Listener() {
+            @Override
             public void productAdded(ProductManager.Event event) {
                  addProduct(event.getProduct());
             }
 
+            @Override
             public void productRemoved(ProductManager.Event event) {
                 Product product = event.getProduct();
                 if (productListModel.getSelectedItem() == product) {
                     productListModel.setSelectedItem(null);
-                    productListModel.removeElement(product);
                 }
+                productListModel.removeElement(product);
             }
         };
     }
@@ -129,8 +132,11 @@ public class SourceProductSelector {
         for (Product product : appContext.getProductManager().getProducts()) {
             addProduct(product);
         }
-        productListModel.setSelectedItem(appContext.getSelectedProduct());
-        appContext.getProductManager().addListener(productManagerListener)       ;
+        final Product selectedProduct = appContext.getSelectedProduct();
+        if (productFilter.accept(selectedProduct)) {
+            productListModel.setSelectedItem(selectedProduct);
+        }
+        appContext.getProductManager().addListener(productManagerListener);
     }
 
     public int getProductCount() {
@@ -201,10 +207,6 @@ public class SourceProductSelector {
         }
     }
 
-    private void removeProduct() {
-        productListModel.removeElement(extraProduct);
-    }
-
     // UI Components
 
     /////////////////////////////////////
@@ -268,6 +270,7 @@ public class SourceProductSelector {
             chooser.setFileFilter(chooser.getAcceptAllFileFilter());
         }
 
+        @Override
         public void actionPerformed(ActionEvent event) {
             final Window window = SwingUtilities.getWindowAncestor((JComponent) event.getSource());
 
@@ -310,6 +313,7 @@ public class SourceProductSelector {
 
         private void handleError(final Component component, final String message) {
             SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                     JOptionPane.showMessageDialog(component, message, "Error",
                                                   JOptionPane.ERROR_MESSAGE);
@@ -342,6 +346,7 @@ public class SourceProductSelector {
      */
     private static class ProductPopupMenuListener implements PopupMenuListener {
 
+        @Override
         public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
             JComboBox box = (JComboBox) e.getSource();
             Object comp = box.getUI().getAccessibleChild(box, 0);
@@ -375,6 +380,7 @@ public class SourceProductSelector {
 
     private static class AllProductFilter implements ProductFilter {
 
+        @Override
         public boolean accept(Product product) {
             return true;
         }

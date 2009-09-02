@@ -1,5 +1,5 @@
 /*
- * $Id: Processor.java,v 1.2 2009-08-06 15:21:21 lveci Exp $
+ * $Id: Processor.java,v 1.3 2009-09-01 20:27:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -257,6 +257,8 @@ public abstract class Processor {
             setCurrentStatus(ProcessorConstants.STATUS_FAILED);
             cleanupAfterFailure();
             throw e;
+        }finally {
+            bandNamesToCopy.clear();
         }
     }
 

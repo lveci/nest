@@ -1,5 +1,5 @@
 /*
- * $Id: WorldMapToolView.java,v 1.1 2009-04-27 13:08:26 lveci Exp $
+ * $Id: WorldMapToolView.java,v 1.2 2009-09-01 20:27:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -51,7 +51,7 @@ import java.awt.event.ActionListener;
  * @author Sabine Embacher
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:26 $
+ * @version $Revision: 1.2 $ $Date: 2009-09-01 20:27:12 $
  */
 public class WorldMapToolView extends AbstractToolView {
 
@@ -205,7 +205,6 @@ public class WorldMapToolView extends AbstractToolView {
         buttons.add(helpButton, BorderLayout.SOUTH);
 
         final JPanel mainPane = new JPanel(new BorderLayout(4, 4));
-        mainPane.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
         _scrollPane = new JScrollPane(_worldMapPane);
         final JPanel scrollPanePanel = new JPanel(new BorderLayout());

@@ -155,7 +155,7 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
                 if (!annot.alias().isEmpty()) {
                     name = annot.alias();
                 }
-                label = ValueEditor.createDisplayName(name);
+                label = ValueDescriptor.createDisplayName(name);
             }
             if (!label.endsWith(":")) {
                 label += ":";

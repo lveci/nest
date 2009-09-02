@@ -2,35 +2,73 @@ package com.bc.ceres.binio.internal;
 
 import com.bc.ceres.binio.*;
 
+import java.io.IOException;
+
 public class DataContextImpl implements DataContext {
     private final DataFormat format;
     private final IOHandler handler;
+    private CompoundData data;
 
     public DataContextImpl(DataFormat format, IOHandler handler) {
         this.format = format;
         this.handler = handler;
     }
 
+    @Override
     public DataFormat getFormat() {
         return format;
     }
 
+    @Override
     public IOHandler getHandler() {
         return handler;
     }
 
+    @Override
     public CompoundData getData() {
-        return getData(0L);
+        if (data == null ) {
+            synchronized (this) {
+                if (data == null ) {
+                    data = createData(0L);
+                }
+            }
+        }
+        return data;
     }
 
-    public CompoundData getData(long position) {
-        return getData(format.getType(), position);
+    @Override
+    public CompoundData createData() {
+        return createData(0L);
     }
 
-    public CompoundData getData(CompoundType type, long position) {
+    @Override
+    public CompoundData createData(long position) {
+        return createData(format.getType(), position);
+    }
+
+    @Override
+    public CompoundData createData(CompoundType type, long position) {
         return InstanceFactory.createCompound(this, null, type, position, format.getByteOrder());
     }
 
-    public void dispose() {
+    @Override
+    public CompoundData getData(long position) {
+        return createData(format.getType(), position);
+    }
+
+    @Override
+    public CompoundData getData(CompoundType type, long position) {
+        return createData(type, position);
+    }
+
+    @Override
+    public synchronized void dispose() {
+        if (data != null) {
+            try {
+                data.flush();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
     }
 }

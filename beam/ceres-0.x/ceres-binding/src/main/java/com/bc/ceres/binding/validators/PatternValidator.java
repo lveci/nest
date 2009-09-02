@@ -14,9 +14,10 @@ public class PatternValidator implements Validator {
         this.pattern = pattern;
     }
 
+    @Override
     public void validateValue(ValueModel valueModel, Object value) throws ValidationException {
         if (!pattern.matcher(value.toString()).matches()) {
-            throw new ValidationException(MessageFormat.format("Value for ''{0}'' does not match ''{1}''.", 
+            throw new ValidationException(MessageFormat.format("Value for ''{0}'' must match ''{1}''.", 
                                                                valueModel.getDescriptor().getDisplayName(),
                                                                pattern));
         }
