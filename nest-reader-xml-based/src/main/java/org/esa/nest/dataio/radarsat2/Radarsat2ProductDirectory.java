@@ -144,8 +144,6 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                 getFlag(sarProcessingInformation, "elevationPatternCorrection"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag,
                 getFlag(sarProcessingInformation, "rangeSpreadingLossCorrection"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 
-                getFlag(sarProcessingInformation, "rawDataCorrection"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isSLC ? 0 : 1);
 
         final ProductData.UTC startTime = getTime(sarProcessingInformation, "zeroDopplerTimeFirstLine");

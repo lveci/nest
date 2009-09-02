@@ -3,15 +3,18 @@ package org.esa.nest.dataio.radarsat2;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.AbstractProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Debug;
+import org.esa.beam.util.StringUtils;
 import org.esa.nest.dataio.ImageIOFile;
 import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.util.XMLSupport;
+import org.jdom.Element;
+import org.jdom.Attribute;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * The product reader for Radarsat2 products.
@@ -20,6 +23,10 @@ import java.io.IOException;
 public class Radarsat2ProductReader extends AbstractProductReader {
 
     private Radarsat2ProductDirectory _dataDir = null;
+
+    private static final String lutsigma = "lutsigma";
+    private static final String lutgamma = "lutgamma";
+    private static final String lutbeta = "lutbeta";
 
     /**
      * Constructs a new abstract product reader.
@@ -70,6 +77,7 @@ public class Radarsat2ProductReader extends AbstractProductReader {
             _dataDir.readProductDirectory();
             product = _dataDir.createProduct();
             product.setFileLocation(fileFromInput);
+            addCalibrationLUT(product, fileFromInput.getParentFile());
         } catch (Exception e) {
             Debug.trace(e.toString());
             final IOException ioException = new IOException(e.getMessage());
@@ -80,6 +88,48 @@ public class Radarsat2ProductReader extends AbstractProductReader {
         product.setModified(false);
 
         return product;
+    }
+
+    /**
+     * Read the LUT for use in calibration
+     * @param product the target product
+     * @param folder the folder containing the input
+     * @throws IOException if can't read lut
+     */
+    private static void addCalibrationLUT(final Product product, final File folder) throws IOException {
+        final File sigmaLUT = new File(folder, lutsigma+".xml");
+        final File gammaLUT = new File(folder, lutgamma+".xml");
+        final File betaLUT = new File(folder, lutbeta+".xml");
+
+        final MetadataElement root = product.getMetadataRoot();
+
+        readCalibrationLUT(sigmaLUT, lutsigma, root);
+        readCalibrationLUT(gammaLUT, lutgamma, root);
+        readCalibrationLUT(betaLUT, lutbeta, root);
+    }
+
+    private static void readCalibrationLUT(final File file, final String lutName, final MetadataElement root) throws IOException {
+        if(!file.exists())
+            return;
+        final org.jdom.Document xmlDoc = XMLSupport.LoadXML(file.getAbsolutePath());
+        final Element rootElement = xmlDoc.getRootElement();
+
+        final Element offsetElem = rootElement.getChild("offset");
+        final double offset = Double.parseDouble(offsetElem.getValue());
+
+        final Element gainsElem = rootElement.getChild("gains");
+        final double[] gainsArray = StringUtils.toDoubleArray(gainsElem.getValue(), " ");
+
+        final MetadataElement lut = new MetadataElement(lutName);
+        root.addElement(lut);
+
+        final MetadataAttribute offsetAttrib = new MetadataAttribute("offset", ProductData.TYPE_FLOAT64);
+        offsetAttrib.getData().setElemDouble(offset);
+        lut.addAttributeFast(offsetAttrib);
+
+        final MetadataAttribute gainsAttrib = new MetadataAttribute("gains", ProductData.TYPE_FLOAT64, gainsArray.length);
+        gainsAttrib.getData().setElems(gainsArray);
+        lut.addAttributeFast(gainsAttrib);
     }
 
     /**

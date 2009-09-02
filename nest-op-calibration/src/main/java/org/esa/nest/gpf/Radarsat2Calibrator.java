@@ -28,10 +28,10 @@ import java.util.HashMap;
 import java.io.File;
 
 /**
- * Calibration for ALOS PALSAR data products.
+ * Calibration for Radarsat2 data products.
  */
 
-public class ALOSCalibrator implements Calibrator {
+public class Radarsat2Calibrator implements Calibrator {
 
     private Product sourceProduct;
     private Product targetProduct;
@@ -40,15 +40,21 @@ public class ALOSCalibrator implements Calibrator {
 
     protected MetadataElement abstractedMetadata = null;
     private String sampleType = null;
-    private double calibrationFactor = 0;
-
+    private boolean isComplex = false;
     protected static final double underFlowFloat = 1.0e-30;
+
+    private static final String lutsigma = "lutsigma";
+    private static final String lutgamma = "lutgamma";
+    private static final String lutbeta = "lutbeta";
+
+    private double offset = 0.0;
+    private double[] gains = null;
 
     /**
      * Default constructor. The graph processing framework
      * requires that an operator has a default constructor.
      */
-    public ALOSCalibrator() {
+    public Radarsat2Calibrator() {
     }
 
     /**
@@ -65,7 +71,7 @@ public class ALOSCalibrator implements Calibrator {
     @Override
     public void setExternalAuxFile(File file) throws OperatorException {
         if (file != null) {
-            throw new OperatorException("No external auxiliary file should be selected for ALOS PALSAR product");
+            throw new OperatorException("No external auxiliary file should be selected for Radarsat2 product");
         }
     }
 
@@ -81,16 +87,19 @@ public class ALOSCalibrator implements Calibrator {
             abstractedMetadata = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
             final String mission = abstractedMetadata.getAttributeString(AbstractMetadata.MISSION);
-            if(!mission.equals("ALOS"))
-                throw new OperatorException(mission + " is not a valid mission for ALOS Calibration");
+            if(!mission.equals("RS2"))
+                throw new OperatorException(mission + " is not a valid mission for Radarsat2 Calibration");
 
             if (abstractedMetadata.getAttribute(AbstractMetadata.abs_calibration_flag).getData().getElemBoolean()) {
                 throw new OperatorException("Absolute radiometric calibration has already been applied to the product");
             }
 
             sampleType = abstractedMetadata.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
+            if(sampleType.equals("COMPLEX")) {
+                isComplex = true;
+            }
 
-            getCalibrationFactor();
+            getLUT();
 
             updateTargetProductMetadata();
 
@@ -99,20 +108,18 @@ public class ALOSCalibrator implements Calibrator {
         }
     }
 
-    /**
-     * Get calibration factor.
-     * @throws Exception for missing metadata
-     */
-    private void getCalibrationFactor() throws Exception {
+    private void getLUT() {
+        final MetadataElement root = sourceProduct.getMetadataRoot();
+        final MetadataElement lutSigmaElem = root.getElement(lutsigma);
 
-        calibrationFactor = abstractedMetadata.getAttributeDouble(AbstractMetadata.calibration_factor);
+        if(lutSigmaElem != null) {
+            offset = lutSigmaElem.getAttributeDouble("offset", 0);
 
-        if (sampleType.contains("COMPLEX")) {
-            calibrationFactor -= 32.0; // calibration factor offset is 32 dB
+            final MetadataAttribute gainsAttrib = lutSigmaElem.getAttribute("gains");
+            if(gainsAttrib !=null) {
+                gains = (double[])gainsAttrib.getData().getElems();
+            }
         }
-
-        calibrationFactor = Math.pow(10.0, calibrationFactor/10.0); // dB to linear scale
-        //System.out.println("Calibration factor is " + calibrationFactor);
     }
 
     /**
@@ -127,6 +134,11 @@ public class ALOSCalibrator implements Calibrator {
         }
 
         abs.getAttribute(AbstractMetadata.abs_calibration_flag).getData().setElemBoolean(true);
+
+        final MetadataElement root = targetProduct.getMetadataRoot();
+        root.removeElement(root.getElement(lutsigma));
+        root.removeElement(root.getElement(lutgamma));
+        root.removeElement(root.getElement(lutbeta));
     }
 
     /**
@@ -200,10 +212,19 @@ public class ALOSCalibrator implements Calibrator {
                     q = srcData2.getElemDoubleAt(index);
                     sigma = i * i + q * q;
                 } else {
-                    throw new OperatorException("ASAR Calibration: unhandled unit");
+                    throw new OperatorException("Calibration: unhandled unit");
                 }
 
-                sigma *= calibrationFactor;
+                if(isComplex) {
+                    if(gains != null) {
+                        sigma /= (gains[x] * gains[x]);
+                    }
+                } else {
+                    sigma += offset;
+                    if(gains != null) {
+                        sigma /= gains[x];
+                    }
+                }
 
                 if (outputImageScaleInDb) { // convert calibration result to dB
                     if (sigma < underFlowFloat) {
@@ -233,7 +254,7 @@ public class ALOSCalibrator implements Calibrator {
             throw new OperatorException("Unknown band unit");
         }
 
-        return sigma*calibrationFactor;
+        return sigma;
     }
 
     public double applyRetroCalibration(int x, int y, double v, int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {

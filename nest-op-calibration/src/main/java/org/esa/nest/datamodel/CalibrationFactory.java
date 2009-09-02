@@ -6,6 +6,7 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.nest.gpf.ALOSCalibrator;
 import org.esa.nest.gpf.ASARCalibrator;
 import org.esa.nest.gpf.ERSCalibrator;
+import org.esa.nest.gpf.Radarsat2Calibrator;
 
 /**
 * The abstract base class for all calibration operators intended to be extended by clients.
@@ -28,6 +29,8 @@ public class CalibrationFactory {
             return new ERSCalibrator();
         } else if(mission.equals("ALOS")) {
             return new ALOSCalibrator();
+        } else if(mission.equals("RS2")) {
+            return new Radarsat2Calibrator();
         }
         return null;
     }

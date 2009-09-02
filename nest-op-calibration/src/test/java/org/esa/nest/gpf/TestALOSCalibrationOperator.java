@@ -23,7 +23,7 @@ public class TestALOSCalibrationOperator extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        spi = new ALOSPALSARCalibrationOperator.Spi();
+        spi = new CalibrationOp.Spi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(spi);
     }
 
@@ -51,7 +51,7 @@ public class TestALOSCalibrationOperator extends TestCase {
         assertNotNull(reader);
         final Product sourceProduct = reader.readProductNodes(inputFile, null);
 
-        final ALOSPALSARCalibrationOperator op = (ALOSPALSARCalibrationOperator)spi.createOperator();
+        final CalibrationOp op = (CalibrationOp)spi.createOperator();
         assertNotNull(op);
         op.setSourceProduct(sourceProduct);
 

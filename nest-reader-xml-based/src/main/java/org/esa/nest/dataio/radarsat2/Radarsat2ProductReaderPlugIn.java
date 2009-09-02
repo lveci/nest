@@ -117,7 +117,8 @@ public class Radarsat2ProductReaderPlugIn implements ProductReaderPlugIn {
          */
         public boolean accept(final File file) {
             if (super.accept(file)) {
-                if (file.isDirectory() || file.getName().toUpperCase().startsWith(Radarsat2Constants.PRODUCT_HEADER_PREFIX)) {
+                if (file.isDirectory() || (file.getName().toUpperCase().startsWith(Radarsat2Constants.PRODUCT_HEADER_PREFIX) &&
+                                           file.getName().toUpperCase().endsWith(Radarsat2Constants.getIndicationKey())) ) {
                     return true;
                 }
             }
