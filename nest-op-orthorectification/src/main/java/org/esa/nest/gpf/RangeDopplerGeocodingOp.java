@@ -916,14 +916,14 @@ public class RangeDopplerGeocodingOp extends Operator {
 
                         for(TileData tileData : trgTiles) {
 
-                            Unit.UnitType bandUnit = getBandUnit(tileData.bandName);
+                            final Unit.UnitType bandUnit = getBandUnit(tileData.bandName);
                             int[] subSwathIndex = {INVALID_SUB_SWATH_INDEX};
                             double v = getPixelValue(azimuthIndex, rangeIndex, tileData, bandUnit, subSwathIndex);
 
                             if (applyRadiometricCalibration) {
                                 v = calibrator.applyCalibration(
-                                        v, slantRange, satelliteHeight, sceneToEarthCentre, localIncidenceAngles[1],
-                                        tileData.bandPolar, bandUnit, subSwathIndex); // use projected incidence angle
+                                        v, (int)rangeIndex, slantRange, satelliteHeight, sceneToEarthCentre,
+                                        localIncidenceAngles[1], tileData.bandPolar, bandUnit, subSwathIndex); // use projected incidence angle
                             }
                             
                             tileData.tileDataBuffer.setElemDoubleAt(index, v);

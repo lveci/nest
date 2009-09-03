@@ -27,6 +27,7 @@ public interface Calibrator {
     public double applyRetroCalibration(int x, int y, double v, int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex);
 
     public double applyCalibration(
-            final double v, final double slantRange, final double satelliteHeight, final double sceneToEarthCentre,
-            final double localIncidenceAngle, final int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex);
+            final double v, final int rangeIndex, final double slantRange, final double satelliteHeight,
+            final double sceneToEarthCentre, final double localIncidenceAngle, final int bandPolar,
+            final Unit.UnitType bandUnit, int[] subSwathIndex);
 }

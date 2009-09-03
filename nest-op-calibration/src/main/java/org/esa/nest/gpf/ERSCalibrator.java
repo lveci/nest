@@ -2416,8 +2416,9 @@ public final class ERSCalibrator implements Calibrator {
     }
 
     public double applyCalibration(
-            final double v, final double slantRange, final double satelliteHeight, final double sceneToEarthCentre,
-            final double localIncidenceAngle, final int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
+            final double v, final int rangeIndex, final double slantRange, final double satelliteHeight,
+            final double sceneToEarthCentre, final double localIncidenceAngle, final int bandPolar, 
+            final Unit.UnitType bandUnit, int[] subSwathIndex) {
 
         double sigma = 0.0;
         if (bandUnit == Unit.UnitType.AMPLITUDE) {
