@@ -129,7 +129,7 @@ public class Radarsat2Calibrator implements Calibrator {
 
         final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(targetProduct);
 
-        if (sampleType.contains("COMPLEX")) {
+        if (isComplex) {
             abs.setAttributeString(AbstractMetadata.SAMPLE_TYPE, "DETECTED");
         }
 
@@ -252,6 +252,17 @@ public class Radarsat2Calibrator implements Calibrator {
             sigma = Math.pow(10, v/10.0); // convert dB to linear scale
         } else {
             throw new OperatorException("Unknown band unit");
+        }
+
+        if(isComplex) {
+            if(gains != null) {
+               // sigma /= (gains[x] * gains[x]);
+            }
+        } else {
+            sigma += offset;
+            if(gains != null) {
+              //  sigma /= gains[x];
+            }
         }
 
         return sigma;
