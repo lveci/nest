@@ -80,7 +80,7 @@ public final class CeosDB {
     public void readRecord(BinaryFileReader reader) throws IOException, IllegalBinaryFormatException
     {
         final Element root = xmlDoc.getRootElement();
-        System.out.println(definitionFile);
+        //System.out.println(definitionFile);
         
         final List children = root.getContent();
         for (Object aChild : children) {
@@ -127,46 +127,46 @@ public final class CeosDB {
                 final int type = Integer.parseInt(typeAttrib.getValue());
                 final int num = Integer.parseInt(numAttrib.getValue());
 
-                System.out.print(" " + reader.getCurrentPos() + ' ' + name + ' ' + type + ' ' + num);
+                //System.out.print(" " + reader.getCurrentPos() + ' ' + name + ' ' + type + ' ' + num);
 
                 if(type == CeosDBTypes.Skip.value()) {
                     reader.skipBytes(num); // blank
                 } else if(type == CeosDBTypes.An.value()) {
 
-                    final String tmp = reader.readAn(num);
-                    System.out.print(" = " + tmp);
-                    metaMap.put(name , tmp);
-                    //metaMap.put(name , reader.readAn(num));
+                    //final String tmp = reader.readAn(num);
+                    //System.out.print(" = " + tmp);
+                    //metaMap.put(name , tmp);
+                    metaMap.put(name , reader.readAn(num));
                 } else if(type == CeosDBTypes.In.value()) {
 
-                    final int tmp = (int)reader.readIn(num);
-                    System.out.print(" = " + tmp);
-                    metaMap.put(name , tmp);
-                    //metaMap.put(name , (int)reader.readIn(num));
+                    //final int tmp = (int)reader.readIn(num);
+                    //System.out.print(" = " + tmp);
+                    //metaMap.put(name , tmp);
+                    metaMap.put(name , (int)reader.readIn(num));
                 } else if(type == CeosDBTypes.B1.value()) {
 
-                    final int tmp = reader.readB1();
-                    System.out.print(" = " + tmp);
-                    metaMap.put(name , tmp);
-                    //metaMap.put(name , reader.readB1());
+                    //final int tmp = reader.readB1();
+                    //System.out.print(" = " + tmp);
+                    //metaMap.put(name , tmp);
+                    metaMap.put(name , reader.readB1());
                 } else if(type == CeosDBTypes.B2.value()) {
 
-                    final int tmp = reader.readB2();
-                    System.out.print(" = " + tmp);
-                    metaMap.put(name , tmp);
-                    //metaMap.put(name , reader.readB2());
+                    //final int tmp = reader.readB2();
+                    //System.out.print(" = " + tmp);
+                    //metaMap.put(name , tmp);
+                    metaMap.put(name , reader.readB2());
                 } else if(type == CeosDBTypes.B4.value()) {
 
-                    final int tmp = reader.readB4();
-                    System.out.print(" = " + tmp);
-                    metaMap.put(name , tmp);
-                    //metaMap.put(name , reader.readB4());
+                    //final int tmp = reader.readB4();
+                    //System.out.print(" = " + tmp);
+                    //metaMap.put(name , tmp);
+                    metaMap.put(name , reader.readB4());
                 } else if(type == CeosDBTypes.Fn.value()) {
 
-                    double tmp = reader.readFn(num);
-                    System.out.print(" = " + tmp);
-                    metaMap.put(name , tmp);
-                    //metaMap.put(name , reader.readFn(num));
+                    //double tmp = reader.readFn(num);
+                    //System.out.print(" = " + tmp);
+                    //metaMap.put(name , tmp);
+                    metaMap.put(name , reader.readFn(num));
                 } else if(type == CeosDBTypes.Debug.value()) {
 
                     System.out.print(" = ");
@@ -179,7 +179,7 @@ public final class CeosDB {
                 } else {
                     throw new IllegalBinaryFormatException("Unknown type " + type, reader.getCurrentPos());
                 }
-                System.out.println();
+                //System.out.println();
             }
 
         } catch(Exception e) {
