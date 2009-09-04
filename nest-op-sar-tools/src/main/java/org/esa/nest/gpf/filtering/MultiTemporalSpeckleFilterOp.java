@@ -88,6 +88,7 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
     private boolean bandMeanComputed = false;
     private double avgSigmma0 = 0.0;
     private double[] bandMeanValues = null;
+    private double[] bandNoDataValues = null;
 
     /**
      * Default constructor. The graph processing framework
@@ -124,7 +125,8 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
         // The tile width has to be the image width, otherwise the index calculation in the last tile is noe correct.
         targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 50);
 
-        bandMeanValues = new double[sourceBandNames.length];                
+        bandMeanValues = new double[sourceBandNames.length];
+        bandNoDataValues = new double[sourceBandNames.length];
     }
 
     /**
@@ -184,6 +186,7 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
 
             if (!bandMeanComputed) {
                 bandMeanValues[i] = srcBand.getStx().getMean();
+                bandNoDataValues[i] = srcBand.getNoDataValue();
                 avgSigmma0 += bandMeanValues[i] / numSourceBands;
             }
         }
@@ -193,15 +196,22 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
         }
 
         final ProductData trgData = targetTile.getDataBuffer();
+        double srcDataValue = 0.0;
+        double tgtDataValue = 0.0;
         for(int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
                 final int index = targetTile.getDataBufferIndex(x, y);
-                double v = 0.0;
+                tgtDataValue = 0.0;
+                int n = 0;
                 for (int i = 0; i < numSourceBands; i++) {
-                    v += srcData[i].getElemDoubleAt(index) / bandMeanValues[i];
+                    srcDataValue = srcData[i].getElemDoubleAt(index);
+                    if (srcDataValue != bandNoDataValues[i]) {
+                        tgtDataValue += srcDataValue / bandMeanValues[i];
+                        n++;
+                    }
                 }
-                v *= avgSigmma0 / numSourceBands;
-                trgData.setElemDoubleAt(index, v);
+                tgtDataValue *= avgSigmma0 / n;
+                trgData.setElemDoubleAt(index, tgtDataValue);
             }
         }
     }
