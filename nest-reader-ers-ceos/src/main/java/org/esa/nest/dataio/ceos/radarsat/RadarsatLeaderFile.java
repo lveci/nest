@@ -1,7 +1,7 @@
 package org.esa.nest.dataio.ceos.radarsat;
 
-import org.esa.nest.dataio.ceos.CEOSLeaderFile;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
+import org.esa.nest.dataio.ceos.CEOSLeaderFile;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;

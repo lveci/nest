@@ -6,10 +6,12 @@ import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
+import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 
+import javax.imageio.stream.FileImageInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -24,8 +26,6 @@ import java.util.Map;
  */
 class JERSProductDirectory extends CEOSProductDirectory {
 
-    private final File _baseDir;
-    private JERSVolumeDirectoryFile _volumeDirectoryFile = null;
     private JERSImageFile[] _imageFiles = null;
     private JERSLeaderFile _leaderFile = null;
 
@@ -37,14 +37,14 @@ class JERSProductDirectory extends CEOSProductDirectory {
     public JERSProductDirectory(final File dir) throws IOException, IllegalBinaryFormatException {
         Guardian.assertNotNull("dir", dir);
 
+        constants = new JERSConstants();
         _baseDir = dir;
-
     }
 
     @Override
     protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         readVolumeDirectoryFile();
-        _leaderFile = new JERSLeaderFile(createInputStream(new File(_baseDir, JERSVolumeDirectoryFile.getLeaderFileName())));
+        _leaderFile = new JERSLeaderFile(createInputStream(CeosHelper.getCEOSFile(_baseDir, "LEA")));
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, "DAT_");
         _imageFiles = new JERSImageFile[imageFileNames.length];
@@ -56,14 +56,6 @@ class JERSProductDirectory extends CEOSProductDirectory {
         _sceneWidth = _imageFiles[0].getRasterWidth();
         _sceneHeight = _imageFiles[0].getRasterHeight();
         assertSameWidthAndHeightForAllImages(_imageFiles, _sceneWidth, _sceneHeight);
-    }
-
-    private void readVolumeDirectoryFile() throws IOException, IllegalBinaryFormatException {
-        if(_volumeDirectoryFile == null)
-            _volumeDirectoryFile = new JERSVolumeDirectoryFile(_baseDir);
-
-        productType = _volumeDirectoryFile.getProductType();
-        isProductSLC = productType.contains("SLC") || productType.contains("COMPLEX");
     }
 
     @Override
@@ -172,9 +164,6 @@ class JERSProductDirectory extends CEOSProductDirectory {
             _imageFiles[i] = null;
         }
         _imageFiles = null;
-        _volumeDirectoryFile.close();
-        _volumeDirectoryFile = null;
-        _leaderFile = null;
     }
 
     private Band createBand(final Product product, final String name, final String unit, final JERSImageFile imageFile) {
@@ -185,20 +174,6 @@ class JERSProductDirectory extends CEOSProductDirectory {
         product.addBand(band);
         bandImageFileMap.put(name, imageFile);
 
-      /*
-        final int bandIndex = index;
-        final double scalingFactor = _leaderFile.getAbsoluteCalibrationGain(bandIndex);
-        final double scalingOffset = _leaderFile.getAbsoluteCalibrationOffset(bandIndex);
-        band.setScalingFactor(scalingFactor);
-        band.setScalingOffset(scalingOffset);
-        band.setNoDataValueUsed(false);
-        final int[] histogramBins = _trailerFile.getHistogramBinsForBand(bandIndex);
-        final float scaledMinSample = (float) (getMinSampleValue(histogramBins) * scalingFactor + scalingOffset);
-        final float scaledMaxSample = (float) (getMaxSampleValue(histogramBins) * scalingFactor + scalingOffset);
-        final ImageInfo imageInfo = new ImageInfo(scaledMinSample, scaledMaxSample, histogramBins);
-        band.setImageInfo(imageInfo);
-        band.setDescription("Radiance band " + ImageFile.getBandIndex());
-        */
         return band;
     }
 

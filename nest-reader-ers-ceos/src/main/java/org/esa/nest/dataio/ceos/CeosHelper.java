@@ -1,6 +1,7 @@
 
 package org.esa.nest.dataio.ceos;
 
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.StringUtils;
 import org.esa.nest.dataio.BinaryFileReader;
@@ -87,6 +88,14 @@ public class CeosHelper {
         calendar.add(Calendar.MILLISECOND, millisInDay);
 
         return ProductData.UTC.create(calendar.getTime(), 0);
+    }
+
+    public static void addMetadata(MetadataElement sphElem, BaseRecord rec, String name) {
+        if(rec != null) {
+            final MetadataElement metadata = new MetadataElement(name);
+            rec.assignMetadataTo(metadata);
+            sphElem.addElement(metadata);
+        }
     }
 
 }

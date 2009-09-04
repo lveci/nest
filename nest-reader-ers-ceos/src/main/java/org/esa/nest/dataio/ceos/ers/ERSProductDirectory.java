@@ -6,11 +6,13 @@ import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
+import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 
+import javax.imageio.stream.FileImageInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -22,8 +24,6 @@ import java.util.Map;
  */
 class ERSProductDirectory extends CEOSProductDirectory {
 
-    private final File _baseDir;
-    private ERSVolumeDirectoryFile _volumeDirectoryFile = null;
     private ERSImageFile[] _imageFiles = null;
     private ERSLeaderFile _leaderFile = null;
 
@@ -35,13 +35,14 @@ class ERSProductDirectory extends CEOSProductDirectory {
     public ERSProductDirectory(final File dir) {
         Guardian.assertNotNull("dir", dir);
 
+        constants = new ERSConstants();
         _baseDir = dir;
     }
 
     @Override
     protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         readVolumeDirectoryFile();
-        _leaderFile = new ERSLeaderFile(createInputStream(new File(_baseDir, ERSVolumeDirectoryFile.getLeaderFileName())));
+        _leaderFile = new ERSLeaderFile(createInputStream(CeosHelper.getCEOSFile(_baseDir, "LEA")));
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, "DAT_");
         final int numImageFiles = imageFileNames.length;
@@ -53,14 +54,6 @@ class ERSProductDirectory extends CEOSProductDirectory {
         _sceneWidth = _imageFiles[0].getRasterWidth();
         _sceneHeight = _imageFiles[0].getRasterHeight();
         assertSameWidthAndHeightForAllImages(_imageFiles, _sceneWidth, _sceneHeight);
-    }
-
-    private void readVolumeDirectoryFile() throws IOException, IllegalBinaryFormatException {
-        if(_volumeDirectoryFile == null)
-            _volumeDirectoryFile = new ERSVolumeDirectoryFile(_baseDir);
-
-        productType = _volumeDirectoryFile.getProductType();
-        isProductSLC = productType.contains("SLC") || productType.contains("COMPLEX");
     }
 
     public boolean isERS() throws IOException, IllegalBinaryFormatException {
@@ -187,8 +180,6 @@ class ERSProductDirectory extends CEOSProductDirectory {
             _imageFiles[i] = null;
         }
         _imageFiles = null;
-        _volumeDirectoryFile.close();
-        _volumeDirectoryFile = null;
         _leaderFile.close();
         _leaderFile = null;
     }

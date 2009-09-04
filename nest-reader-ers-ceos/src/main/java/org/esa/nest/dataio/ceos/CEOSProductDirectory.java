@@ -22,6 +22,9 @@ import java.util.*;
  */
 public abstract class CEOSProductDirectory {
 
+    protected CEOSConstants constants = null;
+    protected File _baseDir = null;
+    protected CEOSVolumeDirectoryFile _volumeDirectoryFile = null;
     protected boolean isProductSLC = false;
     protected String productType = null;
 
@@ -32,6 +35,17 @@ public abstract class CEOSProductDirectory {
     public abstract CEOSImageFile getImageFile(final Band band) throws IOException, IllegalBinaryFormatException;
 
     public abstract void close() throws IOException;
+
+    protected void readVolumeDirectoryFile() throws IOException, IllegalBinaryFormatException {
+        Guardian.assertNotNull("_baseDir", _baseDir);
+        Guardian.assertNotNull("constants", constants);
+
+        if(_volumeDirectoryFile == null)
+            _volumeDirectoryFile = new CEOSVolumeDirectoryFile(_baseDir, constants);
+
+        productType = _volumeDirectoryFile.getProductType();
+        isProductSLC = productType.contains("SLC") || productType.contains("COMPLEX");
+    }
 
     public boolean isSLC() {
         return isProductSLC;

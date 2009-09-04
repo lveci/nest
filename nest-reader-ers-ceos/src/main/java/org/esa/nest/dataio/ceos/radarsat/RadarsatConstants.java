@@ -13,6 +13,8 @@ public class RadarsatConstants implements CEOSConstants {
     final static String PRODUCT_TYPE_PREFIX = "";
     static final String VOLUME_FILE_PREFIX = "VDF";
 
+    final static String MISSION = "radarsat";
+
     final static String PRODUCT_DESCRIPTION_PREFIX = "Radarsat product ";
 
     final static String SUMMARY_FILE_NAME = "summary.txt";
@@ -42,5 +44,9 @@ public class RadarsatConstants implements CEOSConstants {
 
     public String[] getForamtFileExtensions() {
         return FORMAT_FILE_EXTENSIONS;
+    }
+
+    public String getMission() {
+        return MISSION;
     }
 }

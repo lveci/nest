@@ -13,6 +13,8 @@ public class AlosPalsarConstants implements CEOSConstants {
     final static String PRODUCT_TYPE_PREFIX = "";
     final static String VOLUME_FILE_PREFIX = "VOL";
 
+    final static String MISSION = "alos";
+
     final static String PRODUCT_DESCRIPTION_PREFIX = "ALOS PALSAR product ";
 
     final static String SUMMARY_FILE_NAME = "summary.txt";
@@ -71,5 +73,9 @@ public class AlosPalsarConstants implements CEOSConstants {
 
     public String[] getForamtFileExtensions() {
         return FORMAT_FILE_EXTENSIONS;
+    }
+
+    public String getMission() {
+        return MISSION;
     }
 }

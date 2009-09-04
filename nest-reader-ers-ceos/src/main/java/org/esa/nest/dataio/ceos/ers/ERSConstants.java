@@ -13,6 +13,8 @@ public class ERSConstants implements CEOSConstants {
     final static String PRODUCT_TYPE_PREFIX = "";
     final static String VOLUME_FILE_PREFIX = "VDF";
 
+    final static String MISSION = "ers";
+
     final static String PRODUCT_DESCRIPTION_PREFIX = "ERS product ";
 
     final static String SUMMARY_FILE_NAME = "summary.txt";
@@ -42,5 +44,9 @@ public class ERSConstants implements CEOSConstants {
 
     public String[] getForamtFileExtensions() {
         return FORMAT_FILE_EXTENSIONS;
+    }
+
+    public String getMission() {
+        return MISSION;
     }
 }

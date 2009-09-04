@@ -131,24 +131,16 @@ public class CEOSLeaderFile {
 
     public void addLeaderMetadata(MetadataElement sphElem) {
 
-        addMetadata(sphElem, _leaderFDR, "File Descriptor");
-        addMetadata(sphElem, _sceneHeaderRecord, "Scene Parameters");
-        addMetadata(sphElem, _mapProjRecord, "Map Projection");
-        addMetadata(sphElem, _platformPositionRecord, "Platform Position");
-        addMetadata(sphElem, _dataQualityRecord, "Data Quality");
-        addMetadata(sphElem, _histogramRecord, "Histogram");
-        addMetadata(sphElem, _attitudeRecord, "Attitude");
-        addMetadata(sphElem, _radiometricRecord, "Radiometric");
-        addMetadata(sphElem, _radiometricCompRecord, "Radiometric Compensation");
-        addMetadata(sphElem, _detailedProcessingRecord, "Detailed Processing");
-        addMetadata(sphElem, _facilityRecord, "Facility Related");
-    }
-
-    private static void addMetadata(MetadataElement sphElem, BaseRecord rec, String name) {
-        if(rec != null) {
-            final MetadataElement metadata = new MetadataElement(name);
-            rec.assignMetadataTo(metadata);
-            sphElem.addElement(metadata);
-        }
+        CeosHelper.addMetadata(sphElem, _leaderFDR, "File Descriptor");
+        CeosHelper.addMetadata(sphElem, _sceneHeaderRecord, "Scene Parameters");
+        CeosHelper.addMetadata(sphElem, _mapProjRecord, "Map Projection");
+        CeosHelper.addMetadata(sphElem, _platformPositionRecord, "Platform Position");
+        CeosHelper.addMetadata(sphElem, _dataQualityRecord, "Data Quality");
+        CeosHelper.addMetadata(sphElem, _histogramRecord, "Histogram");
+        CeosHelper.addMetadata(sphElem, _attitudeRecord, "Attitude");
+        CeosHelper.addMetadata(sphElem, _radiometricRecord, "Radiometric");
+        CeosHelper.addMetadata(sphElem, _radiometricCompRecord, "Radiometric Compensation");
+        CeosHelper.addMetadata(sphElem, _detailedProcessingRecord, "Detailed Processing");
+        CeosHelper.addMetadata(sphElem, _facilityRecord, "Facility Related");
     }
 }

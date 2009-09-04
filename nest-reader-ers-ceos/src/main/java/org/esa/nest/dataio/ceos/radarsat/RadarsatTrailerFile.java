@@ -1,10 +1,6 @@
 package org.esa.nest.dataio.ceos.radarsat;
 
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.nest.dataio.BinaryFileReader;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
-import org.esa.nest.dataio.ceos.records.BaseRecord;
-import org.esa.nest.dataio.ceos.records.BaseSceneHeaderRecord;
 import org.esa.nest.dataio.ceos.CEOSLeaderFile;
 
 import javax.imageio.stream.ImageInputStream;

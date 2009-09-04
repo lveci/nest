@@ -25,8 +25,6 @@ import java.util.Map;
  */
 class RadarsatProductDirectory extends CEOSProductDirectory {
 
-    private final File _baseDir;
-    private RadarsatVolumeDirectoryFile _volumeDirectoryFile = null;
     private RadarsatImageFile[] _imageFiles = null;
     private RadarsatLeaderFile _leaderFile = null;
     private RadarsatTrailerFile _trailerFile = null;
@@ -39,6 +37,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
     public RadarsatProductDirectory(final File dir) {
         Guardian.assertNotNull("dir", dir);
 
+        constants = new RadarsatConstants();
         _baseDir = dir;
     }
 
@@ -64,20 +63,10 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         assertSameWidthAndHeightForAllImages(_imageFiles, _sceneWidth, _sceneHeight);
     }
 
-    private void readVolumeDirectoryFile() throws IOException, IllegalBinaryFormatException {
-        if(_volumeDirectoryFile == null)
-            _volumeDirectoryFile = new RadarsatVolumeDirectoryFile(_baseDir);
-
-        productType = _volumeDirectoryFile.getProductType();
-        isProductSLC = productType.contains("SLC") || productType.contains("COMPLEX");
-    }
-
     @Override
     public Product createProduct() throws IOException, IllegalBinaryFormatException {
         assert(productType != null);
-        final Product product = new Product(getProductName(),
-                                            productType,
-                                            _sceneWidth, _sceneHeight);
+        final Product product = new Product(getProductName(), productType, _sceneWidth, _sceneHeight);
 
         if(_imageFiles.length > 1) {
             int index = 1;
@@ -150,9 +139,6 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             _imageFiles[i] = null;
         }
         _imageFiles = null;
-        _volumeDirectoryFile.close();
-        _volumeDirectoryFile = null;
-        _leaderFile = null;
     }
 
     private Band createBand(final Product product, final String name, final String unit, final RadarsatImageFile imageFile) {

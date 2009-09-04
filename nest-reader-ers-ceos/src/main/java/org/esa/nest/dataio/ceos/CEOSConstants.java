@@ -16,4 +16,5 @@ public interface CEOSConstants {
     public String getPluginDescription();
     public String[] getFormatNames();
     public String[] getForamtFileExtensions();
+    public String getMission();
 }

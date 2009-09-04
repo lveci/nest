@@ -28,10 +28,9 @@ import java.util.Map;
  */
 class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
-    private final File _baseDir;
-    private AlosPalsarVolumeDirectoryFile _volumeDirectoryFile = null;
     private AlosPalsarImageFile[] _imageFiles = null;
     private AlosPalsarLeaderFile _leaderFile = null;
+    private AlosPalsarTrailerFile _trailerFile = null;
 
     private int _sceneWidth = 0;
     private int _sceneHeight = 0;
@@ -41,13 +40,15 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     public AlosPalsarProductDirectory(final File dir) {
         Guardian.assertNotNull("dir", dir);
 
+        constants = new AlosPalsarConstants();
         _baseDir = dir;
     }
 
     @Override
     protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
         readVolumeDirectoryFile();
-        _leaderFile = new AlosPalsarLeaderFile(new FileImageInputStream(CeosHelper.getCEOSFile(_baseDir, "LED")));
+        _leaderFile = new AlosPalsarLeaderFile(createInputStream(CeosHelper.getCEOSFile(_baseDir, "LED")));
+        _trailerFile = new AlosPalsarTrailerFile(createInputStream(CeosHelper.getCEOSFile(_baseDir, "TRL")));
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, "IMG-");
         final int numImageFiles = imageFileNames.length;
@@ -67,13 +68,6 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         }
     }
 
-    private void readVolumeDirectoryFile() throws IOException, IllegalBinaryFormatException {
-        if(_volumeDirectoryFile == null)
-            _volumeDirectoryFile = new AlosPalsarVolumeDirectoryFile(_baseDir);
-
-        productType = _volumeDirectoryFile.getProductType();
-    }
-
     public static boolean isALOS() {
         //if(productType == null || _volumeDirectoryFile == null)
         //    readVolumeDirectoryFile();
@@ -91,8 +85,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     @Override
     public Product createProduct() throws IOException, IllegalBinaryFormatException {
         final Product product = new Product(getProductName(),
-                                            productType,
-                                            _sceneWidth, _sceneHeight);
+                                            productType, _sceneWidth, _sceneHeight);
 
         for (final AlosPalsarImageFile imageFile : _imageFiles) {
             final String pol = imageFile.getPolarization();
@@ -256,8 +249,6 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             _imageFiles[i] = null;
         }
         _imageFiles = null;
-        _volumeDirectoryFile.close();
-        _volumeDirectoryFile = null;
         _leaderFile.close();
         _leaderFile = null;
     }
@@ -275,20 +266,6 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         product.addBand(band);
         bandImageFileMap.put(name, imageFile);
 
-      /*
-        final int bandIndex = index;
-        final double scalingFactor = _leaderFile.getAbsoluteCalibrationGain(bandIndex);
-        final double scalingOffset = _leaderFile.getAbsoluteCalibrationOffset(bandIndex);
-        band.setScalingFactor(scalingFactor);
-        band.setScalingOffset(scalingOffset);
-        band.setNoDataValueUsed(false);
-        final int[] histogramBins = _trailerFile.getHistogramBinsForBand(bandIndex);
-        final float scaledMinSample = (float) (getMinSampleValue(histogramBins) * scalingFactor + scalingOffset);
-        final float scaledMaxSample = (float) (getMaxSampleValue(histogramBins) * scalingFactor + scalingOffset);
-        final ImageInfo imageInfo = new ImageInfo(scaledMinSample, scaledMaxSample, histogramBins);
-        band.setImageInfo(imageInfo);
-        band.setDescription("Radiance band " + ImageFile.getBandIndex());
-        */
         return band;
     }
 
@@ -298,6 +275,10 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         final MetadataElement leadMetadata = new MetadataElement("Leader");
         _leaderFile.addLeaderMetadata(leadMetadata);
         root.addElement(leadMetadata);
+
+        final MetadataElement trailMetadata = new MetadataElement("Trailer");
+        _trailerFile.addLeaderMetadata(trailMetadata);
+        root.addElement(trailMetadata);
 
         final MetadataElement volMetadata = new MetadataElement("Volume");
         _volumeDirectoryFile.assignMetadataTo(volMetadata);
