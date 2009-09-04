@@ -16,7 +16,8 @@ public class MultiTemporalSpeckleFilterOpAction extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("Speckle-Filter", getAppContext(), "Speckle Filter", getHelpId());
+            dialog = new DefaultSingleTargetProductDialog(
+                    "Multi-Temporal-Speckle-Filter", getAppContext(), "Multi-Temporal-Speckle Filter", getHelpId());
         }
         dialog.show();
 
@@ -24,6 +25,6 @@ public class MultiTemporalSpeckleFilterOpAction extends AbstractVisatAction {
 
     @Override
     public void updateState(final CommandEvent event) {
-        setEnabled(false);
+        setEnabled(true);
     }
 }

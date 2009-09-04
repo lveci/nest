@@ -197,7 +197,7 @@
         <action>
             <id>MultiTemporalSpeckleFilterOp</id>
             <class>org.esa.nest.dat.filtering.MultiTemporalSpeckleFilterOpAction</class>
-            <text>Multi-temporal Products (coming soon)</text>
+            <text>Multi-temporal Products</text>
             <shortDescr>Invoke the Speckle Filter operator on multi-temporal products.</shortDescr>
             <parent>SpeckleFilteringGroup</parent>
             <helpId>SpeckleFilterOp</helpId>
