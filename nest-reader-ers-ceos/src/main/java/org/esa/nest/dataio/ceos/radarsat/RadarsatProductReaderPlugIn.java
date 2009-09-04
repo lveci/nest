@@ -12,7 +12,6 @@ import java.io.File;
  */
 public class RadarsatProductReaderPlugIn extends CEOSProductReaderPlugIn {
 
-
     public RadarsatProductReaderPlugIn() {
         constants = new RadarsatConstants();
     }
@@ -29,7 +28,10 @@ public class RadarsatProductReaderPlugIn extends CEOSProductReaderPlugIn {
 
     @Override
     protected DecodeQualification checkProductQualification(File file) {
-        RadarsatProductReader reader = new RadarsatProductReader(this);
-        return reader.checkProductQualification(file);
+        if(file.getName().toUpperCase().startsWith(constants.getVolumeFilePrefix())) {
+            RadarsatProductReader reader = new RadarsatProductReader(this);
+            return reader.checkProductQualification(file);
+        }
+        return DecodeQualification.UNABLE;
     }
 }

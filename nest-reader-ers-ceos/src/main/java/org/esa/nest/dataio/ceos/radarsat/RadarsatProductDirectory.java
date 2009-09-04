@@ -9,8 +9,10 @@ import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
+import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,9 +21,6 @@ import java.util.Map;
 
 /**
  * This class represents a product directory.
- * <p/>
- * <p>This class is public for the benefit of the implementation of another (internal) class and its API may
- * change in future releases of the software.</p>
  *
  */
 class RadarsatProductDirectory extends CEOSProductDirectory {
@@ -30,31 +29,36 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
     private RadarsatVolumeDirectoryFile _volumeDirectoryFile = null;
     private RadarsatImageFile[] _imageFiles = null;
     private RadarsatLeaderFile _leaderFile = null;
+    private RadarsatTrailerFile _trailerFile = null;
 
     private int _sceneWidth = 0;
     private int _sceneHeight = 0;
 
     private transient Map<String, RadarsatImageFile> bandImageFileMap = new HashMap<String, RadarsatImageFile>(1);
 
-    public RadarsatProductDirectory(final File dir) throws IOException, IllegalBinaryFormatException {
+    public RadarsatProductDirectory(final File dir) {
         Guardian.assertNotNull("dir", dir);
 
         _baseDir = dir;
-
     }
 
     @Override
     protected void readProductDirectory() throws IOException, IllegalBinaryFormatException {
-        _volumeDirectoryFile = new RadarsatVolumeDirectoryFile(_baseDir);
-        _leaderFile = new RadarsatLeaderFile(createInputStream(new File(_baseDir, RadarsatVolumeDirectoryFile.getLeaderFileName())));
+        readVolumeDirectoryFile();
+
+        _leaderFile = new RadarsatLeaderFile(createInputStream(CeosHelper.getCEOSFile(_baseDir, "LEA")));
+        _trailerFile = new RadarsatTrailerFile(createInputStream(CeosHelper.getCEOSFile(_baseDir, "TRA")));
+
+        BaseRecord histogramRec = _leaderFile.getHistogramRecord();
+        if(histogramRec == null)
+            histogramRec = _trailerFile.getHistogramRecord();
 
         final String[] imageFileNames = CEOSImageFile.getImageFileNames(_baseDir, "DAT_");
         _imageFiles = new RadarsatImageFile[imageFileNames.length];
         for (int i = 0; i < _imageFiles.length; i++) {
-            _imageFiles[i] = new RadarsatImageFile(createInputStream(new File(_baseDir, imageFileNames[i])));
+            _imageFiles[i] = new RadarsatImageFile(createInputStream(new File(_baseDir, imageFileNames[i])), histogramRec);
         }
 
-        productType = _volumeDirectoryFile.getProductType();
         _sceneWidth = _imageFiles[0].getRasterWidth();
         _sceneHeight = _imageFiles[0].getRasterHeight();
         assertSameWidthAndHeightForAllImages(_imageFiles, _sceneWidth, _sceneHeight);
@@ -80,40 +84,25 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             for (final RadarsatImageFile imageFile : _imageFiles) {
 
                 if(isProductSLC) {
-                    String bandName = "i_" + index;
-                    final Band bandI = createBand(bandName);
-                    product.addBand(bandI);
-                    bandImageFileMap.put(bandName, imageFile);
-                    bandName = "q_" + index;
-                    final Band bandQ = createBand(bandName);
-                    product.addBand(bandQ);
-                    bandImageFileMap.put(bandName, imageFile);
-
+                    final Band bandI = createBand(product, "i_" + index, Unit.REAL, imageFile);
+                    final Band bandQ = createBand(product, "q_" + index, Unit.IMAGINARY, imageFile);
                     ReaderUtils.createVirtualIntensityBand(product, bandI, bandQ, "_"+index);
-                    ++index;
+                    ReaderUtils.createVirtualPhaseBand(product, bandI, bandQ, "_"+index);
                 } else {
-                    String bandName = "Amplitude_" + index;
-                    Band band = createBand(bandName);
-                    product.addBand(band);
-                    bandImageFileMap.put(bandName, imageFile);
+                    final Band band = createBand(product, "Amplitude_" + index, Unit.AMPLITUDE, imageFile);
                     ReaderUtils.createVirtualIntensityBand(product, band, "_"+index);
-                    ++index;
                 }
+                ++index;
             }
         } else {
             final RadarsatImageFile imageFile = _imageFiles[0];
             if(isProductSLC) {
-                final Band bandI = createBand("i");
-                product.addBand(bandI);
-                bandImageFileMap.put("i", imageFile);
-                final Band bandQ = createBand("q");
-                product.addBand(bandQ);
-                bandImageFileMap.put("q", imageFile);
+                final Band bandI = createBand(product, "i", Unit.REAL, imageFile);
+                final Band bandQ = createBand(product, "q", Unit.IMAGINARY, imageFile);
                 ReaderUtils.createVirtualIntensityBand(product, bandI, bandQ, "");
+                ReaderUtils.createVirtualPhaseBand(product, bandI, bandQ, "");
             } else {
-                final Band band = createBand("Amplitude");
-                product.addBand(band);
-                bandImageFileMap.put("Amplitude", imageFile);
+                final Band band = createBand(product, "Amplitude", Unit.AMPLITUDE, imageFile);
                 ReaderUtils.createVirtualIntensityBand(product, band, "");
             }
         }
@@ -163,30 +152,21 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         _imageFiles = null;
         _volumeDirectoryFile.close();
         _volumeDirectoryFile = null;
-        _leaderFile.close();
         _leaderFile = null;
     }
 
-    private Band createBand(String name) {
-        final Band band = new Band(name, ProductData.TYPE_INT8,
-                                   _sceneWidth, _sceneHeight);
+    private Band createBand(final Product product, final String name, final String unit, final RadarsatImageFile imageFile) {
 
-        //band.setUnit(RadarsatImageFile.getGeophysicalUnit());
+        int dataType = ProductData.TYPE_INT16;
+        if(imageFile.getBitsPerSample() == 8) {
+            dataType = ProductData.TYPE_INT8;
+        }
+        final Band band = new Band(name, dataType,  _sceneWidth, _sceneHeight);
+        band.setDescription(name);
+        band.setUnit(unit);
+        product.addBand(band);
+        bandImageFileMap.put(name, imageFile);
 
-      /*
-        final int bandIndex = index;
-        final double scalingFactor = _leaderFile.getAbsoluteCalibrationGain(bandIndex);
-        final double scalingOffset = _leaderFile.getAbsoluteCalibrationOffset(bandIndex);
-        band.setScalingFactor(scalingFactor);
-        band.setScalingOffset(scalingOffset);
-        band.setNoDataValueUsed(false);
-        final int[] histogramBins = _trailerFile.getHistogramBinsForBand(bandIndex);
-        final float scaledMinSample = (float) (getMinSampleValue(histogramBins) * scalingFactor + scalingOffset);
-        final float scaledMaxSample = (float) (getMaxSampleValue(histogramBins) * scalingFactor + scalingOffset);
-        final ImageInfo imageInfo = new ImageInfo(scaledMinSample, scaledMaxSample, histogramBins);
-        band.setImageInfo(imageInfo);
-        band.setDescription("Radiance band " + ImageFile.getBandIndex());
-        */
         return band;
     }
 
@@ -197,6 +177,10 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         final MetadataElement leadMetadata = new MetadataElement("Leader");
         _leaderFile.addLeaderMetadata(leadMetadata);
         root.addElement(leadMetadata);
+
+        final MetadataElement trailMetadata = new MetadataElement("Trailer");
+        _trailerFile.addLeaderMetadata(trailMetadata);
+        root.addElement(trailMetadata);
 
         final MetadataElement volMetadata = new MetadataElement("Volume");
         _volumeDirectoryFile.assignMetadataTo(volMetadata);
@@ -211,7 +195,10 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.addAbstractedMetadataHeader(root);
 
         final MetadataElement absRoot = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
-        final BaseRecord mapProjRec = _leaderFile.getMapProjRecord();
+        BaseRecord mapProjRec = _leaderFile.getMapProjRecord();
+        if(mapProjRec == null) {
+            mapProjRec = _trailerFile.getMapProjRecord();   
+        }
         final BaseRecord radiometricRec = _leaderFile.getRadiometricRecord();
 
         //mph
@@ -222,33 +209,39 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
                 getProcTime(_volumeDirectoryFile.getVolumeDescriptorRecord()));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
-                mapProjRec.getAttributeDouble("1st line 1st pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_long,
-                mapProjRec.getAttributeDouble("1st line 1st pixel geodetic longitude"));
+        if(mapProjRec != null) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
+                    mapProjRec.getAttributeDouble("1st line 1st pixel geodetic latitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_long,
+                    mapProjRec.getAttributeDouble("1st line 1st pixel geodetic longitude"));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_lat,
-                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_long,
-                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic longitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_lat,
+                    mapProjRec.getAttributeDouble("1st line last valid pixel geodetic latitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_long,
+                    mapProjRec.getAttributeDouble("1st line last valid pixel geodetic longitude"));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_lat,
-                mapProjRec.getAttributeDouble("Last line 1st pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_long,
-                mapProjRec.getAttributeDouble("Last line 1st pixel geodetic longitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_lat,
-                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long,
-                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_lat,
+                    mapProjRec.getAttributeDouble("Last line 1st pixel geodetic latitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_long,
+                    mapProjRec.getAttributeDouble("Last line 1st pixel geodetic longitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_lat,
+                    mapProjRec.getAttributeDouble("Last line last valid pixel geodetic latitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long,
+                    mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));
+
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
+                mapProjRec.getAttributeDouble("Nominal inter-pixel distance in output scene"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
+                mapProjRec.getAttributeDouble("Nominal inter-line distance in output scene"));
+
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.map_projection, getMapProjection(mapProjRec));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.geo_ref_system,
+                mapProjRec.getAttributeString("Name of reference ellipsoid"));
+        }
 
         //sph
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec));
         AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());
-
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
-                mapProjRec.getAttributeDouble("Nominal inter-pixel distance in output scene"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
-                mapProjRec.getAttributeDouble("Nominal inter-line distance in output scene"));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
                 product.getSceneRasterHeight());
@@ -256,12 +249,10 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                 product.getSceneRasterWidth());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(product));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
+        if(radiometricRec != null) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
                 radiometricRec.getAttributeDouble("Calibration constant"));
-
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.map_projection, getMapProjection(mapProjRec));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.geo_ref_system,
-                mapProjRec.getAttributeString("Name of reference ellipsoid"));
+        }
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.replica_power_corr_flag, 0);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
@@ -278,7 +269,15 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         return _volumeDirectoryFile.getProductName();
     }
 
-    private static String getProductDescription() {
-        return RadarsatConstants.PRODUCT_DESCRIPTION_PREFIX + RadarsatLeaderFile.getProductLevel();
+    private String getProductDescription() {
+        BaseRecord sceneRecord = _leaderFile.getSceneRecord();
+        if(sceneRecord == null)
+            sceneRecord = _trailerFile.getSceneRecord();
+
+        String level = "";
+        if(sceneRecord != null) {
+            level = sceneRecord.getAttributeString("Scene reference number").trim();
+        }
+        return RadarsatConstants.PRODUCT_DESCRIPTION_PREFIX + level;
     }
 }

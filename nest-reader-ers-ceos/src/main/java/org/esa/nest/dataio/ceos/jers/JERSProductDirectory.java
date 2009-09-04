@@ -174,7 +174,6 @@ class JERSProductDirectory extends CEOSProductDirectory {
         _imageFiles = null;
         _volumeDirectoryFile.close();
         _volumeDirectoryFile = null;
-        _leaderFile.close();
         _leaderFile = null;
     }
 
@@ -357,6 +356,12 @@ class JERSProductDirectory extends CEOSProductDirectory {
     }
 
     private String getProductDescription() throws IOException, IllegalBinaryFormatException {
-        return JERSConstants.PRODUCT_DESCRIPTION_PREFIX + _leaderFile.getProductLevel();
+        BaseRecord sceneRecord = _leaderFile.getSceneRecord();
+        
+        String level = "";
+        if(sceneRecord != null) {
+            level = sceneRecord.getAttributeString("Scene reference number").trim();
+        }
+        return JERSConstants.PRODUCT_DESCRIPTION_PREFIX + level;
     }
 }

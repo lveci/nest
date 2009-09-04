@@ -39,7 +39,7 @@ public class RadarsatProductReader extends CEOSProductReader {
         try {
             _dataDir = createProductDirectory(file);
 
-            RadarsatProductDirectory dataDir = (RadarsatProductDirectory)_dataDir;
+            final RadarsatProductDirectory dataDir = (RadarsatProductDirectory)_dataDir;
             if(dataDir.isRadarsat())
                 return DecodeQualification.INTENDED;
             return DecodeQualification.SUITABLE;

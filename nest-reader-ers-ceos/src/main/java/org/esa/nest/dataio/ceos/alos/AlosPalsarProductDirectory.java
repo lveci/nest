@@ -28,9 +28,6 @@ import java.util.Map;
  */
 class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
-    private static final double UTM_FALSE_EASTING = 500000.00;
-    private static final double UTM_FALSE_NORTHING = 10000000.00;
-
     private final File _baseDir;
     private AlosPalsarVolumeDirectoryFile _volumeDirectoryFile = null;
     private AlosPalsarImageFile[] _imageFiles = null;
@@ -98,24 +95,16 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                                             _sceneWidth, _sceneHeight);
 
         for (final AlosPalsarImageFile imageFile : _imageFiles) {
+            final String pol = imageFile.getPolarization();
 
             if(isProductSLC) {
-                String bandName = "i_" + imageFile.getPolarization();
-                final Band bandI = createBand(bandName, Unit.REAL);
-                product.addBand(bandI);
-                bandImageFileMap.put(bandName, imageFile);
-                bandName = "q_" + imageFile.getPolarization();
-                final Band bandQ = createBand(bandName, Unit.IMAGINARY);
-                product.addBand(bandQ);
-                bandImageFileMap.put(bandName, imageFile);
-
-                ReaderUtils.createVirtualIntensityBand(product, bandI, bandQ, "_"+imageFile.getPolarization());
-            } else {
-                final String bandName = "Amplitude_" + imageFile.getPolarization();
-                final Band band = createBand(bandName, Unit.AMPLITUDE);
-                product.addBand(band);
-                bandImageFileMap.put(bandName, imageFile);
-                ReaderUtils.createVirtualIntensityBand(product, band, "_"+imageFile.getPolarization());
+                final Band bandI = createBand(product, "i_" + pol, Unit.REAL, imageFile);
+                final Band bandQ = createBand(product, "q_" + pol, Unit.IMAGINARY, imageFile);
+                ReaderUtils.createVirtualIntensityBand(product, bandI, bandQ, "_"+pol);
+                ReaderUtils.createVirtualPhaseBand(product, bandI, bandQ, "_"+pol);
+            } else {                
+                final Band band = createBand(product, "Amplitude_" + pol, Unit.AMPLITUDE, imageFile);
+                ReaderUtils.createVirtualIntensityBand(product, band, "_"+pol);
             }
         }
 
@@ -273,7 +262,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         _leaderFile = null;
     }
 
-    private Band createBand(final String name, final String unit) {
+    private Band createBand(final Product product, final String name, final String unit, final AlosPalsarImageFile imageFile) {
         int dataType = ProductData.TYPE_INT16;
         if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1)
             dataType = ProductData.TYPE_FLOAT32;
@@ -283,7 +272,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         final Band band = new Band(name, dataType, _sceneWidth, _sceneHeight);
         band.setDescription(name);
         band.setUnit(unit);
-
+        product.addBand(band);
+        bandImageFileMap.put(name, imageFile);
 
       /*
         final int bandIndex = index;

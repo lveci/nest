@@ -92,6 +92,10 @@ public class BaseRecord {
         return db; 
     }
 
+    public long getRecordEndPosition() {
+        return _startPos + recordLength;
+    }
+
     public long getAbsolutPosition(final long relativePosition) {
         return _startPos + relativePosition;
     }

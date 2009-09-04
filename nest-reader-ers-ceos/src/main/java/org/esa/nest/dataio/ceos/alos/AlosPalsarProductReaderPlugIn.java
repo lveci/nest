@@ -64,8 +64,11 @@ public class AlosPalsarProductReaderPlugIn extends CEOSProductReaderPlugIn {
 
     @Override
     protected DecodeQualification checkProductQualification(File file) {
-        AlosPalsarProductReader reader = new AlosPalsarProductReader(this);
-        return reader.checkProductQualification(file);
+        if(file.getName().toUpperCase().startsWith(constants.getVolumeFilePrefix())) {
+            final AlosPalsarProductReader reader = new AlosPalsarProductReader(this);
+            return reader.checkProductQualification(file);
+        }
+        return DecodeQualification.UNABLE;
     }
 
 }

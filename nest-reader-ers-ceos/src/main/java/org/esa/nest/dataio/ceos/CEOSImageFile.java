@@ -16,7 +16,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.22 $ $Date: 2009-04-28 13:21:31 $
+ * @version $Revision: 1.23 $ $Date: 2009-09-04 18:24:19 $
  */
 public abstract class CEOSImageFile {
 
@@ -41,6 +41,10 @@ public abstract class CEOSImageFile {
 
     public int getRasterHeight() {
         return _imageFDR.getAttributeInt("Number of lines per data set");
+    }
+
+    public int getBitsPerSample() {
+        return _imageFDR.getAttributeInt("Number of bits per sample");
     }
 
     public void assignMetadataTo(MetadataElement rootElem, int count) {
