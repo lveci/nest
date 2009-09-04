@@ -38,7 +38,37 @@ import java.util.Map;
 
 /**
  * Applies Multitemporal Speckle Filtering to multitemporal images.
- * The input to the operator is assumed to be one product with multiple calibrated and co-registrated bands.
+ *
+ * For a sequence of n registered multitemporal PRI images, with intensity at position (x, y) in image k
+ * denoted by Ik(x, y), the goal of temporal filtering is to combine them linearly such that the n output
+ * images Jk(x, y) meeting the following two conditions:
+ *
+ * 1. Jk is unbiased (i.e. E[Jk] = E[Ik], where E[] denotes expected value, so that the filtering does not
+ *    distort the ?0 values).
+ *
+ * 2. Jk has minimum variance, so that speckle is minimized. 
+ *
+ * The following equation has been implemented:
+ *
+ *    Jk(x, y) = E[Ik]*(I1(x, y)/E[I1] + ... + In(x, y)/E[In])/n
+ *
+ * Since the n output images differ by a factor, only one image is output, i.e.
+ *
+ *    J(x, y) = (E[I1] + ... + E[In])/n * (I1(x, y)/E[I1] + ... + In(x, y)/E[In])/n
+ *
+ * The operator has the following two preprocessing steps:
+ *
+ * 1. The first step is calibration in which ?0 is derived from the digital number at each pixel. This
+ *    ensures that values of from different times and in different parts of the image are comparable.
+ *
+ * 2. The second is registration of the images in the multitemporal sequence.
+ *
+ * Here it is assumed that preprocessing has been performed before applying this operator. The input to
+ * the operator is assumed to be a product with multiple calibrated and co-registrated bands.
+ *
+ * Reference:
+ * [1] S. Quegan, T. L. Toan, J. J. Yu, F. Ribbes and N. Floury, “Multitemporal ERS SAR Analysis Applied to
+ * Forest Mapping”, IEEE Transactions on Geoscience and Remote Sensing, vol. 38, no. 2, March 2000.
  */
 
 @OperatorMetadata(alias="Multi-Temporal-Speckle-Filter",
