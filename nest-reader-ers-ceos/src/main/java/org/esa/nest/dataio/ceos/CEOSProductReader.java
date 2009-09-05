@@ -96,21 +96,40 @@ public abstract class CEOSProductReader extends AbstractProductReader {
                                           ProgressMonitor pm) throws IOException {
         try {
             final CEOSImageFile imageFile = _dataDir.getImageFile(destBand);
-            if(_dataDir.isSLC()) {
-                boolean oneOf2 = !destBand.getName().startsWith("q");
+            if(imageFile.getBitsPerSample() == 8) {
+                if(_dataDir.isSLC()) {
+                    boolean oneOf2 = !destBand.getName().startsWith("q");
 
-                imageFile.readBandRasterDataSLC(sourceOffsetX, sourceOffsetY,
-                                                sourceWidth, sourceHeight,
-                                                sourceStepX, sourceStepY,
-                                                destWidth,
-                                                destBuffer, oneOf2, pm);
+                    imageFile.readBandRasterDataSLCByte(sourceOffsetX, sourceOffsetY,
+                                             sourceWidth, sourceHeight,
+                                             sourceStepX, sourceStepY,
+                                             destWidth,
+                                             destBuffer, oneOf2, pm);
 
+                } else {
+                    imageFile.readBandRasterDataByte(sourceOffsetX, sourceOffsetY,
+                                             sourceWidth, sourceHeight,
+                                             sourceStepX, sourceStepY,
+                                             destWidth,
+                                             destBuffer, pm);
+                }
             } else {
-                imageFile.readBandRasterDataShort(sourceOffsetX, sourceOffsetY,
-                                                sourceWidth, sourceHeight,
-                                                sourceStepX, sourceStepY,
-                                                destWidth,
-                                                destBuffer, pm);
+                if(_dataDir.isSLC()) {
+                    boolean oneOf2 = !destBand.getName().startsWith("q");
+
+                    imageFile.readBandRasterDataSLC(sourceOffsetX, sourceOffsetY,
+                                                    sourceWidth, sourceHeight,
+                                                    sourceStepX, sourceStepY,
+                                                    destWidth,
+                                                    destBuffer, oneOf2, pm);
+
+                } else {
+                    imageFile.readBandRasterDataShort(sourceOffsetX, sourceOffsetY,
+                                                    sourceWidth, sourceHeight,
+                                                    sourceStepX, sourceStepY,
+                                                    destWidth,
+                                                    destBuffer, pm);
+                }
             }
 
         } catch (Exception e) {

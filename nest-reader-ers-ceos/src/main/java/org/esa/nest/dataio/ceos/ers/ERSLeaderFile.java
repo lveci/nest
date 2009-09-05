@@ -5,6 +5,7 @@ import org.esa.nest.dataio.BinaryFileReader;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.BaseSceneHeaderRecord;
+import org.esa.nest.dataio.ceos.CeosHelper;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
@@ -22,7 +23,6 @@ class ERSLeaderFile {
     public final BaseRecord _platformPositionRecord;
     public final BaseRecord _facilityRecord;
     public final BaseRecord _facilityRelatedPCSRecord;
-    public BinaryFileReader _reader;
 
     private final static String mission = "ers";
     private final static String leader_recordDefinitionFile = "leader_file.xml";
@@ -35,21 +35,24 @@ class ERSLeaderFile {
     public ERSLeaderFile(final ImageInputStream leaderStream)
             throws IOException, IllegalBinaryFormatException {
 
-        _reader = new BinaryFileReader(leaderStream);
-        _leaderFDR = new BaseRecord(_reader, -1, mission, leader_recordDefinitionFile);
-        _reader.seek(_leaderFDR.getAbsolutPosition(_leaderFDR.getRecordLength()));
-        _sceneHeaderRecord = new BaseSceneHeaderRecord(_reader, -1, mission, scene_recordDefinitionFile);
-        _reader.seek(_sceneHeaderRecord.getAbsolutPosition(_sceneHeaderRecord.getRecordLength()));
-        _mapProjRecord = new BaseRecord(_reader, -1, mission, mapproj_recordDefinitionFile);
-        _reader.seek(_mapProjRecord.getAbsolutPosition(_mapProjRecord.getRecordLength()));
-        _platformPositionRecord = new BaseRecord(_reader, -1, mission, platform_recordDefinitionFile);
-        _reader.seek(_platformPositionRecord.getAbsolutPosition(_platformPositionRecord.getRecordLength()));
-        _facilityRecord = new BaseRecord(_reader, -1, mission, facility_recordDefinitionFile);
-        _reader.seek(_facilityRecord.getAbsolutPosition(_facilityRecord.getRecordLength()));
-        if(_reader.getCurrentPos() + 4000 < _reader.getLength())
-            _facilityRelatedPCSRecord = new BaseRecord(_reader, -1, mission, facilityRelatedPCS_recordDefinitionFile);
-        else
+        final BinaryFileReader reader = new BinaryFileReader(leaderStream);
+        _leaderFDR = new BaseRecord(reader, -1, mission, leader_recordDefinitionFile);
+        reader.seek(_leaderFDR.getRecordEndPosition());
+        _sceneHeaderRecord = new BaseSceneHeaderRecord(reader, -1, mission, scene_recordDefinitionFile);
+        reader.seek(_sceneHeaderRecord.getRecordEndPosition());
+        _mapProjRecord = new BaseRecord(reader, -1, mission, mapproj_recordDefinitionFile);
+        reader.seek(_mapProjRecord.getRecordEndPosition());
+        _platformPositionRecord = new BaseRecord(reader, -1, mission, platform_recordDefinitionFile);
+        reader.seek(_platformPositionRecord.getRecordEndPosition());
+        _facilityRecord = new BaseRecord(reader, -1, mission, facility_recordDefinitionFile);
+        reader.seek(_facilityRecord.getRecordEndPosition());
+        if(reader.getCurrentPos() + 4000 < reader.getLength()) {
+            _facilityRelatedPCSRecord = new BaseRecord(reader, -1, mission, facilityRelatedPCS_recordDefinitionFile);
+            reader.seek(_facilityRelatedPCSRecord.getRecordEndPosition());
+        } else {
             _facilityRelatedPCSRecord = null;
+        }
+        reader.close();
     }
 
     public String getProductLevel() {
@@ -101,36 +104,12 @@ class ERSLeaderFile {
     }
 
     public void addLeaderMetadata(MetadataElement sphElem) {
-        MetadataElement metadata = new MetadataElement("Leader File Descriptor");
-         _leaderFDR.assignMetadataTo(metadata);
-        sphElem.addElement(metadata);
 
-        metadata = new MetadataElement("Scene Parameters");
-        _sceneHeaderRecord.assignMetadataTo(metadata);
-        sphElem.addElement(metadata);
-
-        metadata = new MetadataElement("Map Projection");
-        _mapProjRecord.assignMetadataTo(metadata);
-        sphElem.addElement(metadata);
-
-        metadata = new MetadataElement("Platform Position");
-        _platformPositionRecord.assignMetadataTo(metadata);
-        sphElem.addElement(metadata);
-
-        metadata = new MetadataElement("Facility Related");
-        _facilityRecord.assignMetadataTo(metadata);
-        sphElem.addElement(metadata);
-
-        if(_facilityRelatedPCSRecord != null) {
-            metadata = new MetadataElement("Facility Related PCS");
-            _facilityRelatedPCSRecord.assignMetadataTo(metadata);
-            sphElem.addElement(metadata);
-        }
+        CeosHelper.addMetadata(sphElem, _leaderFDR, "Leader File Descriptor");
+        CeosHelper.addMetadata(sphElem, _sceneHeaderRecord, "Scene Parameters");
+        CeosHelper.addMetadata(sphElem, _mapProjRecord, "Map Projection");
+        CeosHelper.addMetadata(sphElem, _platformPositionRecord, "Platform Position");
+        CeosHelper.addMetadata(sphElem, _facilityRecord, "Facility Related");
+        CeosHelper.addMetadata(sphElem, _facilityRelatedPCSRecord, "Facility Related PCS");
     }
-
-    public void close() throws IOException {
-        _reader.close();
-        _reader = null;
-    }
-
 }

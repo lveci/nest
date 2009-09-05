@@ -48,39 +48,4 @@ public class RadarsatProductReader extends CEOSProductReader {
             return DecodeQualification.UNABLE;
         }
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight,
-                                          int sourceStepX, int sourceStepY, Band destBand, int destOffsetX,
-                                          int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
-                                          ProgressMonitor pm) throws IOException {
-        try {
-            final CEOSImageFile imageFile = _dataDir.getImageFile(destBand);
-            if(_dataDir.isSLC()) {
-                boolean oneOf2 = !destBand.getName().startsWith("q");
-
-                imageFile.readBandRasterDataSLCByte(sourceOffsetX, sourceOffsetY,
-                                         sourceWidth, sourceHeight,
-                                         sourceStepX, sourceStepY,
-                        destWidth,
-                        destBuffer, oneOf2, pm);
-
-            } else {
-                imageFile.readBandRasterDataByte(sourceOffsetX, sourceOffsetY,
-                                         sourceWidth, sourceHeight,
-                                         sourceStepX, sourceStepY,
-                        destWidth,
-                        destBuffer, pm);
-            }
-
-        } catch (Exception e) {
-            final IOException ioException = new IOException(e.getMessage());
-            ioException.initCause(e);
-            throw ioException;
-        }
-
-    }
 }

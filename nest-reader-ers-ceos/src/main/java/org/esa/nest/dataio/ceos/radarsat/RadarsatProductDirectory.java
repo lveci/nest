@@ -101,7 +101,15 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         product.setDescription(getProductDescription());
 
         addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
-        addTiePointGrids(product);
+
+        BaseRecord facilityRec = _leaderFile.getFacilityRecord();
+        if(facilityRec == null)
+            facilityRec = _trailerFile.getFacilityRecord();
+        BaseRecord sceneRec = _leaderFile.getSceneRecord();
+        if(sceneRec == null)
+            sceneRec = _trailerFile.getSceneRecord();
+
+        addTiePointGrids(product, facilityRec, sceneRec);
         addMetaData(product);
 
         return product;
@@ -111,20 +119,6 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         if(productType == null || _volumeDirectoryFile == null)
             readVolumeDirectoryFile();
         return (productType.contains("RSAT") || productType.contains("RADARSAT"));
-    }
-
-    private void addTiePointGrids(final Product product) throws IllegalBinaryFormatException, IOException {
-      /*  BaseRecord facility = _leaderFile.getFacilityRecord();
-
-        double angle1 = facility.getAttributeDouble("Incidence angle at first range pixel");
-        double angle2 = facility.getAttributeDouble("Incidence angle at centre range pixel");
-        double angle3 = facility.getAttributeDouble("Incidence angle at last valid range pixel");
-
-        TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", 3, 2, 0, 0,
-                product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                new float[]{(float)angle1, (float)angle2, (float)angle3,   (float)angle1, (float)angle2, (float)angle3});
-
-        product.addTiePointGrid(incidentAngleGrid);  */
     }
 
     @Override
@@ -172,20 +166,29 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         _volumeDirectoryFile.assignMetadataTo(volMetadata);
         root.addElement(volMetadata);
 
+        int c = 1;
+        for (final RadarsatImageFile imageFile : _imageFiles) {
+            imageFile.assignMetadataTo(root, c++);
+        }
+
         addSummaryMetadata(new File(_baseDir, RadarsatConstants.SUMMARY_FILE_NAME), "Summary Information", root);
         addAbstractedMetadataHeader(product, root);
     }
 
     private void addAbstractedMetadataHeader(Product product, MetadataElement root) {
 
-        AbstractMetadata.addAbstractedMetadataHeader(root);
+        final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
 
-        final MetadataElement absRoot = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
         BaseRecord mapProjRec = _leaderFile.getMapProjRecord();
-        if(mapProjRec == null) {
+        if(mapProjRec == null)
             mapProjRec = _trailerFile.getMapProjRecord();   
-        }
+        BaseRecord sceneRec = _leaderFile.getSceneRecord();
+        if(sceneRec == null)
+            sceneRec = _trailerFile.getSceneRecord();
         final BaseRecord radiometricRec = _leaderFile.getRadiometricRecord();
+        BaseRecord facilityRec = _leaderFile.getFacilityRecord();
+        if(facilityRec == null)
+            facilityRec = _trailerFile.getFacilityRecord();
 
         //mph
         AbstractMetadata.setAttribute(absRoot, "PRODUCT", getProductName());

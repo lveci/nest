@@ -5,6 +5,7 @@ import org.esa.nest.dataio.BinaryFileReader;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.BaseSceneHeaderRecord;
+import org.esa.nest.dataio.ceos.CeosHelper;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
@@ -25,7 +26,6 @@ class AlosPalsarLeaderFile {
     public final BaseRecord _dataQualityRecord;
     public final BaseRecord _level0CalibrationRecord;
     public final BaseRecord _facilityRecord;
-    public BinaryFileReader _reader;
 
     private final static String mission = "alos";
     private final static String leader_recordDefinitionFile = "leader_file.xml";
@@ -43,38 +43,40 @@ class AlosPalsarLeaderFile {
     public AlosPalsarLeaderFile(final ImageInputStream leaderStream)
             throws IOException, IllegalBinaryFormatException {
 
-        _reader = new BinaryFileReader(leaderStream);
-        _leaderFDR = new BaseRecord(_reader, -1, mission, leader_recordDefinitionFile);
-        _reader.seek(_leaderFDR.getAbsolutPosition(_leaderFDR.getRecordLength()));
-        _sceneHeaderRecord = new BaseSceneHeaderRecord(_reader, -1, mission, scene_recordDefinitionFile);
-        _reader.seek(_sceneHeaderRecord.getAbsolutPosition(_sceneHeaderRecord.getRecordLength()));
+        BinaryFileReader reader = new BinaryFileReader(leaderStream);
+        _leaderFDR = new BaseRecord(reader, -1, mission, leader_recordDefinitionFile);
+        reader.seek(_leaderFDR.getRecordEndPosition());
+        _sceneHeaderRecord = new BaseSceneHeaderRecord(reader, -1, mission, scene_recordDefinitionFile);
+        reader.seek(_sceneHeaderRecord.getRecordEndPosition());
 
         if(getProductLevel() != AlosPalsarConstants.LEVEL1_1 && getProductLevel() != AlosPalsarConstants.LEVEL1_0) {
-            _mapProjRecord = new BaseRecord(_reader, -1, mission, mapproj_recordDefinitionFile);
-            _reader.seek(_mapProjRecord.getAbsolutPosition(_mapProjRecord.getRecordLength()));
+            _mapProjRecord = new BaseRecord(reader, -1, mission, mapproj_recordDefinitionFile);
+            reader.seek(_mapProjRecord.getRecordEndPosition());
         } else _mapProjRecord = null;
 
-        _platformPositionRecord = new BaseRecord(_reader, -1, mission, platform_recordDefinitionFile);
-        _reader.seek(_platformPositionRecord.getAbsolutPosition(_platformPositionRecord.getRecordLength()));
-        _attitudeRecord = new BaseRecord(_reader, -1, mission, attitude_recordDefinitionFile);
-        _reader.seek(_attitudeRecord.getAbsolutPosition(_attitudeRecord.getRecordLength()));
+        _platformPositionRecord = new BaseRecord(reader, -1, mission, platform_recordDefinitionFile);
+        reader.seek(_platformPositionRecord.getRecordEndPosition());
+        _attitudeRecord = new BaseRecord(reader, -1, mission, attitude_recordDefinitionFile);
+        reader.seek(_attitudeRecord.getRecordEndPosition());
 
         if(getProductLevel() != AlosPalsarConstants.LEVEL1_0) {
-            _radiometricRecord = new BaseRecord(_reader, -1, mission, radiometric_recordDefinitionFile);
-            _reader.seek(_radiometricRecord.getAbsolutPosition(_radiometricRecord.getRecordLength()));
-            _dataQualityRecord = new BaseRecord(_reader, -1, mission, dataQuality_recordDefinitionFile);
-            _reader.seek(_dataQualityRecord.getAbsolutPosition(_dataQualityRecord.getRecordLength()));
+            _radiometricRecord = new BaseRecord(reader, -1, mission, radiometric_recordDefinitionFile);
+            reader.seek(_radiometricRecord.getRecordEndPosition());
+            _dataQualityRecord = new BaseRecord(reader, -1, mission, dataQuality_recordDefinitionFile);
+            reader.seek(_dataQualityRecord.getRecordEndPosition());
             _level0CalibrationRecord = null;
         } else {
             _radiometricRecord = null;
             _dataQualityRecord = null;
-            _level0CalibrationRecord = new BaseRecord(_reader, -1, mission, calibration_recordDefinitionFile);
-            _reader.seek(_level0CalibrationRecord.getAbsolutPosition(_level0CalibrationRecord.getRecordLength()));
+            _level0CalibrationRecord = new BaseRecord(reader, -1, mission, calibration_recordDefinitionFile);
+            reader.seek(_level0CalibrationRecord.getRecordEndPosition());
         }
 
         //_facilityRecord = null;
-        _facilityRecord = new BaseRecord(_reader, -1, mission, facility_recordDefinitionFile);
-        _reader.seek(_facilityRecord.getAbsolutPosition(_facilityRecord.getRecordLength()));
+        _facilityRecord = new BaseRecord(reader, -1, mission, facility_recordDefinitionFile);
+        reader.seek(_facilityRecord.getRecordEndPosition());
+
+        reader.close();
     }
 
     public final int getProductLevel() {
@@ -143,59 +145,15 @@ class AlosPalsarLeaderFile {
     }
 
     public void addLeaderMetadata(MetadataElement sphElem) {
-        MetadataElement metadata = new MetadataElement("Leader File Descriptor");
-         _leaderFDR.assignMetadataTo(metadata);
-        sphElem.addElement(metadata);
 
-        metadata = new MetadataElement("Scene Parameters");
-        _sceneHeaderRecord.assignMetadataTo(metadata);
-        sphElem.addElement(metadata);
-
-        if(_mapProjRecord != null) {
-            metadata = new MetadataElement("Map Projection");
-            _mapProjRecord.assignMetadataTo(metadata);
-            sphElem.addElement(metadata);
-        }
-
-        if(_platformPositionRecord != null) {
-            metadata = new MetadataElement("Platform Position");
-            _platformPositionRecord.assignMetadataTo(metadata);
-            sphElem.addElement(metadata);
-        }
-
-        if(_attitudeRecord != null) {
-            metadata = new MetadataElement("Attitude");
-            _attitudeRecord.assignMetadataTo(metadata);
-            sphElem.addElement(metadata);
-        }
-
-        if(_radiometricRecord != null) {
-            metadata = new MetadataElement("Radiometric");
-            _radiometricRecord.assignMetadataTo(metadata);
-            sphElem.addElement(metadata);
-        }
-
-        if(_dataQualityRecord != null) {
-            metadata = new MetadataElement("Data Quality");
-            _dataQualityRecord.assignMetadataTo(metadata);
-            sphElem.addElement(metadata);
-        }
-
-        if(_level0CalibrationRecord != null) {
-            metadata = new MetadataElement("Calibration");
-            _level0CalibrationRecord.assignMetadataTo(metadata);
-            sphElem.addElement(metadata);
-        }
-
-        if(_facilityRecord != null) {
-            metadata = new MetadataElement("Facility Related");
-            _facilityRecord.assignMetadataTo(metadata);
-            sphElem.addElement(metadata);
-        }
-    }
-
-    public void close() throws IOException {
-        _reader.close();
-        _reader = null;
+        CeosHelper.addMetadata(sphElem, _leaderFDR, "Leader File Descriptor");
+        CeosHelper.addMetadata(sphElem, _sceneHeaderRecord, "Scene Parameters");
+        CeosHelper.addMetadata(sphElem, _mapProjRecord, "Map Projection");
+        CeosHelper.addMetadata(sphElem, _platformPositionRecord, "Platform Position");
+        CeosHelper.addMetadata(sphElem, _attitudeRecord, "Attitude");
+        CeosHelper.addMetadata(sphElem, _radiometricRecord, "Radiometric");
+        CeosHelper.addMetadata(sphElem, _dataQualityRecord, "Data Quality");
+        CeosHelper.addMetadata(sphElem, _level0CalibrationRecord, "Calibration");
+        CeosHelper.addMetadata(sphElem, _facilityRecord, "Facility Related");
     }
 }

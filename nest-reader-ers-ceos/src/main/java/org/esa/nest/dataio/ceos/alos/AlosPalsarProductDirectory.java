@@ -249,8 +249,6 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             _imageFiles[i] = null;
         }
         _imageFiles = null;
-        _leaderFile.close();
-        _leaderFile = null;
     }
 
     private Band createBand(final Product product, final String name, final String unit, final AlosPalsarImageFile imageFile) {

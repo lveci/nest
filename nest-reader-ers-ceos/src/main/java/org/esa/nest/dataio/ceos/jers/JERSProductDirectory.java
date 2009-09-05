@@ -97,7 +97,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
         product.setDescription(getProductDescription());
 
         addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
-        addTiePointGrids(product);
+        addTiePointGrids(product, _leaderFile.getFacilityRecord(), _leaderFile.getSceneRecord());
         addMetaData(product);
 
         return product;
@@ -107,49 +107,6 @@ class JERSProductDirectory extends CEOSProductDirectory {
         if(productType == null || _volumeDirectoryFile == null)
             readVolumeDirectoryFile();
         return (productType.contains("JERS"));
-    }
-
-    private void addTiePointGrids(final Product product) throws IllegalBinaryFormatException, IOException {
-
-        // add incidence angle tie point grid
-        final BaseRecord facility = _leaderFile.getFacilityRecord();
-
-        final double angle1 = facility.getAttributeDouble("Incidence angle at first range pixel");
-        final double angle2 = facility.getAttributeDouble("Incidence angle at centre range pixel");
-        final double angle3 = facility.getAttributeDouble("Incidence angle at last valid range pixel");
-
-        final int gridWidth = 6;
-        final int gridHeight = 6;
-
-        final float subSamplingX = (float)product.getSceneRasterWidth() / (float)(gridWidth - 1);
-        final float subSamplingY = (float)product.getSceneRasterHeight() / (float)(gridHeight - 1);
-
-        final float[] angles = new float[]{(float)angle1, (float)angle2, (float)angle3};
-        final float[] fineAngles = new float[gridWidth*gridHeight];
-
-        ReaderUtils.createFineTiePointGrid(3, 1, gridWidth, gridHeight, angles, fineAngles);
-
-        final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
-                subSamplingX, subSamplingY, fineAngles);
-
-        product.addTiePointGrid(incidentAngleGrid);
-
-        // add slant range time tie point grid
-        final BaseRecord scene = _leaderFile.getSceneRecord();
-
-        final double time1 = scene.getAttributeDouble("Zero-doppler range time of first range pixel")*1000000; // ms to ns
-        final double time2 = scene.getAttributeDouble("Zero-doppler range time of centre range pixel")*1000000; // ms to ns
-        final double time3 = scene.getAttributeDouble("Zero-doppler range time of last range pixel")*1000000; // ms to ns
-
-        final float[] times = new float[]{(float)time1, (float)time2, (float)time3};
-        final float[] fineTimes = new float[gridWidth*gridHeight];
-
-        ReaderUtils.createFineTiePointGrid(3, 1, gridWidth, gridHeight, times, fineTimes);
-
-        final TiePointGrid slantRangeTimeGrid = new TiePointGrid("slant_range_time", gridWidth, gridHeight, 0, 0,
-                subSamplingX, subSamplingY, fineTimes);
-
-        product.addTiePointGrid(slantRangeTimeGrid);
     }
 
     @Override

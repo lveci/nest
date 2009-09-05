@@ -16,7 +16,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.23 $ $Date: 2009-09-04 18:24:19 $
+ * @version $Revision: 1.24 $ $Date: 2009-09-04 21:05:37 $
  */
 public abstract class CEOSImageFile {
 
@@ -127,6 +127,51 @@ public abstract class CEOSImageFile {
             int[] destLine = null;
             if (sourceStepX != 1)
                 destLine = new int[destWidth];
+            for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
+                if (pm.isCanceled()) {
+                    break;
+                }
+
+                // Read source line
+                synchronized (binaryReader) {
+                    binaryReader.seek(_imageRecordLength * y + xpos);
+                    binaryReader.read(srcLine);
+                }
+
+                // Copy source line into destination buffer
+                final int currentLineIndex = (y - sourceOffsetY) * destWidth;
+                if (sourceStepX == 1) {
+
+                    System.arraycopy(srcLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+                } else {
+                    copyLine(srcLine, destLine, sourceStepX);
+
+                    System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
+                }
+                pm.worked(1);
+            }
+        } finally {
+            pm.done();
+        }
+    }
+
+    public void readBandRasterDataFloat(final int sourceOffsetX, final int sourceOffsetY,
+                                             final int sourceWidth, final int sourceHeight,
+                                             final int sourceStepX, final int sourceStepY,
+                                             final int destWidth, final ProductData destBuffer,
+                                             final ProgressMonitor pm)
+                                             throws IOException, IllegalBinaryFormatException
+    {
+        final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
+        final int x = sourceOffsetX * ProductData.getElemSize(destBuffer.getType());
+        final long xpos = _startPosImageRecords +_imageHeaderLength + x;
+
+        pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
+        try {
+            final float[] srcLine = new float[sourceWidth];
+            float[] destLine = null;
+            if (sourceStepX != 1)
+                destLine = new float[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
@@ -342,6 +387,13 @@ public abstract class CEOSImageFile {
     }
 
     protected static void copyLine(final int[] srcLine, final int[] destLine,
+                          final int sourceStepX) {
+        for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
+            destLine[x] = srcLine[i];
+        }
+    }
+
+    protected static void copyLine(final float[] srcLine, final float[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[i];
