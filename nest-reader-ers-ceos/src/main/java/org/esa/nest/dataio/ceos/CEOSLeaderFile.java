@@ -133,7 +133,7 @@ public class CEOSLeaderFile {
         return new float[]{(float)lonUL, (float)lonUR, (float)lonLL, (float)lonLR};
     }
 
-    public void addLeaderMetadata(MetadataElement sphElem) {
+    public void addMetadata(MetadataElement sphElem) {
 
         CeosHelper.addMetadata(sphElem, _leaderFDR, "File Descriptor");
         CeosHelper.addMetadata(sphElem, _sceneHeaderRecord, "Scene Parameters");

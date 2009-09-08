@@ -96,18 +96,21 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             }
         }
 
-        //product.setStartTime(getUTCScanStartTime());
-        //product.setEndTime(getUTCScanStopTime());
-        product.setDescription(getProductDescription());
-
-        addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
-
         BaseRecord facilityRec = _leaderFile.getFacilityRecord();
         if(facilityRec == null)
             facilityRec = _trailerFile.getFacilityRecord();
         BaseRecord sceneRec = _leaderFile.getSceneRecord();
         if(sceneRec == null)
             sceneRec = _trailerFile.getSceneRecord();
+        BaseRecord detProcRec = _leaderFile.getDetailedProcessingRecord();
+        if(detProcRec == null)
+            detProcRec = _trailerFile.getDetailedProcessingRecord();
+
+        product.setStartTime(getUTCScanStartTime(sceneRec, detProcRec));
+        product.setEndTime(getUTCScanStopTime(sceneRec, detProcRec));
+        product.setDescription(getProductDescription());
+
+        addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
 
         //addTiePointGrids(product, facilityRec, sceneRec);
         addMetaData(product);
@@ -155,11 +158,11 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         final MetadataElement root = product.getMetadataRoot();
 
         final MetadataElement leadMetadata = new MetadataElement("Leader");
-        _leaderFile.addLeaderMetadata(leadMetadata);
+        _leaderFile.addMetadata(leadMetadata);
         root.addElement(leadMetadata);
 
         final MetadataElement trailMetadata = new MetadataElement("Trailer");
-        _trailerFile.addLeaderMetadata(trailMetadata);
+        _trailerFile.addMetadata(trailMetadata);
         root.addElement(trailMetadata);
 
         final MetadataElement volMetadata = new MetadataElement("Volume");
@@ -311,7 +314,10 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
 
         addOrbitStateVectors(absRoot, _leaderFile.getPlatformPositionRecord());
-        addSRGRCoefficients(absRoot, facilityRec);
+        if(facilityRec != null)
+            addSRGRCoefficients(absRoot, facilityRec);
+        else
+            addSRGRCoefficients(absRoot, detProcRec);
     }
 
     private String getMapProjection(final BaseRecord mapProjRec) {
@@ -335,5 +341,32 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             level = sceneRecord.getAttributeString("Scene reference number").trim();
         }
         return RadarsatConstants.PRODUCT_DESCRIPTION_PREFIX + level;
+    }
+
+    protected static void addSRGRCoefficients(final MetadataElement absRoot, final BaseRecord detailedProcRec) {
+        if(detailedProcRec == null) return;
+
+        final MetadataElement srgrCoefficientsElem = absRoot.getElement(AbstractMetadata.srgr_coefficients);
+        final int numSRGRCoefSets = detailedProcRec.getAttributeInt("Number of SRGR coefficient sets");
+
+        for(int i=1; i <= numSRGRCoefSets; ++i) {
+
+            final MetadataElement srgrListElem = new MetadataElement(AbstractMetadata.srgr_coef_list+" "+i);
+            srgrCoefficientsElem.addElement(srgrListElem);
+
+            final String updateTimeStr = detailedProcRec.getAttributeString("SRGR update date/time "+i);
+            final ProductData.UTC utcTime = AbstractMetadata.parseUTC(updateTimeStr, "yyyy-DDD-HH:mm:ss");
+            srgrListElem.setAttributeUTC(AbstractMetadata.srgr_coef_time, utcTime);
+            AbstractMetadata.addAbstractedAttribute(srgrListElem, AbstractMetadata.ground_range_origin,
+                    ProductData.TYPE_FLOAT64, "m", "Ground Range Origin");
+            AbstractMetadata.setAttribute(srgrListElem, AbstractMetadata.ground_range_origin, 0.0);
+
+            addSRGRCoef(srgrListElem, detailedProcRec, "SRGR coefficients1 "+i, 1);
+            addSRGRCoef(srgrListElem, detailedProcRec, "SRGR coefficients2 "+i, 2);
+            addSRGRCoef(srgrListElem, detailedProcRec, "SRGR coefficients3 "+i, 3);
+            addSRGRCoef(srgrListElem, detailedProcRec, "SRGR coefficients4 "+i, 4);
+            addSRGRCoef(srgrListElem, detailedProcRec, "SRGR coefficients5 "+i, 5);
+            addSRGRCoef(srgrListElem, detailedProcRec, "SRGR coefficients6 "+i, 6);
+        }
     }
 }

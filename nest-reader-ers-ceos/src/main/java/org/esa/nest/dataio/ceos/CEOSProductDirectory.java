@@ -240,7 +240,7 @@ public abstract class CEOSProductDirectory {
         }
     }
 
-    protected int isGroundRange(final BaseRecord mapProjRec) {
+    protected static int isGroundRange(final BaseRecord mapProjRec) {
         final String projDesc = mapProjRec.getAttributeString("Map projection descriptor").toLowerCase();
         if(projDesc.contains("slant"))
             return 0;
@@ -328,13 +328,13 @@ public abstract class CEOSProductDirectory {
                 "coefficients of the ground range to slant range conversion polynomial 4", 4);
     }
 
-    private static void addSRGRCoef(final MetadataElement srgrListElem, final BaseRecord facilityRec, final String tag, int cnt) {
+    protected static void addSRGRCoef(final MetadataElement srgrListElem, final BaseRecord rec, final String tag, int cnt) {
         final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient+'.'+cnt);
         srgrListElem.addElement(coefElem);
 
         AbstractMetadata.addAbstractedAttribute(coefElem, AbstractMetadata.srgr_coef,
                 ProductData.TYPE_FLOAT64, "", "SRGR Coefficient");
-        AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, facilityRec.getAttributeDouble(tag));
+        AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, rec.getAttributeDouble(tag));
     }
 
     protected static ImageInputStream createInputStream(final File file) throws IOException {

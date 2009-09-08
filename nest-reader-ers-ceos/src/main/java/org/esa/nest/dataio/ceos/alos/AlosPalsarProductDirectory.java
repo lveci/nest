@@ -13,7 +13,6 @@ import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 
-import javax.imageio.stream.FileImageInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -275,7 +274,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         root.addElement(leadMetadata);
 
         final MetadataElement trailMetadata = new MetadataElement("Trailer");
-        _trailerFile.addLeaderMetadata(trailMetadata);
+        _trailerFile.addMetadata(trailMetadata);
         root.addElement(trailMetadata);
 
         final MetadataElement volMetadata = new MetadataElement("Volume");

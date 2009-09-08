@@ -11,7 +11,6 @@ import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 
-import javax.imageio.stream.FileImageInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -138,7 +137,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
         final MetadataElement root = product.getMetadataRoot();
 
         final MetadataElement leadMetadata = new MetadataElement("Leader");
-        _leaderFile.addLeaderMetadata(leadMetadata);
+        _leaderFile.addMetadata(leadMetadata);
         root.addElement(leadMetadata);
 
         final MetadataElement volMetadata = new MetadataElement("Volume");
