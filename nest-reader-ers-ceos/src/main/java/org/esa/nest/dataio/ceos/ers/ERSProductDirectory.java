@@ -112,8 +112,8 @@ class ERSProductDirectory extends CEOSProductDirectory {
             }
         }
 
-        product.setStartTime(getUTCScanStartTime(_leaderFile.getSceneRecord()));
-        product.setEndTime(getUTCScanStopTime(_leaderFile.getSceneRecord()));
+        product.setStartTime(getUTCScanStartTime(_leaderFile.getSceneRecord(), null));
+        product.setEndTime(getUTCScanStopTime(_leaderFile.getSceneRecord(), null));
         product.setDescription(getProductDescription());
 
         addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
@@ -200,73 +200,89 @@ class ERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
                 getProcTime(_volumeDirectoryFile.getVolumeDescriptorRecord()));
 
-        final String psID = sceneRec.getAttributeString("Processing system identifier").trim();
-        if (psID.contains("PGS")) {
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier, "PGS");
-        } else { // VMP
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier, "VMP");
+        String psID = "VMP";
+        if(sceneRec != null) {
+            psID = sceneRec.getAttributeString("Processing system identifier").trim();
+            if (psID.contains("PGS")) {
+                AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier, "PGS");
+            } else { // VMP
+                AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier, "VMP");
+            }
+
+            final int absOrbit = Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim());
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.CYCLE, getCycle(absOrbit));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT, getRelOrbit(absOrbit));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT, absOrbit);
         }
-        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier,
-        //        sceneRec.getAttributeString("Processing system identifier").trim() );
 
-        final int absOrbit = Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim());
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.CYCLE, getCycle(absOrbit));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT, getRelOrbit(absOrbit));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT, absOrbit);
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
-                AbstractMetadata.parseUTC(facilityRec.getAttributeString(
-                        "Time of input state vector used to processed the image")));
-
-        final ProductData.UTC startTime = getUTCScanStartTime(sceneRec);
-        final ProductData.UTC endTime = getUTCScanStopTime(sceneRec);
+        final ProductData.UTC startTime = getUTCScanStartTime(sceneRec, null);
+        final ProductData.UTC endTime = getUTCScanStopTime(sceneRec, null);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, endTime);
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
-                mapProjRec.getAttributeDouble("1st line 1st pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_long,
-                mapProjRec.getAttributeDouble("1st line 1st pixel geodetic longitude"));
+        if(mapProjRec != null) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
+                    mapProjRec.getAttributeDouble("1st line 1st pixel geodetic latitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_long,
+                    mapProjRec.getAttributeDouble("1st line 1st pixel geodetic longitude"));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_lat,
-                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_long,
-                mapProjRec.getAttributeDouble("1st line last valid pixel geodetic longitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_lat,
+                    mapProjRec.getAttributeDouble("1st line last valid pixel geodetic latitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_long,
+                    mapProjRec.getAttributeDouble("1st line last valid pixel geodetic longitude"));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_lat,
-                mapProjRec.getAttributeDouble("Last line 1st pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_long,
-                mapProjRec.getAttributeDouble("Last line 1st pixel geodetic longitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_lat,
-                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic latitude"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long,
-                mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_lat,
+                    mapProjRec.getAttributeDouble("Last line 1st pixel geodetic latitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_long,
+                    mapProjRec.getAttributeDouble("Last line 1st pixel geodetic longitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_lat,
+                    mapProjRec.getAttributeDouble("Last line last valid pixel geodetic latitude"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long,
+                    mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));
+
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
+                mapProjRec.getAttributeDouble("Nominal inter-pixel distance in output scene"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
+                mapProjRec.getAttributeDouble("Nominal inter-line distance in output scene"));
+
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange(mapProjRec));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.map_projection, getMapProjection(mapProjRec));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.geo_ref_system,
+                mapProjRec.getAttributeString("Name of reference ellipsoid"));
+        } else if(sceneRec != null) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
+                sceneRec.getAttributeDouble("Pixel spacing"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
+                sceneRec.getAttributeDouble("Line spacing"));
+        }
 
         //sph
+        if(sceneRec != null) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
+                    sceneRec.getAttributeString("Processing algorithm identifier"));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
+                    getPolarization(sceneRec.getAttributeString("Sensor ID and mode of operation for this channel")));
+
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
+                    sceneRec.getAttributeDouble("Nominal number of looks processed in azimuth"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks,
+                    sceneRec.getAttributeDouble("Nominal number of looks processed in range"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
+                    sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency,
+                    sceneRec.getAttributeDouble("Radar frequency") * 1000.0);
+            final double slantRangeTime = sceneRec.getAttributeDouble("Zero-doppler range time of first range pixel")*0.001; //s
+            final double lightSpeed = 299792458.0; //  m / s
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
+                    slantRangeTime*lightSpeed*0.5);
+
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
+                sceneRec.getAttributeDouble("Range sampling rate"));
+        }
+
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, getSampleType());
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
-                sceneRec.getAttributeString("Processing algorithm identifier"));
-
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
-                getPolarization(sceneRec.getAttributeString("Sensor ID and mode of operation for this channel")));
-        
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
-                mapProjRec.getAttributeDouble("Nominal inter-pixel distance in output scene"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
-                mapProjRec.getAttributeDouble("Nominal inter-line distance in output scene"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
-                sceneRec.getAttributeDouble("Nominal number of looks processed in azimuth"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks,
-                sceneRec.getAttributeDouble("Nominal number of looks processed in range"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
-                sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency,
-                sceneRec.getAttributeDouble("Radar frequency") * 1000.0);
-        final double slantRangeTime = sceneRec.getAttributeDouble("Zero-doppler range time of first range pixel")*0.001; //s
-        final double lightSpeed = 299792458.0; //  m / s
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel, slantRangeTime*lightSpeed*0.5);
-
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
                 ReaderUtils.getLineTimeInterval(startTime, endTime, _sceneHeight));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
@@ -275,22 +291,19 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 product.getSceneRasterWidth());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(product));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange());
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.map_projection, getMapProjection(mapProjRec));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.geo_ref_system,
-                mapProjRec.getAttributeString("Name of reference ellipsoid"));
-
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag,
-                facilityRec.getAttributeInt("Antenna pattern correction flag"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag,
-                facilityRec.getAttributeInt("Range spreading loss compensation flag"));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.replica_power_corr_flag, 0);
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
-                facilityRec.getAttributeDouble("Absolute calibration constant K"));
-
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
-                sceneRec.getAttributeDouble("Range sampling rate"));
+        if(facilityRec != null) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME, AbstractMetadata.parseUTC(
+                facilityRec.getAttributeString("Time of input state vector used to processed the image")));
+            
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag,
+                    facilityRec.getAttributeInt("Antenna pattern correction flag"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag,
+                    facilityRec.getAttributeInt("Range spreading loss compensation flag"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.replica_power_corr_flag, 0);
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
+                    facilityRec.getAttributeDouble("Absolute calibration constant K"));
+        }
 
         addOrbitStateVectors(absRoot, _leaderFile.getPlatformPositionRecord());
         addSRGRCoefficients(absRoot, facilityRec);
@@ -324,14 +337,6 @@ class ERSProductDirectory extends CEOSProductDirectory {
             c3 = c3/Fr*Constants.halfLightSpeed;
             AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, c3);
         }
-
-    }
-
-    private int isGroundRange() {
-        final String projDesc = _leaderFile.getMapProjRecord().getAttributeString("Map projection descriptor").toLowerCase();
-        if(projDesc.contains("slant"))
-            return 0;
-        return 1;
     }
 
     private String getMapProjection(BaseRecord mapProjRec) {

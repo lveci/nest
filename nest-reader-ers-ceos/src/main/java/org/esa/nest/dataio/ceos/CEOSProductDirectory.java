@@ -172,16 +172,30 @@ public abstract class CEOSProductDirectory {
         else return "ASCENDING";
     }
 
-    protected static ProductData.UTC getUTCScanStartTime(BaseRecord sceneRec) {
-        if(sceneRec == null) return new ProductData.UTC(0);
-        final String startTime = sceneRec.getAttributeString("Zero-doppler azimuth time of first azimuth pixel");
-        return AbstractMetadata.parseUTC(startTime);
+    protected static ProductData.UTC getUTCScanStartTime(final BaseRecord sceneRec, final BaseRecord detailProcRec) {
+        if(sceneRec != null) {
+            final String startTime = sceneRec.getAttributeString("Zero-doppler azimuth time of first azimuth pixel");
+            if(startTime != null)
+                return AbstractMetadata.parseUTC(startTime);
+        }
+        if(detailProcRec != null) {
+            final String startTime = detailProcRec.getAttributeString("Processing start time");
+            return AbstractMetadata.parseUTC(startTime, "yyyy-DDD-HH:mm:ss");
+        }
+        return new ProductData.UTC(0);
     }
 
-    protected static ProductData.UTC getUTCScanStopTime(BaseRecord sceneRec) {
-        if(sceneRec == null) return new ProductData.UTC(0);
-        final String endTime = sceneRec.getAttributeString("Zero-doppler azimuth time of last azimuth pixel");
-        return AbstractMetadata.parseUTC(endTime);
+    protected static ProductData.UTC getUTCScanStopTime(final BaseRecord sceneRec, final BaseRecord detailProcRec) {
+        if(sceneRec != null) {
+            final String endTime = sceneRec.getAttributeString("Zero-doppler azimuth time of last azimuth pixel");
+            if(endTime != null)
+                return AbstractMetadata.parseUTC(endTime);
+        }
+        if(detailProcRec != null) {
+            final String endTime = detailProcRec.getAttributeString("Processing stop time");
+            return AbstractMetadata.parseUTC(endTime, "yyyy-DDD-HH:mm:ss");
+        }
+        return new ProductData.UTC(0);
     }
 
     protected static void addSummaryMetadata(final File summaryFile, final String name, final MetadataElement parent) 
@@ -226,7 +240,16 @@ public abstract class CEOSProductDirectory {
         }
     }
 
+    protected int isGroundRange(final BaseRecord mapProjRec) {
+        final String projDesc = mapProjRec.getAttributeString("Map projection descriptor").toLowerCase();
+        if(projDesc.contains("slant"))
+            return 0;
+        return 1;
+    }
+
     protected static void addOrbitStateVectors(final MetadataElement absRoot, final BaseRecord platformPosRec) {
+        if(platformPosRec == null) return;
+        
         final MetadataElement orbitVectorListElem = absRoot.getElement(AbstractMetadata.orbit_state_vectors);
         final int numPoints = platformPosRec.getAttributeInt("Number of data points");
 
@@ -282,6 +305,8 @@ public abstract class CEOSProductDirectory {
     }
 
     protected static void addSRGRCoefficients(final MetadataElement absRoot, final BaseRecord facilityRec) {
+        if(facilityRec == null) return;
+
         final MetadataElement srgrCoefficientsElem = absRoot.getElement(AbstractMetadata.srgr_coefficients);
 
         final MetadataElement srgrListElem = new MetadataElement(AbstractMetadata.srgr_coef_list);

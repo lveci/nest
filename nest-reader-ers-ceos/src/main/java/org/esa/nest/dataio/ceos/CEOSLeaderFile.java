@@ -109,6 +109,10 @@ public class CEOSLeaderFile {
         return _facilityRecord;
     }
 
+    public BaseRecord getDetailedProcessingRecord() {
+        return _detailedProcessingRecord;
+    }
+
     public float[] getLatCorners() throws IOException, IllegalBinaryFormatException {
         if(_mapProjRecord == null) return null;
 

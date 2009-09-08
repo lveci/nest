@@ -89,8 +89,14 @@ public final class CeosDB {
 
                 if(child.getName().equals("struct")) {
                     final Attribute loopAttrib = child.getAttribute("loop");
-                    final String loopName = loopAttrib.getValue();
-                    final int loop = getAttributeInt(loopName);
+                    int loop = 0;
+                    if(loopAttrib != null) {
+                        final String loopName = loopAttrib.getValue();
+                        loop = getAttributeInt(loopName);
+                    } else {
+                        final Attribute nloopAttrib = child.getAttribute("nloop");
+                        loop = Integer.parseInt(nloopAttrib.getValue());
+                    }                                                                      
 
                     final List structChildren = child.getChildren();
                     for(int l=1; l <= loop; ++l) {

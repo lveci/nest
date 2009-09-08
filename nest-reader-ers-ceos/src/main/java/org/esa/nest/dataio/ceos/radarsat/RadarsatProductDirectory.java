@@ -109,7 +109,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         if(sceneRec == null)
             sceneRec = _trailerFile.getSceneRecord();
 
-        addTiePointGrids(product, facilityRec, sceneRec);
+        //addTiePointGrids(product, facilityRec, sceneRec);
         addMetaData(product);
 
         return product;
@@ -189,14 +189,32 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         BaseRecord facilityRec = _leaderFile.getFacilityRecord();
         if(facilityRec == null)
             facilityRec = _trailerFile.getFacilityRecord();
+        BaseRecord detProcRec = _leaderFile.getDetailedProcessingRecord();
+        if(detProcRec == null)
+            detProcRec = _trailerFile.getDetailedProcessingRecord();
 
         //mph
-        AbstractMetadata.setAttribute(absRoot, "PRODUCT", getProductName());
-        AbstractMetadata.setAttribute(absRoot, "PRODUCT_TYPE", getProductType());
-        AbstractMetadata.setAttribute(absRoot, "MISSION", "RS1");
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, getProductName());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, getProductType());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
+                sceneRec.getAttributeString("Product type descriptor"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, "RS1");
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
                 getProcTime(_volumeDirectoryFile.getVolumeDescriptorRecord()));
+
+        final ProductData.UTC startTime = getUTCScanStartTime(sceneRec, detProcRec);
+        final ProductData.UTC endTime = getUTCScanStopTime(sceneRec, detProcRec);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, endTime);
+
+        if(sceneRec != null) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
+                    sceneRec.getAttributeString("Processing algorithm identifier"));
+
+            final int absOrbit = Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim());
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT, absOrbit);
+        }
 
         if(mapProjRec != null) {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
@@ -218,25 +236,71 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long,
                     mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));
 
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
                 mapProjRec.getAttributeDouble("Nominal inter-pixel distance in output scene"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
                 mapProjRec.getAttributeDouble("Nominal inter-line distance in output scene"));
 
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isGroundRange(mapProjRec));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.map_projection, getMapProjection(mapProjRec));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.geo_ref_system,
                 mapProjRec.getAttributeString("Name of reference ellipsoid"));
+
+        } else if(sceneRec != null) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
+                sceneRec.getAttributeDouble("Pixel spacing"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
+                sceneRec.getAttributeDouble("Line spacing"));
         }
 
         //sph
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec));
-        AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());
+        if(sceneRec != null) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
+                    sceneRec.getAttributeString("Processing algorithm identifier"));
 
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
+                    getPolarization(sceneRec.getAttributeString("Sensor ID and mode of operation for this channel")));
+
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
+                    sceneRec.getAttributeDouble("Nominal number of looks processed in azimuth"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks,
+                    sceneRec.getAttributeDouble("Nominal number of looks processed in range"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
+                    sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency,
+                    sceneRec.getAttributeDouble("Radar frequency") * 1000.0);
+            //final double slantRangeTime = sceneRec.getAttributeDouble("Zero-doppler range time of first range pixel")*0.001; //s
+            //final double lightSpeed = 299792458.0; //  m / s
+            //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
+            //        slantRangeTime*lightSpeed*0.5);
+
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
+                sceneRec.getAttributeDouble("Range sampling rate"));
+        }
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, getSampleType());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
+                ReaderUtils.getLineTimeInterval(startTime, endTime, _sceneHeight));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
                 product.getSceneRasterHeight());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
                 product.getSceneRasterWidth());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(product));
+
+        if(facilityRec != null) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME, AbstractMetadata.parseUTC(
+                facilityRec.getAttributeString("Time of input state vector used to processed the image")));
+            
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag,
+                    facilityRec.getAttributeInt("Antenna pattern correction flag"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spread_comp_flag,
+                    facilityRec.getAttributeInt("Range spreading loss compensation flag"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.replica_power_corr_flag, 0);
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
+                    facilityRec.getAttributeDouble("Absolute calibration constant K"));
+        }
 
         if(radiometricRec != null) {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor,
@@ -245,9 +309,12 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.replica_power_corr_flag, 0);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 0);
+
+        addOrbitStateVectors(absRoot, _leaderFile.getPlatformPositionRecord());
+        addSRGRCoefficients(absRoot, facilityRec);
     }
 
-    private String getMapProjection(BaseRecord mapProjRec) {
+    private String getMapProjection(final BaseRecord mapProjRec) {
         if(productType.contains("IMG") || productType.contains("GEC") || productType.contains("SSG")) {
             return mapProjRec.getAttributeString("Map projection descriptor");
         }

@@ -73,7 +73,7 @@ public class AbstractMetadata {
     public static final String srgr_flag = "srgr_flag";
     public static final String map_projection = "map_projection";
 
-    // calibration
+    // calibration and flags
     public static final String ant_elev_corr_flag = "ant_elev_corr_flag";
     public static final String range_spread_comp_flag = "range_spread_comp_flag";
     public static final String abs_calibration_flag = "abs_calibration_flag";
@@ -81,6 +81,8 @@ public class AbstractMetadata {
     public static final String replica_power_corr_flag = "replica_power_corr_flag";
     public static final String range_sampling_rate = "range_sampling_rate";
     public static final String avg_scene_height = "avg_scene_height";
+    public static final String multilook_flag = "multilook_flag";
+
     public static final String external_calibration_file = "external_calibration_file";
     public static final String orbit_state_vector_file = "orbit_state_vector_file";
 
@@ -110,10 +112,6 @@ public class AbstractMetadata {
     public static final String lat_pixel_res = "lat_pixel_res";
     public static final String lon_pixel_res = "lon_pixel_res";
     public static final String slant_range_to_first_pixel = "slant_range_to_first_pixel";
-
-    // multilook
-    public static final String multilook_flag = "multilook_flag";
-
 
     /**
      * Abstract common metadata from products to be used uniformly by all operators
@@ -194,14 +192,14 @@ public class AbstractMetadata {
 
         addAbstractedAttribute(absRoot, range_sampling_rate, ProductData.TYPE_FLOAT64, "MHz", "Range Sampling Rate");
 
+        // Multilook
+        addAbstractedAttribute(absRoot, multilook_flag, ProductData.TYPE_UINT8, "flag", "Multilook applied");
+
         addAbstractedAttribute(absRoot, external_calibration_file, ProductData.TYPE_ASCII, "", "External calibration file used");
         addAbstractedAttribute(absRoot, orbit_state_vector_file, ProductData.TYPE_ASCII, "", "Orbit file used");
 
         absRoot.addElement(new MetadataElement(orbit_state_vectors));
         absRoot.addElement(new MetadataElement(srgr_coefficients));
-
-        // Multilook
-        addAbstractedAttribute(absRoot, multilook_flag, ProductData.TYPE_UINT8, "flag", "Multilook applied");
 
         return absRoot;
     }

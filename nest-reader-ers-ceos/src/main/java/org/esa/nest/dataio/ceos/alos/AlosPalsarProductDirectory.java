@@ -101,8 +101,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             }
         }
 
-        product.setStartTime(getUTCScanStartTime(_leaderFile.getSceneRecord()));
-        product.setEndTime(getUTCScanStopTime(_leaderFile.getSceneRecord()));
+        product.setStartTime(getUTCScanStartTime(_leaderFile.getSceneRecord(), null));
+        product.setEndTime(getUTCScanStopTime(_leaderFile.getSceneRecord(), null));
         product.setDescription(getProductDescription());
 
         addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
@@ -346,10 +346,20 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                     mapProjRec.getAttributeDouble("Last line last valid pixel geodetic latitude"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long,
                     mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));
+
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
+                mapProjRec.getAttributeDouble("Nominal inter-pixel distance in output scene"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
+                mapProjRec.getAttributeDouble("Nominal inter-line distance in output scene"));
+        } else if(sceneRec != null) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
+                sceneRec.getAttributeDouble("Pixel spacing"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
+                sceneRec.getAttributeDouble("Line spacing"));
         }
 
         //sph
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec));
         AbstractMetadata.setAttribute(absRoot, "SAMPLE_TYPE", getSampleType());
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
                 sceneRec.getAttributeString("Processing algorithm identifier"));
@@ -361,17 +371,6 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds2_tx_rx_polar,
                 _imageFiles[1].getPolarization());
 
-        if(mapProjRec != null) {
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
-                mapProjRec.getAttributeDouble("Nominal inter-pixel distance in output scene"));
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
-                mapProjRec.getAttributeDouble("Nominal inter-line distance in output scene"));
-        } else {
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
-                sceneRec.getAttributeDouble("Pixel spacing"));
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
-                sceneRec.getAttributeDouble("Line spacing"));
-        }
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
                 sceneRec.getAttributeDouble("Nominal number of looks processed in azimuth"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks,
@@ -434,7 +433,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
     private static ProductData.UTC getStartTime(BaseRecord sceneRec, MetadataElement root,
                                                    String tagInSummary, String tagInWorkReport) {
-        ProductData.UTC time = getUTCScanStartTime(sceneRec);
+        ProductData.UTC time = getUTCScanStartTime(sceneRec, null);
         if(time.equalElems(new ProductData.UTC(0))) {
             try {
                 final MetadataElement summaryElem = root.getElement("Summary Information");
@@ -467,7 +466,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     private static ProductData.UTC getEndTime(BaseRecord sceneRec, MetadataElement root,
                                                    String tagInSummary, String tagInWorkReport,
                                                    ProductData.UTC startTime) {
-        ProductData.UTC time = getUTCScanStartTime(sceneRec);
+        ProductData.UTC time = getUTCScanStartTime(sceneRec, null);
         if(time.equalElems(new ProductData.UTC(0))) {
             try {
                 final MetadataElement summaryElem = root.getElement("Summary Information");
