@@ -1,9 +1,10 @@
 package org.esa.nest.dat.oceantools;
 
-import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
-import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.visat.actions.AbstractVisatAction;
+import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
+
+import java.io.File;
 
 /**
  * Oil Spill Detection action.
@@ -11,20 +12,16 @@ import org.esa.beam.visat.actions.AbstractVisatAction;
  */
 public class OilSpillDetectionOpAction extends AbstractVisatAction {
 
-    private ModelessDialog dialog;
-
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("Oil-Spill-Detection", getAppContext(), "Oil-Spill-Detection", getHelpId());
-        }
+        final GraphBuilderDialog dialog = new GraphBuilderDialog(getAppContext(), "Oil-Spill-Detection", "Oil-Spill-Detection", false);
         dialog.show();
 
+        final File graphPath = GraphBuilderDialog.getInternalGraphFolder();
+        final File graphFile =  new File(graphPath, "OilSpillDetectionGraph.xml");
+
+        dialog.LoadGraph(graphFile);
     }
 
-    @Override
-    public void updateState(final CommandEvent event) {
-        setEnabled(true);
-    }
 }
