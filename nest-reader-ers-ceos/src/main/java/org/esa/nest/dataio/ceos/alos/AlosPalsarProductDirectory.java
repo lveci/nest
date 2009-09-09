@@ -12,6 +12,7 @@ import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.util.Constants;
 
 import java.io.File;
 import java.io.IOException;
@@ -120,7 +121,6 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         // slant range time (2-way)
         final BaseRecord sceneRec = _leaderFile.getSceneRecord();
         final double samplingRate = sceneRec.getAttributeDouble("Range sampling rate") * 1000000.0;  // MHz to Hz
-        final double halfSpeedOfLight = 299792458 / 2.0; // in m/s
 
         final int gridWidth = 11;
         final int gridHeight = 11;
@@ -133,7 +133,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
         if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1) {
 
-            final double tmp = subSamplingX * halfSpeedOfLight / samplingRate;
+            final double tmp = subSamplingX * Constants.halfLightSpeed / samplingRate;
             int k = 0;
             for(int j = 0; j < gridHeight; j++) {
                 final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel(j*subSamplingY);
@@ -146,7 +146,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
             int k = 0;
             for (int j = 0; j < gridHeight; j++) {
-                int y = Math.min(j*subSamplingY, sceneHeight-1);
+                final int y = Math.min(j*subSamplingY, sceneHeight-1);
                 final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel(y); // meters
                 final int slantRangeToMidPixel = _imageFiles[0].getSlantRangeToMidPixel(y);
                 final int slantRangeToLastPixel = _imageFiles[0].getSlantRangeToLastPixel(y);
@@ -156,7 +156,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                                                                         sceneWidth);
 
                 for(int i = 0; i < gridWidth; i++) {
-                    int x = i*subSamplingX;
+                    final int x = i*subSamplingX;
                     rangeDist[k++] = (float)(polyCoef[0] + polyCoef[1]*x + polyCoef[2]*x*x);
                 }
             }
@@ -164,14 +164,13 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
         // get slant range time in nanoseconds from range distance in meters
         for(int k = 0; k < rangeDist.length; k++) {
-             rangeTime[k] = (float)(rangeDist[k] / halfSpeedOfLight * 1000000000.0); // in ns
+             rangeTime[k] = (float)(rangeDist[k] / Constants.halfLightSpeed * 1000000000.0); // in ns
         }
 
         final TiePointGrid slantRangeGrid = new TiePointGrid(
                 "slant_range_time", gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, rangeTime);
-
-        product.addTiePointGrid(slantRangeGrid);
         slantRangeGrid.setUnit(Unit.NANOSECONDS);
+        product.addTiePointGrid(slantRangeGrid);
 
         // incidence angle
         final double a0 = sceneRec.getAttributeDouble("Incidence angle constant term");

@@ -1,10 +1,8 @@
 package org.esa.nest.dataio.ceos.radarsat;
 
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
+import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.ceos.CEOSImageFile;
@@ -13,6 +11,7 @@ import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.util.Constants;
 
 import java.io.File;
 import java.io.IOException;
@@ -110,10 +109,10 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         product.setEndTime(getUTCScanStopTime(sceneRec, detProcRec));
         product.setDescription(getProductDescription());
 
-        addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
-
-        //addTiePointGrids(product, facilityRec, sceneRec);
         addMetaData(product);
+
+        addRSATTiePointGrids(product, sceneRec, detProcRec);
+        addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
 
         return product;
     }
@@ -368,5 +367,93 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             addSRGRCoef(srgrListElem, detailedProcRec, "SRGR coefficients5 "+i, 5);
             addSRGRCoef(srgrListElem, detailedProcRec, "SRGR coefficients6 "+i, 6);
         }
+    }
+
+    private static void addRSATTiePointGrids(final Product product, final BaseRecord sceneRec, final BaseRecord detProcRec)
+            throws IllegalBinaryFormatException, IOException {
+
+        final int gridWidth = 11;
+        final int gridHeight = 11;
+
+        final int subSamplingX = product.getSceneRasterWidth() / (gridWidth - 1);
+        final int subSamplingY = product.getSceneRasterHeight() / (gridHeight - 1);
+
+        final double r = calculateEarthRadius(sceneRec);    // earth radius
+        final double eph_orb_data = detProcRec.getAttributeDouble("Ephemeris orbit data1");
+        final double h = eph_orb_data - r;                  // orbital altitude
+
+        final double pixelSpacing = sceneRec.getAttributeDouble("Pixel spacing");
+
+        AbstractMetadata.SRGRCoefficientList[] srgCoefList = null;
+        try {
+            srgCoefList = AbstractMetadata.getSRGRCoefficients(AbstractMetadata.getAbstractedMetadata(product));
+        } catch(Exception e) {
+            srgCoefList = null;
+        }
+        if(srgCoefList != null) {
+            final double[] coeff = srgCoefList[0].coefficients;
+
+            final double dRg = subSamplingX * pixelSpacing;
+            final float[] rangeDist = new float[gridWidth*gridHeight];
+            final float[] rangeTime = new float[gridWidth*gridHeight];
+
+            // slant range distance in m
+            int k = 0;
+            for (int j = 0; j < gridHeight; j++) {
+
+                for(int i = 0; i < gridWidth; i++) {
+                    final int x = i*subSamplingX;
+                    rangeDist[k++] = (float)(coeff[0] +
+                                             x * dRg * coeff[1] +
+                                            (x * dRg)*(x * dRg) * coeff[2] +
+                                            (x * dRg)*(x * dRg)*(x * dRg) * coeff[3] +
+                                            (x * dRg)*(x * dRg)*(x * dRg)*(x * dRg) * coeff[4] +
+                                            (x * dRg)*(x * dRg)*(x * dRg)*(x * dRg)*(x * dRg) * coeff[5]);
+                }
+            }
+
+            // get slant range time in nanoseconds from range distance in meters
+            for(k = 0; k < rangeDist.length; k++) {
+                 rangeTime[k] = (float)(rangeDist[k] / Constants.halfLightSpeed);// in ns
+            }
+
+            final TiePointGrid slantRangeGrid = new TiePointGrid(
+                    "slant_range_time", gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, rangeTime);
+
+            product.addTiePointGrid(slantRangeGrid);
+            slantRangeGrid.setUnit(Unit.NANOSECONDS);
+
+            // incidence angle
+            final float[] angles = new float[gridWidth*gridHeight];
+
+            k = 0;
+            for(int j = 0; j < gridHeight; j++) {
+                for (int i = 0; i < gridWidth; i++) {
+                    final double RS = rangeDist[k];
+                    final double a = ( (h*h) - (RS*RS) + (2.0*r*h) ) / (2.0*RS*r);
+                    angles[k] = (float)(Math.acos( a ) * MathUtils.RTOD);
+                    k++;
+                }
+            }
+
+            final TiePointGrid incidentAngleGrid = new TiePointGrid(
+                "incident_angle", gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, angles);
+
+            incidentAngleGrid.setUnit(Unit.DEGREES);
+            product.addTiePointGrid(incidentAngleGrid);
+        }
+    }
+
+    private static double calculateEarthRadius(BaseRecord sceneRec) {
+
+        final double platLat = sceneRec.getAttributeDouble("Sensor platform geodetic latitude at nadir");
+        final double a = Math.tan(platLat * MathUtils.DTOR);
+        final double a2 = a*a;
+        final double ellipmin = Constants.semiMinorAxis;
+        final double ellipmin2 = ellipmin * ellipmin;
+        final double ellipmaj = Constants.semiMajorAxis;
+        final double ellipmaj2 = ellipmaj * ellipmaj;
+
+        return Constants.semiMinorAxis * (Math.sqrt(1+a2) / Math.sqrt((ellipmin2/ellipmaj2) + a2));
     }
 }
