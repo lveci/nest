@@ -402,19 +402,19 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             for (int j = 0; j < gridHeight; j++) {
 
                 for(int i = 0; i < gridWidth; i++) {
-                    final int x = i*subSamplingX;
+                    final double groundRange = i*dRg;
                     rangeDist[k++] = (float)(coeff[0] +
-                                             x * dRg * coeff[1] +
-                                            (x * dRg)*(x * dRg) * coeff[2] +
-                                            (x * dRg)*(x * dRg)*(x * dRg) * coeff[3] +
-                                            (x * dRg)*(x * dRg)*(x * dRg)*(x * dRg) * coeff[4] +
-                                            (x * dRg)*(x * dRg)*(x * dRg)*(x * dRg)*(x * dRg) * coeff[5]);
+                                             groundRange * coeff[1] +
+                                             groundRange * groundRange * coeff[2] +
+                                             groundRange * groundRange * groundRange * coeff[3] +
+                                             groundRange * groundRange * groundRange * groundRange * coeff[4] +
+                                             groundRange * groundRange * groundRange * groundRange * groundRange * coeff[5]);
                 }
             }
 
             // get slant range time in nanoseconds from range distance in meters
             for(k = 0; k < rangeDist.length; k++) {
-                 rangeTime[k] = (float)(rangeDist[k] / Constants.halfLightSpeed);// in ns
+                 rangeTime[k] = (float)(rangeDist[k] / Constants.halfLightSpeed)*1000000000;// in ns
             }
 
             final TiePointGrid slantRangeGrid = new TiePointGrid(
