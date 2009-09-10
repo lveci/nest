@@ -498,7 +498,6 @@ public class SpeckleFilterOp extends Operator {
     private static double getVarianceValue(final double[] neighborValues) {
 
         double var = 0.0;
-
         if (neighborValues.length > 1) {
 
             final double mean = getMeanValue(neighborValues);
@@ -689,7 +688,7 @@ public class SpeckleFilterOp extends Operator {
      */
     private void computeRefinedLee(Tile sourceRaster, Tile targetTile, int x0, int y0, int w, int h, ProgressMonitor pm) {
 
-        double[][] neighborPixelValues = new double[filterSizeY][filterSizeX];
+        final double[][] neighborPixelValues = new double[filterSizeY][filterSizeX];
         final ProductData trgData = targetTile.getDataBuffer();
 
         final int maxY = y0 + h;
@@ -697,7 +696,7 @@ public class SpeckleFilterOp extends Operator {
         for (int y = y0; y < maxY; ++y) {
             for (int x = x0; x < maxX; ++x) {
 
-                int n = getNeighborValuesWithoutBorderExt(x, y, sourceRaster, neighborPixelValues);
+                final int n = getNeighborValuesWithoutBorderExt(x, y, sourceRaster, neighborPixelValues);
 
                 trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getRefinedLeeValue(n, neighborPixelValues));
             }
@@ -721,9 +720,9 @@ public class SpeckleFilterOp extends Operator {
         final ProductData srcData = sourceRaster.getDataBuffer();
         int k = 0;
         for (int j = 0; j < filterSizeY; ++j) {
-            int yj = y - halfSizeY + j;
+            final int yj = y - halfSizeY + j;
             for (int i = 0; i < filterSizeX; ++i) {
-                int xi = x - halfSizeX + i;
+                final int xi = x - halfSizeX + i;
                 if (xi < 0 || xi >= sourceImageWidth || yj < 0 || yj >= sourceImageHeight) {
                     neighborPixelValues[j][i] = NonValidPixelValue;
                 } else {
@@ -773,9 +772,9 @@ public class SpeckleFilterOp extends Operator {
      * @param neighborPixelValues The pixel values in the neighborhood.
      * @return The filtered pixel value.
      */
-    private double computePixelValueUsingEdgeDetection(final double[][] neighborPixelValues) {
+    private static double computePixelValueUsingEdgeDetection(final double[][] neighborPixelValues) {
 
-        double[][] subAreaMeans = new double[3][3];
+        final double[][] subAreaMeans = new double[3][3];
         computeSubAreaMeans(neighborPixelValues, subAreaMeans);
 
         final double gradient0 = Math.abs(subAreaMeans[1][0] - subAreaMeans[1][2]);
@@ -834,14 +833,13 @@ public class SpeckleFilterOp extends Operator {
             }
         }
 
-        double[] pixels = new double[28];
+        final double[] pixels = new double[28];
         getNonEdgeAreaPixelValues(neighborPixelValues, d, pixels);
 
         final double mean = getMeanValue(pixels);
         final double var = getVarianceValue(pixels);
         final double sigmma = getLocalNoiseVarianceValue(neighborPixelValues);
         final double k = var / (var + sigmma);
-        double v = mean + k*(neighborPixelValues[3][3] - mean);
         return mean + k*(neighborPixelValues[3][3] - mean);
     }
 
@@ -890,9 +888,10 @@ public class SpeckleFilterOp extends Operator {
      * @param neighborPixelValues The pixel values in the neighborhood.
      * @return The local noise variance.
      */
-    private double getLocalNoiseVarianceValue(final double[][] neighborPixelValues) {
+    private static double getLocalNoiseVarianceValue(final double[][] neighborPixelValues) {
 
-        double[] subAreaVariances = new double[9];
+        final double[] subAreaVariances = new double[9];
+        final double[] subArea = new double[9];
         int numSubArea = 0;
         for (int j = 0; j < 3; j++) {
             final int y0 = 2*j;
@@ -900,11 +899,11 @@ public class SpeckleFilterOp extends Operator {
                 final int x0 = 2*i;
 
                 int k = 0;
-                double[] subArea = new double[9];
                 for (int y = y0; y < y0 + 3; y++) {
+                    final int yy = (y-y0)*3;
                     for (int x = x0; x < x0 + 3; x++) {
                         if (neighborPixelValues[y][x] != NonValidPixelValue) {
-                            subArea[(y-y0)*3 + (x-x0)] = neighborPixelValues[y][x];
+                            subArea[yy + (x-x0)] = neighborPixelValues[y][x];
                             k++;
                         }
                     }
@@ -931,7 +930,7 @@ public class SpeckleFilterOp extends Operator {
      * @param neighborPixelValues The pixel values in the 7x7 neighborhood.
      * @param subAreaMeans The 9 mean values.
      */
-    private void computeSubAreaMeans(final double[][] neighborPixelValues, double[][] subAreaMeans) {
+    private static void computeSubAreaMeans(final double[][] neighborPixelValues, double[][] subAreaMeans) {
         for (int j = 0; j < 3; j++) {
             final int y0 = 2*j;
             for (int i = 0; i < 3; i++) {
@@ -956,7 +955,7 @@ public class SpeckleFilterOp extends Operator {
      * @param d The direction index.
      * @param pixels The array of pixels.
      */
-    private void getNonEdgeAreaPixelValues(final double[][] neighborPixelValues, final int d, double[] pixels) {
+    private static void getNonEdgeAreaPixelValues(final double[][] neighborPixelValues, final int d, double[] pixels) {
 
         if (d == 0) {
 
