@@ -362,25 +362,24 @@ public class ImageManager {
                                                       ImageInfo imageInfo) {
         double newMin = raster.scaleInverse(minSample);
         double newMax = raster.scaleInverse(maxSample);
-        PlanarImage image = createRescaleOp(sourceImage,
-                                            (255.0 / (newMax - newMin)) * imageInfo.getGain(),
-                                            (255.0 * newMin / (newMin - newMax)) + imageInfo.getBias());
 
-        if(imageInfo.getLog10Scaling()) {
-            final DataBuffer data = image.getData().getDataBuffer();
-            final int dataType = data.getDataType();
-            if(dataType == ProductData.TYPE_FLOAT32) {
+        double factor = (255.0 / (newMax - newMin)) * imageInfo.getGain();
+        double offset = (255.0 * newMin / (newMin - newMax)) + imageInfo.getBias();
 
-            } else if(dataType == ProductData.TYPE_FLOAT64) {
-
-            } else {
-                for(int i = 0; i < data.getSize(); ++i) {
-                    final int elem = data.getElem(i);
-                    final int value = elem == 0 ? 0 : (int)Math.log10(Math.abs(data.getElem(i)));
-                    data.setElem(i, value);
-                }
-            }
+        final double exponent = imageInfo.getExponent();
+        if(exponent != 1) {
+            double exp = Math.pow(factor, exponent);
+            if(!Double.isNaN(exp))
+                factor = exp;
+            exp = Math.pow(offset, exponent);
+            if(!Double.isNaN(exp))
+                offset = exp;
         }
+        if(imageInfo.getLog10Scaling()) {
+            factor *= Math.log(10);
+            offset *= Math.log(10);
+        }
+        PlanarImage image = createRescaleOp(sourceImage, factor, offset);
 
         // todo - make sure this is not needed, e.g. does "format" auto-clamp?? (nf, 10.2008)
         // image = createClampOp(image, 0, 255);

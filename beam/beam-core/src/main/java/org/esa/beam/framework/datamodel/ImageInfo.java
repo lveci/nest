@@ -24,7 +24,7 @@ import java.util.List;
  * This class contains information about how a product's raster data node is displayed as an image.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-09-10 16:07:17 $
  */
 public class ImageInfo implements Cloneable {
 
@@ -56,6 +56,7 @@ public class ImageInfo implements Cloneable {
     private HistogramMatching histogramMatching;
     private double gain = 1.0;
     private double bias = 0.0;
+    private double exponent = 1.0;
     private boolean log10Scaling = false;
 
     // The following properties have been moved to org.esa.beam.visat.toolviews.imageinfo.ImageInfoEditorModel
@@ -658,6 +659,14 @@ public class ImageInfo implements Cloneable {
 
     public void setGain(double val) {
         gain = val;
+    }
+
+    public double getExponent() {
+        return exponent;
+    }
+
+    public void setExponent(double val) {
+        exponent = val;
     }
 
     public boolean getLog10Scaling() {
