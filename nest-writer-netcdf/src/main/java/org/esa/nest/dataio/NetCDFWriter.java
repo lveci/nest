@@ -6,9 +6,7 @@ import org.esa.beam.framework.dataio.AbstractProductWriter;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.io.FileUtils;
-import ucar.ma2.Array;
-import ucar.ma2.DataType;
-import ucar.ma2.InvalidRangeException;
+import ucar.ma2.*;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.Group;
@@ -161,15 +159,32 @@ public class NetCDFWriter extends AbstractProductWriter {
 
         final int[] origin = new int[2];
         origin[1] = regionX;
-        origin[0] = (sourceBand.getRasterHeight() - 1) - regionY;
+        //origin[0] = (sourceBand.getRasterHeight() - 1) - regionY;
+        origin[0] = regionY;
         try {
 
-            final double[][] data = new double[1][regionWidth];
+     /*       final double[][] data = new double[1][regionWidth];
             for(int x=0; x < regionWidth; ++x) {
                 data[0][x] = regionData.getElemDoubleAt(x);
             }
-               
+
             netCDFWriteable.write(sourceBand.getName(), origin, Array.factory(data));
+            */
+
+            final ArrayDouble dataTemp = new ArrayDouble.D2(regionHeight, regionWidth);
+            final Index index = dataTemp.getIndex();
+
+            int i=0;
+            for(int y=0; y < regionHeight; ++y) {
+                for(int x=0; x < regionWidth; ++x) {
+                    index.set(y, x);
+                    dataTemp.set(index, regionData.getElemDoubleAt(i));
+                    ++i;
+                }
+            }
+
+            netCDFWriteable.write(sourceBand.getName(), origin, dataTemp);
+
             pm.worked(1);
 
         } catch(Exception e) {
