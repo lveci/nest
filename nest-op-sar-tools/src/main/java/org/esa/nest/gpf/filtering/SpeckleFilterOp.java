@@ -38,10 +38,6 @@ import java.util.Map;
 
 /**
  * Applies a Speckle Filter to the data
- * @todo enhanced Lee filter
- * @todo enhanced Frost filter
- * @todo Kuan filter
- * @todo complex data
  */
 @OperatorMetadata(alias="Speckle-Filter",
         category = "SAR Tools",
@@ -58,15 +54,23 @@ public class SpeckleFilterOp extends Operator {
     String[] sourceBandNames;
 
     @Parameter(valueSet = {MEAN_SPECKLE_FILTER, MEDIAN_SPECKLE_FILTER, FROST_SPECKLE_FILTER,
-            GAMMA_MAP_SPECKLE_FILTER, LEE_SPECKLE_FILTER}, defaultValue = MEAN_SPECKLE_FILTER, label="Filter")
+            GAMMA_MAP_SPECKLE_FILTER, LEE_SPECKLE_FILTER, LEE_REFINED_FILTER}, defaultValue = MEAN_SPECKLE_FILTER,
+            label="Filter")
     private String filter;
+
     @Parameter(description = "The kernel x dimension", interval = "(1, 100]", defaultValue = "3", label="Size X")
     private int filterSizeX = 3;
+
     @Parameter(description = "The kernel y dimension", interval = "(1, 100]", defaultValue = "3", label="Size Y")
     private int filterSizeY = 3;
+
     @Parameter(description = "The damping factor (Frost filter only)", interval = "(0, 100]", defaultValue = "2",
                 label="Frost Damping Factor")
     private int dampingFactor = 2;
+
+    @Parameter(description = "The edge threshold (Refined Lee filter only)", interval = "(0, *)", defaultValue = "0.8",
+                label="Edge detection threshold")
+    private double edgeThreshold = 0.8;
 
     private double enl;
     private double cu, cu2;
@@ -78,12 +82,15 @@ public class SpeckleFilterOp extends Operator {
     static final String FROST_SPECKLE_FILTER = "Frost";
     static final String GAMMA_MAP_SPECKLE_FILTER = "Gamma Map";
     static final String LEE_SPECKLE_FILTER = "Lee";
+    static final String LEE_REFINED_FILTER = "Refined Lee";
 
     private final transient Map<Band, Band> bandMap = new HashMap<Band, Band>(3);
     private int halfSizeX;
     private int halfSizeY;
     private int sourceImageWidth;
     private int sourceImageHeight;
+
+    static final double NonValidPixelValue = -1.0;
 
     /**
      * Default constructor. The graph processing framework
@@ -102,7 +109,8 @@ public class SpeckleFilterOp extends Operator {
             s.equals(MEDIAN_SPECKLE_FILTER) ||
             s.equals(FROST_SPECKLE_FILTER) ||
             s.equals(GAMMA_MAP_SPECKLE_FILTER) ||
-            s.equals(LEE_SPECKLE_FILTER)) {
+            s.equals(LEE_SPECKLE_FILTER) ||
+            s.equals(LEE_REFINED_FILTER)) {
                 filter = s;
         } else {
             throw new OperatorException(s + " is an invalid filter name.");
@@ -135,6 +143,11 @@ public class SpeckleFilterOp extends Operator {
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
         addSelectedBands();
+
+        if(filter.equals(LEE_REFINED_FILTER)) {
+            filterSizeX = 7;
+            filterSizeY = 7;
+        }
 
         halfSizeX = filterSizeX / 2;
         halfSizeY = filterSizeY / 2;
@@ -227,9 +240,21 @@ public class SpeckleFilterOp extends Operator {
 
             computeEquivalentNumberOfLooks(sourceRaster, x0, y0, w, h);
             computeLee(sourceRaster, targetTile, x0, y0, w, h, pm);
+
+        } else if(filter.equals(LEE_REFINED_FILTER)) {
+
+            computeRefinedLee(sourceRaster, targetTile, x0, y0, w, h, pm);
         }
     }
 
+    /**
+     * Get source tile rectangle.
+     * @param x0 X coordinate of the upper left corner point of the target tile rectangle.
+     * @param y0 Y coordinate of the upper left corner point of the target tile rectangle.
+     * @param w The width of the target tile rectangle.
+     * @param h The height of the target tile rectangle.
+     * @return The source tile rectangle.
+     */
     private Rectangle getSourceTileRectangle(int x0, int y0, int w, int h) {
 
         int sx0 = x0;
@@ -260,7 +285,6 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Filter the given tile of image with Mean filter.
-     *
      * @param sourceRaster The source tile.
      * @param targetTile   The current tile associated with the target band to be computed.
      * @param x0           x coordinate for the upper-left point of the target_Tile_Rectangle.
@@ -283,7 +307,7 @@ public class SpeckleFilterOp extends Operator {
 
                 getNeighborValues(x, y, sourceRaster);
 
-                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getMeanValue());
+                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getMeanValue(neighborValues));
             }
             pm.worked(1);
         }
@@ -291,7 +315,6 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Filter the given tile of image with Median filter.
-     *
      * @param sourceRaster The source tile.
      * @param targetTile   The current tile associated with the target band to be computed.
      * @param x0           x coordinate for the upper-left point of the target_Tile_Rectangle.
@@ -321,7 +344,6 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Filter the given tile of image with Frost filter.
-     *
      * @param sourceRaster The source tile.
      * @param targetTile   The current tile associated with the target band to be computed.
      * @param x0           x coordinate for the upper-left point of the target_Tile_Rectangle.
@@ -354,7 +376,6 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Filter the given tile of image with Gamma filter.
-     *
      * @param sourceRaster The source tile.
      * @param targetTile   The current tile associated with the target band to be computed.
      * @param x0           x coordinate for the upper-left point of the target_Tile_Rectangle.
@@ -387,7 +408,6 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Filter the given tile of image with Lee filter.
-     *
      * @param sourceRaster The source tile.
      * @param targetTile   The current tile associated with the target band to be computed.
      * @param x0           x coordinate for the upper-left point of the target_Tile_Rectangle.
@@ -417,7 +437,6 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Get pixel intensities in a filter size rectanglar region centered at the given pixel.
-     *
      * @param x            x coordinate of a given pixel.
      * @param y            y coordinate of a given pixel.
      * @param sourceRaster The source tile.
@@ -453,12 +472,12 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Get the mean value of pixel intensities in a given rectanglar region.
-     *
+     * @param neighborValues The pixel values in the given rectanglar region.
      * @return mean The mean value.
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the mean value.
      */
-    private double getMeanValue() {
+    private static double getMeanValue(final double[] neighborValues) {
 
         double mean = 0.0;
         for (double neighborValue : neighborValues) {
@@ -471,18 +490,18 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Get the variance of pixel intensities in a given rectanglar region.
-     *
+     * @param neighborValues The pixel values in the given rectanglar region.
      * @return var The variance value.
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the variance.
      */
-    private double getVarianceValue() {
+    private static double getVarianceValue(final double[] neighborValues) {
 
         double var = 0.0;
 
         if (neighborValues.length > 1) {
 
-            final double mean = getMeanValue();
+            final double mean = getMeanValue(neighborValues);
             for (double neighborValue : neighborValues) {
                 final double diff = neighborValue - mean;
                 var += diff * diff;
@@ -495,7 +514,6 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Get the median value of pixel intensities in a given rectanglar region.
-     *
      * @return median The median value.
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the median value.
@@ -510,7 +528,6 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Get Frost mask for given Frost filter size.
-     *
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the Frost mask.
      */
@@ -531,19 +548,18 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Get the Frost filtered pixel intensity for pixels in a given rectanglar region.
-     *
      * @return val The Frost filtered value.
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the Frost filtered value.
      */
     private double getFrostValue() {
 
-        final double mean = getMeanValue();
+        final double mean = getMeanValue(neighborValues);
         if (Double.compare(mean, Double.MIN_VALUE) <= 0) {
             return mean;
         }
 
-        final double var = getVarianceValue();
+        final double var = getVarianceValue(neighborValues);
         if (Double.compare(var, Double.MIN_VALUE) <= 0) {
             return mean;
         }
@@ -562,19 +578,18 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Get the Gamma filtered pixel intensity for pixels in a given rectanglar region.
-     *
      * @return val The Gamma filtered value.
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the Gamma filtered value.
      */
     private double getGammaMapValue() {
 
-        final double mean = getMeanValue();
+        final double mean = getMeanValue(neighborValues);
         if (Double.compare(mean, Double.MIN_VALUE) <= 0) {
             return mean;
         }
 
-        final double var = getVarianceValue();
+        final double var = getVarianceValue(neighborValues);
         if (Double.compare(var, Double.MIN_VALUE) <= 0) {
             return mean;
         }
@@ -601,19 +616,18 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Get the Lee filtered pixel intensity for pixels in a given rectanglar region.
-     *
      * @return val The Lee filtered value.
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the Lee filtered value.
      */
     private double getLeeValue() {
 
-        final double mean = getMeanValue();
+        final double mean = getMeanValue(neighborValues);
         if (Double.compare(mean, Double.MIN_VALUE) <= 0) {
             return mean;
         }
 
-        final double var = getVarianceValue();
+        final double var = getVarianceValue(neighborValues);
         if (Double.compare(var, Double.MIN_VALUE) <= 0) {
             return mean;
         }
@@ -629,6 +643,14 @@ public class SpeckleFilterOp extends Operator {
         return cp*w + mean*(1 - w);
     }
 
+    /**
+     * Compute the equivalent number of looks.
+     * @param sourceRaster The source tile.
+     * @param x0 X coordinate of the upper left corner point of the target tile rectangle.
+     * @param y0 Y coordinate of the upper left corner point of the target tile rectangle.
+     * @param w The width of the target tile rectangle.
+     * @param h The height of the target tile rectangle.
+     */
     void computeEquivalentNumberOfLooks(final Tile sourceRaster,
                                         final int x0, final int y0, final int w, final int h) {
 
@@ -654,6 +676,371 @@ public class SpeckleFilterOp extends Operator {
         cu = 1.0 / Math.sqrt(enl);
         cu2 = cu*cu;
     }
+
+    /**
+     * Filter the given tile of image with refined Lee filter.
+     * @param sourceRaster The source tile.
+     * @param targetTile   The current tile associated with the target band to be computed.
+     * @param x0           x coordinate for the upper-left point of the target_Tile_Rectangle.
+     * @param y0           y coordinate for the upper-left point of the target_Tile_Rectangle.
+     * @param w            Width for the target_Tile_Rectangle.
+     * @param h            Hight for the target_Tile_Rectangle.
+     * @param pm           A progress monitor which should be used to determine computation cancelation requests.
+     */
+    private void computeRefinedLee(Tile sourceRaster, Tile targetTile, int x0, int y0, int w, int h, ProgressMonitor pm) {
+
+        double[][] neighborPixelValues = new double[filterSizeY][filterSizeX];
+        final ProductData trgData = targetTile.getDataBuffer();
+
+        final int maxY = y0 + h;
+        final int maxX = x0 + w;
+        for (int y = y0; y < maxY; ++y) {
+            for (int x = x0; x < maxX; ++x) {
+
+                int n = getNeighborValuesWithoutBorderExt(x, y, sourceRaster, neighborPixelValues);
+
+                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getRefinedLeeValue(n, neighborPixelValues));
+            }
+            pm.worked(1);
+        }
+    }
+
+    /**
+     * Get pixel intensities in a filter size rectanglar region centered at the given pixel.
+     * @param x X coordinate of the given pixel.
+     * @param y Y coordinate of the given pixel.
+     * @param sourceRaster The source tile.
+     * @param neighborPixelValues 2-D array holding the pixel valuse.
+     * @return The number of valid pixels.
+     * @throws org.esa.beam.framework.gpf.OperatorException
+     *          If an error occurs in obtaining the pixel values.
+     */
+    private int getNeighborValuesWithoutBorderExt(
+            final int x, final int y, final Tile sourceRaster, double[][] neighborPixelValues) {
+
+        final ProductData srcData = sourceRaster.getDataBuffer();
+        int k = 0;
+        for (int j = 0; j < filterSizeY; ++j) {
+            int yj = y - halfSizeY + j;
+            for (int i = 0; i < filterSizeX; ++i) {
+                int xi = x - halfSizeX + i;
+                if (xi < 0 || xi >= sourceImageWidth || yj < 0 || yj >= sourceImageHeight) {
+                    neighborPixelValues[j][i] = NonValidPixelValue;
+                } else {
+                    neighborPixelValues[j][i] = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(xi, yj));
+                    k++;
+                }
+            }
+        }
+        return k;
+    }
+
+    /**
+     * Compute filtered pixel value using refined Lee filter.
+     * @param n The number of valid pixel in the neighborhood.
+     * @param neighborPixelValues The neighbor pixel values.
+     * @return The filtered pixel value.
+     */
+    private double getRefinedLeeValue(final int n, final double[][] neighborPixelValues) {
+
+        if (n < filterSizeX*filterSizeY) {
+            return computePixelValueUsingLocalStatistics(neighborPixelValues);
+        }
+
+        final double var = getLocalVarianceValue(getLocalMeanValue(neighborPixelValues), neighborPixelValues);
+        if (var < edgeThreshold) {
+            return computePixelValueUsingLocalStatistics(neighborPixelValues);
+        }
+
+        return computePixelValueUsingEdgeDetection(neighborPixelValues);
+    }
+
+    /**
+     * Compute filtered pixel value using Local Statistics filter.
+     * @param neighborPixelValues The pixel values in the neighborhood.
+     * @return The filtered pixel value.
+     */
+    private double computePixelValueUsingLocalStatistics(final double[][] neighborPixelValues) {
+        final double mean = getLocalMeanValue(neighborPixelValues);
+        final double var = getLocalVarianceValue(mean, neighborPixelValues);
+        final double sigmma = getLocalNoiseVarianceValue(neighborPixelValues);
+        final double k = var / (var + sigmma);
+        return mean + k*(neighborPixelValues[3][3] - mean);
+    }
+
+    /**
+     * Compute filtered pixel value using refined Lee filter.
+     * @param neighborPixelValues The pixel values in the neighborhood.
+     * @return The filtered pixel value.
+     */
+    private double computePixelValueUsingEdgeDetection(final double[][] neighborPixelValues) {
+
+        double[][] subAreaMeans = new double[3][3];
+        computeSubAreaMeans(neighborPixelValues, subAreaMeans);
+
+        final double gradient0 = Math.abs(subAreaMeans[1][0] - subAreaMeans[1][2]);
+        final double gradient1 = Math.abs(subAreaMeans[0][2] - subAreaMeans[2][0]);
+        final double gradient2 = Math.abs(subAreaMeans[0][1] - subAreaMeans[2][1]);
+        final double gradient3 = Math.abs(subAreaMeans[0][0] - subAreaMeans[2][2]);
+
+        int direction = 0;
+        double maxGradient = gradient0;
+        if (gradient1 > maxGradient) {
+            maxGradient = gradient1;
+            direction = 1;
+        }
+
+        if (gradient2 > maxGradient) {
+            maxGradient = gradient2;
+            direction = 2;
+        }
+
+        if (gradient3 > maxGradient) {
+            maxGradient = gradient3;
+            direction = 3;
+        }
+
+        int d = 0;
+        if (direction == 0) {
+
+            if (Math.abs(subAreaMeans[1][0] - subAreaMeans[1][1]) < Math.abs(subAreaMeans[1][1] - subAreaMeans[1][2])) {
+                d = 4;
+            } else {
+                d = 0;
+            }
+
+        } else if (direction == 1) {
+
+            if (Math.abs(subAreaMeans[0][2] - subAreaMeans[1][1]) < Math.abs(subAreaMeans[1][1] - subAreaMeans[2][0])) {
+                d = 1;
+            } else {
+                d = 5;
+            }
+
+        } else if (direction == 2) {
+
+            if (Math.abs(subAreaMeans[0][1] - subAreaMeans[1][1]) < Math.abs(subAreaMeans[1][1] - subAreaMeans[2][1])) {
+                d = 2;
+            } else {
+                d = 6;
+            }
+
+        } else if (direction == 3) {
+
+            if (Math.abs(subAreaMeans[0][0] - subAreaMeans[1][1]) < Math.abs(subAreaMeans[1][1] - subAreaMeans[2][2])) {
+                d = 3;
+            } else {
+                d = 7;
+            }
+        }
+
+        double[] pixels = new double[28];
+        getNonEdgeAreaPixelValues(neighborPixelValues, d, pixels);
+
+        final double mean = getMeanValue(pixels);
+        final double var = getVarianceValue(pixels);
+        final double sigmma = getLocalNoiseVarianceValue(neighborPixelValues);
+        final double k = var / (var + sigmma);
+        double v = mean + k*(neighborPixelValues[3][3] - mean);
+        return mean + k*(neighborPixelValues[3][3] - mean);
+    }
+
+    /**
+     * Comppute local mean for pixels in the neighborhood.
+     * @param neighborPixelValues The pixel values in the neighborhood.
+     * @return The local mean.
+     */
+    private double getLocalMeanValue(final double[][] neighborPixelValues) {
+        int k = 0;
+        double mean = 0;
+        for (int j = 0; j < filterSizeY; ++j) {
+            for (int i = 0; i < filterSizeX; ++i) {
+                if (neighborPixelValues[j][i] != NonValidPixelValue) {
+                    mean += neighborPixelValues[j][i];
+                    k++;
+                }
+            }
+        }
+        return mean/k;
+    }
+
+    /**
+     * Comppute local variance for pixels in the neighborhood.
+     * @param mean The mean value for pixels in the neighborhood.
+     * @param neighborPixelValues The pixel values in the neighborhood.
+     * @return The local variance.
+     */
+    private double getLocalVarianceValue(final double mean, final double[][] neighborPixelValues) {
+        int k = 0;
+        double var = 0.0;
+        for (int j = 0; j < filterSizeY; ++j) {
+            for (int i = 0; i < filterSizeX; ++i) {
+                if (neighborPixelValues[j][i] != NonValidPixelValue) {
+                    final double diff = neighborPixelValues[j][i] - mean;
+                    var += diff * diff;
+                    k++;
+                }
+            }
+        }
+        return var/(k-1);
+    }
+
+    /**
+     * Comppute local noise variance for pixels in the neighborhood.
+     * @param neighborPixelValues The pixel values in the neighborhood.
+     * @return The local noise variance.
+     */
+    private double getLocalNoiseVarianceValue(final double[][] neighborPixelValues) {
+
+        double[] subAreaVariances = new double[9];
+        int numSubArea = 0;
+        for (int j = 0; j < 3; j++) {
+            final int y0 = 2*j;
+            for (int i = 0; i < 3; i++) {
+                final int x0 = 2*i;
+
+                int k = 0;
+                double[] subArea = new double[9];
+                for (int y = y0; y < y0 + 3; y++) {
+                    for (int x = x0; x < x0 + 3; x++) {
+                        if (neighborPixelValues[y][x] != NonValidPixelValue) {
+                            subArea[(y-y0)*3 + (x-x0)] = neighborPixelValues[y][x];
+                            k++;
+                        }
+                    }
+                }
+
+                if (k == 9) {
+                    subAreaVariances[numSubArea] = getVarianceValue(subArea);
+                    numSubArea++;
+                }
+            }
+        }
+
+        Arrays.sort(subAreaVariances, 0, numSubArea);
+        if (numSubArea < 9) {
+            return subAreaVariances[0]; // the minimum
+        } else {
+            return (subAreaVariances[0] + subAreaVariances[1] + subAreaVariances[2] + subAreaVariances[3] +
+                    subAreaVariances[4]) / 5.0;
+        }
+    }
+
+    /**
+     * Compute mean values for the 9 3x3 sub-areas in the 7x7 neighborhood.
+     * @param neighborPixelValues The pixel values in the 7x7 neighborhood.
+     * @param subAreaMeans The 9 mean values.
+     */
+    private void computeSubAreaMeans(final double[][] neighborPixelValues, double[][] subAreaMeans) {
+        for (int j = 0; j < 3; j++) {
+            final int y0 = 2*j;
+            for (int i = 0; i < 3; i++) {
+                final int x0 = 2*i;
+
+                int k = 0;
+                double mean = 0.0;
+                for (int y = y0; y < y0 + 3; y++) {
+                    for (int x = x0; x < x0 + 3; x++) {
+                        mean += neighborPixelValues[y][x];
+                        k++;
+                    }
+                }
+                subAreaMeans[j][i] = mean / k;
+            }
+        }
+    }
+
+    /**
+     * Get pixel values from the non-edge area indicated by the given direction.
+     * @param neighborPixelValues The pixel values in the 7x7 neighborhood.
+     * @param d The direction index.
+     * @param pixels The array of pixels.
+     */
+    private void getNonEdgeAreaPixelValues(final double[][] neighborPixelValues, final int d, double[] pixels) {
+
+        if (d == 0) {
+
+            int k = 0;
+            for (int y = 0; y < 7; y++) {
+                for (int x = 3; x < 7; x++) {
+                    pixels[k] = neighborPixelValues[y][x];
+                    k++;
+                }
+            }
+
+        } else if (d == 1) {
+
+            int k = 0;
+            for (int y = 0; y < 7; y++) {
+                for (int x = y; x < 7; x++) {
+                    pixels[k] = neighborPixelValues[y][x];
+                    k++;
+                }
+            }
+
+        } else if (d == 2) {
+
+            int k = 0;
+            for (int y = 0; y < 4; y++) {
+                for (int x = 0; x < 7; x++) {
+                    pixels[k] = neighborPixelValues[y][x];
+                    k++;
+                }
+            }
+
+        } else if (d == 3) {
+
+            int k = 0;
+            for (int y = 0; y < 7; y++) {
+                for (int x = 0; x < 7 - y; x++) {
+                    pixels[k] = neighborPixelValues[y][x];
+                    k++;
+                }
+            }
+
+        } else if (d == 4) {
+
+            int k = 0;
+            for (int y = 0; y < 7; y++) {
+                for (int x = 0; x < 4; x++) {
+                    pixels[k] = neighborPixelValues[y][x];
+                    k++;
+                }
+            }
+
+        } else if (d == 5) {
+
+            int k = 0;
+            for (int y = 0; y < 7; y++) {
+                for (int x = 0; x < y + 1; x++) {
+                    pixels[k] = neighborPixelValues[y][x];
+                    k++;
+                }
+            }
+
+        } else if (d == 6) {
+
+            int k = 0;
+            for (int y = 3; y < 7; y++) {
+                for (int x = 0; x < 7; x++) {
+                    pixels[k] = neighborPixelValues[y][x];
+                    k++;
+                }
+            }
+
+        } else if (d == 7) {
+
+            int k = 0;
+            for (int y = 0; y < 7; y++) {
+                for (int x = 6 - y; x < 7; x++) {
+                    pixels[k] = neighborPixelValues[y][x];
+                    k++;
+                }
+            }
+
+        }
+    }
+
 
     /**
      * The SPI is used to register this operator in the graph processing framework

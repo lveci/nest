@@ -24,17 +24,22 @@ public class SpeckleFilterOpUI extends BaseOperatorUI {
 
     private final JList bandList = new JList();
 
-    private final JComboBox filter = new JComboBox(new String[] {   SpeckleFilterOp.MEAN_SPECKLE_FILTER,
-                                                                        SpeckleFilterOp.MEDIAN_SPECKLE_FILTER,
-                                                                        SpeckleFilterOp.FROST_SPECKLE_FILTER,
-                                                                        SpeckleFilterOp.GAMMA_MAP_SPECKLE_FILTER,
-                                                                        SpeckleFilterOp.LEE_SPECKLE_FILTER  } );
+    private final JComboBox filter = new JComboBox(new String[] { SpeckleFilterOp.MEAN_SPECKLE_FILTER,
+                                                                  SpeckleFilterOp.MEDIAN_SPECKLE_FILTER,
+                                                                  SpeckleFilterOp.FROST_SPECKLE_FILTER,
+                                                                  SpeckleFilterOp.GAMMA_MAP_SPECKLE_FILTER,
+                                                                  SpeckleFilterOp.LEE_SPECKLE_FILTER,
+                                                                  SpeckleFilterOp.LEE_REFINED_FILTER } );
 
     private final JLabel dampingFactorLabel = new JLabel("Damping Factor:");
+    private final JLabel edgeThresholdLabel = new JLabel("Edge Threshold:");
+    private final JLabel filterSizeXLabel = new JLabel("Filter Size X:   ");
+    private final JLabel filterSizeYLabel = new JLabel("Filter Size Y:   ");
 
     private final JTextField filterSizeX = new JTextField("");
     private final JTextField filterSizeY = new JTextField("");
     private final JTextField dampingFactor = new JTextField("");
+    private final JTextField edgeThreshold = new JTextField("");
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -55,6 +60,7 @@ public class SpeckleFilterOpUI extends BaseOperatorUI {
         filterSizeX.setText(String.valueOf(paramMap.get("filterSizeX")));
         filterSizeY.setText(String.valueOf(paramMap.get("filterSizeY")));
         dampingFactor.setText(String.valueOf(paramMap.get("dampingFactor")));
+        edgeThreshold.setText(String.valueOf(paramMap.get("edgeThreshold")));
     }
 
     @Override
@@ -72,6 +78,7 @@ public class SpeckleFilterOpUI extends BaseOperatorUI {
         paramMap.put("filterSizeX", Integer.parseInt(filterSizeX.getText()));
         paramMap.put("filterSizeY", Integer.parseInt(filterSizeY.getText()));
         paramMap.put("dampingFactor", Integer.parseInt(dampingFactor.getText()));
+        paramMap.put("edgeThreshold", Double.parseDouble(edgeThreshold.getText()));
     }
 
     private JComponent createPanel() {
@@ -104,17 +111,33 @@ public class SpeckleFilterOpUI extends BaseOperatorUI {
                 } else {
                     DialogUtils.enableComponents(dampingFactorLabel, dampingFactor, false);
                 }
+
+                if (item.equals(SpeckleFilterOp.LEE_REFINED_FILTER)) {
+                    DialogUtils.enableComponents(edgeThresholdLabel, edgeThreshold, true);
+                    DialogUtils.enableComponents(filterSizeXLabel, filterSizeX, false);
+                    DialogUtils.enableComponents(filterSizeYLabel, filterSizeY, false);
+                } else {
+                    DialogUtils.enableComponents(edgeThresholdLabel, edgeThreshold, false);
+                    DialogUtils.enableComponents(filterSizeXLabel, filterSizeX, true);
+                    DialogUtils.enableComponents(filterSizeYLabel, filterSizeY, true);
+                }
             }
         });
 
+        int savedY = ++_gbc.gridy;
+        DialogUtils.addComponent(contentPane, _gbc, filterSizeXLabel, filterSizeX);
+        DialogUtils.enableComponents(filterSizeXLabel, filterSizeX, true);
         _gbc.gridy++;
-        DialogUtils.addComponent(contentPane, _gbc, "Filter Size X:   ", filterSizeX);
-        _gbc.gridy++;
-        DialogUtils.addComponent(contentPane, _gbc, "Filter Size Y:   ", filterSizeY);
+        DialogUtils.addComponent(contentPane, _gbc, filterSizeYLabel, filterSizeY);
+        DialogUtils.enableComponents(filterSizeYLabel, filterSizeY, true);
 
         _gbc.gridy++;
         DialogUtils.addComponent(contentPane, _gbc, dampingFactorLabel, dampingFactor);
         DialogUtils.enableComponents(dampingFactorLabel, dampingFactor, false);
+
+        _gbc.gridy = savedY;
+        DialogUtils.addComponent(contentPane, _gbc, edgeThresholdLabel, edgeThreshold);
+        DialogUtils.enableComponents(edgeThresholdLabel, edgeThreshold, false);
 
         return contentPane;
     }
