@@ -167,6 +167,10 @@ public class WarpOp extends Operator {
             */
             createTargetProduct();
 
+            // copy master GCPs
+            OperatorUtils.copyGCPsToTarget(masterGCPGroup,
+                targetProduct.getGcpGroup(targetProduct.getBand(masterBand.getName())));
+
             // for all slave bands or band pairs compute a warp
             final int numSrcBands = sourceProduct.getNumBands();
             int inc = 1;
@@ -207,7 +211,7 @@ public class WarpOp extends Operator {
                 computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute final warp polynomial
                 outputCoRegistrationInfo(warpData, true, rmsThreshold, ++parseIdex);
 
-                //addSlaveGCPs();
+                addSlaveGCPs(warpData, srcBand.getName());
             }
 
         } catch(Exception e) {
@@ -226,6 +230,13 @@ public class WarpOp extends Operator {
                 }
             }
         }
+    }
+
+    private void addSlaveGCPs(final WarpData warpData, final String bandName) {
+        targetProduct.getGcpGroup(targetProduct.getBand(bandName));
+
+        OperatorUtils.copyGCPsToTarget(warpData.slaveGCPGroup,
+                targetProduct.getGcpGroup(targetProduct.getBand(bandName)));
     }
 
     /**
