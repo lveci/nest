@@ -206,6 +206,8 @@ public class WarpOp extends Operator {
                 eliminateGCPsBasedOnRMS(warpData, rmsThreshold);
                 computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute final warp polynomial
                 outputCoRegistrationInfo(warpData, true, rmsThreshold, ++parseIdex);
+
+                //addSlaveGCPs();
             }
 
         } catch(Exception e) {
@@ -485,8 +487,8 @@ public class WarpOp extends Operator {
             }
         }
 
-        for (Pin aPinList : pinList) {
-            warpData.slaveGCPGroup.remove(aPinList);
+        for (Pin aPin : pinList) {
+            warpData.slaveGCPGroup.remove(aPin);
         }
 
         return !pinList.isEmpty();

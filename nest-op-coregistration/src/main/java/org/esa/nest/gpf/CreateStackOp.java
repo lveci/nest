@@ -3,6 +3,7 @@ package org.esa.nest.gpf;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.resamp.Resampling;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -31,11 +32,6 @@ import java.util.Map;
                   description = "Collocates two or more products based on their geo-codings.")
 public class CreateStackOp extends Operator {
 
-    private static final String NEAREST_NEIGHBOUR = "NEAREST_NEIGHBOUR";
-    private static final String BILINEAR_INTERPOLATION = "BILINEAR_INTERPOLATION";
-    private static final String CUBIC_CONVOLUTION = "CUBIC_CONVOLUTION";
-    private static final String NONE = "NONE";
-
     @SourceProducts
     private Product[] sourceProduct;
 
@@ -53,10 +49,12 @@ public class CreateStackOp extends Operator {
     @TargetProduct(description = "The target product which will use the master's grid.")
     private Product targetProduct = null;
 
-    @Parameter(valueSet = {NEAREST_NEIGHBOUR, BILINEAR_INTERPOLATION, CUBIC_CONVOLUTION},
-               defaultValue = NEAREST_NEIGHBOUR, description = "The method to be used when resampling the slave grid onto the master grid.",
+    @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+                           ResamplingFactory.BILINEAR_INTERPOLATION_NAME, ResamplingFactory.CUBIC_CONVOLUTION_NAME},
+               defaultValue = ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+               description = "The method to be used when resampling the slave grid onto the master grid.",
                label="Resampling Type")
-    private String resamplingType = NEAREST_NEIGHBOUR;
+    private String resamplingType = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
     private Resampling selectedResampling = Resampling.NEAREST_NEIGHBOUR;
 
     private final static Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
@@ -115,8 +113,8 @@ public class CreateStackOp extends Operator {
 
                     final Band targetBand = new Band(srcBand.getName() + suffix,
                             srcBand.getDataType(),
-                            masterProduct.getSceneRasterWidth(),
-                            masterProduct.getSceneRasterHeight());
+                            targetProduct.getSceneRasterWidth(),
+                            targetProduct.getSceneRasterHeight());
                     ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
                     targetBand.setSourceImage(srcBand.getSourceImage());
 
@@ -136,8 +134,8 @@ public class CreateStackOp extends Operator {
                     final Product srcProduct = srcBand.getProduct();
                     final Band targetBand = new Band(srcBand.getName() + suffix,
                             srcBand.getDataType(),
-                            masterProduct.getSceneRasterWidth(),
-                            masterProduct.getSceneRasterHeight());
+                            targetProduct.getSceneRasterWidth(),
+                            targetProduct.getSceneRasterHeight());
                     ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
                     if (srcProduct == masterProduct || srcProduct.isCompatibleProduct(masterProduct, 1.0e-3f)) {
                         targetBand.setSourceImage(srcBand.getSourceImage());
@@ -157,12 +155,7 @@ public class CreateStackOp extends Operator {
                 OperatorUtils.copyGCPsToTarget(masterGCPgroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
             }
 
-            if(resamplingType.equals(NEAREST_NEIGHBOUR))
-                selectedResampling = Resampling.NEAREST_NEIGHBOUR;
-            else if(resamplingType.equals(BILINEAR_INTERPOLATION))
-                selectedResampling = Resampling.BILINEAR_INTERPOLATION;
-            else
-                selectedResampling = (Resampling.CUBIC_CONVOLUTION);
+            selectedResampling = ResamplingFactory.createResampling(resamplingType);
 
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);

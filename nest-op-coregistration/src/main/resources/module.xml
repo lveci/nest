@@ -26,6 +26,15 @@
     </dependency>
 
 
+    <extension point="beam-visat-rcp:layerSources">
+        <layerSource>
+            <id>gcp-vector-layer-source</id>
+            <name>GCP Movement Vector</name>
+            <description>Show where GCPs have moved</description>
+            <class>org.esa.nest.dat.layersrc.GCPVectorLayerSource</class>
+        </layerSource>
+    </extension>
+
     <extension point="beam-ui:actions">
 
         <action>
