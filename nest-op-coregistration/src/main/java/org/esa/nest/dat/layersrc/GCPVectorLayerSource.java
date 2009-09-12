@@ -20,7 +20,8 @@ public class GCPVectorLayerSource implements LayerSource {
         final ProductNodeGroup<Pin> masterGCPGroup = product.getGcpGroup(product.getBandAt(0));
         final Band band = product.getBand(pageContext.getAppContext().getSelectedProductSceneView().getRaster().getName());
 
-        return (masterGCPGroup != null && masterGCPGroup.getNodeCount() > 0 && product.getBandAt(0) != band);
+        return (masterGCPGroup != null && masterGCPGroup.getNodeCount() > 0 &&
+                band != null && product.getBandAt(0) != band);
     }
 
     @Override

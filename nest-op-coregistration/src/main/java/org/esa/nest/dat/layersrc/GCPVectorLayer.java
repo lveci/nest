@@ -34,7 +34,7 @@ public class GCPVectorLayer extends Layer {
     protected void renderLayer(Rendering rendering) {
 
         final Band masterBand = product.getBandAt(0);
-        if(masterBand == band)
+        if(band == null || masterBand == band)
             return;
 
         final Viewport vp = rendering.getViewport();
