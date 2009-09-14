@@ -20,9 +20,9 @@ import org.esa.beam.framework.datamodel.*;
  */
 public class GCPVectorLayer extends Layer {
 
-    private Product product;
-    private Band band;
-    private float lineThickness = 2.0f;
+    private final Product product;
+    private final Band band;
+    private final float lineThickness = 2.0f;
 
     public GCPVectorLayer(ValueContainer configuration) {
         super(LayerType.getLayerType(GCPVectorLayerType.class.getName()), configuration);

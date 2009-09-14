@@ -57,6 +57,12 @@ public class CreateStackOp extends Operator {
     private String resamplingType = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
     private Resampling selectedResampling = Resampling.NEAREST_NEIGHBOUR;
 
+    @Parameter(valueSet = {"Master", "Minimum", "Maximum"},
+               defaultValue = "Master",
+               description = "The output image extents.",
+               label="Output Extents")
+    private String extent = "Master";
+
     private final static Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
 
     @Override

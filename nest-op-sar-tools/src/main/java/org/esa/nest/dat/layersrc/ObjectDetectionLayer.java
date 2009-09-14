@@ -3,7 +3,6 @@ package org.esa.nest.dat.layersrc;
 import com.bc.ceres.binding.ValueContainer;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerType;
-import com.bc.ceres.glayer.support.ImageLayer;
 import com.bc.ceres.glevel.MultiLevelImage;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
@@ -27,15 +26,17 @@ import org.esa.beam.framework.datamodel.Band;
  */
 public class ObjectDetectionLayer extends Layer {
 
-    private Product product;
+    private final Product product;
+    private final Band band;
+
     private final Color[] palette;
-    private double maxLength = 10.0; // m/s
-    private int res = 16;
     private float lineThickness = 2.0f;
 
     public ObjectDetectionLayer(ValueContainer configuration) {
         super(LayerType.getLayerType(ObjectDetectionLayerType.class.getName()), configuration);
         product = (Product) configuration.getValue("product");
+        band = (Band) configuration.getValue("band");
+
         palette = new Color[256];
         for (int i = 0; i < palette.length; i++) {
             palette[i] = new Color(i, i, i);
@@ -44,6 +45,9 @@ public class ObjectDetectionLayer extends Layer {
 
     @Override
     protected void renderLayer(Rendering rendering) {
+
+        if(band == null)
+            return;
 
         final Viewport vp = rendering.getViewport();
         final int level = 0;
@@ -92,7 +96,6 @@ public class ObjectDetectionLayer extends Layer {
         i2m.transform(ipts, 0, mpts, 0, 4);
         m2v.transform(mpts, 0, vpts, 0, 4);
 
-        final int grey = Math.min(255, (int) Math.round(256 * length / maxLength));
         graphics.setColor(Color.RED);
         graphics.draw(new Line2D.Double(vpts[0], vpts[1], vpts[2], vpts[3]));
         graphics.draw(new Line2D.Double(vpts[4], vpts[5], vpts[2], vpts[3]));

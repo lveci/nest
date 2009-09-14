@@ -368,7 +368,7 @@ public class AbstractMetadata {
         if (root == null) {
             throw new OperatorException("Root Metadata not found");
         }
-        final MetadataElement abstractedMetadata = root.getElement("Abstracted Metadata");
+        final MetadataElement abstractedMetadata = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
         if (abstractedMetadata == null) {
             throw new OperatorException("Abstracted Metadata not found");
         }
