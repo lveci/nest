@@ -218,7 +218,7 @@ public abstract class CEOSProductDirectory {
         sortedEntries.addAll(unsortedEntries);
         for (Object sortedEntry : sortedEntries) {
             final Map.Entry entry = (Map.Entry) sortedEntry;
-            final String data = (String) entry.getValue();
+            final String data = ((String) entry.getValue()).trim();
             // strip of double quotes
             final String strippedData = data.substring(1, data.length() - 1);
             final MetadataAttribute attribute = new MetadataAttribute((String) entry.getKey(),

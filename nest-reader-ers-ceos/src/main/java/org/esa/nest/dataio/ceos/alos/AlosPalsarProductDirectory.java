@@ -3,6 +3,7 @@ package org.esa.nest.dataio.ceos.alos;
 import Jama.Matrix;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.Guardian;
+import org.esa.beam.util.Debug;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ReaderUtils;
@@ -219,19 +220,23 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         final MetadataElement workReportElem = product.getMetadataRoot().getElement("Work Report");
         if(workReportElem != null) {
 
-            final float latUL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftTopLatitude", "0"));
-            final float latUR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightTopLatitude", "0"));
-            final float latLL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftBottomLatitude", "0"));
-            final float latLR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightBottomLatitude", "0"));
-            final float[] latCorners = new float[]{latUL, latUR, latLL, latLR};
+            try {
+                final float latUL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftTopLatitude", "0"));
+                final float latUR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightTopLatitude", "0"));
+                final float latLL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftBottomLatitude", "0"));
+                final float latLR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightBottomLatitude", "0"));
+                final float[] latCorners = new float[]{latUL, latUR, latLL, latLR};
 
-            final float lonUL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftTopLongitude", "0"));
-            final float lonUR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightTopLongitude", "0"));
-            final float lonLL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftBottomLongitude", "0"));
-            final float lonLR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightBottomLongitude", "0"));
-            final float[] lonCorners = new float[]{lonUL, lonUR, lonLL, lonLR};
+                final float lonUL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftTopLongitude", "0"));
+                final float lonUR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightTopLongitude", "0"));
+                final float lonLL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftBottomLongitude", "0"));
+                final float lonLR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightBottomLongitude", "0"));
+                final float[] lonCorners = new float[]{lonUL, lonUR, lonLL, lonLR};
 
-            addGeoCoding(product, latCorners, lonCorners);
+                addGeoCoding(product, latCorners, lonCorners);
+            } catch(Exception e) {
+                Debug.trace(e.toString());       
+            }
         }
     }
 
