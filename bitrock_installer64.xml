@@ -1,7 +1,7 @@
 <project>
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
-    <version>3A</version>
+    <version>3B</version>
     <installerFilename>${product_shortname}-${product_version}-${platform_name}64-installer.${platform_exec_suffix}</installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>beam/res/NEST_Splash.png</splashImage>
@@ -46,7 +46,7 @@
                     <comment>NEST Display and Analysis Tool</comment>
                     <exec> ${installdir}/dat.sh</exec>
                     <icon> ${installdir}/res/dat.png</icon>
-                    <name>NEST 3A</name>
+                    <name>NEST 3B</name>
                     <path> ${installdir}</path>
                     <platforms>all</platforms>
                     <runInTerminal>0</runInTerminal>
@@ -88,97 +88,97 @@
                             <origin>../dist/dist64/jre</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-3A-bin-win64.dir/auxdata</origin>
+                            <origin>target/nest-3B-bin-win64.dir/auxdata</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-3A-bin-win64.dir/bin</origin>
+                            <origin>target/nest-3B-bin-win64.dir/bin</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-3A-bin-win64.dir/commandline</origin>
+                            <origin>target/nest-3B-bin-win64.dir/commandline</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-3A-bin-win64.dir/config</origin>
+                            <origin>target/nest-3B-bin-win64.dir/config</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-3A-bin-win64.dir/graphs</origin>
+                            <origin>target/nest-3B-bin-win64.dir/graphs</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-3A-bin-win64.dir/images</origin>
+                            <origin>target/nest-3B-bin-win64.dir/images</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-3A-bin-win64.dir/lib</origin>
+                            <origin>target/nest-3B-bin-win64.dir/lib</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-3A-bin-win64.dir/licenses</origin>
+                            <origin>target/nest-3B-bin-win64.dir/licenses</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-3A-bin-win64.dir/modules</origin>
+                            <origin>target/nest-3B-bin-win64.dir/modules</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-3A-bin-win64.dir/res</origin>
+                            <origin>target/nest-3B-bin-win64.dir/res</origin>
                         </distributionDirectory>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/VERSION.txt</origin>
+                            <origin>target/nest-3B-bin-win64.dir/VERSION.txt</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/CHANGELOG.txt</origin>
+                            <origin>target/nest-3B-bin-win64.dir/CHANGELOG.txt</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/cli.bat</origin>
+                            <origin>target/nest-3B-bin-win64.dir/cli.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/clib_jiio.dll</origin>
+                            <origin>target/nest-3B-bin-win64.dir/clib_jiio.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/clib_jiio_sse2.dll</origin>
+                            <origin>target/nest-3B-bin-win64.dir/clib_jiio_sse2.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/clib_jiio_util.dll</origin>
+                            <origin>target/nest-3B-bin-win64.dir/clib_jiio_util.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/dat.bat</origin>
+                            <origin>target/nest-3B-bin-win64.dir/dat.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/gluegen-rt.dll</origin>
+                            <origin>target/nest-3B-bin-win64.dir/gluegen-rt.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/gpt.bat</origin>
+                            <origin>target/nest-3B-bin-win64.dir/gpt.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/jogl.dll</origin>
+                            <origin>target/nest-3B-bin-win64.dir/jogl.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/jogl_awt.dll</origin>
+                            <origin>target/nest-3B-bin-win64.dir/jogl_awt.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/jogl_cg.dll</origin>
+                            <origin>target/nest-3B-bin-win64.dir/jogl_cg.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/LICENSE.txt</origin>
+                            <origin>target/nest-3B-bin-win64.dir/LICENSE.txt</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/mlib_jai.dll</origin>
+                            <origin>target/nest-3B-bin-win64.dir/mlib_jai.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/mlib_jai_mmx.dll</origin>
+                            <origin>target/nest-3B-bin-win64.dir/mlib_jai_mmx.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/mlib_jai_util.dll</origin>
+                            <origin>target/nest-3B-bin-win64.dir/mlib_jai_util.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/nest-dat64.exe</origin>
+                            <origin>target/nest-3B-bin-win64.dir/nest-dat64.exe</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/post-uninstall.bat</origin>
+                            <origin>target/nest-3B-bin-win64.dir/post-uninstall.bat</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/readme.html</origin>
+                            <origin>target/nest-3B-bin-win64.dir/readme.html</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/jhdf5.dll</origin>
+                            <origin>target/nest-3B-bin-win64.dir/jhdf5.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3A-bin-win64.dir/jhdf.dll</origin>
+                            <origin>target/nest-3B-bin-win64.dir/jhdf.dll</origin>
                         </distributionFile>
                     </distributionFileList>
                 </folder>
@@ -195,7 +195,7 @@
                 </startMenuShortcut>
                 <startMenuShortcut>
                     <comment>Next ESA SAR Toolbox</comment>
-                    <name>NEST 3A</name>
+                    <name>NEST 3B</name>
                     <runInTerminal>0</runInTerminal>
                     <windowsExec>${installdir}/nest-dat64.exe</windowsExec>
                     <windowsExecArgs></windowsExecArgs>
@@ -213,7 +213,7 @@
                     <comment>NEST Documentation</comment>
                     <name>Online Help</name>
                     <runInTerminal>0</runInTerminal>
-                    <url> ${installdir}\modules\nest-help-3A\doc\help\index.html</url>
+                    <url> ${installdir}\modules\nest-help-3B\doc\help\index.html</url>
                     <windowsIcon></windowsIcon>
                 </startMenuLinkShortcut>
             </startMenuShortcutList>

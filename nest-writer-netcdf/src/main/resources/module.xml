@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-writer-netcdf</symbolicName>
-    <version>3A</version>
+    <version>3B</version>
     <name>NEST NetCDF Writer</name>
 
     <description>Enables writing to NetCDF supported formats</description>

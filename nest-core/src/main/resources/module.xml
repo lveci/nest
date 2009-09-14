@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-core</symbolicName>
-    <version>3A</version>
+    <version>3B</version>
     <name>NEST Core</name>
 
     <description>
