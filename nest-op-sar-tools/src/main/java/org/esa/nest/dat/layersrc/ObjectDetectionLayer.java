@@ -38,7 +38,8 @@ public class ObjectDetectionLayer extends Layer {
     private final Band band;
 
     private final List<ObjectDiscriminationOp.ShipRecord> targetList = new ArrayList<ObjectDiscriminationOp.ShipRecord>();
-
+    private double rangeSpacing;
+    private double azimuthSpacing;
     private float lineThickness = 2.0f;
 
     public ObjectDetectionLayer(ValueContainer configuration) {
@@ -46,7 +47,20 @@ public class ObjectDetectionLayer extends Layer {
         product = (Product) configuration.getValue("product");
         band = (Band) configuration.getValue("band");
 
+        getPixelSize();
+
         LoadTargets(getTargetFile(product));
+    }
+
+    private void getPixelSize() {
+        final MetadataElement root = product.getMetadataRoot();
+        if (root != null) {
+            final MetadataElement absMetadata = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+            if (absMetadata != null) {
+                rangeSpacing = absMetadata.getAttributeDouble(AbstractMetadata.range_spacing, 0);
+                azimuthSpacing = absMetadata.getAttributeDouble(AbstractMetadata.azimuth_spacing, 0);
+            }
+        }
     }
 
     public static File getTargetFile(final Product product) {
