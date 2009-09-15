@@ -13,7 +13,6 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Line2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.RenderedImage;
 import java.io.File;
@@ -40,7 +39,8 @@ public class ObjectDetectionLayer extends Layer {
     private final List<ObjectDiscriminationOp.ShipRecord> targetList = new ArrayList<ObjectDiscriminationOp.ShipRecord>();
     private double rangeSpacing;
     private double azimuthSpacing;
-    private float lineThickness = 2.0f;
+    private final float lineThickness = 2.0f;
+    private final double border = 5.0;
 
     public ObjectDetectionLayer(ValueContainer configuration) {
         super(LayerType.getLayerType(ObjectDetectionLayerType.class.getName()), configuration);
@@ -120,8 +120,8 @@ public class ObjectDetectionLayer extends Layer {
                                     targetList.add(new ObjectDiscriminationOp.ShipRecord(
                                             Double.parseDouble(lat.getValue()),
                                             Double.parseDouble(lon.getValue()),
-                                            Double.parseDouble(width.getValue()) / rangeSpacing,
-                                            Double.parseDouble(length.getValue()) / azimuthSpacing,
+                                            (Double.parseDouble(width.getValue()) / rangeSpacing) + border,
+                                            (Double.parseDouble(length.getValue()) / azimuthSpacing) + border,
                                             Double.parseDouble(intensity.getValue())));
                                 }
                             }

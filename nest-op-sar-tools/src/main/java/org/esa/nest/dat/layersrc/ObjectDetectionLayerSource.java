@@ -2,11 +2,9 @@ package org.esa.nest.dat.layersrc;
 
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.visat.toolviews.layermanager.LayerSource;
 import org.esa.beam.visat.toolviews.layermanager.layersrc.AbstractLayerSourceAssistantPage;
 import org.esa.beam.visat.toolviews.layermanager.layersrc.LayerSourcePageContext;
-import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.File;
 

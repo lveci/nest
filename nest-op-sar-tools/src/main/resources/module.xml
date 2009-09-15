@@ -223,18 +223,28 @@
         </action>
 
         <action>
-            <id>OilSpillDetectionOp</id>
-            <class>org.esa.nest.dat.oceantools.OilSpillDetectionOpAction</class>
-            <text>Oil Spill Detection</text>
-            <shortDescr>Oil Spill Detection</shortDescr>
-            <parent>oceanTools</parent>
-        </action>
-
-        <action>
             <id>ObjectDetection</id>
             <class>org.esa.nest.dat.oceantools.ObjectDetectionAction</class>
             <text>Object Detection</text>
             <shortDescr>Ocean Object Detection</shortDescr>
+            <parent>oceanTools</parent>
+        </action>
+        
+        <action>
+            <id>OilSpillDetectionOp</id>
+            <class>org.esa.nest.dat.oceantools.OilSpillDetectionOpAction</class>
+            <text>Oil Spill Detection</text>
+            <shortDescr>Oil Spill Detection</shortDescr>
+            <placeAfter>ObjectDetection</placeAfter>
+            <parent>oceanTools</parent>
+        </action>
+
+        <action>
+            <id>WindFieldEstimation</id>
+            <class>org.esa.nest.dat.oceantools.WindFieldEstimationOpAction</class>
+            <text>Wind Field Estimation (coming soon)</text>
+            <shortDescr>Wind Field Estimation</shortDescr>
+            <placeAfter>OilSpillDetectionOp</placeAfter>
             <parent>oceanTools</parent>
         </action>
 
