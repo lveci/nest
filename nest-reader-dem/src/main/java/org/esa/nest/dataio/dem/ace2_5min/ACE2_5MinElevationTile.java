@@ -4,27 +4,34 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.util.CachingObjectArray;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.dataio.ProductReaderPlugIn;
+import org.esa.beam.framework.dataio.ProductReader;
 
 import java.io.IOException;
+import java.io.File;
 
 public class ACE2_5MinElevationTile {
 
-    private ACE2_5MinElevationModel _dem;
-    private CachingObjectArray _linesCache;
-    private Product _product;
+    private ACE2_5MinElevationModel dem;
+    private CachingObjectArray linesCache = null;
+    private final File productFile;
+    private Product product = null;
+    private final ProductReaderPlugIn readerPlugIn;
 
-    public ACE2_5MinElevationTile(final ACE2_5MinElevationModel dem, final Product product) {
-        _dem = dem;
-        _product = product;
-
-        _linesCache = new CachingObjectArray(getLineFactory());
-        _linesCache.setCachedRange(0, product.getSceneRasterHeight());
+    public ACE2_5MinElevationTile(final ACE2_5MinElevationModel dem, final File file, final ProductReaderPlugIn readPlugIn) {
+        this.dem = dem;
+        productFile = file;
+        readerPlugIn = readPlugIn;
     }
 
     public float getSample(int pixelX, int pixelY) throws IOException {
         final float[] line;
         try {
-            line = (float[]) _linesCache.getObject(pixelY);
+            if(linesCache == null) {
+                linesCache = new CachingObjectArray(getLineFactory());
+                linesCache.setCachedRange(0, product.getSceneRasterHeight());
+            }
+            line = (float[]) linesCache.getObject(pixelY);
         } catch (Exception e) {
             throw convertLineCacheException(e);
         }
@@ -33,24 +40,28 @@ public class ACE2_5MinElevationTile {
 
     public void dispose() {
         clearCache();
-        _linesCache = null;
-        if (_product != null) {
-            _product.dispose();
-            _product = null;
+        linesCache = null;
+        if (product != null) {
+            product.dispose();
+            product = null;
         }
-        _dem = null;
+        dem = null;
     }
 
     public void clearCache() {
-        _linesCache.clear();
+        linesCache.clear();
     }
 
-    private CachingObjectArray.ObjectFactory getLineFactory() {
-        final Band band = _product.getBandAt(0);
-        final int width = _product.getSceneRasterWidth();
+    private CachingObjectArray.ObjectFactory getLineFactory() throws IOException {
+        if(product == null) {
+            final ProductReader productReader = readerPlugIn.createReaderInstance();
+            product = productReader.readProductNodes(productFile, null);
+        }
+        final Band band = product.getBandAt(0);
+        final int width = product.getSceneRasterWidth();
         return new CachingObjectArray.ObjectFactory() {
             public Object createObject(int index) throws Exception {
-                _dem.updateCache(ACE2_5MinElevationTile.this);
+                dem.updateCache(ACE2_5MinElevationTile.this);
                 return band.readPixels(0, index, width, 1, new float[width], ProgressMonitor.NULL);
             }
         };

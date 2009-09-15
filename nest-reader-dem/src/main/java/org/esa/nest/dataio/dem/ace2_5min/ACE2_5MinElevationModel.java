@@ -104,20 +104,18 @@ public class ACE2_5MinElevationModel implements ElevationModel, Resampling.Raste
         return sample;
     }
 
-    private ACE2_5MinElevationTile[][] createEleveationTiles() throws IOException {
+    private ACE2_5MinElevationTile[][] createEleveationTiles() {
         final ACE2_5MinElevationTile[][] elevationTiles = new ACE2_5MinElevationTile[NUM_X_TILES][NUM_Y_TILES];
         final ProductReaderPlugIn readerPlugIn = getACEReaderPlugIn();
         for (int i = 0; i < elevationTiles.length; i++) {
             final int minLon = i * DEGREE_RES - 180;
 
             for (int j = 0; j < elevationTiles[i].length; j++) {
-                final ProductReader productReader = readerPlugIn.createReaderInstance();
                 final int minLat = j * DEGREE_RES - 90;
 
                 final File file = _descriptor.getTileFile(minLon, minLat);
                 if (file != null && file.exists() && file.isFile()) {
-                    final Product product = productReader.readProductNodes(file, null);
-                    elevationTiles[i][NUM_Y_TILES - 1 - j] = new ACE2_5MinElevationTile(this, product);
+                    elevationTiles[i][NUM_Y_TILES - 1 - j] = new ACE2_5MinElevationTile(this, file, readerPlugIn);
                 } else {
                     elevationTiles[i][NUM_Y_TILES - 1 - j] = null;
                 }
