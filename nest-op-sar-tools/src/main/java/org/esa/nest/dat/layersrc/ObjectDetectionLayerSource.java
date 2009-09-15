@@ -8,6 +8,8 @@ import org.esa.beam.visat.toolviews.layermanager.layersrc.AbstractLayerSourceAss
 import org.esa.beam.visat.toolviews.layermanager.layersrc.LayerSourcePageContext;
 import org.esa.nest.datamodel.AbstractMetadata;
 
+import java.io.File;
+
 /**
  * A source for {@link org.esa.nest.dat.layersrc.ObjectDetectionLayer}s.
  *
@@ -18,16 +20,8 @@ public class ObjectDetectionLayerSource implements LayerSource {
     public boolean isApplicable(LayerSourcePageContext pageContext) {
         final Product product = pageContext.getAppContext().getSelectedProduct();
 
-        final MetadataElement root = product.getMetadataRoot();
-        if (root != null) {
-            final MetadataElement absMetadata = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
-            if (absMetadata != null) {
-                final String shipFilePath = absMetadata.getAttributeString("ship_detection_file", null);
-                if(shipFilePath != null)
-                    return true;
-            }
-        }
-        return false;
+        final File targetFile = ObjectDetectionLayer.getTargetFile(product);
+        return targetFile != null;
     }
 
     @Override

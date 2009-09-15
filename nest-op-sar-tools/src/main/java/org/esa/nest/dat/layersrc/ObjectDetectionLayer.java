@@ -14,11 +14,19 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.RenderedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.ArrayList;
 
-import org.esa.beam.framework.datamodel.RasterDataNode;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.*;
+import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.util.XMLSupport;
+import org.esa.nest.gpf.oceantools.ObjectDiscriminationOp;
+import org.jdom.Element;
+import org.jdom.Attribute;
 
 /**
  * Shows a detected object
@@ -29,7 +37,8 @@ public class ObjectDetectionLayer extends Layer {
     private final Product product;
     private final Band band;
 
-    private final Color[] palette;
+    private final List<ObjectDiscriminationOp.ShipRecord> targetList = new ArrayList<ObjectDiscriminationOp.ShipRecord>();
+
     private float lineThickness = 2.0f;
 
     public ObjectDetectionLayer(ValueContainer configuration) {
@@ -37,16 +46,82 @@ public class ObjectDetectionLayer extends Layer {
         product = (Product) configuration.getValue("product");
         band = (Band) configuration.getValue("band");
 
-        palette = new Color[256];
-        for (int i = 0; i < palette.length; i++) {
-            palette[i] = new Color(i, i, i);
+        LoadTargets(getTargetFile(product));
+    }
+
+    public static File getTargetFile(final Product product) {
+        final MetadataElement root = product.getMetadataRoot();
+        if (root != null) {
+            final MetadataElement absMetadata = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+            if (absMetadata != null) {
+                final String shipFilePath = absMetadata.getAttributeString(AbstractMetadata.target_report_file, null);
+                if(shipFilePath != null) {
+                    final File file = new File(shipFilePath);
+                    if(file.exists())
+                        return file;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void LoadTargets(final File file) {
+        if(file == null)
+            return;
+
+        org.jdom.Document doc;
+        try {
+            doc = XMLSupport.LoadXML(file.getAbsolutePath());
+        } catch(IOException e) {
+            return;
+        }
+
+        targetList.clear();
+
+        final Element root = doc.getRootElement();
+
+        final List children = root.getContent();
+        for (Object aChild : children) {
+            if (aChild instanceof Element) {
+                final Element targetsDetectedElem = (Element) aChild;
+                if(targetsDetectedElem.getName().equals("targetsDetected")) {
+                    final Attribute attrib = targetsDetectedElem.getAttribute("bandName");
+                    if(attrib != null && band.getName().equalsIgnoreCase(attrib.getValue())) {
+                        final List content = targetsDetectedElem.getContent();
+                        for (Object det : content) {
+                            if (det instanceof Element) {
+                                final Element targetElem = (Element) det;
+                                if(targetElem.getName().equals("target")) {
+                                    final Attribute lat = targetElem.getAttribute("lat");
+                                    if(lat == null) continue;
+                                    final Attribute lon = targetElem.getAttribute("lon");
+                                    if(lon == null) continue;
+                                    final Attribute width = targetElem.getAttribute("width");
+                                    if(width == null) continue;
+                                    final Attribute length = targetElem.getAttribute("length");
+                                    if(length == null) continue;
+                                    final Attribute intensity = targetElem.getAttribute("intensity");
+                                    if(intensity == null) continue;
+
+                                    targetList.add(new ObjectDiscriminationOp.ShipRecord(
+                                            Double.parseDouble(lat.getValue()),
+                                            Double.parseDouble(lon.getValue()),
+                                            Double.parseDouble(width.getValue()),
+                                            Double.parseDouble(length.getValue()),
+                                            Double.parseDouble(intensity.getValue())));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
     @Override
     protected void renderLayer(Rendering rendering) {
 
-        if(band == null)
+        if(band == null || targetList.isEmpty())
             return;
 
         final Viewport vp = rendering.getViewport();
@@ -71,35 +146,32 @@ public class ObjectDetectionLayer extends Layer {
             return;
         }
 
-        final AffineTransform m2v = vp.getModelToViewTransform();
+        final GeoCoding geoCoding = product.getGeoCoding();
+        final GeoPos geo = new GeoPos();
+        final PixelPos pix = new PixelPos();
 
         final Graphics2D graphics = rendering.getGraphics();
         graphics.setStroke(new BasicStroke(lineThickness));
+        graphics.setColor(Color.RED);
 
-        final double[] ipts = new double[8];
-        final double[] mpts = new double[8];
-        final double[] vpts = new double[8];
-
+        final AffineTransform m2v = vp.getModelToViewTransform();
+        final double[] ipts = new double[2];
+        final double[] mpts = new double[2];
+        final double[] vpts = new double[2];
 
         final double length = 5;
-        int x = 400;
-        int y = 400;
 
-        ipts[0] = x;
-        ipts[1] = y;
-        ipts[2] = x + 100;
-        ipts[3] = y + 100;
-        ipts[4] = x - 50;
-        ipts[5] = y - 50;
-        ipts[6] = x + 10;
-        ipts[7] = y + 50;
-        i2m.transform(ipts, 0, mpts, 0, 4);
-        m2v.transform(mpts, 0, vpts, 0, 4);
+        for(ObjectDiscriminationOp.ShipRecord target : targetList) {
+            geo.setLocation((float)target.lat, (float)target.lon);
+            geoCoding.getPixelPos(geo, pix);
 
-        graphics.setColor(Color.RED);
-        graphics.draw(new Line2D.Double(vpts[0], vpts[1], vpts[2], vpts[3]));
-        graphics.draw(new Line2D.Double(vpts[4], vpts[5], vpts[2], vpts[3]));
-        graphics.draw(new Line2D.Double(vpts[6], vpts[7], vpts[2], vpts[3]));
+            ipts[0] = pix.getX();
+            ipts[1] = pix.getY();
+            i2m.transform(ipts, 0, mpts, 0, 1);
+            m2v.transform(mpts, 0, vpts, 0, 1);
 
+            final Ellipse2D.Double circle = new Ellipse2D.Double(vpts[0], vpts[1], length, length);
+            graphics.draw(circle);
+        }
     }
 }
