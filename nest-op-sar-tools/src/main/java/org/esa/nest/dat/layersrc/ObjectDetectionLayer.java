@@ -120,8 +120,8 @@ public class ObjectDetectionLayer extends Layer {
                                     targetList.add(new ObjectDiscriminationOp.ShipRecord(
                                             Double.parseDouble(lat.getValue()),
                                             Double.parseDouble(lon.getValue()),
-                                            Double.parseDouble(width.getValue()),
-                                            Double.parseDouble(length.getValue()),
+                                            Double.parseDouble(width.getValue()) / rangeSpacing,
+                                            Double.parseDouble(length.getValue()) / azimuthSpacing,
                                             Double.parseDouble(intensity.getValue())));
                                 }
                             }
@@ -169,22 +169,26 @@ public class ObjectDetectionLayer extends Layer {
         graphics.setColor(Color.RED);
 
         final AffineTransform m2v = vp.getModelToViewTransform();
-        final double[] ipts = new double[2];
-        final double[] mpts = new double[2];
-        final double[] vpts = new double[2];
-
-        final double length = 5;
+        final double[] ipts = new double[4];
+        final double[] mpts = new double[4];
+        final double[] vpts = new double[4];
 
         for(ObjectDiscriminationOp.ShipRecord target : targetList) {
             geo.setLocation((float)target.lat, (float)target.lon);
             geoCoding.getPixelPos(geo, pix);
+            final double halfWidth = target.width/2.0;
+            final double halfHeight = target.length/2.0;
 
-            ipts[0] = pix.getX();
-            ipts[1] = pix.getY();
-            i2m.transform(ipts, 0, mpts, 0, 1);
-            m2v.transform(mpts, 0, vpts, 0, 1);
+            ipts[0] = pix.getX()-halfWidth;
+            ipts[1] = pix.getY()-halfHeight;
+            ipts[2] = ipts[0]+target.width;
+            ipts[3] = ipts[1]+target.length;
+            i2m.transform(ipts, 0, mpts, 0, 2);
+            m2v.transform(mpts, 0, vpts, 0, 2);
 
-            final Ellipse2D.Double circle = new Ellipse2D.Double(vpts[0], vpts[1], length, length);
+            final double w = vpts[2]-vpts[0];
+            final double h = vpts[3]-vpts[1];
+            final Ellipse2D.Double circle = new Ellipse2D.Double(vpts[0], vpts[1], w, h);
             graphics.draw(circle);
         }
     }
