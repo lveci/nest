@@ -69,9 +69,9 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         }
     }
 
-    public static boolean isALOS() {
-        //if(productType == null || _volumeDirectoryFile == null)
-        //    readVolumeDirectoryFile();
+    public boolean isALOS() throws IOException, IllegalBinaryFormatException {
+        if(productType == null || _volumeDirectoryFile == null)
+            readVolumeDirectoryFile();
         return true;
     }
 

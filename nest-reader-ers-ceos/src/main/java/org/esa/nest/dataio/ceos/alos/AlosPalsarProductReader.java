@@ -38,10 +38,10 @@ public class AlosPalsarProductReader extends CEOSProductReader {
         try {
             _dataDir = createProductDirectory(file);
 
-            final AlosPalsarProductDirectory ersDataDir = (AlosPalsarProductDirectory)_dataDir;
-            if(ersDataDir.isALOS())
+            final AlosPalsarProductDirectory dataDir = (AlosPalsarProductDirectory)_dataDir;
+            if(dataDir.isALOS())
                 return DecodeQualification.INTENDED;
-            return DecodeQualification.SUITABLE;
+            return DecodeQualification.UNABLE;
 
         } catch (Exception e) {
             return DecodeQualification.UNABLE;

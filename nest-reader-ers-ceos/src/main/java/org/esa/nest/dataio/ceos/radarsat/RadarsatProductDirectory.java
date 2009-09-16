@@ -1,6 +1,7 @@
 package org.esa.nest.dataio.ceos.radarsat;
 
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
@@ -112,7 +113,12 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         addMetaData(product);
 
         addRSATTiePointGrids(product, sceneRec, detProcRec);
-        addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
+
+        if(_leaderFile.getLatCorners() == null || _leaderFile.getLonCorners() == null) {
+            addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
+        } else {
+            addTPGGeoCoding(product);
+        }
 
         return product;
     }
@@ -455,5 +461,56 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         final double ellipmaj2 = ellipmaj * ellipmaj;
 
         return Constants.semiMinorAxis * (Math.sqrt(1+a2) / Math.sqrt((ellipmin2/ellipmaj2) + a2));
+    }
+
+    /**
+     * Update target product GEOCoding. A new tie point grid is generated.
+     */
+    private void addTPGGeoCoding(final Product product) {
+
+     /*   final int gridWidth = 10;
+        final int gridHeight = 10;
+        final float[] targetLatTiePoints = new float[gridWidth*gridHeight];
+        final float[] targetLonTiePoints = new float[gridWidth*gridHeight];
+
+        computeSubSamplingXY();
+
+        // Create new tie point grid
+        int k = 0;
+        for (int r = 0; r < gridHeight; r++) {
+
+            // get the zero Doppler time for the rth line
+            final int y = getLineIndex(r);
+            final double curLineUTC = computeCurrentLineUTC(y);
+            //System.out.println((new ProductData.UTC(curLineUTC)).toString());
+
+            // compute the satellite position and velocity for the zero Doppler time using cubic interpolation
+            final OrbitData data = getOrbitData(curLineUTC);
+
+            for (int c = 0; c < targetTiePointGridWidth; c++) {
+
+                final int x = getSampleIndex(c);
+                targetIncidenceAngleTiePoints[k] = incidenceAngle.getPixelFloat((float)x, (float)y);
+                targetSlantRangeTimeTiePoints[k] = slantRangeTime.getPixelFloat((float)x, (float)y);
+
+                final double slrgTime = targetSlantRangeTimeTiePoints[k] / 1000000000.0; // ns to s;
+                final GeoPos geoPos = computeLatLon(x, y, slrgTime, data);
+                targetLatTiePoints[k] = geoPos.lat;
+                targetLonTiePoints[k] = geoPos.lon;
+                k++;
+            }
+        }
+
+        final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE, targetTiePointGridWidth, targetTiePointGridHeight,
+                0.0f, 0.0f, (float)subSamplingX, (float)subSamplingY, targetLatTiePoints);
+
+        final TiePointGrid lonGrid = new TiePointGrid(OperatorUtils.TPG_LONGITUDE, targetTiePointGridWidth, targetTiePointGridHeight,
+                0.0f, 0.0f, (float)subSamplingX, (float)subSamplingY, targetLonTiePoints, TiePointGrid.DISCONT_AT_180);
+
+        final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
+
+        product.addTiePointGrid(latGrid);
+        product.addTiePointGrid(lonGrid);
+        product.setGeoCoding(tpGeoCoding);    */
     }
 }

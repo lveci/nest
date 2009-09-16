@@ -13,28 +13,28 @@ import org.esa.nest.util.MathUtils;
  */
 public class QuadInterpolator {
 
-    private float subSamplinX;
-    private float subSamplinY;
-    private double[][] warpPolynomialCoef;
-    private static int warpPolynomialOrder = 2;
+    private final float subSamplinX;
+    private final float subSamplinY;
+    private final double[][] warpPolynomialCoef;
+    private static final int warpPolynomialOrder = 2;
 
-    public QuadInterpolator(TiePointGrid tpg) {
+    public QuadInterpolator(final TiePointGrid tpg) {
 
-        int imageWidth = tpg.getSceneRasterWidth();
+        final int imageWidth = tpg.getSceneRasterWidth();
         subSamplinX = tpg.getSubSamplingX();
         subSamplinY = tpg.getSubSamplingY();
-        int width = tpg.getRasterWidth();
-        int height = tpg.getRasterHeight();
-        float[] tiePoints = tpg.getTiePoints();
+        final int width = tpg.getRasterWidth();
+        final int height = tpg.getRasterHeight();
+        final float[] tiePoints = tpg.getTiePoints();
 
-        String tiePointGridName = tpg.getName();
+        final String tiePointGridName = tpg.getName();
         boolean imageFlipped = false;
         if ((tiePointGridName.contains("incidence_angle") || tiePointGridName.contains("slant_range_time")) &&
             (tiePoints[0] > tiePoints[width - 1])) {
             imageFlipped = true;
         }
 
-        double[] sampleIndexArray = new double[width];
+        final double[] sampleIndexArray = new double[width];
         for (int c = 0; c < width; c++) {
             if (imageFlipped) {
                 sampleIndexArray[width - 1 - c] = imageWidth - 1 - Math.min(c*((int)subSamplinX - 1), imageWidth - 1);
@@ -45,7 +45,7 @@ public class QuadInterpolator {
 
         final Matrix A = MathUtils.createVandermondeMatrix(sampleIndexArray, warpPolynomialOrder);
 
-        double[] tiePointArray = new double[width];
+        final double[] tiePointArray = new double[width];
         warpPolynomialCoef = new double[height][warpPolynomialOrder + 1];
         for (int r = 0; r < height; r++) {
             for (int c = 0; c < width; c++) {

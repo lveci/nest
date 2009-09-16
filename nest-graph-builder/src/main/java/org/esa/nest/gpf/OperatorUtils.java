@@ -16,6 +16,10 @@ import java.util.ArrayList;
  */
 public class OperatorUtils {
 
+    public static final String TPG_SLANT_RANGE_TIME = "slant_range_time";
+    public static final String TPG_INCIDENT_ANGLE = "incident_angle";
+    public static final String TPG_LATITUDE = "latitude";
+    public static final String TPG_LONGITUDE = "longitude";
 
     /**
      * Get incidence angle tie point grid.
@@ -23,7 +27,7 @@ public class OperatorUtils {
      * @param tiePointGridName The tie point grid name.
      * @return srcTPG The incidence angle tie point grid.
      */
-    private static TiePointGrid getTiePointGrid(final Product sourceProduct, String tiePointGridName) {
+    private static TiePointGrid getTiePointGrid(final Product sourceProduct, final String tiePointGridName) {
 
         for (int i = 0; i < sourceProduct.getNumTiePointGrids(); i++) {
             final TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
@@ -42,7 +46,7 @@ public class OperatorUtils {
      */
     public static TiePointGrid getIncidenceAngle(final Product sourceProduct) {
 
-        return getTiePointGrid(sourceProduct, "incident_angle");
+        return getTiePointGrid(sourceProduct, TPG_INCIDENT_ANGLE);
     }
 
     /**
@@ -52,7 +56,7 @@ public class OperatorUtils {
      */
     public static TiePointGrid getSlantRangeTime(final Product sourceProduct) {
 
-        return getTiePointGrid(sourceProduct, "slant_range_time");
+        return getTiePointGrid(sourceProduct, TPG_SLANT_RANGE_TIME);
     }
 
     /**
@@ -62,7 +66,7 @@ public class OperatorUtils {
      */
     public static TiePointGrid getLatitude(final Product sourceProduct) {
 
-        return getTiePointGrid(sourceProduct, "latitude");
+        return getTiePointGrid(sourceProduct, TPG_LATITUDE);
     }
 
     /**
@@ -72,7 +76,7 @@ public class OperatorUtils {
      */
     public static TiePointGrid getLongitude(final Product sourceProduct) {
 
-        return getTiePointGrid(sourceProduct, "longitude");
+        return getTiePointGrid(sourceProduct, TPG_LONGITUDE);
     }
 
     public static String getPolarizationFromBandName(final String bandName) {
@@ -237,9 +241,9 @@ public class OperatorUtils {
 
             targetProduct.addTiePointGrid(tgtTPG);
 
-            if (srcTPG.getName().equals("latitude")) {
+            if (srcTPG.getName().equals(TPG_LATITUDE)) {
                 latGrid = tgtTPG;
-            } else if (srcTPG.getName().equals("longitude")) {
+            } else if (srcTPG.getName().equals(TPG_LONGITUDE)) {
                 lonGrid = tgtTPG;
             }
         }

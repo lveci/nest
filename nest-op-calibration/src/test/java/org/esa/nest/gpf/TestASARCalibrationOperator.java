@@ -8,6 +8,7 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.TestUtils;
 
 import java.util.Arrays;
@@ -81,10 +82,10 @@ public class TestASARCalibrationOperator extends TestCase {
                                    0.005337F,0.006535F,0.009244F,0.017858F,
                                    0.005337F,0.006535F,0.009244F,0.017858F};
 
-        testProduct.addTiePointGrid(new TiePointGrid("incident_angle", 4, 4, 0, 0, 1, 1, incidence_angle));
-        testProduct.addTiePointGrid(new TiePointGrid("slant_range_time", 4, 4, 0, 0, 1, 1, slant_rage_time));
+        testProduct.addTiePointGrid(new TiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE, 4, 4, 0, 0, 1, 1, incidence_angle));
+        testProduct.addTiePointGrid(new TiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME, 4, 4, 0, 0, 1, 1, slant_rage_time));
 
-        final MetadataElement abs = testProduct.getMetadataRoot().getElement("Abstracted Metadata");
+        final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(testProduct);
         AbstractMetadata.setAttribute(abs, AbstractMetadata.PRODUCT_TYPE, "ASA_APG_1P");
         AbstractMetadata.setAttribute(abs, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
         AbstractMetadata.setAttribute(abs, AbstractMetadata.mds1_tx_rx_polar, "HH");
@@ -124,7 +125,7 @@ public class TestASARCalibrationOperator extends TestCase {
 
         final Band band2 = testProduct.addBand("band2", ProductData.TYPE_FLOAT32);
         band2.setSynthetic(true);
-        band2.setUnit("amplitude");
+        band2.setUnit(Unit.AMPLITUDE);
         final float[] floatValues = new float[w * h];
         Arrays.fill(floatValues, 2.5f);
         band2.setData(ProductData.createInstance(floatValues));
@@ -132,7 +133,7 @@ public class TestASARCalibrationOperator extends TestCase {
         final Band band3 = testProduct.addBand("band3", ProductData.TYPE_INT16);
         band3.setScalingFactor(0.5);
         band3.setSynthetic(true);
-        band3.setUnit("amplitude");
+        band3.setUnit(Unit.AMPLITUDE);
         final short[] shortValues = new short[w * h];
         Arrays.fill(shortValues, (short) 6);
         band3.setData(ProductData.createInstance(shortValues));

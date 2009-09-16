@@ -79,8 +79,8 @@ public abstract class CEOSProductDirectory {
 
         if(latCorners == null || lonCorners == null) return;
 
-        int gridWidth = 10;
-        int gridHeight = 10;
+        final int gridWidth = 10;
+        final int gridHeight = 10;
 
         final float[] fineLatTiePoints = new float[gridWidth*gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latCorners, fineLatTiePoints);

@@ -30,6 +30,7 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.nest.dataio.OrbitalDataRecordReader;
 import org.esa.nest.dataio.PrareOrbitReader;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.Settings;
@@ -278,17 +279,21 @@ public final class ApplyOrbitFileOp extends Operator {
             }
         }
 
-        final TiePointGrid angleGrid = new TiePointGrid("incident_angle", targetTiePointGridWidth, targetTiePointGridHeight,
+        final TiePointGrid angleGrid = new TiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE, targetTiePointGridWidth, targetTiePointGridHeight,
                 0.0f, 0.0f, (float)subSamplingX, (float)subSamplingY, targetIncidenceAngleTiePoints);
+        angleGrid.setUnit(Unit.DEGREES);
 
-        final TiePointGrid slrgtGrid = new TiePointGrid("slant_range_time", targetTiePointGridWidth, targetTiePointGridHeight,
+        final TiePointGrid slrgtGrid = new TiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME, targetTiePointGridWidth, targetTiePointGridHeight,
                 0.0f, 0.0f, (float)subSamplingX, (float)subSamplingY, targetSlantRangeTimeTiePoints);
+        slrgtGrid.setUnit(Unit.NANOSECONDS);
 
-        final TiePointGrid latGrid = new TiePointGrid("latitude", targetTiePointGridWidth, targetTiePointGridHeight,
+        final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE, targetTiePointGridWidth, targetTiePointGridHeight,
                 0.0f, 0.0f, (float)subSamplingX, (float)subSamplingY, targetLatTiePoints);
+        latGrid.setUnit(Unit.DEGREES);
 
-        final TiePointGrid lonGrid = new TiePointGrid("longitude", targetTiePointGridWidth, targetTiePointGridHeight,
+        final TiePointGrid lonGrid = new TiePointGrid(OperatorUtils.TPG_LONGITUDE, targetTiePointGridWidth, targetTiePointGridHeight,
                 0.0f, 0.0f, (float)subSamplingX, (float)subSamplingY, targetLonTiePoints, TiePointGrid.DISCONT_AT_180);
+        lonGrid.setUnit(Unit.DEGREES);
 
         final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
 

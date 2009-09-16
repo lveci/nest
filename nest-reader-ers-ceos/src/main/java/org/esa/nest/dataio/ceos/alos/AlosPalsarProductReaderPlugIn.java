@@ -6,7 +6,6 @@ import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.ceos.CEOSProductReaderPlugIn;
 
 import java.io.File;
-import java.io.FilenameFilter;
 
 /**
  * The ReaderPlugIn for ALOS PALSAR CEOS products.
@@ -48,15 +47,7 @@ public class AlosPalsarProductReaderPlugIn extends CEOSProductReaderPlugIn {
 
         final File parentDir = file.getParentFile();
         if (file.isFile() && parentDir.isDirectory()) {
-            final FilenameFilter filter = new FilenameFilter() {
-                public boolean accept(final File dir, final String name) {
-                    return name.toUpperCase().startsWith(constants.getVolumeFilePrefix());
-                }
-            };
-            final File[] files = parentDir.listFiles(filter);
-            if (files != null && files.length >= 0) {
-                return DecodeQualification.INTENDED;//checkProductQualification(file);
-            }
+            return checkProductQualification(file);
         }
         return DecodeQualification.UNABLE;
     }

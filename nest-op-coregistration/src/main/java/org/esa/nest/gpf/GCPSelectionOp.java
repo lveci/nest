@@ -141,8 +141,8 @@ public class GCPSelectionOp extends Operator {
     private final static double CGOLD = 0.3819660; // CGOLD is the golden ratio;
     private final static double ZEPS = 1.0e-10;    // ZEPS is a small number that protects against trying to achieve fractional
 
-    private final static Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
-    private final static Map<Band, Band> complexSrcMap = new HashMap<Band, Band>(10);
+    private final Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
+    private final Map<Band, Band> complexSrcMap = new HashMap<Band, Band>(10);
 
     /**
      * Default constructor. The graph processing framework
@@ -249,7 +249,9 @@ public class GCPSelectionOp extends Operator {
             final Band targetBand = targetProduct.addBand(srcBand.getName(), srcBand.getDataType());
             ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
             sourceRasterMap.put(targetBand, srcBand);
-
+            if(srcBand.getUnit().contains(Unit.IMAGINARY) || srcBand == masterBand1) {
+                targetBand.setSourceImage(srcBand.getSourceImage());
+            }
             if(complexCoregistration) {
                 if(srcBand.getUnit() != null && srcBand.getUnit().equals(Unit.REAL)) {
                     if(i + 1 < numSrcBands)
@@ -275,25 +277,20 @@ public class GCPSelectionOp extends Operator {
     public void computeTileStack(Map<Band, Tile> targetTileMap, Rectangle targetRectangle, ProgressMonitor pm)
                                 throws OperatorException {
         try {
-
-            boolean skipImaginary = false;
             for(Band targetBand : targetProduct.getBands()) {
+                final Tile targetTile = targetTileMap.get(targetBand);
+                if(targetTile == null) continue;
+                
                 final Band slaveBand = sourceRasterMap.get(targetBand);
                 if (slaveBand != masterBand1 && slaveBand != masterBand2) {
                     if(complexCoregistration) {
-                        if(skipImaginary) {             // every other slave band
-                            skipImaginary = false;
-                        } else {
-                            computeSlaveGCPs(slaveBand, complexSrcMap.get(slaveBand), targetBand, targetRectangle,
+                        computeSlaveGCPs(slaveBand, complexSrcMap.get(slaveBand), targetBand, targetRectangle,
                                     SubProgressMonitor.create(pm, 1));
-                            skipImaginary = true;
-                        }
                     } else {
                         computeSlaveGCPs(slaveBand, null, targetBand, targetRectangle, SubProgressMonitor.create(pm, 1));
                     }
                 }
                 // copy slave data to target
-                final Tile targetTile = targetTileMap.get(targetBand);
                 targetTile.setRawSamples(getSourceTile(slaveBand, targetRectangle, pm).getRawSamples());
                 pm.worked(1);
             }
