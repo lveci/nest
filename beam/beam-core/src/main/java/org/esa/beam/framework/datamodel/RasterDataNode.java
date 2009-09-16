@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataNode.java,v 1.5 2009-06-01 19:52:04 lveci Exp $
+ * $Id: RasterDataNode.java,v 1.6 2009-09-15 20:16:49 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -82,7 +82,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
      * Text returned by the <code>{@link #getPixelString}</code> method if no data is available at the given pixel
      * position.
      */
-    public final static String NO_DATA_TEXT = "No data"; /*I18N*/
+    public final static String NO_DATA_TEXT = "NaN"; /*I18N*/
     /**
      * Text returned by the <code>{@link #getPixelString}</code> method if no data is available at the given pixel
      * position.
