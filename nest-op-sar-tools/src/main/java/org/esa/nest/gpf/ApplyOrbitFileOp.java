@@ -93,8 +93,6 @@ public final class ApplyOrbitFileOp extends Operator {
     private int sourceImageHeight;
     private int targetTiePointGridHeight;
     private int targetTiePointGridWidth;
-    private int subSamplingX;
-    private int subSamplingY;
 
     private double firstLineUTC;
     private double lineTimeInterval;
@@ -251,14 +249,21 @@ public final class ApplyOrbitFileOp extends Operator {
         final float[] targetIncidenceAngleTiePoints = new float[targetTiePointGridHeight*targetTiePointGridWidth];
         final float[] targetSlantRangeTimeTiePoints = new float[targetTiePointGridHeight*targetTiePointGridWidth];
 
-        computeSubSamplingXY();
+        final int subSamplingX = sourceImageWidth / (targetTiePointGridWidth - 1);
+        final int subSamplingY = sourceImageHeight / (targetTiePointGridHeight - 1);
 
         // Create new tie point grid
         int k = 0;
         for (int r = 0; r < targetTiePointGridHeight; r++) {
 
             // get the zero Doppler time for the rth line
-            final int y = getLineIndex(r);
+            int y;
+            if (r == targetTiePointGridHeight - 1) { // last row
+                y = sourceImageHeight - 1;
+            } else { // other rows
+                y = r * subSamplingY;
+            }
+
             final double curLineUTC = computeCurrentLineUTC(y);
             //System.out.println((new ProductData.UTC(curLineUTC)).toString());
             
@@ -267,7 +272,7 @@ public final class ApplyOrbitFileOp extends Operator {
 
             for (int c = 0; c < targetTiePointGridWidth; c++) {
 
-                final int x = getSampleIndex(c);
+                final int x = getSampleIndex(c, subSamplingX);
                 targetIncidenceAngleTiePoints[k] = incidenceAngle.getPixelFloat((float)x, (float)y);
                 targetSlantRangeTimeTiePoints[k] = slantRangeTime.getPixelFloat((float)x, (float)y);
 
@@ -309,33 +314,12 @@ public final class ApplyOrbitFileOp extends Operator {
     }
 
     /**
-     * Compute subSamplingX and subSamplingY.
-     */
-    private void computeSubSamplingXY() {
-        subSamplingX = sourceImageWidth / (targetTiePointGridWidth - 1);
-        subSamplingY = sourceImageHeight / (targetTiePointGridHeight - 1);
-    }
-
-    /**
-     * Get corresponding range line index for a given row index in the new tie point grid.
-     * @param rowIdx The row index in the new tie point grid.
-     * @return The range line index.
-     */
-    private int getLineIndex(int rowIdx) {
-
-        if (rowIdx == targetTiePointGridHeight - 1) { // last row
-            return sourceImageHeight - 1;
-        } else { // other rows
-            return rowIdx * subSamplingY;
-        }
-    }
-
-    /**
      * Get corresponding sample index for a given column index in the new tie point grid.
      * @param colIdx The column index in the new tie point grid.
+     * @param subSamplingX the x sub sampling
      * @return The sample index.
      */
-    private int getSampleIndex(int colIdx) {
+    private int getSampleIndex(final int colIdx, final int subSamplingX) {
 
         if (colIdx == targetTiePointGridWidth - 1) { // last column
             return sourceImageWidth - 1;

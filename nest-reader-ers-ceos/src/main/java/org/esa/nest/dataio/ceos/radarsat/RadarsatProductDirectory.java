@@ -13,6 +13,8 @@ import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
+import org.esa.nest.util.GeoUtils;
+import org.esa.nest.gpf.OperatorUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -468,49 +470,66 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
      */
     private void addTPGGeoCoding(final Product product) {
 
-     /*   final int gridWidth = 10;
+    /*    final int gridWidth = 10;
         final int gridHeight = 10;
         final float[] targetLatTiePoints = new float[gridWidth*gridHeight];
         final float[] targetLonTiePoints = new float[gridWidth*gridHeight];
+        final int sourceImageWidth = product.getSceneRasterHeight();
 
-        computeSubSamplingXY();
+        final float subSamplingX = product.getSceneRasterWidth() / (float)(gridWidth - 1);
+        final float subSamplingY = sourceImageWidth / (float)(gridHeight - 1);
+
+        final TiePointGrid slantRangeTime = OperatorUtils.getSlantRangeTime(product);
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        final double firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
+        final double lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
 
         // Create new tie point grid
         int k = 0;
         for (int r = 0; r < gridHeight; r++) {
 
             // get the zero Doppler time for the rth line
-            final int y = getLineIndex(r);
-            final double curLineUTC = computeCurrentLineUTC(y);
+            int y;
+            if (r == gridHeight - 1) { // last row
+                y = product.getSceneRasterHeight() - 1;
+            } else { // other rows
+                y = (int)(r * subSamplingY);
+            }
+            final double curLineUTC = firstLineUTC + y*lineTimeInterval;
             //System.out.println((new ProductData.UTC(curLineUTC)).toString());
 
             // compute the satellite position and velocity for the zero Doppler time using cubic interpolation
-            final OrbitData data = getOrbitData(curLineUTC);
+            //final OrbitData data = getOrbitData(curLineUTC);
 
-            for (int c = 0; c < targetTiePointGridWidth; c++) {
+            for (int c = 0; c < gridWidth; c++) {
 
-                final int x = getSampleIndex(c);
-                targetIncidenceAngleTiePoints[k] = incidenceAngle.getPixelFloat((float)x, (float)y);
-                targetSlantRangeTimeTiePoints[k] = slantRangeTime.getPixelFloat((float)x, (float)y);
+                int x;
+                if (c == gridWidth - 1) { // last column
+                    x = sourceImageWidth - 1;
+                } else { // other columns
+                    x = (int)(c * subSamplingX);
+                }
 
-                final double slrgTime = targetSlantRangeTimeTiePoints[k] / 1000000000.0; // ns to s;
+                final double slrgTime = slantRangeTime.getPixelFloat((float)x, (float)y) / 1000000000.0; // ns to s;
                 final GeoPos geoPos = computeLatLon(x, y, slrgTime, data);
                 targetLatTiePoints[k] = geoPos.lat;
-                targetLonTiePoints[k] = geoPos.lon;
-                k++;
+                targetLonTiePoints[k] = geoPos.lon; 
+                ++k;
             }
         }
 
-        final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE, targetTiePointGridWidth, targetTiePointGridHeight,
-                0.0f, 0.0f, (float)subSamplingX, (float)subSamplingY, targetLatTiePoints);
+        final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE, gridWidth, gridHeight,
+                0.0f, 0.0f, subSamplingX, subSamplingY, targetLatTiePoints);
 
-        final TiePointGrid lonGrid = new TiePointGrid(OperatorUtils.TPG_LONGITUDE, targetTiePointGridWidth, targetTiePointGridHeight,
-                0.0f, 0.0f, (float)subSamplingX, (float)subSamplingY, targetLonTiePoints, TiePointGrid.DISCONT_AT_180);
+        final TiePointGrid lonGrid = new TiePointGrid(OperatorUtils.TPG_LONGITUDE, gridWidth, gridHeight,
+                0.0f, 0.0f, subSamplingX, subSamplingY, targetLonTiePoints, TiePointGrid.DISCONT_AT_180);
 
         final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
 
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
-        product.setGeoCoding(tpGeoCoding);    */
+        product.setGeoCoding(tpGeoCoding);      */
     }
+
+
 }
