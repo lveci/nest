@@ -2,6 +2,7 @@ package org.esa.nest.dataio.ceos.radarsat;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
+import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
@@ -20,6 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import Jama.Matrix;
 
 /**
  * This class represents a product directory.
@@ -116,10 +119,10 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         addRSATTiePointGrids(product, sceneRec, detProcRec);
 
-        if(_leaderFile.getLatCorners() == null || _leaderFile.getLonCorners() == null) {
+        if(_leaderFile.getLatCorners() != null && _leaderFile.getLonCorners() != null) {
             addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
         } else {
-            addTPGGeoCoding(product);
+            addTPGGeoCoding(product, sceneRec);
         }
 
         return product;
@@ -392,14 +395,18 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         final double pixelSpacing = sceneRec.getAttributeDouble("Pixel spacing");
 
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        final double firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
+        final double lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
+
         AbstractMetadata.SRGRCoefficientList[] srgCoefList = null;
         try {
             srgCoefList = AbstractMetadata.getSRGRCoefficients(AbstractMetadata.getAbstractedMetadata(product));
         } catch(Exception e) {
             srgCoefList = null;
         }
+
         if(srgCoefList != null) {
-            final double[] coeff = srgCoefList[0].coefficients;
 
             final double dRg = subSamplingX * pixelSpacing;
             final float[] rangeDist = new float[gridWidth*gridHeight];
@@ -408,6 +415,33 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             // slant range distance in m
             int k = 0;
             for (int j = 0; j < gridHeight; j++) {
+
+                // get UTC for j
+                int y;
+                if (j == gridHeight - 1) { // last row
+                    y = product.getSceneRasterHeight() - 1;
+                } else { // other rows
+                    y = j * subSamplingY;
+                }
+                final double curLineUTC = firstLineUTC + y*lineTimeInterval;
+
+                // get SRGR coeffs for given utc using linear interpolation
+                int idx = 0;
+                for (int i = 0; i < srgCoefList.length && curLineUTC >= srgCoefList[i].timeMJD; i++) {
+                    idx = i;
+                }
+
+                final double[] coeff = new double[srgCoefList[idx].coefficients.length];
+                if (idx == srgCoefList.length - 1) {
+                    idx--;
+                }
+
+                final double mu = (curLineUTC - srgCoefList[idx].timeMJD) /
+                                  (srgCoefList[idx+1].timeMJD - srgCoefList[idx].timeMJD);
+                for (int i = 0; i < coeff.length; i++) {
+                    coeff[i] = org.esa.nest.util.MathUtils.interpolationLinear(
+                            srgCoefList[idx].coefficients[i], srgCoefList[idx+1].coefficients[i], mu);
+                }
 
                 for(int i = 0; i < gridWidth; i++) {
                     final double groundRange = i*dRg;
@@ -428,8 +462,8 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             final TiePointGrid slantRangeGrid = new TiePointGrid(
                     "slant_range_time", gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, rangeTime);
 
-            product.addTiePointGrid(slantRangeGrid);
             slantRangeGrid.setUnit(Unit.NANOSECONDS);
+            product.addTiePointGrid(slantRangeGrid);
 
             // incidence angle
             final float[] angles = new float[gridWidth*gridHeight];
@@ -468,10 +502,10 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
     /**
      * Update target product GEOCoding. A new tie point grid is generated.
      */
-    private void addTPGGeoCoding(final Product product) {
+    private void addTPGGeoCoding(final Product product, final BaseRecord sceneRec) throws IOException {
 
-    /*    final int gridWidth = 10;
-        final int gridHeight = 10;
+        final int gridWidth = 11;
+        final int gridHeight = 11;
         final float[] targetLatTiePoints = new float[gridWidth*gridHeight];
         final float[] targetLonTiePoints = new float[gridWidth*gridHeight];
         final int sourceImageWidth = product.getSceneRasterHeight();
@@ -479,15 +513,45 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         final float subSamplingX = product.getSceneRasterWidth() / (float)(gridWidth - 1);
         final float subSamplingY = sourceImageWidth / (float)(gridHeight - 1);
 
-        final TiePointGrid slantRangeTime = OperatorUtils.getSlantRangeTime(product);
+        final TiePointGrid slantRangeTime = product.getTiePointGrid("slant_range_time");
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         final double firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
         final double lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
 
+        final double latMid = sceneRec.getAttributeDouble("scene centre geodetic latitude");
+        final double lonMid = sceneRec.getAttributeDouble("scene centre geodetic longitude");
+
+        AbstractMetadata.OrbitStateVector[] orbitStateVectors;
+        try {
+            orbitStateVectors = AbstractMetadata.getOrbitStateVectors(absRoot);
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        }
+
+        final int numVectorsUsed = Math.min(orbitStateVectors.length, 5);
+        final double[] timeArray = new double[numVectorsUsed];
+        final double[] xPosArray = new double[numVectorsUsed];
+        final double[] yPosArray = new double[numVectorsUsed];
+        final double[] zPosArray = new double[numVectorsUsed];
+        final double[] xVelArray = new double[numVectorsUsed];
+        final double[] yVelArray = new double[numVectorsUsed];
+        final double[] zVelArray = new double[numVectorsUsed];
+
+        final int numVectors = orbitStateVectors.length;
+        final int d = numVectors / numVectorsUsed;
+        for (int i = 0; i < numVectorsUsed; i++) {
+            timeArray[i] = orbitStateVectors[i*d].time_mjd;
+            xPosArray[i] = orbitStateVectors[i*d].x_pos; // m
+            yPosArray[i] = orbitStateVectors[i*d].y_pos; // m
+            zPosArray[i] = orbitStateVectors[i*d].z_pos; // m
+            xVelArray[i] = orbitStateVectors[i*d].x_vel; // m/s
+            yVelArray[i] = orbitStateVectors[i*d].y_vel; // m/s
+            zVelArray[i] = orbitStateVectors[i*d].z_vel; // m/s
+        }
+
         // Create new tie point grid
         int k = 0;
         for (int r = 0; r < gridHeight; r++) {
-
             // get the zero Doppler time for the rth line
             int y;
             if (r == gridHeight - 1) { // last row
@@ -499,10 +563,10 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             //System.out.println((new ProductData.UTC(curLineUTC)).toString());
 
             // compute the satellite position and velocity for the zero Doppler time using cubic interpolation
-            //final OrbitData data = getOrbitData(curLineUTC);
+            final OrbitData data = getOrbitData(curLineUTC, timeArray, xPosArray, yPosArray, zPosArray,
+                                                xVelArray, yVelArray, zVelArray);
 
             for (int c = 0; c < gridWidth; c++) {
-
                 int x;
                 if (c == gridWidth - 1) { // last column
                     x = sourceImageWidth - 1;
@@ -511,7 +575,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                 }
 
                 final double slrgTime = slantRangeTime.getPixelFloat((float)x, (float)y) / 1000000000.0; // ns to s;
-                final GeoPos geoPos = computeLatLon(x, y, slrgTime, data);
+                final GeoPos geoPos = computeLatLon(latMid, lonMid, slrgTime, data);
                 targetLatTiePoints[k] = geoPos.lat;
                 targetLonTiePoints[k] = geoPos.lon; 
                 ++k;
@@ -528,8 +592,130 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
-        product.setGeoCoding(tpGeoCoding);      */
+        product.setGeoCoding(tpGeoCoding);
     }
 
 
+    /**
+     * Compute accurate target geo position.
+     * @param latMid The scene latitude.
+     * @param lonMid The scene longitude.
+     * @param slrgTime The slant range time of the given pixel.
+     * @param data The orbit data.
+     * @return The geo position of the target.
+     */
+    private GeoPos computeLatLon(final double latMid, final double lonMid, double slrgTime, OrbitData data) {
+
+        final double[] xyz = new double[3];
+        final GeoPos geoPos = new GeoPos((float)latMid, (float)lonMid);
+
+        // compute initial (x,y,z) coordinate from lat/lon
+        GeoUtils.geo2xyz(geoPos, xyz);
+
+        // compute accurate (x,y,z) coordinate using Newton's method
+        computeAccurateXYZ(data, xyz, slrgTime);
+
+        // compute (lat, lon, alt) from accurate (x,y,z) coordinate
+        GeoUtils.xyz2geo(xyz, geoPos);
+
+        return geoPos;
+    }
+
+    /**
+     * Compute accurate target position for given orbit information using Newton's method.
+     * @param data The orbit data.
+     * @param xyz The xyz coordinate for the target.
+     * @param time The slant range time in seconds.
+     */
+    private static void computeAccurateXYZ(OrbitData data, double[] xyz, double time) {
+
+        final double a = Constants.semiMajorAxis;
+        final double b = Constants.semiMinorAxis;
+        final double a2 = a*a;
+        final double b2 = b*b;
+        final double del = 0.002;
+        final int maxIter = 200;
+
+        Matrix X = new Matrix(3, 1);
+        final Matrix F = new Matrix(3, 1);
+        final Matrix J = new Matrix(3, 3);
+
+        X.set(0, 0, xyz[0]);
+        X.set(1, 0, xyz[1]);
+        X.set(2, 0, xyz[2]);
+
+        J.set(0, 0, data.xVel);
+        J.set(0, 1, data.yVel);
+        J.set(0, 2, data.zVel);
+
+        for (int i = 0; i < maxIter; i++) {
+
+            final double x = X.get(0,0);
+            final double y = X.get(1,0);
+            final double z = X.get(2,0);
+
+            final double dx = x - data.xPos;
+            final double dy = y - data.yPos;
+            final double dz = z - data.zPos;
+
+            F.set(0, 0, data.xVel*dx + data.yVel*dy + data.zVel*dz);
+            F.set(1, 0, dx*dx + dy*dy + dz*dz - Math.pow(time*Constants.halfLightSpeed, 2.0));
+            F.set(2, 0, x*x/a2 + y*y/a2 + z*z/b2 - 1);
+
+            J.set(1, 0, 2.0*dx);
+            J.set(1, 1, 2.0*dy);
+            J.set(1, 2, 2.0*dz);
+            J.set(2, 0, 2.0*x/a2);
+            J.set(2, 1, 2.0*y/a2);
+            J.set(2, 2, 2.0*z/b2);
+
+            X = X.minus(J.inverse().times(F));
+
+            if (Math.abs(F.get(0,0)) <= del && Math.abs(F.get(1,0)) <= del && Math.abs(F.get(2,0)) <= del)  {
+                break;
+            }
+        }
+
+        xyz[0] = X.get(0,0);
+        xyz[1] = X.get(1,0);
+        xyz[2] = X.get(2,0);
+    }
+
+    /**
+     * Get orbit information for given time.
+     * @param utc The UTC in days.
+     * @param timeArray Array holding zeros Doppler times for all state vectors.
+     * @param xPosArray Array holding x coordinates for sensor positions in all state vectors.
+     * @param yPosArray Array holding y coordinates for sensor positions in all state vectors.
+     * @param zPosArray Array holding z coordinates for sensor positions in all state vectors.
+     * @param xVelArray Array holding x velocities for sensor positions in all state vectors.
+     * @param yVelArray Array holding y velocities for sensor positions in all state vectors.
+     * @param zVelArray Array holding z velocities for sensor positions in all state vectors.
+     * @return The orbit information.
+     */
+    public static OrbitData getOrbitData(final double utc, final double[] timeArray,
+                                         final double[] xPosArray, final double[] yPosArray, final double[] zPosArray,
+                                         final double[] xVelArray, final double[] yVelArray, final double[] zVelArray) {
+
+        // Lagrange polynomial interpolation
+        final OrbitData orbitData = new OrbitData();
+        orbitData.xPos = org.esa.nest.util.MathUtils.lagrangeInterpolatingPolynomial(timeArray, xPosArray, utc);
+        orbitData.yPos = org.esa.nest.util.MathUtils.lagrangeInterpolatingPolynomial(timeArray, yPosArray, utc);
+        orbitData.zPos = org.esa.nest.util.MathUtils.lagrangeInterpolatingPolynomial(timeArray, zPosArray, utc);
+        orbitData.xVel = org.esa.nest.util.MathUtils.lagrangeInterpolatingPolynomial(timeArray, xVelArray, utc);
+        orbitData.yVel = org.esa.nest.util.MathUtils.lagrangeInterpolatingPolynomial(timeArray, yVelArray, utc);
+        orbitData.zVel = org.esa.nest.util.MathUtils.lagrangeInterpolatingPolynomial(timeArray, zVelArray, utc);
+
+        return orbitData;
+    }
+
+    private final static class OrbitData {
+        public double xPos;
+        public double yPos;
+        public double zPos;
+        public double xVel;
+        public double yVel;
+        public double zVel;
+    }
+    
 }
