@@ -126,6 +126,8 @@ public final class GeoUtils
         
         if (geoPos.lon < 0.0 && y >= 0.0) {
             geoPos.lon += 180.0;
+        } else if (geoPos.lon > 0.0 && y < 0.0) {
+            geoPos.lon -= 180.0;
         }
 
         geoPos.lat = (float)(Math.atan((z + ep2*b*Math.pow(Math.sin(theta), 3)) /
