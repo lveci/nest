@@ -383,6 +383,9 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
     private static void addRSATTiePointGrids(final Product product, final BaseRecord sceneRec, final BaseRecord detProcRec)
             throws IllegalBinaryFormatException, IOException {
 
+        if(detProcRec == null)
+            return;
+
         final int gridWidth = 11;
         final int gridHeight = 11;
 
@@ -502,7 +505,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
     /**
      * Update target product GEOCoding. A new tie point grid is generated.
      */
-    private void addTPGGeoCoding(final Product product, final BaseRecord sceneRec) throws IOException {
+    private static void addTPGGeoCoding(final Product product, final BaseRecord sceneRec) throws IOException {
 
         final int gridWidth = 11;
         final int gridHeight = 11;
@@ -604,7 +607,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
      * @param data The orbit data.
      * @return The geo position of the target.
      */
-    private GeoPos computeLatLon(final double latMid, final double lonMid, double slrgTime, OrbitData data) {
+    private static GeoPos computeLatLon(final double latMid, final double lonMid, double slrgTime, OrbitData data) {
 
         final double[] xyz = new double[3];
         final GeoPos geoPos = new GeoPos((float)latMid, (float)lonMid);
