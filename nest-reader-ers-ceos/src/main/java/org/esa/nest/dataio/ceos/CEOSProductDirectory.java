@@ -220,7 +220,9 @@ public abstract class CEOSProductDirectory {
             final Map.Entry entry = (Map.Entry) sortedEntry;
             final String data = ((String) entry.getValue()).trim();
             // strip of double quotes
-            final String strippedData = data.substring(1, data.length() - 1);
+            String strippedData = "";
+            if(data.length() > 2)
+                strippedData = data.substring(1, data.length() - 1);
             final MetadataAttribute attribute = new MetadataAttribute((String) entry.getKey(),
                     new ProductData.ASCII(strippedData), true);
             summaryMetadata.addAttribute(attribute);

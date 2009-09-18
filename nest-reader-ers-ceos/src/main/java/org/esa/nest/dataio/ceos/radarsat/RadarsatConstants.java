@@ -18,6 +18,7 @@ public class RadarsatConstants implements CEOSConstants {
     final static String PRODUCT_DESCRIPTION_PREFIX = "Radarsat product ";
 
     final static String SUMMARY_FILE_NAME = "summary.txt";
+    final static String SCENE_LABEL_FILE_NAME = "scene01.lbl";
 
     private final static String INDICATION_KEY = ".001";
     private final static int MINIMUM_FILES = 4;    // 4 image files + leader file + volume file + trailer file

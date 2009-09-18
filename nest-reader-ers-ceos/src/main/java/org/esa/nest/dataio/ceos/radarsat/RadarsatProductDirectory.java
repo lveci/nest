@@ -2,8 +2,8 @@ package org.esa.nest.dataio.ceos.radarsat;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
-import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.util.Guardian;
+import org.esa.beam.util.Debug;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ReaderUtils;
@@ -121,7 +121,11 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         if(_leaderFile.getLatCorners() != null && _leaderFile.getLonCorners() != null) {
             addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
-        } else {
+        }
+        if(product.getGeoCoding() == null) {
+            addGeoCodingFromSceneLabel(product);
+        }
+        if(product.getGeoCoding() == null) {
             addTPGGeoCoding(product, sceneRec);
         }
 
@@ -185,6 +189,9 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         }
 
         addSummaryMetadata(new File(_baseDir, RadarsatConstants.SUMMARY_FILE_NAME), "Summary Information", root);
+        addSummaryMetadata(new File(_baseDir, RadarsatConstants.SCENE_LABEL_FILE_NAME), "Scene Label", root);
+        addSummaryMetadata(new File(_baseDir.getParentFile(), RadarsatConstants.SCENE_LABEL_FILE_NAME), "Scene Label", root);
+        
         addAbstractedMetadataHeader(product, root);
     }
 
@@ -351,6 +358,36 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             level = sceneRecord.getAttributeString("Scene reference number").trim();
         }
         return RadarsatConstants.PRODUCT_DESCRIPTION_PREFIX + level;
+    }
+
+    private static void addGeoCodingFromSceneLabel(Product product) {
+
+        final MetadataElement sceneLabelElem = product.getMetadataRoot().getElement("Scene Label");
+        if (sceneLabelElem != null) {
+
+            try {
+                final String ulLatLon = sceneLabelElem.getAttributeString("UL_CORNER_LAT_LON");
+                final String urLatLon = sceneLabelElem.getAttributeString("UR_CORNER_LAT_LON");
+                final String llLatLon = sceneLabelElem.getAttributeString("LL_CORNER_LAT_LON");
+                final String lrLatLon = sceneLabelElem.getAttributeString("LR_CORNER_LAT_LON");
+
+                final float latUL = Float.parseFloat(ulLatLon.substring(0, ulLatLon.indexOf(',')));
+                final float latUR = Float.parseFloat(urLatLon.substring(0, urLatLon.indexOf(',')));
+                final float latLL = Float.parseFloat(llLatLon.substring(0, llLatLon.indexOf(',')));
+                final float latLR = Float.parseFloat(lrLatLon.substring(0, lrLatLon.indexOf(',')));
+                final float[] latCorners = new float[]{latUL, latUR, latLL, latLR};
+
+                final float lonUL = Float.parseFloat(ulLatLon.substring(ulLatLon.indexOf(',')+1, ulLatLon.length()-1));
+                final float lonUR = Float.parseFloat(urLatLon.substring(urLatLon.indexOf(',')+1, urLatLon.length()-1));
+                final float lonLL = Float.parseFloat(llLatLon.substring(llLatLon.indexOf(',')+1, llLatLon.length()-1));
+                final float lonLR = Float.parseFloat(lrLatLon.substring(lrLatLon.indexOf(',')+1, lrLatLon.length()-1));
+                final float[] lonCorners = new float[]{lonUL, lonUR, lonLL, lonLR};
+
+                addGeoCoding(product, latCorners, lonCorners);
+            } catch (Exception e) {
+                Debug.trace(e.toString());
+            }
+        }
     }
 
     protected static void addSRGRCoefficients(final MetadataElement absRoot, final BaseRecord detailedProcRec) {
