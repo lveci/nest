@@ -154,9 +154,9 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
     private Band createBand(final Product product, final String name, final String unit, final RadarsatImageFile imageFile) {
 
-        int dataType = ProductData.TYPE_INT16;
+        int dataType = ProductData.TYPE_UINT16;
         if(imageFile.getBitsPerSample() == 8) {
-            dataType = ProductData.TYPE_INT8;
+            dataType = ProductData.TYPE_UINT8;
         }
         final Band band = new Band(name, dataType,  _sceneWidth, _sceneHeight);
         band.setDescription(name);

@@ -385,7 +385,7 @@ public final class ERSCalibrator implements Calibrator {
             }
         }
     } catch(Exception e) {
-        System.out.println(e.toString());
+        OperatorUtils.catchOperatorException("ERSCalibrator", e);
     }
     }
 

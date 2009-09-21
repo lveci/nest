@@ -255,11 +255,11 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     }
 
     private Band createBand(final Product product, final String name, final String unit, final AlosPalsarImageFile imageFile) {
-        int dataType = ProductData.TYPE_INT16;
+        int dataType = ProductData.TYPE_UINT16;
         if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1)
             dataType = ProductData.TYPE_FLOAT32;
         else if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_0)
-            dataType = ProductData.TYPE_INT8;
+            dataType = ProductData.TYPE_UINT8;
 
         final Band band = new Band(name, dataType, _sceneWidth, _sceneHeight);
         band.setDescription(name);

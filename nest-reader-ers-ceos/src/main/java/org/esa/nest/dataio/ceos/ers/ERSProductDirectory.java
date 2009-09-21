@@ -138,7 +138,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
     }
 
     private Band createBand(final Product product, final String name, final String unit, final ERSImageFile imageFile) {
-        final Band band = new Band(name, ProductData.TYPE_INT16,
+        final Band band = new Band(name, ProductData.TYPE_UINT16,
                                    _sceneWidth, _sceneHeight);
         band.setDescription(name);
         band.setUnit(unit);
