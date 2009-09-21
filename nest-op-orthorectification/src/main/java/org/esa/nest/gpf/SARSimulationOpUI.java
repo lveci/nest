@@ -36,7 +36,9 @@ public class SARSimulationOpUI extends BaseOperatorUI {
     private final JButton externalDEMBrowseButton = new JButton("...");
     private final JLabel externalDEMFileLabel = new JLabel("External DEM:");
     private final JLabel externalDEMNoDataValueLabel = new JLabel("DEM No Data Value:");
+    private final JCheckBox saveLayoverShadowMaskCheckBox = new JCheckBox("Save Layover-Shadow Mask as band");
 
+    private boolean saveLayoverShadowMask = false;
     private double extNoDataValue = 0;
 
     @Override
@@ -79,6 +81,12 @@ public class SARSimulationOpUI extends BaseOperatorUI {
             }
         });
 
+        saveLayoverShadowMaskCheckBox.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    saveLayoverShadowMask = (e.getStateChange() == ItemEvent.SELECTED);
+                }
+        });
+
         return new JScrollPane(panel);
     }
 
@@ -97,6 +105,9 @@ public class SARSimulationOpUI extends BaseOperatorUI {
         } else {
             externalDEMNoDataValue.setText(String.valueOf(paramMap.get("externalDEMNoDataValue")));
         }
+
+        saveLayoverShadowMask = (Boolean)paramMap.get("saveLayoverShadowMask");
+        saveLayoverShadowMaskCheckBox.getModel().setPressed(saveLayoverShadowMask);
     }
 
     @Override
@@ -118,6 +129,8 @@ public class SARSimulationOpUI extends BaseOperatorUI {
             paramMap.put("externalDEMFile", new File(extFileStr));
             paramMap.put("externalDEMNoDataValue", Double.parseDouble(externalDEMNoDataValue.getText()));
         }
+
+        paramMap.put("saveLayoverShadowMask", saveLayoverShadowMask);
     }
 
     private JComponent createPanel() {
@@ -144,6 +157,8 @@ public class SARSimulationOpUI extends BaseOperatorUI {
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "DEM Resampling Method:", demResamplingMethod);
 
+        gbc.gridy++;
+        contentPane.add(saveLayoverShadowMaskCheckBox, gbc);
         //DialogUtils.fillPanel(contentPane, gbc);
 
         return contentPane;
