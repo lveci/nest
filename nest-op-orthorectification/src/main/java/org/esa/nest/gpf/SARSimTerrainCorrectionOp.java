@@ -121,6 +121,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
     private boolean srgrFlag = false;
     private boolean useExternalDEMFile = false;
+    private boolean saveLayoverShadowMask = false;
 
     private String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
     private String demName = null;
@@ -163,7 +164,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
     private boolean useAvgSceneHeight = false;
     private Calibrator calibrator = null;
-
+    private Band maskBand = null;
+    
     /**
      * Initializes this operator and sets the one and only target product.
      * <p>The target product can be either defined by a field of type {@link org.esa.beam.framework.datamodel.Product} annotated with the
@@ -185,6 +187,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 throw new OperatorException("Source product is already map projected");
             }
 
+            maskBand = sourceProduct.getBand("layover_shadow_mask");
+            
             getMetadata();
 
             RangeDopplerGeocodingOp.computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
@@ -421,6 +425,12 @@ public class SARSimTerrainCorrectionOp extends Operator {
         for (int i = 1; i < sourceBands.length; i++) { // skip master band (i=0, simulated image)
 
             final Band srcBand = sourceBands[i];
+            String bandName = srcBand.getName();
+            if (bandName.contains("layover_shadow_mask")) {
+                saveLayoverShadowMask = true;
+                continue;
+            }
+
             final String unit = srcBand.getUnit();
             if(unit == null) {
                 throw new OperatorException("band " + srcBand.getName() + " requires a unit");
@@ -436,7 +446,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 targetBandName = srcBand.getName();
             }
 
-            final String[] srcBandNames = {srcBand.getName()};
+            final String[] srcBandNames = {bandName};
             targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
 
             final Band targetBand = new Band(targetBandName,
@@ -476,6 +486,15 @@ public class SARSimTerrainCorrectionOp extends Operator {
                                                      targetImageHeight);
             projectedIncidenceAngleBand.setUnit(Unit.DEGREES);
             targetProduct.addBand(projectedIncidenceAngleBand);
+        }
+
+        if (saveLayoverShadowMask) {
+            final Band layoverShadowingMasksBand = new Band("layoverShadowingMasks",
+                                                     ProductData.TYPE_INT16,
+                                                     targetImageWidth,
+                                                     targetImageHeight);
+            layoverShadowingMasksBand.setUnit(Unit.AMPLITUDE);
+            targetProduct.addBand(layoverShadowingMasksBand);
         }
     }
 
@@ -624,6 +643,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
         ProductData demBuffer = null;
         ProductData incidenceAngleBuffer = null;
         ProductData projectedIncidenceAngleBuffer = null;
+        ProductData layoverShadowingMasksBuffer = null;
+        
         final double halfLightSpeedInMetersPerDay = Constants.halfLightSpeed * 86400.0;
 
         final ArrayList<TileData> trgTileList = new ArrayList<TileData>();
@@ -645,6 +666,11 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 continue;
             }
 
+            if(targetBand.getName().equals("layoverShadowingMasks")) {
+                layoverShadowingMasksBuffer = targetTiles.get(targetBand).getDataBuffer();
+                continue;
+            }
+            
             final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
 
             final TileData td = new TileData();
@@ -746,6 +772,14 @@ public class SARSimTerrainCorrectionOp extends Operator {
                         saveNoDataValueToTarget(index, trgTiles);
 
                     } else {
+
+                        if (saveLayoverShadowMask) {
+                            final Rectangle srcRect = new Rectangle((int)(rangeIndex+0.5), (int)(azimuthIndex+0.5), 1, 1);
+                            final Tile sourceTile = getSourceTile(maskBand, srcRect, pm);
+                            final int m = sourceTile.getDataBuffer().getElemIntAt(sourceTile.getDataBufferIndex(
+                                    (int)(rangeIndex+0.5), (int)(azimuthIndex+0.5)));
+                            layoverShadowingMasksBuffer.setElemIntAt(index, m);
+                        }
 
                         final PixelPos pixelPos = new PixelPos(0.0f,0.0f);
                         WarpOp.getWarpedCoords(

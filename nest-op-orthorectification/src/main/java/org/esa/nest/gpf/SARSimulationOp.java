@@ -37,6 +37,7 @@ import org.esa.nest.util.GeoUtils;
 import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * This operator generates simulated SAR image using DEM, the Geocoding and orbit state vectors from a given
@@ -103,6 +104,9 @@ public final class SARSimulationOp extends Operator {
 
     @Parameter(label="DEM No Data Value", defaultValue = "0")
     private double externalDEMNoDataValue = 0;
+
+    @Parameter(defaultValue="false", label="Save Layover-Shadow Mask as band")
+    private boolean saveLayoverShadowMask = false;
 
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
@@ -317,6 +321,17 @@ public final class SARSimulationOp extends Operator {
         targetBand.setUnit(Unit.INTENSITY);
         targetProduct.addBand(targetBand);
 
+        // add layover/shadow mask band
+        if (saveLayoverShadowMask) {
+            targetBand = new Band("layover_shadow_mask",
+                                  ProductData.TYPE_INT8,
+                                  sourceImageWidth,
+                                  sourceImageHeight);
+
+            targetBand.setUnit(Unit.AMPLITUDE);
+            targetProduct.addBand(targetBand);
+        }
+
         // add selected slave bands
         boolean bandSlected = false;
         if (sourceBandNames == null || sourceBandNames.length == 0) {
@@ -357,25 +372,29 @@ public final class SARSimulationOp extends Operator {
     }
 
     /**
-     * Called by the framework in order to compute a tile for the given target band.
+     * Called by the framework in order to compute the stack of tiles for the given target bands.
      * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
      *
-     * @param targetBand The target band.
-     * @param targetTile The current tile associated with the target band to be computed.
-     * @param pm         A progress monitor which should be used to determine computation cancelation requests.
-     * @throws org.esa.beam.framework.gpf.OperatorException
-     *          If an error occurs during computation of the target raster.
+     * @param targetTiles     The current tiles to be computed for each target band.
+     * @param targetRectangle The area in pixel coordinates to be computed (same for all rasters in <code>targetRasters</code>).
+     * @param pm              A progress monitor which should be used to determine computation cancelation requests.
+     * @throws OperatorException if an error occurs during computation of the target rasters.
      */
     @Override
-    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+    public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
-        final Rectangle targetTileRectangle = targetTile.getRectangle();
-        final int x0 = targetTileRectangle.x;
-        final int y0 = targetTileRectangle.y;
-        final int w  = targetTileRectangle.width;
-        final int h  = targetTileRectangle.height;
-        final ProductData trgData = targetTile.getDataBuffer();
+        final int x0 = targetRectangle.x;
+        final int y0 = targetRectangle.y;
+        final int w  = targetRectangle.width;
+        final int h  = targetRectangle.height;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+
+        Tile targetTile = targetTiles.get(targetProduct.getBand("intensity_mst"));
+        ProductData masterBuffer = targetTiles.get(targetProduct.getBand("intensity_mst")).getDataBuffer();
+        ProductData layoverShadowMaskBuffer = null;
+        if (saveLayoverShadowMask) {
+            layoverShadowMaskBuffer = targetTiles.get(targetProduct.getBand("layover_shadow_mask")).getDataBuffer();
+        }
 
         int ymin = y0;
         int nh = h;
@@ -386,6 +405,7 @@ public final class SARSimulationOp extends Operator {
         }
 
         final float[][] localDEM = new float[nh+2][w+2];
+        final int[][] localMask = new int[nh+2][w+2];
         try {
             final boolean valid = getLocalDEM(x0, ymin, w, nh, localDEM);
             if(!valid)
@@ -394,10 +414,17 @@ public final class SARSimulationOp extends Operator {
             final double[] earthPoint = new double[3];
             final double[] sensorPos = new double[3];
             for (int y = ymin; y < y0 + h; y++) {
+
+                final double[] slrs = new double[w];
+                final double[] elev = new double[w];
+                final int[] index = new int[w];
+                final boolean[] savePixel = new boolean[w];
+
                 for (int x = x0; x < x0 + w; x++) {
 
                     final double alt = localDEM[y-ymin+1][x-x0+1];
                     if (alt == demNoDataValue) {
+                        savePixel[x - x0] = false;
                         continue;
                     }
 
@@ -420,6 +447,9 @@ public final class SARSimulationOp extends Operator {
                             srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC, rangeSpacing, zeroDopplerTimeWithoutBias,
                             slantRange, nearEdgeSlantRange, srgrConvParams) + 0.5);
 
+                    slrs[x - x0] = slantRange;
+
+                    elev[x - x0] = computeElevationAngle(slantRange, earthPoint, sensorPos);
 
                     final RangeDopplerGeocodingOp.LocalGeometry localGeometry = new RangeDopplerGeocodingOp.LocalGeometry();
                     setLocalGeometry(x, y, earthPoint, sensorPos, localGeometry);
@@ -430,10 +460,11 @@ public final class SARSimulationOp extends Operator {
 
                     final double v = computeBackscatteredPower(localIncidenceAngles[0]);
 
-                    final int index = targetTile.getDataBufferIndex(rangeIndex, azimuthIndex);
+                    index[x - x0] = targetTile.getDataBufferIndex(rangeIndex, azimuthIndex);
 
                     if (rangeIndex >= x0 && rangeIndex < x0+w && azimuthIndex >= y0 && azimuthIndex < y0+h) {
-                        trgData.setElemDoubleAt(index, v + trgData.getElemDoubleAt(index));
+                        masterBuffer.setElemDoubleAt(index[x - x0], v + masterBuffer.getElemDoubleAt(index[x - x0]));
+                        savePixel[x - x0] = true;
                     } else {
                         if (azimuthIndex >= y0+h) {
                             if (!ny0Updated) {
@@ -443,8 +474,54 @@ public final class SARSimulationOp extends Operator {
                                 ny0 = Math.min(ny0, y);
                             }
                         }
+                        savePixel[x - x0] = false;
                     }
                 }
+
+                if (!saveLayoverShadowMask) {
+                    continue;
+                }
+
+                // traverse from near range to far range to detect layover area
+                // todo should determine which side is near range first
+                double maxSlantRange = 0.0;
+                for (int x = x0; x < x0 + w; x++) {
+                    int i = x - x0;
+                    if (savePixel[i]) {
+                        if (slrs[i] > maxSlantRange) {
+                            maxSlantRange = slrs[i];
+                        } else {
+                            layoverShadowMaskBuffer.setElemIntAt(index[i], 1);
+                        }
+                    }
+                }
+
+                // traverse from far range to near range to detect the remaining layover area
+                double minSlantRange = maxSlantRange;
+                for (int x = x0 + w - 1; x >= x0; x--) {
+                    int i = x - x0;
+                    if (savePixel[i]) {
+                        if (slrs[i] < minSlantRange) {
+                            minSlantRange = slrs[i];
+                        } else {
+                            layoverShadowMaskBuffer.setElemIntAt(index[i], 1);
+                        }
+                    }
+                }
+
+                // traverse from near range to far range to detect shadowing area
+                double maxElevAngle = 0.0;
+                for (int x = x0; x < x0 + w; x++) {
+                    int i = x - x0;
+                    if (savePixel[i]) {
+                        if (elev[i] > maxElevAngle) {
+                            maxElevAngle = elev[i];
+                        } else {
+                            layoverShadowMaskBuffer.setElemIntAt(index[i], 2 + layoverShadowMaskBuffer.getElemIntAt(index[i]));
+                        }
+                    }
+                }
+
             }
 
         } catch(Exception e) {
@@ -518,6 +595,22 @@ public final class SARSimulationOp extends Operator {
         return (0.0118*cosAlpha / Math.pow(Math.sin(alpha) + 0.111*cosAlpha, 3));
     }
 
+    /**
+     * Compute elevation angle (in degree).
+     * @param slantRange The slant range.
+     * @param earthPoint The coordinate for target on earth surface.
+     * @param sensorPos The coordinate for satellite position.
+     * @return The elevation angle in degree.
+     */
+    private double computeElevationAngle(final double slantRange, final double[] earthPoint, final double[] sensorPos) {
+
+        final double H2 = sensorPos[0]*sensorPos[0] + sensorPos[1]*sensorPos[1] + sensorPos[2]*sensorPos[2];
+        final double R2 = earthPoint[0]*earthPoint[0] + earthPoint[1]*earthPoint[1] + earthPoint[2]*earthPoint[2];
+
+        return Math.acos((slantRange*slantRange + H2 - R2)/(2*slantRange*Math.sqrt(H2)))*
+                org.esa.beam.util.math.MathUtils.RTOD;
+    }
+    
 
     /**
      * The SPI is used to register this operator in the graph processing framework
