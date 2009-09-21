@@ -157,6 +157,7 @@ public class SARSimulationOpUI extends BaseOperatorUI {
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "DEM Resampling Method:", demResamplingMethod);
 
+        gbc.gridx = 0;
         gbc.gridy++;
         contentPane.add(saveLayoverShadowMaskCheckBox, gbc);
         //DialogUtils.fillPanel(contentPane, gbc);
