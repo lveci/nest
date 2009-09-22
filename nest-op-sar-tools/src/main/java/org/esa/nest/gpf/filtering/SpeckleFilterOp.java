@@ -68,9 +68,9 @@ public class SpeckleFilterOp extends Operator {
                 label="Frost Damping Factor")
     private int dampingFactor = 2;
 
-    @Parameter(description = "The edge threshold (Refined Lee filter only)", interval = "(0, *)", defaultValue = "0.8",
+    @Parameter(description = "The edge threshold (Refined Lee filter only)", interval = "(0, *)", defaultValue = "5000",
                 label="Edge detection threshold")
-    private double edgeThreshold = 0.8;
+    private double edgeThreshold = 5000.0;
 
     private double enl;
     private double cu, cu2;
