@@ -127,6 +127,7 @@
 	<mapID target="WarpOp" url="operators/WarpOp.html"/>	
 	<mapID target="WSSDeburstOp" url="operators/WSSDeburstOp.html"/>
 	<mapID target="ObjectDetection" url="operators/ObjectDetection.html"/>
+	<mapID target="OilSpillDetection" url="operators/OilSpillDetectionOp.html"/>
 	<!--mapID target="WSSMosaicOp" url="operators/WSSMosaicOp.html"/-->
 	
 	<!--Analysis Operators-->

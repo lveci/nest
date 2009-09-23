@@ -143,6 +143,7 @@
 			<tocitem text="Warp" target="WarpOp"/>
 			<tocitem text="WSS Deburst" target="WSSDeburstOp"/>
 			<tocitem text="Object Detection" target="ObjectDetection"/>
+			<tocitem text="Oil Spill Detection" target="OilSpillDetection"/>
 			<!--tocitem text="WSS Mosaic" target="WSSMosaicOp"/-->
 		</tocitem>	
 		<tocitem text="Analysis Operators">
