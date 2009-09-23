@@ -15,7 +15,7 @@ public class OilSpillDetectionOpAction extends AbstractVisatAction {
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        final GraphBuilderDialog dialog = new GraphBuilderDialog(getAppContext(), "Oil-Spill-Detection", "Oil-Spill-Detection", false);
+        final GraphBuilderDialog dialog = new GraphBuilderDialog(getAppContext(), "Oil-Spill-Detection", "OilSpillDetection", false);
         dialog.show();
 
         final File graphPath = GraphBuilderDialog.getInternalGraphFolder();
