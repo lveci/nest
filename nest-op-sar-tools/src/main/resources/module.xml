@@ -210,7 +210,7 @@
             <text>Multi-temporal Products</text>
             <shortDescr>Invoke the Speckle Filter operator on multi-temporal products.</shortDescr>
             <parent>SpeckleFilteringGroup</parent>
-            <helpId>SpeckleFilterOp</helpId>
+            <helpId>MultiTemporalSpeckleFilterOp</helpId>
         </action>
 
         <action>

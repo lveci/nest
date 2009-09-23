@@ -139,8 +139,10 @@
 			<tocitem text="GCP Selection" target="GCPSelectionOp"/>			
 			<tocitem text="Multilook" target="MultilookOp"/>			
 	        <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>			
+	        <tocitem text="Multi-Temporal Speckle Filter" target="MultiTemporalSpeckleFilterOp"/>			
 			<tocitem text="Warp" target="WarpOp"/>
 			<tocitem text="WSS Deburst" target="WSSDeburstOp"/>
+			<tocitem text="Object Detection" target="Object-Detection"/>
 			<!--tocitem text="WSS Mosaic" target="WSSMosaicOp"/-->
 		</tocitem>	
 		<tocitem text="Analysis Operators">
