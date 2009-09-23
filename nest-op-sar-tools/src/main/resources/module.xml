@@ -228,6 +228,7 @@
             <text>Object Detection</text>
             <shortDescr>Ocean Object Detection</shortDescr>
             <parent>oceanTools</parent>
+			<helpId>ObjectDetection</helpId>
         </action>
         
         <action>
