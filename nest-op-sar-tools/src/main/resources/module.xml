@@ -238,6 +238,7 @@
             <shortDescr>Oil Spill Detection</shortDescr>
             <placeAfter>ObjectDetection</placeAfter>
             <parent>oceanTools</parent>
+			<helpId>OilSpillDetection</helpId>
         </action>
 
         <action>
