@@ -20,18 +20,23 @@
         <dependency>
             <groupId>com.bc.ceres</groupId>
             <artifactId>ceres-core</artifactId>
-            <version>0.9-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-core</artifactId>
-            <version>4.6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-gpf</artifactId>
-            <version>4.6-SNAPSHOT</version>
         </dependency>
+		<dependency>
+			<groupId>org.esa.nest</groupId>
+			<artifactId>nest-core</artifactId>
+	    </dependency>
+	    <dependency>
+			<groupId>org.esa.nest</groupId>
+			<artifactId>nest-graph-builder</artifactId>
+	    </dependency>
     </dependencies>
 
     <build>

@@ -120,6 +120,7 @@
 	    <module>nest-op-coregistration</module>
 	    <module>nest-op-sar-tools</module>
 		<module>nest-op-orthorectification</module>
+		<module>nest-developer-tools</module>
   </modules>
 
     <dependencyManagement>
@@ -168,32 +169,22 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-core</artifactId>
-                <version>4.7-SNAPSHOT</version>
+				<version>4.7-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-gpf</artifactId>
-                <version>4.7-SNAPSHOT</version>
+				<version>4.7-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-ui</artifactId>
-                <version>4.7-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.esa.beam</groupId>
-                <artifactId>beam-processing</artifactId>
-                <version>4.7-SNAPSHOT</version>
+				<version>4.7-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-visat-rcp</artifactId>
-                <version>4.7-SNAPSHOT</version>
-            </dependency>
-			<dependency>
-                <groupId>org.esa.beam</groupId>
-                <artifactId>beam-visat</artifactId>
-                <version>4.7-SNAPSHOT</version>
+				<version>4.7-SNAPSHOT</version>
             </dependency>
 
             <!-- BEAM Modules ############################################# -->
