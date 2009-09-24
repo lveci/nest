@@ -1,5 +1,5 @@
 /*
- * $Id: VisatMain.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: VisatMain.java,v 1.2 2009-09-24 19:32:51 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -47,7 +47,7 @@ import java.util.Locale;
  * <i>file</i></code> sets the logfile for VISAT to <i>file</i> </ld>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2009-09-24 19:32:51 $
  */
 public class VisatMain implements RuntimeRunnable {
     /**
@@ -57,6 +57,7 @@ public class VisatMain implements RuntimeRunnable {
      * @param progressMonitor a progress monitor
      * @throws Exception if an error occurs
      */
+    @Override
     public void run(Object argument, ProgressMonitor progressMonitor) throws Exception {
 
         String[] args = new String[0];
@@ -106,6 +107,7 @@ public class VisatMain implements RuntimeRunnable {
         Debug.setEnabled(debugEnabled);
         if (debugEnabled) {
             JAI.getDefaultInstance().setImagingListener(new ImagingListener() {
+                @Override
                 public boolean errorOccurred(String message, Throwable thrown, Object where, boolean isRetryable) throws RuntimeException {
                     Debug.trace("JAI Error: " + message);
                     Debug.trace(thrown);
@@ -140,6 +142,7 @@ public class VisatMain implements RuntimeRunnable {
 
     private static void openProduct(final VisatApp app, final String productFilepath) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 UIUtils.setRootFrameWaitCursor(app.getMainFrame());
                 try {
