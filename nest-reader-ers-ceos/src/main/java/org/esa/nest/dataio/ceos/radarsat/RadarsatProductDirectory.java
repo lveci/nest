@@ -119,6 +119,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         addRSATTiePointGrids(product, sceneRec, detProcRec);
 
+        // set slant_range_to_first_pixel in metadata
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         final TiePointGrid slantRangeTimeTPG = product.getTiePointGrid("slant_range_time");
         final int numOutputLines = absRoot.getAttributeInt(AbstractMetadata.num_output_lines);
@@ -295,12 +296,14 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                     sceneRec.getAttributeDouble("Nominal number of looks processed in range"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
                     sceneRec.getAttributeDouble("Pulse Repetition Frequency"));
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency,
-                    sceneRec.getAttributeDouble("Radar frequency") * 1000.0);
-            //final double slantRangeTime = sceneRec.getAttributeDouble("Zero-doppler range time of first range pixel")*0.001; //s
-            //final double lightSpeed = 299792458.0; //  m / s
-            //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
-            //        slantRangeTime*lightSpeed*0.5);
+            double radarFreq = sceneRec.getAttributeDouble("Radar frequency");
+            if (Double.compare(radarFreq, 0.0) == 0) {
+                final double radarWaveLength = sceneRec.getAttributeDouble("Radar wavelength"); // in m
+                if (Double.compare(radarWaveLength, 0.0) != 0) {
+                    radarFreq = Constants.lightSpeed / radarWaveLength / Constants.oneMillion; // in MHz
+                }
+            }
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency, radarFreq);
 
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
                 sceneRec.getAttributeDouble("Range sampling rate"));
