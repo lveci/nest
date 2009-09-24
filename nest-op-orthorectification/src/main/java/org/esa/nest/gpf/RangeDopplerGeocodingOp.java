@@ -314,6 +314,9 @@ public class RangeDopplerGeocodingOp extends Operator {
     public static double getRadarFrequency(final MetadataElement absRoot) throws Exception {
         final double radarFreq = AbstractMetadata.getAttributeDouble(absRoot,
                                                     AbstractMetadata.radar_frequency)*Constants.oneMillion; // Hz
+        if (Double.compare(radarFreq, 0.0) == 0) {
+            throw new OperatorException("Invalid radar frequency: " + radarFreq);
+        }
         return Constants.lightSpeed / radarFreq;
     }
 
