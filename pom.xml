@@ -120,7 +120,7 @@
 	    <module>nest-op-coregistration</module>
 	    <module>nest-op-sar-tools</module>
 		<module>nest-op-orthorectification</module>
-		<module>nest-developer-tools</module>
+		<!--module>nest-developer-tools</module-->
   </modules>
 
     <dependencyManagement>
@@ -529,7 +529,8 @@
                         <downloadJavadocs>true</downloadJavadocs>
                         <jdkName>1.6</jdkName>
                         <jdkLevel>1.6</jdkLevel>
-                        <exclude>target</exclude>
+                        <exclude>target,maven-nest-gpf-archetype,maven-nest-dataio-archetype</exclude>
+						<useShortDependencyNames>true</useShortDependencyNames>
                     </configuration>
                 </plugin>
 

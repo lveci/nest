@@ -280,6 +280,8 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeDouble("Pixel spacing"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
                 sceneRec.getAttributeDouble("Line spacing"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS,
+                sceneRec.getAttributeDouble("Ascending or Descending flag"));
         }
 
         //sph
