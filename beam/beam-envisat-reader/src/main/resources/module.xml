@@ -57,10 +57,21 @@
             <formatName>ENVISAT</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <accelerator>control E</accelerator>
-            <text>Import ENVISAT Product...</text>
+            <text>Import ENVISAT (ASAR,MERIS,AATSR) Product...</text>
             <shortDescr>Import an ENVISAT (ASAR, MERIS,AATSR) data product or subset.</shortDescr>
             <description>Import an ENVISAT ASAR, MERIS or AATSR data product or subset.</description>
             <largeIcon>icons/Import24.gif</largeIcon>
+        </action>
+		<action>
+            <id>importMERISProduct</id>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <formatName>ENVISAT</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <text>Import ENVISAT MERIS Product...</text>
+            <shortDescr>Import an ENVISAT (ASAR, MERIS,AATSR) data product or subset.</shortDescr>
+            <description>Import an ENVISAT ASAR, MERIS or AATSR data product or subset.</description>
+            <largeIcon>icons/Import24.gif</largeIcon>
+			<parent>importOptical</parent>
         </action>
         <action>
             <id>importErsProduct</id>

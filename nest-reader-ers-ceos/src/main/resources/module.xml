@@ -49,7 +49,7 @@
         <action>
             <id>importAlosPalsarProduct</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
-            <formatName>ALOS PALSAR</formatName>
+            <formatName>ALOS PALSAR CEOS</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import an ALOS PALSAR CEOS data product or subset.</shortDescr>
             <description>Import an ALOS PALSAR CEOS data product or subset.</description>

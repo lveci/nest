@@ -529,7 +529,7 @@
                         <downloadJavadocs>true</downloadJavadocs>
                         <jdkName>1.6</jdkName>
                         <jdkLevel>1.6</jdkLevel>
-                        <exclude>target,maven-nest-gpf-archetype,maven-nest-dataio-archetype</exclude>
+                        <exclude>target</exclude>
 						<useShortDependencyNames>true</useShortDependencyNames>
                     </configuration>
                 </plugin>

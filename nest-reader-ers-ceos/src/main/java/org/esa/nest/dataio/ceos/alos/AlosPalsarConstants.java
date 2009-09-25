@@ -7,7 +7,7 @@ import org.esa.nest.dataio.ceos.CEOSConstants;
  */
 public class AlosPalsarConstants implements CEOSConstants {
 
-    final static String[] FORMAT_NAMES = new String[]{"ALOS PALSAR"};
+    final static String[] FORMAT_NAMES = new String[]{"ALOS PALSAR CEOS"};
     final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
     final static String PLUGIN_DESCRIPTION = "ALOS PALSAR CEOS Products";      /*I18N*/
     final static String PRODUCT_TYPE_PREFIX = "";
