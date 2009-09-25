@@ -130,9 +130,11 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         if(_leaderFile.getLatCorners() != null && _leaderFile.getLonCorners() != null) {
             addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
         }
+        
         if(product.getGeoCoding() == null) {
             addGeoCodingFromSceneLabel(product);
         }
+
         if(product.getGeoCoding() == null) {
             addTPGGeoCoding(product, sceneRec);
         }
@@ -402,6 +404,97 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         }
     }
 
+    protected static void addOrbitStateVectors(final MetadataElement absRoot, final BaseRecord platformPosRec) {
+        if(platformPosRec == null) return;
+
+        final MetadataElement orbitVectorListElem = absRoot.getElement(AbstractMetadata.orbit_state_vectors);
+        final int numPoints = platformPosRec.getAttributeInt("Number of data points");
+        final double theta = platformPosRec.getAttributeDouble("Greenwich mean hour angle");
+
+        final double firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
+        final double lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD();
+        int startIdx = 0;
+        int endIdx = 0;
+        for (int i = 1; i <= numPoints; i++) {
+            double time = getOrbitTime(platformPosRec, i).getMJD();
+            if (time < firstLineUTC) {
+                startIdx = i;
+            }
+
+            if (time < lastLineUTC) {
+                endIdx = i;
+            }
+        }
+        startIdx = Math.max(startIdx - 1, 1);
+        endIdx = Math.min(endIdx+1, numPoints);
+
+//        for(int i=1; i <= numPoints; ++i) {
+        for(int i=startIdx; i <= endIdx; ++i) {
+            addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, theta, i, startIdx);
+        }
+
+        if(absRoot.getAttributeUTC(AbstractMetadata.STATE_VECTOR_TIME, new ProductData.UTC(0)).
+                equalElems(new ProductData.UTC(0))) {
+
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
+                getOrbitTime(platformPosRec, 1));
+        }
+    }
+
+    private static void addVector(String name, MetadataElement orbitVectorListElem,
+                                  BaseRecord platformPosRec, double theta, int num, int startIdx) {
+
+        final MetadataElement orbitVectorElem = new MetadataElement(name+(num-startIdx+1));
+
+        final double xPosECI = platformPosRec.getAttributeDouble("Position vector X "+num);
+        final double yPosECI = platformPosRec.getAttributeDouble("Position vector Y "+num);
+        final double zPosECI = platformPosRec.getAttributeDouble("Position vector Z "+num);
+
+        final double xVelECI = platformPosRec.getAttributeDouble("Velocity vector X' "+num);
+        final double yVelECI = platformPosRec.getAttributeDouble("Velocity vector Y' "+num);
+        final double zVelECI = platformPosRec.getAttributeDouble("Velocity vector Z' "+num);
+
+        final double thetaInRd = theta*MathUtils.DTOR;
+        final double cosTheta = Math.cos(thetaInRd);
+        final double sinTheta = Math.sin(thetaInRd);
+
+        final double xPosECEF =  cosTheta*xPosECI + sinTheta*yPosECI;
+        final double yPosECEF = -sinTheta*xPosECI + cosTheta*yPosECI;
+        final double zPosECEF = zPosECI;
+
+        final double xVelECEF =  cosTheta*xVelECI + sinTheta*yVelECI;
+        final double yVelECEF = -sinTheta*xVelECI + cosTheta*yVelECI;
+        final double zVelECEF = zVelECI;
+
+        orbitVectorElem.setAttributeUTC(AbstractMetadata.orbit_vector_time, getOrbitTime(platformPosRec, num));
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_x_pos, xPosECEF);
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_y_pos, yPosECEF);
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_z_pos, zPosECEF);
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_x_vel, xVelECEF);
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_y_vel, yVelECEF);
+        orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_z_vel, zVelECEF);
+
+        orbitVectorListElem.addElement(orbitVectorElem);
+    }
+
+    private static ProductData.UTC getOrbitTime(BaseRecord platformPosRec, int num) {
+        final int year = platformPosRec.getAttributeInt("Year of data point");
+        final int month = platformPosRec.getAttributeInt("Month of data point");
+        final int day = platformPosRec.getAttributeInt("Day of data point");
+        final float secondsOfDay = (float)platformPosRec.getAttributeDouble("Seconds of day");
+        final float hoursf = secondsOfDay / 3600f;
+        final int hour = (int)hoursf;
+        final float minutesf = (hoursf - hour) * 60f;
+        final int minute = (int)minutesf;
+        float second = (minutesf - minute) * 60f;
+
+        final float interval = (float)platformPosRec.getAttributeDouble("Time interval between DATA points");
+        second += interval * (num-1);
+
+        return AbstractMetadata.parseUTC(String.valueOf(year)+'-'+month+'-'+day+' '+
+                                  hour+':'+minute+':'+second, "yyyy-MM-dd HH:mm:ss");
+    }
+    
     protected static void addSRGRCoefficients(final MetadataElement absRoot, final BaseRecord detailedProcRec) {
         if(detailedProcRec == null) return;
 
@@ -553,6 +646,9 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
     /**
      * Update target product GEOCoding. A new tie point grid is generated.
+     * @param product The product.
+     * @param sceneRec The scene record.
+     * @throws IOException The exceptions.
      */
     private static void addTPGGeoCoding(final Product product, final BaseRecord sceneRec) throws IOException {
 
@@ -568,6 +664,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         final TiePointGrid slantRangeTime = product.getTiePointGrid("slant_range_time");
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         final double firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
+        final double lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD();
         final double lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
 
         final double latMid = sceneRec.getAttributeDouble("scene centre geodetic latitude");
@@ -580,7 +677,23 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             throw new IOException(e.getMessage());
         }
 
-        final int numVectorsUsed = Math.min(orbitStateVectors.length, 5);
+        final int numVectors = orbitStateVectors.length;
+        int startIdx = 0;
+        int endIdx = 0;
+        for (int i = 0; i < numVectors; i++) {
+            double time = orbitStateVectors[i].time_mjd;
+            if (time < firstLineUTC) {
+                startIdx = i;
+            }
+
+            if (time < lastLineUTC) {
+                endIdx = i;
+            }
+        }
+        startIdx = Math.max(startIdx - 1, 0);
+        endIdx = Math.min(endIdx + 1, numVectors-1);
+        final int numVectorsUsed = endIdx - startIdx + 1;
+
         final double[] timeArray = new double[numVectorsUsed];
         final double[] xPosArray = new double[numVectorsUsed];
         final double[] yPosArray = new double[numVectorsUsed];
@@ -589,16 +702,14 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         final double[] yVelArray = new double[numVectorsUsed];
         final double[] zVelArray = new double[numVectorsUsed];
 
-        final int numVectors = orbitStateVectors.length;
-        final int d = numVectors / numVectorsUsed;
-        for (int i = 0; i < numVectorsUsed; i++) {
-            timeArray[i] = orbitStateVectors[i*d].time_mjd;
-            xPosArray[i] = orbitStateVectors[i*d].x_pos; // m
-            yPosArray[i] = orbitStateVectors[i*d].y_pos; // m
-            zPosArray[i] = orbitStateVectors[i*d].z_pos; // m
-            xVelArray[i] = orbitStateVectors[i*d].x_vel; // m/s
-            yVelArray[i] = orbitStateVectors[i*d].y_vel; // m/s
-            zVelArray[i] = orbitStateVectors[i*d].z_vel; // m/s
+        for (int i = startIdx; i <= endIdx; i++) {
+            timeArray[i - startIdx] = orbitStateVectors[i].time_mjd;
+            xPosArray[i - startIdx] = orbitStateVectors[i].x_pos; // m
+            yPosArray[i - startIdx] = orbitStateVectors[i].y_pos; // m
+            zPosArray[i - startIdx] = orbitStateVectors[i].z_pos; // m
+            xVelArray[i - startIdx] = orbitStateVectors[i].x_vel; // m/s
+            yVelArray[i - startIdx] = orbitStateVectors[i].y_vel; // m/s
+            zVelArray[i - startIdx] = orbitStateVectors[i].z_vel; // m/s
         }
 
         // Create new tie point grid
