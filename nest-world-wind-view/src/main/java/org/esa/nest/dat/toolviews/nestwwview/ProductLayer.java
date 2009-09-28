@@ -118,9 +118,9 @@ public class ProductLayer extends RenderableLayer {
                                            band.getImageInfo(com.bc.ceres.core.ProgressMonitor.NULL),
                                            com.bc.ceres.core.ProgressMonitor.NULL);
 
-                final GeoPos geoPos1 = newProduct.getGeoCoding().getGeoPos(new PixelPos(0, 0), null);
-                final GeoPos geoPos2 = newProduct.getGeoCoding().getGeoPos(new PixelPos(newProduct.getSceneRasterWidth()-1,
-                                                                                        newProduct.getSceneRasterHeight()-1),
+                final GeoPos geoPos1 = product.getGeoCoding().getGeoPos(new PixelPos(0, 0), null);
+                final GeoPos geoPos2 = product.getGeoCoding().getGeoPos(new PixelPos(product.getSceneRasterWidth()-1,
+                                                                                        product.getSceneRasterHeight()-1),
                                                                            null);
 
                 final Sector sector = new Sector(Angle.fromDegreesLatitude(geoPos1.getLat()),

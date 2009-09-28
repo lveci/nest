@@ -54,7 +54,6 @@ public class ALOSCalibrator implements Calibrator {
     /**
      * Set flag indicating if target image is output in dB scale.
      */
-    @Override
     public void setOutputImageIndB(boolean flag) {
         outputImageScaleInDb = flag;
     }
@@ -62,7 +61,6 @@ public class ALOSCalibrator implements Calibrator {
     /**
      * Set external auxiliary file.
      */
-    @Override
     public void setExternalAuxFile(File file) throws OperatorException {
         if (file != null) {
             throw new OperatorException("No external auxiliary file should be selected for ALOS PALSAR product");
@@ -72,7 +70,6 @@ public class ALOSCalibrator implements Calibrator {
     /**
 
      */
-    @Override
     public void initialize(Product srcProduct, Product tgtProduct) throws OperatorException {
         try {
             sourceProduct = srcProduct;
@@ -139,7 +136,6 @@ public class ALOSCalibrator implements Calibrator {
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs during computation of the target raster.
      */
-    @Override
     public void computeTile(Band targetBand, Tile targetTile,
                             HashMap<String, String[]> targetBandNameToSourceBandName,
                             ProgressMonitor pm) throws OperatorException {
