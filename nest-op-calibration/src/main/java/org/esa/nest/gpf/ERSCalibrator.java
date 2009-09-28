@@ -340,8 +340,9 @@ public final class ERSCalibrator implements Calibrator {
             OperatorContext.checkForCancelation(pm);
 
             final double sinIncidenceAngleByK = Math.sin(incidenceAngles[x]) / k;
-            if (applyADCSaturationCorrection)
+            if (applyADCSaturationCorrection) {
                 adcJ = Math.min(((x - x0) / blockWidth), adcPowerLoss[0].length - 1);
+            }
 
             for (int y = y0; y < y0 + h; y++) {
 
@@ -362,6 +363,10 @@ public final class ERSCalibrator implements Calibrator {
 
                 if (applyAntennaPatternCorrection) {
                     sigma *= antennaPatternCorrFactor[x-x0];
+                }
+
+                if (applyRangeSpreadingLossCorrection) {
+                    sigma *= rangeSpreadingLoss[x-x0];
                 }
 
                 if (applyReplicaPowerCorrection) {
@@ -686,9 +691,10 @@ public final class ERSCalibrator implements Calibrator {
 
             if (isDetectedSampleType) { // detected
 
-                //if (!antennaPatternCorrectionFlag) {
-                //    applyAntennaPatternCorrection = true;
-                //}
+                if (psID.contains(VMP) &&
+                    processingTime.compareTo(time19910801) >= 0 && processingTime.compareTo(time19950716) < 0) {
+                    applyAntennaPatternCorrection = true; // because the antenna gain applied before was the initial
+                }                                         // one and should be replaced by the improved one.
                 applyReplicaPowerCorrection = true;
                 applyADCSaturationCorrection = true;
 
@@ -1406,8 +1412,14 @@ public final class ERSCalibrator implements Calibrator {
         }
     }
 
+    /**
+     * Compute antenna pattern correction factors for VMP product for a range line in current tile.
+     * @param x0 The x coordinate for the pixel at the upper left corner.
+     * @param w The width of the tile.
+     */
     private void computeAntennaPatternCorrectionFactorsForVMPProduct(int x0, int w) {
 
+        // This function implements Appendix C.
         if (processingTime.compareTo(time19950716) >= 0) {
             for (int x = x0; x < x0 + w; x++) {
                 antennaPatternCorrFactor[x - x0] = 1.0;
@@ -1497,7 +1509,7 @@ public final class ERSCalibrator implements Calibrator {
         getPGSAntennaPatternGainForCurrentTile(x0, w, antennaPatternGain);
 
         for (int x = x0; x < x0 + w; x++) {
-            antennaPatternCorrFactor[x - x0] = 1.0 / antennaPatternGain[x - x0];
+            antennaPatternCorrFactor[x - x0] = 1.0 / (antennaPatternGain[x - x0]*antennaPatternGain[x - x0]);
         }
     }
 
@@ -1766,6 +1778,12 @@ public final class ERSCalibrator implements Calibrator {
         return true;
     }
 
+    /**
+     * Compute antenna pattern gain values for a range line. They are used to remove the antenna
+     * pattern gain correction applied before.
+     * @param x0 The x coordinate for the pixel at the upper left corner
+     * @param w The width of the tile
+     */
     private void computeAntennaPatternGain(int x0, int w) {
 
         antennaPatternGain = new double[w];
@@ -1779,6 +1797,7 @@ public final class ERSCalibrator implements Calibrator {
 
     private void computeAntennaPatternGainForVMPProduct(int x0, int w) {
 
+        // This function implements Appendix E.
         double theta = 0.0;
 
         if (isERS1Mission) {
@@ -1844,7 +1863,13 @@ public final class ERSCalibrator implements Calibrator {
 
     private void computeAntennaPatternGainForPGSProduct(int x0, int w) {
 
-        getPGSAntennaPatternGainForCurrentTile(x0, w, antennaPatternGain);
+        final double[] antennaPatternGainArray = new double[w];
+        getPGSAntennaPatternGainForCurrentTile(x0, w, antennaPatternGainArray);
+
+        for (int x = x0; x < x0 + w; x++) {
+            antennaPatternGain[x - x0] = antennaPatternGainArray[x - x0]*antennaPatternGainArray[x - x0];
+        }
+
     }
 
     private void computeADCPowerLossValuesForCurrentTile(
@@ -2009,7 +2034,11 @@ public final class ERSCalibrator implements Calibrator {
                     sigma /= rangeSpreadingLoss[x*blockWidth];
                 }
 
-                array[k++] = Math.sqrt(sigma * replicaPulseVariationsCorrectionFactor);
+                if (!isERS1Mission) {
+                    sigma /= replicaPulseVariationsCorrectionFactor;
+                }
+                
+                array[k++] = Math.sqrt(sigma);
             }
         }
 
@@ -2415,6 +2444,13 @@ public final class ERSCalibrator implements Calibrator {
         return OperatorContext.getSourceTile(rasterDataNode, rectangle, pm);
     }
 
+    //==================================== pixel calibration used by RD ======================================
+
+    public double applyRetroCalibration(
+            int x, int y, double v, int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
+        return v;
+    }
+
     public double applyCalibration(
             final double v, final int rangeIndex, final double slantRange, final double satelliteHeight,
             final double sceneToEarthCentre, final double localIncidenceAngle, final int bandPolar, 
@@ -2435,8 +2471,4 @@ public final class ERSCalibrator implements Calibrator {
                Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
     }
 
-    public double applyRetroCalibration(int x, int y, double v, int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
-        return v;
-    }
-    
 }
