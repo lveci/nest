@@ -69,7 +69,7 @@ public final class ERSCalibrator implements Calibrator {
     private Band sourceBand1;
     private Band sourceBand2;
 
-    private MetadataElement abstractedMetadata = null;
+    private MetadataElement absRoot = null;
     private String pafID; // processing facility identifier
     private String psID;  // processing system identifier
     private String pvID;  // processing version identifier
@@ -202,8 +202,9 @@ public final class ERSCalibrator implements Calibrator {
         sourceImageHeight = sourceProduct.getSceneRasterHeight();
         //System.out.println("sourceImageWidth = " + sourceImageWidth + ", sourceImageHeight = " + sourceImageHeight);
 
+        absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+
         getImportantTimes();
-        abstractedMetadata = AbstractMetadata.getAbstractedMetadata(sourceProduct);
         getMissionType(); // abs
         getSampleType();  // abs
         getProductType(); // abs
@@ -278,8 +279,7 @@ public final class ERSCalibrator implements Calibrator {
         final int y0 = targetTileRectangle.y;
         final int w = targetTileRectangle.width;
         final int h = targetTileRectangle.height;
-
-        //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+        System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         final ProductData trgData = targetTile.getDataBuffer();
         Tile sourceRaster1 = null;
@@ -475,20 +475,14 @@ public final class ERSCalibrator implements Calibrator {
      */
     private void getMissionType() {
 
-        final MetadataAttribute missionTypeAttr = abstractedMetadata.getAttribute(AbstractMetadata.MISSION);
-        if (missionTypeAttr == null) {
-            throw new OperatorException(AbstractMetadata.MISSION + " not found");
-        }
-
-        missionType = missionTypeAttr.getData().getElemString();
-        //System.out.println("Mission is " + missionType);
-
+        missionType = absRoot.getAttributeString(AbstractMetadata.MISSION);
         if (!missionType.contains("ERS1") && !missionType.contains("ERS2")) {
             throw new OperatorException(missionType + " is not a valid mission for ERS Calibration");
         }
 
         if(missionType.equals("ERS1"))
             isERS1Mission = true;
+        //System.out.println("Mission type is " + missionType);
     }
 
     /**
@@ -496,16 +490,10 @@ public final class ERSCalibrator implements Calibrator {
      */
     private void getSampleType() {
 
-        final MetadataAttribute sampleTypeAttr = abstractedMetadata.getAttribute(AbstractMetadata.SAMPLE_TYPE);
-        if (sampleTypeAttr == null) {
-            throw new OperatorException(AbstractMetadata.SAMPLE_TYPE + " not found");
-        }
-
-        sampleType = sampleTypeAttr.getData().getElemString();
-        //System.out.println("Sample type is " + sampleType);
-
+        sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
         if(sampleType.contains("DETECTED"))
             isDetectedSampleType = true;
+        //System.out.println("Sample type is " + sampleType);
     }
 
     /**
@@ -513,12 +501,7 @@ public final class ERSCalibrator implements Calibrator {
      */
     private void getProductType() {
 
-        final MetadataAttribute productTypeAttr = abstractedMetadata.getAttribute(AbstractMetadata.PRODUCT_TYPE);
-        if (productTypeAttr == null) {
-            throw new OperatorException(AbstractMetadata.PRODUCT_TYPE + " not found");
-        }
-
-        productType = productTypeAttr.getData().getElemString();
+        productType = absRoot.getAttributeString(AbstractMetadata.PRODUCT_TYPE);
 
         if (productType.contains("ERS")) {
             isCEOSFormat = true;
@@ -527,7 +510,7 @@ public final class ERSCalibrator implements Calibrator {
         } else {
             throw new OperatorException("Invalid product type: " + productType);
         }
-        //System.out.println("product type is " + productType);
+        //System.out.println("Product type is " + productType);
     }
 
     /**
@@ -560,12 +543,7 @@ public final class ERSCalibrator implements Calibrator {
      */
     private void getProcessingSystemID() {
 
-        final MetadataAttribute attr = abstractedMetadata.getAttribute(AbstractMetadata.ProcessingSystemIdentifier);
-        if (attr == null) {
-            throw new OperatorException(AbstractMetadata.ProcessingSystemIdentifier + " not found");
-        }
-
-        psID = attr.getData().getElemString();
+        psID = absRoot.getAttributeString(AbstractMetadata.ProcessingSystemIdentifier);
         /*
         if (isCEOSFormat) {
             if (!psID.contains("VMP") && !psID.contains("PGS")) {
@@ -603,7 +581,7 @@ public final class ERSCalibrator implements Calibrator {
      */
     private void getProductAcquisitionTime() {
         try {
-            final ProductData.UTC acqTimeUTC = abstractedMetadata.getAttributeUTC(AbstractMetadata.first_line_time);
+            final ProductData.UTC acqTimeUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time);
             acquisitionTime = acqTimeUTC.getAsDate();
             //System.out.println("The acquisition time is " + acquisitionTime);
         } catch(Exception e) {
@@ -616,8 +594,9 @@ public final class ERSCalibrator implements Calibrator {
      */
     private void getProcessingTime() {
         try {
-            final ProductData.UTC procTimeUTC = abstractedMetadata.getAttributeUTC(AbstractMetadata.PROC_TIME);
+            final ProductData.UTC procTimeUTC = absRoot.getAttributeUTC(AbstractMetadata.PROC_TIME);
             processingTime = procTimeUTC.getAsDate();
+            //System.out.println("The processing time is " + processingTime);
         } catch(Exception e) {
             throw new OperatorException(e.getMessage());
         }
@@ -625,56 +604,30 @@ public final class ERSCalibrator implements Calibrator {
 
     /**
      * Get the range and azimuth spacings (in meter).
+     * @throws Exception The exceptions.
      */
-    private void getPixelSpacings() {
+    private void getPixelSpacings() throws Exception {
 
-        final MetadataAttribute rangeSpacingAttr = abstractedMetadata.getAttribute(AbstractMetadata.range_spacing);
-        if (rangeSpacingAttr == null) {
-            throw new OperatorException(AbstractMetadata.range_spacing + " not found");
-        }
-
-        rangeSpacing = rangeSpacingAttr.getData().getElemFloat();
+        rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
+        azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
         //System.out.println("Range spacing is " + rangeSpacing);
-
-        final MetadataAttribute azimuthSpacingAttr = abstractedMetadata.getAttribute(AbstractMetadata.azimuth_spacing);
-        if (azimuthSpacingAttr == null) {
-            throw new OperatorException(AbstractMetadata.azimuth_spacing + " not found");
-        }
-
-        azimuthSpacing = azimuthSpacingAttr.getData().getElemFloat();
         //System.out.println("Azimuth spacing is " + azimuthSpacing);
     }
 
     /**
      * Get the antenna pattern correction flag and range spreading loss flag.
+     * @throws Exception The exceptions.
      */
-    private void getCalibrationFlags() {
+    private void getCalibrationFlags() throws Exception {
 
-        final MetadataAttribute absCalibrationFlagAttr = abstractedMetadata.getAttribute(AbstractMetadata.abs_calibration_flag);
-        if (absCalibrationFlagAttr == null) {
-            throw new OperatorException(AbstractMetadata.abs_calibration_flag + " not found");
-        }
-
-        if (absCalibrationFlagAttr.getData().getElemBoolean()) {
+        if (AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.abs_calibration_flag)) {
             throw new OperatorException("The product has already been calibrated");
         }
 
-        final MetadataAttribute antElevCorrFlagAttr = abstractedMetadata.getAttribute(AbstractMetadata.ant_elev_corr_flag);
-        if (antElevCorrFlagAttr == null) {
-            throw new OperatorException(AbstractMetadata.ant_elev_corr_flag + " not found");
-        }
-        antennaPatternCorrectionFlag = antElevCorrFlagAttr.getData().getElemBoolean();
+        antennaPatternCorrectionFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.ant_elev_corr_flag);
+        rangeSpreadingLossCompFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.range_spread_comp_flag);
         //System.out.println("Antenna pattern correction flag is " + antennaPatternCorrectionFlag);
-
-        final MetadataAttribute rangeSpreadCompFlagAttr =
-                abstractedMetadata.getAttribute(AbstractMetadata.range_spread_comp_flag);
-        if (rangeSpreadCompFlagAttr == null) {
-            throw new OperatorException(AbstractMetadata.range_spread_comp_flag + " not found");
-        }
-        rangeSpreadingLossCompFlag = rangeSpreadCompFlagAttr.getData().getElemBoolean();
         //System.out.println("Range spreding loss compensation flag is " + rangeSpreadingLossCompFlag);
-
-        // replica pulse power compensation flag???
     }
 
     /**
@@ -821,6 +774,9 @@ public final class ERSCalibrator implements Calibrator {
                 useExtXCAFile = true;
             }
         }
+
+        // Note: For both PGS CEOS and PGS ENVISAT (ERS-1 or ERS-2) use XCA files. See Andrea's email
+        //       dated Nov. 5, 2008.
     }
 
     /**
@@ -964,11 +920,13 @@ public final class ERSCalibrator implements Calibrator {
     /**
      * Obtain from auxiliary data the elevation angles for given swath and the antenna elevation
      * pattern gains for the swath and the polarization of the product.
-     *
      * @param fileName The auxiliary data file name.
+     * @throws OperatorException The exceptions.
      */
     private void getAntennaPatternGainFromAuxData(String fileName) throws OperatorException {
 
+        // Note: ERS-1/2 predate swath-selection, in the Envisat-world all ERS image-data is IS2 VV.
+        //       See Andrea and Marcus' email dated Nov. 5, 2008.
         final EnvisatAuxReader reader = new EnvisatAuxReader();
 
         try {
@@ -1131,14 +1089,13 @@ public final class ERSCalibrator implements Calibrator {
         if (!pafID.contains(UK_PAF) || processingTime.compareTo(time19930408) >= 0) {
 
             // Method 1 in Appendix B1
-            final double r1 = halfLightSpeed * getZeroDopplerTimeOfFirstRangePixel();
+            final double r1 = halfLightSpeed * getSlantRangeTimeToFirstRangePixel();
             rtPlusH = Math.sqrt(rt2 + r1*r1 + 2.0*rt*r1*Math.cos(alpha1));
             rtPlusH2 = rtPlusH*rtPlusH;
             theta1 = Math.acos((r1 + rt*Math.cos(alpha1))/rtPlusH);
             psi1 = alpha1 - theta1;
             psi = psi1;
             for (int i = 0; i < sourceImageWidth; i++) {
-                psi = psi + deltaPsi;
                 ri = Math.sqrt(rt2 + rtPlusH2 - 2.0*rt*rtPlusH*Math.cos(psi));
                 alpha = Math.acos((rtPlusH2 - ri*ri - rt2)/(2.0*ri*rt));
                 incidenceAngles[i] = alpha;
@@ -1149,6 +1106,7 @@ public final class ERSCalibrator implements Calibrator {
                     groundRangeSpacing = rangeSpacing / Math.sin(alpha);
                     deltaPsi = groundRangeSpacing/rt;
                 }
+                psi = psi + deltaPsi;
             }
 
         } else { // For UK-PAF products processed prior to 8th April 1993
@@ -1169,7 +1127,6 @@ public final class ERSCalibrator implements Calibrator {
             psi1 = alpha1 - theta1;
             psi = psi1;
             for (int i = 0; i < sourceImageWidth; i++) {
-                psi = psi + Math.asin(deltaPsi);
                 ri = Math.sqrt(rt2 + rtPlusH2 - 2.0*rt*rtPlusH*Math.cos(psi));
                 alpha = Math.acos((rtPlusH2 - ri*ri - rt2)/(2.0*ri*rt));
                 incidenceAngles[i] = alpha;
@@ -1180,6 +1137,7 @@ public final class ERSCalibrator implements Calibrator {
                     groundRangeSpacing = rangeSpacing / Math.sin(alpha);
                     deltaPsi = groundRangeSpacing/rt;
                 }
+                psi = psi + Math.asin(deltaPsi);
             }
         }
         /*
@@ -1219,10 +1177,10 @@ public final class ERSCalibrator implements Calibrator {
     }
 
     /**
-     * Get the zero doppler range time of the first range pixel (in second).
-     * @return The zero doppler time.
+     * Get slant range time to the first range pixel (in second).
+     * @return The slant range time.
      */
-    private double getZeroDopplerTimeOfFirstRangePixel() {
+    private double getSlantRangeTimeToFirstRangePixel() {
         // Field 126/1 in PRI Data Set Summary Record (in millisec)
         final MetadataElement facility = sourceProduct.getMetadataRoot().getElement("Leader").getElement("Scene Parameters");
         if (facility == null) {
@@ -1362,37 +1320,25 @@ public final class ERSCalibrator implements Calibrator {
         final MetadataElement abs = targetProduct.getMetadataRoot().getElement("Abstracted Metadata");
 
         if (!isDetectedSampleType) {
-            final MetadataAttribute sampleTypeAttr = abs.getAttribute(AbstractMetadata.SAMPLE_TYPE);
-            abs.removeAttribute(sampleTypeAttr);
-            abs.addAttribute(new MetadataAttribute(AbstractMetadata.SAMPLE_TYPE,
-                    ProductData.createInstance("DETECTED"), false));
+            AbstractMetadata.setAttribute(abs, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
         }
 
-        // update antenna pattern correction flag
         if (applyAntennaPatternCorrection) {
-            abs.getAttribute(AbstractMetadata.ant_elev_corr_flag).getData().setElemBoolean(true);
+            AbstractMetadata.setAttribute(abs, AbstractMetadata.ant_elev_corr_flag, 1);
         }
 
-        // update range spreading loss correction flag
         if (applyRangeSpreadingLossCorrection) {
-            abs.getAttribute(AbstractMetadata.range_spread_comp_flag).getData().setElemBoolean(true);
+            AbstractMetadata.setAttribute(abs, AbstractMetadata.range_spread_comp_flag, 1);
         }
 
-        // update replica pulse power correction flag
         if (applyReplicaPowerCorrection) {
-            abs.getAttribute(AbstractMetadata.replica_power_corr_flag).getData().setElemBoolean(true);
+            AbstractMetadata.setAttribute(abs, AbstractMetadata.replica_power_corr_flag, 1);
         }
 
-        // update abs_calibration_flag
-        abs.getAttribute(AbstractMetadata.abs_calibration_flag).getData().setElemBoolean(true);
+        AbstractMetadata.setAttribute(abs, AbstractMetadata.abs_calibration_flag, 1);
 
-        // update XCA file name
-        if (useExtXCAFile == true) {
-            MetadataAttribute attr = abs.getAttribute(AbstractMetadata.external_calibration_file);
-            abs.removeAttribute(attr);
-            abs.addAttribute(new MetadataAttribute(AbstractMetadata.external_calibration_file,
-                                                   ProductData.createInstance(extXCAFileName),
-                                                   false));
+        if (useExtXCAFile) {
+            AbstractMetadata.setAttribute(abs, AbstractMetadata.external_calibration_file, extXCAFileName);
         }
     }
 
@@ -1869,7 +1815,6 @@ public final class ERSCalibrator implements Calibrator {
         for (int x = x0; x < x0 + w; x++) {
             antennaPatternGain[x - x0] = antennaPatternGainArray[x - x0]*antennaPatternGainArray[x - x0];
         }
-
     }
 
     private void computeADCPowerLossValuesForCurrentTile(
