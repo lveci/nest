@@ -108,7 +108,6 @@ public final class SARSimulationOp extends Operator {
     @Parameter(defaultValue="false", label="Save Layover-Shadow Mask as band")
     private boolean saveLayoverShadowMask = false;
 
-    private MetadataElement absRoot = null;
     private ElevationModel dem = null;
     private FileElevationModel fileElevationModel = null;
     private TiePointGrid latitude = null;
@@ -193,7 +192,7 @@ public final class SARSimulationOp extends Operator {
      * @throws Exception if metadata not found
      */
     private void getMetadata() throws Exception {
-        absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
         srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
 
@@ -486,7 +485,7 @@ public final class SARSimulationOp extends Operator {
                 // todo should determine which side is near range first
                 double maxSlantRange = 0.0;
                 for (int x = x0; x < x0 + w; x++) {
-                    int i = x - x0;
+                    final int i = x - x0;
                     if (savePixel[i]) {
                         if (slrs[i] > maxSlantRange) {
                             maxSlantRange = slrs[i];

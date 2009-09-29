@@ -126,8 +126,6 @@
 	<mapID target="MultiTemporalSpeckleFilterOp" url="operators/MultiTemporalSpeckleFilterOp.html"/>	
 	<mapID target="WarpOp" url="operators/WarpOp.html"/>	
 	<mapID target="WSSDeburstOp" url="operators/WSSDeburstOp.html"/>
-	<mapID target="ObjectDetection" url="operators/ObjectDetection.html"/>
-	<mapID target="OilSpillDetection" url="operators/OilSpillDetectionOp.html"/>
 	<!--mapID target="WSSMosaicOp" url="operators/WSSMosaicOp.html"/-->
 	
 	<!--Analysis Operators-->
@@ -154,6 +152,14 @@
 	<mapID target="MapProjectionOp" url="operators/MapProjectionOp.html"/>
 	<mapID target="SRGROp" url="operators/SRGROp.html"/>
 	<mapID target="MosaicOp" url="operators/MosaicOp.html"/>
+	
+	<!--InSAR-->
+	<mapID target="InSAR" url="operators/InSAR.html"/>
+	
+	<!--Ocean Tools-->
+	<mapID target="ObjectDetection" url="operators/ObjectDetection.html"/>
+	<mapID target="OilSpillDetection" url="operators/OilSpillDetectionOp.html"/>
+	<mapID target="CreateLandMask" url="operators/CreateLandMask.html"/>
 	
 	<!--Tutorials-->
 	<mapID target="remote_sensing" url="tutorials/remote_sensing.html"/>

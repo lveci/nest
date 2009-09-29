@@ -142,8 +142,6 @@
 	        <tocitem text="Multi-Temporal Speckle Filter" target="MultiTemporalSpeckleFilterOp"/>			
 			<tocitem text="Warp" target="WarpOp"/>
 			<tocitem text="WSS Deburst" target="WSSDeburstOp"/>
-			<tocitem text="Object Detection" target="ObjectDetection"/>
-			<tocitem text="Oil Spill Detection" target="OilSpillDetection"/>
 			<!--tocitem text="WSS Mosaic" target="WSSMosaicOp"/-->
 		</tocitem>	
 		<tocitem text="Analysis Operators">
@@ -171,6 +169,14 @@
 			<tocitem text="Slant Range to Ground Range" target="SRGROp"/>
 			<tocitem text="Mosaic" target="MosaicOp"/>
 		</tocitem>	
+		<tocitem text="InSAR">
+			<tocitem text="InSAR" target="InSAR"/>
+		</tocitem>
+		<tocitem text="Ocean Tools">
+			<tocitem text="Object Detection" target="ObjectDetection"/>
+			<tocitem text="Oil Spill Detection" target="OilSpillDetection"/>
+			<tocitem text="Create Land Mask" target="CreateLandMask"/>
+		</tocitem>
 	</tocitem>
 	
 	<tocitem text="Tutorials">
