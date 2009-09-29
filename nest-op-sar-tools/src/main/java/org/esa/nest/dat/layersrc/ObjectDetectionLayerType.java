@@ -2,14 +2,14 @@ package org.esa.nest.dat.layersrc;
 
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.ValueModel;
 import com.bc.ceres.binding.ValueDescriptor;
+import com.bc.ceres.binding.ValueModel;
 import com.bc.ceres.binding.accessors.DefaultValueAccessor;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerType;
-import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.Product;
 
 /**
  * The type descriptor of the {@link org.esa.nest.dat.layersrc.ObjectDetectionLayer}.

@@ -149,6 +149,16 @@
         </action>
 
         <action>
+            <id>ScaleData</id>
+            <class>org.esa.nest.dat.ScaleDataAction</class>
+            <text>Scale Data</text>
+            <shortDescr>Scale data using a virtual band</shortDescr>
+            <parent>DatasetConversion</parent>
+            <context>band</context>
+            <helpId>ScaleData</helpId>
+        </action>
+
+        <action>
             <id>ASARWSS</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <text>ASAR WSS</text>

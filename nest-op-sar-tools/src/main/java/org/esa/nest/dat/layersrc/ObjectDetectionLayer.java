@@ -6,26 +6,21 @@ import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.glevel.MultiLevelImage;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
+import org.esa.beam.framework.datamodel.*;
+import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.gpf.oceantools.ObjectDiscriminationOp;
+import org.esa.nest.util.XMLSupport;
+import org.jdom.Attribute;
+import org.jdom.Element;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.ArrayList;
-
-import org.esa.beam.framework.datamodel.*;
-import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.util.XMLSupport;
-import org.esa.nest.gpf.oceantools.ObjectDiscriminationOp;
-import org.jdom.Element;
-import org.jdom.Attribute;
+import java.util.List;
 
 /**
  * Shows a detected object
