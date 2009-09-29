@@ -229,7 +229,7 @@
             <text>Create Land Mask</text>
             <shortDescr>Creates a Land/Sea Mask</shortDescr>
             <parent>oceanTools</parent>
-            <helpId>createLandMaskOp</helpId>
+            <helpId>CreateLandMask</helpId>
         </action>
 
         <action>

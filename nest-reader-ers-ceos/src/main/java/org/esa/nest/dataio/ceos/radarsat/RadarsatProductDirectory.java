@@ -110,6 +110,9 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         BaseRecord detProcRec = _leaderFile.getDetailedProcessingRecord();
         if(detProcRec == null)
             detProcRec = _trailerFile.getDetailedProcessingRecord();
+        BaseRecord mapProjRec = _leaderFile.getMapProjRecord();
+        if(mapProjRec == null)
+            mapProjRec = _trailerFile.getMapProjRecord();
 
         product.setStartTime(getUTCScanStartTime(sceneRec, detProcRec));
         product.setEndTime(getUTCScanStopTime(sceneRec, detProcRec));
@@ -123,7 +126,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         final TiePointGrid slantRangeTimeTPG = product.getTiePointGrid("slant_range_time");
         final int numOutputLines = absRoot.getAttributeInt(AbstractMetadata.num_output_lines);
-        double slantRangeTime = slantRangeTimeTPG.getPixelFloat(numOutputLines/2, 0) / 1000000000.0; //s
+        final double slantRangeTime = slantRangeTimeTPG.getPixelFloat(numOutputLines/2, 0) / 1000000000.0; //s
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
                 slantRangeTime*Constants.halfLightSpeed);
         
@@ -137,6 +140,10 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         if(product.getGeoCoding() == null) {
             addTPGGeoCoding(product, sceneRec);
+        }
+
+        if(mapProjRec == null) {
+            setLatLonMetadata(product, absRoot);
         }
 
         return product;
@@ -283,7 +290,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
                 sceneRec.getAttributeDouble("Line spacing"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS,
-                sceneRec.getAttributeDouble("Ascending or Descending flag"));
+                sceneRec.getAttributeString("Ascending or Descending flag"));
         }
 
         //sph
@@ -758,6 +765,27 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         product.setGeoCoding(tpGeoCoding);
     }
 
+    private static void setLatLonMetadata(final Product product, final MetadataElement absRoot) {
+        final GeoCoding geoCoding = product.getGeoCoding();
+        if(geoCoding == null) return;
+
+        final GeoPos geoPosFirstNear = product.getGeoCoding().getGeoPos(new PixelPos(0, 0), null);
+        final GeoPos geoPosFirstFar = product.getGeoCoding().getGeoPos(new PixelPos(product.getSceneRasterWidth()-1,
+                                                                                   0), null);
+        final GeoPos geoPosLastNear = product.getGeoCoding().getGeoPos(new PixelPos(0,
+                                                                                   product.getSceneRasterHeight()-1), null);
+        final GeoPos geoPosLastFar = product.getGeoCoding().getGeoPos(new PixelPos(product.getSceneRasterWidth()-1,
+                                                                                   product.getSceneRasterHeight()-1), null);
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat, geoPosFirstNear.getLat());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_long, geoPosFirstNear.getLon());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_lat, geoPosFirstFar.getLat());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_far_long, geoPosFirstFar.getLon());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_lat, geoPosLastNear.getLat());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_near_long, geoPosLastNear.getLon());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_lat, geoPosLastFar.getLat());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long, geoPosLastFar.getLon());
+    }
 
     /**
      * Compute accurate target geo position.
