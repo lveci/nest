@@ -120,6 +120,7 @@ public final class SARSimulationOp extends Operator {
     private int ny0 = 0; // line index for starting traverse
     private boolean srgrFlag = false;
     private boolean ny0Updated = false;
+    private boolean isElevationModelAvailable = false;
 
     private double rangeSpacing = 0.0;
     private double firstLineUTC = 0.0; // in days
@@ -164,7 +165,7 @@ public final class SARSimulationOp extends Operator {
 
             getMetadata();
 
-            getElevationModel();
+//            getElevationModel();
 
             getTiePointGrid();
 
@@ -383,6 +384,15 @@ public final class SARSimulationOp extends Operator {
      */
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
+
+        try {
+            if (!isElevationModelAvailable) {
+                getElevationModel();
+                isElevationModelAvailable = true;
+            }
+        } catch(Exception e) {
+            throw new OperatorException(e);
+        }
 
         final int x0 = targetRectangle.x;
         final int y0 = targetRectangle.y;
