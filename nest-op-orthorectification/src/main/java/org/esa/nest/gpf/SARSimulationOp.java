@@ -108,6 +108,8 @@ public final class SARSimulationOp extends Operator {
     @Parameter(defaultValue="false", label="Save Layover-Shadow Mask as band")
     private boolean saveLayoverShadowMask = false;
 
+    public final static String layoverShadowMaskBandName = "layover_shadow_mask";
+
     private ElevationModel dem = null;
     private FileElevationModel fileElevationModel = null;
     private TiePointGrid latitude = null;
@@ -322,7 +324,7 @@ public final class SARSimulationOp extends Operator {
 
         // add layover/shadow mask band
         if (saveLayoverShadowMask) {
-            targetBand = new Band("layover_shadow_mask",
+            targetBand = new Band(layoverShadowMaskBandName,
                                   ProductData.TYPE_INT8,
                                   sourceImageWidth,
                                   sourceImageHeight);

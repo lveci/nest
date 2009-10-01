@@ -187,7 +187,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 throw new OperatorException("Source product is already map projected");
             }
 
-            maskBand = sourceProduct.getBand("layover_shadow_mask");
+            maskBand = sourceProduct.getBand(SARSimulationOp.layoverShadowMaskBandName);
             
             getMetadata();
 
@@ -401,12 +401,20 @@ public class SARSimTerrainCorrectionOp extends Operator {
         addLayoverShadowBitmasks(targetProduct);
     }
 
-    private static void addLayoverShadowBitmasks(Product product) {
-        for(Band band : product.getBands()) {
-            final String expression = band.getName() + " < 0";
-            final BitmaskDef nrv = new BitmaskDef(band.getName()+"_non_reliable_values",
-                    "Non reliable values where DN is negative", expression, Color.RED, 0.5f);
-            product.addBitmaskDef(nrv);
+    private static void addLayoverShadowBitmasks(final Product product) {
+        final Band layoverShadowBand = product.getBand(SARSimulationOp.layoverShadowMaskBandName);
+        if(layoverShadowBand != null) {
+            final String maskName = layoverShadowBand.getName();
+            final BitmaskDef layover = new BitmaskDef("Layover",
+                        "", maskName + " == 1", Color.GREEN, 0.5f);
+            final BitmaskDef shadow = new BitmaskDef("Shadow",
+                        "", maskName + " == 2", Color.BLUE, 0.5f);
+            final BitmaskDef layoverShadow = new BitmaskDef("Layover_and_Shadow",
+                        "", maskName + " == 3", Color.YELLOW, 0.5f);
+
+            product.addBitmaskDef(layover);
+            product.addBitmaskDef(shadow);
+            product.addBitmaskDef(layoverShadow);
         }
     }
 
@@ -426,7 +434,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             final Band srcBand = sourceBands[i];
             String bandName = srcBand.getName();
-            if (bandName.contains("layover_shadow_mask")) {
+            if (bandName.contains(SARSimulationOp.layoverShadowMaskBandName)) {
                 saveLayoverShadowMask = true;
                 continue;
             }
@@ -489,8 +497,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
 
         if (saveLayoverShadowMask) {
-            final Band layoverShadowingMasksBand = new Band("layoverShadowingMasks",
-                                                     ProductData.TYPE_INT16,
+            final Band layoverShadowingMasksBand = new Band(SARSimulationOp.layoverShadowMaskBandName,
+                                                     ProductData.TYPE_INT8,
                                                      targetImageWidth,
                                                      targetImageHeight);
             layoverShadowingMasksBand.setUnit(Unit.AMPLITUDE);
@@ -666,7 +674,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 continue;
             }
 
-            if(targetBand.getName().equals("layoverShadowingMasks")) {
+            if(targetBand.getName().equals(SARSimulationOp.layoverShadowMaskBandName)) {
                 layoverShadowingMasksBuffer = targetTiles.get(targetBand).getDataBuffer();
                 continue;
             }
