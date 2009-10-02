@@ -123,7 +123,11 @@ class JERSProductDirectory extends CEOSProductDirectory {
     }
 
     private Band createBand(final Product product, final String name, final String unit, final JERSImageFile imageFile) {
-        final Band band = new Band(name, ProductData.TYPE_UINT16,
+        int dataType = ProductData.TYPE_UINT16;
+        if(isSLC()) {
+            dataType = ProductData.TYPE_INT16;
+        }
+        final Band band = new Band(name, dataType,
                                    _sceneWidth, _sceneHeight);
         band.setDescription(name);
         band.setUnit(unit);
