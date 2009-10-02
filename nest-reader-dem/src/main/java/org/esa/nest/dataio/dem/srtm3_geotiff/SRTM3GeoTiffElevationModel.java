@@ -33,8 +33,8 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
     private final float noDataValue;
 
     private final List<SRTM3GeoTiffElevationTile> elevationTileCache;
-    private final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn();
-    private final EarthGravitationalModel96 egm = new EarthGravitationalModel96();
+    private static final ProductReaderPlugIn productReaderPlugIn = getReaderPlugIn();
+    private static final EarthGravitationalModel96 egm = new EarthGravitationalModel96();
 
     public SRTM3GeoTiffElevationModel(SRTM3GeoTiffElevationModelDescriptor descriptor, Resampling resamplingMethod) throws IOException {
         _descriptor = descriptor;

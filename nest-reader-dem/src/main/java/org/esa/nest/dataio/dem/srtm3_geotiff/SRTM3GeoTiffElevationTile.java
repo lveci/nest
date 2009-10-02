@@ -96,8 +96,8 @@ public final class SRTM3GeoTiffElevationTile {
         final double delLat = 0.25; // 15 min
         final double delLon = 0.25; // 15 min
         for (int r = 0; r < numEGMSamplesInCol; r++) {
+            final double lat = lat0 - delLat*r;
             for (int c = 0; c < numEGMSamplesInRow; c++) {
-                final double lat = lat0 - delLat*r;
                 final double lon = lon0 + delLon*c;
                 _egmArray[r][c] = _egm.getEGM(lat, lon);
             }
