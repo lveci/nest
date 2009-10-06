@@ -366,7 +366,7 @@ public final class ERSCalibrator implements Calibrator {
                 }
 
                 if (applyRangeSpreadingLossCorrection) {
-                    sigma *= rangeSpreadingLoss[x-x0];
+                    sigma *= rangeSpreadingLoss[x];
                 }
 
                 if (applyReplicaPowerCorrection) {
