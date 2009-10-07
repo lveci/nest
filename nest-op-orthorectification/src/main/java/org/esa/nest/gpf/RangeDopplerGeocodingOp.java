@@ -923,7 +923,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                             int[] subSwathIndex = {INVALID_SUB_SWATH_INDEX};
                             double v = getPixelValue(azimuthIndex, rangeIndex, tileData, bandUnit, subSwathIndex);
 
-                            if (applyRadiometricCalibration) {
+                            if (applyRadiometricCalibration && v != tileData.noDataValue) {
                                 v = calibrator.applyCalibration(
                                         v, (int)rangeIndex, slantRange, satelliteHeight, sceneToEarthCentre,
                                         localIncidenceAngles[1], tileData.bandPolar, bandUnit, subSwathIndex); // use projected incidence angle
