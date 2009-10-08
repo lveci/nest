@@ -85,19 +85,21 @@ public final class ERSCalibrator implements Calibrator {
     private int blockWidth;
     private int blockHeight;
 
-    private boolean applyAntennaPatternCorrection;
-    private boolean applyRangeSpreadingLossCorrection;
-    private boolean applyReplicaPowerCorrection;
-    private boolean applyADCSaturationCorrection;
-
+    private boolean applyAntennaPatternCorrection = false;
+    private boolean applyRangeSpreadingLossCorrection = false;
+    private boolean applyReplicaPowerCorrection = false;
+    private boolean applyADCSaturationCorrection = false;
     private boolean isERS1Mission = false;
     private boolean isDetectedSampleType = false;
     private boolean isCEOSFormat = false;
+    private boolean isAntPattAvailable = false;
     private boolean adcTestFlag = false;
-    private boolean antennaPatternCorrectionFlag;
-    private boolean rangeSpreadingLossCompFlag;
-    private boolean adcSourceTileTopExtFlag;
-    private boolean adcSourceTileBottomExtFlag;
+    private boolean antennaPatternCorrectionFlag = false;
+    private boolean rangeSpreadingLossCompFlag = false;
+    private boolean adcSourceTileTopExtFlag = false;
+    private boolean adcSourceTileBottomExtFlag = false;
+    private boolean adcSourceTileLeftExtFlag = false;
+    private boolean adcSourceTileRightExtFlag = false;
     private boolean useExtXCAFile = false;
 
     private double rangeSpacing; // m
@@ -279,7 +281,7 @@ public final class ERSCalibrator implements Calibrator {
         final int y0 = targetTileRectangle.y;
         final int w = targetTileRectangle.width;
         final int h = targetTileRectangle.height;
-        System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+        //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         final ProductData trgData = targetTile.getDataBuffer();
         Tile sourceRaster1 = null;
@@ -309,13 +311,18 @@ public final class ERSCalibrator implements Calibrator {
             return;
         }
 
-        if (applyAntennaPatternCorrection) {
-            computeAntennaPatternCorrectionFactors(x0, w);
+        if (applyAntennaPatternCorrection && !isAntPattAvailable) {
+            computeAntennaPatternCorrectionFactors(0, sourceImageWidth);
+            isAntPattAvailable = true;
         }
 
         if (applyADCSaturationCorrection && !adcTestFlag) {
             if (!isADCNeeded(srcBandNames, bandUnit, pm)) {
                 applyADCSaturationCorrection = false;
+            }
+
+            if (applyADCSaturationCorrection && antennaPatternCorrectionFlag) {
+                computeAntennaPatternGain(0, sourceImageWidth);
             }
             adcTestFlag = true;
         }
@@ -325,9 +332,6 @@ public final class ERSCalibrator implements Calibrator {
         }
 
         if (applyADCSaturationCorrection) {
-            if (antennaPatternCorrectionFlag) {
-                computeAntennaPatternGain(x0, w);
-            }
             computeADCPowerLossValuesForCurrentTile(x0, y0, w, h, pm, srcBandNames, bandUnit);
         }
 
@@ -362,7 +366,7 @@ public final class ERSCalibrator implements Calibrator {
                 sigma *= sinIncidenceAngleByK;
 
                 if (applyAntennaPatternCorrection) {
-                    sigma *= antennaPatternCorrFactor[x-x0];
+                    sigma *= antennaPatternCorrFactor[x];
                 }
 
                 if (applyRangeSpreadingLossCorrection) {
@@ -1836,7 +1840,7 @@ public final class ERSCalibrator implements Calibrator {
         //outputRealImage(downSampledImage, 0, 999);
 
         // 4. Removing original corrections applied: range spreading loss, antenna pattern and replica pulse power.
-        RenderedImage rawImage = removeFactorsApplied(downSampledImage);
+        RenderedImage rawImage = removeFactorsApplied(downSampledImage, sourceTileRectangle);
         //System.out.println("rawImage width: " + rawImage.getWidth());
         //System.out.println("rawImage height: " + rawImage.getHeight());
         //outputRealImage(rawImage, 0, 999);
@@ -1861,6 +1865,7 @@ public final class ERSCalibrator implements Calibrator {
 
         // The tile height should have window height more pixels than the target tile height
         final int halfWindowHeight = windowHeight/2;
+        final int halfWindowWidth = windowWidth/2;
         int sx0 = tx0;
         int sy0 = ty0;
         int sw = tw;
@@ -1868,22 +1873,29 @@ public final class ERSCalibrator implements Calibrator {
 
         adcSourceTileTopExtFlag = false;
         adcSourceTileBottomExtFlag = false;
+        adcSourceTileLeftExtFlag = false;
+        adcSourceTileRightExtFlag = false;
 
         if (ty0 >= halfWindowHeight) {
             adcSourceTileTopExtFlag = true;
-        }
-
-        if (ty0 + th + halfWindowHeight <= sourceImageHeight) {
-            adcSourceTileBottomExtFlag = true;
-        }
-
-        if (adcSourceTileTopExtFlag) {
             sy0 = ty0 - halfWindowHeight;
             sh += halfWindowHeight;
         }
 
-        if (adcSourceTileBottomExtFlag) {
+        if (ty0 + th + halfWindowHeight <= sourceImageHeight) {
+            adcSourceTileBottomExtFlag = true;
             sh += halfWindowHeight;
+        }
+
+        if (tx0 >= halfWindowWidth) {
+            adcSourceTileLeftExtFlag = true;
+            sx0 = tx0 - halfWindowWidth;
+            sw += halfWindowWidth;
+        }
+
+        if (tx0 + tw + halfWindowWidth <= sourceImageWidth) {
+            adcSourceTileRightExtFlag = true;
+            sw += halfWindowWidth;
         }
 
         return new Rectangle(sx0, sy0, sw, sh);
@@ -1956,9 +1968,9 @@ public final class ERSCalibrator implements Calibrator {
         return SubsampleAverageDescriptor.create(intendityImage, scaleX, scaleY, null);
     }
 
-    private RenderedImage removeFactorsApplied(RenderedImage downSampledImage) {
+    private RenderedImage removeFactorsApplied(RenderedImage downSampledImage, Rectangle sourceTileRectangle) {
 
-        // Not complete for now
+        final int sx0 = sourceTileRectangle.x;
         final int w = downSampledImage.getWidth();
         final int h = downSampledImage.getHeight();
         final double[] array = new double[h*w];
@@ -1972,11 +1984,11 @@ public final class ERSCalibrator implements Calibrator {
                 sigma = data.getSampleDouble(x, y, 0);
 
                 if (antennaPatternCorrectionFlag) {
-                    sigma *= antennaPatternGain[x*blockWidth];
+                    sigma *= antennaPatternGain[sx0 + x*blockWidth];
                 }
 
                 if (rangeSpreadingLossCompFlag) {
-                    sigma /= rangeSpreadingLoss[x*blockWidth];
+                    sigma /= rangeSpreadingLoss[sx0 + x*blockWidth];
                 }
 
                 if (!isERS1Mission) {
@@ -2023,39 +2035,45 @@ public final class ERSCalibrator implements Calibrator {
 
     private void computeADCPowerLossValue(RenderedImage squaredImage) {
 
-        final int del = (windowHeight / 2) / blockHeight;
+        final int delH = (windowHeight / 2) / blockHeight;
+        final int delW = (windowWidth / 2) / blockWidth;
 
-        final int w = squaredImage.getWidth();
+        int x0 = 0;
+        int y0 = 0;
+        int w = squaredImage.getWidth();
         int h = squaredImage.getHeight();
-
         if (adcSourceTileTopExtFlag) {
-            h -= del;
+            y0 = delH;
+            h -= delH;
         }
-
         if (adcSourceTileBottomExtFlag) {
-            h -= del;
+            h -= delH;
         }
         if(h <= 0)
             h = 1;
+
+        if (adcSourceTileLeftExtFlag) {
+            x0 = delW;
+            w -= delW;
+        }
+        if (adcSourceTileRightExtFlag) {
+            w -= delW;
+        }
+        if(w <= 0)
+            w = 1;
 
         adcPowerLoss = new double[h][w];
 
         Raster data = squaredImage.getData();
 
         double dn;
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-
-                if (adcSourceTileTopExtFlag) {
-                    dn = data.getSampleDouble(x, y + del, 0);
-                } else {
-                    dn = data.getSampleDouble(x, y, 0);
-                }
-
+        for (int y = y0; y < y0 + h; y++) {
+            for (int x = x0; x < x0 + w; x++) {
+                dn = data.getSampleDouble(x, y, 0);
                 if (isERS1Mission) {
-                    adcPowerLoss[y][x] = getPowerLossValue(dn, appendixF1);
+                    adcPowerLoss[y-y0][x-x0] = getPowerLossValue(dn, appendixF1);
                 } else {
-                    adcPowerLoss[y][x] = getPowerLossValue(dn, appendixF2);
+                    adcPowerLoss[y-y0][x-x0] = getPowerLossValue(dn, appendixF2);
                 }
             }
         }
