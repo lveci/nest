@@ -2,6 +2,7 @@
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>3B</version>
+    <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>beam/res/NEST_Splash.png</splashImage>
     <postInstallationActionList>
@@ -43,8 +44,8 @@
             <desktopShortcutList>
                 <shortcut>
                     <comment>NEST Display and Analysis Tool</comment>
-                    <exec> ${installdir}/dat.sh</exec>
-                    <icon> ${installdir}/res/dat.png</icon>
+                    <exec>dat.sh</exec>
+                    <icon>res/dat.png</icon>
                     <name>NEST 3B</name>
                     <path> ${installdir}</path>
                     <platforms>all</platforms>
