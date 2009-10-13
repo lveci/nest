@@ -8,6 +8,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.CEOSProductReader;
+import org.esa.nest.datamodel.Unit;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,7 +61,7 @@ public class AlosPalsarProductReader extends CEOSProductReader {
             final AlosPalsarProductDirectory dataDir = (AlosPalsarProductDirectory) _dataDir;
             final AlosPalsarImageFile imageFile = (AlosPalsarImageFile)dataDir.getImageFile(destBand);
             if(dataDir.isSLC()) {
-                boolean oneOf2 = !destBand.getName().startsWith("q");
+                boolean oneOf2 = destBand.getUnit().equals(Unit.REAL) || !destBand.getName().startsWith("q");
 
                 if(dataDir.getProductLevel() == AlosPalsarConstants.LEVEL1_0) {
                     imageFile.readBandRasterDataSLCByte(sourceOffsetX, sourceOffsetY,

@@ -9,6 +9,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.Debug;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.datamodel.Unit;
 
 import java.io.File;
 import java.io.IOException;
@@ -98,7 +99,7 @@ public abstract class CEOSProductReader extends AbstractProductReader {
             final CEOSImageFile imageFile = _dataDir.getImageFile(destBand);
             if(imageFile.getBitsPerSample() == 8) {
                 if(_dataDir.isSLC()) {
-                    boolean oneOf2 = !destBand.getName().startsWith("q");
+                    boolean oneOf2 = destBand.getUnit().equals(Unit.REAL) || !destBand.getName().startsWith("q");
 
                     imageFile.readBandRasterDataSLCByte(sourceOffsetX, sourceOffsetY,
                                              sourceWidth, sourceHeight,
@@ -115,7 +116,7 @@ public abstract class CEOSProductReader extends AbstractProductReader {
                 }
             } else {
                 if(_dataDir.isSLC()) {
-                    boolean oneOf2 = !destBand.getName().startsWith("q");
+                    boolean oneOf2 = destBand.getUnit().equals(Unit.REAL) || !destBand.getName().startsWith("q");
 
                     imageFile.readBandRasterDataSLC(sourceOffsetX, sourceOffsetY,
                                                     sourceWidth, sourceHeight,
