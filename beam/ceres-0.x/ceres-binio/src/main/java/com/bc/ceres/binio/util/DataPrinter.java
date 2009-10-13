@@ -38,7 +38,7 @@ public class DataPrinter {
     }
 
     private void printCompound(String prefix, String name, CompoundData compoundData) throws IOException {
-        CompoundType compoundType = compoundData.getCompoundType();
+        CompoundType compoundType = compoundData.getType();
         printComplexTypeName(prefix, name, compoundType, compoundData);
         final int memberCount = compoundType.getMemberCount();
         for (int i = 0; i < memberCount; i++) {
@@ -58,7 +58,7 @@ public class DataPrinter {
     }
 
     private void printSequence(String prefix, String name, SequenceData sequenceData) throws IOException {
-        SequenceType sequenceType = sequenceData.getSequenceType();
+        SequenceType sequenceType = sequenceData.getType();
         printComplexTypeName(prefix, name, sequenceType, sequenceData);
         Type type = sequenceType.getElementType();
         final int elementCount = sequenceType.getElementCount();

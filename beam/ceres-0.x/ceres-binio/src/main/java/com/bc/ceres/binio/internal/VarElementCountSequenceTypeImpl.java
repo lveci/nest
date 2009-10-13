@@ -26,6 +26,14 @@ public final class VarElementCountSequenceTypeImpl extends VarElementCountSequen
         this.memberIndex = -1;
     }
 
+    public String getMemberName() {
+        return memberName;
+    }
+
+    public int getMemberIndex() {
+        return memberIndex;
+    }
+
     @Override
     protected int resolveElementCount(CollectionData parent) throws IOException {
         if (memberIndex == -1) {
@@ -33,7 +41,7 @@ public final class VarElementCountSequenceTypeImpl extends VarElementCountSequen
                 if (memberIndex == -1) {
                     if (parent instanceof CompoundData) {
                         CompoundData compoundData = (CompoundData) parent;
-                        memberIndex = compoundData.getCompoundType().getMemberIndex(memberName);
+                        memberIndex = compoundData.getType().getMemberIndex(memberName);
                     }
                 }
             }

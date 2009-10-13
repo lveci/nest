@@ -1,25 +1,26 @@
 package com.bc.ceres.binio.internal;
 
-import com.bc.ceres.binio.*;
+import com.bc.ceres.binio.CollectionData;
+import com.bc.ceres.binio.CompoundType;
+import com.bc.ceres.binio.DataContext;
+import com.bc.ceres.binio.Type;
 
 import java.io.IOException;
 
 
 final class VarCompound extends AbstractCompound {
-    private final CompoundTypeImpl resolvedCompoundType;
     private int maxResolvedIndex;
+    private long size;
 
     public VarCompound(DataContext context, CollectionData parent, CompoundType compoundType, long position) {
         super(context, parent, compoundType, position);
-        this.resolvedCompoundType = new CompoundTypeImpl(compoundType.getName(), compoundType.getMembers());
         this.maxResolvedIndex = -1;
 
         // todo - OPT: do this in resolve()
         // todo - OPT: do this for all subsequntial fixed-size member types
-        // todo - OPT: idea: register a hint with a type in a format whcih tells the com.bc.ceres.binio API to use a fixed size segment
 
         // Determine first members up to maxMemberIndex which have known size
-        int maxMemberIndex = FixCompound.getMemberIndexWithinSizeLimit(compoundType, com.bc.ceres.binio.internal.Segment.SEGMENT_SIZE_LIMIT);
+        int maxMemberIndex = FixCompound.getMemberIndexWithinSizeLimit(compoundType, Segment.getSegmentSizeLimit());
         if (maxMemberIndex >= 0) {
             int segmentSize = 0;
             for (int i = 0; i <= maxMemberIndex; i++) {
@@ -29,7 +30,11 @@ final class VarCompound extends AbstractCompound {
             int segmentOffset = 0;
             for (int i = 0; i <= maxMemberIndex; i++) {
                 final Type memberType = compoundType.getMember(i).getType();
-                setMemberInstance(i, InstanceFactory.createFixMember(context, this, memberType, segment, segmentOffset));
+                final MemberInstance fixMember = InstanceFactory.createFixMember(context, this, memberType,
+                                                                                 segment,
+                                                                                 segmentOffset);
+                setMemberInstance(i, fixMember);
+                size += fixMember.getSize();
                 segmentOffset += memberType.getSize();
             }
         }
@@ -38,18 +43,13 @@ final class VarCompound extends AbstractCompound {
     }
 
     @Override
-    public Type getType() {
-        return resolvedCompoundType;
-    }
-
-    @Override
     public long getSize() {
-        return resolvedCompoundType.getSize();
+        return isSizeResolved() ? size : -1;
     }
 
     @Override
     public boolean isSizeResolved() {
-        return resolvedCompoundType.isSizeKnown();
+        return isSizeResolved(getMemberCount() - 1);
     }
 
     @Override
@@ -72,11 +72,7 @@ final class VarCompound extends AbstractCompound {
             if (!memberInstance.isSizeResolved()) {
                 memberInstance.resolveSize();
             }
-            final CompoundMember resolvedMember = new CompoundMemberImpl(getCompoundType().getMember(i).getName(),
-                                                                         memberInstance.getType(),
-                                                                         memberInstance.getSize(),
-                                                                         null);
-            resolvedCompoundType.setMember(i, resolvedMember);
+            size += memberInstance.getSize();
         }
         if (maxResolvedIndex < index) {
             maxResolvedIndex = index;
@@ -95,7 +91,7 @@ final class VarCompound extends AbstractCompound {
 
     private MemberInstance createMemberInstance(int index) throws IOException {
         final DataContext context = getContext();
-        final Type memberType = getCompoundType().getMemberType(index);
+        final Type memberType = getType().getMemberType(index);
         final long position;
         if (index > 0) {
             final MemberInstance prevMember = getMemberInstance(index - 1);
@@ -106,6 +102,8 @@ final class VarCompound extends AbstractCompound {
         } else {
             position = getPosition();
         }
-        return InstanceFactory.createMember(context, this, memberType, position, getContext().getFormat().getByteOrder());
+        return InstanceFactory.createMember(context, this, memberType, position,
+                                            getContext().getFormat().getByteOrder());
     }
+
 }

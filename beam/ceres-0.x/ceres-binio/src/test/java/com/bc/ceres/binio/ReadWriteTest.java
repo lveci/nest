@@ -106,12 +106,11 @@ public class ReadWriteTest extends TestCase {
         CompoundData data = context.getData();
         data.setInt("Counter", -1);
         SequenceData seq = data.getSequence("Complex_List");
-        assertEquals(-1, seq.getElementCount());
-        assertEquals(-1, seq.getSize());
+        assertEquals(0, seq.getElementCount());
+        assertEquals(0, seq.getSize());
         data.flush();
         assertEquals("R(0,4)W(0,4)", tracingIOHandler.getTrace());
 // TODO - want to test also the following (nf 27.08.2009)
-//        SequenceData seq = data.getSequence("Complex_List");
 //        for (int i = 0; i < 5; i++) {
 // TODO - Next statement throws a com.bc.ceres.binio.DataAccessException,
 // TODO - instead seq.elementCount shall increase by one during the call to seq.getCompound(i) (nf 27.08.2009)                  

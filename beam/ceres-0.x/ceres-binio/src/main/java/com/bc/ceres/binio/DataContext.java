@@ -2,9 +2,12 @@ package com.bc.ceres.binio;
 
 /**
  * The context provides the means to read from or write to a random access stream or file.
+ * <p>
+ * I/O performance my be tuned by setting the {@code ceres.binio.segmentSizeLimit} system property
+ * to the size (in bytes) of data segments shared by multiple subsequent compounds members.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-09-01 20:27:12 $
+ * @version $Revision: 1.3 $ $Date: 2009-10-13 15:56:30 $
  * @since Ceres 0.8
  */
 public interface DataContext {

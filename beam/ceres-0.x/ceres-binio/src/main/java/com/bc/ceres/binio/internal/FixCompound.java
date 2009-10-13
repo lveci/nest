@@ -22,12 +22,8 @@ final class FixCompound extends AbstractCompound {
     }
 
     @Override
-    public Type getType() {
-        return getCompoundType();
-    }
-
     public long getSize() {
-        return getCompoundType().getSize();
+        return getType().getSize();
     }
 
     @Override
@@ -35,19 +31,22 @@ final class FixCompound extends AbstractCompound {
         return true;
     }
 
+    @Override
     public boolean isSizeResolved(int index) {
         return true;
     }
 
+    @Override
     public void resolveSize() {
         // ok
     }
 
+    @Override
     public void resolveSize(int index) {
         // ok
     }
 
-    public static int getMemberIndexWithinSizeLimit(CompoundType compoundType, int sizeLimit) {
+    static int getMemberIndexWithinSizeLimit(CompoundType compoundType, long sizeLimit) {
         int index = -1;
         int segmentSize = 0;
         for (int i = 0; i < compoundType.getMemberCount(); i++) {
@@ -62,7 +61,7 @@ final class FixCompound extends AbstractCompound {
         return index;
     }
 
-    public static boolean isCompoundTypeWithinSizeLimit(CompoundType compoundType, int sizeLimit) {
+    static boolean isCompoundTypeWithinSizeLimit(CompoundType compoundType, long sizeLimit) {
         return getMemberIndexWithinSizeLimit(compoundType, sizeLimit) == compoundType.getMemberCount() - 1;
     }
 }

@@ -9,6 +9,15 @@ public interface CompoundData extends CollectionData {
     /**
      * @return The resolved instance type of the compound.
      */
+    @Override
+    CompoundType getType();
+
+    /**
+     * @return The resolved instance type of the compound.
+     *
+     * @deprecated since ceres 0.10; use {@link #getType()} instead.
+     */
+    @Deprecated
     CompoundType getCompoundType();
 
     int getMemberCount();

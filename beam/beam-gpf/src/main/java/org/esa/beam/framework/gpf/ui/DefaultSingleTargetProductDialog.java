@@ -33,7 +33,7 @@ import java.util.Map;
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-09-01 20:27:12 $
+ * @version $Revision: 1.4 $ $Date: 2009-10-13 15:56:30 $
  */
 public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog {
 
@@ -102,8 +102,7 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
             showErrorDialog(e.getMessage());
         }
         if (valueContainer.getModels().length > 0) {
-            BindingContext context = new BindingContext(valueContainer);
-            ValueEditorsPane parametersPane = new ValueEditorsPane(context);
+            ValueEditorsPane parametersPane = new ValueEditorsPane(valueContainer);
             final JPanel paremetersPanel = parametersPane.createPanel();
             paremetersPanel.setBorder(new EmptyBorder(4, 4, 4, 4));
             this.form.add("Processing Parameters", new JScrollPane(paremetersPanel));

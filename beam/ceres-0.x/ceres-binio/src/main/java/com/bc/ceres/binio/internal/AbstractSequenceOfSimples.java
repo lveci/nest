@@ -100,12 +100,12 @@ abstract class AbstractSequenceOfSimples extends AbstractSequence {
 
     @Override
     public SequenceInstance getSequence(int index) {
-        throw new DataAccessException();
+        throw new DataAccessException(getTypeErrorMsg());
     }
 
     @Override
     public CompoundInstance getCompound(int index) {
-        throw new DataAccessException();
+        throw new DataAccessException(getTypeErrorMsg());
     }
 
     protected int getSegmentOffset(int index) {
@@ -114,7 +114,7 @@ abstract class AbstractSequenceOfSimples extends AbstractSequence {
 
     private void ensureDataAccessible() throws IOException {
         if (dataAccessor == null) {
-            dataAccessor = DataAccessor.getInstance(getSequenceType().getElementType(), getContext().getFormat().getByteOrder());
+            dataAccessor = DataAccessor.getInstance(getType().getElementType(), getContext().getFormat().getByteOrder());
         }
         if (!isDataAccessible()) {
             if (!isSizeResolved()) {

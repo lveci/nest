@@ -1,5 +1,5 @@
 /*
- * $Id: MapGeoCoding.java,v 1.6 2009-07-02 15:03:13 lveci Exp $
+ * $Id: MapGeoCoding.java,v 1.7 2009-10-13 15:56:30 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -23,8 +23,6 @@ import org.esa.beam.framework.dataop.maptransf.MapTransform;
 import org.esa.beam.framework.dataop.maptransf.geotools.CoordinateReferenceSystems;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.ProductUtils;
-import org.geotools.referencing.crs.DefaultDerivedCRS;
-import org.geotools.referencing.cs.DefaultCartesianCS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -37,7 +35,7 @@ import java.awt.geom.Point2D;
  * A geo-coding based on a cartographical map.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.6 $ $Date: 2009-07-02 15:03:13 $
+ * @version $Revision: 1.7 $ $Date: 2009-10-13 15:56:30 $
  */
 public class MapGeoCoding extends AbstractGeoCoding {
 
@@ -86,10 +84,7 @@ public class MapGeoCoding extends AbstractGeoCoding {
         final CoordinateReferenceSystem baseCRS = CoordinateReferenceSystems.getCRS(mapInfo.getMapProjection(),
                                                                                     mapInfo.getDatum());
         setBaseCRS(baseCRS);
-        setGridCRS(new DefaultDerivedCRS("Grid CS based on " + baseCRS.getName(),
-                                         baseCRS,
-                                         new AffineTransform2D(modelToImageTransform),
-                                         DefaultCartesianCS.DISPLAY));
+        setImageCRS(createImageCRS(baseCRS, new AffineTransform2D(modelToImageTransform)));
         setModelCRS(baseCRS);
     }
 
