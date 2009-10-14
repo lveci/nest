@@ -27,9 +27,11 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.nest.gpf.OperatorUtils;
+import org.esa.nest.datamodel.Unit;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Applies Multitemporal Speckle Filtering to multitemporal images.
@@ -80,10 +82,21 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
             sourceProductId="source", label="Source Bands")
     String[] sourceBandNames;
 
-    private boolean bandMeanComputed = false;
-    private double avgSigmma0 = 0.0;
-    private double[] bandMeanValues = null;
+    @Parameter(valueSet = {WINDOW_SIZE_3x3, WINDOW_SIZE_5x5, WINDOW_SIZE_7x7, WINDOW_SIZE_9x9, WINDOW_SIZE_11x11},
+               defaultValue = WINDOW_SIZE_3x3, label="Window Size")
+    private String windowSize = WINDOW_SIZE_3x3;
+
+    private int halfWindowWidth = 0;
+    private int halfWindowHeight = 0;
+    private int sourceImageWidth = 0;
+    private int sourceImageHeight = 0;
     private double[] bandNoDataValues = null;
+
+    public static final String WINDOW_SIZE_3x3 = "3x3";
+    public static final String WINDOW_SIZE_5x5 = "5x5";
+    public static final String WINDOW_SIZE_7x7 = "7x7";
+    public static final String WINDOW_SIZE_9x9 = "9x9";
+    public static final String WINDOW_SIZE_11x11 = "11x11";
 
     /**
      * Default constructor. The graph processing framework
@@ -108,6 +121,9 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
+        sourceImageWidth = sourceProduct.getSceneRasterWidth();
+        sourceImageHeight = sourceProduct.getSceneRasterHeight();
+
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),
                                     sourceProduct.getSceneRasterWidth(),
@@ -117,11 +133,32 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
 
         addSelectedBands();
 
-        // The tile width has to be the image width, otherwise the index calculation in the last tile is noe correct.
+        // The tile width has to be the image width, otherwise the index calculation in the last tile is not correct.
         targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 50);
 
-        bandMeanValues = new double[sourceBandNames.length];
-        bandNoDataValues = new double[sourceBandNames.length];
+        int windowWidth = 0;
+        int windowHeight = 0;
+        if (windowSize.equals(WINDOW_SIZE_3x3)) {
+            windowWidth = 3;
+            windowHeight = 3;
+        } else if (windowSize.equals(WINDOW_SIZE_5x5)) {
+            windowWidth = 5;
+            windowHeight = 5;
+        } else if (windowSize.equals(WINDOW_SIZE_7x7)) {
+            windowWidth = 7;
+            windowHeight = 7;
+        } else if (windowSize.equals(WINDOW_SIZE_9x9)) {
+            windowWidth = 9;
+            windowHeight = 9;
+        } else if (windowSize.equals(WINDOW_SIZE_11x11)) {
+            windowWidth = 11;
+            windowHeight = 11;
+        } else {
+            throw new OperatorException("Unknown filter size: " + windowSize);
+        }
+
+        halfWindowWidth = windowWidth/2;
+        halfWindowHeight = windowHeight/2;
     }
 
     /**
@@ -142,73 +179,161 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
             throw new OperatorException("Multitemporal filtering cannot be applied with one source band. Select more bands.");
         }
 
-        final Band targetBand = new Band("filtered_band",
-                                         ProductData.TYPE_FLOAT32,
-                                         sourceProduct.getSceneRasterWidth(),
-                                         sourceProduct.getSceneRasterHeight());
+        final Band[] sourceBands = new Band[sourceBandNames.length];
+        for (int i = 0; i < sourceBandNames.length; i++) {
+            final String sourceBandName = sourceBandNames[i];
+            final Band sourceBand = sourceProduct.getBand(sourceBandName);
+            if (sourceBand == null) {
+                throw new OperatorException("Source band not found: " + sourceBandName);
+            }
+            sourceBands[i] = sourceBand;
+        }
 
-        targetBand.setUnit(sourceProduct.getBand(sourceBandNames[0]).getUnit());
-        targetProduct.addBand(targetBand);
+        for (Band srcBand : sourceBands) {
+            final String unit = srcBand.getUnit();
+            if(unit == null) {
+                throw new OperatorException("band " + srcBand.getName() + " requires a unit");
+            }
+
+            if (unit.contains(Unit.PHASE) || unit.contains(Unit.IMAGINARY) || unit.contains(Unit.REAL)) {
+                throw new OperatorException("Please select amplitude or intensity bands.");
+            } else {
+                final Band targetBand = new Band(srcBand.getName(),
+                                                 ProductData.TYPE_FLOAT32,
+                                                 sourceProduct.getSceneRasterWidth(),
+                                                 sourceProduct.getSceneRasterHeight());
+
+                targetBand.setUnit(unit);
+                targetProduct.addBand(targetBand);
+            }
+        }
+
+        bandNoDataValues = new double[targetProduct.getNumBands()];
     }
 
     /**
-     * Called by the framework in order to compute a tile for the given target band.
+     * Called by the framework in order to compute the stack of tiles for the given target bands.
      * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
      *
-     * @param targetBand The target band.
-     * @param targetTile The current tile associated with the target band to be computed.
-     * @param pm         A progress monitor which should be used to determine computation cancelation requests.
-     * @throws org.esa.beam.framework.gpf.OperatorException
-     *          If an error occurs during computation of the target raster.
+     * @param targetTiles     The current tiles to be computed for each target band.
+     * @param targetRectangle The area in pixel coordinates to be computed (same for all rasters in <code>targetRasters</code>).
+     * @param pm              A progress monitor which should be used to determine computation cancelation requests.
+     * @throws OperatorException if an error occurs during computation of the target rasters.
      */
     @Override
-    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+    public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
-        final Rectangle targetTileRectangle = targetTile.getRectangle();
-        final int x0 = targetTileRectangle.x;
-        final int y0 = targetTileRectangle.y;
-        final int w = targetTileRectangle.width;
-        final int h = targetTileRectangle.height;
-
-        final int numSourceBands = sourceBandNames.length;
-        final ProductData srcData[] = new ProductData[numSourceBands];
-
-        for (int i = 0; i < numSourceBands; i++) {
-            final String srcBandName = sourceBandNames[i];
-            final Band srcBand = sourceProduct.getBand(srcBandName);
-            final Tile srcTile = getSourceTile(srcBand, targetTileRectangle, pm);
-            srcData[i] = srcTile.getDataBuffer();
-
-            if (!bandMeanComputed) {
-                bandMeanValues[i] = srcBand.getStx().getMean();
-                bandNoDataValues[i] = srcBand.getNoDataValue();
-                avgSigmma0 += bandMeanValues[i] / numSourceBands;
-            }
+        final int x0 = targetRectangle.x;
+        final int y0 = targetRectangle.y;
+        final int w  = targetRectangle.width;
+        final int h  = targetRectangle.height;
+        //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+        
+        final Band[] targetBands = targetProduct.getBands();
+        final int numBands = targetBands.length;
+        final ProductData[] targetData = new ProductData[numBands];
+        for (int i = 0; i < numBands; i++) {
+            Tile targetTile = targetTiles.get(targetBands[i]);
+            targetData[i] = targetTile.getDataBuffer();
         }
 
-        if (!bandMeanComputed) {
-            bandMeanComputed = true;
+        Rectangle sourceRectangle = getSourceRectangle(x0, y0, w, h);
+
+        final Tile[] sourceTile = new Tile[numBands];
+        final ProductData[] sourceData = new ProductData[numBands];
+        for (int i = 0; i < numBands; i++) {
+            final Band srcBand = sourceProduct.getBand(targetBands[i].getName());
+            sourceTile[i] = getSourceTile(srcBand, sourceRectangle, pm);
+            sourceData[i] = sourceTile[i].getDataBuffer();
+            bandNoDataValues[i] = srcBand.getNoDataValue();
         }
 
-        final ProductData trgData = targetTile.getDataBuffer();
+        double[] localMeans = new double[numBands];
         double srcDataValue = 0.0;
-        double tgtDataValue = 0.0;
         for(int y = y0; y < y0 + h; y++) {
             for (int x = x0; x < x0 + w; x++) {
-                final int index = targetTile.getDataBufferIndex(x, y);
-                tgtDataValue = 0.0;
+
+                final int sourceIndex = sourceTile[0].getDataBufferIndex(x, y);
+
+                double sum = 0.0;
                 int n = 0;
-                for (int i = 0; i < numSourceBands; i++) {
-                    srcDataValue = srcData[i].getElemDoubleAt(index);
-                    if (srcDataValue != bandNoDataValues[i]) {
-                        tgtDataValue += srcDataValue / bandMeanValues[i];
-                        n++;
+                for (int i = 0; i < numBands; i++) {
+                    srcDataValue = sourceData[i].getElemDoubleAt(sourceIndex);
+                    if (srcDataValue == bandNoDataValues[i]) {
+                        localMeans[i] = bandNoDataValues[i];
+                        continue;
+                    }
+
+                    localMeans[i] = computeLocalMean(x, y, sourceTile[i], sourceData[i], bandNoDataValues[i]);
+
+                    if (localMeans[i] != 0.0) {
+                        sum += sourceData[i].getElemDoubleAt(sourceIndex) / localMeans[i];
+                    }
+                    n++;
+                }
+                if (n > 0) {
+                    sum /= n;
+                }
+
+                final int targetIndex = targetTiles.get(targetBands[0]).getDataBufferIndex(x, y);
+                for (int i = 0; i < numBands; i++) {
+                    if (localMeans[i] != bandNoDataValues[i]) {
+                        targetData[i].setElemDoubleAt(targetIndex, sum * localMeans[i]);
+                    } else {
+                        targetData[i].setElemDoubleAt(targetIndex, bandNoDataValues[i]);
                     }
                 }
-                tgtDataValue *= avgSigmma0 / n;
-                trgData.setElemDoubleAt(index, tgtDataValue);
             }
         }
+    }
+
+    /**
+     * Get source tile rectangle.
+     * @param tx0 X coordinate for the upper left corner pixel in the target tile.
+     * @param ty0 Y coordinate for the upper left corner pixel in the target tile.
+     * @param tw The target tile width.
+     * @param th The target tile height.
+     * @return The source tile rectangle.
+     */
+    private Rectangle getSourceRectangle(final int tx0, final int ty0, final int tw, final int th) {
+        final int x0 = Math.max(0, tx0 - halfWindowWidth);
+        final int y0 = Math.max(0, ty0 - halfWindowHeight);
+        final int xMax = Math.min(tx0 + tw - 1 + halfWindowWidth, sourceImageWidth);
+        final int yMax = Math.min(ty0 + th - 1 + halfWindowHeight, sourceImageHeight);
+        final int w = xMax - x0 + 1;
+        final int h = yMax - y0 + 1;
+        return new Rectangle(x0, y0, w, h);
+    }
+
+    /**
+     * Compute mean value for pixels in a window with given center.
+     * @param xc X coordinate of the center pixel.
+     * @param yc Y coordinate of the center pixel.
+     * @param srcTile Source tile.
+     * @param srcData Source data.
+     * @param noDataValue The noDataValue for source band.
+     * @return The mean value.
+     */
+    private double computeLocalMean(int xc, int yc, Tile srcTile, ProductData srcData, double noDataValue) {
+        final int x0 = Math.max(0, xc - halfWindowWidth);
+        final int y0 = Math.max(0, yc - halfWindowHeight);
+        final int xMax = Math.min(xc + halfWindowWidth, sourceImageWidth-1);
+        final int yMax = Math.min(yc + halfWindowHeight, sourceImageHeight-1);
+
+        double mean = 0.0;
+        double value = 0.0;
+        int n = 0;
+        for (int y = y0; y < yMax; y++) {
+            for (int x = x0; x < xMax; x++) {
+                final int index = srcTile.getDataBufferIndex(x, y);
+                value = srcData.getElemDoubleAt(index);
+                if (value != noDataValue) {
+                    mean += value;
+                    n++;
+                }
+            }
+        }
+        return mean/n;
     }
 
 
