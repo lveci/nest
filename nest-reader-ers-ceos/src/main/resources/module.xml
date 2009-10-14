@@ -2,7 +2,7 @@
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-reader-ers-ceos</symbolicName>
     <version>3B</version>
-    <name>ERS 1 and 2 CEOS Product Reader</name>
+    <name>NEST ERS 1 and 2 CEOS Product Reader</name>
 
     <description>
         Enables reading of ERS data products in CEOS format.

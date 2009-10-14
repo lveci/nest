@@ -447,13 +447,20 @@
         </action>
 
         <action>
+            <id>MetadataTools</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Metadata</text>
+            <parent>tools</parent>
+        </action>
+
+        <action>
             <id>editMetadata</id>
             <class>org.esa.nest.dat.actions.EditMetadataAction</class>
             <text>Edit Metadata</text>
             <shortDescr>Edit product metadata</shortDescr>
             <description>Edit product metadata</description>
             <helpId>editMetadata</helpId>
-            <parent>sartools</parent>
+            <parent>MetadataTools</parent>
             <placeBefore>searchMetadata</placeBefore>
             <context>metadata</context>
             <largeIcon>/org/esa/nest/icons/metadata_edit.png</largeIcon>
@@ -466,10 +473,30 @@
             <shortDescr>Search product metadata</shortDescr>
             <description>Search product metadata</description>
             <helpId>searchMetadata</helpId>
-            <placeBefore>applyOrbitFile</placeBefore>
-            <parent>sartools</parent>
+            <parent>MetadataTools</parent>
             <context>metadata</context>
         </action>
+
+        <action>
+            <id>replaceMetadata</id>
+            <class>org.esa.nest.dat.actions.ReplaceMetadataAction</class>
+            <text>Replace Metadata</text>
+            <shortDescr>Replace product metadata with that of another product</shortDescr>
+            <description>Replace product metadata with that of another product</description>
+            <parent>MetadataTools</parent>
+            <context>metadata</context>
+        </action>
+
+        <action>
+            <id>exportProductMetadata</id>
+            <class>org.esa.beam.visat.actions.ExportMetadataAction</class>
+            <text>Export Metadata</text>
+            <shortDescr>Export the currently displayed metadata.</shortDescr>
+            <description>Export the currently displayed metadata as tab-separated text.</description>
+            <helpId>exportMetadata</helpId>
+            <parent>MetadataTools</parent>
+        </action>
+
 
         <action>
             <id>showLayersToolBar</id>

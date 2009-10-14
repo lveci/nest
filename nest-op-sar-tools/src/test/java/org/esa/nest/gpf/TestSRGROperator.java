@@ -64,8 +64,8 @@ public class TestSRGROperator extends TestCase {
         //assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
-        MetadataElement abs = targetProduct.getMetadataRoot().getElement("Abstracted Metadata");
-        MetadataAttribute attr = abs.getAttribute(AbstractMetadata.srgr_flag);
+        final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(targetProduct);
+        final MetadataAttribute attr = abs.getAttribute(AbstractMetadata.srgr_flag);
         assertTrue(attr.getData().getElemBoolean());
     }
 
@@ -91,7 +91,7 @@ public class TestSRGROperator extends TestCase {
         band1.setData(ProductData.createInstance(intValues));
 
         // create abstracted metadata
-        MetadataElement abs = new MetadataElement("Abstracted Metadata");
+        MetadataElement abs = new MetadataElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
 
         abs.addAttribute(new MetadataAttribute(AbstractMetadata.MISSION,
                 ProductData.createInstance("ENVISAT"), false));

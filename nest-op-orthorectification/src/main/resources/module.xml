@@ -2,7 +2,7 @@
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-op-orthorectification</symbolicName>
     <version>3B</version>
-    <name>nest-op-orthorectification</name>
+    <name>NEST Orthorectification</name>
     <description>NEST Orthorectification</description>
 	
 	<vendor>Array Systems Computing Inc</vendor>

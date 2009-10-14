@@ -1,5 +1,5 @@
 /*
- * $Id: ProductTree.java,v 1.4 2009-06-03 14:30:18 lveci Exp $
+ * $Id: ProductTree.java,v 1.5 2009-10-14 19:16:21 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -69,7 +69,7 @@ import java.io.File;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.4 $ $Date: 2009-06-03 14:30:18 $
+ * @version $Revision: 1.5 $ $Date: 2009-10-14 19:16:21 $
  * @see org.esa.beam.framework.ui.product.ProductTreeListener
  * @see org.esa.beam.framework.datamodel.Product
  */
@@ -302,7 +302,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
 
     private static DefaultMutableTreeNode createIdentificationNodes(Product product) {
         final MetadataElement rootElement = product.getMetadataRoot();
-        final MetadataElement absRoot = rootElement.getElement("Abstracted Metadata");
+        final MetadataElement absRoot = rootElement.getElement("Abstracted_Metadata");
         if(absRoot == null) return null;
 
         final DefaultMutableTreeNode identNode = new DefaultMutableTreeNode("Identification");
@@ -632,7 +632,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
 
     private static void addDN(Band band, StringBuffer toolTipBuffer) {
         final Product product = band.getProduct();
-        final MetadataElement absRoot = product.getMetadataRoot().getElement("Abstracted Metadata");
+        final MetadataElement absRoot = product.getMetadataRoot().getElement("Abstracted_Metadata");
         boolean calibrated = false;
         if(absRoot != null) {
             calibrated = absRoot.getAttributeInt("abs_calibration_flag", 0) == 1;

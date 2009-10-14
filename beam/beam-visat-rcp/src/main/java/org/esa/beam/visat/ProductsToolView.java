@@ -181,8 +181,8 @@ public class ProductsToolView extends AbstractToolView {
                     // ok
                 }
             } else if (clickCount == 2) {
-                final String type = raster.getProduct().getProductType();
-                if(type.startsWith("ASA_WV") && raster.getName().contains("Spectra")) {
+                if(raster.getProduct() != null && 
+                   raster.getProduct().getProductType().startsWith("ASA_WV") && raster.getName().contains("Spectra")) {
                     final ExecCommand command = visatApp.getCommandManager().getExecCommand("showPolarWaveView");
                     command.execute(clickCount);
                 } else {

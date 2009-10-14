@@ -33,6 +33,8 @@ public class PromptDialog extends ModalDialog {
         gbc.insets.top = 2;
         prompt1 = addTextComponent(content, gbc, label, defaultValue, textArea);
 
+        getJDialog().setMinimumSize(new Dimension(400, 100));
+
         setContent(content);
     }
 
@@ -40,7 +42,7 @@ public class PromptDialog extends ModalDialog {
                                  final String text, final String value, boolean isTextArea) {
         JTextComponent textComp;
         if(isTextArea) {
-            JTextArea textArea = new JTextArea(value);
+            final JTextArea textArea = new JTextArea(value);
             textArea.setColumns(50);
             textArea.setRows(7);
             textComp = textArea;

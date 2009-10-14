@@ -1321,7 +1321,7 @@ public final class ERSCalibrator implements Calibrator {
      */
     private void updateTargetProductMetadata() {
 
-        final MetadataElement abs = targetProduct.getMetadataRoot().getElement("Abstracted Metadata");
+        final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(targetProduct);
 
         if (!isDetectedSampleType) {
             AbstractMetadata.setAttribute(abs, AbstractMetadata.SAMPLE_TYPE, "DETECTED");

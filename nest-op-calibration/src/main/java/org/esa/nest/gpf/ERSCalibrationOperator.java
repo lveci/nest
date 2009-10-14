@@ -1487,7 +1487,7 @@ public final class ERSCalibrationOperator extends Operator {
      */
     private void updateTargetProductMetadata() {
 
-        final MetadataElement abs = targetProduct.getMetadataRoot().getElement("Abstracted Metadata");
+        final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(targetProduct);
 
         if (!isDetectedSampleType) {
             final MetadataAttribute sampleTypeAttr = abs.getAttribute(AbstractMetadata.SAMPLE_TYPE);

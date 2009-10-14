@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-visat-rcp</symbolicName>
-    <version>4.6</version>
+    <version>4.7</version>
     <name>VISAT Rich Client Platform</name>
 
     <description>
@@ -11,8 +11,6 @@
 
     <changelog>
         <![CDATA[
-<<<<<<< .mine
-=======
         <p>Changes in 4.7:<br/>
           [BEAM-1040] Exchange 'no data' with 'NaN' in text exports<br/>
           [BEAM-1028] Navigation window not fully functional on Unix/GTK+<br/>
@@ -34,7 +32,6 @@
           [BEAM-991] Yaxis of scatterplot does not show the right values<br/>
           [BEAM-456] ROI includes also no-data pixels if "Include pixel by conditions" is selected<br/>
         </p>
->>>>>>> .r6293
         <p>Changes in 4.6:<br/>
           [BEAM-998] VISAT fails to import shapes from ESRI shapefiles<br/>
           [BEAM-997] VISAT should display a band's coordinate system<br/>

@@ -402,7 +402,7 @@ public class ASARRetroCalibrationOperator extends Operator {
      * Update auxiliary file name in the metadata of target product.
      */
     private void updateAuxFileName() {
-        final MetadataElement tgtAbsRoot = targetProduct.getMetadataRoot().getElement("Abstracted Metadata");
+        final MetadataElement tgtAbsRoot = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(tgtAbsRoot, AbstractMetadata.external_calibration_file, newXCAFileName);
     }
 

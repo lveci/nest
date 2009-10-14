@@ -167,8 +167,8 @@ public class OperatorUtils {
     public static boolean isMapProjected(Product product) {
         if(product.getGeoCoding() instanceof MapGeoCoding)
             return true;
-        final MetadataElement absRoot = product.getMetadataRoot().getElement("Abstracted Metadata");
-        return absRoot != null && !absRoot.getAttributeString("map_projection", "").trim().isEmpty();
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        return absRoot != null && !absRoot.getAttributeString(AbstractMetadata.map_projection, "").trim().isEmpty();
     }
 
     /**

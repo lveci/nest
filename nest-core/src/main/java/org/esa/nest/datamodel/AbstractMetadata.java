@@ -23,7 +23,7 @@ public class AbstractMetadata {
     public static final short NO_METADATA_BYTE = 0;
     public static final String NO_METADATA_STRING = " ";
 
-    public static final String ABSTRACT_METADATA_ROOT = "Abstracted Metadata";
+    public static final String ABSTRACT_METADATA_ROOT = "Abstracted_Metadata";
     public static final String SLAVE_METADATA_ROOT = "Slave Metadata";
 
     public static final String PRODUCT = "PRODUCT";

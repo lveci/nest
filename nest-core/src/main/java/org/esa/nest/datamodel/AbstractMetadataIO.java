@@ -22,7 +22,7 @@ import java.util.StringTokenizer;
  */
 public class AbstractMetadataIO {
 
-     static void Save(final Product product, final MetadataElement metadataElem, final File metadataFile) {
+     public static void Save(final Product product, final MetadataElement metadataElem, final File metadataFile) {
 
          final Element root = new Element("Metadata");
          final Document doc = new Document(root);
@@ -41,7 +41,7 @@ public class AbstractMetadataIO {
          XMLSupport.SaveXML(doc, metadataFile.getAbsoluteFile().toString());
     }
 
-    static boolean Load(final Product product, final MetadataElement metadataElem, final File metadataFile)
+    public static boolean Load(final Product product, final MetadataElement metadataElem, final File metadataFile)
         throws IOException {
 
         Document doc;
@@ -96,13 +96,21 @@ public class AbstractMetadataIO {
         final Attribute valueAttrib = domElem.getAttribute("value");
         if(valueAttrib == null) return;
 
+        final Attribute typeAttrib = domElem.getAttribute("type");
+        Integer typeFromFile = null;
+        if(typeAttrib != null) {
+            typeFromFile = Integer.parseInt(typeAttrib.getValue());
+        }
+
         MetadataAttribute metaAttrib = rootElem.getAttribute(name);
         if(metaAttrib == null) {
-            final Attribute typeAttrib = domElem.getAttribute("type");
-            if(typeAttrib == null) return;
-            metaAttrib = new MetadataAttribute(name, Integer.parseInt(typeAttrib.getValue()));
-            rootElem.addAttributeFast(metaAttrib);
-        }        
+            if(typeFromFile != null) {
+                metaAttrib = new MetadataAttribute(name, typeFromFile);
+                rootElem.addAttributeFast(metaAttrib);
+            } else {
+                return;                
+            }
+        }
 
         final int type = metaAttrib.getDataType();
         if(type == ProductData.TYPE_ASCII)
@@ -111,6 +119,8 @@ public class AbstractMetadataIO {
                 metaAttrib.getData().setElems(AbstractMetadata.parseUTC(valueAttrib.getValue()).getArray());
         else if(type == ProductData.TYPE_FLOAT64 || type == ProductData.TYPE_FLOAT32)
             metaAttrib.getData().setElemDouble(Double.parseDouble(valueAttrib.getValue()));
+        else if(type == ProductData.TYPE_INT8 && typeFromFile != null && typeFromFile == ProductData.TYPE_ASCII)
+            metaAttrib.getData().setElems(valueAttrib.getValue());  
         else
             metaAttrib.getData().setElemInt(Integer.parseInt(valueAttrib.getValue()));
 
@@ -202,10 +212,10 @@ public class AbstractMetadataIO {
 
         ReaderUtils.createFineTiePointGrid(inputWidth, inputHeight, gridWidth, gridHeight, inPoints, outPoints);
 
-        final TiePointGrid incidentAngleGrid = new TiePointGrid(name, gridWidth, gridHeight, 0, 0,
+        final TiePointGrid newTPG = new TiePointGrid(name, gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, outPoints);
 
-        product.addTiePointGrid(incidentAngleGrid);
+        product.addTiePointGrid(newTPG);
     }
 
     private static void writeTiePointGrids(final Product product, final Element root) {
@@ -215,8 +225,10 @@ public class AbstractMetadataIO {
             final Element gridElem = new Element(g.getName());
             root.addContent(gridElem);
 
-            gridElem.setAttribute("unit", g.getUnit());
-            gridElem.setAttribute("desc", g.getDescription());
+            final String unit = g.getUnit();
+            final String desc = g.getDescription();
+            gridElem.setAttribute("unit", unit == null ? "" : unit);
+            gridElem.setAttribute("desc", desc == null ? "" : desc);
 
             final int width = g.getRasterWidth();
             final int height = g.getRasterHeight();

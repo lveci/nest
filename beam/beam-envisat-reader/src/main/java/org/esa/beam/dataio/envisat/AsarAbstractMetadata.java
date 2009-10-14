@@ -13,7 +13,7 @@ import java.util.ArrayList;
  */
 public final class AsarAbstractMetadata {
 
-    public static final String ABSTRACTED_METADATA_ROOT_NAME = "Abstracted Metadata";
+    public static final String ABSTRACTED_METADATA_ROOT_NAME = "Abstracted_Metadata";
 
     private final String _productType;
     private final String _version;

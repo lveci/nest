@@ -14,6 +14,7 @@ import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.GeoUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
@@ -241,8 +242,8 @@ public class ProductLayer extends RenderableLayer {
     private static boolean isMapProjected(Product product) {
         if(product.getGeoCoding() instanceof MapGeoCoding)
             return true;
-        final MetadataElement absRoot = product.getMetadataRoot().getElement("Abstracted Metadata");
-        return absRoot != null && !absRoot.getAttributeString("map_projection", "").isEmpty();
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        return absRoot != null && !absRoot.getAttributeString(AbstractMetadata.map_projection, "").isEmpty();
     }
 
     private static Product createSubsampledProduct(final Product product) throws IOException {
