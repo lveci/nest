@@ -1,6 +1,7 @@
 package org.esa.nest.dataio.ceos;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.util.CachingObjectArray;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.BinaryFileReader;
@@ -11,12 +12,14 @@ import org.esa.nest.dataio.ceos.records.ImageRecord;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.HashMap;
 
 
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.24 $ $Date: 2009-09-04 21:05:37 $
+ * @version $Revision: 1.25 $ $Date: 2009-10-13 20:26:50 $
  */
 public abstract class CEOSImageFile {
 
@@ -27,6 +30,13 @@ public abstract class CEOSImageFile {
     protected int _imageRecordLength = 0;
     protected long _startPosImageRecords = 0;
     protected int _imageHeaderLength = 0;
+
+    private final static int cacheSize = 1024;
+    private final Object[] linesCache = new Object[cacheSize];
+    private final int[] indexList = new int[cacheSize];
+    private Integer cachePos = 0;
+    private final HashMap<Integer, Integer> indexMap = new HashMap<Integer, Integer>(cacheSize);
+
 
     public BaseRecord getImageFileDescriptor() {
         return _imageFDR;
@@ -258,12 +268,37 @@ public abstract class CEOSImageFile {
 
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
+            //short[] srcLine;
             final short[] srcLine = new short[sourceWidth * 2];
             final short[] destLine = new short[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
                 }
+
+                /*
+                synchronized (binaryReader) {
+                    Integer cacheIndex = indexMap.get(y);
+                    if(cacheIndex == null) {
+                            if (cachePos >= cacheSize) {
+                                cachePos = 0;
+                            }
+
+                            srcLine = new short[sourceWidth * 2];
+                            binaryReader.seek(_imageRecordLength * y + xpos);
+                            binaryReader.read(srcLine);
+
+                            if(linesCache[cachePos] != null) {
+                                indexMap.put(indexList[cachePos], null);
+                            }
+                            linesCache[cachePos] = srcLine;
+                            indexList[cachePos] = y;
+                            indexMap.put(y, cachePos);
+                            ++cachePos;
+                    } else {
+                        srcLine = (short[]) linesCache[cacheIndex];
+                    }
+                }   */
 
                 // Read source line
                 synchronized (binaryReader) {

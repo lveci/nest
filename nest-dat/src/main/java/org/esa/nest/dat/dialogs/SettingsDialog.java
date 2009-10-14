@@ -51,6 +51,7 @@ public class SettingsDialog extends ModelessDialog {
         editLabel.setMinimumSize(new Dimension(500, 20));
         editField.addKeyListener(new SettingsKeyListener());
         editField.setMargin(new Insets(2, 5, 2, 5));
+        editField.setMaximumSize(new Dimension(500, 20));
         
         setContent(splitPane);
     }
@@ -124,6 +125,8 @@ public class SettingsDialog extends ModelessDialog {
         } else {
             editField.setText("");
         }
+
+        editField.setColumns(80);
     }
 
     @Override
