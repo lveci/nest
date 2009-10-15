@@ -111,6 +111,8 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         // mid panel
         final JPanel midPanel = new JPanel(new BorderLayout(4, 4));
         tabbedPanel = new JTabbedPane();
+        //tabbedPanel.setTabPlacement(JTabbedPane.LEFT);
+        tabbedPanel.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         tabbedPanel.addChangeListener(new ChangeListener() {
 
             public void stateChanged(final ChangeEvent e) {

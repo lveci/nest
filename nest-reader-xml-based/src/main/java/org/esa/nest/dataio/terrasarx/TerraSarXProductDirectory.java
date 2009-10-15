@@ -349,12 +349,14 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
             for(int i=0; i < img.getNumImages(); ++i) {
 
                 for(int b=0; b < img.getNumBands(); ++b) {
-                    final Band band = new Band(img.getName()+bandCnt++, img.getDataType(),
+                    final String pol = ReaderUtils.findPolarizationInBandName(img.getName());
+                    final Band band = new Band("Amplitude_"+pol,
+                                       img.getDataType(),
                                        img.getSceneWidth(), img.getSceneHeight());
                     band.setUnit(Unit.AMPLITUDE);
                     product.addBand(band);
 
-                    ReaderUtils.createVirtualIntensityBand(product, band, '_'+img.getName());
+                    ReaderUtils.createVirtualIntensityBand(product, band, '_'+pol);
 
                     bandMap.put(band, new ImageIOFile.BandInfo(img, i, b));
                 }
@@ -368,22 +370,22 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
             for (final File file : cosarFileList) {
 
-                // todo get polarizations
+                final String pol = ReaderUtils.findPolarizationInBandName(file.getName());
 
-                final Band realBand = new Band("i_"+file.getName(),
+                final Band realBand = new Band("i_"+pol,
                         ProductData.TYPE_INT16,
                         width, height);
                 realBand.setUnit(Unit.REAL);
                 product.addBand(realBand);
 
-                final Band imaginaryBand = new Band("q_"+file.getName(),
+                final Band imaginaryBand = new Band("q_"+pol,
                         ProductData.TYPE_INT16,
                         width, height);
                 imaginaryBand.setUnit(Unit.IMAGINARY);
                 product.addBand(imaginaryBand);
 
-                ReaderUtils.createVirtualIntensityBand(product, realBand, imaginaryBand, '_'+file.getName());
-                ReaderUtils.createVirtualPhaseBand(product, realBand, imaginaryBand, '_'+file.getName());
+                ReaderUtils.createVirtualIntensityBand(product, realBand, imaginaryBand, '_'+pol);
+                ReaderUtils.createVirtualPhaseBand(product, realBand, imaginaryBand, '_'+pol);
 
                 try {
                     cosarBandMap.put(realBand, FileImageInputStreamExtImpl.createInputStream(file));

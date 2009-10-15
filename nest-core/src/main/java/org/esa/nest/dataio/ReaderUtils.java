@@ -169,4 +169,19 @@ public class ReaderUtils {
                 throw new Exception("band " + b.getName() + " has null unit");
         }
     }
+
+    public static String findPolarizationInBandName(final String bandName) {
+
+        final String name = bandName.toUpperCase();
+        if(name.contains("HH"))
+            return "HH";
+        else if(name.contains("VV"))
+            return "VV";
+        else if(name.contains("HV"))
+            return "HV";
+        else if(name.contains("VH"))
+            return "VH";
+
+        return null;
+    }
 }
