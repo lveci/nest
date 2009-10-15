@@ -548,6 +548,14 @@
             <helpId>settings</helpId>
         </action>
 
+        <action>
+            <id>insarSoon</id>
+            <parent>insar</parent>
+            <class>org.esa.nest.dat.actions.ComingSoonAction</class>
+            <text>DORIS port coming soon...</text>
+            <shortDescr>DORIS port to NEST coming soon</shortDescr>
+        </action>
+
     </extension>
 
 

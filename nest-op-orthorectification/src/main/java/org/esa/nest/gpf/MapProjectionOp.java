@@ -48,6 +48,22 @@ public final class MapProjectionOp extends Operator {
             defaultValue = ResamplingFactory.NEAREST_NEIGHBOUR_NAME, label="Resampling Method")
     private String resamplingMethod = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
 
+
+    @Parameter
+    private float pixelSizeX = 0;
+
+    @Parameter
+    private float pixelSizeY = 0;
+
+    @Parameter
+    private float easting = 0;
+
+    @Parameter
+    private float northing = 0;
+
+    @Parameter
+    private float orientation = 0;
+    
     /**
      * Initializes this operator and sets the one and only target product.
      * <p>The target product can be either defined by a field of type {@link org.esa.beam.framework.datamodel.Product} annotated with the
@@ -66,7 +82,9 @@ public final class MapProjectionOp extends Operator {
 
         try {
             projectedProduct = createSubsampledProduct(sourceProduct, sourceBandNames,
-                                                       projectionName, resamplingMethod);
+                                                       projectionName, resamplingMethod,
+                                                       pixelSizeX, pixelSizeY,
+                                                       easting, northing, orientation);
 
             targetProduct = new Product(sourceProduct.getName(),
                                         sourceProduct.getProductType(),
@@ -121,7 +139,10 @@ public final class MapProjectionOp extends Operator {
     }
 
     private static Product createSubsampledProduct(final Product product, final String[] selectedBands,
-                                                   final String projectionName, final String resmaplingName) throws IOException {
+                                                   final String projectionName, final String resmaplingName,
+                                                   final float pixelSizeX, final float pixelSizeY,
+                                                   final float easting, final float northing,
+                                                   final float orientation) throws IOException {
 
         final String quicklookBandName = ProductUtils.findSuitableQuicklookBandName(product);
         final ProductSubsetDef productSubsetDef = new ProductSubsetDef("subset");
@@ -132,9 +153,17 @@ public final class MapProjectionOp extends Operator {
         if(!OperatorUtils.isMapProjected(product)) {
             final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(productSubset,
                                                 MapProjectionRegistry.getProjection(projectionName),
-                                                0.0,
+                                                orientation,
                                                 product.getBand(quicklookBandName).getNoDataValue());
             mapInfo.setResampling(ResamplingFactory.createResampling(resmaplingName));
+            if(pixelSizeX != 0)
+                mapInfo.setPixelSizeX(pixelSizeX);
+            if(pixelSizeY != 0)
+                mapInfo.setPixelSizeY(pixelSizeY);
+            if(easting != 0)
+                mapInfo.setEasting(easting);
+            if(northing != 0)
+                mapInfo.setNorthing(northing);
             productSubset = productSubset.createProjectedProduct(mapInfo, quicklookBandName, null);
         }
 

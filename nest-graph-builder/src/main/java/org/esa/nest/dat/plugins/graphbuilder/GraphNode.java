@@ -289,7 +289,7 @@ public class GraphNode {
         final int y = displayPosition.y;
 
         final FontMetrics metrics = g.getFontMetrics();
-        final String name = getOperatorName();
+        final String name = node.getId(); //getOperatorName();
         final Rectangle2D rect = metrics.getStringBounds(name, g);
         final int stringWidth = (int) rect.getWidth();
         setSize(Math.max(stringWidth, 50) + 10, 30);
