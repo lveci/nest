@@ -95,8 +95,6 @@ public class ConvertDataTypeOp extends Operator {
                                     sourceProduct.getSceneRasterWidth(),
                                     sourceProduct.getSceneRasterHeight());
 
-        targetProduct.setPreferredTileSize(JAI.getDefaultTileSize());
-
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
@@ -193,16 +191,25 @@ public class ConvertDataTypeOp extends Operator {
             final ProductData srcData = srcTile.getRawSamples();
             final ProductData dstData = targetTile.getRawSamples();
 
+            final double srcNoDataValue = sourceBand.getNoDataValue();
+            final double destNoDataValue = targetBand.getNoDataValue();
+
             final int numElem = dstData.getNumElems();
+            double srcValue;
             for(int i=0; i < numElem; ++i) {
-                if(scaling == ScalingType.NONE)
-                    dstData.setElemDoubleAt(i, srcData.getElemDoubleAt(i));
-                else if(scaling == ScalingType.TRUNC)
-                    dstData.setElemDoubleAt(i, truncate(srcData.getElemDoubleAt(i), newMin, newMax));
-                else if(scaling == ScalingType.LOGARITHMIC)
-                    dstData.setElemDoubleAt(i, logScale(srcData.getElemDoubleAt(i), origMin, newMin, origRange, newRange));
-                else
-                    dstData.setElemDoubleAt(i, scale(srcData.getElemDoubleAt(i), origMin, newMin, origRange, newRange));
+                srcValue = srcData.getElemDoubleAt(i);
+                if(srcValue == srcNoDataValue) {
+                    dstData.setElemDoubleAt(i, destNoDataValue);
+                } else {
+                    if(scaling == ScalingType.NONE)
+                        dstData.setElemDoubleAt(i, srcValue);
+                    else if(scaling == ScalingType.TRUNC)
+                        dstData.setElemDoubleAt(i, truncate(srcValue, newMin, newMax));
+                    else if(scaling == ScalingType.LOGARITHMIC)
+                        dstData.setElemDoubleAt(i, logScale(srcValue, origMin, newMin, origRange, newRange));
+                    else
+                        dstData.setElemDoubleAt(i, scale(srcValue, origMin, newMin, origRange, newRange));
+                }
             }
 
             targetTile.setRawSamples(dstData);

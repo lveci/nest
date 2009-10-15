@@ -58,7 +58,9 @@ public class ftpUtils {
 
             fos = new FileOutputStream(localFile.getAbsolutePath());
 
-            if(VisatApp.getApp() != null) {
+            final VisatApp visatApp = VisatApp.getApp();
+
+            if(false) {//visatApp != null) {
                 if(!readFile(fis, fos, localFile.getName(), fileSize)) {
                     return FTPError.READ_ERROR;    
                 }
@@ -66,8 +68,19 @@ public class ftpUtils {
                 final int size = 8192;
                 final byte[] buf = new byte[size];
                 int n;
-                while ((n = fis.read(buf, 0, size)) > -1)
+                int total = 0, lastPct = 0;
+                while ((n = fis.read(buf, 0, size)) > -1)  {
                     fos.write(buf, 0, n);
+                    if(visatApp != null) {
+                        total += n;
+                        final int pct = (int)((total/(float)fileSize) * 100);
+                        if(pct >= lastPct + 10) {
+                            visatApp.setStatusBarMessage("Downloading "+localFile.getName()+"... "+pct+"%");
+                            lastPct = pct;
+                        }
+                    }
+                }
+                visatApp.setStatusBarMessage("");
             }
 
             ftpClient.completePendingCommand();
