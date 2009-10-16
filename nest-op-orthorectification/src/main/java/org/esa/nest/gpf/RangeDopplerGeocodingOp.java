@@ -120,14 +120,29 @@ public class RangeDopplerGeocodingOp extends Operator {
     @Parameter(defaultValue="false", label="Save projected local incidence angle as band")
     private boolean saveProjectedLocalIncidenceAngle = false;
 
-    @Parameter(defaultValue="false", label="Apply radiometric calibration")
-    private boolean applyRadiometricCalibration = false;
+    @Parameter(defaultValue="false", label="Save Sigma0 as a band")
+    private boolean saveSigmaNought = false;
+
+    @Parameter(defaultValue="false", label="Save Gamma0 as a band")
+    private boolean saveGammaNought = false;
+
+    @Parameter(defaultValue="false", label="Save Beta0 as a band")
+    private boolean saveBetaNought = false;
+
+    @Parameter(valueSet = {USE_INCIDENCE_ANGLE_FROM_ELLIPSOID, USE_INCIDENCE_ANGLE_FROM_DEM},
+            defaultValue = USE_INCIDENCE_ANGLE_FROM_DEM, label="")
+    private String incidenceAngleForSigma0 = USE_INCIDENCE_ANGLE_FROM_DEM;
+
+    @Parameter(valueSet = {USE_INCIDENCE_ANGLE_FROM_ELLIPSOID, USE_INCIDENCE_ANGLE_FROM_DEM},
+            defaultValue = USE_INCIDENCE_ANGLE_FROM_DEM, label="")
+    private String incidenceAngleForGamma0 = USE_INCIDENCE_ANGLE_FROM_DEM;
 
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
     private FileElevationModel fileElevationModel = null;
 
     private boolean srgrFlag = false;
+    private boolean saveIncidenceAngleFromEllipsoid = false;
 
     private String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
 
@@ -159,6 +174,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
+    protected TiePointGrid incidenceAngle = null;
 
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
     private static final double NonValidZeroDopplerTime = -99999.0;
@@ -170,6 +186,9 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     boolean useAvgSceneHeight = false;
     Calibrator calibrator = null;
+
+    public static final String USE_INCIDENCE_ANGLE_FROM_DEM = "Use projected local incidence angle from DEM";
+    public static final String USE_INCIDENCE_ANGLE_FROM_ELLIPSOID = "Use incidence angle from Ellipsoid";
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -192,6 +211,8 @@ public class RangeDopplerGeocodingOp extends Operator {
                 throw new OperatorException("Source product is already map projected");
             }
 
+            checkUserInput();
+
             getMetadata();
 
             computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
@@ -201,7 +222,9 @@ public class RangeDopplerGeocodingOp extends Operator {
             computedTargetImageDimension();
 
             if (useAvgSceneHeight) {
-                applyRadiometricCalibration = false;
+                saveSigmaNought = false;
+                saveBetaNought = false;
+                saveGammaNought = false;
                 saveDEM = false;
                 saveLocalIncidenceAngle = false;
                 saveProjectedLocalIncidenceAngle = false;
@@ -225,7 +248,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 throw new OperatorException("Unknown interpolation method");
             }
 
-            if (applyRadiometricCalibration) {
+            if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
                 calibrator.initialize(sourceProduct, targetProduct);
                 OperatorUtils.getProductPolarization(absRoot, mdsPolar);
@@ -245,6 +268,24 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
         if(fileElevationModel != null) {
             fileElevationModel.dispose();
+        }
+    }
+
+    private void checkUserInput() {
+
+        if (saveBetaNought || saveGammaNought ||
+            (saveSigmaNought && incidenceAngleForSigma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID))) {
+            saveSigmaNought = true;
+            saveProjectedLocalIncidenceAngle = true;
+        }
+
+        if ((saveGammaNought && incidenceAngleForGamma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) ||
+            (saveSigmaNought && incidenceAngleForSigma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID))) {
+            saveIncidenceAngleFromEllipsoid = true;
+        }
+
+        if (saveIncidenceAngleFromEllipsoid) {
+            incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
         }
     }
 
@@ -533,7 +574,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 srcBandNames[1] = sourceBands[i+1].getName();
                 final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
 
-                if (applyRadiometricCalibration) {
+                if (saveSigmaNought) {
                     targetBandName = "Sigma0";
                 } else {
                     targetBandName = "Intensity";
@@ -552,7 +593,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
                 final String[] srcBandNames = {srcBand.getName()};
                 final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
-                if (applyRadiometricCalibration) {
+                if (saveSigmaNought) {
                     if (pol != null) {
                         targetBandName = "Sigma0_" + pol.toUpperCase();
                     } else {
@@ -608,6 +649,27 @@ public class RangeDopplerGeocodingOp extends Operator {
                                                      targetImageHeight);
             projectedIncidenceAngleBand.setUnit(Unit.DEGREES);
             targetProduct.addBand(projectedIncidenceAngleBand);
+        }
+
+        if (saveIncidenceAngleFromEllipsoid) {
+            final Band incidenceAngleFromEllipsoidBand = new Band("incidenceAngleFromEllipsoid",
+                                                     ProductData.TYPE_FLOAT32,
+                                                     targetImageWidth,
+                                                     targetImageHeight);
+            incidenceAngleFromEllipsoidBand.setUnit(Unit.DEGREES);
+            targetProduct.addBand(incidenceAngleFromEllipsoidBand);
+        }
+
+        if (saveSigmaNought && incidenceAngleForSigma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) {
+            createSigmaNoughtVirtualBand(targetProduct, incidenceAngleForSigma0);
+        }
+
+        if (saveGammaNought) {
+            createGammaNoughtVirtualBand(targetProduct, incidenceAngleForGamma0);
+        }
+
+        if (saveBetaNought) {
+            createBetaNoughtVirtualBand(targetProduct);
         }
     }
 
@@ -774,7 +836,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         try {
             float[][] localDEM = null; // DEM for current tile for computing slope angle
-            if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) {
+            if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) {
                 localDEM = new float[h+2][w+2];
                 final boolean valid = getLocalDEM(x0, y0, w, h, localDEM);
                 if(!valid && !useAvgSceneHeight && !saveDEM)
@@ -789,6 +851,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             ProductData demBuffer = null;
             ProductData incidenceAngleBuffer = null;
             ProductData projectedIncidenceAngleBuffer = null;
+            ProductData incidenceAngleFromEllipsoidBuffer = null;
 
             final ArrayList<TileData> trgTileList = new ArrayList<TileData>();
             final Set<Band> keySet = targetTiles.keySet();
@@ -806,6 +869,11 @@ public class RangeDopplerGeocodingOp extends Operator {
 
                 if(targetBand.getName().equals("projectedIncidenceAngle")) {
                     projectedIncidenceAngleBuffer = targetTiles.get(targetBand).getDataBuffer();
+                    continue;
+                }
+
+                if (targetBand.getName().equals("incidenceAngleFromEllipsoid")) {
+                    incidenceAngleFromEllipsoidBuffer = targetTiles.get(targetBand).getDataBuffer();
                     continue;
                 }
 
@@ -838,7 +906,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                     final double lon = imageGeoBoundary.lonMin + x*delLon;
 
                     double alt;
-                    if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) { // localDEM is available
+                    if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) { // localDEM is available
                         alt = (double)localDEM[yy][x-x0+1];
                     } else {
                         if (useAvgSceneHeight) {
@@ -879,13 +947,13 @@ public class RangeDopplerGeocodingOp extends Operator {
                             zeroDopplerTimeWithoutBias,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
                     double[] localIncidenceAngles = {0.0, 0.0};
-                    if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) {
+                    if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) {
 
                         final LocalGeometry localGeometry = new LocalGeometry(lat, lon, delLat, delLon, earthPoint, sensorPos);
 
                         computeLocalIncidenceAngle(
                                 localGeometry, saveLocalIncidenceAngle, saveProjectedLocalIncidenceAngle,
-                                applyRadiometricCalibration, x0, y0, x, y, localDEM, localIncidenceAngles); // in degrees
+                                saveSigmaNought, x0, y0, x, y, localDEM, localIncidenceAngles); // in degrees
 
                         if (saveLocalIncidenceAngle) {
                             incidenceAngleBuffer.setElemDoubleAt(index, localIncidenceAngles[0]);
@@ -906,9 +974,14 @@ public class RangeDopplerGeocodingOp extends Operator {
 
                     } else {
 
+                        if (saveIncidenceAngleFromEllipsoid) {
+                            incidenceAngleFromEllipsoidBuffer.setElemDoubleAt(
+                                    index, (double)incidenceAngle.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
+                        }
+
                         double satelliteHeight = 0;
                         double sceneToEarthCentre = 0;
-                        if (applyRadiometricCalibration) {
+                        if (saveSigmaNought) {
 
                                 satelliteHeight = Math.sqrt(
                                         sensorPos[0]*sensorPos[0] + sensorPos[1]*sensorPos[1] + sensorPos[2]*sensorPos[2]);
@@ -923,7 +996,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                             int[] subSwathIndex = {INVALID_SUB_SWATH_INDEX};
                             double v = getPixelValue(azimuthIndex, rangeIndex, tileData, bandUnit, subSwathIndex);
 
-                            if (applyRadiometricCalibration && v != tileData.noDataValue) {
+                            if (saveSigmaNought && v != tileData.noDataValue) {
                                 v = calibrator.applyCalibration(
                                         v, (int)rangeIndex, slantRange, satelliteHeight, sceneToEarthCentre,
                                         localIncidenceAngles[1], tileData.bandPolar, bandUnit, subSwathIndex); // use projected incidence angle
@@ -1326,7 +1399,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             throw new OperatorException("Uknown band unit");
         }
 
-        if (applyRadiometricCalibration) {
+        if (saveSigmaNought) {
             v = calibrator.applyRetroCalibration(x0, y0, v, tileData.bandPolar, bandUnit, subSwathIndex);
         }
 
@@ -1409,7 +1482,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         int[] subSwathIndex11 = {0};
         double v = 0;
 
-        if (applyRadiometricCalibration) {
+        if (saveSigmaNought) {
 
             v00 = calibrator.applyRetroCalibration(x0, y0, v00, tileData.bandPolar, bandUnit, subSwathIndex00);
             v01 = calibrator.applyRetroCalibration(x1, y0, v01, tileData.bandPolar, bandUnit, subSwathIndex01);
@@ -1503,7 +1576,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
 
         int[][][] ss = new int[4][4][1];
-        if (applyRadiometricCalibration) {
+        if (saveSigmaNought) {
             for (int i = 0; i < y.length; i++) {
                 for (int j = 0; j < x.length; j++) {
                     v[i][j] = calibrator.applyRetroCalibration(x[j], y[i], v[i][j], tileData.bandPolar, bandUnit, ss[i][j]);
@@ -1540,7 +1613,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param lg Object holding local geometry information.
      * @param saveLocalIncidenceAngle Boolean flag indicating saving local incidence angle.
      * @param saveProjectedLocalIncidenceAngle Boolean flag indicating saving projected local incidence angle.
-     * @param applyRadiometricCalibration Boolean flag indicating applying radiometric calibration.
+     * @param saveSigmaNought Boolean flag indicating applying radiometric calibration.
      * @param x0 The x coordinate of the pixel at the upper left corner of current tile.
      * @param y0 The y coordinate of the pixel at the upper left corner of current tile.
      * @param x The x coordinate of the current pixel.
@@ -1550,7 +1623,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      */
     public static void computeLocalIncidenceAngle(
             final LocalGeometry lg, final boolean saveLocalIncidenceAngle,
-            final boolean saveProjectedLocalIncidenceAngle, final boolean applyRadiometricCalibration, final int x0,
+            final boolean saveProjectedLocalIncidenceAngle, final boolean saveSigmaNought, final int x0,
             final int y0, final int x, final int y, final float[][] localDEM, double[] localIncidenceAngles) {
 
         // Note: For algorithm and notation of the following implementation, please see Andrea's email dated
@@ -1612,7 +1685,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             localIncidenceAngles[0] = Math.acos(nsInnerProduct) * org.esa.beam.util.math.MathUtils.RTOD;
         }
 
-        if (saveProjectedLocalIncidenceAngle || applyRadiometricCalibration) { // projected local incidence angle
+        if (saveProjectedLocalIncidenceAngle || saveSigmaNought) { // projected local incidence angle
             final double[] m = {s[1]*c[2] - s[2]*c[1], s[2]*c[0] - s[0]*c[2], s[0]*c[1] - s[1]*c[0]}; // range plane normal
             normalizeVector(m);
             final double mnInnerProduct = innerProduct(m, n);
@@ -1656,7 +1729,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param flag The flag.
      */
     void setApplyRadiometricCalibration(boolean flag) {
-        applyRadiometricCalibration = flag;
+        saveSigmaNought = flag;
     }
 
     void setSourceBandNames(String[] names) {
@@ -1705,6 +1778,254 @@ public class RangeDopplerGeocodingOp extends Operator {
         public double latMin = 0.0, latMax = 0.0;
         public double lonMin = 0.0, lonMax= 0.0;
     }
+
+
+ //================================== Create Sigma0, Gamma0 and Beta0 virtual bands ====================================
+
+    /**
+     * Create Sigma0 image as a virtual band using incidence angle from ellipsoid.
+     */
+    /*
+    private void createSigmaNoughtVirtualBand() {
+
+        if (!incidenceAngleForSigma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) {
+            return;
+        }
+
+        final Band[] bands = targetProduct.getBands();
+        for(Band trgBand : bands) {
+
+            final String trgBandName = trgBand.getName();
+            if (trgBand.isSynthetic() || !trgBandName.contains("Sigma0")) {
+                continue;
+            }
+
+            final String expression = trgBandName +
+                         "==" + trgBand.getNoDataValue() + "?" + trgBand.getNoDataValue() +
+                         ":" + trgBandName + " / sin(projectedIncidenceAngle * PI/180.0)" +
+                         " * sin(incidenceAngleFromEllipsoid * PI/180)";
+
+            String sigmaNoughtVirtualBandName = trgBandName + "_use_inci_angle_from_ellipsoid";
+
+            final VirtualBand band = new VirtualBand(sigmaNoughtVirtualBandName,
+                                                     ProductData.TYPE_FLOAT32,
+                                                     targetProduct.getSceneRasterWidth(),
+                                                     targetProduct.getSceneRasterHeight(),
+                                                     expression);
+            band.setSynthetic(true);
+            band.setUnit(trgBand.getUnit());
+            band.setDescription("Sigma0 image created using inci angle from ellipsoid");
+            targetProduct.addBand(band);
+        }
+    }
+    */
+    public static void createSigmaNoughtVirtualBand(Product targetProduct, String incidenceAngleForSigma0) {
+
+        if (!incidenceAngleForSigma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) {
+            return;
+        }
+
+        final Band[] bands = targetProduct.getBands();
+        for(Band trgBand : bands) {
+
+            final String trgBandName = trgBand.getName();
+            if (trgBand.isSynthetic() || !trgBandName.contains("Sigma0")) {
+                continue;
+            }
+
+            final String expression = trgBandName +
+                         "==" + trgBand.getNoDataValue() + "?" + trgBand.getNoDataValue() +
+                         ":" + trgBandName + " / sin(projectedIncidenceAngle * PI/180.0)" +
+                         " * sin(incidenceAngleFromEllipsoid * PI/180)";
+
+            String sigmaNoughtVirtualBandName = trgBandName + "_use_inci_angle_from_ellipsoid";
+
+            final VirtualBand band = new VirtualBand(sigmaNoughtVirtualBandName,
+                                                     ProductData.TYPE_FLOAT32,
+                                                     targetProduct.getSceneRasterWidth(),
+                                                     targetProduct.getSceneRasterHeight(),
+                                                     expression);
+            band.setSynthetic(true);
+            band.setUnit(trgBand.getUnit());
+            band.setDescription("Sigma0 image created using inci angle from ellipsoid");
+            targetProduct.addBand(band);
+        }
+    }
+
+    /**
+     * Create Gamma0 image as a virtual band.
+     */
+    /*
+    private void createGammaNoughtVirtualBand() {
+
+        final Band[] bands = targetProduct.getBands();
+        for(Band trgBand : bands) {
+
+            final String trgBandName = trgBand.getName();
+            if (trgBand.isSynthetic() || !trgBandName.contains("Sigma0")) {
+                continue;
+            }
+
+            final String incidenceAngle;
+            if (incidenceAngleForGamma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) {
+                incidenceAngle = "incidenceAngleFromEllipsoid";
+            } else { // USE_INCIDENCE_ANGLE_FROM_DEM
+                incidenceAngle = "projectedIncidenceAngle";
+            }
+
+            final String expression = trgBandName +
+                         "==" + trgBand.getNoDataValue() + "?" + trgBand.getNoDataValue() +
+                         ":" + trgBandName + " / sin(projectedIncidenceAngle * PI/180.0)" +
+                         " * sin(" + incidenceAngle + " * PI/180)" + " / cos(" + incidenceAngle + " * PI/180)";
+
+            String gammaNoughtVirtualBandName;
+            String description;
+            if (incidenceAngleForGamma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) {
+                gammaNoughtVirtualBandName = "_use_inci_angle_from_ellipsoid";
+                description = "Gamma0 image created using inci angle from ellipsoid";
+            } else { // USE_INCIDENCE_ANGLE_FROM_DEM
+                gammaNoughtVirtualBandName = "_use_projected_local_inci_angle_from_dem";
+                description = "Gamma0 image created using projected local inci angle from dem";
+            }
+
+            if(trgBandName.contains("_HH")) {
+                gammaNoughtVirtualBandName = "Gamma0_HH" + gammaNoughtVirtualBandName;
+            } else if(trgBandName.contains("_VV")) {
+                gammaNoughtVirtualBandName = "Gamma0_VV" + gammaNoughtVirtualBandName;
+            } else if(trgBandName.contains("_HV")) {
+                gammaNoughtVirtualBandName = "Gamma0_HV" + gammaNoughtVirtualBandName;
+            } else if(trgBandName.contains("_VH")) {
+                gammaNoughtVirtualBandName = "Gamma0_VH" + gammaNoughtVirtualBandName;
+            } else {
+                gammaNoughtVirtualBandName = "Gamma0" + gammaNoughtVirtualBandName;
+            }
+
+            final VirtualBand band = new VirtualBand(gammaNoughtVirtualBandName,
+                                                     ProductData.TYPE_FLOAT32,
+                                                     targetProduct.getSceneRasterWidth(),
+                                                     targetProduct.getSceneRasterHeight(),
+                                                     expression);
+            band.setSynthetic(true);
+            band.setUnit(trgBand.getUnit());
+            band.setDescription(description);
+            targetProduct.addBand(band);
+        }
+    }
+    */
+    public static void createGammaNoughtVirtualBand(Product targetProduct, String incidenceAngleForGamma0) {
+
+        final Band[] bands = targetProduct.getBands();
+        for(Band trgBand : bands) {
+
+            final String trgBandName = trgBand.getName();
+            if (trgBand.isSynthetic() || !trgBandName.contains("Sigma0")) {
+                continue;
+            }
+
+            final String incidenceAngle;
+            if (incidenceAngleForGamma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) {
+                incidenceAngle = "incidenceAngleFromEllipsoid";
+            } else { // USE_INCIDENCE_ANGLE_FROM_DEM
+                incidenceAngle = "projectedIncidenceAngle";
+            }
+
+            final String expression = trgBandName +
+                         "==" + trgBand.getNoDataValue() + "?" + trgBand.getNoDataValue() +
+                         ":" + trgBandName + " / sin(projectedIncidenceAngle * PI/180.0)" +
+                         " * sin(" + incidenceAngle + " * PI/180)" + " / cos(" + incidenceAngle + " * PI/180)";
+
+            String gammaNoughtVirtualBandName;
+            String description;
+            if (incidenceAngleForGamma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) {
+                gammaNoughtVirtualBandName = "_use_inci_angle_from_ellipsoid";
+                description = "Gamma0 image created using inci angle from ellipsoid";
+            } else { // USE_INCIDENCE_ANGLE_FROM_DEM
+                gammaNoughtVirtualBandName = "_use_projected_local_inci_angle_from_dem";
+                description = "Gamma0 image created using projected local inci angle from dem";
+            }
+
+            if(trgBandName.contains("_HH")) {
+                gammaNoughtVirtualBandName = "Gamma0_HH" + gammaNoughtVirtualBandName;
+            } else if(trgBandName.contains("_VV")) {
+                gammaNoughtVirtualBandName = "Gamma0_VV" + gammaNoughtVirtualBandName;
+            } else if(trgBandName.contains("_HV")) {
+                gammaNoughtVirtualBandName = "Gamma0_HV" + gammaNoughtVirtualBandName;
+            } else if(trgBandName.contains("_VH")) {
+                gammaNoughtVirtualBandName = "Gamma0_VH" + gammaNoughtVirtualBandName;
+            } else {
+                gammaNoughtVirtualBandName = "Gamma0" + gammaNoughtVirtualBandName;
+            }
+
+            final VirtualBand band = new VirtualBand(gammaNoughtVirtualBandName,
+                                                     ProductData.TYPE_FLOAT32,
+                                                     targetProduct.getSceneRasterWidth(),
+                                                     targetProduct.getSceneRasterHeight(),
+                                                     expression);
+            band.setSynthetic(true);
+            band.setUnit(trgBand.getUnit());
+            band.setDescription(description);
+            targetProduct.addBand(band);
+        }
+    }
+
+    /**
+     * Create Beta0 image as a virtual band.
+     */
+    /*
+    private void createBetaNoughtVirtualBand() {
+
+        final Band[] bands = targetProduct.getBands();
+        for(Band trgBand : bands) {
+
+            final String trgBandName = trgBand.getName();
+            if (trgBand.isSynthetic() || !trgBandName.contains("Sigma0")) {
+                continue;
+            }
+
+            final String expression = trgBandName +
+                         "==" + trgBand.getNoDataValue() + "?" + trgBand.getNoDataValue() +
+                         ":" + trgBandName + " / sin(projectedIncidenceAngle * PI/180.0)";
+
+            String betaNoughtVirtualBandName = "Beta0";
+            final VirtualBand band = new VirtualBand(betaNoughtVirtualBandName,
+                                                     ProductData.TYPE_FLOAT32,
+                                                     targetProduct.getSceneRasterWidth(),
+                                                     targetProduct.getSceneRasterHeight(),
+                                                     expression);
+            band.setSynthetic(true);
+            band.setUnit(trgBand.getUnit());
+            band.setDescription("Beta0 image");
+            targetProduct.addBand(band);
+        }
+    }
+    */
+    public static void createBetaNoughtVirtualBand(Product targetProduct) {
+
+        final Band[] bands = targetProduct.getBands();
+        for(Band trgBand : bands) {
+
+            final String trgBandName = trgBand.getName();
+            if (trgBand.isSynthetic() || !trgBandName.contains("Sigma0")) {
+                continue;
+            }
+
+            final String expression = trgBandName +
+                         "==" + trgBand.getNoDataValue() + "?" + trgBand.getNoDataValue() +
+                         ":" + trgBandName + " / sin(projectedIncidenceAngle * PI/180.0)";
+
+            String betaNoughtVirtualBandName = "Beta0";
+            final VirtualBand band = new VirtualBand(betaNoughtVirtualBandName,
+                                                     ProductData.TYPE_FLOAT32,
+                                                     targetProduct.getSceneRasterWidth(),
+                                                     targetProduct.getSceneRasterHeight(),
+                                                     expression);
+            band.setSynthetic(true);
+            band.setUnit(trgBand.getUnit());
+            band.setDescription("Beta0 image");
+            targetProduct.addBand(band);
+        }
+    }
+
 
     /**
      * The SPI is used to register this operator in the graph processing framework

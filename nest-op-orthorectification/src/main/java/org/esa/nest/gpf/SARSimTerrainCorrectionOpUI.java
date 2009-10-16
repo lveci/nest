@@ -19,11 +19,10 @@ import java.io.File;
 import java.util.Map;
 
 /**
- * User interface for RangeDopplerGeocodingOp
+ * User interface for SARSimTerrainCorrectionOp
  */
-public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
+public class SARSimTerrainCorrectionOpUI extends BaseOperatorUI {
 
-    private final JList bandList = new JList();
     private final JComboBox demName = new JComboBox();
     private static final String externalDEMStr = "External DEM";
 
@@ -38,6 +37,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     private final JComboBox incidenceAngleForSigma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM,
                                                                            RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID});
 
+    private final JTextField rmsThreshold = new JTextField("");
+    private final JTextField warpPolynomialOrder = new JTextField("");
     private final JTextField pixelSpacing = new JTextField("");
     private final JTextField externalDEMFile = new JTextField("");
     private final JTextField externalDEMNoDataValue = new JTextField("");
@@ -101,6 +102,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
             }
         });
 
+        rmsThreshold.addKeyListener(new TextAreaKeyListener());
+        warpPolynomialOrder.addKeyListener(new TextAreaKeyListener());
         pixelSpacing.addKeyListener(new TextAreaKeyListener());
 
         saveDEMCheckBox.addItemListener(new ItemListener() {
@@ -151,13 +154,17 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     @Override
     public void initParameters() {
 
-        OperatorUIUtils.initBandList(bandList, getBandNames());
-
         demName.setSelectedItem(paramMap.get("demName"));
         demResamplingMethod.setSelectedItem(paramMap.get("demResamplingMethod"));
         imgResamplingMethod.setSelectedItem(paramMap.get("imgResamplingMethod"));
         incidenceAngleForGamma0.setSelectedItem(paramMap.get("incidenceAngleForGamma0"));
         incidenceAngleForSigma0.setSelectedItem(paramMap.get("incidenceAngleForSigma0"));
+
+        float threshold = (Float)paramMap.get("rmsThreshold");
+        rmsThreshold.setText(String.valueOf(threshold));
+
+        int order = (Integer)paramMap.get("warpPolynomialOrder");
+        warpPolynomialOrder.setText(String.valueOf(order));
 
         double pix = (Double)paramMap.get("pixelSpacing");
         if((!changedByUser || pixelSpacing.getText().isEmpty()) && sourceProducts != null) {
@@ -205,8 +212,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     @Override
     public void updateParameters() {
 
-        OperatorUIUtils.updateBandList(bandList, paramMap);
-
+        paramMap.put("rmsThreshold", Float.parseFloat(rmsThreshold.getText()));
+        paramMap.put("warpPolynomialOrder", Integer.parseInt(warpPolynomialOrder.getText()));
         paramMap.put("demName", demName.getSelectedItem());
         paramMap.put("demResamplingMethod", demResamplingMethod.getSelectedItem());
         paramMap.put("imgResamplingMethod", imgResamplingMethod.getSelectedItem());
@@ -238,13 +245,13 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         contentPane.setLayout(new GridBagLayout());
         final GridBagConstraints gbc = DialogUtils.createGridBagConstraints();
 
-        contentPane.add(new JLabel("Source Bands:"), gbc);
-        gbc.fill = GridBagConstraints.BOTH;
         gbc.gridx = 1;
-        contentPane.add(new JScrollPane(bandList), gbc);
-
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "RMS Threshold:", rmsThreshold);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "WARP Polynomial Order:", warpPolynomialOrder);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Digital Elevation Model:", demName);
         gbc.gridy++;
