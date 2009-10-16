@@ -24,33 +24,33 @@ import java.util.Map;
 public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
     private final JList bandList = new JList();
-    private final JComboBox demName = new JComboBox();
+    protected final JComboBox demName = new JComboBox();
     private static final String externalDEMStr = "External DEM";
 
-    private final JComboBox demResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+    protected final JComboBox demResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
                                                                            ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
                                                                            ResamplingFactory.CUBIC_CONVOLUTION_NAME});
-    private final JComboBox imgResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+    protected final JComboBox imgResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
                                                                            ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
                                                                            ResamplingFactory.CUBIC_CONVOLUTION_NAME});
-    private final JComboBox incidenceAngleForGamma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM,
+    protected final JComboBox incidenceAngleForGamma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM,
                                                                            RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID});
-    private final JComboBox incidenceAngleForSigma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM,
+    protected final JComboBox incidenceAngleForSigma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM,
                                                                            RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID});
 
-    private final JTextField pixelSpacing = new JTextField("");
-    private final JTextField externalDEMFile = new JTextField("");
-    private final JTextField externalDEMNoDataValue = new JTextField("");
-    private final JButton externalDEMBrowseButton = new JButton("...");
-    private final JLabel externalDEMFileLabel = new JLabel("External DEM:");
-    private final JLabel externalDEMNoDataValueLabel = new JLabel("DEM No Data Value:");
+    protected final JTextField pixelSpacing = new JTextField("");
+    protected final JTextField externalDEMFile = new JTextField("");
+    protected final JTextField externalDEMNoDataValue = new JTextField("");
+    protected final JButton externalDEMBrowseButton = new JButton("...");
+    protected final JLabel externalDEMFileLabel = new JLabel("External DEM:");
+    protected final JLabel externalDEMNoDataValueLabel = new JLabel("DEM No Data Value:");
 
-    private final JCheckBox saveDEMCheckBox = new JCheckBox("Save DEM as a band");
-    private final JCheckBox saveLocalIncidenceAngleCheckBox = new JCheckBox("Save local incidence angle as a band");
-    private final JCheckBox saveProjectedLocalIncidenceAngleCheckBox = new JCheckBox("Save projected local incidence angle as a band");
-    private final JCheckBox saveBetaNoughtCheckBox = new JCheckBox("Save Beta0 as a band");
-    private final JCheckBox saveGammaNoughtCheckBox = new JCheckBox("Save Gamma0 as a band");
-    private final JCheckBox saveSigmaNoughtCheckBox = new JCheckBox("Save Sigma0 as a band");
+    protected final JCheckBox saveDEMCheckBox = new JCheckBox("Save DEM as a band");
+    protected final JCheckBox saveLocalIncidenceAngleCheckBox = new JCheckBox("Save local incidence angle as a band");
+    protected final JCheckBox saveProjectedLocalIncidenceAngleCheckBox = new JCheckBox("Save projected local incidence angle as a band");
+    protected final JCheckBox saveBetaNoughtCheckBox = new JCheckBox("Save Beta0 as a band");
+    protected final JCheckBox saveGammaNoughtCheckBox = new JCheckBox("Save Gamma0 as a band");
+    protected final JCheckBox saveSigmaNoughtCheckBox = new JCheckBox("Save Sigma0 as a band");
 
     private boolean saveDEM = false;
     private boolean saveLocalIncidenceAngle = false;
@@ -232,7 +232,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         paramMap.put("saveSigmaNought", saveSigmaNought);
     }
 
-    private JComponent createPanel() {
+    protected JComponent createPanel() {
 
         final JPanel contentPane = new JPanel();
         contentPane.setLayout(new GridBagLayout());

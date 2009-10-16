@@ -2,7 +2,6 @@
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>3B</version>
-    <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>beam/res/NEST_Splash.png</splashImage>
     <postInstallationActionList>
@@ -116,9 +115,6 @@
                         </distributionFile>
                         <distributionFile>
                             <origin>target/nest-3B-bin-linux.dir/libjogl_cg.so</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-3B-bin-linux.dir/libjogl_drihack.so</origin>
                         </distributionFile>
                         <distributionFile>
                             <origin>target/nest-3B-bin-linux.dir/libmlib_jai.so</origin>
