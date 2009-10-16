@@ -127,6 +127,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
             defaultValue = RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM, label="")
     private String incidenceAngleForGamma0 = RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM;
 
+    @Parameter(description = "Show GCP Residuals file in a text viewer", defaultValue = "false", label="Show GCP Residuals")
+    private boolean openResidualsFile = false;
+
     private ProductNodeGroup<Pin> masterGCPGroup = null;
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
@@ -664,6 +667,20 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         WarpOp.eliminateGCPsBasedOnRMS(warpData, rmsThreshold);
         WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute final warp polynomial
+        WarpOp.outputCoRegistrationInfo(
+                sourceProduct, warpPolynomialOrder, warpData, false, rmsThreshold, 3, slaveBand.getName());
+
+        if(openResidualsFile) {
+            final File residualsFile = WarpOp.getResidualsFile(sourceProduct);
+            if(Desktop.isDesktopSupported()) {
+                try {
+                    Desktop.getDesktop().open(residualsFile);
+                } catch(Exception e) {
+                    System.out.println(e.getMessage());
+                    // do nothing
+                }
+            }
+        }
     }
 
     /**

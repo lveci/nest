@@ -1,9 +1,13 @@
 package org.esa.nest.gpf;
 
 import org.esa.nest.util.DialogUtils;
+import org.esa.beam.framework.ui.AppContext;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Map;
 
 /**
  * User interface for SARSimTerrainCorrectionOp
@@ -12,6 +16,21 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
 
     private final JTextField rmsThreshold = new JTextField("");
     private final JTextField warpPolynomialOrder = new JTextField("");
+    private final JCheckBox openResidualsFileCheckBox = new JCheckBox("Show GCP Residuals");
+    private boolean openResidualsFile = false;
+
+    @Override
+    public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
+        JComponent pane = super.CreateOpTab(operatorName, parameterMap, appContext);
+
+        openResidualsFileCheckBox.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    openResidualsFile = (e.getStateChange() == ItemEvent.SELECTED);
+                }
+        });
+                
+        return pane;
+    }
 
     @Override
     public void initParameters() {
@@ -23,6 +42,8 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
         int order = (Integer)paramMap.get("warpPolynomialOrder");
         warpPolynomialOrder.setText(String.valueOf(order));
 
+        openResidualsFile = (Boolean)paramMap.get("openResidualsFile");
+        openResidualsFileCheckBox.getModel().setPressed(openResidualsFile);        
     }
 
     @Override
@@ -31,7 +52,7 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
 
         paramMap.put("rmsThreshold", Float.parseFloat(rmsThreshold.getText()));
         paramMap.put("warpPolynomialOrder", Integer.parseInt(warpPolynomialOrder.getText()));
-
+        paramMap.put("openResidualsFile", openResidualsFile);        
     }
 
     @Override
@@ -82,7 +103,9 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
         gbc.gridx = 0;
         gbc.gridy++;
         contentPane.add(saveBetaNoughtCheckBox, gbc);
-
+        gbc.gridy++;
+        contentPane.add(openResidualsFileCheckBox, gbc);
+        
         //DialogUtils.fillPanel(contentPane, gbc);
 
         return contentPane;
