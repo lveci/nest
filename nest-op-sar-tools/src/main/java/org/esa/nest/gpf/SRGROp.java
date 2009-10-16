@@ -320,8 +320,6 @@ public class SRGROp extends Operator {
 
         addSelectedBands();
 
-        targetProduct.setPreferredTileSize(targetImageWidth, 256);
-
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());

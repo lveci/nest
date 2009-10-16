@@ -1,5 +1,5 @@
 /*
- * $Id: ProductVisitor.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ProductVisitor.java,v 1.2 2009-10-15 20:30:19 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -23,7 +23,7 @@ package org.esa.beam.framework.datamodel;
  * method of an <code>Product</code> (or any other <code>ProductNode</code>).
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2009-10-15 20:30:19 $
  * @see org.esa.beam.framework.datamodel.Product#acceptVisitor(ProductVisitor)
  * @see ProductNode#acceptVisitor(ProductVisitor)
  */
@@ -98,4 +98,18 @@ public interface ProductVisitor {
      * @param group the group to be visited
      */
     void visit(ProductNodeGroup group);
+
+    /**
+     * Visits a node group.
+     *
+     * @param mask the mask to be visited
+     */
+    void visit(Mask mask);
+
+    /**
+     * Visits a node group.
+     *
+     * @param vectorData the group to be visited
+     */
+    void visit(VectorData vectorData);
 }

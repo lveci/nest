@@ -1,5 +1,5 @@
 /*
- * $Id: ProductNodeList.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ProductNodeList.java,v 1.2 2009-10-15 20:30:19 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -26,7 +26,7 @@ import java.util.List;
  * A type-safe list for elements of the type <code>ProductNode</code>.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2009-10-15 20:30:19 $
  */
 public final class ProductNodeList<T extends ProductNode> {
 
@@ -290,7 +290,7 @@ public final class ProductNodeList<T extends ProductNode> {
     /**
      * Returns the list of named nodes as an array. If this list is empty a zero-length array is returned.
      *
-     * @param array the array into which the elements of the Vector are to be stored, if it is big enough; otherwise, a
+     * @param array the array into which the elements of the list are to be stored, if it is big enough; otherwise, a
      *              new array of the same runtime type is allocated for this purpose.
      *
      * @return an array containing the elements of the list. never <code>null</code>

@@ -1,5 +1,5 @@
 /*
- * $Id: ProductVisitorAdapter.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ProductVisitorAdapter.java,v 1.2 2009-10-15 20:30:19 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -23,54 +23,72 @@ import java.util.Stack;
  * A default implementation of the <code>ProductVisitor</code> interface.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2009-10-15 20:30:19 $
  */
 public class ProductVisitorAdapter implements ProductVisitor {
 
-    protected Stack stack = new Stack();
+    protected Stack<ProductNode> stack = new Stack<ProductNode>();
 
     public ProductVisitorAdapter() {
     }
 
-    protected void push(Object node) {
+    protected void push(ProductNode node) {
         stack.push(node);
     }
 
-    protected Object pop() {
+    protected ProductNode pop() {
         return stack.pop();
     }
 
-    protected Object peek() {
+    protected ProductNode peek() {
         return stack.peek();
     }
 
+    @Override
     public void visit(Product product) {
     }
 
+    @Override
     public void visit(TiePointGrid grid) {
     }
 
+    @Override
     public void visit(Band band) {
     }
 
+    @Override
     public void visit(VirtualBand virtualBand) {
     }
 
+    @Override
     public void visit(MetadataAttribute attribute) {
     }
 
+    @Override
     public void visit(MetadataElement group) {
     }
 
+    @Override
     public void visit(FlagCoding flagCoding) {
     }
 
+    @Override
     public void visit(IndexCoding indexCoding) {
     }
 
+    @Override
     public void visit(BitmaskDef bitmaskDef) {
     }
 
+    @Override
     public void visit(ProductNodeGroup group) {
+    }
+
+    @Override
+    public void visit(Mask mask) {
+    }
+
+    @Override
+    public void visit(VectorData data) {
     }
 }

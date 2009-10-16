@@ -1,5 +1,5 @@
 /*
- * $Id: JavaMathTest.java,v 1.1 2009-04-28 14:39:34 lveci Exp $
+ * $Id: JavaMathTest.java,v 1.2 2009-10-15 20:30:19 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -26,14 +26,6 @@ import junit.framework.TestSuite;
  * behaviour of Java mathematics.
  */
 public class JavaMathTest extends TestCase {
-
-    public JavaMathTest(String s) {
-        super(s);
-    }
-
-    public static Test suite() {
-        return new TestSuite(JavaMathTest.class);
-    }
 
     public void testUnsignedIntegerArithmetic() {
 

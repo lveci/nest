@@ -1,5 +1,5 @@
 /*
- * $Id: ProductNodeListenerAdapter.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ProductNodeListenerAdapter.java,v 1.2 2009-10-15 20:30:19 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -22,7 +22,7 @@ package org.esa.beam.framework.datamodel;
  * some method you need without implementing methods which are not needed.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2009-10-15 20:30:19 $
  */
 public class ProductNodeListenerAdapter implements ProductNodeListener {
 
@@ -31,6 +31,7 @@ public class ProductNodeListenerAdapter implements ProductNodeListener {
      *
      * @param event the product node which the listener to be notified
      */
+    @Override
     public void nodeChanged(ProductNodeEvent event) {
     }
 
@@ -39,6 +40,7 @@ public class ProductNodeListenerAdapter implements ProductNodeListener {
      *
      * @param event the product node which the listener to be notified
      */
+    @Override
     public void nodeDataChanged(ProductNodeEvent event) {
     }
 
@@ -47,6 +49,7 @@ public class ProductNodeListenerAdapter implements ProductNodeListener {
      *
      * @param event the product node which the listener to be notified
      */
+    @Override
     public void nodeAdded(ProductNodeEvent event) {
     }
 
@@ -55,6 +58,7 @@ public class ProductNodeListenerAdapter implements ProductNodeListener {
      *
      * @param event the product node which the listener to be notified
      */
+    @Override
     public void nodeRemoved(ProductNodeEvent event) {
     }
 }

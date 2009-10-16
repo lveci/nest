@@ -97,8 +97,6 @@ public class GenericReader extends AbstractProductReader {
         imageInputStream.setByteOrder(byteOrder);
         binaryReader = new BinaryFileReader(imageInputStream);
 
-        product.setPreferredTileSize(rasterWidth, 500);
-
         return product;
     }
 

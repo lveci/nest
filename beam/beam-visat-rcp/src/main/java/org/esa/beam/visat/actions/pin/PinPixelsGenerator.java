@@ -1,5 +1,5 @@
 /*
- * $Id: PinPixelsGenerator.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: PinPixelsGenerator.java,v 1.2 2009-10-15 20:30:19 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,9 +16,9 @@
  */
 package org.esa.beam.visat.actions.pin;
 
+import com.bc.ceres.core.ProgressMonitor;
 import com.bc.jexp.ParseException;
 import com.bc.jexp.Term;
-import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.dataop.barithm.RasterDataEvalEnv;
 import org.esa.beam.framework.dataop.barithm.RasterDataLoop;
@@ -74,9 +74,12 @@ class PinPixelsGenerator {
         }
 
         loop.forEachPixel(new RasterDataLoop.Body() {
+            @Override
             public void eval(RasterDataEvalEnv env, int pixelIndex) {
                 if (t == null || t.evalB(env)) {
-                    pixels.add(new Point(env.getPixelX(), env.getPixelY()));
+                    int pixelX = minX + pixelIndex % regionWidth;
+                    int pixelY = minY + pixelIndex / regionWidth;
+                    pixels.add(new Point(pixelX, pixelY));
                 }
             }
         });

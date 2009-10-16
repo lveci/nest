@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataNode.java,v 1.6 2009-09-15 20:16:49 lveci Exp $
+ * $Id: RasterDataNode.java,v 1.7 2009-10-15 20:30:19 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -2179,8 +2179,6 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
 
     /**
      * Returns whether the source image is set on this {@code RasterDataNode}.
-     * <p/>
-     * This method belongs to preliminary API and may be removed or changed in the future.
      *
      * @return whether the source image is set.
      *
@@ -2192,10 +2190,8 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
 
     /**
      * Gets the source image associated with this {@code RasterDataNode}.
-     * <p/>
-     * This method belongs to preliminary API and may be removed or changed in the future.
      *
-     * @return The rendered image.
+     * @return The source image.
      *
      * @since BEAM 4.2
      */

@@ -3,6 +3,7 @@ package org.esa.beam.visat.toolviews.layermanager;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.support.LayerStyleListener;
 import com.bc.ceres.glayer.support.LayerUtils;
+import com.bc.ceres.swing.TreeCellExtender;
 import com.jidesoft.swing.CheckBoxTree;
 import com.jidesoft.swing.CheckBoxTreeSelectionModel;
 import org.esa.beam.framework.ui.AppContext;
@@ -69,6 +70,7 @@ class LayerManagerForm extends AbstractLayerForm {
         layerTreeModel = new LayerTreeModel(view.getRootLayer());
         layerTree = createCheckBoxTree(layerTreeModel);
         layerTree.setCellRenderer(new MyTreeCellRenderer());
+        TreeCellExtender.equip(layerTree);
 
         Hashtable<Integer, JLabel> transparencySliderLabelTable = new Hashtable<Integer, JLabel>();
         transparencySliderLabelTable.put(0, createSliderLabel("0%"));
@@ -161,7 +163,7 @@ class LayerManagerForm extends AbstractLayerForm {
 
     }
 
-    private JLabel createSliderLabel(String text) {
+    private static JLabel createSliderLabel(String text) {
         JLabel label = new JLabel(text);
         Font oldFont = label.getFont();
         Font newFont = oldFont.deriveFont(oldFont.getSize2D() * 0.85f);
@@ -192,7 +194,7 @@ class LayerManagerForm extends AbstractLayerForm {
         moveLayerRightAction.setEnabled(isLayerSelected && moveLayerRightAction.canMove(selectedLayer));
     }
 
-    public boolean isLayerProtected(Layer layer) {
+    public static boolean isLayerProtected(Layer layer) {
         return isLayerProtectedImpl(layer) || isChildLayerProtected(layer);
     }
 
@@ -200,11 +202,11 @@ class LayerManagerForm extends AbstractLayerForm {
         return view.getSelectedLayer();
     }
 
-    private boolean isLayerProtectedImpl(Layer layer) {
+    private static boolean isLayerProtectedImpl(Layer layer) {
         return layer.getId().equals(ProductSceneView.BASE_IMAGE_LAYER_ID);
     }
 
-    private boolean isChildLayerProtected(Layer selectedLayer) {
+    private static boolean isChildLayerProtected(Layer selectedLayer) {
         Layer[] children = selectedLayer.getChildren().toArray(new Layer[selectedLayer.getChildren().size()]);
         for (Layer childLayer : children) {
             if (isLayerProtectedImpl(childLayer) ||
