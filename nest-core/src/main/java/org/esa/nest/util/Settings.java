@@ -75,16 +75,20 @@ public final class Settings {
             String newId = "";
             if (aChild instanceof Element) {
                 final Element child = (Element) aChild;
-                if(!id.isEmpty())
-                    newId = id + '/';
-                newId += child.getName();
-                final Attribute attrib = child.getAttribute(VALUE);
-                if (attrib != null) {
+                try {
+                    if(!id.isEmpty())
+                        newId = id + '/';
+                    newId += child.getName();
+                    final Attribute attrib = child.getAttribute(VALUE);
+                    if (attrib != null) {
 
-                    String value = attrib.getValue();
-                    if(value.contains("${"))
-                        value = resolve(value);
-                    settingMap.put(newId, value);
+                        String value = attrib.getValue();
+                        if(value.contains("${"))
+                            value = resolve(value);
+                        settingMap.put(newId, value);
+                    }
+                } catch(Exception e) {
+                    System.out.println("Settings error: "+e.getMessage() + " " + newId);
                 }
 
                 final List grandChildren = child.getChildren();
@@ -123,8 +127,8 @@ public final class Settings {
         }
 
         if(keyWord.equalsIgnoreCase("nest.home") || keyWord.equalsIgnoreCase("NEST_HOME")) {
-            out = value.substring(0, idx1) + value.substring(idx2, value.length());
-            final File file = ResourceUtils.findInHomeFolder(out);
+            final String valStr = value.substring(0, idx1) + value.substring(idx2, value.length());
+            final File file = ResourceUtils.findInHomeFolder(valStr);
             if(file != null)
                 return file.getAbsolutePath();
         }

@@ -192,6 +192,10 @@ public class ResourceUtils {
     {
         final File homePath = findHomeFolder();
         String homePathStr = homePath.getAbsolutePath();
+        filename = filename.replaceAll("/", File.separator);
+        if(!File.separator.equals("\\")) {
+            filename = filename.replaceAll("\\\\", File.separator);
+        }
         if(homePathStr.endsWith(".") && homePathStr.length() > 1)
             homePathStr = homePathStr.substring(0, homePathStr.lastIndexOf(File.separator));
         String filePath = homePathStr + filename;
