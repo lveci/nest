@@ -193,23 +193,27 @@ public class WarpOp extends Operator {
 
                 int parseIdex = 0;
                 computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute initial warp polynomial
-                outputCoRegistrationInfo(warpData, i!=0, 0.0f, parseIdex, srcBand.getName());
+                outputCoRegistrationInfo(
+                        sourceProduct, warpPolynomialOrder, warpData, i!=0, 0.0f, parseIdex, srcBand.getName());
 
                 if (warpData.rmsMean > rmsThreshold && eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
                     final float threshold = (float)warpData.rmsMean;
                     computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 2nd warp polynomial
-                    outputCoRegistrationInfo(warpData, true, threshold, ++parseIdex, srcBand.getName());
+                    outputCoRegistrationInfo(
+                            sourceProduct, warpPolynomialOrder, warpData, true, threshold, ++parseIdex, srcBand.getName());
                 }
 
                 if (warpData.rmsMean > rmsThreshold && eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
                     final float threshold = (float)warpData.rmsMean;
                     computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 3rd warp polynomial
-                    outputCoRegistrationInfo(warpData, true, threshold, ++parseIdex, srcBand.getName());
+                    outputCoRegistrationInfo(
+                            sourceProduct, warpPolynomialOrder, warpData, true, threshold, ++parseIdex, srcBand.getName());
                 }
 
                 eliminateGCPsBasedOnRMS(warpData, rmsThreshold);
                 computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute final warp polynomial
-                outputCoRegistrationInfo(warpData, true, rmsThreshold, ++parseIdex, srcBand.getName());
+                outputCoRegistrationInfo(
+                        sourceProduct, warpPolynomialOrder, warpData, true, rmsThreshold, ++parseIdex, srcBand.getName());
 
                 addSlaveGCPs(warpData, srcBand.getName());
             }
@@ -581,9 +585,10 @@ public class WarpOp extends Operator {
      * @param bandName the band name
      * @throws OperatorException The exceptions.
      */
-    private void outputCoRegistrationInfo(final WarpData warpData, final boolean appendFlag,
-                                          final float threshold, final int parseIndex,
-                                          final String bandName) throws OperatorException {
+    public static void outputCoRegistrationInfo(final Product sourceProduct, final int warpPolynomialOrder,
+                                                final WarpData warpData, final boolean appendFlag,
+                                                final float threshold, final int parseIndex, final String bandName)
+            throws OperatorException {
 
         final float[] xCoeffs = warpData.warp.getXCoeffs();
         final float[] yCoeffs = warpData.warp.getYCoeffs();
@@ -675,7 +680,7 @@ public class WarpOp extends Operator {
         }
     }
 
-    private static File getResidualsFile(final Product sourceProduct) {
+    public static File getResidualsFile(final Product sourceProduct) {
         String fileName = sourceProduct.getName() + "_residual.txt";
         final File appUserDir = new File(ResourceUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
         if(!appUserDir.exists()) {
