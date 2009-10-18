@@ -39,10 +39,13 @@ import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.MathUtils;
+import org.esa.nest.util.ResourceUtils;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -127,8 +130,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
             defaultValue = RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM, label="")
     private String incidenceAngleForGamma0 = RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM;
 
-    @Parameter(description = "Show GCP Residuals file in a text viewer", defaultValue = "false", label="Show GCP Residuals")
-    private boolean openResidualsFile = false;
+    @Parameter(description = "Show range and azimuth shifts file in a text viewer", defaultValue = "false", label="Show Range and Azimuth Shifts")
+    private boolean openShiftsFile = false;
 
     private ProductNodeGroup<Pin> masterGCPGroup = null;
     private MetadataElement absRoot = null;
@@ -667,14 +670,13 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         WarpOp.eliminateGCPsBasedOnRMS(warpData, rmsThreshold);
         WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute final warp polynomial
-        WarpOp.outputCoRegistrationInfo(
-                sourceProduct, warpPolynomialOrder, warpData, false, rmsThreshold, 3, slaveBand.getName());
+        outputCoRegistrationInfo(warpData, slaveBand.getName());
 
-        if(openResidualsFile) {
-            final File residualsFile = WarpOp.getResidualsFile(sourceProduct);
+        if(openShiftsFile) {
+            final File shiftsFile = getShiftsFile(sourceProduct);
             if(Desktop.isDesktopSupported()) {
                 try {
-                    Desktop.getDesktop().open(residualsFile);
+                    Desktop.getDesktop().open(shiftsFile);
                 } catch(Exception e) {
                     System.out.println(e.getMessage());
                     // do nothing
@@ -1350,6 +1352,79 @@ public class SARSimTerrainCorrectionOp extends Operator {
         } else {
             return vv;
         }
+    }
+
+    private void outputCoRegistrationInfo(final WarpOp.WarpData warpData, final String bandName)
+            throws OperatorException {
+
+        final File residualFile = getShiftsFile(sourceProduct);
+        PrintStream p = null; // declare a print stream object
+
+        try {
+            final FileOutputStream out = new FileOutputStream(residualFile.getAbsolutePath());
+
+            // Connect print stream to the output stream
+            p = new PrintStream(out);
+
+            p.println();
+            p.println("Band: " + bandName);
+            p.println();
+            p.print("Range and Azimuth Shifts for Valid GCPs:");
+            p.println();
+
+            p.println();
+            p.println("No. | Range Shift (m) | Azimuth Shift (m) |");
+            p.println("-------------------------------------------");
+
+            double meanRangeShift = 0.0;
+            double meanAzimuthShift = 0.0;
+            for (int i = 0; i < warpData.numValidGCPs; i++) {
+
+                // get final slave GCP position
+                final Pin sPin = warpData.slaveGCPGroup.get(i);
+                final PixelPos sGCPPos = sPin.getPixelPos();
+
+                // get initial slave GCP position
+                // Note: master GCP position is the same as the initial slave GCP position because master and slave
+                //       now share the same geocoding.
+                final Pin mPin = masterGCPGroup.get(sPin.getName());
+                final PixelPos mGCPPos = mPin.getPixelPos();
+
+                // compute range and azimuth shifts
+                final double rangeShift = Math.abs(sGCPPos.x - mGCPPos.x) * rangeSpacing; // in m
+                final double azimuthShift = Math.abs(sGCPPos.y - mGCPPos.y) * azimuthSpacing; // in m
+
+                meanRangeShift += rangeShift;
+                meanAzimuthShift += azimuthShift;
+
+                p.format("%2d  |%16.3f |%18.3f |", i, rangeShift, azimuthShift);
+                p.println();
+            }
+
+            meanRangeShift /= warpData.numValidGCPs;
+            meanAzimuthShift /= warpData.numValidGCPs;
+
+            p.println();
+            p.format("Mean Range Shift = %8.3f", meanRangeShift);
+            p.println();
+            p.format("Mean Azimuth Shift = %8.3f", meanAzimuthShift);
+            p.println();
+
+        } catch(IOException exc) {
+            throw new OperatorException(exc);
+        } finally {
+            if(p != null)
+                p.close();
+        }
+    }
+
+    public static File getShiftsFile(final Product sourceProduct) {
+        String fileName = sourceProduct.getName() + "_shift.txt";
+        final File appUserDir = new File(ResourceUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
+        if(!appUserDir.exists()) {
+            appUserDir.mkdirs();
+        }
+        return new File(appUserDir.toString(), fileName);
     }
 
     private static class TileData {

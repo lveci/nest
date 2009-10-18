@@ -16,16 +16,16 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
 
     private final JTextField rmsThreshold = new JTextField("");
     private final JTextField warpPolynomialOrder = new JTextField("");
-    private final JCheckBox openResidualsFileCheckBox = new JCheckBox("Show GCP Residuals");
-    private boolean openResidualsFile = false;
+    private final JCheckBox openShiftsFileCheckBox = new JCheckBox("Show Range and Azimuth Shifts");
+    private boolean openShiftsFile = false;
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
         JComponent pane = super.CreateOpTab(operatorName, parameterMap, appContext);
 
-        openResidualsFileCheckBox.addItemListener(new ItemListener() {
+        openShiftsFileCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
-                    openResidualsFile = (e.getStateChange() == ItemEvent.SELECTED);
+                    openShiftsFile = (e.getStateChange() == ItemEvent.SELECTED);
                 }
         });
                 
@@ -42,8 +42,8 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
         int order = (Integer)paramMap.get("warpPolynomialOrder");
         warpPolynomialOrder.setText(String.valueOf(order));
 
-        openResidualsFile = (Boolean)paramMap.get("openResidualsFile");
-        openResidualsFileCheckBox.getModel().setPressed(openResidualsFile);        
+        openShiftsFile = (Boolean)paramMap.get("openShiftsFile");
+        openShiftsFileCheckBox.getModel().setPressed(openShiftsFile);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
 
         paramMap.put("rmsThreshold", Float.parseFloat(rmsThreshold.getText()));
         paramMap.put("warpPolynomialOrder", Integer.parseInt(warpPolynomialOrder.getText()));
-        paramMap.put("openResidualsFile", openResidualsFile);        
+        paramMap.put("openShiftsFile", openShiftsFile);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
         gbc.gridy++;
         contentPane.add(saveBetaNoughtCheckBox, gbc);
         gbc.gridy++;
-        contentPane.add(openResidualsFileCheckBox, gbc);
+        contentPane.add(openShiftsFileCheckBox, gbc);
         
         //DialogUtils.fillPanel(contentPane, gbc);
 
