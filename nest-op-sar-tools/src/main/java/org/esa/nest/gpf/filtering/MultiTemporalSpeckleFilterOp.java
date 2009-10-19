@@ -41,7 +41,7 @@ import java.util.Map;
  * images Jk(x, y) meeting the following two conditions:
  *
  * 1. Jk is unbiased (i.e. E[Jk] = E[Ik], where E[] denotes expected value, so that the filtering does not
- *    distort the ?0 values).
+ *    distort the sigma0 values).
  *
  * 2. Jk has minimum variance, so that speckle is minimized. 
  *
@@ -49,10 +49,9 @@ import java.util.Map;
  *
  *    Jk(x, y) = E[Ik]*(I1(x, y)/E[I1] + ... + In(x, y)/E[In])/n
  *
- * Since the n output images differ by a factor, only one image is output, i.e.
- *
- *    J(x, y) = (E[I1] + ... + E[In])/n * (I1(x, y)/E[I1] + ... + In(x, y)/E[In])/n
- *
+ * where E[I] is the local mean value of pixels in a user selected window centered at (x, y) in image I.
+ * The window size can be 3x3, 5x5, 7x7, 9x9 or 11x11.
+ * 
  * The operator has the following two preprocessing steps:
  *
  * 1. The first step is calibration in which ?0 is derived from the digital number at each pixel. This
