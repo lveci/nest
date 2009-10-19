@@ -2,6 +2,7 @@
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>3B</version>
+    <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>beam/res/NEST_Splash.png</splashImage>
     <postInstallationActionList>
@@ -47,7 +48,7 @@
                     <icon>res/dat.png</icon>
                     <name>NEST 3B</name>
                     <path> ${installdir}</path>
-                    <platforms>all</platforms>
+                    <platforms>windows</platforms>
                     <runInTerminal>0</runInTerminal>
                     <windowsExec>${installdir}/nest-dat.exe</windowsExec>
                     <windowsExecArgs></windowsExecArgs>
@@ -61,6 +62,44 @@
                     <destination>${installdir}</destination>
                     <name>programfiles</name>
                     <platforms>all</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <origin>target/nest-3B-bin.dir/readme.html</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3B-bin.dir/VERSION.txt</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3B-bin.dir/LICENSE.txt</origin>
+                        </distributionFile>
+                        <distributionDirectory>
+                            <origin>target/nest-3B-bin.dir/auxdata</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-3B-bin.dir/bin</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-3B-bin.dir/commandline</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-3B-bin.dir/graphs</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-3B-bin.dir/images</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-3B-bin.dir/lib</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-3B-bin.dir/licenses</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-3B-bin.dir/modules</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-3B-bin.dir/res</origin>
+                        </distributionDirectory>
+                    </distributionFileList>
                     <shortcutList>
                         <shortcut>
                             <comment>Uninstall</comment>
@@ -84,28 +123,13 @@
                     <platforms>linux</platforms>
                     <distributionFileList>
                         <distributionFile>
-                            <origin>target/nest-3B-bin-linux.dir/VERSION.txt</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-3B-bin-linux.dir/CHANGELOG.txt</origin>
-                        </distributionFile>
-                        <distributionFile>
                             <origin>target/nest-3B-bin-linux.dir/dat.sh</origin>
                         </distributionFile>
                         <distributionFile>
                             <origin>target/nest-3B-bin-linux.dir/gpt.sh</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3B-bin-linux.dir/libclib_jiio.so</origin>
-                        </distributionFile>
-                        <distributionFile>
                             <origin>target/nest-3B-bin-linux.dir/libgluegen-rt.so</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-3B-bin-linux.dir/libjhdf5.so</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-3B-bin-linux.dir/libjhdf.so</origin>
                         </distributionFile>
                         <distributionFile>
                             <origin>target/nest-3B-bin-linux.dir/libjogl.so</origin>
@@ -119,41 +143,11 @@
                         <distributionFile>
                             <origin>target/nest-3B-bin-linux.dir/libmlib_jai.so</origin>
                         </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-3B-bin-linux.dir/LICENSE.txt</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-3B-bin-linux.dir/readme.html</origin>
-                        </distributionFile>
-                        <distributionDirectory>
-                            <origin>target/nest-3B-bin-linux.dir/auxdata</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-3B-bin-linux.dir/bin</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-3B-bin-linux.dir/commandline</origin>
-                        </distributionDirectory>
                         <distributionDirectory>
                             <origin>target/nest-3B-bin-linux.dir/config</origin>
                         </distributionDirectory>
                         <distributionDirectory>
-                            <origin>target/nest-3B-bin-linux.dir/images</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-3B-bin-linux.dir/graphs</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-3B-bin-linux.dir/lib</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-3B-bin-linux.dir/licenses</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-3B-bin-linux.dir/modules</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-3B-bin-linux.dir/res</origin>
+                            <origin>../dist/jdk7/linux/jre</origin>
                         </distributionDirectory>
                     </distributionFileList>
                 </folder>
@@ -164,44 +158,8 @@
                     <platforms>windows</platforms>
                     <distributionFileList>
                         <distributionDirectory>
-                            <origin>../dist/jre</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-3B-bin-win.dir/auxdata</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-3B-bin-win.dir/bin</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-3B-bin-win.dir/commandline</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
                             <origin>target/nest-3B-bin-win.dir/config</origin>
                         </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-3B-bin-win.dir/graphs</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-3B-bin-win.dir/images</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-3B-bin-win.dir/lib</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-3B-bin-win.dir/licenses</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-3B-bin-win.dir/modules</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
-                            <origin>target/nest-3B-bin-win.dir/res</origin>
-                        </distributionDirectory>
-                        <distributionFile>
-                            <origin>target/nest-3B-bin-win.dir/VERSION.txt</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-3B-bin-win.dir/CHANGELOG.txt</origin>
-                        </distributionFile>
                         <distributionFile>
                             <origin>target/nest-3B-bin-win.dir/clean-nest.bat</origin>
                         </distributionFile>
@@ -242,9 +200,6 @@
                             <origin>target/nest-3B-bin-win.dir/jogl_cg.dll</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3B-bin-win.dir/LICENSE.txt</origin>
-                        </distributionFile>
-                        <distributionFile>
                             <origin>target/nest-3B-bin-win.dir/mlib_jai.dll</origin>
                         </distributionFile>
                         <distributionFile>
@@ -259,9 +214,50 @@
                         <distributionFile>
                             <origin>target/nest-3B-bin-win.dir/post-uninstall.bat</origin>
                         </distributionFile>
+                        <distributionDirectory>
+                            <origin>../dist/jdk7/windows/jre</origin>
+                        </distributionDirectory>
+                    </distributionFileList>
+                </folder>
+                <folder>
+                    <description>Program Files</description>
+                    <destination>${installdir}</destination>
+                    <name>programfileslinux64</name>
+                    <platforms>linux-x64</platforms>
+                    <distributionFileList>
                         <distributionFile>
-                            <origin>target/nest-3B-bin-win.dir/readme.html</origin>
+                            <origin>target/nest-3B-bin-linux64.dir/libjhdf5.so</origin>
                         </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3B-bin-linux64.dir/libjhdf.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3B-bin-linux64.dir/libjogl.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3B-bin-linux64.dir/libjogl_awt.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3B-bin-linux64.dir/libjogl_cg.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3B-bin-linux64.dir/libmlib_jai.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3B-bin-linux64.dir/dat.sh</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3B-bin-linux64.dir/gpt.sh</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3B-bin-linux64.dir/libclib_jiio.so</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3B-bin-linux64.dir/libgluegen-rt.so</origin>
+                        </distributionFile>
+                        <distributionDirectory>
+                            <origin>target/nest-3B-bin-linux64.dir/config</origin>
+                        </distributionDirectory>
                     </distributionFileList>
                 </folder>
             </folderList>
