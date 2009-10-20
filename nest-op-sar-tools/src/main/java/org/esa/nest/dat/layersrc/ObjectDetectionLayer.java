@@ -50,7 +50,7 @@ public class ObjectDetectionLayer extends Layer {
     private void getPixelSize() {
         final MetadataElement root = product.getMetadataRoot();
         if (root != null) {
-            final MetadataElement absMetadata = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+            final MetadataElement absMetadata = AbstractMetadata.getAbstractedMetadata(product);
             if (absMetadata != null) {
                 rangeSpacing = absMetadata.getAttributeDouble(AbstractMetadata.range_spacing, 0);
                 azimuthSpacing = absMetadata.getAttributeDouble(AbstractMetadata.azimuth_spacing, 0);
@@ -61,7 +61,7 @@ public class ObjectDetectionLayer extends Layer {
     public static File getTargetFile(final Product product) {
         final MetadataElement root = product.getMetadataRoot();
         if (root != null) {
-            final MetadataElement absMetadata = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+            final MetadataElement absMetadata = AbstractMetadata.getAbstractedMetadata(product);
             if (absMetadata != null) {
                 final String shipFilePath = absMetadata.getAttributeString(AbstractMetadata.target_report_file, null);
                 if(shipFilePath != null) {

@@ -120,13 +120,8 @@ public class NetCDFReader extends AbstractProductReader {
 
         final Group rootGroup = _netcdfFile.getRootGroup();
         NetCDFUtils.addGroups(_product.getMetadataRoot(), rootGroup);
-        
-        final MetadataElement root = _product.getMetadataRoot();
-        final MetadataElement absRoot = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
-        if(absRoot == null) {
-            root.addElement(new MetadataElement(AbstractMetadata.ABSTRACT_METADATA_ROOT));
-            AbstractMetadata.addAbstractedMetadataHeader(root);
-        }
+
+        AbstractMetadata.addAbstractedMetadataHeader(_product.getMetadataRoot());
     }
 
     private void addBandsToProduct(final Variable[] variables) {

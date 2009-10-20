@@ -193,9 +193,6 @@ public class TestConvertDataTypeOperator extends TestCase {
 
         //outputValues(band1.getName() + " values:", values);
 
-        // create abstracted metadata
-        MetadataElement abs = testProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
-
         return testProduct;
     }
 }

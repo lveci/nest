@@ -12,16 +12,15 @@ import org.esa.nest.datamodel.AbstractMetadata;
  * This action to edit Metadata
  *
  * @author lveci
- * @version $Revision: 1.4 $ $Date: 2009-06-25 17:24:03 $
+ * @version $Revision: 1.5 $ $Date: 2009-10-20 19:57:55 $
  */
 public class EditMetadataAction extends ExecCommand {
 
     @Override
     public void actionPerformed(final CommandEvent event) {
 
-        Product product = VisatApp.getApp().getSelectedProduct();
-        MetadataElement root = product.getMetadataRoot();
-        MetadataElement absRoot = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+        final Product product = VisatApp.getApp().getSelectedProduct();
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
 
         if(absRoot != null) {
             VisatApp.getApp().createProductMetadataView(absRoot);

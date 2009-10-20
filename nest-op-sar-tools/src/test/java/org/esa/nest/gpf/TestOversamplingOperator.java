@@ -95,7 +95,7 @@ public class TestOversamplingOperator extends TestCase {
         band1.setData(ProductData.createInstance(intValues));
 
         // create abstracted metadata
-        MetadataElement abs = testProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+        MetadataElement abs = AbstractMetadata.getAbstractedMetadata(testProduct);
 
         AbstractMetadata.setAttribute(abs, AbstractMetadata.PRODUCT_TYPE, "ASA_APG_1P");
         AbstractMetadata.setAttribute(abs, AbstractMetadata.SAMPLE_TYPE, "DETECTED");

@@ -24,6 +24,9 @@ public class AbstractMetadata {
     public static final String NO_METADATA_STRING = " ";
 
     public static final String ABSTRACT_METADATA_ROOT = "Abstracted_Metadata";
+    @Deprecated
+    public static final String ABSTRACT_METADATA_ROOT_OLD = "Abstracted Metadata";
+
     public static final String SLAVE_METADATA_ROOT = "Slave Metadata";
 
     public static final String PRODUCT = "PRODUCT";
@@ -369,9 +372,12 @@ public class AbstractMetadata {
         if (root == null) {
             throw new OperatorException("Root Metadata not found");
         }
-        final MetadataElement abstractedMetadata = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+        MetadataElement abstractedMetadata = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
         if (abstractedMetadata == null) {
-            throw new OperatorException("Abstracted Metadata not found");
+            abstractedMetadata = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT_OLD);
+            if (abstractedMetadata == null) {
+                throw new OperatorException("Abstracted Metadata not found");
+            }
         }
         return abstractedMetadata;
     }

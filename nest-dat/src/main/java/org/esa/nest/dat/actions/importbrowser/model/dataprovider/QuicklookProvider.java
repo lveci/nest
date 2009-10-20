@@ -65,7 +65,7 @@ public class QuicklookProvider implements DataProvider {
     private static boolean isComplex(Product product) {
         final MetadataElement root = product.getMetadataRoot();
         if(root != null) {
-            final MetadataElement absRoot = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+            final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
             if(absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE, "").equals("COMPLEX"))
                 return true;
         }

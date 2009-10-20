@@ -88,10 +88,10 @@ public class TestUtils {
     }
 
     public static void compareMetadata(Product testProduct, Product expectedProduct, String[] excemptionList) throws Exception {
-        final MetadataElement testAbsRoot = testProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+        final MetadataElement testAbsRoot = AbstractMetadata.getAbstractedMetadata(testProduct);
         if(testAbsRoot == null)
             throwErr("Metadata is null");
-        final MetadataElement expectedAbsRoot = expectedProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+        final MetadataElement expectedAbsRoot = AbstractMetadata.getAbstractedMetadata(expectedProduct);
         if(expectedAbsRoot == null)
             throwErr("Metadata is null");
 

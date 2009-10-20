@@ -383,8 +383,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
     }
 
     private static void setLatLongMetadata(Product product, TiePointGrid latGrid, TiePointGrid lonGrid) {
-        final MetadataElement root = product.getMetadataRoot();
-        final MetadataElement absRoot = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
 
         final int w = product.getSceneRasterWidth();
         final int h = product.getSceneRasterHeight();

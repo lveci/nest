@@ -47,7 +47,7 @@ public class GenericWriter extends AbstractProductWriter {
 
         _outputStream = new FileImageOutputStream(file);
 
-        final MetadataElement absRoot = getSourceProduct().getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(getSourceProduct());
         AbstractMetadata.saveExternalMetadata(getSourceProduct(), absRoot, file);
     }
 

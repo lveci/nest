@@ -79,10 +79,10 @@ public class TestSRGROperator extends TestCase {
      */
     private static Product createTestProduct(int w, int h) {
 
-        Product testProduct = new Product("source", "ASA_APS_1P", w, h);
+        final Product testProduct = new Product("source", "ASA_APS_1P", w, h);
 
         // create a Band: band1
-        Band band1 = testProduct.addBand("band1", ProductData.TYPE_INT32);
+        final Band band1 = testProduct.addBand("band1", ProductData.TYPE_INT32);
         band1.setSynthetic(true);
         int[] intValues = new int[w * h];
         for (int i = 0; i < w * h; i++) {
@@ -91,7 +91,7 @@ public class TestSRGROperator extends TestCase {
         band1.setData(ProductData.createInstance(intValues));
 
         // create abstracted metadata
-        MetadataElement abs = new MetadataElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+        final MetadataElement abs = new MetadataElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
 
         abs.addAttribute(new MetadataAttribute(AbstractMetadata.MISSION,
                 ProductData.createInstance("ENVISAT"), false));

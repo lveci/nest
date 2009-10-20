@@ -66,7 +66,7 @@ public class TestMultilookOperator extends TestCase {
         assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
-        final MetadataElement abs = targetProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+        final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(targetProduct);
 
         TestUtils.attributeEquals(abs, AbstractMetadata.azimuth_looks, 2.0);
         TestUtils.attributeEquals(abs, AbstractMetadata.range_looks, 4.0);
@@ -123,7 +123,7 @@ public class TestMultilookOperator extends TestCase {
         band1.setData(ProductData.createInstance(intValues));
 
         // create abstracted metadata
-        final MetadataElement abs = testProduct.getMetadataRoot().getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
+        final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(testProduct);
 
         AbstractMetadata.setAttribute(abs, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
         AbstractMetadata.setAttribute(abs, AbstractMetadata.MISSION, "ENVISAT");
