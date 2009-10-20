@@ -226,12 +226,6 @@
                     <platforms>linux-x64</platforms>
                     <distributionFileList>
                         <distributionFile>
-                            <origin>target/nest-3B-bin-linux64.dir/libjhdf5.so</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-3B-bin-linux64.dir/libjhdf.so</origin>
-                        </distributionFile>
-                        <distributionFile>
                             <origin>target/nest-3B-bin-linux64.dir/libjogl.so</origin>
                         </distributionFile>
                         <distributionFile>
@@ -250,13 +244,13 @@
                             <origin>target/nest-3B-bin-linux64.dir/gpt.sh</origin>
                         </distributionFile>
                         <distributionFile>
-                            <origin>target/nest-3B-bin-linux64.dir/libclib_jiio.so</origin>
-                        </distributionFile>
-                        <distributionFile>
                             <origin>target/nest-3B-bin-linux64.dir/libgluegen-rt.so</origin>
                         </distributionFile>
                         <distributionDirectory>
                             <origin>target/nest-3B-bin-linux64.dir/config</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>../dist/jdk7/linux64/jre</origin>
                         </distributionDirectory>
                     </distributionFileList>
                 </folder>
