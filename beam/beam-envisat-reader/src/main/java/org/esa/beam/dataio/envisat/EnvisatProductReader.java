@@ -1,5 +1,5 @@
 /*
- * $Id: EnvisatProductReader.java,v 1.3 2009-08-06 15:21:21 lveci Exp $
+ * $Id: EnvisatProductReader.java,v 1.4 2009-10-21 16:31:31 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -20,22 +20,11 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.AbstractProductReader;
 import org.esa.beam.framework.dataio.IllegalFileFormatException;
 import org.esa.beam.framework.dataio.ProductIOException;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.BitmaskDef;
-import org.esa.beam.framework.datamodel.BitmaskOverlayInfo;
-import org.esa.beam.framework.datamodel.MetadataAttribute;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.PixelGeoCoding;
-import org.esa.beam.framework.datamodel.PointingFactory;
-import org.esa.beam.framework.datamodel.PointingFactoryRegistry;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.TiePointGeoCoding;
-import org.esa.beam.framework.datamodel.TiePointGrid;
-import org.esa.beam.framework.datamodel.VirtualBand;
-import org.esa.beam.framework.dataop.maptransf.Datum;
+import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataop.maptransf.*;
 import org.esa.beam.util.ArrayUtils;
 import org.esa.beam.util.Debug;
+import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.io.FileUtils;
 
 import javax.imageio.stream.FileCacheImageInputStream;
@@ -53,7 +42,7 @@ import java.util.Vector;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.3 $ $Date: 2009-08-06 15:21:21 $
+ * @version $Revision: 1.4 $ $Date: 2009-10-21 16:31:31 $
  * @see org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn
  */
 public class EnvisatProductReader extends AbstractProductReader {
@@ -237,6 +226,11 @@ public class EnvisatProductReader extends AbstractProductReader {
             addTiePointGridsToProduct(product);
             addGeoCodingToProduct(product);
             initPointingFactory(product);
+
+            if(getProductFile().getProductType().contains("IMG")) {
+                createMapGeocoding(product, TransverseMercatorDescriptor.NAME,
+                    product.getBandAt(0).getNoDataValue());
+            }
         }
         addDefaultBitmaskDefsToProduct(product);
         addDefaultBitmaskDefsToBands(product);
@@ -244,6 +238,17 @@ public class EnvisatProductReader extends AbstractProductReader {
         _productFile.addCustomMetadata(product);
 
         return product;
+    }
+
+    public static void createMapGeocoding(final Product targetProduct, final String projectionName, final double noDataValue) {
+        final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(targetProduct,
+                                                MapProjectionRegistry.getProjection(projectionName),
+                                                0.0,
+                                                noDataValue);
+        mapInfo.setSceneWidth(targetProduct.getSceneRasterWidth());
+        mapInfo.setSceneHeight(targetProduct.getSceneRasterHeight());
+
+        targetProduct.setGeoCoding(new MapGeoCoding(mapInfo));
     }
 
     private void addBandsToProduct(Product product) {

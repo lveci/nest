@@ -125,10 +125,12 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         // set slant_range_to_first_pixel in metadata
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         final TiePointGrid slantRangeTimeTPG = product.getTiePointGrid("slant_range_time");
-        final int numOutputLines = absRoot.getAttributeInt(AbstractMetadata.num_output_lines);
-        final double slantRangeTime = slantRangeTimeTPG.getPixelFloat(numOutputLines/2, 0) / 1000000000.0; //s
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
-                slantRangeTime*Constants.halfLightSpeed);
+        if(slantRangeTimeTPG != null) {
+            final int numOutputLines = absRoot.getAttributeInt(AbstractMetadata.num_output_lines);
+            final double slantRangeTime = slantRangeTimeTPG.getPixelFloat(numOutputLines/2, 0) / 1000000000.0; //s
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
+                    slantRangeTime*Constants.halfLightSpeed);
+        }
         
         if(_leaderFile.getLatCorners() != null && _leaderFile.getLonCorners() != null) {
             addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());

@@ -1,6 +1,8 @@
 package org.esa.nest.dataio.ceos.ers;
 
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
+import org.esa.beam.framework.dataop.maptransf.TransverseMercatorDescriptor;
 import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ReaderUtils;
@@ -120,6 +122,11 @@ class ERSProductDirectory extends CEOSProductDirectory {
         addTiePointGrids(product, _leaderFile.getFacilityRecord(), _leaderFile.getSceneRecord());
         addMetaData(product);
         
+        if(productType.contains("GEC") || productType.contains("IMG")) {
+            ReaderUtils.createMapGeocoding(product, TransverseMercatorDescriptor.NAME,
+                product.getBandAt(0).getNoDataValue());
+        }
+
         return product;
     }
 
