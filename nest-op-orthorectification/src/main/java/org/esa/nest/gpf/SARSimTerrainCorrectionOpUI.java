@@ -70,16 +70,6 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "WARP Polynomial Order:", warpPolynomialOrder);
         gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "Digital Elevation Model:", demName);
-        gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, externalDEMFileLabel, externalDEMFile);
-        gbc.gridx = 2;
-        contentPane.add(externalDEMBrowseButton, gbc);
-        gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, externalDEMNoDataValueLabel, externalDEMNoDataValue);
-        gbc.gridy++;
-        DialogUtils.addComponent(contentPane, gbc, "DEM Resampling Method:", demResamplingMethod);
-        gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Image Resampling Method:", imgResamplingMethod);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Pixel Spacing (m):", pixelSpacing);

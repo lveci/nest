@@ -302,7 +302,8 @@ public final class SARSimulationOp extends Operator {
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);        
+        absTgt.setAttributeString("DEM resampling method", demResamplingMethod);
         if(externalDEMFile != null) {
             absTgt.setAttributeDouble("external DEM no data value", externalDEMNoDataValue);
         }

@@ -90,12 +90,12 @@ public class SARSimTerrainCorrectionOp extends Operator {
     @Parameter(description = "The order of WARP polynomial function", valueSet = {"1", "2", "3"}, defaultValue = "1",
                 label="Warp Polynomial Order")
     private int warpPolynomialOrder = 1;
-
+    /*
     @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
             ResamplingFactory.BILINEAR_INTERPOLATION_NAME, ResamplingFactory.CUBIC_CONVOLUTION_NAME},
             defaultValue = ResamplingFactory.BILINEAR_INTERPOLATION_NAME, label="DEM Resampling Method")
     private String demResamplingMethod = ResamplingFactory.BILINEAR_INTERPOLATION_NAME;
-
+    */
     @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
             ResamplingFactory.BILINEAR_INTERPOLATION_NAME, ResamplingFactory.CUBIC_CONVOLUTION_NAME},
             defaultValue = ResamplingFactory.BILINEAR_INTERPOLATION_NAME, label="Image Resampling Method")
@@ -390,6 +390,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private void getElevationModel() throws Exception {
 
         demName = absRoot.getAttributeString(AbstractMetadata.DEM);
+        final String demResamplingMethod = absRoot.getAttributeString("DEM resampling method");
         final ElevationModelRegistry elevationModelRegistry = ElevationModelRegistry.getInstance();
         final ElevationModelDescriptor demDescriptor = elevationModelRegistry.getDescriptor(demName);
 
