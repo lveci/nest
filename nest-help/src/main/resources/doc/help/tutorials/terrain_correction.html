@@ -12,37 +12,16 @@ Tutorial</td>
 </tr>
 </tbody>
 </table>
-<h3>Terrain Correction</h3>
-<p>Geocoding is the process of resampling the data to conform to a standard
-map projection with known coordinates. There are various levels of geocoding</p>
-<ul>
-<li>Geocoded Ellipsoid Corrected (GEC)</li>
-</ul>
-<div style="margin-left: 40px;">The GEC product is a multi-look (speckle-reduced),
-ground range, system corrected image. It is precisely located and rectified
-onto a map projection, but not corrected for terrain distortion</div>
-<ul>
-<li>Geocoded Terrain Corrected (GTC)</li>
-</ul>
-<div style="margin-left: 40px;">The GTC product is precisely located, corrected
-for terrain variations and rectified onto a map projection. </div>
-<ul>
-<li>Radiometric Terrain Corrected (RTC)</li>
-</ul>
-<div style="margin-left: 40px;">The RTC product is precisely located, corrected
-for terrain variations, rectified onto a map projection and retro calibrated. <br></div>
-<br>
-<p>The <a href="../operators/RangeDopplerGeocodingOp.html">Terrain Correction</a> Operator will
-produce GTC and optionally RTC products.
-The <a href="../operators/EllipsoidCorrectionRDOp.html">Ellipsoid Correction RD</a> and 
-<a href="../operators/GeolocationGridGeocodingOp.html">Ellipsoid Correction GG</a> Operators will
-produce GEC products.</p>
+<h3>Terrain Correction</h3>The <a href="../operators/RangeDopplerGeocodingOp.html">Terrain Correction</a>
+Operator will
+produce&nbsp;an orthorectified product in the WGS 84 geogreaphic
+coordinates. Optionally radiometric normalisation can be applied to the
+orthorectified image to produce &#963;<sup>0</sup>, &#947;<sup>0</sup> or &#946;<sup>0</sup> output. <br><br>The <a href="../operators/EllipsoidCorrectionRDOp.html">Ellipsoid Correction RD</a> and 
+<a href="../operators/GeolocationGridGeocodingOp.html">Ellipsoid Correction GG</a> Operators will&nbsp;produce ellipsoid corrected products in the WGS 84 geographic coordinates.<br><br>The Terrain Correction Operator should be used whenever DEM is available. The 
+Ellipsoid Correction (RD and GG) should be used only when DEM is not available.
 
-<p>The Terrain Correction Operator should be used whenever DEM is available. The 
-Ellipsoid Correction (RD and GG) should be used only when DEM is not available.</p>
-
-<br><p>1. From the Geometry menu select Terrain Correction. This will call up the dialog for the <a href="../operators/RangeDopplerGeocodingOp.html">Terrain Correction</a>
-Operator.</p><p>2. Select your source bands.</p><p>3.
+<br><br><br>The following steps should be followed to produce an orthorectified image:<br><p>1. From the Geometry menu select Terrain Correction. This will call up the dialog for the <a href="../operators/RangeDopplerGeocodingOp.html">Terrain Correction</a>
+Operator (Figure 1).</p><p>2. Select your source bands.</p><p>3.
 Select the Digital Elevation Model (DEM) to use. You can select 30
 second GETASSE30 or ACE DEMs if they are installed on your computer.</p><p>&nbsp;&nbsp;&nbsp;
 Preferably, select the SRTM 3 second DEM which has much better
@@ -50,12 +29,35 @@ resolution and can be downloaded as need automaticaly by NEST if you
 have an internet connection.</p><p>&nbsp;&nbsp;&nbsp; Alternatively,
 you could also browse for an External DEM tile in any file format
 readable by NEST (GeoTIFF, HDF, NetCDF, GTOPO30, ...)</p><p>4. Select the interpolation methods to use for the DEM resampling and the target image resampling.</p><p>5. Optionally select to save the DEM as a band and the local incidence angle.</p><p>6.
-Optionlly select to apply Radiometric Correction to do a retro
-calibration of the resulting product. Note: Radiometric Correction
-is&nbsp;currently only supported for ASAR and ERS products.</p><br><div style="text-align: center;"><img style="width: 432px; height: 477px;" alt="" src="images/TC_dialog.jpg"><br></div><br><p>7. Press Run to process the data.</p><p><br>Below
-are two images of an ASAR IMP product. The first is in the original SAR
-geometry. The second has been Terrain Corrected and Radiometric
-Corrected.</p><br><div style="text-align: center;"><img style="width: 606px; height: 590px;" alt="" src="images/IMP_orig.jpg"><br><span style="font-weight: bold;">ASAR IMP in original SAR Geometry</span><br></div><br><br><br><div style="text-align: center;"><img style="width: 606px; height: 589px;" alt="" src="images/IMP_RTC.jpg"><br><span style="font-weight: bold;">ASAR IMP after Terrain Correction with Radiometric Correction</span><br></div><br><br><p>After
+Optionlly select to apply Radiometric Normallizatin to output &#963;<sup>0</sup>, &#947;<sup>0</sup> or &#946;<sup>0</sup> of the orthorectified image. Note: Radiometric&nbsp;Normallizatin
+is&nbsp;currently only supported for ASAR product.</p><br><div style="text-align: center;"><img style="width: 624px; height: 579px;" alt="" src="../operators/images/range_doppler_dlg.JPG"><br><br><span style="font-weight: bold;">Figure 1. Terrain Correction operator dialog box.</span><br></div><br><p>7. Press Run to process the data.</p><p><br>Below
+are some sample images showing the Terrain Correction result of an ASAR
+IMP product
+ASA_IMP_1PNDPA20040402_092740_000000152025_00351_10926_0004.N1, which
+is SAR image of Lake Bracciano and Lake Vico rigion of Italy.</p><p> Figure 2&nbsp;is in the original SAR
+geometry. Figure 3 is the SRTM 3 second DEM image for the SAR geometry. The orthorectified image and its &#963;<sup>0 </sup>are shown in Figure 4&nbsp; and Figure 5 respectively.</p><br><div style="text-align: center;"><img style="width: 649px; height: 650px;" alt="" src="images/IMP_orig.jpg"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img style="width: 729px; height: 536px;" alt="" src="images/IMP_dem.jpg"><br><div style="text-align: left;"><span style="font-weight: bold;">&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; Figure 2. ASAR IMP in original SAR Geometry. &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp;&nbsp; &nbsp; Figure 3. SRTM 3 second DEM for the SAR
+Geometry.</span><br></div></div><br><br><br><div style="text-align: center;"><img style="width: 876px; height: 608px;" alt="" src="images/IMP_amp.jpg"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img style="width: 879px; height: 597px;" alt="" src="images/IMP_sigma.jpg"><br><div style="text-align: left;"><span style="font-weight: bold;">&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Figure 4.&nbsp;ASAR IMP after
+orthorectification. &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Figure 5.&#963; </span><sup><span style="font-weight: bold;">0 </span></sup><span style="font-weight: bold;">of the orthorectified image (incidence angle compluted from ellipsoid was used in generating </span><span style="font-weight: bold;">&#963;</span><sup><span style="font-weight: bold;">0</span></sup><span style="font-weight: bold;">). &nbsp;</span></div></div><br><br><p>After
 Terrain Correction your SAR data will be closer to the real world
 geometry and you will be able to overlay layers from other sources
 correctly.</p><p><br></p><br>
