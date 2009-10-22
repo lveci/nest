@@ -317,16 +317,21 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         gbc.gridy++;
         contentPane.add(applyRadiometricNormalizationCheckBox, gbc);
         gbc.gridy++;
+        gbc.insets.left = 20;
         contentPane.add(saveSigmaNoughtCheckBox, gbc);
         gbc.gridx = 1;
+        gbc.insets.left = 1;
         contentPane.add(incidenceAngleForSigma0, gbc);
         gbc.gridx = 0;
         gbc.gridy++;
+        gbc.insets.left = 20;
         contentPane.add(saveGammaNoughtCheckBox, gbc);
         gbc.gridx = 1;
+        gbc.insets.left = 1;
         contentPane.add(incidenceAngleForGamma0, gbc);
         gbc.gridx = 0;
         gbc.gridy++;
+        gbc.insets.left = 20;
         contentPane.add(saveBetaNoughtCheckBox, gbc);
 
         //DialogUtils.fillPanel(contentPane, gbc);
