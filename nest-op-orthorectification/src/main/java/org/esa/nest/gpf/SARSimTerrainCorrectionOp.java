@@ -90,12 +90,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     @Parameter(description = "The order of WARP polynomial function", valueSet = {"1", "2", "3"}, defaultValue = "1",
                 label="Warp Polynomial Order")
     private int warpPolynomialOrder = 1;
-    /*
-    @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
-            ResamplingFactory.BILINEAR_INTERPOLATION_NAME, ResamplingFactory.CUBIC_CONVOLUTION_NAME},
-            defaultValue = ResamplingFactory.BILINEAR_INTERPOLATION_NAME, label="DEM Resampling Method")
-    private String demResamplingMethod = ResamplingFactory.BILINEAR_INTERPOLATION_NAME;
-    */
+
     @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
             ResamplingFactory.BILINEAR_INTERPOLATION_NAME, ResamplingFactory.CUBIC_CONVOLUTION_NAME},
             defaultValue = ResamplingFactory.BILINEAR_INTERPOLATION_NAME, label="Image Resampling Method")
@@ -113,6 +108,12 @@ public class SARSimTerrainCorrectionOp extends Operator {
     @Parameter(defaultValue="false", label="Save projected local incidence angle as band")
     private boolean saveProjectedLocalIncidenceAngle = false;
 
+    @Parameter(defaultValue="true", label="Save selected source band")
+    private boolean saveSelectedSourceBand = true;
+
+    @Parameter(defaultValue="false", label="Apply radiometric normalization")
+    private boolean applyRadiometricNormalization = false;
+    
     @Parameter(defaultValue="false", label="Save Sigma0 as a band")
     private boolean saveSigmaNought = false;
 
@@ -274,6 +275,16 @@ public class SARSimTerrainCorrectionOp extends Operator {
     }
 
     private void checkUserInput() {
+
+        if (!saveSelectedSourceBand && !applyRadiometricNormalization) {
+            throw new OperatorException("Please selecte output band for terrain corrected image");
+        }
+
+        if (!applyRadiometricNormalization) {
+            saveSigmaNought = false;
+            saveGammaNought = false;
+            saveBetaNought = false;
+        }
 
         if (saveBetaNought || saveGammaNought ||
             (saveSigmaNought && incidenceAngleForSigma0.contains(RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID))) {
@@ -493,52 +504,39 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 throw new OperatorException("Only amplitude or intensity band should be used for orthorectification");
             }
 
+            final String[] srcBandNames = {bandName};
             if (saveSigmaNought) {
-                targetBandName = "Sigma0";
-            } else {
-                targetBandName = srcBand.getName();
+                if (bandName.contains("HH")) {
+                    targetBandName = "Sigma0_HH";
+                } else if (bandName.contains("VV")) {
+                    targetBandName = "Sigma0_VV";
+                } else {
+                    targetBandName = "Sigma0";
+                }
+
+                if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
+                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                }
             }
 
-            final String[] srcBandNames = {bandName};
-            targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
-
-            final Band targetBand = new Band(targetBandName,
-                                             ProductData.TYPE_FLOAT32,
-                                             targetImageWidth,
-                                             targetImageHeight);
-
-            targetBand.setUnit(unit);
-            targetBand.setDescription(srcBand.getDescription());
-            targetBand.setNoDataValue(srcBand.getNoDataValue());
-            targetBand.setNoDataValueUsed(true);
-            targetProduct.addBand(targetBand);
+            if (saveSelectedSourceBand) {
+                targetBandName = bandName;
+                if (addTargetBand(targetBandName, unit, srcBand)) {
+                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                }
+            }
         }
 
         if(saveDEM) {
-            final Band demBand = new Band("elevation",
-                                             ProductData.TYPE_FLOAT32,
-                                             targetImageWidth,
-                                             targetImageHeight);
-            demBand.setUnit(Unit.METERS);
-            targetProduct.addBand(demBand);
+            addTargetBand("elevation", Unit.METERS, null);
         }
 
         if(saveLocalIncidenceAngle) {
-            final Band incidenceAngleBand = new Band("incidenceAngle",
-                                                     ProductData.TYPE_FLOAT32,
-                                                     targetImageWidth,
-                                                     targetImageHeight);
-            incidenceAngleBand.setUnit(Unit.DEGREES);
-            targetProduct.addBand(incidenceAngleBand);
+            addTargetBand("incidenceAngle", Unit.DEGREES, null);
         }
 
         if(saveProjectedLocalIncidenceAngle) {
-            final Band projectedIncidenceAngleBand = new Band("projectedIncidenceAngle",
-                                                     ProductData.TYPE_FLOAT32,
-                                                     targetImageWidth,
-                                                     targetImageHeight);
-            projectedIncidenceAngleBand.setUnit(Unit.DEGREES);
-            targetProduct.addBand(projectedIncidenceAngleBand);
+            addTargetBand("projectedIncidenceAngle", Unit.DEGREES, null);
         }
 
         if (saveLayoverShadowMask) {
@@ -551,12 +549,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
 
         if (saveIncidenceAngleFromEllipsoid) {
-            final Band incidenceAngleFromEllipsoidBand = new Band("incidenceAngleFromEllipsoid",
-                                                     ProductData.TYPE_FLOAT32,
-                                                     targetImageWidth,
-                                                     targetImageHeight);
-            incidenceAngleFromEllipsoidBand.setUnit(Unit.DEGREES);
-            targetProduct.addBand(incidenceAngleFromEllipsoidBand);
+            addTargetBand("incidenceAngleFromEllipsoid", Unit.DEGREES, null);
         }
 
         if (saveSigmaNought && incidenceAngleForSigma0.contains(RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) {
@@ -570,6 +563,28 @@ public class SARSimTerrainCorrectionOp extends Operator {
         if (saveBetaNought) {
             RangeDopplerGeocodingOp.createBetaNoughtVirtualBand(targetProduct);
         }
+    }
+
+    private boolean addTargetBand(String bandName, String bandUnit, Band sourceBand) {
+
+        if(targetProduct.getBand(bandName) == null) {
+
+            final Band targetBand = new Band(bandName,
+                                             ProductData.TYPE_FLOAT32,
+                                             targetImageWidth,
+                                             targetImageHeight);
+
+            targetBand.setUnit(bandUnit);
+            if (sourceBand != null) {
+                targetBand.setDescription(sourceBand.getDescription());
+                targetBand.setNoDataValue(sourceBand.getNoDataValue());
+            }
+            targetBand.setNoDataValueUsed(true);
+            targetProduct.addBand(targetBand);
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -771,6 +786,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             td.tileDataBuffer = td.targetTile.getDataBuffer();
             td.bandName = targetBand.getName();
             td.noDataValue = sourceProduct.getBand(srcBandNames[0]).getNoDataValue();
+            td.applyRadiometricNormalization = targetBand.getName().contains("Sigma0");
 
             final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
             td.bandPolar = 0;
@@ -895,7 +911,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                                 int[] subSwathIndex = {INVALID_SUB_SWATH_INDEX};
                                 double v = getPixelValue(pixelPos.y, pixelPos.x, tileData, bandUnit, subSwathIndex);
 
-                                if (saveSigmaNought) {
+                                if (tileData.applyRadiometricNormalization) {
 
                                     final double satelliteHeight = Math.sqrt(
                                             sensorPos[0]*sensorPos[0] + sensorPos[1]*sensorPos[1] + sensorPos[2]*sensorPos[2]);
@@ -1145,7 +1161,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             throw new OperatorException("Uknown band unit");
         }
 
-        if (saveSigmaNought) {
+        if (tileData.applyRadiometricNormalization) {
             v = calibrator.applyRetroCalibration(x0, y0, v, tileData.bandPolar, bandUnit, subSwathIndex);
         }
 
@@ -1229,7 +1245,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         int[] subSwathIndex11 = {0};
         double v = 0;
 
-        if (saveSigmaNought) {
+        if (tileData.applyRadiometricNormalization) {
 
             v00 = calibrator.applyRetroCalibration(x0, y0, v00, tileData.bandPolar, bandUnit, subSwathIndex00);
             v01 = calibrator.applyRetroCalibration(x1, y0, v01, tileData.bandPolar, bandUnit, subSwathIndex01);
@@ -1323,7 +1339,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
 
         int[][][] ss = new int[4][4][1];
-        if (saveSigmaNought) {
+        if (tileData.applyRadiometricNormalization) {
             for (int i = 0; i < y.length; i++) {
                 for (int j = 0; j < x.length; j++) {
                     v[i][j] = calibrator.applyRetroCalibration(x[j], y[i], v[i][j], tileData.bandPolar, bandUnit, ss[i][j]);
@@ -1434,6 +1450,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         String bandName = null;
         int bandPolar = 0;
         double noDataValue = 0;
+        boolean applyRadiometricNormalization = false;
     }
 
     /**

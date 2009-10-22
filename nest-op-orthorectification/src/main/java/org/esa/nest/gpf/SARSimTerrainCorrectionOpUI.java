@@ -82,6 +82,10 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
         gbc.gridy++;
         contentPane.add(saveProjectedLocalIncidenceAngleCheckBox, gbc);
         gbc.gridy++;
+        contentPane.add(saveSelectedSourceBandCheckBox, gbc);
+        gbc.gridy++;
+        contentPane.add(applyRadiometricNormalizationCheckBox, gbc);
+        gbc.gridy++;
         contentPane.add(saveSigmaNoughtCheckBox, gbc);
         gbc.gridx = 1;
         contentPane.add(incidenceAngleForSigma0, gbc);

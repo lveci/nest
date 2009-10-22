@@ -48,6 +48,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     protected final JCheckBox saveDEMCheckBox = new JCheckBox("Save DEM as a band");
     protected final JCheckBox saveLocalIncidenceAngleCheckBox = new JCheckBox("Save local incidence angle as a band");
     protected final JCheckBox saveProjectedLocalIncidenceAngleCheckBox = new JCheckBox("Save projected local incidence angle as a band");
+    protected final JCheckBox saveSelectedSourceBandCheckBox = new JCheckBox("Save selected source band");
+    protected final JCheckBox applyRadiometricNormalizationCheckBox = new JCheckBox("Apply radiometric normalization");
     protected final JCheckBox saveBetaNoughtCheckBox = new JCheckBox("Save Beta0 as a band");
     protected final JCheckBox saveGammaNoughtCheckBox = new JCheckBox("Save Gamma0 as a band");
     protected final JCheckBox saveSigmaNoughtCheckBox = new JCheckBox("Save Sigma0 as a band");
@@ -55,6 +57,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     private boolean saveDEM = false;
     private boolean saveLocalIncidenceAngle = false;
     private boolean saveProjectedLocalIncidenceAngle = false;
+    private boolean saveSelectedSourceBand = false;
+    private boolean applyRadiometricNormalization = false;
     private boolean saveBetaNought = false;
     private boolean saveGammaNought = false;
     private boolean saveSigmaNought = false;
@@ -116,6 +120,35 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         saveProjectedLocalIncidenceAngleCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
                     saveProjectedLocalIncidenceAngle = (e.getStateChange() == ItemEvent.SELECTED);
+                }
+        });
+        saveSelectedSourceBandCheckBox.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    saveSelectedSourceBand = (e.getStateChange() == ItemEvent.SELECTED);
+                }
+        });
+
+        applyRadiometricNormalizationCheckBox.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    applyRadiometricNormalization = (e.getStateChange() == ItemEvent.SELECTED);
+                    if (applyRadiometricNormalization) {
+                        saveSigmaNoughtCheckBox.setEnabled(true);
+                        saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
+                        saveSigmaNoughtCheckBox.setSelected(true);
+                        incidenceAngleForSigma0.setEnabled(true);
+                        saveGammaNoughtCheckBox.setEnabled(true);
+                        saveGammaNoughtCheckBox.getModel().setPressed(saveGammaNought);
+                        incidenceAngleForGamma0.setEnabled(true);
+                        saveBetaNoughtCheckBox.setEnabled(true);
+                        saveBetaNoughtCheckBox.getModel().setPressed(saveBetaNought);
+                    } else {
+                        saveSigmaNoughtCheckBox.setSelected(false);
+                        saveSigmaNoughtCheckBox.setEnabled(false);
+                        saveGammaNoughtCheckBox.setEnabled(false);
+                        saveBetaNoughtCheckBox.setEnabled(false);
+                        incidenceAngleForSigma0.setEnabled(false);
+                        incidenceAngleForGamma0.setEnabled(false);
+                    }
                 }
         });
         saveBetaNoughtCheckBox.addItemListener(new ItemListener() {
@@ -186,14 +219,24 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         saveProjectedLocalIncidenceAngle = (Boolean)paramMap.get("saveProjectedLocalIncidenceAngle");
         saveProjectedLocalIncidenceAngleCheckBox.getModel().setPressed(saveProjectedLocalIncidenceAngle);
 
+        saveSelectedSourceBand = (Boolean)paramMap.get("saveSelectedSourceBand");
+        saveSelectedSourceBandCheckBox.getModel().setPressed(saveSelectedSourceBand);
+        saveSelectedSourceBandCheckBox.setSelected(true);
+
+        applyRadiometricNormalization = (Boolean)paramMap.get("applyRadiometricNormalization");
+        applyRadiometricNormalizationCheckBox.getModel().setPressed(applyRadiometricNormalization);
+
         saveBetaNought = (Boolean)paramMap.get("saveBetaNought");
-        saveBetaNoughtCheckBox.getModel().setPressed(saveBetaNought);
+//        saveBetaNoughtCheckBox.getModel().setPressed(saveBetaNought);
+        saveBetaNoughtCheckBox.setEnabled(false);
 
         saveGammaNought = (Boolean)paramMap.get("saveGammaNought");
-        saveGammaNoughtCheckBox.getModel().setPressed(saveGammaNought);
+//        saveGammaNoughtCheckBox.getModel().setPressed(saveGammaNought);
+        saveGammaNoughtCheckBox.setEnabled(false);
 
         saveSigmaNought = (Boolean)paramMap.get("saveSigmaNought");
-        saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
+//        saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
+        saveSigmaNoughtCheckBox.setEnabled(false);
     }
 
     @Override
@@ -227,6 +270,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         paramMap.put("saveDEM", saveDEM);
         paramMap.put("saveLocalIncidenceAngle", saveLocalIncidenceAngle);
         paramMap.put("saveProjectedLocalIncidenceAngle", saveProjectedLocalIncidenceAngle);
+        paramMap.put("saveSelectedSourceBand", saveSelectedSourceBand);
+        paramMap.put("applyRadiometricNormalization", applyRadiometricNormalization);
         paramMap.put("saveBetaNought", saveBetaNought);
         paramMap.put("saveGammaNought", saveGammaNought);
         paramMap.put("saveSigmaNought", saveSigmaNought);
@@ -267,6 +312,10 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         contentPane.add(saveLocalIncidenceAngleCheckBox, gbc);
         gbc.gridy++;
         contentPane.add(saveProjectedLocalIncidenceAngleCheckBox, gbc);
+        gbc.gridy++;
+        contentPane.add(saveSelectedSourceBandCheckBox, gbc);
+        gbc.gridy++;
+        contentPane.add(applyRadiometricNormalizationCheckBox, gbc);
         gbc.gridy++;
         contentPane.add(saveSigmaNoughtCheckBox, gbc);
         gbc.gridx = 1;

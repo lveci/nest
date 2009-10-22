@@ -76,7 +76,6 @@ import java.util.Set;
  */
 
 @OperatorMetadata(alias="Terrain-Correction", category = "Geometry", description="RD method for orthorectification")
-//public final class RangeDopplerGeocodingOp extends Operator {
 public class RangeDopplerGeocodingOp extends Operator {
 
     @SourceProduct(alias="source")
@@ -119,6 +118,12 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     @Parameter(defaultValue="false", label="Save projected local incidence angle as band")
     private boolean saveProjectedLocalIncidenceAngle = false;
+
+    @Parameter(defaultValue="true", label="Save selected source band")
+    private boolean saveSelectedSourceBand = true;
+
+    @Parameter(defaultValue="false", label="Apply radiometric normalization")
+    private boolean applyRadiometricNormalization = false;
 
     @Parameter(defaultValue="false", label="Save Sigma0 as a band")
     private boolean saveSigmaNought = false;
@@ -272,6 +277,16 @@ public class RangeDopplerGeocodingOp extends Operator {
     }
 
     private void checkUserInput() {
+
+        if (!saveSelectedSourceBand && !applyRadiometricNormalization) {
+            throw new OperatorException("Please selecte output band for terrain corrected image");
+        }
+
+        if (!applyRadiometricNormalization) {
+            saveSigmaNought = false;
+            saveGammaNought = false;
+            saveBetaNought = false;
+        }
 
         if (saveBetaNought || saveGammaNought ||
             (saveSigmaNought && incidenceAngleForSigma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID))) {
@@ -575,19 +590,28 @@ public class RangeDopplerGeocodingOp extends Operator {
                 final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
 
                 if (saveSigmaNought) {
-                    targetBandName = "Sigma0";
-                } else {
-                    targetBandName = "Intensity";
+                    if (pol != null) {
+                        targetBandName = "Sigma0_" + pol.toUpperCase();
+                    } else {
+                        targetBandName = "Sigma0";
+                    }
+                    if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
+                        targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                    }
                 }
-                if (pol != null) {
-                    targetBandName = targetBandName + "_" + pol.toUpperCase();
+
+                if (saveSelectedSourceBand) {
+                    if (pol != null) {
+                        targetBandName = "Intensity_" + pol.toUpperCase();
+                    } else {
+                        targetBandName = "Intensity";
+                    }
+                    if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
+                        targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                    }
                 }
 
                 ++i;
-                if(targetProduct.getBand(targetBandName) == null) {
-                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
-                    targetUnit = Unit.INTENSITY;
-                }
 
             } else {
 
@@ -599,65 +623,34 @@ public class RangeDopplerGeocodingOp extends Operator {
                     } else {
                         targetBandName = "Sigma0";
                     }
-                } else {
+                    if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
+                        targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                    }
+                }
+
+                if (saveSelectedSourceBand) {
                     targetBandName = srcBand.getName();
+                    if (addTargetBand(targetBandName, unit, srcBand)) {
+                        targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                    }
                 }
-
-                if(targetProduct.getBand(targetBandName) == null) {
-                    targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
-                    targetUnit = unit;
-                }
-            }
-
-            if(targetProduct.getBand(targetBandName) == null) {
-
-                final Band targetBand = new Band(targetBandName,
-                                                 ProductData.TYPE_FLOAT32,
-                                                 targetImageWidth,
-                                                 targetImageHeight);
-
-                targetBand.setUnit(targetUnit);
-                targetBand.setDescription(srcBand.getDescription());
-                targetBand.setNoDataValue(srcBand.getNoDataValue());
-                targetBand.setNoDataValueUsed(true);
-                targetProduct.addBand(targetBand);
             }
         }
 
         if(saveDEM) {
-            final Band demBand = new Band("elevation",
-                                             ProductData.TYPE_FLOAT32,
-                                             targetImageWidth,
-                                             targetImageHeight);
-            demBand.setUnit(Unit.METERS);
-            targetProduct.addBand(demBand);
+            addTargetBand("elevation", Unit.METERS, null);
         }
 
         if(saveLocalIncidenceAngle) {
-            final Band incidenceAngleBand = new Band("incidenceAngle",
-                                                     ProductData.TYPE_FLOAT32,
-                                                     targetImageWidth,
-                                                     targetImageHeight);
-            incidenceAngleBand.setUnit(Unit.DEGREES);
-            targetProduct.addBand(incidenceAngleBand);
+            addTargetBand("incidenceAngle", Unit.DEGREES, null);
         }
 
         if(saveProjectedLocalIncidenceAngle) {
-            final Band projectedIncidenceAngleBand = new Band("projectedIncidenceAngle",
-                                                     ProductData.TYPE_FLOAT32,
-                                                     targetImageWidth,
-                                                     targetImageHeight);
-            projectedIncidenceAngleBand.setUnit(Unit.DEGREES);
-            targetProduct.addBand(projectedIncidenceAngleBand);
+            addTargetBand("projectedIncidenceAngle", Unit.DEGREES, null);
         }
 
         if (saveIncidenceAngleFromEllipsoid) {
-            final Band incidenceAngleFromEllipsoidBand = new Band("incidenceAngleFromEllipsoid",
-                                                     ProductData.TYPE_FLOAT32,
-                                                     targetImageWidth,
-                                                     targetImageHeight);
-            incidenceAngleFromEllipsoidBand.setUnit(Unit.DEGREES);
-            targetProduct.addBand(incidenceAngleFromEllipsoidBand);
+            addTargetBand("incidenceAngleFromEllipsoid", Unit.DEGREES, null);
         }
 
         if (saveSigmaNought && incidenceAngleForSigma0.contains(USE_INCIDENCE_ANGLE_FROM_ELLIPSOID)) {
@@ -671,6 +664,28 @@ public class RangeDopplerGeocodingOp extends Operator {
         if (saveBetaNought) {
             createBetaNoughtVirtualBand(targetProduct);
         }
+    }
+
+    private boolean addTargetBand(String bandName, String bandUnit, Band sourceBand) {
+
+        if(targetProduct.getBand(bandName) == null) {
+
+            final Band targetBand = new Band(bandName,
+                                             ProductData.TYPE_FLOAT32,
+                                             targetImageWidth,
+                                             targetImageHeight);
+
+            targetBand.setUnit(bandUnit);
+            if (sourceBand != null) {
+                targetBand.setDescription(sourceBand.getDescription());
+                targetBand.setNoDataValue(sourceBand.getNoDataValue());
+            }
+            targetBand.setNoDataValueUsed(true);
+            targetProduct.addBand(targetBand);
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -884,6 +899,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 td.tileDataBuffer = td.targetTile.getDataBuffer();
                 td.bandName = targetBand.getName();
                 td.noDataValue = sourceProduct.getBand(srcBandNames[0]).getNoDataValue();
+                td.applyRadiometricNormalization = targetBand.getName().contains("Sigma0");
 
                 final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
                 td.bandPolar = 0;
@@ -996,7 +1012,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                             int[] subSwathIndex = {INVALID_SUB_SWATH_INDEX};
                             double v = getPixelValue(azimuthIndex, rangeIndex, tileData, bandUnit, subSwathIndex);
 
-                            if (saveSigmaNought && v != tileData.noDataValue) {
+                            if (v != tileData.noDataValue && tileData.applyRadiometricNormalization) {
                                 v = calibrator.applyCalibration(
                                         v, (int)rangeIndex, slantRange, satelliteHeight, sceneToEarthCentre,
                                         localIncidenceAngles[1], tileData.bandPolar, bandUnit, subSwathIndex); // use projected incidence angle
@@ -1399,7 +1415,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             throw new OperatorException("Uknown band unit");
         }
 
-        if (saveSigmaNought) {
+        if (tileData.applyRadiometricNormalization) {
             v = calibrator.applyRetroCalibration(x0, y0, v, tileData.bandPolar, bandUnit, subSwathIndex);
         }
 
@@ -1482,7 +1498,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         int[] subSwathIndex11 = {0};
         double v = 0;
 
-        if (saveSigmaNought) {
+        if (tileData.applyRadiometricNormalization) {
 
             v00 = calibrator.applyRetroCalibration(x0, y0, v00, tileData.bandPolar, bandUnit, subSwathIndex00);
             v01 = calibrator.applyRetroCalibration(x1, y0, v01, tileData.bandPolar, bandUnit, subSwathIndex01);
@@ -1576,7 +1592,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
 
         int[][][] ss = new int[4][4][1];
-        if (saveSigmaNought) {
+        if (tileData.applyRadiometricNormalization) {
             for (int i = 0; i < y.length; i++) {
                 for (int j = 0; j < x.length; j++) {
                     v[i][j] = calibrator.applyRetroCalibration(x[j], y[i], v[i][j], tileData.bandPolar, bandUnit, ss[i][j]);
@@ -1742,6 +1758,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         String bandName = null;
         int bandPolar = 0;
         double noDataValue = 0;
+        boolean applyRadiometricNormalization = false;
     }
 
     public static class LocalGeometry {
