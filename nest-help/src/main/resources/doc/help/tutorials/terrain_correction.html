@@ -32,32 +32,39 @@ readable by NEST (GeoTIFF, HDF, NetCDF, GTOPO30, ...)</p><p>4. Select the interp
 Optionlly select to apply Radiometric Normallizatin to output &#963;<sup>0</sup>, &#947;<sup>0</sup> or &#946;<sup>0</sup> of the orthorectified image. Note: Radiometric&nbsp;Normallizatin
 is&nbsp;currently only supported for ASAR product.</p><br><div style="text-align: center;"><img style="width: 624px; height: 579px;" alt="" src="../operators/images/range_doppler_dlg.JPG"><br><br><span style="font-weight: bold;">Figure 1. Terrain Correction operator dialog box.</span><br></div><br><p>7. Press Run to process the data.</p><p><br>Below
 are some sample images showing the Terrain Correction result of an ASAR
-IMP product
-ASA_IMP_1PNDPA20040402_092740_000000152025_00351_10926_0004.N1, which
-is SAR image of Lake Bracciano and Lake Vico rigion of Italy.</p><p> Figure 2&nbsp;is in the original SAR
-geometry. Figure 3 is the SRTM 3 second DEM image for the SAR geometry. The orthorectified image and its &#963;<sup>0 </sup>are shown in Figure 4&nbsp; and Figure 5 respectively.</p><br><div style="text-align: center;"><img style="width: 649px; height: 650px;" alt="" src="images/IMP_orig.jpg"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img style="width: 729px; height: 536px;" alt="" src="images/IMP_dem.jpg"><br><div style="text-align: left;"><span style="font-weight: bold;">&nbsp;
+IMS product
+ASA_IMS_1PNUPA20081003_092731_000000162072_00351_34473_2366.N1,
+acquired on&nbsp;October 3, 2008,&nbsp;imaging the area around Rome in
+Central Italy. <br></p><p> The ASAR IMS image has been multi-looked with 2 Range looks and 10 Azimuth Looks before to be orthorectified. <br><br>The
+DEM employed is the SRTM 3 second Version 4 and since the SRTM height
+information is referred to geoid EGM96, not WGS84 ellipsoid, correction
+has been applied to obtain height relative to the WGS84 ellipsoid (this
+is done automatically)<br><br>Figure 2 is in the original SAR geometry after multi-looking 2-10. <br><br>The orthorectified image and its radiometric normalised image &#963;0 are shown in Figure 3&nbsp; and Figure 4 respectively. <br><br>Figures 5 and 6 are a zoom of the figure 3 and 4.<br><br>The radiometric scale is in dB/m^2.<br></p><div style="text-align: center;"><img style="width: 592px; height: 616px;" alt="" src="images/IMP_orig.jpg"><br><br><span style="font-weight: bold;">Figure 3. Original SAR Geometry after multi-looking 2-10.</span>&nbsp;</div><br><br><div style="text-align: center;"><img style="width: 722px; height: 569px;" alt="" src="images/IMP_amp.jpg">&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;<img style="width: 693px; height: 545px;" alt="" src="images/IMP_sigma.jpg"><br><br><div style="text-align: left;"><span style="font-weight: bold;">&nbsp;
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-&nbsp; &nbsp; Figure 2. ASAR IMP in original SAR Geometry. &nbsp;
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-&nbsp; &nbsp;&nbsp; &nbsp; Figure 3. SRTM 3 second DEM for the SAR
-Geometry.</span><br></div></div><br><br><br><div style="text-align: center;"><img style="width: 876px; height: 608px;" alt="" src="images/IMP_amp.jpg"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<img style="width: 879px; height: 597px;" alt="" src="images/IMP_sigma.jpg"><br><div style="text-align: left;"><span style="font-weight: bold;">&nbsp;
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Figure 4.&nbsp;ASAR IMP after
-orthorectification. &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; Figure 3. Orthrectified image. &nbsp;
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Figure 5.&#963; </span><sup><span style="font-weight: bold;">0 </span></sup><span style="font-weight: bold;">of the orthorectified image (incidence angle compluted from ellipsoid was used in generating </span><span style="font-weight: bold;">&#963;</span><sup><span style="font-weight: bold;">0</span></sup><span style="font-weight: bold;">). &nbsp;</span></div></div><br><br><p>After
+&nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp;
+&nbsp;Figure 4. Radiometric normalized image.</span><br></div></div><br><br><br><div style="text-align: center;"><img style="width: 739px; height: 489px;" alt="" src="images/IMP_amp_zoom.jpg">&nbsp;&nbsp; &nbsp;<img style="width: 739px; height: 490px;" alt="" src="images/IMP_sigma_zoom.jpg"><br><br><div style="text-align: left;"><span style="font-weight: bold;">&nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;Figure 5. Zoom in of the
+orthorectified image. &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp;&nbsp;Figure 6.&nbsp;</span><sup><span style="font-weight: bold;"></span></sup><span style="font-weight: bold;">Zoom in of the radiometric normalized image</span><span style="font-weight: bold;"></span><sup><span style="font-weight: bold;"></span></sup><span style="font-weight: bold;">. &nbsp;</span></div></div><br><br><p>After
 Terrain Correction your SAR data will be closer to the real world
 geometry and you will be able to overlay layers from other sources
 correctly.</p><p><br></p><br>
