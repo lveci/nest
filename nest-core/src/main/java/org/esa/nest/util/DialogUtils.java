@@ -4,6 +4,8 @@ import org.esa.beam.framework.ui.GridBagUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
 
@@ -98,5 +100,20 @@ public class DialogUtils {
         gbc.gridx = 0;
         gbc.gridy = 0;
         return gbc;
+    }
+
+    public static class TextAreaKeyListener implements KeyListener {
+        private boolean changedByUser = false;
+        public void keyPressed(KeyEvent e) {
+        }
+        public void keyReleased(KeyEvent e) {
+            changedByUser = true;
+        }
+        public void keyTyped(KeyEvent e) {
+        }
+
+        public boolean isChangedByUser() {
+            return changedByUser;
+        }
     }
 }

@@ -11,10 +11,7 @@ import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.*;
 import java.io.File;
 import java.util.Map;
 
@@ -40,6 +37,8 @@ public class SARSimulationOpUI extends BaseOperatorUI {
 
 //    private boolean saveLayoverShadowMask = false;
     private double extNoDataValue = 0;
+
+    private final DialogUtils.TextAreaKeyListener textAreaKeyListener = new DialogUtils.TextAreaKeyListener();
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -80,6 +79,9 @@ public class SARSimulationOpUI extends BaseOperatorUI {
                 externalDEMNoDataValue.setText(String.valueOf(extNoDataValue));
             }
         });
+
+        externalDEMNoDataValue.addKeyListener(textAreaKeyListener);
+
         /*
         saveLayoverShadowMaskCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
@@ -101,7 +103,9 @@ public class SARSimulationOpUI extends BaseOperatorUI {
         final File extFile = (File)paramMap.get("externalDEMFile");
         if(extFile != null) {
             externalDEMFile.setText(extFile.getAbsolutePath());
-            externalDEMNoDataValue.setText(String.valueOf(extNoDataValue));
+            if(!textAreaKeyListener.isChangedByUser()) {
+                externalDEMNoDataValue.setText(String.valueOf(extNoDataValue));
+            }
         } else {
             externalDEMNoDataValue.setText(String.valueOf(paramMap.get("externalDEMNoDataValue")));
         }
