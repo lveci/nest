@@ -190,7 +190,9 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         demResamplingMethod.setSelectedItem(paramMap.get("demResamplingMethod"));
         imgResamplingMethod.setSelectedItem(paramMap.get("imgResamplingMethod"));
         incidenceAngleForGamma0.setSelectedItem(paramMap.get("incidenceAngleForGamma0"));
+        incidenceAngleForGamma0.setEnabled(false);
         incidenceAngleForSigma0.setSelectedItem(paramMap.get("incidenceAngleForSigma0"));
+        incidenceAngleForSigma0.setEnabled(false);
 
         double pix = (Double)paramMap.get("pixelSpacing");
         if((!changedByUser || pixelSpacing.getText().isEmpty()) && sourceProducts != null) {
