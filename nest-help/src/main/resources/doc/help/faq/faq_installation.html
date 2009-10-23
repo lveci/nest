@@ -18,6 +18,9 @@ Questions</td>
 Update your video card drivers. (<a class="wiki external" target="_blank" href="http://worldwind.arc.nasa.gov/java/video.html" rel="external">How to update windows drivers</a>) (<a class="wiki external" target="_blank" href="http://ati.amd.com/support/driver.html" rel="external">ATI/AMD</a> - <a class="wiki external" target="_blank" href="http://www.nvidia.com/content/drivers/drivers.asp" rel="external">Nvidia</a> - <a class="wiki external" target="_blank" href="http://www.intel.com/support/graphics/index.htm" rel="external">Intel</a>)</p><h4>How can I improve performance</h4><p>Performance in NEST drops considerably when using virtual memory. If you have more than 2Gb of RAM and wish to use all of it, on
 a 64-bit OS you should be using a 64-bit version of Java. You may then
 set the heap size for the Java virtual machine to something larger such
-as -Xmx4096M</p><p>For Windows64, the 64-bit Windows version of NEST should already come with 64-bit Java and be ready for use.</p><p></p>
+as -Xmx4096M</p><p>To
+do so, open in a text editor your gpt.bat on Windows or gpt.sh on Linux found in your NEST installation folder
+and replace the -Xmx1024M value with something larger like -Xmx4096M.
+You may do the same with dat.bat or dat.sh.</p><p>For Windows64, the 64-bit Windows version of NEST should already come with 64-bit Java and be ready for use.</p><p></p>
 <hr>
 </body></html>
