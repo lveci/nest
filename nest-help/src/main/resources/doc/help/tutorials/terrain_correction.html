@@ -16,7 +16,11 @@ Tutorial</td>
 Operator will
 produce&nbsp;an orthorectified product in the WGS 84 geogreaphic
 coordinates. Optionally radiometric normalisation can be applied to the
-orthorectified image to produce &#963;<sup>0</sup>, &#947;<sup>0</sup> or &#946;<sup>0</sup> output. <br><br>The <a href="../operators/EllipsoidCorrectionRDOp.html">Ellipsoid Correction RD</a> and 
+orthorectified image to produce &#963;<sup>0</sup>, &#947;<sup>0</sup> or &#946;<sup>0</sup>
+output. The radiometric normallizatin
+is&nbsp;currently only supported for ASAR product. For other products,
+the radiometric normalization consists of only the constant and
+incidence angle corrections.<br><br>The <a href="../operators/EllipsoidCorrectionRDOp.html">Ellipsoid Correction RD</a> and 
 <a href="../operators/GeolocationGridGeocodingOp.html">Ellipsoid Correction GG</a> Operators will&nbsp;produce ellipsoid corrected products in the WGS 84 geographic coordinates.<br><br>The Terrain Correction Operator should be used whenever DEM is available. The 
 Ellipsoid Correction (RD and GG) should be used only when DEM is not available.
 
@@ -29,8 +33,7 @@ resolution and can be downloaded as need automaticaly by NEST if you
 have an internet connection.</p><p>&nbsp;&nbsp;&nbsp; Alternatively,
 you could also browse for an External DEM tile in any file format
 readable by NEST (GeoTIFF, HDF, NetCDF, GTOPO30, ...)</p><p>4. Select the interpolation methods to use for the DEM resampling and the target image resampling.</p><p>5. Optionally select to save the DEM as a band and the local incidence angle.</p><p>6.
-Optionlly select to apply Radiometric Normallizatin to output &#963;<sup>0</sup>, &#947;<sup>0</sup> or &#946;<sup>0</sup> of the orthorectified image. Note: Radiometric&nbsp;Normallizatin
-is&nbsp;currently only supported for ASAR product.</p><p>7. Press Run to process the data.</p><p></p><br><div style="text-align: center;"><img style="width: 624px; height: 579px;" alt="" src="../operators/images/range_doppler_dlg.JPG"><br><br><span style="font-weight: bold;">Figure 1. Terrain Correction operator dialog box.</span><br></div><br><br><p><br>Below
+Optionlly select to apply Radiometric Normallizatin to output &#963;<sup>0</sup>, &#947;<sup>0</sup> or &#946;<sup>0</sup> of the orthorectified image.&nbsp;</p><p>7. Press Run to process the data.</p><p></p><br><div style="text-align: center;"><img style="width: 624px; height: 579px;" alt="" src="../operators/images/range_doppler_dlg.JPG"><br><br><span style="font-weight: bold;">Figure 1. Terrain Correction operator dialog box.</span><br></div><br><br><p><br>Below
 are some sample images showing the Terrain Correction result of an ASAR
 IMS product
 ASA_IMS_1PNUPA20081003_092731_000000162072_00351_34473_2366.N1,
