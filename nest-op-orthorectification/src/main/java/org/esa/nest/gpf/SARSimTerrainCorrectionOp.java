@@ -852,21 +852,22 @@ public class SARSimTerrainCorrectionOp extends Operator {
                     slantRange = RangeDopplerGeocodingOp.computeSlantRange(
                             zeroDopplerTimeWithoutBias, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    double[] localIncidenceAngles = {0.0, 0.0};
+                    double[] localIncidenceAngles =
+                            {RangeDopplerGeocodingOp.NonValidIncidenceAngle, RangeDopplerGeocodingOp.NonValidIncidenceAngle};
                     if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) {
 
                         final RangeDopplerGeocodingOp.LocalGeometry localGeometry =
                                 new RangeDopplerGeocodingOp.LocalGeometry(lat, lon, delLat, delLon, earthPoint, sensorPos);
 
                         RangeDopplerGeocodingOp.computeLocalIncidenceAngle(
-                                localGeometry, saveLocalIncidenceAngle, saveProjectedLocalIncidenceAngle,
+                                localGeometry, demNoDataValue, saveLocalIncidenceAngle, saveProjectedLocalIncidenceAngle,
                                 saveSigmaNought, x0, y0, x, y, localDEM, localIncidenceAngles); // in degrees
 
-                        if (saveLocalIncidenceAngle) {
+                        if (saveLocalIncidenceAngle && localIncidenceAngles[0] != RangeDopplerGeocodingOp.NonValidIncidenceAngle) {
                             incidenceAngleBuffer.setElemDoubleAt(index, localIncidenceAngles[0]);
                         }
 
-                        if (saveProjectedLocalIncidenceAngle) {
+                        if (saveProjectedLocalIncidenceAngle && localIncidenceAngles[1] != RangeDopplerGeocodingOp.NonValidIncidenceAngle) {
                             projectedIncidenceAngleBuffer.setElemDoubleAt(index, localIncidenceAngles[1]);
                         }
                     }
@@ -911,7 +912,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
                                 int[] subSwathIndex = {INVALID_SUB_SWATH_INDEX};
                                 double v = getPixelValue(pixelPos.y, pixelPos.x, tileData, bandUnit, subSwathIndex);
 
-                                if (tileData.applyRadiometricNormalization) {
+                                if (v != tileData.noDataValue && tileData.applyRadiometricNormalization &&
+                                        localIncidenceAngles[1] != RangeDopplerGeocodingOp.NonValidIncidenceAngle) {
 
                                     final double satelliteHeight = Math.sqrt(
                                             sensorPos[0]*sensorPos[0] + sensorPos[1]*sensorPos[1] + sensorPos[2]*sensorPos[2]);

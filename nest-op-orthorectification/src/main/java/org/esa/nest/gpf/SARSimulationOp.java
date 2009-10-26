@@ -466,9 +466,15 @@ public final class SARSimulationOp extends Operator {
                     final RangeDopplerGeocodingOp.LocalGeometry localGeometry = new RangeDopplerGeocodingOp.LocalGeometry();
                     setLocalGeometry(x, y, earthPoint, sensorPos, localGeometry);
 
-                    double[] localIncidenceAngles = {0.0, 0.0};
+                    double[] localIncidenceAngles =
+                            {RangeDopplerGeocodingOp.NonValidIncidenceAngle, RangeDopplerGeocodingOp.NonValidIncidenceAngle};
                     RangeDopplerGeocodingOp.computeLocalIncidenceAngle(
-                            localGeometry, true, false, false, x0, ymin, x, y, localDEM, localIncidenceAngles); // in degrees
+                            localGeometry, demNoDataValue, true, false, false, x0, ymin, x, y, localDEM, localIncidenceAngles); // in degrees
+
+                    if (localIncidenceAngles[0] == RangeDopplerGeocodingOp.NonValidIncidenceAngle) {
+                        savePixel[x - x0] = false;
+                        continue;
+                    }
 
                     final double v = computeBackscatteredPower(localIncidenceAngles[0]);
 

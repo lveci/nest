@@ -194,6 +194,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     public static final String USE_INCIDENCE_ANGLE_FROM_DEM = "Use projected local incidence angle from DEM";
     public static final String USE_INCIDENCE_ANGLE_FROM_ELLIPSOID = "Use incidence angle from Ellipsoid";
+    public static final double NonValidIncidenceAngle = -99999.0;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -962,20 +963,20 @@ public class RangeDopplerGeocodingOp extends Operator {
                     slantRange = computeSlantRange(
                             zeroDopplerTimeWithoutBias,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    double[] localIncidenceAngles = {0.0, 0.0};
+                    double[] localIncidenceAngles = {NonValidIncidenceAngle, NonValidIncidenceAngle};
                     if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) {
 
                         final LocalGeometry localGeometry = new LocalGeometry(lat, lon, delLat, delLon, earthPoint, sensorPos);
 
                         computeLocalIncidenceAngle(
-                                localGeometry, saveLocalIncidenceAngle, saveProjectedLocalIncidenceAngle,
+                                localGeometry, demNoDataValue, saveLocalIncidenceAngle, saveProjectedLocalIncidenceAngle,
                                 saveSigmaNought, x0, y0, x, y, localDEM, localIncidenceAngles); // in degrees
 
-                        if (saveLocalIncidenceAngle) {
+                        if (saveLocalIncidenceAngle && localIncidenceAngles[0] != NonValidIncidenceAngle) {
                             incidenceAngleBuffer.setElemDoubleAt(index, localIncidenceAngles[0]);
                         }
 
-                        if (saveProjectedLocalIncidenceAngle) {
+                        if (saveProjectedLocalIncidenceAngle && localIncidenceAngles[1] != NonValidIncidenceAngle) {
                             projectedIncidenceAngleBuffer.setElemDoubleAt(index, localIncidenceAngles[1]);
                         }
                     }
@@ -1012,10 +1013,13 @@ public class RangeDopplerGeocodingOp extends Operator {
                             int[] subSwathIndex = {INVALID_SUB_SWATH_INDEX};
                             double v = getPixelValue(azimuthIndex, rangeIndex, tileData, bandUnit, subSwathIndex);
 
-                            if (v != tileData.noDataValue && tileData.applyRadiometricNormalization) {
+                            if (v != tileData.noDataValue && tileData.applyRadiometricNormalization &&
+                                    localIncidenceAngles[1] != NonValidIncidenceAngle) {
                                 v = calibrator.applyCalibration(
                                         v, (int)rangeIndex, slantRange, satelliteHeight, sceneToEarthCentre,
                                         localIncidenceAngles[1], tileData.bandPolar, bandUnit, subSwathIndex); // use projected incidence angle
+                            } else {
+                                v = tileData.noDataValue;
                             }
                             
                             tileData.tileDataBuffer.setElemDoubleAt(index, v);
@@ -1638,7 +1642,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param localIncidenceAngles The local incidence angle and projected local incidence angle.
      */
     public static void computeLocalIncidenceAngle(
-            final LocalGeometry lg, final boolean saveLocalIncidenceAngle,
+            final LocalGeometry lg, final float demNoDataValue, final boolean saveLocalIncidenceAngle,
             final boolean saveProjectedLocalIncidenceAngle, final boolean saveSigmaNought, final int x0,
             final int y0, final int x, final int y, final float[][] localDEM, double[] localIncidenceAngles) {
 
@@ -1647,6 +1651,14 @@ public class RangeDopplerGeocodingOp extends Operator {
         //       321 and 323 in "SAR Geocoding - Data and Systems".
         //       The Cartesian coordinate (x, y, z) is represented here by a length-3 array with element[0]
         //       representing x, element[1] representing y and element[2] representing z.
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (localDEM[y-y0+i][x-x0+j] == demNoDataValue) {
+                    return;
+                }
+            }
+        }
 
         final int yy = y - y0;
         final int xx = x - x0;
