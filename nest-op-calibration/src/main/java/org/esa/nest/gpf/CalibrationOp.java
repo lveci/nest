@@ -225,7 +225,7 @@ public class CalibrationOp extends Operator {
             // add band only if it doesn't already exist
             if(targetProduct.getBand(targetBandName) == null) {
                 final Band targetBand = new Band(targetBandName,
-                                           ProductData.TYPE_FLOAT64,
+                                           ProductData.TYPE_FLOAT32,
                                            sourceProduct.getSceneRasterWidth(),
                                            sourceProduct.getSceneRasterHeight());
 
@@ -301,7 +301,7 @@ public class CalibrationOp extends Operator {
             }
 
             final VirtualBand band = new VirtualBand(gammeBandName,
-                    ProductData.TYPE_FLOAT64,
+                    ProductData.TYPE_FLOAT32,
                     trgProduct.getSceneRasterWidth(),
                     trgProduct.getSceneRasterHeight(),
                     expression);
@@ -359,7 +359,7 @@ public class CalibrationOp extends Operator {
             }
 
             final VirtualBand band = new VirtualBand(betaBandName,
-                    ProductData.TYPE_FLOAT64,
+                    ProductData.TYPE_FLOAT32,
                     trgProduct.getSceneRasterWidth(),
                     trgProduct.getSceneRasterHeight(),
                     expression);

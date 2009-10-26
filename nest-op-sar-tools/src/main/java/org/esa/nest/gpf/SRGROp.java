@@ -114,6 +114,9 @@ public class SRGROp extends Operator {
             getSourceImageDimension();
 
             geoCoding = sourceProduct.getGeoCoding();
+            if(geoCoding == null) {
+                throw new OperatorException("GeoCoding is null");
+            }
 
             computeSlantRangeDistanceArray();
 

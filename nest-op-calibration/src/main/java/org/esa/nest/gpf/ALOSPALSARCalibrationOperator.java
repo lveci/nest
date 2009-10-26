@@ -249,7 +249,7 @@ public class ALOSPALSARCalibrationOperator extends Operator {
             // add band only if it doesn't already exist
             if(targetProduct.getBand(targetBandName) == null) {
                 final Band targetBand = new Band(targetBandName,
-                                           ProductData.TYPE_FLOAT64,
+                                           ProductData.TYPE_FLOAT32,
                                            sourceProduct.getSceneRasterWidth(),
                                            sourceProduct.getSceneRasterHeight());
 

@@ -226,7 +226,7 @@ public class PCAStatisticsOp extends Operator {
         expression += " ) / " + sourceBandNames.length;
 
         final VirtualBand band = new VirtualBand(meanImageBandName,
-                                                 ProductData.TYPE_FLOAT64,
+                                                 ProductData.TYPE_FLOAT32,
                                                  sourceProduct.getSceneRasterWidth(),
                                                  sourceProduct.getSceneRasterHeight(),
                                                  expression);

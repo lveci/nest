@@ -185,7 +185,7 @@ public class ConvertDataTypeOp extends Operator {
             final double newMax = getMax(dataType);
             final double newRange = newMax - newMin;
 
-            if(origMax <= newMax && origMin >= newMin)
+            if(origMax >= newMax && origMin <= newMin)
                 scaling = ScalingType.NONE;
             
             final ProductData srcData = srcTile.getRawSamples();
