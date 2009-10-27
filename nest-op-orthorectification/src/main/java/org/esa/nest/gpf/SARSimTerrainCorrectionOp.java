@@ -912,18 +912,21 @@ public class SARSimTerrainCorrectionOp extends Operator {
                                 int[] subSwathIndex = {INVALID_SUB_SWATH_INDEX};
                                 double v = getPixelValue(pixelPos.y, pixelPos.x, tileData, bandUnit, subSwathIndex);
 
-                                if (v != tileData.noDataValue && tileData.applyRadiometricNormalization &&
-                                        localIncidenceAngles[1] != RangeDopplerGeocodingOp.NonValidIncidenceAngle) {
+                                if (v != tileData.noDataValue && tileData.applyRadiometricNormalization) {
 
-                                    final double satelliteHeight = Math.sqrt(
-                                            sensorPos[0]*sensorPos[0] + sensorPos[1]*sensorPos[1] + sensorPos[2]*sensorPos[2]);
+                                    if (localIncidenceAngles[1] != RangeDopplerGeocodingOp.NonValidIncidenceAngle) {
+                                        final double satelliteHeight = Math.sqrt(
+                                                sensorPos[0]*sensorPos[0] + sensorPos[1]*sensorPos[1] + sensorPos[2]*sensorPos[2]);
 
-                                    final double sceneToEarthCentre = Math.sqrt(
-                                            earthPoint[0]*earthPoint[0] + earthPoint[1]*earthPoint[1] + earthPoint[2]*earthPoint[2]);
+                                        final double sceneToEarthCentre = Math.sqrt(
+                                                earthPoint[0]*earthPoint[0] + earthPoint[1]*earthPoint[1] + earthPoint[2]*earthPoint[2]);
 
-                                    v = calibrator.applyCalibration(
-                                            v, (int)rangeIndex, slantRange, satelliteHeight, sceneToEarthCentre, localIncidenceAngles[1],
-                                            tileData.bandPolar, bandUnit, subSwathIndex); // use projected incidence angle
+                                        v = calibrator.applyCalibration(
+                                                v, (int)rangeIndex, slantRange, satelliteHeight, sceneToEarthCentre, localIncidenceAngles[1],
+                                                tileData.bandPolar, bandUnit, subSwathIndex); // use projected incidence angle
+                                    } else {
+                                        v = tileData.noDataValue;
+                                    }
                                 }
 
                                 tileData.tileDataBuffer.setElemDoubleAt(index, v);
