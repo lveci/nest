@@ -58,6 +58,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         final MetadataElement instrument = level1Elem.getElement("instrument");
         final MetadataElement platform = level1Elem.getElement("platform");
         final MetadataElement orbit = platform.getElement("orbit");
+        final MetadataElement complexImageInfo = productSpecific.getElement("complexImageInfo");
 
         MetadataAttribute attrib = generalHeader.getAttribute("fileName");
         if(attrib != null)
@@ -124,12 +125,10 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
                 imageRaster.getAttributeInt("numberOfColumns", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, getTotalSize(product));
 
-        final MetadataElement rowSpacing = imageRaster.getElement("rowSpacing");
-        final MetadataElement columnSpacing = imageRaster.getElement("columnSpacing");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
-                columnSpacing.getAttributeDouble("columnSpacing", defInt));
+                complexImageInfo.getAttributeDouble("projectedSpacingAzimuth", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
-                rowSpacing.getAttributeDouble("rowSpacing", defInt));
+                complexImageInfo.getElement("projectedSpacingRange").getAttributeDouble("slantRange", defInt));
 
         final MetadataElement settings = instrument.getElement("settings");
         final MetadataElement settingRecord = settings.getElement("settingRecord");
