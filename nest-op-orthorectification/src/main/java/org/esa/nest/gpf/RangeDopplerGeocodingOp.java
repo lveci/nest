@@ -1013,13 +1013,14 @@ public class RangeDopplerGeocodingOp extends Operator {
                             int[] subSwathIndex = {INVALID_SUB_SWATH_INDEX};
                             double v = getPixelValue(azimuthIndex, rangeIndex, tileData, bandUnit, subSwathIndex);
 
-                            if (v != tileData.noDataValue && tileData.applyRadiometricNormalization &&
-                                    localIncidenceAngles[1] != NonValidIncidenceAngle) {
-                                v = calibrator.applyCalibration(
-                                        v, (int)rangeIndex, slantRange, satelliteHeight, sceneToEarthCentre,
-                                        localIncidenceAngles[1], tileData.bandPolar, bandUnit, subSwathIndex); // use projected incidence angle
-                            } else {
-                                v = tileData.noDataValue;
+                            if (v != tileData.noDataValue && tileData.applyRadiometricNormalization) {
+                                if (localIncidenceAngles[1] != NonValidIncidenceAngle) {
+                                    v = calibrator.applyCalibration(
+                                            v, (int)rangeIndex, slantRange, satelliteHeight, sceneToEarthCentre,
+                                            localIncidenceAngles[1], tileData.bandPolar, bandUnit, subSwathIndex); // use projected incidence angle
+                                } else {
+                                    v = tileData.noDataValue;
+                                }
                             }
                             
                             tileData.tileDataBuffer.setElemDoubleAt(index, v);
