@@ -19,7 +19,7 @@
             <value>${installdir}</value>
         </addEnvironmentVariable>
         <changePermissions>
-            <files>*/*.sh;*/*.bin;${InstallDir}/dat.sh;${InstallDir}/gpt.sh;${InstallDir}/jre/bin/*</files>
+            <files>*/*.sh;*/*.bin;${InstallDir}/dat.sh;${InstallDir}/gpt.sh;${InstallDir}/jre/bin/*;${InstallDir}/*.so</files>
             <permissions>755</permissions>
         </changePermissions>
         <addDirectoryToPath>
@@ -225,25 +225,10 @@
                     <platforms>linux-x64</platforms>
                     <distributionFileList>
                         <distributionFile>
-                            <origin>target/nest-3B-bin-linux64.dir/libjogl.so</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-3B-bin-linux64.dir/libjogl_awt.so</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-3B-bin-linux64.dir/libjogl_cg.so</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-3B-bin-linux64.dir/libmlib_jai.so</origin>
-                        </distributionFile>
-                        <distributionFile>
                             <origin>target/nest-3B-bin-linux64.dir/dat.sh</origin>
                         </distributionFile>
                         <distributionFile>
                             <origin>target/nest-3B-bin-linux64.dir/gpt.sh</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>target/nest-3B-bin-linux64.dir/libgluegen-rt.so</origin>
                         </distributionFile>
                         <distributionDirectory>
                             <origin>target/nest-3B-bin-linux64.dir/config</origin>
