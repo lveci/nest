@@ -31,6 +31,12 @@ public class BaseRecord {
             _startPos = reader.getCurrentPos();
         }
 
+        if(_startPos >= reader.getLength()) {
+            recordLength = 0;
+            System.out.println(mission+" "+ recordDefinitionFileName + " is empty");
+            return;
+        }
+
         final String resPath = mission + sep + recordDefinitionFileName;
         db = new CeosDB(getResFile(resPath).getAbsolutePath());
         db.readRecord(reader);
@@ -68,11 +74,11 @@ public class BaseRecord {
         return db.getAttributeString(name);
     }
 
-    public final int getAttributeInt(final String name) {
+    public final Integer getAttributeInt(final String name) {
         return db.getAttributeInt(name);
     }
 
-    public final double getAttributeDouble(final String name) {
+    public final Double getAttributeDouble(final String name) {
         return db.getAttributeDouble(name);
     }
 
@@ -101,7 +107,9 @@ public class BaseRecord {
     }
 
     public void assignMetadataTo(final MetadataElement elem) {
-        db.assignMetadataTo(elem);
+        if(db != null) {
+            db.assignMetadataTo(elem);
+        }
     }
 
     protected static MetadataElement createMetadataElement(final String name, final String suffix) {

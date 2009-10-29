@@ -1,11 +1,10 @@
 package org.esa.nest.dataio.ceos.alos;
 
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.nest.dataio.BinaryFileReader;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
+import org.esa.nest.dataio.BinaryFileReader;
+import org.esa.nest.dataio.ceos.CEOSLeaderFile;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.BaseSceneHeaderRecord;
-import org.esa.nest.dataio.ceos.CeosHelper;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
@@ -15,32 +14,63 @@ import java.util.Calendar;
  * This class represents a leader file of a product.
  *
  */
-class AlosPalsarLeaderFile {
-
-    public final BaseRecord _leaderFDR;
-    public final BaseSceneHeaderRecord _sceneHeaderRecord;
-    public final BaseRecord _mapProjRecord;
-    public final BaseRecord _platformPositionRecord;
-    public final BaseRecord _attitudeRecord;
-    public final BaseRecord _radiometricRecord;
-    public final BaseRecord _dataQualityRecord;
-    public final BaseRecord _level0CalibrationRecord;
-    public final BaseRecord _facilityRecord;
+class AlosPalsarLeaderFile extends CEOSLeaderFile {
 
     private final static String mission = "alos";
     private final static String leader_recordDefinitionFile = "leader_file.xml";
-    private final static String scene_recordDefinitionFile = "scene_record.xml";
-    private final static String mapproj_recordDefinitionFile = "map_proj_record.xml";
-    private final static String platform_recordDefinitionFile = "platform_position_record.xml";
-    private final static String attitude_recordDefinitionFile = "attitude_record.xml";
-    private final static String radiometric_recordDefinitionFile = "radiometric_record.xml";
-    private final static String dataQuality_recordDefinitionFile = "data_quality_summary_record.xml";
-    private final static String calibration_recordDefinitionFile = "calibration_record.xml";
-    private final static String facility_recordDefinitionFile = "facility_record.xml";
 
     private int productLevel = -1;
 
-    public AlosPalsarLeaderFile(final ImageInputStream leaderStream)
+    public AlosPalsarLeaderFile(final ImageInputStream stream) throws IOException, IllegalBinaryFormatException {
+                final BinaryFileReader reader = new BinaryFileReader(stream);
+
+        _leaderFDR = new BaseRecord(reader, -1, mission, leader_recordDefinitionFile);
+        reader.seek(_leaderFDR.getRecordEndPosition());
+        for(int i=0; i < _leaderFDR.getAttributeInt("Number of data set summary records"); ++i) {
+            _sceneHeaderRecord = new BaseSceneHeaderRecord(reader, -1, mission, scene_recordDefinitionFile);
+            reader.seek(_sceneHeaderRecord.getRecordEndPosition());
+        }
+        for(int i=0; i < _leaderFDR.getAttributeInt("Number of map projection data records"); ++i) {
+            _mapProjRecord = new BaseRecord(reader, -1, mission, mapproj_recordDefinitionFile);
+            reader.seek(_mapProjRecord.getRecordEndPosition());
+        }
+        for(int i=0; i < _leaderFDR.getAttributeInt("Number of platform pos. data records"); ++i) {
+            _platformPositionRecord = new BaseRecord(reader, -1, mission, platformPosition_recordDefinitionFile);
+            reader.seek(_platformPositionRecord.getRecordEndPosition());
+        }
+        for(int i=0; i < _leaderFDR.getAttributeInt("Number of data histograms records"); ++i) {
+            _histogramRecord = new BaseRecord(reader, -1, mission, histogram_recordDefinitionFile);
+            reader.seek(_histogramRecord.getRecordEndPosition());
+        }
+        for(int i=0; i < _leaderFDR.getAttributeInt("Number of det. processing records"); ++i) {
+            _detailedProcessingRecord = new BaseRecord(reader, -1, mission, detailedProcessing_recordDefinitionFile);
+            reader.seek(_detailedProcessingRecord.getRecordEndPosition());
+        }
+        for(int i=0; i < _leaderFDR.getAttributeInt("Number of attitude data records"); ++i) {
+            _attitudeRecord = new BaseRecord(reader, -1, mission, attitude_recordDefinitionFile);
+            reader.seek(_attitudeRecord.getRecordEndPosition());
+        }
+        for(int i=0; i < _leaderFDR.getAttributeInt("Number of radiometric data records"); ++i) {
+            _radiometricRecord = new BaseRecord(reader, -1, mission, radiometric_recordDefinitionFile);
+            reader.seek(_radiometricRecord.getRecordEndPosition());
+        }
+        for(int i=0; i < _leaderFDR.getAttributeInt("Number of data quality summary records"); ++i) {
+            _dataQualityRecord = new BaseRecord(reader, -1, mission, dataQuality_recordDefinitionFile);
+            reader.seek(_dataQualityRecord.getRecordEndPosition());
+        }
+        for(int i=0; i < _leaderFDR.getAttributeInt("Number of rad. compensation records"); ++i) {
+            _radiometricCompRecord = new BaseRecord(reader, -1, mission, radiometric_comp_recordDefinitionFile);
+            reader.seek(_radiometricCompRecord.getRecordEndPosition());
+        }
+        for(int i=0; i < _leaderFDR.getAttributeInt("Number of facility data records"); ++i) {
+            _facilityRecord = new BaseRecord(reader, -1, mission, facility_recordDefinitionFile);
+            reader.seek(_facilityRecord.getRecordEndPosition());
+        }
+
+        reader.close();
+    }
+
+  /*  public AlosPalsarLeaderFile(final ImageInputStream leaderStream)
             throws IOException, IllegalBinaryFormatException {
 
         BinaryFileReader reader = new BinaryFileReader(leaderStream);
@@ -77,7 +107,7 @@ class AlosPalsarLeaderFile {
         reader.seek(_facilityRecord.getRecordEndPosition());
 
         reader.close();
-    }
+    }        */
 
     public final int getProductLevel() {
         if(productLevel < 0) {
@@ -102,58 +132,5 @@ class AlosPalsarLeaderFile {
 
     public String getProductType() {
         return _sceneHeaderRecord.getAttributeString("Product type specifier");
-    }
-
-    public BaseRecord getSceneRecord() {
-        return _sceneHeaderRecord;
-    }
-
-    public BaseRecord getMapProjRecord() {
-        return _mapProjRecord;
-    }
-
-    public BaseRecord getFacilityRecord() {
-        return _facilityRecord;
-    }
-
-    public BaseRecord getRadiometricRecord() {
-        return _radiometricRecord;
-    }
-
-    public BaseRecord getPlatformPositionRecord() {
-        return _platformPositionRecord;
-    }
-
-    public float[] getLatCorners() throws IOException, IllegalBinaryFormatException {
-        if(_mapProjRecord == null) return null;
-
-        final double latUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic latitude");
-        final double latUR = _mapProjRecord.getAttributeDouble("1st line last valid pixel geodetic latitude");
-        final double latLL = _mapProjRecord.getAttributeDouble("Last line 1st pixel geodetic latitude");
-        final double latLR = _mapProjRecord.getAttributeDouble("Last line last valid pixel geodetic latitude");
-        return new float[]{(float)latUL, (float)latUR, (float)latLL, (float)latLR};
-    }
-
-    public float[] getLonCorners() throws IOException, IllegalBinaryFormatException {
-        if(_mapProjRecord == null) return null;
-        
-        final double lonUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic longitude");
-        final double lonUR = _mapProjRecord.getAttributeDouble("1st line last valid pixel geodetic longitude");
-        final double lonLL = _mapProjRecord.getAttributeDouble("Last line 1st pixel geodetic longitude");
-        final double lonLR = _mapProjRecord.getAttributeDouble("Last line last valid pixel geodetic longitude");
-        return new float[]{(float)lonUL, (float)lonUR, (float)lonLL, (float)lonLR};
-    }
-
-    public void addLeaderMetadata(MetadataElement sphElem) {
-
-        CeosHelper.addMetadata(sphElem, _leaderFDR, "Leader File Descriptor");
-        CeosHelper.addMetadata(sphElem, _sceneHeaderRecord, "Scene Parameters");
-        CeosHelper.addMetadata(sphElem, _mapProjRecord, "Map Projection");
-        CeosHelper.addMetadata(sphElem, _platformPositionRecord, "Platform Position");
-        CeosHelper.addMetadata(sphElem, _attitudeRecord, "Attitude");
-        CeosHelper.addMetadata(sphElem, _radiometricRecord, "Radiometric");
-        CeosHelper.addMetadata(sphElem, _dataQualityRecord, "Data Quality");
-        CeosHelper.addMetadata(sphElem, _level0CalibrationRecord, "Calibration");
-        CeosHelper.addMetadata(sphElem, _facilityRecord, "Facility Related");
     }
 }

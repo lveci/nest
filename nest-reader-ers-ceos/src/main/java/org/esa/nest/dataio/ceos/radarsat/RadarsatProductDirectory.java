@@ -491,24 +491,6 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         orbitVectorListElem.addElement(orbitVectorElem);
     }
-
-    private static ProductData.UTC getOrbitTime(BaseRecord platformPosRec, int num) {
-        final int year = platformPosRec.getAttributeInt("Year of data point");
-        final int month = platformPosRec.getAttributeInt("Month of data point");
-        final int day = platformPosRec.getAttributeInt("Day of data point");
-        final float secondsOfDay = (float)platformPosRec.getAttributeDouble("Seconds of day");
-        final float hoursf = secondsOfDay / 3600f;
-        final int hour = (int)hoursf;
-        final float minutesf = (hoursf - hour) * 60f;
-        final int minute = (int)minutesf;
-        float second = (minutesf - minute) * 60f;
-
-        final float interval = (float)platformPosRec.getAttributeDouble("Time interval between DATA points");
-        second += interval * (num-1);
-
-        return AbstractMetadata.parseUTC(String.valueOf(year)+'-'+month+'-'+day+' '+
-                                  hour+':'+minute+':'+second, "yyyy-MM-dd HH:mm:ss");
-    }
     
     protected static void addSRGRCoefficients(final MetadataElement absRoot, final BaseRecord detailedProcRec) {
         if(detailedProcRec == null) return;

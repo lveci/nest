@@ -273,13 +273,17 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     private void addMetaData(final Product product) throws IOException {
         final MetadataElement root = product.getMetadataRoot();
 
-        final MetadataElement leadMetadata = new MetadataElement("Leader");
-        _leaderFile.addLeaderMetadata(leadMetadata);
-        root.addElement(leadMetadata);
+        if(_leaderFile != null) {
+            final MetadataElement leadMetadata = new MetadataElement("Leader");
+            _leaderFile.addMetadata(leadMetadata);
+            root.addElement(leadMetadata);
+        }
 
-        final MetadataElement trailMetadata = new MetadataElement("Trailer");
-        _trailerFile.addMetadata(trailMetadata);
-        root.addElement(trailMetadata);
+        if(_trailerFile != null) {
+            final MetadataElement trailMetadata = new MetadataElement("Trailer");
+            _trailerFile.addMetadata(trailMetadata);
+            root.addElement(trailMetadata);
+        }
 
         final MetadataElement volMetadata = new MetadataElement("Volume");
         _volumeDirectoryFile.assignMetadataTo(volMetadata);

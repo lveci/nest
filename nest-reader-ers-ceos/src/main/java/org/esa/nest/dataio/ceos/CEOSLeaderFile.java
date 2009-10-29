@@ -12,28 +12,31 @@ import java.io.IOException;
 
 public class CEOSLeaderFile {
 
-    public final BaseRecord _leaderFDR;
-    public BaseSceneHeaderRecord _sceneHeaderRecord = null;
-    public BaseRecord _platformPositionRecord = null;
-    public BaseRecord _mapProjRecord = null;
-    public BaseRecord _dataQualityRecord = null;
-    public BaseRecord _histogramRecord = null;
-    public BaseRecord _attitudeRecord = null;
-    public BaseRecord _radiometricRecord = null;
-    public BaseRecord _radiometricCompRecord = null;
-    public BaseRecord _detailedProcessingRecord = null;
-    public BaseRecord _facilityRecord = null;
+    protected BaseRecord _leaderFDR = null;
+    protected BaseSceneHeaderRecord _sceneHeaderRecord = null;
+    protected BaseRecord _platformPositionRecord = null;
+    protected BaseRecord _mapProjRecord = null;
+    protected BaseRecord _dataQualityRecord = null;
+    protected BaseRecord _histogramRecord = null;
+    protected BaseRecord _attitudeRecord = null;
+    protected BaseRecord _radiometricRecord = null;
+    protected BaseRecord _radiometricCompRecord = null;
+    protected BaseRecord _detailedProcessingRecord = null;
+    protected BaseRecord _facilityRecord = null;
 
-    private final static String scene_recordDefinitionFile = "scene_record.xml";
-    private final static String platformPosition_recordDefinitionFile = "platform_position_record.xml";
-    private final static String mapproj_recordDefinitionFile = "map_proj_record.xml";
-    private final static String dataQuality_recordDefinitionFile = "data_quality_summary_record.xml";
-    private final static String histogram_recordDefinitionFile = "data_histogram_record.xml";
-    private final static String attitude_recordDefinitionFile = "attitude_record.xml";
-    private final static String radiometric_recordDefinitionFile = "radiometric_record.xml";
-    private final static String radiometric_comp_recordDefinitionFile = "radiometric_compensation_record.xml";
-    private final static String detailedProcessing_recordDefinitionFile = "detailed_processing_record.xml";
-    private final static String facility_recordDefinitionFile = "facility_record.xml";
+    protected final static String scene_recordDefinitionFile = "scene_record.xml";
+    protected final static String platformPosition_recordDefinitionFile = "platform_position_record.xml";
+    protected final static String mapproj_recordDefinitionFile = "map_proj_record.xml";
+    protected final static String dataQuality_recordDefinitionFile = "data_quality_summary_record.xml";
+    protected final static String histogram_recordDefinitionFile = "data_histogram_record.xml";
+    protected final static String attitude_recordDefinitionFile = "attitude_record.xml";
+    protected final static String radiometric_recordDefinitionFile = "radiometric_record.xml";
+    protected final static String radiometric_comp_recordDefinitionFile = "radiometric_compensation_record.xml";
+    protected final static String detailedProcessing_recordDefinitionFile = "detailed_processing_record.xml";
+    protected final static String facility_recordDefinitionFile = "facility_record.xml";
+
+    public CEOSLeaderFile() {
+    }
 
     public CEOSLeaderFile(final ImageInputStream stream, final String mission, final String defnFile)
             throws IOException, IllegalBinaryFormatException {

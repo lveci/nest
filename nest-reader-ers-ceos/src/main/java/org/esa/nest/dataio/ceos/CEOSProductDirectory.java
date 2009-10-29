@@ -288,18 +288,18 @@ public abstract class CEOSProductDirectory {
         orbitVectorListElem.addElement(orbitVectorElem);
     }
 
-    private static ProductData.UTC getOrbitTime(BaseRecord platformPosRec, int num) {
+    protected static ProductData.UTC getOrbitTime(BaseRecord platformPosRec, int num) {
         final int year = platformPosRec.getAttributeInt("Year of data point");
         final int month = platformPosRec.getAttributeInt("Month of data point");
         final int day = platformPosRec.getAttributeInt("Day of data point");
-        final float secondsOfDay = (float)platformPosRec.getAttributeDouble("Seconds of day");
-        final float hoursf = secondsOfDay / 3600f;
+        final double secondsOfDay = platformPosRec.getAttributeDouble("Seconds of day");
+        final double hoursf = secondsOfDay / 3600f;
         final int hour = (int)hoursf;
-        final float minutesf = (hoursf - hour) * 60f;
+        final double minutesf = (hoursf - hour) * 60f;
         final int minute = (int)minutesf;
-        float second = (minutesf - minute) * 60f;
+        float second = ((float)minutesf - minute) * 60f;
 
-        final float interval = (float)platformPosRec.getAttributeDouble("Time interval between DATA points");
+        final double interval = platformPosRec.getAttributeDouble("Time interval between DATA points");
         second += interval * (num-1);
 
         return AbstractMetadata.parseUTC(String.valueOf(year)+'-'+month+'-'+day+' '+

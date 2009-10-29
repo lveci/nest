@@ -84,8 +84,6 @@ public class TestAlosPalsarProductReader extends TestCase {
     public static void verifyProduct(Product product) throws Exception {
         if(product == null)
             throw new Exception("product is null");
-        if(!product.getProductType().contains("1.1") && !product.getProductType().contains("1.0") && product.getGeoCoding() == null)
-            throw new Exception("geocoding is null");
         if(product.getMetadataRoot() == null)
             throw new Exception("metadataroot is null");
         if(product.getNumBands() == 0)

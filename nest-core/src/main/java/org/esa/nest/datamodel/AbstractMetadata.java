@@ -298,6 +298,14 @@ public class AbstractMetadata {
             attrib.getData().setElemDouble(value);
     }
 
+    public static void setAttribute(final MetadataElement dest, final String tag, final Double value) {
+        final MetadataAttribute attrib = dest.getAttribute(tag);
+        if(attrib == null)
+            System.out.println(tag + " not found in metadata");
+        else if(value != null)
+            attrib.getData().setElemDouble(value);
+    }
+
     public static ProductData.UTC parseUTC(final String timeStr) {
         try {
             if(timeStr == null)
@@ -310,6 +318,11 @@ public class AbstractMetadata {
 
     public static ProductData.UTC parseUTC(final String timeStr, final String format) {
         try {
+            final int dotPos = timeStr.lastIndexOf(".");
+            if (dotPos > 0) {
+                final String newTimeStr = timeStr.substring(0, Math.min(dotPos+6, timeStr.length()));
+                return ProductData.UTC.parse(newTimeStr, format);
+            }
             return ProductData.UTC.parse(timeStr, format);
         } catch(ParseException e) {
             System.out.println("UTC parse error:"+ e.toString());
