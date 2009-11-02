@@ -42,6 +42,18 @@
             <version>4.7-SNAPSHOT</version>
         </dependency>
 
+		<dependency>
+		  <groupId>org.esa.beam</groupId>
+		  <artifactId>beam-visat-rcp</artifactId>
+		  <version>4.7-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>org.esa.nest</groupId>
+		  <artifactId>nest-graph-builder</artifactId>
+		  <version>3B</version>
+		</dependency>
+		
     </dependencies>
 
     <build>

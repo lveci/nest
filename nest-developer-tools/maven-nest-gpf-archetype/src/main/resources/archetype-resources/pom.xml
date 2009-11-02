@@ -6,8 +6,8 @@
     <groupId>${groupId}</groupId>
     <artifactId>${artifactId}</artifactId>
     <version>${version}</version>
-    <name>GPF Module '${artifactId}'</name>
-    <description></description>
+    <name>NEST GPF Module ${artifactId}</name>
+    <description>NEST Operator ${artifactId}</description>
     <packaging>jar</packaging>
 
     <dependencies>

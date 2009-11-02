@@ -32,7 +32,7 @@ import java.awt.*;
  * The sample operator implementation for an algorithm
  * that can compute bands independently of each other.
  */
-@OperatorMetadata(alias="MySingleOp")
+@OperatorMetadata(alias="$artifactId")
 public class SingleTileOperator extends Operator {
 
     @SourceProduct

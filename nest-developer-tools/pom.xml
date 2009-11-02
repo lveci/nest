@@ -24,8 +24,7 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-
-
+	
     <modules>
         <module>maven-nest-dataio-archetype</module>
 		<module>maven-nest-gpf-archetype</module>       

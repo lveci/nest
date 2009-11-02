@@ -120,7 +120,7 @@
 	    <module>nest-op-coregistration</module>
 	    <module>nest-op-sar-tools</module>
 		<module>nest-op-orthorectification</module>
-		<!--module>nest-developer-tools</module-->
+		<module>nest-developer-tools</module>
   </modules>
 
     <dependencyManagement>
