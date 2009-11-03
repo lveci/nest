@@ -3,12 +3,10 @@
     <allowPartial>true</allowPartial>
     <sources>
         <source>src/main/java/SingleTileOperator.java</source>
-        <source>src/main/java/MultiTileOperator.java</source>
 		<source>src/main/java/SingleTileOpAction.java</source>
     </sources>
     <testSources>
         <source>src/test/java/SingleTileOperatorTest.java</source>
-        <source>src/test/java/MultiTileOperatorTest.java</source>
     </testSources>
     <resources>
         <resource>readme.html</resource>
