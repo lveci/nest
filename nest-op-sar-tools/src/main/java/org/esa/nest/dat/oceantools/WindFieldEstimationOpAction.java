@@ -17,7 +17,7 @@ public class WindFieldEstimationOpAction extends AbstractVisatAction {
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("Wind-Field-Estimation ", getAppContext(), "Wind Field Estimation ", getHelpId());
+            dialog = new DefaultSingleTargetProductDialog("Wind-Field-Estimation", getAppContext(), "Wind-Field-Estimation", getHelpId());
         }
         dialog.show();
 
@@ -25,6 +25,6 @@ public class WindFieldEstimationOpAction extends AbstractVisatAction {
 
     @Override
     public void updateState(final CommandEvent event) {
-        setEnabled(false);
+        setEnabled(true);
     }
 }

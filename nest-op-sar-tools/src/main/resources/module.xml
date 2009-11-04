@@ -254,7 +254,7 @@
         <action>
             <id>WindFieldEstimation</id>
             <class>org.esa.nest.dat.oceantools.WindFieldEstimationOpAction</class>
-            <text>Wind Field Estimation (coming soon)</text>
+            <text>Wind Field Estimation</text>
             <shortDescr>Wind Field Estimation</shortDescr>
             <placeAfter>OilSpillDetectionOp</placeAfter>
             <parent>oceanTools</parent>
