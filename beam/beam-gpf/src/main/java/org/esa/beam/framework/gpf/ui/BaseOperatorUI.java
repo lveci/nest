@@ -19,7 +19,6 @@ import com.bc.ceres.binding.dom.DomConverter;
 import com.bc.ceres.binding.dom.Xpp3DomElement;
 import com.bc.ceres.binding.*;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
-import com.sun.xml.internal.bind.v2.runtime.property.ValueProperty;
 
 /**
 * The abstract base class for all operator user interfaces intended to be extended by clients.

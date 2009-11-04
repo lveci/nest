@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
 	<properties>
-		<nest.version>3B</nest.version>
+		<nest.version>3C</nest.version>
 	</properties>
 	
     <name>NEST Project</name>
