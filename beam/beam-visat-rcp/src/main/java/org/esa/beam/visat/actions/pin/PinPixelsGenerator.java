@@ -1,5 +1,5 @@
 /*
- * $Id: PinPixelsGenerator.java,v 1.2 2009-10-15 20:30:19 lveci Exp $
+ * $Id: PinPixelsGenerator.java,v 1.3 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -142,9 +142,9 @@ class PinPixelsGenerator {
         loop.forEachPixel(new RasterDataLoop.Body() {
             public void eval(RasterDataEvalEnv env, int pixelIndex) {
                 if (t == null || t.evalB(env)) {
-                    relevance.add(new Boolean(true));
+                    relevance.add(Boolean.TRUE);
                 } else {
-                    relevance.add(new Boolean(false));
+                    relevance.add(Boolean.FALSE);
                 }
             }
         });

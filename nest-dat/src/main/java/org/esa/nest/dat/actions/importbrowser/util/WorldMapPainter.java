@@ -8,6 +8,7 @@ import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.ProductUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -64,6 +65,7 @@ public class WorldMapPainter {
 
     private GeoCoding createGeocoding() {
         return new GeoCoding() {
+
             @Override
             public AffineTransform getImageToModelTransform() {
                 return null;
@@ -120,7 +122,22 @@ public class WorldMapPainter {
             }
 
             @Override
+            public CoordinateReferenceSystem getMapCRS() {
+                return null;
+            }
+
+            @Override
             public CoordinateReferenceSystem getModelCRS() {
+                return null;
+            }
+
+            @Override
+            public CoordinateReferenceSystem getGeoCRS() {
+                return null;
+            }
+
+            @Override
+            public MathTransform getImageToMapTransform() {
                 return null;
             }
         };

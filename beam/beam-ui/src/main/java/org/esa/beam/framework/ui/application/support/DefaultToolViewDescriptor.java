@@ -1,11 +1,10 @@
 package org.esa.beam.framework.ui.application.support;
 
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.CoreException;
 import com.bc.ceres.core.runtime.ConfigurableExtension;
 import com.bc.ceres.core.runtime.ConfigurationElement;
-import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.ValidationException;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import org.esa.beam.framework.ui.UIUtils;
@@ -76,10 +75,10 @@ public class DefaultToolViewDescriptor implements ToolViewDescriptor, Configurab
 
     private transient Icon smallIcon;
     private transient Icon largeIcon;
-    private transient ValueContainer valueContainer;
+    private transient PropertyContainer propertyContainer;
 
     public DefaultToolViewDescriptor() {
-        valueContainer = ValueContainer.createObjectBacked(this);
+        propertyContainer = PropertyContainer.createObjectBacked(this);
         initState = State.HIDDEN;
         preferredSize = new Dimension(320, 200);
         floatingBounds = new Rectangle(100, 100, 320, 200);
@@ -380,22 +379,22 @@ public class DefaultToolViewDescriptor implements ToolViewDescriptor, Configurab
 
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
-        valueContainer.addPropertyChangeListener(listener);
+        propertyContainer.addPropertyChangeListener(listener);
     }
 
     @Override
     public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-        valueContainer.addPropertyChangeListener(propertyName, listener);
+        propertyContainer.addPropertyChangeListener(propertyName, listener);
     }
 
     @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
-        valueContainer.removePropertyChangeListener(listener);
+        propertyContainer.removePropertyChangeListener(listener);
     }
 
     @Override
     public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-        valueContainer.removePropertyChangeListener(propertyName, listener);
+        propertyContainer.removePropertyChangeListener(propertyName, listener);
     }
 
     @Override
@@ -469,12 +468,8 @@ public class DefaultToolViewDescriptor implements ToolViewDescriptor, Configurab
     public void configure(ConfigurationElement config) throws CoreException {
     }
 
-    private void setValue(String key, Object value)  {
-        try {
-            valueContainer.setValue(key, value);
-        } catch (ValidationException e) {
-            throw new IllegalArgumentException(e);
-        }
+    private void setValue(String key, Object value) {
+        propertyContainer.setValue(key, value);
     }
 
 }

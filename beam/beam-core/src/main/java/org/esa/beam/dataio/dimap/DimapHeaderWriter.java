@@ -1,5 +1,5 @@
 /*
- * $Id: DimapHeaderWriter.java,v 1.6 2009-09-01 20:27:12 lveci Exp $
+ * $Id: DimapHeaderWriter.java,v 1.7 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -57,8 +57,10 @@ import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.XmlWriter;
 import org.jdom.Element;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
 
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
@@ -704,9 +706,12 @@ public final class DimapHeaderWriter extends XmlWriter {
 
     private void writeCrsGeoCoding(GeoCoding geoCoding, int indent, int index) {
         final CrsGeoCoding crsGeoCoding = (CrsGeoCoding) geoCoding;
-        final CoordinateReferenceSystem crs = crsGeoCoding.getModelCRS();
+        final CoordinateReferenceSystem crs = crsGeoCoding.getMapCRS();
         final double[] matrix = new double[6];
-        crsGeoCoding.getImageToModelTransform().getMatrix(matrix);
+        final MathTransform transform = crsGeoCoding.getImageToMapTransform();
+        if (transform instanceof AffineTransform) {
+            ((AffineTransform)transform).getMatrix(matrix);
+        }
 
         final String[] crsTags = createTags(indent, DimapProductConstants.TAG_COORDINATE_REFERENCE_SYSTEM);
         println(crsTags[0]);

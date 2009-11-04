@@ -1,5 +1,5 @@
 /*
- * $Id: VisatMain.java,v 1.2 2009-09-24 19:32:51 lveci Exp $
+ * $Id: VisatMain.java,v 1.3 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -47,7 +47,7 @@ import java.util.Locale;
  * <i>file</i></code> sets the logfile for VISAT to <i>file</i> </ld>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-09-24 19:32:51 $
+ * @version $Revision: 1.3 $ $Date: 2009-11-04 17:04:32 $
  */
 public class VisatMain implements RuntimeRunnable {
     /**
@@ -115,7 +115,7 @@ public class VisatMain implements RuntimeRunnable {
                 }
             });
         }
-
+        JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
 
         final VisatApp app = createApplication(applicationDescriptor);
         app.startUp(progressMonitor);

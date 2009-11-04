@@ -1,8 +1,7 @@
 package org.esa.beam.glayer;
 
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.ValueModel;
+import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.support.ImageLayer;
@@ -32,11 +31,12 @@ public class RoiLayerType extends ImageLayer.Type {
     }
 
     @Override
-    protected Layer createLayerImpl(LayerContext ctx, ValueContainer configuration) {
+    public Layer createLayer(LayerContext ctx, PropertyContainer configuration) {
         final RasterDataNode raster = (RasterDataNode) configuration.getValue(PROPERTY_NAME_RASTER);
 
-        if (configuration.getValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE) == null) {
-            final MultiLevelSource multiLevelSource;
+        MultiLevelSource multiLevelSource;
+        multiLevelSource = (MultiLevelSource) configuration.getValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE);
+        if (multiLevelSource == null) {
             if (raster.getROIDefinition() != null && raster.getROIDefinition().isUsable()) {
                 final Color color = (Color) configuration.getValue(PROPERTY_NAME_COLOR);
                 final AffineTransform i2mTransform = (AffineTransform) configuration.getValue(
@@ -45,14 +45,10 @@ public class RoiLayerType extends ImageLayer.Type {
             } else {
                 multiLevelSource = MultiLevelSource.NULL;
             }
-            try {
-                configuration.setValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE, multiLevelSource);
-            } catch (ValidationException e) {
-                throw new IllegalArgumentException(e);
-            }
+            configuration.setValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE, multiLevelSource);
         }
 
-        final ImageLayer roiLayer = new ImageLayer(this, configuration);
+        final ImageLayer roiLayer = new ImageLayer(this, multiLevelSource, configuration);
         roiLayer.setName("ROI");
         roiLayer.setId(ROI_LAYER_ID);
 
@@ -60,16 +56,16 @@ public class RoiLayerType extends ImageLayer.Type {
     }
 
     @Override
-    public ValueContainer getConfigurationTemplate() {
-        final ValueContainer template = super.getConfigurationTemplate();
+    public PropertyContainer createLayerConfig(LayerContext ctx) {
+        final PropertyContainer prototype = super.createLayerConfig(ctx);
 
-        final ValueModel rasterModel = createDefaultValueModel(PROPERTY_NAME_RASTER, RasterDataNode.class);
+        final Property rasterModel = Property.create(PROPERTY_NAME_RASTER, RasterDataNode.class);
         rasterModel.getDescriptor().setNotNull(true);
-        template.addModel(rasterModel);
+        prototype.addProperty(rasterModel);
 
-        template.addModel(createDefaultValueModel(PROPERTY_NAME_COLOR, Color.class, Color.RED));
-        template.addModel(createDefaultValueModel(PROPERTY_NAME_TRANSPARENCY, Double.class, 0.5));
+        prototype.addProperty(Property.create(PROPERTY_NAME_COLOR, Color.class, Color.RED, true));
+        prototype.addProperty(Property.create(PROPERTY_NAME_TRANSPARENCY, Double.class, 0.5, true));
 
-        return template;
+        return prototype;
     }
 }

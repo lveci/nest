@@ -1,5 +1,5 @@
 /*
- * $Id: SingleTargetProductDialog.java,v 1.1 2009-04-28 14:37:14 lveci Exp $
+ * $Id: SingleTargetProductDialog.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -46,7 +46,7 @@ import java.awt.*;
  *
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:14 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
  */
 public abstract class SingleTargetProductDialog extends ModelessDialog {
 
@@ -150,10 +150,10 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
     protected void handleInitialisationError(Throwable t) {
         String msg;
         if (t instanceof RuntimeException || t instanceof Error) {
-            msg = MessageFormat.format("A internal error occured during the target product initialisation.\n{0}",
+            msg = MessageFormat.format("An internal error occurred during the target product initialisation.\n{0}",
                                        formatThrowable(t));
         } else {
-            msg = MessageFormat.format("A error occured during the target product initialisation.\n{0}",
+            msg = MessageFormat.format("An error occurred during the target product initialisation.\n{0}",
                                        formatThrowable(t));
         }
         appContext.handleError(msg, t);
@@ -162,10 +162,10 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
     protected void handleProcessingError(Throwable t) {
         String msg;
         if (t instanceof RuntimeException || t instanceof Error) {
-            msg = MessageFormat.format("A internal error occured during the target product processing.\n{0}",
+            msg = MessageFormat.format("An internal error occurred during the target product processing.\n{0}",
                                        formatThrowable(t));
         } else {
-            msg = MessageFormat.format("A error occured during processing the target product processing.\n{0}",
+            msg = MessageFormat.format("An error occurred during processing the target product processing.\n{0}",
                                        formatThrowable(t));
         }
         appContext.handleError(msg, t);

@@ -1,5 +1,5 @@
 /*
- * $Id: MapProjectionRegistry.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: MapProjectionRegistry.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,7 +17,7 @@
 package org.esa.beam.framework.dataop.maptransf;
 
 import com.bc.ceres.core.ServiceRegistry;
-import com.bc.ceres.core.ServiceRegistryFactory;
+import com.bc.ceres.core.ServiceRegistryManager;
 import org.esa.beam.BeamCoreActivator;
 import org.esa.beam.util.Guardian;
 
@@ -35,8 +35,8 @@ public class MapProjectionRegistry {
 
     static {
         projectionList = new LinkedList<MapProjection>();
-        ServiceRegistryFactory factory = ServiceRegistryFactory.getInstance();
-        descriptors = factory.getServiceRegistry(MapTransformDescriptor.class);
+        ServiceRegistryManager serviceRegistryManager = ServiceRegistryManager.getInstance();
+        descriptors = serviceRegistryManager.getServiceRegistry(MapTransformDescriptor.class);
         if (!BeamCoreActivator.isStarted()) {
             BeamCoreActivator.loadServices(descriptors);
         }

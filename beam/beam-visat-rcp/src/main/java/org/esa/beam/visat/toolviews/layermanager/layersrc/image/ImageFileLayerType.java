@@ -1,53 +1,50 @@
 package org.esa.beam.visat.toolviews.layermanager.layersrc.image;
 
-import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.ValueModel;
+import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
-import com.bc.ceres.glayer.LayerType;
+import com.bc.ceres.glayer.support.ImageLayer;
+import com.bc.ceres.glevel.MultiLevelSource;
+import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
+import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
 
+import javax.media.jai.operator.FileLoadDescriptor;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.RenderedImage;
 import java.io.File;
 
 
-public class ImageFileLayerType extends LayerType{
+public class ImageFileLayerType extends ImageLayer.Type {
 
-    static final String PROPERTY_NAME_IMAGE = "image";
     static final String PROPERTY_NAME_IMAGE_FILE = "filePath";
     static final String PROPERTY_NAME_WORLD_TRANSFORM = "worldTransform";
 
     @Override
-    public String getName() {
-        return "Image Layer";
+    public Layer createLayer(LayerContext ctx, PropertyContainer configuration) {
+        final File file = (File) configuration.getValue(PROPERTY_NAME_IMAGE_FILE);
+        final AffineTransform transform = (AffineTransform) configuration.getValue(PROPERTY_NAME_WORLD_TRANSFORM);
+        RenderedImage image = FileLoadDescriptor.create(file.getPath(), null, true, null);
+        final Rectangle2D modelBounds = DefaultMultiLevelModel.getModelBounds(transform, image);
+        final DefaultMultiLevelModel model = new DefaultMultiLevelModel(1, transform, modelBounds);
+        final MultiLevelSource multiLevelSource = new DefaultMultiLevelSource(image, model);
+        return new ImageLayer(this, multiLevelSource, configuration);
     }
 
     @Override
-    public boolean isValidFor(LayerContext ctx) {
-        return true;
-    }
+    public PropertyContainer createLayerConfig(LayerContext ctx) {
+        final PropertyContainer template = new PropertyContainer();
 
-    @Override
-    protected Layer createLayerImpl(LayerContext ctx, ValueContainer configuration) {
-        return new ImageFileLayer(this, configuration);
-    }
-
-    @Override
-    public ValueContainer getConfigurationTemplate() {
-        final ValueContainer template = new ValueContainer();
-
-        final ValueModel imageModel = createDefaultValueModel(PROPERTY_NAME_IMAGE, RenderedImage.class);
-        imageModel.getDescriptor().setTransient(true);
-        template.addModel(imageModel);
-
-        final ValueModel filePathModel = createDefaultValueModel(PROPERTY_NAME_IMAGE_FILE, File.class);
+        final Property filePathModel = Property.create(PROPERTY_NAME_IMAGE_FILE, File.class);
         filePathModel.getDescriptor().setNotNull(true);
-        template.addModel(filePathModel);
+        template.addProperty(filePathModel);
 
-        final ValueModel worldTransformModel = createDefaultValueModel(PROPERTY_NAME_WORLD_TRANSFORM, AffineTransform.class);
+        final Property worldTransformModel = Property.create(PROPERTY_NAME_WORLD_TRANSFORM, AffineTransform.class);
         worldTransformModel.getDescriptor().setNotNull(true);
-        template.addModel(worldTransformModel);
+        template.addProperty(worldTransformModel);
 
         return template;
     }
+
 }

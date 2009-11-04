@@ -1,5 +1,5 @@
 /*
- * $Id: ValueSetUpdater.java,v 1.1 2009-04-28 14:37:14 lveci Exp $
+ * $Id: ValueSetUpdater.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -20,22 +20,22 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.ui.application.SelectionChangeEvent;
 import org.esa.beam.framework.ui.application.SelectionChangeListener;
 
-import com.bc.ceres.binding.ValueDescriptor;
+import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.ValueSet;
 
 /**
  * Updates the ValueSet of the ValueContainer, when the selection changes.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:14 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
  * @since BEAM 4.2
  */
 public class ValueSetUpdater implements SelectionChangeListener {
     
-    private final ValueDescriptor valueDescriptor;
+    private final PropertyDescriptor propertyDescriptor;
 
-    public ValueSetUpdater(ValueDescriptor valueDescriptor) {
-        this.valueDescriptor = valueDescriptor;
+    public ValueSetUpdater(PropertyDescriptor propertyDescriptor) {
+        this.propertyDescriptor = propertyDescriptor;
     }
 
     @Override
@@ -47,6 +47,6 @@ public class ValueSetUpdater implements SelectionChangeListener {
         } else {
             valueSet = new ValueSet(new String[0]);
         }
-        valueDescriptor.setValueSet(valueSet);
+        propertyDescriptor.setValueSet(valueSet);
     }
 }

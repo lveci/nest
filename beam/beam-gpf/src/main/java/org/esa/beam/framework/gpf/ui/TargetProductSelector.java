@@ -11,6 +11,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Insets;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -23,7 +24,7 @@ import java.io.File;
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:14 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
  */
 public class TargetProductSelector {
 
@@ -212,15 +213,16 @@ public class TargetProductSelector {
         }
 
         public void actionPerformed(ActionEvent event) {
-            JButton button = null;
+            Window windowAncestor = null;
             if (event.getSource() instanceof JComponent) {
-                button = (JButton) event.getSource();
+                JButton button = (JButton) event.getSource();
+                if (button != null) {
+                    windowAncestor = SwingUtilities.getWindowAncestor(button);
+                }
             }
             final JFileChooser chooser = FileChooserFactory.getInstance().createDirChooser(model.getProductDir());
             chooser.setDialogTitle("Select Target Directory");
-            if (chooser.showDialog(SwingUtilities.getWindowAncestor(button),
-                                   APPROVE_BUTTON_TEXT) == JFileChooser.APPROVE_OPTION) {
-
+            if (chooser.showDialog(windowAncestor, APPROVE_BUTTON_TEXT) == JFileChooser.APPROVE_OPTION) {
                 final File selectedDir = chooser.getSelectedFile();
                 if (selectedDir != null) {
                     model.setProductDir(selectedDir);

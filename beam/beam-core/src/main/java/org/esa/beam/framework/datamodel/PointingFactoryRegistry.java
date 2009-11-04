@@ -1,5 +1,5 @@
 /*
- * $Id: PointingFactoryRegistry.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: PointingFactoryRegistry.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,7 +17,8 @@
 package org.esa.beam.framework.datamodel;
 
 import com.bc.ceres.core.ServiceRegistry;
-import com.bc.ceres.core.ServiceRegistryFactory;
+import com.bc.ceres.core.ServiceRegistryManager;
+
 import org.esa.beam.BeamCoreActivator;
 import org.esa.beam.util.Guardian;
 
@@ -27,29 +28,22 @@ import java.util.Set;
  * Created by Marco Peters.
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
  */
 public class PointingFactoryRegistry {
 
-    private static PointingFactoryRegistry instance;
-
     private static ServiceRegistry<PointingFactory> typeToFactoryMap;
 
-
     private PointingFactoryRegistry() {
-
+        ServiceRegistryManager serviceRegistryManager = ServiceRegistryManager.getInstance();
+        typeToFactoryMap = serviceRegistryManager.getServiceRegistry(PointingFactory.class);
+        if (!BeamCoreActivator.isStarted()) {
+            BeamCoreActivator.loadServices(typeToFactoryMap);
+        }
     }
 
-    public synchronized static PointingFactoryRegistry getInstance() {
-        if (instance == null) {
-            instance = new PointingFactoryRegistry();
-            ServiceRegistryFactory factory = ServiceRegistryFactory.getInstance();
-            typeToFactoryMap = factory.getServiceRegistry(PointingFactory.class);
-            if (!BeamCoreActivator.isStarted()) {
-                BeamCoreActivator.loadServices(typeToFactoryMap);
-            }
-        }
-        return instance;
+    public static PointingFactoryRegistry getInstance() {
+        return Holder.instance;
     }
 
     public PointingFactory getPointingFactory(String productType) {
@@ -69,5 +63,9 @@ public class PointingFactoryRegistry {
     public void addFactory(PointingFactory pointingFactory) {
             typeToFactoryMap.addService(pointingFactory);
     }
-
+    
+    // Initialization on demand holder idiom
+    private static class Holder {
+        private static final PointingFactoryRegistry instance = new PointingFactoryRegistry();
+    }
 }

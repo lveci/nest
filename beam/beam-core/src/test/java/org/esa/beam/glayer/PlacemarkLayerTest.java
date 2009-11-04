@@ -1,9 +1,9 @@
 package org.esa.beam.glayer;
 
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerType;
+import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.glayer.support.AbstractLayerListener;
 import junit.framework.TestCase;
 import org.esa.beam.framework.datamodel.GeoPos;
@@ -19,13 +19,13 @@ import java.awt.geom.Rectangle2D;
 
 public class PlacemarkLayerTest extends TestCase {
 
-    public void testConstruction() throws ValidationException {
+    public void testConstruction() {
         final Product product = new Product("N", "T", 16, 16);
         final PinDescriptor pmd = PinDescriptor.INSTANCE;
         final AffineTransform i2m = new AffineTransform();
 
-        final LayerType type = LayerType.getLayerType(PlacemarkLayerType.class.getName());
-        final ValueContainer template = type.getConfigurationTemplate();
+        final LayerType type = LayerTypeRegistry.getLayerType(PlacemarkLayerType.class);
+        final PropertyContainer template = type.createLayerConfig(null);
         template.setValue("product", product);
         template.setValue("placemarkDescriptor", pmd);
         template.setValue("imageToModelTransform", i2m);
@@ -36,19 +36,6 @@ public class PlacemarkLayerTest extends TestCase {
 
         assertTrue(type instanceof PlacemarkLayerType);
         assertNotNull(type.getName());
-
-        final ValueContainer configuration = type.getConfigurationCopy(null, placemarkLayer);
-        assertNotNull(configuration);
-        assertEquals(product, configuration.getValue("product"));
-        assertEquals(pmd, configuration.getValue("placemarkDescriptor"));
-        assertEquals(i2m, configuration.getValue("imageToModelTransform"));
-
-        final Layer layerCopy = type.createLayer(null, configuration);
-        assertTrue(layerCopy instanceof PlacemarkLayer);
-        final PlacemarkLayer placemarkLayerCopy = (PlacemarkLayer) layerCopy;
-        assertEquals(product, placemarkLayerCopy.getProduct());
-        assertEquals(pmd, placemarkLayerCopy.getPlacemarkDescriptor());
-        assertEquals(i2m, placemarkLayerCopy.getImageToModelTransform());
     }
 
     public void testLayerDataChanges() {

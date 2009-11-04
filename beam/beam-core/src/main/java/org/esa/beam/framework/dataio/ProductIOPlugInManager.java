@@ -1,5 +1,5 @@
 /*
- * $Id: ProductIOPlugInManager.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: ProductIOPlugInManager.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,7 +17,7 @@
 package org.esa.beam.framework.dataio;
 
 import com.bc.ceres.core.ServiceRegistry;
-import com.bc.ceres.core.ServiceRegistryFactory;
+import com.bc.ceres.core.ServiceRegistryManager;
 import org.esa.beam.BeamCoreActivator;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
@@ -33,22 +33,18 @@ import java.util.Set;
  * <p> This class implements the singleton design pattern, since only one manager instance is required in the system.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
  */
 public class ProductIOPlugInManager {
 
-    private static ProductIOPlugInManager instance;
     private final ServiceRegistry<ProductReaderPlugIn> readerPlugIns;
     private final ServiceRegistry<ProductWriterPlugIn> writerPlugIns;
 
     /**
      * Gets this's managers singleton instance.
      */
-    public synchronized static ProductIOPlugInManager getInstance() {
-        if (instance == null) {
-            instance = new ProductIOPlugInManager();
-        }
-        return instance;
+    public static ProductIOPlugInManager getInstance() {
+        return Holder.instance;
     }
 
     /**
@@ -192,13 +188,18 @@ public class ProductIOPlugInManager {
      * Protected constructor - singleton
      */
     protected ProductIOPlugInManager() {
-        ServiceRegistryFactory factory = ServiceRegistryFactory.getInstance();
-        readerPlugIns = factory.getServiceRegistry(ProductReaderPlugIn.class);
-        writerPlugIns = factory.getServiceRegistry(ProductWriterPlugIn.class);
+        ServiceRegistryManager serviceRegistryManager = ServiceRegistryManager.getInstance();
+        readerPlugIns = serviceRegistryManager.getServiceRegistry(ProductReaderPlugIn.class);
+        writerPlugIns = serviceRegistryManager.getServiceRegistry(ProductWriterPlugIn.class);
 
         if (!BeamCoreActivator.isStarted()) {
             BeamCoreActivator.loadServices(readerPlugIns);
             BeamCoreActivator.loadServices(writerPlugIns);
         }
+    }
+    
+    // Initialization on demand holder idiom
+    private static class Holder {
+        private static final ProductIOPlugInManager instance = new ProductIOPlugInManager();
     }
 }

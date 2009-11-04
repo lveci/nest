@@ -1,5 +1,5 @@
 /*
- * $Id: BitmaskCollectionLayer.java,v 1.3 2009-05-12 12:56:42 lveci Exp $
+ * $Id: BitmaskCollectionLayer.java,v 1.4 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,7 +16,8 @@
  */
 package org.esa.beam.glayer;
 
-import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.Property;
 import com.bc.ceres.glayer.CollectionLayer;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
@@ -32,6 +33,7 @@ import java.awt.geom.AffineTransform;
 import java.util.List;
 
 
+@Deprecated
 public class BitmaskCollectionLayer extends CollectionLayer {
 
 
@@ -40,7 +42,7 @@ public class BitmaskCollectionLayer extends CollectionLayer {
 
     private RasterDataNode rasterDataNode;
 
-    public BitmaskCollectionLayer(Type layerType, ValueContainer configuration) {
+    public BitmaskCollectionLayer(Type layerType, PropertyContainer configuration) {
         super(layerType, configuration, "Bitmasks");
         this.rasterDataNode = (RasterDataNode) configuration.getValue(Type.PROPERTY_NAME_RASTER);
         this.i2mTransform = (AffineTransform) configuration.getValue(Type.PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM);
@@ -165,23 +167,23 @@ public class BitmaskCollectionLayer extends CollectionLayer {
         }
 
         @Override
-        protected Layer createLayerImpl(LayerContext ctx, ValueContainer configuration) {
+        public Layer createLayer(LayerContext ctx, PropertyContainer configuration) {
             final BitmaskCollectionLayer bitmaskCollectionLayer = new BitmaskCollectionLayer(this, configuration);
             bitmaskCollectionLayer.setId(BITMASK_LAYER_ID);
             return bitmaskCollectionLayer;
         }
 
         @Override
-        public ValueContainer getConfigurationTemplate() {
-            final ValueContainer template = super.getConfigurationTemplate();
+        public PropertyContainer createLayerConfig(LayerContext ctx) {
+            final PropertyContainer prototype = super.createLayerConfig(ctx);
 
-            template.addModel(createDefaultValueModel(PROPERTY_NAME_RASTER, RasterDataNode.class));
-            template.getDescriptor(PROPERTY_NAME_RASTER).setNotNull(true);
+            prototype.addProperty(Property.create(PROPERTY_NAME_RASTER, RasterDataNode.class));
+            prototype.getDescriptor(PROPERTY_NAME_RASTER).setNotNull(true);
 
-            template.addModel(createDefaultValueModel(PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM, AffineTransform.class));
-            template.getDescriptor(PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM).setNotNull(true);
+            prototype.addProperty(Property.create(PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM, AffineTransform.class));
+            prototype.getDescriptor(PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM).setNotNull(true);
 
-            return template;
+            return prototype;
 
         }
     }

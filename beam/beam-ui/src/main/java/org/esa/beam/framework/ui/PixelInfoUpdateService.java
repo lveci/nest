@@ -1,5 +1,5 @@
 /*
- * $Id: PixelInfoUpdateService.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: PixelInfoUpdateService.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author Marco Zuehlke
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:17:18 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
  * @since BEAM 4.5.2
  */
 class PixelInfoUpdateService implements Runnable {
@@ -78,7 +78,7 @@ class PixelInfoUpdateService implements Runnable {
         clearState();
     }
 
-    public void run() {
+    public synchronized void run() {
         if (state == PixelInfoState.INVALID) {
             return;
         }

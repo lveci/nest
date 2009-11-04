@@ -1,8 +1,9 @@
 package org.esa.beam.visat;
 
-import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerType;
+import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.jidesoft.swing.JideScrollPane;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.MetadataElement;
@@ -170,21 +171,16 @@ public class ProductsToolView extends AbstractToolView {
                 return;
             }
             if (clickCount == 2) {
-                LayerType flt = LayerType.getLayerType(FeatureLayerType.class.getName());
+                LayerType flt = LayerTypeRegistry.getLayerType(FeatureLayerType.class);
 
-                final ValueContainer conf = flt.getConfigurationTemplate();
+                final PropertyContainer conf = flt.createLayerConfig(sceneView);
                 final StyleBuilder builder = new StyleBuilder();
                 Mark mark = builder.createMark("circle", Color.RED);
                 Graphic g = builder.createGraphic(null, mark, null);
                 Symbolizer s = builder.createPointSymbolizer(g);
                 Style style = builder.createStyle(s);
-                try {
-                    conf.setValue(FeatureLayerType.PROPERTY_NAME_SLD_STYLE, style);
-                    conf.setValue(FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION, vectorData.getFeatureCollection());
-                } catch (Exception e) {
-                    visatApp.handleError(e);
-                    return;
-                }
+                conf.setValue(FeatureLayerType.PROPERTY_NAME_SLD_STYLE, style);
+                conf.setValue(FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION, vectorData.getFeatureCollection());
                 final Layer layer = flt.createLayer(sceneView, conf);
                 layer.setName(vectorData.getName());
                 layer.setVisible(true);

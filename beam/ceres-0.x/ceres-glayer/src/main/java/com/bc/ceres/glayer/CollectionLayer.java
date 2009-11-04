@@ -1,6 +1,6 @@
 package com.bc.ceres.glayer;
 
-import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.PropertyContainer;
 
 
 /**
@@ -12,17 +12,19 @@ import com.bc.ceres.binding.ValueContainer;
  */
 public class CollectionLayer extends Layer {
 
-    private static final Type LAYER_TYPE = (Type) LayerType.getLayerType(Type.class.getName());
+    private static Type type() {
+        return LayerTypeRegistry.getLayerType(Type.class);
+    }
 
     public CollectionLayer() {
-        this(LAYER_TYPE.getName());
+        this(type().getName());
     }
 
     public CollectionLayer(String name) {
-        this(LAYER_TYPE, LAYER_TYPE.getConfigurationTemplate(), name);
+        this(type(), type().createLayerConfig(null), name);
     }
 
-    public CollectionLayer(Type type, ValueContainer configuration, String name) {
+    public CollectionLayer(Type type, PropertyContainer configuration, String name) {
         super(type, configuration);
         setName(name);
     }
@@ -45,12 +47,12 @@ public class CollectionLayer extends Layer {
         }
 
         @Override
-        public ValueContainer getConfigurationTemplate() {
-            return new ValueContainer();
+        public PropertyContainer createLayerConfig(LayerContext ctx) {
+            return new PropertyContainer();
         }
 
         @Override
-        protected Layer createLayerImpl(LayerContext ctx, ValueContainer configuration) {
+        public Layer createLayer(LayerContext ctx, PropertyContainer configuration) {
             return new CollectionLayer(this, configuration, "Collection layer");
         }
     }

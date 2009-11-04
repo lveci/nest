@@ -92,7 +92,7 @@ public class Project extends Observable {
         final ProductManager prodman = VisatApp.getApp().getProductManager();
         final int numProducts = prodman.getProductCount();
         for(int i=0; i < numProducts; ++i) {
-            addProductLink(prodman.getProductAt(i));
+            addProductLink(prodman.getProduct(i));
         }
     }
 

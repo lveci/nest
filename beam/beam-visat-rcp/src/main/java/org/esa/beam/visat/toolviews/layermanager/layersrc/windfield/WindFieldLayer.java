@@ -1,8 +1,9 @@
 package org.esa.beam.visat.toolviews.layermanager.layersrc.windfield;
 
-import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerType;
+import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.glayer.support.ImageLayer;
 import com.bc.ceres.glevel.MultiLevelImage;
 import com.bc.ceres.grender.Rendering;
@@ -33,10 +34,18 @@ public class WindFieldLayer extends Layer {
     private int res = 16;
     private float lineThickness = 2.0f;
 
-    public WindFieldLayer(ValueContainer configuration) {
-        super(LayerType.getLayerType(WindFieldLayerType.class.getName()), configuration);
-        windu = (RasterDataNode) configuration.getValue("windu");
-        windv = (RasterDataNode) configuration.getValue("windv");
+    public WindFieldLayer(PropertyContainer configuration) {
+        this(LayerTypeRegistry.getLayerType(WindFieldLayerType.class.getName()),
+             (RasterDataNode) configuration.getValue("windu"),
+             (RasterDataNode) configuration.getValue("windv"),
+             configuration);
+    }
+
+    public WindFieldLayer(LayerType layerType, RasterDataNode windu, RasterDataNode windv,
+                          PropertyContainer configuration) {
+        super(layerType, configuration);
+        this.windu = windu;
+        this.windv = windv;
         palette = new Color[256];
         for (int i = 0; i < palette.length; i++) {
             palette[i] = new Color(i, i, i);

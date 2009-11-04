@@ -1,8 +1,7 @@
 package org.esa.beam.glayer;
 
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.ValueModel;
+import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
@@ -11,10 +10,10 @@ import com.bc.ceres.glevel.MultiLevelSource;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.framework.datamodel.RGBImageProfile;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.datamodel.VirtualBand;
+import org.esa.beam.framework.dataop.barithm.BandArithmetic;
 import org.esa.beam.glevel.BandImageMultiLevelSource;
 
 import java.awt.geom.AffineTransform;
@@ -33,8 +32,10 @@ public class RgbImageLayerType extends ImageLayer.Type {
     }
 
     @Override
-    protected ImageLayer createLayerImpl(LayerContext ctx, ValueContainer configuration) {
-        if (configuration.getValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE) == null) {
+    public ImageLayer createLayer(LayerContext ctx, PropertyContainer configuration) {
+        MultiLevelSource multiLevelSource = (MultiLevelSource) configuration.getValue(
+                ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE);
+        if (multiLevelSource == null) {
             final Product product = (Product) configuration.getValue(PROPERTY_NAME_PRODUCT);
 
             final String[] rgbExpressions = new String[3];
@@ -45,42 +46,38 @@ public class RgbImageLayerType extends ImageLayer.Type {
 
             final AffineTransform i2mTransform = (AffineTransform) configuration.getValue(
                     ImageLayer.PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM);
-            final MultiLevelSource multiLevelSource = BandImageMultiLevelSource.create(rasters, i2mTransform,
-                                                                                       ProgressMonitor.NULL);
-            try {
-                configuration.setValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE, multiLevelSource);
-                configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_SHOWN, true);
-                configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_COLOR, ImageLayer.DEFAULT_BORDER_COLOR);
-                configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_WIDTH, ImageLayer.DEFAULT_BORDER_WIDTH);
-            } catch (ValidationException e) {
-                throw new IllegalArgumentException(e);
-            }
+            multiLevelSource = BandImageMultiLevelSource.create(rasters, i2mTransform,
+                                                                ProgressMonitor.NULL);
         }
 
-        return new ImageLayer(this, configuration);
+        configuration.setValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE, multiLevelSource);
+        configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_SHOWN, true);
+        configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_COLOR, ImageLayer.DEFAULT_BORDER_COLOR);
+        configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_WIDTH, ImageLayer.DEFAULT_BORDER_WIDTH);
+        return new ImageLayer(this, multiLevelSource, configuration);
     }
 
     @Override
-    public ValueContainer getConfigurationTemplate() {
-        final ValueContainer template = super.getConfigurationTemplate();
+    public PropertyContainer createLayerConfig(LayerContext ctx) {
+        final PropertyContainer prototype = super.createLayerConfig(ctx);
 
-        final ValueModel productModel = createDefaultValueModel(PROPERTY_NAME_PRODUCT, Product.class);
+        final Property productModel = Property.create(PROPERTY_NAME_PRODUCT, Product.class);
         productModel.getDescriptor().setNotNull(true);
-        template.addModel(productModel);
+        prototype.addProperty(productModel);
 
-        final ValueModel redModel = createDefaultValueModel(PROPERTY_NAME_EXPRESSION_R, String.class);
+        final Property redModel = Property.create(PROPERTY_NAME_EXPRESSION_R, String.class);
         redModel.getDescriptor().setNotNull(true);
-        template.addModel(redModel);
+        prototype.addProperty(redModel);
 
-        final ValueModel greenModel = createDefaultValueModel(PROPERTY_NAME_EXPRESSION_G, String.class);
+        final Property greenModel = Property.create(PROPERTY_NAME_EXPRESSION_G, String.class);
         greenModel.getDescriptor().setNotNull(true);
-        template.addModel(greenModel);
+        prototype.addProperty(greenModel);
 
-        final ValueModel blueModel = createDefaultValueModel(PROPERTY_NAME_EXPRESSION_B, String.class);
+        final Property blueModel = Property.create(PROPERTY_NAME_EXPRESSION_B, String.class);
         blueModel.getDescriptor().setNotNull(true);
-        template.addModel(blueModel);
+        prototype.addProperty(blueModel);
 
-        return template;
+        return prototype;
     }
 
     public Layer createLayer(RasterDataNode[] rasters, BandImageMultiLevelSource multiLevelSource) {
@@ -97,48 +94,42 @@ public class RgbImageLayerType extends ImageLayer.Type {
         if (product != rasters[2].getProduct()) {
             throw new IllegalArgumentException("rasters[0].getProduct() != rasters[2].getProduct()");
         }
-        final ValueContainer configuration = getConfigurationTemplate();
+        final PropertyContainer configuration = createLayerConfig(null);
 
-        try {
-            final String expressionR = getExpression(rasters[0]);
-            final String expressionG = getExpression(rasters[1]);
-            final String expressionB = getExpression(rasters[2]);
+        final String expressionR = getExpression(rasters[0]);
+        final String expressionG = getExpression(rasters[1]);
+        final String expressionB = getExpression(rasters[2]);
 
-            configuration.setValue(PROPERTY_NAME_PRODUCT, product);
-            configuration.setValue(PROPERTY_NAME_EXPRESSION_R, expressionR);
-            configuration.setValue(PROPERTY_NAME_EXPRESSION_G, expressionG);
-            configuration.setValue(PROPERTY_NAME_EXPRESSION_B, expressionB);
+        configuration.setValue(PROPERTY_NAME_PRODUCT, product);
+        configuration.setValue(PROPERTY_NAME_EXPRESSION_R, expressionR);
+        configuration.setValue(PROPERTY_NAME_EXPRESSION_G, expressionG);
+        configuration.setValue(PROPERTY_NAME_EXPRESSION_B, expressionB);
 
-            if (multiLevelSource == null) {
-                multiLevelSource = BandImageMultiLevelSource.create(rasters, ProgressMonitor.NULL);
-            }
-            configuration.setValue(ImageLayer.PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM,
-                                   multiLevelSource.getModel().getImageToModelTransform(0));
-            configuration.setValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE, multiLevelSource);
-            configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_SHOWN, true);
-            configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_COLOR, ImageLayer.DEFAULT_BORDER_COLOR);
-            configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_WIDTH, ImageLayer.DEFAULT_BORDER_WIDTH);
-        } catch (ValidationException e) {
-            throw new IllegalArgumentException(e);
+        if (multiLevelSource == null) {
+            multiLevelSource = BandImageMultiLevelSource.create(rasters, ProgressMonitor.NULL);
         }
+        configuration.setValue(ImageLayer.PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM,
+                               multiLevelSource.getModel().getImageToModelTransform(0));
+        configuration.setValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE, multiLevelSource);
+        configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_SHOWN, true);
+        configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_COLOR, ImageLayer.DEFAULT_BORDER_COLOR);
+        configuration.setValue(ImageLayer.PROPERTY_NAME_BORDER_WIDTH, ImageLayer.DEFAULT_BORDER_WIDTH);
 
         return createLayer(null, configuration);
     }
 
+    // todo - code duplication in Session.java (nf 10.2009)
     private static String getExpression(RasterDataNode raster) {
-        final ProductNode owner = raster.getOwner();
-
-        if (owner instanceof Product) {
-            final Product product = (Product) owner;
+        final Product product = raster.getProduct();
+        if (product != null) {
             if (product.containsBand(raster.getName())) {
-                return raster.getName();
+                return BandArithmetic.createExternalName(raster.getName());
             } else {
                 if (raster instanceof VirtualBand) {
                     return ((VirtualBand) raster).getExpression();
                 }
             }
         }
-
         return null;
     }
 

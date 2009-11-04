@@ -1,10 +1,9 @@
 package org.esa.beam.visat.toolviews.layermanager.layersrc.shapefile;
 
-import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.grender.Rendering;
-import com.vividsolutions.jts.geom.Geometry;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.map.DefaultMapContext;
@@ -31,8 +30,6 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
-import java.io.IOException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +40,7 @@ import java.util.Map;
  *
  * @author Marco Peters
  * @author Marco Zühlke
- * @version $Revision: 1.8 $ $Date: 2009-10-15 20:30:19 $
+ * @version $Revision: 1.9 $ $Date: 2009-11-04 17:04:32 $
  * @since BEAM 4.6
  */
 public class FeatureLayer extends Layer {
@@ -58,25 +55,9 @@ public class FeatureLayer extends Layer {
     private double textOpacity = 1.0;
     private Rectangle2D modelBounds;
 
-    public FeatureLayer(LayerType layerType, ValueContainer configuration) {
+    public FeatureLayer(LayerType layerType, final FeatureCollection<SimpleFeatureType, SimpleFeature> fc,
+                        PropertyContainer configuration) {
         super(layerType, configuration);
-        FeatureCollection<SimpleFeatureType, SimpleFeature> fc;
-        fc = (FeatureCollection<SimpleFeatureType, SimpleFeature>) configuration.getValue(
-                FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION);
-        if (fc == null) {
-            final URL url = (URL) configuration.getValue(FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION_URL);
-            final CoordinateReferenceSystem targetCrs = (CoordinateReferenceSystem) configuration.getValue(
-                    FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION_CRS);
-            final Geometry clipGeometry = (Geometry) configuration.getValue(
-                    FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION_CLIP_GEOMETRY);
-            try {
-                fc = ShapefileUtils.createFeatureCollection(url, targetCrs, clipGeometry);
-            } catch (IOException e) {
-                throw new IllegalArgumentException(e);
-            }
-        }
-        Style style = (Style) configuration.getValue(FeatureLayerType.PROPERTY_NAME_SLD_STYLE);
-
         crs = fc.getSchema().getGeometryDescriptor().getCoordinateReferenceSystem();
         if (crs == null) {
             // todo - check me! Why can this happen??? (nf)
@@ -86,6 +67,7 @@ public class FeatureLayer extends Layer {
         modelBounds = new Rectangle2D.Double(envelope.getMinX(), envelope.getMinY(),
                                              envelope.getWidth(), envelope.getHeight());
         mapContext = new DefaultMapContext(crs);
+        final Style style = (Style) configuration.getValue(FeatureLayerType.PROPERTY_NAME_SLD_STYLE);
         mapContext.addLayer(fc, style);
         renderer = new StreamingRenderer();
         workaroundLabelCacheBug();
@@ -93,7 +75,6 @@ public class FeatureLayer extends Layer {
         renderer.setContext(mapContext);
 
     }
-
 
     @Override
     protected Rectangle2D getLayerModelBounds() {

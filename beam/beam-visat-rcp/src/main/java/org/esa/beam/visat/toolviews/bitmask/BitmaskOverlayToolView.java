@@ -1,5 +1,5 @@
 /*
- * $Id: BitmaskOverlayToolView.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: BitmaskOverlayToolView.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -743,19 +743,8 @@ public class BitmaskOverlayToolView extends AbstractToolView {
     }
 
     private boolean isBitmaskDefOfAnotherProduct(final BitmaskDef bitmaskDefOld) {
-        final Product product = getSelectedProduct();
-        if (product == null) {
-            return false;
-        }
-        final ProductNode owner = bitmaskDefOld.getOwner();
-        if (owner == null) {
-            return false;
-        }
-        //noinspection SimplifiableIfStatement
-        if (owner.getProduct() == null) {
-            return false;
-        }
-        return owner.getProduct() != product;
+        final Product selectedProduct = getSelectedProduct();
+        return selectedProduct != null && bitmaskDefOld.getProduct() != selectedProduct;
     }
 
 

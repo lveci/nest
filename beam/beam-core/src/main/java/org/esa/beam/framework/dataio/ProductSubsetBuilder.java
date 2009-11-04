@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetBuilder.java,v 1.13 2009-10-14 19:16:21 lveci Exp $
+ * $Id: ProductSubsetBuilder.java,v 1.14 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +31,7 @@ import java.util.Arrays;
  * A special-purpose product reader used to build subsets of data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.13 $ $Date: 2009-10-14 19:16:21 $
+ * @version $Revision: 1.14 $ $Date: 2009-11-04 17:04:32 $
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
@@ -721,6 +721,8 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         final Stx sourceStx = sourceRaster.getStx();
         final Stx targetStx = new Stx(sourceStx.getMin(), sourceStx.getMax(),
                                       sourceStx.getMean(), sourceStx.getStandardDeviation(),
+                                      sourceStx.getCoefficientOfVariation(),
+                                      sourceStx.getEquivilantNumberOfLooks(),
                                       ProductData.isIntType(sourceRaster.getDataType()),
                                       Arrays.copyOf(sourceStx.getHistogramBins(), sourceStx.getHistogramBins().length),
                                       sourceStx.getResolutionLevel());

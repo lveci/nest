@@ -1,5 +1,5 @@
 /*
- * $Id: OperatorSpiRegistryImpl.java,v 1.1 2009-04-28 14:37:14 lveci Exp $
+ * $Id: OperatorSpiRegistryImpl.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,7 +17,7 @@
 package org.esa.beam.framework.gpf.internal;
 
 import com.bc.ceres.core.ServiceRegistry;
-import com.bc.ceres.core.ServiceRegistryFactory;
+import com.bc.ceres.core.ServiceRegistryManager;
 import com.bc.ceres.core.ServiceRegistryListener;
 import org.esa.beam.BeamCoreActivator;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -43,7 +43,7 @@ public class OperatorSpiRegistryImpl implements OperatorSpiRegistry {
      * The provate singleton constructor.
      */
     public OperatorSpiRegistryImpl() {
-        serviceRegistry = ServiceRegistryFactory.getInstance().getServiceRegistry(OperatorSpi.class);
+        serviceRegistry = ServiceRegistryManager.getInstance().getServiceRegistry(OperatorSpi.class);
         aliases = new HashMap<String, String>(20);
         serviceRegistry.addListener(new ServiceRegistryListener<OperatorSpi>() {
             public void serviceAdded(ServiceRegistry<OperatorSpi> registry, OperatorSpi service) {

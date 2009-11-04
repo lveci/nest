@@ -1,5 +1,5 @@
 /*
- * $Id: BandArithmeticPerformanceTest.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: BandArithmeticPerformanceTest.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -65,7 +65,7 @@ public class BandArithmeticPerformanceTest extends TestCase {
         long dt = (t3 - t2) - (t2 - t1);
         long numOps = Math.round(numLoops * (1000.0 / dt));
 
-        System.out.println("BandArithmeticPerformanceTest: " + numOps + " ops per second for term '" + code + "'");
+        //System.out.println("BandArithmeticPerformanceTest: " + numOps + " ops per second for term '" + code + "'");
         assertTrue("Low evaluation performance detected: Term implementation change?",
                    numOps > 2500000);
     }

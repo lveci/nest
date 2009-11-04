@@ -1,5 +1,5 @@
 /*
- * $Id: WorldMapImageLoader.java,v 1.2 2009-07-10 18:36:55 lveci Exp $
+ * $Id: WorldMapImageLoader.java,v 1.3 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,11 +16,12 @@
  */
 package org.esa.beam.framework.ui;
 
-import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.glayer.CollectionLayer;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerType;
+import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.grender.support.BufferedImageRendering;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 
@@ -37,7 +38,7 @@ import java.awt.image.BufferedImage;
  * This utility class is responsible for loading the world map image.
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2009-07-10 18:36:55 $
+ * @version $Revision: 1.3 $ $Date: 2009-11-04 17:04:32 $
  */
 public class WorldMapImageLoader {
 
@@ -63,12 +64,12 @@ public class WorldMapImageLoader {
         if (worldMapImage == null || isHighRes() != highRes) {
             setHighRes(highRes);
 
-            LayerType layerType = LayerType.getLayerType("org.esa.beam.worldmap.BlueMarbleLayerType");
+            LayerType layerType = LayerTypeRegistry.getLayerType("org.esa.beam.worldmap.BlueMarbleLayerType");
             if (layerType == null) {
                 worldMapImage = createErrorImage();
             } else {
                 final CollectionLayer rootLayer = new CollectionLayer();
-                Layer worldMapLayer = layerType.createLayer(new WorldMapLayerContext(rootLayer), new ValueContainer());
+                Layer worldMapLayer = layerType.createLayer(new WorldMapLayerContext(rootLayer), new PropertyContainer());
                 Dimension dimension = highRes ? HI_RES_DIMENSION : LOW_RES_DIMENSION;
                 final BufferedImageRendering biRendering = new BufferedImageRendering(dimension.width,
                                                                                       dimension.height);

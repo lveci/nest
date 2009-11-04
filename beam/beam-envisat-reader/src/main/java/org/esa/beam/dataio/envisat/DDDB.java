@@ -1,5 +1,5 @@
 /*
- * $Id: DDDB.java,v 1.1 2009-04-28 14:37:13 lveci Exp $
+ * $Id: DDDB.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -36,7 +36,7 @@ import java.util.Vector;
  * <p> Note this class has public access as a side-effect of the implementation.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:13 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
  * @see org.esa.beam.dataio.envisat.RecordInfo
  */
 public class DDDB {
@@ -73,14 +73,6 @@ public class DDDB {
     public static final String NULL_VALUE_STRING = "*";
 
     /**
-     * The DDDB singleton instance
-     *
-     * @supplierCardinality 1
-     * @supplierRole -instance
-     */
-    private static final DDDB _instance = new DDDB();
-
-    /**
      * The index of the first binary dataset in product-info files.
      */
     private final int _firstBinaryDsIndex = 3;
@@ -104,7 +96,7 @@ public class DDDB {
      * Gets the singleton instance of the RecordInfoDB.
      */
     public static DDDB getInstance() {
-        return _instance;
+        return Holder.instance;
     }
 
 
@@ -1136,6 +1128,11 @@ public class DDDB {
             sb.append("']");
             return sb.toString();
         }
+    }
+    
+    // Initialization on demand holder idiom
+    private static class Holder {
+        private static final DDDB instance = new DDDB();
     }
 
 }

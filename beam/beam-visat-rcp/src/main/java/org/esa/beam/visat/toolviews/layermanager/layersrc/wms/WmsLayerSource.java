@@ -1,5 +1,5 @@
 /*
- * $Id: WmsLayerSource.java,v 1.4 2009-05-27 13:12:23 lveci Exp $
+ * $Id: WmsLayerSource.java,v 1.5 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,8 +16,9 @@
  */
 package org.esa.beam.visat.toolviews.layermanager.layersrc.wms;
 
-import org.esa.beam.framework.datamodel.RasterDataNode;
+import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.MapGeoCoding;
+import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.visat.toolviews.layermanager.LayerSource;
 import org.esa.beam.visat.toolviews.layermanager.layersrc.AbstractLayerSourceAssistantPage;
@@ -37,7 +38,7 @@ public class WmsLayerSource implements LayerSource {
     public boolean isApplicable(LayerSourcePageContext pageContext) {
         ProductSceneView view = pageContext.getAppContext().getSelectedProductSceneView();
         RasterDataNode raster = view.getRaster();
-        return raster.getGeoCoding() instanceof MapGeoCoding;
+        return raster.getGeoCoding() instanceof MapGeoCoding || raster.getGeoCoding() instanceof CrsGeoCoding;
     }
 
     @Override

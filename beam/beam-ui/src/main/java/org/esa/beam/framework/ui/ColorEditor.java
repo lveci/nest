@@ -1,5 +1,5 @@
 /*
- * $Id: ColorEditor.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: ColorEditor.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,7 +16,7 @@
  */
 package org.esa.beam.framework.ui;
 
-import com.bc.ceres.binding.ValueDescriptor;
+import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.swing.BindingContext;
 import com.bc.ceres.binding.swing.ValueEditor;
 import com.jidesoft.combobox.ColorComboBox;
@@ -29,14 +29,14 @@ import javax.swing.JComponent;
  * A value editor for colors.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:17:18 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
  * @since BEAM 4.6
  */
 public class ColorEditor extends ValueEditor {
 
     @Override
-    public boolean isValidFor(ValueDescriptor valueDescriptor) {
-        Class<?> type = valueDescriptor.getType();
+    public boolean isValidFor(PropertyDescriptor propertyDescriptor) {
+        Class<?> type = propertyDescriptor.getType();
         if (type.isAssignableFrom(Color.class)) {
             return true;
         }
@@ -44,12 +44,12 @@ public class ColorEditor extends ValueEditor {
     }
     
     @Override
-    public JComponent createEditorComponent(ValueDescriptor valueDescriptor, BindingContext bindingContext) {
+    public JComponent createEditorComponent(PropertyDescriptor propertyDescriptor, BindingContext bindingContext) {
         ColorComboBox colorComboBox = new ColorComboBox();
         colorComboBox.setColorValueVisible(true);
         colorComboBox.setAllowDefaultColor(true);
         ColorComboBoxAdapter adapter = new ColorComboBoxAdapter(colorComboBox);
-        bindingContext.bind(valueDescriptor.getName(), adapter);
+        bindingContext.bind(propertyDescriptor.getName(), adapter);
         return colorComboBox;
     }
 }

@@ -1,7 +1,6 @@
 package org.esa.beam.glayer;
 
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.glayer.Layer;
 import static junit.framework.Assert.assertSame;
 import org.esa.beam.framework.datamodel.Band;
@@ -27,7 +26,7 @@ public class FigureLayerTypeTest extends LayerTypeTest {
 
     @Test
     public void testConfigurationTemplate() {
-        final ValueContainer template = getLayerType().getConfigurationTemplate();
+        final PropertyContainer template = getLayerType().createLayerConfig(null);
 
         assertNotNull(template);
 
@@ -47,12 +46,12 @@ public class FigureLayerTypeTest extends LayerTypeTest {
     }
 
     @Test
-    public void testCreateLayer() throws ValidationException {
+    public void testCreateLayer() {
         final Product product = new Product("N", "T", 10, 10);
         final Band raster = new VirtualBand("A", ProductData.TYPE_INT32, 10, 10, "42");
         product.addBand(raster);
 
-        final ValueContainer config = getLayerType().getConfigurationTemplate();
+        final PropertyContainer config = getLayerType().createLayerConfig(null);
         final ArrayList figureList = new ArrayList();
         figureList.add(new LineFigure(new Rectangle(0, 0, 10, 10), Collections.EMPTY_MAP));
         config.setValue(FigureLayer.PROPERTY_NAME_FIGURE_LIST, figureList);

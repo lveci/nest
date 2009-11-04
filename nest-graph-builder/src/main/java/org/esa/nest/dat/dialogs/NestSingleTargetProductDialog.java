@@ -1,10 +1,9 @@
 package org.esa.nest.dat.dialogs;
 
 import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.ValueDescriptor;
-import com.bc.ceres.binding.ValueModel;
-import com.bc.ceres.binding.swing.ValueEditor;
+import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.swing.TableLayout;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductFilter;
@@ -87,7 +86,7 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
         this.form.add("I/O Parameters", ioParametersPanel);
 
         final ParameterDescriptorFactory parameterDescriptorFactory = new ParameterDescriptorFactory();
-        final ValueContainer valueContainer = ValueContainer.createMapBacked(parameterMap,
+        final PropertyContainer valueContainer = PropertyContainer.createMapBacked(parameterMap,
                                                 operatorSpi.getOperatorClass(), parameterDescriptorFactory);
         try {
             valueContainer.setDefaultValues();
@@ -95,13 +94,10 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
             e.printStackTrace();
             showErrorDialog(e.getMessage());
         }
-        if (valueContainer.getModels().length > 0) {
+        if (valueContainer.getProperties().length > 0) {
 
             final JComponent paremetersPanel = opUI.CreateOpTab(operatorName, parameterMap, appContext);
 
-            //BindingContext context = new BindingContext(valueContainer);
-            //ParametersPane parametersPane = new ParametersPane(context);
-            // JPanel paremetersPanel = parametersPane.createPanel();
             paremetersPanel.setBorder(new EmptyBorder(4, 4, 4, 4));
             this.form.add("Processing Parameters", new JScrollPane(paremetersPanel));
 
@@ -109,9 +105,9 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
                 final SourceProductSelector sourceProductSelector = sourceProductSelectorMap.get(field);
                 final String sourceAlias = field.getAnnotation(SourceProduct.class).alias();
 
-                for (ValueModel valueModel : valueContainer.getModels()) {
-                    final ValueDescriptor parameterDescriptor = valueModel.getDescriptor();
-                    final String sourceId = (String) parameterDescriptor.getProperty("sourceId");
+                for (Property p : valueContainer.getProperties()) {
+                    final PropertyDescriptor parameterDescriptor = p.getDescriptor();
+                    final String sourceId = (String) parameterDescriptor.getAttribute("sourceId");
                     if (sourceId != null && (sourceId.equals(field.getName()) || sourceId.equals(sourceAlias))) {
                         final SelectionChangeListener valueSetUpdater = new ValueSetUpdater(parameterDescriptor);
                         sourceProductSelector.addSelectionChangeListener(valueSetUpdater);
@@ -155,7 +151,7 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
                 if (!annot.alias().isEmpty()) {
                     name = annot.alias();
                 }
-                label = ValueDescriptor.createDisplayName(name);
+                label = PropertyDescriptor.createDisplayName(name);
             }
             if (!label.endsWith(":")) {
                 label += ":";

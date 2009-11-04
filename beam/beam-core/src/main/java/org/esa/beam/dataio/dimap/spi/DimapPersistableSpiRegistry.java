@@ -1,5 +1,5 @@
 /*
- * $Id: DimapPersistableSpiRegistry.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: DimapPersistableSpiRegistry.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,15 +16,12 @@
  */
 package org.esa.beam.dataio.dimap.spi;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Set;
-
-import org.esa.beam.util.Debug;
-import org.esa.beam.framework.dataio.ProductWriterPlugIn;
-import org.esa.beam.BeamCoreActivator;
-import com.bc.ceres.core.ServiceRegistryFactory;
 import com.bc.ceres.core.ServiceRegistry;
+import com.bc.ceres.core.ServiceRegistryManager;
+
+import org.esa.beam.BeamCoreActivator;
+
+import java.util.Iterator;
 
 
 /**
@@ -37,10 +34,9 @@ import com.bc.ceres.core.ServiceRegistry;
 public final class DimapPersistableSpiRegistry {
 
     private ServiceRegistry<DimapPersistableSpi> providers;
-    private static DimapPersistableSpiRegistry instance;
 
     private DimapPersistableSpiRegistry() {
-        providers = ServiceRegistryFactory.getInstance().getServiceRegistry(DimapPersistableSpi.class);
+        providers = ServiceRegistryManager.getInstance().getServiceRegistry(DimapPersistableSpi.class);
         if (!BeamCoreActivator.isStarted()) {
             BeamCoreActivator.loadServices(providers);
         }
@@ -52,18 +48,7 @@ public final class DimapPersistableSpiRegistry {
      * @return the instance
      */
     public static DimapPersistableSpiRegistry getInstance(){
-        if(instance == null) {
-            instance = new DimapPersistableSpiRegistry();
-            ServiceRegistryFactory factory = ServiceRegistryFactory.getInstance();
-            ServiceRegistry<DimapPersistableSpi> persistableRegistry = factory.getServiceRegistry(DimapPersistableSpi.class);
-            Set<DimapPersistableSpi> persistableSpis = persistableRegistry.getServices();
-            Debug.trace("registering dimap persistable service provider...");
-            for (DimapPersistableSpi spi : persistableSpis) {
-                instance.addPersistableSpi(spi);
-                Debug.trace("dimap persistable service provider registered: " + spi.getClass().getName());
-            }
-        }
-        return instance;
+        return Holder.instance;
     }
 
     public void addPersistableSpi(DimapPersistableSpi spi) {
@@ -76,5 +61,10 @@ public final class DimapPersistableSpiRegistry {
 
     public boolean isRegistered(DimapPersistableSpi spi) {
         return providers.getService(spi.getClass().getName()) != null;
+    }
+    
+    // Initialization on demand holder idiom
+    private static class Holder {
+        private static final DimapPersistableSpiRegistry instance = new DimapPersistableSpiRegistry();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: WakefulComponent.java,v 1.2 2009-07-07 00:27:41 lveci Exp $
+ * $Id: WakefulComponent.java,v 1.3 2009-11-04 17:04:33 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -60,7 +60,7 @@ import java.awt.image.BufferedImage;
  * {@link WakefulComponent#getVisualState() visualState} property.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-07-07 00:27:41 $
+ * @version $Revision: 1.3 $ $Date: 2009-11-04 17:04:33 $
  */
 public class WakefulComponent extends JComponent {
 
@@ -207,7 +207,7 @@ public class WakefulComponent extends JComponent {
 
     @Override
     public final void setLayout(LayoutManager mgr) {
-        if (mgr != null) {
+        if (mgr == null) {
             throw new IllegalArgumentException("mgr");
         }
         super.setLayout(mgr);

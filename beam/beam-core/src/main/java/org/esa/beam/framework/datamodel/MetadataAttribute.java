@@ -1,5 +1,5 @@
 /*
- * $Id: MetadataAttribute.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: MetadataAttribute.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -23,7 +23,7 @@ import org.esa.beam.util.ObjectUtils;
  * A <code>MetadataAttribute</code> is part of a <code>{@link MetadataElement}</code> and represents a key/value pair.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
  */
 public class MetadataAttribute extends DataNode {
 
@@ -38,6 +38,10 @@ public class MetadataAttribute extends DataNode {
 
     public MetadataAttribute(String name, ProductData data, boolean readOnly) {
         super(name, data, readOnly);
+    }
+
+    public MetadataElement getParentElement() {
+        return MetadataElement.getParentElement(this);
     }
 
     @Override

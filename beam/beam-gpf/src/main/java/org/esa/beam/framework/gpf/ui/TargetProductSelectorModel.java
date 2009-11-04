@@ -1,9 +1,9 @@
 package org.esa.beam.framework.gpf.ui;
 
-import com.bc.ceres.binding.*;
+import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.validators.NotEmptyValidator;
 import com.bc.ceres.binding.validators.NotNullValidator;
-
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
@@ -12,14 +12,13 @@ import org.esa.beam.util.StringUtils;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.Iterator;
 
 /**
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:14 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
  */
 @SuppressWarnings({"UnusedDeclaration"})
 public class TargetProductSelectorModel {
@@ -32,32 +31,32 @@ public class TargetProductSelectorModel {
     private String formatName;
     private String[] formatNames = { ProductIO.DEFAULT_FORMAT_NAME };
 
-    private final ValueContainer valueContainer;
+    private final PropertyContainer propertyContainer;
 
     TargetProductSelectorModel() {
-        valueContainer = ValueContainer.createObjectBacked(this);
-        valueContainer.addPropertyChangeListener("saveToFileSelected", new PropertyChangeListener() {
+        propertyContainer = PropertyContainer.createObjectBacked(this);
+        propertyContainer.addPropertyChangeListener("saveToFileSelected", new PropertyChangeListener() {
             public void propertyChange(PropertyChangeEvent evt) {
                 if (!(Boolean) evt.getNewValue()) {
                     setOpenInAppSelected(true);
                 }
             }
         });
-        valueContainer.addPropertyChangeListener("openInAppSelected", new PropertyChangeListener() {
+        propertyContainer.addPropertyChangeListener("openInAppSelected", new PropertyChangeListener() {
             public void propertyChange(PropertyChangeEvent evt) {
                 if (!(Boolean) evt.getNewValue()) {
                     setSaveToFileSelected(true);
                 }
             }
         });
-        ValueDescriptor productNameDescriptor = valueContainer.getDescriptor("productName");
+        PropertyDescriptor productNameDescriptor = propertyContainer.getDescriptor("productName");
         productNameDescriptor.setValidator(new NotEmptyValidator());
         productNameDescriptor.setDisplayName("target product name");
 
-        ValueDescriptor productDirDescriptor = valueContainer.getDescriptor("productDir");
+        PropertyDescriptor productDirDescriptor = propertyContainer.getDescriptor("productDir");
         productDirDescriptor.setValidator(new NotNullValidator());
         productDirDescriptor.setDisplayName("target product directory");
-        
+
         setOpenInAppSelected(true);
         setSaveToFileSelected(true);
         //formatNames = ProductIOPlugInManager.getInstance().getAllProductWriterFormatStrings();
@@ -136,16 +135,12 @@ public class TargetProductSelectorModel {
         setValueContainerValue("formatName", formatName);
     }
 
-    public ValueContainer getValueContainer() {
-        return valueContainer;
+    public PropertyContainer getValueContainer() {
+        return propertyContainer;
     }
 
     private void setValueContainerValue(String name, Object value) {
-        try {
-            valueContainer.setValue(name, value);
-        } catch (ValidationException e) {
-            throw new IllegalArgumentException(e);
-        }
+        propertyContainer.setValue(name, value);
     }
 
 }

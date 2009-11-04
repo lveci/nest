@@ -2,7 +2,10 @@ package org.esa.beam.visat.actions.session;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertyDescriptor;
+import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.accessors.DefaultPropertyAccessor;
 import com.bc.ceres.binding.dom.DefaultDomElement;
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.DomElementXStreamConverter;
@@ -12,6 +15,7 @@ import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerType;
+import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.grender.Viewport;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
@@ -23,7 +27,6 @@ import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductManager;
-import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.framework.datamodel.RGBImageProfile;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.datamodel.VirtualBand;
@@ -34,6 +37,7 @@ import org.esa.beam.framework.ui.product.ProductSceneImage;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.util.PropertyMap;
 import org.esa.beam.visat.actions.session.dom.SessionDomConverter;
+import org.esa.beam.glayer.MaskCollectionLayerType;
 
 import javax.swing.JComponent;
 import javax.swing.RootPaneContainer;
@@ -51,7 +55,7 @@ import java.util.List;
  *
  * @author Ralf Quast
  * @author Norman Fomferra
- * @version $Revision: 1.10 $ $Date: 2009-10-13 15:56:30 $
+ * @version $Revision: 1.11 $ $Date: 2009-11-04 17:04:32 $
  * @since BEAM 4.6
  */
 @XStreamAlias("session")
@@ -94,7 +98,7 @@ public class Session {
                                               viewport.getZoomFactor(),
                                               viewport.getOrientation());
                 final List<Layer> layers = sceneView.getRootLayer().getChildren();
-                layerRefs = getLayerRefs(sceneView, layers, productManager);
+                layerRefs = getLayerRefs(layers, productManager);
             }
 
             Rectangle viewBounds = new Rectangle(0, 0, 200, 200);
@@ -128,11 +132,11 @@ public class Session {
                 MetadataElement metadataRoot = metadataView.getProduct().getMetadataRoot();
                 MetadataElement metadataElement = metadataView.getMetadataElement();
                 StringBuilder sb = new StringBuilder(metadataElement.getName());
-                ProductNode owner = metadataElement.getOwner();
-                while (owner != metadataRoot) {
+                MetadataElement parent = metadataElement.getParentElement();
+                while (parent != metadataRoot) {
                     sb.append('|');
-                    sb.append(owner.getName());
-                    owner = owner.getOwner();
+                    sb.append(parent.getName());
+                    parent = parent.getParentElement();
                 }
                 productNodeName = sb.toString();
                 productRefNo = view.getVisibleProductNode().getProduct().getRefNo();
@@ -151,11 +155,10 @@ public class Session {
         }
     }
 
+    // todo - code duplication in RgbImageLayerType.java (nf 10.2009)
     private static String getExpression(RasterDataNode raster) {
-        final ProductNode owner = raster.getOwner();
-
-        if (owner instanceof Product) {
-            final Product product = (Product) owner;
+        final Product product = raster.getProduct();
+        if (product != null) {
             if (product.containsBand(raster.getName())) {
                 return raster.getName();
             } else {
@@ -164,7 +167,6 @@ public class Session {
                 }
             }
         }
-
         return null;
     }
 
@@ -180,28 +182,45 @@ public class Session {
         return rootURI.relativize(uri);
     }
 
-    private static LayerRef[] getLayerRefs(LayerContext layerContext, List<Layer> layers, ProductManager productManager) {
-        final LayerRef[] layerRefs = new LayerRef[layers.size()];
+    private static LayerRef[] getLayerRefs(List<Layer> layers, ProductManager productManager) {
+        final ArrayList<LayerRef> layerRefs = new ArrayList<LayerRef>(layers.size());
         for (int i = 0; i < layers.size(); i++) {
             Layer layer = layers.get(i);
-            final ValueContainer configuration = getConfiguration(layerContext, layer);
-            final SessionDomConverter domConverter = new SessionDomConverter(productManager);
-            final DomElement element = new DefaultDomElement("configuration");
-            try {
-                domConverter.convertValueToDom(configuration, element);
-            } catch (ConversionException e) {
-                e.printStackTrace();
+            if (isSerializableLayer(layer)) {
+                PropertyContainer configuration = layer.getConfiguration();
+                // todo - check - why create a configuration copy here?! (nf, 10.2009)
+                PropertyContainer configurationCopy = getConfigurationCopy(configuration);
+                SessionDomConverter domConverter = new SessionDomConverter(productManager);
+                DomElement element = new DefaultDomElement("configuration");
+                try {
+                    domConverter.convertValueToDom(configurationCopy, element);
+                } catch (ConversionException e) {
+                    e.printStackTrace();
+                }
+                layerRefs.add(new LayerRef(layer, i, element,
+                                            getLayerRefs(layer.getChildren(), productManager)));
             }
-            layerRefs[i] = new LayerRef(layer, i, element,
-                                        getLayerRefs(layerContext, layer.getChildren(), productManager));
         }
-        return layerRefs;
+        return layerRefs.toArray(new LayerRef[layerRefs.size()]);
+    }
+
+    private static boolean isSerializableLayer(Layer layer) {
+        // todo - check, this could be solved in a generic way (nf, 10.2009)
+        return !(layer.getLayerType() instanceof MaskCollectionLayerType);
     }
 
 
-    private static ValueContainer getConfiguration(LayerContext ctx, Layer layer) {
-        // todo - check - why create a copy here?! (nf, 10.2009)         
-        return layer.getLayerType().getConfigurationCopy(ctx, layer);
+    private static PropertyContainer getConfigurationCopy(PropertyContainer propertyContainer) {
+        final PropertyContainer configuration = new PropertyContainer();
+
+        for (Property model : propertyContainer.getProperties()) {
+            final PropertyDescriptor descriptor = new PropertyDescriptor(model.getDescriptor());
+            final DefaultPropertyAccessor valueAccessor = new DefaultPropertyAccessor();
+            valueAccessor.setValue(model.getValue());
+            configuration.addProperty(new Property(descriptor, valueAccessor));
+        }
+
+        return configuration;
     }
 
     public String getModelVersion() {
@@ -408,9 +427,9 @@ public class Session {
                                     Layer parentLayer,
                                     LayerRef layerRef,
                                     ProductManager productManager) throws ConversionException, ValidationException {
-        final LayerType type = LayerType.getLayerType(layerRef.layerTypeName);
+        final LayerType type = LayerTypeRegistry.getLayerType(layerRef.layerTypeName);
         final SessionDomConverter converter = new SessionDomConverter(productManager);
-        final ValueContainer template = type.getConfigurationTemplate();
+        final PropertyContainer template = type.createLayerConfig(layerContext);
         converter.convertDomToValue(layerRef.configuration, template);
         final Layer layer = type.createLayer(layerContext, template);
         layer.setId(layerRef.id);
@@ -454,7 +473,7 @@ public class Session {
     public static class ProductRef {
 
         final int refNo;
-        @XStreamConverter(URIConnverterWrapper.class)
+        @XStreamConverter(URIConverterWrapper.class)
         final URI uri;
 
         public ProductRef(int refNo, URI uri) {
@@ -581,14 +600,14 @@ public class Session {
         }
     }
 
-    public static class URIConnverterWrapper extends SingleValueConverterWrapper {
+    public static class URIConverterWrapper extends SingleValueConverterWrapper {
 
-        public URIConnverterWrapper() {
-            super(new URIConnverter());
+        public URIConverterWrapper() {
+            super(new URIConverter());
         }
     }
 
-    public static class URIConnverter extends AbstractSingleValueConverter {
+    public static class URIConverter extends AbstractSingleValueConverter {
 
         @Override
         public boolean canConvert(Class type) {
@@ -602,24 +621,6 @@ public class Session {
             } catch (URISyntaxException e) {
                 throw new com.thoughtworks.xstream.converters.ConversionException(e);
             }
-        }
-    }
-
-    public static class SessionAccessor {
-
-        private final Product[] products;
-
-        public SessionAccessor(Product[] products) {
-            this.products = products;
-        }
-
-        Product getProduct(int refNo) {
-            return getProductForRefNo(products, refNo);
-        }
-
-        RasterDataNode getRasterDataNode(int refNo, String nodeName) {
-            final Product product = getProductForRefNo(products, refNo);
-            return product.getRasterDataNode(nodeName);
         }
     }
 }

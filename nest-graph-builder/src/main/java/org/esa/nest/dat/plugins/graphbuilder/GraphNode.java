@@ -63,7 +63,8 @@ public class GraphNode {
         if(operatorSpi == null) return;
 
         final ParameterDescriptorFactory parameterDescriptorFactory = new ParameterDescriptorFactory();
-        final ValueContainer valueContainer = ValueContainer.createMapBacked(parameterMap, operatorSpi.getOperatorClass(), parameterDescriptorFactory);
+        final PropertyContainer valueContainer = PropertyContainer.createMapBacked(parameterMap,
+                operatorSpi.getOperatorClass(), parameterDescriptorFactory);
 
         final DomElement config = node.getConfiguration();
         final int count = config.getChildCount();
@@ -96,12 +97,12 @@ public class GraphNode {
         }
     }
 
-    private static Converter getConverter(final ValueContainer valueContainer, final String name) {
-        final ValueModel[] models = valueContainer.getModels();
+    private static Converter getConverter(final PropertyContainer valueContainer, final String name) {
+        final Property[] properties = valueContainer.getProperties();
 
-        for (ValueModel model : models) {
+        for (Property p : properties) {
 
-            final ValueDescriptor descriptor = model.getDescriptor();
+            final PropertyDescriptor descriptor = p.getDescriptor();
             if(descriptor != null && (descriptor.getName().equals(name) ||
                (descriptor.getAlias() != null && descriptor.getAlias().equals(name)))) {
                 return descriptor.getConverter();

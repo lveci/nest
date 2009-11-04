@@ -36,6 +36,7 @@ import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.framework.ui.tool.ToolInputEvent;
 import org.esa.beam.glayer.FigureLayer;
 import org.esa.beam.glayer.GraticuleLayer;
+import org.esa.beam.glayer.MaskCollectionLayer;
 import org.esa.beam.glayer.NoDataLayerType;
 import org.esa.beam.glayer.RoiLayerType;
 import org.esa.beam.glevel.MaskImageMultiLevelSource;
@@ -74,11 +75,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Vector;
-
-// todo - Layer API: make it implement ProductSceneViewContext 
 
 /**
  * The class <code>ProductSceneView</code> is a high-level image display component for color index/RGB images created
@@ -96,6 +93,7 @@ public class ProductSceneView extends BasicView
     public static final String BASE_IMAGE_LAYER_ID = "org.esa.beam.layers.baseImage";
     public static final String NO_DATA_LAYER_ID = "org.esa.beam.layers.noData";
     public static final String BITMASK_LAYER_ID = "org.esa.beam.layers.bitmask";
+    public static final String MASKS_LAYER_ID = MaskCollectionLayer.ID;
     public static final String ROI_LAYER_ID = "org.esa.beam.layers.roi";
     public static final String GRATICULE_LAYER_ID = "org.esa.beam.layers.graticule";
     public static final String GCP_LAYER_ID = "org.esa.beam.layers.gcp";
@@ -223,6 +221,8 @@ public class ProductSceneView extends BasicView
 
         this.rasterChangeHandler = new RasterChangeHandler();
         getRaster().getProduct().addProductNodeListener(rasterChangeHandler);
+
+        setMaskOverlayEnabled(true);
     }
 
     private AdjustableViewScrollPane createScrollPane() {
@@ -558,14 +558,27 @@ public class ProductSceneView extends BasicView
         }
     }
 
+    @Deprecated
     public boolean isBitmaskOverlayEnabled() {
         final Layer bitmaskLayer = getBitmaskLayer(false);
         return bitmaskLayer != null && bitmaskLayer.isVisible();
     }
 
+    @Deprecated
     public void setBitmaskOverlayEnabled(boolean enabled) {
         if (isBitmaskOverlayEnabled() != enabled) {
             getBitmaskLayer(true).setVisible(enabled);
+        }
+    }
+
+    public boolean isMaskOverlayEnabled() {
+        final Layer layer = getMaskCollectionLayer(false);
+        return layer != null && layer.isVisible();
+    }
+
+    public void setMaskOverlayEnabled(boolean enabled) {
+        if (isMaskOverlayEnabled() != enabled) {
+            getMaskCollectionLayer(true).setVisible(enabled);
         }
     }
 
@@ -1029,42 +1042,27 @@ public class ProductSceneView extends BasicView
 
     protected class RasterChangeHandler implements ProductNodeListener {
 
-        private final List<String> imageChangingProperties = Arrays.asList(RasterDataNode.PROPERTY_NAME_DATA,
-                                                                           RasterDataNode.PROPERTY_NAME_NO_DATA_VALUE,
-                                                                           RasterDataNode.PROPERTY_NAME_NO_DATA_VALUE_USED,
-                                                                           RasterDataNode.PROPERTY_NAME_VALID_PIXEL_EXPRESSION,
-                                                                           VirtualBand.PROPERTY_NAME_EXPRESSION);
-
         @Override
         public void nodeChanged(final ProductNodeEvent event) {
-            repaintView(event);
+            repaintView();
         }
 
         @Override
         public void nodeDataChanged(final ProductNodeEvent event) {
-            repaintView(event);
+            repaintView();
         }
 
         @Override
         public void nodeAdded(final ProductNodeEvent event) {
-            repaintView(event);
+            repaintView();
         }
 
         @Override
         public void nodeRemoved(final ProductNodeEvent event) {
-            repaintView(event);
+            repaintView();
         }
 
-        private void repaintView(final ProductNodeEvent event) {
-            final RasterDataNode[] rasters = getRasters();
-            final ProductNode productNode = event.getSourceNode();
-            if (imageChangingProperties.contains(event.getPropertyName()) &&
-                Arrays.asList(rasters).contains(productNode)) {
-
-                RasterDataNode raster = (RasterDataNode) productNode;
-                final ImageInfo imageInfo = raster.createDefaultImageInfo(null, ProgressMonitor.NULL);
-                setImageInfo(imageInfo);
-            }
+        private void repaintView() {
             repaint(100);
         }
     }
@@ -1077,8 +1075,13 @@ public class ProductSceneView extends BasicView
         return getSceneImage().getFigureLayer(create);
     }
 
+    @Deprecated
     private Layer getBitmaskLayer(boolean create) {
         return getSceneImage().getBitmaskLayer(create);
+    }
+
+    private Layer getMaskCollectionLayer(boolean create) {
+        return getSceneImage().getMaskCollectionLayer(create);
     }
 
     private ImageLayer getRoiLayer(boolean create) {

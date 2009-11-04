@@ -1,5 +1,5 @@
 /*
- * $Id: ProductUtilsTest.java,v 1.2 2009-05-11 16:17:36 lveci Exp $
+ * $Id: ProductUtilsTest.java,v 1.3 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -34,6 +34,7 @@ import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
 
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
@@ -515,12 +516,27 @@ public class ProductUtilsTest extends TestCase {
         }
 
         @Override
+        public CoordinateReferenceSystem getMapCRS() {
+            return null;
+        }
+
+        @Override
         public CoordinateReferenceSystem getImageCRS() {
             return null;
         }
 
         @Override
         public CoordinateReferenceSystem getModelCRS() {
+            return null;
+        }
+
+        @Override
+        public CoordinateReferenceSystem getGeoCRS() {
+            return null;
+        }
+
+        @Override
+        public MathTransform getImageToMapTransform() {
             return null;
         }
     }
@@ -570,7 +586,22 @@ public class ProductUtilsTest extends TestCase {
         }
 
         @Override
+        public CoordinateReferenceSystem getMapCRS() {
+            return null;
+        }
+
+        @Override
         public CoordinateReferenceSystem getModelCRS() {
+            return null;
+        }
+
+        @Override
+        public CoordinateReferenceSystem getGeoCRS() {
+            return null;
+        }
+
+        @Override
+        public MathTransform getImageToMapTransform() {
             return null;
         }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: ExportImageAction.java,v 1.5 2009-05-27 13:12:23 lveci Exp $
+ * $Id: ExportImageAction.java,v 1.6 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,11 +16,10 @@
  */
 package org.esa.beam.visat.actions;
 
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.ValueDescriptor;
-import com.bc.ceres.binding.ValueModel;
-import com.bc.ceres.binding.accessors.DefaultValueAccessor;
+import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertyDescriptor;
+import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.accessors.DefaultPropertyAccessor;
 import com.bc.ceres.binding.converters.IntegerConverter;
 import com.bc.ceres.binding.swing.BindingContext;
 import com.bc.ceres.glayer.support.ImageLayer;
@@ -59,7 +58,7 @@ import java.beans.PropertyChangeListener;
  *
  * @author Marco Peters
  * @author Ralf Quast
- * @version $Revision: 1.5 $ $Date: 2009-05-27 13:12:23 $
+ * @version $Revision: 1.6 $ $Date: 2009-11-04 17:04:32 $
  */
 public class ExportImageAction extends AbstractExportImageAction {
 
@@ -181,13 +180,13 @@ public class ExportImageAction extends AbstractExportImageAction {
         private static final String PROPERTY_NAME_HEIGHT = "height";
         private static final String PROPERTY_NAME_WIDTH = "width";
 
-        private final ValueContainer valueContainer;
+        private final PropertyContainer propertyContainer;
         private final ProductSceneView view;
         private double aspectRatio;
 
         public SizeComponent(ProductSceneView view) {
             this.view = view;
-            valueContainer = new ValueContainer();
+            propertyContainer = new PropertyContainer();
             initValueContainer();
             updateDimensions();
         }
@@ -226,7 +225,7 @@ public class ExportImageAction extends AbstractExportImageAction {
         }
 
         public JComponent createComponent() {
-            BindingContext bindingContext = new BindingContext(valueContainer);
+            BindingContext bindingContext = new BindingContext(propertyContainer);
             ValueEditorsPane valueEditorsPane = new ValueEditorsPane(bindingContext);
             return valueEditorsPane.createPanel();
         }
@@ -236,13 +235,13 @@ public class ExportImageAction extends AbstractExportImageAction {
         }
 
         private void initValueContainer() {
-            final ValueDescriptor widthDescriptor = new ValueDescriptor(PROPERTY_NAME_WIDTH, Integer.class);
+            final PropertyDescriptor widthDescriptor = new PropertyDescriptor(PROPERTY_NAME_WIDTH, Integer.class);
             widthDescriptor.setConverter(new IntegerConverter());
-            valueContainer.addModel(new ValueModel(widthDescriptor, new DefaultValueAccessor()));
+            propertyContainer.addProperty(new Property(widthDescriptor, new DefaultPropertyAccessor()));
 
-            final ValueDescriptor heightDescriptor = new ValueDescriptor(PROPERTY_NAME_HEIGHT, Integer.class);
+            final PropertyDescriptor heightDescriptor = new PropertyDescriptor(PROPERTY_NAME_HEIGHT, Integer.class);
             heightDescriptor.setConverter(new IntegerConverter());
-            valueContainer.addModel(new ValueModel(heightDescriptor, new DefaultValueAccessor()));
+            propertyContainer.addProperty(new Property(heightDescriptor, new DefaultPropertyAccessor()));
 
             final PropertyChangeListener listener = new PropertyChangeListener() {
                 private boolean adjusting = false;
@@ -280,12 +279,12 @@ public class ExportImageAction extends AbstractExportImageAction {
                 private int showQuestionDialog() {
                     return VisatApp.getApp().showQuestionDialog(
                             "There may not be enough memory to export the image because\n" +
-                            "the image dimension is too large.\n\n" +
-                            "Do you really want to keep the image dimension?", null);
+                                    "the image dimension is too large.\n\n" +
+                                    "Do you really want to keep the image dimension?", null);
                 }
             };
 
-            valueContainer.addPropertyChangeListener(listener);
+            propertyContainer.addPropertyChangeListener(listener);
         }
 
         private long getFreeMemory() {
@@ -313,27 +312,19 @@ public class ExportImageAction extends AbstractExportImageAction {
         }
 
         private int getWidth() {
-            return (Integer) valueContainer.getValue(PROPERTY_NAME_WIDTH);
+            return (Integer) propertyContainer.getValue(PROPERTY_NAME_WIDTH);
         }
 
         private void setWidth(Object value) {
-            try {
-                valueContainer.setValue(PROPERTY_NAME_WIDTH, value);
-            } catch (ValidationException e) {
-                throw new IllegalArgumentException(e);
-            }
+            propertyContainer.setValue(PROPERTY_NAME_WIDTH, value);
         }
 
         private int getHeight() {
-            return (Integer) valueContainer.getValue(PROPERTY_NAME_HEIGHT);
+            return (Integer) propertyContainer.getValue(PROPERTY_NAME_HEIGHT);
         }
 
         private void setHeight(Object value) {
-            try {
-                valueContainer.setValue(PROPERTY_NAME_HEIGHT, value);
-            } catch (ValidationException e) {
-                throw new IllegalArgumentException(e);
-            }
+            propertyContainer.setValue(PROPERTY_NAME_HEIGHT, value);
         }
     }
 }

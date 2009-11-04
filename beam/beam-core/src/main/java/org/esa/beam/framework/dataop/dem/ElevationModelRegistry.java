@@ -1,5 +1,5 @@
 /*
- * $Id: ElevationModelRegistry.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ElevationModelRegistry.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -7,7 +7,8 @@
 package org.esa.beam.framework.dataop.dem;
 
 import com.bc.ceres.core.ServiceRegistry;
-import com.bc.ceres.core.ServiceRegistryFactory;
+import com.bc.ceres.core.ServiceRegistryManager;
+
 import org.esa.beam.BeamCoreActivator;
 import org.esa.beam.util.Guardian;
 
@@ -18,25 +19,21 @@ import java.util.Set;
  * elevation models as described by their {@link ElevationModelDescriptor}s.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ElevationModelRegistry {
 
-    private static ElevationModelRegistry instance;
     private final ServiceRegistry<ElevationModelDescriptor> descriptors;
 
     private ElevationModelRegistry() {
-        descriptors = ServiceRegistryFactory.getInstance().getServiceRegistry(ElevationModelDescriptor.class);
+        descriptors = ServiceRegistryManager.getInstance().getServiceRegistry(ElevationModelDescriptor.class);
         if (!BeamCoreActivator.isStarted()) {
             BeamCoreActivator.loadServices(descriptors);
         }
     }
 
-    public synchronized static ElevationModelRegistry getInstance() {
-        if (instance == null) {
-            instance = new ElevationModelRegistry();
-        }
-        return instance;
+    public static ElevationModelRegistry getInstance() {
+        return Holder.instance;
     }
 
     public void addDescriptor(ElevationModelDescriptor elevationModelDescriptor) {
@@ -60,5 +57,10 @@ public class ElevationModelRegistry {
 
     public ElevationModelDescriptor[] getAllDescriptors() {
         return descriptors.getServices().toArray(new ElevationModelDescriptor[0]);
+    }
+    
+    // Initialization on demand holder idiom
+    private static class Holder {
+        private static final ElevationModelRegistry instance = new ElevationModelRegistry();
     }
 }

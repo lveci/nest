@@ -1,111 +1,59 @@
 package com.bc.ceres.glayer;
 
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.ValueDescriptor;
-import com.bc.ceres.binding.ValueModel;
-import com.bc.ceres.binding.accessors.DefaultValueAccessor;
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.core.ExtensibleObject;
-import com.bc.ceres.core.ServiceRegistry;
-import com.bc.ceres.core.ServiceRegistryFactory;
 
-import java.util.ServiceLoader;
-
-// todo - Layer API: the API of this class is confusing and it is hard to implement subclasses. (nf)
-
-// todo - Layer API: carefully javadoc it (nf)
+/**
+ * A layer type is a factory for layer instances and layer (default) configurations.
+ * Layer types are managed by the {@link LayerTypeRegistry}.
+ *
+ * @author Norman Fomferra
+ * @author Marco Peters
+ * @author Marco Zuehlke
+ */
 public abstract class LayerType extends ExtensibleObject {
-
-    private static final ServiceRegistry<LayerType> REGISTRY;
 
     protected LayerType() {
     }
 
+    // todo - Layer API: remove, no framework use (nf)
+    /**
+     * Gets the name for this layer type.
+     *
+     * @return A name.
+     */
     public abstract String getName();
 
-    // todo - Layer API: it shall be safe for BEAM layers to cast ctx into a ProductSceneViewContext, otherwise there can be no reasonable implementations of this method beside CRS checkings (nf)
+    /**
+     * Tests if this type can create layers for the given application provided context.
+     * Note that some applications may provide their context through the extension object interface
+     * (see {@link #getExtension(Class)}).
+     *
+     * @param ctx An application-dependent layer context.
+     * @return {@code true} if the type is valid with respect to the given context.
+     */
     public abstract boolean isValidFor(LayerContext ctx);
 
-    // todo - Layer API: this seems to be the only framework usage of getConfigurationTemplate()! (nf)
-    // todo - Layer API: why is this final? assume overriding it in order to cast ctx into an application-specific ctx (nf)
-    public final Layer createLayer(LayerContext ctx, ValueContainer configuration) {
-        for (final ValueModel expectedModel : getConfigurationTemplate().getModels()) {
-            final String propertyName = expectedModel.getDescriptor().getName();
-            final ValueModel actualModel = configuration.getModel(propertyName);
-            if (actualModel != null) {
-                try {
-                    if (actualModel.getValue() == null && actualModel.getDescriptor().isNotNull()) {
-                        actualModel.setValue(actualModel.getDescriptor().getDefaultValue());
-                    }
-                    expectedModel.validate(actualModel.getValue());
-                } catch (ValidationException e) {
-                    throw new IllegalArgumentException(String.format(
-                            "Invalid value for property '%s': %s", propertyName, e.getMessage()), e);
-                }
-            } else {
-                // todo - Layer API: why not copy from template if not present? (nf)
-                throw new IllegalArgumentException(String.format(
-                        "No model defined for property '%s'", propertyName));
-            }
-        }
+    /**
+     * Creates a layer instance for the given application provided context and the given layer configuration.
+     * The configuration may contain both, inmutable construction parameters passed to specific layer constructor
+     * as well as mutable layer properties.
+     *
+     * @param ctx         An application provided context, may be {@code null}. The parameter may be ignored by many layer types.
+     * @param layerConfig The layer configuration.
+     * @return A new layer instance.
+     */
+    public abstract Layer createLayer(LayerContext ctx, PropertyContainer layerConfig);
 
-        return createLayerImpl(ctx, configuration);
-    }
-
-    // todo - Layer API: why is LayerContext not used in implementations? (mp)
-    protected abstract Layer createLayerImpl(LayerContext ctx, ValueContainer configuration);
-
-    // todo - Layer API: why not use annotations? (nf)
-    // todo - Layer API: check IDEA ALT+F7: is this a utility or framework API? Only framework usage is in createLayer(). How must clients use this? (nf)
-    // todo - Layer API: shouldn't it be createLayerConfiguration(LayerContext ctx)? (nf)
-    // todo - Layer API: how can clients know whether my value model can be serialized or not? when to impl. a converter? (nf)
-    public abstract ValueContainer getConfigurationTemplate();
-
-    // todo - Layer API: check IDEA ALT+F7: is this a utility or framework API? move to BEAM Session?  (nf)
-    public ValueContainer getConfigurationCopy(LayerContext ctx, Layer layer) {
-        final ValueContainer configuration = new ValueContainer();
-
-        for (ValueModel model : layer.getConfiguration().getModels()) {
-            final ValueDescriptor descriptor = new ValueDescriptor(model.getDescriptor());
-            final DefaultValueAccessor valueAccessor = new DefaultValueAccessor();
-            valueAccessor.setValue(model.getValue());
-            configuration.addModel(new ValueModel(descriptor, valueAccessor));
-        }
-
-        return configuration;
-    }
-
-    // todo - Layer API: check ALT+F7: Has no framework usage. (nf)
-    public static LayerType getLayerType(String layerTypeClassName) {
-        return REGISTRY.getService(layerTypeClassName);
-    }
-
-    static {
-        final ServiceRegistry<LayerType> typeServiceRegistry = ServiceRegistryFactory.getInstance().getServiceRegistry(LayerType.class);
-        final ServiceLoader<LayerType> serviceLoader = ServiceLoader.load(LayerType.class);
-        for (final LayerType layerType : serviceLoader) {
-            typeServiceRegistry.addService(layerType);
-        }
-        REGISTRY = typeServiceRegistry;
-    }
-
-
-    // todo - Layer API: check following createDefaultValueModel helpers:
-    // (1) why "default"? why static if protected? should be non-static for override.
-    // (2) check ALT+F7: no framework usage
-    protected static ValueModel createDefaultValueModel(String propertyName, Class<?> type) {
-        final ValueDescriptor descriptor = new ValueDescriptor(propertyName, type);
-        return new ValueModel(descriptor, new DefaultValueAccessor());
-    }
-
-    protected static <T> ValueModel createDefaultValueModel(String propertyName, Class<T> type, T defaultValue) {
-        final ValueDescriptor descriptor = new ValueDescriptor(propertyName, type);
-        descriptor.setDefaultValue(defaultValue);
-        descriptor.setNotNull(true);
-
-        final DefaultValueAccessor accessor = new DefaultValueAccessor();
-        accessor.setValue(defaultValue);
-
-        return new ValueModel(descriptor, accessor);
-    }
+    /**
+     * Creates a default configuration instance for the type of layers this type can create.
+     * After a default configuration has been created it is usually modified to specify a layer's
+     * construction parameters, e.g. for an image layer this could be the file path to the image file.
+     * Then, an application will pass the configuration to the {@link #createLayer} method in order
+     * to create a new layer instance.
+     *
+     * @param ctx An application provided context, may be {@code null}. The parameter may be ignored by many layer types.
+     * @return A new layer (default) configuration.
+     */
+    public abstract PropertyContainer createLayerConfig(LayerContext ctx);
 }

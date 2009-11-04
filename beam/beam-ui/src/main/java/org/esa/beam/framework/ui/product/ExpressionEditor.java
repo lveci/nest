@@ -1,5 +1,5 @@
 /*
- * $Id: ExpressionEditor.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: ExpressionEditor.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,7 +16,7 @@
  */
 package org.esa.beam.framework.ui.product;
 
-import com.bc.ceres.binding.ValueDescriptor;
+import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.swing.Binding;
 import com.bc.ceres.binding.swing.BindingContext;
 import com.bc.ceres.binding.swing.ComponentAdapter;
@@ -24,7 +24,6 @@ import com.bc.ceres.binding.swing.ValueEditor;
 import com.bc.ceres.binding.swing.internal.TextFieldAdapter;
 
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductManager;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.util.PropertyMap;
 
@@ -34,7 +33,6 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -43,7 +41,7 @@ import javax.swing.JTextField;
  * A value editor for band arithmetic expressions
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:17:18 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
  * @since BEAM 4.6
  */
 public class ExpressionEditor extends ValueEditor {
@@ -63,10 +61,10 @@ public class ExpressionEditor extends ValueEditor {
     }
 
     @Override
-    public JComponent createEditorComponent(ValueDescriptor valueDescriptor, BindingContext bindingContext) {
+    public JComponent createEditorComponent(PropertyDescriptor propertyDescriptor, BindingContext bindingContext) {
         JTextField textField = new JTextField();
         ComponentAdapter adapter = new TextFieldAdapter(textField);
-        final Binding binding = bindingContext.bind(valueDescriptor.getName(), adapter);
+        final Binding binding = bindingContext.bind(propertyDescriptor.getName(), adapter);
         final JPanel subPanel = new JPanel(new BorderLayout(2, 2));
         subPanel.add(textField, BorderLayout.CENTER);
         JButton etcButton = new JButton("...");

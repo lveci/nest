@@ -6,8 +6,8 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
 
 public class CrsGeoCodingTest {
 
@@ -17,7 +17,7 @@ public class CrsGeoCodingTest {
 
     @Before
     public void setup() throws Exception {
-        final Rectangle2D.Double imageBounds = new Rectangle2D.Double(0, 0, 10, 20);
+        final Rectangle imageBounds = new Rectangle(10, 20);
         srcGeoCoding = createCrsGeoCoding(imageBounds);
 
         final Band srcNode = new Band("srcDummy", ProductData.TYPE_INT8, 10, 20);
@@ -38,8 +38,8 @@ public class CrsGeoCodingTest {
         assertNotSame(srcGeoCoding, destGeoCoding);
 
         assertEquals(srcGeoCoding.getDatum(), destGeoCoding.getDatum());
-        assertEquals(srcGeoCoding.getModelCRS(), destGeoCoding.getModelCRS());
-        assertEquals(srcGeoCoding.getImageToModelTransform(), destGeoCoding.getImageToModelTransform());
+        assertEquals(srcGeoCoding.getMapCRS(), destGeoCoding.getMapCRS());
+        assertEquals(srcGeoCoding.getGeoCRS(), destGeoCoding.getGeoCRS());
 
         assertEquals(srcGeoCoding.getGeoPos(new PixelPos(3.5f, 0.5f), null),
                      destGeoCoding.getGeoPos(new PixelPos(3.5f, 0.5f), null));
@@ -57,7 +57,7 @@ public class CrsGeoCodingTest {
         assertNotSame(srcGeoCoding, destGeoCoding);
 
         assertEquals(srcGeoCoding.getDatum(), destGeoCoding.getDatum());
-        assertEquals(srcGeoCoding.getModelCRS(), destGeoCoding.getModelCRS());
+        assertEquals(srcGeoCoding.getMapCRS(), destGeoCoding.getMapCRS());
 
         // position (3,3) in source equals (1,1) in dest
         comparePixelPos(destGeoCoding, new PixelPos(3, 3), new PixelPos(1, 1));
@@ -75,7 +75,8 @@ public class CrsGeoCodingTest {
         assertNotSame(srcGeoCoding, destGeoCoding);
 
         assertEquals(srcGeoCoding.getDatum(), destGeoCoding.getDatum());
-        assertEquals(srcGeoCoding.getModelCRS(), destGeoCoding.getModelCRS());
+        assertEquals(srcGeoCoding.getMapCRS(), destGeoCoding.getMapCRS());
+        assertEquals(srcGeoCoding.getGeoCRS(), destGeoCoding.getGeoCRS());
 
         comparePixelPos(destGeoCoding, new PixelPos(0, 0), new PixelPos(0, 0));
         comparePixelPos(destGeoCoding, new PixelPos(8, 0), new PixelPos(4, 0));
@@ -96,7 +97,8 @@ public class CrsGeoCodingTest {
         assertNotSame(srcGeoCoding, destGeoCoding);
 
         assertEquals(srcGeoCoding.getDatum(), destGeoCoding.getDatum());
-        assertEquals(srcGeoCoding.getModelCRS(), destGeoCoding.getModelCRS());
+        assertEquals(srcGeoCoding.getMapCRS(), destGeoCoding.getMapCRS());
+        assertEquals(srcGeoCoding.getGeoCRS(), destGeoCoding.getGeoCRS());
 
         comparePixelPos(destGeoCoding, new PixelPos( 2, 2), new PixelPos(0, 0));
         comparePixelPos(destGeoCoding, new PixelPos(10, 2), new PixelPos(4, 0));
@@ -106,7 +108,7 @@ public class CrsGeoCodingTest {
 
     @Test
     public void testCrossing180() throws Exception {
-        final Rectangle2D.Double imageBounds = new Rectangle2D.Double(0, 0, 10, 20);
+        final Rectangle imageBounds = new Rectangle(10, 20);
         srcGeoCoding = createCrsGeoCodingCross180(imageBounds);
 
         assertTrue(srcGeoCoding.isCrossingMeridianAt180());
@@ -136,7 +138,7 @@ public class CrsGeoCodingTest {
         assertEquals(srcPos, destPos);
     }
 
-    private CrsGeoCoding createCrsGeoCoding(Rectangle2D.Double imageBounds) throws Exception{
+    private CrsGeoCoding createCrsGeoCoding(Rectangle imageBounds) throws Exception{
         AffineTransform i2m = new AffineTransform();
         final int northing = 60;
         final int easting = 5;
@@ -147,7 +149,7 @@ public class CrsGeoCodingTest {
         return new CrsGeoCoding(DefaultGeographicCRS.WGS84, imageBounds, i2m);
     }
 
-    private CrsGeoCoding createCrsGeoCodingCross180(Rectangle2D.Double imageBounds) throws Exception {
+    private CrsGeoCoding createCrsGeoCodingCross180(Rectangle imageBounds) throws Exception {
         AffineTransform i2m = new AffineTransform();
         final int northing = 60;
         final int easting = 175;

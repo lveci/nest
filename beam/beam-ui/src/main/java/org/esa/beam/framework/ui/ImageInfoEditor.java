@@ -1,5 +1,5 @@
 /*
- * $Id: ImageInfoEditor.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: ImageInfoEditor.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,8 +16,8 @@
  */
 package org.esa.beam.framework.ui;
 
-import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.ValueModel;
+import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.ValueRange;
 import com.bc.ceres.binding.swing.BindingContext;
 import com.jidesoft.combobox.ColorChooserPanel;
@@ -58,7 +58,7 @@ import java.text.DecimalFormat;
  * Unstable interface. Do not use.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:17:18 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
  * @since BEAM 4.5.1
  */
 public class ImageInfoEditor extends JPanel {
@@ -737,8 +737,8 @@ public class ImageInfoEditor extends JPanel {
     }
 
     private void editSliderSample(MouseEvent evt, final int sliderIndex) {
-        final ValueContainer vc = new ValueContainer();
-        vc.addModel(ValueModel.createValueModel("sample", getSliderSample(sliderIndex)));
+        final PropertyContainer vc = new PropertyContainer();
+        vc.addProperty(Property.create("sample", getSliderSample(sliderIndex)));
         vc.getDescriptor("sample").setDisplayName("sample");
         vc.getDescriptor("sample").setUnit(getModel().getParameterUnit());
         final ValueRange valueRange;

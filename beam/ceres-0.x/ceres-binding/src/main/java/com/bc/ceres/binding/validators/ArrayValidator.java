@@ -1,5 +1,5 @@
 /*
- * $Id: ArrayValidator.java,v 1.2 2009-09-01 20:27:12 lveci Exp $
+ * $Id: ArrayValidator.java,v 1.3 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -20,7 +20,7 @@ import java.lang.reflect.Array;
 
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.Validator;
-import com.bc.ceres.binding.ValueModel;
+import com.bc.ceres.binding.Property;
 
 public class ArrayValidator implements Validator {
     
@@ -31,11 +31,11 @@ public class ArrayValidator implements Validator {
     }
 
     @Override
-    public void validateValue(ValueModel valueModel, Object value) throws ValidationException {
+    public void validateValue(Property property, Object value) throws ValidationException {
         final int length = Array.getLength(value);
         for (int i = 0; i < length; i++) {
             Object singleValue = Array.get(value, i);
-            validator.validateValue(valueModel, singleValue);
+            validator.validateValue(property, singleValue);
         }
     }
 }

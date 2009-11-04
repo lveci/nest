@@ -28,9 +28,10 @@ public class DefaultUI extends BaseOperatorUI {
     @Override
     public void initParameters() {
         if(valueContainer == null) return;
-        
-        for(ValueModel model : valueContainer.getModels()) {
-            final ValueDescriptor descriptor = model.getDescriptor();
+
+        final Property[] properties = valueContainer.getProperties();
+        for(Property p : properties) {
+            final PropertyDescriptor descriptor = p.getDescriptor();
             final String itemAlias = descriptor.getItemAlias();
 
             if(sourceProducts != null && itemAlias != null && itemAlias.equals("band")) {
@@ -41,10 +42,10 @@ public class DefaultUI extends BaseOperatorUI {
 
                     try {
                         if(descriptor.getType().isArray()) {
-                            if(model.getValue() == null)
-                                model.setValue(new String[] {bandNames[0]});    
+                            if(p.getValue() == null)
+                                p.setValue(new String[] {bandNames[0]});
                         } else {
-                            model.setValue(bandNames[0]);
+                            p.setValue(bandNames[0]);
                         }
                     } catch(ValidationException e) {
                         System.out.println(e.toString());

@@ -1,5 +1,5 @@
 /*
- * $Id: PixelInfoView.java,v 1.2 2009-07-10 18:36:55 lveci Exp $
+ * $Id: PixelInfoView.java,v 1.3 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -377,7 +377,7 @@ public class PixelInfoView extends JPanel {
         return false;
     }
 
-    private class FlagCellRenderer extends DefaultTableCellRenderer {
+    private static class FlagCellRenderer extends DefaultTableCellRenderer {
 
         /**
          * Returns the default table cell renderer.

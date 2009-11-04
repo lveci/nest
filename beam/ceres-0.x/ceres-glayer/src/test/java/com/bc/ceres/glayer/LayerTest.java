@@ -1,7 +1,7 @@
 package com.bc.ceres.glayer;
 
 import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.PropertyContainer;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -14,7 +14,7 @@ public class LayerTest {
 
         assertNotNull(layer1.getLayerType());
         assertSame(layer1.getLayerType(), layer2.getLayerType());
-        assertSame(layer1.getLayerType(), LayerType.getLayerType(CollectionLayer.Type.class.getName()));
+        assertSame(layer1.getLayerType(), LayerTypeRegistry.getLayerType(CollectionLayer.Type.class));
     }
 
     @Test
@@ -22,7 +22,7 @@ public class LayerTest {
         Layer layer = new CollectionLayer();
         LayerType layerType = layer.getLayerType();
         assertNotNull(layerType);
-        assertTrue(layerType.createLayer(null, new ValueContainer()) != null);
+        assertTrue(layerType.createLayer(null, new PropertyContainer()) != null);
         assertTrue(layerType.isValidFor(null));
         assertNotNull(layer.getId());
         assertEquals("Collection Layer", layer.getName());

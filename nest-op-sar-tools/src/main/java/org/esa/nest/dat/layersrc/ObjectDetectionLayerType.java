@@ -1,13 +1,12 @@
 package org.esa.nest.dat.layersrc;
 
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.ValueDescriptor;
-import com.bc.ceres.binding.ValueModel;
-import com.bc.ceres.binding.accessors.DefaultValueAccessor;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerType;
+import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertyDescriptor;
+import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.accessors.DefaultPropertyAccessor;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 
@@ -21,13 +20,9 @@ public class ObjectDetectionLayerType extends LayerType {
 
     public static ObjectDetectionLayer createLayer(final Product product, final Band band) {
         // todo - weird!!!
-        final ValueContainer template = instance.getConfigurationTemplate();
-        try {
-            template.setValue("product", product);
-            template.setValue("band", band);
-        } catch (ValidationException e) {
-            throw new IllegalStateException(e);
-        }
+        final PropertyContainer template = instance.createLayerConfig(null);
+        template.setValue("product", product);
+        template.setValue("band", band);
         return new ObjectDetectionLayer(template);
     }
 
@@ -43,17 +38,17 @@ public class ObjectDetectionLayerType extends LayerType {
     }
 
     @Override
-    protected Layer createLayerImpl(LayerContext ctx, ValueContainer configuration) {
+    public Layer createLayer(LayerContext ctx, PropertyContainer configuration) {
         return new ObjectDetectionLayer(configuration);
     }
 
     // todo - rename getDefaultConfiguration  ? (nf)
     @Override
-    public ValueContainer getConfigurationTemplate() {
-        final ValueContainer valueContainer = new ValueContainer();
+    public PropertyContainer createLayerConfig(LayerContext ctx) {
+        final PropertyContainer valueContainer = new PropertyContainer();
         // todo - how do I know whether my value model type can be serialized or not? (nf)
-        valueContainer.addModel(new ValueModel(new ValueDescriptor("product", Product.class), new DefaultValueAccessor()));
-        valueContainer.addModel(new ValueModel(new ValueDescriptor("band", Band.class), new DefaultValueAccessor()));
+        valueContainer.addProperty(new Property(new PropertyDescriptor("product", Product.class), new DefaultPropertyAccessor()));
+        valueContainer.addProperty(new Property(new PropertyDescriptor("band", Band.class), new DefaultPropertyAccessor()));
         return valueContainer;
     }
 }

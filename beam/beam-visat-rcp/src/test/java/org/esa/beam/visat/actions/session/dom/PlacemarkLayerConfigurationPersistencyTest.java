@@ -1,8 +1,10 @@
 package org.esa.beam.visat.actions.session.dom;
 
-import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerType;
+import com.bc.ceres.glayer.LayerTypeRegistry;
+
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.Pin;
 import org.esa.beam.framework.datamodel.PinDescriptor;
@@ -20,7 +22,7 @@ public class PlacemarkLayerConfigurationPersistencyTest extends AbstractLayerCon
     private Product product;
 
     public PlacemarkLayerConfigurationPersistencyTest() {
-        super(LayerType.getLayerType(PlacemarkLayerType.class.getName()));
+        super(LayerTypeRegistry.getLayerType(PlacemarkLayerType.class));
     }
 
     @Before
@@ -39,12 +41,10 @@ public class PlacemarkLayerConfigurationPersistencyTest extends AbstractLayerCon
 
     @Override
     protected Layer createLayer(LayerType layerType) throws Exception {
-        final ValueContainer configuration = layerType.getConfigurationTemplate();
-
+        final PropertyContainer configuration = layerType.createLayerConfig(null);
         configuration.setValue("product", product);
         configuration.setValue("placemarkDescriptor", PinDescriptor.INSTANCE);
         configuration.setValue("imageToModelTransform", new AffineTransform());
-
         return layerType.createLayer(null, configuration);
     }
 

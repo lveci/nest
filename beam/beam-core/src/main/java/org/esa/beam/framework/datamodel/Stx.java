@@ -3,6 +3,7 @@ package org.esa.beam.framework.datamodel;
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
+import com.bc.ceres.jai.NoDataRaster;
 import org.esa.beam.jai.ImageManager;
 
 import javax.media.jai.Histogram;
@@ -22,6 +23,7 @@ import java.util.concurrent.CancellationException;
  * @since BEAM 4.2
  */
 public class Stx {
+
     public static final int DEFAULT_BIN_COUNT = 512;
 
     private final double min;
@@ -46,38 +48,62 @@ public class Stx {
         return create(raster, 0, roiImage, binCount, pm);
     }
 
-    public static Stx create(RasterDataNode raster, int level, int binCount, double min, double max, ProgressMonitor pm) {
+    public static Stx create(RasterDataNode raster, int level, int binCount, double min, double max,
+                             ProgressMonitor pm) {
         return create(raster, level, null, binCount, min, max, pm);
     }
 
-    public static Stx create(RasterDataNode raster, RenderedImage roiImage, int binCount, double min, double max, ProgressMonitor pm) {
+    public static Stx create(RasterDataNode raster, RenderedImage roiImage, int binCount, double min, double max,
+                             ProgressMonitor pm) {
         return create(raster, 0, roiImage, binCount, min, max, pm);
     }
 
-
     /**
      * Creates a {@code Stx} object with the given Parameter.
-     * @param min the minimum value
-     * @param max the maximum value
-     * @param mean the mean value, if it's {@link Double#NaN} the mean will be computed
-     * @param stdDev the value of the standard deviation, if it's {@link Double#NaN} it will be computed
-     * @param intType if true, statistics are computed from a data basis of integer number type.
+     *
+     * @param min               the minimum value
+     * @param max               the maximum value
+     * @param mean              the mean value, if it's {@link Double#NaN} the mean will be computed
+     * @param stdDev            the value of the standard deviation, if it's {@link Double#NaN} it will be computed
+     * @param intType           if true, statistics are computed from a data basis of integer number type.
      * @param sampleFrequencies the frequencies of the samples
-     * @param resolutionLevel the resolution level this {@code Stx} is for
+     * @param resolutionLevel   the resolution level this {@code Stx} is for
      *
      * @see Stx#Stx(double, double, double, double, double, double, javax.media.jai.Histogram, int)
      */
-    public Stx(double min, double max, double mean, double stdDev, boolean intType, int[] sampleFrequencies, int resolutionLevel) {
-        this(min, max, mean, stdDev, Double.NaN, Double.NaN, createHistogram(min, max + (intType ? 1.0 : 0.0), sampleFrequencies), resolutionLevel);
+    public Stx(double min, double max, double mean, double stdDev, boolean intType, int[] sampleFrequencies,
+               int resolutionLevel) {
+        this(min, max, mean, stdDev, Double.NaN, Double.NaN, createHistogram(min, max + (intType ? 1.0 : 0.0), sampleFrequencies),
+             resolutionLevel);
     }
 
     /**
      * Creates a {@code Stx} object with the given Parameter.
-     * @param min the minimum value
-     * @param max the maximum value
-     * @param mean the mean value, if it's {@link Double#NaN} the mean is taken from the {@code histogram}
-     * @param stdDev the value of the standard deviation, if it's {@link Double#NaN} it is taken from the {@code histogram}
-     * @param histogram the histogram
+     *
+     * @param min               the minimum value
+     * @param max               the maximum value
+     * @param mean              the mean value, if it's {@link Double#NaN} the mean will be computed
+     * @param stdDev            the value of the standard deviation, if it's {@link Double#NaN} it will be computed
+     * @param intType           if true, statistics are computed from a data basis of integer number type.
+     * @param sampleFrequencies the frequencies of the samples
+     * @param resolutionLevel   the resolution level this {@code Stx} is for
+     *
+     * @see Stx#Stx(double, double, double, double, double, double, javax.media.jai.Histogram, int)
+     */
+    public Stx(double min, double max, double mean, double stdDev, double coeffOfVariation, double enl, boolean intType, int[] sampleFrequencies,
+               int resolutionLevel) {
+        this(min, max, mean, stdDev, coeffOfVariation, enl, createHistogram(min, max + (intType ? 1.0 : 0.0), sampleFrequencies),
+             resolutionLevel);
+    }
+
+    /**
+     * Creates a {@code Stx} object with the given Parameter.
+     *
+     * @param min             the minimum value
+     * @param max             the maximum value
+     * @param mean            the mean value, if it's {@link Double#NaN} the mean is taken from the {@code histogram}
+     * @param stdDev          the value of the standard deviation, if it's {@link Double#NaN} it is taken from the {@code histogram}
+     * @param histogram       the histogram
      * @param resolutionLevel the resolution level this {@code Stx} is for
      *
      * @see Stx#Stx(double, double, double, double, double, double, javax.media.jai.Histogram, int)
@@ -160,7 +186,8 @@ public class Stx {
         return sum;
     }
 
-    private static Stx create(RasterDataNode raster, int level, RenderedImage roiImage, int binCount, ProgressMonitor pm) {
+    private static Stx create(RasterDataNode raster, int level, RenderedImage roiImage, int binCount,
+                              ProgressMonitor pm) {
         try {
             pm.beginTask("Computing statistics", 3);
             final ExtremaStxOp extremaOp = new ExtremaStxOp();
@@ -187,7 +214,6 @@ public class Stx {
             final Histogram histogram = createHistogram(binCount, min, max + off);
             System.arraycopy(histogramOp.getBins(), 0, histogram.getBins(0), 0, binCount);
 
-
             return create(raster, level, roiImage, histogram,
                           min, max, mean, numValues, coeffOfVariation, enl,
                           SubProgressMonitor.create(pm, 1));
@@ -196,7 +222,8 @@ public class Stx {
         }
     }
 
-    private static Stx create(RasterDataNode raster, int level, RenderedImage roiImage, int binCount, double min, double max, ProgressMonitor pm) {
+    private static Stx create(RasterDataNode raster, int level, RenderedImage roiImage, int binCount, double min,
+                              double max, ProgressMonitor pm) {
         try {
             pm.beginTask("Computing statistics", 3);
 
@@ -208,7 +235,8 @@ public class Stx {
             final Histogram histogram = createHistogram(binCount, min, max + off);
             System.arraycopy(histogramOp.getBins(), 0, histogram.getBins(0), 0, binCount);
 
-            return create(raster, level, roiImage, histogram, min, max, Double.NaN, -1L, Double.NaN, Double.NaN, SubProgressMonitor.create(pm, 1));
+            return create(raster, level, roiImage, histogram, min, max, Double.NaN, -1L, Double.NaN, Double.NaN,
+                          SubProgressMonitor.create(pm, 1));
         } finally {
             pm.done();
         }
@@ -220,10 +248,10 @@ public class Stx {
                               ProgressMonitor pm) {
         try {
             pm.beginTask("Computing statistics", 1);
-            if(numSamples <0) {
+            if (numSamples < 0) {
                 numSamples = computeSum(histogram.getBins(0));
             }
-            if(Double.isNaN(mean)) {
+            if (Double.isNaN(mean)) {
                 final MeanStxOp meanOp = new MeanStxOp(numSamples);
                 accumulate(raster, level, roiImage, meanOp, SubProgressMonitor.create(pm, 1));
                 mean = meanOp.getMean();
@@ -308,30 +336,34 @@ public class Stx {
                         throw new CancellationException("Process terminated by user."); /*I18N*/
                     }
                     final Raster dataTile = dataImage.getTile(tileX, tileY);
-                    // data and mask image might not have the same tile size
-                    // --> we can not use the tile index of the one for the other, so we use the bounds
-                    final Raster maskTile = maskImage != null ? maskImage.getData(dataTile.getBounds()) : null;
-                    final Rectangle r = new Rectangle(dataImage.getMinX(), dataImage.getMinY(), dataImage.getWidth(), dataImage.getHeight()).intersection(dataTile.getBounds());
-                    switch (dataAccessor.sampleType) {
-                        case PixelAccessor.TYPE_BIT:
-                        case DataBuffer.TYPE_BYTE:
-                            op.accumulateDataUByte(dataAccessor, dataTile, maskAccessor, maskTile, r);
-                            break;
-                        case DataBuffer.TYPE_USHORT:
-                            op.accumulateDataUShort(dataAccessor, dataTile, maskAccessor, maskTile, r);
-                            break;
-                        case DataBuffer.TYPE_SHORT:
-                            op.accumulateDataShort(dataAccessor, dataTile, maskAccessor, maskTile, r);
-                            break;
-                        case DataBuffer.TYPE_INT:
-                            op.accumulateDataInt(dataAccessor, dataTile, maskAccessor, maskTile, r);
-                            break;
-                        case DataBuffer.TYPE_FLOAT:
-                            op.accumulateDataFloat(dataAccessor, dataTile, maskAccessor, maskTile, r);
-                            break;
-                        case DataBuffer.TYPE_DOUBLE:
-                            op.accumulateDataDouble(dataAccessor, dataTile, maskAccessor, maskTile, r);
-                            break;
+                    if (!(dataTile instanceof NoDataRaster)) {
+                        // data and mask image might not have the same tile size
+                        // --> we can not use the tile index of the one for the other, so we use the bounds
+                        final Raster maskTile = maskImage != null ? maskImage.getData(dataTile.getBounds()) : null;
+                        final Rectangle r = new Rectangle(dataImage.getMinX(), dataImage.getMinY(),
+                                                          dataImage.getWidth(), dataImage.getHeight()).intersection(
+                                dataTile.getBounds());
+                        switch (dataAccessor.sampleType) {
+                            case PixelAccessor.TYPE_BIT:
+                            case DataBuffer.TYPE_BYTE:
+                                op.accumulateDataUByte(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                break;
+                            case DataBuffer.TYPE_USHORT:
+                                op.accumulateDataUShort(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                break;
+                            case DataBuffer.TYPE_SHORT:
+                                op.accumulateDataShort(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                break;
+                            case DataBuffer.TYPE_INT:
+                                op.accumulateDataInt(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                break;
+                            case DataBuffer.TYPE_FLOAT:
+                                op.accumulateDataFloat(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                break;
+                            case DataBuffer.TYPE_DOUBLE:
+                                op.accumulateDataDouble(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                break;
+                        }
                     }
                     pm.worked(1);
                 }

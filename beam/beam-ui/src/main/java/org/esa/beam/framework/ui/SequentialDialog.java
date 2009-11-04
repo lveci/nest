@@ -1,5 +1,5 @@
 /*
- * $Id: SequentialDialog.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: SequentialDialog.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -40,7 +40,7 @@ import javax.swing.JPanel;
 
 /**
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:17:18 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
  */
 public class SequentialDialog {
 
@@ -282,7 +282,7 @@ public class SequentialDialog {
         return true;
     }
 
-    class HorizontalLine extends Canvas {
+    static class HorizontalLine extends Canvas {
 
         Dimension prefSize;
 

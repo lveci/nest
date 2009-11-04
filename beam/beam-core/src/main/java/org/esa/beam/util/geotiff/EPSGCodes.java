@@ -1,5 +1,5 @@
 /*
- * $Id: EPSGCodes.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: EPSGCodes.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2004 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -1733,16 +1733,16 @@ public class EPSGCodes extends IntMap {
     public static final int Datum_Ancienne_Triangulation_Francaise = 6901;
     public static final int Datum_Nord_de_Guerre = 6902;
     
-    private static EPSGCodes instance = null;
-
-    public static synchronized EPSGCodes getInstance() {
-        if(instance == null) {
-            instance = new EPSGCodes();
-        }
-        return instance;
+    public static EPSGCodes getInstance() {
+        return Holder.instance;
     }
 
     private EPSGCodes() {
         init(EPSGCodes.class.getFields());
+    }
+    
+    // Initialization on demand holder idiom
+    private static class Holder {
+        private static final EPSGCodes instance = new EPSGCodes();
     }
 }

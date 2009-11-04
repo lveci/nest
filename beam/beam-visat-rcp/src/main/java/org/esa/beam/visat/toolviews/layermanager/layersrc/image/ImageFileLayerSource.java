@@ -1,5 +1,5 @@
 /*
- * $Id: ImageFileLayerSource.java,v 1.3 2009-05-12 12:56:42 lveci Exp $
+ * $Id: ImageFileLayerSource.java,v 1.4 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,9 +16,9 @@
  */
 package org.esa.beam.visat.toolviews.layermanager.layersrc.image;
 
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.glayer.Layer;
-import com.bc.ceres.glayer.LayerType;
-import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.glayer.LayerTypeRegistry;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.visat.toolviews.layermanager.LayerSource;
@@ -26,7 +26,6 @@ import org.esa.beam.visat.toolviews.layermanager.layersrc.AbstractLayerSourceAss
 import org.esa.beam.visat.toolviews.layermanager.layersrc.LayerSourcePageContext;
 
 import java.awt.geom.AffineTransform;
-import java.awt.image.RenderedImage;
 import java.io.File;
 
 /**
@@ -36,12 +35,11 @@ import java.io.File;
  * the orientation relative to the existing layers has to be given by hand.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.3 $ $Date: 2009-05-12 12:56:42 $
+ * @version $Revision: 1.4 $ $Date: 2009-11-04 17:04:32 $
  * @since BEAM 4.6
  */
 public class ImageFileLayerSource implements LayerSource {
 
-    static final String PROPERTY_NAME_IMAGE = "image";
     static final String PROPERTY_NAME_IMAGE_FILE_PATH = "imageFilePath";
     static final String PROPERTY_NAME_WORLD_FILE_PATH = "worldFilePath";
     static final String PROPERTY_NAME_WORLD_TRANSFORM = "worldTransform";
@@ -73,23 +71,20 @@ public class ImageFileLayerSource implements LayerSource {
 
     @Override
     public void cancel(LayerSourcePageContext pageContext) {
-        pageContext.setPropertyValue(PROPERTY_NAME_IMAGE, null);
+        pageContext.setPropertyValue(PROPERTY_NAME_IMAGE_FILE_PATH, null);
     }
 
     static boolean insertImageLayer(LayerSourcePageContext pageContext) {
-        AffineTransform transform = (AffineTransform) pageContext.getPropertyValue(
-                PROPERTY_NAME_WORLD_TRANSFORM);
-        RenderedImage image = (RenderedImage) pageContext.getPropertyValue(PROPERTY_NAME_IMAGE);
+        AffineTransform transform = (AffineTransform) pageContext.getPropertyValue(PROPERTY_NAME_WORLD_TRANSFORM);
         String imageFilePath = (String) pageContext.getPropertyValue(PROPERTY_NAME_IMAGE_FILE_PATH);
 
         try {
             ProductSceneView sceneView = pageContext.getAppContext().getSelectedProductSceneView();
-            final LayerType type = LayerType.getLayerType(ImageFileLayerType.class.getName());
-            final ValueContainer configuration = type.getConfigurationTemplate();
-            configuration.setValue(ImageFileLayerType.PROPERTY_NAME_IMAGE, image);
+            final ImageFileLayerType type = LayerTypeRegistry.getLayerType(ImageFileLayerType.class);
+            final PropertyContainer configuration = type.createLayerConfig(sceneView);
             configuration.setValue(ImageFileLayerType.PROPERTY_NAME_IMAGE_FILE, new File(imageFilePath));
             configuration.setValue(ImageFileLayerType.PROPERTY_NAME_WORLD_TRANSFORM, transform);
-            Layer layer = type.createLayer(sceneView.getLayerContext(), configuration);
+            Layer layer = type.createLayer(sceneView, configuration);
             layer.setName(FileUtils.getFileNameFromPath(imageFilePath));
             Layer rootLayer = sceneView.getRootLayer();
             rootLayer.getChildren().add(sceneView.getFirstImageLayerIndex(), layer);

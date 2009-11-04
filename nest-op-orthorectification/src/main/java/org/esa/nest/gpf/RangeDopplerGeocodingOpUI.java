@@ -194,7 +194,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         incidenceAngleForSigma0.setSelectedItem(paramMap.get("incidenceAngleForSigma0"));
         incidenceAngleForSigma0.setEnabled(false);
 
-        double pix = (Double)paramMap.get("pixelSpacing");
+        Double pix = (Double)paramMap.get("pixelSpacing");
         if((!changedByUser || pixelSpacing.getText().isEmpty()) && sourceProducts != null) {
             try {
                 pix = RangeDopplerGeocodingOp.getPixelSpacing(sourceProducts[0]);

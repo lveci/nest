@@ -18,9 +18,22 @@ package com.bc.ceres.core;
  * Base class for an object that can be dynamically extended.
  *
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-04-09 17:06:19 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:33 $
  */
 public class ExtensibleObject implements Extensible {
+    /**
+     * Gets the extension for this object corresponding to a specified extension
+     * type.
+     * <p/>
+     * The default implementation is
+     * <pre>
+     *    return ExtensionManager.getInstance().getExtension(this, extensionType);
+     * </pre>
+     *
+     * @param extensionType the extension type.
+     * @return the extension for this object corresponding to the specified type.
+     * @see ExtensionManager
+     */
     @Override
     public <E> E getExtension(Class<E> extensionType) {
         return ExtensionManager.getInstance().getExtension(this, extensionType);

@@ -1,16 +1,15 @@
 package org.esa.beam.glayer;
 
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerType;
+import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
 import org.esa.beam.framework.datamodel.Pin;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.PlacemarkDescriptor;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.framework.datamodel.ProductNodeEvent;
 import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.datamodel.ProductNodeListenerAdapter;
@@ -28,8 +27,7 @@ import java.util.Collection;
 
 public class PlacemarkLayer extends Layer {
 
-    private static final PlacemarkLayerType LAYER_TYPE = (PlacemarkLayerType) LayerType.getLayerType(
-            PlacemarkLayerType.class.getName());
+    private static final PlacemarkLayerType LAYER_TYPE = LayerTypeRegistry.getLayerType(PlacemarkLayerType.class);
 
     public static final String PROPERTY_NAME_TEXT_FONT = "text.font";
     public static final String PROPERTY_NAME_TEXT_ENABLED = "text.enabled";
@@ -48,40 +46,28 @@ public class PlacemarkLayer extends Layer {
 
     public PlacemarkLayer(Product product, PlacemarkDescriptor placemarkDescriptor,
                           AffineTransform imageToModelTransform) {
-        this(LAYER_TYPE, product, placemarkDescriptor, imageToModelTransform);
+        this(LAYER_TYPE, product, placemarkDescriptor, imageToModelTransform,
+             initConfiguration(LAYER_TYPE.createLayerConfig(null), product, placemarkDescriptor, imageToModelTransform));
     }
 
-    protected PlacemarkLayer(LayerType layerType, ValueContainer configuration) {
+    protected PlacemarkLayer(LayerType layerType, Product product, PlacemarkDescriptor placemarkDescriptor,
+                             AffineTransform imageToModelTransform, PropertyContainer configuration) {
         super(layerType, configuration);
-        this.product = (Product) configuration.getValue(PlacemarkLayerType.PROPERTY_PRODUCT);
-        this.placemarkDescriptor = (PlacemarkDescriptor) configuration.getValue(
-                PlacemarkLayerType.PROPERTY_PLACEMARK_DESCRIPTOR);
-        this.imageToModelTransform = (AffineTransform) configuration.getValue(
-                PlacemarkLayerType.PROPERTY_IMAGE_TO_MODEL_TRANSFORM);
+        this.product = product;
+        this.placemarkDescriptor = placemarkDescriptor;
+        this.imageToModelTransform = imageToModelTransform;
         this.pnl = new MyProductNodeListenerAdapter();
         product.addProductNodeListener(pnl);
-
     }
 
 
-    private static ValueContainer initConfiguration(ValueContainer configurationTemplate, Product product,
+    private static PropertyContainer initConfiguration(PropertyContainer configurationTemplate, Product product,
                                                     PlacemarkDescriptor placemarkDescriptor,
                                                     AffineTransform imageToModelTransform) {
-        try {
-            configurationTemplate.setValue(PlacemarkLayerType.PROPERTY_PRODUCT, product);
-            configurationTemplate.setValue(PlacemarkLayerType.PROPERTY_PLACEMARK_DESCRIPTOR, placemarkDescriptor);
-            configurationTemplate.setValue(PlacemarkLayerType.PROPERTY_IMAGE_TO_MODEL_TRANSFORM, imageToModelTransform);
-        } catch (ValidationException e) {
-            throw new IllegalArgumentException(e);
-        }
-
+        configurationTemplate.setValue(PlacemarkLayerType.PROPERTY_PRODUCT, product);
+        configurationTemplate.setValue(PlacemarkLayerType.PROPERTY_PLACEMARK_DESCRIPTOR, placemarkDescriptor);
+        configurationTemplate.setValue(PlacemarkLayerType.PROPERTY_IMAGE_TO_MODEL_TRANSFORM, imageToModelTransform);
         return configurationTemplate;
-    }
-
-    protected PlacemarkLayer(PlacemarkLayerType type, Product product, PlacemarkDescriptor placemarkDescriptor,
-                             AffineTransform imageToModelTransform) {
-        this(type,
-             initConfiguration(type.getConfigurationTemplate(), product, placemarkDescriptor, imageToModelTransform));
     }
 
     @Override
@@ -214,11 +200,7 @@ public class PlacemarkLayer extends Layer {
     }
 
     public final void setTextEnabled(boolean enabled) {
-        try {
-            getConfiguration().setValue(PROPERTY_NAME_TEXT_ENABLED, enabled);
-        } catch (ValidationException e) {
-            throw new IllegalArgumentException(e.getMessage(), e);
-        }
+        getConfiguration().setValue(PROPERTY_NAME_TEXT_ENABLED, enabled);
     }
 
     public Font getTextFont() {
@@ -226,11 +208,7 @@ public class PlacemarkLayer extends Layer {
     }
 
     public final void setTextFont(Font font) {
-        try {
-            getConfiguration().setValue(PROPERTY_NAME_TEXT_FONT, font);
-        } catch (ValidationException e) {
-            throw new IllegalArgumentException(e.getMessage(), e);
-        }
+        getConfiguration().setValue(PROPERTY_NAME_TEXT_FONT, font);
     }
 
     public Color getTextFgColor() {
@@ -238,11 +216,7 @@ public class PlacemarkLayer extends Layer {
     }
 
     public final void setTextFgColor(Color color) {
-        try {
-            getConfiguration().setValue(PROPERTY_NAME_TEXT_FG_COLOR, color);
-        } catch (ValidationException e) {
-            throw new IllegalArgumentException(e.getMessage(), e);
-        }
+        getConfiguration().setValue(PROPERTY_NAME_TEXT_FG_COLOR, color);
     }
 
     public Color getTextBgColor() {
@@ -250,11 +224,7 @@ public class PlacemarkLayer extends Layer {
     }
 
     public final void setTextBgColor(Color color) {
-        try {
-            getConfiguration().setValue(PROPERTY_NAME_TEXT_BG_COLOR, color);
-        } catch (ValidationException e) {
-            throw new IllegalArgumentException(e.getMessage(), e);
-        }
+        getConfiguration().setValue(PROPERTY_NAME_TEXT_BG_COLOR, color);
     }
 
     public void setOutlineColor(Color color) {
@@ -343,8 +313,7 @@ public class PlacemarkLayer extends Layer {
         }
 
         private void maybeFireLayerDataChanged(ProductNodeEvent event) {
-            if (event.getSourceNode() instanceof Pin &&
-                !ProductNode.PROPERTY_NAME_OWNER.equals(event.getPropertyName())) {
+            if (event.getSourceNode() instanceof Pin) {
                 fireLayerDataChanged(getLayerModelBounds());
             }
         }

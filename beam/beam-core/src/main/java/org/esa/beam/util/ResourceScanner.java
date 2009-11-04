@@ -1,5 +1,5 @@
 /*
- * $Id: ResourceScanner.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ResourceScanner.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
  * The scanner searches for all resources in the given locations.
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
  */
 public class ResourceScanner {
 
@@ -124,12 +124,10 @@ public class ResourceScanner {
 
     private static void collectMatchingUrls(Map<String, URL> resourcesMap, Pattern pattern,
                                             ArrayList<URL> resourceUrls) {
-        Set<String> keys = resourcesMap.keySet();
-        for (Iterator<String> iterator = keys.iterator(); iterator.hasNext();) {
-            String key = iterator.next();
-            Matcher matcher = pattern.matcher(key);
+        for (Map.Entry<String, URL> entry : resourcesMap.entrySet()) {
+            Matcher matcher = pattern.matcher(entry.getKey());
             if (matcher.matches()) {
-                resourceUrls.add(resourcesMap.get(key));
+                resourceUrls.add(entry.getValue());
             }
         }
     }

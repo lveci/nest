@@ -1,5 +1,5 @@
 /*
- * $Id: UIUtilsTest.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: UIUtilsTest.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -134,11 +134,11 @@ public class UIUtilsTest extends TestCase {
 
     public void testCreateSpinner_WithParameter() {
         final String labelname = "paramLabel";
-        final ParamProperties properties = new ParamProperties(Integer.class, new Integer(3));
+        final ParamProperties properties = new ParamProperties(Integer.class, Integer.valueOf(3));
         properties.setLabel(labelname);
         final Parameter parameter = new Parameter("paramName", properties);
 
-        final JSpinner spinner = UIUtils.createSpinner(parameter, new Integer(10), "#0");
+        final JSpinner spinner = UIUtils.createSpinner(parameter, Integer.valueOf(10), "#0");
         assertEquals(labelname, spinner.getName());
     }
 

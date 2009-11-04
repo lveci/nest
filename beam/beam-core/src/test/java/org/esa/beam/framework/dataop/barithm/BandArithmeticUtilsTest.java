@@ -1,5 +1,5 @@
 /*
- * $Id: BandArithmeticUtilsTest.java,v 1.2 2009-04-29 19:35:16 lveci Exp $
+ * $Id: BandArithmeticUtilsTest.java,v 1.3 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -101,7 +101,6 @@ public class BandArithmeticUtilsTest extends TestCase {
                                                     new Product[]{p1, p2}, 0,
                                                     null);
         assertEquals("($2.f.WATER && !$2.f.INVALID)", vme);
-        System.out.println(vme);
     }
 
     private FlagCoding createFlagCoding() {

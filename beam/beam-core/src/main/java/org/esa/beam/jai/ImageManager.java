@@ -12,6 +12,7 @@ import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
 import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.ColorPaletteDef;
+import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.ImageInfo;
 import org.esa.beam.framework.datamodel.IndexCoding;
 import org.esa.beam.framework.datamodel.PinDescriptor;
@@ -35,6 +36,8 @@ import org.esa.beam.util.IntMap;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.jai.JAIUtils;
 import org.esa.beam.util.math.MathUtils;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
 
 import javax.media.jai.Histogram;
 import javax.media.jai.ImageLayout;
@@ -76,12 +79,11 @@ public class ImageManager {
 
     private static final String CACHE_INTERMEDIATE_TILES_PROPERTY = "beam.imageManager.enableIntermediateTileCaching";
 
-    private static final ImageManager INSTANCE = new ImageManager();
     private final Map<MaskKey, MultiLevelImage> maskImageMap = new HashMap<MaskKey, MultiLevelImage>(101);
     private final ProductNodeListener rasterDataChangeListener;
 
     public static ImageManager getInstance() {
-        return INSTANCE;
+        return Holder.instance;
     }
 
     public ImageManager() {
@@ -95,11 +97,33 @@ public class ImageManager {
         maskImageMap.clear();
     }
 
-    public MultiLevelModel getMultiLevelModel(RasterDataNode rasterDataNode) {
+    public static MultiLevelModel getMultiLevelModel(RasterDataNode rasterDataNode) {
         if (rasterDataNode.isSourceImageSet()) {
             return rasterDataNode.getSourceImage().getModel();
         }
         return createMultiLevelModel(rasterDataNode);
+    }
+
+    public static AffineTransform getImageToModelTransform(GeoCoding geoCoding) {
+        if (geoCoding == null) {
+            return new AffineTransform();
+        }
+        final MathTransform image2Map = geoCoding.getImageToMapTransform();
+        if (image2Map instanceof AffineTransform) {
+            return new AffineTransform((AffineTransform) image2Map);
+        }
+        return new AffineTransform();
+    }
+
+    public static CoordinateReferenceSystem getModelCrs(GeoCoding geoCoding) {
+        if (geoCoding == null) {
+            return null;
+        }
+        final MathTransform image2Map = geoCoding.getImageToMapTransform();
+        if (image2Map instanceof AffineTransform) {
+            return geoCoding.getMapCRS();
+        }
+        return geoCoding.getImageCRS();
     }
 
     public PlanarImage getSourceImage(RasterDataNode rasterDataNode, int level) {
@@ -160,7 +184,7 @@ public class ImageManager {
                                                             int height,
                                                             int tileWidth,
                                                             int tileHeight) {
-        SampleModel sampleModel = ImageUtils.createSingleBandedSampleModel(dataType, width, height);
+        SampleModel sampleModel = ImageUtils.createSingleBandedSampleModel(dataType, tileWidth, tileHeight);
         ColorModel colorModel = PlanarImage.createColorModel(sampleModel);
         return createImageLayout(width, height, tileWidth, tileHeight, sampleModel, colorModel);
     }
@@ -271,8 +295,8 @@ public class ImageManager {
         Assert.notNull(rasterDataNodes,
                        "rasterDataNodes");
         Assert.state(rasterDataNodes.length == 1
-                     || rasterDataNodes.length == 3
-                     || rasterDataNodes.length == 4,
+                || rasterDataNodes.length == 3
+                || rasterDataNodes.length == 4,
                      "invalid number of bands");
 
         prepareImageInfos(rasterDataNodes, ProgressMonitor.NULL);
@@ -283,7 +307,7 @@ public class ImageManager {
         }
     }
 
-    private MultiLevelModel createMultiLevelModel(ProductNode productNode) {
+    public static MultiLevelModel createMultiLevelModel(ProductNode productNode) {
         final Scene scene = SceneFactory.createScene(productNode);
         if (scene == null) {
             return null;
@@ -291,13 +315,7 @@ public class ImageManager {
         final int w = scene.getRasterWidth();
         final int h = scene.getRasterHeight();
 
-        final AffineTransform i2mTransform;
-        if (scene.getGeoCoding() != null) {
-            i2mTransform = scene.getGeoCoding().getImageToModelTransform();
-        } else {
-            i2mTransform = new AffineTransform();
-        }
-
+        final AffineTransform i2mTransform = getImageToModelTransform(scene.getGeoCoding());
         return new DefaultMultiLevelModel(i2mTransform, w, h);
     }
 
@@ -614,7 +632,7 @@ public class ImageManager {
             for (int i = 1; i < binCount; i++) {
                 double deviation = i - mu;
                 normCDF[b][i] = normCDF[b][i - 1] +
-                                (float) Math.exp(-deviation * deviation / twoSigmaSquared);
+                        (float) Math.exp(-deviation * deviation / twoSigmaSquared);
             }
         }
 
@@ -651,6 +669,7 @@ public class ImageManager {
         }
     }
 
+    @Deprecated
     public MultiLevelImage createValidMaskMultiLevelImage(final RasterDataNode rasterDataNode) {
         final MultiLevelModel model = ImageManager.getInstance().getMultiLevelModel(rasterDataNode);
         final MultiLevelSource mls = new AbstractMultiLevelSource(model) {
@@ -664,14 +683,14 @@ public class ImageManager {
         return new DefaultMultiLevelImage(mls);
     }
 
-    @Deprecated
     public RenderedImage getMaskImage(final Product product, final String expression, int level) {
-        return getMaskImage(expression, product, level);
+        MultiLevelImage mli = getMaskImage(expression, product);
+        return mli.getImage(level);
     }
 
-    public RenderedImage getMaskImage(final String expression, final Product product, int level) {
-        final MaskKey key = new MaskKey(product, expression);
+    public MultiLevelImage getMaskImage(final String expression, final Product product) {
         synchronized (maskImageMap) {
+            final MaskKey key = new MaskKey(product, expression);
             MultiLevelImage mli = maskImageMap.get(key);
             if (mli == null) {
                 MultiLevelSource mls = new AbstractMultiLevelSource(createMultiLevelModel(product)) {
@@ -687,8 +706,13 @@ public class ImageManager {
                 product.addProductNodeListener(rasterDataChangeListener);
                 maskImageMap.put(key, mli);
             }
-            return mli.getImage(level);
+            return mli;
         }
+    }
+
+    @Deprecated
+    public RenderedImage getMaskImage(final String expression, final Product product, int level) {
+        return getMaskImage(product, expression, level);
     }
 
     public ImageInfo getImageInfo(RasterDataNode[] rasters) {
@@ -748,16 +772,16 @@ public class ImageManager {
         return statisticsLevel;
     }
 
-    @Deprecated
     public PlanarImage createColoredMaskImage(Product product, String expression, Color color, boolean invertMask,
                                               int level) {
-        return createColoredMaskImage(expression, product, color, invertMask, level);
+        RenderedImage image = getMaskImage(product, expression, level);
+        return createColoredMaskImage(color, image, invertMask);
     }
 
+    @Deprecated
     public PlanarImage createColoredMaskImage(String expression, Product product, Color color, boolean invertMask,
                                               int level) {
-        RenderedImage image = getMaskImage(expression, product, level);
-        return createColoredMaskImage(color, image, invertMask);
+        return createColoredMaskImage(product, expression, color, invertMask, level);
     }
 
     public static PlanarImage createColoredMaskImage(Color color, RenderedImage alphaImage, boolean invertAlpha) {
@@ -824,7 +848,7 @@ public class ImageManager {
         if (roiDefinition.isValueRangeEnabled()) {
             final String escapedName = BandArithmetic.createExternalName(rasterDataNode.getName());
             String rangeExpr = escapedName + " >= " + roiDefinition.getValueRangeMin() + " && "
-                               + escapedName + " <= " + roiDefinition.getValueRangeMax();
+                    + escapedName + " <= " + roiDefinition.getValueRangeMax();
             final String validMaskExpression = rasterDataNode.getValidMaskExpression();
             if (validMaskExpression != null) {
                 rangeExpr += " && " + validMaskExpression;
@@ -984,6 +1008,11 @@ public class ImageManager {
                 }
             }
         }
+    }
+    
+    // Initialization on demand holder idiom
+    private static class Holder {
+        private static final ImageManager instance = new ImageManager();
     }
 }
 

@@ -1,7 +1,7 @@
 package org.esa.beam.visat.toolviews.imageinfo;
 
-import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.ValueModel;
+import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.ValueSet;
 import com.bc.ceres.binding.swing.Binding;
 import com.bc.ceres.binding.swing.BindingContext;
@@ -36,20 +36,20 @@ class MoreOptionsForm {
 
     MoreOptionsForm(ColorManipulationForm parentForm, boolean hasHistogramMatching) {
         this.parentForm = parentForm;
-        ValueContainer valueContainer = new ValueContainer();
+        PropertyContainer propertyContainer = new PropertyContainer();
 
-        valueContainer.addModel(ValueModel.createValueModel(GAIN_PROPERTY, 1.0));
-        valueContainer.addModel(ValueModel.createValueModel(BIAS_PROPERTY, 0.0));
-        valueContainer.addModel(ValueModel.createValueModel(LOG_SCALING_PROPERTY, false));
-        valueContainer.addModel(ValueModel.createValueModel(EXPONENT_PROPERTY, 1.0));
+        propertyContainer.addProperty(Property.create(GAIN_PROPERTY, 1.0));
+        propertyContainer.addProperty(Property.create(BIAS_PROPERTY, 0.0));
+        propertyContainer.addProperty(Property.create(LOG_SCALING_PROPERTY, false));
+        propertyContainer.addProperty(Property.create(EXPONENT_PROPERTY, 1.0));
 
-        valueContainer.addModel(ValueModel.createValueModel(NO_DATA_COLOR_PROPERTY, ImageInfo.NO_COLOR));
+        propertyContainer.addProperty(Property.create(NO_DATA_COLOR_PROPERTY, ImageInfo.NO_COLOR));
 
         this.hasHistogramMatching = hasHistogramMatching;
         if (this.hasHistogramMatching) {
-            valueContainer.addModel(ValueModel.createValueModel(HISTOGRAM_MATCHING_PROPERTY, ImageInfo.HistogramMatching.None));
-            valueContainer.getDescriptor(HISTOGRAM_MATCHING_PROPERTY).setNotNull(true);
-            valueContainer.getDescriptor(HISTOGRAM_MATCHING_PROPERTY).setValueSet(new ValueSet(
+            propertyContainer.addProperty(Property.create(HISTOGRAM_MATCHING_PROPERTY, ImageInfo.HistogramMatching.None));
+            propertyContainer.getDescriptor(HISTOGRAM_MATCHING_PROPERTY).setNotNull(true);
+            propertyContainer.getDescriptor(HISTOGRAM_MATCHING_PROPERTY).setValueSet(new ValueSet(
                     new ImageInfo.HistogramMatching[]{
                             ImageInfo.HistogramMatching.None,
                             ImageInfo.HistogramMatching.Equalize,
@@ -67,7 +67,7 @@ class MoreOptionsForm {
         constraints.weighty = 0.0;
         constraints.insets = new Insets(1, 0, 1, 0);
 
-        bindingContext = new BindingContext(valueContainer);
+        bindingContext = new BindingContext(propertyContainer);
 
         final PropertyChangeListener pcl = new PropertyChangeListener() {
 

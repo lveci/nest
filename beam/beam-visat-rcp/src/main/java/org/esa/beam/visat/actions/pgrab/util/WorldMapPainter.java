@@ -1,5 +1,5 @@
 /*
- * $Id: WorldMapPainter.java,v 1.1 2009-05-14 16:28:49 lveci Exp $
+ * $Id: WorldMapPainter.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -23,6 +23,7 @@ import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.ProductUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -138,7 +139,22 @@ public class WorldMapPainter {
             }
 
             @Override
+            public CoordinateReferenceSystem getMapCRS() {
+                return null;
+            }
+
+            @Override
             public CoordinateReferenceSystem getModelCRS() {
+                return null;
+            }
+
+            @Override
+            public CoordinateReferenceSystem getGeoCRS() {
+                return null;
+            }
+
+            @Override
+            public MathTransform getImageToMapTransform() {
                 return null;
             }
         };

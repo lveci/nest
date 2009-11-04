@@ -1,5 +1,5 @@
 /*
- * $Id: WorldMapPane.java,v 1.4 2009-09-01 20:27:12 lveci Exp $
+ * $Id: WorldMapPane.java,v 1.5 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -54,7 +54,7 @@ import java.util.List;
  * This class displays a world map specified by the {@link WorldMapPaneDataModel}.
  *
  * @author Marco Peters
- * @version $Revision: 1.4 $ $Date: 2009-09-01 20:27:12 $
+ * @version $Revision: 1.5 $ $Date: 2009-11-04 17:04:32 $
  */
 public class WorldMapPane extends JPanel {
 
@@ -107,7 +107,7 @@ public class WorldMapPane extends JPanel {
     }
 
     public float getScale() {
-        return new Float(layerCanvas.getViewport().getZoomFactor());
+        return (float) layerCanvas.getViewport().getZoomFactor();
     }
 
     public void setScale(final float scale) {

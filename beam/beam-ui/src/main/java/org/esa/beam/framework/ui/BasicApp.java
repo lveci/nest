@@ -1,5 +1,5 @@
 /*
- * $Id: BasicApp.java,v 1.5 2009-07-10 18:36:55 lveci Exp $
+ * $Id: BasicApp.java,v 1.6 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -125,7 +125,7 @@ import java.util.logging.Logger;
  * dialog boxes.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.5 $  $Date: 2009-07-10 18:36:55 $
+ * @version $Revision: 1.6 $  $Date: 2009-11-04 17:04:32 $
  * @see org.esa.beam.framework.ui.command.Command
  * @see org.esa.beam.framework.ui.command.ExecCommand
  * @see org.esa.beam.framework.ui.command.CommandGroup
@@ -1782,14 +1782,16 @@ public class BasicApp {
         }
     }
 
-    private void initBeamUserDir() {
+    private void initBeamUserDir() throws IOException {
         String userHome = System.getProperty("user.home");
         if (userHome == null) {
             throw new IllegalStateException("Java system property 'user.home' not set");
         }
         _beamUserDir = SystemUtils.getApplicationDataDir(true);
         _appUserDir = new File(_beamUserDir, getAppSymbolicName());
-        _appUserDir.mkdir();
+        if (!_appUserDir.exists() && !_appUserDir.mkdir()) {
+            throw new IOException("Failed to create directory '" + _appUserDir + "'.");
+        }
     }
 
 

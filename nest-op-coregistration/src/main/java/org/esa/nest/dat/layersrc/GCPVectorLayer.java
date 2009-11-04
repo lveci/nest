@@ -1,8 +1,9 @@
 package org.esa.nest.dat.layersrc;
 
-import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerType;
+import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.glevel.MultiLevelImage;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
@@ -24,8 +25,8 @@ public class GCPVectorLayer extends Layer {
     private final Band band;
     private final float lineThickness = 2.0f;
 
-    public GCPVectorLayer(ValueContainer configuration) {
-        super(LayerType.getLayerType(GCPVectorLayerType.class.getName()), configuration);
+    public GCPVectorLayer(PropertyContainer configuration) {
+        super(LayerTypeRegistry.getLayerType(GCPVectorLayerType.class.getName()), configuration);
         product = (Product) configuration.getValue("product");
         band = (Band) configuration.getValue("band");
     }

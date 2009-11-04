@@ -1,8 +1,9 @@
 package org.esa.beam.visat.toolviews.layermanager.layersrc.shapefile;
 
 import com.bc.ceres.binding.ConversionException;
+import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
 import com.bc.ceres.binding.dom.DefaultDomConverter;
 import com.bc.ceres.binding.dom.DomConverter;
 import com.bc.ceres.binding.dom.DomElement;
@@ -21,10 +22,13 @@ import org.geotools.referencing.CRS;
 import org.geotools.styling.SLDParser;
 import org.geotools.styling.SLDTransformer;
 import org.geotools.styling.Style;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.xml.transform.TransformerException;
+import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
@@ -54,39 +58,50 @@ public class FeatureLayerType extends LayerType {
     }
 
     @Override
-    protected Layer createLayerImpl(LayerContext ctx, ValueContainer configuration) {
-        try {
-            if (configuration.getValue(PROPERTY_NAME_FEATURE_COLLECTION_CRS) == null && ctx != null) {
-                configuration.setValue(PROPERTY_NAME_FEATURE_COLLECTION_CRS, ctx.getCoordinateReferenceSystem());
-            }
-        } catch (ValidationException e) {
-            throw new IllegalStateException(e);
+    public Layer createLayer(LayerContext ctx, PropertyContainer configuration) {
+        if (configuration.getValue(PROPERTY_NAME_FEATURE_COLLECTION_CRS) == null && ctx != null) {
+            configuration.setValue(PROPERTY_NAME_FEATURE_COLLECTION_CRS, ctx.getCoordinateReferenceSystem());
         }
-        return new FeatureLayer(this, configuration);
+        FeatureCollection<SimpleFeatureType, SimpleFeature> fc;
+        fc = (FeatureCollection<SimpleFeatureType, SimpleFeature>) configuration.getValue(
+                FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION);
+        if (fc == null) {
+            final URL url = (URL) configuration.getValue(FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION_URL);
+            final CoordinateReferenceSystem targetCrs = (CoordinateReferenceSystem) configuration.getValue(
+                    FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION_CRS);
+            final Geometry clipGeometry = (Geometry) configuration.getValue(
+                    FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION_CLIP_GEOMETRY);
+            try {
+                fc = ShapefileUtils.createFeatureCollection(url, targetCrs, clipGeometry);
+            } catch (IOException e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
+        return new FeatureLayer(this, fc, configuration);
     }
 
     @Override
-    public ValueContainer getConfigurationTemplate() {
-        final ValueContainer configuration = new ValueContainer();
+    public PropertyContainer createLayerConfig(LayerContext ctx) {
+        final PropertyContainer configuration = new PropertyContainer();
 
         // Mandatory Parameters
 
-        configuration.addModel(createDefaultValueModel(PROPERTY_NAME_FEATURE_COLLECTION, FeatureCollection.class));
+        configuration.addProperty(Property.create(PROPERTY_NAME_FEATURE_COLLECTION, FeatureCollection.class));
         configuration.getDescriptor(PROPERTY_NAME_FEATURE_COLLECTION).setTransient(true);
         //configuration.getDescriptor(PROPERTY_NAME_FEATURE_COLLECTION).setNotNull(true);
 
-        configuration.addModel(createDefaultValueModel(PROPERTY_NAME_SLD_STYLE, Style.class));
+        configuration.addProperty(Property.create(PROPERTY_NAME_SLD_STYLE, Style.class));
         configuration.getDescriptor(PROPERTY_NAME_SLD_STYLE).setDomConverter(new StyleDomConverter());
         configuration.getDescriptor(PROPERTY_NAME_SLD_STYLE).setNotNull(true);
 
         // Optional Parameters
 
-        configuration.addModel(createDefaultValueModel(PROPERTY_NAME_FEATURE_COLLECTION_CLIP_GEOMETRY, Geometry.class));
+        configuration.addProperty(Property.create(PROPERTY_NAME_FEATURE_COLLECTION_CLIP_GEOMETRY, Geometry.class));
         configuration.getDescriptor(PROPERTY_NAME_FEATURE_COLLECTION_CLIP_GEOMETRY).setDomConverter(new GeometryDomConverter());
 
-        configuration.addModel(createDefaultValueModel(PROPERTY_NAME_FEATURE_COLLECTION_URL, URL.class));
+        configuration.addProperty(Property.create(PROPERTY_NAME_FEATURE_COLLECTION_URL, URL.class));
 
-        configuration.addModel(createDefaultValueModel(PROPERTY_NAME_FEATURE_COLLECTION_CRS, CoordinateReferenceSystem.class));
+        configuration.addProperty(Property.create(PROPERTY_NAME_FEATURE_COLLECTION_CRS, CoordinateReferenceSystem.class));
         configuration.getDescriptor(PROPERTY_NAME_FEATURE_COLLECTION_CRS).setDomConverter(new CRSDomConverter());
         configuration.getDescriptor(PROPERTY_NAME_FEATURE_COLLECTION_CRS).setTransient(true);
 

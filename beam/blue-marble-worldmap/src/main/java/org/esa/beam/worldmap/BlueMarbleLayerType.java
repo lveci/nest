@@ -1,8 +1,7 @@
 package org.esa.beam.worldmap;
 
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
-import com.bc.ceres.binding.ValueModel;
+import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.Property;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.support.ImageLayer;
@@ -11,7 +10,6 @@ import org.esa.beam.glevel.TiledFileMultiLevelSource;
 import org.geotools.referencing.AbstractIdentifiedObject;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 
-import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -19,13 +17,14 @@ import java.net.URL;
 
 /**
  * @author Marco Peters
- * @version $Revision: 1.3 $ $Date: 2009-05-28 14:55:40 $
+ * @version $Revision: 1.4 $ $Date: 2009-11-04 17:04:32 $
  * @since BEAM 4.6
  */
 public class BlueMarbleLayerType extends ImageLayer.Type {
 
     private static final String WORLD_IMAGE_DIR_PROPERTY_NAME = "org.esa.beam.worldImageDir";
-    private MultiLevelSource multiLevelSource;
+    private volatile MultiLevelSource multiLevelSource;
+    private static final String WORLD_MAP_LAYER_NAME = "World Map (NASA Blue Marble)";
 
     @Override
     public String getName() {
@@ -42,7 +41,7 @@ public class BlueMarbleLayerType extends ImageLayer.Type {
     }
 
     @Override
-    protected Layer createLayerImpl(LayerContext ctx, ValueContainer configuration) {
+    public Layer createLayer(LayerContext ctx, PropertyContainer configuration) {
         if (multiLevelSource == null) {
             synchronized (this) {
                 if (multiLevelSource == null) {
@@ -50,25 +49,23 @@ public class BlueMarbleLayerType extends ImageLayer.Type {
                 }
             }
         }
-        for (final ValueModel model : super.getConfigurationTemplate().getModels()) {
-            if (configuration.getModel(model.getDescriptor().getName()) == null) {
-                configuration.addModel(model);
+        for (final Property model : super.createLayerConfig(ctx).getProperties()) {
+            if (configuration.getProperty(model.getDescriptor().getName()) == null) {
+                configuration.addProperty(model);
             }
         }
-        try {
-            configuration.setValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE, multiLevelSource);
-            final AffineTransform imageToModelTransform = multiLevelSource.getModel().getImageToModelTransform(0);
-            configuration.setValue(ImageLayer.PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM, imageToModelTransform);
-        } catch (ValidationException e) {
-            throw new IllegalStateException(e);
-        }
+        configuration.setValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE, multiLevelSource);
 
-        return new BlueMarbleWorldMapLayer(configuration);
+        final ImageLayer layer = new ImageLayer(this, multiLevelSource, configuration);
+        layer.setName(WORLD_MAP_LAYER_NAME);
+        layer.setVisible(true);
+
+        return layer;
     }
 
     @Override
-    public ValueContainer getConfigurationTemplate() {
-        return new ValueContainer();
+    public PropertyContainer createLayerConfig(LayerContext ctx) {
+        return new PropertyContainer();
     }
 
     private static MultiLevelSource createMultiLevelSource() {
@@ -89,7 +86,7 @@ public class BlueMarbleLayerType extends ImageLayer.Type {
     }
 
     private static String getDirPathFromModule() {
-        final URL resource = BlueMarbleWorldMapLayer.class.getResource("image.properties");
+        final URL resource = BlueMarbleLayerType.class.getResource("image.properties");
         try {
             return new File(resource.toURI()).getParent();
         } catch (URISyntaxException e) {

@@ -1,5 +1,5 @@
 /*
- * $Id: FigureLayer.java,v 1.2 2009-05-12 12:56:42 lveci Exp $
+ * $Id: FigureLayer.java,v 1.3 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,9 +16,8 @@
  */
 package org.esa.beam.glayer;
 
-import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.glayer.Layer;
-import com.bc.ceres.glayer.Style;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
 import org.esa.beam.framework.draw.Figure;
@@ -58,11 +57,13 @@ public class FigureLayer extends Layer {
     private final List<Figure> figureList;
     private final AffineTransform shapeToModelTransform;
 
-    public FigureLayer(FigureLayerType type, ValueContainer configuration) {
+    public FigureLayer(FigureLayerType type, final List<Figure> figureList,
+                       final AffineTransform shapeToModelTransform,
+                       PropertyContainer configuration) {
         super(type, configuration);
         setName("Figures");
-        this.figureList = (List<Figure>) configuration.getValue(FigureLayer.PROPERTY_NAME_FIGURE_LIST);
-        this.shapeToModelTransform = (AffineTransform) configuration.getValue(PROPERTY_NAME_TRANSFORM);
+        this.figureList = figureList;
+        this.shapeToModelTransform = shapeToModelTransform;
     }
 
     public void addFigure(Figure currentShapeFigure) {

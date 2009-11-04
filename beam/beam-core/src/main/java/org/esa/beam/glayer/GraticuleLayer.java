@@ -1,5 +1,5 @@
 /*
- * $Id: GraticuleLayer.java,v 1.2 2009-05-12 12:56:42 lveci Exp $
+ * $Id: GraticuleLayer.java,v 1.3 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,11 +16,9 @@
  */
 package org.esa.beam.glayer;
 
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.ValueContainer;
+import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.glayer.Layer;
-import com.bc.ceres.glayer.LayerType;
-import com.bc.ceres.glayer.Style;
+import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
 import org.esa.beam.framework.datamodel.Graticule;
@@ -42,13 +40,12 @@ import java.beans.PropertyChangeEvent;
 
 /**
  * @author Marco Zuehlke
- * @version $Revision: 1.2 $ $Date: 2009-05-12 12:56:42 $
+ * @version $Revision: 1.3 $ $Date: 2009-11-04 17:04:32 $
  * @since BEAM 4.2
  */
 public class GraticuleLayer extends Layer {
 
-    private static final GraticuleLayerType LAYER_TYPE = (GraticuleLayerType) LayerType.getLayerType(
-            GraticuleLayerType.class.getName());
+    private static final GraticuleLayerType LAYER_TYPE = LayerTypeRegistry.getLayerType(GraticuleLayerType.class);
 
     private RasterDataNode raster;
     private final AffineTransform i2mTransform;
@@ -56,30 +53,27 @@ public class GraticuleLayer extends Layer {
     private ProductNodeHandler productNodeHandler;
     private Graticule graticule;
 
-    public GraticuleLayer(RasterDataNode raster, AffineTransform i2mTransform) {
-        this(LAYER_TYPE, initConfiguration(LAYER_TYPE.getConfigurationTemplate(), raster, i2mTransform));
+    public GraticuleLayer(RasterDataNode raster) {
+        this(LAYER_TYPE, raster, initConfiguration(LAYER_TYPE.createLayerConfig(null), raster));
     }
 
-
-    public GraticuleLayer(GraticuleLayerType type, ValueContainer configuration) {
+    public GraticuleLayer(GraticuleLayerType type, RasterDataNode raster, PropertyContainer configuration) {
         super(type, configuration);
+        this.raster = raster;
+        
         this.i2mTransform = (AffineTransform) getConfiguration().getValue(GraticuleLayerType.PROPERTY_NAME_TRANSFORM);
-        this.raster = (RasterDataNode) getConfiguration().getValue(GraticuleLayerType.PROPERTY_NAME_RASTER);
 
         productNodeHandler = new ProductNodeHandler();
         raster.getProduct().addProductNodeListener(productNodeHandler);
 
         setTransparency(0.5);
+
     }
 
-    private static ValueContainer initConfiguration(ValueContainer configurationTemplate, RasterDataNode raster,
-                                                    AffineTransform i2mTransform) {
-        try {
-            configurationTemplate.setValue(GraticuleLayerType.PROPERTY_NAME_RASTER, raster);
-            configurationTemplate.setValue(GraticuleLayerType.PROPERTY_NAME_TRANSFORM, i2mTransform);
-        } catch (ValidationException e) {
-            throw new IllegalArgumentException(e);
-        }
+    private static PropertyContainer initConfiguration(PropertyContainer configurationTemplate, RasterDataNode raster) {
+        configurationTemplate.setValue(GraticuleLayerType.PROPERTY_NAME_RASTER, raster);
+        configurationTemplate.setValue(GraticuleLayerType.PROPERTY_NAME_TRANSFORM,
+                                       raster.getSourceImage().getModel().getImageToModelTransform(0));
         return configurationTemplate;
     }
 
@@ -211,17 +205,13 @@ public class GraticuleLayer extends Layer {
     protected void fireLayerPropertyChanged(PropertyChangeEvent event) {
         String propertyName = event.getPropertyName();
         if (propertyName.equals(GraticuleLayerType.PROPERTY_NAME_RES_AUTO) ||
-            propertyName.equals(GraticuleLayerType.PROPERTY_NAME_RES_LAT) ||
-            propertyName.equals(GraticuleLayerType.PROPERTY_NAME_RES_LON) ||
-            propertyName.equals(GraticuleLayerType.PROPERTY_NAME_RES_PIXELS)) {
+                propertyName.equals(GraticuleLayerType.PROPERTY_NAME_RES_LAT) ||
+                propertyName.equals(GraticuleLayerType.PROPERTY_NAME_RES_LON) ||
+                propertyName.equals(GraticuleLayerType.PROPERTY_NAME_RES_PIXELS)) {
             graticule = null;
         }
-        if (getConfiguration().getModel(propertyName) != null) {
-            try {
-                getConfiguration().setValue(propertyName, event.getNewValue());
-            } catch (ValidationException e) {
-                throw new IllegalArgumentException(e);
-            }
+        if (getConfiguration().getProperty(propertyName) != null) {
+            getConfiguration().setValue(propertyName, event.getNewValue());
         }
         super.fireLayerPropertyChanged(event);
     }

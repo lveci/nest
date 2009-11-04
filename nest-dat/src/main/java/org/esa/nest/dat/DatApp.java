@@ -84,7 +84,11 @@ public final class DatApp extends VisatApp {
                             new NestSingleTargetProductDialog("Multilook", VisatApp.getApp(), "Multilook", null);
                     dialog = new NestSingleTargetProductDialog(
                         "Terrain-Correction", VisatApp.getApp(), "Terrain-Correction", null);
-
+                } catch(Exception e) {
+                    VisatApp.getApp().showErrorDialog(e.getMessage());
+                }
+                
+                try {
                     final ImportBrowser ib = ImportBrowserAction.getInstance().getImportBrowser();
                     ib.getFrame().setVisible(false);
                     final Repository rep = ib.getRepositoryManager().getRepository(0);

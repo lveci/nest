@@ -37,7 +37,7 @@ import java.util.Map;
  * Operator for cluster analysis.
  *
  * @author Ralf Quast
- * @version $Revision: 1.2 $ $Date: 2009-08-07 19:30:15 $
+ * @version $Revision: 1.3 $ $Date: 2009-11-04 17:04:31 $
  */
 @OperatorMetadata(alias = "EMClusterAnalysis",
                   version = "1.0",
@@ -79,7 +79,7 @@ public class EMClusterOp extends Operator {
     private transient Band[] probabilityBands;
     private transient ROI roi;
     private transient MetadataElement clusterAnalysis;
-    private transient ProbabilityCalculator probabilityCalculator;
+    private transient volatile  ProbabilityCalculator probabilityCalculator;
 
     public EMClusterOp() {
     }

@@ -1,5 +1,5 @@
 /*
- * $Id: VisatApp.java,v 1.9 2009-05-27 13:12:23 lveci Exp $
+ * $Id: VisatApp.java,v 1.10 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -36,7 +36,9 @@ import org.esa.beam.framework.dataio.ProductIOPlugIn;
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.GcpDescriptor;
+import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.MapGeoCoding;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.PinDescriptor;
@@ -138,7 +140,7 @@ import java.util.logging.Level;
  * @author Norman Fomferra
  * @author Marco Peters
  * @author Sabine Embacher
- * @version $Revision: 1.9 $ $Date: 2009-05-27 13:12:23 $
+ * @version $Revision: 1.10 $ $Date: 2009-11-04 17:04:32 $
  */
 public class VisatApp extends BasicApp implements AppContext {
 
@@ -1167,7 +1169,9 @@ public class VisatApp extends BasicApp implements AppContext {
             @Override
             protected Object doInBackground() throws Exception {
                 try {
-                    view.updateROIImage(recreateROIImage, pm);
+                    if (view != null) {
+                        view.updateROIImage(recreateROIImage, pm);
+                    }
                 } catch (IOException e) {
                     Debug.trace(e);
                     showErrorDialog("Failed to create ROI image.\nAn I/O error occured:\n" + e.getMessage());
@@ -1896,9 +1900,9 @@ public class VisatApp extends BasicApp implements AppContext {
         }
         final RasterDataNode raster = sceneView.getRaster();
         final String csName;
-        if (raster.getGeoCoding() instanceof MapGeoCoding) {
-            MapGeoCoding mapGeoCoding = (MapGeoCoding) raster.getGeoCoding();
-            csName = mapGeoCoding.getModelCRS().getName().toString();
+        final GeoCoding geoCoding = raster.getGeoCoding();
+        if (geoCoding instanceof MapGeoCoding || geoCoding instanceof CrsGeoCoding) {
+            csName = geoCoding.getMapCRS().getName().toString();
         } else {
             csName = "Satellite coordinates";
         }
@@ -2336,7 +2340,7 @@ public class VisatApp extends BasicApp implements AppContext {
         }
 
         /**
-         * Invoked when a internal frame has been opened.
+         * Invoked when an internal frame has been opened.
          *
          * @see javax.swing.JInternalFrame#show
          */

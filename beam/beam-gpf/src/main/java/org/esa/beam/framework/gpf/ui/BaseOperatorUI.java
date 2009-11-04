@@ -19,6 +19,7 @@ import com.bc.ceres.binding.dom.DomConverter;
 import com.bc.ceres.binding.dom.Xpp3DomElement;
 import com.bc.ceres.binding.*;
 import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
+import com.sun.xml.internal.bind.v2.runtime.property.ValueProperty;
 
 /**
 * The abstract base class for all operator user interfaces intended to be extended by clients.
@@ -29,7 +30,7 @@ import com.thoughtworks.xstream.io.xml.xppdom.Xpp3Dom;
  */
 public abstract class BaseOperatorUI implements OperatorUI {
 
-    protected ValueContainer valueContainer = null;
+    protected PropertyContainer valueContainer = null;
     protected Map<String, Object> paramMap = null;
     protected Product[] sourceProducts = null;
 
@@ -52,7 +53,7 @@ public abstract class BaseOperatorUI implements OperatorUI {
 
         paramMap = parameterMap;
         final ParameterDescriptorFactory parameterDescriptorFactory = new ParameterDescriptorFactory();
-        valueContainer = ValueContainer.createMapBacked(paramMap, operatorSpi.getOperatorClass(), parameterDescriptorFactory);
+        valueContainer = PropertyContainer.createMapBacked(paramMap, operatorSpi.getOperatorClass(), parameterDescriptorFactory);
         
         if(paramMap.isEmpty()) {
             try {
@@ -76,14 +77,14 @@ public abstract class BaseOperatorUI implements OperatorUI {
             return;
         }
 
-        final ValueModel[] models = valueContainer.getModels();
-        for (ValueModel model : models) {
-            final ValueDescriptor descriptor = model.getDescriptor();
+        final Property[] properties = valueContainer.getProperties();
+        for (Property p : properties) {
+            final PropertyDescriptor descriptor = p.getDescriptor();
             final DomConverter domConverter = descriptor.getDomConverter();
             if(domConverter != null) {
                 try {
-                    final DomElement childElement = parentElement.createChild(getElementName(model));
-                    domConverter.convertValueToDom(model.getValue(), childElement);
+                    final DomElement childElement = parentElement.createChild(getElementName(p));
+                    domConverter.convertValueToDom(p.getValue(), childElement);
                 } catch (ConversionException e) {
                     e.printStackTrace();
                 }
@@ -91,8 +92,8 @@ public abstract class BaseOperatorUI implements OperatorUI {
 
                 final String itemAlias = descriptor.getItemAlias();
                 if (descriptor.getType().isArray() && itemAlias != null && !itemAlias.isEmpty()) {
-                    final DomElement childElement = descriptor.getItemsInlined() ? parentElement : parentElement.createChild(getElementName(model));
-                    final Object array = model.getValue();
+                    final DomElement childElement = descriptor.getItemsInlined() ? parentElement : parentElement.createChild(getElementName(p));
+                    final Object array = p.getValue();
                     if (array != null) {
                         final int arrayLength = Array.getLength(array);
                         final Converter itemConverter = getItemConverter(descriptor);
@@ -107,8 +108,8 @@ public abstract class BaseOperatorUI implements OperatorUI {
                         }
                     }
                 } else {
-                    final DomElement childElement = parentElement.createChild(getElementName(model));
-                    final Object childValue = model.getValue();
+                    final DomElement childElement = parentElement.createChild(getElementName(p));
+                    final Object childValue = p.getValue();
                     final Converter converter = descriptor.getConverter();
 
                     final String text = converter.format(childValue);
@@ -138,15 +139,15 @@ public abstract class BaseOperatorUI implements OperatorUI {
 
     public void convertFromDOM() {
 
-        final ValueModel[] models = valueContainer.getModels();
-        for (ValueModel model : models) {
+        final Property[] properties = valueContainer.getProperties();
+        for (Property p : properties) {
 
-            final ValueDescriptor descriptor = model.getDescriptor();
+            final PropertyDescriptor descriptor = p.getDescriptor();
             final String name =  descriptor.getName();
             try {
                 final Object value = paramMap.get(name);
                 if(value != null) {
-                    model.setValue(value);
+                    p.setValue(value);
                 }
             } catch(ValidationException e) {
                 throw new IllegalArgumentException(name);
@@ -171,7 +172,7 @@ public abstract class BaseOperatorUI implements OperatorUI {
         }
     }
 
-    private static Converter getItemConverter(final ValueDescriptor descriptor) {
+    private static Converter getItemConverter(final PropertyDescriptor descriptor) {
         final Class<?> itemType = descriptor.getType().getComponentType();
         Converter itemConverter = descriptor.getConverter();
         if (itemConverter == null) {
@@ -180,11 +181,11 @@ public abstract class BaseOperatorUI implements OperatorUI {
         return itemConverter;
     }
 
-    private static String getElementName(final ValueModel model) {
-        final String alias = model.getDescriptor().getAlias();
+    private static String getElementName(final Property p) {
+        final String alias = p.getDescriptor().getAlias();
         if (alias != null && !alias.isEmpty()) {
             return alias;
         }
-        return model.getDescriptor().getName();
+        return p.getDescriptor().getName();
     }
 }

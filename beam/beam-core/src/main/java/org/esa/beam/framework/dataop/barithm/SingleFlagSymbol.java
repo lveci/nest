@@ -1,5 +1,5 @@
 /*
- * $Id: SingleFlagSymbol.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: SingleFlagSymbol.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,20 +31,19 @@ import com.bc.jexp.Term;
  * The resulting term in this case is an instance of <code>{@link com.bc.jexp.Term.Ref}</code>.
  *
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
  */
+public final  class SingleFlagSymbol extends RasterDataSymbol {
 
-public class SingleFlagSymbol extends RasterDataSymbol {
-
-    private int _flagMask;
+    private final int flagMask;
 
     public SingleFlagSymbol(final String symbolName, final RasterDataNode raster, final int flagMask) {
-        super(symbolName, raster);
-        _flagMask = flagMask;
+        super(symbolName, raster, RAW);
+        this.flagMask = flagMask;
     }
 
     @Override
-    public int getRetType() {
+    public final  int getRetType() {
         return Term.TYPE_B;
     }
 
@@ -53,25 +52,25 @@ public class SingleFlagSymbol extends RasterDataSymbol {
      *
      * @return the flag mask.
      */
-    public int getFlagMask() {
-        return _flagMask;
+    public final  int getFlagMask() {
+        return flagMask;
     }
 
     @Override
-    public boolean evalB(final EvalEnv env) throws EvalException {
+    public final  boolean evalB(final EvalEnv env) throws EvalException {
         final int elemIndex = ((RasterDataEvalEnv) env).getElemIndex();
-        return (_data.getElemIntAt(elemIndex) & _flagMask) == _flagMask;
+        return (data.getElemIntAt(elemIndex) & flagMask) == flagMask;
     }
 
     @Override
-    public int evalI(final EvalEnv env) throws EvalException {
+    public final int evalI(final EvalEnv env) throws EvalException {
         final int elemIndex = ((RasterDataEvalEnv) env).getElemIndex();
-        return (_data.getElemIntAt(elemIndex) & _flagMask) == _flagMask ? 1 : 0;
+        return (data.getElemIntAt(elemIndex) & flagMask) == flagMask ? 1 : 0;
     }
 
     @Override
-    public double evalD(final EvalEnv env) throws EvalException {
+    public final double evalD(final EvalEnv env) throws EvalException {
         final int elemIndex = ((RasterDataEvalEnv) env).getElemIndex();
-        return (_data.getElemIntAt(elemIndex) & _flagMask) == _flagMask ? 1.0 : 0.0;
+        return (data.getElemIntAt(elemIndex) & flagMask) == flagMask ? 1.0 : 0.0;
     }
 }
