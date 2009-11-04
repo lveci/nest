@@ -179,6 +179,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
+    private final Map<String, Boolean> targetBandapplyRadiometricNormalizationFlag = new HashMap<String, Boolean>();
     protected TiePointGrid incidenceAngle = null;
 
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
@@ -598,6 +599,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                     }
                     if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
                         targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                        targetBandapplyRadiometricNormalizationFlag.put(targetBandName, true);
                     }
                 }
 
@@ -609,6 +611,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                     }
                     if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
                         targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                        targetBandapplyRadiometricNormalizationFlag.put(targetBandName, false);
                     }
                 }
 
@@ -626,6 +629,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                     }
                     if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
                         targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                        targetBandapplyRadiometricNormalizationFlag.put(targetBandName, true);
                     }
                 }
 
@@ -633,6 +637,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                     targetBandName = srcBand.getName();
                     if (addTargetBand(targetBandName, unit, srcBand)) {
                         targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                        targetBandapplyRadiometricNormalizationFlag.put(targetBandName, false);
                     }
                 }
             }
@@ -900,7 +905,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 td.tileDataBuffer = td.targetTile.getDataBuffer();
                 td.bandName = targetBand.getName();
                 td.noDataValue = sourceProduct.getBand(srcBandNames[0]).getNoDataValue();
-                td.applyRadiometricNormalization = targetBand.getName().contains("Sigma0");
+                td.applyRadiometricNormalization = targetBandapplyRadiometricNormalizationFlag.get(targetBand.getName());
 
                 final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
                 td.bandPolar = 0;
