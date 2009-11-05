@@ -155,11 +155,11 @@ public class ASARCalibrator implements Calibrator {
 
             getTiePointGridData(sourceProduct);
 
+            checkXCAFileExsitence();
+
             if (retroCalibrationFlag) {
 
                 getSrgrCoeff();
-
-                getOldXCAFile();
 
                 getOldAntennaPattern();
             }
@@ -173,8 +173,6 @@ public class ASARCalibrator implements Calibrator {
                 getAverageSceneHeight();
 
                 getOrbitStateVectors();
-
-                getNewXCAFile();
 
                 getNewAntennaPattern();
 
@@ -311,13 +309,14 @@ public class ASARCalibrator implements Calibrator {
         }
     }
 
-
     /**
      * Get XCA file used for the original radiometric calibration.
+     * @return The complete path to the XCA file.
      * @throws Exception The exceptions.
      */
-    private void getOldXCAFile() throws Exception {
+    private String getOldXCAFile() throws Exception {
         oldXCAFileName = absRoot.getAttributeString(AbstractMetadata.external_calibration_file);
+        return Settings.instance().get("AuxData/envisatAuxDataPath") + File.separator + oldXCAFileName;
     }
 
     /**
@@ -378,12 +377,55 @@ public class ASARCalibrator implements Calibrator {
         latitude = OperatorUtils.getLatitude(sourceProduct);
         longitude = OperatorUtils.getLongitude(sourceProduct);
 
-	if (productType.contains("ASA_GM")) {
-        	final double centreSlandRangeNS = slantRangeTime.getPixelDouble(sourceProduct.getSceneRasterWidth()/2,
-                                                                        sourceProduct.getSceneRasterHeight()/2);
-        	refSlantRange = Constants.halfLightSpeed * (centreSlandRangeNS/ 1000000000.0); // ns to s;
-        	halfLightSpeedByRefSlantRange = Constants.halfLightSpeed / refSlantRange;
-	}
+        if (productType.contains("ASA_GM")) {
+            final double centreSlandRangeNS = slantRangeTime.getPixelDouble(sourceProduct.getSceneRasterWidth()/2,
+                                                                            sourceProduct.getSceneRasterHeight()/2);
+            refSlantRange = Constants.halfLightSpeed * (centreSlandRangeNS/ 1000000000.0); // ns to s;
+            halfLightSpeedByRefSlantRange = Constants.halfLightSpeed / refSlantRange;
+        }
+    }
+
+    /**
+     * Check if old or new XCA file exists.
+     * @throws Exception The exception.
+     */
+    private void checkXCAFileExsitence() throws Exception {
+
+        String oldXCAFilePath = null;
+        if (retroCalibrationFlag) {
+            oldXCAFilePath = getOldXCAFile();
+            if (!isFileExists(oldXCAFilePath)) {
+                retroCalibrationFlag = false;
+                applyAntennaPatternCorr = false;
+            }
+        }
+
+        if (retroCalibrationFlag) {
+            getNewXCAFile();
+            if (!isFileExists(newXCAFilePath)) {
+                throw new OperatorException("Cannot find XCA file:" + newXCAFilePath);
+            } else if (oldXCAFilePath.contains(newXCAFilePath) || newXCAFilePath.contains(oldXCAFilePath)) {
+                retroCalibrationFlag = false;
+                applyAntennaPatternCorr = false;
+            }
+        }
+    }
+
+    /**
+     * Return true if a given file exists, otherwise, false.
+     * @param filePath The complete path to the given file.
+     * @return Return true if the file exists, false otherwise.
+     */
+    private boolean isFileExists(String filePath) {
+        File file = null;
+        final String[] exts = new String[] {"", ".gz", ".zip"};
+        for (String ext : exts) {
+            file = new File(filePath + ext);
+            if (file.exists()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void getNewXCAFile() throws Exception {
@@ -405,9 +447,9 @@ public class ASARCalibrator implements Calibrator {
             newXCAFilePath = xcaFileDir.toString() + File.separator + newXCAFileName;
         }
 
-        if (newXCAFileName == null) {
-            throw new OperatorException("No proper XCA file has been found");
-        }
+//        if (newXCAFileName == null) {
+//            throw new OperatorException("No proper XCA file has been found");
+//        }
     }
 
     /**
