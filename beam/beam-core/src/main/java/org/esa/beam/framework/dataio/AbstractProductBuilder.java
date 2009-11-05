@@ -117,7 +117,7 @@ public abstract class AbstractProductBuilder extends AbstractProductReader {
 
     protected static void addAttribString(String name, String value, MetadataElement subsetElem) {
         final ProductData data = ProductData.createInstance(value);
-        subsetElem.addAttributeFast(new MetadataAttribute(name, data, true));
+        subsetElem.addAttribute(new MetadataAttribute(name, data, true));
     }
 
     protected void addBitmaskDefsToProduct(Product product) {
@@ -178,7 +178,7 @@ public abstract class AbstractProductBuilder extends AbstractProductReader {
     protected void cloneMetadataAttributes(MetadataElement sourceRoot, MetadataElement destRoot) {
         for (int i = 0; i < sourceRoot.getNumAttributes(); i++) {
             final MetadataAttribute sourceAttribute = sourceRoot.getAttributeAt(i);
-            destRoot.addAttributeFast(sourceAttribute.createDeepClone());
+            destRoot.addAttribute(sourceAttribute.createDeepClone());
         }
     }
 

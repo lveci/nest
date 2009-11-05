@@ -106,7 +106,7 @@ public class AbstractMetadataIO {
         if(metaAttrib == null) {
             if(typeFromFile != null) {
                 metaAttrib = new MetadataAttribute(name, typeFromFile);
-                rootElem.addAttributeFast(metaAttrib);
+                rootElem.addAttribute(metaAttrib);
             } else {
                 return;                
             }

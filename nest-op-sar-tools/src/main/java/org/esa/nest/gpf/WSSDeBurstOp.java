@@ -144,7 +144,7 @@ public class WSSDeBurstOp extends Operator {
                 target.addElement(element.createDeepClone());
         }
         for (final MetadataAttribute attribute : source.getAttributes()) {
-            target.addAttributeFast(attribute.createDeepClone());
+            target.addAttribute(attribute.createDeepClone());
         }
     }
 

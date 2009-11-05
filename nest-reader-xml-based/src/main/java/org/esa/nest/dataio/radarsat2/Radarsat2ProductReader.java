@@ -125,11 +125,11 @@ public class Radarsat2ProductReader extends AbstractProductReader {
 
         final MetadataAttribute offsetAttrib = new MetadataAttribute("offset", ProductData.TYPE_FLOAT64);
         offsetAttrib.getData().setElemDouble(offset);
-        lut.addAttributeFast(offsetAttrib);
+        lut.addAttribute(offsetAttrib);
 
         final MetadataAttribute gainsAttrib = new MetadataAttribute("gains", ProductData.TYPE_FLOAT64, gainsArray.length);
         gainsAttrib.getData().setElems(gainsArray);
-        lut.addAttributeFast(gainsAttrib);
+        lut.addAttribute(gainsAttrib);
     }
 
     /**

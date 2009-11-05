@@ -140,6 +140,6 @@ public class XMLSupport {
         if(descAttrib != null)
             attribute.setDescription(descAttrib.getValue());
 
-        root.addAttributeFast(attribute);
+        root.addAttribute(attribute);
     }
 }

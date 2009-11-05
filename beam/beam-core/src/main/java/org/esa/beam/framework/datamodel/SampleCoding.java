@@ -36,7 +36,7 @@ public class SampleCoding extends MetadataElement {
         if (!attribute.getData().isScalar()) {
             throw new IllegalArgumentException("attribute value is not a scalar");
         }
-        super.addAttributeFast(attribute);
+        super.addAttribute(attribute);
     }
 
     /**
@@ -55,7 +55,7 @@ public class SampleCoding extends MetadataElement {
         if (description != null) {
             attribute.setDescription(description);
         }
-        addAttributeFast(attribute);
+        addAttribute(attribute);
         return attribute;
     }
 

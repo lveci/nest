@@ -1,5 +1,5 @@
 /*
- * $Id: MetadataElement.java,v 1.5 2009-11-04 17:04:32 lveci Exp $
+ * $Id: MetadataElement.java,v 1.6 2009-11-05 19:13:43 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,7 +27,7 @@ import java.text.ParseException;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.5 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.6 $ $Date: 2009-11-05 19:13:43 $
  */
 public class MetadataElement extends ProductNode {
 
@@ -541,7 +541,7 @@ public class MetadataElement extends ProductNode {
         MetadataAttribute attribute = getAttribute(name);
         if (attribute == null) {
             attribute = new MetadataAttribute(name, type, numElems);
-            addAttributeFast(attribute);
+            addAttribute(attribute);
         }
         return attribute;
     }
@@ -572,7 +572,7 @@ public class MetadataElement extends ProductNode {
         clone.setDescription(getDescription());
         final MetadataAttribute[] attributes = getAttributes();
         for (MetadataAttribute attribute : attributes) {
-            clone.addAttributeFast(attribute.createDeepClone());
+            clone.addAttribute(attribute.createDeepClone());
         }
         final MetadataElement[] elements = getElements();
         for (MetadataElement element : elements) {
@@ -617,21 +617,6 @@ public class MetadataElement extends ProductNode {
     private static String getAttributeNotFoundMessage(String name) {
         return "Metadata attribute '" + name + "' not found";
     }
-
-    /////////////////////////////////////////////////////////////////////////
-    // Deprecated API
-
-    /**
-     * Adds an attribute to this node. It will not check if a node exists
-     *
-     * @param attribute the attribute to be added, <code>null</code> is ignored
-     * @deprecated since BEAM 4.7, {@link #addAttribute(MetadataAttribute)} should now be fast enough
-     */
-    @Deprecated
-    public void addAttributeFast(MetadataAttribute attribute) {
-        addAttribute(attribute);
-    }
-
 }
 
 

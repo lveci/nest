@@ -1,5 +1,5 @@
 /*
- * $Id: EnvisatProductReader.java,v 1.4 2009-10-21 16:31:31 lveci Exp $
+ * $Id: EnvisatProductReader.java,v 1.5 2009-11-05 19:13:43 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -42,7 +42,7 @@ import java.util.Vector;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.4 $ $Date: 2009-10-21 16:31:31 $
+ * @version $Revision: 1.5 $ $Date: 2009-11-05 19:13:43 $
  * @see org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn
  */
 public class EnvisatProductReader extends AbstractProductReader {
@@ -633,27 +633,28 @@ public class EnvisatProductReader extends AbstractProductReader {
         Debug.assertNotNullOrEmpty(name);
         Debug.assertNotNull(record);
 
-        MetadataElement metadataGroup = new MetadataElement(name);
+        final MetadataElement metadataGroup = new MetadataElement(name);
 
-        for (int i = 0; i < record.getNumFields(); i++) {
-            Field field = record.getFieldAt(i);
+        final int numFields = record.getNumFields();
+        for (int i = 0; i < numFields; i++) {
+            final Field field = record.getFieldAt(i);
 
-            String description = field.getInfo().getDescription();
+            final String description = field.getInfo().getDescription();
             if (description != null) {
                 if ("Spare".equalsIgnoreCase(description)) {
                     continue;
                 }
             }
 
-            MetadataAttribute attribute = new MetadataAttribute(field.getName(), field.getData(), true);
+            final MetadataAttribute attribute = new MetadataAttribute(field.getName(), field.getData(), true);
             if (field.getInfo().getPhysicalUnit() != null) {
                 attribute.setUnit(field.getInfo().getPhysicalUnit());
             }
-            if (description != null) {
+            //if (description != null) {
                 //attribute.setDescription(field.getInfo().getDescription());
-            }
+            //}
 
-            metadataGroup.addAttributeFast(attribute);
+            metadataGroup.addAttribute(attribute);
         }
 
         return metadataGroup;

@@ -226,7 +226,7 @@ public final class AsarAbstractMetadata {
         final MetadataAttribute attribute = new MetadataAttribute(tag, ProductData.TYPE_ASCII, 1);
         attribute.getData().setElems(value);
         attribute.setDescription(desc);
-        dest.addAttributeFast(attribute);
+        dest.addAttribute(attribute);
     }
 
     /**
@@ -241,7 +241,7 @@ public final class AsarAbstractMetadata {
         attribute.getData().setElems(value.getArray());
         attribute.setUnit("utc");
         attribute.setDescription(desc);
-        dest.addAttributeFast(attribute);
+        dest.addAttribute(attribute);
     }
 
     /**
@@ -257,7 +257,7 @@ public final class AsarAbstractMetadata {
         attribute.getData().setElemInt(value);
         attribute.setUnit(unit);
         attribute.setDescription(desc);
-        dest.addAttributeFast(attribute);
+        dest.addAttribute(attribute);
     }
 
     /**
@@ -273,7 +273,7 @@ public final class AsarAbstractMetadata {
         attribute.getData().setElems( new double[] {value} );
         attribute.setUnit(unit);
         attribute.setDescription(desc);
-        dest.addAttributeFast(attribute);
+        dest.addAttribute(attribute);
     }
 
     /**
@@ -293,7 +293,7 @@ public final class AsarAbstractMetadata {
         attribute.setUnit(unit);
         attribute.setDescription(desc);
         attribute.setReadOnly(false);
-        dest.addAttributeFast(attribute);
+        dest.addAttribute(attribute);
         return attribute;
     }
 
@@ -310,7 +310,7 @@ public final class AsarAbstractMetadata {
             MetadataAttribute copiedAttrib = attrib.createDeepClone();
             copiedAttrib.setReadOnly(false);
             copiedAttrib.setDescription(desc);
-            dest.addAttributeFast(copiedAttrib);
+            dest.addAttribute(copiedAttrib);
         }
     }
 

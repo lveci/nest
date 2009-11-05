@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductHelpers.java,v 1.9 2009-11-04 17:04:32 lveci Exp $
+ * $Id: DimapProductHelpers.java,v 1.10 2009-11-05 19:13:43 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -73,7 +73,7 @@ import javax.xml.parsers.ParserConfigurationException;
  * @author Sabine Embacher
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.9 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.10 $ $Date: 2009-11-05 19:13:43 $
  */
 public class DimapProductHelpers {
 
@@ -987,7 +987,7 @@ public class DimapProductHelpers {
                 metadataAttribute.setDescription(
                         attribElement.getAttributeValue(DimapProductConstants.ATTRIB_DESCRIPTION));
                 metadataAttribute.setUnit(attribElement.getAttributeValue(DimapProductConstants.ATTRIB_UNIT));
-                mdElem.addAttributeFast(metadataAttribute);
+                mdElem.addAttribute(metadataAttribute);
             }
         }
 

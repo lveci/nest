@@ -230,7 +230,7 @@ public class AbstractMetadata {
         attribute.setUnit(unit);
         attribute.setDescription(desc);
         attribute.setReadOnly(false);
-        dest.addAttributeFast(attribute);
+        dest.addAttribute(attribute);
         return attribute;
     }
 

@@ -211,7 +211,7 @@ public class XMLProductDirectory {
     private static void addAttribute(MetadataElement meta, String name, String value) {
         final MetadataAttribute attribute = new MetadataAttribute(name, ProductData.TYPE_ASCII, 1);
         attribute.getData().setElems(value);
-        meta.addAttributeFast(attribute);
+        meta.addAttribute(attribute);
     }
 
     protected static int getTotalSize(Product product) {

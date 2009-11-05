@@ -13,7 +13,7 @@ import org.esa.beam.visat.dialogs.PromptDialog;
  * This action to searches the Metadata
  *
  * @author lveci
- * @version $Revision: 1.4 $ $Date: 2009-06-25 17:24:03 $
+ * @version $Revision: 1.5 $ $Date: 2009-11-05 19:13:43 $
  */
 public class SearchMetadataAction extends ExecCommand {
 
@@ -65,7 +65,7 @@ public class SearchMetadataAction extends ExecCommand {
             MetadataAttribute[] attribList = elem.getAttributes();
             for(MetadataAttribute attrib : attribList) {
                 if(attrib.getName().toUpperCase().contains(tag))
-                    resultElem.addAttributeFast(attrib);
+                    resultElem.addAttribute(attrib);
             }
     }
 }
