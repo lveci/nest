@@ -18,6 +18,10 @@ import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
@@ -152,30 +156,31 @@ public class ProductLayer extends RenderableLayer {
     }
 
     private void addOutline(final Product product) {
-        final GeoPos geoPos1 = product.getGeoCoding().getGeoPos(new PixelPos(0, 0), null);
-        final GeoPos geoPos2 = product.getGeoCoding().getGeoPos(new PixelPos(product.getSceneRasterWidth()-1, 0), null);
-        final GeoPos geoPos3 = product.getGeoCoding().getGeoPos(new PixelPos(product.getSceneRasterWidth()-1,
-                product.getSceneRasterHeight()-1), null);
-        final GeoPos geoPos4 = product.getGeoCoding().getGeoPos(new PixelPos(0, product.getSceneRasterHeight()-1), null);
+        final int step = Math.max(16, (product.getSceneRasterWidth() + product.getSceneRasterHeight()) / 250);
+        final GeneralPath[] boundaryPaths = ProductUtils.createGeoBoundaryPaths(product, null, step);
 
-        final ArrayList<Position> positions = new ArrayList<Position>(4);
-        positions.add(new Position(Angle.fromDegreesLatitude(geoPos1.getLat()),
-                Angle.fromDegreesLongitude(geoPos1.getLon()), 0.0));
-        positions.add(new Position(Angle.fromDegreesLatitude(geoPos2.getLat()),
-                Angle.fromDegreesLongitude(geoPos2.getLon()), 0.0));
-        positions.add(new Position(Angle.fromDegreesLatitude(geoPos3.getLat()),
-                Angle.fromDegreesLongitude(geoPos3.getLon()), 0.0));
-        positions.add(new Position(Angle.fromDegreesLatitude(geoPos4.getLat()),
-                Angle.fromDegreesLongitude(geoPos4.getLon()), 0.0));
-        positions.add(new Position(Angle.fromDegreesLatitude(geoPos1.getLat()),
-                Angle.fromDegreesLongitude(geoPos1.getLon()), 0.0));
+        final Polyline[] polyLineList = new Polyline[boundaryPaths.length];
+        int i = 0;
+        for (GeneralPath boundaryPath : boundaryPaths) {
+            final PathIterator it = boundaryPath.getPathIterator(null);
+            final float[] floats = new float[2];
+            final ArrayList<Position> positions = new ArrayList<Position>(4);
 
-        final Polyline line = new Polyline();
-        line.setFollowTerrain(true);
-        line.setPositions(positions);
+            while(!it.isDone()) {
+                it.currentSegment(floats);
+                positions.add(new Position(Angle.fromDegreesLatitude(floats[1]),
+                                   Angle.fromDegreesLongitude(floats[0]), 0.0));
+                it.next();
+            }
 
-        addRenderable(line);
-        outlineTable.put(product.getName(), new Polyline[]{line});
+            polyLineList[i] = new Polyline();
+            polyLineList[i].setFollowTerrain(true);
+            polyLineList[i].setPositions(positions);
+
+            addRenderable(polyLineList[i]);
+            ++i;
+        }
+        outlineTable.put(product.getName(), polyLineList);
     }
 
     private void addWaveProduct(final Product product) {
