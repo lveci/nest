@@ -71,6 +71,7 @@ public final class DatApp extends VisatApp {
         final int tileSize = Integer.parseInt(Settings.instance().get("defaultJAITileSize"));
         JAI.setDefaultTileSize(new Dimension(tileSize, tileSize));
 
+
         prefetchClasses();
     }
 
@@ -176,9 +177,9 @@ public final class DatApp extends VisatApp {
     protected HashSet<String> getExcludedToolbars() {
         final HashSet<String> excludedIds = new HashSet<String>(8);
         // todo - remove bad forward dependencies to tool views (nf - 30.10.2008)
-        excludedIds.add(TileCacheDiagnosisToolView.ID);
+        //excludedIds.add(TileCacheDiagnosisToolView.ID);
         excludedIds.add(StatisticsToolView.ID);
-        excludedIds.add("org.esa.beam.scripting.visat.ScriptConsoleToolView");
+        //excludedIds.add("org.esa.beam.scripting.visat.ScriptConsoleToolView");
         excludedIds.add("org.esa.beam.visat.toolviews.placemark.pin.PinManagerToolView");
         excludedIds.add("org.esa.beam.visat.toolviews.placemark.gcp.GcpManagerToolView");
         excludedIds.add("org.esa.beam.visat.toolviews.roi.RoiManagerToolView");

@@ -178,7 +178,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
-    private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
+    private final HashMap<String, Band[]> targetBandNameToSourceBand = new HashMap<String, Band[]>();
     private final Map<String, Boolean> targetBandapplyRadiometricNormalizationFlag = new HashMap<String, Boolean>();
     protected TiePointGrid incidenceAngle = null;
 
@@ -586,10 +586,10 @@ public class RangeDopplerGeocodingOp extends Operator {
                 if (nextUnit == null || !nextUnit.contains(Unit.IMAGINARY)) {
                     throw new OperatorException("Real and imaginary bands should be selected in pairs");
                 }
-                final String[] srcBandNames = new String[2];
-                srcBandNames[0] = srcBand.getName();
-                srcBandNames[1] = sourceBands[i+1].getName();
-                final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
+                final Band[] srcBands = new Band[2];
+                srcBands[0] = srcBand;
+                srcBands[1] = sourceBands[i+1];
+                final String pol = OperatorUtils.getPolarizationFromBandName(srcBand.getName());
 
                 if (saveSigmaNought) {
                     if (pol != null) {
@@ -598,7 +598,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                         targetBandName = "Sigma0";
                     }
                     if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
-                        targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                        targetBandNameToSourceBand.put(targetBandName, srcBands);
                         targetBandapplyRadiometricNormalizationFlag.put(targetBandName, true);
                     }
                 }
@@ -610,7 +610,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                         targetBandName = "Intensity";
                     }
                     if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
-                        targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                        targetBandNameToSourceBand.put(targetBandName, srcBands);
                         targetBandapplyRadiometricNormalizationFlag.put(targetBandName, false);
                     }
                 }
@@ -619,8 +619,8 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             } else {
 
-                final String[] srcBandNames = {srcBand.getName()};
-                final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
+                final Band[] srcBands = {srcBand};
+                final String pol = OperatorUtils.getPolarizationFromBandName(srcBand.getName());
                 if (saveSigmaNought) {
                     if (pol != null) {
                         targetBandName = "Sigma0_" + pol.toUpperCase();
@@ -628,7 +628,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                         targetBandName = "Sigma0";
                     }
                     if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
-                        targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                        targetBandNameToSourceBand.put(targetBandName, srcBands);
                         targetBandapplyRadiometricNormalizationFlag.put(targetBandName, true);
                     }
                 }
@@ -636,7 +636,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 if (saveSelectedSourceBand) {
                     targetBandName = srcBand.getName();
                     if (addTargetBand(targetBandName, unit, srcBand)) {
-                        targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
+                        targetBandNameToSourceBand.put(targetBandName, srcBands);
                         targetBandapplyRadiometricNormalizationFlag.put(targetBandName, false);
                     }
                 }
@@ -730,10 +730,10 @@ public class RangeDopplerGeocodingOp extends Operator {
         targetProduct.addTiePointGrid(lonGrid);
         targetProduct.setGeoCoding(tpGeoCoding);
 
-        final String[] srcBandNames = targetBandNameToSourceBandName.get(targetProduct.getBandAt(0).getName());
+        final Band[] srcBands = targetBandNameToSourceBand.get(targetProduct.getBandAt(0).getName());
 
         ReaderUtils.createMapGeocoding(targetProduct, IdentityTransformDescriptor.NAME,
-                sourceProduct.getBand(srcBandNames[0]).getNoDataValue());
+                srcBands[0].getNoDataValue());
     }
 
     /**
@@ -898,16 +898,16 @@ public class RangeDopplerGeocodingOp extends Operator {
                     continue;
                 }
 
-                final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
+                final Band[] srcBands = targetBandNameToSourceBand.get(targetBand.getName());
 
                 final TileData td = new TileData();
                 td.targetTile = targetTiles.get(targetBand);
                 td.tileDataBuffer = td.targetTile.getDataBuffer();
                 td.bandName = targetBand.getName();
-                td.noDataValue = sourceProduct.getBand(srcBandNames[0]).getNoDataValue();
+                td.noDataValue = srcBands[0].getNoDataValue();
                 td.applyRadiometricNormalization = targetBandapplyRadiometricNormalizationFlag.get(targetBand.getName());
 
-                final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
+                final String pol = OperatorUtils.getPolarizationFromBandName(srcBands[0].getName());
                 td.bandPolar = 0;
                 if (pol != null && mdsPolar[1] != null && pol.contains(mdsPolar[1])) {
                     td.bandPolar = 1;
@@ -1182,15 +1182,12 @@ public class RangeDopplerGeocodingOp extends Operator {
             throw new OperatorException("Invalid range line index: " + y);
         }
         
-        final double xVel = sensorVelocity[y][0];
-        final double yVel = sensorVelocity[y][1];
-        final double zVel = sensorVelocity[y][2];
         final double xDiff = earthPoint[0] - sensorPosition[y][0];
         final double yDiff = earthPoint[1] - sensorPosition[y][1];
         final double zDiff = earthPoint[2] - sensorPosition[y][2];
         final double distance = Math.sqrt(xDiff*xDiff + yDiff*yDiff + zDiff*zDiff);
 
-        return 2.0 * (xVel*xDiff + yVel*yDiff + zVel*zDiff) / (distance*wavelength);
+        return 2.0 * (sensorVelocity[y][0]*xDiff + sensorVelocity[y][1]*yDiff + sensorVelocity[y][2]*zDiff) / (distance*wavelength);
     }
 
     /**
@@ -1295,8 +1292,8 @@ public class RangeDopplerGeocodingOp extends Operator {
         // binary search is used in finding the zero doppler time
         double lowerBound = ground_range_origin;
         double upperBound = ground_range_origin + sourceImageWidth*rangeSpacing;
-        double lowerBoundSlantRange = org.esa.nest.util.MathUtils.computePolynomialValue(lowerBound, srgrCoeff);
-        double upperBoundSlantRange = org.esa.nest.util.MathUtils.computePolynomialValue(upperBound, srgrCoeff);
+        final double lowerBoundSlantRange = org.esa.nest.util.MathUtils.computePolynomialValue(lowerBound, srgrCoeff);
+        final double upperBoundSlantRange = org.esa.nest.util.MathUtils.computePolynomialValue(upperBound, srgrCoeff);
 
         if (slantRange < lowerBoundSlantRange || slantRange > upperBoundSlantRange) {
             return -1.0;
@@ -1326,8 +1323,8 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @return The source band unit.
      */
     private Unit.UnitType getBandUnit(String bandName) {
-        final String[] srcBandNames = targetBandNameToSourceBandName.get(bandName);
-        return Unit.getUnitType(sourceProduct.getBand(srcBandNames[0]));
+        final Band[] srcBands = targetBandNameToSourceBand.get(bandName);
+        return Unit.getUnitType(srcBands[0]);
     }
 
     /**
@@ -1344,17 +1341,16 @@ public class RangeDopplerGeocodingOp extends Operator {
                                  final TileData tileData, Unit.UnitType bandUnit, int[] subSwathIndex)
             throws IOException {
 
-        final String[] srcBandNames = targetBandNameToSourceBandName.get(tileData.bandName);
-        final Band iSrcBand = sourceProduct.getBand(srcBandNames[0]);
+        final Band[] srcBands = targetBandNameToSourceBand.get(tileData.bandName);
+        final Band iSrcBand = srcBands[0];
         Tile sourceTile2 = null;
 
         if (imgResampling.equals(ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR)) {
 
             final Rectangle srcRect = new Rectangle((int)rangeIndex, (int)azimuthIndex, 1, 1);
             final Tile sourceTile = getSourceTile(iSrcBand, srcRect, ProgressMonitor.NULL);
-            if (srcBandNames.length > 1) {
-                sourceTile2 = getSourceTile(sourceProduct.getBand(srcBandNames[1]),
-                                         srcRect, ProgressMonitor.NULL);
+            if (srcBands.length > 1) {
+                sourceTile2 = getSourceTile(srcBands[1], srcRect, ProgressMonitor.NULL);
             }
             return getPixelValueUsingNearestNeighbourInterp(
                     azimuthIndex, rangeIndex, tileData, bandUnit, sourceTile, sourceTile2, subSwathIndex);
@@ -1363,9 +1359,8 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             final Rectangle srcRect = new Rectangle((int)rangeIndex, (int)azimuthIndex, 2, 2);
             final Tile sourceTile = getSourceTile(iSrcBand, srcRect, ProgressMonitor.NULL);
-            if (srcBandNames.length > 1) {
-                sourceTile2 = getSourceTile(sourceProduct.getBand(srcBandNames[1]),
-                                         srcRect, ProgressMonitor.NULL);
+            if (srcBands.length > 1) {
+                sourceTile2 = getSourceTile(srcBands[1], srcRect, ProgressMonitor.NULL);
             }
             return getPixelValueUsingBilinearInterp(azimuthIndex, rangeIndex,
                     tileData, bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2, subSwathIndex);
@@ -1375,9 +1370,8 @@ public class RangeDopplerGeocodingOp extends Operator {
             final Rectangle srcRect = new Rectangle(Math.max(0, (int)rangeIndex - 1),
                                          Math.max(0, (int)azimuthIndex - 1), 4, 4);
             final Tile sourceTile = getSourceTile(iSrcBand, srcRect, ProgressMonitor.NULL);
-            if (srcBandNames.length > 1) {
-                sourceTile2 = getSourceTile(sourceProduct.getBand(srcBandNames[1]),
-                                         srcRect, ProgressMonitor.NULL);
+            if (srcBands.length > 1) {
+                sourceTile2 = getSourceTile(srcBands[1], srcRect, ProgressMonitor.NULL);
             }
             return getPixelValueUsingBicubicInterp(azimuthIndex, rangeIndex,
                     tileData, bandUnit, sourceImageWidth, sourceImageHeight, sourceTile, sourceTile2, subSwathIndex);

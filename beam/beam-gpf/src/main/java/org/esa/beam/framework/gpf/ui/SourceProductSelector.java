@@ -41,7 +41,7 @@ import com.bc.ceres.swing.TableLayout;
  * todo - add capability to specify optional sources
  *
  * @author Ralf Quast
- * @version $Revision: 1.2 $ $Date: 2009-09-01 20:27:12 $
+ * @version $Revision: 1.3 $ $Date: 2009-11-06 19:46:21 $
  */
 public class SourceProductSelector {
 
@@ -133,7 +133,7 @@ public class SourceProductSelector {
             addProduct(product);
         }
         final Product selectedProduct = appContext.getSelectedProduct();
-        if (productFilter.accept(selectedProduct)) {
+        if (selectedProduct != null && productFilter.accept(selectedProduct)) {
             productListModel.setSelectedItem(selectedProduct);
         }
         appContext.getProductManager().addListener(productManagerListener);

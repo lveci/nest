@@ -18,7 +18,7 @@ import java.util.Locale;
  * Tests for class {@link TargetProductSelectorModel}.
  *
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:14 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-06 19:46:21 $
  */
 public class TargetProductSelectorModelTest extends TestCase {
 
@@ -38,6 +38,17 @@ public class TargetProductSelectorModelTest extends TestCase {
         assertEquals("Obelix", model.getProductName());
     }
 
+    public void testSetGetInvalidProductName() {
+        assertNull(model.getProductName());
+        try {
+            model.setProductName("Obel/x");
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().startsWith("The product name 'Obel/x' is not valid"));
+        }
+        assertNull(model.getProductName());
+    }
+    
     public void testSetGetFormatName() {
         model.setFormatName("Majestix");
         assertEquals("Majestix", model.getFormatName());
