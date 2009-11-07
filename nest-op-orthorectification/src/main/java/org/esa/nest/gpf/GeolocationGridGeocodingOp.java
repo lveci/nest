@@ -133,13 +133,13 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
             getMetadata();
 
+            getSourceImageDimension();
+
             RangeDopplerGeocodingOp.computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
 
             computeDEMTraversalSampleInterval();
 
             computedTargetImageDimension();
-
-            getSourceImageDimension();
 
             createTargetProduct();
 
@@ -188,6 +188,12 @@ public final class GeolocationGridGeocodingOp extends Operator {
      */
     private void computeDEMTraversalSampleInterval() {
 
+        double mapW = imageGeoBoundary.lonMax - imageGeoBoundary.lonMin;
+        double mapH = imageGeoBoundary.latMax - imageGeoBoundary.latMin;
+
+        delLat = Math.min(mapW / sourceImageWidth, mapH / sourceImageHeight);
+        delLon = delLat;
+        /*
         final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
         double minAbsLat;
         if (imageGeoBoundary.latMin*imageGeoBoundary.latMax > 0) {
@@ -199,6 +205,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
         delLon = minSpacing / (MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
         delLat = Math.min(delLat, delLon);
         delLon = delLat;
+        */
         /*
         final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
         final double minAbsLat = Math.min(Math.abs(latMin), Math.abs(latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
@@ -347,7 +354,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
         final float[] latTiePoints = {(float)imageGeoBoundary.latMax, (float)imageGeoBoundary.latMax,
                                       (float)imageGeoBoundary.latMin, (float)imageGeoBoundary.latMin};
-        final float[] lonTiePoints = {(float)imageGeoBoundary.lonMin, (float)imageGeoBoundary.lonMax,
+        float[] lonTiePoints = {(float)imageGeoBoundary.lonMin, (float)imageGeoBoundary.lonMax,
                                       (float)imageGeoBoundary.lonMin, (float)imageGeoBoundary.lonMax};
 
         final TiePointGrid latGrid = new TiePointGrid(
@@ -461,7 +468,10 @@ public final class GeolocationGridGeocodingOp extends Operator {
                 for (int x = x0; x < x0 + w; x++) {
 
                     final int index = targetTile.getDataBufferIndex(x, y);
-                    final double lon = imageGeoBoundary.lonMin + x*delLon;
+                    double lon = imageGeoBoundary.lonMin + x*delLon;
+                    if (lon >= 180.0) {
+                        lon -= 360.0;
+                    }
                     final PixelPos pixPos = computePixelPosition(lat, lon);
                     if (pixPos.x < 0 || pixPos.y < 0) {
                         trgData.setElemDoubleAt(index, srcBandNoDataValue);
