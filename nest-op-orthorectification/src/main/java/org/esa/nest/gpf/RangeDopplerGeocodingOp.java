@@ -19,8 +19,7 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
-import org.esa.beam.framework.dataop.maptransf.Datum;
-import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
+import org.esa.beam.framework.dataop.maptransf.*;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -41,6 +40,7 @@ import org.esa.nest.util.GeoUtils;
 import org.esa.nest.util.MathUtils;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -181,6 +181,8 @@ public class RangeDopplerGeocodingOp extends Operator {
     private final HashMap<String, Band[]> targetBandNameToSourceBand = new HashMap<String, Band[]>();
     private final Map<String, Boolean> targetBandapplyRadiometricNormalizationFlag = new HashMap<String, Boolean>();
     protected TiePointGrid incidenceAngle = null;
+    protected TiePointGrid latitude = null;
+    protected TiePointGrid longitude = null;
 
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
     private static final double NonValidZeroDopplerTime = -99999.0;
@@ -222,6 +224,10 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             getMetadata();
 
+            getSourceImageDimension();
+
+            getTiePointGrid();
+
             computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
 
             computeDEMTraversalSampleInterval();
@@ -238,8 +244,6 @@ public class RangeDopplerGeocodingOp extends Operator {
             } else {
                 getElevationModel();
             }
-
-            getSourceImageDimension();
 
             createTargetProduct();
 
@@ -304,6 +308,11 @@ public class RangeDopplerGeocodingOp extends Operator {
         if (saveIncidenceAngleFromEllipsoid) {
             incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
         }
+    }
+
+    private void getTiePointGrid() {
+        latitude = OperatorUtils.getLatitude(sourceProduct);
+        longitude = OperatorUtils.getLongitude(sourceProduct);
     }
 
     /**
@@ -387,7 +396,22 @@ public class RangeDopplerGeocodingOp extends Operator {
      */
     public static void computeImageGeoBoundary(final Product sourceProduct,
                                                final ImageGeoBoundary geoBoundary) throws Exception {
+
+        final int sourceW = sourceProduct.getSceneRasterWidth();
+        final int sourceH = sourceProduct.getSceneRasterHeight();
+        final MapProjection mapProjection = MapProjectionRegistry.getProjection(IdentityTransformDescriptor.NAME);
+        final MapTransform mapTransform = mapProjection.getMapTransform();
+        final Point2D[] envelope =
+                ProductUtils.createMapEnvelope(sourceProduct, new Rectangle(sourceW, sourceH), mapTransform);
+        final Point2D pMin = envelope[0];
+        final Point2D pMax = envelope[1];
+
+        geoBoundary.latMax = pMax.getY();
+        geoBoundary.latMin = pMin.getY();
+        geoBoundary.lonMax = pMax.getX();
+        geoBoundary.lonMin = pMin.getX();
         
+        /*
         final GeoCoding geoCoding = sourceProduct.getGeoCoding();
         if(geoCoding == null) {
             throw new OperatorException("Product does not contain a geocoding");
@@ -422,6 +446,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 geoBoundary.lonMax = lon;
             }
         }
+        */
     }
 
     /**
@@ -429,6 +454,13 @@ public class RangeDopplerGeocodingOp extends Operator {
      */
     private void computeDEMTraversalSampleInterval() {
 
+        double mapW = imageGeoBoundary.lonMax - imageGeoBoundary.lonMin;
+        double mapH = imageGeoBoundary.latMax - imageGeoBoundary.latMin;
+
+        delLat = Math.min(mapW / sourceImageWidth, mapH / sourceImageHeight);
+        delLon = delLat;
+
+        /*
         double spacing = 0.0;
         if (pixelSpacing > 0.0) {
             spacing = pixelSpacing;
@@ -451,6 +483,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         delLon = spacing / (MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
         delLat = Math.min(delLat, delLon);
         delLon = delLat;
+        */
     }
 
     /**
@@ -719,7 +752,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         final float[] fineLonTiePoints = new float[gridWidth*gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonTiePoints, fineLonTiePoints);
-
+        
         final TiePointGrid lonGrid = new TiePointGrid("longitude", gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
         lonGrid.setUnit(Unit.DEGREES);
@@ -924,8 +957,10 @@ public class RangeDopplerGeocodingOp extends Operator {
 
                 for (int x = x0; x < maxX; x++) {
                     final int index = trgTiles[0].targetTile.getDataBufferIndex(x, y);
-
-                    final double lon = imageGeoBoundary.lonMin + x*delLon;
+                    double lon = imageGeoBoundary.lonMin + x*delLon;
+                    if (lon >= 180.0) {
+                        lon -= 360.0;
+                    }
 
                     double alt;
                     if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) { // localDEM is available
@@ -968,33 +1003,28 @@ public class RangeDopplerGeocodingOp extends Operator {
                     slantRange = computeSlantRange(
                             zeroDopplerTimeWithoutBias,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    double[] localIncidenceAngles = {NonValidIncidenceAngle, NonValidIncidenceAngle};
-                    if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) {
-
-                        final LocalGeometry localGeometry = new LocalGeometry(lat, lon, delLat, delLon, earthPoint, sensorPos);
-
-                        computeLocalIncidenceAngle(
-                                localGeometry, demNoDataValue, saveLocalIncidenceAngle, saveProjectedLocalIncidenceAngle,
-                                saveSigmaNought, x0, y0, x, y, localDEM, localIncidenceAngles); // in degrees
-
-                        if (saveLocalIncidenceAngle && localIncidenceAngles[0] != NonValidIncidenceAngle) {
-                            incidenceAngleBuffer.setElemDoubleAt(index, localIncidenceAngles[0]);
-                        }
-
-                        if (saveProjectedLocalIncidenceAngle && localIncidenceAngles[1] != NonValidIncidenceAngle) {
-                            projectedIncidenceAngleBuffer.setElemDoubleAt(index, localIncidenceAngles[1]);
-                        }
-                    }
-
                     final double rangeIndex = computeRangeIndex(srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC,
                             rangeSpacing, zeroDopplerTimeWithoutBias, slantRange, nearEdgeSlantRange, srgrConvParams);
 
-                    if (rangeIndex < 0.0 || rangeIndex >= srcMaxRange ||
-                            azimuthIndex < 0.0 || azimuthIndex >= srcMaxAzimuth) {
-
+                    if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, srcMaxRange, srcMaxAzimuth)) {
                         saveNoDataValueToTarget(index, trgTiles);
-
                     } else {
+                        double[] localIncidenceAngles = {NonValidIncidenceAngle, NonValidIncidenceAngle};
+                        if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) {
+                            final LocalGeometry localGeometry = new LocalGeometry(lat, lon, delLat, delLon, earthPoint, sensorPos);
+
+                            computeLocalIncidenceAngle(
+                                    localGeometry, demNoDataValue, saveLocalIncidenceAngle, saveProjectedLocalIncidenceAngle,
+                                    saveSigmaNought, x0, y0, x, y, localDEM, localIncidenceAngles); // in degrees
+
+                            if (saveLocalIncidenceAngle && localIncidenceAngles[0] != NonValidIncidenceAngle) {
+                                incidenceAngleBuffer.setElemDoubleAt(index, localIncidenceAngles[0]);
+                            }
+
+                            if (saveProjectedLocalIncidenceAngle && localIncidenceAngles[1] != NonValidIncidenceAngle) {
+                                projectedIncidenceAngleBuffer.setElemDoubleAt(index, localIncidenceAngles[1]);
+                            }
+                        }
 
                         if (saveIncidenceAngleFromEllipsoid) {
                             incidenceAngleFromEllipsoidBuffer.setElemDoubleAt(
@@ -1004,7 +1034,6 @@ public class RangeDopplerGeocodingOp extends Operator {
                         double satelliteHeight = 0;
                         double sceneToEarthCentre = 0;
                         if (saveSigmaNought) {
-
                                 satelliteHeight = Math.sqrt(
                                         sensorPos[0]*sensorPos[0] + sensorPos[1]*sensorPos[1] + sensorPos[2]*sensorPos[2]);
 
@@ -1013,7 +1042,6 @@ public class RangeDopplerGeocodingOp extends Operator {
                         }
 
                         for(TileData tileData : trgTiles) {
-
                             final Unit.UnitType bandUnit = getBandUnit(tileData.bandName);
                             int[] subSwathIndex = {INVALID_SUB_SWATH_INDEX};
                             double v = getPixelValue(azimuthIndex, rangeIndex, tileData, bandUnit, subSwathIndex);
@@ -1074,7 +1102,11 @@ public class RangeDopplerGeocodingOp extends Operator {
             final float lat = (float)(imageGeoBoundary.latMax - y*delLat);
             final int yy = y - y0 + 1;
             for (int x = x0 - 1; x < maxX; x++) {
-                geoPos.setLocation(lat, (float)(imageGeoBoundary.lonMin + x*delLon));
+                float lon = (float)(imageGeoBoundary.lonMin + x*delLon);
+                if (lon >= 180.0) {
+                    lon -= 360.0;
+                }
+                geoPos.setLocation(lat, lon);
                 alt = getLocalElevation(geoPos);
                 localDEM[yy][x - x0 + 1] = alt;
                 if(alt != demNoDataValue)
@@ -1096,6 +1128,23 @@ public class RangeDopplerGeocodingOp extends Operator {
             return dem.getElevation(geoPos);
         }
         return fileElevationModel.getElevation(geoPos);
+    }
+
+    private boolean isValidCell(final double rangeIndex, final double azimuthIndex,
+                                final double lat, final double lon,
+                                final int srcMaxRange, final int srcMaxAzimuth) {
+
+        if (rangeIndex < 0.0 || rangeIndex >= srcMaxRange || azimuthIndex < 0.0 || azimuthIndex >= srcMaxAzimuth) {
+            return  false;
+        }
+
+        double delLat = Math.abs(lat - latitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
+        double delLon = Math.abs(lon - longitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
+        if (delLat > 1.0 || delLon > 1.0 && delLon <= 359.0) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -1289,7 +1338,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                                             final double slantRange, final double[] srgrCoeff,
                                             final double ground_range_origin) {
 
-        // binary search is used in finding the zero doppler time
+        // binary search is used in finding the ground range for given slant range
         double lowerBound = ground_range_origin;
         double upperBound = ground_range_origin + sourceImageWidth*rangeSpacing;
         final double lowerBoundSlantRange = org.esa.nest.util.MathUtils.computePolynomialValue(lowerBound, srgrCoeff);
