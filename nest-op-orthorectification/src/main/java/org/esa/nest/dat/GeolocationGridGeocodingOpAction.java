@@ -17,7 +17,7 @@ public class GeolocationGridGeocodingOpAction extends AbstractVisatAction {
 
         if (dialog == null) {
             dialog = new NestSingleTargetProductDialog(
-                    "Ellipsoid-Correction", getAppContext(), "Ellipsoid-Correction-GG", getHelpId());
+                    "Ellipsoid-Correction-GG", getAppContext(), "Ellipsoid-Correction-GG", getHelpId());
             dialog.setTargetProductNameSuffix("_EC");
         }
         dialog.show();
