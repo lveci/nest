@@ -31,7 +31,7 @@ public class GraphNode {
     private OperatorUI operatorUI = null;
 
     private int nodeWidth = 60;
-    private int nodeHeight = 30;
+    private int nodeHeight = 25;
     private int halfNodeHeight = 0;
     private int halfNodeWidth = 0;
     static final private int hotSpotSize = 10;
@@ -293,7 +293,7 @@ public class GraphNode {
         final String name = node.getId(); //getOperatorName();
         final Rectangle2D rect = metrics.getStringBounds(name, g);
         final int stringWidth = (int) rect.getWidth();
-        setSize(Math.max(stringWidth, 50) + 10, 30);
+        setSize(Math.max(stringWidth, 50) + 10, 25);
 
         g.setColor(col);
         g.fill3DRect(x, y, nodeWidth, nodeHeight, true);
@@ -301,7 +301,7 @@ public class GraphNode {
         g.draw3DRect(x, y, nodeWidth, nodeHeight, true);
 
         g.setColor(Color.black);
-        g.drawString(name, x + (nodeWidth - stringWidth) / 2, y + 20);
+        g.drawString(name, x + (nodeWidth - stringWidth) / 2, y + 15);
     }
 
     /**
@@ -327,10 +327,10 @@ public class GraphNode {
         if (tail.x + nodeWidth < head.x) {
             drawArrow(g, tail.x + nodeWidth, tail.y + halfNodeHeight,
                     head.x, head.y + src.getHalfNodeHeight());
-        } else if (tail.x < head.x + nodeWidth && head.y > tail.y) {
+        } else if (tail.x < head.x + halfNodeWidth && head.y > tail.y) {
             drawArrow(g, tail.x + halfNodeWidth, tail.y + nodeHeight,
                     head.x + src.getHalfNodeWidth(), head.y);
-        } else if (tail.x < head.x + nodeWidth && head.y < tail.y) {
+        } else if (tail.x < head.x + halfNodeWidth && head.y < tail.y) {
             drawArrow(g, tail.x + halfNodeWidth, tail.y,
                     head.x + src.getHalfNodeWidth(), head.y + nodeHeight);
         } else {
