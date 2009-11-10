@@ -400,11 +400,14 @@ public class ASARCalibrator implements Calibrator {
             }
         }
 
-        if (retroCalibrationFlag) {
+        if (applyAntennaPatternCorr) {
             getNewXCAFile();
             if (!isFileExists(newXCAFilePath)) {
                 throw new OperatorException("Cannot find XCA file:" + newXCAFilePath);
-            } else if (oldXCAFilePath.contains(newXCAFilePath) || newXCAFilePath.contains(oldXCAFilePath)) {
+            }
+
+            if (retroCalibrationFlag &&
+               (oldXCAFilePath.contains(newXCAFilePath) || newXCAFilePath.contains(oldXCAFilePath))) {
                 retroCalibrationFlag = false;
                 applyAntennaPatternCorr = false;
             }
