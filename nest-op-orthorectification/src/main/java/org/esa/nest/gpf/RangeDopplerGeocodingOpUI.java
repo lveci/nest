@@ -141,6 +141,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                         incidenceAngleForGamma0.setEnabled(true);
                         saveBetaNoughtCheckBox.setEnabled(true);
                         saveBetaNoughtCheckBox.getModel().setPressed(saveBetaNought);
+                        saveSelectedSourceBandCheckBox.setSelected(false);
                     } else {
                         saveSigmaNoughtCheckBox.setSelected(false);
                         saveSigmaNoughtCheckBox.setEnabled(false);
@@ -173,7 +174,11 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                 public void itemStateChanged(ItemEvent e) {
                     saveSigmaNought = (e.getStateChange() == ItemEvent.SELECTED);
                     if (saveSigmaNought) {
-                        saveProjectedLocalIncidenceAngleCheckBox.setSelected(true);
+                        if (incidenceAngleForSigma0.getSelectedItem().equals(RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM)) {
+                            saveProjectedLocalIncidenceAngleCheckBox.setSelected(false);
+                        } else {
+                            saveProjectedLocalIncidenceAngleCheckBox.setSelected(true);
+                        }
                     }
                 }
         });
