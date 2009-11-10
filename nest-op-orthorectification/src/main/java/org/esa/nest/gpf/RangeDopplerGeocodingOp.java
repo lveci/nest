@@ -262,7 +262,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
-                calibrator.initialize(sourceProduct, targetProduct);
+                calibrator.initialize(sourceProduct, targetProduct, true);
                 OperatorUtils.getProductPolarization(absRoot, mdsPolar);
             }
 
