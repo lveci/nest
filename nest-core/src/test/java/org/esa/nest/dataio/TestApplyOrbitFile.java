@@ -31,7 +31,5 @@ public class TestApplyOrbitFile  extends TestCase {
 
         EnvisatOrbitReader reader = new EnvisatOrbitReader();
 
-        //Date productDate = new Date(12345678);
-        //OrbitFileUpdater.FindOrbitFile(reader, vorPath, productDate);
     }
 }

@@ -51,7 +51,7 @@ import java.util.Date;
  *    1)  Get the range line index y for the tie point;
  *    2)  Get zero Doppler time t for the range line.
  *    3)  Compute satellite position and velocity for the zero Doppler time t using cubic interpolation. (dorisReader)
- *    4)  Get sample number x (index in the range line).
+ *    4)  Get sample number x (index in the range line).            c
  *    5)  Get slant range time for pixel (x, y) from the old slant range time tie point grid.
  *    6)  Get incidence angle for pixel (x, y) from the old incidence angle tie point grid.
  *    7)  Get latitude for pixel (x, y) from the old latitude tie point grid.
@@ -88,7 +88,6 @@ public final class ApplyOrbitFileOp extends Operator {
     private PrareOrbitReader prareReader = null;
     private File orbitFile = null;
 
-    private int absOrbit;
     private int sourceImageWidth;
     private int sourceImageHeight;
     private int targetTiePointGridHeight;
@@ -505,8 +504,8 @@ public final class ApplyOrbitFileOp extends Operator {
      */
     private void getDorisOrbitFile() throws IOException {
 
-        dorisReader = new EnvisatOrbitReader();
-        absOrbit = absRoot.getAttributeInt(AbstractMetadata.ABS_ORBIT, 0);
+        dorisReader = EnvisatOrbitReader.getInstance();
+        final int absOrbit = absRoot.getAttributeInt(AbstractMetadata.ABS_ORBIT, 0);
 
         // construct path to the orbit file folder
         String orbitPath = "";
@@ -529,7 +528,7 @@ public final class ApplyOrbitFileOp extends Operator {
         orbitFile = FindDorisOrbitFile(dorisReader, new File(orbitPath), startDate, absOrbit);
 
         if(orbitFile == null) {
-            throw new IOException("Unable to find suitable orbit file");
+            throw new IOException("Unable to find suitable DORIS orbit file");
         }
     }
 
@@ -585,8 +584,7 @@ public final class ApplyOrbitFileOp extends Operator {
      */
     private void getDelftOrbitFile() throws Exception {
 
-        delftReader = new OrbitalDataRecordReader();
-
+        delftReader = OrbitalDataRecordReader.getInstance();
         // get product start time
         final Date startDate = sourceProduct.getStartTime().getAsDate();
 
@@ -704,8 +702,7 @@ public final class ApplyOrbitFileOp extends Operator {
      */
     private void getPrareOrbitFile() throws IOException {
 
-        prareReader = new PrareOrbitReader();
-
+        prareReader = PrareOrbitReader.getInstance();
         // construct path to the orbit file folder
         String orbitPath = "";
         if(orbitType.contains(PRARE_ERS_1)) {

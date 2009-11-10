@@ -516,4 +516,18 @@ public final class PrareOrbitReader {
         public double yVel = 0;
         public double zVel = 0;
     }
+
+    /**
+     * Gets the singleton instance of this class.
+     * @return the singlton instance
+     */
+    public static PrareOrbitReader getInstance() {
+        return Holder.instance;
+    }
+
+    /** Initialization on demand holder idiom
+     */
+    private static class Holder {
+        private static final PrareOrbitReader instance = new PrareOrbitReader();
+    }
 }

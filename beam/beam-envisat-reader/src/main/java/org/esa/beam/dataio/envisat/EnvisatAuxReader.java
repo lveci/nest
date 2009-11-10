@@ -119,16 +119,16 @@ public class EnvisatAuxReader {
 
         final String[] exts = new String[] {"", ".gz", ".zip"};
         for (String ext : exts) {
+            file = new File(filePath + ext);
+            if (file.exists()) {
+                break;
+            }
             final URI fileUri = getFileURI(filePath + ext);
             if (fileUri != null) {
                 file = new File(fileUri);
                 if (file.exists()) {
                     break;
                 }
-            }
-            file = new File(filePath + ext);
-            if (file.exists()) {
-                break;
             }
         }
         if (file == null) {

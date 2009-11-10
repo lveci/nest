@@ -462,4 +462,18 @@ public final class OrbitalDataRecordReader {
         public double yVel = 0;
         public double zVel = 0;
     }
+
+    /**
+     * Gets the singleton instance of this class.
+     * @return the singlton instance
+     */
+    public static OrbitalDataRecordReader getInstance() {
+        return Holder.instance;
+    }
+
+    /** Initialization on demand holder idiom
+     */
+    private static class Holder {
+        private static final OrbitalDataRecordReader instance = new OrbitalDataRecordReader();
+    }
 }

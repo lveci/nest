@@ -255,4 +255,18 @@ public class EnvisatOrbitReader extends EnvisatAuxReader {
         public double zVel = 0;
         public String qualFlags = null;
     }
+
+        /**
+     * Gets the singleton instance of this class.
+     * @return the singlton instance
+     */
+    public static EnvisatOrbitReader getInstance() {
+        return Holder.instance;
+    }
+
+    /** Initialization on demand holder idiom
+     */
+    private static class Holder {
+        private static final EnvisatOrbitReader instance = new EnvisatOrbitReader();
+    }
 }
