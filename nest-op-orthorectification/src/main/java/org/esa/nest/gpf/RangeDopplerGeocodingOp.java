@@ -148,6 +148,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     private boolean srgrFlag = false;
     private boolean saveIncidenceAngleFromEllipsoid = false;
+    private boolean isElevationModelAvailable = false;
 
     private String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
 
@@ -242,7 +243,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 saveLocalIncidenceAngle = false;
                 saveProjectedLocalIncidenceAngle = false;
             } else {
-                getElevationModel();
+//                getElevationModel();
             }
 
             createTargetProduct();
@@ -754,7 +755,8 @@ public class RangeDopplerGeocodingOp extends Operator {
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonTiePoints, fineLonTiePoints);
         
         final TiePointGrid lonGrid = new TiePointGrid("longitude", gridWidth, gridHeight, 0.5f, 0.5f,
-                subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
+                subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_360);
+//              subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
         lonGrid.setUnit(Unit.DEGREES);
 
         final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
@@ -792,7 +794,11 @@ public class RangeDopplerGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, IdentityTransformDescriptor.NAME);
         if (!useAvgSceneHeight) {
             AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_terrain_corrected, 1);
-            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
+            if(externalDEMFile != null && fileElevationModel == null) { // if external DEM file is specified by user
+                AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, externalDEMFile.getPath());
+            } else {
+                AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
+            }
         }
 
         // map projection too
@@ -881,6 +887,15 @@ public class RangeDopplerGeocodingOp extends Operator {
      */
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
+
+        try {
+            if (!isElevationModelAvailable) {
+                getElevationModel();
+                isElevationModelAvailable = true;
+            }
+        } catch(Exception e) {
+            throw new OperatorException(e);
+        }
 
         final int x0 = targetRectangle.x;
         final int y0 = targetRectangle.y;
