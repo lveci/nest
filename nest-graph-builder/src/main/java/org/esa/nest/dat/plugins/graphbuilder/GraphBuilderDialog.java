@@ -455,6 +455,9 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
                 }
             }
             graphEx.disposeGraphContext();
+            // free cache
+            JAI.getDefaultInstance().getTileCache().flush();
+            System.gc();
 
             if(!errorOccured) {
                 openTargetProducts(graphEx.getProductsToOpenInDAT());

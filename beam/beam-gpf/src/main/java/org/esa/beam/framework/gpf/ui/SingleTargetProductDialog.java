@@ -1,5 +1,5 @@
 /*
- * $Id: SingleTargetProductDialog.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
+ * $Id: SingleTargetProductDialog.java,v 1.3 2009-11-10 21:30:51 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -46,7 +46,7 @@ import java.awt.*;
  *
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.3 $ $Date: 2009-11-10 21:30:51 $
  */
 public abstract class SingleTargetProductDialog extends ModelessDialog {
 
@@ -295,6 +295,7 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
             saveTime = 0L;
             Product product = null;
             try {
+                // free cache
                 JAI.getDefaultInstance().getTileCache().flush();
                 System.gc();
 
@@ -311,6 +312,9 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
                     }
                     pm.worked(5);
                 }
+                // free cache
+                JAI.getDefaultInstance().getTileCache().flush();
+                System.gc();
             } finally {
                 pm.done();
                 if (product != targetProduct) {

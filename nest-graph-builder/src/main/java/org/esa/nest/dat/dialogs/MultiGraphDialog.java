@@ -287,6 +287,10 @@ public abstract class MultiGraphDialog extends ModelessDialog {
                     statusLabel.setText("Processing completed in " + diff + " seconds");
                 }
 
+                // free cache
+                JAI.getDefaultInstance().getTileCache().flush();
+                System.gc();
+
                 if(ioPanel.isOpenInAppSelected()) {
                     final GraphExecuter graphEx = graphExecuterList.get(graphExecuterList.size()-1);
                     openTargetProducts(graphEx.getProductsToOpenInDAT());
