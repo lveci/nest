@@ -14,7 +14,8 @@ import java.io.File;
  */
 public interface Calibrator {
 
-    public void initialize(Product sourceProduct, Product targetProduct) throws OperatorException;
+    public void initialize(Product sourceProduct, Product targetProduct, boolean mustPerformRetroCalibration)
+            throws OperatorException;
 
     public void computeTile(Band targetBand, Tile targetTile,
                             HashMap<String, String[]> targetBandNameToSourceBandName,

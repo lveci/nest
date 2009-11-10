@@ -70,7 +70,8 @@ public class ALOSCalibrator implements Calibrator {
     /**
 
      */
-    public void initialize(Product srcProduct, Product tgtProduct) throws OperatorException {
+    public void initialize(Product srcProduct, Product tgtProduct, boolean mustPerformRetroCalibration)
+            throws OperatorException {
         try {
             sourceProduct = srcProduct;
             targetProduct = tgtProduct;
