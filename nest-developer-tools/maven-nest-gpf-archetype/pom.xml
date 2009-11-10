@@ -13,7 +13,7 @@
     <version>${nest.version}</version>
     <name>Maven 2 Archetype Plugin for NEST GPF Operators</name>
     <description>A Maven 2 archetype for projects using NEST Graph Processing Framework (GPF).</description>
-    <packaging>maven-plugin</packaging>
+    <packaging>pom</packaging>
 
     <dependencies>
 

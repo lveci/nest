@@ -13,7 +13,7 @@
     <version>${nest.version}</version>
     <name>Maven 2 NEST Data I/O Archetype Plugin</name>
     <description>A Maven 2 archetype for projects using NEST Data I/O framework.</description>
-    <packaging>maven-plugin</packaging>
+    <packaging>pom</packaging>
 
     <dependencies>
 
