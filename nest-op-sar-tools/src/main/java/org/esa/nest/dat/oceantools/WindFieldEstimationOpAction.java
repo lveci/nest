@@ -1,9 +1,8 @@
 package org.esa.nest.dat.oceantools;
 
-import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
-import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.visat.actions.AbstractVisatAction;
+import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
 
 /**
  * Wind Field Estimation action.
@@ -11,20 +10,16 @@ import org.esa.beam.visat.actions.AbstractVisatAction;
  */
 public class WindFieldEstimationOpAction extends AbstractVisatAction {
 
-    private ModelessDialog dialog;
+    private NestSingleTargetProductDialog dialog;
 
     @Override
     public void actionPerformed(CommandEvent event) {
 
         if (dialog == null) {
-            dialog = new DefaultSingleTargetProductDialog("Wind-Field-Estimation", getAppContext(), "Wind-Field-Estimation", getHelpId());
+            dialog = new NestSingleTargetProductDialog("Wind-Field-Estimation", getAppContext(), "Wind-Field-Estimation", getHelpId());
         }
+        dialog.setTargetProductNameSuffix("_wind");
         dialog.show();
 
-    }
-
-    @Override
-    public void updateState(final CommandEvent event) {
-        setEnabled(true);
     }
 }
