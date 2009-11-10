@@ -125,10 +125,15 @@ public class ASARCalibrator implements Calibrator {
     }
 
     /**
-
+     *
+     * @param srcProduct The source product.
+     * @param tgtProduct The target product.
+     * @param mustPerformRetroCalibration If true, retro-calibration must be performed if it is applicable.
+     * @throws OperatorException The exception.
      */
     @Override
-    public void initialize(Product srcProduct, Product tgtProduct) throws OperatorException {
+    public void initialize(Product srcProduct, Product tgtProduct, boolean mustPerformRetroCalibration)
+            throws OperatorException {
         try {
             sourceProduct = srcProduct;
             targetProduct = tgtProduct;
@@ -155,7 +160,7 @@ public class ASARCalibrator implements Calibrator {
 
             getTiePointGridData(sourceProduct);
 
-            checkXCAFileExsitence();
+            checkXCAFileExsitence(mustPerformRetroCalibration);
 
             if (retroCalibrationFlag) {
 
@@ -387,26 +392,32 @@ public class ASARCalibrator implements Calibrator {
 
     /**
      * Check if old or new XCA file exists.
+     * @param mustPerformRetroCalibration If true, retro-calibration must be performed if it is applicable.
      * @throws Exception The exception.
      */
-    private void checkXCAFileExsitence() throws Exception {
+    private void checkXCAFileExsitence(boolean mustPerformRetroCalibration) throws Exception {
 
         String oldXCAFilePath = null;
         if (retroCalibrationFlag) {
             oldXCAFilePath = getOldXCAFile();
             if (!isFileExists(oldXCAFilePath)) {
-                retroCalibrationFlag = false;
-                applyAntennaPatternCorr = false;
+                if (mustPerformRetroCalibration) {
+                    throw new OperatorException("Cannot find XCA file: " + oldXCAFilePath);
+                } else {
+                    retroCalibrationFlag = false;
+                    applyAntennaPatternCorr = false;
+                    // todo should warn the user that retro-calibration will not be performed
+                }
             }
         }
 
         if (applyAntennaPatternCorr) {
             getNewXCAFile();
             if (!isFileExists(newXCAFilePath)) {
-                throw new OperatorException("Cannot find XCA file:" + newXCAFilePath);
+                throw new OperatorException("Cannot find XCA file: " + newXCAFilePath);
             }
 
-            if (retroCalibrationFlag &&
+            if (retroCalibrationFlag && !mustPerformRetroCalibration &&
                (oldXCAFilePath.contains(newXCAFilePath) || newXCAFilePath.contains(oldXCAFilePath))) {
                 retroCalibrationFlag = false;
                 applyAntennaPatternCorr = false;
