@@ -1,5 +1,5 @@
 /*
- * $Id: BandArithmetikDialog.java,v 1.11 2009-11-04 17:04:32 lveci Exp $
+ * $Id: BandArithmetikDialog.java,v 1.12 2009-11-11 20:19:25 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -115,8 +115,7 @@ public class BandArithmetikDialog extends ModalDialog {
         try {
             Product[] products = getCompatibleProducts();
             int defaultProductIndex = Arrays.asList(products).indexOf(targetProduct);
-            validMaskExpression = BandArithmetic.getValidMaskExpression(getExpression(), products, defaultProductIndex,
-                                                                        null);
+            validMaskExpression = BandArithmetic.getValidMaskExpression(getExpression(), products, defaultProductIndex, null);
         } catch (ParseException e) {
             String errorMessage = "The band could not be created.\nAn expression parse error occurred:\n" + e.getMessage(); /*I18N*/
             visatApp.showErrorDialog(errorMessage);
@@ -148,7 +147,7 @@ public class BandArithmetikDialog extends ModalDialog {
 
         if (!saveExpressionOnly) {
             String expression = getExpression();
-            if (!validMaskExpression.isEmpty()) {
+            if (validMaskExpression != null && !validMaskExpression.isEmpty()) {
                 expression = "(" + validMaskExpression + ") ? (" + expression + ") : NaN";
             }
             band.setSourceImage(VirtualBand.createVirtualSourceImage(band, expression));

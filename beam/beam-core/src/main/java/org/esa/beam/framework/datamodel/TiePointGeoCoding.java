@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGeoCoding.java,v 1.5 2009-09-01 18:13:54 lveci Exp $
+ * $Id: TiePointGeoCoding.java,v 1.6 2009-11-11 20:19:25 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -187,8 +187,8 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         if (geoPos == null) {
             geoPos = new GeoPos();
         }
-        if (pixelPos.x < 0 || pixelPos.x >= sceneRasterWidth ||
-            pixelPos.y < 0 || pixelPos.y >= sceneRasterHeight) {
+        if (pixelPos.x < 0 || pixelPos.x > sceneRasterWidth ||
+            pixelPos.y < 0 || pixelPos.y > sceneRasterHeight) {
             geoPos.setInvalid();
         } else {
             geoPos.lat = _latGrid.getPixelFloat(pixelPos.x, pixelPos.y);
