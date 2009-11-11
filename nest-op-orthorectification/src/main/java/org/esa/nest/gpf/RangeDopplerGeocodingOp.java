@@ -738,8 +738,8 @@ public class RangeDopplerGeocodingOp extends Operator {
         final float[] lonTiePoints = {(float)imageGeoBoundary.lonMin, (float)imageGeoBoundary.lonMax,
                                       (float)imageGeoBoundary.lonMin, (float)imageGeoBoundary.lonMax};
 
-        final int gridWidth = 10;
-        final int gridHeight = 10;
+        final int gridWidth = latitude.getRasterWidth();
+        final int gridHeight = latitude.getRasterHeight();
 
         final float[] fineLatTiePoints = new float[gridWidth*gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latTiePoints, fineLatTiePoints);
@@ -753,10 +753,14 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         final float[] fineLonTiePoints = new float[gridWidth*gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonTiePoints, fineLonTiePoints);
+        for (float lon : fineLonTiePoints) {
+            if (lon >= 180) {
+                lon -= 360;
+            }
+        }
         
         final TiePointGrid lonGrid = new TiePointGrid("longitude", gridWidth, gridHeight, 0.5f, 0.5f,
-                subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_360);
-//              subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
+              subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
         lonGrid.setUnit(Unit.DEGREES);
 
         final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
