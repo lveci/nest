@@ -76,7 +76,6 @@ public final class MultilookOp extends Operator {
 
     private MetadataElement absRoot = null;
 
-    private double nAzRgLooks;
     private double azimuthLooks; // original azimuth_looks from metadata
     private double rangeLooks;   // original range_looks from metadata
     private int sourceImageWidth;
@@ -416,15 +415,19 @@ public final class MultilookOp extends Operator {
         if(sourceRaster2 != null)
             srcData2 = sourceRaster2.getDataBuffer();
 
-        nAzRgLooks = nRgLooks * nAzLooks;
+        final int tileOffset = targetTile.getScanlineOffset();
+        final int tileStride = targetTile.getScanlineStride();
+        final int tileMinX = targetTile.getMinX();
+        final int tileMinY = targetTile.getMinY();
 
         double meanValue;
         final int maxy = ty0 + th;
         final int maxx = tx0 + tw;
         for (int ty = ty0; ty < maxy; ty++) {
+            final int stride = ((ty - tileMinY) * tileStride) + tileOffset;
             for (int tx = tx0; tx < maxx; tx++) {
-                meanValue = getMeanValue(tx, ty, sourceRaster1, srcData1, srcData2, bandUnit);
-                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(tx, ty), meanValue);
+                meanValue = getMeanValue(tx, ty, sourceRaster1, srcData1, srcData2, nRgLooks, nAzLooks, bandUnit);
+                trgData.setElemDoubleAt((tx - tileMinX) + stride, meanValue);
             }
         }
     }
@@ -439,45 +442,54 @@ public final class MultilookOp extends Operator {
      * @param bandUnit Integer indicating the unit of source data.
      * @return The mean value.
      */
-    private double getMeanValue(int tx, int ty, Tile sourceRaster1, ProductData srcData1, ProductData srcData2,
-                        Unit.UnitType bandUnit) {
+    private static double getMeanValue(final int tx, final int ty, final Tile sourceRaster1,
+                                       final ProductData srcData1, final ProductData srcData2,
+                                       final int nRgLooks, final int nAzLooks,
+                                       final Unit.UnitType bandUnit) {
 
         final int xStart = tx * nRgLooks;
         final int yStart = ty * nAzLooks;
         final int xEnd = xStart + nRgLooks;
         final int yEnd = yStart + nAzLooks;
 
-        double meanValue = 0.0;
-        int index;
+        final int tileOffset = sourceRaster1.getScanlineOffset();
+        final int tileStride = sourceRaster1.getScanlineStride();
+        final int tileMinX = sourceRaster1.getMinX();
+        final int tileMinY = sourceRaster1.getMinY();
 
+        double meanValue = 0.0;
         if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY) {
             for (int y = yStart; y < yEnd; y++) {
+                final int stride = ((y - tileMinY) * tileStride) + tileOffset;
                 for (int x = xStart; x < xEnd; x++) {
-                    meanValue += srcData1.getElemDoubleAt(sourceRaster1.getDataBufferIndex(x, y));
+                    meanValue += srcData1.getElemDoubleAt((x - tileMinX) + stride);
                 }
             }
         } else if (bandUnit == Unit.UnitType.INTENSITY_DB || bandUnit == Unit.UnitType.AMPLITUDE_DB) {
             for (int y = yStart; y < yEnd; y++) {
+                final int stride = ((y - tileMinY) * tileStride) + tileOffset;
                 for (int x = xStart; x < xEnd; x++) {
-                    index = sourceRaster1.getDataBufferIndex(x, y);
-                    meanValue += Math.pow(10, srcData1.getElemDoubleAt(index) / 10.0); // dB to linear
+                    meanValue += Math.pow(10, srcData1.getElemDoubleAt((x - tileMinX) + stride) / 10.0); // dB to linear
                 }
             }
 
-            meanValue /= nAzRgLooks;
+            meanValue /= (nRgLooks * nAzLooks);
             return 10.0*Math.log10(meanValue); // linear to dB
         } else { // COMPLEX
+            double i, q;
+            int index;
             for (int y = yStart; y < yEnd; y++) {
+                final int stride = ((y - tileMinY) * tileStride) + tileOffset;
                 for (int x = xStart; x < xEnd; x++) {
-                    index = sourceRaster1.getDataBufferIndex(x, y);
-                    final double i = srcData1.getElemDoubleAt(index);
-                    final double q = srcData2.getElemDoubleAt(index);
+                    index = (x - tileMinX) + stride;
+                    i = srcData1.getElemDoubleAt(index);
+                    q = srcData2.getElemDoubleAt(index);
                     meanValue += i*i + q*q;
                 }
             }
         }
 
-        return meanValue / nAzRgLooks;
+        return meanValue / (nRgLooks * nAzLooks);
     }
 
     /**

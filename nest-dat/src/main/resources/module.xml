@@ -63,8 +63,8 @@
                 </excludedActions>
                 <excludedToolViews>
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
-                    <id>org.esa.beam.scripting.visat.ScriptConsoleToolView</id>
-                    <id>org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView</id>
+                    <!--id>org.esa.beam.scripting.visat.ScriptConsoleToolView</id>
+                    <id>org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView</id-->
                     <id>org.esa.beam.visat.toolviews.worldmap.WorldMapToolView</id>
                 </excludedToolViews>
             </applicationDescriptor>
@@ -293,11 +293,25 @@
         </action>
 
         <action>
+            <id>closeAllOthers</id>
+            <class>org.esa.beam.visat.actions.CloseAllOthersAction</class>
+            <parent>file</parent>
+            <text>Close All Others</text>
+            <placeAfter>closeAll</placeAfter>
+            <shortDescr>Closes all opened data products other than the one selected.</shortDescr>
+            <description>Closes all opened data products other than the one selected.</description>
+            <smallIcon>icons/Close16.gif</smallIcon>
+            <largeIcon>icons/Close24.gif</largeIcon>
+            <helpId>closeAll</helpId>
+            <context>product</context>
+        </action>
+
+        <action>
             <id>import</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <parent>file</parent>
             <text>Product Readers</text>
-            <placeAfter>closeAll</placeAfter>
+            <placeAfter>closeAllOthers</placeAfter>
             <mnemonic>I</mnemonic>
             <separatorBefore>true</separatorBefore>
             <shortDescr>Product Readers</shortDescr>
