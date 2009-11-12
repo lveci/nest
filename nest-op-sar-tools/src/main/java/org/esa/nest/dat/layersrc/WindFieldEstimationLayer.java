@@ -1,0 +1,172 @@
+package org.esa.nest.dat.layersrc;
+
+import com.bc.ceres.glayer.Layer;
+import com.bc.ceres.glayer.LayerType;
+import com.bc.ceres.glayer.LayerTypeRegistry;
+import com.bc.ceres.glevel.MultiLevelImage;
+import com.bc.ceres.grender.Rendering;
+import com.bc.ceres.grender.Viewport;
+import com.bc.ceres.binding.PropertyContainer;
+import org.esa.beam.framework.datamodel.*;
+import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.gpf.oceantools.WindFieldEstimationOp;
+import org.esa.nest.util.XMLSupport;
+import org.jdom.Attribute;
+import org.jdom.Element;
+
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
+import java.awt.image.RenderedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Shows a detected object
+ *
+ */
+public class WindFieldEstimationLayer extends Layer {
+
+    private final Product product;
+    private final Band band;
+
+    private final List<WindFieldEstimationOp.WindFieldRecord> targetList = new ArrayList<WindFieldEstimationOp.WindFieldRecord>();
+    private final float lineThickness = 2.0f;
+
+    public WindFieldEstimationLayer(PropertyContainer configuration) {
+        super(LayerTypeRegistry.getLayerType(WindFieldEstimationLayerType.class.getName()), configuration);
+        product = (Product) configuration.getValue("product");
+        band = (Band) configuration.getValue("band");
+
+        LoadTargets(getTargetFile(product));
+    }
+
+    public static File getTargetFile(final Product product) {
+        final MetadataElement root = product.getMetadataRoot();
+        if (root != null) {
+            final MetadataElement absMetadata = AbstractMetadata.getAbstractedMetadata(product);
+            if (absMetadata != null) {
+                final String windFieldReportFilePath = absMetadata.getAttributeString(AbstractMetadata.target_report_file, null);
+                if(windFieldReportFilePath != null) {
+                    final File file = new File(windFieldReportFilePath);
+                    if(file.exists())
+                        return file;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void LoadTargets(final File file) {
+        if(file == null)
+            return;
+
+        org.jdom.Document doc;
+        try {
+            doc = XMLSupport.LoadXML(file.getAbsolutePath());
+        } catch(IOException e) {
+            return;
+        }
+
+        targetList.clear();
+
+        final Element root = doc.getRootElement();
+
+        final List children = root.getContent();
+        for (Object aChild : children) {
+            if (aChild instanceof Element) {
+                final Element targetsDetectedElem = (Element) aChild;
+                if(targetsDetectedElem.getName().equals("windFieldEstimated")) {
+                    final Attribute attrib = targetsDetectedElem.getAttribute("bandName");
+                    if(attrib != null && band.getName().equalsIgnoreCase(attrib.getValue())) {
+                        final List content = targetsDetectedElem.getContent();
+                        for (Object det : content) {
+                            if (det instanceof Element) {
+                                final Element targetElem = (Element) det;
+                                if(targetElem.getName().equals("windFieldInfo")) {
+                                    final Attribute lat = targetElem.getAttribute("lat");
+                                    if(lat == null) continue;
+                                    final Attribute lon = targetElem.getAttribute("lon");
+                                    if(lon == null) continue;
+                                    final Attribute speed = targetElem.getAttribute("speed");
+                                    if(speed == null) continue;
+                                    final Attribute dx = targetElem.getAttribute("dx");
+                                    if(dx == null) continue;
+                                    final Attribute dy = targetElem.getAttribute("dy");
+                                    if(dy == null) continue;
+
+                                    targetList.add(new WindFieldEstimationOp.WindFieldRecord(
+                                            Double.parseDouble(lat.getValue()),
+                                            Double.parseDouble(lon.getValue()),
+                                            Double.parseDouble(speed.getValue()),
+                                            Double.parseDouble(dx.getValue()),
+                                            Double.parseDouble(dy.getValue())));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void renderLayer(Rendering rendering) {
+
+        if(band == null || targetList.isEmpty())
+            return;
+
+        final Viewport vp = rendering.getViewport();
+        final int level = 0;
+
+        final RasterDataNode raster = product.getRasterDataNode(product.getBandAt(0).getName());
+        final MultiLevelImage mli = raster.getGeophysicalImage();
+
+        final AffineTransform m2i = mli.getModel().getModelToImageTransform(level);
+        final AffineTransform i2m = mli.getModel().getImageToModelTransform(level);
+
+        final Shape vbounds = vp.getViewBounds();
+        final Shape mbounds = vp.getViewToModelTransform().createTransformedShape(vbounds);
+        final Shape ibounds = m2i.createTransformedShape(mbounds);
+
+        final RenderedImage winduRI = mli.getImage(level);
+
+        final int width = winduRI.getWidth();
+        final int height = winduRI.getHeight();
+        final Rectangle irect = ibounds.getBounds().intersection(new Rectangle(0, 0, width, height));
+        if (irect.isEmpty()) {
+            return;
+        }
+
+        final GeoCoding geoCoding = product.getGeoCoding();
+        final GeoPos geo = new GeoPos();
+        final PixelPos pix = new PixelPos();
+
+        final Graphics2D graphics = rendering.getGraphics();
+        graphics.setStroke(new BasicStroke(lineThickness));
+        graphics.setColor(Color.RED);
+
+        final AffineTransform m2v = vp.getModelToViewTransform();
+        final double[] ipts = new double[4];
+        final double[] mpts = new double[4];
+        final double[] vpts = new double[4];
+
+        for(WindFieldEstimationOp.WindFieldRecord target : targetList) {
+
+            geo.setLocation((float)target.lat, (float)target.lon);
+            geoCoding.getPixelPos(geo, pix);
+
+            ipts[0] = pix.getX();
+            ipts[1] = pix.getY();
+            ipts[2] = ipts[0] + 30*target.dx;
+            ipts[3] = ipts[1] + 30*target.dy;
+            i2m.transform(ipts, 0, mpts, 0, 2);
+            m2v.transform(mpts, 0, vpts, 0, 2);
+
+            graphics.setColor(Color.RED);
+            graphics.draw(new Line2D.Double(vpts[0], vpts[1], vpts[2], vpts[3]));
+        }
+    }
+}
