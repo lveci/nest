@@ -1,5 +1,5 @@
 /*
- * $Id: ProductTree.java,v 1.7 2009-11-04 17:04:32 lveci Exp $
+ * $Id: ProductTree.java,v 1.8 2009-11-12 20:25:44 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -71,7 +71,7 @@ import java.io.File;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.7 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.8 $ $Date: 2009-11-12 20:25:44 $
  * @see org.esa.beam.framework.ui.product.ProductTreeListener
  * @see org.esa.beam.framework.datamodel.Product
  */
@@ -337,6 +337,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
         addIDNode(absRoot, identNode, "Mission", "MISSION");
         addIDNode(absRoot, identNode, "Type", "PRODUCT_TYPE");
         addIDNode(absRoot, identNode, "Acquisition", "first_line_time");
+        addIDNode(absRoot, identNode, "Pass", "PASS");
         addIDNode(absRoot, identNode, "Track", "REL_ORBIT");
         addIDNode(absRoot, identNode, "Orbit", "ABS_ORBIT");
 
@@ -347,6 +348,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
                 addIDNode(slvElem, slvNode, "Mission", "MISSION");
                 addIDNode(slvElem, slvNode, "Type", "PRODUCT_TYPE");
                 addIDNode(slvElem, slvNode, "Acquisition", "first_line_time");
+                addIDNode(slvElem, slvNode, "Pass", "PASS");
                 addIDNode(slvElem, slvNode, "Track", "REL_ORBIT");
                 addIDNode(slvElem, slvNode, "Orbit", "ABS_ORBIT");
                 identNode.add(slvNode);
