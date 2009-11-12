@@ -121,6 +121,8 @@
 	    <module>nest-op-sar-tools</module>
 		<module>nest-op-orthorectification</module>
 		<module>nest-developer-tools</module>
+		
+		<module>doris-op-products</module>
   </modules>
 
     <dependencyManagement>

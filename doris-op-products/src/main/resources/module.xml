@@ -1,0 +1,49 @@
+<module>
+
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>doris-op-products</symbolicName>
+    <version>3C</version>
+    <name>NEST-DORIS Products</name>
+    <description>NEST-DORIS InSAR products</description>
+	
+	<vendor>PPO.labs</vendor>
+    <contactAddress>XXXX</contactAddress>
+    <copyright>XXXX</copyright>
+    <url>XXXX</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+	
+	<dependency>
+    	<module>beam-visat</module>
+        <optional>true</optional>
+    </dependency>
+    <dependency>
+        <module>beam-gpf</module>
+    </dependency>
+    <dependency>
+        <module>nest-core</module>
+    </dependency>
+	<dependency>
+        <module>nest-graph-builder</module>
+    </dependency>
+
+    <extension point="beam-ui:actions">
+
+		<action>
+            <id>InSARProducts</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>InSAR Products</text>
+            <parent>insar</parent>
+            <separatorAfter>true</separatorAfter>
+        </action>
+
+        <action>
+            <id>CplxIfgAction</id>
+            <class>org.esa.nest.dat.CplxIfgAction</class>
+            <text>Interferogram</text>
+            <shortDescr>Compute interferogram from stack of images</shortDescr>
+            <parent>InSARProducts</parent>
+        </action>
+		    
+	</extension>
+
+</module>
