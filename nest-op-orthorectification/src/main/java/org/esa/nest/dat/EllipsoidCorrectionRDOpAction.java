@@ -3,6 +3,7 @@ package org.esa.nest.dat;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.visat.actions.AbstractVisatAction;
 import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
+import org.esa.nest.gpf.EllipsoidCorrectionRDOp;
 
 /**
  * Ellipsoid-Correction-RD action.
@@ -18,7 +19,7 @@ public class EllipsoidCorrectionRDOpAction extends AbstractVisatAction {
         if (dialog == null) {
             dialog = new NestSingleTargetProductDialog(
                     "Ellipsoid-Correction-RD", getAppContext(), "Ellipsoid-Correction-RD", getHelpId());
-            dialog.setTargetProductNameSuffix("_EC");
+            dialog.setTargetProductNameSuffix(EllipsoidCorrectionRDOp.PRODUCT_SUFFIX);
         }
         dialog.show();
 
