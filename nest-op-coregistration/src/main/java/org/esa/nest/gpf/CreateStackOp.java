@@ -69,6 +69,8 @@ public class CreateStackOp extends Operator {
     public void initialize() throws OperatorException {
 
         try {
+            if(sourceProduct == null)
+                return;
             if(sourceProduct.length < 2)
                 throw new OperatorException("Please select at least two source products");
             for(final Product prod : sourceProduct) {
@@ -263,7 +265,9 @@ public class CreateStackOp extends Operator {
                 final String bandName = getBandName(name);
                 final String productName = getProductName(name);
 
-                final Product prod = getProduct(productName);
+                final Product prod = getProduct(productName, bandName);
+                if(prod == null) continue;
+
                 final Band band = prod.getBand(bandName);
                 final String bandUnit = band.getUnit();
                 if(bandUnit != null) {
@@ -298,10 +302,11 @@ public class CreateStackOp extends Operator {
         return bandList.toArray(new Band[bandList.size()]);
     }
 
-    private Product getProduct(String productName) {
+    private Product getProduct(final String productName, final String bandName) {
         for(Product prod : sourceProduct) {
             if(prod.getName().equals(productName)) {
-                return prod;
+                if(prod.getBand(bandName) != null)
+                    return prod;
             }
         }
         return null;

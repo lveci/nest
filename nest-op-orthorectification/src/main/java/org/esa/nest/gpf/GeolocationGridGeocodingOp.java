@@ -68,6 +68,8 @@ import java.util.HashMap;
         description="GG method for orthorectification")
 public final class GeolocationGridGeocodingOp extends Operator {
 
+    public static final String PRODUCT_SUFFIX = "_EC";
+
     @SourceProduct(alias="source")
     private Product sourceProduct;
     @TargetProduct
@@ -238,7 +240,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
      */
     private void createTargetProduct() throws OperatorException {
         
-        targetProduct = new Product(sourceProduct.getName(),
+        targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
                                     sourceProduct.getProductType(),
                                     targetImageWidth,
                                     targetImageHeight);

@@ -20,6 +20,7 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.util.ProductUtils;
 
 /**
  * This operator performs the same terrain correction as RangeDopplerGeocodingOp does except that it uses average
@@ -31,17 +32,39 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
         description="Ellipsoid correction with RD method and average scene height")
 public final class EllipsoidCorrectionRDOp extends RangeDopplerGeocodingOp {
 
+    public static final String PRODUCT_SUFFIX = "_EC";
+    
     @SourceProduct(alias="source")
-    private Product sourceProduct2;
+    private Product sourceProduct;
     @TargetProduct
     private Product targetProduct2;
 
     @Override
     public void initialize() throws OperatorException {
-        sourceProduct = sourceProduct2;
+        super.sourceProduct = this.sourceProduct;
         useAvgSceneHeight = true;
         super.initialize();
-        targetProduct2 = targetProduct;
+        targetProduct2 = super.targetProduct;
+    }
+
+    /**
+     * Create target product.
+     * @throws OperatorException The exception.
+     */
+    protected void createTargetProduct() throws OperatorException {
+
+        super.targetProduct = new Product(super.sourceProduct.getName() + this.PRODUCT_SUFFIX,
+                                    super.sourceProduct.getProductType(),
+                                    targetImageWidth,
+                                    targetImageHeight);
+
+        addSelectedBands();
+
+        addGeoCoding();
+
+        addLayoverShadowBitmasks(super.targetProduct);
+
+        ProductUtils.copyMetadata(super.sourceProduct, super.targetProduct);
     }
 
     /**

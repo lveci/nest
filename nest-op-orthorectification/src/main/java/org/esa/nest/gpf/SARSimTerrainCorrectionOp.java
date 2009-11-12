@@ -78,6 +78,8 @@ import java.util.Set;
         description="Orthorectification with SAR simulation")
 public class SARSimTerrainCorrectionOp extends Operator {
 
+    public static final String PRODUCT_SUFFIX = "_SimTC";
+    
     @SourceProduct(alias="source")
     protected Product sourceProduct;
     @TargetProduct
@@ -460,7 +462,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      */
     private void createTargetProduct() throws OperatorException {
         
-        targetProduct = new Product(sourceProduct.getName(),
+        targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
                                     sourceProduct.getProductType(),
                                     targetImageWidth,
                                     targetImageHeight);

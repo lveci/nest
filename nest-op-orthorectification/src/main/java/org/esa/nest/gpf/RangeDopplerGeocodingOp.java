@@ -78,6 +78,8 @@ import java.util.Set;
 @OperatorMetadata(alias="Terrain-Correction", category = "Geometry", description="RD method for orthorectification")
 public class RangeDopplerGeocodingOp extends Operator {
 
+    public static final String PRODUCT_SUFFIX = "_TC";
+
     @SourceProduct(alias="source")
     protected Product sourceProduct;
     @TargetProduct
@@ -154,8 +156,8 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     private int sourceImageWidth = 0;
     private int sourceImageHeight = 0;
-    private int targetImageWidth = 0;
-    private int targetImageHeight = 0;
+    protected int targetImageWidth = 0;
+    protected int targetImageHeight = 0;
 
     private double avgSceneHeight = 0.0; // in m
     private double wavelength = 0.0; // in m
@@ -562,9 +564,9 @@ public class RangeDopplerGeocodingOp extends Operator {
      * Create target product.
      * @throws OperatorException The exception.
      */
-    private void createTargetProduct() throws OperatorException {
+    protected void createTargetProduct() throws OperatorException {
         
-        targetProduct = new Product(sourceProduct.getName(),
+        targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
                                     sourceProduct.getProductType(),
                                     targetImageWidth,
                                     targetImageHeight);
@@ -578,7 +580,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
     }
 
-    private static void addLayoverShadowBitmasks(Product product) {
+    protected static void addLayoverShadowBitmasks(Product product) {
         for(Band band : product.getBands()) {
             final String expression = band.getName() + " < 0";
             final BitmaskDef nrv = new BitmaskDef(band.getName()+"_non_reliable_values",
@@ -591,7 +593,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * Add the user selected bands to target product.
      * @throws OperatorException The exceptions.
      */
-    private void addSelectedBands() throws OperatorException {
+    protected void addSelectedBands() throws OperatorException {
 
         final Band[] sourceBands = OperatorUtils.getSourceBands(sourceProduct, sourceBandNames);
 
@@ -731,7 +733,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     /**
      * Add geocoding to the target product.
      */
-    private void addGeoCoding() {
+    protected void addGeoCoding() {
 
         final float[] latTiePoints = {(float)imageGeoBoundary.latMax, (float)imageGeoBoundary.latMax,
                                       (float)imageGeoBoundary.latMin, (float)imageGeoBoundary.latMin};
