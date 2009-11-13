@@ -2,7 +2,9 @@ package org.esa.nest.dataio;
 
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.nest.util.MathUtils;
+import org.esa.nest.util.ResourceUtils;
 
+import java.util.zip.GZIPInputStream;
 import java.io.*;
 import java.util.Arrays;
 
@@ -60,6 +62,17 @@ public final class PrareOrbitReader {
     private static BufferedReader getBufferedReader(File file) {
 
         final String fileName = file.getAbsolutePath();
+        final String fileLower = fileName.toLowerCase();
+        if(fileLower.endsWith("gz") || fileLower.endsWith("z") || fileLower.endsWith("zip"))  {
+            try {
+                final InputStream zipstream = ResourceUtils.getInflaterInputStream(file);
+                return new BufferedReader(new InputStreamReader(zipstream));
+            } catch(Exception e) {
+                System.out.println(e.getMessage());
+                // try as a plain file
+            }
+        }
+
         FileInputStream stream;
         try {
             stream = new FileInputStream(fileName);

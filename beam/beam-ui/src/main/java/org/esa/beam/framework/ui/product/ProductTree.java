@@ -1,5 +1,5 @@
 /*
- * $Id: ProductTree.java,v 1.8 2009-11-12 20:25:44 lveci Exp $
+ * $Id: ProductTree.java,v 1.9 2009-11-13 20:53:13 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -71,7 +71,7 @@ import java.io.File;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.8 $ $Date: 2009-11-12 20:25:44 $
+ * @version $Revision: 1.9 $ $Date: 2009-11-13 20:53:13 $
  * @see org.esa.beam.framework.ui.product.ProductTreeListener
  * @see org.esa.beam.framework.datamodel.Product
  */
@@ -752,12 +752,11 @@ public class ProductTree extends JTree implements PopupMenuFactory {
                 commandUIFactory.addContextDependentMenuItems("product", popup);
             }
         } else if (context instanceof MetadataElement) {
-// TODO
-//            menuItem = new JMenuItem("New Group...");
-//            popup.add(menuItem);
-//
-//            menuItem = new JMenuItem("New Attribute...");
-//            popup.add(menuItem);
+            int componentCountBefore = popup.getComponentCount();
+            if (commandUIFactory != null) {
+                commandUIFactory.addContextDependentMenuItems("metadataNode", popup);
+            }
+            addSeparatorIfAnyComponentsAdded(popup, componentCountBefore);
 
             if (commandUIFactory != null) {
                 commandUIFactory.addContextDependentMenuItems("metadata", popup);

@@ -61,42 +61,46 @@ public final class SRTM3GeoTiffFile {
 
     public SRTM3GeoTiffElevationTile getTile() throws IOException {
         if(tile == null) {
-            try {
-                if(localFileExists) {
-                    final File dataFile = getFileFromZip(localFile);
-                    if(dataFile != null) {
-                        final Product product = productReader.readProductNodes(dataFile, null);
-                        if(product != null) {
-                            tile = new SRTM3GeoTiffElevationTile(demModel, product);
-                        }
-                    }
-                } else if(remoteFileExists && getRemoteFile()) {
-                    final File dataFile = getFileFromZip(localFile);
-                    if(dataFile != null) {
-                        final Product product = productReader.readProductNodes(dataFile, null);
-                        if(product != null) {
-                            tile = new SRTM3GeoTiffElevationTile(demModel, product);
-                        }
-                    }
-                }
-                if(tile != null) {
-                    demModel.updateCache(tile);
-                } else {
-                    if(!remoteFileExists && localFileExists) {
-                        System.out.println("SRTM unable to reader product "+localFile.getAbsolutePath());
-                    }
-                    localFileExists = false;
-                }
-            } catch(Exception e) {
-                System.out.println(e.getMessage());
-                tile = null;
-                localFileExists = false;
-                if(unrecoverableError) {
-                    throw new IOException(e);
-                }
-            }
+            getFile();
         }
         return tile;
+    }
+
+    private synchronized void getFile() throws IOException {
+        try {
+            if(localFileExists) {
+                final File dataFile = getFileFromZip(localFile);
+                if(dataFile != null) {
+                    final Product product = productReader.readProductNodes(dataFile, null);
+                    if(product != null) {
+                        tile = new SRTM3GeoTiffElevationTile(demModel, product);
+                    }
+                }
+            } else if(remoteFileExists && getRemoteFile()) {
+                final File dataFile = getFileFromZip(localFile);
+                if(dataFile != null) {
+                    final Product product = productReader.readProductNodes(dataFile, null);
+                    if(product != null) {
+                        tile = new SRTM3GeoTiffElevationTile(demModel, product);
+                    }
+                }
+            }
+            if(tile != null) {
+                demModel.updateCache(tile);
+            } else {
+                if(!remoteFileExists && localFileExists) {
+                    System.out.println("SRTM unable to reader product "+localFile.getAbsolutePath());
+                }
+                localFileExists = false;
+            }
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
+            tile = null;
+            localFileExists = false;
+            if(unrecoverableError) {
+                throw new IOException(e);
+            }
+        }
     }
 
     private boolean getRemoteFile() throws IOException {

@@ -1,5 +1,5 @@
 /*
- * $Id: FileArrayEditor.java,v 1.2 2009-11-11 20:19:25 lveci Exp $
+ * $Id: FileArrayEditor.java,v 1.3 2009-11-13 20:53:13 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -102,7 +102,7 @@ public final class FileArrayEditor {
      *
      * @return a <code>List</code> of currently edited <code>File</code>s
      */
-    public List getFiles() {
+    public List<File> getFiles() {
         return _fileList;
     }
 

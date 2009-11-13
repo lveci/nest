@@ -5,6 +5,7 @@ import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.visat.VisatApp;
+import org.esa.beam.framework.dataio.IllegalFileFormatException;
 
 import javax.swing.*;
 import java.io.File;
@@ -12,6 +13,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipEntry;
+import java.util.zip.GZIPInputStream;
+import java.util.Enumeration;
 
 /**
  * Look up paths to resources
@@ -219,5 +224,40 @@ public class ResourceUtils {
         System.out.println("findInHomeFolder "+filename+ " not found in " + homePath);
 
         return null;
+    }
+
+    /**
+     * Opens an input stream for a compressed file (.gz or .zip).
+     *
+     * @param file the compressed file
+     * @return the input stream
+     * @throws java.io.IOException if an I/O error occured
+     */
+    public static InputStream getInflaterInputStream(File file) throws IOException {
+        if (file.getName().endsWith(".gz")) {
+            try {
+                return createGZIPInputStream(file);
+            } catch (IOException e) {
+                // ok, try ZIP
+            }
+        }
+        return createZIPInputStream(file);
+    }
+
+    private static InputStream createZIPInputStream(File file) throws IOException {
+        final ZipFile productZip = new ZipFile(file, ZipFile.OPEN_READ);
+        if (productZip.size() != 1) {
+            throw new IllegalFileFormatException("Illegal ZIP format, single file entry expected.");
+        }
+        final Enumeration<? extends ZipEntry> entries = productZip.entries();
+        final ZipEntry zipEntry = entries.nextElement();
+        if (zipEntry == null || zipEntry.isDirectory()) {
+            throw new IllegalFileFormatException("Illegal ZIP format, single file entry expected.");
+        }
+        return productZip.getInputStream(zipEntry);
+    }
+
+    private static InputStream createGZIPInputStream(File file) throws IOException {
+        return new GZIPInputStream(new FileInputStream(file));
     }
 }

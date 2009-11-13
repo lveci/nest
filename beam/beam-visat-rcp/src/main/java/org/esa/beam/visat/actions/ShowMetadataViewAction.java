@@ -1,5 +1,5 @@
 /*
- * $Id: ShowMetadataViewAction.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: ShowMetadataViewAction.java,v 1.2 2009-11-13 20:53:13 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -25,19 +25,17 @@ import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.framework.ui.product.ProductMetadataView;
-import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.visat.VisatApp;
-
-import java.awt.Cursor;
 
 import javax.swing.Icon;
 import javax.swing.JInternalFrame;
+import java.awt.Cursor;
 
 /**
  * This action opens an Metadata View of the currently selected Metadata Node
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2009-11-13 20:53:13 $
  * @since BEAM 4.6
  */
 public class ShowMetadataViewAction extends ExecCommand {
@@ -69,7 +67,7 @@ public class ShowMetadataViewAction extends ExecCommand {
 
         JInternalFrame metadataFrame = null;
         try {
-            metadataView.setCommandUIFactory(getCommandUIFactory());
+            metadataView.setCommandUIFactory(visatApp.getCommandUIFactory());
             final Icon icon = UIUtils.loadImageIcon("icons/RsMetaData16.gif");
             final MetadataElement element = metadataView.getMetadataElement();
             metadataFrame = visatApp.createInternalFrame(element.getDisplayName(),
