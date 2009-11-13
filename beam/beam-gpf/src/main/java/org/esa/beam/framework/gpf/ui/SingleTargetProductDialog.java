@@ -1,5 +1,5 @@
 /*
- * $Id: SingleTargetProductDialog.java,v 1.3 2009-11-10 21:30:51 lveci Exp $
+ * $Id: SingleTargetProductDialog.java,v 1.4 2009-11-13 15:16:01 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -46,7 +46,7 @@ import java.awt.*;
  *
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.3 $ $Date: 2009-11-10 21:30:51 $
+ * @version $Revision: 1.4 $ $Date: 2009-11-13 15:16:01 $
  */
 public abstract class SingleTargetProductDialog extends ModelessDialog {
 
@@ -340,9 +340,9 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
                 final Product targetProduct = get();
                 if (model.isOpenInAppSelected()) {
                     appContext.getProductManager().addProduct(targetProduct);
-                    showSaveAndOpenInAppInfo(saveTime);
+                    //showSaveAndOpenInAppInfo(saveTime);
                 } else {
-                    showSaveInfo(saveTime);
+                    //showSaveInfo(saveTime);
                 }
             } catch (InterruptedException e) {
                 // ignore
