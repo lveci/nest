@@ -169,8 +169,8 @@ public final class PrareOrbitReader {
 
             orbitVectors[i] = new OrbitVector();
             // todo need to convert TDT time to UTC time
-            orbitVectors[i].utcTime = (double)dataRecord.tTagD*0.1 +  0.5 +
-                                      (double)dataRecord.tTagMs * microSecondToSecond * secondToDay;
+            orbitVectors[i].utcTime = TDT2UTC((double)dataRecord.tTagD*0.1 +  0.5 +
+                                              (double)dataRecord.tTagMs * microSecondToSecond * secondToDay);
             orbitVectors[i].xPos = (double)dataRecord.xSat * millimeterToMeter;
             orbitVectors[i].yPos = (double)dataRecord.ySat * millimeterToMeter;
             orbitVectors[i].zPos = (double)dataRecord.zSat * millimeterToMeter;
@@ -331,23 +331,57 @@ public final class PrareOrbitReader {
     /**
      * Get the start time of the Arc in MJD (in days).
      * @return The start time.
+     * @throws IOException The exception.
      */
-    public float getSensingStart() {
+    public float getSensingStart() throws IOException {
         // The start time is given as Julian days since 1.1.2000 12h in TDT.
         // Add 0.5 days to make it as Julian days since 1.1.2000 0h in TDT. 
         // todo need to convert TDT time to UTC time
-        return dataHeaderRecord.start*0.1f + 0.5f; // 0.1 days to days
+        return (float)TDT2UTC(dataHeaderRecord.start*0.1f + 0.5f); // 0.1 days to days
     }
 
     /**
      * Get the end time of the Arc in MJD (in days).
      * @return The end time.
+     * @throws IOException The exception.
      */
-    public float getSensingStop() {
+    public float getSensingStop() throws IOException {
         // The end time is given as Julian days since 1.1.2000 12h in TDT.
         // Add 0.5 days to make it as Julian days since 1.1.2000 0h in TDT.
         // todo need to convert TDT time to UTC time
-        return dataHeaderRecord.end*0.1f + 0.5f; // 0.1 days to days
+        return (float)TDT2UTC(dataHeaderRecord.end*0.1f + 0.5f); // 0.1 days to days
+    }
+
+    /**
+     * Convert TDT time to UTC time
+     * @param tdt TDT time in days.
+     * @return The UTC time.
+     * @throws IOException The exception.
+     */
+    public double TDT2UTC(double tdt) throws IOException {
+        double tai = tdt - 32.184/secondToDay;
+
+        if (tai >= 54832.0) {                 /* 2009 Jan 1 */
+            return tai - 33.0/secondToDay;
+        } else if (tai >= 53736.0) {          /* 2006 Jan 1 */
+            return tai - 33.0/secondToDay;
+        } else if (tai >= 51179.0) {          /* 1999 Jan 1 */
+            return tai - 32.0/secondToDay;
+        } else if (tai >= 50630.0) {          /* 1997 Jul 1 */
+            return tai - 31.0/secondToDay;
+        } else if (tai >= 50083.0) {          /* 1996 Jan 1 */
+            return tai - 30.0/secondToDay;
+        } else if (tai >= 49534.0) {          /* 1994 July 1 */
+            return tai - 29.0/secondToDay;
+        } else if (tai >= 49169.0) {          /* 1993 July 1 */
+            return tai - 28.0/secondToDay;
+        } else if (tai >= 48804.0) {          /* 1992 July 1 */
+            return tai - 27.0/secondToDay;
+        } else if (tai >= 48257.0) {          /* 1991 Jan 1 */
+            return tai - 26.0;
+        } else {
+            throw new IOException("Incorrect UTC time");
+        }
     }
 
     /**
