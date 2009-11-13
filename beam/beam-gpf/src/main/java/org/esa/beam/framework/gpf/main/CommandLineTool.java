@@ -1,9 +1,9 @@
 package org.esa.beam.framework.gpf.main;
 
 import com.bc.ceres.binding.ConversionException;
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.dom.DefaultDomElement;
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.Xpp3DomElement;
@@ -240,7 +240,7 @@ class CommandLineTool {
 
     private static Map<String, Object> getParameterMap(CommandLineArgs lineArgs) throws ValidationException, ConversionException {
         HashMap<String, Object> parameters = new HashMap<String, Object>();
-        PropertyContainer container = ParameterDescriptorFactory.createMapBackedOperatorValueContainer(lineArgs.getOperatorName(), parameters);
+        PropertyContainer container = ParameterDescriptorFactory.createMapBackedOperatorPropertyContainer(lineArgs.getOperatorName(), parameters);
         Map<String, String> parameterMap = lineArgs.getParameterMap();
         for (Entry<String, String> entry : parameterMap.entrySet()) {
             String paramName = entry.getKey();
