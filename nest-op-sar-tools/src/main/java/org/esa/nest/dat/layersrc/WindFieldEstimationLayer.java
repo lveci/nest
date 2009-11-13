@@ -149,24 +149,47 @@ public class WindFieldEstimationLayer extends Layer {
         graphics.setColor(Color.RED);
 
         final AffineTransform m2v = vp.getModelToViewTransform();
-        final double[] ipts = new double[4];
-        final double[] mpts = new double[4];
-        final double[] vpts = new double[4];
+        final double[] ipts = new double[8];
+        final double[] mpts = new double[8];
+        final double[] vpts = new double[8];
+
+        double arrowSize = 1.0;
+        if (targetList.size() > 1) {
+            WindFieldEstimationOp.WindFieldRecord target0 = targetList.get(0);
+            geo.setLocation((float)target0.lat, (float)target0.lon);
+            geoCoding.getPixelPos(geo, pix);
+            float x0 = pix.x;
+            WindFieldEstimationOp.WindFieldRecord target1 = targetList.get(1);
+            geo.setLocation((float)target1.lat, (float)target1.lon);
+            geoCoding.getPixelPos(geo, pix);
+            float x1 = pix.x;
+            arrowSize = Math.abs(x0 - x1)/2.5;
+        }
 
         for(WindFieldEstimationOp.WindFieldRecord target : targetList) {
 
             geo.setLocation((float)target.lat, (float)target.lon);
             geoCoding.getPixelPos(geo, pix);
+            double dx = arrowSize*target.dx;
+            double dy = arrowSize*target.dy;
 
             ipts[0] = pix.getX();
             ipts[1] = pix.getY();
-            ipts[2] = ipts[0] + 30*target.dx;
-            ipts[3] = ipts[1] + 30*target.dy;
-            i2m.transform(ipts, 0, mpts, 0, 2);
-            m2v.transform(mpts, 0, vpts, 0, 2);
+            ipts[2] = ipts[0] + dx;
+            ipts[3] = ipts[1] + dy;
+
+            ipts[4] = ipts[2] - 5*(1.732*dx - dy)/arrowSize;
+            ipts[5] = ipts[3] - 5*(1.732*dy + dx)/arrowSize;
+            ipts[6] = ipts[2] - 5*(1.732*dx + dy)/arrowSize;
+            ipts[7] = ipts[3] - 5*(1.732*dy - dx)/arrowSize;
+
+            i2m.transform(ipts, 0, mpts, 0, 4);
+            m2v.transform(mpts, 0, vpts, 0, 4);
 
             graphics.setColor(Color.RED);
             graphics.draw(new Line2D.Double(vpts[0], vpts[1], vpts[2], vpts[3]));
+            graphics.draw(new Line2D.Double(vpts[4], vpts[5], vpts[2], vpts[3]));
+            graphics.draw(new Line2D.Double(vpts[6], vpts[7], vpts[2], vpts[3]));
         }
     }
 }
