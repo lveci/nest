@@ -89,6 +89,7 @@ public class AbstractMetadata {
     public static final String external_calibration_file = "external_calibration_file";
     public static final String orbit_state_vector_file = "orbit_state_vector_file";
     public static final String target_report_file = "target_report_file";
+    public static final String wind_field_report_file = "wind_field_report_file";
 
     // orbit state vectors
     public static final String orbit_state_vectors = "Orbit_State_Vectors";
