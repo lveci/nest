@@ -40,15 +40,15 @@ public class WindFieldEstimationLayer extends Layer {
         product = (Product) configuration.getValue("product");
         band = (Band) configuration.getValue("band");
 
-        LoadTargets(getTargetFile(product));
+        LoadTargets(getWindFieldReportFile(product));
     }
 
-    public static File getTargetFile(final Product product) {
+    public static File getWindFieldReportFile(final Product product) {
         final MetadataElement root = product.getMetadataRoot();
         if (root != null) {
             final MetadataElement absMetadata = AbstractMetadata.getAbstractedMetadata(product);
             if (absMetadata != null) {
-                final String windFieldReportFilePath = absMetadata.getAttributeString(AbstractMetadata.target_report_file, null);
+                final String windFieldReportFilePath = absMetadata.getAttributeString(AbstractMetadata.wind_field_report_file, null);
                 if(windFieldReportFilePath != null) {
                     final File file = new File(windFieldReportFilePath);
                     if(file.exists())
@@ -153,17 +153,19 @@ public class WindFieldEstimationLayer extends Layer {
         final double[] mpts = new double[8];
         final double[] vpts = new double[8];
 
-        double arrowSize = 1.0;
+        double arrowSize = 10.0;
         if (targetList.size() > 1) {
             WindFieldEstimationOp.WindFieldRecord target0 = targetList.get(0);
             geo.setLocation((float)target0.lat, (float)target0.lon);
             geoCoding.getPixelPos(geo, pix);
             float x0 = pix.x;
+            float y0 = pix.y;
             WindFieldEstimationOp.WindFieldRecord target1 = targetList.get(1);
             geo.setLocation((float)target1.lat, (float)target1.lon);
             geoCoding.getPixelPos(geo, pix);
             float x1 = pix.x;
-            arrowSize = Math.abs(x0 - x1)/2.5;
+            float y1 = pix.y;
+            arrowSize = Math.sqrt((x0 - x1)*(x0 - x1) + (y0 - y1)*(y0 - y1))/2.5;
         }
 
         for(WindFieldEstimationOp.WindFieldRecord target : targetList) {
@@ -178,10 +180,10 @@ public class WindFieldEstimationLayer extends Layer {
             ipts[2] = ipts[0] + dx;
             ipts[3] = ipts[1] + dy;
 
-            ipts[4] = ipts[2] - 5*(1.732*dx - dy)/arrowSize;
-            ipts[5] = ipts[3] - 5*(1.732*dy + dx)/arrowSize;
-            ipts[6] = ipts[2] - 5*(1.732*dx + dy)/arrowSize;
-            ipts[7] = ipts[3] - 5*(1.732*dy - dx)/arrowSize;
+            ipts[4] = ipts[2] - (1.732*dx - dy)/6;
+            ipts[5] = ipts[3] - (1.732*dy + dx)/6;
+            ipts[6] = ipts[2] - (1.732*dx + dy)/6;
+            ipts[7] = ipts[3] - (1.732*dy - dx)/6;
 
             i2m.transform(ipts, 0, mpts, 0, 4);
             m2v.transform(mpts, 0, vpts, 0, 4);

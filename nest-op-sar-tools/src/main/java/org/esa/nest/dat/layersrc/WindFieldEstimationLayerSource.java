@@ -18,8 +18,8 @@ public class WindFieldEstimationLayerSource implements LayerSource {
     public boolean isApplicable(LayerSourcePageContext pageContext) {
         final Product product = pageContext.getAppContext().getSelectedProduct();
 
-        final File targetFile = ObjectDetectionLayer.getTargetFile(product);
-        return targetFile != null;
+        final File windFieldReportFile = WindFieldEstimationLayer.getWindFieldReportFile(product);
+        return windFieldReportFile != null;
     }
 
     @Override
