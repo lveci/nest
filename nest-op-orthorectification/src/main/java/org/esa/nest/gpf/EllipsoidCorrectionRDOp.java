@@ -62,7 +62,7 @@ public final class EllipsoidCorrectionRDOp extends RangeDopplerGeocodingOp {
 
         addGeoCoding();
 
-        addLayoverShadowBitmasks(super.targetProduct);
+        // addLayoverShadowBitmasks(super.targetProduct);
 
         ProductUtils.copyMetadata(super.sourceProduct, super.targetProduct);
     }

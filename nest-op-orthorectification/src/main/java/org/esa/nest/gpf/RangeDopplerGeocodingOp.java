@@ -575,11 +575,11 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         addGeoCoding();
 
-        addLayoverShadowBitmasks(targetProduct);
+//        addLayoverShadowBitmasks(targetProduct);
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
     }
-
+    /*
     protected static void addLayoverShadowBitmasks(Product product) {
         for(Band band : product.getBands()) {
             final String expression = band.getName() + " < 0";
@@ -588,7 +588,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             product.addBitmaskDef(nrv);
         }
     }
-
+    */
     /**
      * Add the user selected bands to target product.
      * @throws OperatorException The exceptions.
