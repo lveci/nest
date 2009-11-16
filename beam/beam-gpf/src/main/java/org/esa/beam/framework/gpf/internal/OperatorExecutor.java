@@ -1,5 +1,5 @@
 /*
- * $Id: OperatorExecutor.java,v 1.2 2009-11-16 17:26:48 lveci Exp $
+ * $Id: OperatorExecutor.java,v 1.3 2009-11-16 18:30:26 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -40,10 +40,11 @@ import javax.media.jai.TileRequest;
 import javax.media.jai.TileScheduler;
 
 /**
- * todo - what's this thing ???
+ * This executor triggers the computation of all tiles that the bands of the target product
+ * of the given operator have. The computation of these tiles is parallelized to use all available
+ * CPUs (cores) using the JAI {@link TileScheduler}.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.2 $ $Date: 2009-11-16 17:26:48 $
  * @since BEAM 4.7
  */
 public class OperatorExecutor {
