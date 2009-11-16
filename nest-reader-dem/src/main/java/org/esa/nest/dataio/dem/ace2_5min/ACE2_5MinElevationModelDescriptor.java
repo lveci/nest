@@ -110,7 +110,7 @@ public class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDes
     }
 
     @Override
-    public boolean installDemFiles(Object uiComponent) {
+    public synchronized boolean installDemFiles(Object uiComponent) {
         if (isDemInstalled()) {
             return true;
         }

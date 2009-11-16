@@ -44,6 +44,8 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
         elevationFiles = createElevationFiles();
         noDataValue = _descriptor.getNoDataValue();
         this.elevationTileCache = new ArrayList<SRTM3GeoTiffElevationTile>();
+
+        System.out.println("SRTM DEM created");
     }
 
     /**
@@ -58,7 +60,7 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
         return _descriptor;
     }
 
-    public float getElevation(GeoPos geoPos) throws Exception {
+    public synchronized float getElevation(GeoPos geoPos) throws Exception {
         float pixelY = RASTER_HEIGHT - (geoPos.lat + 60.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; //DEGREE_RES * NUM_PIXELS_PER_TILE;
         if(pixelY < 0)
             return noDataValue;

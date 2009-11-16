@@ -520,7 +520,9 @@ public class RangeDopplerGeocodingOp extends Operator {
      * Get elevation model.
      * @throws Exception The exceptions.
      */
-    private void getElevationModel() throws Exception {
+    private synchronized void getElevationModel() throws Exception {
+
+        if(isElevationModelAvailable) return;
 
         if(externalDEMFile != null && fileElevationModel == null) { // if external DEM file is specified by user
 
@@ -550,6 +552,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             demNoDataValue = dem.getDescriptor().getNoDataValue();
         }
+        isElevationModelAvailable = true;
     }
 
     /**
@@ -897,7 +900,6 @@ public class RangeDopplerGeocodingOp extends Operator {
         try {
             if (!isElevationModelAvailable) {
                 getElevationModel();
-                isElevationModelAvailable = true;
             }
         } catch(Exception e) {
             throw new OperatorException(e);
@@ -1000,7 +1002,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                     }
 
                     if (!useAvgSceneHeight && alt == demNoDataValue) {
-                        saveNoDataValueToTarget(index, trgTiles);
+                        saveNoDataValueToTarget(index, trgTiles, 1);
                         continue;
                     }
 
@@ -1010,7 +1012,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                             lineTimeInterval, wavelength, earthPoint, sensorPosition, sensorVelocity);
 
                     if (Double.compare(zeroDopplerTime, NonValidZeroDopplerTime) == 0) {
-                        saveNoDataValueToTarget(index, trgTiles);
+                        saveNoDataValueToTarget(index, trgTiles, 2);
                         continue;
                     }
 
@@ -1028,7 +1030,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                             rangeSpacing, zeroDopplerTimeWithoutBias, slantRange, nearEdgeSlantRange, srgrConvParams);
 
                     if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, srcMaxRange, srcMaxAzimuth)) {
-                        saveNoDataValueToTarget(index, trgTiles);
+                        saveNoDataValueToTarget(index, trgTiles, 3);
                     } else {
                         double[] localIncidenceAngles = {NonValidIncidenceAngle, NonValidIncidenceAngle};
                         if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) {
@@ -1173,9 +1175,9 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param index The pixel index in target image.
      * @param trgTiles The target tiles.
      */
-    private static void saveNoDataValueToTarget(final int index, final TileData[] trgTiles) {
+    private static void saveNoDataValueToTarget(final int index, final TileData[] trgTiles, final double value) {
         for(TileData tileData : trgTiles) {
-            tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
+            tileData.tileDataBuffer.setElemDoubleAt(index, value);
         }
     }
 

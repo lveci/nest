@@ -64,7 +64,6 @@ public class SRGROp extends Operator {
 
     private MetadataElement absRoot = null;
     private GeoCoding geoCoding = null;
-    private boolean srgrFlag = false;
     private boolean imageFlipped = false;
     private double slantRangeSpacing; // in m
     private double groundRangeSpacing; // in m
@@ -138,7 +137,7 @@ public class SRGROp extends Operator {
      * @throws Exception The exceptions.
      */
     private void getSRGRFlag() throws Exception {
-        srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
+        final boolean srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
         if (srgrFlag) {
             throw new OperatorException("Slant range to ground range conversion has already been applied");
         }

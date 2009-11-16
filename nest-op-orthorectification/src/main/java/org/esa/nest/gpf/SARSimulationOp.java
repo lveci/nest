@@ -231,6 +231,7 @@ public final class SARSimulationOp extends Operator {
      */
     private void getElevationModel() throws Exception {
 
+        if(isElevationModelAvailable) return;
         if(externalDEMFile != null && fileElevationModel == null) { // if external DEM file is specified by user
 
             fileElevationModel = new FileElevationModel(externalDEMFile,
@@ -259,6 +260,7 @@ public final class SARSimulationOp extends Operator {
 
             demNoDataValue = dem.getDescriptor().getNoDataValue();
         }
+        isElevationModelAvailable = true;
     }
 
     /**
@@ -396,7 +398,6 @@ public final class SARSimulationOp extends Operator {
         try {
             if (!isElevationModelAvailable) {
                 getElevationModel();
-                isElevationModelAvailable = true;
             }
         } catch(Exception e) {
             throw new OperatorException(e);

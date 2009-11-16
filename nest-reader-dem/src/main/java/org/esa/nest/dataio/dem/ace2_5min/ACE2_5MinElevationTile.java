@@ -28,14 +28,20 @@ public class ACE2_5MinElevationTile {
         final float[] line;
         try {
             if(linesCache == null) {
-                linesCache = new CachingObjectArray(getLineFactory());
-                linesCache.setCachedRange(0, product.getSceneRasterHeight());
+                createLineCache();
             }
             line = (float[]) linesCache.getObject(pixelY);
         } catch (Exception e) {
             throw convertLineCacheException(e);
         }
         return line[pixelX];
+    }
+
+    private synchronized void createLineCache() throws IOException {
+        if(linesCache == null) {
+            linesCache = new CachingObjectArray(getLineFactory());
+            linesCache.setCachedRange(0, product.getSceneRasterHeight());
+        }
     }
 
     public void dispose() {
@@ -60,7 +66,7 @@ public class ACE2_5MinElevationTile {
         final Band band = product.getBandAt(0);
         final int width = product.getSceneRasterWidth();
         return new CachingObjectArray.ObjectFactory() {
-            public Object createObject(int index) throws Exception {
+            public synchronized Object createObject(int index) throws Exception {
                 dem.updateCache(ACE2_5MinElevationTile.this);
                 return band.readPixels(0, index, width, 1, new float[width], ProgressMonitor.NULL);
             }

@@ -1,5 +1,5 @@
 /*
- * $Id: ProductTree.java,v 1.9 2009-11-13 20:53:13 lveci Exp $
+ * $Id: ProductTree.java,v 1.10 2009-11-16 17:26:48 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -71,7 +71,7 @@ import java.io.File;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.9 $ $Date: 2009-11-13 20:53:13 $
+ * @version $Revision: 1.10 $ $Date: 2009-11-16 17:26:48 $
  * @see org.esa.beam.framework.ui.product.ProductTreeListener
  * @see org.esa.beam.framework.datamodel.Product
  */
@@ -904,6 +904,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
                     final DefaultMutableTreeNode bandGroupTNode = getBandGroupTNode(sourceNode, productTNode);
                     bandGroupTNode.add(new DefaultMutableTreeNode(sourceNode));
                     getTreeModel().nodeStructureChanged(bandGroupTNode);
+                    updateUI();
                 }
             }
         }
@@ -953,11 +954,19 @@ public class ProductTree extends JTree implements PopupMenuFactory {
         }
 
         private DefaultMutableTreeNode getBandGroupTNode(ProductNode sourceNode, DefaultMutableTreeNode productTNode) {
-            final DefaultMutableTreeNode groupTNode;
+            DefaultMutableTreeNode groupTNode;
             if (sourceNode instanceof Mask) {
                 groupTNode = getTreeNodeFor(MASKS, productTNode);
+                if(groupTNode == null) {
+                    groupTNode = new DefaultMutableTreeNode(MASKS);
+                    productTNode.add(groupTNode);
+                }
             } else {
                 groupTNode = getTreeNodeFor(BANDS, productTNode);
+                if(groupTNode == null) {
+                    groupTNode = new DefaultMutableTreeNode(BANDS);
+                    productTNode.add(groupTNode);
+                }
             }
             return groupTNode;
         }

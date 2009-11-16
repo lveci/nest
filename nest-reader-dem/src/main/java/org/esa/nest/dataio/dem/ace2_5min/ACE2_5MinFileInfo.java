@@ -263,7 +263,7 @@ public class ACE2_5MinFileInfo {
             if (c == 's' || c == 'S') {
                 return directionSouth;
             }
-            throw new ParseException("Illegal direction character.", pos);
+            throw new ParseException("Illegal direction character. "+c, pos);
         }
 
         private int readNumber() throws ParseException {

@@ -68,6 +68,8 @@ public final class SRTM3GeoTiffFile {
 
     private synchronized void getFile() throws IOException {
         try {
+            if(tile != null) return;
+
             if(localFileExists) {
                 final File dataFile = getFileFromZip(localFile);
                 if(dataFile != null) {

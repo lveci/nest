@@ -9,7 +9,6 @@ import java.io.IOException;
 
 public final class SRTM3GeoTiffElevationTile {
 
-    private SRTM3GeoTiffElevationModel _dem;
     private EarthGravitationalModel96 _egm;
     private CachingObjectArray _linesCache;
     private Product _product;
@@ -17,13 +16,13 @@ public final class SRTM3GeoTiffElevationTile {
     private float[][] _egmArray = null;
 
     public SRTM3GeoTiffElevationTile(final SRTM3GeoTiffElevationModel dem, final Product product) {
-        _dem = dem;
         _egm = dem.getEarthGravitationalModel96();
         _product = product;
         _noDataValue = dem.getDescriptor().getNoDataValue();
         _linesCache = new CachingObjectArray(getLineFactory());
         _linesCache.setCachedRange(0, product.getSceneRasterHeight());
 
+        System.out.println("Dem Tile "+product.getName());
         computeEGMArray();
     }
 
@@ -43,7 +42,6 @@ public final class SRTM3GeoTiffElevationTile {
             _product.dispose();
             _product = null;
         }
-        _dem = null;
     }
 
     public void clearCache() {
@@ -54,8 +52,8 @@ public final class SRTM3GeoTiffElevationTile {
         final Band band = _product.getBandAt(0);
         final int width = _product.getSceneRasterWidth();
         return new CachingObjectArray.ObjectFactory() {
-            public Object createObject(int index) throws Exception {
-                float[] line =  band.readPixels(0, index, width, 1, new float[width], ProgressMonitor.NULL);
+            public synchronized Object createObject(int index) throws Exception {
+                final float[] line =  band.readPixels(0, index, width, 1, new float[width], ProgressMonitor.NULL);
                 final int rowIdxInEGMArray = index / 300; // tile_height / numEGMSamplesInCol
                 for (int i = 0; i < line.length; i++) {
                     if (line[i] != _noDataValue) {
@@ -98,8 +96,7 @@ public final class SRTM3GeoTiffElevationTile {
         for (int r = 0; r < numEGMSamplesInCol; r++) {
             final double lat = lat0 - delLat*r;
             for (int c = 0; c < numEGMSamplesInRow; c++) {
-                final double lon = lon0 + delLon*c;
-                _egmArray[r][c] = _egm.getEGM(lat, lon);
+                _egmArray[r][c] = _egm.getEGM(lat, lon0 + delLon*c);
             }
         }
     }
