@@ -1002,7 +1002,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                     }
 
                     if (!useAvgSceneHeight && alt == demNoDataValue) {
-                        saveNoDataValueToTarget(index, trgTiles, 1);
+                        saveNoDataValueToTarget(index, trgTiles);
                         continue;
                     }
 
@@ -1012,7 +1012,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                             lineTimeInterval, wavelength, earthPoint, sensorPosition, sensorVelocity);
 
                     if (Double.compare(zeroDopplerTime, NonValidZeroDopplerTime) == 0) {
-                        saveNoDataValueToTarget(index, trgTiles, 2);
+                        saveNoDataValueToTarget(index, trgTiles);
                         continue;
                     }
 
@@ -1030,7 +1030,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                             rangeSpacing, zeroDopplerTimeWithoutBias, slantRange, nearEdgeSlantRange, srgrConvParams);
 
                     if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, srcMaxRange, srcMaxAzimuth)) {
-                        saveNoDataValueToTarget(index, trgTiles, 3);
+                        saveNoDataValueToTarget(index, trgTiles);
                     } else {
                         double[] localIncidenceAngles = {NonValidIncidenceAngle, NonValidIncidenceAngle};
                         if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) {
@@ -1175,9 +1175,9 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param index The pixel index in target image.
      * @param trgTiles The target tiles.
      */
-    private static void saveNoDataValueToTarget(final int index, final TileData[] trgTiles, final double value) {
+    private static void saveNoDataValueToTarget(final int index, final TileData[] trgTiles) {
         for(TileData tileData : trgTiles) {
-            tileData.tileDataBuffer.setElemDoubleAt(index, value);
+            tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
         }
     }
 
