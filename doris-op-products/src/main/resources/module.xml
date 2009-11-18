@@ -40,10 +40,20 @@
             <id>CplxIfgAction</id>
             <class>org.esa.nest.dat.CplxIfgAction</class>
             <text>Interferogram</text>
-            <shortDescr>Compute interferogram from stack of images</shortDescr>
+            <shortDescr>Compute interferogram from stack of coregistered images</shortDescr>
             <parent>InSARProducts</parent>
         </action>
-		    
+
+        <action>
+            <id>CplxCohAction</id>
+            <class>org.esa.nest.dat.CplxCohAction</class>
+            <text>Coherence</text>
+            <shortDescr>Estimate coherence from stack of coregistered images</shortDescr>
+            <parent>InSARProducts</parent>
+        </action>
+
+
+
 	</extension>
 
 </module>

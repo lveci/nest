@@ -43,6 +43,12 @@ public final class DatApp extends VisatApp {
         return (DatApp) VisatApp.getApp();
     }
 
+    @Override
+    protected String getMainFrameTitle() {
+        //return getAppName() + " " + getAppVersion();
+        return getAppName() + " 3C-0.2 Beta";
+    }
+
     // You can now override numerous createXXX() methods
     // to customize the application GUI
 

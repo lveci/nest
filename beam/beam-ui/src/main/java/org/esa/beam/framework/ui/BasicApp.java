@@ -1,5 +1,5 @@
 /*
- * $Id: BasicApp.java,v 1.6 2009-11-04 17:04:32 lveci Exp $
+ * $Id: BasicApp.java,v 1.7 2009-11-18 04:32:52 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -125,7 +125,7 @@ import java.util.logging.Logger;
  * dialog boxes.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.6 $  $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.7 $  $Date: 2009-11-18 04:32:52 $
  * @see org.esa.beam.framework.ui.command.Command
  * @see org.esa.beam.framework.ui.command.ExecCommand
  * @see org.esa.beam.framework.ui.command.CommandGroup
@@ -1727,7 +1727,7 @@ public class BasicApp {
         _closeHandler = closeHandler;
     }
 
-    private String getMainFrameTitle() {
+    protected String getMainFrameTitle() {
         return getAppName() + " " + getAppVersion();
     }
 

@@ -42,8 +42,8 @@ public class CplxIfgOp extends Operator {
 //            defaultValue = "5",
 //            label="SRP Polynomial Order")
 //    private int srpPolynomialOrder = 2;
-
-    private String[] stackBandNames = null;
+//
+//    private String[] stackBandNames = null;
     private Band masterBand0 = null;
     private Band masterBand1 = null;
 
@@ -121,7 +121,6 @@ public class CplxIfgOp extends Operator {
                     iBandName = "i_ifg" + cnt + "_" +
                             masterBand0.getDisplayName() + "_" +
                             srcBandI.getDisplayName();
-
                 }
                 //final Band targetBandI = targetProduct.addBand(srcBandI.getName(), ProductData.TYPE_FLOAT32);
                 final Band targetBandI = targetProduct.addBand(iBandName, ProductData.TYPE_FLOAT32);
