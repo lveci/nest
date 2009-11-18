@@ -1,8 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head><title>NEST Help - Frequently Asked Questions</title>
 
-<link rel="stylesheet" href="../style.css">
-</head>
+<link rel="stylesheet" href="../style.css"></head>
 <body>
 <table class="header">
 <tbody>
@@ -19,6 +18,26 @@ Questions</td>
 If that works then it could be a version not supported by NEST. Let us
 know and we'll try to get it supported asap. If Enviview and NEST are
 not able to read the product, then it could be that the file is corrupt
-or compressed.&nbsp;</p><p>Some users have had difficulty when decompressing files using Winzip. Deactivate the CR/LF translation option in winzip (this option is activated by default).</p>
+or compressed.&nbsp;</p><p>Some
+users have had difficulty when decompressing files using Winzip.
+Deactivate the CR/LF translation option in winzip (this option is
+activated by default).</p><h4>What method is used for Oil Spill Detection?</h4><p>The
+method currently implemented in NEST for oil spill detection is an
+adaptive thresholding dark spots detection algorithm. It first
+estimates the mean backscatter level in a large window, then set a
+threshold which is k decibel below the estimated mean backscatter
+level. Pixels with backscatter&nbsp; values lower than the threshold
+are considered as potential oil spill. Finally the detected pixels are
+clustered and discriminated. Only those clusters that are larger enough
+will be saved as detection result. Here in the algorithm, the user has
+fully control of the window size for estimating the mean backscatter
+level, the parameter k for setting the threshold, and the minimum
+cluster size.<br>&nbsp;<br>The method is based on the following
+reference in which a much more complicated pyramid approach was
+proposed. In NEST however one level detection is implemented.<br><br>&nbsp;A.
+S. Solberg, C. Brekke and R. Solberg, "Algorithms for oil spill
+detection in Radarsat and ENVISAT SAR images", Geoscience and Remote
+Sensing Symposium, 2004. IGARSS '04. Proceedings. 2004 IEEE
+International, 20-24 Sept. 2004, page 4909-4912, vol.7.</p><p></p>
 <hr>
 </body></html>
