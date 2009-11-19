@@ -19,7 +19,7 @@ import java.util.Map;
 public final class Settings {
 
     private static final Settings _instance = new Settings();
-    private static final String settingsFile = "settings.xml";
+    private final String settingsFile;
     private final Map<String, String> settingMap = new HashMap<String, String>(100);
 
     private Element rootXML = null;
@@ -37,7 +37,17 @@ public final class Settings {
     }
 
     private Settings() {
+        settingsFile = Settings.getSettingsFileName();
         Load();
+    }
+
+    private static String getSettingsFileName() {
+        final String osName = System.getProperty("os.name");
+        if (osName.toLowerCase().contains("win")) {
+            return "settings_win.xml";
+        } else {
+            return "settings_unix.xml";
+        }
     }
 
     public Element getSettingsRootXML() {
