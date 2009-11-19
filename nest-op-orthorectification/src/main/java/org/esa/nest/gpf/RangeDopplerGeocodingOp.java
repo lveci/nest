@@ -1085,6 +1085,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             localDEM = null;
             
         } catch(Exception e) {
+            orthoDataProduced = true; //to prevent multiple error messages
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }

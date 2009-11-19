@@ -963,6 +963,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 }
             }
         } catch(Exception e) {
+            orthoDataProduced = true; //to prevent multiple error messages
             OperatorUtils.catchOperatorException(getId(), e);
         }
     }
