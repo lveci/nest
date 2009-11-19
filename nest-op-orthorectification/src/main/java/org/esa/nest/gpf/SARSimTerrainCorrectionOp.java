@@ -31,6 +31,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.CalibrationFactory;
@@ -193,7 +194,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private boolean useAvgSceneHeight = false;
     private Calibrator calibrator = null;
     private Band maskBand = null;
-    
+
+    boolean orthoDataProduced = false;  // check if any ortho data is actually produced
+
     /**
      * Initializes this operator and sets the one and only target product.
      * <p>The target product can be either defined by a field of type {@link org.esa.beam.framework.datamodel.Product} annotated with the
@@ -278,6 +281,14 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
         if(fileElevationModel != null) {
             fileElevationModel.dispose();
+        }
+
+        if(!orthoDataProduced) {
+            final String errMsg = getId() +" error: no valid output was produced. Please verify the DEM or FTP connection";
+            System.out.println(errMsg);
+            if(VisatApp.getApp() != null) {
+                VisatApp.getApp().showErrorDialog(errMsg);
+            }
         }
     }
 
@@ -947,6 +958,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
                             tileData.tileDataBuffer.setElemDoubleAt(index, v);
                         }
+                        orthoDataProduced = true;
                     }
                 }
             }

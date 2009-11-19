@@ -139,7 +139,7 @@ public final class SRTM3GeoTiffFile {
         } catch(Exception e) {
             System.out.println(e.getMessage());
             if(ftp == null) {
-                unrecoverableError = true;
+                unrecoverableError = false;      // allow to continue
                 remoteFileExists = false;
                 throw new IOException("Failed to connect to FTP "+ remoteFTP);
             }

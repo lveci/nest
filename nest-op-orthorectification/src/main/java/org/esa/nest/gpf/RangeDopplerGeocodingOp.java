@@ -30,6 +30,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.CalibrationFactory;
@@ -197,6 +198,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     boolean useAvgSceneHeight = false;
     Calibrator calibrator = null;
+    boolean orthoDataProduced = false;  // check if any ortho data is actually produced
 
     public static final String USE_INCIDENCE_ANGLE_FROM_DEM = "Use projected local incidence angle from DEM";
     public static final String USE_INCIDENCE_ANGLE_FROM_ELLIPSOID = "Use incidence angle from Ellipsoid";
@@ -282,6 +284,14 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
         if(fileElevationModel != null) {
             fileElevationModel.dispose();
+        }
+
+        if(!orthoDataProduced) {
+            final String errMsg = getId() +" error: no valid output was produced. Please verify the DEM or FTP connection";
+            System.out.println(errMsg);
+            if(VisatApp.getApp() != null) {
+                VisatApp.getApp().showErrorDialog(errMsg);
+            }
         }
     }
 
@@ -578,20 +588,9 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         addGeoCoding();
 
-//        addLayoverShadowBitmasks(targetProduct);
-
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
     }
-    /*
-    protected static void addLayoverShadowBitmasks(Product product) {
-        for(Band band : product.getBands()) {
-            final String expression = band.getName() + " < 0";
-            final BitmaskDef nrv = new BitmaskDef(band.getName()+"_non_reliable_values",
-                    "Non reliable values where DN is negative", expression, Color.RED, 0.5f);
-            product.addBitmaskDef(nrv);
-        }
-    }
-    */
+
     /**
      * Add the user selected bands to target product.
      * @throws OperatorException The exceptions.
@@ -609,7 +608,6 @@ public class RangeDopplerGeocodingOp extends Operator {
                 throw new OperatorException("band " + srcBand.getName() + " requires a unit");
             }
 
-            String targetUnit = "";
             if (unit.contains(Unit.PHASE)) {
                 continue;
 
@@ -653,7 +651,6 @@ public class RangeDopplerGeocodingOp extends Operator {
                         targetBandapplyRadiometricNormalizationFlag.put(targetBandName, false);
                     }
                 }
-
                 ++i;
 
             } else {
@@ -1081,10 +1078,10 @@ public class RangeDopplerGeocodingOp extends Operator {
                             
                             tileData.tileDataBuffer.setElemDoubleAt(index, v);
                         }
+                        orthoDataProduced = true;
                     }
                 }
             }
-
             localDEM = null;
             
         } catch(Exception e) {
