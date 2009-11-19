@@ -2,6 +2,7 @@
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>3C</version>
+    <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>beam/res/NEST_Splash.png</splashImage>
     <postInstallationActionList>
@@ -98,6 +99,9 @@
                         <distributionDirectory>
                             <origin>target/nest-3C-bin.dir/res</origin>
                         </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-3C-bin.dir/config</origin>
+                        </distributionDirectory>
                     </distributionFileList>
                     <shortcutList>
                         <shortcut>
@@ -143,9 +147,6 @@
                             <origin>target/nest-3C-bin-linux.dir/libmlib_jai.so</origin>
                         </distributionFile>
                         <distributionDirectory>
-                            <origin>target/nest-3C-bin-linux.dir/config</origin>
-                        </distributionDirectory>
-                        <distributionDirectory>
                             <origin>../dist/jdk7/linux/jre</origin>
                         </distributionDirectory>
                     </distributionFileList>
@@ -156,9 +157,6 @@
                     <name>programfileswindows</name>
                     <platforms>windows</platforms>
                     <distributionFileList>
-                        <distributionDirectory>
-                            <origin>target/nest-3C-bin-win.dir/config</origin>
-                        </distributionDirectory>
                         <distributionFile>
                             <origin>target/nest-3C-bin-win.dir/clean-nest.bat</origin>
                         </distributionFile>
@@ -230,9 +228,6 @@
                         <distributionFile>
                             <origin>target/nest-3C-bin-linux64.dir/gpt.sh</origin>
                         </distributionFile>
-                        <distributionDirectory>
-                            <origin>target/nest-3C-bin-linux64.dir/config</origin>
-                        </distributionDirectory>
                         <distributionDirectory>
                             <origin>../dist/jdk7/linux64/jre</origin>
                         </distributionDirectory>

@@ -99,6 +99,9 @@
                         <distributionDirectory>
                             <origin>target/nest-3C-bin.dir/res</origin>
                         </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>target/nest-3C-bin.dir/config</origin>
+                        </distributionDirectory>
                     </distributionFileList>
                     <shortcutList>
                         <shortcut>
@@ -122,9 +125,6 @@
                     <name>programfileswindows</name>
                     <platforms>windows</platforms>
                     <distributionFileList>
-                        <distributionDirectory>
-                            <origin>target/nest-3C-bin-win64.dir/config</origin>
-                        </distributionDirectory>
                         <distributionFile>
                             <origin>target/nest-3C-bin-win64.dir/cli.bat</origin>
                         </distributionFile>
