@@ -656,7 +656,7 @@ public class UndersamplingOp extends Operator {
         final double newSeconds = oldSeconds + oldLineTimeInterval*(filterHeight - 1)/2.0;
         final String newFirstLineTime = String.valueOf(oldFirstLineTime.subSequence(0, idx)) + newSeconds + "000000";
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_line_time,
-            AbstractMetadata.parseUTC(newFirstLineTime.substring(0,27)));
+            AbstractMetadata.parseUTC(newFirstLineTime.substring(0,27), "dd-MMM-yyyy HH:mm:ss"));
     }
 
     @Override
