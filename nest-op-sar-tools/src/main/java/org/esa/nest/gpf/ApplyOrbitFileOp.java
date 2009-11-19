@@ -528,7 +528,7 @@ public final class ApplyOrbitFileOp extends Operator {
         orbitFile = FindDorisOrbitFile(dorisReader, new File(orbitPath), startDate, absOrbit);
 
         if(orbitFile == null) {
-            throw new IOException("Unable to find suitable DORIS orbit file");
+            throw new IOException("Unable to find suitable DORIS orbit file in\n"+orbitPath);
         }
     }
 
@@ -721,7 +721,7 @@ public final class ApplyOrbitFileOp extends Operator {
         orbitFile = FindPrareOrbitFile(prareReader, new File(orbitPath), startDate);
 
         if(orbitFile == null) {
-            throw new IOException("Unable to find suitable orbit file");
+            throw new IOException("Unable to find suitable orbit file \n"+orbitPath);
         }
     }
 
