@@ -105,7 +105,7 @@ public final class SARSimulationOp extends Operator {
     @Parameter(label="DEM No Data Value", defaultValue = "0")
     private double externalDEMNoDataValue = 0;
 
-//    @Parameter(defaultValue="false", label="Save Layover-Shadow Mask as band")
+    @Parameter(defaultValue="false", label="Save Layover-Shadow Mask as band")
     private boolean saveLayoverShadowMask = false;
 
     public final static String layoverShadowMaskBandName = "layover_shadow_mask";
