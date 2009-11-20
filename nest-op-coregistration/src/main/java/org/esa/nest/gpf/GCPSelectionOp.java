@@ -880,11 +880,14 @@ public class GCPSelectionOp extends Operator {
         final ProductData masterData1 = masterImagetteRaster1.getDataBuffer();
         final ProductData masterData2 = masterImagetteRaster2.getDataBuffer();
 
+        final double[][] mIIdata = compleData.mII;
+        final double[][] mIQdata = compleData.mIQ;
         for (int j = 0; j < fWindowHeight; j++) {
+            final int yy = yul + j;
             for (int i = 0; i < fWindowWidth; i++) {
-                final int index = masterImagetteRaster1.getDataBufferIndex(xul + i, yul + j);
-                compleData.mII[j][i] = masterData1.getElemDoubleAt(index);
-                compleData.mIQ[j][i] = masterData2.getElemDoubleAt(index);
+                final int index = masterImagetteRaster1.getDataBufferIndex(xul + i, yy);
+                mIIdata[j][i] = masterData1.getElemDoubleAt(index);
+                mIQdata[j][i] = masterData2.getElemDoubleAt(index);
             }
         }
     }
@@ -912,11 +915,14 @@ public class GCPSelectionOp extends Operator {
         final ProductData slaveData1 = slaveImagetteRaster1.getDataBuffer();
         final ProductData slaveData2 = slaveImagetteRaster2.getDataBuffer();
 
+        final double[][] sII0data = compleData.sII0;
+        final double[][] sIQ0data = compleData.sIQ0;
         for (int j = 0; j < fWindowHeight; j++) {
+            final int yy = yul + j;
             for (int i = 0; i < fWindowWidth; i++) {
-                final int index = slaveImagetteRaster1.getDataBufferIndex(xul + i, yul + j);
-                compleData.sII0[j][i] = slaveData1.getElemDoubleAt(index);
-                compleData.sIQ0[j][i] = slaveData2.getElemDoubleAt(index);
+                final int index = slaveImagetteRaster1.getDataBufferIndex(xul + i, yy);
+                sII0data[j][i] = slaveData1.getElemDoubleAt(index);
+                sIQ0data[j][i] = slaveData2.getElemDoubleAt(index);
             }
         }
     }
@@ -945,13 +951,15 @@ public class GCPSelectionOp extends Operator {
         double coherence = 0.0;
         if (useSlidingWindow) {
 
-            for (int r = 0; r <= fWindowHeight - coherenceWindowSize; r++) {
-                for (int c = 0; c <= fWindowWidth - coherenceWindowSize; c++) {
+            final int maxR = fWindowHeight - coherenceWindowSize;
+            final int maxC = fWindowWidth - coherenceWindowSize;
+            for (int r = 0; r <= maxR; r++) {
+                for (int c = 0; c <= maxC; c++) {
                     coherence += getCoherence(compleData, r, c, coherenceWindowSize, coherenceWindowSize);
                 }
             }
 
-            coherence /= (fWindowHeight - coherenceWindowSize + 1)*(fWindowWidth - coherenceWindowSize + 1);
+            coherence /= (maxR + 1)*(maxC + 1);
 
         } else {
             coherence = getCoherence(compleData, 0, 0, fWindowWidth, fWindowHeight);
@@ -973,6 +981,11 @@ public class GCPSelectionOp extends Operator {
         compleData.sII = new double[fWindowHeight][fWindowWidth];
         compleData.sIQ = new double[fWindowHeight][fWindowWidth];
 
+        final double[][] sII0data = compleData.sII0;
+        final double[][] sIQ0data = compleData.sIQ0;
+        final double[][] sIIdata = compleData.sII;
+        final double[][] sIQdata = compleData.sIQ;
+
         final int x0 = (int)(compleData.point0[0] + 0.5);
         final int y0 = (int)(compleData.point0[1] + 0.5);
 
@@ -989,17 +1002,19 @@ public class GCPSelectionOp extends Operator {
         computeShiftPhaseArray(xShift, signalLength, rowPhaseArray);
         for (int r = 0; r < fWindowHeight; r++) {
             int k = 0;
+            final double[] sII = sII0data[r];
+            final double[] sIQ = sIQ0data[r];
             for (int c = 0; c < fWindowWidth; c++) {
-                rowArray[k++] = compleData.sII0[r][c];
-                rowArray[k++] = compleData.sIQ0[r][c];
+                rowArray[k++] = sII[c];
+                rowArray[k++] = sIQ[c];
             }
 
             row_fft.complexForward(rowArray);
             multiplySpectrumByShiftFactor(rowArray, rowPhaseArray);
             row_fft.complexInverse(rowArray, true);
             for (int c = 0; c < fWindowWidth; c++) {
-                compleData.sII[r][c] = rowArray[2*c];
-                compleData.sIQ[r][c] = rowArray[2*c+1];
+                sIIdata[r][c] = rowArray[2*c];
+                sIQdata[r][c] = rowArray[2*c+1];
             }
         }
 
@@ -1012,16 +1027,16 @@ public class GCPSelectionOp extends Operator {
         for (int c = 0; c < fWindowWidth; c++) {
             int k = 0;
             for (int r = 0; r < fWindowHeight; r++) {
-                colArray[k++] = compleData.sII[r][c];
-                colArray[k++] = compleData.sIQ[r][c];
+                colArray[k++] = sIIdata[r][c];
+                colArray[k++] = sIQdata[r][c];
             }
 
             col_fft.complexForward(colArray);
             multiplySpectrumByShiftFactor(colArray, colPhaseArray);
             col_fft.complexInverse(colArray, true);
             for (int r = 0; r < fWindowHeight; r++) {
-                compleData.sII[r][c] = colArray[2*r];
-                compleData.sIQ[r][c] = colArray[2*r+1];
+                sIIdata[r][c] = colArray[2*r];
+                sIQdata[r][c] = colArray[2*r+1];
             }
         }
     }
@@ -1030,8 +1045,8 @@ public class GCPSelectionOp extends Operator {
 
         int k2;
         double phaseK;
-        double phase = -2.0*Math.PI*shift/signalLength;
-        int halfSignalLength = (int)(signalLength*0.5 + 0.5);
+        final double phase = -2.0*Math.PI*shift/signalLength;
+        final int halfSignalLength = (int)(signalLength*0.5 + 0.5);
 
         for (int k = 0; k < signalLength; ++k) {
             if (k < halfSignalLength) {
@@ -1050,7 +1065,7 @@ public class GCPSelectionOp extends Operator {
         int k2;
         double c, s;
         double real, imag;
-        int signalLength = array.length / 2;
+        final int signalLength = array.length / 2;
         for (int k = 0; k < signalLength; ++k) {
             k2 = k * 2;
             c = phaseArray[k2];
@@ -1071,19 +1086,24 @@ public class GCPSelectionOp extends Operator {
         double sum3 = 0.0;
         double sum4 = 0.0;
         double mr, mi, sr, si;
+        final double[][] mIIdata = compleData.mII;
+        final double[][] mIQdata = compleData.mIQ;
+        final double[][] sIIdata = compleData.sII;
+        final double[][] sIQdata = compleData.sIQ;
         double[] mII, mIQ, sII, sIQ;
-        int rIdx;
+        int rIdx, cIdx;
         for (int r = 0; r < coherenceWindowHeight; r++) {
             rIdx = row + r;
-            mII = compleData.mII[rIdx];
-            mIQ = compleData.mIQ[rIdx];
-            sII = compleData.sII[rIdx];
-            sIQ = compleData.sIQ[rIdx];
+            mII = mIIdata[rIdx];
+            mIQ = mIQdata[rIdx];
+            sII = sIIdata[rIdx];
+            sIQ = sIQdata[rIdx];
             for (int c = 0; c < coherenceWindowWidth; c++) {
-                mr = mII[col+c];
-                mi = mIQ[col+c];
-                sr = sII[col+c];
-                si = sIQ[col+c];
+                cIdx = col+c;
+                mr = mII[cIdx];
+                mi = mIQ[cIdx];
+                sr = sII[cIdx];
+                si = sIQ[cIdx];
                 sum1 += mr*sr + mi*si;
                 sum2 += mi*sr - mr*si;
                 sum3 += mr*mr + mi*mi;
@@ -1104,8 +1124,6 @@ public class GCPSelectionOp extends Operator {
      * @return fp
      */
     private double powell(final ComplexCoregData complexData, final double[] p) {
-
-        final double ftol = 0.01;
 
         final double[][] directions = {{0, 1}, {1, 0}}; // set initial searching directions
         double fp = computeCoherence(complexData, p); // get function value for initial point
