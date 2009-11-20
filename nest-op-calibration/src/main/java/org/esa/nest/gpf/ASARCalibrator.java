@@ -1376,6 +1376,8 @@ public class ASARCalibrator implements Calibrator {
 
         if (bandUnit == Unit.UnitType.AMPLITUDE) {
             return v*gain*Math.pow(refSlantRange800km / slantRange, halfRangeSpreadingCompPower); // amplitude
+        } else if (bandUnit == Unit.UnitType.AMPLITUDE_DB) {
+            return 10.0*Math.log10(Math.pow(10, v/10.0)*gain*Math.pow(refSlantRange800km / slantRange, halfRangeSpreadingCompPower));
         } else if (bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
             return v*gain*gain*Math.pow(refSlantRange800km / slantRange, rangeSpreadingCompPower); // intensity
         } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {

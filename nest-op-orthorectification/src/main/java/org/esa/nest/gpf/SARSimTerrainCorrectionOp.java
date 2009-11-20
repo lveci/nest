@@ -1214,14 +1214,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         final int y0 = (int)azimuthIndex;
 
         double v = 0.0;
-        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.INTENSITY_DB) {
-
-            v = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
-            if (v == tileData.noDataValue) {
-                return tileData.noDataValue;
-            }
-
-        } else if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+        if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
 
             final double vi = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
             final double vq = sourceTile2.getDataBuffer().getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y0));
@@ -1231,7 +1224,11 @@ public class SARSimTerrainCorrectionOp extends Operator {
             v = vi*vi + vq*vq;
 
         } else {
-            throw new OperatorException("Uknown band unit");
+
+            v = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
+            if (v == tileData.noDataValue) {
+                return tileData.noDataValue;
+            }
         }
 
         if (tileData.applyRadiometricNormalization) {
@@ -1269,20 +1266,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         final ProductData srcData = sourceTile.getDataBuffer();
 
         double v00, v01, v10, v11;
-        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.INTENSITY_DB) {
-
-            v00 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
-            v01 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y0));
-            v10 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y1));
-            v11 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y1));
-
-            if (v00 == tileData.noDataValue || v01 == tileData.noDataValue ||
-                v10 == tileData.noDataValue || v11 == tileData.noDataValue) {
-                return tileData.noDataValue;
-            }
-
-
-        } else if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+        if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
 
             final ProductData srcData2 = sourceTile2.getDataBuffer();
 
@@ -1309,7 +1293,16 @@ public class SARSimTerrainCorrectionOp extends Operator {
             v11 = vi11*vi11 + vq11*vq11;
 
         } else {
-            throw new OperatorException("Uknown band unit");
+
+            v00 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
+            v01 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y0));
+            v10 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y1));
+            v11 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y1));
+
+            if (v00 == tileData.noDataValue || v01 == tileData.noDataValue ||
+                v10 == tileData.noDataValue || v11 == tileData.noDataValue) {
+                return tileData.noDataValue;
+            }
         }
 
         int[] subSwathIndex00 = {0};
@@ -1382,18 +1375,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         final ProductData srcData = sourceTile.getDataBuffer();
 
         final double[][] v = new double[4][4];
-        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.INTENSITY_DB) {
-
-            for (int i = 0; i < y.length; i++) {
-                for (int j = 0; j < x.length; j++) {
-                    v[i][j] = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x[j], y[i]));
-                    if (v[i][j] == tileData.noDataValue) {
-                        return tileData.noDataValue;
-                    }
-                }
-            }
-
-        } else if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+        if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
 
             final ProductData srcData2 = sourceTile2.getDataBuffer();
             for (int i = 0; i < y.length; i++) {
@@ -1408,7 +1390,15 @@ public class SARSimTerrainCorrectionOp extends Operator {
             }
 
         } else {
-            throw new OperatorException("Uknown band unit");
+
+            for (int i = 0; i < y.length; i++) {
+                for (int j = 0; j < x.length; j++) {
+                    v[i][j] = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x[j], y[i]));
+                    if (v[i][j] == tileData.noDataValue) {
+                        return tileData.noDataValue;
+                    }
+                }
+            }
         }
 
         int[][][] ss = new int[4][4][1];
