@@ -152,8 +152,9 @@ public final class FillHoleOp extends Operator {
         final int h  = targetTileRectangle.height;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
+        final Rectangle sourceTileRectangle = getSourceRectangle(x0, y0, w, h);
         Band sourceBand = sourceProduct.getBand(targetBand.getName());
-        Tile sourceTile = getSourceTile(sourceBand, targetTileRectangle, pm);
+        Tile sourceTile = getSourceTile(sourceBand, sourceTileRectangle, pm);
         final ProductData srcData = sourceTile.getDataBuffer();
         final ProductData trgData = targetTile.getDataBuffer();
 
@@ -169,6 +170,25 @@ public final class FillHoleOp extends Operator {
                 trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), v);
             }
         }
+    }
+
+    /**
+     * Get source tile rectangle.
+     * @param tx0 X coordinate for the upper left corner pixel in the target tile.
+     * @param ty0 Y coordinate for the upper left corner pixel in the target tile.
+     * @param tw The target tile width.
+     * @param th The target tile height.
+     * @return The source tile rectangle.
+     */
+    private Rectangle getSourceRectangle(final int tx0, final int ty0, final int tw, final int th) {
+        // extend target rectangle by 20% to all directions
+        final int x0 = Math.max(0, tx0 - tw/5);
+        final int y0 = Math.max(0, ty0 - th/5);
+        final int xMax = Math.min(tx0 + tw - 1 + tw/5, sourceImageWidth);
+        final int yMax = Math.min(ty0 + th - 1 + th/5, sourceImageHeight);
+        final int w = xMax - x0 + 1;
+        final int h = yMax - y0 + 1;
+        return new Rectangle(x0, y0, w, h);
     }
 
     /**
@@ -225,9 +245,8 @@ public final class FillHoleOp extends Operator {
      * @param direction The direction string which can be "up", "down", "left" and "right".
      * @return The pixel value.
      */
-    private double getNearestNonHolePixelPosition(
-            final int x, final int y, final ProductData srcData, final Tile srcTile,
-            final PixelPos pixel, final String direction) {
+    private double getNearestNonHolePixelPosition(final int x, final int y, final ProductData srcData,
+                                                  final Tile srcTile, final PixelPos pixel, final String direction) {
 
         final Rectangle srcTileRectangle = srcTile.getRectangle();
         final int x0 = srcTileRectangle.x;
