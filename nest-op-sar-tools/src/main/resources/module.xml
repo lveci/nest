@@ -269,6 +269,15 @@
             <parent>oceanTools</parent>
         </action>
 
+        <action>
+            <id>FillHoleOp</id>
+            <class>org.esa.nest.dat.FillHoleOpAction</class>
+            <text>FillHole</text>
+            <shortDescr>Fill holes in product</shortDescr>
+            <parent>sartools</parent>
+            <helpId>FillHoleOp</helpId>
+        </action>
+
     </extension>
 
 </module>
