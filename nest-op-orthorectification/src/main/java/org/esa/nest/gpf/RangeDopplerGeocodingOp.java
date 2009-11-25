@@ -152,6 +152,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private boolean srgrFlag = false;
     private boolean saveIncidenceAngleFromEllipsoid = false;
     private boolean isElevationModelAvailable = false;
+    private boolean usePreCalibrationOp = false;
 
     private String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
 
@@ -183,7 +184,8 @@ public class RangeDopplerGeocodingOp extends Operator {
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
     private final HashMap<String, Band[]> targetBandNameToSourceBand = new HashMap<String, Band[]>();
-    private final Map<String, Boolean> targetBandapplyRadiometricNormalizationFlag = new HashMap<String, Boolean>();
+    private final Map<String, Boolean> targetBandApplyRadiometricNormalizationFlag = new HashMap<String, Boolean>();
+    private final Map<String, Boolean> targetBandApplyRetroCalibrationFlag = new HashMap<String, Boolean>();
     protected TiePointGrid incidenceAngle = null;
     protected TiePointGrid latitude = null;
     protected TiePointGrid longitude = null;
@@ -199,6 +201,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     boolean useAvgSceneHeight = false;
     Calibrator calibrator = null;
     boolean orthoDataProduced = false;  // check if any ortho data is actually produced
+    boolean processingStart = false;
 
     public static final String USE_INCIDENCE_ANGLE_FROM_DEM = "Use projected local incidence angle from DEM";
     public static final String USE_INCIDENCE_ANGLE_FROM_ELLIPSOID = "Use incidence angle from Ellipsoid";
@@ -266,7 +269,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
-                calibrator.initialize(sourceProduct, targetProduct, true);
+                calibrator.initialize(sourceProduct, targetProduct, true, true);
                 OperatorUtils.getProductPolarization(absRoot, mdsPolar);
             }
 
@@ -279,6 +282,10 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     @Override
     public void dispose() {
+        if (!processingStart) {
+            return;
+        }
+
         if (dem != null) {
             dem.dispose();
         }
@@ -362,6 +369,17 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         // used for retro-calibration or when useAvgSceneHeight is true
         avgSceneHeight = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.avg_scene_height);
+
+        MetadataAttribute attribute = absRoot.getAttribute("retro-calibration performed flag");
+        if (attribute != null) {
+            usePreCalibrationOp = true;
+            if (!applyRadiometricNormalization) {
+                throw new OperatorException("Apply radiometric normalization must be selected.");
+            }
+//            if (saveSelectedSourceBand) {
+//                throw new OperatorException("Selected source band cannot be saved.");
+//            }
+        }
     }
 
     /**
@@ -636,7 +654,12 @@ public class RangeDopplerGeocodingOp extends Operator {
                     }
                     if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
                         targetBandNameToSourceBand.put(targetBandName, srcBands);
-                        targetBandapplyRadiometricNormalizationFlag.put(targetBandName, true);
+                        targetBandApplyRadiometricNormalizationFlag.put(targetBandName, true);
+                        if (usePreCalibrationOp) {
+                            targetBandApplyRetroCalibrationFlag.put(targetBandName, false);
+                        } else {
+                            targetBandApplyRetroCalibrationFlag.put(targetBandName, true);
+                        }
                     }
                 }
 
@@ -648,7 +671,8 @@ public class RangeDopplerGeocodingOp extends Operator {
                     }
                     if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
                         targetBandNameToSourceBand.put(targetBandName, srcBands);
-                        targetBandapplyRadiometricNormalizationFlag.put(targetBandName, false);
+                        targetBandApplyRadiometricNormalizationFlag.put(targetBandName, false);
+                        targetBandApplyRetroCalibrationFlag.put(targetBandName, false);
                     }
                 }
                 ++i;
@@ -665,7 +689,12 @@ public class RangeDopplerGeocodingOp extends Operator {
                     }
                     if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
                         targetBandNameToSourceBand.put(targetBandName, srcBands);
-                        targetBandapplyRadiometricNormalizationFlag.put(targetBandName, true);
+                        targetBandApplyRadiometricNormalizationFlag.put(targetBandName, true);
+                        if (usePreCalibrationOp) {
+                            targetBandApplyRetroCalibrationFlag.put(targetBandName, false);
+                        } else {
+                            targetBandApplyRetroCalibrationFlag.put(targetBandName, true);
+                        }
                     }
                 }
 
@@ -673,7 +702,8 @@ public class RangeDopplerGeocodingOp extends Operator {
                     targetBandName = srcBand.getName();
                     if (addTargetBand(targetBandName, unit, srcBand)) {
                         targetBandNameToSourceBand.put(targetBandName, srcBands);
-                        targetBandapplyRadiometricNormalizationFlag.put(targetBandName, false);
+                        targetBandApplyRadiometricNormalizationFlag.put(targetBandName, false);
+                        targetBandApplyRetroCalibrationFlag.put(targetBandName, false);
                     }
                 }
             }
@@ -958,7 +988,8 @@ public class RangeDopplerGeocodingOp extends Operator {
                 td.tileDataBuffer = td.targetTile.getDataBuffer();
                 td.bandName = targetBand.getName();
                 td.noDataValue = srcBands[0].getNoDataValue();
-                td.applyRadiometricNormalization = targetBandapplyRadiometricNormalizationFlag.get(targetBand.getName());
+                td.applyRadiometricNormalization = targetBandApplyRadiometricNormalizationFlag.get(targetBand.getName());
+                td.applyRetroCalibration = targetBandApplyRetroCalibrationFlag.get(targetBand.getName());
 
                 final String pol = OperatorUtils.getPolarizationFromBandName(srcBands[0].getName());
                 td.bandPolar = 0;
@@ -1087,6 +1118,10 @@ public class RangeDopplerGeocodingOp extends Operator {
         } catch(Exception e) {
             orthoDataProduced = true; //to prevent multiple error messages
             OperatorUtils.catchOperatorException(getId(), e);
+        }
+
+        if (!processingStart) {
+            processingStart = true;
         }
     }
 
@@ -1486,7 +1521,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             }
         }
 
-        if (tileData.applyRadiometricNormalization) {
+        if (tileData.applyRetroCalibration) {
             v = calibrator.applyRetroCalibration(x0, y0, v, tileData.bandPolar, bandUnit, subSwathIndex);
         }
 
@@ -1566,7 +1601,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         int[] subSwathIndex11 = {0};
         double v = 0;
 
-        if (tileData.applyRadiometricNormalization) {
+        if (tileData.applyRetroCalibration) {
 
             v00 = calibrator.applyRetroCalibration(x0, y0, v00, tileData.bandPolar, bandUnit, subSwathIndex00);
             v01 = calibrator.applyRetroCalibration(x1, y0, v01, tileData.bandPolar, bandUnit, subSwathIndex01);
@@ -1657,7 +1692,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
 
         int[][][] ss = new int[4][4][1];
-        if (tileData.applyRadiometricNormalization) {
+        if (tileData.applyRetroCalibration) {
             for (int i = 0; i < y.length; i++) {
                 for (int j = 0; j < x.length; j++) {
                     v[i][j] = calibrator.applyRetroCalibration(x[j], y[i], v[i][j], tileData.bandPolar, bandUnit, ss[i][j]);
@@ -1832,6 +1867,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         int bandPolar = 0;
         double noDataValue = 0;
         boolean applyRadiometricNormalization = false;
+        boolean applyRetroCalibration = false;
     }
 
     public static class LocalGeometry {

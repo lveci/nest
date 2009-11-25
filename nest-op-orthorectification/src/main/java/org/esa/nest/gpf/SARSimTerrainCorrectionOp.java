@@ -147,6 +147,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private boolean useExternalDEMFile = false;
     private boolean saveLayoverShadowMask = false;
     private boolean saveIncidenceAngleFromEllipsoid = false;
+    private boolean usePreCalibrationOp = false;
 
     private String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
     private String demName = null;
@@ -180,6 +181,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
     private final Map<String, Boolean> targetBandapplyRadiometricNormalizationFlag = new HashMap<String, Boolean>();
+    private final Map<String, Boolean> targetBandApplyRetroCalibrationFlag = new HashMap<String, Boolean>();
     protected TiePointGrid incidenceAngle = null;
     protected TiePointGrid latitude = null;
     protected TiePointGrid longitude = null;
@@ -263,7 +265,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
-                calibrator.initialize(sourceProduct, targetProduct, true);
+                calibrator.initialize(sourceProduct, targetProduct, true, true);
                 OperatorUtils.getProductPolarization(absRoot, mdsPolar);
             }
 
@@ -354,6 +356,17 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         // used for retro-calibration or when useAvgSceneHeight is true
         avgSceneHeight = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.avg_scene_height);
+
+        MetadataAttribute attribute = absRoot.getAttribute("retro-calibration performed flag");
+        if (attribute != null) {
+            usePreCalibrationOp = true;
+            if (!applyRadiometricNormalization) {
+                throw new OperatorException("Apply radiometric normalization must be selected.");
+            }
+//            if (saveSelectedSourceBand) {
+//                throw new OperatorException("Selected source band cannot be saved.");
+//            }
+        }
     }
 
     /**
@@ -551,6 +564,11 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 if (addTargetBand(targetBandName, Unit.INTENSITY, srcBand)) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
                     targetBandapplyRadiometricNormalizationFlag.put(targetBandName, true);
+                    if (usePreCalibrationOp) {
+                        targetBandApplyRetroCalibrationFlag.put(targetBandName, false);
+                    } else {
+                        targetBandApplyRetroCalibrationFlag.put(targetBandName, true);
+                    }
                 }
             }
 
@@ -559,6 +577,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 if (addTargetBand(targetBandName, unit, srcBand)) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
                     targetBandapplyRadiometricNormalizationFlag.put(targetBandName, false);
+                    targetBandApplyRetroCalibrationFlag.put(targetBandName, false);
                 }
             }
         }
@@ -830,6 +849,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             td.bandName = targetBand.getName();
             td.noDataValue = sourceProduct.getBand(srcBandNames[0]).getNoDataValue();
             td.applyRadiometricNormalization = targetBandapplyRadiometricNormalizationFlag.get(targetBand.getName());
+            td.applyRetroCalibration = targetBandApplyRetroCalibrationFlag.get(targetBand.getName());
 
             final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
             td.bandPolar = 0;
@@ -1231,7 +1251,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             }
         }
 
-        if (tileData.applyRadiometricNormalization) {
+        if (tileData.applyRetroCalibration) {
             v = calibrator.applyRetroCalibration(x0, y0, v, tileData.bandPolar, bandUnit, subSwathIndex);
         }
 
@@ -1311,7 +1331,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         int[] subSwathIndex11 = {0};
         double v = 0;
 
-        if (tileData.applyRadiometricNormalization) {
+        if (tileData.applyRetroCalibration) {
 
             v00 = calibrator.applyRetroCalibration(x0, y0, v00, tileData.bandPolar, bandUnit, subSwathIndex00);
             v01 = calibrator.applyRetroCalibration(x1, y0, v01, tileData.bandPolar, bandUnit, subSwathIndex01);
@@ -1402,7 +1422,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
 
         int[][][] ss = new int[4][4][1];
-        if (tileData.applyRadiometricNormalization) {
+        if (tileData.applyRetroCalibration) {
             for (int i = 0; i < y.length; i++) {
                 for (int j = 0; j < x.length; j++) {
                     v[i][j] = calibrator.applyRetroCalibration(x[j], y[i], v[i][j], tileData.bandPolar, bandUnit, ss[i][j]);
@@ -1514,6 +1534,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         int bandPolar = 0;
         double noDataValue = 0;
         boolean applyRadiometricNormalization = false;
+        boolean applyRetroCalibration = false;
     }
 
     /**
