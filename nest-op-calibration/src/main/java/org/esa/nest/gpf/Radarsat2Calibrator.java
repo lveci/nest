@@ -79,7 +79,8 @@ public class Radarsat2Calibrator implements Calibrator {
 
      */
     @Override
-    public void initialize(Product srcProduct, Product tgtProduct, boolean mustPerformRetroCalibration)
+    public void initialize(Product srcProduct, Product tgtProduct,
+                           boolean mustPerformRetroCalibration, boolean mustUpdateMetadata)
             throws OperatorException {
         try {
             sourceProduct = srcProduct;
@@ -102,7 +103,9 @@ public class Radarsat2Calibrator implements Calibrator {
 
             getLUT();
 
-            updateTargetProductMetadata();
+            if (mustUpdateMetadata) {
+                updateTargetProductMetadata();
+            }
 
         } catch(Exception e) {
             throw new OperatorException(e);
@@ -273,4 +276,8 @@ public class Radarsat2Calibrator implements Calibrator {
     public double applyRetroCalibration(int x, int y, double v, int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
         return v;
     }
+
+    public void removeFactorsForCurrentTile(Band targetBand, Tile targetTile, String srcBandName, ProgressMonitor pm) throws OperatorException {
+
+    }    
 }

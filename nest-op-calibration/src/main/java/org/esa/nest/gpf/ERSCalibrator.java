@@ -194,7 +194,8 @@ public final class ERSCalibrator implements Calibrator {
     /**
 
      */
-    public void initialize(Product srcProduct, Product tgtProduct, boolean mustPerformRetroCalibration)
+    public void initialize(Product srcProduct, Product tgtProduct,
+                           boolean mustPerformRetroCalibration, boolean mustUpdateMetadata)
             throws OperatorException {
 
         try {
@@ -253,7 +254,9 @@ public final class ERSCalibrator implements Calibrator {
 
         //computeIncidenceAnglesLookAnglesRangeSpreadingLoss();  // common to CEOS and ENVISAT
 
-        updateTargetProductMetadata();
+        if (mustUpdateMetadata) {
+            updateTargetProductMetadata();
+        }
 
         } catch(Exception e) {
             throw new OperatorException(e);
@@ -2417,8 +2420,14 @@ public final class ERSCalibrator implements Calibrator {
 
     public double applyCalibration(
             final double v, final int rangeIndex, final double slantRange, final double satelliteHeight,
-            final double sceneToEarthCentre, final double localIncidenceAngle, final int bandPolar, 
+            final double sceneToEarthCentre, final double localIncidenceAngle, final int bandPolar,
             final Unit.UnitType bandUnit, int[] subSwathIndex) {
+
+        // For both detectec and slant range products,
+        //   1) local incidence angle (Remember that for ERS the correction is sin(theta_loc)/sin(theta_ref))
+        //   2) antenna pattern
+        //   3) range spreading loss
+        //   4) replica pulse power (for both ERS-1 and ERS-2 since for ERS2 it has been removed in the pre-calibration step)
 
         double sigma = 0.0;
         if (bandUnit == Unit.UnitType.AMPLITUDE) {
@@ -2431,8 +2440,141 @@ public final class ERSCalibrator implements Calibrator {
             throw new OperatorException("Uknown band unit");
         }
 
-        return sigma / calibrationConstant *
-               Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
+        sigma *= Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR) /
+                 Math.sin(referenceIncidenceAngle);
+
+        sigma /= getNewAntennaPatternGainSquare(rangeIndex);
+
+        sigma *= rangeSpreadingLoss[rangeIndex];
+
+        sigma *= replicaPulseVariationsCorrectionFactor;
+
+        return sigma;
+    }
+
+    /**
+     * Get the new antenna pattern gain square for a given pixel.
+     * @param rangeIndex The x coordinate for the pixel
+     * @return The antenna pattern gain square.
+     */
+    private double getNewAntennaPatternGainSquare(int rangeIndex) {
+
+        if (psID.contains(VMP)) {
+            return getNewAntennaPatternGainSquareForVMPProduct(rangeIndex);
+        } else { // PGS (CEOS or ENVISAT)
+            return getNewAntennaPatternGainSquareForPGSProduct(rangeIndex);
+        }
+    }
+
+    /**
+     * Get the new antenna pattern gain for a given pixel for VMP product.
+     * @param rangeIndex The x coordinate for the pixel
+     * @return The antenna pattern gain square.
+     */
+    private double getNewAntennaPatternGainSquareForVMPProduct(int rangeIndex) {
+        return g2Im(lookAngles[rangeIndex] * MathUtils.RTOD);
+    }
+
+    private double getNewAntennaPatternGainSquareForPGSProduct(int rangeIndex) {
+        final double delta = 0.05;
+        final double theta = lookAngles[rangeIndex] * MathUtils.RTOD; // in degree
+        final int k = (int) ((theta - elevationAngle + 5.0) / delta);
+        final double theta1 = elevationAngle - 5.0 + k * delta;
+        final double theta2 = theta1 + delta;
+        final double gain1 = Math.pow(10.0, (double) antPatForPGS[k] / 10.0); // convert dB to linear scale
+        final double gain2 = Math.pow(10.0, (double) antPatForPGS[k + 1] / 10.0);
+        final double gain = ((theta2 - theta) * gain1 + (theta - theta1) * gain2) / (theta2 - theta1);
+        return gain * gain;
+    }
+
+    public void removeFactorsForCurrentTile(Band targetBand, Tile targetTile, String srcBandName, ProgressMonitor pm)
+            throws OperatorException {
+
+        // For ground range product,
+        //    a) remove antenna pattern gain
+        //    b) remove range spreading loss corrections
+        //    c) remove replica pulse variation (ERS-2 only)
+        //    d) multiply calibration constant
+        //    e) apply ADC power loss correction
+        //
+        // For slant range complex product,
+        //    c) remove replica pulse variation (ERS-2 only)
+        //    d) multiply calibration constant
+        //    e) apply ADC power loss correction
+
+        final Rectangle targetTileRectangle = targetTile.getRectangle();
+        final int tx0 = targetTileRectangle.x;
+        final int ty0 = targetTileRectangle.y;
+        final int tw = targetTileRectangle.width;
+        final int th = targetTileRectangle.height;
+        final ProductData trgData = targetTile.getDataBuffer();
+//        System.out.println("RetroOp: tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
+
+        sourceBand1 = sourceProduct.getBand(srcBandName);
+        Tile sourceTile = getSourceTile(sourceBand1, targetTileRectangle, pm);
+        ProductData srcData = sourceTile.getDataBuffer();
+
+        final Unit.UnitType bandUnit = Unit.getUnitType(sourceBand1);
+        final String[] srcBandNames = {targetBand.getName()};
+        if (applyADCSaturationCorrection && !adcTestFlag) {
+            if (!isADCNeeded(srcBandNames, bandUnit, pm)) {
+                applyADCSaturationCorrection = false;
+            }
+
+            if (applyADCSaturationCorrection && antennaPatternCorrectionFlag) {
+                computeAntennaPatternGain(0, sourceImageWidth);
+            }
+            adcTestFlag = true;
+        }
+
+        if (applyADCSaturationCorrection) {
+            computeADCPowerLossValuesForCurrentTile(tx0, ty0, tw, th, pm, srcBandNames, bandUnit);
+        }
+
+        double sigma = 0.0;
+        int adcJ = 0;
+        for (int x = tx0; x < tx0 + tw; x++) {
+            OperatorContext.checkForCancelation(pm);
+
+            double antennaPatternByRangeSpreadingLoss = 0.0;
+            if (isDetectedSampleType) {
+                antennaPatternByRangeSpreadingLoss = antennaPatternGain[x] / rangeSpreadingLoss[x];
+            }
+
+            if (applyADCSaturationCorrection) {
+                adcJ = Math.min(((x - tx0) / blockWidth), adcPowerLoss[0].length - 1);
+            }
+
+            for (int y = ty0; y < ty0 + th; y++) {
+                final int index = targetTile.getDataBufferIndex(x, y);
+
+                if (bandUnit == Unit.UnitType.AMPLITUDE) {
+                    final double dn = srcData.getElemDoubleAt(index);
+                    sigma = dn*dn;
+                } else if (bandUnit == Unit.UnitType.INTENSITY) {
+                    sigma = srcData.getElemDoubleAt(index);
+                } else  if (bandUnit == Unit.UnitType.INTENSITY_DB) {
+                    sigma = Math.pow(10, srcData.getElemDoubleAt(index)/10.0);
+                } else {
+                    throw new OperatorException("ERSCalibrator: Uknown band unit");
+                }
+
+                if (isDetectedSampleType) { // ground range
+                    sigma *= antennaPatternByRangeSpreadingLoss;
+                }
+
+                if (!isERS1Mission) {
+                    sigma /= replicaPulseVariationsCorrectionFactor;
+                }
+
+                if (applyADCSaturationCorrection) {
+                    final int adcI = Math.min(((y - ty0) / blockHeight), adcPowerLoss.length - 1);
+                    sigma *= adcPowerLoss[adcI][adcJ];
+                }
+
+                trgData.setElemDoubleAt(index, sigma);
+            }
+        }
     }
 
 }

@@ -83,7 +83,8 @@ public class ASARCalibrator implements Calibrator {
     private double[] newRefElevationAngle = null; // reference elevation angle for given swath in new aux file, in degree
     private double[][] targetTileOldAntPat = null; // old antenna pattern gains for row pixels in a tile, in linear scale
     private double[][] targetTileNewAntPat = null; // new antenna pattern gains for row pixels in a tile, in linear scale
-
+    private double[][] targetTileSlantRange = null; // slant range for pixels in a tile, in m
+    
     private float[][] oldAntennaPatternSingleSwath = null; // old antenna pattern gains for single swath product, in dB
     private float[][] oldAntennaPatternWideSwath = null; // old antenna pattern gains for single swath product, in dB
     private float[][] newAntennaPatternSingleSwath = null; // new antenna pattern gains for single swath product, in dB
@@ -132,7 +133,8 @@ public class ASARCalibrator implements Calibrator {
      * @throws OperatorException The exception.
      */
     @Override
-    public void initialize(Product srcProduct, Product tgtProduct, boolean mustPerformRetroCalibration)
+    public void initialize(Product srcProduct, Product tgtProduct,
+                           boolean mustPerformRetroCalibration, boolean mustUpdateMetadata)
             throws OperatorException {
         try {
             sourceProduct = srcProduct;
@@ -188,7 +190,9 @@ public class ASARCalibrator implements Calibrator {
 
             setRangeSpreadingLossCompPower();
 
-            updateTargetProductMetadata();
+            if (mustUpdateMetadata) {
+                updateTargetProductMetadata();
+            }
 
         } catch(Exception e) {
             throw new OperatorException(e);
@@ -994,6 +998,7 @@ public class ASARCalibrator implements Calibrator {
     private void computeSingleSwathAntennaPatternForCurrentTile(int x0, int y0, int w, int h, int band) {
 
         targetTileNewAntPat = new double[h][w];
+        targetTileSlantRange = new double[h][w];        
         if (retroCalibrationFlag) {
             targetTileOldAntPat = new double[h][w];
         }
@@ -1011,12 +1016,12 @@ public class ASARCalibrator implements Calibrator {
 
             for (int x = x0; x < x0 + w; x++) {
 
-                final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
+                targetTileSlantRange[y - y0][x - x0] =  computeSlantRange(x, y, srgrConvParam); // in m
 
                 final double localEarthRadius = getEarthRadius(x, y);
 
                 final double theta = computeElevationAngle(
-                        slantRange, satelitteHeight, avgSceneHeight + localEarthRadius); // in degree
+                        targetTileSlantRange[y - y0][x - x0], satelitteHeight, avgSceneHeight + localEarthRadius); // in degree
 
                 targetTileNewAntPat[y - y0][x - x0] = computeAntPatGain(
                         theta, newRefElevationAngle[0], newAntennaPatternSingleSwath[band]);
@@ -1040,6 +1045,7 @@ public class ASARCalibrator implements Calibrator {
     private void computeWideSwathAntennaPatternForCurrentTile(int x0, int y0, int w, int h) {
 
         targetTileNewAntPat = new double[h][w];
+        targetTileSlantRange = new double[h][w];        
         if (retroCalibrationFlag) {
             targetTileOldAntPat = new double[h][w];
         }
@@ -1057,12 +1063,12 @@ public class ASARCalibrator implements Calibrator {
 
             for (int x = x0; x < x0 + w; x++) {
 
-                final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
+                targetTileSlantRange[y - y0][x - x0] = computeSlantRange(x, y, srgrConvParam); // in m
 
                 final double localEarthRadius = getEarthRadius(x, y);
 
                 final double theta = computeElevationAngle(
-                                                slantRange, satelitteHeight, avgSceneHeight + localEarthRadius); // in degree
+                        targetTileSlantRange[y - y0][x - x0], satelitteHeight, avgSceneHeight + localEarthRadius); // in degree
 
                 int subSwathIndex = findSubSwath(theta, newRefElevationAngle);
 
@@ -1467,4 +1473,64 @@ public class ASARCalibrator implements Calibrator {
                Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
     }
 
+    public void removeFactorsForCurrentTile(Band targetBand, Tile targetTile, String srcBandName, ProgressMonitor pm) throws OperatorException {
+
+        if (!srgrFlag) {
+            return;
+        }
+
+        final Rectangle targetTileRectangle = targetTile.getRectangle();
+        final int x0 = targetTileRectangle.x;
+        final int y0 = targetTileRectangle.y;
+        final int w = targetTileRectangle.width;
+        final int h = targetTileRectangle.height;
+        //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+
+        Band sourceBand = sourceProduct.getBand(srcBandName);
+        Tile sourceTile = getSourceTile(sourceBand, targetTileRectangle, pm);
+        ProductData srcData = sourceTile.getDataBuffer();
+        final Unit.UnitType bandUnit = Unit.getUnitType(sourceBand);
+        final ProductData trgData = targetTile.getDataBuffer();
+
+        final String pol = OperatorUtils.getPolarizationFromBandName(targetBand.getName());
+        int prodBand = 0;
+        if (pol != null && mdsPolar[1] != null && pol.contains(mdsPolar[1])) {
+            prodBand = 1;
+        }
+
+        if (wideSwathProductFlag) {
+            computeWideSwathAntennaPatternForCurrentTile(x0, y0, w, h);
+        } else {
+            computeSingleSwathAntennaPatternForCurrentTile(x0, y0, w, h, prodBand);
+        }
+
+        final int maxY = y0 + h;
+        final int maxX = x0 + w;
+        double gain, slantRange, sigma;
+        int index;
+
+        for (int y = y0, yy = 0; y < maxY; ++y, ++yy) {
+            for (int x = x0, xx = 0; x < maxX; ++x, ++xx) {
+
+                index = targetTile.getDataBufferIndex(x, y);
+                gain = targetTileOldAntPat[yy][xx];
+                slantRange = targetTileSlantRange[yy][xx];
+
+                if (bandUnit == Unit.UnitType.AMPLITUDE) {
+                    final double dn = srcData.getElemDoubleAt(index);
+                    sigma = dn*dn;
+                } else if (bandUnit == Unit.UnitType.INTENSITY) {
+                    sigma = srcData.getElemDoubleAt(index);
+                } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
+                    sigma = Math.pow(10, srcData.getElemDoubleAt(index)/10.0);
+                } else {
+                    throw new OperatorException("Uknown band unit");
+                }
+
+                sigma *= gain*gain*Math.pow(refSlantRange800km / slantRange, rangeSpreadingCompPower);
+                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), sigma);
+            }
+        }
+    }
+     
 }
