@@ -228,22 +228,23 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
         saveSelectedSourceBand = (Boolean)paramMap.get("saveSelectedSourceBand");
         saveSelectedSourceBandCheckBox.getModel().setPressed(saveSelectedSourceBand);
-        saveSelectedSourceBandCheckBox.setSelected(true);
+        saveSelectedSourceBandCheckBox.setSelected(saveSelectedSourceBand);
 
         applyRadiometricNormalization = (Boolean)paramMap.get("applyRadiometricNormalization");
         applyRadiometricNormalizationCheckBox.getModel().setPressed(applyRadiometricNormalization);
+        applyRadiometricNormalizationCheckBox.setSelected(applyRadiometricNormalization);
 
         saveBetaNought = (Boolean)paramMap.get("saveBetaNought");
-//        saveBetaNoughtCheckBox.getModel().setPressed(saveBetaNought);
-        saveBetaNoughtCheckBox.setEnabled(false);
+        saveBetaNoughtCheckBox.getModel().setPressed(saveBetaNought);
+        saveBetaNoughtCheckBox.setSelected(false);
 
         saveGammaNought = (Boolean)paramMap.get("saveGammaNought");
-//        saveGammaNoughtCheckBox.getModel().setPressed(saveGammaNought);
-        saveGammaNoughtCheckBox.setEnabled(false);
+        saveGammaNoughtCheckBox.getModel().setPressed(saveGammaNought);
+        saveGammaNoughtCheckBox.setSelected(false);
 
         saveSigmaNought = (Boolean)paramMap.get("saveSigmaNought");
-//        saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
-        saveSigmaNoughtCheckBox.setEnabled(false);
+        saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
+        saveSigmaNoughtCheckBox.setSelected(saveSigmaNought);
     }
 
     @Override
