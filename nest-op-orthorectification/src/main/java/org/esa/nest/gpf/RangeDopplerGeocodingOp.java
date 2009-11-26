@@ -342,7 +342,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private void getMetadata() throws Exception {
         absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
-        getMissionType(absRoot);
+        final String mission = getMissionType(absRoot);
 
         srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
 
@@ -379,6 +379,11 @@ public class RangeDopplerGeocodingOp extends Operator {
 //            if (saveSelectedSourceBand) {
 //                throw new OperatorException("Selected source band cannot be saved.");
 //            }
+        } else {
+            if (applyRadiometricNormalization && mission.contains("ERS")) {
+                throw new OperatorException("For radiometric normalization of ERS product, please use 'PreCalibration" +
+                        " Range Doppler Terrain Correction' or 'PreCalibration SAR-Sim Terrain Correction'");
+            }
         }
     }
 
