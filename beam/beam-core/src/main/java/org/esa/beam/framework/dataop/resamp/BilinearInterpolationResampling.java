@@ -23,8 +23,8 @@ final class BilinearInterpolationResampling implements Resampling {
 
         //final int i0 = (int) Math.floor(x);
         //final int j0 = (int) Math.floor(y);
-        final int i0 = Index.crop((int)x + 1, width - 1);
-        final int j0 = Index.crop((int)y + 1, height - 1);
+        final int i0 = Index.crop((int)x, width - 1);
+        final int j0 = Index.crop((int)y, height - 1);
 /*
         final float di = x - (i0 + .5f);
         final float dj = y - (j0 + .5f);
