@@ -809,7 +809,7 @@ public class GenericReader extends AbstractProductReader {
         }
     }
 
-    private static void copyLine1Of2(final byte[] srcLine, final byte[] destLine, final int sourceStepX) {
+    public static void copyLine1Of2(final byte[] srcLine, final byte[] destLine, final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[i << 1];
         }
@@ -834,7 +834,7 @@ public class GenericReader extends AbstractProductReader {
         }
     }
 
-    private static void copyLine2Of2(final byte[] srcLine, final byte[] destLine, final int sourceStepX) {
+    public static void copyLine2Of2(final byte[] srcLine, final byte[] destLine, final int sourceStepX) {
         final int length = destLine.length;
         for (int x = 0, i = 0; x < length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[(i << 1) + 1];
