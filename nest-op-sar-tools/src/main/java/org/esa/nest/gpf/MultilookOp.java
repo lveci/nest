@@ -326,9 +326,9 @@ public final class MultilookOp extends Operator {
         for (int i = 0; i < sourceBands.length; i++) {
 
             final Band srcBand = sourceBands[i];
-            final String unit = srcBand.getUnit();
+            String unit = srcBand.getUnit();
             if(unit == null) {
-                throw new OperatorException("band "+srcBand.getName()+" requires a unit");
+                unit = Unit.AMPLITUDE;  // assume amplitude
             }
 
             String targetUnit = "";

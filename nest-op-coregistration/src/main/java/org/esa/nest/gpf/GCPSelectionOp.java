@@ -249,7 +249,8 @@ public class GCPSelectionOp extends Operator {
             final Band targetBand = targetProduct.addBand(srcBand.getName(), srcBand.getDataType());
             ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
             sourceRasterMap.put(targetBand, srcBand);
-            if(srcBand.getUnit().contains(Unit.IMAGINARY) || srcBand == masterBand1) {
+            final String unit = srcBand.getUnit();
+            if((unit != null && srcBand.getUnit().contains(Unit.IMAGINARY)) || srcBand == masterBand1) {
                 targetBand.setSourceImage(srcBand.getSourceImage());
             }
             if(complexCoregistration) {

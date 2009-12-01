@@ -24,12 +24,12 @@ public class AmplitudeToIntensityOpAction extends AbstractVisatAction {
             String bandName = band.getName();
             final String unit = band.getUnit();
 
-            if(unit.contains(Unit.DB)) {
+            if(unit != null && unit.contains(Unit.DB)) {
                 visatApp.showWarningDialog("Please convert band " + bandName + " from dB to linear first");
                 return;
             }
 
-            if(unit.contains(Unit.AMPLITUDE)) {
+            if(unit != null && unit.contains(Unit.AMPLITUDE)) {
 
                 bandName = replaceName(bandName, "Amplitude", "Intensity");
                 if(product.getBand(bandName) != null) {
@@ -42,7 +42,7 @@ public class AmplitudeToIntensityOpAction extends AbstractVisatAction {
                         + band.getName() + " into Intensity in a new virtual band?", true, null) == 0) {
                     convert(product, band, false);
                 }
-            } else if(unit.contains(Unit.INTENSITY)) {
+            } else if(unit != null && unit.contains(Unit.INTENSITY)) {
 
                 bandName = replaceName(bandName, "Intensity", "Amplitude");
                 if(product.getBand(bandName) != null) {

@@ -27,6 +27,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -404,9 +405,9 @@ public class OversamplingOp extends Operator {
 
         for(Band srcBand : sourceBands) {
 
-            final String unit = srcBand.getUnit();
+            String unit = srcBand.getUnit();
             if(unit == null) {
-                throw new OperatorException("band "+srcBand.getName()+" requires a unit");
+                unit = Unit.AMPLITUDE;  // assume amplitude
             }
 
             if (unit.contains("phase")) {

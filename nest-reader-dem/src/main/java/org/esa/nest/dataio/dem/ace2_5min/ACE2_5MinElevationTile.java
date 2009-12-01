@@ -55,7 +55,8 @@ public class ACE2_5MinElevationTile {
     }
 
     public void clearCache() {
-        linesCache.clear();
+        if(linesCache != null)
+            linesCache.clear();
     }
 
     private CachingObjectArray.ObjectFactory getLineFactory() throws IOException {

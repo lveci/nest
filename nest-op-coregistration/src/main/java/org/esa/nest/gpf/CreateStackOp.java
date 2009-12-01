@@ -93,16 +93,20 @@ public class CreateStackOp extends Operator {
                     }
                 }
                 if(masterBandNames.length == 0) {
-                    targetProduct = OperatorUtils.createDummyTargetProduct();
+                    targetProduct = OperatorUtils.createDummyTargetProduct(sourceProduct);
                     return;
                 }
             }
 
             masterProduct = getMasterProduct(masterBandNames[0]);
+            if(masterProduct == null) {
+                targetProduct = OperatorUtils.createDummyTargetProduct(sourceProduct);
+                return;
+            }
 
             final Band[] slaveBandList = getSlaveBands();
             if(masterProduct == null || slaveBandList.length == 0 || slaveBandList[0] == null) {
-                targetProduct = OperatorUtils.createDummyTargetProduct();
+                targetProduct = OperatorUtils.createDummyTargetProduct(sourceProduct);
                 return;
             }
 

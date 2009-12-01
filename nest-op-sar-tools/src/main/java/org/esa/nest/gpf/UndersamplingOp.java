@@ -196,7 +196,8 @@ public class UndersamplingOp extends Operator {
         }
 
         for (int i = 0; i < sourceBandNames.length; i++) {
-            if (sourceProduct.getBand(sourceBandNames[i]).getUnit().contains(Unit.REAL)) {
+            final String unit1 = sourceProduct.getBand(sourceBandNames[i]).getUnit();
+            if (unit1 != null && unit1.contains(Unit.REAL)) {
                 if (i+1 < sourceBandNames.length &&
                     sourceProduct.getBand(sourceBandNames[i+1]).getUnit().contains(Unit.IMAGINARY)) {
                     i++;
@@ -530,9 +531,9 @@ public class UndersamplingOp extends Operator {
         for (int i = 0; i < sourceBands.length; i++) {
 
             final Band srcBand = sourceBands[i];
-            final String unit = srcBand.getUnit();
+            String unit = srcBand.getUnit();
             if(unit == null) {
-                throw new OperatorException("band "+srcBand.getName()+" requires a unit");
+                unit = Unit.AMPLITUDE;  // assume amplitude
             }
 
             String targetUnit = "";

@@ -192,10 +192,18 @@ public class OperatorUtils {
         }
     }
 
-    public static Product createDummyTargetProduct() {
-        final Product targetProduct = new Product("tmp", "tmp", 1, 1);
-        targetProduct.addBand(new Band("tmp", ProductData.TYPE_INT8, 1, 1));
-        AbstractMetadata.addAbstractedMetadataHeader(targetProduct.getMetadataRoot());
+    public static Product createDummyTargetProduct(final Product[] sourceProducts) {
+        final Product targetProduct = new Product(sourceProducts[0].getName(),
+                                        sourceProducts[0].getProductType(),
+                                        sourceProducts[0].getSceneRasterWidth(),
+                                        sourceProducts[0].getSceneRasterHeight());
+
+        OperatorUtils.copyProductNodes(sourceProducts[0], targetProduct);
+        for(Product prod : sourceProducts) {
+            for(Band band : prod.getBands()) {
+                ProductUtils.copyBand(band.getName(), prod, band.getName(), targetProduct);
+            }
+        }
         return targetProduct;
     }
 
@@ -291,9 +299,6 @@ public class OperatorUtils {
             message += e.toString();
 
         System.out.println(message);
-        if(VisatApp.getApp() != null) {
-            VisatApp.getApp().showErrorDialog(message);
-        }
         throw new OperatorException(message);
     }
 }

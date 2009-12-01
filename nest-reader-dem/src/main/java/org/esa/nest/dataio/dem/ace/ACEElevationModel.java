@@ -75,7 +75,8 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
         _elevationTileCache.clear();
         for (int i = 0; i < _elevationTiles.length; i++) {
             for (int j = 0; j < _elevationTiles[i].length; j++) {
-                _elevationTiles[i][j].dispose();
+                if(_elevationTiles[i][j] != null)
+                    _elevationTiles[i][j].dispose();
             }
         }
     }
