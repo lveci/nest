@@ -185,11 +185,10 @@ public class SARSimTerrainCorrectionOp extends Operator {
     protected TiePointGrid incidenceAngle = null;
     protected TiePointGrid latitude = null;
     protected TiePointGrid longitude = null;
-    
-    private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
+
     private static final double NonValidZeroDopplerTime = -99999.0;
     private static final int INVALID_SUB_SWATH_INDEX = -1;
-    
+
     private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
     private ResampleMethod imgResampling = null;
 
@@ -198,6 +197,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private Band maskBand = null;
 
     boolean orthoDataProduced = false;  // check if any ortho data is actually produced
+    boolean processingStarted = false;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -285,7 +285,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             fileElevationModel.dispose();
         }
 
-        if(!orthoDataProduced) {
+        if(!orthoDataProduced && processingStarted) {
             final String errMsg = getId() +" error: no valid output was produced. Please verify the DEM or FTP connection";
             System.out.println(errMsg);
             if(VisatApp.getApp() != null) {
@@ -791,6 +791,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
+        processingStarted = true;
         final int x0 = targetRectangle.x;
         final int y0 = targetRectangle.y;
         final int w  = targetRectangle.width;

@@ -190,18 +190,17 @@ public class RangeDopplerGeocodingOp extends Operator {
     protected TiePointGrid latitude = null;
     protected TiePointGrid longitude = null;
 
-    private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
     private static final double NonValidZeroDopplerTime = -99999.0;
     private static final double halfLightSpeedInMetersPerDay = Constants.halfLightSpeed * 86400.0;
     private static final int INVALID_SUB_SWATH_INDEX = -1;
-    
+
     private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
     private ResampleMethod imgResampling = null;
 
     boolean useAvgSceneHeight = false;
     Calibrator calibrator = null;
     boolean orthoDataProduced = false;  // check if any ortho data is actually produced
-    boolean processingStart = false;
+    boolean processingStarted = false;
 
     public static final String USE_INCIDENCE_ANGLE_FROM_DEM = "Use projected local incidence angle from DEM";
     public static final String USE_INCIDENCE_ANGLE_FROM_ELLIPSOID = "Use incidence angle from Ellipsoid";
@@ -249,8 +248,6 @@ public class RangeDopplerGeocodingOp extends Operator {
                 saveDEM = false;
                 saveLocalIncidenceAngle = false;
                 saveProjectedLocalIncidenceAngle = false;
-            } else {
-//                getElevationModel();
             }
 
             createTargetProduct();
@@ -282,10 +279,6 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     @Override
     public void dispose() {
-        if (!processingStart) {
-            return;
-        }
-
         if (dem != null) {
             dem.dispose();
         }
@@ -293,7 +286,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             fileElevationModel.dispose();
         }
 
-        if(!orthoDataProduced) {
+        if(!orthoDataProduced && processingStarted) {
             final String errMsg = getId() +" error: no valid output was produced. Please verify the DEM or FTP connection";
             System.out.println(errMsg);
             if(VisatApp.getApp() != null) {
@@ -929,6 +922,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
+        processingStarted = true;
         try {
             if (!isElevationModelAvailable) {
                 getElevationModel();
@@ -1123,10 +1117,6 @@ public class RangeDopplerGeocodingOp extends Operator {
         } catch(Exception e) {
             orthoDataProduced = true; //to prevent multiple error messages
             OperatorUtils.catchOperatorException(getId(), e);
-        }
-
-        if (!processingStart) {
-            processingStart = true;
         }
     }
 
@@ -1600,10 +1590,10 @@ public class RangeDopplerGeocodingOp extends Operator {
             }
         }
 
-        int[] subSwathIndex00 = {0};
-        int[] subSwathIndex01 = {0};
-        int[] subSwathIndex10 = {0};
-        int[] subSwathIndex11 = {0};
+        final int[] subSwathIndex00 = {0};
+        final int[] subSwathIndex01 = {0};
+        final int[] subSwathIndex10 = {0};
+        final int[] subSwathIndex11 = {0};
         double v = 0;
 
         if (tileData.applyRetroCalibration) {
