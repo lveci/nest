@@ -1,5 +1,5 @@
 /*
- * $Id: ProductFile.java,v 1.2 2009-08-10 19:18:36 lveci Exp $
+ * $Id: ProductFile.java,v 1.3 2009-12-01 17:02:07 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -40,7 +40,7 @@ import java.util.logging.Logger;
  * product files which have been opened for <i>read-only</i> access.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-08-10 19:18:36 $
+ * @version $Revision: 1.3 $ $Date: 2009-12-01 17:02:07 $
  */
 public abstract class ProductFile {
 
@@ -1146,6 +1146,10 @@ public abstract class ProductFile {
             productType = magicString.substring(EnvisatConstants.MAGIC_STRING.length());
         }
         //}
+
+        if(productType != null && productType.endsWith("C")) {
+            productType = productType.substring(0, productType.length()-1) + "P";
+        }
 
         return productType;
     }

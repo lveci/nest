@@ -1,5 +1,5 @@
 /*
- * $Id: EnvisatProductReader.java,v 1.5 2009-11-05 19:13:43 lveci Exp $
+ * $Id: EnvisatProductReader.java,v 1.6 2009-12-01 17:02:07 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -42,7 +42,7 @@ import java.util.Vector;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.5 $ $Date: 2009-11-05 19:13:43 $
+ * @version $Revision: 1.6 $ $Date: 2009-12-01 17:02:07 $
  * @see org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn
  */
 public class EnvisatProductReader extends AbstractProductReader {
@@ -227,10 +227,10 @@ public class EnvisatProductReader extends AbstractProductReader {
             addGeoCodingToProduct(product);
             initPointingFactory(product);
 
-            if(getProductFile().getProductType().contains("IMG")) {
-                createMapGeocoding(product, TransverseMercatorDescriptor.NAME,
-                    product.getBandAt(0).getNoDataValue());
-            }
+            //if(getProductFile().getProductType().contains("IMG")) {
+                //createMapGeocoding(product, TransverseMercatorDescriptor.NAME,
+                //    product.getBandAt(0).getNoDataValue());
+            //}
         }
         addDefaultBitmaskDefsToProduct(product);
         addDefaultBitmaskDefsToBands(product);
