@@ -122,9 +122,11 @@ public class CplxIfgOp extends Operator {
                             masterBand0.getDisplayName() + "_" +
                             srcBandI.getDisplayName();
                 }
-                //final Band targetBandI = targetProduct.addBand(srcBandI.getName(), ProductData.TYPE_FLOAT32);
                 final Band targetBandI = targetProduct.addBand(iBandName, ProductData.TYPE_FLOAT32);
                 ProductUtils.copyRasterDataNodeProperties(srcBandI, targetBandI);
+                if(srcBandI == masterBand0) {
+                    targetBandI.setSourceImage(srcBandI.getSourceImage());
+                }
                 sourceRasterMap.put(targetBandI, srcBandI);
 
                 if (srcBandQ == masterBand1) {
@@ -137,6 +139,9 @@ public class CplxIfgOp extends Operator {
 
                 final Band targetBandQ = targetProduct.addBand(qBandName, ProductData.TYPE_FLOAT32);
                 ProductUtils.copyRasterDataNodeProperties(srcBandQ, targetBandQ);
+                if(srcBandQ == masterBand1) {
+                    targetBandQ.setSourceImage(srcBandQ.getSourceImage());
+                }
                 sourceRasterMap.put(targetBandQ, srcBandQ);
 
                 complexSrcMapQ.put(srcBandI, srcBandQ);
@@ -202,77 +207,62 @@ public class CplxIfgOp extends Operator {
 
             final Band srcBand = sourceRasterMap.get(targetBand);
 
-            if (srcBand == masterBand0 || srcBand == masterBand1) {
-                final Tile masterRaster = getSourceTile(srcBand, targetTileRectangle, pm);
-                final ProductData masterData = masterRaster.getDataBuffer();
-                final ProductData targetData = targetTile.getDataBuffer();
+            final Tile masterRasterI = getSourceTile(masterBand0, targetTileRectangle, pm);
+            final ProductData masterDataI = masterRasterI.getDataBuffer();
+
+            final Tile masterRasterQ = getSourceTile(masterBand1, targetTileRectangle, pm);
+            final ProductData masterDataQ = masterRasterQ.getDataBuffer();
+
+//          complexSrcMapQ.put(srcBandI, srcBandQ);
+//          complexSrcMapI.put(srcBandQ, srcBandI);
+
+            final ProductData targetData = targetTile.getDataBuffer();
+
+            if (srcBand.getUnit().equals(Unit.REAL)) {
+
+                final Tile slaveRasterI = getSourceTile(srcBand, targetTileRectangle, pm);
+                final ProductData slaveDataI = slaveRasterI.getDataBuffer();
+
+                final Band cplxSlaveBandQ = complexSrcMapQ.get(srcBand);
+                final Tile slaveRasterQ = getSourceTile(cplxSlaveBandQ, targetTileRectangle, pm);
+                final ProductData slaveDataQ = slaveRasterQ.getDataBuffer();
 
                 for (int y = y0; y < y0 + h; y++) {
                     for (int x = x0; x < x0 + w; x++) {
-                        final int index = masterRaster.getDataBufferIndex(x, y);
-                        targetData.setElemFloatAt(index, masterData.getElemFloatAt(index));
+
+                        final int index = slaveRasterQ.getDataBufferIndex(x, y);
+
+                        // cplx(a).*conj(cplx(b))
+                        targetData.setElemFloatAt(index,
+                                (masterDataI.getElemFloatAt(index) * slaveDataI.getElemFloatAt(index)) -
+                                        (masterDataQ.getElemFloatAt(index) * (-1)*slaveDataQ.getElemFloatAt(index)));
+
                     }
                 }
-            } else {
+            } else if (srcBand.getUnit().equals(Unit.IMAGINARY)) {
 
-                final Tile masterRasterI = getSourceTile(masterBand0, targetTileRectangle, pm);
-                final ProductData masterDataI = masterRasterI.getDataBuffer();
+                final Tile slaveRasterQ = getSourceTile(srcBand, targetTileRectangle, pm);
+                final ProductData slaveDataQ = slaveRasterQ.getDataBuffer();
 
-                final Tile masterRasterQ = getSourceTile(masterBand1, targetTileRectangle, pm);
-                final ProductData masterDataQ = masterRasterQ.getDataBuffer();
+                final Band cplxSlaveBandI = complexSrcMapI.get(srcBand);
+                final Tile slaveRasterI = getSourceTile(cplxSlaveBandI, targetTileRectangle, pm);
+                final ProductData slaveDataI = slaveRasterI.getDataBuffer();
 
-//                complexSrcMapQ.put(srcBandI, srcBandQ);
-//                complexSrcMapI.put(srcBandQ, srcBandI);
+                for (int y = y0; y < y0 + h; y++) {
+                    for (int x = x0; x < x0 + w; x++) {
 
-                final ProductData targetData = targetTile.getDataBuffer();
+                        final int index = slaveRasterI.getDataBufferIndex(x, y);
 
-                if (srcBand.getUnit().equals(Unit.REAL)) {
-
-                    final Tile slaveRasterI = getSourceTile(srcBand, targetTileRectangle, pm);
-                    final ProductData slaveDataI = slaveRasterI.getDataBuffer();
-
-                    Band cplxSlaveBandQ = complexSrcMapQ.get(srcBand);
-                    final Tile slaveRasterQ = getSourceTile(cplxSlaveBandQ, targetTileRectangle, pm);
-                    final ProductData slaveDataQ = slaveRasterQ.getDataBuffer();
-
-                    for (int y = y0; y < y0 + h; y++) {
-                        for (int x = x0; x < x0 + w; x++) {
-
-                            final int index = slaveRasterQ.getDataBufferIndex(x, y);
-
-                            // cplx(a).*conj(cplx(b))
-                            targetData.setElemFloatAt(index,
-                                    (masterDataI.getElemFloatAt(index) * slaveDataI.getElemFloatAt(index)) -
-                                    (masterDataQ.getElemFloatAt(index) * (-1)*slaveDataQ.getElemFloatAt(index)));
-
-                        }
-                    }
-                } else if (srcBand.getUnit().equals(Unit.IMAGINARY)) {
-
-                    final Tile slaveRasterQ = getSourceTile(srcBand, targetTileRectangle, pm);
-                    final ProductData slaveDataQ = slaveRasterQ.getDataBuffer();
-
-                    Band cplxSlaveBandI = complexSrcMapI.get(srcBand);
-                    final Tile slaveRasterI = getSourceTile(cplxSlaveBandI, targetTileRectangle, pm);
-                    final ProductData slaveDataI = slaveRasterI.getDataBuffer();
-
-                    for (int y = y0; y < y0 + h; y++) {
-                        for (int x = x0; x < x0 + w; x++) {
-
-                            final int index = slaveRasterI.getDataBufferIndex(x, y);
-
-                            // cplx(a).*conj(cplx(b))                            
-                            targetData.setElemFloatAt(index,
-                                    (masterDataI.getElemFloatAt(index) * (-1)*slaveDataQ.getElemFloatAt(index)) +
-                                    (masterDataQ.getElemFloatAt(index) * slaveDataI.getElemFloatAt(index)));
+                        // cplx(a).*conj(cplx(b))
+                        targetData.setElemFloatAt(index,
+                                (masterDataI.getElemFloatAt(index) * (-1)*slaveDataQ.getElemFloatAt(index)) +
+                                        (masterDataQ.getElemFloatAt(index) * slaveDataI.getElemFloatAt(index)));
 
 
-                        }
                     }
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new OperatorException(e);
         }
     }
