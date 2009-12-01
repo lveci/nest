@@ -21,7 +21,7 @@ import java.util.Enumeration;
 /**
  * Look up paths to resources
  */
-public class ResourceUtils {
+public final class ResourceUtils {
 
 
     public static ImageIcon LoadIcon(String path) {

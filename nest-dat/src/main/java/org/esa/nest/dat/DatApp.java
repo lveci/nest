@@ -46,7 +46,7 @@ public final class DatApp extends VisatApp {
     @Override
     protected String getMainFrameTitle() {
         //return getAppName() + " " + getAppVersion();
-        return getAppName() + " 3C-0.3 Beta";
+        return getAppName() + " 3C-0.5 Beta";
     }
 
     // You can now override numerous createXXX() methods
@@ -166,14 +166,14 @@ public final class DatApp extends VisatApp {
         valueItem.setText("");
         valueItem.setPreferredWidth(50);
         valueItem.setAlignment(JLabel.CENTER);
-        valueItem.setToolTip("Displays pixel value");
+        valueItem.setToolTipText("Displays pixel value");
         statusBar.add(valueItem, 3);
 
         final LabelStatusBarItem dimensions = new LabelStatusBarItem("STATUS_BAR_DIMENSIONS_ITEM");
         dimensions.setText("");
         dimensions.setPreferredWidth(70);
         dimensions.setAlignment(JLabel.CENTER);
-        dimensions.setToolTip("Displays image dimensions");
+        dimensions.setToolTipText("Displays image dimensions");
         statusBar.add(dimensions, 4);
 
         return statusBar;

@@ -17,7 +17,7 @@ import java.util.Calendar;
 import java.util.concurrent.ExecutionException;
 
 
-public class ftpUtils {
+public final class ftpUtils {
 
     private final FTPClient ftpClient = new FTPClient();
 

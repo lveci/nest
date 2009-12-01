@@ -27,12 +27,15 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
     private final AddMenuListener addListener = new AddMenuListener(this);
     private final RemoveSourceMenuListener removeSourceListener = new RemoveSourceMenuListener(this);
 
+    private static final Font font = new Font("Ariel", 10, 10);
     private static final Color opColor = new Color(200, 200, 255, 128);
     private static final Color selColor = new Color(200, 255, 200, 150);
     private static final Color helpColor = new Color(250, 255, 250, 150);
     private GraphNode selectedNode = null;
-    private boolean showSourceHotSpot = false;
-    private boolean connectingSource = false;
+    private boolean showHeadHotSpot = false;
+    private boolean showTailHotSpot = false;
+    private boolean connectingSourceFromHead = false;
+    private boolean connectingSourceFromTail = false;
     private Point connectingSourcePos = null;
     private GraphNode connectSourceTargetNode = null;
     private boolean showRightClickHelp = false;
@@ -181,7 +184,6 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
      */
     private void DrawGraph(Graphics g, ArrayList<GraphNode> nodeList) {
 
-        final Font font = new Font("Ariel", 10, 10);
         g.setFont(font);
         if(showRightClickHelp) {
             drawHelp(g, helpColor);
@@ -207,15 +209,27 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
             }
         }
 
-        if(showSourceHotSpot && selectedNode != null) {
-            selectedNode.drawHotspot(g, Color.red);
+        if(showHeadHotSpot && selectedNode != null) {
+            selectedNode.drawHeadHotspot(g, Color.red);
         }
-        if(connectingSource && connectSourceTargetNode != null) {
+        if(showTailHotSpot && selectedNode != null) {
+            selectedNode.drawTailHotspot(g, Color.red);
+        }
+        if(connectingSourceFromHead && connectSourceTargetNode != null) {
             final Point p1 = connectSourceTargetNode.getPos();
             final Point p2 = connectingSourcePos;
             if(p1 != null && p2 != null) {
                 g.setColor(Color.red);
                 g.drawLine(p1.x, p1.y + connectSourceTargetNode.getHalfNodeHeight(), p2.x, p2.y);
+            }
+        } else if(connectingSourceFromTail && connectSourceTargetNode != null) {
+            final Point p1 = connectSourceTargetNode.getPos();
+            final Point p2 = connectingSourcePos;
+            if(p1 != null && p2 != null) {
+                g.setColor(Color.red);
+                g.drawLine(p1.x+connectSourceTargetNode.getWidth(),
+                        p1.y + connectSourceTargetNode.getHalfNodeHeight(),
+                        p2.x, p2.y);
             }
         }
     }
@@ -244,8 +258,10 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
     public void mousePressed(MouseEvent e) {
         checkPopup(e);
 
-        if(showSourceHotSpot) {
-             connectingSource = true;
+        if(showHeadHotSpot) {
+             connectingSourceFromHead = true;
+        } else if(showTailHotSpot) {
+             connectingSourceFromTail = true;
         }
 
         lastMousePos = e.getPoint();
@@ -273,27 +289,19 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
     public void mouseReleased(MouseEvent e) {
         checkPopup(e);
 
-        if(connectingSource) {
+        if(connectingSourceFromHead) {
             final GraphNode n = findNode(e.getPoint());
             if(n != null && selectedNode != n) {
-
-              /*  Field[] declaredFields = graphEx.graphContext.getNodeContext(n.getNode()).getOperator().getClass().getDeclaredFields();
-                for (Field declaredField : declaredFields) {
-                    SourceProduct sourceProductAnnotation = declaredField.getAnnotation(SourceProduct.class);
-                    if (sourceProductAnnotation != null) {
-                        processSourceProductField(declaredField, sourceProductAnnotation);
-                    }
-                    SourceProducts sourceProductsAnnotation = declaredField.getAnnotation(SourceProducts.class);
-                    if (sourceProductsAnnotation != null) {
-                        processSourceProductsField(declaredField, sourceProductsAnnotation);
-                    }
-                }   */
-
-
                 connectSourceTargetNode.connectOperatorSource(n.getID());
             }
+        } else if(connectingSourceFromTail) {
+            final GraphNode n = findNode(e.getPoint());
+            if(n != null && selectedNode != n) {
+                n.connectOperatorSource(connectSourceTargetNode.getID());
+            }
         }
-        connectingSource = false;
+        connectingSourceFromHead = false;
+        connectingSourceFromTail = false;
         connectSourceTargetNode = null;
         repaint();
     }
@@ -304,14 +312,14 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
      */
     public void mouseDragged(MouseEvent e) {
 
-        if(selectedNode != null && !connectingSource) {
+        if(selectedNode != null && !connectingSourceFromHead && !connectingSourceFromTail) {
             final Point p = new Point(e.getX() - (lastMousePos.x - selectedNode.getPos().x),
                                 e.getY() - (lastMousePos.y - selectedNode.getPos().y));
             selectedNode.setPos(p);
             lastMousePos = e.getPoint();
             repaint();
         }
-        if(connectingSource) {
+        if(connectingSourceFromHead || connectingSourceFromTail) {
             connectingSourcePos = e.getPoint();
             repaint();
         }
@@ -325,20 +333,29 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
   
         final GraphNode n = findNode(e.getPoint());
         if(selectedNode != n) {
-            showSourceHotSpot = false;
+            showHeadHotSpot = false;
+            showTailHotSpot = false;
             selectedNode = n;
             graphEx.setSelectedNode(selectedNode);
 
             repaint();
         }
         if(selectedNode != null) {
-            Point sourcePoint = new Point(n.getPos().x, n.getPos().y + selectedNode.getHotSpotOffset());
-            if(isWithinRect(sourcePoint, GraphNode.getHotSpotSize(), GraphNode.getHotSpotSize(), e.getPoint())) {
-                 showSourceHotSpot = true;
+            final int hotspotSize = GraphNode.getHotSpotSize();
+            final Point headPoint = new Point(n.getPos().x, n.getPos().y + selectedNode.getHotSpotOffset());
+            final Point tailPoint = new Point(n.getPos().x + n.getWidth()-hotspotSize, n.getPos().y + selectedNode.getHotSpotOffset());
+
+            if(isWithinRect(headPoint, hotspotSize, hotspotSize, e.getPoint())) {
+                 showHeadHotSpot = true;
                  connectSourceTargetNode = selectedNode;
                  repaint();
-            } else if(showSourceHotSpot) {
-                 showSourceHotSpot = false;
+            } else if(isWithinRect(tailPoint, hotspotSize, hotspotSize, e.getPoint())) {
+                 showTailHotSpot = true;
+                 connectSourceTargetNode = selectedNode;
+                 repaint();
+            } else if(showHeadHotSpot || showTailHotSpot) {
+                 showHeadHotSpot = false;
+                 showTailHotSpot = false;
                  repaint();
             }
        }
@@ -366,7 +383,6 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
         public void actionPerformed(java.awt.event.ActionEvent event) {
             graphPanel.AddOperatorAction(event.getActionCommand());
         }
-
     }
 
     static class RemoveSourceMenuListener implements ActionListener {
@@ -378,6 +394,5 @@ class GraphPanel extends JPanel implements ActionListener, PopupMenuListener, Mo
         public void actionPerformed(java.awt.event.ActionEvent event) {
             graphPanel.RemoveSourceAction(event.getActionCommand());
         }
-
     }
 }

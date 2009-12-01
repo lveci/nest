@@ -34,7 +34,8 @@ public class GraphNode {
     private int nodeHeight = 25;
     private int halfNodeHeight = 0;
     private int halfNodeWidth = 0;
-    static final private int hotSpotSize = 10;
+    private static final int hotSpotSize = 10;
+    private static final int halfHotSpotSize = hotSpotSize / 2;
     private int hotSpotOffset = 0;
 
     private Point displayPosition = new Point(0,0);
@@ -203,7 +204,7 @@ public class GraphNode {
         nodeHeight = height;
         halfNodeHeight = nodeHeight / 2;
         halfNodeWidth = nodeWidth / 2;
-        hotSpotOffset = halfNodeHeight - (hotSpotSize / 2);
+        hotSpotOffset = halfNodeHeight - halfHotSpotSize;
     }
 
     public int getHotSpotOffset() {
@@ -309,10 +310,26 @@ public class GraphNode {
      * @param g The Java2D Graphics
      * @param col The color to draw
      */
-    public void drawHotspot(final Graphics g, final Color col) {
+    public void drawHeadHotspot(final Graphics g, final Color col) {
         final Point p = displayPosition;
         g.setColor(col);
-        g.drawOval(p.x - hotSpotSize / 2, p.y + hotSpotOffset, hotSpotSize, hotSpotSize);
+        g.drawOval(p.x - halfHotSpotSize, p.y + hotSpotOffset, hotSpotSize, hotSpotSize);
+    }
+
+    /**
+     * Draws the hotspot where the user can join the node to a source node
+     * @param g The Java2D Graphics
+     * @param col The color to draw
+     */
+    public void drawTailHotspot(final Graphics g, final Color col) {
+        final Point p = displayPosition;
+        g.setColor(col);
+
+        final int x = p.x + nodeWidth;
+        final int y = p.y + halfNodeHeight;
+        final int[] xpoints = { x, x+hotSpotOffset, x, x};
+        final int[] ypoints = { y-halfHotSpotSize, y, y+halfHotSpotSize, y-halfHotSpotSize };
+        g.fillPolygon(xpoints, ypoints, xpoints.length);
     }
 
     /**

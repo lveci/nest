@@ -29,7 +29,7 @@ public class Unit {
 
     public static UnitType getUnitType(Band sourceBand) {
 
-        String  unit =  sourceBand.getUnit();
+        final String  unit =  sourceBand.getUnit().toLowerCase();
         if (unit.contains(AMPLITUDE)) {
             if (unit.contains(DB))
                 return UnitType.AMPLITUDE_DB;
