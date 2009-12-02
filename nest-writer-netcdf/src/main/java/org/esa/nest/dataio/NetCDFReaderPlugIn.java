@@ -6,7 +6,6 @@ import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.util.io.BeamFileFilter;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.Locale;
 
 /**
@@ -29,7 +28,7 @@ public class NetCDFReaderPlugIn implements ProductReaderPlugIn {
      * @return true if this product reader can decode the given input, otherwise false.
      */
     public DecodeQualification getDecodeQualification(final Object input) {
-        final File file = getFileFromInput(input);
+        final File file = ReaderUtils.getFileFromInput(input);
         if (file == null) {
             return DecodeQualification.UNABLE;
         }
@@ -37,22 +36,14 @@ public class NetCDFReaderPlugIn implements ProductReaderPlugIn {
         return checkProductQualification(file);
     }
 
-    DecodeQualification checkProductQualification(final File file) {
+    protected DecodeQualification checkProductQualification(final File file) {
+        final String fileName = file.getName().toLowerCase();
         for(String ext : FORMAT_FILE_EXTENSIONS) {
-            if(!ext.isEmpty() && file.getName().toLowerCase().endsWith(ext.toLowerCase()))
+            if(!ext.isEmpty() && fileName.endsWith(ext.toLowerCase()))
                 return DecodeQualification.INTENDED;
         }
 
         return DecodeQualification.UNABLE;
-    }
-
-     public static File getFileFromInput(final Object input) {
-        if (input instanceof String) {
-            return new File((String) input);
-        } else if (input instanceof File) {
-            return (File) input;
-        }
-        return null;
     }
 
     /**

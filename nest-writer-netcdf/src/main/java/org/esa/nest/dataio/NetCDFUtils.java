@@ -332,13 +332,13 @@ public class NetCDFUtils {
     private NetCDFUtils() {
     }
 
-    static Variable[] getRasterVariables(Map<NcRasterDim, List<Variable>> variableLists,
+    public static Variable[] getRasterVariables(Map<NcRasterDim, List<Variable>> variableLists,
                                                  NcRasterDim rasterDim) {
         final List<Variable> list = variableLists.get(rasterDim);
         return list.toArray(new Variable[list.size()]);
     }
 
-    static Variable[] getTiePointGridVariables(Map<NcRasterDim, List<Variable>> variableLists,
+    public static Variable[] getTiePointGridVariables(Map<NcRasterDim, List<Variable>> variableLists,
                                                Variable[] rasterVariables) {
         final ArrayList<Variable> tpgList = new ArrayList<Variable>();
         final Set keySet = variableLists.keySet();
@@ -360,14 +360,13 @@ public class NetCDFUtils {
         return tpgList.toArray(new Variable[tpgList.size()]);
     }
 
-    static NcRasterDim getBestRasterDim(Map<NcRasterDim, List<Variable>> variableListMap) {
+    public static NcRasterDim getBestRasterDim(Map<NcRasterDim, List<Variable>> variableListMap) {
 
         final NcRasterDim[] keys = variableListMap.keySet().toArray(new NcRasterDim[variableListMap.keySet().size()]);
         if (keys.length == 0) {
             return null;
         }
         final String[] bandNames = { "amplitude", "intensity", "phase", "band", "proc_data" };
-
 
         NcRasterDim bestRasterDim = null;
         List<Variable> bestVarList = null;
@@ -381,17 +380,26 @@ public class NetCDFUtils {
                 return rasterDim;
             }
             for(Variable v : varList) {
-                for(String unit : bandNames) {
-                    final String vUnit = v.getUnitsString();
-                    if(vUnit != null && vUnit.equalsIgnoreCase(unit))
-                        return rasterDim;
+                final String vUnit = v.getUnitsString();
+                if(vUnit != null) {
+                    for(String unit : bandNames) {
+                        if(vUnit.equalsIgnoreCase(unit))
+                            return rasterDim;
+                    }
                 }
             }
-            // Otherwise, the best is the one which holds the most variables
-            if (bestVarList == null || varList.size() > bestVarList.size()) {
-                bestRasterDim = rasterDim;
-                bestVarList = varList;
+            
+            // otherwise go by the largest size
+            if(bestRasterDim == null ||
+               (bestRasterDim.getDimX().getLength() * bestRasterDim.getDimY().getLength()) <
+               (rasterDim.getDimX().getLength()*rasterDim.getDimY().getLength())) {
+                    bestRasterDim = rasterDim;
             }
+            // Otherwise, the best is the one which holds the most variables
+            //if (bestVarList == null || varList.size() > bestVarList.size()) {
+            //    bestRasterDim = rasterDim;
+            //    bestVarList = varList;
+            //}
         }
 
         return bestRasterDim;
@@ -407,7 +415,7 @@ public class NetCDFUtils {
         return false;
     }
 
-    static Map<NcRasterDim, List<Variable>> getVariableListMap(final Group group) {
+    public static Map<NcRasterDim, List<Variable>> getVariableListMap(final Group group) {
         final Map<NcRasterDim, List<Variable>> variableLists = new HashMap<NcRasterDim, List<Variable>>(31);
         collectVariableLists(group, variableLists);
         return variableLists;

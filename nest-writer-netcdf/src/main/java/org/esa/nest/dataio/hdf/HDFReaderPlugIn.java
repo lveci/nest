@@ -1,4 +1,6 @@
-package org.esa.nest.dataio;
+package org.esa.nest.dataio.hdf;
+
+import org.esa.nest.dataio.NetCDFReaderPlugIn;
 
 /**
  * The ReaderPlugIn for HDF products.

@@ -25,6 +25,19 @@
     <extension point="beam-ui:actions">
 
         <action>
+            <id>importCosmoSkymed</id>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <formatName>CosmoSkymed</formatName>
+            <readerPlugin>org.esa.nest.dataio.cosmo.CosmoSkymedReaderPlugIn</readerPlugin>
+            <useAllFileFilter>true</useAllFileFilter>
+            <shortDescr>Import a CosmoSkymed file format</shortDescr>
+            <description>Import a CosmoSkymed file format</description>
+            <largeIcon>icons/Import24.gif</largeIcon>
+            <placeAfter>importTerraSarXProduct</placeAfter>
+            <helpId>importCosmoSkymed</helpId>
+        </action>
+
+        <action>
             <id>importNetCDF</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <text>Import NetCDF Product...</text>
@@ -49,11 +62,12 @@
             <id>importHDF</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>HDF</formatName>
-            <readerPlugin>org.esa.nest.dataio.HDFReaderPlugIn</readerPlugin>
+            <readerPlugin>org.esa.nest.dataio.hdf.HDFReaderPlugIn</readerPlugin>
             <useAllFileFilter>true</useAllFileFilter>
             <shortDescr>Import a HDF file format</shortDescr>
             <description>Import a HDF file format</description>
             <largeIcon>icons/Import24.gif</largeIcon>
+            <placeAfter>importNetCDF</placeAfter>
             <helpId>importHDF</helpId>
         </action>
 
