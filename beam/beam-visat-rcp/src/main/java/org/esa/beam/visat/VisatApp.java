@@ -1,5 +1,5 @@
 /*
- * $Id: VisatApp.java,v 1.12 2009-12-02 16:52:12 lveci Exp $
+ * $Id: VisatApp.java,v 1.13 2009-12-02 17:33:08 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -145,7 +145,7 @@ import java.util.logging.Level;
  * @author Norman Fomferra
  * @author Marco Peters
  * @author Sabine Embacher
- * @version $Revision: 1.12 $ $Date: 2009-12-02 16:52:12 $
+ * @version $Revision: 1.13 $ $Date: 2009-12-02 17:33:08 $
  */
 public class VisatApp extends BasicApp implements AppContext {
 
@@ -2068,7 +2068,6 @@ public class VisatApp extends BasicApp implements AppContext {
                 toolBar.add(ToolButtonFactory.createToolBarSeparator());
             } else {
                 final Command command = getCommandManager().getCommand(commandID);
-                System.out.println(commandID);
                 Assert.state(command != null, "commandID=" + commandID);
                 final AbstractButton toolBarButton = command.createToolBarButton();
                 toolBarButton.addMouseListener(getMouseOverActionHandler());
