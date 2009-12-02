@@ -12,6 +12,14 @@ import com.bc.ceres.glevel.MultiLevelSource;
 import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
 import com.bc.ceres.grender.Viewport;
 import com.bc.ceres.grender.support.DefaultViewport;
+import com.bc.ceres.swing.figure.Figure;
+import com.bc.ceres.swing.figure.FigureCollection;
+import com.bc.ceres.swing.figure.FigureEditor;
+import com.bc.ceres.swing.figure.FigureEditorHolder;
+import com.bc.ceres.swing.figure.support.DefaultFigureCollection;
+import com.bc.ceres.swing.figure.support.DefaultFigureEditor;
+import com.bc.ceres.swing.undo.UndoContext;
+import com.bc.ceres.swing.undo.support.DefaultUndoContext;
 import org.esa.beam.framework.datamodel.ImageInfo;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
@@ -20,28 +28,18 @@ import org.esa.beam.framework.datamodel.ProductNodeEvent;
 import org.esa.beam.framework.datamodel.ProductNodeListener;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.datamodel.VirtualBand;
-import org.esa.beam.framework.draw.Figure;
-import org.esa.beam.framework.draw.ShapeFigure;
 import org.esa.beam.framework.ui.BasicView;
-import org.esa.beam.framework.ui.LayerUI;
 import org.esa.beam.framework.ui.PixelInfoFactory;
 import org.esa.beam.framework.ui.PixelPositionListener;
 import org.esa.beam.framework.ui.PopupMenuHandler;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.command.CommandUIFactory;
-import org.esa.beam.framework.ui.tool.AbstractTool;
-import org.esa.beam.framework.ui.tool.DrawingEditor;
-import org.esa.beam.framework.ui.tool.Tool;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
-import org.esa.beam.framework.ui.tool.ToolInputEvent;
 import org.esa.beam.glayer.FigureLayer;
 import org.esa.beam.glayer.GraticuleLayer;
 import org.esa.beam.glayer.MaskCollectionLayer;
 import org.esa.beam.glayer.NoDataLayerType;
-import org.esa.beam.glayer.RoiLayerType;
 import org.esa.beam.glevel.MaskImageMultiLevelSource;
-import org.esa.beam.glevel.RoiImageMultiLevelSource;
-import org.esa.beam.util.Guardian;
 import org.esa.beam.util.PropertyMap;
 import org.esa.beam.util.PropertyMapChangeListener;
 import org.esa.beam.util.SystemUtils;
@@ -63,8 +61,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
@@ -88,7 +84,7 @@ import java.util.Vector;
  * @version $ Revision: $ $ Date: $
  */
 public class ProductSceneView extends BasicView
-        implements ProductNodeView, DrawingEditor, PropertyMapChangeListener, PixelInfoFactory, LayerContext {
+        implements FigureEditorHolder, ProductNodeView, PropertyMapChangeListener, PixelInfoFactory, LayerContext {
 
     public static final String BASE_IMAGE_LAYER_ID = "org.esa.beam.layers.baseImage";
     public static final String NO_DATA_LAYER_ID = "org.esa.beam.layers.noData";
@@ -131,33 +127,12 @@ public class ProductSceneView extends BasicView
      */
     public static final String PROPERTY_NAME_SELECTED_LAYER = "selectedLayer";
 
-    /**
-     * Property name for the image histogram matching type
-     *
-     * @deprecated
-     */
-    @Deprecated
-    public static final String PROPERTY_KEY_HISTOGRAM_MATCHING = "graphics.histogramMatching";
-
-    @Deprecated
-    public static String IMAGE_INTERPOLATION_NEAREST_NEIGHBOUR = "Nearest Neighbour";
-    @Deprecated
-    public static String IMAGE_INTERPOLATION_BILINEAR = "Bi-Linear Interpolation";
-    @Deprecated
-    public static String IMAGE_INTERPOLATION_BICUBIC = "Bi-Cubic Interpolation";
-    @Deprecated
-    public static String IMAGE_INTERPOLATION_SYSTEM_DEFAULT = "System Default";
-    @Deprecated
-    public static String DEFAULT_IMAGE_INTERPOLATION_METHOD = IMAGE_INTERPOLATION_SYSTEM_DEFAULT;
-
-    //    public static final Color DEFAULT_IMAGE_BORDER_COLOR = new Color(204, 204, 255);
     public static final Color DEFAULT_IMAGE_BACKGROUND_COLOR = new Color(51, 51, 51);
-    //    public static final double DEFAULT_IMAGE_BORDER_SIZE = 2.0;
     public static final int DEFAULT_IMAGE_VIEW_BORDER_SIZE = 64;
 
 
     private ProductSceneImage sceneImage;
-    private LayerCanvas layerCanvas;
+    private FigureEditorLayerCanvas layerCanvas;
 
     // todo - (re)move following variables, they don't belong to here (nf - 28.10.2008)
     // {{
@@ -171,18 +146,16 @@ public class ProductSceneView extends BasicView
     private boolean pixelBorderDrawn; // has it been drawn?
     private double pixelBorderViewScale;
     private final Vector<PixelPositionListener> pixelPositionListeners;
-    // }}
 
-    private Tool tool;
     private Layer selectedLayer;
-    private LayerUI selectedLayerUI;
 
     private ComponentAdapter layerCanvasComponentHandler;
     private LayerCanvasMouseHandler layerCanvasMouseHandler;
-    private KeyListener layerCanvasKeyHandler;
     private RasterChangeHandler rasterChangeHandler;
     private boolean scrollBarsShown;
     private AdjustableViewScrollPane scrollPane;
+
+    private UndoContext undoContext;
 
     public ProductSceneView(ProductSceneImage sceneImage) {
         Assert.notNull(sceneImage, "sceneImage");
@@ -199,8 +172,13 @@ public class ProductSceneView extends BasicView
         this.pixelBorderViewScale = 2.0;
         this.pixelPositionListeners = new Vector<PixelPositionListener>();
 
-        this.layerCanvas = new LayerCanvas(sceneImage.getRootLayer(),
-                                           new DefaultViewport(isModelYAxisDown(baseImageLayer)));
+        // todo - use global application undo context
+        undoContext = new DefaultUndoContext(this);
+
+        this.layerCanvas = new FigureEditorLayerCanvas(sceneImage.getRootLayer(),
+                                                       new DefaultViewport(isModelYAxisDown(baseImageLayer)),
+                                                       undoContext);
+
         final boolean navControlShown = sceneImage.getConfiguration().getPropertyBool(
                 PROPERTY_KEY_IMAGE_NAV_CONTROL_SHOWN, true);
         this.layerCanvas.setNavControlShown(navControlShown);
@@ -215,14 +193,17 @@ public class ProductSceneView extends BasicView
             add(layerCanvas, BorderLayout.CENTER);
         }
 
-        layerCanvas.addOverlay(new ToolPainter());
-
         registerLayerCanvasListeners();
 
         this.rasterChangeHandler = new RasterChangeHandler();
         getRaster().getProduct().addProductNodeListener(rasterChangeHandler);
 
         setMaskOverlayEnabled(true);
+    }
+
+    @Override
+    public FigureEditor getFigureEditor() {
+        return layerCanvas.getFigureEditor();
     }
 
     private AdjustableViewScrollPane createScrollPane() {
@@ -466,50 +447,6 @@ public class ProductSceneView extends BasicView
         return getSceneImage().getRasters().length >= 3;
     }
 
-    @Override
-    public void addFigure(Figure figure) {
-        Guardian.assertNotNull("figure", figure);
-        InsertMode insertMode = InsertMode.REPLACE;
-        ToolInputEvent toolInputEvent = (ToolInputEvent) figure.getAttribute(Figure.TOOL_INPUT_EVENT_KEY);
-        if (toolInputEvent != null && toolInputEvent.getMouseEvent() != null) {
-            MouseEvent mouseEvent = toolInputEvent.getMouseEvent();
-            if ((mouseEvent.isShiftDown())) {
-                insertMode = InsertMode.ADD;
-            } else if ((mouseEvent.isControlDown())) {
-                insertMode = InsertMode.SUBTRACT;
-            }
-        }
-
-        insertFigure(figure, insertMode);
-    }
-
-    @Override
-    public void insertFigure(Figure figure, InsertMode insertMode) {
-        Guardian.assertNotNull("figure", figure);
-
-        Figure oldFigure = getCurrentShapeFigure();
-
-        if (InsertMode.REPLACE.equals(insertMode) || oldFigure == null) {
-            setCurrentShapeFigure(figure);
-            return;
-        }
-
-        Shape shape = figure.getShape();
-        if (shape == null) {
-            return;
-        }
-
-        Area area1 = oldFigure.getAsArea();
-        Area area2 = figure.getAsArea();
-        if (InsertMode.ADD.equals(insertMode)) {
-            area1.add(area2);
-        } else {
-            area1.subtract(area2);
-        }
-
-        setCurrentShapeFigure(ShapeFigure.createArbitraryArea(area1, figure.getAttributes()));
-    }
-
     public boolean isNoDataOverlayEnabled() {
         final Layer noDataLayer = getNoDataLayer(false);
         return noDataLayer != null && noDataLayer.isVisible();
@@ -627,18 +564,14 @@ public class ProductSceneView extends BasicView
         }
     }
 
-    public Figure getRasterROIShapeFigure() {
-        if (getRaster().getROIDefinition() != null) {
-            return getRaster().getROIDefinition().getShapeFigure();
-        }
+    @Deprecated
+    public Figure getCurrentShapeFigure() {
         return null;
     }
 
-    public Figure getCurrentShapeFigure() {
-        return getNumFigures() > 0 ? getFigureAt(0) : null;
-    }
-
+    @Deprecated
     public void setCurrentShapeFigure(Figure currentShapeFigure) {
+        /*
         setShapeOverlayEnabled(true);
         final Figure oldShapeFigure = getCurrentShapeFigure();
         if (currentShapeFigure != oldShapeFigure) {
@@ -649,6 +582,7 @@ public class ProductSceneView extends BasicView
                 getFigureLayer(true).addFigure(currentShapeFigure);
             }
         }
+        */
     }
 
     public boolean areScrollBarsShown() {
@@ -744,29 +678,7 @@ public class ProductSceneView extends BasicView
         Layer oldLayer = selectedLayer;
         if (oldLayer != layer) {
             selectedLayer = layer;
-            if (selectedLayer != null) {
-                selectedLayerUI = selectedLayer.getExtension(LayerUI.class);
-            } else {
-                selectedLayerUI = null;
-            }
             firePropertyChange(PROPERTY_NAME_SELECTED_LAYER, oldLayer, selectedLayer);
-        }
-    }
-
-    @Override
-    public AbstractTool getSelectTool() {
-        if (getSelectedLayerUI() != null) {
-            return getSelectedLayerUI().getSelectTool(this);
-        }
-        return null;
-    }
-
-    @Override
-    public void handleSelection(Rectangle rectangle) {
-        if (getSelectedLayerUI() != null) {
-            getSelectedLayerUI().handleSelection(this, rectangle);
-        } else {
-            // todo - implement default selection event, e.g. select features from feature layers such as pins, GCPs (nf 20090119)
         }
     }
 
@@ -838,7 +750,7 @@ public class ProductSceneView extends BasicView
         final Product currentProduct = getRaster().getProduct();
         final Product otherProduct = view.getRaster().getProduct();
         if (otherProduct == currentProduct ||
-            otherProduct.isCompatibleProduct(currentProduct, 1.0e-3f)) {
+                otherProduct.isCompatibleProduct(currentProduct, 1.0e-3f)) {
 
             Viewport viewPortToChange = view.layerCanvas.getViewport();
             Viewport myViewPort = layerCanvas.getViewport();
@@ -846,93 +758,6 @@ public class ProductSceneView extends BasicView
         }
     }
 
-
-    @Override
-    public Tool getTool() {
-        return tool;
-    }
-
-    @Override
-    public void setTool(Tool tool) {
-        if (this.tool != tool) {
-            if (tool != null) {
-                tool.setDrawingEditor(this);
-                setCursor(tool.getCursor());
-            }
-            this.tool = tool;
-        }
-    }
-
-    @Override
-    public void repaintTool() {
-        if (getTool() != null) {
-            repaint(100);
-        }
-    }
-
-    // TODO remove ??? UNUSED
-    @Override
-    @Deprecated
-    public void removeFigure(Figure figure) {
-        final FigureLayer figureLayer = getFigureLayer(false);
-        if (figureLayer != null) {
-            figureLayer.removeFigure(figure);
-        }
-    }
-
-    // used only internaly --> private ???
-    @Override
-    @Deprecated
-    public int getNumFigures() {
-        final FigureLayer figureLayer = getFigureLayer(false);
-        if (figureLayer != null) {
-            return figureLayer.getFigureList().size();
-        }
-        return 0;
-    }
-
-    // used only internaly --> private ???
-    @Override
-    @Deprecated
-    public Figure getFigureAt(int index) {
-        FigureLayer figureLayer = getFigureLayer(false);
-        if (figureLayer != null) {
-            return figureLayer.getFigureList().get(index);
-        }
-        return null;
-    }
-
-    // TODO remove ??? UNUSED
-    @Override
-    @Deprecated
-    public Figure[] getAllFigures() {
-        final FigureLayer figureLayer = getFigureLayer(false);
-        if (figureLayer != null) {
-            return figureLayer.getFigureList().toArray(new Figure[getNumFigures()]);
-        }
-        return new Figure[0];
-    }
-
-    //TODO remove ??? UNUSED
-    @Override
-    @Deprecated
-    public Figure[] getSelectedFigures() {
-        return new Figure[0];
-    }
-
-    // TODO remove ??? UNUSED
-    @Override
-    @Deprecated
-    public Figure[] getFiguresWithAttribute(String name) {
-        return new Figure[0];
-    }
-
-    // TODO remove ??? UNUSED
-    @Override
-    @Deprecated
-    public Figure[] getFiguresWithAttribute(String name, Object value) {
-        return new Figure[0];
-    }
 
     protected void copyPixelInfoStringToClipboard() {
         SystemUtils.copyToClipboard(createPixelInfoString(pixelX, pixelY));
@@ -972,27 +797,6 @@ public class ProductSceneView extends BasicView
                 noDataLayer.setMultiLevelSource(multiLevelSource);
             } else {
                 noDataLayer.setMultiLevelSource(MultiLevelSource.NULL);
-            }
-        }
-    }
-
-    @Deprecated
-    public void updateROIImage(boolean recreate, ProgressMonitor pm) throws Exception {
-        updateROIImage();
-    }
-
-    // used by PropertyEditor
-    public void updateROIImage() {
-        final ImageLayer roiLayer = getRoiLayer(false);
-        if (roiLayer != null) {
-            if (getRaster().getROIDefinition() != null && getRaster().getROIDefinition().isUsable()) {
-                final Color color = (Color) roiLayer.getConfiguration().getValue(RoiLayerType.PROPERTY_NAME_COLOR);
-                final MultiLevelSource multiLevelSource = RoiImageMultiLevelSource.create(getRaster(),
-                                                                                          color,
-                                                                                          getBaseImageLayer().getImageToModelTransform());
-                roiLayer.setMultiLevelSource(multiLevelSource);
-            } else {
-                roiLayer.setMultiLevelSource(MultiLevelSource.NULL);
             }
         }
     }
@@ -1040,7 +844,7 @@ public class ProductSceneView extends BasicView
         }
     }
 
-    protected class RasterChangeHandler implements ProductNodeListener {
+    private final class RasterChangeHandler implements ProductNodeListener {
 
         @Override
         public void nodeChanged(final ProductNodeEvent event) {
@@ -1100,10 +904,6 @@ public class ProductSceneView extends BasicView
         return getSceneImage().getGcpLayer(create);
     }
 
-    private LayerUI getSelectedLayerUI() {
-        return selectedLayerUI;
-    }
-
     private static boolean isModelYAxisDown(ImageLayer baseImageLayer) {
         return baseImageLayer.getImageToModelTransform().getDeterminant() > 0.0;
     }
@@ -1111,13 +911,11 @@ public class ProductSceneView extends BasicView
     private void registerLayerCanvasListeners() {
         layerCanvasComponentHandler = new LayerCanvasComponentHandler();
         layerCanvasMouseHandler = new LayerCanvasMouseHandler();
-        layerCanvasKeyHandler = new LayerCanvasKeyHandler();
 
         layerCanvas.addComponentListener(layerCanvasComponentHandler);
         layerCanvas.addMouseListener(layerCanvasMouseHandler);
         layerCanvas.addMouseMotionListener(layerCanvasMouseHandler);
         layerCanvas.addMouseWheelListener(layerCanvasMouseHandler);
-        layerCanvas.addKeyListener(layerCanvasKeyHandler);
 
         PopupMenuHandler popupMenuHandler = new PopupMenuHandler(this);
         layerCanvas.addMouseListener(popupMenuHandler);
@@ -1129,28 +927,16 @@ public class ProductSceneView extends BasicView
         layerCanvas.removeComponentListener(layerCanvasComponentHandler);
         layerCanvas.removeMouseListener(layerCanvasMouseHandler);
         layerCanvas.removeMouseMotionListener(layerCanvasMouseHandler);
-        layerCanvas.removeKeyListener(layerCanvasKeyHandler);
     }
 
-    private void fireToolEvent(MouseEvent e) {
-        if (tool != null) {
-            ToolInputEvent toolInputEvent = createToolInputEvent(e);
-            tool.handleEvent(toolInputEvent);
-        }
-    }
-
-    private ToolInputEvent createToolInputEvent(MouseEvent e) {
-        return new ToolInputEvent(layerCanvas, e, pixelX, pixelY, isPixelPosValid(levelPixelX, levelPixelY, level));
-    }
-
-    private ToolInputEvent createToolInputEvent(KeyEvent e) {
-        return new ToolInputEvent(layerCanvas, e, pixelX, pixelY, isPixelPosValid(levelPixelX, levelPixelY, level));
+    public boolean isPixelPosValid() {
+        return isPixelPosValid(levelPixelX, levelPixelY, level);
     }
 
     private boolean isPixelPosValid(int currentPixelX, int currentPixelY, int currentLevel) {
         return currentPixelX >= 0 && currentPixelX < baseImageLayer.getImage(
                 currentLevel).getWidth() && currentPixelY >= 0
-               && currentPixelY < baseImageLayer.getImage(currentLevel).getHeight();
+                && currentPixelY < baseImageLayer.getImage(currentLevel).getHeight();
     }
 
     private void firePixelPosChanged(MouseEvent e, int currentPixelX, int currentPixelY, int currentLevel) {
@@ -1163,12 +949,6 @@ public class ProductSceneView extends BasicView
     private void firePixelPosNotAvailable() {
         for (PixelPositionListener listener : pixelPositionListeners) {
             listener.pixelPosNotAvailable();
-        }
-    }
-
-    private void drawToolNoTransf(Graphics2D g2d) {
-        if (tool.getDrawable() != null) {
-            tool.getDrawable().draw(g2d);
         }
     }
 
@@ -1206,8 +986,7 @@ public class ProductSceneView extends BasicView
 
     private boolean isPixelBorderDisplayEnabled() {
         return pixelBorderShown &&
-               (getTool() == null || getTool().getDrawable() != null) &&
-               getLayerCanvas().getViewport().getZoomFactor() >= pixelBorderViewScale;
+                getLayerCanvas().getViewport().getZoomFactor() >= pixelBorderViewScale;
     }
 
     private void drawPixelBorder(int currentPixelX, int currentPixelY, int currentLevel, boolean showBorder) {
@@ -1240,37 +1019,37 @@ public class ProductSceneView extends BasicView
     private final class LayerCanvasMouseHandler implements MouseInputListener, MouseWheelListener {
 
         @Override
-        public final void mouseClicked(MouseEvent e) {
+        public void mouseClicked(MouseEvent e) {
             updatePixelPos(e, false);
         }
 
         @Override
-        public final void mouseEntered(MouseEvent e) {
+        public void mouseEntered(MouseEvent e) {
             updatePixelPos(e, false);
         }
 
         @Override
-        public final void mousePressed(MouseEvent e) {
+        public void mousePressed(MouseEvent e) {
             updatePixelPos(e, false);
         }
 
         @Override
-        public final void mouseReleased(MouseEvent e) {
+        public void mouseReleased(MouseEvent e) {
             updatePixelPos(e, false);
         }
 
         @Override
-        public final void mouseExited(MouseEvent e) {
+        public void mouseExited(MouseEvent e) {
             updatePixelPos(e, false);
         }
 
         @Override
-        public final void mouseDragged(MouseEvent e) {
+        public void mouseDragged(MouseEvent e) {
             updatePixelPos(e, true);
         }
 
         @Override
-        public final void mouseMoved(MouseEvent e) {
+        public void mouseMoved(MouseEvent e) {
             updatePixelPos(e, true);
         }
 
@@ -1285,7 +1064,6 @@ public class ProductSceneView extends BasicView
 
         private void updatePixelPos(MouseEvent e, boolean showBorder) {
             setPixelPos(e, showBorder);
-            fireToolEvent(e);
         }
     }
 
@@ -1300,57 +1078,32 @@ public class ProductSceneView extends BasicView
         }
     }
 
-    private class LayerCanvasKeyHandler implements KeyListener {
+    private static class FigureEditorLayerCanvas extends LayerCanvas implements FigureEditorHolder {
 
-        /**
-         * Invoked when a key has been pressed.
-         */
-        @Override
-        public void keyPressed(KeyEvent e) {
-            if (tool != null) {
-                tool.handleEvent(createToolInputEvent(e));
-            }
-        }
+        private final FigureCollection figureCollection;
+        private final DefaultFigureEditor figureEditor;
 
-        /**
-         * Invoked when a key has been released.
-         */
-        @Override
-        public void keyReleased(KeyEvent e) {
-            if (tool != null) {
-                tool.handleEvent(createToolInputEvent(e));
-            }
-        }
+        private FigureEditorLayerCanvas(Layer rootLayer, Viewport viewport, UndoContext undoContext) {
+            super(rootLayer, viewport);
+            // todo - use FigureCollection from FigureLayer(s)!
+            figureCollection = new DefaultFigureCollection();
 
-        /**
-         * Invoked when a key has been typed. This event occurs when a key
-         * press is followed by a key dispose.
-         */
-        @Override
-        public void keyTyped(KeyEvent e) {
-            if (tool != null) {
-                tool.handleEvent(createToolInputEvent(e));
-            }
-        }
-    }
+            figureEditor = new DefaultFigureEditor(this, undoContext, figureCollection);
 
-    private class ToolPainter implements LayerCanvas.Overlay {
-
-        @Override
-        public void paintOverlay(LayerCanvas canvas, Graphics2D g2d) {
-            if (tool != null && tool.isActive()) {
-                final Viewport vp = getLayerCanvas().getViewport();
-                final AffineTransform transformSave = g2d.getTransform();
-                try {
-                    AffineTransform transform = vp.getModelToViewTransform();
-                    transform.concatenate(getSceneImage().getBaseImageLayer().getImageToModelTransform());
-                    g2d.setTransform(transform);
-                    drawToolNoTransf(g2d);
-                } finally {
-                    g2d.setTransform(transformSave);
+            addOverlay(new LayerCanvas.Overlay() {
+                @Override
+                public void paintOverlay(LayerCanvas canvas, Graphics2D graphics) {
+                    // todo - figureEditor.drawFigures(graphics, true);
+                    figureEditor.drawFigures(graphics, false);
+                    figureEditor.drawSelectionRectangle(graphics);
                 }
-            }
+            });
         }
-    }
 
+        @Override
+        public FigureEditor getFigureEditor() {
+            return figureEditor;
+        }
+
+    }
 }

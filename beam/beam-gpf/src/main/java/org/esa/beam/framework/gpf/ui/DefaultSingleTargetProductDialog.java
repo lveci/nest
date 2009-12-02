@@ -1,20 +1,25 @@
 package org.esa.beam.framework.gpf.ui;
 
-import com.bc.ceres.binding.ValidationException;
+import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertyDescriptor;
-import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.ValidationException;
+import com.bc.ceres.binding.ValueSet;
 import com.bc.ceres.swing.TableLayout;
+import com.bc.ceres.swing.selection.AbstractSelectionChangeListener;
+import com.bc.ceres.swing.selection.Selection;
+import com.bc.ceres.swing.selection.SelectionChangeEvent;
+import com.bc.ceres.swing.selection.SelectionChangeListener;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductFilter;
+import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.esa.beam.framework.gpf.internal.RasterDataNodeValues;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ValueEditorsPane;
-import org.esa.beam.framework.ui.application.SelectionChangeEvent;
-import org.esa.beam.framework.ui.application.SelectionChangeListener;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -32,7 +37,7 @@ import java.util.Map;
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.5 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.6 $ $Date: 2009-12-02 16:52:11 $
  */
 public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog {
 
@@ -59,7 +64,7 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
 
         // Fetch source products
         initSourceProductSelectors(operatorSpi);
-        if (sourceProductSelectorList.size() > 0) {
+        if (!sourceProductSelectorList.isEmpty()) {
             setSourceProductSelectorLabels();
             setSourceProductSelectorToolTipTexts();
         }
@@ -76,10 +81,11 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
         }
         ioParametersPanel.add(getTargetProductSelector().createDefaultPanel());
         ioParametersPanel.add(tableLayout.createVerticalSpacer());
-        sourceProductSelectorList.get(0).addSelectionChangeListener(new SelectionChangeListener() {
+        sourceProductSelectorList.get(0).addSelectionChangeListener(new AbstractSelectionChangeListener() {
+
             @Override
             public void selectionChanged(SelectionChangeEvent event) {
-                final Product selectedProduct = (Product) event.getSelection().getFirstElement();
+                final Product selectedProduct = (Product) event.getSelection().getSelectedValue();
                 final TargetProductSelectorModel targetProductSelectorModel = getTargetProductSelector().getModel();
                 targetProductSelectorModel.setProductName(selectedProduct.getName() + getTargetProductNameSuffix());
             }
@@ -92,8 +98,8 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
         ParameterDescriptorFactory parameterDescriptorFactory = new ParameterDescriptorFactory();
         parameterMap = new HashMap<String, Object>(17);
         final PropertyContainer propertyContainer = PropertyContainer.createMapBacked(parameterMap,
-                                                                             operatorSpi.getOperatorClass(),
-                                                                             parameterDescriptorFactory);
+                                                                                      operatorSpi.getOperatorClass(),
+                                                                                      parameterDescriptorFactory);
         try {
             propertyContainer.setDefaultValues();
         } catch (ValidationException e) {
@@ -101,26 +107,21 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
             showErrorDialog(e.getMessage());
         }
         if (propertyContainer.getProperties().length > 0) {
-            ValueEditorsPane parametersPane = new ValueEditorsPane(propertyContainer);
-            final JPanel paremetersPanel = parametersPane.createPanel();
-            paremetersPanel.setBorder(new EmptyBorder(4, 4, 4, 4));
-            this.form.add("Processing Parameters", new JScrollPane(paremetersPanel));
-
-            for (final Field field : sourceProductSelectorMap.keySet()) {
-                final SourceProductSelector sourceProductSelector = sourceProductSelectorMap.get(field);
-                final String sourceAlias = field.getAnnotation(SourceProduct.class).alias();
-
+            if (!sourceProductSelectorList.isEmpty()) {
+                SourceProductSelector sourceProductSelector = sourceProductSelectorList.get(0);
                 for (Property property : propertyContainer.getProperties()) {
                     PropertyDescriptor parameterDescriptor = property.getDescriptor();
-                    String sourceId = (String) parameterDescriptor.getAttribute("sourceId");
-                    if (sourceId != null && (sourceId.equals(field.getName()) || sourceId.equals(sourceAlias))) {
+                    if (parameterDescriptor.getAttribute(RasterDataNodeValues.ATTRIBUTE_NAME) != null) {
                         SelectionChangeListener valueSetUpdater = new ValueSetUpdater(parameterDescriptor);
                         sourceProductSelector.addSelectionChangeListener(valueSetUpdater);
                     }
                 }
             }
+            ValueEditorsPane parametersPane = new ValueEditorsPane(propertyContainer);
+            final JPanel paremetersPanel = parametersPane.createPanel();
+            paremetersPanel.setBorder(new EmptyBorder(4, 4, 4, 4));
+            this.form.add("Processing Parameters", new JScrollPane(paremetersPanel));
         }
-
     }
 
     private void initSourceProductSelectors(OperatorSpi operatorSpi) {
@@ -233,7 +234,7 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
 
         private final SourceProduct annot;
 
-        public AnnotatedSourceProductFilter(SourceProduct annot) {
+        private AnnotatedSourceProductFilter(SourceProduct annot) {
             this.annot = annot;
         }
 
@@ -251,6 +252,33 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
             }
 
             return true;
+        }
+    }
+
+    private static class ValueSetUpdater extends AbstractSelectionChangeListener {
+
+        private final PropertyDescriptor propertyDescriptor;
+
+        private ValueSetUpdater(PropertyDescriptor propertyDescriptor) {
+            this.propertyDescriptor = propertyDescriptor;
+        }
+
+        @Override
+        public void selectionChanged(SelectionChangeEvent event) {
+            Selection selection = event.getSelection();
+            String[] values = new String[0];
+            if (selection != null) {
+                final Product selectedProduct = (Product) selection.getSelectedValue();
+                if (selectedProduct != null) {
+                    Object object = propertyDescriptor.getAttribute(RasterDataNodeValues.ATTRIBUTE_NAME);
+                    if (object != null) {
+                        Class<? extends RasterDataNode> rasterDataNodeType = (Class<? extends RasterDataNode>) object;
+                        boolean includeEmptyValue = !propertyDescriptor.isNotNull() && !propertyDescriptor.getType().isArray();
+                        values = RasterDataNodeValues.getNames(selectedProduct, rasterDataNodeType, includeEmptyValue);
+                    }
+                }
+            }
+            propertyDescriptor.setValueSet(new ValueSet(values));
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: MaskCollectionLayer.java,v 1.1 2009-11-04 17:04:32 lveci Exp $
+ * $Id: MaskCollectionLayer.java,v 1.2 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -26,6 +26,7 @@ import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.framework.datamodel.ProductNodeEvent;
+import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.datamodel.ProductNodeListener;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 
@@ -152,10 +153,13 @@ public class MaskCollectionLayer extends CollectionLayer {
                 final Object value = layer.getConfiguration().getValue("mask");
                 if (value instanceof Mask) {
                     Mask mask = (Mask) value;
+                    final ProductNodeGroup<Mask> overlayMaskGroup = getRaster().getOverlayMaskGroup();
                     if (layer.isVisible()) {
-                        getRaster().getOverlayMaskGroup().add(mask);
+                        if (!overlayMaskGroup.contains(mask)) {
+                            overlayMaskGroup.add(mask);
+                        }
                     } else {
-                        getRaster().getOverlayMaskGroup().remove(mask);
+                        overlayMaskGroup.remove(mask);
                     }
                 }
             }

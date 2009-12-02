@@ -1,5 +1,5 @@
 /*
- * $Id: MapProjectionDialog.java,v 1.2 2009-05-29 19:18:33 lveci Exp $
+ * $Id: MapProjectionDialog.java,v 1.3 2009-12-02 16:52:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -63,6 +63,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 
+/**
+ * @deprecated since BEAM 4.7, replaced by GPF operator 'Reproject'
+ */
+@Deprecated
 public class MapProjectionDialog extends ModalDialog {
 
     private static final String RESAMPLING_NEAREST_NEIGHBOUR = "Nearest Neighbour";

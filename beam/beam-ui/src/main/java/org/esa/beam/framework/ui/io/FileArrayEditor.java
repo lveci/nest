@@ -1,5 +1,5 @@
 /*
- * $Id: FileArrayEditor.java,v 1.3 2009-11-13 20:53:13 lveci Exp $
+ * $Id: FileArrayEditor.java,v 1.4 2009-12-02 16:52:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -43,7 +43,7 @@ import java.util.List;
 /**
  * An UI-Component which represents a file list with the ability to add and remove files.
  */
-public final class FileArrayEditor {
+public class FileArrayEditor {
 
     private static final Dimension _listPreferredSize = new Dimension(500, 200);
 
@@ -71,6 +71,9 @@ public final class FileArrayEditor {
         setName(_listComponent, _label);
     }
 
+    protected final EditorParent getParent() {
+        return _parent;
+    }
     /**
      * Retrieves the editor UI.
      *
@@ -245,13 +248,18 @@ public final class FileArrayEditor {
      */
     private JFileChooser getFileDialogSafe() {
         if (_fileDialog == null) {
-            _fileDialog = new BeamFileChooser();
-            _fileDialog.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            _fileDialog.setCurrentDirectory(SystemUtils.getUserHomeDir());
-            _fileDialog.setMultiSelectionEnabled(true);
+            _fileDialog = createFileChooserDialog();
         }
 
         return _fileDialog;
+    }
+
+    protected JFileChooser createFileChooserDialog() {
+        final JFileChooser chooser = new BeamFileChooser();
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        chooser.setCurrentDirectory(SystemUtils.getUserHomeDir());
+        chooser.setMultiSelectionEnabled(true);
+        return chooser;
     }
 
     /*

@@ -1,5 +1,5 @@
 /*
- * $Id: WakefulComponent.java,v 1.3 2009-11-04 17:04:33 lveci Exp $
+ * $Id: WakefulComponent.java,v 1.4 2009-12-02 16:48:34 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -60,7 +60,7 @@ import java.awt.image.BufferedImage;
  * {@link WakefulComponent#getVisualState() visualState} property.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-11-04 17:04:33 $
+ * @version $Revision: 1.4 $ $Date: 2009-12-02 16:48:34 $
  */
 public class WakefulComponent extends JComponent {
 

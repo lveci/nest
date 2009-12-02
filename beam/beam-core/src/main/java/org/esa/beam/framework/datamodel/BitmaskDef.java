@@ -1,5 +1,5 @@
 /*
- * $Id: BitmaskDef.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: BitmaskDef.java,v 1.2 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -26,7 +26,7 @@ import java.awt.Color;
  * transparancy.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-12-02 16:52:11 $
  */
 public class BitmaskDef extends ProductNode {
 
@@ -49,7 +49,7 @@ public class BitmaskDef extends ProductNode {
 
     /**
      * Gets the bitmask's boolean expression code.
-     * To create a {@link Term} use {@link Product#createTerm(String) createTerm(getExpr())}.
+     * To create a {@link Term} use {@link Product#parseExpression(String) createTerm(getExpr())}.
      *
      * @return the bitmask's boolean expression code.
      */

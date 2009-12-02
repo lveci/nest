@@ -1,5 +1,5 @@
 /*
- * $Id: RoiCombiner.java,v 1.1 2009-04-28 14:37:13 lveci Exp $
+ * $Id: RoiCombiner.java,v 1.2 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,85 +16,75 @@
  */
 package org.esa.beam.cluster;
 
-import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.RasterDataNode;
-import org.esa.beam.framework.gpf.OperatorException;
+import org.esa.beam.framework.datamodel.Mask;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.StringUtils;
 
-import javax.media.jai.ROI;
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.IndexColorModel;
-import java.io.IOException;
+import java.awt.image.RenderedImage;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import javax.media.jai.ROI;
+import javax.media.jai.operator.MinDescriptor;
 
 
 class RoiCombiner {
 
-    private ROI combinedRoi;
+    private final Set<RenderedImage> maskImages = new HashSet<RenderedImage>();
+    private final ROI roi;
 
-    public RoiCombiner(Band[] sourceBands, Band roiBand) throws IOException {
-        createRoi(roiBand);
-        createValidMaskRoi(sourceBands);
+    RoiCombiner(Product sourceProduct, Band[] sourceBands, String roiMaskName) {
+        handleRoiMask(sourceProduct, roiMaskName);
+        handleValidMasks(sourceBands);
+        if (maskImages.size() > 0) {
+            RenderedImage combinedMaskImage = createCombinedMaskImage();
+            if (combinedMaskImage != null) {
+                roi = new ROI(combinedMaskImage, 1);
+            } else {
+                roi = null;
+            }
+        } else {
+            roi = null;
+        }
     }
 
-    public ROI getCombinedRoi() {
-        return combinedRoi;
+
+    public ROI getROI() {
+        return roi;
     }
 
-    private void createRoi(Band roiBand) {
-        if (roiBand != null && roiBand.isROIUsable()) {
-            try {
-                combinedRoi = roiBand.createROI(ProgressMonitor.NULL);
-            } catch (IOException e) {
-                throw new OperatorException(e);
+    private void handleRoiMask(Product product, String roiMaskName) {
+        Mask roiMask = null;
+        if (StringUtils.isNotNullAndNotEmpty(roiMaskName)) {
+            roiMask = product.getMaskGroup().get(roiMaskName);
+        }
+        if (roiMask != null) {
+            maskImages.add(roiMask.getSourceImage());
+        }
+    }
+
+    private void handleValidMasks(Band[] sourceBands) {
+        for (Band band : sourceBands) {
+            if (StringUtils.isNotNullAndNotEmpty(band.getValidMaskExpression())) {
+                maskImages.add(band.getValidMaskImage());
             }
         }
     }
 
-    private void createValidMaskRoi(Band[] sourceBands) throws IOException {
-        Set<String> validMaskSet = new HashSet<String>(sourceBands.length);
-        for (int i = 0; i < sourceBands.length; i++) {
-            Band band = sourceBands[i];
-            String validExpression = band.getValidMaskExpression();
-            if (StringUtils.isNotNullAndNotEmpty(validExpression)
-                    && !validMaskSet.contains(validExpression)) {
-                validMaskSet.add(validExpression);
-                BufferedImage noDataImage = createValidMaskImage(band);
-                ROI noDataRoi = new ROI(noDataImage, 1);
-                if (combinedRoi == null) {
-                    combinedRoi = noDataRoi;
-                } else {
-                    combinedRoi = combinedRoi.intersect(noDataRoi);
-                }
-            }
+    private RenderedImage createCombinedMaskImage() {
+        if (maskImages.size() <= 0) {
+            return null;
         }
-    }
+        List<RenderedImage> imageList = new ArrayList<RenderedImage>(maskImages);
+        RenderedImage combinedImage = imageList.get(0);
 
-    private static BufferedImage createValidMaskImage(RasterDataNode raster) throws IOException {
-        final byte b00 = (byte) 0;
-        final byte b01 = (byte) 1;
-        final int width = raster.getSceneRasterWidth();
-        final int height = raster.getSceneRasterHeight();
-        final Color color = Color.WHITE;
-        final IndexColorModel cm = new IndexColorModel(8, 2,
-                                                       new byte[]{b00, (byte) color.getRed()},
-                                                       new byte[]{b00, (byte) color.getGreen()},
-                                                       new byte[]{b00, (byte) color.getBlue()},
-                                                       0);
-        final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_INDEXED, cm);
-        final byte[] imageDataBuffer = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
-        raster.ensureValidMaskComputed(ProgressMonitor.NULL);
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                if (raster.isPixelValid(x, y)) {
-                    imageDataBuffer[y * width + x] = b01;
-                }
-            }
+        for (int i = 1; i < imageList.size(); i++) {
+            RenderedImage roiImage2 = imageList.get(i);
+            combinedImage = MinDescriptor.create(combinedImage, roiImage2, null);
         }
-        return bi;
+        return combinedImage;
     }
 }

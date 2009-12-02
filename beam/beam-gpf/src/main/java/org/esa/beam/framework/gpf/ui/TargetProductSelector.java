@@ -24,7 +24,7 @@ import java.io.File;
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Ralf Quast
- * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.3 $ $Date: 2009-12-02 16:52:11 $
  */
 public class TargetProductSelector {
 
@@ -62,7 +62,7 @@ public class TargetProductSelector {
         productDirChooserButton.setMinimumSize(size);
         saveToFileCheckBox.addActionListener(new UIStateUpdater());
         formatNameComboBox.addItemListener(new ItemListener() {
-
+            @Override
             public void itemStateChanged(ItemEvent e) {
                 final String formatName = (String) formatNameComboBox.getSelectedItem();
                 if(!canReadOutputFormat(formatName)) {
@@ -82,11 +82,13 @@ public class TargetProductSelector {
         bc.bind("productDir", productDirTextField);
 
         model.getValueContainer().addPropertyChangeListener("productDir", new PropertyChangeListener() {
+            @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 productDirTextField.setToolTipText(model.getProductDir().getPath());
             }
         });
         model.getValueContainer().addPropertyChangeListener("formatName", new PropertyChangeListener() {
+            @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 updateUIState();
             }
@@ -196,6 +198,7 @@ public class TargetProductSelector {
 
     private class UIStateUpdater implements ActionListener {
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (!canReadOutputFormat(model.getFormatName())) {
                 model.setOpenInAppSelected(false);
@@ -212,6 +215,7 @@ public class TargetProductSelector {
             super("...");
         }
 
+        @Override
         public void actionPerformed(ActionEvent event) {
             Window windowAncestor = null;
             if (event.getSource() instanceof JComponent) {

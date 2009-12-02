@@ -22,7 +22,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
 
 import javax.media.jai.JAI;
@@ -179,6 +179,12 @@ public class GraphProcessor {
         for (Dimension dimension : dimList) {
             numPmTicks += dimension.width * dimension.height * tileDimMap.get(dimension).size();
         }
+        
+        final TileScheduler tileScheduler = JAI.getDefaultInstance().getTileScheduler();
+        final int parallelism = tileScheduler.getParallelism();
+        final Semaphore semaphore = new Semaphore(parallelism , true);
+        final TileComputationListener tcl = new GraphTileComputationListener(semaphore);
+        final TileComputationListener[] listeners = new TileComputationListener[] { tcl };
 
         int percentComplete;
         final int percentStep = 10;
@@ -186,7 +192,6 @@ public class GraphProcessor {
         int cnt=0;
         
         try {
-            AtomicInteger scheduledTiles = new AtomicInteger(0);
             pm.beginTask("Computing raster data...", numPmTicks);
             for (Dimension dimension : dimList) {
                 List<NodeContext> nodeContextList = tileDimMap.get(dimension);
@@ -213,7 +218,7 @@ public class GraphProcessor {
                                 for (Band band : targetProduct.getBands()) {
                                     OperatorImage image = nodeContext.getTargetImage(band);
                                     if (image != null) {
-                                        forceTileComputation(image, tileX, tileY, scheduledTiles);
+                                        forceTileComputation(image, tileX, tileY, semaphore, tileScheduler, listeners);
                                         break;
                                     }
                                 }
@@ -224,7 +229,7 @@ public class GraphProcessor {
                                     OperatorImage image = nodeContext.getTargetImage(band);
                                     if (image == null) {
                                         if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
-                                            forceTileComputation(band.getSourceImage(), tileX, tileY, scheduledTiles);
+                                            forceTileComputation(band.getSourceImage(), tileX, tileY, semaphore, tileScheduler, listeners);
                                         }
                                     }
                                 }
@@ -235,9 +240,9 @@ public class GraphProcessor {
                                 for (Band band : targetProduct.getBands()) {
                                     OperatorImage image = nodeContext.getTargetImage(band);
                                     if (image != null) {
-                                        forceTileComputation(image, tileX, tileY, scheduledTiles);
+                                        forceTileComputation(image, tileX, tileY, semaphore, tileScheduler, listeners);
                                     } else if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
-                                        forceTileComputation(band.getSourceImage(), tileX, tileY, scheduledTiles);
+                                        forceTileComputation(band.getSourceImage(), tileX, tileY, semaphore, tileScheduler, listeners);
                                     }
                                 }
                             }
@@ -260,13 +265,7 @@ public class GraphProcessor {
                     System.out.println(" 100%");
                 }
             }
-            while (scheduledTiles.get() > 0) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    throw new OperatorException(e);
-                }
-            }
+            acquirePermits(semaphore, parallelism);
         } finally {
             pm.done();
             fireProcessingStopped(graphContext);
@@ -292,28 +291,26 @@ public class GraphProcessor {
         return tileSizeMap;
     }
 
-    private static void forceTileComputation(RenderedImage image, int tileX, int tileY, AtomicInteger scheduledTiles) {
+    private static void forceTileComputation(PlanarImage image, int tileX, int tileY, Semaphore semaphore,
+                                             TileScheduler tileScheduler, TileComputationListener[] listeners) {
         /////////////////////////////////////////////////////////////////////
         //
         // GPF pull-processing is triggered here!!!
         //
-        TileScheduler tileScheduler = JAI.getDefaultInstance().getTileScheduler();
-        Point[] points = new Point[1];
-        points[0] = new Point(tileX, tileY);
-        final PlanarImage planarImage = PlanarImage.wrapRenderedImage(image);
-        final TileComputationListener tcl = new GraphTileComputationListener(scheduledTiles);
-        final TileComputationListener[] listeners = new TileComputationListener[] {tcl};
-        scheduledTiles.addAndGet(1);
-        tileScheduler.scheduleTiles(planarImage, points, listeners);
-        while (scheduledTiles.intValue() > tileScheduler.getParallelism()) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                throw new OperatorException(e);
-            }
-        }
+        Point[] points = new Point[] {new Point(tileX, tileY)};
+        acquirePermits(semaphore, 1);
+        tileScheduler.scheduleTiles(image, points, listeners);
+        
         //
         /////////////////////////////////////////////////////////////////////
+    }
+    
+    private static void acquirePermits(Semaphore semaphore, int permits) {
+        try {
+            semaphore.acquire(permits);
+        } catch (InterruptedException e) {
+            throw new OperatorException(e);
+        }
     }
 
     private static void initNodeDependencies(GraphContext graphContext) throws GraphException {
@@ -407,28 +404,30 @@ public class GraphProcessor {
 
     private static class GraphTileComputationListener implements TileComputationListener {
 
-        private final AtomicInteger scheduledTiles;
+        private final Semaphore semaphore;
 
-        GraphTileComputationListener(AtomicInteger scheduledTiles) {
-            this.scheduledTiles = scheduledTiles;
+        GraphTileComputationListener(Semaphore semaphore) {
+            this.semaphore = semaphore;
         }
 
         @Override
-            public void tileComputed(Object eventSource, TileRequest[] requests, PlanarImage image, int tileX,
+        public void tileComputed(Object eventSource, TileRequest[] requests, PlanarImage image, int tileX,
                                  int tileY,
                                  Raster raster) {
-            scheduledTiles.decrementAndGet();
+            semaphore.release();
         }
 
         @Override
-            public void tileCancelled(Object eventSource, TileRequest[] requests, PlanarImage image, int tileX,
+        public void tileCancelled(Object eventSource, TileRequest[] requests, PlanarImage image, int tileX,
                                   int tileY) {
+            semaphore.release();
             throw new OperatorException("Operation cancelled.");
         }
 
         @Override
-            public void tileComputationFailure(Object eventSource, TileRequest[] requests, PlanarImage image, int tileX,
+        public void tileComputationFailure(Object eventSource, TileRequest[] requests, PlanarImage image, int tileX,
                                            int tileY, Throwable situation) {
+            semaphore.release();
             throw new OperatorException("Operation failed.", situation);
         }
     } 

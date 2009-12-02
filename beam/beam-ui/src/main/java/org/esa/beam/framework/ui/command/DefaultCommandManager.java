@@ -1,5 +1,5 @@
 /*
- * $Id: DefaultCommandManager.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: DefaultCommandManager.java,v 1.2 2009-12-02 16:52:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,12 +16,12 @@
  */
 package org.esa.beam.framework.ui.command;
 
-import org.esa.beam.framework.ui.tool.Tool;
+import com.bc.ceres.swing.figure.Interactor;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +34,7 @@ import java.util.Map;
  *
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.1 $  $Date: 2009-04-28 14:17:18 $
+ * @version $Revision: 1.2 $  $Date: 2009-12-02 16:52:12 $
  * @see Command
  * @see java.util.ResourceBundle
  */
@@ -43,12 +43,12 @@ public class DefaultCommandManager implements CommandManager {
     /**
      * Stores all commands registered in this applications. Provided for fast key based access.
      */
-    private final Map _commandMap = new Hashtable();
+    private final Map<String, Command> commandMap = new HashMap<String, Command>();
 
     /**
      * Stores all commands registered in this applications. Provided for command order and index based access.
      */
-    private final List _commandList = new ArrayList();
+    private final List<Command> commandList = new ArrayList<Command>();
 
     /**
      * Creates a new executable command for the given unique command ID and the given command listener.
@@ -63,6 +63,7 @@ public class DefaultCommandManager implements CommandManager {
      * @see #createCommandGroup
      * @see #addCommand(Command)
      */
+    @Override
     public ExecCommand createExecCommand(String commandID, CommandListener listener) {
         Guardian.assertNotNullOrEmpty("commandID", commandID);
         ExecCommand command = new ExecCommand(commandID, listener);
@@ -84,7 +85,8 @@ public class DefaultCommandManager implements CommandManager {
      * @see #createCommandGroup
      * @see #addCommand(Command)
      */
-    public ToolCommand createToolCommand(String commandID, CommandStateListener listener, Tool tool) {
+    @Override
+    public ToolCommand createToolCommand(String commandID, CommandStateListener listener, Interactor tool) {
         Guardian.assertNotNullOrEmpty("commandID", commandID);
         Guardian.assertNotNull("tool", tool);
         ToolCommand command = new ToolCommand(commandID, listener, tool);
@@ -105,6 +107,7 @@ public class DefaultCommandManager implements CommandManager {
      * @see #createToolCommand
      * @see #addCommand(Command)
      */
+    @Override
     public CommandGroup createCommandGroup(String commandGroupID, CommandStateListener listener) {
         Guardian.assertNotNullOrEmpty("commandGroupID", commandGroupID);
         CommandGroup commandGroup = new CommandGroup(commandGroupID, listener);
@@ -118,8 +121,9 @@ public class DefaultCommandManager implements CommandManager {
      *
      * @return the number of commands in this <code>DefaultCommandManager</code>.
      */
+    @Override
     public int getNumCommands() {
-        return _commandList.size();
+        return commandList.size();
     }
 
 
@@ -132,8 +136,9 @@ public class DefaultCommandManager implements CommandManager {
      *
      * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt;= getNumCommands()).
      */
+    @Override
     public Command getCommandAt(int index) {
-        return (Command) _commandList.get(index);
+        return commandList.get(index);
     }
 
 
@@ -141,14 +146,16 @@ public class DefaultCommandManager implements CommandManager {
      * Gets the command associated with the given command-COMMAND_ID or <code>null</code> if a command with the given command-ID
      * has not been registered (so far).
      */
+    @Override
     public Command getCommand(String commandID) {
-        return (Command) _commandMap.get(commandID);
+        return commandMap.get(commandID);
     }
 
     /**
      * Gets the command associated with the given command-ID or <code>null</code> if an command with the given
      * command-ID has not been registered.
      */
+    @Override
     public ExecCommand getExecCommand(String commandID) {
         final Command command = getCommand(commandID);
         if (command instanceof ExecCommand) {
@@ -161,6 +168,7 @@ public class DefaultCommandManager implements CommandManager {
      * Gets the tool command associated with the given command-ID or <code>null</code> if a tool command with the given
      * command-ID has not been registered.
      */
+    @Override
     public ToolCommand getToolCommand(String commandID) {
         final Command command = getCommand(commandID);
         if (command instanceof ToolCommand) {
@@ -173,6 +181,7 @@ public class DefaultCommandManager implements CommandManager {
      * Gets the command group associated with the given command-ID or <code>null</code> if an command group with the
      * given command-ID has not been registered.
      */
+    @Override
     public CommandGroup getCommandGroup(String commandID) {
         Command command = getCommand(commandID);
         if (command instanceof CommandGroup) {
@@ -184,6 +193,7 @@ public class DefaultCommandManager implements CommandManager {
     /**
      * Calls the <code>updateState</code> method of all registered commands.
      */
+    @Override
     public void updateState() {
         final int n = getNumCommands();
         for (int i = 0; i < n; i++) {
@@ -194,34 +204,11 @@ public class DefaultCommandManager implements CommandManager {
     /**
      * Updates the component tree of all commands since the Java look-and-feel has changed.
      */
+    @Override
     public void updateComponentTreeUI() {
         final int n = getNumCommands();
         for (int i = 0; i < n; i++) {
             getCommandAt(i).updateComponentTreeUI();
-        }
-    }
-
-
-    /**
-     * Deactivates the tools of the tool commands which not equals given activated tool and which are currenbly active.
-     * In general, this should be the case for just one or none tool.
-     *
-     * @param activatedTool the tool that has been activated, must not be <code>null</code> and be active
-     */
-    public void toggleToolActivatedState(Tool activatedTool) {
-        Guardian.assertNotNull("activatedTool", activatedTool);
-        if (!activatedTool.isActive()) {
-            throw new IllegalArgumentException("tool is not active");
-        }
-        for (int i = 0; i < getNumCommands(); i++) {
-            Command command = getCommandAt(i);
-            if (command instanceof ToolCommand) {
-                ToolCommand toolCommand = (ToolCommand) command;
-                Tool tool = toolCommand.getTool();
-                if (tool != activatedTool && tool.isActive()) {
-                    tool.deactivate();
-                }
-            }
         }
     }
 
@@ -233,13 +220,14 @@ public class DefaultCommandManager implements CommandManager {
      * @throws IllegalArgumentException if the command ID property of the command has not been set, or if an command
      *                                  with the same command ID has alreay been registered
      */
+    @Override
     public void addCommand(Command command) {
-        if (_commandMap.containsKey(command.getCommandID())) {
+        if (commandMap.containsKey(command.getCommandID())) {
             throw new IllegalArgumentException(
                     "a command named '" + command.getCommandID() + "' is already registered");
         }
-        _commandMap.put(command.getCommandID(), command);
-        _commandList.add(command);
+        commandMap.put(command.getCommandID(), command);
+        commandList.add(command);
         Debug.trace("DefaultCommandManager: added command '" + command + "'");
     }
 
@@ -248,10 +236,11 @@ public class DefaultCommandManager implements CommandManager {
      *
      * @param command the command to be removed
      */
+    @Override
     public void removeCommand(Command command) {
         String commandKey = command.getCommandID();
-        _commandMap.remove(commandKey);
-        _commandList.remove(command);
+        commandMap.remove(commandKey);
+        commandList.remove(command);
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductReader.java,v 1.6 2009-08-06 15:21:21 lveci Exp $
+ * $Id: DimapProductReader.java,v 1.7 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -54,7 +54,7 @@ import java.util.Map;
  *
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.6 $ $Date: 2009-08-06 15:21:21 $
+ * @version $Revision: 1.7 $ $Date: 2009-12-02 16:52:11 $
  * @see org.esa.beam.dataio.dimap.DimapProductReaderPlugIn
  */
 public class DimapProductReader extends AbstractProductReader {
@@ -294,13 +294,12 @@ public class DimapProductReader extends AbstractProductReader {
         pm.beginTask("Reading band '" + destBand.getName() + "'...", sourceMaxY - sourceMinY);
         // For each scan in the data source
         try {
-          synchronized (inputStream) {
+            synchronized (inputStream) {
             for (int sourceY = sourceMinY; sourceY <= sourceMaxY; sourceY += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
                 }
                 final int sourcePosY = sourceY * sourceRasterWidth;
-
                     if (sourceStepX == 1) {
                         destBuffer.readFrom(destPos, destWidth, inputStream, sourcePosY + sourceMinX);
                         destPos += destWidth;

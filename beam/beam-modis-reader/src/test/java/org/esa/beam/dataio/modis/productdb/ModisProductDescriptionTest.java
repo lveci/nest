@@ -1,5 +1,5 @@
 /*
- * $Id: ModisProductDescriptionTest.java,v 1.1 2009-09-25 19:03:49 lveci Exp $
+ * $Id: ModisProductDescriptionTest.java,v 1.2 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2002,2003  by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -139,7 +139,7 @@ public class ModisProductDescriptionTest extends TestCase {
         String[] un = new String[]{"unit_1", "unit_2", "unit_3"};
 
         for (int n = 0; n < 3; n++) {
-            _prod.addTiePointGrid(tp[n], sc[n], of[n], un[n]);
+            _prod.addTiePointGrid(new ModisTiePointDescription(tp[n], sc[n], of[n], un[n]));
         }
 
         String[] tpNames = _prod.getTiePointNames();

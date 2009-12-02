@@ -1,5 +1,5 @@
 /*
- * $Id: ProductTest.java,v 1.5 2009-11-04 17:04:32 lveci Exp $
+ * $Id: ProductTest.java,v 1.6 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -210,7 +210,7 @@ public class ProductTest extends TestCase {
         flagCoding.addFlag("F2", F2, null);
         flagCoding.addFlag("F3", F3, null);
 
-        product.addFlagCoding(flagCoding);
+        product.getFlagCodingGroup().add(flagCoding);
         band.setFlagCoding(flagCoding);
 
         band.ensureRasterData();
@@ -263,7 +263,7 @@ public class ProductTest extends TestCase {
         flagCoding.addFlag("F2", F2, null);
         flagCoding.addFlag("F3", F3, null);
 
-        product.addFlagCoding(flagCoding);
+        product.getFlagCodingGroup().add(flagCoding);
         band.setFlagCoding(flagCoding);
 
         ProductData data = band.createCompatibleRasterData();
@@ -313,7 +313,7 @@ public class ProductTest extends TestCase {
         Term term = null;
 
         try {
-            term = product.createTerm(expr);
+            term = product.parseExpression(expr);
         } catch (ParseException e) {
             fail("unexpected BitmaskExpressionParseException: " + e.getMessage());
         }
@@ -333,7 +333,7 @@ public class ProductTest extends TestCase {
         Term term = null;
 
         try {
-            term = product.createTerm(expr);
+            term = product.parseExpression(expr);
         } catch (ParseException e) {
             fail("unexpected BitmaskExpressionParseException: " + e.getMessage());
         }
@@ -565,7 +565,7 @@ public class ProductTest extends TestCase {
         flagCoding.addFlag("F2", F2, null);
         flagCoding.addFlag("F3", F3, null);
 
-        product.addFlagCoding(flagCoding);
+        product.getFlagCodingGroup().add(flagCoding);
         band.setFlagCoding(flagCoding);
 
         band.ensureRasterData();
@@ -582,7 +582,7 @@ public class ProductTest extends TestCase {
         final byte TRUE = 23;
         final byte FALSE = 45;
 
-        final Term termF1 = product.createTerm("flags.F1");
+        final Term termF1 = product.parseExpression("flags.F1");
         final byte[] F1_MASK = new byte[]{
                 FALSE, TRUE, FALSE, FALSE,
                 TRUE, FALSE, TRUE, TRUE,
@@ -601,7 +601,7 @@ public class ProductTest extends TestCase {
         assertEquals(true, ObjectUtils.equalObjects(currentF1Sub, F1_MASK_SUB));
 
 
-        final Term termF1AF2 = product.createTerm("flags.F1 AND flags.F2");
+        final Term termF1AF2 = product.parseExpression("flags.F1 AND flags.F2");
         final byte[] F1_AND_F2_MASK = new byte[]{
                 FALSE, FALSE, FALSE, FALSE,
                 FALSE, FALSE, TRUE, FALSE,
@@ -620,7 +620,7 @@ public class ProductTest extends TestCase {
         assertEquals(true, ObjectUtils.equalObjects(currentF1AF2Sub, F1_AND_F2_MASK_SUB));
 
 
-        final Term termF1AF2OF3 = product.createTerm("(flags.F1 AND flags.F2) OR flags.F3");
+        final Term termF1AF2OF3 = product.parseExpression("(flags.F1 AND flags.F2) OR flags.F3");
         final byte[] F1_AND_F2_OR_F3_MASK = new byte[]{
                 FALSE, FALSE, FALSE, TRUE,
                 FALSE, FALSE, TRUE, TRUE,
@@ -652,7 +652,7 @@ public class ProductTest extends TestCase {
         flagCoding.addFlag("F2", F2, null);
         flagCoding.addFlag("F3", F3, null);
 
-        product.addFlagCoding(flagCoding);
+        product.getFlagCodingGroup().add(flagCoding);
         band.setFlagCoding(flagCoding);
 
         band.ensureRasterData();
@@ -669,7 +669,7 @@ public class ProductTest extends TestCase {
         final int TRUE = 23345;
         final int FALSE = 454236;
 
-        final Term termF1 = product.createTerm("flags.F1");
+        final Term termF1 = product.parseExpression("flags.F1");
         final int[] F1_MASK = new int[]{
                 FALSE, TRUE, FALSE, FALSE,
                 TRUE, FALSE, TRUE, TRUE,
@@ -688,7 +688,7 @@ public class ProductTest extends TestCase {
         assertEquals(true, ObjectUtils.equalObjects(currentF1Sub, F1_MASK_SUB));
 
 
-        final Term termF1AF2 = product.createTerm("flags.F1 AND flags.F2");
+        final Term termF1AF2 = product.parseExpression("flags.F1 AND flags.F2");
         final int[] F1_AND_F2_MASK = new int[]{
                 FALSE, FALSE, FALSE, FALSE,
                 FALSE, FALSE, TRUE, FALSE,
@@ -707,7 +707,7 @@ public class ProductTest extends TestCase {
         assertEquals(true, ObjectUtils.equalObjects(currentF1AF2Sub, F1_AND_F2_MASK_SUB));
 
 
-        final Term termF1AF2OF3 = product.createTerm("(flags.F1 AND flags.F2) OR flags.F3");
+        final Term termF1AF2OF3 = product.parseExpression("(flags.F1 AND flags.F2) OR flags.F3");
         final int[] F1_AND_F2_OR_F3_MASK = new int[]{
                 FALSE, FALSE, FALSE, TRUE,
                 FALSE, FALSE, TRUE, TRUE,
@@ -734,7 +734,7 @@ public class ProductTest extends TestCase {
         final int f1Mask = 1;
         flagCoding.addFlag("f1", f1Mask, "");
         flagsBand.setFlagCoding(flagCoding);
-        product.addFlagCoding(flagCoding);
+        product.getFlagCodingGroup().add(flagCoding);
         final byte[] elems = new byte[]{
                 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0,
                 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1,
@@ -743,7 +743,7 @@ public class ProductTest extends TestCase {
         product.setModified(false);
 
 
-        final Term term = product.createTerm("flags.f1");
+        final Term term = product.parseExpression("flags.f1");
         final BitRaster validMask = product.createValidMask(term, ProgressMonitor.NULL);
 
         for (int i = 0; i < elems.length; i++) {
@@ -761,7 +761,7 @@ public class ProductTest extends TestCase {
         final FlagCoding flagCoding = new FlagCoding("flags");
         flagCoding.addFlag("F1", F1, null);
 
-        product.addFlagCoding(flagCoding);
+        product.getFlagCodingGroup().add(flagCoding);
         band.setFlagCoding(flagCoding);
 
         final byte[] elems = new byte[]{
@@ -774,7 +774,7 @@ public class ProductTest extends TestCase {
         product.setModified(false);
 
 
-        final Term term = product.createTerm("flags.F1");
+        final Term term = product.parseExpression("flags.F1");
         final float[] currentData = new float[4 * 4];
         final float[] currentDataSub = new float[2 * 2];
         final ProductData rasterData = ProductData.createInstance(currentData);

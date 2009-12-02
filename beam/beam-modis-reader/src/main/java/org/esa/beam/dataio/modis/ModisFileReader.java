@@ -1,5 +1,5 @@
 /*
- * $Id: ModisFileReader.java,v 1.1 2009-09-25 19:03:49 lveci Exp $
+ * $Id: ModisFileReader.java,v 1.2 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -518,6 +518,10 @@ class ModisFileReader {
         case ProductData.TYPE_UINT16:
             ret = new short[size];
             break;
+        case ProductData.TYPE_INT8:
+        case ProductData.TYPE_UINT8:
+            ret = new byte[size];
+            break;
         }
         return ret;
     }
@@ -540,6 +544,23 @@ class ModisFileReader {
             for (int n = 0; n < fRet.length; n++) {
                 fRet[n] = scale * fRet[n] + offset;
             }
+        } else if (dataType == ProductData.TYPE_INT8) {
+            byte[] sData = (byte[]) buffer;
+            fRet = new float[sData.length];
+            for (int n = 0; n < fRet.length; n++) {
+                fRet[n] = sData[n] * scale + offset;
+            }
+        } else if (dataType == ProductData.TYPE_UINT8) {
+            byte[] sData = (byte[]) buffer;
+            fRet = new float[sData.length];
+            for (int n = 0; n < fRet.length; n++) {
+                if (sData[n] < 0) {
+                    fRet[n] = (sData[n] + 256) * scale + offset;
+                } else {
+                    fRet[n] = sData[n] * scale + offset;
+                }
+            }
+
         } else if (dataType == ProductData.TYPE_INT16) {
             short[] sData = (short[]) buffer;
             fRet = new float[sData.length];

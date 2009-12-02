@@ -1,5 +1,5 @@
 /*
- * $Id: ModisBandReaderFactory.java,v 1.1 2009-09-25 19:03:49 lveci Exp $
+ * $Id: ModisBandReaderFactory.java,v 1.2 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -80,6 +80,12 @@ public class ModisBandReaderFactory {
                     if ((scaleMethod == ModisBandReader.SCALE_UNKNOWN) ||
                         (scaleMethod == ModisBandReader.SCALE_LINEAR)) {
                         readers[i] = new ModisInt16BandReader(sdsId, i, is3d);
+                    }
+                } else if (prodIODataType == ProductData.TYPE_UINT32) {
+                    if ((scaleMethod == ModisBandReader.SCALE_UNKNOWN) ||
+                        (scaleMethod == ModisBandReader.SCALE_LINEAR) ||
+                        (scaleMethod == ModisBandReader.SCALE_SLOPE_INTERCEPT)) {
+                        readers[i] = new ModisUint32BandReader(sdsId, i, is3d);
                     }
                 }
                 readers[i].setName(bandName);

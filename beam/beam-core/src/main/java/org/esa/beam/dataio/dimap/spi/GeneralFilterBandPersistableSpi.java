@@ -4,7 +4,7 @@ import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.datamodel.GeneralFilterBand;
 import org.jdom.Element;
 /*
- * $Id: GeneralFilterBandPersistableSpi.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: GeneralFilterBandPersistableSpi.java,v 1.2 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -26,15 +26,17 @@ import org.jdom.Element;
  * <p><i>Note that this class is not yet public API. Interface may chhange in future releases.</i></p>
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-12-02 16:52:11 $
  */
 public class GeneralFilterBandPersistableSpi implements DimapPersistableSpi {
 
 
+    @Override
     public DimapPersistable createPersistable() {
         return new GeneralFilterBandPersistable();
     }
 
+    @Override
     public boolean canDecode(Element element) {
         final String elementName = element.getName();
         if(elementName.equals(DimapProductConstants.TAG_SPECTRAL_BAND_INFO)) {
@@ -49,6 +51,7 @@ public class GeneralFilterBandPersistableSpi implements DimapPersistableSpi {
         return false;
     }
 
+    @Override
     public boolean canPersist(Object object) {
         return object instanceof GeneralFilterBand;
     }

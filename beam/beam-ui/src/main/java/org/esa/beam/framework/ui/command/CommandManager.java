@@ -1,5 +1,5 @@
 /*
- * $Id: CommandManager.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: CommandManager.java,v 1.2 2009-12-02 16:52:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,7 +16,7 @@
  */
 package org.esa.beam.framework.ui.command;
 
-import org.esa.beam.framework.ui.tool.Tool;
+import com.bc.ceres.swing.figure.Interactor;
 
 
 /**
@@ -24,7 +24,7 @@ import org.esa.beam.framework.ui.tool.Tool;
  * which are applied to all commands in the list.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $  $Date: 2009-04-28 14:17:18 $
+ * @version $Revision: 1.2 $  $Date: 2009-12-02 16:52:12 $
  */
 public interface CommandManager {
 
@@ -53,7 +53,7 @@ public interface CommandManager {
      * @see #createExecCommand
      * @see #createCommandGroup
      */
-    ToolCommand createToolCommand(String commandID, CommandStateListener listener, Tool tool);
+    ToolCommand createToolCommand(String commandID, CommandStateListener listener, Interactor tool);
 
     /**
      * Creates a new command group command for the given unique command ID and the given command state listener.
@@ -121,15 +121,6 @@ public interface CommandManager {
      * Updates the component tree of all commands since the Java look-and-feel has changed.
      */
     void updateComponentTreeUI();
-
-    /**
-     * Deactivates the tools of the tool commands which not equals given activated tool and which are currenbly active.
-     * In general, this should be the case for just one or none tool.
-     *
-     * @param activatedTool the tool that has been activated, must not be <code>null</code> and be active
-     */
-    void toggleToolActivatedState(Tool activatedTool);
-
 
     /**
      * Adds a new command to this command manager.

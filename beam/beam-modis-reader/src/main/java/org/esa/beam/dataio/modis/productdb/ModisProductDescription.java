@@ -1,5 +1,5 @@
 /*
- * $Id: ModisProductDescription.java,v 1.1 2009-09-25 19:03:49 lveci Exp $
+ * $Id: ModisProductDescription.java,v 1.2 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2002,2003  by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -185,11 +185,10 @@ public class ModisProductDescription {
     /**
      * Adds a tie point grid to the product description
      *
-     * @param gridName
+     * @param desc
      */
-    void addTiePointGrid(String gridName, String scaleName, String offsetName, String unitName) {
-        ModisTiePointDescription desc = new ModisTiePointDescription(gridName, scaleName, offsetName, unitName);
-        _tiePoints.put(gridName, desc);
+    void addTiePointGrid(final ModisTiePointDescription desc) {
+        _tiePoints.put(desc.getName(), desc);
         _tiePointVec.add(desc);
     }
 

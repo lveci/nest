@@ -4,25 +4,27 @@ import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
+import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.glayer.support.ImageLayer;
-import com.bc.ceres.glevel.MultiLevelSource;
+import org.esa.beam.framework.datamodel.Mask;
+import org.esa.beam.framework.datamodel.Mask.ImageType;
 import org.esa.beam.framework.datamodel.RasterDataNode;
-import org.esa.beam.glevel.RoiImageMultiLevelSource;
 
 import java.awt.Color;
-import java.awt.geom.AffineTransform;
 
 
 /**
  * @author Marco Peters
  * @version $ Revision: $ Date: $
  * @since BEAM 4.6
+ * @deprecated since 4.7, use {@link MaskLayerType}
  */
+@Deprecated
 public class RoiLayerType extends ImageLayer.Type {
 
     public static final String ROI_LAYER_ID = "org.esa.beam.layers.roi";
-    public static final String PROPERTY_NAME_COLOR = "color";
-    public static final String PROPERTY_NAME_TRANSPARENCY = "transparency";
+    public static final String PROPERTY_NAME_COLOR = ImageType.PROPERTY_NAME_COLOR;
+    public static final String PROPERTY_NAME_TRANSPARENCY = ImageType.PROPERTY_NAME_TRANSPARENCY;
     public static final String PROPERTY_NAME_RASTER = "raster";
 
     @Override
@@ -30,29 +32,33 @@ public class RoiLayerType extends ImageLayer.Type {
         return "ROI";
     }
 
+    /**
+     * Converts a RoiLayer into a MaskLayer, for backward compatibility.
+     */
     @Override
     public Layer createLayer(LayerContext ctx, PropertyContainer configuration) {
         final RasterDataNode raster = (RasterDataNode) configuration.getValue(PROPERTY_NAME_RASTER);
-
-        MultiLevelSource multiLevelSource;
-        multiLevelSource = (MultiLevelSource) configuration.getValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE);
-        if (multiLevelSource == null) {
-            if (raster.getROIDefinition() != null && raster.getROIDefinition().isUsable()) {
-                final Color color = (Color) configuration.getValue(PROPERTY_NAME_COLOR);
-                final AffineTransform i2mTransform = (AffineTransform) configuration.getValue(
-                        ImageLayer.PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM);
-                multiLevelSource = RoiImageMultiLevelSource.create(raster, color, i2mTransform);
-            } else {
-                multiLevelSource = MultiLevelSource.NULL;
-            }
-            configuration.setValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE, multiLevelSource);
+        String maskName = raster.getName() + "_roi";
+        final Mask mask = raster.getProduct().getMaskGroup().get(maskName);
+        if (mask == null) {
+            throw new IllegalArgumentException("Mask '" + maskName + "'not available in product.");
         }
+        final double transparency = (Double) configuration.getValue(PROPERTY_NAME_TRANSPARENCY);
+        mask.setImageTransparency(transparency);
+        final Color color = (Color) configuration.getValue(PROPERTY_NAME_COLOR);
+        mask.setImageColor(color);
 
-        final ImageLayer roiLayer = new ImageLayer(this, multiLevelSource, configuration);
-        roiLayer.setName("ROI");
-        roiLayer.setId(ROI_LAYER_ID);
-
-        return roiLayer;
+        MaskLayerType maskLayerType = LayerTypeRegistry.getLayerType(MaskLayerType.class);
+        PropertyContainer maskConfiguration = maskLayerType.createLayerConfig(null);
+        for (Property property : maskConfiguration.getProperties()) {
+            String propertyName = property.getName();
+            Property srcProperty = configuration.getProperty(propertyName);
+            if (srcProperty != null) {
+                maskConfiguration.setValue(propertyName, srcProperty.getValue());
+            }
+        }
+        maskConfiguration.setValue(MaskLayerType.PROPERTY_NAME_MASK, mask);
+        return maskLayerType.createLayer(ctx, maskConfiguration);
     }
 
     @Override

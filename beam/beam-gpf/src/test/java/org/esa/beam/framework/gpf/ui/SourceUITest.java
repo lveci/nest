@@ -2,6 +2,7 @@ package org.esa.beam.framework.gpf.ui;
 
 import junit.framework.TestCase;
 import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.framework.ui.application.ApplicationPage;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductManager;
@@ -80,16 +81,20 @@ public class SourceUITest  extends TestCase {
         private PropertyMap preferences = new PropertyMap();
         private ProductManager prodMan = new ProductManager();
 
-        public Product getSelectedProduct() {
-            return defaultProducts[0];
-        }
-
         public Window getApplicationWindow() {
             return null;
         }
 
         public String getApplicationName() {
             return "Killer App";
+        }
+
+        public ApplicationPage getApplicationPage() {
+            return null;
+        }
+
+        public Product getSelectedProduct() {
+            return defaultProducts[0];
         }
 
         public void handleError(Throwable e) {

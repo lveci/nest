@@ -1,5 +1,19 @@
 package org.esa.beam.framework.gpf.annotations;
 
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.RasterDataNode;
+import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.Operator;
+import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.OperatorSpiRegistry;
+import org.esa.beam.framework.gpf.internal.RasterDataNodeValues;
+
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
+
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
 import com.bc.ceres.binding.ConverterRegistry;
@@ -10,16 +24,6 @@ import com.bc.ceres.binding.Validator;
 import com.bc.ceres.binding.ValueRange;
 import com.bc.ceres.binding.ValueSet;
 import com.bc.ceres.binding.dom.DomConverter;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.GPF;
-import org.esa.beam.framework.gpf.Operator;
-import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.OperatorSpiRegistry;
-
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 public class ParameterDescriptorFactory implements PropertyDescriptorFactory {
 
@@ -131,13 +135,20 @@ public class ParameterDescriptorFactory implements PropertyDescriptorFactory {
             propertyDescriptor.setDefaultValue(converter.parse(parameter.defaultValue()));
         }
         if (isSet(parameter.sourceProductId())) {
-            propertyDescriptor.setAttribute("sourceId", parameter.sourceProductId());
+            propertyDescriptor.setAttribute(RasterDataNodeValues.ATTRIBUTE_NAME, Band.class);
+        }
+        if (parameter.rasterDataNodeType() != RasterDataNode.class) {
+            Class<? extends RasterDataNode> rasterDataNodeType = parameter.rasterDataNodeType();
+            propertyDescriptor.setAttribute(RasterDataNodeValues.ATTRIBUTE_NAME, rasterDataNodeType);
+        }
+        if (propertyDescriptor.getAttribute(RasterDataNodeValues.ATTRIBUTE_NAME) != null) {
+            Class<? extends RasterDataNode> rasterDataNodeType = (Class<? extends RasterDataNode>) propertyDescriptor.getAttribute(RasterDataNodeValues.ATTRIBUTE_NAME);
             String[] values = new String[0];
-            if (sourceProductMap != null) {
-                String sourceProductId = parameter.sourceProductId();
-                Product product = sourceProductMap.get(sourceProductId);
-                if (product != null) {
-                    values = product.getBandNames();
+            if (sourceProductMap != null && sourceProductMap.size() > 0) {
+                Product firstProduct = sourceProductMap.values().iterator().next();
+                if (firstProduct != null) {
+                    boolean includeEmptyValue = !propertyDescriptor.isNotNull() && !propertyDescriptor.getType().isArray();
+                    values = RasterDataNodeValues.getNames(firstProduct, rasterDataNodeType, includeEmptyValue);
                 }
             }
             propertyDescriptor.setValueSet(new ValueSet(values));

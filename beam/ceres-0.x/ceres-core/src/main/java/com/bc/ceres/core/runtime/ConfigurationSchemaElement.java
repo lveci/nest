@@ -1,5 +1,5 @@
 /*
- * $Id: ConfigurationSchemaElement.java,v 1.1 2009-07-07 00:27:41 lveci Exp $
+ * $Id: ConfigurationSchemaElement.java,v 1.2 2009-12-02 16:48:34 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

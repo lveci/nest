@@ -1,5 +1,5 @@
 /*
- * $Id: MaskForm.java,v 1.1 2009-11-04 17:04:33 lveci Exp $
+ * $Id: MaskForm.java,v 1.2 2009-12-02 16:52:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -21,16 +21,16 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 
 import javax.swing.AbstractButton;
-import javax.swing.JPanel;
 import javax.swing.Action;
+import javax.swing.JPanel;
 import javax.swing.JTable;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.TableModelListener;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.ActionEvent;
 
 abstract class MaskForm {
 
@@ -101,11 +101,14 @@ abstract class MaskForm {
         maskTable.addMask(mask);
     }
 
+    public void insertMask(Mask mask, int index) {
+        maskTable.insertMask(mask, index);
+    }
     public void removeMask(Mask mask) {
         maskTable.removeMask(mask);
     }
 
-    public boolean isInManagmentMode() {
+    public boolean isInManagementMode() {
         return maskTable.isInManagmentMode();
     }
 
@@ -115,6 +118,10 @@ abstract class MaskForm {
 
     public int getSelectedRow() {
         return maskTable.getSelectedRow();
+    }
+
+    public void setSelectedRow(int rowIndex) {
+        maskTable.getSelectionModel().setSelectionInterval(rowIndex, rowIndex);
     }
 
     public int getRowCount() {

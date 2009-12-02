@@ -15,7 +15,7 @@ import java.util.List;
  * The {@link Module} default implementation.
  * Instances of this class can only be created via the {@link ModuleManifestParser}.
  */
-public final class ModuleImpl implements Module {
+public class ModuleImpl implements Module {
 
     public static final ModuleImpl[] EMPTY_ARRAY = new ModuleImpl[0];
 

@@ -1,5 +1,5 @@
 /*
- * $Id: DimapHeaderWriterTest.java,v 1.7 2009-11-04 17:04:32 lveci Exp $
+ * $Id: DimapHeaderWriterTest.java,v 1.8 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -245,7 +245,7 @@ public class DimapHeaderWriterTest extends TestCase {
 
         dimapHeaderWriter.writeHeader();
 
-        assertEquals(getExpectedForWriteBitmaskDefs(), stringWriter.toString());
+        assertEquals(getExpectedForWriteMasks(), stringWriter.toString());
     }
 
     // #############################################
@@ -419,24 +419,26 @@ public class DimapHeaderWriterTest extends TestCase {
         product.addBitmaskDef(bitmaskDef2);
     }
 
-    private String getExpectedForWriteBitmaskDefs() {
+    private String getExpectedForWriteMasks() {
         return
                 header +
                 rasterDimensions +
-                "    <Bitmask_Definitions>" + LS +
-                "        <Bitmask_Definition name=\"bitmaskDef1\">" + LS +
+                "    <Masks>" + LS +
+                "        <Mask type=\"Math\">" + LS +
+                "            <NAME value=\"bitmaskDef1\" />" + LS +
                 "            <DESCRIPTION value=\"description1\" />" + LS +
-                "            <EXPRESSION value=\"!l1_flags.INVALID\" />" + LS +
                 "            <COLOR red=\"0\" green=\"0\" blue=\"255\" alpha=\"255\" />" + LS +
                 "            <TRANSPARENCY value=\"0.75\" />" + LS +
-                "        </Bitmask_Definition>" + LS +
-                "        <Bitmask_Definition name=\"bitmaskDef2\">" + LS +
+                "            <EXPRESSION value=\"!l1_flags.INVALID\" />" + LS +
+                "        </Mask>" + LS +
+                "        <Mask type=\"Math\">" + LS +
+                "            <NAME value=\"bitmaskDef2\" />" + LS +
                 "            <DESCRIPTION value=\"description2\" />" + LS +
-                "            <EXPRESSION value=\"l1_flags.LAND\" />" + LS +
                 "            <COLOR red=\"0\" green=\"255\" blue=\"0\" alpha=\"255\" />" + LS +
                 "            <TRANSPARENCY value=\"0.5\" />" + LS +
-                "        </Bitmask_Definition>" + LS +
-                "    </Bitmask_Definitions>" + LS +
+                "            <EXPRESSION value=\"l1_flags.LAND\" />" + LS +
+                "        </Mask>" + LS +
+                "    </Masks>" + LS +
                 footer;
     }
 

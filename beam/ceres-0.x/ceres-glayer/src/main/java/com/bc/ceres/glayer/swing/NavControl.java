@@ -1,5 +1,5 @@
 /*
- * $Id: NavControl.java,v 1.1 2009-04-09 17:06:19 lveci Exp $
+ * $Id: NavControl.java,v 1.2 2009-12-02 16:48:34 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -30,7 +30,7 @@ import java.awt.geom.*;
  * It can fire rotation, translation and scale events.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-09 17:06:19 $
+ * @version $Revision: 1.2 $ $Date: 2009-12-02 16:48:34 $
  */
 public class NavControl extends JComponent {
     private static final Dimension PREFERRED_SIZE = new Dimension(100, 120);

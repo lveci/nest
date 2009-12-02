@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataNode.java,v 1.8 2009-11-04 17:04:32 lveci Exp $
+ * $Id: RasterDataNode.java,v 1.9 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -745,22 +745,6 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
             validPixelExpression = expression;
             setModified(true);
         }
-
-        if (roiDefinition != null) {
-            final String bitmaskExpr = roiDefinition.getBitmaskExpr();
-            if (!StringUtils.isNullOrEmpty(bitmaskExpr) && bitmaskExpr.contains(oldExternalName)) {
-                final String newBitmaskExpression = StringUtils.replaceWord(bitmaskExpr, oldExternalName,
-                                                                            newExternalName);
-                final ROIDefinition newRoiDef = roiDefinition.createCopy();
-                newRoiDef.setBitmaskExpr(newBitmaskExpression);
-                // a new roi definition must be set to inform product node listeners because a roi sourceImage
-                // is only automatically updated if a product node listener is informed of changes.
-                // A roi definition is not a product node so that a product node listener can not be
-                // informed if an expression is changed.
-                setROIDefinition(newRoiDef);
-            }
-        }
-
         super.updateExpression(oldExternalName, newExternalName);
     }
 
@@ -1656,13 +1640,6 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
     }
 
     /**
-     * @return {@code true} if a ROI is usable for this raster data node.
-     */
-    public boolean isROIUsable() {
-        return getROIDefinition() != null && getROIDefinition().isUsable();
-    }
-
-    /**
      * Creates an image for this raster data node. The method simply returns <code>ProductUtils.createColorIndexedImage(this,
      * null)</code>.
      *
@@ -2261,6 +2238,17 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
     /////////////////////////////////////////////////////////////////////////
     // Deprecated API
 
+    // todo - find replacement (mz 11.2009)
+    /**
+     * @return {@code true} if a ROI is usable for this raster data node.
+     * @Deprecated since BEAM 4.7, currently no replacement
+     * 
+     */
+    @Deprecated
+    public boolean isROIUsable() {
+        return getROIDefinition() != null && getROIDefinition().isUsable();
+    }
+    
     // todo - find replacement (nf 10.2009)
     /**
      * @return the ROI definition

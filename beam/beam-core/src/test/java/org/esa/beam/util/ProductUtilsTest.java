@@ -1,5 +1,5 @@
 /*
- * $Id: ProductUtilsTest.java,v 1.4 2009-11-11 20:19:25 lveci Exp $
+ * $Id: ProductUtilsTest.java,v 1.5 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -33,6 +33,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.datamodel.TiePointGeoCoding;
 import org.esa.beam.framework.datamodel.TiePointGrid;
+import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -262,8 +263,7 @@ public class ProductUtilsTest extends TestCase {
     }
 
     private void shiftGeoPolygon(final GeoPos[] geoPositions, final int lonOffset) {
-        for (int i = 0; i < geoPositions.length; i++) {
-            GeoPos geoPosition = geoPositions[i];
+        for (final GeoPos geoPosition : geoPositions) {
             geoPosition.lon += lonOffset;
         }
     }
@@ -373,7 +373,7 @@ public class ProductUtilsTest extends TestCase {
         source.addBand(b2);
         source.addBand(b3);
 
-        final Map bandMapping = new HashMap();
+        final Map<Band, RasterDataNode> bandMapping = new HashMap<Band, RasterDataNode>();
 
         // Should NOT copy any bands because source is NOT geo-coded
         final Product target1 = new Product("target1", "test", 300, 400);
@@ -479,22 +479,27 @@ public class ProductUtilsTest extends TestCase {
             return null;
         }
 
+        @Override
         public boolean isCrossingMeridianAt180() {
             return false;
         }
 
+        @Override
         public Datum getDatum() {
             return Datum.WGS_84;
         }
 
+        @Override
         public boolean canGetPixelPos() {
             return true;
         }
 
+        @Override
         public boolean canGetGeoPos() {
             return false;
         }
 
+        @Override
         public PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
             if (pixelPos == null) {
                 pixelPos = new PixelPos();
@@ -504,10 +509,12 @@ public class ProductUtilsTest extends TestCase {
             return pixelPos;
         }
 
+        @Override
         public GeoPos getGeoPos(PixelPos pixelPos, GeoPos geoPos) {
             return geoPos;
         }
 
+        @Override
         public void dispose() {
         }
 
@@ -544,26 +551,32 @@ public class ProductUtilsTest extends TestCase {
 
     public static class DGeoCoding implements GeoCoding {
 
+        @Override
         public boolean isCrossingMeridianAt180() {
             return true;
         }
 
+        @Override
         public Datum getDatum() {
             return Datum.WGS_84;
         }
 
+        @Override
         public boolean canGetPixelPos() {
             return false;
         }
 
+        @Override
         public boolean canGetGeoPos() {
             return true;
         }
 
+        @Override
         public PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
             return pixelPos;
         }
 
+        @Override
         public GeoPos getGeoPos(PixelPos pixelPos, GeoPos geoPos) {
             if (geoPos == null) {
                 geoPos = new GeoPos();
@@ -573,6 +586,7 @@ public class ProductUtilsTest extends TestCase {
             return geoPos;
         }
 
+        @Override
         public void dispose() {
         }
 
@@ -704,12 +718,12 @@ public class ProductUtilsTest extends TestCase {
 
     public void testCopyMetadata() {
         try {
-            ProductUtils.copyMetadata((Product) null, (Product) null);
+            ProductUtils.copyMetadata((Product) null, null);
             fail();
         } catch (NullPointerException expected) {
         }
         try {
-            ProductUtils.copyMetadata((MetadataElement) null, (MetadataElement) null);
+            ProductUtils.copyMetadata((MetadataElement) null, null);
             fail();
         } catch (NullPointerException expected) {
         }

@@ -4,7 +4,7 @@ package com.bc.ceres.core.runtime;
  * Indicates conditions that a reasonable Ceres application might want to catch.
  *
  * @author  Norman Fomferra
- * @version $Id: RuntimeConfigException.java,v 1.1 2009-04-09 17:06:19 lveci Exp $
+ * @version $Id: RuntimeConfigException.java,v 1.2 2009-12-02 16:48:34 lveci Exp $
  */
 public class RuntimeConfigException extends Exception {
     /**

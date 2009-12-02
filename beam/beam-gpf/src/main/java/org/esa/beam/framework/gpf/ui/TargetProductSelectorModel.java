@@ -23,7 +23,7 @@ import java.util.Iterator;
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Ralf Quast
- * @version $Revision: 1.3 $ $Date: 2009-11-06 19:46:21 $
+ * @version $Revision: 1.4 $ $Date: 2009-12-02 16:52:11 $
  */
 @SuppressWarnings({"UnusedDeclaration"})
 public class TargetProductSelectorModel {
@@ -148,7 +148,7 @@ public class TargetProductSelectorModel {
         propertyContainer.setValue(name, value);
     }
     
-    private class ProductNameValidator implements Validator {
+    private static class ProductNameValidator implements Validator {
 
         @Override
         public void validateValue(Property property, Object value) throws ValidationException {

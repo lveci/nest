@@ -1,6 +1,6 @@
 package com.bc.ceres.core;
 /*
- * $Id: PrintWriterProgressMonitorTest.java,v 1.1 2009-04-09 17:06:19 lveci Exp $
+ * $Id: PrintWriterProgressMonitorTest.java,v 1.2 2009-12-02 16:48:34 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -24,7 +24,7 @@ import java.io.*;
  * Created by Marco Peters.
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-09 17:06:19 $
+ * @version $Revision: 1.2 $ $Date: 2009-12-02 16:48:34 $
  */
 public class PrintWriterProgressMonitorTest extends TestCase {
 

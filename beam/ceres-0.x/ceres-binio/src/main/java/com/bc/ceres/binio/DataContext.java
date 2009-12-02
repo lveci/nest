@@ -7,7 +7,7 @@ package com.bc.ceres.binio;
  * to the size (in bytes) of data segments shared by multiple subsequent compounds members.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-10-13 15:56:30 $
+ * @version $Revision: 1.4 $ $Date: 2009-12-02 16:48:34 $
  * @since Ceres 0.8
  */
 public interface DataContext {

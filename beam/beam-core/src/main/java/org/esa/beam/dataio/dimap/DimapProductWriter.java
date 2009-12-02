@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductWriter.java,v 1.4 2009-07-22 20:30:52 lveci Exp $
+ * $Id: DimapProductWriter.java,v 1.5 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -45,7 +45,7 @@ import java.util.Map;
  * The product writer for BEAM DIMAP products.
  *
  * @author Sabine Embacher
- * @version $Revision: 1.4 $ $Date: 2009-07-22 20:30:52 $
+ * @version $Revision: 1.5 $ $Date: 2009-12-02 16:52:11 $
  */
 public class DimapProductWriter extends AbstractProductWriter {
 
@@ -446,10 +446,12 @@ public class DimapProductWriter extends AbstractProductWriter {
         final Product product = getSourceProduct();
         final ProductReader productReader = product.getProductReader();
         if (productReader instanceof DimapProductReader) {
-            productReader.close();
             final ProductNode[] removedNodes = product.getRemovedChildNodes();
-            for (int i = 0; i < removedNodes.length; i++) {
-                removedNodes[i].removeFromFile(this);
+            if (removedNodes.length > 0) {
+                productReader.close();
+                for (int i = 0; i < removedNodes.length; i++) {
+                    removedNodes[i].removeFromFile(this);
+                }
             }
         }
     }

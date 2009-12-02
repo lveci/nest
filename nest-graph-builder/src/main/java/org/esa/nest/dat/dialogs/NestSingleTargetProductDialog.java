@@ -1,24 +1,24 @@
 package org.esa.nest.dat.dialogs;
 
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.PropertyContainer;
-import com.bc.ceres.binding.Property;
-import com.bc.ceres.binding.PropertyDescriptor;
+import com.bc.ceres.binding.*;
 import com.bc.ceres.swing.TableLayout;
+import com.bc.ceres.swing.selection.SelectionChangeListener;
+import com.bc.ceres.swing.selection.SelectionChangeEvent;
+import com.bc.ceres.swing.selection.AbstractSelectionChangeListener;
+import com.bc.ceres.swing.selection.Selection;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductFilter;
+import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.OperatorUI;
+import org.esa.beam.framework.gpf.internal.RasterDataNodeValues;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.ui.SingleTargetProductDialog;
 import org.esa.beam.framework.gpf.ui.SourceProductSelector;
 import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
-import org.esa.beam.framework.gpf.ui.ValueSetUpdater;
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.application.SelectionChangeEvent;
-import org.esa.beam.framework.ui.application.SelectionChangeListener;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -71,16 +71,16 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
         }
         ioParametersPanel.add(getTargetProductSelector().createDefaultPanel());
         ioParametersPanel.add(tableLayout.createVerticalSpacer());
-        sourceProductSelectorList.get(0).addSelectionChangeListener(new SelectionChangeListener() {
+        sourceProductSelectorList.get(0).addSelectionChangeListener(new AbstractSelectionChangeListener() {
+
+            @Override
             public void selectionChanged(SelectionChangeEvent event) {
-                final Product selectedProduct = (Product) event.getSelection().getFirstElement();
+                final Product selectedProduct = (Product) event.getSelection().getSelectedValue();
                 final TargetProductSelectorModel targetProductSelectorModel = getTargetProductSelector().getModel();
                 targetProductSelectorModel.setProductName(selectedProduct.getName() + getTargetProductNameSuffix());
-
                 opUI.setSourceProducts(new Product[] { selectedProduct });
             }
         });
-
 
         this.form = new JTabbedPane();
         this.form.add("I/O Parameters", ioParametersPanel);
@@ -248,6 +248,33 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
             }
 
             return true;
+        }
+    }
+
+    private static class ValueSetUpdater extends AbstractSelectionChangeListener {
+
+        private final PropertyDescriptor propertyDescriptor;
+
+        private ValueSetUpdater(PropertyDescriptor propertyDescriptor) {
+            this.propertyDescriptor = propertyDescriptor;
+        }
+
+        @Override
+        public void selectionChanged(SelectionChangeEvent event) {
+            Selection selection = event.getSelection();
+            String[] values = new String[0];
+            if (selection != null) {
+                final Product selectedProduct = (Product) selection.getSelectedValue();
+                if (selectedProduct != null) {
+                    Object object = propertyDescriptor.getAttribute(RasterDataNodeValues.ATTRIBUTE_NAME);
+                    if (object != null) {
+                        Class<? extends RasterDataNode> rasterDataNodeType = (Class<? extends RasterDataNode>) object;
+                        boolean includeEmptyValue = !propertyDescriptor.isNotNull() && !propertyDescriptor.getType().isArray();
+                        values = RasterDataNodeValues.getNames(selectedProduct, rasterDataNodeType, includeEmptyValue);
+                    }
+                }
+            }
+            propertyDescriptor.setValueSet(new ValueSet(values));
         }
     }
 }

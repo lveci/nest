@@ -1,5 +1,5 @@
 /*
- * $Id: GeneralFilterBandPersistable.java,v 1.2 2009-07-15 20:04:37 lveci Exp $
+ * $Id: GeneralFilterBandPersistable.java,v 1.3 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,7 +32,7 @@ import java.util.List;
  * <p><i>Note that this class is not yet public API. Interface may chhange in future releases.</i></p>
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2009-07-15 20:04:37 $
+ * @version $Revision: 1.3 $ $Date: 2009-12-02 16:52:11 $
  */
 class GeneralFilterBandPersistable implements DimapPersistable {
     static final String VERSION_1_0 = "1.0";
@@ -41,6 +41,7 @@ class GeneralFilterBandPersistable implements DimapPersistable {
     static final String ATTRIBUTE_VERSION = "version";
     static final String GENERAL_FILTER_BAND_TYPE = "GeneralFilterBand";
 
+    @Override
     public Object createObjectFromXml(Element element, Product product) {
         final Element filterBandInfo = element.getChild(DimapProductConstants.TAG_FILTER_BAND_INFO);
         final String version = filterBandInfo.getAttributeValue(ATTRIBUTE_VERSION);
@@ -82,6 +83,7 @@ class GeneralFilterBandPersistable implements DimapPersistable {
         return gfb;
     }
 
+    @Override
     public Element createXmlFromObject(Object object) {
         final GeneralFilterBand gfb = (GeneralFilterBand) object;
         final List<Element> contentList = new ArrayList<Element>(20);

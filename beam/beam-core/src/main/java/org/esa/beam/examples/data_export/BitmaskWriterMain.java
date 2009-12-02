@@ -1,5 +1,5 @@
 /*
- * $Id: BitmaskWriterMain.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: BitmaskWriterMain.java,v 1.2 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -107,7 +107,7 @@ public class BitmaskWriterMain {
 
         // Parse the given bit-mask expression string to a term which can efficiently
         // be evaluated by the framework
-        Term bitmaskTerm = product.createTerm(bitmaskExpr);
+        Term bitmaskTerm = product.parseExpression(bitmaskExpr);
 
         // Get the scene width
         int w = product.getSceneRasterWidth();

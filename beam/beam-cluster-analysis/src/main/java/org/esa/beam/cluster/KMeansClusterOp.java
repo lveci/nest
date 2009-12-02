@@ -16,7 +16,12 @@ package org.esa.beam.cluster;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.IndexCoding;
+import org.esa.beam.framework.datamodel.Mask;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -25,19 +30,20 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.math.MathUtils;
 
 import javax.media.jai.ROI;
-import java.awt.*;
-import java.io.IOException;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.awt.image.Raster;
 
 /**
  * Operator for k-means cluster analysis.
  *
  * @author Ralf Quast
- * @version $Revision: 1.2 $ $Date: 2009-08-07 19:30:15 $
+ * @version $Revision: 1.3 $ $Date: 2009-12-02 16:52:11 $
  */
 @OperatorMetadata(alias = "KMeansClusterAnalysis",
                   version = "1.0",
@@ -63,12 +69,12 @@ public class KMeansClusterOp extends Operator {
     private int randomSeed;
     @Parameter(label = "Source band names",
                description = "The names of the bands being used for the cluster analysis.",
-               sourceProductId = "source")
+               rasterDataNodeType = Band.class)
     private String[] sourceBandNames;
-    @Parameter(label = "Region of interest",
-               description = "The name of the band which contains a ROI that should be used.",
-               sourceProductId = "source")
-    private String roiBandName;
+    @Parameter(label = "ROI-Mask",
+               description = "The name of the ROI-Mask that should be used.",
+               rasterDataNodeType = Mask.class)
+    private String roiMaskName;
 
     private transient ROI roi;
     private transient Band[] sourceBands;
@@ -144,13 +150,17 @@ public class KMeansClusterOp extends Operator {
             double[] point = new double[sourceTiles.length];
             for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
                 for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-                    if (roi == null || roi.contains(x, y)) {
-                        for (int i = 0; i < sourceTiles.length; i++) {
-                            point[i] = sourceTiles[i].getSampleDouble(x, y);
+                    try {
+                        if (roi == null || roi.contains(x, y)) {
+                            for (int i = 0; i < sourceTiles.length; i++) {
+                                point[i] = sourceTiles[i].getSampleDouble(x, y);
+                            }
+                            targetTile.setSample(x, y, theClusterSet.getMembership(point));
+                        } else {
+                            targetTile.setSample(x, y, NO_DATA_VALUE);
                         }
-                        targetTile.setSample(x, y, theClusterSet.getMembership(point));
-                    } else {
-                        targetTile.setSample(x, y, NO_DATA_VALUE);
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -162,15 +172,11 @@ public class KMeansClusterOp extends Operator {
 
     private synchronized KMeansClusterSet getClusterSet(ProgressMonitor pm) {
         if (clusterSet == null) {
-            Rectangle[] tileRectangles = getAllTileRactangles();
+            Rectangle[] tileRectangles = getAllTileRectangles();
             pm.beginTask("Extracting data points...", tileRectangles.length * iterationCount * 2 + 2);
             try {
-                Band roiBand = null;
-                if (StringUtils.isNotNullAndNotEmpty(roiBandName)) {
-                    roiBand = sourceProduct.getBand(roiBandName);
-                }
-                RoiCombiner roiCombiner = new RoiCombiner(sourceBands, roiBand);
-                roi = roiCombiner.getCombinedRoi();
+                RoiCombiner roiCombiner = new RoiCombiner(sourceProduct, sourceBands, roiMaskName);
+                roi = roiCombiner.getROI();
                 pm.worked(1);
                 final KMeansClusterer clusterer = createClusterer();
                 pm.worked(1);
@@ -180,7 +186,7 @@ public class KMeansClusterOp extends Operator {
                     clusterer.startIteration();
                     for (Rectangle rectangle : tileRectangles) {
                         checkForCancelation(pm);
-                        PixelIter pixelIterr = createPixelIterr(rectangle, SubProgressMonitor.create(pm, 1));
+                        PixelIter pixelIterr = createPixelIter(rectangle, SubProgressMonitor.create(pm, 1));
                         clusterer.iterateTile(pixelIterr);
                         pm.worked(1);
                     }
@@ -192,8 +198,6 @@ public class KMeansClusterOp extends Operator {
                         clusterMapBand.getIndexCoding(), sourceBands, clusterSet.getMeans());
                 ClusterMetaDataUtils.addCenterToMetadata(
                         clusterAnalysis, sourceBands, clusterSet.getMeans());
-            } catch (IOException e) {
-                throw new OperatorException(e);
             } finally {
                 pm.done();
             }
@@ -212,10 +216,10 @@ public class KMeansClusterOp extends Operator {
         return clusterer;
     }
 
-    private Rectangle[] getAllTileRactangles() {
-        Dimension tileSize = targetProduct.getPreferredTileSize();
-        final int rasterHeight = targetProduct.getSceneRasterHeight();
-        final int rasterWidth = targetProduct.getSceneRasterWidth();
+    private Rectangle[] getAllTileRectangles() {
+        Dimension tileSize = ImageManager.getPreferredTileSize(sourceProduct);
+        final int rasterHeight = sourceProduct.getSceneRasterHeight();
+        final int rasterWidth = sourceProduct.getSceneRasterWidth();
         final Rectangle boundary = new Rectangle(rasterWidth, rasterHeight);
         final int tileCountX = MathUtils.ceilInt(boundary.width / (double) tileSize.width);
         final int tileCountY = MathUtils.ceilInt(boundary.height / (double) tileSize.height);
@@ -236,7 +240,7 @@ public class KMeansClusterOp extends Operator {
         return rectangles;
     }
 
-    private PixelIter createPixelIterr(Rectangle rectangle, ProgressMonitor pm) {
+    private PixelIter createPixelIter(Rectangle rectangle, ProgressMonitor pm) {
         final Tile[] sourceTiles = new Tile[sourceBands.length];
         try {
             pm.beginTask("Extracting data points...", sourceBands.length);

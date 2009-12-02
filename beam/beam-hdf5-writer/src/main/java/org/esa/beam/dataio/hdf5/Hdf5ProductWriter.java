@@ -1,5 +1,5 @@
 /*
- * $Id: Hdf5ProductWriter.java,v 1.2 2009-05-27 21:09:23 lveci Exp $
+ * $Id: Hdf5ProductWriter.java,v 1.3 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -56,7 +56,7 @@ import java.util.Map;
  * A product writer implementation for the HDF5 format.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-05-27 21:09:23 $
+ * @version $Revision: 1.3 $ $Date: 2009-12-02 16:52:11 $
  */
 public class Hdf5ProductWriter extends AbstractProductWriter {
 
@@ -385,13 +385,13 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
     }
 
     private void writeFlagCodings() throws IOException {
-        if (getSourceProduct().getNumFlagCodings() == 0) {
+        if (getSourceProduct().getFlagCodingGroup().getNodeCount() == 0) {
             return;
         }
         int groupID = createH5G(_fileID, "/flag_codings");
         try {
-            for (int i = 0; i < getSourceProduct().getNumFlagCodings(); i++) {
-                FlagCoding flagCoding = getSourceProduct().getFlagCodingAt(i);
+            for (int i = 0; i < getSourceProduct().getFlagCodingGroup().getNodeCount(); i++) {
+                FlagCoding flagCoding = getSourceProduct().getFlagCodingGroup().get(i);
                 writeMetadataElement(groupID, flagCoding);
             }
         } catch (IOException e) {

@@ -1,14 +1,14 @@
 package org.esa.nest.dat.dialogs;
 
 import com.bc.ceres.swing.TableLayout;
+import com.bc.ceres.swing.selection.AbstractSelectionChangeListener;
+import com.bc.ceres.swing.selection.SelectionChangeEvent;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.ui.SourceProductSelector;
 import org.esa.beam.framework.gpf.ui.TargetProductSelector;
 import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.BasicApp;
-import org.esa.beam.framework.ui.application.SelectionChangeEvent;
-import org.esa.beam.framework.ui.application.SelectionChangeListener;
 import org.esa.beam.util.SystemUtils;
 
 import javax.swing.*;
@@ -54,9 +54,9 @@ public class IOPanel {
                 ioParametersPanel.add(selector.createDefaultPanel());
             }
             ioParametersPanel.add(tableLayout.createVerticalSpacer());
-            sourceProductSelectorList.get(0).addSelectionChangeListener(new SelectionChangeListener() {
+            sourceProductSelectorList.get(0).addSelectionChangeListener(new AbstractSelectionChangeListener() {
                 public void selectionChanged(SelectionChangeEvent event) {
-                    final Product selectedProduct = (Product) event.getSelection().getFirstElement();
+                    final Product selectedProduct = (Product) event.getSelection().getSelectedValue();                    
                     final TargetProductSelectorModel targetProductSelectorModel = targetProductSelector.getModel();
                     targetProductSelectorModel.setProductName(selectedProduct.getName() + getTargetProductNameSuffix());
                 }

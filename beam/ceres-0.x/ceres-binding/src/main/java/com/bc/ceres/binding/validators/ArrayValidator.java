@@ -1,5 +1,5 @@
 /*
- * $Id: ArrayValidator.java,v 1.3 2009-11-04 17:04:32 lveci Exp $
+ * $Id: ArrayValidator.java,v 1.4 2009-12-02 16:48:34 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *

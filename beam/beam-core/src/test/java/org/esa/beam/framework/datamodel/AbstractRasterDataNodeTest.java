@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractRasterDataNodeTest.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
+ * $Id: AbstractRasterDataNodeTest.java,v 1.3 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -47,7 +47,7 @@ public abstract class AbstractRasterDataNodeTest extends AbstractDataNodeTest {
 
         final Band flagsBand = product.addBand("flagsBand", ProductData.TYPE_INT8);
         flagsBand.setFlagCoding(flagCoding);
-        product.addFlagCoding(flagCoding);
+        product.getFlagCodingGroup().add(flagCoding);
 
         flagsBand.setName("flags");
 

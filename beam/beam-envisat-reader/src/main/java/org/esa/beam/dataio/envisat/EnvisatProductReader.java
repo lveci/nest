@@ -1,5 +1,5 @@
 /*
- * $Id: EnvisatProductReader.java,v 1.6 2009-12-01 17:02:07 lveci Exp $
+ * $Id: EnvisatProductReader.java,v 1.7 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -42,7 +42,7 @@ import java.util.Vector;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.6 $ $Date: 2009-12-01 17:02:07 $
+ * @version $Revision: 1.7 $ $Date: 2009-12-02 16:52:11 $
  * @see org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn
  */
 public class EnvisatProductReader extends AbstractProductReader {
@@ -303,7 +303,7 @@ public class EnvisatProductReader extends AbstractProductReader {
                     band.setDescription(bandInfo.getDescription());
                 }
                 if (bandInfo.getFlagCoding() != null) {
-                    product.addFlagCoding(bandInfo.getFlagCoding());
+                    product.getFlagCodingGroup().add(bandInfo.getFlagCoding());
                     band.setFlagCoding(bandInfo.getFlagCoding());
                 }
                 final String expression = bandInfo.getValidExpression();

@@ -1,5 +1,5 @@
 /*
- * $Id: LayerTypeRegistry.java,v 1.1 2009-11-04 17:04:33 lveci Exp $
+ * $Id: LayerTypeRegistry.java,v 1.2 2009-12-02 16:48:34 lveci Exp $
  * 
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  * 

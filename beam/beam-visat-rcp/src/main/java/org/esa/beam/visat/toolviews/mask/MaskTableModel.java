@@ -1,5 +1,5 @@
 /*
- * $Id: MaskTableModel.java,v 1.1 2009-11-04 17:04:33 lveci Exp $
+ * $Id: MaskTableModel.java,v 1.2 2009-12-02 16:52:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -165,6 +165,11 @@ class MaskTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    public void addMask(Mask mask, int index) {
+        getProduct().getMaskGroup().add(index, mask);
+        fireTableDataChanged();
+    }
+
     void removeMask(Mask mask) {
         getProduct().getMaskGroup().remove(mask);
         fireTableDataChanged();
@@ -266,10 +271,13 @@ class MaskTableModel extends AbstractTableModel {
 
         if (column == IDX_VISIBILITY) {
             boolean visible = (Boolean) aValue;
+            final ProductNodeGroup<Mask> overlayMaskGroup = visibleBand.getOverlayMaskGroup();
             if (visible) {
-                visibleBand.getOverlayMaskGroup().add(mask);
+                if (!overlayMaskGroup.contains(mask)) {
+                    overlayMaskGroup.add(mask);
+                }
             } else {
-                visibleBand.getOverlayMaskGroup().remove(mask);
+                overlayMaskGroup.remove(mask);
             }
             visibleBand.fireImageInfoChanged();
             fireTableCellUpdated(rowIndex, columnIndex);
@@ -311,8 +319,7 @@ class MaskTableModel extends AbstractTableModel {
         private void processEvent(ProductNodeEvent event) {
             if (event.getSourceNode() instanceof Mask) {
                 fireTableDataChanged();
-            }
-            if (event.getSourceNode() == visibleBand
+            }else if (event.getSourceNode() == visibleBand
                     && event.getPropertyName().equals(RasterDataNode.PROPERTY_NAME_IMAGE_INFO)) {
                 fireTableDataChanged();
             }

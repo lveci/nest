@@ -177,10 +177,6 @@
             <layerType>org.esa.beam.glayer.NoDataLayerType</layerType>
         </layerEditor>
         <layerEditor>
-            <editor>org.esa.beam.visat.toolviews.layermanager.editors.RoiLayerEditor</editor>
-            <layerType>org.esa.beam.glayer.RoiLayerType</layerType>
-        </layerEditor>
-        <layerEditor>
             <editor>org.esa.beam.visat.toolviews.layermanager.editors.FigureLayerEditor</editor>
             <layerType>org.esa.beam.glayer.FigureLayerType</layerType>
         </layerEditor>
@@ -429,21 +425,6 @@
             <smallIcon>/org/esa/beam/resources/images/icons/GcpManager16.gif</smallIcon>
             <largeIcon>/org/esa/beam/resources/images/icons/GcpManager24.gif</largeIcon>
             <helpId>showGcpManagerWnd</helpId>/
-            <initState>HIDDEN</initState>
-            <initSide>SOUTH</initSide>
-            <initIndex>0</initIndex>
-        </toolView>
-
-        <toolView>
-            <id>org.esa.beam.visat.toolviews.roi.RoiManagerToolView</id>
-            <class>org.esa.beam.visat.toolviews.roi.RoiManagerToolView</class>
-            <title>ROI Manager</title>
-            <mnemonic>r</mnemonic>
-            <accelerator>ctrl alt R</accelerator>
-            <description>Manage ROI of a selected image view.</description>
-            <smallIcon>/org/esa/beam/resources/images/icons/ROIDefinition16.gif</smallIcon>
-            <largeIcon>/org/esa/beam/resources/images/icons/ROIDefinition24.gif</largeIcon>
-            <helpId>showROIDefWnd</helpId>
             <initState>HIDDEN</initState>
             <initSide>SOUTH</initSide>
             <initIndex>0</initIndex>
@@ -832,10 +813,10 @@
             <parent>export</parent>
             <id>exportROIPixels</id>
             <class>org.esa.beam.visat.actions.ExportROIPixelsAction</class>
-            <text>Export ROI Pixels...</text>
+            <text>Export ROI-Mask Pixels...</text>
             <mnemonic>R</mnemonic>
-            <shortDescr>Export the pixels of the current ROI.</shortDescr>
-            <description>Export the pixels of the current ROI as tab-separated text.</description>
+            <shortDescr>Export the pixels of a ROI-Mask.</shortDescr>
+            <description>Export the pixels of a ROI_mask as tab-separated text.</description>
             <accelerator>shift control P</accelerator>
             <helpId>exportROIPixels</helpId>
         </action>
@@ -921,36 +902,6 @@
             <helpId>deleteShape</helpId>
         </action>
 
-        <action>
-            <parent>edit</parent>
-            <id>convertShapeToROI</id>
-            <class>org.esa.beam.visat.actions.ConvertShapeToROIAction</class>
-            <text>Shape to ROI</text>
-            <mnemonic>R</mnemonic>
-            <shortDescr>Convert shape to ROI.</shortDescr>
-            <description>Convert shape to current ROI.</description>
-            <smallIcon>icons/ShapeToROI16.gif</smallIcon>
-            <largeIcon>icons/ShapeToROI24.gif</largeIcon>
-            <helpId>convertShapeToROI</helpId>
-            <placeAfter>deleteShape</placeAfter>
-            <separatorBefore>true</separatorBefore>
-        </action>
-
-        <action>
-            <parent>edit</parent>
-            <id>convertROIToShape</id>
-            <class>org.esa.beam.visat.actions.ConvertROIToShapeAction</class>
-            <text>ROI to Shape</text>
-            <mnemonic>S</mnemonic>
-            <shortDescr>Convert ROI to shape.</shortDescr>
-            <description>Convert ROI to current shape.</description>
-            <smallIcon>icons/ROIToShape16.gif</smallIcon>
-            <largeIcon>icons/ROIToShape24.gif</largeIcon>
-            <helpId>convertROIToShape</helpId>
-            <placeAfter>convertShapeToROI</placeAfter>
-            <separatorBefore>false</separatorBefore>
-        </action>
-
         <!--####################-->
         <!-- Data Menu          -->
         <!--####################-->
@@ -959,7 +910,7 @@
             <parent>data</parent>
             <id>computeRoiArea</id>
             <class>org.esa.beam.visat.actions.ComputeRoiAreaAction</class>
-            <text>Compute ROI Area...</text>
+            <text>Compute ROI-Mask Area...</text>
             <mnemonic>A</mnemonic>
             <helpId>computeRoiArea</helpId>
         </action>
@@ -1577,7 +1528,7 @@
         <action>
             <id>selectTool</id>
             <class>org.esa.beam.visat.actions.ToolAction</class>
-            <tool>org.esa.beam.framework.ui.tool.impl.SelectTool</tool>
+            <interactor>com.bc.ceres.swing.figure.interactions.SelectionInteractor</interactor>
             <parent>tools</parent>
             <text>Select</text>
             <shortDescr>Selection Tool</shortDescr>
@@ -1586,6 +1537,35 @@
             <helpId>selectTool</helpId>
         </action>
 
+        <action>
+            <id>zoomTool</id>
+            <class>org.esa.beam.visat.actions.ToolAction</class>
+            <interactor>com.bc.ceres.swing.figure.interactions.ZoomInteractor</interactor>
+            <parent>tools</parent>
+            <placeAfter>selectTool</placeAfter>
+            <text>Zoom</text>
+            <shortDescr>Zooming Tool</shortDescr>
+            <largeIcon>icons/ZoomTool24.gif</largeIcon>
+            <selected>false</selected>
+            <context>image</context>
+            <helpId>zoomTool</helpId>
+        </action>
+
+        <action>
+            <id>pannerTool</id>
+            <class>org.esa.beam.visat.actions.ToolAction</class>
+            <interactor>com.bc.ceres.swing.figure.interactions.PanInteractor</interactor>
+            <parent>tools</parent>
+            <placeAfter>zoomTool</placeAfter>
+            <text>Pan</text>
+            <shortDescr>Pan Tool</shortDescr>
+            <largeIcon>icons/PannerTool24.gif</largeIcon>
+            <selected>true</selected>
+            <context>image</context>
+            <helpId>panTool</helpId>
+        </action>
+
+<!--
         <action>
             <id>rangeFinder</id>
             <class>org.esa.beam.visat.actions.rangefinder.RangeFinderToolAction</class>
@@ -1601,33 +1581,6 @@
             <helpId>rangeFinder</helpId>
         </action>
 
-        <action>
-            <id>zoomTool</id>
-            <class>org.esa.beam.visat.actions.ToolAction</class>
-            <tool>org.esa.beam.framework.ui.tool.impl.ZoomTool</tool>
-            <parent>tools</parent>
-            <placeAfter>selectTool</placeAfter>
-            <text>Zoom</text>
-            <shortDescr>Zooming Tool</shortDescr>
-            <largeIcon>icons/ZoomTool24.gif</largeIcon>
-            <selected>false</selected>
-            <context>image</context>
-            <helpId>zoomTool</helpId>
-        </action>
-
-        <action>
-            <id>pannerTool</id>
-            <class>org.esa.beam.visat.actions.ToolAction</class>
-            <tool>org.esa.beam.framework.ui.tool.impl.PannerTool</tool>
-            <parent>tools</parent>
-            <placeAfter>zoomTool</placeAfter>
-            <text>Pan</text>
-            <shortDescr>Panner Tool</shortDescr>
-            <largeIcon>icons/PannerTool24.gif</largeIcon>
-            <selected>true</selected>
-            <context>image</context>
-            <helpId>panTool</helpId>
-        </action>
 
         <action>
             <id>pinTool</id>
@@ -1640,7 +1593,9 @@
             <description>Sets, edits or deletes pins</description>
             <largeIcon>icons/PinTool24.gif</largeIcon>
             <selected>false</selected>
-            <!--<context>image</context>-->
+            -->
+<!--<context>image</context>-->
+<!--
             <helpId>pinTool</helpId>
         </action>
 
@@ -1656,14 +1611,17 @@
             <description>Sets, edits or deletes GCPs</description>
             <largeIcon>icons/GcpTool24.gif</largeIcon>
             <selected>false</selected>
-            <!--<context>image</context>-->
+            -->
+<!--<context>image</context>-->
+<!--
             <helpId>gcpTool</helpId>
         </action>
+-->
 
         <action>
             <id>drawLineTool</id>
             <class>org.esa.beam.visat.actions.ToolAction</class>
-            <tool>org.esa.beam.framework.ui.tool.impl.CreateLineTool</tool>
+            <interactor>com.bc.ceres.swing.figure.interactions.InsertLineFigureInteractor</interactor>
             <parent>tools</parent>
             <placeAfter>pinTool</placeAfter>
             <text>Draw Line</text>
@@ -1677,7 +1635,7 @@
         <action>
             <id>drawRectangleTool</id>
             <class>org.esa.beam.visat.actions.ToolAction</class>
-            <tool>org.esa.beam.framework.ui.tool.impl.CreateRectangleTool</tool>
+            <interactor>com.bc.ceres.swing.figure.interactions.InsertRectangleFigureInteractor</interactor>
             <parent>tools</parent>
             <placeAfter>drawLineTool</placeAfter>
             <text>Draw Rectangle</text>
@@ -1691,7 +1649,7 @@
         <action>
             <id>drawEllipseTool</id>
             <class>org.esa.beam.visat.actions.ToolAction</class>
-            <tool>org.esa.beam.framework.ui.tool.impl.CreateEllipseTool</tool>
+            <interactor>com.bc.ceres.swing.figure.interactions.InsertEllipseFigureInteractor</interactor>
             <parent>tools</parent>
             <placeAfter>drawRectangleTool</placeAfter>
             <text>Draw Ellipse</text>
@@ -1705,7 +1663,7 @@
         <action>
             <id>drawPolylineTool</id>
             <class>org.esa.beam.visat.actions.ToolAction</class>
-            <tool>org.esa.beam.framework.ui.tool.impl.CreatePolylineTool</tool>
+            <interactor>com.bc.ceres.swing.figure.interactions.InsertPolylineFigureInteractor</interactor>
             <parent>tools</parent>
             <placeAfter>drawEllipseTool</placeAfter>
             <text>Draw Polyline</text>
@@ -1719,7 +1677,7 @@
         <action>
             <id>drawPolygonTool</id>
             <class>org.esa.beam.visat.actions.ToolAction</class>
-            <tool>org.esa.beam.framework.ui.tool.impl.CreatePolygonTool</tool>
+            <interactor>com.bc.ceres.swing.figure.interactions.InsertPolygonFigureInteractor</interactor>
             <parent>tools</parent>
             <placeAfter>drawPolylineTool</placeAfter>
             <text>Draw Polygon</text>

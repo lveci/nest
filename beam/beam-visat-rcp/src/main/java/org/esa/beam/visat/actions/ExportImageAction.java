@@ -1,5 +1,5 @@
 /*
- * $Id: ExportImageAction.java,v 1.6 2009-11-04 17:04:32 lveci Exp $
+ * $Id: ExportImageAction.java,v 1.7 2009-12-02 16:52:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,9 +16,9 @@
  */
 package org.esa.beam.visat.actions;
 
+import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertyDescriptor;
-import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.accessors.DefaultPropertyAccessor;
 import com.bc.ceres.binding.converters.IntegerConverter;
 import com.bc.ceres.binding.swing.BindingContext;
@@ -40,25 +40,23 @@ import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 /**
  * Action for exporting scene views as images.
  *
  * @author Marco Peters
  * @author Ralf Quast
- * @version $Revision: 1.6 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.7 $ $Date: 2009-12-02 16:52:12 $
  */
 public class ExportImageAction extends AbstractExportImageAction {
 
@@ -104,12 +102,19 @@ public class ExportImageAction extends AbstractExportImageAction {
         accessory.add(sizePanel);
         fileChooser.setAccessory(accessory);
 
-        buttonFullScene.addChangeListener(new ChangeListener() {
+        buttonFullScene.addActionListener(new ActionListener() {
             @Override
-            public void stateChanged(ChangeEvent e) {
+            public void actionPerformed(ActionEvent e) {
                 sizeComponent.updateDimensions();
             }
         });
+        buttonVisibleRegion.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sizeComponent.updateDimensions();
+            }
+        });
+
     }
 
     @Override
@@ -182,7 +187,6 @@ public class ExportImageAction extends AbstractExportImageAction {
 
         private final PropertyContainer propertyContainer;
         private final ProductSceneView view;
-        private double aspectRatio;
 
         public SizeComponent(ProductSceneView view) {
             this.view = view;
@@ -200,7 +204,6 @@ public class ExportImageAction extends AbstractExportImageAction {
             } else {
                 bounds = view.getLayerCanvas().getViewport().getViewBounds();
             }
-            aspectRatio = bounds.getWidth() / bounds.getHeight();
 
             int w = toInteger(bounds.getWidth());
             int h = toInteger(bounds.getHeight());
@@ -208,12 +211,16 @@ public class ExportImageAction extends AbstractExportImageAction {
             final long freeMemory = getFreeMemory();
             final long expectedMemory = getExpectedMemory(w, h);
             if (freeMemory < expectedMemory) {
-                final double scale = Math.sqrt((double) freeMemory / (double) expectedMemory);
-                final double scaledW = w * scale;
-                final double scaledH = h * scale;
+                final int answer = showQuestionDialog();
+                if (answer != JOptionPane.YES_OPTION) {
+                    final double scale = Math.sqrt((double) freeMemory / (double) expectedMemory);
+                    final double scaledW = w * scale;
+                    final double scaledH = h * scale;
 
-                w = toInteger(scaledW);
-                h = toInteger(scaledH);
+                    w = toInteger(scaledW);
+                    h = toInteger(scaledH);
+                }
+
             }
 
             setWidth(w);
@@ -242,73 +249,22 @@ public class ExportImageAction extends AbstractExportImageAction {
             final PropertyDescriptor heightDescriptor = new PropertyDescriptor(PROPERTY_NAME_HEIGHT, Integer.class);
             heightDescriptor.setConverter(new IntegerConverter());
             propertyContainer.addProperty(new Property(heightDescriptor, new DefaultPropertyAccessor()));
+        }
 
-            final PropertyChangeListener listener = new PropertyChangeListener() {
-                private boolean adjusting = false;
-
-                @Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    if (!adjusting) {
-                        adjusting = true;
-
-                        if (evt.getPropertyName().equals(PROPERTY_NAME_WIDTH)) {
-                            adjustHeight();
-                            if (getFreeMemory() < getExpectedMemory(getWidth(), getAdjustedHeight())) {
-                                final int answer = showQuestionDialog();
-                                if (answer != JOptionPane.YES_OPTION) {
-                                    setWidth(evt.getOldValue());
-                                    adjustHeight();
-                                }
-                            }
-                        }
-                        if (evt.getPropertyName().equals(PROPERTY_NAME_HEIGHT)) {
-                            adjustWidth();
-                            if (getFreeMemory() < getExpectedMemory(getAdjustedWidth(), getHeight())) {
-                                final int answer = showQuestionDialog();
-                                if (answer != JOptionPane.YES_OPTION) {
-                                    setHeight(evt.getOldValue());
-                                    adjustWidth();
-                                }
-                            }
-                        }
-
-                        adjusting = false;
-                    }
-                }
-
-                private int showQuestionDialog() {
-                    return VisatApp.getApp().showQuestionDialog(
-                            "There may not be enough memory to export the image because\n" +
-                                    "the image dimension is too large.\n\n" +
-                                    "Do you really want to keep the image dimension?", null);
-                }
-            };
-
-            propertyContainer.addPropertyChangeListener(listener);
+        private int showQuestionDialog() {
+            return VisatApp.getApp().showQuestionDialog(
+                    "There may not be enough memory to export the image because\n" +
+                    "the image dimension is too large.\n\n" +
+                    "Do you really want to keep the image dimension?", null);
         }
 
         private long getFreeMemory() {
-            return Runtime.getRuntime().freeMemory();
+            final long usedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+            return Runtime.getRuntime().maxMemory() - usedMemory;
         }
 
         private long getExpectedMemory(int width, int height) {
             return width * height * 6L;
-        }
-
-        private int getAdjustedWidth() {
-            return MathUtils.floorInt(getHeight() * aspectRatio);
-        }
-
-        private int getAdjustedHeight() {
-            return MathUtils.floorInt(getWidth() / aspectRatio);
-        }
-
-        private void adjustWidth() {
-            setWidth(getAdjustedWidth());
-        }
-
-        private void adjustHeight() {
-            setHeight(getAdjustedHeight());
         }
 
         private int getWidth() {

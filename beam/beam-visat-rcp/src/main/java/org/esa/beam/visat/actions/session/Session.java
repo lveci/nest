@@ -55,7 +55,7 @@ import java.util.List;
  *
  * @author Ralf Quast
  * @author Norman Fomferra
- * @version $Revision: 1.11 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.12 $ $Date: 2009-12-02 16:52:12 $
  * @since BEAM 4.6
  */
 @XStreamAlias("session")
@@ -428,17 +428,19 @@ public class Session {
                                     LayerRef layerRef,
                                     ProductManager productManager) throws ConversionException, ValidationException {
         final LayerType type = LayerTypeRegistry.getLayerType(layerRef.layerTypeName);
-        final SessionDomConverter converter = new SessionDomConverter(productManager);
-        final PropertyContainer template = type.createLayerConfig(layerContext);
-        converter.convertDomToValue(layerRef.configuration, template);
-        final Layer layer = type.createLayer(layerContext, template);
-        layer.setId(layerRef.id);
-        layer.setVisible(layerRef.visible);
-        layer.setTransparency(layerRef.transparency);
-        layer.setName(layerRef.name);
-        parentLayer.getChildren().add(layerRef.zOrder, layer);
-        for (LayerRef child : layerRef.children) {
-            addLayerRef(layerContext, layer, child, productManager);
+        if (type != null) {
+            final SessionDomConverter converter = new SessionDomConverter(productManager);
+            final PropertyContainer template = type.createLayerConfig(layerContext);
+            converter.convertDomToValue(layerRef.configuration, template);
+            final Layer layer = type.createLayer(layerContext, template);
+            layer.setId(layerRef.id);
+            layer.setVisible(layerRef.visible);
+            layer.setTransparency(layerRef.transparency);
+            layer.setName(layerRef.name);
+            parentLayer.getChildren().add(layerRef.zOrder, layer);
+            for (LayerRef child : layerRef.children) {
+                addLayerRef(layerContext, layer, child, productManager);
+            }
         }
     }
 

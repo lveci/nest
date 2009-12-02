@@ -1,5 +1,5 @@
 /*
- * $Id: ProductMetadataView.java,v 1.2 2009-05-11 16:17:37 lveci Exp $
+ * $Id: ProductMetadataView.java,v 1.3 2009-12-02 16:52:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -21,7 +21,6 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.framework.ui.BasicView;
 import org.esa.beam.framework.ui.PopupMenuHandler;
-import org.esa.beam.framework.ui.tool.Tool;
 
 import javax.swing.AbstractAction;
 import javax.swing.JMenuItem;
@@ -84,19 +83,6 @@ public class ProductMetadataView extends BasicView implements ProductNodeView {
     @Override
     public JPopupMenu createPopupMenu(MouseEvent event) {
         return null;
-    }
-
-    /**
-     * Returns the active tool for this view.
-     */
-    public Tool getTool() {
-        return null;
-    }
-
-    /**
-     * Returns the active tool for this view.
-     */
-    public void setTool(Tool tool) {
     }
 
     /**

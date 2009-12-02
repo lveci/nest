@@ -1,5 +1,5 @@
 /*
- * $Id: TableLayout.java,v 1.2 2009-04-13 16:43:41 lveci Exp $
+ * $Id: TableLayout.java,v 1.3 2009-12-02 16:48:34 lveci Exp $
  *
  * Copyright (c) 2007 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -7,7 +7,13 @@
 package com.bc.ceres.swing;
 
 import javax.swing.JPanel;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.LayoutManager2;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -326,6 +332,7 @@ public class TableLayout implements LayoutManager2 {
      * container, given the components it contains.
      *
      * @param parent the component to be laid out
+     *
      * @see #preferredLayoutSize
      */
     @Override
@@ -338,6 +345,7 @@ public class TableLayout implements LayoutManager2 {
      * container, given the components it contains.
      *
      * @param parent the container to be laid out
+     *
      * @see #minimumLayoutSize
      */
     @Override

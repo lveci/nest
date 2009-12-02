@@ -318,13 +318,13 @@ public final class DatApp extends VisatApp {
                 // These IDs are defined in the module.xml
                 "selectTool",
                 "crossHairTool",
-                "rangeFinder",
+                //"rangeFinder",
                 "zoomTool",
                 "pannerTool",
                 null,
-                "pinTool",
+                //"pinTool",
                 //"org.esa.beam.visat.toolviews.pin.PinManagerToolView.showCmd",
-                "gcpTool",
+                //"gcpTool",
                 //"org.esa.beam.visat.toolviews.pin.GcpManagerToolView.showCmd",
                 null,
                 "drawLineTool",
@@ -335,7 +335,7 @@ public final class DatApp extends VisatApp {
                 //"deleteShape",
                 //"magicStickTool",
                 null,
-                "convertShapeToROI",
+                //"convertShapeToROI",
                 //"convertROIToShape",
         });
 

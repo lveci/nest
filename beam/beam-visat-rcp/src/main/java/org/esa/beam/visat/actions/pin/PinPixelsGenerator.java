@@ -1,5 +1,5 @@
 /*
- * $Id: PinPixelsGenerator.java,v 1.3 2009-11-04 17:04:32 lveci Exp $
+ * $Id: PinPixelsGenerator.java,v 1.4 2009-12-02 16:52:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -66,7 +66,7 @@ class PinPixelsGenerator {
         final RasterDataLoop loop;
         final Term t;
         if (expression != null) {
-            t = product.createTerm(expression);
+            t = product.parseExpression(expression);
             loop = new RasterDataLoop(minX, minY, regionWidth, regionHeight, new Term[]{t}, ProgressMonitor.NULL);
         } else {
             t = null;
@@ -132,7 +132,7 @@ class PinPixelsGenerator {
         final Term t;
 
         if (expression != null) {
-            t = product.createTerm(expression);
+            t = product.parseExpression(expression);
             loop = new RasterDataLoop(points[0].x, points[0].y, regionWidth, regionHeight, new Term[]{t}, ProgressMonitor.NULL);
         } else {
             t = null;

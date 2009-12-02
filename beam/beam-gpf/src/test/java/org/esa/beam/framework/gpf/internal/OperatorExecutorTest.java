@@ -1,5 +1,5 @@
 /*
- * $Id: OperatorExecutorTest.java,v 1.2 2009-11-16 18:30:26 lveci Exp $
+ * $Id: OperatorExecutorTest.java,v 1.3 2009-12-02 16:52:11 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -30,6 +30,7 @@ import java.awt.Point;
 import java.awt.image.Raster;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.media.jai.JAI;
@@ -46,8 +47,8 @@ public class OperatorExecutorTest extends TestCase {
     private class RecordingTileScheduler implements TileScheduler {
         
         TileScheduler delegate;
-        List<String> recordedCalls = new ArrayList<String>();
-        List<Point> requestedTileIndices = new ArrayList<Point>();
+        List<String> recordedCalls = Collections.synchronizedList(new ArrayList<String>());
+        List<Point> requestedTileIndices = Collections.synchronizedList(new ArrayList<Point>());
         
         RecordingTileScheduler(TileScheduler delegate) {
             this.delegate = delegate;
@@ -174,7 +175,7 @@ public class OperatorExecutorTest extends TestCase {
     public void testOneTile() {
         Product sourceProduct = createSourceProduct();
         Operator op = new TestOP(sourceProduct);
-        OperatorExecutor operatorExecutor = new OperatorExecutor(op);
+        OperatorExecutor operatorExecutor = OperatorExecutor.create(op);
         operatorExecutor.execute(ProgressMonitor.NULL);
         
         assertEquals(3, recordingTileScheduler.recordedCalls.size());
@@ -191,7 +192,7 @@ public class OperatorExecutorTest extends TestCase {
         Product sourceProduct = createSourceProduct();
         sourceProduct.setPreferredTileSize(50, 50);
         Operator op = new TestOP(sourceProduct);
-        OperatorExecutor operatorExecutor = new OperatorExecutor(op);
+        OperatorExecutor operatorExecutor = OperatorExecutor.create(op);
         operatorExecutor.execute(ProgressMonitor.NULL);
         
         assertEquals(9, recordingTileScheduler.recordedCalls.size());
@@ -210,7 +211,7 @@ public class OperatorExecutorTest extends TestCase {
         bandB.setSynthetic(true);
         sourceProduct.setPreferredTileSize(50, 50);
         Operator op = new TestOP(sourceProduct);
-        OperatorExecutor operatorExecutor = new OperatorExecutor(op);
+        OperatorExecutor operatorExecutor = OperatorExecutor.create(op);
         operatorExecutor.execute(ProgressMonitor.NULL);
         
         assertEquals(17, recordingTileScheduler.recordedCalls.size());
@@ -233,7 +234,7 @@ public class OperatorExecutorTest extends TestCase {
         bandB.setSynthetic(true);
         sourceProduct.setPreferredTileSize(50, 50);
         Operator op = new TestOP(sourceProduct);
-        OperatorExecutor operatorExecutor = new OperatorExecutor(op);
+        OperatorExecutor operatorExecutor = OperatorExecutor.create(op);
         operatorExecutor.execute(ExecutionOrder.ROW_COLUMN_BAND, ProgressMonitor.NULL);
         
         assertEquals(17, recordingTileScheduler.recordedCalls.size());
