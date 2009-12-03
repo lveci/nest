@@ -1,5 +1,5 @@
 /*
- * $Id: ProductFile.java,v 1.3 2009-12-01 17:02:07 lveci Exp $
+ * $Id: ProductFile.java,v 1.4 2009-12-03 15:29:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -40,7 +40,7 @@ import java.util.logging.Logger;
  * product files which have been opened for <i>read-only</i> access.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-12-01 17:02:07 $
+ * @version $Revision: 1.4 $ $Date: 2009-12-03 15:29:56 $
  */
 public abstract class ProductFile {
 
@@ -287,7 +287,6 @@ public abstract class ProductFile {
         } catch (IOException e) {
             // ignore
         }
-
         return productType;
     }
 
@@ -1027,6 +1026,9 @@ public abstract class ProductFile {
         }
 
         productType = productId.substring(0, EnvisatConstants.PRODUCT_TYPE_STRLEN).toUpperCase();
+        if(productType != null && productType.endsWith("C")) {
+            productType = productType.substring(0, productType.length()-1) + "P";
+        }
  /*       if (!productType.endsWith("P")) {
             final String newType = productType.substring(0, 9) + "P";
             getLogger().warning("mapping to regular product type '" + newType +
