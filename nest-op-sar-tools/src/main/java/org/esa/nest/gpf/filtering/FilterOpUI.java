@@ -29,6 +29,8 @@ import java.io.File;
  */
 public class FilterOpUI extends BaseOperatorUI {
 
+    private final JList bandList = new JList();
+
     private JTree tree = null;
     private DefaultMutableTreeNode root = null;
     private final JLabel filterLabel = new JLabel("Filters:");
@@ -54,6 +56,9 @@ public class FilterOpUI extends BaseOperatorUI {
     }
 
     public void initParameters() {
+
+        OperatorUIUtils.initBandList(bandList, getBandNames());
+
         String filterName = (String)paramMap.get("selectedFilterName");
         if(filterName != null) {
             setSelectedFilter(filterName);    
@@ -71,6 +76,9 @@ public class FilterOpUI extends BaseOperatorUI {
     }
 
     public void updateParameters() {
+
+        OperatorUIUtils.updateBandList(bandList, paramMap);
+
         FilterOperator.Filter filter = getSelectedFilter(tree);
         if(filter != null) {
             paramMap.put("selectedFilterName", filter.toString());
@@ -113,6 +121,13 @@ public class FilterOpUI extends BaseOperatorUI {
 
         _gbc.gridx = 0;
         _gbc.gridy = 0;
+        contentPane.add(new JLabel("Source Bands:"), _gbc);
+        _gbc.fill = GridBagConstraints.BOTH;
+        _gbc.gridx = 1;
+        contentPane.add(new JScrollPane(bandList), _gbc);
+        _gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        _gbc.gridy++;
         DialogUtils.addComponent(contentPane, _gbc, filterLabel, treeView);
 
         _gbc.gridy++;

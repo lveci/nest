@@ -31,6 +31,7 @@ import java.awt.*;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
 import java.io.File;
 
 /**
@@ -47,6 +48,10 @@ public class FilterOperator extends Operator {
     @TargetProduct
     private Product targetProduct;
 
+    @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
+            sourceProductId="source", label="Source Bands")
+    String[] sourceBandNames;
+    
     @Parameter
     private String selectedFilterName = null;
 
@@ -107,8 +112,26 @@ public class FilterOperator extends Operator {
             return;
 
         bandMap = new HashMap<Band, Band>(5);
-        final Band[] srcBands = sourceProduct.getBands();
-        for(Band srcBand : srcBands) {
+        if (sourceBandNames == null || sourceBandNames.length == 0) {
+            final Band[] bands = sourceProduct.getBands();
+            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            for (Band band : bands) {
+                bandNameList.add(band.getName());
+            }
+            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
+        }
+
+        final Band[] sourceBands = new Band[sourceBandNames.length];
+        for (int i = 0; i < sourceBandNames.length; i++) {
+            final String sourceBandName = sourceBandNames[i];
+            final Band sourceBand = sourceProduct.getBand(sourceBandName);
+            if (sourceBand == null) {
+                throw new OperatorException("Source band not found: " + sourceBandName);
+            }
+            sourceBands[i] = sourceBand;
+        }
+
+        for(Band srcBand : sourceBands) {
             final Band targetBand = new Band(srcBand.getName(), ProductData.TYPE_FLOAT32,
                     sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
             targetBand.setUnit(srcBand.getUnit());
