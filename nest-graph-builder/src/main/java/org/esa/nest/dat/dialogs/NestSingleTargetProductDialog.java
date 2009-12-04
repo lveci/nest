@@ -76,9 +76,11 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
             @Override
             public void selectionChanged(SelectionChangeEvent event) {
                 final Product selectedProduct = (Product) event.getSelection().getSelectedValue();
-                final TargetProductSelectorModel targetProductSelectorModel = getTargetProductSelector().getModel();
-                targetProductSelectorModel.setProductName(selectedProduct.getName() + getTargetProductNameSuffix());
-                opUI.setSourceProducts(new Product[] { selectedProduct });
+                if(selectedProduct != null) {
+                    final TargetProductSelectorModel targetProductSelectorModel = getTargetProductSelector().getModel();
+                    targetProductSelectorModel.setProductName(selectedProduct.getName() + getTargetProductNameSuffix());
+                    opUI.setSourceProducts(new Product[] { selectedProduct });
+                }
             }
         });
 
