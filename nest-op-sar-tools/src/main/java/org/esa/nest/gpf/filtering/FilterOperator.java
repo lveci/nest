@@ -25,11 +25,13 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.nest.gpf.UndersamplingOp;
 
 import java.awt.*;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.File;
 
 /**
  * The sample operator implementation for an algorithm
@@ -47,6 +49,9 @@ public class FilterOperator extends Operator {
 
     @Parameter
     private String selectedFilterName = null;
+
+    @Parameter(description = "The kernel file", label="Kernel File")
+    private File userDefinedKernelFile = null;
 
     private transient Map<Band, Band> bandMap;
     private transient Map<String, Filter> filterMap = new HashMap<String, Filter>(5);
@@ -92,9 +97,12 @@ public class FilterOperator extends Operator {
                                     sourceProduct.getSceneRasterHeight());
 
         Filter selectedFilter = null;
-        if(selectedFilterName != null) {
+        if (userDefinedKernelFile != null) {
+            selectedFilter = getUserDefinedFilter(userDefinedKernelFile);
+        } else if(selectedFilterName != null) {
             selectedFilter = filterMap.get(selectedFilterName);
         }
+
         if(selectedFilter == null)
             return;
 
@@ -166,6 +174,21 @@ public class FilterOperator extends Operator {
         filterBand.setDescription(descr);
         return filterBand;
     }
+
+    private KernelFilter getUserDefinedFilter(File userDefinedKernelFile) {
+        float[][] kernelData = UndersamplingOp.readFile(userDefinedKernelFile.getAbsolutePath());
+        final int filterWidth = kernelData.length;
+        final int filterHeight = kernelData[0].length;
+        double[] data = new double[filterWidth*filterHeight];
+        int k = 0;
+        for (int r = 0; r < filterHeight; r++) {
+            for (int c = 0; c < filterWidth; c++) {
+                data[k++] = (double)kernelData[r][c];
+            }
+        }
+        return new KernelFilter("User Defined Filter", new Kernel(filterWidth, filterHeight, data));
+    }
+
 
     static abstract class Filter {
 

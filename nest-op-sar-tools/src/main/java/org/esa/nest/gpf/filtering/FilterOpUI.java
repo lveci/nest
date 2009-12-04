@@ -3,6 +3,10 @@ package org.esa.nest.gpf.filtering;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.framework.ui.GridBagUtils;
+import org.esa.beam.visat.VisatApp;
+import org.esa.nest.util.DialogUtils;
+import org.esa.nest.gpf.OperatorUIUtils;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -10,8 +14,11 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.util.Enumeration;
 import java.util.Map;
+import java.io.File;
 
 /**
  * Created by IntelliJ IDEA.
@@ -24,12 +31,24 @@ public class FilterOpUI extends BaseOperatorUI {
 
     private JTree tree = null;
     private DefaultMutableTreeNode root = null;
+    private final JLabel filterLabel = new JLabel("Filters:");
+    private final JLabel kernelFileLabel = new JLabel("User Defined Kernel File:");
+    private final JTextField kernelFile = new JTextField("");
+    protected final JButton kernelFileBrowseButton = new JButton("...");
 
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 
         initializeOperatorUI(operatorName, parameterMap);
         JComponent panel = createPanel();
         initParameters();
+
+        kernelFile.setColumns(30);
+        kernelFileBrowseButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                final File file = VisatApp.getApp().showFileOpenDialog("User Defined Kernel File", false, null);
+                kernelFile.setText(file.getAbsolutePath());
+            }
+        });
 
         return panel;
     }
@@ -38,6 +57,11 @@ public class FilterOpUI extends BaseOperatorUI {
         String filterName = (String)paramMap.get("selectedFilterName");
         if(filterName != null) {
             setSelectedFilter(filterName);    
+        }
+
+        File kFile = (File)paramMap.get("userDefinedKernelFile");
+        if(kFile != null) {
+            kernelFile.setText(kFile.getAbsolutePath());
         }
     }
 
@@ -48,8 +72,14 @@ public class FilterOpUI extends BaseOperatorUI {
 
     public void updateParameters() {
         FilterOperator.Filter filter = getSelectedFilter(tree);
-        if(filter != null)
+        if(filter != null) {
             paramMap.put("selectedFilterName", filter.toString());
+        }
+        
+        final String kernelFileStr = kernelFile.getText();
+        if(!kernelFileStr.isEmpty()) {
+            paramMap.put("userDefinedKernelFile", new File(kernelFileStr));
+        }
     }
 
     private static DefaultMutableTreeNode findItem(DefaultMutableTreeNode parentItem, String filterName) {
@@ -74,8 +104,22 @@ public class FilterOpUI extends BaseOperatorUI {
         final JScrollPane treeView = new JScrollPane(tree);
 
         final JPanel contentPane = new JPanel(new BorderLayout(4, 4));
-        contentPane.add(new JLabel("Filters:"), BorderLayout.NORTH);
-        contentPane.add(treeView, BorderLayout.CENTER);
+        contentPane.setLayout(new GridBagLayout());
+        GridBagConstraints _gbc = GridBagUtils.createDefaultConstraints();
+        _gbc.fill = GridBagConstraints.HORIZONTAL;
+        _gbc.anchor = GridBagConstraints.NORTHWEST;
+        _gbc.insets.top = 2;
+        _gbc.insets.bottom = 2;
+
+        _gbc.gridx = 0;
+        _gbc.gridy = 0;
+        DialogUtils.addComponent(contentPane, _gbc, filterLabel, treeView);
+
+        _gbc.gridy++;
+        DialogUtils.addComponent(contentPane, _gbc, kernelFileLabel, kernelFile);
+        DialogUtils.enableComponents(kernelFileLabel, kernelFile, true);
+        _gbc.gridx = 2;
+        contentPane.add(kernelFileBrowseButton, _gbc);
 
         return contentPane;
     }
