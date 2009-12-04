@@ -34,6 +34,8 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
     private final ArrayList<File> cosarFileList = new ArrayList<File>(1);
     private final Map<Band, ImageInputStream> cosarBandMap = new HashMap<Band, ImageInputStream>(1);
 
+    private final static String timeFormat = "yyyy-MM-dd HH:mm:ss";
+
     public TerraSarXProductDirectory(final File headerFile, final File imageFolder) {
         super(headerFile, imageFolder);
     }
@@ -72,7 +74,8 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
                 generalHeader.getAttributeString("itemName", defStr));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, "TSX1");
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, getTime(generalHeader, "generationTime"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
+                ReaderUtils.getTime(generalHeader, "generationTime", timeFormat));
 
         MetadataElement elem = generalHeader.getElement("generationSystem");
         if(elem != null) {
@@ -95,8 +98,8 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds2_tx_rx_polar, polList[1].getData().getElemString());
         }
 
-        final ProductData.UTC startTime = getTime(sceneInfo.getElement("start"), "timeUTC");
-        final ProductData.UTC stopTime = getTime(sceneInfo.getElement("stop"), "timeUTC");
+        final ProductData.UTC startTime = ReaderUtils.getTime(sceneInfo.getElement("start"), "timeUTC", timeFormat);
+        final ProductData.UTC stopTime = ReaderUtils.getTime(sceneInfo.getElement("stop"), "timeUTC", timeFormat);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, stopTime);
         product.setStartTime(startTime);
@@ -165,35 +168,6 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         if(elem.getAttributeString(attribTag, " ").equalsIgnoreCase(trueValue))
             val = 1;
         AbstractMetadata.setAttribute(absRoot, absTag, val);
-    }
-
-    private static ProductData.UTC getTime(MetadataElement elem, String tag) {
-        final String timeStr = createValidUTCString(elem.getAttributeString(tag, " ").toUpperCase(), 
-                new char[]{':','.','-'}, ' ').trim();
-        return AbstractMetadata.parseUTC(timeStr, "yyyy-MM-dd HH:mm:ss");
-    }
-
-    private static String createValidUTCString(String name, char[] validChars, char replaceChar) {
-        Guardian.assertNotNull("name", name);
-        char[] sortedValidChars = null;
-        if (validChars == null) {
-            sortedValidChars = new char[5];
-        } else {
-            sortedValidChars = (char[]) validChars.clone();
-        }
-        Arrays.sort(sortedValidChars);
-        StringBuilder validName = new StringBuilder(name.length());
-        for (int i = 0; i < name.length(); i++) {
-            final char ch = name.charAt(i);
-            if (Character.isDigit(ch)) {
-                validName.append(ch);
-            } else if (Arrays.binarySearch(sortedValidChars, ch) >= 0) {
-                validName.append(ch);
-            } else {
-                validName.append(replaceChar);
-            }
-        }
-        return validName.toString();
     }
 
     private void getCornerCoords(MetadataElement sceneInfo) {
@@ -410,7 +384,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
                 equalElems(new ProductData.UTC(0))) {
 
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
-                getTime(stateVectorElems[1], "timeUTC"));
+                ReaderUtils.getTime(stateVectorElems[1], "timeUTC", timeFormat));
         }
     }
 
@@ -418,7 +392,8 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
                                   MetadataElement srcElem, int num) {
         final MetadataElement orbitVectorElem = new MetadataElement(name+num);
 
-        orbitVectorElem.setAttributeUTC(AbstractMetadata.orbit_vector_time, getTime(srcElem, "timeUTC"));
+        orbitVectorElem.setAttributeUTC(AbstractMetadata.orbit_vector_time,
+                ReaderUtils.getTime(srcElem, "timeUTC", timeFormat));
 
         orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_x_pos,
                 srcElem.getAttributeDouble("posX", 0));

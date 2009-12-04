@@ -11,7 +11,7 @@ public interface NetcdfConstants {
 
     final static String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
-    final static String GLOBAL_ATTRIBUTES_NAME = "global_attributes";
+    final static String GLOBAL_ATTRIBUTES_NAME = "Global_Attributes";
 
     final static String SCALE_FACTOR_ATT_NAME = "scale_factor";
     final static String SLOPE_ATT_NAME = "slope";

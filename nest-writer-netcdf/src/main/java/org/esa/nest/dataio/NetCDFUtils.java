@@ -216,6 +216,14 @@ public class NetCDFUtils {
         addAttributes(parentElem, parentGroup);
     }
 
+    public static void addGlobalAttributes(final MetadataElement parentElem, final List<Attribute> attribList) {
+        final MetadataElement globalElem = new MetadataElement(NetcdfConstants.GLOBAL_ATTRIBUTES_NAME);
+        parentElem.addElement(globalElem);
+        for(Attribute at : attribList) {
+            createMetadataAttributes(globalElem, at, at.getName());
+        }
+    }
+
     public static void addAttributes(final MetadataElement parentElem, final Group parentGroup) {
         final List<Attribute> attribList = parentGroup.getAttributes();
         for(Attribute at : attribList) {
@@ -407,8 +415,9 @@ public class NetCDFUtils {
 
     private static boolean contains(List<Variable> varList, String[] nameList) {
         for(Variable v : varList) {
+            final String vName = v.getName().toLowerCase();
             for(String str : nameList) {
-                if(v.getName().toLowerCase().contains(str))
+                if(vName.contains(str))
                     return true;
             }
         }
@@ -426,10 +435,12 @@ public class NetCDFUtils {
         for (Variable variable : variables) {
             final int rank = variable.getRank();
             if (rank >= 2 && isValidRasterDataType(variable.getDataType())) {
-                final Dimension dimX = variable.getDimension(rank - 1);
-                Dimension dimY = variable.getDimension(rank - 2);
-                if(rank >= 3 && dimY.getLength() <= 1) {
-                    dimY = variable.getDimension(rank - 3);    
+                Dimension dimY = variable.getDimension(0);
+                Dimension dimX = variable.getDimension(1);
+                if(rank >= 3 && dimY.getLength() <= 32) {
+                    final Dimension dim3 = variable.getDimension(2);
+                    dimY = dimX;
+                    dimX = dim3;
                 }
                 if (dimX.getLength() > 1 && dimY.getLength() > 1) {
                     NcRasterDim rasterDim = new NcRasterDim(dimX, dimY);

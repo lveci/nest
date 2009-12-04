@@ -5,10 +5,13 @@ import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.framework.dataop.maptransf.MapInfo;
 import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.util.Guardian;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.File;
+import java.util.Arrays;
 
 /**
  * Common functions for readers
@@ -169,6 +172,36 @@ public class ReaderUtils {
                 throw new Exception("band " + b.getName() + " has null unit");
         }
     }
+
+    public static ProductData.UTC getTime(final MetadataElement elem, final String tag, final String timeFormat) {
+        final String timeStr = createValidUTCString(elem.getAttributeString(tag, " ").toUpperCase(),
+                new char[]{':','.','-'}, ' ').trim();
+        return AbstractMetadata.parseUTC(timeStr, timeFormat);
+    }
+
+    private static String createValidUTCString(final String name, final char[] validChars, final char replaceChar) {
+        Guardian.assertNotNull("name", name);
+        char[] sortedValidChars = null;
+        if (validChars == null) {
+            sortedValidChars = new char[5];
+        } else {
+            sortedValidChars = (char[]) validChars.clone();
+        }
+        Arrays.sort(sortedValidChars);
+        final StringBuilder validName = new StringBuilder(name.length());
+        for (int i = 0; i < name.length(); i++) {
+            final char ch = name.charAt(i);
+            if (Character.isDigit(ch)) {
+                validName.append(ch);
+            } else if (Arrays.binarySearch(sortedValidChars, ch) >= 0) {
+                validName.append(ch);
+            } else {
+                validName.append(replaceChar);
+            }
+        }
+        return validName.toString();
+    }
+
 
     public static String findPolarizationInBandName(final String bandName) {
 

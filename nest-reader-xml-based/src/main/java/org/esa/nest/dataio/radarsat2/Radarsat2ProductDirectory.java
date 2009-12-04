@@ -25,6 +25,8 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
     private boolean isSLC = false;
     private transient Map<String, String> polarizationMap = new HashMap<String, String>(4);
 
+    private final static String timeFormat = "yyyy-MM-dd HH:mm:ss";
+
     public Radarsat2ProductDirectory(final File headerFile, final File imageFolder) {
         super(headerFile, imageFolder);
     }
@@ -137,7 +139,8 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                 generalProcessingInformation.getAttributeString("processingFacility", defStr) +"-"+
                 generalProcessingInformation.getAttributeString("softwareVersion", defStr));
 
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME, getTime(generalProcessingInformation, "processingTime"));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
+                ReaderUtils.getTime(generalProcessingInformation, "processingTime", timeFormat));
 
         final MetadataElement sarProcessingInformation = imageGenerationParameters.getElement("sarProcessingInformation");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ant_elev_corr_flag,
@@ -146,8 +149,8 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                 getFlag(sarProcessingInformation, "rangeSpreadingLossCorrection"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, isSLC ? 0 : 1);
 
-        final ProductData.UTC startTime = getTime(sarProcessingInformation, "zeroDopplerTimeFirstLine");
-        final ProductData.UTC stopTime = getTime(sarProcessingInformation, "zeroDopplerTimeLastLine");
+        final ProductData.UTC startTime = ReaderUtils.getTime(sarProcessingInformation, "zeroDopplerTimeFirstLine", timeFormat);
+        final ProductData.UTC stopTime = ReaderUtils.getTime(sarProcessingInformation, "zeroDopplerTimeLastLine", timeFormat);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, stopTime);
         product.setStartTime(startTime);
@@ -199,35 +202,6 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         return -1;
     }
 
-    private static ProductData.UTC getTime(MetadataElement elem, String tag) {
-        final String timeStr = createValidUTCString(elem.getAttributeString(tag, " ").toUpperCase(),
-                new char[]{':','.','-'}, ' ').trim();
-        return AbstractMetadata.parseUTC(timeStr, "yyyy-MM-dd HH:mm:ss");
-    }
-
-    private static String createValidUTCString(String name, char[] validChars, char replaceChar) {
-        Guardian.assertNotNull("name", name);
-        char[] sortedValidChars = null;
-        if (validChars == null) {
-            sortedValidChars = new char[5];
-        } else {
-            sortedValidChars = (char[]) validChars.clone();
-        }
-        Arrays.sort(sortedValidChars);
-        final StringBuilder validName = new StringBuilder(name.length());
-        for (int i = 0; i < name.length(); i++) {
-            final char ch = name.charAt(i);
-            if (Character.isDigit(ch)) {
-                validName.append(ch);
-            } else if (Arrays.binarySearch(sortedValidChars, ch) >= 0) {
-                validName.append(ch);
-            } else {
-                validName.append(replaceChar);
-            }
-        }
-        return validName.toString();
-    }
-
     private void getPolarizations(MetadataElement imageAttributes) {
         final MetadataElement[] imageAttribElems = imageAttributes.getElements();
         for(MetadataElement elem : imageAttribElems) {
@@ -259,7 +233,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                 equalElems(new ProductData.UTC(0))) {
 
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
-                getTime(stateVectorElems[0], "timeStamp"));
+                ReaderUtils.getTime(stateVectorElems[0], "timeStamp", timeFormat));
         }
     }
 
@@ -267,7 +241,8 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                                   MetadataElement srcElem, int num) {
         final MetadataElement orbitVectorElem = new MetadataElement(name+num);
 
-        orbitVectorElem.setAttributeUTC(AbstractMetadata.orbit_vector_time, getTime(srcElem, "timeStamp"));
+        orbitVectorElem.setAttributeUTC(AbstractMetadata.orbit_vector_time,
+                ReaderUtils.getTime(srcElem, "timeStamp", timeFormat));
 
         final MetadataElement xpos = srcElem.getElement("xPosition");
         orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_x_pos,
@@ -301,7 +276,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                 srgrCoefficientsElem.addElement(srgrListElem);
                 ++listCnt;
 
-                final ProductData.UTC utcTime = getTime(elem, "zeroDopplerAzimuthTime");
+                final ProductData.UTC utcTime = ReaderUtils.getTime(elem, "zeroDopplerAzimuthTime", timeFormat);
                 srgrListElem.setAttributeUTC(AbstractMetadata.srgr_coef_time, utcTime);
 
                 final double grOrigin = elem.getElement("groundRangeOrigin").getAttributeDouble("groundRangeOrigin", 0);
@@ -445,7 +420,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
             if(elem.getName().equalsIgnoreCase("slantRangeToGroundRange")) {
                 final coefList coef = new coefList();
                 segmentsArray.add(coef);
-                coef.utcSeconds = getTime(elem, "zeroDopplerAzimuthTime").getMJD() * 24 * 3600;
+                coef.utcSeconds = ReaderUtils.getTime(elem, "zeroDopplerAzimuthTime", timeFormat).getMJD() * 24 * 3600;
                 coef.grOrigin = elem.getElement("groundRangeOrigin").getAttributeDouble("groundRangeOrigin", 0);
 
                 final String coeffStr = elem.getAttributeString("groundToSlantRangeCoefficients", "");
