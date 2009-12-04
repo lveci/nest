@@ -278,6 +278,15 @@
             <helpId>FillHoleOp</helpId>
         </action>
 
+        <action>
+            <id>ImageFilterOp</id>
+            <class>org.esa.nest.dat.filtering.FilterOperatorAction</class>
+            <text>Image Filtering</text>
+            <shortDescr>Image filtering</shortDescr>
+            <parent>sartools</parent>
+            <helpId>FilterOperator</helpId>
+        </action>
+
     </extension>
 
 </module>
