@@ -16,6 +16,7 @@ import com.bc.ceres.swing.figure.Figure;
 import com.bc.ceres.swing.figure.FigureCollection;
 import com.bc.ceres.swing.figure.FigureEditor;
 import com.bc.ceres.swing.figure.FigureEditorHolder;
+import com.bc.ceres.swing.figure.ShapeFigure;
 import com.bc.ceres.swing.figure.support.DefaultFigureCollection;
 import com.bc.ceres.swing.figure.support.DefaultFigureEditor;
 import com.bc.ceres.swing.undo.UndoContext;
@@ -530,42 +531,8 @@ public class ProductSceneView extends BasicView
         }
     }
 
-    public boolean isROIOverlayEnabled() {
-        final Layer roiLayer = getRoiLayer(false);
-        return roiLayer != null && roiLayer.isVisible();
-    }
-
-    public void setROIOverlayEnabled(boolean enabled) {
-        if (isROIOverlayEnabled() != enabled) {
-            getRoiLayer(true).setVisible(enabled);
-        }
-    }
-
-    public RenderedImage getROIImage() {
-        final ImageLayer roiLayer = getRoiLayer(false);
-        if (roiLayer == null) {
-            return null;
-        }
-
-        final RenderedImage roiImage = roiLayer.getImage(0);
-        if (roiImage == MultiLevelSource.NULL) {
-            return null;
-        }
-
-        return roiImage;
-    }
-
-    public void setROIImage(RenderedImage roiImage) {
-        // used by MagicStick only
-        ImageLayer roiLayer = getRoiLayer(false);
-        if (roiLayer != null) {
-            MultiLevelModel model = roiLayer.getMultiLevelSource().getModel();
-            roiLayer.setMultiLevelSource(new DefaultMultiLevelSource(roiImage, model));
-        }
-    }
-
     @Deprecated
-    public Figure getCurrentShapeFigure() {
+    public ShapeFigure getCurrentShapeFigure() {
         return null;
     }
 
@@ -886,10 +853,6 @@ public class ProductSceneView extends BasicView
 
     private Layer getMaskCollectionLayer(boolean create) {
         return getSceneImage().getMaskCollectionLayer(create);
-    }
-
-    private ImageLayer getRoiLayer(boolean create) {
-        return getSceneImage().getRoiLayer(create);
     }
 
     private GraticuleLayer getGraticuleLayer(boolean create) {

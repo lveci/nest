@@ -1,5 +1,5 @@
 /*
- * $Id: MaskTable.java,v 1.2 2009-12-02 16:52:12 lveci Exp $
+ * $Id: MaskTable.java,v 1.3 2009-12-04 19:06:45 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -164,8 +164,7 @@ class MaskTable extends JTable {
 
         private String getToolTipText(int rowIndex) {
             Mask mask = getMask(rowIndex);
-            // todo - return appropriate info text
-            return mask.getImageType().getClass().getName();
+            return mask.getDescription();
         }
     }
 

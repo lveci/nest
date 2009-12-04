@@ -1,5 +1,5 @@
 /*
- * $Id: MaskTableModel.java,v 1.2 2009-12-02 16:52:12 lveci Exp $
+ * $Id: MaskTableModel.java,v 1.3 2009-12-04 19:06:45 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -265,7 +265,6 @@ class MaskTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-
         Mask mask = getMaskGroup().get(rowIndex);
         int column = modeIdxs[columnIndex];
 

@@ -47,10 +47,10 @@ public class DefaultFigureEditor implements FigureEditor {
             viewport = ((ViewportOwner) editorComponent).getViewport();
             InteractionDispatcher interactionDispatcher = new InteractionDispatcher(this);
             interactionDispatcher.registerListeners(this.editorComponent);
-            editorComponent.requestFocusInWindow();
         } else {
             viewport = new DefaultViewport(true);
         }
+        editorComponent.setFocusable(true);
 
         this.undoContext = undoContext != null ? undoContext : new DefaultUndoContext(this);
         this.figureSelectionContext = new FigureSelectionContext(this, figureCollection, new DefaultFigureSelection());
@@ -58,8 +58,8 @@ public class DefaultFigureEditor implements FigureEditor {
         this.rendering = new DefaultRendering(viewport);
 
         RepaintHandler repaintHandler = new RepaintHandler();
-        this.figureSelectionContext.getFigureCollection().addListener(repaintHandler);
-        this.figureSelectionContext.getFigureSelection().addListener(repaintHandler);
+        this.figureSelectionContext.getFigureCollection().addChangeListener(repaintHandler);
+        this.figureSelectionContext.getFigureSelection().addChangeListener(repaintHandler);
     }
 
     @Override

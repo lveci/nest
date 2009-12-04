@@ -1,10 +1,10 @@
 package com.bc.ceres.swing.figure;
 
-import com.bc.ceres.swing.undo.Restorable;
 import com.bc.ceres.grender.Rendering;
+import com.bc.ceres.swing.undo.Restorable;
 
-import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
@@ -18,6 +18,10 @@ import java.awt.geom.Rectangle2D;
  */
 public interface Figure extends Restorable, Cloneable {
 
+    ///////////////////////////////////////////
+    // {{
+    // todo - interface FigureGeometry?
+
     enum Rank {
         PUNCTUAL,
         LINEAL,
@@ -25,27 +29,15 @@ public interface Figure extends Restorable, Cloneable {
         COLLECTION
     }
 
-    // Temporarily solution
-    // todo - (1) remove or
-    // todo - (2) rename to getGeometryAsShape()
-    Shape getShape();
-
-    // Temporarily solution
-    // todo - (1) remove or
-    // todo - (2) rename to setGeometryFromShape()
-    void setShape(Shape shape);
-
-    boolean isSelectable();
-
-    boolean isSelected();
-
-    void setSelected(boolean selected);
-
-    void draw(Rendering rendering);
-
     boolean contains(Figure figure);
 
-    boolean contains(Point2D point);
+    /**
+     * Tests if the given point is "close to" the given point.
+     * @param point Point in model coordinates.
+     * @param m2v  Current model-to-view transformation.
+     * @return The figure, or {@code null}.
+     */
+    boolean isCloseTo(Point2D point, AffineTransform m2v);
 
     Rectangle2D getBounds();
 
@@ -57,11 +49,23 @@ public interface Figure extends Restorable, Cloneable {
 
     void rotate(Point2D point, double theta);
 
-    // todo - why not use Point2D
-    double[] getVertex(int index);
+    double[] getSegment(int index);
 
-    // todo - why not use Point2D
-    void setVertex(int index, double[] vertex);
+    void setSegment(int index, double[] segment);
+
+    void addSegment(int index, double[] segment);
+
+    void removeSegment(int index);
+    // }}
+    ///////////////////////////////////////////
+
+    boolean isSelectable();
+
+    boolean isSelected();
+
+    void setSelected(boolean selected);
+
+    void draw(Rendering rendering);
 
     int getFigureCount();
 
@@ -69,7 +73,13 @@ public interface Figure extends Restorable, Cloneable {
 
     Figure getFigure(int index);
 
-    Figure getFigure(Point2D p);
+    /**
+     * Gets the "nearest" figure for the given point.
+     * @param point Point in model coordinates.
+     * @param m2v  Current model-to-view transformation.
+     * @return The figure, or {@code null}.
+     */
+    Figure getFigure(Point2D point, AffineTransform m2v);
 
     Figure[] getFigures();
 
@@ -91,11 +101,11 @@ public interface Figure extends Restorable, Cloneable {
 
     Handle[] createHandles(int selectionStage);
 
-    void addListener(FigureChangeListener l);
+    void addChangeListener(FigureChangeListener l);
 
-    void removeListener(FigureChangeListener listener);
+    void removeChangeListener(FigureChangeListener listener);
 
-    FigureChangeListener[] getListeners();
+    FigureChangeListener[] getChangeListeners();
 
     void dispose();
 

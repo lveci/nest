@@ -70,7 +70,9 @@ final class Functions {
 
     static final class FXY_X4Y4 implements FXY {
         public final double f(double x, double y) {
-            return (x * x * x * x) * (y * y * y * y);
+            final double x2 = x*x;
+            final double y2 = y*y;
+            return (x2 * x2) * (y2 * y2);
         }
         public String getCCodeExpr() {
             return "pow(x, 4) * pow(y, 4)";
@@ -79,7 +81,8 @@ final class Functions {
 
     static final class FXY_X4Y3 implements FXY {
         public final double f(double x, double y) {
-            return (x * x * x * x) * (y * y * y);
+            final double x2 = x*x;
+            return (x2 * x2) * (y * y * y);
         }
         public String getCCodeExpr() {
             return "pow(x, 4) * pow(y, 3)";
@@ -88,7 +91,8 @@ final class Functions {
 
     static final class FXY_X3Y4 implements FXY {
         public final double f(double x, double y) {
-            return (x * x * x) * (y * y * y * y);
+            final double y2 = y*y;
+            return (x * x * x) * (y2 * y2);
         }
         public String getCCodeExpr() {
             return "pow(x, 3) * pow(y, 4)";
@@ -97,7 +101,8 @@ final class Functions {
 
     static final class FXY_X4Y2 implements FXY {
         public final double f(double x, double y) {
-            return (x * x * x * x) * (y * y);
+            final double x2 = x*x;
+            return (x2 * x2) * (y * y);
         }
         public String getCCodeExpr() {
             return "pow(x, 4) * pow(y, 2)";
@@ -106,7 +111,8 @@ final class Functions {
 
     static final class FXY_X2Y4 implements FXY {
         public final double f(double x, double y) {
-            return (x * x) * (y * y * y * y);
+            final double y2 = y*y;
+            return (x * x) * (y2 * y2);
         }
         public String getCCodeExpr() {
             return "pow(x, 2) * pow(y, 4)";
@@ -115,7 +121,8 @@ final class Functions {
 
     static final class FXY_X4Y implements FXY {
         public final double f(double x, double y) {
-            return (x * x * x * x) * (y);
+            final double x2 = x*x;
+            return (x2 * x2) * (y);
         }
         public String getCCodeExpr() {
             return "pow(x, 4) * y";
@@ -124,7 +131,8 @@ final class Functions {
 
     static final class FXY_XY4 implements FXY {
         public final double f(double x, double y) {
-            return (x) * (y * y * y * y);
+            final double y2 = y*y;
+            return (x) * (y2 * y2);
         }
         public String getCCodeExpr() {
             return "x * pow(y, 4)";
@@ -133,7 +141,8 @@ final class Functions {
 
     static final class FXY_X4 implements FXY {
         public final double f(double x, double y) {
-            return (x * x * x * x);
+            final double x2 = x*x;
+            return (x2 * x2);
         }
         public String getCCodeExpr() {
             return "pow(x, 4)";
@@ -142,7 +151,8 @@ final class Functions {
 
     static final class FXY_Y4 implements FXY {
         public final double f(double x, double y) {
-            return (y * y * y * y);
+            final double y2 = y*y;
+            return (y2 * y2);
         }
         public String getCCodeExpr() {
             return "pow(y, 4)";

@@ -1,5 +1,5 @@
 /*
- * $Id: MaskManagerToolView.java,v 1.1 2009-11-04 17:04:33 lveci Exp $
+ * $Id: MaskManagerToolView.java,v 1.2 2009-12-04 19:06:45 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,11 +16,13 @@
  */
 package org.esa.beam.visat.toolviews.mask;
 
+import org.esa.beam.framework.ui.application.support.AbstractToolView;
+
 public class MaskManagerToolView extends MaskToolView {
     public static final String ID = MaskManagerToolView.class.getName();
 
     @Override
-    protected MaskForm createMaskForm() {
-        return new MaskManagerForm();
+    protected MaskForm createMaskForm(AbstractToolView maskToolView) {
+        return new MaskManagerForm(this);
     }
 }

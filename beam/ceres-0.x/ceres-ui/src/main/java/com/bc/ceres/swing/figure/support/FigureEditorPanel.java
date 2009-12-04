@@ -10,6 +10,7 @@ import com.bc.ceres.swing.figure.FigureEditorHolder;
 import com.bc.ceres.swing.undo.UndoContext;
 
 import javax.swing.JPanel;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ComponentAdapter;
@@ -34,7 +35,9 @@ public class FigureEditorPanel extends JPanel implements FigureEditorHolder, Adj
     public FigureEditorPanel(UndoContext undoContext, FigureCollection figureCollection) {
         super(null);
 
-        requestFocusInWindow(); // to receive key events
+        setFocusable(true);
+        setRequestFocusEnabled(true);
+        setBackground(Color.WHITE);
 
         this.figureCollection = figureCollection;
         this.viewport = new DefaultViewport(true);

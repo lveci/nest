@@ -1,5 +1,5 @@
 /*
- * $Id: MaskToolView.java,v 1.1 2009-11-04 17:04:33 lveci Exp $
+ * $Id: MaskToolView.java,v 1.2 2009-12-04 19:06:45 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -94,8 +94,7 @@ public abstract class MaskToolView extends AbstractToolView {
 
     @Override
     public JComponent createControl() {
-
-        maskForm = createMaskForm();
+        maskForm = createMaskForm(this);
 
         AbstractButton helpButton = maskForm.getHelpButton();
         if (helpButton != null) {
@@ -119,7 +118,7 @@ public abstract class MaskToolView extends AbstractToolView {
         return maskForm.createContentPanel();
     }
 
-    protected abstract MaskForm createMaskForm();
+    protected abstract MaskForm createMaskForm(AbstractToolView maskToolView);
 
     private class MaskIFL extends InternalFrameAdapter {
 

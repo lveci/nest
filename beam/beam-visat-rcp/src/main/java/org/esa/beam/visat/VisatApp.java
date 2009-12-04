@@ -1,5 +1,5 @@
 /*
- * $Id: VisatApp.java,v 1.13 2009-12-02 17:33:08 lveci Exp $
+ * $Id: VisatApp.java,v 1.14 2009-12-04 19:06:45 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -145,7 +145,7 @@ import java.util.logging.Level;
  * @author Norman Fomferra
  * @author Marco Peters
  * @author Sabine Embacher
- * @version $Revision: 1.13 $ $Date: 2009-12-02 17:33:08 $
+ * @version $Revision: 1.14 $ $Date: 2009-12-04 19:06:45 $
  */
 public class VisatApp extends BasicApp implements AppContext {
 
@@ -1950,7 +1950,6 @@ public class VisatApp extends BasicApp implements AppContext {
         final CommandBar toolBar = createToolBar(LAYERS_TOOL_BAR_ID, "Layers");
         addCommandsToToolBar(toolBar, new String[]{
                 "showNoDataOverlay",
-                "showROIOverlay",
                 "showShapeOverlay",
                 "showGraticuleOverlay",
                 PinDescriptor.INSTANCE.getShowLayerCommandId(),

@@ -1,5 +1,5 @@
 /*
- * $Id: Product.java,v 1.7 2009-12-02 16:52:11 lveci Exp $
+ * $Id: Product.java,v 1.8 2009-12-04 19:06:45 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -83,7 +83,7 @@ import java.util.TreeSet;
  * necessarily store data in the same format. Furthermore, it is not mandatory for a product to have both of them.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.7 $ $Date: 2009-12-02 16:52:11 $
+ * @version $Revision: 1.8 $ $Date: 2009-12-04 19:06:45 $
  */
 public class Product extends ProductNode {
 
@@ -235,10 +235,11 @@ public class Product extends ProductNode {
         this.pinGroup = new ProductNodeGroup<Pin>(this, "pinGroup", true);
         this.gcpGroup = new ProductNodeGroup<Pin>(this, "gcpGroup", true);
 
-        
+
         // todo - review me, this is test code (nf 10.2009)
         this.vectorDataGroup.add(new VectorData("pins", createPlacemarkFeaureType("PinType", "pixelPoint")));
-        this.vectorDataGroup.add(new VectorData("ground_control_points", createPlacemarkFeaureType("GcpType", "geoPoint")));
+        this.vectorDataGroup.add(
+                new VectorData("ground_control_points", createPlacemarkFeaureType("GcpType", "geoPoint")));
 
         if ("true".equals(System.getProperty("beam.maskDev"))) {
 
@@ -248,11 +249,13 @@ public class Product extends ProductNode {
             VectorData testShapes2 = createTestShapes2("test_shapes_2");
             this.vectorDataGroup.add(testShapes2);
 
-            Mask testShapes1Mask = new Mask("test_shapes_1", sceneRasterWidth, sceneRasterHeight, new Mask.VectorDataType());
+            Mask testShapes1Mask = new Mask("test_shapes_1", sceneRasterWidth, sceneRasterHeight,
+                                            new Mask.VectorDataType());
             testShapes1Mask.getImageConfig().setValue("vectorData", testShapes1);
             this.maskGroup.add(testShapes1Mask);
 
-            Mask testShapes2Mask = new Mask("test_shapes_2", sceneRasterWidth, sceneRasterHeight, new Mask.VectorDataType());
+            Mask testShapes2Mask = new Mask("test_shapes_2", sceneRasterWidth, sceneRasterHeight,
+                                            new Mask.VectorDataType());
             testShapes2Mask.getImageConfig().setValue("vectorData", testShapes2);
             this.maskGroup.add(testShapes2Mask);
 
@@ -260,7 +263,7 @@ public class Product extends ProductNode {
         // todo - remove, only needed because the vector data stuff above modified the product (nf 10.2009)
         setModified(false);
 
-        
+
         addProductNodeListener(new ProductNodeListenerAdapter() {
             @Override
             public void nodeChanged(final ProductNodeEvent event) {
@@ -814,7 +817,7 @@ public class Product extends ProductNode {
     public void addTiePointGrid(final TiePointGrid tiePointGrid) {
         if (containsRasterDataNode(tiePointGrid.getName())) {
             throw new IllegalArgumentException("The Product '" + getName() + "' already contains " +
-                    "a tie-point grid with the name '" + tiePointGrid.getName() + "'.");
+                                               "a tie-point grid with the name '" + tiePointGrid.getName() + "'.");
         }
         tiePointGridGroup.add(tiePointGrid);
     }
@@ -928,12 +931,12 @@ public class Product extends ProductNode {
     public void addBand(final Band band) {
         Guardian.assertNotNull("band", band);
         if (band.getSceneRasterWidth() != getSceneRasterWidth()
-                || band.getSceneRasterHeight() != getSceneRasterHeight()) {
+            || band.getSceneRasterHeight() != getSceneRasterHeight()) {
             //throw new IllegalArgumentException("illegal raster dimensions");
         }
         if (containsRasterDataNode(band.getName())) {
             throw new IllegalArgumentException("The Product '" + getName() + "' already contains " +
-                    "a band with the name '" + band.getName() + "'.");
+                                               "a band with the name '" + band.getName() + "'.");
         }
         bandGroup.add(band);
 
@@ -1132,7 +1135,7 @@ public class Product extends ProductNode {
      */
     public boolean containsPixel(final float x, final float y) {
         return x >= 0.0f && x <= getSceneRasterWidth() &&
-                y >= 0.0f && y <= getSceneRasterHeight();
+               y >= 0.0f && y <= getSceneRasterHeight();
     }
 
     /**
@@ -1283,10 +1286,7 @@ public class Product extends ProductNode {
     }
 
     private static boolean equalsLatLon(final GeoPos pos1, final GeoPos pos2, final float eps) {
-        if (!MathUtils.equalValues(pos1.lat, pos2.lat, eps)) {
-            return false;
-        }
-        return MathUtils.equalValues(pos1.lon, pos2.lon, eps);
+        return MathUtils.equalValues(pos1.lat, pos2.lat, eps) && MathUtils.equalValues(pos1.lon, pos2.lon, eps);
     }
 
     /**
@@ -1397,6 +1397,8 @@ public class Product extends ProductNode {
 
     /**
      * Removes a <code>ProductNodeListener</code> from this product.
+     *
+     * @param listener the listener to be removed.
      */
     public void removeProductNodeListener(final ProductNodeListener listener) {
         if (listener != null && listeners != null) {
@@ -1408,7 +1410,7 @@ public class Product extends ProductNode {
         if (listeners == null) {
             return new ProductNodeListener[0];
         }
-        return listeners.toArray(new ProductNodeListener[0]);
+        return listeners.toArray(new ProductNodeListener[listeners.size()]);
     }
 
     protected boolean hasProductNodeListeners() {
@@ -1427,10 +1429,12 @@ public class Product extends ProductNode {
         fireEvent(sourceNode, ProductNodeEvent.NODE_DATA_CHANGED);
     }
 
+    // todo: rq/nf - fireNodeAdded(ProductNode parentNode, ProductNode addedNode)
     protected void fireNodeAdded(final ProductNode sourceNode) {
         fireEvent(sourceNode, ProductNodeEvent.NODE_ADDED);
     }
 
+    // todo: rq/nf - fireNodeRemoved(ProductNode parentNode, ProductNode removedNode)
     protected void fireNodeRemoved(final ProductNode sourceNode) {
         fireEvent(sourceNode, ProductNodeEvent.NODE_REMOVED);
     }
@@ -1450,7 +1454,7 @@ public class Product extends ProductNode {
     }
 
     private void fireEvent(final ProductNodeEvent event) {
-        fireEvent(event, listeners.toArray(new ProductNodeListener[0]));
+        fireEvent(event, listeners.toArray(new ProductNodeListener[listeners.size()]));
     }
 
     static void fireEvent(final ProductNodeEvent event, final ProductNodeListener[] productNodeListeners) {
@@ -1461,18 +1465,18 @@ public class Product extends ProductNode {
 
     static void fireEvent(final ProductNodeEvent event, final ProductNodeListener listener) {
         switch (event.getType()) {
-            case ProductNodeEvent.NODE_CHANGED:
-                listener.nodeChanged(event);
-                break;
-            case ProductNodeEvent.NODE_DATA_CHANGED:
-                listener.nodeDataChanged(event);
-                break;
-            case ProductNodeEvent.NODE_ADDED:
-                listener.nodeAdded(event);
-                break;
-            case ProductNodeEvent.NODE_REMOVED:
-                listener.nodeRemoved(event);
-                break;
+        case ProductNodeEvent.NODE_CHANGED:
+            listener.nodeChanged(event);
+            break;
+        case ProductNodeEvent.NODE_DATA_CHANGED:
+            listener.nodeDataChanged(event);
+            break;
+        case ProductNodeEvent.NODE_ADDED:
+            listener.nodeAdded(event);
+            break;
+        case ProductNodeEvent.NODE_REMOVED:
+            listener.nodeRemoved(event);
+            break;
         }
     }
 
@@ -1507,6 +1511,8 @@ public class Product extends ProductNode {
 
     /**
      * Returns the reference string of this product.
+     *
+     * @return the reference string.
      */
     String getRefStr() {
         return refStr;
@@ -1628,7 +1634,7 @@ public class Product extends ProductNode {
      * @throws IOException if an I/O error occurs
      */
     public Product createSubset(final ProductSubsetDef subsetDef, final String name, final String desc) throws
-            IOException {
+                                                                                                        IOException {
         return ProductSubsetBuilder.createProductSubset(this, subsetDef, name, desc);
     }
 
@@ -1645,7 +1651,7 @@ public class Product extends ProductNode {
      * @throws IOException if an I/O error occurs
      */
     public Product createProjectedProduct(final MapInfo mapInfo, final String name, final String desc) throws
-            IOException {
+                                                                                                       IOException {
         return ProductProjectionBuilder.createProductProjection(this, false, mapInfo, name, desc);
     }
 
@@ -1796,7 +1802,7 @@ public class Product extends ProductNode {
         }
 
         if (pixelX >= 0 && pixelX < getSceneRasterWidth()
-                && pixelY >= 0 && pixelY < getSceneRasterHeight()) {
+            && pixelY >= 0 && pixelY < getSceneRasterHeight()) {
 
             sb.append("\n");
 
@@ -2449,7 +2455,7 @@ public class Product extends ProductNode {
      * @return <code>false</code> if the bitmask has a valid expression and(!) the flag name is not contained in this
      *         data product, <code>true</code> otherwise.
      *
-     * @deprecated since BEAM 4.7, use {@link #isCompatibleMask()} instead
+     * @deprecated since BEAM 4.7
      */
     @Deprecated
     public boolean isCompatibleBitmaskDef(final BitmaskDef bitmaskDef) {
@@ -2567,6 +2573,7 @@ public class Product extends ProductNode {
                                                        productWidth, productHeight,
                                                        new Term[]{term}, pm);
         loop.forEachPixel(new RasterDataLoop.Body() {
+            @Override
             public void eval(final RasterDataEvalEnv env, final int pixelIndex) {
                 if (term.evalB(env)) {
                     validMask.set(pixelIndex);
@@ -2656,6 +2663,7 @@ public class Product extends ProductNode {
                                                        width, height,
                                                        new Term[]{bitmaskTerm}, pm);
         loop.forEachPixel(new RasterDataLoop.Body() {
+            @Override
             public void eval(final RasterDataEvalEnv env, final int pixelIndex) {
                 bitmask[pixelIndex] = bitmaskTerm.evalB(env);
             }
@@ -2723,6 +2731,7 @@ public class Product extends ProductNode {
                                                        width, height,
                                                        new Term[]{bitmaskTerm}, pm);
         loop.forEachPixel(new RasterDataLoop.Body() {
+            @Override
             public void eval(final RasterDataEvalEnv env, final int pixelIndex) {
                 if (bitmaskTerm.evalB(env)) {
                     bitmask[pixelIndex] = trueValue;
@@ -2803,6 +2812,7 @@ public class Product extends ProductNode {
                             ProgressMonitor pm) throws IOException {
         final RasterDataLoop loop = new RasterDataLoop(offsetX, offsetY, width, height, new Term[]{bitmaskTerm}, pm);
         loop.forEachPixel(new RasterDataLoop.Body() {
+            @Override
             public void eval(final RasterDataEvalEnv env, final int pixelIndex) {
                 if (bitmaskTerm.evalB(env)) {
                     bitmask[pixelIndex] = trueValue;
@@ -2876,6 +2886,7 @@ public class Product extends ProductNode {
                                                        new Term[]{bitmaskTerm},
                                                        pm);
         loop.forEachPixel(new RasterDataLoop.Body() {
+            @Override
             public void eval(final RasterDataEvalEnv env, final int pixelIndex) {
                 if (bitmaskTerm.evalB(env) == termValue) {
                     rasterData.setElemDoubleAt(pixelIndex, maskValue);

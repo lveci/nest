@@ -1,5 +1,5 @@
 /*
- * $Id: VirtualBand.java,v 1.5 2009-05-28 14:17:58 lveci Exp $
+ * $Id: VirtualBand.java,v 1.6 2009-12-04 19:06:45 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -18,14 +18,7 @@ package org.esa.beam.framework.datamodel;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
-import com.bc.ceres.glevel.MultiLevelModel;
-import com.bc.ceres.glevel.support.AbstractMultiLevelSource;
-import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
-import org.esa.beam.jai.ImageManager;
-import org.esa.beam.jai.ResolutionLevel;
-import org.esa.beam.jai.VirtualBandOpImage;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.StringUtils;
 
@@ -51,7 +44,7 @@ import java.io.IOException;
  * and <code>writePixel</code> perform the inverse operations in this case.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.5 $ $Date: 2009-05-28 14:17:58 $
+ * @version $Revision: 1.6 $ $Date: 2009-12-04 19:06:45 $
  * @see ProductData
  * @see #getPixels
  * @see #setPixels
@@ -238,10 +231,10 @@ public class VirtualBand extends Band {
     @Override
     public String toString() {
         return getClass().getName() + "["
-                + getName() + ","
-                + ProductData.getTypeString(getDataType()) + "," +
-                +getRasterWidth() + "," +
-                +getRasterHeight() + "]";
+               + getName() + ","
+               + ProductData.getTypeString(getDataType()) + "," +
+               +getRasterWidth() + "," +
+               +getRasterHeight() + "]";
     }
 
     /**
@@ -272,20 +265,8 @@ public class VirtualBand extends Band {
      * @return A multi-level image.
      */
     public static MultiLevelImage createVirtualSourceImage(final RasterDataNode raster, final String expression) {
-        final MultiLevelModel model = ImageManager.getInstance().getMultiLevelModel(raster);
-        return new DefaultMultiLevelImage(new AbstractMultiLevelSource(model) {
-
-            @Override
-            public RenderedImage createImage(int level) {
-                return VirtualBandOpImage.create(expression,
-                                                 raster.getDataType(),
-                                                 raster.isNoDataValueUsed() ? raster.getGeophysicalNoDataValue() : null,
-                                                 raster.getProduct(),
-                                                 ResolutionLevel.create(getModel(), level));
-            }
-        });
+        return MathMultiLevelImage.create(expression, raster);
     }
-
 }
 
 

@@ -3,18 +3,19 @@ package com.bc.ceres.swing.figure;
 import junit.framework.TestCase;
 
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 
 public class AbstractFigureTest extends TestCase {
 
     public void testDefaultProperties() {
         Figure f = new AbstractFigureImpl();
-        assertNotNull(f.getListeners());
+        assertNotNull(f.getChangeListeners());
         assertEquals(false, f.isSelectable());
-        assertEquals(0, f.getListeners().length);
-        assertEquals(null, f.getFigure(null));
+        assertEquals(0, f.getChangeListeners().length);
+        assertEquals(null, f.getFigure(null, new AffineTransform()));
         assertEquals(0, f.getFigureCount());
         assertEquals(0, f.getMaxSelectionStage());
-        assertNull(f.getFigure(null));
+        assertNull(f.getFigure(null, new AffineTransform()));
         assertNotNull(f.getFigures((Shape) null));
         assertEquals(0, f.getFigures(null).length);
         assertNotNull(f.getFigures());
@@ -26,17 +27,17 @@ public class AbstractFigureTest extends TestCase {
 
     public void testThatCloneDoesNotCopyListeners() {
         Figure f = new AbstractFigureImpl();
-        f.addListener(new AbstractFigureChangeListener() {
+        f.addChangeListener(new AbstractFigureChangeListener() {
         });
         AbstractFigure cf = (AbstractFigure) f.clone();
-        assertNotNull(cf.getListeners());
-        assertEquals(0, cf.getListeners().length);
+        assertNotNull(cf.getChangeListeners());
+        assertEquals(0, cf.getChangeListeners().length);
     }
 
     public void testListeners() {
         AbstractFigureImpl f = new AbstractFigureImpl();
         final Figure[] figureBuf = new Figure[1];
-        f.addListener(new AbstractFigureChangeListener() {
+        f.addChangeListener(new AbstractFigureChangeListener() {
             @Override
             public void figureChanged(FigureChangeEvent event) {
                 figureBuf[0] = event.getFigure();
@@ -49,13 +50,13 @@ public class AbstractFigureTest extends TestCase {
 
     public void testDisposeRemovesListeners() {
         Figure f = new AbstractFigureImpl();
-        f.addListener(new AbstractFigureChangeListener() {
+        f.addChangeListener(new AbstractFigureChangeListener() {
         });
-        FigureChangeListener[] listeners = f.getListeners();
+        FigureChangeListener[] listeners = f.getChangeListeners();
         assertNotNull(listeners);
         assertTrue(listeners.length >= 1);
         f.dispose();
-        listeners = f.getListeners();
+        listeners = f.getChangeListeners();
         assertNotNull(listeners);
         assertEquals(0, listeners.length);
     }
@@ -84,19 +85,6 @@ public class AbstractFigureTest extends TestCase {
             // ok
         }
 
-        try {
-            f.getVertex(0);
-            fail("IllegalStateException expected!");
-        } catch (IllegalStateException e) {
-            // ok
-        }
-
-        try {
-            f.setVertex(0, null);
-            fail("IllegalStateException expected!");
-        } catch (IllegalStateException e) {
-            // ok
-        }
     }
 
     public void testThatChildrenAreNotSupported() {

@@ -1,5 +1,5 @@
 /*
- * $Id: ShowImageViewRGBAction.java,v 1.4 2009-05-25 13:29:17 lveci Exp $
+ * $Id: ShowImageViewRGBAction.java,v 1.5 2009-12-04 19:06:45 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -39,7 +39,7 @@ import java.awt.Cursor;
  * This action opens an RGB image view on the currently selected Product.
  *
  * @author Marco Peters
- * @version $Revision: 1.4 $ $Date: 2009-05-25 13:29:17 $
+ * @version $Revision: 1.5 $ $Date: 2009-12-04 19:06:45 $
  */
 public class ShowImageViewRGBAction extends ExecCommand {
 
@@ -107,7 +107,6 @@ public class ShowImageViewRGBAction extends ExecCommand {
 
                 ProductSceneView productSceneView = new ProductSceneView(productSceneImage);
                 productSceneView.setNoDataOverlayEnabled(false);
-                productSceneView.setROIOverlayEnabled(false);
                 productSceneView.setGraticuleOverlayEnabled(false);
                 productSceneView.setPinOverlayEnabled(false);
                 productSceneView.setLayerProperties(visatApp.getPreferences());

@@ -1,14 +1,12 @@
 package com.bc.ceres.swing.figure;
 
-import com.bc.ceres.swing.figure.FigureStyle;
 import com.bc.ceres.swing.figure.support.RotateHandle;
 import com.bc.ceres.swing.figure.support.ScaleHandle;
 import com.bc.ceres.swing.figure.support.StyleDefaults;
 
-import java.awt.geom.Point2D;
 import java.awt.Shape;
-import java.awt.Stroke;
-import java.awt.BasicStroke;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +16,8 @@ public abstract class AbstractFigure implements Figure {
     private static final String OPERATION_NOT_SUPPORTED = "Operation not supported.";
     protected static final Handle[] NO_HANDLES = new Handle[0];
 
+    private boolean selectable;
+    private boolean selected;
 
     protected AbstractFigure() {
     }
@@ -29,17 +29,27 @@ public abstract class AbstractFigure implements Figure {
      */
     @Override
     public boolean isSelectable() {
-        return false;
+        return selectable;
     }
 
-    /**
-     * The default implementation returns {@code false}.
-     *
-     * @return Always {@code false}.
-     */
+    public void setSelectable(boolean selectable) {
+        if (this.selectable != selectable) {
+            this.selectable = selectable;
+            fireFigureChanged();
+        }
+    }
+
     @Override
-    public boolean contains(Point2D point) {
-        return false;
+    public boolean isSelected() {
+        return selected;
+    }
+
+    @Override
+    public void setSelected(boolean selected) {
+        if (this.selected != selected) {
+            this.selected = selected;
+            fireFigureChanged();
+        }
     }
 
     /**
@@ -78,15 +88,16 @@ public abstract class AbstractFigure implements Figure {
      * @return Always {@code null}.
      */
     @Override
-    public Figure getFigure(Point2D p) {
+    public Figure getFigure(Point2D p, AffineTransform m2v) {
         return null;
     }
 
     /**
      * The default implementation returns an empty array.
      *
+     * @param shape The shape defining the area in which the figures must be contained.
+     *
      * @return Always an empty array.
-     * @param shape
      */
     @Override
     public Figure[] getFigures(Shape shape) {
@@ -241,12 +252,22 @@ public abstract class AbstractFigure implements Figure {
     }
 
     @Override
-    public synchronized double[] getVertex(int index) {
+    public double[] getSegment(int index) {
         throw new IllegalStateException(OPERATION_NOT_SUPPORTED);
     }
 
     @Override
-    public synchronized void setVertex(int index, double[] newSeg) {
+    public void setSegment(int index, double[] segment) {
+        throw new IllegalStateException(OPERATION_NOT_SUPPORTED);
+    }
+
+    @Override
+    public void addSegment(int index, double[] segment) {
+        throw new IllegalStateException(OPERATION_NOT_SUPPORTED);
+    }
+
+    @Override
+    public void removeSegment(int index) {
         throw new IllegalStateException(OPERATION_NOT_SUPPORTED);
     }
 
@@ -293,7 +314,7 @@ public abstract class AbstractFigure implements Figure {
     }
 
     @Override
-    public synchronized void addListener(FigureChangeListener listener) {
+    public synchronized void addChangeListener(FigureChangeListener listener) {
         if (listenerList == null) {
             listenerList = new ArrayList<FigureChangeListener>(3);
         }
@@ -301,14 +322,14 @@ public abstract class AbstractFigure implements Figure {
     }
 
     @Override
-    public synchronized void removeListener(FigureChangeListener listener) {
+    public synchronized void removeChangeListener(FigureChangeListener listener) {
         if (listenerList != null) {
             listenerList.remove(listener);
         }
     }
 
     @Override
-    public synchronized FigureChangeListener[] getListeners() {
+    public synchronized FigureChangeListener[] getChangeListeners() {
         if (listenerList != null) {
             return listenerList.toArray(new FigureChangeListener[listenerList.size()]);
         } else {
@@ -337,21 +358,21 @@ public abstract class AbstractFigure implements Figure {
 
     protected void fireFigureChanged() {
         FigureChangeEvent event = FigureChangeEvent.createChangedEvent(this);
-        for (FigureChangeListener listener : getListeners()) {
+        for (FigureChangeListener listener : getChangeListeners()) {
             listener.figureChanged(event);
         }
     }
 
     protected void fireFiguresAdded(Figure... figures) {
         FigureChangeEvent event = FigureChangeEvent.createAddedEvent(this, figures);
-        for (FigureChangeListener listener : getListeners()) {
+        for (FigureChangeListener listener : getChangeListeners()) {
             listener.figuresAdded(event);
         }
     }
 
     protected void fireFiguresRemoved(Figure... figures) {
         FigureChangeEvent event = FigureChangeEvent.createRemovedEvent(this, figures);
-        for (FigureChangeListener listener : getListeners()) {
+        for (FigureChangeListener listener : getChangeListeners()) {
             listener.figuresRemoved(event);
         }
     }

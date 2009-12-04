@@ -3,43 +3,43 @@ package com.bc.ceres.swing.figure.support;
 import com.bc.ceres.swing.figure.AbstractHandle;
 import com.bc.ceres.swing.figure.Figure;
 import com.bc.ceres.swing.figure.FigureStyle;
-import static com.bc.ceres.swing.figure.support.StyleDefaults.VERTEX_HANDLE_SIZE;
+import static com.bc.ceres.swing.figure.support.StyleDefaults.*;
 
 import java.awt.Shape;
 import java.awt.geom.Path2D;
 
 
 public class VertexHandle extends AbstractHandle {
-    private final int vertexIndex;
+    private final int segmentIndex;
 
     public VertexHandle(Figure figure,
                         int vertexIndex,
                         FigureStyle style,
                         FigureStyle selectedStyle) {
         super(figure, style, selectedStyle);
-        this.vertexIndex = vertexIndex;
+        this.segmentIndex = vertexIndex;
         updateLocation();
         setShape(createHandleShape());
     }
 
     @Override
     public void updateLocation() {
-        final double[] segment = getFigure().getVertex(vertexIndex);
-        double x = segment[0];
-        double y = segment[1];
-        setLocation(x, y);
+        final double[] segment = getFigure().getSegment(segmentIndex);
+        if (segment != null) {
+            setLocation(segment[0], segment[1]);
+        }
     }
 
     @Override
     public void move(double dx, double dy) {
         setLocation(getX() + dx, getY() + dy);
-        
-        final double[] segment = getFigure().getVertex(vertexIndex);
+        final double[] segment = getFigure().getSegment(segmentIndex);
         if (segment != null) {
             segment[0] += dx;
             segment[1] += dy;
-            getFigure().setVertex(vertexIndex, segment);
+            getFigure().setSegment(segmentIndex, segment);
         }
+
     }
 
     private static Shape createHandleShape() {

@@ -1,5 +1,5 @@
 /*
- * $Id: BandArithmetic.java,v 1.3 2009-11-04 17:04:32 lveci Exp $
+ * $Id: BandArithmetic.java,v 1.4 2009-12-04 19:06:45 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -365,7 +365,7 @@ public class BandArithmetic {
         return productIndex;
     }
 
-    public static RasterDataNode[] getRefRasters(String expression, Product[] products) throws ParseException {
+    public static RasterDataNode[] getRefRasters(String expression, Product... products) throws ParseException {
         return getRefRasters(expression, products, 0);
     }
 

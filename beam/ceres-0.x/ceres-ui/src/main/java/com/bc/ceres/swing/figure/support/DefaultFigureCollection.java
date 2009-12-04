@@ -1,17 +1,17 @@
 package com.bc.ceres.swing.figure.support;
 
+import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.swing.figure.AbstractFigure;
 import com.bc.ceres.swing.figure.AbstractFigureChangeListener;
-import com.bc.ceres.swing.figure.FigureChangeEvent;
-import com.bc.ceres.swing.figure.Handle;
 import com.bc.ceres.swing.figure.Figure;
+import com.bc.ceres.swing.figure.FigureChangeEvent;
 import com.bc.ceres.swing.figure.FigureCollection;
-import com.bc.ceres.grender.Rendering;
+import com.bc.ceres.swing.figure.Handle;
 
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.geom.Area;
-import java.awt.Shape;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,26 +41,7 @@ public class DefaultFigureCollection extends AbstractFigure implements FigureCol
         this.figureList = new ArrayList<Figure>(list);
         this.figureSet = new HashSet<Figure>(list);
         this.changeDelegate = new ChangeDelegate();
-        addListener(new BoundsUpdater());
-    }
-
-    @Override
-    public Shape getShape() {
-        Area area = new Area();
-        for (Figure figure : figureList) {
-            area.add(new Area(figure.getShape()));
-        }
-        return area;
-    }
-
-    /**
-     * Throws a runtime exception "Operation not supported".
-     * @param shape Ignored.
-     * @throws RuntimeException Always "Operation not supported".
-     */
-    @Override
-    public void setShape(Shape shape) {
-        throw new IllegalStateException("Operation not supported.");
+        addChangeListener(new BoundsUpdater());
     }
 
     @Override
@@ -127,7 +108,7 @@ public class DefaultFigureCollection extends AbstractFigure implements FigureCol
     }
 
     @Override
-    public boolean contains(Point2D point) {
+    public boolean isCloseTo(Point2D point, AffineTransform m2v) {
         return getBounds().contains(point);
     }
 
@@ -152,10 +133,10 @@ public class DefaultFigureCollection extends AbstractFigure implements FigureCol
     }
 
     @Override
-    public synchronized Figure getFigure(Point2D p) {
+    public synchronized Figure getFigure(Point2D p, AffineTransform m2v) {
         Figure selectedShape = null;
         for (Figure figure : getFigures()) {
-            if (figure.contains(p)) {
+            if (figure.isCloseTo(p, m2v)) {
                 selectedShape = figure;
             }
         }
@@ -187,7 +168,7 @@ public class DefaultFigureCollection extends AbstractFigure implements FigureCol
     protected synchronized boolean addFigureImpl(int index, Figure figure) {
         figureSet.add(figure);
         figureList.add(index, figure);
-        figure.addListener(changeDelegate);
+        figure.addChangeListener(changeDelegate);
         return true;
     }
 
@@ -196,7 +177,7 @@ public class DefaultFigureCollection extends AbstractFigure implements FigureCol
         boolean b = figureSet.remove(figure);
         if (b) {
             figureList.remove(figure);
-            figure.removeListener(changeDelegate);
+            figure.removeChangeListener(changeDelegate);
         }
         return b;
     }
@@ -205,7 +186,7 @@ public class DefaultFigureCollection extends AbstractFigure implements FigureCol
     protected synchronized Figure[] removeFiguresImpl() {
         Figure[] allFigures = getFigures();
         for (Figure figure : allFigures) {
-            figure.removeListener(changeDelegate);
+            figure.removeChangeListener(changeDelegate);
         }
         figureSet.clear();
         figureList.clear();
