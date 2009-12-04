@@ -32,6 +32,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.MathUtils;
+import org.esa.nest.dataio.ReaderUtils;
 
 import java.awt.*;
 import java.io.IOException;
@@ -403,8 +404,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_long, imageGeoBoundary.lonMax);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, imageGeoBoundary.lonMin);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, imageGeoBoundary.lonMax);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE,
-                (int)(targetProduct.getRawStorageSize() / (1024.0f * 1024.0f)));
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(targetProduct));
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_terrain_corrected, 0);
         //AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.geo_ref_system, "WGS84");

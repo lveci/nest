@@ -8,6 +8,7 @@ package org.esa.nest.dat.actions.importbrowser.model.dataprovider;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.nest.dat.actions.importbrowser.model.Repository;
 import org.esa.nest.dat.actions.importbrowser.model.RepositoryEntry;
+import org.esa.nest.dataio.ReaderUtils;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -34,7 +35,7 @@ public class ProductSizeProvider implements DataProvider {
         float prodSize = entry.getProductSize();
         Product product = entry.getProduct();
         if(prodSize < 1 && product != null)
-            prodSize = product.getRawStorageSize() / (1024.0f * 1024.0f);
+            prodSize = ReaderUtils.getTotalSize(product);
         return prodSize;
     }
 

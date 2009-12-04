@@ -249,4 +249,55 @@ public class AbstractMetadataIO {
             }
         }
     }
+
+    /**
+     * Add metadata from an XML file into the Metadata of the product
+     * @param xmlRoot root element of xml file
+     * @param metadataRoot MetadataElement to place it into
+     */
+    public static void AddXMLMetadata(Element xmlRoot, MetadataElement metadataRoot) {
+
+        if(xmlRoot.getChildren().isEmpty() && xmlRoot.getAttributes().isEmpty()) {
+            if(!xmlRoot.getValue().isEmpty()) {
+                addAttribute(metadataRoot, xmlRoot.getName(), xmlRoot.getValue());
+            }
+        } else if(xmlRoot.getChildren().isEmpty()) {
+            final MetadataElement metaElem = new MetadataElement(xmlRoot.getName());
+
+            addAttribute(metaElem, xmlRoot.getName(), xmlRoot.getValue());
+
+            final List<Attribute> xmlAttribs = xmlRoot.getAttributes();
+            for (Attribute aChild : xmlAttribs) {
+                addAttribute(metaElem, aChild.getName(), aChild.getValue());
+            }
+
+            metadataRoot.addElement(metaElem);
+        } else {
+            final MetadataElement metaElem = new MetadataElement(xmlRoot.getName());
+            xmlRoot.getAttributes();
+
+            final List children = xmlRoot.getContent();
+            for (Object aChild : children) {
+                if (aChild instanceof Element) {
+                    AddXMLMetadata((Element) aChild, metaElem);
+                } else if(aChild instanceof Attribute) {
+                    final Attribute childAtrrib = (Attribute) aChild;
+                    addAttribute(metaElem, childAtrrib.getName(), childAtrrib.getValue());
+                }
+            }
+
+            final List<Attribute> xmlAttribs = xmlRoot.getAttributes();
+            for (Attribute aChild : xmlAttribs) {
+                addAttribute(metaElem, aChild.getName(), aChild.getValue());
+            }
+
+            metadataRoot.addElement(metaElem);
+        }
+    }
+
+    private static void addAttribute(MetadataElement meta, String name, String value) {
+        final MetadataAttribute attribute = new MetadataAttribute(name, ProductData.TYPE_ASCII, 1);
+        attribute.getData().setElems(value);
+        meta.addAttribute(attribute);
+    }
 }

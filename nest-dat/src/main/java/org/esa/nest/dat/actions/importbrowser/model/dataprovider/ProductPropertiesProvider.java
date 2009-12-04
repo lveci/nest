@@ -10,6 +10,7 @@ import org.esa.beam.util.PropertyMap;
 import org.esa.nest.dat.actions.importbrowser.model.Repository;
 import org.esa.nest.dat.actions.importbrowser.model.RepositoryEntry;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.dataio.ReaderUtils;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -95,7 +96,7 @@ public class ProductPropertiesProvider implements DataProvider {
 
             float prodSize = entry.getProductSize();
             if(prodSize < 1 && product != null)
-                prodSize = product.getRawStorageSize() / (1024.0f * 1024.0f);
+                prodSize = ReaderUtils.getTotalSize(product);
             final String sizeString = String.format("%1$.2f MB", prodSize);
 
             String pixelSizeStr = "unavailable";

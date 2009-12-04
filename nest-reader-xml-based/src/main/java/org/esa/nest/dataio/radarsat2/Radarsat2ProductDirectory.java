@@ -175,7 +175,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                 rasterAttributes.getAttributeInt("numberOfLines", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
                 rasterAttributes.getAttributeInt("numberOfSamplesPerLine", defInt));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, getTotalSize(product));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(product));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
                 ReaderUtils.getLineTimeInterval(startTime, stopTime, product.getSceneRasterHeight()));
 

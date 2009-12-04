@@ -5,6 +5,7 @@ import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.datamodel.AbstractMetadataIO;
 import org.esa.nest.util.XMLSupport;
 import org.jdom.Attribute;
 import org.jdom.Element;
@@ -159,63 +160,13 @@ public class XMLProductDirectory {
     private void addMetaData(final Product product) throws IOException {
         final MetadataElement root = product.getMetadataRoot();
         final Element rootElement = xmlDoc.getRootElement();
-        AddXMLMetadata(rootElement, root);
+        AbstractMetadataIO.AddXMLMetadata(rootElement, root);
 
         addAbstractedMetadataHeader(product, root);
     }
 
     protected Element getXMLRootElement() {
         return xmlDoc.getRootElement();
-    }
-
-    private static void AddXMLMetadata(Element xmlRoot, MetadataElement metadataRoot) {
-
-        if(xmlRoot.getChildren().isEmpty() && xmlRoot.getAttributes().isEmpty()) {
-            if(!xmlRoot.getValue().isEmpty()) {
-                addAttribute(metadataRoot, xmlRoot.getName(), xmlRoot.getValue());
-            }
-        } else if(xmlRoot.getChildren().isEmpty()) {
-            final MetadataElement metaElem = new MetadataElement(xmlRoot.getName());
-
-            addAttribute(metaElem, xmlRoot.getName(), xmlRoot.getValue());
-
-            final List<Attribute> xmlAttribs = xmlRoot.getAttributes();
-            for (Attribute aChild : xmlAttribs) {
-                addAttribute(metaElem, aChild.getName(), aChild.getValue());
-            }
-
-            metadataRoot.addElement(metaElem);
-        } else {
-            final MetadataElement metaElem = new MetadataElement(xmlRoot.getName());
-            xmlRoot.getAttributes();
-
-            final List children = xmlRoot.getContent();
-            for (Object aChild : children) {
-                if (aChild instanceof Element) {
-                    AddXMLMetadata((Element) aChild, metaElem);
-                } else if(aChild instanceof Attribute) {
-                    final Attribute childAtrrib = (Attribute) aChild;
-                    addAttribute(metaElem, childAtrrib.getName(), childAtrrib.getValue());
-                }
-            }
-
-            final List<Attribute> xmlAttribs = xmlRoot.getAttributes();
-            for (Attribute aChild : xmlAttribs) {
-                addAttribute(metaElem, aChild.getName(), aChild.getValue());
-            }
-
-            metadataRoot.addElement(metaElem);
-        }
-    }
-
-    private static void addAttribute(MetadataElement meta, String name, String value) {
-        final MetadataAttribute attribute = new MetadataAttribute(name, ProductData.TYPE_ASCII, 1);
-        attribute.getData().setElems(value);
-        meta.addAttribute(attribute);
-    }
-
-    protected static int getTotalSize(Product product) {
-        return (int)(product.getRawStorageSize() / (1024.0f * 1024.0f));
     }
 
     protected void addAbstractedMetadataHeader(Product product, MetadataElement root) {

@@ -8,8 +8,12 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.logging.BeamLogManager;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.AbstractMetadataIO;
 import org.esa.nest.dataio.*;
+import org.esa.nest.util.XMLSupport;
+import org.jdom.Element;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Group;
@@ -152,10 +156,34 @@ public class CosmoSkymedReader extends AbstractProductReader {
 
         NetCDFUtils.addGlobalAttributes(product.getMetadataRoot(), netcdfFile.getGlobalAttributes());
 
+        addDeliveryNote(product);
+
         //final Group rootGroup = netcdfFile.getRootGroup();
         //NetCDFUtils.addGroups(product.getMetadataRoot(), rootGroup);
 
         addAbstractedMetadataHeader(product, product.getMetadataRoot());
+    }
+
+    private void addDeliveryNote(final Product product) {
+        try {
+            final File folder = product.getFileLocation().getParentFile();
+            File dnFile = null;
+            for(File f : folder.listFiles()) {
+                final String name = f.getName().toLowerCase();
+                if(name.startsWith("dfdn") && name.endsWith("xml")) {
+                    dnFile = f;
+                    break;
+                }
+            }
+            if(dnFile != null) {
+                final org.jdom.Document xmlDoc = XMLSupport.LoadXML(dnFile.getAbsolutePath());
+                final Element rootElement = xmlDoc.getRootElement();
+
+                AbstractMetadataIO.AddXMLMetadata(rootElement, product.getMetadataRoot());
+            }
+        } catch(IOException e) {
+            ReaderUtils.showErrorMsg("Unable to read Delivery Note for "+product.getName());
+        }
     }
 
     private void addAbstractedMetadataHeader(Product product, MetadataElement root) {
@@ -181,7 +209,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT, globalElem.getAttributeInt("Orbit Number", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, globalElem.getAttributeString("Orbit Direction", defStr));
-        //AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, globalElem.getAttributeString("imageDataType", defStr));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SAMPLE_TYPE, getSampleType(globalElem));
 
         final ProductData.UTC startTime = ReaderUtils.getTime(globalElem, "Scene Sensing Start UTC", timeFormat);
         final ProductData.UTC stopTime = ReaderUtils.getTime(globalElem, "Scene Sensing Stop UTC", timeFormat);
@@ -190,10 +218,36 @@ public class CosmoSkymedReader extends AbstractProductReader {
         product.setStartTime(startTime);
         product.setEndTime(stopTime);
 
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
+                product.getSceneRasterHeight());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
+                product.getSceneRasterWidth());
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(product));
+
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency,
                 globalElem.getAttributeDouble("Radar Frequency", defInt) / 1000000.0);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.line_time_interval,
                 ReaderUtils.getLineTimeInterval(startTime, stopTime, product.getSceneRasterHeight()));
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
+                globalElem.getAttributeString("Focusing Algorithm ID", defStr));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.geo_ref_system,
+                globalElem.getAttributeString("Ellipsoid Designator", defStr));
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks,
+                globalElem.getAttributeDouble("Range Processing Number of Looks", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
+                globalElem.getAttributeDouble("Azimuth Processing Number of Looks", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
+                globalElem.getAttributeDouble("Ground Range Geometric Resolution", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
+                globalElem.getAttributeDouble("Azimuth Geometric Resolution", defInt));
+    }
+
+    private static String getSampleType(final MetadataElement globalElem) {
+        if(globalElem.getAttributeInt("Samples per Pixel", 0) > 1)
+            return "COMPLEX";
+        return "DETECTED";
     }
 
     private void addBandsToProduct(final Variable[] variables) {

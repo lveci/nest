@@ -7,6 +7,7 @@ import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.math.MathUtils;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.datamodel.AbstractMetadata;
 
@@ -202,6 +203,12 @@ public class ReaderUtils {
         return validName.toString();
     }
 
+    public static void showErrorMsg(final String msg) {
+        System.out.println(msg);
+        if(VisatApp.getApp() != null) {
+            VisatApp.getApp().showErrorDialog(msg);
+        }
+    }
 
     public static String findPolarizationInBandName(final String bandName) {
 

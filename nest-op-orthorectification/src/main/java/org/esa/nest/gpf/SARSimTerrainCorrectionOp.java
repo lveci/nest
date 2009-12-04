@@ -707,8 +707,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_long, imageGeoBoundary.lonMax);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, imageGeoBoundary.lonMin);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, imageGeoBoundary.lonMax);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE,
-                (int)(targetProduct.getRawStorageSize() / (1024.0f * 1024.0f)));
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(targetProduct));
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, IdentityTransformDescriptor.NAME);
         if (!useAvgSceneHeight) {
             AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_terrain_corrected, 1);

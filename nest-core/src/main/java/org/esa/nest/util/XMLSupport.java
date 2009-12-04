@@ -46,6 +46,9 @@ public class XMLSupport {
 
         final DOMParser parser = new DOMParser();
         try {
+            parser.setFeature("http://xml.org/sax/features/validation", false);
+            parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+
             // handle spaces in the path
             final String path = filePath.replaceAll(" ", "%20");
             parser.parse(path);
