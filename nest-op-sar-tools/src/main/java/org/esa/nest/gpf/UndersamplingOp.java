@@ -395,7 +395,15 @@ public class UndersamplingOp extends Operator {
             kernelFile = getResFile(fileName);
         }
 
-        kernel = readFile(kernelFile.getAbsolutePath(), isPreDefinedKernel);
+        kernel = readFile(kernelFile.getAbsolutePath());
+        if (isPreDefinedKernel) {
+            if (filterHeight != kernel.length || filterWidth != kernel[0].length) {
+                throw new OperatorException("Kernel size does not match given filter size");
+            }
+        } else { // user defined kernel
+            filterHeight = kernel.length;
+            filterWidth = kernel[0].length;
+        }
     }
 
     private static File getResFile(String fileName) {
@@ -406,11 +414,10 @@ public class UndersamplingOp extends Operator {
     
     /**
      * Read data from kernel file and save them in a 2D array.
-     *
      * @param fileName The kernel file name
      * @return array The 2D array holding kernel data
      */
-    private float[][] readFile(String fileName, boolean isPreDefinedKernel) {
+    public static float[][] readFile(String fileName) {
 
         // get reader
         FileInputStream stream;
@@ -463,15 +470,6 @@ public class UndersamplingOp extends Operator {
 
             reader.close();
             stream.close();
-
-            if (isPreDefinedKernel) {
-                if (filterHeight != numRows || filterWidth != numCols) {
-                    throw new OperatorException("Kernel size does not match given filter size");
-                }
-            } else { // user defined kernel
-                filterHeight = numRows;
-                filterWidth = numCols;
-            }
 
         } catch (IOException e) {
             throw new OperatorException(e);
