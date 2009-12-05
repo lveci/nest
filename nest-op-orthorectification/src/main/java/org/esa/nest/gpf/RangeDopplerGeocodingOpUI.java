@@ -3,6 +3,8 @@ package org.esa.nest.gpf;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
+import org.esa.beam.framework.dataop.maptransf.MapProjection;
+import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
@@ -17,6 +19,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.util.Map;
+import java.util.Arrays;
 
 /**
  * User interface for RangeDopplerGeocodingOp
@@ -25,6 +28,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
     private final JList bandList = new JList();
     protected final JComboBox demName = new JComboBox();
+    private final JComboBox projectionName = new JComboBox();
     private static final String externalDEMStr = "External DEM";
 
     protected final JComboBox demResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
@@ -77,6 +81,12 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         demName.addItem(externalDEMStr);
 
         initializeOperatorUI(operatorName, parameterMap);
+
+        final String[] projectionsValueSet = getProjectionsValueSet();
+        Arrays.sort(projectionsValueSet);
+        for(String name : projectionsValueSet) {
+            projectionName.addItem(name);
+        }
 
         final JComponent panel = createPanel();
         initParameters();
@@ -192,6 +202,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         OperatorUIUtils.initBandList(bandList, getBandNames());
 
         demName.setSelectedItem(paramMap.get("demName"));
+        projectionName.setSelectedItem(paramMap.get("projectionName"));
         demResamplingMethod.setSelectedItem(paramMap.get("demResamplingMethod"));
         imgResamplingMethod.setSelectedItem(paramMap.get("imgResamplingMethod"));
         incidenceAngleForGamma0.setSelectedItem(paramMap.get("incidenceAngleForGamma0"));
@@ -259,6 +270,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         OperatorUIUtils.updateBandList(bandList, paramMap);
 
         paramMap.put("demName", demName.getSelectedItem());
+        paramMap.put("projectionName", projectionName.getSelectedItem());
         paramMap.put("demResamplingMethod", demResamplingMethod.getSelectedItem());
         paramMap.put("imgResamplingMethod", imgResamplingMethod.getSelectedItem());
         paramMap.put("incidenceAngleForGamma0", incidenceAngleForGamma0.getSelectedItem());
@@ -312,7 +324,9 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         DialogUtils.addComponent(contentPane, gbc, "Image Resampling Method:", imgResamplingMethod);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Pixel Spacing (m):", pixelSpacing);
-
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "Map Projection:", projectionName);
+        
         gbc.gridx = 0;
         gbc.gridy++;
         contentPane.add(saveDEMCheckBox, gbc);
@@ -351,6 +365,15 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         DialogUtils.enableComponents(externalDEMFileLabel, externalDEMFile, flag);
         DialogUtils.enableComponents(externalDEMNoDataValueLabel, externalDEMNoDataValue, flag);
         externalDEMBrowseButton.setVisible(flag);
+    }
+
+    private static String[] getProjectionsValueSet() {
+        final MapProjection[] projections = MapProjectionRegistry.getProjections();
+        final String[] projectionsValueSet = new String[projections.length];
+        for (int i = 0; i < projectionsValueSet.length; i++) {
+            projectionsValueSet[i] = projections[i].getName();
+        }
+        return projectionsValueSet;
     }
 
     private class TextAreaKeyListener implements KeyListener {

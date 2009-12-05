@@ -29,6 +29,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.framework.dataio.ProductProjectionBuilder;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.ReaderUtils;
@@ -113,6 +114,9 @@ public class RangeDopplerGeocodingOp extends Operator {
     @Parameter(description = "The pixel spacing", defaultValue = "0", label="Pixel Spacing (m)")
     private double pixelSpacing = 0;
 
+    @Parameter(description = "The projection name", defaultValue = IdentityTransformDescriptor.NAME)
+    private String projectionName = IdentityTransformDescriptor.NAME;
+
     @Parameter(defaultValue="false", label="Save DEM as band")
     private boolean saveDEM = false;
 
@@ -148,6 +152,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
     private FileElevationModel fileElevationModel = null;
+    private GeoCoding targetGeoCoding = null;
 
     private boolean srgrFlag = false;
     private boolean saveIncidenceAngleFromEllipsoid = false;
@@ -235,11 +240,11 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             getTiePointGrid();
 
-            computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
+//            computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
 
-            computeDEMTraversalSampleInterval();
+//            computeDEMTraversalSampleInterval();
 
-            computedTargetImageDimension();
+//            computedTargetImageDimension();
 
             if (useAvgSceneHeight) {
                 saveSigmaNought = false;
@@ -593,8 +598,30 @@ public class RangeDopplerGeocodingOp extends Operator {
      * Create target product.
      * @throws OperatorException The exception.
      */
-    protected void createTargetProduct() throws OperatorException {
+    protected void createTargetProduct() throws OperatorException, IOException {
+
+
+        final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(
+                                                sourceProduct,
+                                                MapProjectionRegistry.getProjection(projectionName),
+                                                0.0,
+                                                sourceProduct.getBandAt(0).getNoDataValue());
+
+        targetProduct = ProductProjectionBuilder.createProductProjection(sourceProduct, false, false, mapInfo,
+                                                                  sourceProduct.getName() + PRODUCT_SUFFIX, "");
+
+        targetImageWidth = targetProduct.getSceneRasterWidth();
+        targetImageHeight = targetProduct.getSceneRasterHeight();
+
+        for (Band band : targetProduct.getBands()) {
+            targetProduct.removeBand(band);
+        }
         
+        addSelectedBands();
+
+        targetGeoCoding = targetProduct.getGeoCoding();
+
+        /*
         targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
                                     sourceProduct.getProductType(),
                                     targetImageWidth,
@@ -603,7 +630,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         addSelectedBands();
 
         addGeoCoding();
-
+        */
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
     }
 
@@ -800,9 +827,6 @@ public class RangeDopplerGeocodingOp extends Operator {
         targetProduct.setGeoCoding(tpGeoCoding);
 
         final Band[] srcBands = targetBandNameToSourceBand.get(targetProduct.getBandAt(0).getName());
-
-        ReaderUtils.createMapGeocoding(targetProduct, IdentityTransformDescriptor.NAME,
-                srcBands[0].getNoDataValue());
     }
 
     /**
@@ -945,7 +969,8 @@ public class RangeDopplerGeocodingOp extends Operator {
                     return;
             }
 
-            final GeoPos geoPos = new GeoPos();
+//            final GeoPos geoPos = new GeoPos();
+            GeoPos geoPos = null;
             final double[] earthPoint = new double[3];
             final double[] sensorPos = new double[3];
             final int srcMaxRange = sourceImageWidth - 1;
@@ -1001,12 +1026,16 @@ public class RangeDopplerGeocodingOp extends Operator {
             final int maxY = y0 + h;
             final int maxX = x0 + w;
             for (int y = y0; y < maxY; y++) {
-                final double lat = imageGeoBoundary.latMax - y*delLat;
+//                final double lat = imageGeoBoundary.latMax - y*delLat;
                 final int yy = y-y0+1;
 
                 for (int x = x0; x < maxX; x++) {
+
+                    geoPos = targetGeoCoding.getGeoPos(new PixelPos(x,y), null);
+                    final double lat = geoPos.lat;
+                    double lon = geoPos.lon;
                     final int index = trgTiles[0].targetTile.getDataBufferIndex(x, y);
-                    double lon = imageGeoBoundary.lonMin + x*delLon;
+//                    double lon = imageGeoBoundary.lonMin + x*delLon;
                     if (lon >= 180.0) {
                         lon -= 360.0;
                     }
@@ -1018,7 +1047,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                         if (useAvgSceneHeight) {
                             alt = avgSceneHeight;
                         } else {
-                            geoPos.setLocation((float)lat, (float)lon);
+//                            geoPos.setLocation((float)lat, (float)lon);
                             alt = getLocalElevation(geoPos);
                         }
                     }
