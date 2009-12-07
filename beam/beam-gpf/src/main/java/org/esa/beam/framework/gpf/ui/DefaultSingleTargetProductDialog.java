@@ -37,7 +37,7 @@ import java.util.Map;
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.6 $ $Date: 2009-12-02 16:52:11 $
+ * @version $Revision: 1.7 $ $Date: 2009-12-07 21:39:44 $
  */
 public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog {
 
@@ -86,8 +86,10 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
             @Override
             public void selectionChanged(SelectionChangeEvent event) {
                 final Product selectedProduct = (Product) event.getSelection().getSelectedValue();
-                final TargetProductSelectorModel targetProductSelectorModel = getTargetProductSelector().getModel();
-                targetProductSelectorModel.setProductName(selectedProduct.getName() + getTargetProductNameSuffix());
+                if (selectedProduct != null ) {
+                    final TargetProductSelectorModel targetProductSelectorModel = getTargetProductSelector().getModel();
+                    targetProductSelectorModel.setProductName(selectedProduct.getName() + getTargetProductNameSuffix());
+                }
             }
         });
 

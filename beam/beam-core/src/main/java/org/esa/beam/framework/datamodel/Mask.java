@@ -37,7 +37,7 @@ import javax.media.jai.operator.DilateDescriptor;
  * This is a preliminary API under construction for BEAM 4.7. Not intended for public use.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2009-12-04 19:06:45 $
+ * @version $Revision: 1.5 $ $Date: 2009-12-07 21:39:44 $
  * @since BEAM 4.7
  */
 public class Mask extends Band {
@@ -516,7 +516,7 @@ public class Mask extends Band {
             return (Double) mask.getImageConfig().getValue(PROPERTY_NAME_MAXIMUM);
         }
 
-        private static String getExpression(Mask mask) {
+        public static String getExpression(Mask mask) {
             final Double min = getMinimum(mask);
             final Double max = getMaximum(mask);
             final String rasterName = getRasterName(mask);

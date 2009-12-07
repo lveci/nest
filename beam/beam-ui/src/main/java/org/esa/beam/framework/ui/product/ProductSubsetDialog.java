@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetDialog.java,v 1.2 2009-12-02 16:52:12 lveci Exp $
+ * $Id: ProductSubsetDialog.java,v 1.3 2009-12-07 21:39:44 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -266,7 +266,7 @@ public class ProductSubsetDialog extends ModalDialog {
                     if (overlayMask.getImageType() instanceof Mask.BandMathType) {
                         expression = Mask.BandMathType.getExpression(overlayMask);
                     } else if (overlayMask.getImageType() instanceof Mask.RangeType) {
-                        expression = Mask.RangeType.getRasterName(overlayMask);
+                        expression = Mask.RangeType.getExpression(overlayMask);
                     } else {
                         expression = null;
                     }

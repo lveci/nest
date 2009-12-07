@@ -1,5 +1,5 @@
 /*
- * $Id: ProductFlipper.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: ProductFlipper.java,v 1.2 2009-12-07 21:39:44 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,12 +27,13 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
+import org.esa.beam.util.ProductUtils;
 
 import java.io.IOException;
 
 /**
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-12-07 21:39:44 $
  */
 public class ProductFlipper extends AbstractProductBuilder {
 
@@ -287,7 +288,8 @@ public class ProductFlipper extends AbstractProductBuilder {
         if (!isMetadataIgnored()) {
             addGeoCodingToProduct(product);
         }
-        addBitmaskDefsToProduct(product);
+        ProductUtils.copyMasks(getSourceProduct(), product);
+        ProductUtils.copyOverlayMasks(getSourceProduct(), product);
         return product;
     }
 

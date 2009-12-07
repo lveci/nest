@@ -40,9 +40,9 @@ import java.awt.image.RenderedImage;
  * A pane within the statistcs window which displays a histogram.
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2009-12-02 16:52:12 $
+ * @version $Revision: 1.3 $ $Date: 2009-12-07 21:39:44 $
  */
-class HistogramPanel extends PagePanel {
+class HistogramPanel extends PagePanel implements ComputePanel.ComputeMasks {
 
     private static final String NO_DATA_MESSAGE = "No histogram computed yet.\n" +
                                                   "TIP: To zoom within the chart draw a rectangle\n" +
@@ -179,16 +179,7 @@ class HistogramPanel extends PagePanel {
 
         histogramDisplay = createChartPanel(chart);
 
-        final ComputePanel.ComputeMasks computeMasks = new ComputePanel.ComputeMasks() {
-            
-            @Override
-            public void compute(Mask[] selectedMasks) {
-                computeHistogram(selectedMasks);
-                
-            }
-        };
-
-        computePanel = ComputePanel.createComputePane(computeMasks, false, getRaster());
+        computePanel = new ComputePanel(this, false, getRaster());
         final TableLayout rightPanelLayout = new TableLayout(1);
         final JPanel rightPanel = new JPanel(rightPanelLayout);
         rightPanelLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
@@ -261,7 +252,8 @@ class HistogramPanel extends PagePanel {
         return optionsPane;
     }
 
-    private void computeHistogram(final Mask[] selectedMasks) {
+    @Override
+    public void compute(final Mask[] selectedMasks) {
         final RenderedImage maskImage;
         if (selectedMasks.length > 0 && selectedMasks[0] != null) {
             maskImage = selectedMasks[0].getSourceImage();

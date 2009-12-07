@@ -1,5 +1,5 @@
 /*
- * $Id: ProductProjectionBuilder.java,v 1.3 2009-12-02 16:52:11 lveci Exp $
+ * $Id: ProductProjectionBuilder.java,v 1.4 2009-12-07 21:39:44 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -436,7 +436,8 @@ public class ProductProjectionBuilder extends AbstractProductBuilder {
         }
         addGeoCodingToProduct(targetGC, product);
         addBandsToProduct(product);
-        addBitmaskDefsToProduct(product);
+        ProductUtils.copyMasks(getSourceProduct(), product);
+        ProductUtils.copyOverlayMasks(getSourceProduct(), product);
         copyPlacemarks(getSourceProduct().getPinGroup(), product.getPinGroup(),
                        PlacemarkSymbol.createDefaultPinSymbol());
         copyPlacemarks(getSourceProduct().getGcpGroup(), product.getGcpGroup(),

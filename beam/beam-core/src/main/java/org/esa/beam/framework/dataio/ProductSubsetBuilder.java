@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetBuilder.java,v 1.14 2009-11-04 17:04:32 lveci Exp $
+ * $Id: ProductSubsetBuilder.java,v 1.15 2009-12-07 21:39:44 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +31,7 @@ import java.util.Arrays;
  * A special-purpose product reader used to build subsets of data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.14 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.15 $ $Date: 2009-12-07 21:39:44 $
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
@@ -438,8 +438,8 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         if (!isMetadataIgnored()) {
             addGeoCodingToProduct(product);
         }
-        addBitmaskDefsToProduct(product);
-        addBitmaskOverlayInfosToBandAndTiePointGrids(product);
+        ProductUtils.copyMasks(getSourceProduct(), product);
+        ProductUtils.copyOverlayMasks(getSourceProduct(), product);
         setSceneRasterStartAndStopTime(product);
         addSubsetInfoMetadata(product);
         addPlacemarks(product);

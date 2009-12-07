@@ -1,5 +1,5 @@
 /*
- * $Id: VirtualBand.java,v 1.6 2009-12-04 19:06:45 lveci Exp $
+ * $Id: VirtualBand.java,v 1.7 2009-12-07 21:39:44 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -44,7 +44,7 @@ import java.io.IOException;
  * and <code>writePixel</code> perform the inverse operations in this case.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.6 $ $Date: 2009-12-04 19:06:45 $
+ * @version $Revision: 1.7 $ $Date: 2009-12-07 21:39:44 $
  * @see ProductData
  * @see #getPixels
  * @see #setPixels
@@ -232,9 +232,9 @@ public class VirtualBand extends Band {
     public String toString() {
         return getClass().getName() + "["
                + getName() + ","
-               + ProductData.getTypeString(getDataType()) + "," +
-               +getRasterWidth() + "," +
-               +getRasterHeight() + "]";
+               + ProductData.getTypeString(getDataType()) + ","
+               + getRasterWidth() + ","
+               + getRasterHeight() + "]";
     }
 
     /**

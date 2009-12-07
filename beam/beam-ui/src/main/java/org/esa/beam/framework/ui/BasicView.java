@@ -1,5 +1,5 @@
 /*
- * $Id: BasicView.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: BasicView.java,v 1.2 2009-12-07 21:39:44 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,9 +16,10 @@
  */
 package org.esa.beam.framework.ui;
 
-import javax.swing.JPanel;
-
+import com.bc.ceres.swing.selection.SelectionContext;
 import org.esa.beam.framework.ui.command.CommandUIFactory;
+
+import javax.swing.JPanel;
 
 /**
  * The base class for application view panes. It provides support for a context menu and command handling.
@@ -62,5 +63,15 @@ public abstract class BasicView extends JPanel implements PopupMenuFactory, Comm
      */
     public void dispose() {
         _commandUIFactory = null;
+    }
+
+    /**
+     * Gets the current selection context, if any.
+     *
+     * @return The current selection context, or {@code null} if none exists.
+     * @since BEAM 4.7
+     */
+    public SelectionContext getSelectionContext() {
+        return null;
     }
 }

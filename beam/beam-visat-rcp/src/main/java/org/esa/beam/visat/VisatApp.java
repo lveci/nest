@@ -1,5 +1,5 @@
 /*
- * $Id: VisatApp.java,v 1.14 2009-12-04 19:06:45 lveci Exp $
+ * $Id: VisatApp.java,v 1.15 2009-12-07 21:39:44 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -18,13 +18,24 @@ package org.esa.beam.visat;
 
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.swing.actions.CopyAction;
+import com.bc.ceres.swing.actions.CutAction;
+import com.bc.ceres.swing.actions.DeleteAction;
+import com.bc.ceres.swing.actions.PasteAction;
+import com.bc.ceres.swing.actions.RedoAction;
+import com.bc.ceres.swing.actions.SelectAllAction;
+import com.bc.ceres.swing.actions.UndoAction;
 import com.bc.ceres.swing.figure.AbstractInteractorListener;
 import com.bc.ceres.swing.figure.FigureEditor;
 import com.bc.ceres.swing.figure.FigureEditorHolder;
 import com.bc.ceres.swing.figure.Interactor;
 import com.bc.ceres.swing.figure.interactions.NullInteractor;
 import com.bc.ceres.swing.progress.DialogProgressMonitor;
+import com.bc.ceres.swing.selection.SelectionContext;
+import com.bc.ceres.swing.selection.SelectionManager;
 import com.bc.ceres.swing.selection.support.DefaultSelectionManager;
+import com.bc.ceres.swing.undo.UndoContext;
+import com.bc.ceres.swing.undo.support.DefaultUndoContext;
 import com.bc.swing.desktop.TabbedDesktopPane;
 import com.jidesoft.action.CommandBar;
 import com.jidesoft.action.CommandMenuBar;
@@ -63,6 +74,7 @@ import org.esa.beam.framework.param.ParamExceptionHandler;
 import org.esa.beam.framework.param.Parameter;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.BasicApp;
+import org.esa.beam.framework.ui.BasicView;
 import org.esa.beam.framework.ui.FileHistory;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.NewProductDialog;
@@ -99,6 +111,7 @@ import org.esa.beam.visat.toolviews.stat.StatisticsToolView;
 
 import javax.media.jai.JAI;
 import javax.swing.AbstractButton;
+import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -145,7 +158,7 @@ import java.util.logging.Level;
  * @author Norman Fomferra
  * @author Marco Peters
  * @author Sabine Embacher
- * @version $Revision: 1.14 $ $Date: 2009-12-04 19:06:45 $
+ * @version $Revision: 1.15 $ $Date: 2009-12-07 21:39:44 $
  */
 public class VisatApp extends BasicApp implements AppContext {
 
@@ -391,15 +404,17 @@ public class VisatApp extends BasicApp implements AppContext {
 
             desktopPane = new TabbedDesktopPane();
 
-            applicationPage = new VisatApplicationPage(getMainFrame(), getCommandManager(), new DefaultSelectionManager(this),
-                                                       getMainFrame().getDockingManager(), desktopPane
-            );
+            applicationPage = new VisatApplicationPage(getMainFrame(),
+                                                       getCommandManager(),
+                                                       new DefaultSelectionManager(this),
+                                                       getMainFrame().getDockingManager(),
+                                                       desktopPane);
 
             pm.setTaskName("Loading commands");
             Command[] commands = VisatActivator.getInstance().getCommands();
             for (Command command : commands) {
                 addCommand(command, getCommandManager());
-                if("selectTool".equals(command.getCommandID())){
+                if ("selectTool".equals(command.getCommandID())) {
                     ToolCommand toolCommand = (ToolCommand) command;
                     defaultInteractor = toolCommand.getTool();
                     activeInteractorListener = new AbstractInteractorListener() {
@@ -448,10 +463,10 @@ public class VisatApp extends BasicApp implements AppContext {
         setInteractor(getSelectedProductSceneView(), activeInteractor);
     }
 
-    private void setInteractor(Component contentPane, Interactor activeInteractor) {
+    private void setInteractor(Component contentPane, Interactor interactor) {
         if (contentPane instanceof FigureEditorHolder) {
             final FigureEditor figureEditor = ((FigureEditorHolder) contentPane).getFigureEditor();
-            figureEditor.setInteractor(activeInteractor);
+            figureEditor.setInteractor(interactor);
         }
     }
 
@@ -572,6 +587,7 @@ public class VisatApp extends BasicApp implements AppContext {
         return null;
     }
 
+    @Override
     public VisatApplicationPage getApplicationPage() {
         return applicationPage;
     }
@@ -641,7 +657,6 @@ public class VisatApp extends BasicApp implements AppContext {
 
     /**
      * @return The file of the current session.
-     *
      * @since BEAM 4.6
      */
     public File getSessionFile() {
@@ -652,7 +667,6 @@ public class VisatApp extends BasicApp implements AppContext {
      * Sets the file of the current session.
      *
      * @param sessionFile The file of the current session.
-     *
      * @since BEAM 4.6
      */
     public void setSessionFile(File sessionFile) {
@@ -767,7 +781,6 @@ public class VisatApp extends BasicApp implements AppContext {
      * object cannot be used anymore.
      *
      * @param product the product to be disposed
-     *
      * @see org.esa.beam.framework.datamodel.Product#dispose
      */
     public void disposeProduct(final Product product) {
@@ -927,7 +940,6 @@ public class VisatApp extends BasicApp implements AppContext {
      * @param raster   the raster for which to perform the lookup
      * @param numBands the number of bands in the view, pass -1 for all view types, 1 for single band type and 3 for RGB
      *                 views
-     *
      * @return the internal frames, never <code>null</code>.
      */
     public JInternalFrame[] findInternalFrames(final RasterDataNode raster, final int numBands) {
@@ -952,7 +964,6 @@ public class VisatApp extends BasicApp implements AppContext {
      * <p>The content pane of the returned frame is always an instance of <code>ProductSceneView</code>.
      *
      * @param raster the raster for which to perform the lookup
-     *
      * @return the internal frame or <code>null</code> if no frame was found
      */
     public JInternalFrame findInternalFrame(final RasterDataNode raster) {
@@ -978,7 +989,6 @@ public class VisatApp extends BasicApp implements AppContext {
      * <p>The content pane of the returned frame is always an instance of <code>ProductSceneView</code>.
      *
      * @param raster the raster for which to perform the lookup
-     *
      * @return the internal frames, never <code>null</code>.
      */
     public JInternalFrame[] findInternalFrames(final RasterDataNode raster) {
@@ -1005,7 +1015,6 @@ public class VisatApp extends BasicApp implements AppContext {
      * <p>The content pane of the returned frame is always an instance of <code>ProductMetadataView</code>.
      *
      * @param metadataElement the metadata element for which to perform the lookup
-     *
      * @return the internal frame or <code>null</code> if no frame was found
      */
     public JInternalFrame findInternalFrame(final MetadataElement metadataElement) {
@@ -1031,7 +1040,6 @@ public class VisatApp extends BasicApp implements AppContext {
      * <p>The content pane of the returned frame is always an instance of <code>ProductMetadataView</code>.
      *
      * @param productNode the product node for which to perform the lookup
-     *
      * @return the internal frame or <code>null</code> if no frame was found
      */
     public JInternalFrame findInternalFrame(final ProductNode productNode) {
@@ -1056,7 +1064,6 @@ public class VisatApp extends BasicApp implements AppContext {
      * Finds the product associated with the given file.
      *
      * @param file the file
-     *
      * @return the product associated with the given file. or <code>null</code> if no such exists.
      */
     public Product getOpenProduct(final File file) {
@@ -1115,7 +1122,6 @@ public class VisatApp extends BasicApp implements AppContext {
      * Returns true if the given raster data node is used in any product scene view.
      *
      * @param raster
-     *
      * @return true if raster is used
      */
     public boolean hasRasterProductSceneView(final RasterDataNode raster) {
@@ -1980,7 +1986,7 @@ public class VisatApp extends BasicApp implements AppContext {
                 "pannerTool",
 //                "pinTool",
 //                "gcpTool",
-               "drawLineTool",
+                "drawLineTool",
                 "drawRectangleTool",
                 "drawEllipseTool",
                 "drawPolylineTool",
@@ -2162,9 +2168,7 @@ public class VisatApp extends BasicApp implements AppContext {
      * is selected.
      *
      * @param commandID the command ID
-     *
      * @return a tool button which is automatically added to VISAT's tool button group.
-     *
      * @see #getCommandManager
      */
     public AbstractButton createToolButton(final String commandID) {
@@ -2182,16 +2186,65 @@ public class VisatApp extends BasicApp implements AppContext {
         menuBar.setHidable(false);
         menuBar.setStretch(true);
 
-        menuBar.add(createJMenu("file", "File", 'F')); /*I18N*/
-        menuBar.add(createJMenu("edit", "Edit", 'E')); /*I18N*/
-        menuBar.add(createJMenu("view", "View", 'V'));  /*I18N*/
-        menuBar.add(createJMenu("data", "Analysis", 'A')); /*I18N*/
-        menuBar.add(createJMenu("tools", "Tools", 'T')); /*I18N*/
-        menuBar.add(createJMenu("window", "Window", 'W')); /*I18N*/
-        menuBar.add(createJMenu("help", "Help", 'H')); /*I18N*/
+        menuBar.add(createJMenu("file", "File", 'F'));
+        menuBar.add(createJMenu("edit", "Edit", 'E'));
+        menuBar.add(createJMenu("view", "View", 'V'));
+        menuBar.add(createJMenu("data", "Analysis", 'A'));
+        menuBar.add(createJMenu("tools", "Tools", 'T'));
+        menuBar.add(createJMenu("window", "Window", 'W'));
+        menuBar.add(createJMenu("help", "Help", 'H'));
 
         return menuBar;
     }
+
+
+    private UndoAction undoAction;
+    private RedoAction redoAction;
+    private UndoContext undoContext;
+
+    @Override
+    protected void insertCommandMenuItems() {
+        super.insertCommandMenuItems();
+
+        undoContext = new DefaultUndoContext(this);
+
+        JMenu menu = findMenu("edit");
+
+        undoAction = new UndoAction(undoContext) {
+            @Override
+            public void execute() {
+                super.execute();
+                redoAction.updateState();
+            }
+        };
+        redoAction = new RedoAction(undoContext) {
+            @Override
+            public void execute() {
+                super.execute();
+                undoAction.updateState();
+            }
+        };
+
+        SelectionManager selectionManager = getApplicationPage().getSelectionManager();
+        Action cutAction = new CutAction(selectionManager);
+        Action copyAction = new CopyAction(selectionManager);
+        Action pasteAction = new PasteAction(selectionManager);
+        Action selectAllAction = new SelectAllAction(selectionManager);
+        Action deleteAction = new DeleteAction(selectionManager);
+
+        menu.insert(undoAction, 0);
+        menu.insert(redoAction, 1);
+        menu.insertSeparator(2);
+        menu.insert(cutAction, 3);
+        menu.insert(copyAction, 4);
+        menu.insert(pasteAction, 5);
+        menu.insertSeparator(6);
+        menu.insert(selectAllAction, 7);
+        menu.insertSeparator(8);
+        menu.insert(deleteAction, 9);
+        menu.insertSeparator(10);
+    }
+
 
     /**
      * Creates a new product metadata view and opens an internal frame for it.
@@ -2208,7 +2261,6 @@ public class VisatApp extends BasicApp implements AppContext {
      * @param title   a frame title
      * @param icon    a frame icon, can be null
      * @param content the frame's content pane
-     *
      * @return the newly created frame
      */
     public synchronized JInternalFrame createInternalFrame(final String title, final Icon icon,
@@ -2307,9 +2359,37 @@ public class VisatApp extends BasicApp implements AppContext {
             setSelectedProductNode(e.getInternalFrame());
             final Component contentPane = e.getInternalFrame().getContentPane();
             setInteractor(contentPane, activeInteractor);
+            setSelectionContext(contentPane);
             updateMainFrameTitle();
             updateState();
             clearStatusBarMessage();
+        }
+
+        /**
+         * CLears the current selection context provided by the given component.
+         * @param contentPane The component being activated.
+         */
+        private void setSelectionContext(Component contentPane) {
+            if (contentPane instanceof BasicView) {
+                BasicView view = (BasicView) contentPane;
+                SelectionContext context = view.getSelectionContext();
+                getApplicationPage().getSelectionManager().setSelectionContext(context);
+            }
+        }
+
+        /**
+         * Clears the current selection context if it is the one provided by the given component.
+         * @param contentPane The component being closed.
+         */
+        private void clearSelectionContext(Component contentPane) {
+            if (contentPane instanceof BasicView) {
+                BasicView view = (BasicView) contentPane;
+                SelectionManager selectionManager = getApplicationPage().getSelectionManager();
+                SelectionContext context = view.getSelectionContext();
+                if (context != null && selectionManager.getSelectionContext() == context) {
+                    selectionManager.setSelectionContext(null);
+                }
+            }
         }
 
         /**
@@ -2321,7 +2401,7 @@ public class VisatApp extends BasicApp implements AppContext {
         public void internalFrameDeactivated(final InternalFrameEvent e) {
             Debug.trace("VisatApp: internal frame deactivated: " + e);
             final Component contentPane = e.getInternalFrame().getContentPane();
-            setInteractor(contentPane, activeInteractor);
+            setInteractor(contentPane, NullInteractor.INSTANCE);
             updateState();
         }
 
@@ -2360,6 +2440,8 @@ public class VisatApp extends BasicApp implements AppContext {
             Debug.trace("VisatApp: internal frame closed: " + e);
             final String title = e.getInternalFrame().getTitle();
             final Container contentPane = e.getInternalFrame().getContentPane();
+            setInteractor(contentPane, NullInteractor.INSTANCE);
+            clearSelectionContext(contentPane);
             if (contentPane instanceof ProductSceneView) {
                 final ProductSceneView productSceneView = (ProductSceneView) contentPane;
                 removePropertyMapChangeListener(productSceneView);
