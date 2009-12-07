@@ -21,6 +21,8 @@ import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
+import org.esa.beam.framework.dataop.maptransf.MapInfo;
+import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -30,6 +32,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.framework.dataio.ProductProjectionBuilder;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.ReaderUtils;
@@ -102,6 +105,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
     @Parameter(description = "The pixel spacing", defaultValue = "0", label="Pixel Spacing (m)")
     private double pixelSpacing = 0;
 
+    @Parameter(description = "The projection name", defaultValue = IdentityTransformDescriptor.NAME)
+    private String projectionName = IdentityTransformDescriptor.NAME;
+
     @Parameter(defaultValue="false", label="Save DEM as band")
     private boolean saveDEM = false;
 
@@ -142,6 +148,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private ElevationModel dem = null;
     private WarpOp.WarpData warpData = null;
     private FileElevationModel fileElevationModel = null;
+    private GeoCoding targetGeoCoding = null;
 
     private boolean srgrFlag = false;
     private boolean useExternalDEMFile = false;
@@ -489,8 +496,28 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * Create target product.
      * @throws OperatorException The exception.
      */
-    private void createTargetProduct() throws OperatorException {
-        
+    private void createTargetProduct() throws OperatorException, IOException {
+
+        final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(
+                                                sourceProduct,
+                                                MapProjectionRegistry.getProjection(projectionName),
+                                                0.0,
+                                                sourceProduct.getBandAt(0).getNoDataValue());
+
+        targetProduct = ProductProjectionBuilder.createProductProjection(sourceProduct, false, false, mapInfo,
+                                                                  sourceProduct.getName() + PRODUCT_SUFFIX, "");
+
+        targetImageWidth = targetProduct.getSceneRasterWidth();
+        targetImageHeight = targetProduct.getSceneRasterHeight();
+
+        for (Band band : targetProduct.getBands()) {
+            targetProduct.removeBand(band);
+        }
+
+        addSelectedBands();
+
+        targetGeoCoding = targetProduct.getGeoCoding();
+        /*
         targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
                                     sourceProduct.getProductType(),
                                     targetImageWidth,
@@ -501,8 +528,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
         addGeoCoding();
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
-
+        */
         addLayoverShadowBitmasks(targetProduct);
+
     }
 
     private static void addLayoverShadowBitmasks(final Product product) {
@@ -804,7 +832,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             getLocalDEM(x0, y0, w, h, localDEM);
         }
 
-        final GeoPos geoPos = new GeoPos();
+        GeoPos geoPos = null;
         final double[] earthPoint = new double[3];
         final double[] sensorPos = new double[3];
         final int srcMaxRange = sourceImageWidth - 1;
@@ -867,12 +895,13 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         try {
             for (int y = y0; y < y0 + h; y++) {
-                final double lat = imageGeoBoundary.latMax - y*delLat;
 
                 for (int x = x0; x < x0 + w; x++) {
-                    final int index = trgTiles[0].targetTile.getDataBufferIndex(x, y);
 
-                    double lon = imageGeoBoundary.lonMin + x*delLon;
+                    geoPos = targetGeoCoding.getGeoPos(new PixelPos(x,y), null);
+                    final double lat = geoPos.lat;
+                    double lon = geoPos.lon;
+                    final int index = trgTiles[0].targetTile.getDataBufferIndex(x, y);
                     if (lon >= 180.0) {
                         lon -= 360.0;
                     }
@@ -922,7 +951,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                             zeroDopplerTimeWithoutBias, slantRange, nearEdgeSlantRange, srgrConvParams);
 
                     final PixelPos pixelPos = new PixelPos(0.0f,0.0f);
-                    if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, srcMaxRange, srcMaxAzimuth, pixelPos)) {
+                    if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, srcMaxRange, srcMaxAzimuth, pixelPos, sensorPos)) {
                         saveNoDataValueToTarget(index, trgTiles);
                     } else {
                         double[] localIncidenceAngles =
@@ -1056,7 +1085,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
     private boolean isValidCell(final double rangeIndex, final double azimuthIndex,
                                 final double lat, final double lon,
-                                final int srcMaxRange, final int srcMaxAzimuth, PixelPos pixelPos) {
+                                final int srcMaxRange, final int srcMaxAzimuth,
+                                final PixelPos pixelPos, final double[] sensorPos) {
 
         if (rangeIndex < 0.0 || rangeIndex >= srcMaxRange || azimuthIndex < 0.0 || azimuthIndex >= srcMaxAzimuth) {
             return  false;
@@ -1067,13 +1097,30 @@ public class SARSimTerrainCorrectionOp extends Operator {
             return false;
         }
 
-        double delLat = Math.abs(lat - latitude.getPixelFloat(pixelPos.x, pixelPos.y));
-        double delLon = Math.abs(lon - longitude.getPixelFloat(pixelPos.x, pixelPos.y));
-        if (delLat > 1.0 || delLon > 1.0 && delLon <= 359.0) {
-            return false;
+        GeoPos sensorGeoPos = new GeoPos();
+        GeoUtils.xyz2geo(sensorPos, sensorGeoPos, GeoUtils.EarthModel.WGS84);
+        double delLatMax = Math.abs(lat - sensorGeoPos.lat);
+        double delLonMax;
+        if (lon < 0 && sensorGeoPos.lon > 0) {
+            delLonMax = Math.abs(360 + lon - sensorGeoPos.lon);
+        } else if (lon > 0 && sensorGeoPos.lon < 0) {
+            delLonMax = Math.abs(360 + sensorGeoPos.lon - lon);
+        } else {
+            delLonMax = Math.abs(lon - sensorGeoPos.lon);
         }
 
-        return true;
+        double delLat = Math.abs(lat - latitude.getPixelFloat(pixelPos.x, pixelPos.y));
+        double srcLon = longitude.getPixelFloat(pixelPos.x, pixelPos.y);
+        double delLon;
+        if (lon < 0 && srcLon > 0) {
+            delLon = Math.abs(360 + lon - srcLon);
+        } else if (lon > 0 && srcLon < 0) {
+            delLon = Math.abs(360 + srcLon - lon);
+        } else {
+            delLon = Math.abs(lon - srcLon);
+        }
+
+        return (delLat + delLon <= delLatMax + delLonMax);
     }
 
     /**

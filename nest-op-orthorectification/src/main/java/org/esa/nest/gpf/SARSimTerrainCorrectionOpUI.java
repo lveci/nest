@@ -73,6 +73,8 @@ public class SARSimTerrainCorrectionOpUI extends RangeDopplerGeocodingOpUI {
         DialogUtils.addComponent(contentPane, gbc, "Image Resampling Method:", imgResamplingMethod);
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Pixel Spacing (m):", pixelSpacing);
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, "Map Projection:", projectionName);
 
         gbc.gridx = 0;
         gbc.gridy++;
