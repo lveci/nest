@@ -1026,7 +1026,6 @@ public class RangeDopplerGeocodingOp extends Operator {
             final int maxY = y0 + h;
             final int maxX = x0 + w;
             for (int y = y0; y < maxY; y++) {
-//                final double lat = imageGeoBoundary.latMax - y*delLat;
                 final int yy = y-y0+1;
 
                 for (int x = x0; x < maxX; x++) {
@@ -1035,7 +1034,6 @@ public class RangeDopplerGeocodingOp extends Operator {
                     final double lat = geoPos.lat;
                     double lon = geoPos.lon;
                     final int index = trgTiles[0].targetTile.getDataBufferIndex(x, y);
-//                    double lon = imageGeoBoundary.lonMin + x*delLon;
                     if (lon >= 180.0) {
                         lon -= 360.0;
                     }
@@ -1047,7 +1045,6 @@ public class RangeDopplerGeocodingOp extends Operator {
                         if (useAvgSceneHeight) {
                             alt = avgSceneHeight;
                         } else {
-//                            geoPos.setLocation((float)lat, (float)lon);
                             alt = getLocalElevation(geoPos);
                         }
                     }
@@ -1084,7 +1081,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                     final double rangeIndex = computeRangeIndex(srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC,
                             rangeSpacing, zeroDopplerTimeWithoutBias, slantRange, nearEdgeSlantRange, srgrConvParams);
 
-                    if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, srcMaxRange, srcMaxAzimuth)) {
+                    if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, srcMaxRange, srcMaxAzimuth, sensorPos)) {
                         saveNoDataValueToTarget(index, trgTiles);
                     } else {
                         double[] localIncidenceAngles = {NonValidIncidenceAngle, NonValidIncidenceAngle};
@@ -1211,19 +1208,36 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     private boolean isValidCell(final double rangeIndex, final double azimuthIndex,
                                 final double lat, final double lon,
-                                final int srcMaxRange, final int srcMaxAzimuth) {
+                                final int srcMaxRange, final int srcMaxAzimuth, final double[] sensorPos) {
 
         if (rangeIndex < 0.0 || rangeIndex >= srcMaxRange || azimuthIndex < 0.0 || azimuthIndex >= srcMaxAzimuth) {
             return  false;
         }
 
-        double delLat = Math.abs(lat - latitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
-        double delLon = Math.abs(lon - longitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
-        if (delLat > 1.0 || delLon > 1.0 && delLon <= 359.0) {
-            return false;
+        GeoPos sensorGeoPos = new GeoPos();
+        GeoUtils.xyz2geo(sensorPos, sensorGeoPos, GeoUtils.EarthModel.WGS84);
+        double delLatMax = Math.abs(lat - sensorGeoPos.lat);
+        double delLonMax;
+        if (lon < 0 && sensorGeoPos.lon > 0) {
+            delLonMax = Math.abs(360 + lon - sensorGeoPos.lon);
+        } else if (lon > 0 && sensorGeoPos.lon < 0) {
+            delLonMax = Math.abs(360 + sensorGeoPos.lon - lon);
+        } else {
+            delLonMax = Math.abs(lon - sensorGeoPos.lon);
         }
 
-        return true;
+        double delLat = Math.abs(lat - latitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
+        double srcLon = longitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex);
+        double delLon;
+        if (lon < 0 && srcLon > 0) {
+            delLon = Math.abs(360 + lon - srcLon);
+        } else if (lon > 0 && srcLon < 0) {
+            delLon = Math.abs(360 + srcLon - lon);
+        } else {
+            delLon = Math.abs(lon - srcLon);
+        }
+
+        return (delLat + delLon <= delLatMax + delLonMax);
     }
 
     /**
