@@ -28,7 +28,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
     private final JList bandList = new JList();
     protected final JComboBox demName = new JComboBox();
-    private final JComboBox projectionName = new JComboBox();
+    protected final JComboBox projectionName = new JComboBox();
     private static final String externalDEMStr = "External DEM";
 
     protected final JComboBox demResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
