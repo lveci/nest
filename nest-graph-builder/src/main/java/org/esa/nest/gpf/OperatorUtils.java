@@ -238,6 +238,11 @@ public class OperatorUtils {
                 tiePoints[k] = srcTPG.getPixelFloat(newTiePointPos[k].x, newTiePointPos[k].y);
             }
 
+            int discontinuity = TiePointGrid.DISCONT_NONE;
+            if (srcTPG.getName().equals(TPG_LONGITUDE)) {
+                discontinuity = TiePointGrid.DISCONT_AT_180;
+            }
+
             final TiePointGrid tgtTPG = new TiePointGrid(srcTPG.getName(),
                                                    gridWidth,
                                                    gridHeight,
@@ -245,7 +250,8 @@ public class OperatorUtils {
                                                    0.0f,
                                                    subSamplingX,
                                                    subSamplingY,
-                                                   tiePoints);
+                                                   tiePoints,
+                                                   discontinuity);
 
             targetProduct.addTiePointGrid(tgtTPG);
 
