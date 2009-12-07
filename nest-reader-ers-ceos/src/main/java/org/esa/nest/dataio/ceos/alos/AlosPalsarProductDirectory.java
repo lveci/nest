@@ -106,7 +106,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         product.setEndTime(getUTCScanStopTime(_leaderFile.getSceneRecord(), null));
         product.setDescription(getProductDescription());
 
-        addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
+        ReaderUtils.addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
         addTiePointGrids(product);
         addMetaData(product);
 
@@ -233,7 +233,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 final float lonLR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightBottomLongitude", "0"));
                 final float[] lonCorners = new float[]{lonUL, lonUR, lonLL, lonLR};
 
-                addGeoCoding(product, latCorners, lonCorners);
+                ReaderUtils.addGeoCoding(product, latCorners, lonCorners);
             } catch(Exception e) {
                 Debug.trace(e.toString());       
             }

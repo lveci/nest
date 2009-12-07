@@ -22,7 +22,7 @@ public class NetCDFUtils {
 
     public static Band createBand(final Variable variable, final int rasterWidth, final int rasterHeight) {
         final NcAttributeMap attMap = NcAttributeMap.create(variable);
-        final Band band = new Band(variable.getShortName(),
+        final Band band = new Band(variable.getName(),
                                    getRasterDataType(variable),
                                    rasterWidth,
                                    rasterHeight);
@@ -216,8 +216,9 @@ public class NetCDFUtils {
         addAttributes(parentElem, parentGroup);
     }
 
-    public static void addGlobalAttributes(final MetadataElement parentElem, final List<Attribute> attribList) {
-        final MetadataElement globalElem = new MetadataElement(NetcdfConstants.GLOBAL_ATTRIBUTES_NAME);
+    public static void addAttributes(final MetadataElement parentElem, final String elemName, 
+                                           final List<Attribute> attribList) {
+        final MetadataElement globalElem = new MetadataElement(elemName);
         parentElem.addElement(globalElem);
         for(Attribute at : attribList) {
             createMetadataAttributes(globalElem, at, at.getName());

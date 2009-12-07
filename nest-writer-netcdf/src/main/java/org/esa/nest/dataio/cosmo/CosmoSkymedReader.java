@@ -8,7 +8,6 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.logging.BeamLogManager;
-import org.esa.beam.visat.VisatApp;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.AbstractMetadataIO;
 import org.esa.nest.dataio.*;
@@ -16,7 +15,6 @@ import org.esa.nest.util.XMLSupport;
 import org.jdom.Element;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
-import ucar.nc2.Group;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
@@ -126,7 +124,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
         super.close();
     }
 
-    private void removeQuickLooks(Map<NcRasterDim, List<Variable>> variableListMap) {
+    private static void removeQuickLooks(Map<NcRasterDim, List<Variable>> variableListMap) {
         final String[] excludeList = { "qlk" };
         final NcRasterDim[] keys = variableListMap.keySet().toArray(new NcRasterDim[variableListMap.keySet().size()]);
         final ArrayList<NcRasterDim> removeList = new ArrayList<NcRasterDim>();
@@ -154,9 +152,15 @@ public class CosmoSkymedReader extends AbstractProductReader {
 
     private void addMetadataToProduct() {
 
-        NetCDFUtils.addGlobalAttributes(product.getMetadataRoot(), netcdfFile.getGlobalAttributes());
+        NetCDFUtils.addAttributes(product.getMetadataRoot(), NetcdfConstants.GLOBAL_ATTRIBUTES_NAME,
+                                  netcdfFile.getGlobalAttributes());
 
         addDeliveryNote(product);
+
+        for (final Variable variable : variableMap.getAll()) {
+            NetCDFUtils.addAttributes(product.getMetadataRoot(), variable.getName(),
+                                  variable.getAttributes());
+        }
 
         //final Group rootGroup = netcdfFile.getRootGroup();
         //NetCDFUtils.addGroups(product.getMetadataRoot(), rootGroup);
@@ -242,6 +246,8 @@ public class CosmoSkymedReader extends AbstractProductReader {
                 globalElem.getAttributeDouble("Ground Range Geometric Resolution", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
                 globalElem.getAttributeDouble("Azimuth Geometric Resolution", defInt));
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, 1);
     }
 
     private static String getSampleType(final MetadataElement globalElem) {
@@ -255,7 +261,12 @@ public class CosmoSkymedReader extends AbstractProductReader {
             final int height = variable.getDimension(0).getLength();
             final int width = variable.getDimension(1).getLength();
             final Band band = NetCDFUtils.createBand(variable, width, height);
-
+            int cnt = 1;
+            final String origName = band.getName();
+            while(product.getBand(band.getName()) != null) {
+                band.setName(origName + cnt);
+                ++cnt;
+            }
             product.addBand(band);
         }
     }
@@ -272,81 +283,56 @@ public class CosmoSkymedReader extends AbstractProductReader {
 
             product.addTiePointGrid(tpg);
         }
+
+        addGeocodingFromMetadata();
     }
 
-    private void addGeoCodingToProduct(final NcRasterDim rasterDim) throws IOException {
-        setTiePointGeoCoding();
-        if (product.getGeoCoding() == null) {
-            setPixelGeoCoding();
-        }
-        if (product.getGeoCoding() == null) {
-            setMapGeoCoding(rasterDim);
-        }
-    }
-
-    private void setMapGeoCoding(final NcRasterDim rasterDim) {
-        final NcVariableMap varMap = NcVariableMap.create(netcdfFile);
-
-        Variable lonVar=null, latVar=null;
-        for(String lonStr : NetcdfConstants.LON_VAR_NAMES) {
-            lonVar = varMap.get(lonStr);
-            if(lonVar != null)
+    private void addGeocodingFromMetadata() {
+        final MetadataElement root = product.getMetadataRoot();
+        final String bandName = product.getBandAt(0).getName();
+        MetadataElement bandElem = null;
+        for(MetadataElement elem : root.getElements()) {
+            if(elem.getName().equalsIgnoreCase(bandName)) {
+                bandElem = elem;
                 break;
+            }
         }
-        for(String latStr : NetcdfConstants.LAT_VAR_NAMES) {
-            latVar = varMap.get(latStr);
-            if(latVar != null)
-                break;
-        }
-        if (lonVar != null && latVar != null && rasterDim.fitsTo(lonVar, latVar)) {
+
+        if(bandElem != null) {
             try {
-                final NetCDFUtils.MapInfoX mapInfoX = NetCDFUtils.createMapInfoX(lonVar, latVar,
-                                                                                 product.getSceneRasterWidth(),
-                                                                                 product.getSceneRasterHeight());
-                if (mapInfoX != null) {
-                    yFlipped = mapInfoX.isYFlipped();
-                    product.setGeoCoding(new MapGeoCoding(mapInfoX.getMapInfo()));
-                }
-            } catch (IOException e) {
-                BeamLogManager.getSystemLogger().warning("Failed to create NetCDF geo-coding");
+                String str = bandElem.getAttributeString("Top Left Geodetic Coordinates");
+                final float latUL = Float.parseFloat(str.substring(0, str.indexOf(',')));
+                final float lonUL = Float.parseFloat(str.substring(str.indexOf(',')+1, str.lastIndexOf(',')));
+                str = bandElem.getAttributeString("Top Right Geodetic Coordinates");
+                final float latUR = Float.parseFloat(str.substring(0, str.indexOf(',')));
+                final float lonUR = Float.parseFloat(str.substring(str.indexOf(',')+1, str.lastIndexOf(',')));
+                str = bandElem.getAttributeString("Bottom Left Geodetic Coordinates");
+                final float latLL = Float.parseFloat(str.substring(0, str.indexOf(',')));
+                final float lonLL = Float.parseFloat(str.substring(str.indexOf(',')+1, str.lastIndexOf(',')));
+                str = bandElem.getAttributeString("Bottom Right Geodetic Coordinates");
+                final float latLR = Float.parseFloat(str.substring(0, str.indexOf(',')));
+                final float lonLR = Float.parseFloat(str.substring(str.indexOf(',')+1, str.lastIndexOf(',')));
+
+                final float[] latCorners = new float[]{latUL, latUR, latLL, latLR};
+                final float[] lonCorners = new float[]{lonUL, lonUR, lonLL, lonLR};
+
+                ReaderUtils.addGeoCoding(product, latCorners, lonCorners);
+            } catch(Exception e) {
+                System.out.println(e.getMessage());
+                // continue
             }
         }
     }
 
-    private void setTiePointGeoCoding() {
-        TiePointGrid lonGrid=null, latGrid=null;
-        for(String lonStr : NetcdfConstants.LON_VAR_NAMES) {
-            lonGrid = product.getTiePointGrid(lonStr);
-            if(lonGrid != null)
-                break;
+    private void addGeoCodingToProduct(final NcRasterDim rasterDim) throws IOException {
+        if (product.getGeoCoding() == null) {
+            NetCDFReader.setTiePointGeoCoding(product);
         }
-        for(String latStr : NetcdfConstants.LAT_VAR_NAMES) {
-            latGrid = product.getTiePointGrid(latStr);
-            if(latGrid != null)
-                break;
+        if (product.getGeoCoding() == null) {
+            NetCDFReader.setPixelGeoCoding(product);
         }
-        if (latGrid != null && lonGrid != null) {
-            final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
-            product.setGeoCoding(tpGeoCoding);
-        }
-    }
-
-    private void setPixelGeoCoding() throws IOException {
-        Band lonBand=null, latBand=null;
-        for(String lonStr : NetcdfConstants.LON_VAR_NAMES) {
-            lonBand = product.getBand(lonStr);
-            if(lonBand != null)
-                break;
-        }
-        for(String latStr : NetcdfConstants.LAT_VAR_NAMES) {
-            latBand = product.getBand(latStr);
-            if(latBand != null)
-                break;
-        }
-        if (latBand != null && lonBand != null) {
-            product.setGeoCoding(new PixelGeoCoding(latBand, lonBand,
-                                                     latBand.getValidPixelExpression(),
-                                                     5, ProgressMonitor.NULL));
+        if (product.getGeoCoding() == null) {
+            yFlipped = NetCDFReader.setMapGeoCoding(rasterDim, product, netcdfFile, yFlipped);
         }
     }
 

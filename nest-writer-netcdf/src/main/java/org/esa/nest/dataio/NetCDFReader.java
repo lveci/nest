@@ -150,17 +150,18 @@ public class NetCDFReader extends AbstractProductReader {
     }
 
     private void addGeoCodingToProduct(final NcRasterDim rasterDim) throws IOException {
-        setTiePointGeoCoding();
+        setTiePointGeoCoding(_product);
         if (_product.getGeoCoding() == null) {
-            setPixelGeoCoding();
+            setPixelGeoCoding(_product);
         }
         if (_product.getGeoCoding() == null) {
-            setMapGeoCoding(rasterDim);
+            _yFlipped = setMapGeoCoding(rasterDim, _product, _netcdfFile, _yFlipped);
         }
     }
 
-    private void setMapGeoCoding(final NcRasterDim rasterDim) {
-        final NcVariableMap varMap = NcVariableMap.create(_netcdfFile);
+    public static boolean setMapGeoCoding(final NcRasterDim rasterDim, final Product product,
+                                       NetcdfFile netcdfFile, boolean yFlipped) {
+        final NcVariableMap varMap = NcVariableMap.create(netcdfFile);
 
         Variable lonVar=null, latVar=null;
         for(String lonStr : NetcdfConstants.LON_VAR_NAMES) {
@@ -176,50 +177,51 @@ public class NetCDFReader extends AbstractProductReader {
         if (lonVar != null && latVar != null && rasterDim.fitsTo(lonVar, latVar)) {
             try {
                 final NetCDFUtils.MapInfoX mapInfoX = NetCDFUtils.createMapInfoX(lonVar, latVar,
-                                                                                 _product.getSceneRasterWidth(),
-                                                                                 _product.getSceneRasterHeight());
+                                                                                 product.getSceneRasterWidth(),
+                                                                                 product.getSceneRasterHeight());
                 if (mapInfoX != null) {
-                    _yFlipped = mapInfoX.isYFlipped();
-                    _product.setGeoCoding(new MapGeoCoding(mapInfoX.getMapInfo()));
+                    yFlipped = mapInfoX.isYFlipped();
+                    product.setGeoCoding(new MapGeoCoding(mapInfoX.getMapInfo()));
                 }
             } catch (IOException e) {
                 BeamLogManager.getSystemLogger().warning("Failed to create NetCDF geo-coding");
             }
         }
+        return yFlipped;
     }
 
-    private void setTiePointGeoCoding() {
+    public static void setTiePointGeoCoding(final Product product) {
         TiePointGrid lonGrid=null, latGrid=null;
         for(String lonStr : NetcdfConstants.LON_VAR_NAMES) {
-            lonGrid = _product.getTiePointGrid(lonStr);
+            lonGrid = product.getTiePointGrid(lonStr);
             if(lonGrid != null)
                 break;
         }
         for(String latStr : NetcdfConstants.LAT_VAR_NAMES) {
-            latGrid = _product.getTiePointGrid(latStr);
+            latGrid = product.getTiePointGrid(latStr);
             if(latGrid != null)
                 break;
         }
         if (latGrid != null && lonGrid != null) {       
             final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
-            _product.setGeoCoding(tpGeoCoding);
+            product.setGeoCoding(tpGeoCoding);
         }
     }
 
-    private void setPixelGeoCoding() throws IOException {
+    public static void setPixelGeoCoding(final Product product) throws IOException {
         Band lonBand=null, latBand=null;
         for(String lonStr : NetcdfConstants.LON_VAR_NAMES) {
-            lonBand = _product.getBand(lonStr);
+            lonBand = product.getBand(lonStr);
             if(lonBand != null)
                 break;
         }
         for(String latStr : NetcdfConstants.LAT_VAR_NAMES) {
-            latBand = _product.getBand(latStr);
+            latBand = product.getBand(latStr);
             if(latBand != null)
                 break;
         }
         if (latBand != null && lonBand != null) {
-            _product.setGeoCoding(new PixelGeoCoding(latBand, lonBand,
+            product.setGeoCoding(new PixelGeoCoding(latBand, lonBand,
                                                      latBand.getValidPixelExpression(),
                                                      5, ProgressMonitor.NULL));
         }

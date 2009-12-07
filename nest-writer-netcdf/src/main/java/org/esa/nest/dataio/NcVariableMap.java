@@ -7,6 +7,7 @@ import ucar.nc2.Variable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Utility class which provides a fast, hash map based access to NetCDF variables lists.
@@ -57,7 +58,7 @@ public class NcVariableMap {
      * @param variable The variable.
      */
     public void put(Variable variable) {
-        _map.put(variable.getShortName(), variable);
+        _map.put(variable.getName(), variable);
     }
 
     /**
@@ -67,13 +68,22 @@ public class NcVariableMap {
         _map.clear();
     }
 
-
     /**
      * Tests if this map is empty.
      * @return true if empty
      */
     public boolean isEmpty() {
         return _map.isEmpty();
+    }
+
+    public Variable[] getAll() {
+        final Set<String> keySet = _map.keySet();
+        final Variable[] variables = new Variable[keySet.size()];
+        int i = 0;
+        for(String key : keySet) {
+            variables[i++] = _map.get(key);
+        }
+        return variables;
     }
 
     /**

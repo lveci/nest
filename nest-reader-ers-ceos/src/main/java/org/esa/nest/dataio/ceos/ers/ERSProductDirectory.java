@@ -118,7 +118,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         product.setEndTime(getUTCScanStopTime(_leaderFile.getSceneRecord(), null));
         product.setDescription(getProductDescription());
 
-        addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
+        ReaderUtils.addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
         addTiePointGrids(product, _leaderFile.getFacilityRecord(), _leaderFile.getSceneRecord());
         addMetaData(product);
         
@@ -274,7 +274,8 @@ class ERSProductDirectory extends CEOSProductDirectory {
                     sceneRec.getAttributeString("Processing algorithm identifier"));
 
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
-                    getPolarization(sceneRec.getAttributeString("Sensor ID and mode of operation for this channel")));
+                    ReaderUtils.findPolarizationInBandName(
+                            sceneRec.getAttributeString("Sensor ID and mode of operation for this channel")));
 
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
                     sceneRec.getAttributeDouble("Nominal number of looks processed in azimuth"));

@@ -280,7 +280,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
     @Override
     protected void addGeoCoding(final Product product) {
 
-        addGeoCoding(product, latCorners, lonCorners);
+        ReaderUtils.addGeoCoding(product, latCorners, lonCorners);
     }
 
     @Override

@@ -133,7 +133,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         }
         
         if(_leaderFile.getLatCorners() != null && _leaderFile.getLonCorners() != null) {
-            addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
+            ReaderUtils.addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
         }
         
         if(product.getGeoCoding() == null) {
@@ -307,7 +307,8 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                     sceneRec.getAttributeString("Processing algorithm identifier"));
 
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
-                    getPolarization(sceneRec.getAttributeString("Sensor ID and mode of operation for this channel")));
+                    ReaderUtils.findPolarizationInBandName(
+                            sceneRec.getAttributeString("Sensor ID and mode of operation for this channel")));
 
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
                     sceneRec.getAttributeDouble("Nominal number of looks processed in azimuth"));
@@ -412,7 +413,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                 final float lonLR = Float.parseFloat(lrLatLon.substring(lrLatLon.indexOf(',')+1, lrLatLon.length()-1));
                 final float[] lonCorners = new float[]{lonUL, lonUR, lonLL, lonLR};
 
-                addGeoCoding(product, latCorners, lonCorners);
+                ReaderUtils.addGeoCoding(product, latCorners, lonCorners);
             } catch (Exception e) {
                 Debug.trace(e.toString());
             }
