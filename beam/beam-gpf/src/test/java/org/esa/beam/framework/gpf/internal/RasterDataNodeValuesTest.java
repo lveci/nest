@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataNodeValuesTest.java,v 1.1 2009-12-02 16:52:11 lveci Exp $
+ * $Id: RasterDataNodeValuesTest.java,v 1.2 2009-12-08 20:08:42 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -47,6 +47,6 @@ public class RasterDataNodeValuesTest extends TestCase {
         
         String[] maskNames = RasterDataNodeValues.getNames(testProduct, Mask.class);
         assertNotNull(maskNames);
-        assertEquals(0, maskNames.length);
+        assertEquals(2, maskNames.length);
     }
 }

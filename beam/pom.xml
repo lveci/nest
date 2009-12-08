@@ -113,7 +113,7 @@
         <module>beam-visat-rcp</module>
         <module>beam-visat</module>
         <module>beam-gpf</module>
-		<module>beam-gpf-common</module>
+        <module>beam-gpf-common</module>
         <module>beam-processing</module>
         <module>beam-scripting</module>
         <!--module>beam-help</module-->
@@ -149,7 +149,7 @@
         <module>lib-hdf</module>
         <module>lib-netcdf</module>
         <module>blue-marble-worldmap</module>
-	    <module>beam-envi-reader</module>
+	<module>beam-envi-reader</module>
 
     </modules>
 
@@ -194,12 +194,12 @@
                 <version>0.10-SNAPSHOT</version>
             </dependency>
 
-			<dependency>
+            <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-jai</artifactId>
                 <version>0.10-SNAPSHOT</version>
             </dependency>
-			
+
             <!-- BEAM System Level Modules ############################################# -->
 
             <dependency>
@@ -248,10 +248,10 @@
             </dependency>
 
             <!--dependency>
-		                <groupId>ucar.netcdf</groupId>
-		                <artifactId>lib-netcdf</artifactId>
-		                <version>4.0</version>
-			</dependency-->
+                <groupId>ucar.netcdf</groupId>
+                <artifactId>lib-netcdf</artifactId>
+                <version>4.0</version>
+            </dependency-->
 
             <!-- GeoTools Libraries ############################################# -->
 
@@ -293,6 +293,11 @@
             <dependency>
               <groupId>org.geotools</groupId>
               <artifactId>gt-render</artifactId>
+              <version>2.5.3</version>
+            </dependency>
+            <dependency>
+              <groupId>org.geotools</groupId>
+              <artifactId>gt-property</artifactId>
               <version>2.5.3</version>
             </dependency>
 
@@ -463,7 +468,7 @@
                         <source>1.6</source>
                         <target>1.6</target>
                         <debug>true</debug>
-						<optimize>true</optimize>
+			<optimize>true</optimize>
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>

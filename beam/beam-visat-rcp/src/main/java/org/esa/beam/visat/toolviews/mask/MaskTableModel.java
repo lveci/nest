@@ -1,5 +1,5 @@
 /*
- * $Id: MaskTableModel.java,v 1.4 2009-12-08 16:08:33 lveci Exp $
+ * $Id: MaskTableModel.java,v 1.5 2009-12-08 20:08:43 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -90,7 +90,7 @@ class MaskTableModel extends AbstractTableModel {
 
     private static final String[] COLUMN_NAMES = {
             "Visibility",
-            "Roi",
+            "ROI",
             "Name",
             "Type",
             "Colour",

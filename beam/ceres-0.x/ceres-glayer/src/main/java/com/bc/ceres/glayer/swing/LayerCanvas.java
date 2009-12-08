@@ -1,5 +1,5 @@
 /*
- * $Id: LayerCanvas.java,v 1.2 2009-12-02 16:48:34 lveci Exp $
+ * $Id: LayerCanvas.java,v 1.3 2009-12-08 20:08:43 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -25,6 +25,7 @@ import com.bc.ceres.glayer.support.LayerViewInvalidationListener;
 import com.bc.ceres.glayer.swing.NavControl.NavControlModel;
 import com.bc.ceres.grender.AdjustableView;
 import com.bc.ceres.grender.InteractiveRendering;
+import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
 import com.bc.ceres.grender.support.DefaultViewport;
 
@@ -345,7 +346,7 @@ public class LayerCanvas extends JPanel implements AdjustableView {
 
         if (!isPaintingForPrint()) {
             for (Overlay overlay : overlays) {
-                overlay.paintOverlay(this, (Graphics2D) g);
+                overlay.paintOverlay(this, canvasRendering);
             }
         }
 
@@ -426,7 +427,7 @@ public class LayerCanvas extends JPanel implements AdjustableView {
 
     public interface Overlay {
 
-        void paintOverlay(LayerCanvas canvas, Graphics2D graphics);
+        void paintOverlay(LayerCanvas canvas, Rendering rendering);
     }
 
     private class ModelChangeHandler extends LayerViewInvalidationListener implements LayerCanvasModel.ChangeListener {

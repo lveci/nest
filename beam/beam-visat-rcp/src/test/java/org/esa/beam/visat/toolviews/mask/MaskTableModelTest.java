@@ -25,19 +25,19 @@ public class MaskTableModelTest extends TestCase {
         assertEquals("Colour", maskTableModel.getColumnName(2));
         assertEquals("Transparency", maskTableModel.getColumnName(3));
         assertEquals("Description", maskTableModel.getColumnName(4));
-        assertEquals(12, maskTableModel.getRowCount());
+        assertEquals(14, maskTableModel.getRowCount());
 
         maskTableModel.setProduct(product, product.getBand("C"));
         assertEquals(true, maskTableModel.isInManagmentMode());
         assertEquals(7, maskTableModel.getColumnCount());
         assertEquals("Visibility", maskTableModel.getColumnName(0));
-        assertEquals("Roi", maskTableModel.getColumnName(1));
+        assertEquals("ROI", maskTableModel.getColumnName(1));
         assertEquals("Name", maskTableModel.getColumnName(2));
         assertEquals("Type", maskTableModel.getColumnName(3));
         assertEquals("Colour", maskTableModel.getColumnName(4));
         assertEquals("Transparency", maskTableModel.getColumnName(5));
         assertEquals("Description", maskTableModel.getColumnName(6));
-        assertEquals(12, maskTableModel.getRowCount());
+        assertEquals(14, maskTableModel.getRowCount());
     }
 
     public void testViewMode() {
@@ -58,7 +58,7 @@ public class MaskTableModelTest extends TestCase {
         assertEquals("Colour", maskTableModel.getColumnName(1));
         assertEquals("Transparency", maskTableModel.getColumnName(2));
         assertEquals("Description", maskTableModel.getColumnName(3));
-        assertEquals(12, maskTableModel.getRowCount());
+        assertEquals(14, maskTableModel.getRowCount());
 
         maskTableModel.setProduct(product, product.getBand("C"));
         assertEquals(false, maskTableModel.isInManagmentMode());
@@ -68,6 +68,6 @@ public class MaskTableModelTest extends TestCase {
         assertEquals("Colour", maskTableModel.getColumnName(2));
         assertEquals("Transparency", maskTableModel.getColumnName(3));
         assertEquals("Description", maskTableModel.getColumnName(4));
-        assertEquals(12, maskTableModel.getRowCount());
+        assertEquals(14, maskTableModel.getRowCount());
     }
 }

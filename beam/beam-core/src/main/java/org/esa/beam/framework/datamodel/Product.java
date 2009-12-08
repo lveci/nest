@@ -1,5 +1,5 @@
 /*
- * $Id: Product.java,v 1.9 2009-12-08 16:08:33 lveci Exp $
+ * $Id: Product.java,v 1.10 2009-12-08 20:08:42 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -83,7 +83,7 @@ import java.util.TreeSet;
  * necessarily store data in the same format. Furthermore, it is not mandatory for a product to have both of them.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.9 $ $Date: 2009-12-08 16:08:33 $
+ * @version $Revision: 1.10 $ $Date: 2009-12-08 20:08:42 $
  */
 public class Product extends ProductNode {
 
@@ -228,18 +228,58 @@ public class Product extends ProductNode {
         this.bandGroup = new ProductNodeGroup<Band>(this, "bandGroup", true);
         this.tiePointGridGroup = new ProductNodeGroup<TiePointGrid>(this, "tiePointGridGroup", true);
         this.bitmaskDefGroup = new ProductNodeGroup<BitmaskDef>(this, "bitmaskDefGroup", true);
-        this.vectorDataGroup = new ProductNodeGroup<VectorData>(this, "vectorDataGroup", true);
+        this.vectorDataGroup = new ProductNodeGroup<VectorData>(this, "vectorDataGroup", true) {
+            @Override
+            public boolean add(VectorData node) {
+                final boolean added = super.add(node);
+                if (added) {
+                    getMaskGroup().add(createMask(node));
+                }
+                return added;
+            }
+
+            @Override
+            public void add(int index, VectorData node) {
+                super.add(index, node);
+                getMaskGroup().add(createMask(node));
+            }
+
+            @Override
+            public boolean remove(VectorData node) {
+                final boolean removed = super.remove(node);
+                if (removed) {
+                    final Mask[] masks = getMaskGroup().toArray(new Mask[getMaskGroup().getNodeCount()]);
+                    for (final Mask mask : masks) {
+                        if (mask.getImageType() instanceof Mask.VectorDataType) {
+                            if (Mask.VectorDataType.getVectorData(mask) == node) {
+                                getMaskGroup().remove(mask);
+                                break;
+                            }
+                        }
+                    }
+                }
+                return removed;
+            }
+
+            private Mask createMask(VectorData node) {
+                final Mask mask = new Mask(node.getName(),
+                                           getSceneRasterWidth(),
+                                           getSceneRasterHeight(),
+                                           new Mask.VectorDataType());
+                Mask.VectorDataType.setVectorData(mask, node);
+                return mask;
+            }
+        };
         this.indexCodingGroup = new ProductNodeGroup<IndexCoding>(this, "indexCodingGroup", true);
         this.flagCodingGroup = new ProductNodeGroup<FlagCoding>(this, "flagCodingGroup", true);
         this.maskGroup = new ProductNodeGroup<Mask>(this, "maskGroup", true);
         this.pinGroup = new ProductNodeGroup<Pin>(this, "pinGroup", true);
         this.gcpGroup = new ProductNodeGroup<Pin>(this, "gcpGroup", true);
 
-
         // todo - review me, this is test code (nf 10.2009)
-        this.vectorDataGroup.add(new VectorData("pins", createPlacemarkFeaureType("PinType", "pixelPoint")));
+        this.vectorDataGroup.add(new VectorData("pins", createPlacemarkFeatureType("PinType", "pixelPoint")));
         this.vectorDataGroup.add(
-                new VectorData("ground_control_points", createPlacemarkFeaureType("GcpType", "geoPoint")));
+                new VectorData("ground_control_points", createPlacemarkFeatureType("GcpType", "geoPoint")));
 
         if ("true".equals(System.getProperty("beam.maskDev"))) {
 
@@ -336,7 +376,7 @@ public class Product extends ProductNode {
         return new VectorData(name, fc);
     }
 
-    private static SimpleFeatureType createPlacemarkFeaureType(String typeName, String defaultGeometryName) {
+    private static SimpleFeatureType createPlacemarkFeatureType(String typeName, String defaultGeometryName) {
         SimpleFeatureTypeBuilder ftb = new SimpleFeatureTypeBuilder();
         DefaultGeographicCRS crs = DefaultGeographicCRS.WGS84;
         ftb.setCRS(crs);
