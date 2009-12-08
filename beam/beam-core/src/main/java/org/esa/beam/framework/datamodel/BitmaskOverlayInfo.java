@@ -15,8 +15,10 @@ import java.util.List;
  * The <code>BitmaskOverlayInfo</code> class manages a list of <code>{@link BitmaskDef}</code>s.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-12-08 16:08:33 $
+ * @deprecated since BEAM 4.7, use {@link RasterDataNode#getOverlayMaskGroup()} instead.
  */
+@Deprecated
 public class BitmaskOverlayInfo implements Cloneable {
 
     private List<BitmaskDef> _bitmaskDefs;
@@ -27,6 +29,7 @@ public class BitmaskOverlayInfo implements Cloneable {
     /**
      * Adds a bitmask definition reference to this bitmask overlay info.
      */
+    @Deprecated
     public void addBitmaskDef(BitmaskDef bitmaskDef) {
         if (bitmaskDef != null) {
             if (_bitmaskDefs == null) {
@@ -39,6 +42,7 @@ public class BitmaskOverlayInfo implements Cloneable {
     /**
      * Removes a bitmask definiton reference from this bitmask overlay info.
      */
+    @Deprecated
     public void removeBitmaskDef(BitmaskDef bitmaskDef) {
         Guardian.assertNotNull("bitmaskDef", bitmaskDef);
         if (_bitmaskDefs != null) {
@@ -49,6 +53,7 @@ public class BitmaskOverlayInfo implements Cloneable {
     /**
      * Gets an array of bitmask definition references, never <code>null</code>.
      */
+    @Deprecated
     public BitmaskDef[] getBitmaskDefs() {
         if (_bitmaskDefs == null) {
             return new BitmaskDef[0];
@@ -64,6 +69,7 @@ public class BitmaskOverlayInfo implements Cloneable {
      * @return <code>true</code> if the given bitmask def is contained in this bitmask overlay info, otherwise
      *         <code>false</code>
      */
+    @Deprecated
     public boolean containsBitmaskDef(BitmaskDef bitmaskDef) {
         return _bitmaskDefs != null && _bitmaskDefs.contains(bitmaskDef);
     }
@@ -76,6 +82,7 @@ public class BitmaskOverlayInfo implements Cloneable {
      * @return <code>true</code> if a bitmask with the given name  is contained in this bitmask overlay info, otherwise
      *         <code>false</code>
      */
+    @Deprecated
     public boolean containsBitmaskDef(String bitmaskName) {
         if (_bitmaskDefs != null) {
             BitmaskDef[] bitmaskDefs = getBitmaskDefs();
@@ -97,6 +104,7 @@ public class BitmaskOverlayInfo implements Cloneable {
      * <p/>
      * <p>Overrides of this method should always call <code>super.dispose();</code> after disposing this instance.
      */
+    @Deprecated
     public void dispose() {
         if (_bitmaskDefs != null) {
             _bitmaskDefs = null;

@@ -1,13 +1,12 @@
 /*
- * $Id: VersionCheckerTest.java,v 1.2 2009-10-15 20:30:19 lveci Exp $
+ * $Id: VersionCheckerTest.java,v 1.1 2009-12-08 16:08:33 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
  */
-package org.esa.beam.framework.ui;
+package org.esa.beam.util;
 
 import junit.framework.TestCase;
-import org.esa.beam.util.VersionChecker;
 
 import java.io.IOException;
 
@@ -36,5 +35,14 @@ public class VersionCheckerTest extends TestCase {
         final String remoteVersion = vc.getRemoteVersion();
         assertNotNull(remoteVersion);
         assertTrue(remoteVersion.startsWith("VERSION "));
+    }
+
+    public void testCompare() {
+        assertTrue(VersionChecker.compareVersions("VERSION 4.7", "VERSION 4.7") == 0);
+        assertTrue(VersionChecker.compareVersions("VERSION 4.7", "VERSION 3.7") > 0);
+        assertTrue(VersionChecker.compareVersions("VERSION 4.7", "VERSION 4.7-SNAPSHOT") > 0);
+        assertTrue(VersionChecker.compareVersions("VERSION 4.2.0", "VERSION 4.2") == 0);
+        assertTrue(VersionChecker.compareVersions("VERSION 4.2", "VERSION 4.2.0") == 0);
+        assertTrue(VersionChecker.compareVersions("VERSION 4.6.999", "VERSION 4.7") < 0);
     }
 }

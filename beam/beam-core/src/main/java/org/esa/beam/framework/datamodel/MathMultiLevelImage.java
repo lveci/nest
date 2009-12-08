@@ -23,7 +23,7 @@ import java.util.WeakHashMap;
  * resets itsself whenever any referred raster data have changed.
  *
  * @author Ralf Quast
- * @version $Revision: 1.2 $ $Date: 2009-12-07 21:39:44 $
+ * @version $Revision: 1.3 $ $Date: 2009-12-08 16:08:33 $
  * @since BEAM 4.7
  */
 class MathMultiLevelImage extends DefaultMultiLevelImage implements ProductNodeListener {
@@ -167,12 +167,12 @@ class MathMultiLevelImage extends DefaultMultiLevelImage implements ProductNodeL
     }
 
     // implementation copied from {@code HashSet}
-    static class WeakHashSet<E> extends AbstractSet<E> {
+    private static class WeakHashSet<E> extends AbstractSet<E> {
 
         private static final Object PRESENT = new Object();
         private final WeakHashMap<E, Object> map;
 
-        WeakHashSet() {
+        private WeakHashSet() {
             map = new WeakHashMap<E, Object>();
         }
 
@@ -192,9 +192,9 @@ class MathMultiLevelImage extends DefaultMultiLevelImage implements ProductNodeL
         }
 
         @Override
-        public boolean contains(Object key) {
+        public boolean contains(Object o) {
             //noinspection SuspiciousMethodCalls
-            return map.containsKey(key);
+            return map.containsKey(o);
         }
 
         @Override

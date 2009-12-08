@@ -87,24 +87,32 @@ public class ExportROIPixelsAction extends ExecCommand {
         // Get the displayed raster data node (band or tie-point grid)
         final RasterDataNode raster = view.getRaster();
         
-        String[] maskNames = raster.getProduct().getMaskGroup().getNodeNames();
-        JPanel panel = new JPanel();
-        BoxLayout boxLayout = new BoxLayout(panel, BoxLayout.X_AXIS);
-        panel.setLayout(boxLayout);
-        panel.add(new JLabel("Select ROI-Mask: "));
-        JComboBox maskCombo = new JComboBox(maskNames);
-        panel.add(maskCombo);
-        ModalDialog modalDialog = new ModalDialog(VisatApp.getApp().getApplicationWindow(), DLG_TITLE, panel, 
-                        ModalDialog.ID_OK_CANCEL | ModalDialog.ID_HELP, getHelpId());
-        if (modalDialog.show() != AbstractDialog.ID_OK) {
-            return; //Cancel
+        String[] maskNames;
+        if (raster.getRoiMaskGroup().getNodeCount() > 0) {
+            maskNames = raster.getRoiMaskGroup().getNodeNames();
+        } else {
+            maskNames = raster.getProduct().getMaskGroup().getNodeNames();
         }
-        String maskName = (String) maskCombo.getSelectedItem();
+        String maskName;
+        if (maskNames.length == 1) {
+            maskName = maskNames[0];
+        } else {
+            JPanel panel = new JPanel();
+            BoxLayout boxLayout = new BoxLayout(panel, BoxLayout.X_AXIS);
+            panel.setLayout(boxLayout);
+            panel.add(new JLabel("Select ROI-Mask: "));
+            JComboBox maskCombo = new JComboBox(maskNames);
+            panel.add(maskCombo);
+            ModalDialog modalDialog = new ModalDialog(VisatApp.getApp().getApplicationWindow(), DLG_TITLE, panel, 
+                                                      ModalDialog.ID_OK_CANCEL | ModalDialog.ID_HELP, getHelpId());
+            if (modalDialog.show() == AbstractDialog.ID_OK) {
+                maskName = (String) maskCombo.getSelectedItem();
+            } else {
+                return;
+            }
+        }
         Mask mask = raster.getProduct().getMaskGroup().get(maskName);
-        if (mask == null) {
-            VisatApp.getApp().showErrorDialog(DLG_TITLE, ERR_MSG_BASE + "No ROI-Mask selected.");
-            return;
-        }
+        
         final RenderedImage roiMaskImage = mask.getSourceImage();
         if (roiMaskImage == null) {
             VisatApp.getApp().showErrorDialog(DLG_TITLE, ERR_MSG_BASE + "No ROI-Mask image available.");

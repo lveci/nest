@@ -1,5 +1,5 @@
 /*
- * $Id: ComputeRoiAreaAction.java,v 1.2 2009-12-02 16:52:12 lveci Exp $
+ * $Id: ComputeRoiAreaAction.java,v 1.3 2009-12-08 16:08:33 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -53,7 +53,7 @@ import java.util.concurrent.ExecutionException;
  * Created by Marco Peters.
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2009-12-02 16:52:12 $
+ * @version $Revision: 1.3 $ $Date: 2009-12-08 16:08:33 $
  */
 public class ComputeRoiAreaAction extends ExecCommand {
 
@@ -71,7 +71,7 @@ public class ComputeRoiAreaAction extends ExecCommand {
 
         if (view != null) {
             final RasterDataNode raster = view.getRaster();
-            if (raster != null) {
+            if (raster != null && raster.getGeoCoding() != null) {
                 Product product = raster.getProduct();
                 int numMasks = product.getMaskGroup().getNodeCount();
                 enabled = numMasks > 0;
@@ -94,40 +94,40 @@ public class ComputeRoiAreaAction extends ExecCommand {
         final RasterDataNode raster = view.getRaster();
         assert raster != null;
         
-        String[] maskNames = raster.getProduct().getMaskGroup().getNodeNames();
-        JPanel panel = new JPanel();
-        BoxLayout boxLayout = new BoxLayout(panel, BoxLayout.X_AXIS);
-        panel.setLayout(boxLayout);
-        panel.add(new JLabel("Select ROI-Mask: "));
-        JComboBox maskCombo = new JComboBox(maskNames);
-        panel.add(maskCombo);
-        ModalDialog modalDialog = new ModalDialog(VisatApp.getApp().getApplicationWindow(), DIALOG_TITLE, panel, 
-                        ModalDialog.ID_OK_CANCEL | ModalDialog.ID_HELP, getHelpId());
-        if (modalDialog.show() == AbstractDialog.ID_OK) {
-            String maskName = (String) maskCombo.getSelectedItem();
-            Mask mask = raster.getProduct().getMaskGroup().get(maskName);
-            if (mask == null) {
-                VisatApp.getApp().showErrorDialog(DIALOG_TITLE, errMsgBase + "No ROI-Mask selected.");
-                return;
-            }
-            RenderedImage maskImage = mask.getSourceImage();
-            if (maskImage == null) {
-                VisatApp.getApp().showErrorDialog(DIALOG_TITLE, errMsgBase + "No ROI-Mask image available.");
-                return;
-            }
-            
-            // Get the current product's geo-coding
-            final GeoCoding geoCoding = raster.getGeoCoding();
-            if (geoCoding == null) {
-                VisatApp.getApp().showErrorDialog(DIALOG_TITLE, errMsgBase + "Product is not geo-coded.");
-                return;
-            }
-            
-            final SwingWorker<RoiAreaStatistics, Object> swingWorker = new RoiAreaSwingWorker(raster, maskImage, errMsgBase);
-            swingWorker.execute();
+        String[] maskNames;
+        if (raster.getRoiMaskGroup().getNodeCount() > 0) {
+            maskNames = raster.getRoiMaskGroup().getNodeNames();
         } else {
+            maskNames = raster.getProduct().getMaskGroup().getNodeNames();
+        }
+        String maskName;
+        if (maskNames.length == 1) {
+            maskName = maskNames[0];
+        } else {
+            JPanel panel = new JPanel();
+            BoxLayout boxLayout = new BoxLayout(panel, BoxLayout.X_AXIS);
+            panel.setLayout(boxLayout);
+            panel.add(new JLabel("Select ROI-Mask: "));
+            JComboBox maskCombo = new JComboBox(maskNames);
+            panel.add(maskCombo);
+            ModalDialog modalDialog = new ModalDialog(VisatApp.getApp().getApplicationWindow(), DIALOG_TITLE, panel, 
+                                                      ModalDialog.ID_OK_CANCEL | ModalDialog.ID_HELP, getHelpId());
+            if (modalDialog.show() == AbstractDialog.ID_OK) {
+                maskName = (String) maskCombo.getSelectedItem();
+            } else {
+                return;
+            }
+        }
+        Mask mask = raster.getProduct().getMaskGroup().get(maskName);
+        
+        RenderedImage maskImage = mask.getSourceImage();
+        if (maskImage == null) {
+            VisatApp.getApp().showErrorDialog(DIALOG_TITLE, errMsgBase + "No ROI-Mask image available.");
             return;
         }
+            
+        final SwingWorker<RoiAreaStatistics, Object> swingWorker = new RoiAreaSwingWorker(raster, maskImage, errMsgBase);
+        swingWorker.execute();
     }
 
 

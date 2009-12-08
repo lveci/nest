@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataNode.java,v 1.10 2009-12-04 19:06:45 lveci Exp $
+ * $Id: RasterDataNode.java,v 1.11 2009-12-08 16:08:33 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -128,12 +128,12 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
     @Deprecated
     private BitmaskOverlayInfo bitmaskOverlayInfo;
     // todo - use instead of bitmaskOverlayInfo
-    private ProductNodeGroup<Mask> overlayMasks;
+    private final ProductNodeGroup<Mask> overlayMasks;
 
     @Deprecated
     private ROIDefinition roiDefinition;
-    // todo - use instead of roiDefinition
-    private Mask roiMask;
+
+    private final ProductNodeGroup<Mask> roiMasks;
 
     /**
      * Number of bytes used for internal read buffer.
@@ -183,6 +183,9 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
         noDataValueUsed = false;
         geophysicalNoDataValue = 0.0;
         validPixelExpression = null;
+
+        overlayMasks = new ProductNodeGroup<Mask>(this, "overlayMasks", false);
+        roiMasks = new ProductNodeGroup<Mask>(this, "roiMasks", false);
     }
 
     /**
@@ -229,6 +232,9 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
         if (oldState != modified) {
             if (!modified && overlayMasks != null) {
                 overlayMasks.setModified(false);
+            }
+            if (!modified && roiMasks != null) {
+                roiMasks.setModified(false);
             }
             super.setModified(modified);
         }
@@ -880,6 +886,10 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
             geophysicalImage.dispose();
             geophysicalImage = null;
         }
+        overlayMasks.removeAll();
+        overlayMasks.clearRemovedList();
+        roiMasks.removeAll();
+        roiMasks.clearRemovedList();
         super.dispose();
     }
 
@@ -1634,10 +1644,14 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
      * @return The overlay mask group.
      */
     public ProductNodeGroup<Mask> getOverlayMaskGroup() {
-        if (overlayMasks == null) {
-            overlayMasks = new ProductNodeGroup<Mask>(this, "overlayMasks", false);
-        }
         return overlayMasks;
+    }
+
+    /**
+     * @return The roi mask group.
+     */
+    public ProductNodeGroup<Mask> getRoiMaskGroup() {
+        return roiMasks;
     }
 
     /**
@@ -2240,36 +2254,32 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
     /////////////////////////////////////////////////////////////////////////
     // Deprecated API
 
-    // todo - find replacement (mz 11.2009)
-
     /**
      * @return {@code true} if a ROI is usable for this raster data node.
      *
-     * @Deprecated since BEAM 4.7, currently no replacement
+     * @Deprecated since BEAM 4.7, use {@link #getRoiMaskGroup()}
      */
     @Deprecated
     public boolean isROIUsable() {
         return getROIDefinition() != null && getROIDefinition().isUsable();
     }
 
-    // todo - find replacement (nf 10.2009)
     /**
      * @return the ROI definition
      *
-     * @Deprecated since BEAM 4.7, currently no replacement
+     * @Deprecated since BEAM 4.7, use {@link #getRoiMaskGroup()}
      */
     @Deprecated
     public ROIDefinition getROIDefinition() {
         return roiDefinition;
     }
 
-    // todo - find replacement (nf 10.2009)
     /**
      * Sets the ROI definition for image display
      *
      * @param roiDefinition the ROI definition
      *
-     * @Deprecated since BEAM 4.7, currently no replacement
+     * @Deprecated since BEAM 4.7, use {@link #getRoiMaskGroup()}
      */
     @Deprecated
     public void setROIDefinition(ROIDefinition roiDefinition) {
@@ -2280,9 +2290,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
             if (getProduct() != null) {
                 if (roiDefinition.isUsable()) {
                     final Mask mask = ROIDefinition.toMask(roiDefinition, this);
-
                     getProduct().getMaskGroup().add(mask);
-                    getOverlayMaskGroup().add(mask);
                 }
             }
 
@@ -2386,6 +2394,22 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
         if (this.bitmaskOverlayInfo != bitmaskOverlayInfo) {
             this.bitmaskOverlayInfo = bitmaskOverlayInfo;
             fireProductNodeChanged(PROPERTY_NAME_BITMASK_OVERLAY_INFO);
+
+            synchronized (overlayMasks) {
+                if (getProduct() != null) {
+                    overlayMasks.removeAll();
+                    if (bitmaskOverlayInfo != null) {
+                        final ProductNodeGroup<Mask> maskGroup = getProduct().getMaskGroup();
+                        for (final BitmaskDef def : bitmaskOverlayInfo.getBitmaskDefs()) {
+                            final Mask mask = maskGroup.get(def.getName());
+                            if (mask != null) {
+                                overlayMasks.add(mask);
+                            }
+                        }
+                    }
+                }
+            }
+
             setModified(true);
         }
     }

@@ -1,5 +1,5 @@
 /*
- * $Id: EnvisatProductReader.java,v 1.7 2009-12-02 16:52:11 lveci Exp $
+ * $Id: EnvisatProductReader.java,v 1.8 2009-12-08 16:08:33 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -21,7 +21,9 @@ import org.esa.beam.framework.dataio.AbstractProductReader;
 import org.esa.beam.framework.dataio.IllegalFileFormatException;
 import org.esa.beam.framework.dataio.ProductIOException;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.dataop.maptransf.*;
+import org.esa.beam.framework.dataop.maptransf.Datum;
+import org.esa.beam.framework.dataop.maptransf.MapInfo;
+import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.util.ArrayUtils;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.ProductUtils;
@@ -42,10 +44,11 @@ import java.util.Vector;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.7 $ $Date: 2009-12-02 16:52:11 $
+ * @version $Revision: 1.8 $ $Date: 2009-12-08 16:08:33 $
  * @see org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn
  */
 public class EnvisatProductReader extends AbstractProductReader {
+
     private static final String ENVISAT_AMORGOS_USE_PIXEL_GEO_CODING = "beam.envisat.amorgos.usePixelGeoCoding";
 
     /**
@@ -338,19 +341,13 @@ public class EnvisatProductReader extends AbstractProductReader {
 
 
     private void addDefaultBitmaskDefsToBands(Product product) {
-        for (int i = 0; i < product.getNumBands(); i++) {
-            Band band = product.getBandAt(i);
-            final String[] bitmaskNames = getDefaultBitmaskNames(band.getName());
-            if (bitmaskNames != null) {
-                for (String bitmaskName : bitmaskNames) {
-                    final BitmaskDef bitmaskDef = product.getBitmaskDef(bitmaskName);
-                    if (bitmaskDef != null) {
-                        BitmaskOverlayInfo bitmaskOverlayInfo = band.getBitmaskOverlayInfo();
-                        if (bitmaskOverlayInfo == null) {
-                            bitmaskOverlayInfo = new BitmaskOverlayInfo();
-                            band.setBitmaskOverlayInfo(bitmaskOverlayInfo);
-                        }
-                        bitmaskOverlayInfo.addBitmaskDef(bitmaskDef);
+        for (final Band band : product.getBands()) {
+            final String[] maskNames = getDefaultBitmaskNames(band.getName());
+            if (maskNames != null) {
+                for (final String maskName : maskNames) {
+                    final Mask mask = product.getMaskGroup().get(maskName);
+                    if (mask != null) {
+                        band.getOverlayMaskGroup().add(mask);
                     }
                 }
             }
