@@ -272,9 +272,9 @@
         <action>
             <id>FillHoleOp</id>
             <class>org.esa.nest.dat.FillHoleOpAction</class>
-            <text>FillHole</text>
-            <shortDescr>Fill holes in product</shortDescr>
-            <parent>sartools</parent>
+            <text>Fill DEM Hole</text>
+            <shortDescr>Fill holes in DEM product</shortDescr>
+            <parent>tools</parent>
             <helpId>FillHoleOp</helpId>
         </action>
 
@@ -283,7 +283,7 @@
             <class>org.esa.nest.dat.filtering.FilterOperatorAction</class>
             <text>Image Filtering</text>
             <shortDescr>Image filtering</shortDescr>
-            <parent>sartools</parent>
+            <parent>tools</parent>
             <helpId>FilterOperator</helpId>
         </action>
 

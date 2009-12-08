@@ -60,6 +60,7 @@
                     <id>createXYDisplacementBandsAction</id>
                     <id>createElevationBand</id>
                     <id>productGrabber</id>
+                    <id>createFilteredBand</id>
                 </excludedActions>
                 <excludedToolViews>
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>

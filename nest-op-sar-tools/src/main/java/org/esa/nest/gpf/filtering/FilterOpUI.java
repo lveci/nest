@@ -59,12 +59,12 @@ public class FilterOpUI extends BaseOperatorUI {
 
         OperatorUIUtils.initBandList(bandList, getBandNames());
 
-        String filterName = (String)paramMap.get("selectedFilterName");
+        final String filterName = (String)paramMap.get("selectedFilterName");
         if(filterName != null) {
             setSelectedFilter(filterName);    
         }
 
-        File kFile = (File)paramMap.get("userDefinedKernelFile");
+        final File kFile = (File)paramMap.get("userDefinedKernelFile");
         if(kFile != null) {
             kernelFile.setText(kFile.getAbsolutePath());
         }
@@ -79,7 +79,7 @@ public class FilterOpUI extends BaseOperatorUI {
 
         OperatorUIUtils.updateBandList(bandList, paramMap);
 
-        FilterOperator.Filter filter = getSelectedFilter(tree);
+        final FilterOperator.Filter filter = getSelectedFilter(tree);
         if(filter != null) {
             paramMap.put("selectedFilterName", filter.toString());
         }
@@ -95,7 +95,7 @@ public class FilterOpUI extends BaseOperatorUI {
             final Enumeration enumeration = parentItem.children();
             while (enumeration.hasMoreElements()) {
                 final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) enumeration.nextElement();
-                DefaultMutableTreeNode found = findItem(treeNode, filterName);
+                final DefaultMutableTreeNode found = findItem(treeNode, filterName);
                 if (found != null)
                     return found;
             }
@@ -113,28 +113,33 @@ public class FilterOpUI extends BaseOperatorUI {
 
         final JPanel contentPane = new JPanel(new BorderLayout(4, 4));
         contentPane.setLayout(new GridBagLayout());
-        GridBagConstraints _gbc = GridBagUtils.createDefaultConstraints();
-        _gbc.fill = GridBagConstraints.HORIZONTAL;
-        _gbc.anchor = GridBagConstraints.NORTHWEST;
-        _gbc.insets.top = 2;
-        _gbc.insets.bottom = 2;
+        final GridBagConstraints gbc = GridBagUtils.createDefaultConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.insets.top = 2;
+        gbc.insets.bottom = 2;
 
-        _gbc.gridx = 0;
-        _gbc.gridy = 0;
-        contentPane.add(new JLabel("Source Bands:"), _gbc);
-        _gbc.fill = GridBagConstraints.BOTH;
-        _gbc.gridx = 1;
-        contentPane.add(new JScrollPane(bandList), _gbc);
-        _gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        contentPane.add(new JLabel("Source Bands:"), gbc);
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.gridx = 1;
+        gbc.weighty = 2;
+        contentPane.add(new JScrollPane(bandList), gbc);
 
-        _gbc.gridy++;
-        DialogUtils.addComponent(contentPane, _gbc, filterLabel, treeView);
+        gbc.weighty = 4;
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, filterLabel, treeView);
 
-        _gbc.gridy++;
-        DialogUtils.addComponent(contentPane, _gbc, kernelFileLabel, kernelFile);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weighty = 1;
+        gbc.gridy++;
+        DialogUtils.addComponent(contentPane, gbc, kernelFileLabel, kernelFile);
         DialogUtils.enableComponents(kernelFileLabel, kernelFile, true);
-        _gbc.gridx = 2;
-        contentPane.add(kernelFileBrowseButton, _gbc);
+        gbc.gridx = 2;
+        contentPane.add(kernelFileBrowseButton, gbc);
+
+        DialogUtils.fillPanel(contentPane, gbc);
 
         return contentPane;
     }
@@ -162,7 +167,7 @@ public class FilterOpUI extends BaseOperatorUI {
     }
 
     protected void setSelectedFilter(String filterName) {
-        DefaultMutableTreeNode item = findItem(root, filterName);
+        final DefaultMutableTreeNode item = findItem(root, filterName);
         if(item != null) {
             tree.setSelectionPath(new TreePath(item.getPath()));
         }
@@ -188,10 +193,10 @@ public class FilterOpUI extends BaseOperatorUI {
 
     private static DefaultMutableTreeNode createNodes(String categoryName, FilterOperator.Filter[] filters) {
 
-        DefaultMutableTreeNode category = new DefaultMutableTreeNode(categoryName);
+        final DefaultMutableTreeNode category = new DefaultMutableTreeNode(categoryName);
 
         for (FilterOperator.Filter filter : filters) {
-            DefaultMutableTreeNode item = new DefaultMutableTreeNode(filter);
+            final DefaultMutableTreeNode item = new DefaultMutableTreeNode(filter);
             category.add(item);
         }
 
