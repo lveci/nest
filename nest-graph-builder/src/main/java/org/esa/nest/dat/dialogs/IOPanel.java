@@ -56,9 +56,11 @@ public class IOPanel {
             ioParametersPanel.add(tableLayout.createVerticalSpacer());
             sourceProductSelectorList.get(0).addSelectionChangeListener(new AbstractSelectionChangeListener() {
                 public void selectionChanged(SelectionChangeEvent event) {
-                    final Product selectedProduct = (Product) event.getSelection().getSelectedValue();                    
-                    final TargetProductSelectorModel targetProductSelectorModel = targetProductSelector.getModel();
-                    targetProductSelectorModel.setProductName(selectedProduct.getName() + getTargetProductNameSuffix());
+                    final Product selectedProduct = (Product) event.getSelection().getSelectedValue();
+                    if(selectedProduct != null) {
+                        final TargetProductSelectorModel targetProductSelectorModel = targetProductSelector.getModel();
+                        targetProductSelectorModel.setProductName(selectedProduct.getName() + getTargetProductNameSuffix());
+                    }
                 }
             });
         }
