@@ -600,7 +600,6 @@ public class RangeDopplerGeocodingOp extends Operator {
      */
     protected void createTargetProduct() throws OperatorException, IOException {
 
-
         final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(
                                                 sourceProduct,
                                                 MapProjectionRegistry.getProjection(projectionName),
@@ -839,14 +838,14 @@ public class RangeDopplerGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.srgr_flag, 1);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetImageHeight);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_lat, imageGeoBoundary.latMax);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_lat, imageGeoBoundary.latMax);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_lat, imageGeoBoundary.latMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_lat, imageGeoBoundary.latMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_long, imageGeoBoundary.lonMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_long, imageGeoBoundary.lonMax);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, imageGeoBoundary.lonMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, imageGeoBoundary.lonMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_lat, AbstractMetadata.NO_METADATA);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_lat, AbstractMetadata.NO_METADATA);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_lat, AbstractMetadata.NO_METADATA);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_lat, AbstractMetadata.NO_METADATA);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_long, AbstractMetadata.NO_METADATA);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_long, AbstractMetadata.NO_METADATA);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, AbstractMetadata.NO_METADATA);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, AbstractMetadata.NO_METADATA);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(targetProduct));
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, IdentityTransformDescriptor.NAME);
         if (!useAvgSceneHeight) {
@@ -860,8 +859,8 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         // map projection too
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.geo_ref_system, "WGS84");
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lat_pixel_res, delLat);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lon_pixel_res, delLon);
+//        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lat_pixel_res, delLat);
+//        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lon_pixel_res, delLon);
     }
 
     /**
@@ -1086,7 +1085,9 @@ public class RangeDopplerGeocodingOp extends Operator {
                     } else {
                         double[] localIncidenceAngles = {NonValidIncidenceAngle, NonValidIncidenceAngle};
                         if (saveLocalIncidenceAngle || saveProjectedLocalIncidenceAngle || saveSigmaNought) {
-                            final LocalGeometry localGeometry = new LocalGeometry(lat, lon, delLat, delLon, earthPoint, sensorPos);
+
+                            final LocalGeometry localGeometry = new LocalGeometry();
+                            setLocalGeometry(x, y, targetGeoCoding, earthPoint, sensorPos, localGeometry);
 
                             computeLocalIncidenceAngle(
                                     localGeometry, demNoDataValue, saveLocalIncidenceAngle, saveProjectedLocalIncidenceAngle,
@@ -1161,8 +1162,10 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         // Note: the localDEM covers current tile with 1 extra row above, 1 extra row below, 1 extra column to
         //       the left and 1 extra column to the right of the tile.            
+
         final int maxY = y0 + tileHeight + 1;
         final int maxX = x0 + tileWidth + 1;
+        /*
         if(demName.equals("SRTM 3Sec GeoTiff")) {
             double maxLat = (imageGeoBoundary.latMax - maxY*delLat);
             double minLat = (imageGeoBoundary.latMax - y0*delLat);
@@ -1170,19 +1173,14 @@ public class RangeDopplerGeocodingOp extends Operator {
                 return false;
             }
         }
-
-        final GeoPos geoPos = new GeoPos();
+        */
+        GeoPos geoPos = null;
         float alt;
         boolean valid = false;
         for (int y = y0 - 1; y < maxY; y++) {
-            final float lat = (float)(imageGeoBoundary.latMax - y*delLat);
             final int yy = y - y0 + 1;
             for (int x = x0 - 1; x < maxX; x++) {
-                float lon = (float)(imageGeoBoundary.lonMin + x*delLon);
-                if (lon >= 180.0) {
-                    lon -= 360.0;
-                }
-                geoPos.setLocation(lat, lon);
+                geoPos = targetGeoCoding.getGeoPos(new PixelPos(x,y), null);
                 alt = getLocalElevation(geoPos);
                 localDEM[yy][x - x0 + 1] = alt;
                 if(alt != demNoDataValue)
@@ -1761,6 +1759,27 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
     }
 
+    public static void setLocalGeometry(final int x, final int y, final GeoCoding targetGeoCoding,
+                                        final double[] earthPoint, final double[] sensorPos,
+                                        LocalGeometry localGeometry) {
+
+        GeoPos rightPointGeoPos = targetGeoCoding.getGeoPos(new PixelPos(x + 1, y), null);
+        GeoPos leftPointGeoPos  = targetGeoCoding.getGeoPos(new PixelPos(x - 1, y), null);
+        GeoPos upPointGeoPos    = targetGeoCoding.getGeoPos(new PixelPos(x, y - 1), null);
+        GeoPos downPointGeoPos  = targetGeoCoding.getGeoPos(new PixelPos(x, y + 1), null);
+
+        localGeometry.leftPointLat  = leftPointGeoPos.lat;
+        localGeometry.leftPointLon  = leftPointGeoPos.lon;
+        localGeometry.rightPointLat = rightPointGeoPos.lat;
+        localGeometry.rightPointLon = rightPointGeoPos.lon;
+        localGeometry.upPointLat    = upPointGeoPos.lat;
+        localGeometry.upPointLon    = upPointGeoPos.lon;
+        localGeometry.downPointLat  = downPointGeoPos.lat;
+        localGeometry.downPointLon  = downPointGeoPos.lon;
+        localGeometry.centrePoint   = earthPoint;
+        localGeometry.sensorPos     = sensorPos;
+    }
+
     /**
      * Compute projected local incidence angle (in degree).
      * @param lg Object holding local geometry information.
@@ -1921,7 +1940,7 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         public LocalGeometry() {
         }
-
+        /*
         public LocalGeometry(final double lat, final double lon, final double delLat, final double delLon,
                              final double[] earthPoint, final double[] sensorPos) {
             this.leftPointLat = lat;
@@ -1935,6 +1954,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             this.centrePoint = earthPoint;
             this.sensorPos = sensorPos;
         }
+        */
     }
 
     public static class ImageGeoBoundary {
