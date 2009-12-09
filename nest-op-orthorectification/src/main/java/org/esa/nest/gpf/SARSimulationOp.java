@@ -416,16 +416,10 @@ public final class SARSimulationOp extends Operator {
             layoverShadowMaskBuffer = targetTiles.get(targetProduct.getBand("layover_shadow_mask")).getDataBuffer();
         }
 
-        int ymin = y0;
-        int nh = h;
-        if(ny0Updated) {
-            ymin = ny0;
-            nh += y0 - ny0;
-            ny0Updated = false;
-        }
+        int ymin = Math.max(y0 - h/5, 0);
+        int nh = h + h/5;
 
         final float[][] localDEM = new float[nh+2][w+2];
-        final int[][] localMask = new int[nh+2][w+2];
         try {
             final boolean valid = getLocalDEM(x0, ymin, w, nh, localDEM);
             if(!valid)
@@ -492,14 +486,6 @@ public final class SARSimulationOp extends Operator {
                         masterBuffer.setElemDoubleAt(index[x - x0], v + masterBuffer.getElemDoubleAt(index[x - x0]));
                         savePixel[x - x0] = true;
                     } else {
-                        if (azimuthIndex >= y0+h) {
-                            if (!ny0Updated) {
-                                ny0 = y;
-                                ny0Updated = true;
-                            } else {
-                                ny0 = Math.min(ny0, y);
-                            }
-                        }
                         savePixel[x - x0] = false;
                     }
                 }
