@@ -1,5 +1,5 @@
 /*
- * $Id: ViewportOwner.java,v 1.1 2009-12-02 16:48:34 lveci Exp $
+ * $Id: ViewportAware.java,v 1.1 2009-12-09 16:41:39 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,15 +16,10 @@
  */
 package com.bc.ceres.grender;
 
-import com.bc.ceres.grender.Viewport;
-
-import java.awt.geom.Rectangle2D;
-
-
 /**
- * Something which owns a viewport, most likely a view GUI component.
+ * Something which knows about a viewport, most likely a view GUI component.
  */
-public interface ViewportOwner {
+public interface ViewportAware {
     /**
      * @return The viewport.
      */

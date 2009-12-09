@@ -40,7 +40,7 @@ import java.awt.image.RenderedImage;
  * A pane within the statistcs window which displays a histogram.
  *
  * @author Marco Peters
- * @version $Revision: 1.4 $ $Date: 2009-12-08 20:08:43 $
+ * @version $Revision: 1.5 $ $Date: 2009-12-09 16:41:39 $
  */
 class HistogramPanel extends PagePanel implements SingleRoiComputePanel.ComputeMask {
 
@@ -394,11 +394,6 @@ class HistogramPanel extends PagePanel implements SingleRoiComputePanel.ComputeM
         }
 
         return sb.toString();
-    }
-
-    @Override
-    public void handleLayerContentChanged() {
-        computePanel.updateMaskListState();
     }
 }
 
