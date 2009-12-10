@@ -351,10 +351,6 @@ public class RangeDopplerGeocodingOp extends Operator {
 
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
         lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD(); // in days
-        if (firstLineUTC >= lastLineUTC) {
-            throw new OperatorException("First line time should be smaller than the last line time");
-        }
-
         lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
 
         orbitStateVectors = AbstractMetadata.getOrbitStateVectors(absRoot);
@@ -374,9 +370,6 @@ public class RangeDopplerGeocodingOp extends Operator {
             if (!applyRadiometricNormalization) {
                 throw new OperatorException("Apply radiometric normalization must be selected.");
             }
-//            if (saveSelectedSourceBand) {
-//                throw new OperatorException("Selected source band cannot be saved.");
-//            }
         } else {
             if (applyRadiometricNormalization && mission.contains("ERS")) {
                 throw new OperatorException("For radiometric normalization of ERS product, please use 'PreCalibration" +
@@ -1367,7 +1360,8 @@ public class RangeDopplerGeocodingOp extends Operator {
             final double rangeSpacing, final double zeroDopplerTime, final double slantRange,
             final double nearEdgeSlantRange, final AbstractMetadata.SRGRCoefficientList[] srgrConvParams) {
 
-        if (zeroDopplerTime < firstLineUTC || zeroDopplerTime > lastLineUTC) {
+        if (zeroDopplerTime < Math.min(firstLineUTC, lastLineUTC) ||
+            zeroDopplerTime > Math.max(firstLineUTC, lastLineUTC)) {
             return -1.0;
         }
 

@@ -347,10 +347,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
         lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD(); // in days
-        if (firstLineUTC >= lastLineUTC) {
-            throw new OperatorException("First line time should be smaller than the last line time");
-        }
-
         lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
 
         orbitStateVectors = AbstractMetadata.getOrbitStateVectors(absRoot);
