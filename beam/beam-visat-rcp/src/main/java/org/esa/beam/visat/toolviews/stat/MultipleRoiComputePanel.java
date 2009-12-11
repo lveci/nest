@@ -16,7 +16,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.ButtonGroup;
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -88,23 +87,29 @@ class MultipleRoiComputePanel extends JPanel {
         });
         
         maskNameComboBox = new JComboBox();
-        
-        final TableLayout tableLayoutRoi = new TableLayout(1);
-        tableLayoutRoi.setTableAnchor(TableLayout.Anchor.SOUTHWEST);
-        tableLayoutRoi.setTableFill(TableLayout.Fill.HORIZONTAL);
-        tableLayoutRoi.setTableWeightX(1.0);
-        tableLayoutRoi.setCellPadding(2, 0, new Insets(4, 20, 4, 0));
-        
-        JPanel roiPanel = new JPanel();
-        roiPanel.setLayout(tableLayoutRoi);
-        iterateButton = new JRadioButton("Iterate");
-        singleButton = new JRadioButton("Single");
+        iterateButton = new JRadioButton("Iterate over all");
+        singleButton = new JRadioButton();
         ButtonGroup buttonGroup = new ButtonGroup();
         buttonGroup.add(iterateButton);
         buttonGroup.add(singleButton);
+        
+        final TableLayout tableLayoutSingle = new TableLayout(2);
+        tableLayoutSingle.setTableAnchor(TableLayout.Anchor.WEST);
+        tableLayoutSingle.setTableFill(TableLayout.Fill.HORIZONTAL);
+        tableLayoutSingle.setTableWeightX(1.0);
+        
+        JPanel singlePanel = new JPanel(tableLayoutSingle);
+        singlePanel.add(singleButton);
+        singlePanel.add(maskNameComboBox);
+        
+        final TableLayout tableLayoutRoi = new TableLayout(1);
+        tableLayoutRoi.setTableAnchor(TableLayout.Anchor.WEST);
+        tableLayoutRoi.setTableFill(TableLayout.Fill.HORIZONTAL);
+        tableLayoutRoi.setTableWeightX(1.0);
+        
+        JPanel roiPanel = new JPanel(tableLayoutRoi);
+        roiPanel.add(singlePanel);
         roiPanel.add(iterateButton);
-        roiPanel.add(singleButton);
-        roiPanel.add(maskNameComboBox);
 
         ActionListener actionListener = new ActionListener() {
             
@@ -120,7 +125,7 @@ class MultipleRoiComputePanel extends JPanel {
         tableLayout.setTableAnchor(TableLayout.Anchor.SOUTHWEST);
         tableLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
         tableLayout.setTableWeightX(1.0);
-        tableLayout.setCellPadding(2, 0, new Insets(4, 20, 4, 0));
+        tableLayout.setCellPadding(2, 0, new Insets(4, 10, 4, 0));
         setLayout(tableLayout);
 
         add(computeButton);
@@ -154,7 +159,10 @@ class MultipleRoiComputePanel extends JPanel {
     private void updateMaskListState() {
         boolean hasRaster = (raster != null);
         computeButton.setEnabled(hasRaster);
-        int roiCount = raster.getRoiMaskGroup().getNodeCount();
+        int roiCount = 0;
+        if (hasRaster) {
+            roiCount = raster.getRoiMaskGroup().getNodeCount();
+        }
         boolean hasRois = (hasRaster && roiCount > 0);
         useRoiCheckBox.setEnabled(hasRois);
         if (hasRois) {
@@ -172,11 +180,14 @@ class MultipleRoiComputePanel extends JPanel {
         boolean useRoi = useRoiCheckBox.isSelected() && useRoiCheckBox.isEnabled();
         int numRoiMasks = maskNameComboBox.getModel().getSize();
         boolean hasMultipleRois = numRoiMasks > 1;
-        boolean singleRoi = singleButton.isSelected() && singleButton.isEnabled();
+        boolean useSingleRoi = singleButton.isSelected();
         
         singleButton.setEnabled(hasMultipleRois && useRoi);
-        iterateButton.setEnabled(hasMultipleRois && useRoi);   
-        maskNameComboBox.setEnabled(hasMultipleRois && useRoi && singleRoi);
+        iterateButton.setEnabled(hasMultipleRois && useRoi);
+        if (hasMultipleRois && useRoi && !singleButton.isSelected() && !iterateButton.isSelected()) {
+            singleButton.setSelected(true);
+        }
+        maskNameComboBox.setEnabled(hasMultipleRois && useRoi && useSingleRoi);
     }
     
     private class PNL implements ProductNodeListener {

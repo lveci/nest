@@ -13,16 +13,16 @@ import java.awt.image.RenderedImage;
 import java.lang.ref.WeakReference;
 
 /**
- * A {@link MultiLevelImage} computed from vector data. The {@link VectorMultiLevelImage}
+ * A {@link MultiLevelImage} computed from vector data. The {@link VectorDataMultiLevelImage}
  * resets itsself whenever the referred vector data have changed.
  *
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-12-09 16:41:39 $
+ * @version $Revision: 1.1 $ $Date: 2009-12-11 20:46:13 $
  * @since BEAM 4.7
  */
-class VectorMultiLevelImage extends DefaultMultiLevelImage implements ProductNodeListener {
+class VectorDataMultiLevelImage extends DefaultMultiLevelImage implements ProductNodeListener {
 
-    private final WeakReference<VectorData> vectorDataReference;
+    private final WeakReference<VectorDataNode> vectorDataReference;
 
     /**
      * Creates a new mask {@link MultiLevelImage} computed from vector data. The mask image
@@ -31,14 +31,14 @@ class VectorMultiLevelImage extends DefaultMultiLevelImage implements ProductNod
      * A 'node data changed' event is fired from the associated {@link RasterDataNode} whenever
      * the mask image is reset.
      *
-     * @param vectorData     the vector data referred.
+     * @param vectorDataNode     the vector data referred.
      * @param associatedNode the {@link RasterDataNode} associated with the image being created.
      *
      * @return the {@code MultiLevelImage} created.
      */
-    static MultiLevelImage createMask(final VectorData vectorData, final RasterDataNode associatedNode) {
-        final MultiLevelSource multiLevelSource = createMaskMultiLevelSource(vectorData);
-        return new VectorMultiLevelImage(multiLevelSource, vectorData) {
+    static MultiLevelImage createMask(final VectorDataNode vectorDataNode, final RasterDataNode associatedNode) {
+        final MultiLevelSource multiLevelSource = createMaskMultiLevelSource(vectorDataNode);
+        return new VectorDataMultiLevelImage(multiLevelSource, vectorDataNode) {
             @Override
             public void reset() {
                 super.reset();
@@ -52,12 +52,12 @@ class VectorMultiLevelImage extends DefaultMultiLevelImage implements ProductNod
      * image resets itsself whenever the referred vector data have changed.
      *
      * @param multiLevelSource the multi-level image source
-     * @param vectorData       the vector data referred.
+     * @param vectorDataNode       the vector data referred.
      */
-    VectorMultiLevelImage(MultiLevelSource multiLevelSource, final VectorData vectorData) {
+    VectorDataMultiLevelImage(MultiLevelSource multiLevelSource, final VectorDataNode vectorDataNode) {
         super(multiLevelSource);
 
-        this.vectorDataReference = new WeakReference<VectorData>(vectorData);
+        this.vectorDataReference = new WeakReference<VectorDataNode>(vectorDataNode);
         this.vectorDataReference.get().getProduct().addProductNodeListener(this);
     }
 
@@ -71,7 +71,7 @@ class VectorMultiLevelImage extends DefaultMultiLevelImage implements ProductNod
     @Override
     public void nodeChanged(ProductNodeEvent event) {
         if (event.getSourceNode() == vectorDataReference.get()) {
-            if (event.getPropertyName().equals("featureCollection")) {
+            if (event.getPropertyName().equals(VectorDataNode.PROPERTY_NAME_FEATURE_COLLECTION)) {
                 reset();
             }
         }
@@ -90,17 +90,17 @@ class VectorMultiLevelImage extends DefaultMultiLevelImage implements ProductNod
     }
 
     // use for testing only
-    VectorData getVectorData() {
+    VectorDataNode getVectorData() {
         return vectorDataReference.get();
     }
 
     // use for testing only
-    static MultiLevelSource createMaskMultiLevelSource(final VectorData vectorData) {
-        final MultiLevelModel multiLevelModel = ImageManager.createMultiLevelModel(vectorData.getProduct());
+    static MultiLevelSource createMaskMultiLevelSource(final VectorDataNode vectorDataNode) {
+        final MultiLevelModel multiLevelModel = ImageManager.createMultiLevelModel(vectorDataNode.getProduct());
         return new AbstractMultiLevelSource(multiLevelModel) {
             @Override
             public RenderedImage createImage(int level) {
-                return new VectorDataMaskOpImage(vectorData, ResolutionLevel.create(getModel(), level));
+                return new VectorDataMaskOpImage(vectorDataNode, ResolutionLevel.create(getModel(), level));
             }
         };
     }

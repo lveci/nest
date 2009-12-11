@@ -13,7 +13,6 @@ import com.bc.ceres.swing.figure.FigureCollection;
 import com.bc.ceres.swing.figure.FigureFactory;
 import com.bc.ceres.swing.figure.Interactor;
 import com.bc.ceres.swing.figure.interactions.InsertEllipseFigureInteractor;
-import com.bc.ceres.swing.figure.interactions.InsertFigureInteractor;
 import com.bc.ceres.swing.figure.interactions.InsertLineFigureInteractor;
 import com.bc.ceres.swing.figure.interactions.InsertPolygonFigureInteractor;
 import com.bc.ceres.swing.figure.interactions.InsertPolylineFigureInteractor;
@@ -21,6 +20,7 @@ import com.bc.ceres.swing.figure.interactions.InsertRectangleFigureInteractor;
 import com.bc.ceres.swing.figure.interactions.PanInteractor;
 import com.bc.ceres.swing.figure.interactions.SelectionInteractor;
 import com.bc.ceres.swing.figure.interactions.ZoomInteractor;
+import com.bc.ceres.swing.figure.support.DefaultFigureCollection;
 import com.bc.ceres.swing.figure.support.DefaultFigureFactory;
 import com.bc.ceres.swing.figure.support.DefaultFigureStyle;
 import com.bc.ceres.swing.figure.support.FigureEditorPanel;
@@ -49,6 +49,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.BasicStroke;
 import java.awt.datatransfer.FlavorEvent;
 import java.awt.datatransfer.FlavorListener;
 import java.awt.event.ActionEvent;
@@ -67,11 +68,11 @@ public abstract class FigureEditorApp {
     private static final Interactor SELECTION_INTERACTOR = new SelectionInteractor();
     private static final Interactor ZOOM_INTERACTOR = new ZoomInteractor();
     private static final Interactor PAN_INTERACTOR = new PanInteractor();
-    private static final InsertFigureInteractor NEW_LINE_INTERACTOR = new InsertLineFigureInteractor();
-    private static final InsertFigureInteractor NEW_RECT_INTERACTOR = new InsertRectangleFigureInteractor();
-    private static final InsertFigureInteractor NEW_ELLI_INTERACTOR = new InsertEllipseFigureInteractor();
-    private static final InsertFigureInteractor NEW_POLYLINE_INTERACTOR = new InsertPolylineFigureInteractor();
-    private static final InsertFigureInteractor NEW_POLYGON_INTERACTOR = new InsertPolygonFigureInteractor();
+    private static final Interactor NEW_LINE_INTERACTOR = new InsertLineFigureInteractor();
+    private static final Interactor NEW_RECT_INTERACTOR = new InsertRectangleFigureInteractor();
+    private static final Interactor NEW_ELLI_INTERACTOR = new InsertEllipseFigureInteractor();
+    private static final Interactor NEW_POLYLINE_INTERACTOR = new InsertPolylineFigureInteractor();
+    private static final Interactor NEW_POLYGON_INTERACTOR = new InsertPolygonFigureInteractor();
 
     private JFrame frame;
 
@@ -101,7 +102,7 @@ public abstract class FigureEditorApp {
         DefaultSelectionManager selectionManager = new DefaultSelectionManager();
         DefaultUndoContext undoContext = new DefaultUndoContext(this);
 
-        figureEditorPanel = new FigureEditorPanel(undoContext);
+        figureEditorPanel = new FigureEditorPanel(undoContext, new DefaultFigureCollection(), getFigureFactory());
         selectionManager.setSelectionContext(figureEditorPanel.getFigureEditor().getSelectionContext());
 
         undoAction = new UndoAction(undoContext) {
@@ -124,13 +125,7 @@ public abstract class FigureEditorApp {
         selectAllAction = new SelectAllAction(selectionManager);
         deleteAction = new DeleteAction(selectionManager);
 
-        FigureFactory figureFactory = getFigureFactory();
-        // todo - set FigureFactory on FigureEditor?
-        NEW_LINE_INTERACTOR.setFigureFactory(figureFactory);
-        NEW_RECT_INTERACTOR.setFigureFactory(figureFactory);
-        NEW_ELLI_INTERACTOR.setFigureFactory(figureFactory);
-        NEW_POLYLINE_INTERACTOR.setFigureFactory(figureFactory);
-        NEW_POLYGON_INTERACTOR.setFigureFactory(figureFactory);
+
 
         AbstractButton selectButton = createInteractorButton(figureEditorPanel, "S", SELECTION_INTERACTOR);
         AbstractButton zoomButton = createInteractorButton(figureEditorPanel, "Z", ZOOM_INTERACTOR);
@@ -166,24 +161,25 @@ public abstract class FigureEditorApp {
 
         FigureCollection drawing = figureEditorPanel.getFigureEditor().getFigureCollection();
 
-        drawing.addFigure(figureFactory.createPolygonalFigure(new Rectangle(20, 30, 200, 100), DefaultFigureStyle.createPolygonStyle(Color.BLUE, Color.GREEN, 1.0)));
-        drawing.addFigure(figureFactory.createPolygonalFigure(new Rectangle(90, 10, 100, 200), DefaultFigureStyle.createPolygonStyle(Color.MAGENTA, Color.ORANGE, 1.0)));
+        FigureFactory figureFactory = figureEditorPanel.getFigureEditor().getFigureFactory();
+        drawing.addFigure(figureFactory.createPolygonFigure(new Rectangle(20, 30, 200, 100), DefaultFigureStyle.createPolygonStyle(Color.BLUE, Color.GREEN)));
+        drawing.addFigure(figureFactory.createPolygonFigure(new Rectangle(90, 10, 100, 200), DefaultFigureStyle.createPolygonStyle(Color.MAGENTA, Color.ORANGE)));
         Path2D linePath = rectPath(true, 110, 60, 70, 140);
-        drawing.addFigure(figureFactory.createLinealFigure(linePath, DefaultFigureStyle.createLineStyle(Color.GRAY, 1.0)));
+           drawing.addFigure(figureFactory.createLineFigure(linePath, DefaultFigureStyle.createLineStyle(Color.GRAY)));
 
         linePath = new Path2D.Double();
         linePath.moveTo(110, 60);
         linePath.lineTo(110 + 70, 60);
         linePath.lineTo(110 + 70, 60 + 140);
-        drawing.addFigure(figureFactory.createLinealFigure(linePath, DefaultFigureStyle.createLineStyle(Color.BLACK, 1.0)));
+        drawing.addFigure(figureFactory.createLineFigure(linePath, DefaultFigureStyle.createLineStyle(Color.BLACK)));
 
         linePath = new Path2D.Double();
         linePath.moveTo(200, 100);
         linePath.lineTo(300, 200);
-        drawing.addFigure(figureFactory.createLinealFigure(linePath, DefaultFigureStyle.createLineStyle(Color.MAGENTA, 5.0)));
+        drawing.addFigure(figureFactory.createLineFigure(linePath, DefaultFigureStyle.createLineStyle(Color.MAGENTA, new BasicStroke(5.0f))));
 
-        drawing.addFigure(figureFactory.createPolygonalFigure(new Ellipse2D.Double(50, 100, 80, 80), DefaultFigureStyle.createPolygonStyle(Color.YELLOW, Color.RED, 1.0)));
-        drawing.addFigure(figureFactory.createPolygonalFigure(new Ellipse2D.Double(220, 120, 150, 300), DefaultFigureStyle.createPolygonStyle(Color.GREEN, Color.BLUE, 1.0)));
+        drawing.addFigure(figureFactory.createPolygonFigure(new Ellipse2D.Double(50, 100, 80, 80), DefaultFigureStyle.createPolygonStyle(Color.YELLOW, Color.RED)));
+        drawing.addFigure(figureFactory.createPolygonFigure(new Ellipse2D.Double(220, 120, 150, 300), DefaultFigureStyle.createPolygonStyle(Color.GREEN, Color.BLUE)));
 
         Area area = new Area(new Rectangle(0, 0, 100, 100));
         area.subtract(new Area(new Rectangle(25, 25, 50, 50)));
@@ -196,11 +192,12 @@ public abstract class FigureEditorApp {
         path.append(rectPath(true, 0, 0, 100, 100), false);
         path.append(rectPath(false, 12, 12, 25, 25), false);
         path.append(rectPath(false, 65, 65, 25, 25), false);
-        DefaultFigureStyle shapeStyle = DefaultFigureStyle.createPolygonStyle(new Color(0, 0, 255, 127), Color.ORANGE, 1.0);
-        drawing.addFigure(figureFactory.createPolygonalFigure(path, shapeStyle));
+        DefaultFigureStyle shapeStyle = DefaultFigureStyle.createPolygonStyle(new Color(0, 0, 255, 127), Color.ORANGE);
+        drawing.addFigure(figureFactory.createPolygonFigure(path, shapeStyle));
 
         for (int i = 0; i < 10; i++) {
-            drawing.addFigure(figureFactory.createPunctualFigure(new Point2D.Double(200 + 100 * Math.random(), 200 + 100 * Math.random()), null));
+            drawing.addFigure(figureFactory.createPointFigure(new Point2D.Double(200 + 100 * Math.random(),
+                                                                                 200 + 100 * Math.random()), null));
         }
 
         /*

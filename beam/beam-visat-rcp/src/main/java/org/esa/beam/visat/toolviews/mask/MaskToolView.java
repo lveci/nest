@@ -1,5 +1,5 @@
 /*
- * $Id: MaskToolView.java,v 1.3 2009-12-07 21:39:44 lveci Exp $
+ * $Id: MaskToolView.java,v 1.4 2009-12-11 20:46:14 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -74,7 +74,9 @@ public abstract class MaskToolView extends AbstractToolView {
                 titleAddtion = " - " + sceneView.getRaster().getDisplayName();
             }
         } else {
-            if (maskForm.getProduct() != null) {
+            if (maskForm.getRaster() != null) {
+                titleAddtion = " - " + maskForm.getRaster().getDisplayName();
+            } else if (maskForm.getProduct() != null) {
                 titleAddtion = " - " + maskForm.getProduct().getDisplayName();
             } else {
                 titleAddtion = "";
@@ -167,10 +169,10 @@ public abstract class MaskToolView extends AbstractToolView {
     private class MaskPTL extends ProductTreeListenerAdapter {
         @Override
         public void productSelected(Product product, int clickCount) {
-            if (sceneView == null && maskForm.getProduct() != product) {
+//            if (sceneView == null && maskForm.getProduct() != product) {
                 maskForm.reconfigureMaskTable(product, null);
                 updateTitle();
-            }
+//            }
         }
         
         @Override

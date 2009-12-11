@@ -14,6 +14,7 @@ import java.awt.Rectangle;
  * @since Ceres 0.10
  */
 public interface FigureEditor extends InteractorAware, ViewportAware, SelectionContext {
+    FigureFactory getFigureFactory();
 
     JComponent getEditorComponent();
 
@@ -34,4 +35,8 @@ public interface FigureEditor extends InteractorAware, ViewportAware, SelectionC
     void deleteFigures(boolean performDelete, Figure... figures);
 
     void changeFigure(Figure figure, Object figureMemento, String presentationName);
+
+    FigureStyle getDefaultLineStyle();
+
+    FigureStyle getDefaultPolygonStyle();
 }

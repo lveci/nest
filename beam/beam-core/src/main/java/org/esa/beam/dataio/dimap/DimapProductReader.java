@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductReader.java,v 1.7 2009-12-02 16:52:11 lveci Exp $
+ * $Id: DimapProductReader.java,v 1.8 2009-12-11 20:46:13 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -18,6 +18,8 @@ package org.esa.beam.dataio.dimap;
 
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
+
+import org.esa.beam.dataio.propertystore.PropertyDataStore;
 import org.esa.beam.framework.dataio.AbstractProductReader;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
@@ -28,17 +30,24 @@ import org.esa.beam.framework.datamodel.PixelGeoCoding;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.TiePointGrid;
+import org.esa.beam.framework.datamodel.VectorDataNode;
 import org.esa.beam.framework.datamodel.VirtualBand;
+import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.logging.BeamLogManager;
+import org.geotools.data.DataStore;
+import org.geotools.data.FeatureSource;
+import org.geotools.data.crs.ForceCoordinateSystemFeatureResults;
+import org.geotools.feature.DefaultFeatureCollection;
+import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.SchemaException;
 import org.jdom.Document;
 import org.jdom.input.DOMBuilder;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import javax.imageio.stream.FileImageInputStream;
-import javax.imageio.stream.ImageInputStream;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,13 +57,18 @@ import java.text.MessageFormat;
 import java.util.Hashtable;
 import java.util.Map;
 
+import javax.imageio.stream.FileImageInputStream;
+import javax.imageio.stream.ImageInputStream;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 /**
  * The <code>DimapProductReader</code> class is an implementation of the <code>ProductReader</code> interface
  * exclusively for data products having the BEAM-DIMAP product format.
  *
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.7 $ $Date: 2009-12-02 16:52:11 $
+ * @version $Revision: 1.8 $ $Date: 2009-12-11 20:46:13 $
  * @see org.esa.beam.dataio.dimap.DimapProductReaderPlugIn
  */
 public class DimapProductReader extends AbstractProductReader {
@@ -67,7 +81,7 @@ public class DimapProductReader extends AbstractProductReader {
 
     private int sourceRasterWidth;
     private int sourceRasterHeight;
-    private Map bandDataFiles;
+    private Map<Band, File> bandDataFiles;
 
     /**
      * Construct a new instance of a product reader for the given BEAM-DIMAP product reader plug-in.
@@ -138,6 +152,7 @@ public class DimapProductReader extends AbstractProductReader {
         bindBandsToFiles(dom);
         if (product == null) {
             initGeoCodings(dom);
+            readVectorData();
         }
         this.product.setProductReader(this);
         this.product.setFileLocation(inputFile);
@@ -146,7 +161,7 @@ public class DimapProductReader extends AbstractProductReader {
     }
 
 
-    private void initGeoCodings(Document dom) throws IOException {
+    private void initGeoCodings(Document dom) {
         final GeoCoding[] geoCodings = DimapProductHelpers.createGeoCoding(dom, product);
         if (geoCodings != null) {
             if (geoCodings.length == 1) {
@@ -172,7 +187,7 @@ public class DimapProductReader extends AbstractProductReader {
             if (band instanceof VirtualBand || band instanceof FilterBand) {
                 continue;
             }
-            final File dataFile = (File) bandDataFiles.get(band);
+            final File dataFile = bandDataFiles.get(band);
             if (dataFile == null) {
                 product.removeBand(band);
                 BeamLogManager.getSystemLogger().warning(
@@ -286,7 +301,7 @@ public class DimapProductReader extends AbstractProductReader {
         final int sourceMaxX = sourceOffsetX + sourceWidth - 1;
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
 
-        final File dataFile = (File) bandDataFiles.get(destBand);
+        final File dataFile = bandDataFiles.get(destBand);
         final ImageInputStream inputStream = getOrCreateImageInputStream(destBand, dataFile);
 
         int destPos = 0;
@@ -360,5 +375,36 @@ public class DimapProductReader extends AbstractProductReader {
         }
         return null;
     }
-
+    
+    private void readVectorData() {
+        File dataDir = new File(inputDir, FileUtils.getFilenameWithoutExtension(inputFile) + DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION);
+        File vectorDataDir = new File(dataDir, "vector_data");
+        if (vectorDataDir.exists()) {
+            File[] vectorFiles = vectorDataDir.listFiles();
+            for (File vectorFile : vectorFiles) {
+                String propertiesSuffix = ".properties";
+                String name = vectorFile.getName();
+                if (name.endsWith(propertiesSuffix)) {
+                    name = name.substring(0, name.length() - propertiesSuffix.length());
+                }
+                FeatureSource<SimpleFeatureType, SimpleFeature> featureSource;
+                try {
+                    DataStore dataStore = new PropertyDataStore(vectorDataDir, name);
+                    featureSource = dataStore.getFeatureSource(name);
+                    FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = featureSource.getFeatures();
+                    CoordinateReferenceSystem modelCrs = ImageManager.getModelCrs(product.getGeoCoding());
+                    FeatureCollection<SimpleFeatureType, SimpleFeature> forcesFeatureCollection = new ForceCoordinateSystemFeatureResults( featureCollection, modelCrs);
+                    DefaultFeatureCollection defaultFeatureCollection = new DefaultFeatureCollection(forcesFeatureCollection);
+                    VectorDataNode vectorDataNode = new VectorDataNode(name, defaultFeatureCollection);
+                    product.getVectorDataGroup().add(vectorDataNode);
+                } catch (IOException e) {
+                    BeamLogManager.getSystemLogger().throwing("DimapProductReader", "readVectorData", e);
+                    e.printStackTrace();
+                } catch (SchemaException e) {
+                    BeamLogManager.getSystemLogger().throwing("DimapProductReader", "readVectorData", e);
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 }

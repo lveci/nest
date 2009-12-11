@@ -17,12 +17,19 @@ import com.bc.ceres.swing.figure.FigureChangeListener;
 import com.bc.ceres.swing.figure.FigureCollection;
 import com.bc.ceres.swing.figure.FigureEditor;
 import com.bc.ceres.swing.figure.FigureEditorAware;
+import com.bc.ceres.swing.figure.FigureFactory;
+import com.bc.ceres.swing.figure.FigureStyle;
 import com.bc.ceres.swing.figure.Handle;
+import com.bc.ceres.swing.figure.PointFigure;
 import com.bc.ceres.swing.figure.ShapeFigure;
 import com.bc.ceres.swing.figure.support.DefaultFigureEditor;
 import com.bc.ceres.swing.selection.SelectionContext;
 import com.bc.ceres.swing.undo.UndoContext;
 import com.bc.ceres.swing.undo.support.DefaultUndoContext;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.Polygon;
+import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.ImageInfo;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
@@ -30,6 +37,7 @@ import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.framework.datamodel.ProductNodeEvent;
 import org.esa.beam.framework.datamodel.ProductNodeListener;
 import org.esa.beam.framework.datamodel.RasterDataNode;
+import org.esa.beam.framework.datamodel.VectorDataNode;
 import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.framework.ui.BasicView;
 import org.esa.beam.framework.ui.PixelInfoFactory;
@@ -41,10 +49,17 @@ import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.glayer.GraticuleLayer;
 import org.esa.beam.glayer.MaskCollectionLayer;
 import org.esa.beam.glayer.NoDataLayerType;
+import org.esa.beam.glayer.ProductLayerContext;
 import org.esa.beam.glevel.MaskImageMultiLevelSource;
+import org.esa.beam.jai.ImageManager;
+import org.esa.beam.util.AwtGeomToJtsGeomConverter;
 import org.esa.beam.util.PropertyMap;
 import org.esa.beam.util.PropertyMapChangeListener;
 import org.esa.beam.util.SystemUtils;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.swing.AbstractButton;
 import javax.swing.JMenuItem;
@@ -73,6 +88,8 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -86,12 +103,13 @@ import java.util.Vector;
  * @version $ Revision: $ $ Date: $
  */
 public class ProductSceneView extends BasicView
-        implements FigureEditorAware, ProductNodeView, PropertyMapChangeListener, PixelInfoFactory, LayerContext,
+        implements FigureEditorAware, ProductNodeView, PropertyMapChangeListener, PixelInfoFactory, ProductLayerContext,
                    ViewportAware {
 
     public static final String BASE_IMAGE_LAYER_ID = "org.esa.beam.layers.baseImage";
     public static final String NO_DATA_LAYER_ID = "org.esa.beam.layers.noData";
     public static final String BITMASK_LAYER_ID = "org.esa.beam.layers.bitmask";
+    public static final String VECTOR_DATA_LAYER_ID = VectorDataCollectionLayer.ID;
     public static final String MASKS_LAYER_ID = MaskCollectionLayer.ID;
     public static final String ROI_LAYER_ID = "org.esa.beam.layers.roi";
     public static final String GRATICULE_LAYER_ID = "org.esa.beam.layers.graticule";
@@ -137,29 +155,40 @@ public class ProductSceneView extends BasicView
     private ProductSceneImage sceneImage;
     private LayerCanvas layerCanvas;
 
-    // todo - (re)move following variables, they don't belong to here (nf - 28.10.2008)
-    // {{
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Properties corresponding to the base image displaying the raster data returned by #getRaster()
+    //
+    // layer which displays the base image
     private final ImageLayer baseImageLayer;
-    private int pixelX = -1;
-    private int pixelY = -1;
-    private int levelPixelX = -1;
-    private int levelPixelY = -1;
-    private int level = 0;
+    // current resolution level of the base image
+    private int currentLevel = 0;
+    // current pixel X (from mouse cursor) at current resolution level of the base image
+    private int currentLevelPixelX = -1;
+    // current pixel Y (from mouse cursor) at current resolution level of the base image
+    private int currentLevelPixelY = -1;
+    // current pixel X (from mouse cursor) at highest resolution level of the base image
+    private int currentPixelX = -1;
+    // current pixel Y (from mouse cursor) at highest resolution level of the base image
+    private int currentPixelY = -1;
+    // display properties for the current pixel (from mouse cursor)
     private boolean pixelBorderShown; // can it be shown?
     private boolean pixelBorderDrawn; // has it been drawn?
     private double pixelBorderViewScale;
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     private final Vector<PixelPositionListener> pixelPositionListeners;
 
     private Layer selectedLayer;
-
     private ComponentAdapter layerCanvasComponentHandler;
     private LayerCanvasMouseHandler layerCanvasMouseHandler;
     private RasterChangeHandler rasterChangeHandler;
     private boolean scrollBarsShown;
-    private AdjustableViewScrollPane scrollPane;
 
+    private AdjustableViewScrollPane scrollPane;
     private UndoContext undoContext;
     private DefaultFigureEditor figureEditor;
+    private MyFigureFactory figureFactory;
 
     public ProductSceneView(ProductSceneImage sceneImage) {
         Assert.notNull(sceneImage, "sceneImage");
@@ -195,7 +224,42 @@ public class ProductSceneView extends BasicView
             }
         });
 
-        figureEditor = new DefaultFigureEditor(layerCanvas, viewport, undoContext, NullFigureCollection.INSTANCE);
+        figureFactory = new MyFigureFactory();
+        figureEditor = new DefaultFigureEditor(layerCanvas, viewport, undoContext, NullFigureCollection.INSTANCE,
+                                               figureFactory) {
+            @Override
+            public void insertFigures(boolean performInsert, Figure... figures) {
+                super.insertFigures(performInsert, figures);
+                System.out.println("PSV: insertFigures " + performInsert + ", " + figures.length);
+                figureFactory.getVectorData().getFeatureCollection().addAll(toSimpleFeatureList(figures));
+            }
+
+            @Override
+            public void deleteFigures(boolean performDelete, Figure... figures) {
+                super.deleteFigures(performDelete, figures);
+                System.out.println("PSV: deleteFigures " + performDelete + ", " + figures.length);
+                figureFactory.getVectorData().getFeatureCollection().removeAll(toSimpleFeatureList(figures));
+            }
+
+            @Override
+            public void changeFigure(Figure figure, Object figureMemento, String presentationName) {
+                super.changeFigure(figure, figureMemento, presentationName);
+                System.out.println("PSV: changeFigure " + figure + ", " + presentationName);
+                figureFactory.getVectorData().fireFeatureCollectionChanged();
+            }
+
+            private List<SimpleFeature> toSimpleFeatureList(Figure[] figures) {
+                SimpleFeature[] features = new SimpleFeature[figures.length];
+                for (int i = 0, figuresLength = figures.length; i < figuresLength; i++) {
+                    Figure figure = figures[i];
+                    if (figure instanceof SimpleFeatureFigure) {
+                        SimpleFeatureFigure simpleFeatureFigure = (SimpleFeatureFigure) figure;
+                        features[i] = simpleFeatureFigure.getSimpleFeature();
+                    }
+                }
+                return Arrays.asList(features);
+            }
+        };
 
         this.scrollBarsShown = sceneImage.getConfiguration().getPropertyBool(PROPERTY_KEY_IMAGE_SCROLL_BARS_SHOWN,
                                                                              false);
@@ -222,6 +286,18 @@ public class ProductSceneView extends BasicView
     @Override
     public Viewport getViewport() {
         return layerCanvas.getViewport();
+    }
+
+    public int getCurrentPixelX() {
+        return currentPixelX;
+    }
+
+    public int getCurrentPixelY() {
+        return currentPixelY;
+    }
+
+    public boolean isCurrentPixelPosValid() {
+        return isPixelPosValid(currentLevelPixelX, currentLevelPixelY, currentLevel);
     }
 
     private AdjustableViewScrollPane createScrollPane() {
@@ -412,6 +488,7 @@ public class ProductSceneView extends BasicView
     /**
      * @return the associated product.
      */
+    @Override
     public Product getProduct() {
         return getRaster().getProduct();
     }
@@ -550,13 +627,13 @@ public class ProductSceneView extends BasicView
     }
 
     public boolean isShapeOverlayEnabled() {
-        final VectorDataLayer vectorDataLayer = getFigureLayer(false);
-        return vectorDataLayer != null && vectorDataLayer.isVisible();
+        final Layer layer = getVectorDataCollectionLayer(false);
+        return layer != null && layer.isVisible();
     }
 
     public void setShapeOverlayEnabled(boolean enabled) {
         if (isShapeOverlayEnabled() != enabled) {
-            getFigureLayer(true).setVisible(enabled);
+            getVectorDataCollectionLayer(true).setVisible(enabled);
         }
     }
 
@@ -627,9 +704,9 @@ public class ProductSceneView extends BasicView
         if (gcpLayer != null) {
             ProductSceneImage.setGcpLayerStyle(configuration, gcpLayer);
         }
-        final VectorDataLayer vectorDataLayer = getFigureLayer(false);
-        if (vectorDataLayer != null) {
-            ProductSceneImage.setFigureLayerStyle(configuration, vectorDataLayer);
+        final Layer collectionLayer = getVectorDataCollectionLayer(false);
+        if (collectionLayer != null) {
+            ProductSceneImage.setFigureLayerStyle(configuration, collectionLayer);
         }
         final GraticuleLayer graticuleLayer = getGraticuleLayer(false);
         if (graticuleLayer != null) {
@@ -683,9 +760,10 @@ public class ProductSceneView extends BasicView
         if (selectedLayer instanceof VectorDataLayer) {
             VectorDataLayer vectorDataLayer = (VectorDataLayer) selectedLayer;
             figureEditor.setFigureCollection(vectorDataLayer.getFigureCollection());
+            figureFactory.setVectorData(vectorDataLayer.getVectorData());
+
         }
     }
-
 
     public void disposeLayers() {
         getSceneImage().getRootLayer().dispose();
@@ -765,7 +843,7 @@ public class ProductSceneView extends BasicView
 
 
     protected void copyPixelInfoStringToClipboard() {
-        SystemUtils.copyToClipboard(createPixelInfoString(pixelX, pixelY));
+        SystemUtils.copyToClipboard(createPixelInfoString(currentPixelX, currentPixelY));
     }
 
     protected void disposeImageDisplayComponent() {
@@ -882,13 +960,13 @@ public class ProductSceneView extends BasicView
         return getSceneImage().getNoDataLayer(create);
     }
 
-    private VectorDataLayer getFigureLayer(boolean create) {
-        return getSceneImage().getFigureLayer(create);
-    }
-
     @Deprecated
     private Layer getBitmaskLayer(boolean create) {
         return getSceneImage().getBitmaskLayer(create);
+    }
+
+    public Layer getVectorDataCollectionLayer(boolean create) {
+        return getSceneImage().getVectorDataCollectionLayer(create);
     }
 
     private Layer getMaskCollectionLayer(boolean create) {
@@ -932,10 +1010,6 @@ public class ProductSceneView extends BasicView
         layerCanvas.removeMouseMotionListener(layerCanvasMouseHandler);
     }
 
-    public boolean isPixelPosValid() {
-        return isPixelPosValid(levelPixelX, levelPixelY, level);
-    }
-
     private boolean isPixelPosValid(int currentPixelX, int currentPixelY, int currentLevel) {
         return currentPixelX >= 0 && currentPixelX < baseImageLayer.getImage(
                 currentLevel).getWidth() && currentPixelY >= 0
@@ -965,22 +1039,22 @@ public class ProductSceneView extends BasicView
 
         AffineTransform m2iTransform = baseImageLayer.getModelToImageTransform();
         Point2D imageP = m2iTransform.transform(modelP, null);
-        pixelX = (int) Math.floor(imageP.getX());
-        pixelY = (int) Math.floor(imageP.getY());
+        currentPixelX = (int) Math.floor(imageP.getX());
+        currentPixelY = (int) Math.floor(imageP.getY());
 
         AffineTransform m2iLevelTransform = baseImageLayer.getModelToImageTransform(currentLevel);
         Point2D imageLevelP = m2iLevelTransform.transform(modelP, null);
         int currentPixelX = (int) Math.floor(imageLevelP.getX());
         int currentPixelY = (int) Math.floor(imageLevelP.getY());
-        if (currentPixelX != levelPixelX || currentPixelY != levelPixelY || currentLevel != level) {
+        if (currentPixelX != currentLevelPixelX || currentPixelY != currentLevelPixelY || currentLevel != this.currentLevel) {
             if (isPixelBorderDisplayEnabled() && (showBorder || pixelBorderDrawn)) {
                 drawPixelBorder(currentPixelX, currentPixelY, currentLevel, showBorder);
             }
-            levelPixelX = currentPixelX;
-            levelPixelY = currentPixelY;
-            level = currentLevel;
+            currentLevelPixelX = currentPixelX;
+            currentLevelPixelY = currentPixelY;
+            this.currentLevel = currentLevel;
             if (e.getID() != MouseEvent.MOUSE_EXITED) {
-                firePixelPosChanged(e, levelPixelX, levelPixelY, level);
+                firePixelPosChanged(e, currentLevelPixelX, currentLevelPixelY, this.currentLevel);
             } else {
                 firePixelPosNotAvailable();
             }
@@ -996,7 +1070,7 @@ public class ProductSceneView extends BasicView
         final Graphics g = getGraphics();
         g.setXORMode(Color.white);
         if (pixelBorderDrawn) {
-            drawPixelBorder(g, levelPixelX, levelPixelY, level);
+            drawPixelBorder(g, currentLevelPixelX, currentLevelPixelY, this.currentLevel);
             pixelBorderDrawn = false;
         }
         if (showBorder) {
@@ -1258,4 +1332,59 @@ public class ProductSceneView extends BasicView
         }
     }
 
+    public static class MyFigureFactory implements FigureFactory {
+
+        private VectorDataNode vectorDataNode;
+        private AwtGeomToJtsGeomConverter toJtsGeom;
+        private long currentFeatureId;
+
+        MyFigureFactory() {
+            this.toJtsGeom = new AwtGeomToJtsGeomConverter();
+            this.currentFeatureId = System.nanoTime();
+        }
+
+        public VectorDataNode getVectorData() {
+            return vectorDataNode;
+        }
+
+        public void setVectorData(VectorDataNode vectorDataNode) {
+            this.vectorDataNode = vectorDataNode;
+        }
+
+        @Override
+        public PointFigure createPointFigure(Point2D point, FigureStyle style) {
+            return new SimpleFeaturePointFigure(createSimpleFeature(toJtsGeom.createPoint(point)), style);
+        }
+
+        @Override
+        public ShapeFigure createLineFigure(Shape shape, FigureStyle style) {
+            MultiLineString multiLineString = toJtsGeom.createMultiLineString(shape);
+            if (multiLineString.getNumGeometries() == 1) {
+                return createShapeFigure(multiLineString.getGeometryN(0), style);
+            } else {
+                return createShapeFigure(multiLineString, style);
+            }
+        }
+
+        @Override
+        public ShapeFigure createPolygonFigure(Shape shape, FigureStyle style) {
+            Polygon polygon = toJtsGeom.createPolygon(shape);
+            return createShapeFigure(polygon, style);
+        }
+
+        private ShapeFigure createShapeFigure(Geometry geometry, FigureStyle style) {
+            return new SimpleFeatureShapeFigure(createSimpleFeature(geometry), style);
+        }
+
+        private SimpleFeature createSimpleFeature(Geometry geometry) {
+            SimpleFeatureType ft = vectorDataNode.getFeatureType();
+            SimpleFeatureBuilder sfb = new SimpleFeatureBuilder(ft);
+            sfb.set(ft.getGeometryDescriptor().getLocalName(), geometry);
+            return sfb.buildFeature(createFeatureId(ft));
+        }
+
+        private String createFeatureId(SimpleFeatureType ft) {
+            return ft.getName() + "_" + Long.toHexString(currentFeatureId++);
+        }
+    }
 }

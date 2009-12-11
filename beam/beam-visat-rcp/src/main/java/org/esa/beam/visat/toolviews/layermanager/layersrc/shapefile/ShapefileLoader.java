@@ -1,17 +1,18 @@
 package org.esa.beam.visat.toolviews.layermanager.layersrc.shapefile;
 
-import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertySet;
+import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
-import com.bc.ceres.core.ProgressMonitor;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import org.esa.beam.framework.ui.product.ProductSceneView;
+import org.esa.beam.util.FeatureCollectionClipper;
 import org.esa.beam.visat.toolviews.layermanager.layersrc.LayerSourcePageContext;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureCollection;
@@ -63,7 +64,7 @@ class ShapefileLoader extends ProgressMonitorSwingWorker<Layer, Object> {
             pm.beginTask("Reading shapes", ProgressMonitor.UNKNOWN);
             final ProductSceneView sceneView = context.getAppContext().getSelectedProductSceneView();
             CoordinateReferenceSystem targetCrs = (CoordinateReferenceSystem) context.getLayerContext().getCoordinateReferenceSystem();
-            final Geometry clipGeometry = ShapefileUtils.createGeoBoundaryPolygon(sceneView.getRaster());
+            final Geometry clipGeometry = FeatureCollectionClipper.createGeoBoundaryPolygon(sceneView.getRaster());
 
             File file = new File((String) context.getPropertyValue(ShapefileLayerSource.PROPERTY_NAME_FILE_PATH));
             Object featureCollectionValue = context.getPropertyValue(ShapefileLayerSource.PROPERTY_NAME_FEATURE_COLLECTION);
@@ -78,7 +79,7 @@ class ShapefileLoader extends ProgressMonitorSwingWorker<Layer, Object> {
             Style selectedStyle = getSelectedStyle(styles);
 
             final LayerType type = LayerTypeRegistry.getLayerType(FeatureLayerType.class.getName());
-            final PropertyContainer configuration = type.createLayerConfig(sceneView);
+            final PropertySet configuration = type.createLayerConfig(sceneView);
             configuration.setValue(FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION_URL, file.toURI().toURL());
             configuration.setValue(FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION_CRS, targetCrs);
             configuration.setValue(FeatureLayerType.PROPERTY_NAME_FEATURE_COLLECTION_CLIP_GEOMETRY, clipGeometry);

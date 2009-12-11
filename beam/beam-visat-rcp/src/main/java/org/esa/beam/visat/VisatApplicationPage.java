@@ -1,11 +1,13 @@
 package org.esa.beam.visat;
 
+import com.bc.ceres.swing.selection.SelectionContext;
 import com.bc.ceres.swing.selection.SelectionManager;
 import com.bc.swing.desktop.TabbedDesktopPane;
 import com.jidesoft.docking.DockableFrame;
 import com.jidesoft.docking.DockingManager;
 import com.jidesoft.docking.event.DockableFrameAdapter;
 import com.jidesoft.docking.event.DockableFrameEvent;
+import org.esa.beam.framework.ui.BasicView;
 import org.esa.beam.framework.ui.application.DocView;
 import org.esa.beam.framework.ui.application.PageComponent;
 import org.esa.beam.framework.ui.application.PageComponentPane;
@@ -18,6 +20,7 @@ import org.esa.beam.framework.ui.command.CommandManager;
 
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
+import java.awt.Container;
 import java.awt.Window;
 import java.beans.PropertyVetoException;
 
@@ -125,12 +128,31 @@ public class VisatApplicationPage extends AbstractApplicationPage {
 
     @Override
     protected void setActiveComponent() {
+        String activeFrameKey = dockingManager.getActiveFrameKey();
+        System.out.println("setActiveComponent: " + activeFrameKey);
+
         ToolView toolView = null;
-        DockableFrame activeFrame = dockingManager.getActiveFrame();
-        if (activeFrame != null) {
-            toolView = getToolView(activeFrame);
+        if (activeFrameKey != null) {
+            DockableFrame activeFrame = dockingManager.getFrame(activeFrameKey);
+            if (activeFrame != null) {
+                toolView = getToolView(activeFrame);
+            }
         }
-        setActiveComponent(toolView);
+        if (toolView != null) {
+            setActiveComponent(toolView);
+        } else {
+            SelectionContext context = null;
+            // No tool view currently selected, must look for active "DocView".
+            JInternalFrame selectedFrame = documentPane.getSelectedFrame();
+            if (selectedFrame != null) {
+                Container pageComponent = selectedFrame.getContentPane();
+                if (pageComponent instanceof BasicView) {
+                    BasicView view = (BasicView) pageComponent;
+                    context = view.getSelectionContext();
+                }
+            }
+            getSelectionManager().setSelectionContext(context);
+        }
     }
 
     private ToolView getToolView(DockableFrame activeFrame) {
@@ -148,9 +170,9 @@ public class VisatApplicationPage extends AbstractApplicationPage {
         State initState = toolViewDescriptor.getInitState();
         DockableFrame frame = dockingManager.getFrame(toolView.getId());
         return frame != null
-               && frame.getContext().getDockPreviousState() == null
-               && frame.getContext().getFloatPreviousState() == null
-               && initState == State.HIDDEN;
+                && frame.getContext().getDockPreviousState() == null
+                && frame.getContext().getFloatPreviousState() == null
+                && initState == State.HIDDEN;
     }
 
 

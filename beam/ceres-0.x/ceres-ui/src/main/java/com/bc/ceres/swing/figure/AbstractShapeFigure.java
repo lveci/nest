@@ -5,6 +5,7 @@ import com.bc.ceres.grender.Viewport;
 import com.bc.ceres.swing.figure.support.DefaultFigureStyle;
 import com.bc.ceres.swing.figure.support.VertexHandle;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
@@ -32,8 +33,8 @@ public abstract class AbstractShapeFigure extends AbstractFigure implements Shap
     protected AbstractShapeFigure(boolean polygonal, FigureStyle normalStyle) {
         this.rank = polygonal ? Rank.POLYGONAL : Rank.LINEAL;
         this.normalStyle = normalStyle;
-        this.selectedStyle = DefaultFigureStyle.createPolygonStyle(null, new Color(255, 255, 0, 180),
-                                                                 5.0);
+        this.selectedStyle = DefaultFigureStyle.createLineStyle(new Color(255, 255, 0, 180),
+                                                                new BasicStroke(4.0f));
         setSelectable(true);
     }
 
@@ -90,14 +91,14 @@ public abstract class AbstractShapeFigure extends AbstractFigure implements Shap
             g.transform(vp.getModelToViewTransform());
 
             if (rank == Rank.POLYGONAL) {
-                Paint fillPaint = getNormalStyle().getFillColor();
+                Paint fillPaint = getNormalStyle().getFillPaint();
                 if (fillPaint != null) {
                     g.setPaint(fillPaint);
                     g.fill(shape);
                 }
             }
 
-            Paint strokePaint = getNormalStyle().getStrokeColor();
+            Paint strokePaint = getNormalStyle().getStrokePaint();
             if (strokePaint != null) {
                 Stroke normalStroke = getNormalStyle().getStroke(1.0 / vp.getZoomFactor());
                 g.setPaint(strokePaint);
@@ -106,7 +107,7 @@ public abstract class AbstractShapeFigure extends AbstractFigure implements Shap
             }
 
             if (isSelected()) {
-                Paint selectedStrokePaint = getSelectedStyle().getStrokeColor();
+                Paint selectedStrokePaint = getSelectedStyle().getStrokePaint();
                 if (selectedStrokePaint != null) {
                     Stroke selectedStroke = getSelectedStyle().getStroke(1.0 / vp.getZoomFactor());
                     g.setStroke(selectedStroke);
@@ -258,18 +259,25 @@ public abstract class AbstractShapeFigure extends AbstractFigure implements Shap
     public void setSegment(int index, double[] newSeg) {
         final Path2D.Double path = new Path2D.Double();
         final PathIterator pathIterator = getShape().getPathIterator(null);
+        double[] changedSeg = new double[6];
+        Arrays.fill(changedSeg, Double.NaN);
         final double[] seg0 = new double[6];
         int i = 0;
         while (!pathIterator.isDone()) {
             final int type = pathIterator.currentSegment(seg0);
             double[] seg = seg0;
             if (i == index) {
+                changedSeg = seg.clone();
                 seg = newSeg;
             }
             if (type == PathIterator.SEG_MOVETO) {
                 path.moveTo(seg[0], seg[1]);
             } else if (type == PathIterator.SEG_LINETO) {
-                path.lineTo(seg[0], seg[1]);
+                if(seg[0] == changedSeg[0] && seg[1] == changedSeg[1]){
+                    path.lineTo(newSeg[0], newSeg[1]);
+                }else {
+                    path.lineTo(seg[0], seg[1]);
+                }
             } else if (type == PathIterator.SEG_QUADTO) {
                 path.quadTo(seg[0], seg[1], seg[2], seg[3]);
             } else if (type == PathIterator.SEG_CUBICTO) {
@@ -323,12 +331,18 @@ public abstract class AbstractShapeFigure extends AbstractFigure implements Shap
         FigureStyle selectedHandleStyle = getSelectedHandleStyle();
         ArrayList<Handle> handleList = new ArrayList<Handle>();
         PathIterator pathIterator = getShape().getPathIterator(null);
+        double[] firstSeg = new double[6];
+        Arrays.fill(firstSeg, Double.NaN);
         int segmentIndex = 0;
         while (!pathIterator.isDone()) {
             final double[] seg = new double[6];
             final int type = pathIterator.currentSegment(seg);
-            if (type != PathIterator.SEG_CLOSE) {
+            final boolean isEqualToFirst = seg[0] == firstSeg[0] && seg[1] == firstSeg[1];
+            if (type != PathIterator.SEG_CLOSE && !isEqualToFirst) {
                 handleList.add(new VertexHandle(this, segmentIndex, handleStyle, selectedHandleStyle));
+            }
+            if (segmentIndex == 0) {
+                firstSeg = seg;
             }
             pathIterator.next();
             segmentIndex++;

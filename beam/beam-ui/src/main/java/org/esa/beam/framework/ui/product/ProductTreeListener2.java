@@ -1,5 +1,5 @@
 /*
- * $Id: ProductTreeListener2.java,v 1.1 2009-10-15 20:30:19 lveci Exp $
+ * $Id: ProductTreeListener2.java,v 1.2 2009-12-11 20:46:14 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,7 +17,7 @@
 package org.esa.beam.framework.ui.product;
 
 import org.esa.beam.framework.datamodel.ProductNode;
-import org.esa.beam.framework.datamodel.VectorData;
+import org.esa.beam.framework.datamodel.VectorDataNode;
 
 // todo - this is a stupid interface, use SelectionService/SelectionProvide instead (nf, 10.2009)
 
@@ -27,7 +27,7 @@ import org.esa.beam.framework.datamodel.VectorData;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.1 $ $Date: 2009-10-15 20:30:19 $
+ * @version $Revision: 1.2 $ $Date: 2009-12-11 20:46:14 $
  * @see ProductTree
  * @since BEAM 4.7
  */
@@ -45,10 +45,10 @@ public interface ProductTreeListener2 extends ProductTreeListener {
     /**
      * Called when a product's node has been selected in the tree.
      *
-     * @param vectorData The selected vector data.
+     * @param vectorDataNode The selected vector data.
      * @param clickCount The number of mouse clicks.
      *
      * @since BEAM 4.7
      */
-    void vectorDataSelected(VectorData vectorData, int clickCount);
+    void vectorDataSelected(VectorDataNode vectorDataNode, int clickCount);
 }

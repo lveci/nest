@@ -1,5 +1,5 @@
 /*
- * $Id: ToolCommand.java,v 1.2 2009-12-02 16:52:12 lveci Exp $
+ * $Id: ToolCommand.java,v 1.3 2009-12-11 20:46:14 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,40 +32,40 @@ import java.awt.event.ActionEvent;
  * A command which activates a tool.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $  $Date: 2009-12-02 16:52:12 $
+ * @version $Revision: 1.3 $  $Date: 2009-12-11 20:46:14 $
  */
 public class ToolCommand extends SelectableCommand {
 
-    private Interactor tool;
+    private Interactor interactor;
     private final InteractorListener toolListener;
 
     public ToolCommand(String commandID) {
         super(commandID);
-        tool = NullInteractor.INSTANCE;
+        interactor = NullInteractor.INSTANCE;
         toolListener = new InternalInteractorListener();
     }
 
-    public ToolCommand(String commandID, CommandStateListener listener, Interactor tool) {
+    public ToolCommand(String commandID, CommandStateListener listener, Interactor interactor) {
         this(commandID);
-        setTool(tool);
+        setInteractor(interactor);
         addCommandStateListener(listener);
     }
 
-    public Interactor getTool() {
-        return tool;
+    public Interactor getInteractor() {
+        return interactor;
     }
 
-    public final void setTool(Interactor tool) {
-        Guardian.assertNotNull("tool", tool);
-        Interactor oldTool = this.tool;
-        if (tool == oldTool) {
+    public final void setInteractor(Interactor interactor) {
+        Guardian.assertNotNull("interactor", interactor);
+        Interactor oldTool = this.interactor;
+        if (interactor == oldTool) {
             return;
         }
         if (oldTool != null) {
             oldTool.removeListener(toolListener);
         }
-        this.tool = tool;
-        this.tool.addListener(toolListener);
+        this.interactor = interactor;
+        this.interactor.addListener(toolListener);
     }
 
     /**

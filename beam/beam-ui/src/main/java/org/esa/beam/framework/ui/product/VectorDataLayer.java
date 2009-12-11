@@ -1,5 +1,5 @@
 /*
- * $Id: VectorDataLayer.java,v 1.1 2009-12-08 20:08:43 lveci Exp $
+ * $Id: VectorDataLayer.java,v 1.2 2009-12-11 20:46:14 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,15 +16,17 @@
  */
 package org.esa.beam.framework.ui.product;
 
-import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.glayer.Layer;
+import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.swing.figure.Figure;
 import com.bc.ceres.swing.figure.FigureCollection;
-import com.bc.ceres.swing.figure.support.DefaultFigureSelection;
+import com.bc.ceres.swing.figure.support.DefaultFigureCollection;
+import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.framework.datamodel.ProductNodeEvent;
 import org.esa.beam.framework.datamodel.ProductNodeListenerAdapter;
-import org.esa.beam.framework.datamodel.VectorData;
+import org.esa.beam.framework.datamodel.VectorDataNode;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.opengis.feature.simple.SimpleFeature;
@@ -37,26 +39,39 @@ import java.util.Map;
 
 public class VectorDataLayer extends Layer {
 
+    private static final VectorDataLayerType TYPE = new VectorDataLayerType();
     private FigureCollection figureCollection;
-    private final VectorData vectorData;
+    private VectorDataNode vectorDataNode;
+    private VectorDataChangeHandler vectorDataChangeHandler;
 
-    public VectorDataLayer(VectorDataLayerType type, VectorData vectorData, PropertyContainer configuration) {
-        super(type, configuration);
-        this.vectorData = vectorData;
-        setName("Figures");
-        figureCollection = new DefaultFigureSelection();
-        vectorData.getProduct().addProductNodeListener(new ProductNodeListenerAdapter() {
-            @Override
-            public void nodeDataChanged(ProductNodeEvent event) {
-                if (event.getSourceNode() == VectorDataLayer.this.vectorData) {
-                    updateFigureCollection();
-                }
-            }
-        });
+    public VectorDataLayer(LayerContext ctx, VectorDataNode vectorDataNode) {
+        this(TYPE, vectorDataNode, TYPE.createLayerConfig(ctx));
+        getConfiguration().setValue(VectorDataLayerType.PROPERTY_NAME_VECTOR_DATA, vectorDataNode.getName());
+    }
+
+    VectorDataLayer(VectorDataLayerType vectorDataLayerType, VectorDataNode vectorDataNode, PropertySet configuration) {
+        super(vectorDataLayerType, configuration);
+        this.vectorDataNode = vectorDataNode;
+        setName(vectorDataNode.getName());
+        figureCollection = new DefaultFigureCollection();
+        vectorDataChangeHandler = new VectorDataChangeHandler();
+        vectorDataNode.getProduct().addProductNodeListener(vectorDataChangeHandler);
+        updateFigureCollection();
+    }
+
+    public VectorDataNode getVectorData() {
+        return vectorDataNode;
+    }
+
+    @Override
+    protected void disposeLayer() {
+        vectorDataNode.getProduct().removeProductNodeListener(vectorDataChangeHandler);
+        vectorDataNode = null;
+        super.disposeLayer();
     }
 
     private void updateFigureCollection() {
-        FeatureCollection<SimpleFeatureType,SimpleFeature> featureCollection = vectorData.getFeatureCollection();
+        FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = vectorDataNode.getFeatureCollection();
 
         Figure[] figures = figureCollection.getFigures();
         Map<SimpleFeature, SimpleFeatureFigure> figureMap = new HashMap<SimpleFeature, SimpleFeatureFigure>();
@@ -73,14 +88,19 @@ public class VectorDataLayer extends Layer {
             if (figureMap.containsKey(simpleFeature)) {
                 figureMap.remove(simpleFeature);
             } else {
-                figureCollection.addFigure(new SimpleFeatureFigureFactory(featureCollection).cre(simpleFeature));
+                figureCollection.addFigure(
+                        getFigureFactory().createFigure(simpleFeature));
             }
         }
 
         Collection<SimpleFeatureFigure> remainingFigures = figureMap.values();
         figureCollection.removeFigures(remainingFigures.toArray(new Figure[remainingFigures.size()]));
-        
+
         fireLayerDataChanged(null);
+    }
+
+    private SimpleFeatureFigureFactory getFigureFactory() {
+        return new SimpleFeatureFigureFactory(vectorDataNode.getFeatureCollection());
     }
 
     public FigureCollection getFigureCollection() {
@@ -97,4 +117,18 @@ public class VectorDataLayer extends Layer {
         figureCollection.draw(rendering);
     }
 
+    private class VectorDataChangeHandler extends ProductNodeListenerAdapter {
+
+        @Override
+        public void nodeChanged(ProductNodeEvent event) {
+            if (event.getSourceNode() == VectorDataLayer.this.vectorDataNode) {
+                if (ProductNode.PROPERTY_NAME_NAME.equals(event.getPropertyName())) {
+                    setName(VectorDataLayer.this.vectorDataNode.getName());
+                }
+                if (VectorDataNode.PROPERTY_NAME_FEATURE_COLLECTION.equals(event.getPropertyName())) {
+                    updateFigureCollection();
+                }
+            }
+        }
+    }
 }

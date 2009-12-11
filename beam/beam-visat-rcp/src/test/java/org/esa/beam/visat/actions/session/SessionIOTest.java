@@ -11,119 +11,16 @@ import com.bc.ceres.glayer.LayerType;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import junit.framework.TestCase;
 import org.esa.beam.framework.ui.product.ProductSceneView;
-import org.geotools.feature.NameImpl;
-import org.geotools.feature.simple.SimpleFeatureImpl;
-import org.geotools.feature.simple.SimpleFeatureTypeImpl;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.geotools.feature.type.AttributeDescriptorImpl;
-import org.geotools.feature.type.AttributeTypeImpl;
-import org.geotools.feature.type.GeometryDescriptorImpl;
-import org.geotools.feature.type.GeometryTypeImpl;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.geotools.util.SimpleInternationalString;
-import org.geotools.xml.DocumentWriter;
-import org.geotools.xml.schema.Element;
-import org.geotools.xml.gml.GMLSchema;
-import org.geotools.filter.identity.FeatureIdImpl;
-import org.opengis.feature.type.AttributeDescriptor;
-import org.opengis.feature.type.AttributeType;
-import org.opengis.feature.type.GeometryDescriptor;
-import org.opengis.feature.type.GeometryType;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.feature.simple.SimpleFeature;
 
-import javax.naming.OperationNotSupportedException;
 import java.awt.Rectangle;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.HashMap;
 
 public class SessionIOTest extends TestCase {
-/* todo - May be useful for final implementation, otherwise remove
-    public void testGML() {
-        GeometryType geometryAT = new GeometryTypeImpl(new NameImpl("point"), Point.class, DefaultGeographicCRS.WGS84, false, false, null, null, new SimpleInternationalString("A pin geometry type!"));
-        AttributeType labelAT = new AttributeTypeImpl(new NameImpl("name"), String.class, false, false, null, null, new SimpleInternationalString("A pin feature!"));
-        GeometryDescriptor geometryAD = new GeometryDescriptorImpl(geometryAT,
-                                                                   new NameImpl("point"), 1, 1, false, null);
-        AttributeDescriptor labelAD = new AttributeDescriptorImpl(labelAT,
-                                                                  new NameImpl("name"), 1, 1, false, null);
-        List<AttributeDescriptor> schema = Arrays.asList(geometryAD, labelAD);
-        SimpleFeatureType pinT = new SimpleFeatureTypeImpl(new NameImpl("pinT"), schema, geometryAD, false, null, null, new SimpleInternationalString("Fuck you!"));
-
-        SimpleFeatureBuilder builder = new SimpleFeatureBuilder(pinT);
-        builder.set("point", new GeometryFactory().createPoint(new Coordinate(13.0, 53.2)));
-        builder.set("name", "Pin 3");
-        SimpleFeature feature = builder.buildFeature("a2");
-
-        StringWriter writer = new StringWriter();
-        try {
-            DocumentWriter.writeFragment(feature, GMLSchema.getInstance(), writer, null);
-        } catch (OperationNotSupportedException e) {
-            e.printStackTrace();
-            fail();
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail();
-        }
-        assertEquals("", writer.toString());
-    }
-*/    
-
-
-/* todo - May be useful for final implementation, otherwise remove
-    static {
-        ExtensionManager.getInstance().register(ImageLayer.Type.class, new ExtensionFactory() {
-            @Override
-            public Object getExtension(Object object, Class<?> extensionType) {
-                return new DomConverter() {
-                    @Override
-                    public Class<?> getValueType() {
-                        return Map.class;
-                    }
-
-                    @Override
-                    public Object convertDomToValue(DomElement parentElement, Object value) throws ConversionException,
-                                                                                                   ValidationException {
-                                                Map<String, Object> configuration = (Map<String, Object>) value;
-                        if (configuration == null) {
-                            configuration = new HashMap<String, Object>();
-                        }
-
-                        parentElement.getChild("multiLevelSourceType")
-                        ExtensionManager.getInstance().get
-
-                                                final DomConverter converter = mls.getExtension(DomConverter.class);
-                        converter.convertValueToDom(mls, parentElement);
-                        return null;  //To change body of implemented methods use File | Settings | File Templates.
-                    }
-
-                    @Override
-                    public void convertValueToDom(Object value, DomElement parentElement) {
-                        Map<String, Object> configuration = (Map<String, Object>) value;
-                        MultiLevelSource mls = (MultiLevelSource) configuration.get("multiLevelSource");
-                        final DomConverter converter = mls.getExtension(DomConverter.class);
-                        converter.convertValueToDom(mls, parentElement);
-                    }
-                };
-            }
-
-            @Override
-            public Class<?>[] getExtensionTypes() {
-                return new Class<?>[] {DomConverter.class};
-            }
-        });
-    }
-*/
 
     private interface LayerIO {
 
@@ -221,7 +118,7 @@ public class SessionIOTest extends TestCase {
                 e.printStackTrace();
             }
 
-            final LayerMemento memento = new LayerMemento(layer.getLayerType().getName(), configuration);
+            final LayerMemento memento = new LayerMemento(layer.getLayerType().getClass().getSimpleName(), configuration);
             xs.toXML(memento, writer);
         }
 

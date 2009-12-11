@@ -9,10 +9,8 @@ import com.bc.ceres.swing.TableLayout;
 import com.bc.ceres.swing.selection.AbstractSelectionChangeListener;
 import com.bc.ceres.swing.selection.Selection;
 import com.bc.ceres.swing.selection.SelectionChangeEvent;
-
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductFilter;
-import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.framework.datamodel.ProductNodeEvent;
 import org.esa.beam.framework.datamodel.ProductNodeListener;
 import org.esa.beam.framework.datamodel.RasterDataNode;
@@ -22,7 +20,7 @@ import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.internal.RasterDataNodeValues;
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.ValueEditorsPane;
+import org.esa.beam.framework.ui.PropertyPane;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -40,7 +38,7 @@ import java.util.Map;
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.8 $ $Date: 2009-12-08 16:08:33 $
+ * @version $Revision: 1.9 $ $Date: 2009-12-11 20:46:14 $
  */
 public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog {
 
@@ -115,7 +113,7 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
                 }
                 rasterDataNodeTypeProperties = rdnTypeProperties.toArray(new PropertyDescriptor[rdnTypeProperties.size()]);
             }
-            ValueEditorsPane parametersPane = new ValueEditorsPane(propertyContainer);
+            PropertyPane parametersPane = new PropertyPane(propertyContainer);
             final JPanel paremetersPanel = parametersPane.createPanel();
             paremetersPanel.setBorder(new EmptyBorder(4, 4, 4, 4));
             this.form.add("Processing Parameters", new JScrollPane(paremetersPanel));
@@ -255,8 +253,9 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
             return true;
         }
     }
+
     private class ProductChangedHandler extends AbstractSelectionChangeListener implements ProductNodeListener {
-        
+
         private Product currentProduct;
 
         public void releaseProduct() {
@@ -265,7 +264,7 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
                 currentProduct = null;
             }
         }
-        
+
         @Override
         public void selectionChanged(SelectionChangeEvent event) {
             Selection selection = event.getSelection();
@@ -304,7 +303,7 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
         public void nodeRemoved(ProductNodeEvent event) {
             handleProductNodeEvent(event);
         }
-        
+
         private void updateTargetProductname() {
             String productName = "";
             if (currentProduct != null) {
@@ -313,11 +312,11 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
             final TargetProductSelectorModel targetProductSelectorModel = getTargetProductSelector().getModel();
             targetProductSelectorModel.setProductName(productName + getTargetProductNameSuffix());
         }
-        
+
         private void handleProductNodeEvent(ProductNodeEvent event) {
             updateValueSets(currentProduct);
         }
-        
+
         private void updateValueSets(Product product) {
             for (PropertyDescriptor propertyDescriptor : rasterDataNodeTypeProperties) {
                 updateValueSet(propertyDescriptor, product);

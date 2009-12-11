@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractRasterDataNodeTest.java,v 1.3 2009-12-02 16:52:11 lveci Exp $
+ * $Id: AbstractRasterDataNodeTest.java,v 1.4 2009-12-11 20:46:13 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -68,7 +68,14 @@ public abstract class AbstractRasterDataNodeTest extends AbstractDataNodeTest {
         final boolean[] isActive = {false};
         final Product product = new Product("n", "t", width, height) {
             @Override
-            protected void fireNodeAdded(ProductNode sourceNode) {
+            protected void fireNodeAdded(ProductNode childNode, ProductNodeGroup parentNode) {
+                if (isActive[0]) {
+                    fail("Event not expected.");
+                }
+            }
+
+            @Override
+            protected void fireNodeRemoved(ProductNode childNode, ProductNodeGroup parentNode) {
                 if (isActive[0]) {
                     fail("Event not expected.");
                 }
@@ -77,7 +84,7 @@ public abstract class AbstractRasterDataNodeTest extends AbstractDataNodeTest {
             @Override
             protected void fireNodeChanged(ProductNode sourceNode, String propertyName, Object oldValue) {
                 if (isActive[0]
-                && !RasterDataNode.PROPERTY_NAME_ROI_DEFINITION.equalsIgnoreCase(propertyName)) {
+                        && !RasterDataNode.PROPERTY_NAME_ROI_DEFINITION.equalsIgnoreCase(propertyName)) {
                     fail("Event for property '" + propertyName + "' not expected.");
                 }
             }
@@ -89,12 +96,6 @@ public abstract class AbstractRasterDataNodeTest extends AbstractDataNodeTest {
                 }
             }
 
-            @Override
-            protected void fireNodeRemoved(ProductNode sourceNode) {
-                if (isActive[0]) {
-                    fail("Event not expected.");
-                }
-            }
         };
         addRasterDataNodeToProduct(product, node);
         product.setModified(false);

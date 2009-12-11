@@ -1,5 +1,5 @@
 /*
- * $Id: ColorEditor.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
+ * $Id: ColorEditor.java,v 1.3 2009-12-11 20:46:14 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -18,7 +18,7 @@ package org.esa.beam.framework.ui;
 
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.swing.BindingContext;
-import com.bc.ceres.binding.swing.ValueEditor;
+import com.bc.ceres.binding.swing.PropertyEditor;
 import com.jidesoft.combobox.ColorComboBox;
 
 import java.awt.Color;
@@ -29,10 +29,10 @@ import javax.swing.JComponent;
  * A value editor for colors.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.3 $ $Date: 2009-12-11 20:46:14 $
  * @since BEAM 4.6
  */
-public class ColorEditor extends ValueEditor {
+public class ColorEditor extends PropertyEditor {
 
     @Override
     public boolean isValidFor(PropertyDescriptor propertyDescriptor) {

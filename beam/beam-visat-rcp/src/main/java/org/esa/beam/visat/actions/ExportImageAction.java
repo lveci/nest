@@ -1,5 +1,5 @@
 /*
- * $Id: ExportImageAction.java,v 1.7 2009-12-02 16:52:12 lveci Exp $
+ * $Id: ExportImageAction.java,v 1.8 2009-12-11 20:46:14 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -26,7 +26,7 @@ import com.bc.ceres.glayer.support.ImageLayer;
 import com.bc.ceres.grender.Viewport;
 import com.bc.ceres.grender.support.BufferedImageRendering;
 import com.bc.ceres.grender.support.DefaultViewport;
-import org.esa.beam.framework.ui.ValueEditorsPane;
+import org.esa.beam.framework.ui.PropertyPane;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.util.io.BeamFileChooser;
@@ -56,7 +56,7 @@ import java.awt.image.RenderedImage;
  *
  * @author Marco Peters
  * @author Ralf Quast
- * @version $Revision: 1.7 $ $Date: 2009-12-02 16:52:12 $
+ * @version $Revision: 1.8 $ $Date: 2009-12-11 20:46:14 $
  */
 public class ExportImageAction extends AbstractExportImageAction {
 
@@ -233,8 +233,8 @@ public class ExportImageAction extends AbstractExportImageAction {
 
         public JComponent createComponent() {
             BindingContext bindingContext = new BindingContext(propertyContainer);
-            ValueEditorsPane valueEditorsPane = new ValueEditorsPane(bindingContext);
-            return valueEditorsPane.createPanel();
+            PropertyPane propertyPane = new PropertyPane(bindingContext);
+            return propertyPane.createPanel();
         }
 
         public Dimension getDimension() {

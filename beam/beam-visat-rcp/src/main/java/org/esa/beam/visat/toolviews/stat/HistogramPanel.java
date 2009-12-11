@@ -40,7 +40,7 @@ import java.awt.image.RenderedImage;
  * A pane within the statistcs window which displays a histogram.
  *
  * @author Marco Peters
- * @version $Revision: 1.5 $ $Date: 2009-12-09 16:41:39 $
+ * @version $Revision: 1.6 $ $Date: 2009-12-11 20:46:14 $
  */
 class HistogramPanel extends PagePanel implements SingleRoiComputePanel.ComputeMask {
 
@@ -88,7 +88,6 @@ class HistogramPanel extends PagePanel implements SingleRoiComputePanel.ComputeM
     protected void updateContent() {
         if (computePanel != null) {
             computePanel.setRaster(getRaster());
-            setRaster(getRaster());
             if (!(Boolean) autoMinMaxEnabledParam.getValue()) {
                 return;
             }
@@ -109,14 +108,9 @@ class HistogramPanel extends PagePanel implements SingleRoiComputePanel.ComputeM
             }
             histoMinParam.setDefaultValue();
             histoMaxParam.setDefaultValue();
-
-            if(getRaster() != null) {
-                final Stx stat = getRaster().getStx();
-                if(stat != null) {
-                    setStx(stat);
-                }
-            }
-        }
+            chart.getXYPlot().setDataset(null);
+            chart.fireChartChanged();
+			/*if(getRaster() != null) {                final Stx stat = getRaster().getStx();                if(stat != null) {                    setStx(stat);                }            }*/        }
     }
 
     @Override

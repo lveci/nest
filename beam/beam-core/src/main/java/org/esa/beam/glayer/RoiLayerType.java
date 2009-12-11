@@ -1,7 +1,7 @@
 package org.esa.beam.glayer;
 
 import com.bc.ceres.binding.Property;
-import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerTypeRegistry;
@@ -13,30 +13,18 @@ import org.esa.beam.framework.datamodel.RasterDataNode;
 import java.awt.Color;
 
 
-/**
- * @author Marco Peters
- * @version $ Revision: $ Date: $
- * @since BEAM 4.6
- * @deprecated since 4.7, use {@link MaskLayerType}
- */
 @Deprecated
 public class RoiLayerType extends ImageLayer.Type {
 
-    public static final String ROI_LAYER_ID = "org.esa.beam.layers.roi";
     public static final String PROPERTY_NAME_COLOR = ImageType.PROPERTY_NAME_COLOR;
     public static final String PROPERTY_NAME_TRANSPARENCY = ImageType.PROPERTY_NAME_TRANSPARENCY;
     public static final String PROPERTY_NAME_RASTER = "raster";
-
-    @Override
-    public String getName() {
-        return "ROI";
-    }
 
     /**
      * Converts a RoiLayer into a MaskLayer, for backward compatibility.
      */
     @Override
-    public Layer createLayer(LayerContext ctx, PropertyContainer configuration) {
+    public Layer createLayer(LayerContext ctx, PropertySet configuration) {
         final RasterDataNode raster = (RasterDataNode) configuration.getValue(PROPERTY_NAME_RASTER);
         String maskName = raster.getName() + "_roi";
         final Mask mask = raster.getProduct().getMaskGroup().get(maskName);
@@ -49,7 +37,7 @@ public class RoiLayerType extends ImageLayer.Type {
         mask.setImageColor(color);
 
         MaskLayerType maskLayerType = LayerTypeRegistry.getLayerType(MaskLayerType.class);
-        PropertyContainer maskConfiguration = maskLayerType.createLayerConfig(null);
+        PropertySet maskConfiguration = maskLayerType.createLayerConfig(null);
         for (Property property : maskConfiguration.getProperties()) {
             String propertyName = property.getName();
             Property srcProperty = configuration.getProperty(propertyName);
@@ -62,8 +50,8 @@ public class RoiLayerType extends ImageLayer.Type {
     }
 
     @Override
-    public PropertyContainer createLayerConfig(LayerContext ctx) {
-        final PropertyContainer prototype = super.createLayerConfig(ctx);
+    public PropertySet createLayerConfig(LayerContext ctx) {
+        final PropertySet prototype = super.createLayerConfig(ctx);
 
         final Property rasterModel = Property.create(PROPERTY_NAME_RASTER, RasterDataNode.class);
         rasterModel.getDescriptor().setNotNull(true);

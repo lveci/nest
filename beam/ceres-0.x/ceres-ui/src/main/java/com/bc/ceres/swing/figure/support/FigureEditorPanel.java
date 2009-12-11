@@ -8,6 +8,7 @@ import com.bc.ceres.grender.support.DefaultViewport;
 import com.bc.ceres.swing.figure.FigureCollection;
 import com.bc.ceres.swing.figure.FigureEditor;
 import com.bc.ceres.swing.figure.FigureEditorAware;
+import com.bc.ceres.swing.figure.FigureFactory;
 import com.bc.ceres.swing.undo.UndoContext;
 
 import javax.swing.JPanel;
@@ -26,15 +27,9 @@ public class FigureEditorPanel extends JPanel implements FigureEditorAware, Adju
     private DefaultRendering rendering;
     private Viewport viewport;
 
-    public FigureEditorPanel() {
-        this(null);
-    }
-
-    public FigureEditorPanel(UndoContext undoContext) {
-        this(undoContext, new DefaultFigureCollection());
-    }
-
-    public FigureEditorPanel(UndoContext undoContext, FigureCollection figureCollection) {
+    public FigureEditorPanel(UndoContext undoContext,
+                             FigureCollection figureCollection,
+                             FigureFactory figureFactory) {
         super(null);
 
         setFocusable(true);
@@ -43,7 +38,11 @@ public class FigureEditorPanel extends JPanel implements FigureEditorAware, Adju
 
         this.figureCollection = figureCollection;
         this.viewport = new DefaultViewport(true);
-        this.figureEditor = new DefaultFigureEditor(this, this.viewport, undoContext, figureCollection);
+        this.figureEditor = new DefaultFigureEditor(this,
+                                                    this.viewport,
+                                                    undoContext,
+                                                    figureCollection,
+                                                     figureFactory);
 
         rendering = new DefaultRendering(this.viewport);
 

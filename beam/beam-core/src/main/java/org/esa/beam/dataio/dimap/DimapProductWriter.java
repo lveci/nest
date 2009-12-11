@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductWriter.java,v 1.5 2009-12-02 16:52:11 lveci Exp $
+ * $Id: DimapProductWriter.java,v 1.6 2009-12-11 20:46:13 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,6 +17,8 @@
 package org.esa.beam.dataio.dimap;
 
 import com.bc.ceres.core.ProgressMonitor;
+
+import org.esa.beam.dataio.propertystore.PropertyDataStore;
 import org.esa.beam.framework.dataio.AbstractProductWriter;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
@@ -25,13 +27,21 @@ import org.esa.beam.framework.datamodel.FilterBand;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductNode;
+import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.datamodel.TiePointGrid;
+import org.esa.beam.framework.datamodel.VectorDataNode;
 import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.FileUtils;
+import org.esa.beam.util.logging.BeamLogManager;
+import org.geotools.data.DataStore;
+import org.geotools.data.DefaultTransaction;
+import org.geotools.data.FeatureStore;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 
 import javax.imageio.stream.ImageOutputStream;
 import java.io.File;
@@ -45,7 +55,7 @@ import java.util.Map;
  * The product writer for BEAM DIMAP products.
  *
  * @author Sabine Embacher
- * @version $Revision: 1.5 $ $Date: 2009-12-02 16:52:11 $
+ * @version $Revision: 1.6 $ $Date: 2009-12-11 20:46:13 $
  */
 public class DimapProductWriter extends AbstractProductWriter {
 
@@ -100,6 +110,7 @@ public class DimapProductWriter extends AbstractProductWriter {
 
         ensureNamingConvention();
         writeDimapDocument();
+        writeVectorData();
         writeTiePointGrids();
         getSourceProduct().setProductWriter(this);
         deleteRemovedNodes();
@@ -475,6 +486,59 @@ public class DimapProductWriter extends AbstractProductWriter {
                     files[i].delete();
                 }
             }
+        }
+    }
+    
+    private void writeVectorData() {
+        Product product = getSourceProduct();
+        ProductNodeGroup<VectorDataNode> vectorDataGroup = product.getVectorDataGroup();
+        boolean hasVectorData = false;
+        for (int i = 0; i < vectorDataGroup.getNodeCount(); i++) {
+            VectorDataNode vectorDataNode = vectorDataGroup.get(i);
+            String name = vectorDataNode.getName();
+            if (!"pins".equals(name) && !"ground_control_points".equals(name)) {
+                hasVectorData = true;
+                break;
+            }
+        }
+        if (hasVectorData) {
+            File vectorDataDir = new File(_dataOutputDir, "vector_data");
+            if (vectorDataDir.exists()) {
+                File[] files = vectorDataDir.listFiles();
+                for (File file : files) {
+                    file.delete();
+                }
+            } else {
+                vectorDataDir.mkdirs();
+            }
+            for (int i = 0; i < vectorDataGroup.getNodeCount(); i++) {
+                VectorDataNode vectorDataNode = vectorDataGroup.get(i);
+                String name = vectorDataNode.getName();
+                if (!"pins".equals(name) && !"ground_control_points".equals(name)) {
+                    writeVectorData(vectorDataDir, vectorDataNode);
+                }
+            }
+        }
+    }
+    
+    private void writeVectorData(File vectorDataDir, VectorDataNode vectorDataNode) {
+        DefaultTransaction transaction = null;
+        try {
+            String name = vectorDataNode.getName();
+            DataStore dataStore = new PropertyDataStore(vectorDataDir, name);
+            SimpleFeatureType simpleFeatureType = vectorDataNode.getFeatureType();
+            dataStore.createSchema(simpleFeatureType);
+            FeatureStore<SimpleFeatureType, SimpleFeature> featureSource = 
+                (FeatureStore<SimpleFeatureType, SimpleFeature>) dataStore.getFeatureSource(name);
+            transaction = new DefaultTransaction("");
+            featureSource.setTransaction(transaction);
+            featureSource.addFeatures(vectorDataNode.getFeatureCollection());
+            transaction.commit();
+        } catch (IOException e) {
+            BeamLogManager.getSystemLogger().throwing("DimapProductWriter", "writeVectorData", e);
+        } finally {
+            if (transaction != null)
+                transaction.close();
         }
     }
 }

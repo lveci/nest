@@ -1,5 +1,5 @@
 /*
- * $Id: GraticuleLayer.java,v 1.3 2009-11-04 17:04:32 lveci Exp $
+ * $Id: GraticuleLayer.java,v 1.4 2009-12-11 20:46:13 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,7 +16,7 @@
  */
 package org.esa.beam.glayer;
 
-import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.grender.Rendering;
@@ -40,7 +40,7 @@ import java.beans.PropertyChangeEvent;
 
 /**
  * @author Marco Zuehlke
- * @version $Revision: 1.3 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.4 $ $Date: 2009-12-11 20:46:13 $
  * @since BEAM 4.2
  */
 public class GraticuleLayer extends Layer {
@@ -57,8 +57,9 @@ public class GraticuleLayer extends Layer {
         this(LAYER_TYPE, raster, initConfiguration(LAYER_TYPE.createLayerConfig(null), raster));
     }
 
-    public GraticuleLayer(GraticuleLayerType type, RasterDataNode raster, PropertyContainer configuration) {
+    public GraticuleLayer(GraticuleLayerType type, RasterDataNode raster, PropertySet configuration) {
         super(type, configuration);
+        setName("Graticule Layer");
         this.raster = raster;
         
         this.i2mTransform = (AffineTransform) getConfiguration().getValue(GraticuleLayerType.PROPERTY_NAME_TRANSFORM);
@@ -70,7 +71,7 @@ public class GraticuleLayer extends Layer {
 
     }
 
-    private static PropertyContainer initConfiguration(PropertyContainer configurationTemplate, RasterDataNode raster) {
+    private static PropertySet initConfiguration(PropertySet configurationTemplate, RasterDataNode raster) {
         configurationTemplate.setValue(GraticuleLayerType.PROPERTY_NAME_RASTER, raster);
         configurationTemplate.setValue(GraticuleLayerType.PROPERTY_NAME_TRANSFORM,
                                        raster.getSourceImage().getModel().getImageToModelTransform(0));

@@ -1,5 +1,5 @@
 /*
- * $Id: MaskCollectionLayer.java,v 1.2 2009-12-02 16:52:11 lveci Exp $
+ * $Id: MaskCollectionLayer.java,v 1.3 2009-12-11 20:46:13 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,7 +16,7 @@
  */
 package org.esa.beam.glayer;
 
-import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.glayer.CollectionLayer;
 import com.bc.ceres.glayer.Layer;
@@ -44,7 +44,7 @@ public class MaskCollectionLayer extends CollectionLayer {
 
     public MaskCollectionLayer(MaskCollectionLayerType layerType,
                                RasterDataNode raster,
-                               PropertyContainer configuration) {
+                               PropertySet configuration) {
         super(layerType, configuration, "Masks");
         Assert.notNull(raster, "raster");
         this.raster = raster;
@@ -132,17 +132,23 @@ public class MaskCollectionLayer extends CollectionLayer {
 
         @Override
         public void nodeDataChanged(ProductNodeEvent event) {
-            nodeChanged(event);
+            if (event.getSourceNode() instanceof Mask) {
+                nodeChanged(event);
+            }
         }
 
         @Override
         public void nodeAdded(ProductNodeEvent event) {
-            updateChildren();
+            if (event.getSourceNode() instanceof Mask) {
+                updateChildren();
+            }
         }
 
         @Override
         public void nodeRemoved(ProductNodeEvent event) {
-            updateChildren();
+            if (event.getSourceNode() instanceof Mask) {
+                updateChildren();
+            }
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: ProductVisitorAdapter.java,v 1.2 2009-10-15 20:30:19 lveci Exp $
+ * $Id: ProductVisitorAdapter.java,v 1.3 2009-12-11 20:46:13 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -23,7 +23,7 @@ import java.util.Stack;
  * A default implementation of the <code>ProductVisitor</code> interface.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-10-15 20:30:19 $
+ * @version $Revision: 1.3 $ $Date: 2009-12-11 20:46:13 $
  */
 public class ProductVisitorAdapter implements ProductVisitor {
 
@@ -89,6 +89,6 @@ public class ProductVisitorAdapter implements ProductVisitor {
     }
 
     @Override
-    public void visit(VectorData data) {
+    public void visit(VectorDataNode dataNode) {
     }
 }

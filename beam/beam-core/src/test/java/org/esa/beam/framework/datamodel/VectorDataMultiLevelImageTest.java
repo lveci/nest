@@ -6,7 +6,6 @@ import com.vividsolutions.jts.geom.LinearRing;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,26 +17,19 @@ import java.awt.Polygon;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 
-public class VectorMultiLevelImageTest {
+public class VectorDataMultiLevelImageTest {
 
     private Product product;
-    private VectorData pyramids;
-    private VectorMultiLevelImage image;
+    private VectorDataNode pyramids;
+    private VectorDataMultiLevelImage image;
 
     @Before
     public void setup() {
         product = new Product("P", "T", 11, 11);
-        pyramids = new VectorData("pyramids", createPyramidFeatureType());
+        pyramids = new VectorDataNode("pyramids", createPyramidFeatureType());
         product.getVectorDataGroup().add(pyramids);
 
-        image = new VectorMultiLevelImage(VectorMultiLevelImage.createMaskMultiLevelSource(pyramids), pyramids);
-    }
-
-    @After
-    public void tearDown() {
-        image = null;
-        pyramids = null;
-        product = null;
+        image = new VectorDataMultiLevelImage(VectorDataMultiLevelImage.createMaskMultiLevelSource(pyramids), pyramids);
     }
 
     @Test

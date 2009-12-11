@@ -1,6 +1,6 @@
 package org.esa.beam.visat.toolviews.layermanager.layersrc.shapefile;
 
-import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.grender.Rendering;
@@ -40,7 +40,7 @@ import java.util.Map;
  *
  * @author Marco Peters
  * @author Marco Zühlke
- * @version $Revision: 1.9 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.10 $ $Date: 2009-12-11 20:46:14 $
  * @since BEAM 4.6
  */
 public class FeatureLayer extends Layer {
@@ -56,7 +56,7 @@ public class FeatureLayer extends Layer {
     private Rectangle2D modelBounds;
 
     public FeatureLayer(LayerType layerType, final FeatureCollection<SimpleFeatureType, SimpleFeature> fc,
-                        PropertyContainer configuration) {
+                        PropertySet configuration) {
         super(layerType, configuration);
         crs = fc.getSchema().getGeometryDescriptor().getCoordinateReferenceSystem();
         if (crs == null) {

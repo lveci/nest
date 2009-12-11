@@ -1,5 +1,5 @@
 /*
- * $Id: RoiLayerTypeTest.java,v 1.1 2009-12-02 16:52:11 lveci Exp $
+ * $Id: RoiLayerTypeTest.java,v 1.2 2009-12-11 20:46:14 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,22 +16,19 @@
  */
 package org.esa.beam.glayer;
 
-import static junit.framework.Assert.assertSame;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import com.bc.ceres.binding.PropertyContainer;
-import com.bc.ceres.binding.ValidationException;
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.glayer.support.ImageLayer;
-
+import static junit.framework.Assert.assertSame;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.datamodel.VirtualBand;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.awt.Color;
@@ -45,7 +42,7 @@ public class RoiLayerTypeTest extends LayerTypeTest {
 
     @Test
     public void testConfigurationTemplate() {
-        final PropertyContainer template = getLayerType().createLayerConfig(null);
+        final PropertySet template = getLayerType().createLayerConfig(null);
 
         assertNotNull(template);
         ensurePropertyIsDeclaredButNotDefined(template, RoiLayerType.PROPERTY_NAME_RASTER, RasterDataNode.class);
@@ -63,7 +60,7 @@ public class RoiLayerTypeTest extends LayerTypeTest {
         Mask.BandMathType.setExpression(mask, "A == 42");
         product.getMaskGroup().add(mask);
 
-        final PropertyContainer config = getLayerType().createLayerConfig(null);
+        final PropertySet config = getLayerType().createLayerConfig(null);
         config.setValue(RoiLayerType.PROPERTY_NAME_RASTER, raster);
 
         final Layer layer = getLayerType().createLayer(null, config);

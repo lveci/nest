@@ -8,9 +8,15 @@ import com.bc.ceres.binding.Validator;
 import com.bc.ceres.binding.accessors.DefaultPropertyAccessor;
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.glevel.MultiLevelImage;
+import com.bc.ceres.glevel.MultiLevelModel;
+import com.bc.ceres.glevel.MultiLevelSource;
+import com.bc.ceres.glevel.support.AbstractMultiLevelSource;
 import com.bc.jexp.ParseException;
 import com.bc.jexp.impl.Tokenizer;
 import org.esa.beam.framework.dataop.barithm.BandArithmetic;
+import org.esa.beam.jai.ImageManager;
+import org.esa.beam.jai.ResolutionLevel;
+import org.esa.beam.jai.VirtualBandOpImage;
 import org.esa.beam.util.StringUtils;
 
 import java.awt.Color;
@@ -27,7 +33,7 @@ import java.util.Map;
  * This is a preliminary API under construction for BEAM 4.7. Not intended for public use.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.6 $ $Date: 2009-12-09 16:41:39 $
+ * @version $Revision: 1.7 $ $Date: 2009-12-11 20:46:13 $
  * @since BEAM 4.7
  */
 public class Mask extends Band {
@@ -224,7 +230,22 @@ public class Mask extends Band {
          */
         @Override
         public MultiLevelImage createImage(final Mask mask) {
-            return MathMultiLevelImage.createMask(getExpression(mask), mask);
+            final MultiLevelModel multiLevelModel = ImageManager.getMultiLevelModel(mask);
+            final MultiLevelSource multiLevelSource = new AbstractMultiLevelSource(multiLevelModel) {
+                @Override
+                public RenderedImage createImage(int level) {
+                    return VirtualBandOpImage.createMask(getExpression(mask),
+                                                         mask.getProduct(),
+                                                         ResolutionLevel.create(getModel(), level));
+                }
+            };
+            return new MathMultiLevelImage(multiLevelSource, getExpression(mask), mask.getProduct()) {
+                @Override
+                public void reset() {
+                    super.reset();
+                    mask.fireProductNodeDataChanged();
+                }
+            };
         }
 
         @Override
@@ -357,7 +378,7 @@ public class Mask extends Band {
          */
         @Override
         public MultiLevelImage createImage(final Mask mask) {
-            return VectorMultiLevelImage.createMask(getVectorData(mask), mask);
+            return VectorDataMultiLevelImage.createMask(getVectorData(mask), mask);
         }
 
         /**
@@ -369,7 +390,7 @@ public class Mask extends Band {
         public PropertyContainer createImageConfig() {
 
             PropertyDescriptor vectorDataDescriptor = new PropertyDescriptor(PROPERTY_NAME_VECTOR_DATA,
-                                                                             VectorData.class);
+                                                                             VectorDataNode.class);
             vectorDataDescriptor.setNotNull(true);
 
             PropertyContainer imageConfig = super.createImageConfig();
@@ -378,12 +399,12 @@ public class Mask extends Band {
             return imageConfig;
         }
 
-        public static VectorData getVectorData(Mask mask) {
-            return (VectorData) mask.getImageConfig().getValue(PROPERTY_NAME_VECTOR_DATA);
+        public static VectorDataNode getVectorData(Mask mask) {
+            return (VectorDataNode) mask.getImageConfig().getValue(PROPERTY_NAME_VECTOR_DATA);
         }
 
-        public static void setVectorData(Mask mask, VectorData vectorData) {
-            mask.getImageConfig().setValue(PROPERTY_NAME_VECTOR_DATA, vectorData);
+        public static void setVectorData(Mask mask, VectorDataNode vectorDataNode) {
+            mask.getImageConfig().setValue(PROPERTY_NAME_VECTOR_DATA, vectorDataNode);
         }
     }
 
@@ -401,7 +422,22 @@ public class Mask extends Band {
 
         @Override
         public MultiLevelImage createImage(final Mask mask) {
-            return MathMultiLevelImage.createMask(getExpression(mask), mask);
+            final MultiLevelModel multiLevelModel = ImageManager.getMultiLevelModel(mask);
+            final MultiLevelSource multiLevelSource = new AbstractMultiLevelSource(multiLevelModel) {
+                @Override
+                public RenderedImage createImage(int level) {
+                    return VirtualBandOpImage.createMask(getExpression(mask),
+                                                         mask.getProduct(),
+                                                         ResolutionLevel.create(getModel(), level));
+                }
+            };
+            return new MathMultiLevelImage(multiLevelSource, getExpression(mask), mask.getProduct()) {
+                @Override
+                public void reset() {
+                    super.reset();
+                    mask.fireProductNodeDataChanged();
+                }
+            };
         }
 
         @Override

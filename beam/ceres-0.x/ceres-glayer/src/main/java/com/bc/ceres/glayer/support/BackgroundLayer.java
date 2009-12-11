@@ -1,7 +1,8 @@
 package com.bc.ceres.glayer.support;
 
-import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerType;
@@ -26,11 +27,11 @@ public class BackgroundLayer extends Layer {
         this(LAYER_TYPE, initConfiguration(LAYER_TYPE.createLayerConfig(null), color));
     }
 
-    public BackgroundLayer(Type type, PropertyContainer configuration) {
+    public BackgroundLayer(Type type, PropertySet configuration) {
         super(type, configuration);
     }
 
-    private static PropertyContainer initConfiguration(PropertyContainer configuration, Color color) {
+    private static PropertySet initConfiguration(PropertySet configuration, Color color) {
         configuration.setValue(Type.COLOR, color);
         return configuration;
     }
@@ -57,10 +58,6 @@ public class BackgroundLayer extends Layer {
 
         private static final String COLOR = "color";
 
-        @Override
-        public String getName() {
-            return "Background Layer";
-        }
 
         @Override
         public boolean isValidFor(LayerContext ctx) {
@@ -68,7 +65,7 @@ public class BackgroundLayer extends Layer {
         }
 
         @Override
-        public PropertyContainer createLayerConfig(LayerContext ctx) {
+        public PropertySet createLayerConfig(LayerContext ctx) {
             final PropertyContainer template = new PropertyContainer();
             template.addProperty(Property.create(COLOR, Color.class));
 
@@ -77,8 +74,10 @@ public class BackgroundLayer extends Layer {
         }
 
         @Override
-        public Layer createLayer(LayerContext ctx, PropertyContainer configuration) {
-            return new BackgroundLayer(this, configuration);
+        public Layer createLayer(LayerContext ctx, PropertySet configuration) {
+            final BackgroundLayer layer = new BackgroundLayer(this, configuration);
+            layer.setName("Background Layer");
+            return layer;
         }
     }
 }

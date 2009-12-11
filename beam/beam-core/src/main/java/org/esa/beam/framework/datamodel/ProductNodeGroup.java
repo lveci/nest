@@ -10,7 +10,7 @@ import java.util.Collection;
  * A type-safe container for elements of the type <code>ProductNode</code>.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.4 $ $Date: 2009-12-11 20:46:13 $
  */
 public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
 
@@ -322,7 +322,7 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
         // notify listeners
         Product product = getProduct();
         if (product != null) {
-            product.fireNodeAdded(node);
+            product.fireNodeAdded(node, this);
         }
 
         // Intended: set modified=true is last operation
@@ -333,7 +333,7 @@ public class ProductNodeGroup<T extends ProductNode> extends ProductNode {
         // notify listeners
         Product product = getProduct();
         if (product != null) {
-            product.fireNodeRemoved(node);
+            product.fireNodeRemoved(node, this);
         }
 
         // Intended: set owner=null after notifying listeners

@@ -1,5 +1,5 @@
 /*
- * $Id: MaskForm.java,v 1.2 2009-12-02 16:52:12 lveci Exp $
+ * $Id: MaskForm.java,v 1.3 2009-12-11 20:46:14 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -85,6 +85,10 @@ abstract class MaskForm {
         return maskTable.getProduct();
     }
 
+    public RasterDataNode getRaster() {
+        return maskTable.getModel().getVisibleBand();
+    }
+    
     public Mask getSelectedMask() {
         return maskTable.getSelectedMask();
     }
@@ -135,4 +139,5 @@ abstract class MaskForm {
     void clearMaskTable() {
         maskTable.clear();
     }
+
 }

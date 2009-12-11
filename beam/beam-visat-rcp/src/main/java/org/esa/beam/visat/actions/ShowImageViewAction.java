@@ -1,5 +1,5 @@
 /*
- * $Id: ShowImageViewAction.java,v 1.6 2009-11-04 17:04:32 lveci Exp $
+ * $Id: ShowImageViewAction.java,v 1.7 2009-12-11 20:46:14 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -48,7 +48,7 @@ import java.util.ArrayList;
  * This action opens an image view of the currently selected raster.
  *
  * @author Marco Peters
- * @version $Revision: 1.6 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.7 $ $Date: 2009-12-11 20:46:14 $
  */
 public class ShowImageViewAction extends ExecCommand {
 
@@ -208,6 +208,7 @@ public class ShowImageViewAction extends ExecCommand {
                 sceneImage = new ProductSceneImage(raster, app.getPreferences(), SubProgressMonitor.create(pm, 1));
             }
             sceneImage.initBitmaskLayer();
+            sceneImage.initVectorDataCollectionLayer();
             sceneImage.initMaskCollectionLayer();
         } finally {
             pm.done();

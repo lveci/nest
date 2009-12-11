@@ -1,6 +1,6 @@
 package org.esa.beam.glayer;
 
-import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.glayer.LayerTypeRegistry;
@@ -47,11 +47,12 @@ public class PlacemarkLayer extends Layer {
     public PlacemarkLayer(Product product, PlacemarkDescriptor placemarkDescriptor,
                           AffineTransform imageToModelTransform) {
         this(LAYER_TYPE, product, placemarkDescriptor, imageToModelTransform,
-             initConfiguration(LAYER_TYPE.createLayerConfig(null), product, placemarkDescriptor, imageToModelTransform));
+             initConfiguration(LAYER_TYPE.createLayerConfig(null), product, placemarkDescriptor,
+                               imageToModelTransform));
     }
 
     protected PlacemarkLayer(LayerType layerType, Product product, PlacemarkDescriptor placemarkDescriptor,
-                             AffineTransform imageToModelTransform, PropertyContainer configuration) {
+                             AffineTransform imageToModelTransform, PropertySet configuration) {
         super(layerType, configuration);
         this.product = product;
         this.placemarkDescriptor = placemarkDescriptor;
@@ -61,9 +62,9 @@ public class PlacemarkLayer extends Layer {
     }
 
 
-    private static PropertyContainer initConfiguration(PropertyContainer configurationTemplate, Product product,
-                                                    PlacemarkDescriptor placemarkDescriptor,
-                                                    AffineTransform imageToModelTransform) {
+    private static PropertySet initConfiguration(PropertySet configurationTemplate, Product product,
+                                                       PlacemarkDescriptor placemarkDescriptor,
+                                                       AffineTransform imageToModelTransform) {
         configurationTemplate.setValue(PlacemarkLayerType.PROPERTY_PRODUCT, product);
         configurationTemplate.setValue(PlacemarkLayerType.PROPERTY_PLACEMARK_DESCRIPTOR, placemarkDescriptor);
         configurationTemplate.setValue(PlacemarkLayerType.PROPERTY_IMAGE_TO_MODEL_TRANSFORM, imageToModelTransform);

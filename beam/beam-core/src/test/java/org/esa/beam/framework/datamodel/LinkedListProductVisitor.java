@@ -1,5 +1,5 @@
 /*
- * $Id: LinkedListProductVisitor.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
+ * $Id: LinkedListProductVisitor.java,v 1.3 2009-12-11 20:46:13 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -83,8 +83,8 @@ public class LinkedListProductVisitor extends ProductVisitorAdapter {
     }
 
     @Override
-    public void visit(VectorData data) {
-        visitedList.add(data.getName()); 
+    public void visit(VectorDataNode dataNode) {
+        visitedList.add(dataNode.getName());
     }
 
     public List<String> getVisitedList() {

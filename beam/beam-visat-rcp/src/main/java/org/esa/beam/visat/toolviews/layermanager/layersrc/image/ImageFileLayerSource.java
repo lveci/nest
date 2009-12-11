@@ -1,5 +1,5 @@
 /*
- * $Id: ImageFileLayerSource.java,v 1.4 2009-11-04 17:04:32 lveci Exp $
+ * $Id: ImageFileLayerSource.java,v 1.5 2009-12-11 20:46:14 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,7 +16,7 @@
  */
 package org.esa.beam.visat.toolviews.layermanager.layersrc.image;
 
-import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerTypeRegistry;
 import org.esa.beam.framework.ui.product.ProductSceneView;
@@ -35,7 +35,7 @@ import java.io.File;
  * the orientation relative to the existing layers has to be given by hand.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.4 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.5 $ $Date: 2009-12-11 20:46:14 $
  * @since BEAM 4.6
  */
 public class ImageFileLayerSource implements LayerSource {
@@ -81,7 +81,7 @@ public class ImageFileLayerSource implements LayerSource {
         try {
             ProductSceneView sceneView = pageContext.getAppContext().getSelectedProductSceneView();
             final ImageFileLayerType type = LayerTypeRegistry.getLayerType(ImageFileLayerType.class);
-            final PropertyContainer configuration = type.createLayerConfig(sceneView);
+            final PropertySet configuration = type.createLayerConfig(sceneView);
             configuration.setValue(ImageFileLayerType.PROPERTY_NAME_IMAGE_FILE, new File(imageFilePath));
             configuration.setValue(ImageFileLayerType.PROPERTY_NAME_WORLD_TRANSFORM, transform);
             Layer layer = type.createLayer(sceneView, configuration);

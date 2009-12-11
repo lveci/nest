@@ -1,6 +1,7 @@
 package org.esa.beam.visat.toolviews.layermanager;
 
 import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.core.ServiceRegistry;
 import com.bc.ceres.core.ServiceRegistryManager;
 import com.bc.ceres.glayer.CollectionLayer;
@@ -71,22 +72,17 @@ public class DefaultLayerSourceDescriptorTest {
     private static class SimpleTestLayerType extends LayerType {
 
         @Override
-        public String getName() {
-            return "simple layer";
-        }
-
-        @Override
         public boolean isValidFor(LayerContext ctx) {
             return true;
         }
 
         @Override
-        public Layer createLayer(LayerContext ctx, PropertyContainer configuration) {
+        public Layer createLayer(LayerContext ctx, PropertySet configuration) {
             return new CollectionLayer();
         }
 
         @Override
-        public PropertyContainer createLayerConfig(LayerContext ctx) {
+        public PropertySet createLayerConfig(LayerContext ctx) {
             return new PropertyContainer();
         }
     }

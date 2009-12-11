@@ -14,11 +14,14 @@ import org.opengis.feature.simple.SimpleFeatureType;
  * This is a preliminary API under construction for BEAM 4.7. Not intended for public use.
  *
  * @author Norman Fomferra
+ * @version $Revision: 1.3 $ $Date: 2009-12-11 20:46:13 $
+ * @see Product#getVectorDataGroup()
  * @since BEAM 4.7
- * @version $Revision: 1.1 $ $Date: 2009-10-15 20:30:19 $
- * @see Product#getVectorDataGroup() 
  */
-public class VectorData extends ProductNode {
+public class VectorDataNode extends ProductNode {
+
+    public static final String PROPERTY_NAME_FEATURE_COLLECTION = "featureCollection";
+    
     private final SimpleFeatureType featureType;
     private final FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection;
     private final CollectionListener featureCollectionListener;
@@ -31,7 +34,7 @@ public class VectorData extends ProductNode {
      *
      * @throws IllegalArgumentException if the given name is not a valid node identifier
      */
-    public VectorData(String name, SimpleFeatureType featureType) {
+    public VectorDataNode(String name, SimpleFeatureType featureType) {
         this(name, new DefaultFeatureCollection(name, featureType));
     }
 
@@ -43,17 +46,22 @@ public class VectorData extends ProductNode {
      *
      * @throws IllegalArgumentException if the given name is not a valid node identifier
      */
-    public VectorData(String name, FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection) {
+    public VectorDataNode(String name, FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection) {
         super(name, "");
         this.featureType = featureCollection.getSchema();
         this.featureCollection = featureCollection;
         this.featureCollectionListener = new CollectionListener() {
             @Override
             public void collectionChanged(CollectionEvent tce) {
-                fireProductNodeChanged("featureCollection");
+                fireFeatureCollectionChanged();
             }
         };
         this.featureCollection.addListener(featureCollectionListener);
+    }
+
+    public void fireFeatureCollectionChanged() {
+        System.out.println("VectorDataNode '" + getName() + "': fireProductNodeChanged");
+        fireProductNodeChanged(PROPERTY_NAME_FEATURE_COLLECTION);
     }
 
     /**

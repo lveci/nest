@@ -1,7 +1,7 @@
 package org.esa.beam.framework.gpf.ui;
 
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.ValueEditorsPane;
+import org.esa.beam.framework.ui.PropertyPane;
 
 import javax.swing.*;
 import com.bc.ceres.binding.*;
@@ -21,7 +21,7 @@ public class DefaultUI extends BaseOperatorUI {
         initializeOperatorUI(operatorName, parameterMap);
         final BindingContext context = new BindingContext(valueContainer);
 
-        final ValueEditorsPane parametersPane = new ValueEditorsPane(context);
+        final PropertyPane parametersPane = new PropertyPane(context);
         return new JScrollPane(parametersPane.createPanel());
     }
 

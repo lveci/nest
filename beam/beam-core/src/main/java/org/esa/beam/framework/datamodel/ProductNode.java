@@ -1,5 +1,5 @@
 /*
- * $Id: ProductNode.java,v 1.6 2009-11-04 17:04:32 lveci Exp $
+ * $Id: ProductNode.java,v 1.7 2009-12-11 20:46:13 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,7 +27,7 @@ import org.esa.beam.util.ObjectUtils;
  * product itself.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.6 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.7 $ $Date: 2009-12-11 20:46:13 $
  */
 public abstract class ProductNode {
 
@@ -484,7 +484,7 @@ public abstract class ProductNode {
             node.setOwner(this);
             Product product = getProduct();
             if (product != null) {
-                product.fireNodeAdded(node);
+                product.fireNodeAdded(node, null);
             }
             setModified(true);
         }
@@ -517,7 +517,7 @@ public abstract class ProductNode {
                 Product product = getProduct();
                 if (product != null) {
                     product.setModified(true);
-                    product.fireNodeRemoved(node);
+                    product.fireNodeRemoved(node, null);
                 }
                 node.setOwner(null);
             }

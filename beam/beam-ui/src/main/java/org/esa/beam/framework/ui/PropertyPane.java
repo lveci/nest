@@ -1,35 +1,35 @@
 package org.esa.beam.framework.ui;
 
-import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.binding.swing.BindingContext;
-import com.bc.ceres.binding.swing.ValueEditor;
-import com.bc.ceres.binding.swing.ValueEditorRegistry;
+import com.bc.ceres.binding.swing.PropertyEditor;
+import com.bc.ceres.binding.swing.PropertyEditorRegistry;
 import com.bc.ceres.swing.TableLayout;
-import org.esa.beam.util.StringUtils;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+// todo - Class has no BEAM dependencies, move into Ceres (ceres-ui) (nf)
 
 /**
  * A utility class used to create a {@link JPanel} containing default Swing components and their corresponding bindings for the
  * {@link com.bc.ceres.binding.PropertyContainer} given by the {@link com.bc.ceres.binding.swing.BindingContext}.
  * <p/>
- * <p>If the {@code displayName} property of a {@link com.bc.ceres.binding.PropertyDescriptor ValueDescriptor} is set, it will be used as label, otherwise
- * a label is derived from the {@code name} property.</p>
+ * <p>If the {@code displayName} property of the binding's {@link com.bc.ceres.binding.PropertySet PropertySet}
+ * is set, it will be used as label, otherwise a label is derived from the {@code name} property.</p>
  */
-public class ValueEditorsPane {
+public class PropertyPane {
 
     private final BindingContext bindingContext;
 
-    public ValueEditorsPane(PropertyContainer container) {
-        this(new BindingContext(container));
+    public PropertyPane(PropertySet propertySet) {
+        this(new BindingContext(propertySet));
     }
 
-    public ValueEditorsPane(BindingContext bindingContext) {
+    public PropertyPane(BindingContext bindingContext) {
         this.bindingContext = bindingContext;
     }
 
@@ -38,10 +38,10 @@ public class ValueEditorsPane {
     }
 
     public JPanel createPanel() {
-        PropertyContainer propertyContainer = bindingContext.getPropertyContainer();
+        PropertySet propertyContainer = bindingContext.getPropertySet();
         Property[] models = propertyContainer.getProperties();
 
-        boolean displayUnitColumn = displayUnitColumn(models);
+        boolean displayUnitColumn = wantDisplayUnitColumn(models);
         TableLayout layout = new TableLayout(displayUnitColumn ? 3 : 2);
         layout.setTableAnchor(TableLayout.Anchor.WEST);
         layout.setTableFill(TableLayout.Fill.HORIZONTAL);
@@ -49,11 +49,11 @@ public class ValueEditorsPane {
         final JPanel panel = new JPanel(layout);
 
         int rowIndex = 0;
-        final ValueEditorRegistry registry = ValueEditorRegistry.getInstance();
+        final PropertyEditorRegistry registry = PropertyEditorRegistry.getInstance();
         for (Property model : models) {
             PropertyDescriptor descriptor = model.getDescriptor();
-            ValueEditor valueEditor = registry.findValueEditor(descriptor);
-            JComponent[] components = valueEditor.createComponents(descriptor, bindingContext);
+            PropertyEditor propertyEditor = registry.findValueEditor(descriptor);
+            JComponent[] components = propertyEditor.createComponents(descriptor, bindingContext);
             if (components.length == 2) {
                 layout.setCellWeightX(rowIndex, 0, 0.0);
                 panel.add(components[1], new TableLayout.Cell(rowIndex, 0));
@@ -81,11 +81,12 @@ public class ValueEditorsPane {
         return panel;
     }
 
-    private boolean displayUnitColumn(Property[] models) {
+    private boolean wantDisplayUnitColumn(Property[] models) {
         boolean showUnitColumn = false;
         for (Property model : models) {
             PropertyDescriptor descriptor = model.getDescriptor();
-            if (StringUtils.isNotNullAndNotEmpty(descriptor.getUnit())) {
+            String unit = descriptor.getUnit();
+            if (!(unit == null || unit.length() == 0)) {
                 showUnitColumn = true;
                 break;
             }

@@ -5,6 +5,7 @@ import org.geotools.referencing.operation.transform.AbstractMathTransform;
 import org.opengis.parameter.GeneralParameterDescriptor;
 import org.opengis.parameter.ParameterDescriptorGroup;
 import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.MathTransform2D;
 import org.opengis.referencing.operation.NoninvertibleTransformException;
 import org.opengis.referencing.operation.TransformException;
 
@@ -13,10 +14,10 @@ import org.opengis.referencing.operation.TransformException;
  *
  * @author Marco Peters
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-09-01 20:27:12 $
+ * @version $Revision: 1.4 $ $Date: 2009-12-11 20:46:13 $
  * @since BEAM 4.6
  */
-public class GeoCodingMathTransform extends AbstractMathTransform {
+public class GeoCodingMathTransform extends AbstractMathTransform implements MathTransform2D{
 
     private static final TG2P G2P = new TG2P();
     private static final TP2G P2G = new TP2G();
@@ -52,7 +53,7 @@ public class GeoCodingMathTransform extends AbstractMathTransform {
     }
 
     @Override
-    public MathTransform inverse() throws NoninvertibleTransformException {
+    public MathTransform2D inverse() throws NoninvertibleTransformException {
         return new GeoCodingMathTransform(geoCoding, t == G2P ? P2G : G2P);
     }
 

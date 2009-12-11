@@ -2,6 +2,7 @@ package org.esa.beam.glayer;
 
 import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerType;
@@ -11,11 +12,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.AffineTransform;
 
-/**
- * @author Marco Peters
- * @version $ Revision $ Date $
- * @since BEAM 4.6
- */
+
 public class GraticuleLayerType extends LayerType {
 
     public static final String PROPERTY_NAME_RASTER = "raster";
@@ -46,23 +43,18 @@ public class GraticuleLayerType extends LayerType {
     public static final double DEFAULT_TEXT_BG_TRANSPARENCY = 0.7;
 
     @Override
-    public String getName() {
-        return "Graticule Layer";
-    }
-
-    @Override
     public boolean isValidFor(LayerContext ctx) {
         return true;
     }
 
     @Override
-    public Layer createLayer(LayerContext ctx, PropertyContainer configuration) {
+    public Layer createLayer(LayerContext ctx, PropertySet configuration) {
         return new GraticuleLayer(this, (RasterDataNode) configuration.getValue(PROPERTY_NAME_RASTER),
                                   configuration);
     }
 
     @Override
-    public PropertyContainer createLayerConfig(LayerContext ctx) {
+    public PropertySet createLayerConfig(LayerContext ctx) {
         final PropertyContainer vc = new PropertyContainer();
 
         final Property rasterModel = Property.create(PROPERTY_NAME_RASTER, RasterDataNode.class);

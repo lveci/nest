@@ -1,5 +1,5 @@
 /*
- * $Id: BandArithmetikDialog.java,v 1.12 2009-11-11 20:19:25 lveci Exp $
+ * $Id: BandArithmetikDialog.java,v 1.13 2009-12-11 20:46:14 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -23,8 +23,8 @@ import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.ValueSet;
 import com.bc.ceres.binding.swing.BindingContext;
-import com.bc.ceres.binding.swing.ValueEditor;
-import com.bc.ceres.binding.swing.ValueEditorRegistry;
+import com.bc.ceres.binding.swing.PropertyEditor;
+import com.bc.ceres.binding.swing.PropertyEditorRegistry;
 import com.bc.ceres.binding.swing.internal.CheckBoxEditor;
 import com.bc.ceres.binding.swing.internal.NumericEditor;
 import com.bc.ceres.binding.swing.internal.SingleSelectionEditor;
@@ -249,9 +249,9 @@ public class BandArithmetikDialog extends ModalDialog {
         setContent(panel);
     }
 
-    private JComponent[] createComponents(String propertyName, Class<? extends ValueEditor> editorClass) {
-        PropertyDescriptor descriptor = bindingContext.getPropertyContainer().getDescriptor(propertyName);
-        ValueEditor editor = ValueEditorRegistry.getInstance().getValueEditor(editorClass.getName());
+    private JComponent[] createComponents(String propertyName, Class<? extends PropertyEditor> editorClass) {
+        PropertyDescriptor descriptor = bindingContext.getPropertySet().getDescriptor(propertyName);
+        PropertyEditor editor = PropertyEditorRegistry.getInstance().getValueEditor(editorClass.getName());
         return editor.createComponents(descriptor, bindingContext);
     }
 

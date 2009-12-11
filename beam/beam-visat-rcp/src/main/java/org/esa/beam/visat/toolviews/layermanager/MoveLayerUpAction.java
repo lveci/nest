@@ -10,7 +10,7 @@ import java.awt.event.ActionEvent;
 
 /**
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2009-05-11 16:17:37 $
+ * @version $Revision: 1.3 $ $Date: 2009-12-11 20:46:14 $
  * @since BEAM 4.6
  */
 class MoveLayerUpAction extends AbstractAction {
@@ -44,6 +44,9 @@ class MoveLayerUpAction extends AbstractAction {
 
     public boolean canMove(Layer layer) {
         final Layer parentLayer = layer.getParent();
+        if (parentLayer == null) {
+            return false;
+        }
         final int layerIndex = parentLayer.getChildIndex(layer.getId());
         return layerIndex > 0;
     }

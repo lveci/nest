@@ -1,5 +1,5 @@
 /*
- * $Id: ExpressionEditor.java,v 1.3 2009-12-04 19:06:45 lveci Exp $
+ * $Id: ExpressionEditor.java,v 1.4 2009-12-11 20:46:14 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -20,7 +20,7 @@ import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.swing.Binding;
 import com.bc.ceres.binding.swing.BindingContext;
 import com.bc.ceres.binding.swing.ComponentAdapter;
-import com.bc.ceres.binding.swing.ValueEditor;
+import com.bc.ceres.binding.swing.PropertyEditor;
 import com.bc.ceres.binding.swing.internal.TextComponentAdapter;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.ui.ModalDialog;
@@ -39,10 +39,10 @@ import java.awt.event.ActionListener;
  * A value editor for band arithmetic expressions
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.3 $ $Date: 2009-12-04 19:06:45 $
+ * @version $Revision: 1.4 $ $Date: 2009-12-11 20:46:14 $
  * @since BEAM 4.6
  */
-public class ExpressionEditor extends ValueEditor {
+public class ExpressionEditor extends PropertyEditor {
     
     private final Product[] sourceProducts;
     private final Product currentProduct;

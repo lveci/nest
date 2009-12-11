@@ -1,16 +1,16 @@
 package org.esa.beam.visat.toolviews.layermanager.editors;
 
-import com.bc.ceres.binding.ValidationException;
-import com.bc.ceres.binding.PropertyAccessor;
-import com.bc.ceres.binding.PropertyContainer;
-import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.PropertyAccessor;
+import com.bc.ceres.binding.PropertyDescriptor;
+import com.bc.ceres.binding.PropertySet;
+import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.accessors.MapEntryAccessor;
 import com.bc.ceres.binding.swing.Binding;
 import com.bc.ceres.binding.swing.BindingContext;
 import com.bc.ceres.glayer.Layer;
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.ValueEditorsPane;
+import org.esa.beam.framework.ui.PropertyPane;
 import org.esa.beam.visat.toolviews.layermanager.LayerEditor;
 
 import javax.swing.JComponent;
@@ -23,7 +23,7 @@ import java.util.Map;
  * General Editor for layers using {@link com.bc.ceres.binding.PropertyDescriptor ValueDescriptors}.
  *
  * @author Marco Zühlke
- * @version $Revision: 1.9 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.10 $ $Date: 2009-12-11 20:46:14 $
  * @since BEAM 4.6
  */
 public abstract class AbstractBindingLayerEditor implements LayerEditor {
@@ -39,12 +39,12 @@ public abstract class AbstractBindingLayerEditor implements LayerEditor {
         // TODO - replace this code block with the following line (rq-20090528)
         // bindingContext = new BindingContext(layer.getConfiguration());
         bindingContext = new BindingContext();
-        PropertyContainer propertyContainer = bindingContext.getPropertyContainer();
-        propertyContainer.addPropertyChangeListener(new UpdateStylePropertyChangeListener());
+        PropertySet propertySet = bindingContext.getPropertySet();
+        propertySet.addPropertyChangeListener(new UpdateStylePropertyChangeListener());
         initializeBinding(appContext, bindingContext);
         // ODOT
 
-        ValueEditorsPane parametersPane = new ValueEditorsPane(bindingContext);
+        PropertyPane parametersPane = new PropertyPane(bindingContext);
         return parametersPane.createPanel();
     }
 
@@ -58,17 +58,17 @@ public abstract class AbstractBindingLayerEditor implements LayerEditor {
         valueData.put(propertyName, value);
         PropertyAccessor accessor = new MapEntryAccessor(valueData, propertyName);
         Property model = new Property(propertyDescriptor, accessor);
-        bindingContext.getPropertyContainer().addProperty(model);
+        bindingContext.getPropertySet().addProperty(model);
     }
 
     @Override
     public void updateControl() {
-        final Property[] properties = bindingContext.getPropertyContainer().getProperties();
+        final Property[] properties = bindingContext.getPropertySet().getProperties();
         for (Property property : properties) {
             final PropertyDescriptor propertyDescriptor = property.getDescriptor();
             String propertyName = propertyDescriptor.getName();
             Binding binding = bindingContext.getBinding(propertyName);
-            PropertyContainer configuration = layer.getConfiguration();
+            PropertySet configuration = layer.getConfiguration();
 
             if (configuration.getProperty(propertyName) != null) {
                 final Object value = configuration.getProperty(propertyName).getValue();
