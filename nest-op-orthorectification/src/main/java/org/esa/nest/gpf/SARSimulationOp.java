@@ -88,7 +88,7 @@ public final class SARSimulationOp extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
-    String[] sourceBandNames;
+    private String[] sourceBandNames;
 
     @Parameter(valueSet = {"ACE", "GETASSE30", "SRTM 3Sec GeoTiff"}, description = "The digital elevation model.",
                defaultValue="SRTM 3Sec GeoTiff", label="Digital Elevation Model")
@@ -165,8 +165,6 @@ public final class SARSimulationOp extends Operator {
 
             getMetadata();
 
-//            getElevationModel();
-
             getTiePointGrid();
 
             getSourceImageDimension();
@@ -229,7 +227,7 @@ public final class SARSimulationOp extends Operator {
      * Get elevation model.
      * @throws Exception The exceptions.
      */
-    private void getElevationModel() throws Exception {
+    private synchronized void getElevationModel() throws Exception {
 
         if(isElevationModelAvailable) return;
         if(externalDEMFile != null && fileElevationModel == null) { // if external DEM file is specified by user
@@ -409,15 +407,15 @@ public final class SARSimulationOp extends Operator {
         final int h  = targetRectangle.height;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        Tile targetTile = targetTiles.get(targetProduct.getBand("intensity_mst"));
-        ProductData masterBuffer = targetTiles.get(targetProduct.getBand("intensity_mst")).getDataBuffer();
+        final Tile targetTile = targetTiles.get(targetProduct.getBand("intensity_mst"));
+        final ProductData masterBuffer = targetTiles.get(targetProduct.getBand("intensity_mst")).getDataBuffer();
         ProductData layoverShadowMaskBuffer = null;
         if (saveLayoverShadowMask) {
             layoverShadowMaskBuffer = targetTiles.get(targetProduct.getBand("layover_shadow_mask")).getDataBuffer();
         }
 
-        int ymin = Math.max(y0 - h/5, 0);
-        int nh = h + h/5;
+        final int ymin = Math.max(y0 - h/5, 0);
+        final int nh = h + h/5;
 
         final float[][] localDEM = new float[nh+2][w+2];
         try {
@@ -468,7 +466,7 @@ public final class SARSimulationOp extends Operator {
                     final RangeDopplerGeocodingOp.LocalGeometry localGeometry = new RangeDopplerGeocodingOp.LocalGeometry();
                     setLocalGeometry(x, y, earthPoint, sensorPos, localGeometry);
 
-                    double[] localIncidenceAngles =
+                    final double[] localIncidenceAngles =
                             {RangeDopplerGeocodingOp.NonValidIncidenceAngle, RangeDopplerGeocodingOp.NonValidIncidenceAngle};
                     RangeDopplerGeocodingOp.computeLocalIncidenceAngle(
                             localGeometry, demNoDataValue, true, false, false, x0, ymin, x, y, localDEM, localIncidenceAngles); // in degrees

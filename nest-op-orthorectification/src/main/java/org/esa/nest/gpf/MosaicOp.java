@@ -393,8 +393,9 @@ public class MosaicOp extends Operator {
                 return;
 
             final ArrayList<PixelPos[]> srcPixelCoords = new ArrayList<PixelPos[]>(validProducts.size());
+            final int numPixelPos = targetRect.width * targetRect.height;
             for (Product validProduct : validProducts) {
-                srcPixelCoords.add(new PixelPos[targetRect.width * targetRect.height]);
+                srcPixelCoords.add(new PixelPos[numPixelPos]);
             }
 
             final GeoCoding targetGeoCoding = targetProduct.getGeoCoding();
