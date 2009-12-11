@@ -51,6 +51,8 @@ public final class FillHoleOp extends Operator {
     private int sourceImageWidth;
     private int sourceImageHeight;
 
+    private enum Direction { UP, DOWN, LEFT, RIGHT }
+
     /**
      * Initializes this operator and sets the one and only target product.
      * <p>The target product can be either defined by a field of type {@link org.esa.beam.framework.datamodel.Product} annotated with the
@@ -153,8 +155,8 @@ public final class FillHoleOp extends Operator {
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         final Rectangle sourceTileRectangle = getSourceRectangle(x0, y0, w, h);
-        Band sourceBand = sourceProduct.getBand(targetBand.getName());
-        Tile sourceTile = getSourceTile(sourceBand, sourceTileRectangle, pm);
+        final Band sourceBand = sourceProduct.getBand(targetBand.getName());
+        final Tile sourceTile = getSourceTile(sourceBand, sourceTileRectangle, pm);
         final ProductData srcData = sourceTile.getDataBuffer();
         final ProductData trgData = targetTile.getDataBuffer();
 
@@ -202,25 +204,25 @@ public final class FillHoleOp extends Operator {
     private double getPixelValueByInterpolation(
             final int x, final int y, final ProductData srcData, final Tile srcTile) {
 
-        PixelPos pixelUp = new PixelPos(x, y);
-        PixelPos pixelDown = new PixelPos(x, y);
-        PixelPos pixelLeft = new PixelPos(x, y);
-        PixelPos pixelRight = new PixelPos(x, y);
+        final PixelPos pixelUp = new PixelPos(x, y);
+        final PixelPos pixelDown = new PixelPos(x, y);
+        final PixelPos pixelLeft = new PixelPos(x, y);
+        final PixelPos pixelRight = new PixelPos(x, y);
 
-        double vUp = getNearestNonHolePixelPosition(x, y, srcData, srcTile, pixelUp, "up");
-        double vDown = getNearestNonHolePixelPosition(x, y, srcData, srcTile, pixelDown, "down");
-        double vLeft = getNearestNonHolePixelPosition(x, y, srcData, srcTile, pixelLeft, "left");
-        double vRight = getNearestNonHolePixelPosition(x, y, srcData, srcTile, pixelRight, "right");
+        final double vUp = getNearestNonHolePixelPosition(x, y, srcData, srcTile, pixelUp, Direction.UP);
+        final double vDown = getNearestNonHolePixelPosition(x, y, srcData, srcTile, pixelDown, Direction.DOWN);
+        final double vLeft = getNearestNonHolePixelPosition(x, y, srcData, srcTile, pixelLeft, Direction.LEFT);
+        final double vRight = getNearestNonHolePixelPosition(x, y, srcData, srcTile, pixelRight, Direction.RIGHT);
 
         double v1 = NoDataValue;
         if (vUp != NoDataValue && vDown != NoDataValue) {
-            double mu = (y - pixelUp.y) / (pixelDown.y - pixelUp.y);
+            final double mu = (y - pixelUp.y) / (pixelDown.y - pixelUp.y);
             v1 = MathUtils.interpolationLinear(vUp, vDown, mu);
         }
 
         double v2 = NoDataValue;
         if (vLeft != NoDataValue && vRight != NoDataValue) {
-            double mu = (x - pixelLeft.x) / (pixelRight.x - pixelLeft.x);
+            final double mu = (x - pixelLeft.x) / (pixelRight.x - pixelLeft.x);
             v2 = MathUtils.interpolationLinear(vLeft, vRight, mu);
         }
 
@@ -242,11 +244,11 @@ public final class FillHoleOp extends Operator {
      * @param srcData The source data.
      * @param srcTile The source tile.
      * @param pixel The pixel position.
-     * @param direction The direction string which can be "up", "down", "left" and "right".
+     * @param dir The direction enum which can be "up", "down", "left" and "right".
      * @return The pixel value.
      */
     private double getNearestNonHolePixelPosition(final int x, final int y, final ProductData srcData,
-                                                  final Tile srcTile, final PixelPos pixel, final String direction) {
+                                                  final Tile srcTile, final PixelPos pixel, final Direction dir) {
 
         final Rectangle srcTileRectangle = srcTile.getRectangle();
         final int x0 = srcTileRectangle.x;
@@ -255,7 +257,7 @@ public final class FillHoleOp extends Operator {
         final int h  = srcTileRectangle.height;
 
         double v = 0.0;
-        if (direction.contains("up")) {
+        if (dir == Direction.UP) {
 
             for (int yy = y; yy >= y0; yy--) {
                 v = srcData.getElemDoubleAt(srcTile.getDataBufferIndex(x, yy));
@@ -265,7 +267,7 @@ public final class FillHoleOp extends Operator {
                 }
             }
 
-        } else if (direction.contains("down")) {
+        } else if (dir == Direction.DOWN) {
 
             for (int yy = y; yy < y0 + h; yy++) {
                 v = srcData.getElemDoubleAt(srcTile.getDataBufferIndex(x, yy));
@@ -275,7 +277,7 @@ public final class FillHoleOp extends Operator {
                 }
             }
 
-        } else if (direction.contains("left")) {
+        } else if (dir == Direction.LEFT) {
 
             for (int xx = x; xx >= x0; xx--) {
                 v = srcData.getElemDoubleAt(srcTile.getDataBufferIndex(xx, y));
@@ -285,7 +287,7 @@ public final class FillHoleOp extends Operator {
                 }
             }
 
-        } else if (direction.contains("right")) {
+        } else if (dir == Direction.RIGHT) {
 
             for (int xx = x; xx < x0 + w; xx++) {
                 v = srcData.getElemDoubleAt(srcTile.getDataBufferIndex(xx, y));

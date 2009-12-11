@@ -7,6 +7,7 @@ import com.bc.ceres.glevel.MultiLevelImage;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
 import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertySet;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.gpf.oceantools.ObjectDiscriminationOp;
@@ -38,8 +39,9 @@ public class ObjectDetectionLayer extends Layer {
     private final float lineThickness = 2.0f;
     private final double border = 5.0;
 
-    public ObjectDetectionLayer(PropertyContainer configuration) {
+    public ObjectDetectionLayer(PropertySet configuration) {
         super(LayerTypeRegistry.getLayerType(ObjectDetectionLayerType.class.getName()), configuration);
+        setName("Object Detection");
         product = (Product) configuration.getValue("product");
         band = (Band) configuration.getValue("band");
 

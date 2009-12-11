@@ -7,6 +7,7 @@ import com.bc.ceres.glevel.MultiLevelImage;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
 import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertySet;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.gpf.oceantools.WindFieldEstimationOp;
@@ -35,8 +36,9 @@ public class WindFieldEstimationLayer extends Layer {
     private final List<WindFieldEstimationOp.WindFieldRecord> targetList = new ArrayList<WindFieldEstimationOp.WindFieldRecord>();
     private final float lineThickness = 2.0f;
 
-    public WindFieldEstimationLayer(PropertyContainer configuration) {
+    public WindFieldEstimationLayer(PropertySet configuration) {
         super(LayerTypeRegistry.getLayerType(WindFieldEstimationLayerType.class.getName()), configuration);
+        setName("Windfield Estimation");
         product = (Product) configuration.getValue("product");
         band = (Band) configuration.getValue("band");
 

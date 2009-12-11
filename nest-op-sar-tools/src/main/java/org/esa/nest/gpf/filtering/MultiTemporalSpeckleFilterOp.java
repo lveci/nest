@@ -89,7 +89,6 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
     private int halfWindowHeight = 0;
     private int sourceImageWidth = 0;
     private int sourceImageHeight = 0;
-    private double[] bandNoDataValues = null;
 
     public static final String WINDOW_SIZE_3x3 = "3x3";
     public static final String WINDOW_SIZE_5x5 = "5x5";
@@ -133,7 +132,7 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
         addSelectedBands();
 
         // The tile width has to be the image width, otherwise the index calculation in the last tile is not correct.
-        targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 50);
+        //targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 50);
 
         int windowWidth = 0;
         int windowHeight = 0;
@@ -206,8 +205,6 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
                 targetProduct.addBand(targetBand);
             }
         }
-
-        bandNoDataValues = new double[targetProduct.getNumBands()];
     }
 
     /**
@@ -236,10 +233,11 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
             targetData[i] = targetTile.getDataBuffer();
         }
 
-        Rectangle sourceRectangle = getSourceRectangle(x0, y0, w, h);
+        final Rectangle sourceRectangle = getSourceRectangle(x0, y0, w, h);
 
         final Tile[] sourceTile = new Tile[numBands];
         final ProductData[] sourceData = new ProductData[numBands];
+        final double[] bandNoDataValues = new double[numBands];
         for (int i = 0; i < numBands; i++) {
             final Band srcBand = sourceProduct.getBand(targetBands[i].getName());
             sourceTile[i] = getSourceTile(srcBand, sourceRectangle, pm);
@@ -247,10 +245,12 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
             bandNoDataValues[i] = srcBand.getNoDataValue();
         }
 
-        double[] localMeans = new double[numBands];
+        final double[] localMeans = new double[numBands];
         double srcDataValue = 0.0;
-        for(int y = y0; y < y0 + h; y++) {
-            for (int x = x0; x < x0 + w; x++) {
+        final int yMax = y0 + h;
+        for(int y = y0; y < yMax; y++) {
+            final int xMax = x0 + w;
+            for (int x = x0; x < xMax; x++) {
 
                 final int sourceIndex = sourceTile[0].getDataBufferIndex(x, y);
 

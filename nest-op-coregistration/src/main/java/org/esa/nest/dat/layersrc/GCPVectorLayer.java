@@ -1,6 +1,7 @@
 package org.esa.nest.dat.layersrc;
 
 import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.glayer.LayerTypeRegistry;
@@ -25,8 +26,9 @@ public class GCPVectorLayer extends Layer {
     private final Band band;
     private final float lineThickness = 2.0f;
 
-    public GCPVectorLayer(PropertyContainer configuration) {
+    public GCPVectorLayer(PropertySet configuration) {
         super(LayerTypeRegistry.getLayerType(GCPVectorLayerType.class.getName()), configuration);
+        setName("GCP Movement");
         product = (Product) configuration.getValue("product");
         band = (Band) configuration.getValue("band");
     }

@@ -529,7 +529,7 @@
             <helpId>showLayersToolBar</helpId>
         </action>
 
-        <action>
+        <!--action>
             <id>crossHairTool</id>
             <class>org.esa.beam.visat.actions.ToolAction</class>
             <tool>org.esa.nest.dat.tool.CrossHairTool</tool>
@@ -539,7 +539,7 @@
             <largeIcon>icons/CrossHairTool.gif</largeIcon>
             <selected>true</selected>
             <helpId>selectTool</helpId>
-        </action>
+        </action-->
 
         <action>
             <id>showPolarWaveView</id>

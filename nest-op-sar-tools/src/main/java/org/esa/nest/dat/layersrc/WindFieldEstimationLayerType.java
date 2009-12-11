@@ -3,9 +3,11 @@ package org.esa.nest.dat.layersrc;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerType;
+import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.binding.accessors.DefaultPropertyAccessor;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
@@ -19,16 +21,11 @@ public class WindFieldEstimationLayerType extends LayerType {
     static LayerType instance = new WindFieldEstimationLayerType();
 
     public static WindFieldEstimationLayer createLayer(final Product product, final Band band) {
-        // todo - weird!!!
-        final PropertyContainer template = instance.createLayerConfig(null);
+        final LayerType type = LayerTypeRegistry.getLayerType(WindFieldEstimationLayerType.class);
+        final PropertySet template = type.createLayerConfig(null);
         template.setValue("product", product);
         template.setValue("band", band);
         return new WindFieldEstimationLayer(template);
-    }
-
-    @Override
-    public String getName() {
-        return "Wind Field Estimation";
     }
 
     @Override
@@ -38,7 +35,7 @@ public class WindFieldEstimationLayerType extends LayerType {
     }
 
     @Override
-    public Layer createLayer(LayerContext ctx, PropertyContainer configuration) {
+    public Layer createLayer(LayerContext ctx, PropertySet configuration) {
         return new WindFieldEstimationLayer(configuration);
     }
 
