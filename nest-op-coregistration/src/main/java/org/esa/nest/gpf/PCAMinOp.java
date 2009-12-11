@@ -35,6 +35,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.awt.*;
 import java.util.Map;
+import java.util.Arrays;
 
 /**
  * The operator performs the following perations:
@@ -68,6 +69,7 @@ public class PCAMinOp extends Operator {
     private double[] minPCA; // min value for all PCA images
     private double totalEigenvalues; // summation of all eigenvalues
     private boolean reloadStats = true;
+    private boolean initialValuesSet = false;
 
     /**
      * Default constructor. The graph processing framework
@@ -95,10 +97,11 @@ public class PCAMinOp extends Operator {
         try {
 
             createTargetProduct();
-            
+
             if(getStatistics()) {
                 addSelectedBands();
             }
+
         } catch(Exception e) {
             throw new OperatorException(e);
         }
@@ -151,7 +154,9 @@ public class PCAMinOp extends Operator {
     /**
      * Set initial values to some internal variables.
      */
-    private void setInitialValues() {
+    private synchronized void setInitialValues() {
+
+        if (initialValuesSet) return;
 
         minPCA = new double[numOfSourceBands];
         for (int i = 0; i < numOfSourceBands; i++) {
@@ -159,6 +164,7 @@ public class PCAMinOp extends Operator {
         }
 
         computeEigenDecompositionOfCovarianceMatrix();
+        initialValuesSet = true;
     }
 
     /**
@@ -276,6 +282,9 @@ public class PCAMinOp extends Operator {
             }
             final int n = bandsRawSamples[0].getNumElems();
 
+            double[] tileMinPCA = new double[numOfSourceBands];
+            Arrays.fill(tileMinPCA, Double.MAX_VALUE);
+
             for (int i = 0; i < numPCA; i++) {
                 checkForCancelation(pm);
                 for (int k = 0; k < n; k++) {
@@ -283,10 +292,12 @@ public class PCAMinOp extends Operator {
                     for (int j = 0; j < numOfSourceBands; j++) {
                         vPCA += bandsRawSamples[j].getElemDoubleAt(k)*eigenVectorMatrices[j][i];
                     }
-                    if(vPCA < minPCA[i])
-                        minPCA[i] = vPCA;
+                    if(vPCA < tileMinPCA[i])
+                        tileMinPCA[i] = vPCA;
                 }
             }
+
+            computePCAMin(tileMinPCA);
 
         } catch (Exception e){
             throw new OperatorException(e);
@@ -295,6 +306,18 @@ public class PCAMinOp extends Operator {
         }
 
         statsCalculated = true;
+    }
+
+    /**
+     * Compute minimum values for all PCA images.
+     * @param tileMinPCA The minimum values for all PCA images for a given tile.
+     */
+    private synchronized void computePCAMin(double[] tileMinPCA) {
+        for (int i = 0; i < numPCA; i++) {
+            if (tileMinPCA[i] < minPCA[i]) {
+                minPCA[i] = tileMinPCA[i];
+            }
+        }
     }
 
     /**

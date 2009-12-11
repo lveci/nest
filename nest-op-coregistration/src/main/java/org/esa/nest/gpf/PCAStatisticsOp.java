@@ -32,6 +32,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Arrays;
 
 /**
  * The operator evaluates some local statistics for every pair of user selected source bands.
@@ -292,17 +293,23 @@ public class PCAStatisticsOp extends Operator {
                         getSourceTile(sourceProduct.getBand(sourceBandNames[i]), targetRectangle, pm).getRawSamples();
             }
 
+            double[] tileSum = new double[numOfSourceBands];
+            double[][] tileSumCross = new double[numOfSourceBands][numOfSourceBands];
+
             if (subtractMeanImage && virtualBandCreated) {
 
                 ProductData meanBandRawSamples =
                         getSourceTile(sourceProduct.getBand(meanImageBandName), targetRectangle, pm).getRawSamples();
 
-                computeStatisticsWithMeanImageSubstract(bandsRawSamples, meanBandRawSamples, pm);
+                computeTileStatisticsWithMeanImageSubstract(
+                        bandsRawSamples, meanBandRawSamples, tileSum, tileSumCross, pm);
 
             } else {
 
-                computeStatisticsWithoutMeanImageSubstract(bandsRawSamples, pm);
+                computeTileStatisticsWithoutMeanImageSubstract(bandsRawSamples, tileSum, tileSumCross, pm);
             }
+
+            computeImageStatistics(tileSum, tileSumCross, pm);
 
         } catch (Exception e){
             throw new OperatorException(e);
@@ -313,14 +320,27 @@ public class PCAStatisticsOp extends Operator {
         statsCalculated = true;
     }
 
-    private void computeStatisticsWithoutMeanImageSubstract (
-            ProductData[] bandsRawSamples, ProgressMonitor pm) throws Exception {
+    /**
+     * Compute summation and cross-summation for all bands for a given tile.
+     * @param bandsRawSamples The raw data for all bands for the given tile.
+     * @param tileSum The summation for all bands for the given tile.
+     * @param tileSumCross The cross-summation for all bands for the given tile.
+     * @param pm A progress monitor which should be used to determine computation cancelation requests.
+     * @throws Exception The exceptions.
+     */
+    private void computeTileStatisticsWithoutMeanImageSubstract (
+            ProductData[] bandsRawSamples, double[] tileSum, double[][] tileSumCross, ProgressMonitor pm)
+            throws Exception {
 
+        Arrays.fill(tileSum, 0.0);
         final int n = bandsRawSamples[0].getNumElems();
 
         double vi, vj;
         for (int i = 0; i < numOfSourceBands; i++) {
+
             checkForCancelation(pm);
+            Arrays.fill(tileSumCross[i], 0.0);
+
             for (int j = 0; j <= i; j++) {
 
                 //System.out.println("i = " + i + ", j = " + j);
@@ -329,29 +349,43 @@ public class PCAStatisticsOp extends Operator {
                     for (int k = 0; k < n; k++) {
                         vi = bandsRawSamples[i].getElemDoubleAt(k);
                         vj = bandsRawSamples[j].getElemDoubleAt(k);
-                        sumCross[i][j] += vi*vj;
+                        tileSumCross[i][j] += vi*vj;
                     }
 
                 } else { // j == i
 
                     for (int k = 0; k < n; k++) {
                         vi = bandsRawSamples[i].getElemDoubleAt(k);
-                        sum[i] += vi;
-                        sumCross[i][j] += vi*vi;
+                        tileSum[i] += vi;
+                        tileSumCross[i][j] += vi*vi;
                     }
                 }
             }
         }
     }
 
-    private void computeStatisticsWithMeanImageSubstract (
-            ProductData[] bandsRawSamples, ProductData meanBandRawSamples, ProgressMonitor pm) throws Exception {
+    /**
+     * Compute summation and cross-summation for all bands for a given tile with mean image substracted.
+     * @param bandsRawSamples The raw data for all bands for the given tile.
+     * @param meanBandRawSamples The raw data for the band of mean image for the given tile.
+     * @param tileSum The summation for all bands for the given tile.
+     * @param tileSumCross The cross-summation for all bands for the given tile.
+     * @param pm A progress monitor which should be used to determine computation cancelation requests.
+     * @throws Exception The exceptions.
+     */
+    private void computeTileStatisticsWithMeanImageSubstract (
+            ProductData[] bandsRawSamples, ProductData meanBandRawSamples,
+            double[] tileSum, double[][] tileSumCross, ProgressMonitor pm) throws Exception {
 
+        Arrays.fill(tileSum, 0.0);
         final int n = bandsRawSamples[0].getNumElems();
 
         double vi, vj, vm;
         for (int i = 0; i < numOfSourceBands; i++) {
+
             checkForCancelation(pm);
+            Arrays.fill(tileSumCross[i], 0.0);
+
             for (int j = 0; j <= i; j++) {
 
                 //System.out.println("i = " + i + ", j = " + j);
@@ -361,7 +395,7 @@ public class PCAStatisticsOp extends Operator {
                         vm = meanBandRawSamples.getElemDoubleAt(k);
                         vi = bandsRawSamples[i].getElemDoubleAt(k) - vm;
                         vj = bandsRawSamples[j].getElemDoubleAt(k) - vm;
-                        sumCross[i][j] += vi*vj;
+                        tileSumCross[i][j] += vi*vj;
                     }
 
                 } else { // j == i
@@ -369,9 +403,32 @@ public class PCAStatisticsOp extends Operator {
                     for (int k = 0; k < n; k++) {
                         vm = meanBandRawSamples.getElemDoubleAt(k);
                         vi = bandsRawSamples[i].getElemDoubleAt(k) - vm;
-                        sum[i] += vi;
-                        sumCross[i][j] += vi*vi;
+                        tileSum[i] += vi;
+                        tileSumCross[i][j] += vi*vi;
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     * Compute summation and cross-summation for the whole image.
+     * @param tileSum The summation computed for each tile.
+     * @param tileSumCross The cross-summation computed for each tile.
+     * @param pm A progress monitor which should be used to determine computation cancelation requests.
+     * @throws Exception The exceptions.
+     */
+    private synchronized void computeImageStatistics (double[] tileSum, double[][] tileSumCross, ProgressMonitor pm)
+            throws Exception {
+
+        for (int i = 0; i < numOfSourceBands; i++) {
+            checkForCancelation(pm);
+            for (int j = 0; j <= i; j++) {
+                if (j < i) {
+                    sumCross[i][j] += tileSumCross[i][j];
+                } else { // j == i
+                    sum[i] += tileSum[i];
+                    sumCross[i][j] += tileSumCross[i][j];
                 }
             }
         }

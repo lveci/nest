@@ -33,7 +33,7 @@ public class PCAStatisticsOpUI extends BaseOperatorUI {
     private final JCheckBox showEigenvalues = new JCheckBox("Show Eigenvalues");
     private final JCheckBox subtractMeanImage = new JCheckBox("Subtract Mean Image");
 
-    private final JLabel eigenvalueThresholdLabel = new JLabel("Eigenvalue Threshold:");
+    private final JLabel eigenvalueThresholdLabel = new JLabel("Eigenvalue Threshold (%):");
     private final JLabel numberOfEigenvaluesLabel = new JLabel("Number Of Eigenvalues:");
     private final JLabel selectEigenvaluesByLabel = new JLabel("Select Eigenvalues By:     ");
 
