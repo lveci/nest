@@ -19,6 +19,7 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.framework.dataop.maptransf.MapInfo;
 import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -27,6 +28,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.framework.dataio.ProductProjectionBuilder;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
@@ -80,9 +82,14 @@ public final class GeolocationGridGeocodingOp extends Operator {
             sourceProductId="source", label="Source Bands")
     String[] sourceBandNames = null;
 
-    @Parameter(valueSet = {NEAREST_NEIGHBOUR, BILINEAR, CUBIC}, defaultValue = BILINEAR, label="Image Resampling Method")
-    private String imgResamplingMethod = BILINEAR;
+    @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+            ResamplingFactory.BILINEAR_INTERPOLATION_NAME, ResamplingFactory.CUBIC_CONVOLUTION_NAME},
+            defaultValue = ResamplingFactory.BILINEAR_INTERPOLATION_NAME, label="Image Resampling Method")
+    private String imgResamplingMethod = ResamplingFactory.BILINEAR_INTERPOLATION_NAME;
 
+    @Parameter(description = "The projection name", defaultValue = IdentityTransformDescriptor.NAME)
+    private String projectionName = IdentityTransformDescriptor.NAME;
+    
     private Band sourceBand = null;
     private Band sourceBand2 = null;
     private MetadataElement absRoot = null;
@@ -94,6 +101,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
     private int targetImageHeight = 0;
 
     private TiePointGrid slantRangeTime = null;
+    private GeoCoding targetGeoCoding = null;
 
     private double rangeSpacing = 0.0;
     private double azimuthSpacing = 0.0;
@@ -107,9 +115,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
 
-    static final String NEAREST_NEIGHBOUR = "Nearest Neighbour";
-    static final String BILINEAR = "Bilinear Interpolation";
-    static final String CUBIC = "Cubic Convolution";
     private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
     private ResampleMethod imgResampling = null;
 
@@ -138,21 +143,21 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
             getSourceImageDimension();
 
-            RangeDopplerGeocodingOp.computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
+//            RangeDopplerGeocodingOp.computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
 
-            computeDEMTraversalSampleInterval();
+//            computeDEMTraversalSampleInterval();
 
-            computedTargetImageDimension();
+//            computedTargetImageDimension();
 
             createTargetProduct();
 
             getTiePointGrids();
 
-            if (imgResamplingMethod.equals(NEAREST_NEIGHBOUR)) {
+            if (imgResamplingMethod.equals(ResamplingFactory.NEAREST_NEIGHBOUR_NAME)) {
                 imgResampling = ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR;
-            } else if (imgResamplingMethod.contains(BILINEAR)) {
+            } else if (imgResamplingMethod.contains(ResamplingFactory.BILINEAR_INTERPOLATION_NAME)) {
                 imgResampling = ResampleMethod.RESAMPLE_BILINEAR;
-            } else if (imgResamplingMethod.contains(CUBIC)) {
+            } else if (imgResamplingMethod.contains(ResamplingFactory.CUBIC_CONVOLUTION_NAME)) {
                 imgResampling = ResampleMethod.RESAMPLE_CUBIC;
             } else {
                 throw new OperatorException("Unknown interpolation method");
@@ -239,8 +244,28 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * Create target product.
      * @throws OperatorException The exception.
      */
-    private void createTargetProduct() throws OperatorException {
-        
+    private void createTargetProduct() throws OperatorException, IOException {
+
+        final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(
+                                                sourceProduct,
+                                                MapProjectionRegistry.getProjection(projectionName),
+                                                0.0,
+                                                sourceProduct.getBandAt(0).getNoDataValue());
+
+        targetProduct = ProductProjectionBuilder.createProductProjection(sourceProduct, false, false, mapInfo,
+                                                                  sourceProduct.getName() + PRODUCT_SUFFIX, "");
+
+        targetImageWidth = targetProduct.getSceneRasterWidth();
+        targetImageHeight = targetProduct.getSceneRasterHeight();
+
+        for (Band band : targetProduct.getBands()) {
+            targetProduct.removeBand(band);
+        }
+
+        addSelectedBands();
+
+        targetGeoCoding = targetProduct.getGeoCoding();
+        /*
         targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
                                     sourceProduct.getProductType(),
                                     targetImageWidth,
@@ -249,7 +274,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
         addSelectedBands();
 
         addGeoCoding();
-
+        */
         updateTargetProductMetadata();
     }
 
@@ -396,20 +421,20 @@ public final class GeolocationGridGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, IdentityTransformDescriptor.NAME);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetImageHeight);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_lat, imageGeoBoundary.latMax);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_lat, imageGeoBoundary.latMax);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_lat, imageGeoBoundary.latMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_lat, imageGeoBoundary.latMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_long, imageGeoBoundary.lonMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_long, imageGeoBoundary.lonMax);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, imageGeoBoundary.lonMin);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, imageGeoBoundary.lonMax);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_lat, AbstractMetadata.NO_METADATA);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_lat, AbstractMetadata.NO_METADATA);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_lat, AbstractMetadata.NO_METADATA);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_lat, AbstractMetadata.NO_METADATA);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_long, AbstractMetadata.NO_METADATA);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_long, AbstractMetadata.NO_METADATA);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, AbstractMetadata.NO_METADATA);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, AbstractMetadata.NO_METADATA);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(targetProduct));
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.is_terrain_corrected, 0);
         //AbstractMetadata.setAttribute(absTgt, AbstractMetadata.DEM, demName);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.geo_ref_system, "WGS84");
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lat_pixel_res, delLat);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lon_pixel_res, delLon);
+        //AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lat_pixel_res, delLat);
+        //AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lon_pixel_res, delLon);
     }
 
     /**
@@ -463,14 +488,14 @@ public final class GeolocationGridGeocodingOp extends Operator {
             final ProductData trgData = targetTile.getDataBuffer();
             final int srcMaxRange = sourceImageWidth - 1;
             final int srcMaxAzimuth = sourceImageHeight - 1;
-
+            GeoPos geoPos = null;
             for (int y = y0; y < y0 + h; y++) {
-                final double lat = imageGeoBoundary.latMax - y*delLat;
-
                 for (int x = x0; x < x0 + w; x++) {
 
                     final int index = targetTile.getDataBufferIndex(x, y);
-                    double lon = imageGeoBoundary.lonMin + x*delLon;
+                    geoPos = targetGeoCoding.getGeoPos(new PixelPos(x,y), null);
+                    final double lat = geoPos.lat;
+                    double lon = geoPos.lon;
                     if (lon >= 180.0) {
                         lon -= 360.0;
                     }
@@ -824,6 +849,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
     public static class Spi extends OperatorSpi {
         public Spi() {
             super(GeolocationGridGeocodingOp.class);
+            setOperatorUI(GeolocationGridGeocodingOpUI.class);            
         }
     }
 }
