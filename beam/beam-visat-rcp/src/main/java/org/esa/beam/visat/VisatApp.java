@@ -1,5 +1,5 @@
 /*
- * $Id: VisatApp.java,v 1.17 2009-12-11 20:46:14 lveci Exp $
+ * $Id: VisatApp.java,v 1.18 2009-12-14 21:03:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -154,7 +154,7 @@ import java.util.logging.Level;
  * @author Norman Fomferra
  * @author Marco Peters
  * @author Sabine Embacher
- * @version $Revision: 1.17 $ $Date: 2009-12-11 20:46:14 $
+ * @version $Revision: 1.18 $ $Date: 2009-12-14 21:03:50 $
  */
 public class VisatApp extends BasicApp implements AppContext {
 

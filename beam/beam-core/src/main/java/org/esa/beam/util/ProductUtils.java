@@ -1,5 +1,5 @@
 /*
- * $Id: ProductUtils.java,v 1.10 2009-12-11 20:46:13 lveci Exp $
+ * $Id: ProductUtils.java,v 1.11 2009-12-14 21:03:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -1558,12 +1558,13 @@ public class ProductUtils {
         for (int i = 0; i < vectorDataGroup.getNodeCount(); i++) {
             VectorDataNode vectorDataNode = vectorDataGroup.get(i);
             String name = vectorDataNode.getName();
-            if (!"pins".equals(name) && !"ground_control_points".equals(name)) {
+            if (!sourceProduct.isInternalNode(vectorDataNode)) {
                 FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = vectorDataNode.getFeatureCollection();
                 ReprojectingFeatureCollection wgs84Collection = new ReprojectingFeatureCollection(featureCollection, DefaultGeographicCRS.WGS84);
                 FeatureCollection<SimpleFeatureType, SimpleFeature> clippedToSource = FeatureCollectionClipper.doOperation(wgs84Collection, sourceGeometry, null, null);
                 FeatureCollection<SimpleFeatureType, SimpleFeature> clippedToTarget = FeatureCollectionClipper.doOperation(clippedToSource, targetGeometry, null, targetCRS);
                 VectorDataNode targetVDN = new VectorDataNode(name, clippedToTarget);
+                targetVDN.setDefaultCSS(vectorDataNode.getDefaultCSS());
                 targetVDN.setDescription(vectorDataNode.getDescription());
                 targetProduct.getVectorDataGroup().add(targetVDN);
             }

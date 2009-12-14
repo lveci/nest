@@ -1,5 +1,5 @@
 /*
- * $Id: ROIDefinitionTest.java,v 1.2 2009-12-04 19:06:45 lveci Exp $
+ * $Id: ROIDefinitionTest.java,v 1.3 2009-12-14 21:03:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -44,7 +44,7 @@ public class ROIDefinitionTest extends TestCase {
         roiDefinition.setInverted(true);
 
         final Mask mask = ROIDefinition.toMask(roiDefinition, new Band("B", ProductData.TYPE_INT8, 10, 10));
-        assertEquals("!((true) && (B >= 1.0 && B <= 2.0))", Mask.BandMathType.getExpression(mask));
+        assertEquals("!(true && (B >= 1.0 && B <= 2.0))", Mask.BandMathType.getExpression(mask));
     }
 
     public void testWriteXml() {

@@ -23,13 +23,13 @@ import com.bc.ceres.swing.figure.Handle;
 import com.bc.ceres.swing.figure.PointFigure;
 import com.bc.ceres.swing.figure.ShapeFigure;
 import com.bc.ceres.swing.figure.support.DefaultFigureEditor;
+import com.bc.ceres.swing.figure.support.DefaultFigureStyle;
 import com.bc.ceres.swing.selection.SelectionContext;
 import com.bc.ceres.swing.undo.UndoContext;
 import com.bc.ceres.swing.undo.support.DefaultUndoContext;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.Polygon;
-import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.ImageInfo;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
@@ -51,7 +51,6 @@ import org.esa.beam.glayer.MaskCollectionLayer;
 import org.esa.beam.glayer.NoDataLayerType;
 import org.esa.beam.glayer.ProductLayerContext;
 import org.esa.beam.glevel.MaskImageMultiLevelSource;
-import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.AwtGeomToJtsGeomConverter;
 import org.esa.beam.util.PropertyMap;
 import org.esa.beam.util.PropertyMapChangeListener;
@@ -59,7 +58,6 @@ import org.esa.beam.util.SystemUtils;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.swing.AbstractButton;
 import javax.swing.JMenuItem;
@@ -696,14 +694,6 @@ public class ProductSceneView extends BasicView
         if (imageLayer != null) {
             ProductSceneImage.setBaseImageLayerStyle(configuration, imageLayer);
         }
-        final Layer pinLayer = getPinLayer(false);
-        if (pinLayer != null) {
-            ProductSceneImage.setPinLayerStyle(configuration, pinLayer);
-        }
-        final Layer gcpLayer = getGcpLayer(false);
-        if (gcpLayer != null) {
-            ProductSceneImage.setGcpLayerStyle(configuration, gcpLayer);
-        }
         final Layer collectionLayer = getVectorDataCollectionLayer(false);
         if (collectionLayer != null) {
             ProductSceneImage.setFigureLayerStyle(configuration, collectionLayer);
@@ -760,8 +750,11 @@ public class ProductSceneView extends BasicView
         if (selectedLayer instanceof VectorDataLayer) {
             VectorDataLayer vectorDataLayer = (VectorDataLayer) selectedLayer;
             figureEditor.setFigureCollection(vectorDataLayer.getFigureCollection());
-            figureFactory.setVectorData(vectorDataLayer.getVectorData());
-
+            figureFactory.setVectorData(vectorDataLayer.getVectorDataNode());
+            final DefaultFigureStyle style = new DefaultFigureStyle();
+            style.fromCssString(vectorDataLayer.getVectorDataNode().getDefaultCSS());
+            figureEditor.setDefaultLineStyle(style);
+            figureEditor.setDefaultPolygonStyle(style);
         }
     }
 

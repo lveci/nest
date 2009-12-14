@@ -29,6 +29,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
@@ -112,14 +113,12 @@ public final class SARSimulationOp extends Operator {
 
     private ElevationModel dem = null;
     private FileElevationModel fileElevationModel = null;
-    private TiePointGrid latitude = null;
-    private TiePointGrid longitude = null;
+    private TiePointGrid latitudeTPG = null;
+    private TiePointGrid longitudeTPG = null;
 
     private int sourceImageWidth = 0;
     private int sourceImageHeight = 0;
-    private int ny0 = 0; // line index for starting traverse
     private boolean srgrFlag = false;
-    private boolean ny0Updated = false;
     private boolean isElevationModelAvailable = false;
 
     private double rangeSpacing = 0.0;
@@ -139,7 +138,6 @@ public final class SARSimulationOp extends Operator {
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
 
-    private static final double NonValidZeroDopplerTime = -99999.0;
     private static final double halfLightSpeedInMetersPerDay = Constants.halfLightSpeed * 86400.0;
 
     /**
@@ -172,6 +170,8 @@ public final class SARSimulationOp extends Operator {
             computeSensorPositionsAndVelocities();
 
             createTargetProduct();
+
+            //checkIfDEMInstalled();
 
         } catch(Exception e) {
             throw new OperatorException(e);
@@ -223,6 +223,20 @@ public final class SARSimulationOp extends Operator {
         sourceImageHeight = sourceProduct.getSceneRasterHeight();
     }
 
+    private void checkIfDEMInstalled() {
+        if(externalDEMFile == null) {
+            final ElevationModelRegistry elevationModelRegistry = ElevationModelRegistry.getInstance();
+            final ElevationModelDescriptor demDescriptor = elevationModelRegistry.getDescriptor(demName);
+            if (demDescriptor == null) {
+                throw new OperatorException("The DEM '" + demName + "' is not supported.");
+            }
+
+            if (!demDescriptor.isInstallingDem() && !demDescriptor.isDemInstalled()) {
+                demDescriptor.installDemFiles(VisatApp.getApp());
+            }
+        }
+    }
+
     /**
      * Get elevation model.
      * @throws Exception The exceptions.
@@ -265,8 +279,8 @@ public final class SARSimulationOp extends Operator {
      * Get incidence angle and slant range time tie point grids.
      */
     private void getTiePointGrid() {
-        latitude = OperatorUtils.getLatitude(sourceProduct);
-        longitude = OperatorUtils.getLongitude(sourceProduct);
+        latitudeTPG = OperatorUtils.getLatitude(sourceProduct);
+        longitudeTPG = OperatorUtils.getLongitude(sourceProduct);
     }
 
     /**
@@ -440,7 +454,7 @@ public final class SARSimulationOp extends Operator {
                         continue;
                     }
 
-                    GeoUtils.geo2xyz(latitude.getPixelFloat(x, y), longitude.getPixelFloat(x, y), alt, earthPoint, GeoUtils.EarthModel.WGS84);
+                    GeoUtils.geo2xyz(latitudeTPG.getPixelFloat(x, y), longitudeTPG.getPixelFloat(x, y), alt, earthPoint, GeoUtils.EarthModel.WGS84);
 
                     final double zeroDopplerTime = RangeDopplerGeocodingOp.getEarthPointZeroDopplerTime(sourceImageHeight,
                             firstLineUTC, lineTimeInterval, wavelength, earthPoint, sensorPosition, sensorVelocity);
@@ -562,7 +576,7 @@ public final class SARSimulationOp extends Operator {
         for (int y = y0 - 1; y < maxY; y++) {
             final int yy = y - y0 + 1;
             for (int x = x0 - 1; x < maxX; x++) {
-                geoPos.setLocation(latitude.getPixelFloat(x, y), longitude.getPixelFloat(x, y));
+                geoPos.setLocation(latitudeTPG.getPixelFloat(x, y), longitudeTPG.getPixelFloat(x, y));
                 if(externalDEMFile == null) {
                     alt = dem.getElevation(geoPos);
                 } else {
@@ -581,15 +595,15 @@ public final class SARSimulationOp extends Operator {
     }
 
     private void setLocalGeometry(final int x, final int y, final double[] earthPoint, final double[] sensorPos,
-                                  RangeDopplerGeocodingOp.LocalGeometry localGeometry) {
-        localGeometry.leftPointLat  = latitude.getPixelFloat(x-1, y);
-        localGeometry.leftPointLon  = longitude.getPixelFloat(x-1, y);
-        localGeometry.rightPointLat = latitude.getPixelFloat(x+1, y);
-        localGeometry.rightPointLon = longitude.getPixelFloat(x+1, y);
-        localGeometry.upPointLat    = latitude.getPixelFloat(x, y-1);
-        localGeometry.upPointLon    = longitude.getPixelFloat(x, y-1);
-        localGeometry.downPointLat  = latitude.getPixelFloat(x, y+1);
-        localGeometry.downPointLon  = longitude.getPixelFloat(x, y+1);
+                                  final RangeDopplerGeocodingOp.LocalGeometry localGeometry) {
+        localGeometry.leftPointLat  = latitudeTPG.getPixelFloat(x-1, y);
+        localGeometry.leftPointLon  = longitudeTPG.getPixelFloat(x-1, y);
+        localGeometry.rightPointLat = latitudeTPG.getPixelFloat(x+1, y);
+        localGeometry.rightPointLon = longitudeTPG.getPixelFloat(x+1, y);
+        localGeometry.upPointLat    = latitudeTPG.getPixelFloat(x, y-1);
+        localGeometry.upPointLon    = longitudeTPG.getPixelFloat(x, y-1);
+        localGeometry.downPointLat  = latitudeTPG.getPixelFloat(x, y+1);
+        localGeometry.downPointLon  = longitudeTPG.getPixelFloat(x, y+1);
         localGeometry.centrePoint   = earthPoint;
         localGeometry.sensorPos     = sensorPos;
     }
@@ -612,7 +626,7 @@ public final class SARSimulationOp extends Operator {
      * @param sensorPos The coordinate for satellite position.
      * @return The elevation angle in degree.
      */
-    private double computeElevationAngle(final double slantRange, final double[] earthPoint, final double[] sensorPos) {
+    private static double computeElevationAngle(final double slantRange, final double[] earthPoint, final double[] sensorPos) {
 
         final double H2 = sensorPos[0]*sensorPos[0] + sensorPos[1]*sensorPos[1] + sensorPos[2]*sensorPos[2];
         final double R2 = earthPoint[0]*earthPoint[0] + earthPoint[1]*earthPoint[1] + earthPoint[2]*earthPoint[2];

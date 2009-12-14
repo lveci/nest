@@ -188,7 +188,6 @@ public final class DatApp extends VisatApp {
         excludedIds.add("org.esa.beam.scripting.visat.ScriptConsoleToolView");
         excludedIds.add("org.esa.beam.visat.toolviews.placemark.pin.PinManagerToolView");
         excludedIds.add("org.esa.beam.visat.toolviews.placemark.gcp.GcpManagerToolView");
-        excludedIds.add("org.esa.beam.visat.toolviews.roi.RoiManagerToolView");
         excludedIds.add("org.esa.nest.dat.toolviews.worldmap.NestWorldMapToolView");
 
         return excludedIds;
@@ -204,7 +203,6 @@ public final class DatApp extends VisatApp {
         commandIds.add("org.esa.beam.visat.toolviews.nav.NavigationToolView.showCmd");
         commandIds.add("org.esa.beam.visat.toolviews.imageinfo.ColorManipulationToolView.showCmd");
         commandIds.add("org.esa.beam.visat.toolviews.layermanager.LayerManagerToolView.showCmd");
-        commandIds.add("org.esa.beam.visat.toolviews.bitmask.BitmaskOverlayToolView.showCmd");
         commandIds.add(null);
     }
 
@@ -322,21 +320,16 @@ public final class DatApp extends VisatApp {
                 "zoomTool",
                 "pannerTool",
                 null,
-                //"pinTool",
-                //"org.esa.beam.visat.toolviews.pin.PinManagerToolView.showCmd",
-                //"gcpTool",
-                //"org.esa.beam.visat.toolviews.pin.GcpManagerToolView.showCmd",
+                "pinTool",
+                "gcpTool",
                 null,
                 "drawLineTool",
                 "drawRectangleTool",
                 "drawEllipseTool",
                 //"drawPolylineTool",
                 "drawPolygonTool",
-                //"deleteShape",
                 //"magicStickTool",
                 null,
-                //"convertShapeToROI",
-                //"convertROIToShape",
         });
 
         return toolBar;

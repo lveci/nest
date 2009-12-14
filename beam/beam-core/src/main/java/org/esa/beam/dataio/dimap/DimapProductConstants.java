@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductConstants.java,v 1.5 2009-12-02 16:52:11 lveci Exp $
+ * $Id: DimapProductConstants.java,v 1.6 2009-12-14 21:03:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -21,7 +21,7 @@ package org.esa.beam.dataio.dimap;
  *
  * @author Sabine Embacher
  * @author Marco Peters
- * @version $Revision: 1.5 $ $Date: 2009-12-02 16:52:11 $
+ * @version $Revision: 1.6 $ $Date: 2009-12-14 21:03:50 $
  */
 public final class DimapProductConstants {
 
@@ -580,6 +580,9 @@ public final class DimapProductConstants {
     public static final String TAG_VALUE_RANGE_ENABLED = "VALUE_RANGE_ENABLED";
     public static final String TAG_PATH_SEG = "SEGMENT";
     public static final String TAG_PIN_USE_ENABLED = "PIN_USE_ENABLED";
+    public static final String TAG_MASK_USAGE = "Mask_Usage";
+    public static final String TAG_ROI = "ROI";
+    public static final String TAG_OVERLAY = "OVERLAY";
 
     // BEAM-Dimap image interpretation tags
     public static final String TAG_IMAGE_INTERPRETATION = "Image_Interpretation";

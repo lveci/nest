@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductWriter.java,v 1.6 2009-12-11 20:46:13 lveci Exp $
+ * $Id: DimapProductWriter.java,v 1.7 2009-12-14 21:03:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -55,7 +55,7 @@ import java.util.Map;
  * The product writer for BEAM DIMAP products.
  *
  * @author Sabine Embacher
- * @version $Revision: 1.6 $ $Date: 2009-12-11 20:46:13 $
+ * @version $Revision: 1.7 $ $Date: 2009-12-14 21:03:50 $
  */
 public class DimapProductWriter extends AbstractProductWriter {
 
@@ -495,8 +495,7 @@ public class DimapProductWriter extends AbstractProductWriter {
         boolean hasVectorData = false;
         for (int i = 0; i < vectorDataGroup.getNodeCount(); i++) {
             VectorDataNode vectorDataNode = vectorDataGroup.get(i);
-            String name = vectorDataNode.getName();
-            if (!"pins".equals(name) && !"ground_control_points".equals(name)) {
+            if (!product.isInternalNode(vectorDataNode)) {
                 hasVectorData = true;
                 break;
             }
@@ -513,8 +512,7 @@ public class DimapProductWriter extends AbstractProductWriter {
             }
             for (int i = 0; i < vectorDataGroup.getNodeCount(); i++) {
                 VectorDataNode vectorDataNode = vectorDataGroup.get(i);
-                String name = vectorDataNode.getName();
-                if (!"pins".equals(name) && !"ground_control_points".equals(name)) {
+                if (!product.isInternalNode(vectorDataNode)) {
                     writeVectorData(vectorDataDir, vectorDataNode);
                 }
             }

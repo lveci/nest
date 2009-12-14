@@ -10,10 +10,10 @@ import org.esa.beam.dataio.dimap.spi.DimapPersistence;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.BitmaskDef;
 import org.esa.beam.framework.datamodel.Mask;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.datamodel.Mask.BandMathType;
 import org.esa.beam.framework.datamodel.Mask.ImageType;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.dataop.barithm.BandArithmetic;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.ui.AbstractDialog;
@@ -25,6 +25,7 @@ import org.esa.beam.util.io.BeamFileChooser;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.visat.VisatApp;
+import org.esa.beam.visat.actions.NewVectorDataNodeAction;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -37,14 +38,17 @@ import org.xml.sax.SAXException;
 import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
-
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -55,6 +59,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
+import java.util.ArrayList;
 
 /**
  * @author Marco Peters
@@ -68,8 +74,9 @@ class MaskFormActions {
     MaskFormActions(AbstractToolView maskToolView, MaskForm maskForm) {
         maskActions = new MaskAction[]{
                 new NewBandMathAction(maskForm), new NewRangeAction(maskForm),
-                new NewUnionAction(maskForm), new NewIntersectionAction(maskForm),
-                new NewDifferenceAction(maskForm), new NewComplementAction(maskForm),
+                new _NewVectorDataNodeAction(maskForm), new NewUnionAction(maskForm),
+                new NewIntersectionAction(maskForm), new NewComplementAction(maskForm),
+                new NewDifferenceAction(maskForm), new NewInvDifferenceAction(maskForm),
                 new CopyAction(maskForm), new NullAction(maskForm),
                 new EditAction(maskForm), new RemoveAction(maskForm),
                 new ImportAction(maskToolView, maskForm), new ExportAction(maskToolView, maskForm),
@@ -167,6 +174,29 @@ class MaskFormActions {
 
     }
 
+    private static class _NewVectorDataNodeAction extends MaskAction {
+        private NewVectorDataNodeAction action;
+
+        private _NewVectorDataNodeAction(MaskForm maskForm) {
+            super(maskForm,
+                  "Geometry24.png",
+                  "newGeometry",
+                  "Creates a new mask based on geometry (lines and polygons))");
+            action = new NewVectorDataNodeAction();
+        }
+
+        @Override
+        void updateState() {
+            action.updateState();
+            setEnabled(action.isEnabled());
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            action.run();
+        }
+    }
+
     private static class NewIntersectionAction extends BandMathAction {
 
         private NewIntersectionAction(MaskForm maskForm) {
@@ -233,13 +263,13 @@ class MaskFormActions {
             model.setMaxValue(1.0);
             model.setRasterName(rasterNames[0]);
 
-            final RangeEditorDialog rangeEditorDialog = new RangeEditorDialog(model);
+            final RangeEditorDialog rangeEditorDialog = new RangeEditorDialog(getWindow(e), model);
             if (rangeEditorDialog.show() == AbstractDialog.ID_OK) {
                 Mask.RangeType type = new Mask.RangeType();
 
                 final Mask mask = createNewMask(type);
                 final String externalName = Tokenizer.createExternalName(model.getRasterName());
-                mask.setDescription(model.getMinValue() + " < " + externalName + " < " + model.getMaxValue());
+                mask.setDescription(model.getMinValue() + " <= " + externalName + " <= " + model.getMaxValue());
 
                 final PropertyContainer imageConfig = mask.getImageConfig();
                 imageConfig.setValue(Mask.RangeType.PROPERTY_NAME_MINIMUM, model.getMinValue());
@@ -263,12 +293,42 @@ class MaskFormActions {
 
         private NewDifferenceAction(MaskForm maskForm) {
             super(maskForm, "Difference24.png", "differenceButton",
-                  "Creates the difference of the selected masks");
+                  "Creates the difference of the selected masks (in top-down order)");
         }
 
         @Override
         String getCode(ActionEvent e) {
             Mask[] selectedMasks = getMaskForm().getSelectedMasks();
+            StringBuilder code = new StringBuilder();
+            code.append(BandArithmetic.createExternalName(selectedMasks[0].getName()));
+            if (selectedMasks.length > 1) {
+                code.append(" && !(");
+                code.append(createCodeFromSelection("||", selectedMasks, 1));
+                code.append(")");
+            }
+            return code.toString();
+        }
+
+        @Override
+        void updateState() {
+            setEnabled(getMaskForm().isInManagementMode() && getMaskForm().getSelectedRowCount() > 1);
+        }
+
+    }
+
+    private static class NewInvDifferenceAction extends BandMathAction {
+
+        private NewInvDifferenceAction(MaskForm maskForm) {
+            super(maskForm, "InvDifference24.png", "invDifferenceButton",
+                  "Creates the difference of the selected masks (in bottom-up order)");
+        }
+
+        @Override
+        String getCode(ActionEvent e) {
+            Mask[] selectedMasks = getMaskForm().getSelectedMasks();
+            final List<Mask> reverseList = new ArrayList<Mask>(Arrays.asList(selectedMasks));
+            Collections.reverse(reverseList);
+            selectedMasks =  reverseList.toArray(new Mask[selectedMasks.length]);
             StringBuilder code = new StringBuilder();
             code.append(BandArithmetic.createExternalName(selectedMasks[0].getName()));
             if (selectedMasks.length > 1) {
@@ -380,11 +440,12 @@ class MaskFormActions {
                         } else {
                             importMasks(file);
                         }
-                        
+
                     }
                 }
             }
         }
+
         private void importBitmaskDef(File file) {
             final PropertyMap propertyMap = new PropertyMap();
             try {
@@ -405,6 +466,7 @@ class MaskFormActions {
                 showErrorDialog("I/O Error.\nFailed to import bitmask definition.");        /*I18N*/
             }
         }
+
         private void importBitmaskDefs(File file) {
             try {
                 try {
@@ -441,7 +503,7 @@ class MaskFormActions {
                 showErrorDialog("I/O Error.\nFailed to import bitmask definition.");        /*I18N*/
             }
         }
-        
+
         private void importMasks(File file) {
             try {
                 final SAXBuilder saxBuilder = new SAXBuilder();
@@ -534,6 +596,16 @@ class MaskFormActions {
         }
     }
 
+   static Window getWindow(ActionEvent e) {
+        Object source = e.getSource();
+        Window window = null;
+        if (source instanceof Component) {
+            Component component = (Component) source;
+            window = SwingUtilities.getWindowAncestor(component);
+        }
+        return window;
+    }
+
     private static class EditAction extends MaskAction {
 
         private EditAction(MaskForm maskForm) {
@@ -542,6 +614,7 @@ class MaskFormActions {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            Window window = getWindow(e);
             Mask selectedMask = getMaskForm().getSelectedMask();
             PropertyContainer selectedMaskConfig = selectedMask.getImageConfig();
             Mask.ImageType type = selectedMask.getImageType();
@@ -551,7 +624,7 @@ class MaskFormActions {
                         new Product[]{product}, product, null);
                 expressionPane.setEmptyExpressionAllowed(false);
                 expressionPane.setCode((String) selectedMaskConfig.getValue("expression"));
-                if (expressionPane.showModalDialog(null, "Edit Band-Math Mask") == AbstractDialog.ID_OK) {
+                if (expressionPane.showModalDialog(window, "Edit Band-Math Mask") == AbstractDialog.ID_OK) {
                     String code = expressionPane.getCode();
                     selectedMaskConfig.setValue("expression", code);
                     selectedMask.setDescription(code);
@@ -564,9 +637,9 @@ class MaskFormActions {
                 model.setMinValue((Double) selectedMaskConfig.getValue(Mask.RangeType.PROPERTY_NAME_MINIMUM));
                 model.setMaxValue((Double) selectedMaskConfig.getValue(Mask.RangeType.PROPERTY_NAME_MAXIMUM));
                 model.setRasterName((String) selectedMaskConfig.getValue(Mask.RangeType.PROPERTY_NAME_RASTER));
-                final RangeEditorDialog rangeEditorDialog = new RangeEditorDialog(model);
+                final RangeEditorDialog rangeEditorDialog = new RangeEditorDialog(window, model);
                 if (rangeEditorDialog.show() == AbstractDialog.ID_OK) {
-                    final String description = String.format("%s < %s < %s",
+                    final String description = String.format("%s <= %s <= %s",
                                                              model.getMinValue(), model.getRasterName(),
                                                              model.getMaxValue());
                     selectedMask.setDescription(description);
@@ -574,6 +647,13 @@ class MaskFormActions {
                     selectedMaskConfig.setValue(Mask.RangeType.PROPERTY_NAME_MAXIMUM, model.getMaxValue());
                     selectedMaskConfig.setValue(Mask.RangeType.PROPERTY_NAME_RASTER, model.getRasterName());
                 }
+            } else if (type instanceof Mask.VectorDataType) {
+                JOptionPane.showMessageDialog(window,
+                                              "Use the VISAT geometry tools to add new points, lines or polygons.\n" +
+                                                      "You can then use the select tool to select and modify the shape\n" +
+                                                      "and position of the geometries.",
+                                              "Edit Geometry Mask",
+                                              JOptionPane.INFORMATION_MESSAGE);
             } else {
                 // todo - implement for other types too
 
@@ -594,16 +674,6 @@ class MaskFormActions {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            addNewMaskCopy();
-        }
-
-        @Override
-        void updateState() {
-            setEnabled(getMaskForm().isInManagementMode() && getMaskForm().getSelectedRowCount() == 1);
-        }
-
-
-        private void addNewMaskCopy() {
             Mask selectedMask = getMaskForm().getSelectedMask();
             final Mask mask = createNewMask(selectedMask.getImageType());
             mask.setName("Copy_of_" + selectedMask.getName());
@@ -615,6 +685,11 @@ class MaskFormActions {
                                                model.getValue());
             }
             getMaskForm().addMask(mask);
+        }
+
+        @Override
+        void updateState() {
+            setEnabled(getMaskForm().isInManagementMode() && getMaskForm().getSelectedRowCount() == 1);
         }
     }
 
@@ -675,18 +750,18 @@ class MaskFormActions {
             getMaskForm().addMask(mask);
         }
     }
-    
-    private static class TransferAction extends MaskAction  {
+
+    private static class TransferAction extends MaskAction {
 
         private TransferAction(MaskForm maskForm) {
             super(maskForm, "icons/MultiAssignProducts24.gif", "transferButton", "Transfer the selected mask(s) to other products.");
         }
-        
+
         @Override
         void updateState() {
-            setEnabled(getMaskForm().isInManagementMode() && 
-                       getMaskForm().getSelectedRowCount() > 0 && 
-                       VisatApp.getApp().getProductManager().getProducts().length > 1);
+            setEnabled(getMaskForm().isInManagementMode() &&
+                    getMaskForm().getSelectedRowCount() > 0 &&
+                    VisatApp.getApp().getProductManager().getProducts().length > 1);
         }
 
         @Override
@@ -698,7 +773,7 @@ class MaskFormActions {
             if (dialog.show() == AbstractDialog.ID_OK) {
                 Product[] maskPixelTargetProducts = dialog.getMaskPixelTargets();
                 copyMaskPixel(selectedMasks, sourcProduct, maskPixelTargetProducts);
-                
+
                 Product[] maskDefinitionTargetProducts = dialog.getMaskDefinitionTargets();
                 copyMaskDefinition(selectedMasks, maskDefinitionTargetProducts);
             }
@@ -714,7 +789,7 @@ class MaskFormActions {
                 }
             }
         }
-        
+
         private static void copyMaskPixel(Mask[] selectedMasks, Product sourcProduct, Product[] maskPixelTargetProducts) {
             for (Product targetProduct : maskPixelTargetProducts) {
                 if (sourcProduct.isCompatibleProduct(targetProduct, 1.0e-3f)) {
@@ -733,21 +808,20 @@ class MaskFormActions {
         }
 
 
-        
         private static void reprojectBandData(Mask[] selectedMasks, Product sourceProduct, Product targetProduct) {
             final Map<String, Object> projParameters = Collections.EMPTY_MAP;
             Map<String, Product> projProducts = new HashMap<String, Product>();
             projProducts.put("source", sourceProduct);
             projProducts.put("collocateWith", targetProduct);
             Product reprojectedProduct = GPF.createProduct("Reproject", projParameters, projProducts);
-            
+
             for (Mask mask : selectedMasks) {
                 Band band = createBandCopy(targetProduct, mask);
                 MultiLevelImage image = reprojectedProduct.getMaskGroup().get(mask.getName()).getSourceImage();
                 band.setSourceImage(image);
             }
         }
-        
+
         private static Band createBandCopy(Product targetProduct, Mask mask) {
             String bandName = getAvaliableBandName("mask_" + mask.getName(), targetProduct);
             String maskName = getAvailableMaskName(mask.getName(), targetProduct.getMaskGroup());
@@ -757,13 +831,13 @@ class MaskFormActions {
             int height = targetProduct.getSceneRasterHeight();
             Mask targetMask = new Mask(maskName, width, height, new Mask.BandMathType());
             BandMathType.setExpression(targetMask, bandName);
-            targetMask.setDescription(mask.getDescription() + " (from " + mask.getProduct().getDisplayName()+ ")");
+            targetMask.setDescription(mask.getDescription() + " (from " + mask.getProduct().getDisplayName() + ")");
             targetMask.setImageColor(mask.getImageColor());
             targetMask.setImageTransparency(mask.getImageTransparency());
             targetProduct.getMaskGroup().add(targetMask);
             return band;
         }
-        
+
         private static String getAvailableMaskName(String name, ProductNodeGroup<Mask> maskGroup) {
             int index = 1;
             String foundName = name;
@@ -772,7 +846,7 @@ class MaskFormActions {
             }
             return foundName;
         }
-        
+
         private static String getAvaliableBandName(String name, Product product) {
             int index = 1;
             String foundName = name;

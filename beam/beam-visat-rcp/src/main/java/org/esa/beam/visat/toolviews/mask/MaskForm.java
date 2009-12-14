@@ -1,5 +1,5 @@
 /*
- * $Id: MaskForm.java,v 1.3 2009-12-11 20:46:14 lveci Exp $
+ * $Id: MaskForm.java,v 1.4 2009-12-14 21:03:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -36,8 +36,9 @@ abstract class MaskForm {
 
     private final MaskTable maskTable;
 
-    protected MaskForm(boolean maskManagmentMode) {
+    protected MaskForm(boolean maskManagmentMode, ListSelectionListener selectionListener) {
         maskTable = new MaskTable(maskManagmentMode);
+        maskTable.getSelectionModel().addListSelectionListener(selectionListener);
         maskTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -88,7 +89,7 @@ abstract class MaskForm {
     public RasterDataNode getRaster() {
         return maskTable.getModel().getVisibleBand();
     }
-    
+
     public Mask getSelectedMask() {
         return maskTable.getSelectedMask();
     }
@@ -108,6 +109,7 @@ abstract class MaskForm {
     public void insertMask(Mask mask, int index) {
         maskTable.insertMask(mask, index);
     }
+
     public void removeMask(Mask mask) {
         maskTable.removeMask(mask);
     }

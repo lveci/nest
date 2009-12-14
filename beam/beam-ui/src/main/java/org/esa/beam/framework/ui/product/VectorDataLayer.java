@@ -1,5 +1,5 @@
 /*
- * $Id: VectorDataLayer.java,v 1.2 2009-12-11 20:46:14 lveci Exp $
+ * $Id: VectorDataLayer.java,v 1.3 2009-12-14 21:03:50 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -20,7 +20,9 @@ import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.grender.Rendering;
+import com.bc.ceres.swing.figure.AbstractFigureChangeListener;
 import com.bc.ceres.swing.figure.Figure;
+import com.bc.ceres.swing.figure.FigureChangeEvent;
 import com.bc.ceres.swing.figure.FigureCollection;
 import com.bc.ceres.swing.figure.support.DefaultFigureCollection;
 import org.esa.beam.framework.datamodel.ProductNode;
@@ -32,6 +34,8 @@ import org.geotools.feature.FeatureIterator;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 import java.util.Collection;
 import java.util.HashMap;
@@ -57,9 +61,15 @@ public class VectorDataLayer extends Layer {
         vectorDataChangeHandler = new VectorDataChangeHandler();
         vectorDataNode.getProduct().addProductNodeListener(vectorDataChangeHandler);
         updateFigureCollection();
+        figureCollection.addChangeListener(new AbstractFigureChangeListener() {
+            @Override
+            public void figureChanged(FigureChangeEvent event) {
+                fireLayerDataChanged(null);
+            }
+        });
     }
 
-    public VectorDataNode getVectorData() {
+    public VectorDataNode getVectorDataNode() {
         return vectorDataNode;
     }
 
@@ -89,7 +99,7 @@ public class VectorDataLayer extends Layer {
                 figureMap.remove(simpleFeature);
             } else {
                 figureCollection.addFigure(
-                        getFigureFactory().createFigure(simpleFeature));
+                        getFigureFactory().createFigure(simpleFeature, vectorDataNode.getDefaultCSS()));
             }
         }
 
@@ -114,7 +124,19 @@ public class VectorDataLayer extends Layer {
 
     @Override
     protected void renderLayer(Rendering rendering) {
-        figureCollection.draw(rendering);
+        final Graphics2D g2d = rendering.getGraphics();
+        final Object antiAliasing = g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+        final Object textAntiAliasing = g2d.getRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING);
+
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+        try {
+            figureCollection.draw(rendering);
+        } finally {
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, antiAliasing);
+            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, textAntiAliasing);
+        }
     }
 
     private class VectorDataChangeHandler extends ProductNodeListenerAdapter {

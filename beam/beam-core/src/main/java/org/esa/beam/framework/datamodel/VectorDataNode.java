@@ -7,6 +7,7 @@ import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import com.bc.ceres.core.Assert;
 
 /**
  * A container which allows to store vector data in the BEAM product model.
@@ -14,17 +15,20 @@ import org.opengis.feature.simple.SimpleFeatureType;
  * This is a preliminary API under construction for BEAM 4.7. Not intended for public use.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-12-11 20:46:13 $
+ * @version $Revision: 1.4 $ $Date: 2009-12-14 21:03:50 $
  * @see Product#getVectorDataGroup()
  * @since BEAM 4.7
  */
 public class VectorDataNode extends ProductNode {
 
     public static final String PROPERTY_NAME_FEATURE_COLLECTION = "featureCollection";
-    
+
+    private static final String DEFAULT_STYLE = "fill:#00ff00; fill-opacity:0.5; stroke:#ffffff; stroke-opacity:1.0; stroke-width:1.0";
+
     private final SimpleFeatureType featureType;
     private final FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection;
     private final CollectionListener featureCollectionListener;
+    private String defaultCSS = DEFAULT_STYLE;
 
     /**
      * Constructs a new vector data node for the given feature collection.
@@ -82,6 +86,15 @@ public class VectorDataNode extends ProductNode {
     public long getRawStorageSize(ProductSubsetDef subsetDef) {
         // todo - estimate shapefile size (nf, 10.2009)
         return 0;
+    }
+
+    public String getDefaultCSS() {
+        return defaultCSS;
+    }
+
+    public void setDefaultCSS(String defaultCSS) {
+        Assert.notNull(defaultCSS, "defaultCSS");
+        this.defaultCSS = defaultCSS;
     }
 
     @Override

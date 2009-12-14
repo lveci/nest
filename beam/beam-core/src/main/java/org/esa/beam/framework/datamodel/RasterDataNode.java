@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataNode.java,v 1.11 2009-12-08 16:08:33 lveci Exp $
+ * $Id: RasterDataNode.java,v 1.12 2009-12-14 21:03:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -2290,7 +2290,9 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
             if (getProduct() != null) {
                 if (roiDefinition.isUsable()) {
                     final Mask mask = ROIDefinition.toMask(roiDefinition, this);
-                    getProduct().getMaskGroup().add(mask);
+                    if (mask != null) {
+                        getProduct().getMaskGroup().add(mask);
+                    }
                 }
             }
 

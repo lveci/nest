@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductReader.java,v 1.8 2009-12-11 20:46:13 lveci Exp $
+ * $Id: DimapProductReader.java,v 1.9 2009-12-14 21:03:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -68,7 +68,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
  *
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.8 $ $Date: 2009-12-11 20:46:13 $
+ * @version $Revision: 1.9 $ $Date: 2009-12-14 21:03:50 $
  * @see org.esa.beam.dataio.dimap.DimapProductReaderPlugIn
  */
 public class DimapProductReader extends AbstractProductReader {
@@ -393,16 +393,16 @@ public class DimapProductReader extends AbstractProductReader {
                     featureSource = dataStore.getFeatureSource(name);
                     FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = featureSource.getFeatures();
                     CoordinateReferenceSystem modelCrs = ImageManager.getModelCrs(product.getGeoCoding());
-                    FeatureCollection<SimpleFeatureType, SimpleFeature> forcesFeatureCollection = new ForceCoordinateSystemFeatureResults( featureCollection, modelCrs);
-                    DefaultFeatureCollection defaultFeatureCollection = new DefaultFeatureCollection(forcesFeatureCollection);
+                    if (modelCrs != null) {
+                        featureCollection = new ForceCoordinateSystemFeatureResults(featureCollection, modelCrs);
+                    }
+                    DefaultFeatureCollection defaultFeatureCollection = new DefaultFeatureCollection(featureCollection);
                     VectorDataNode vectorDataNode = new VectorDataNode(name, defaultFeatureCollection);
                     product.getVectorDataGroup().add(vectorDataNode);
                 } catch (IOException e) {
                     BeamLogManager.getSystemLogger().throwing("DimapProductReader", "readVectorData", e);
-                    e.printStackTrace();
                 } catch (SchemaException e) {
                     BeamLogManager.getSystemLogger().throwing("DimapProductReader", "readVectorData", e);
-                    e.printStackTrace();
                 }
             }
         }

@@ -21,7 +21,7 @@ public final class GeoUtils
      * @param geoPos The geodetic coordinate of a given pixel.
      * @param xyz The xyz coordinates of the given pixel.
      */
-    public static void geo2xyz(GeoPos geoPos, double xyz[]) {
+    public static void geo2xyz(final GeoPos geoPos, final double xyz[]) {
         geo2xyz(geoPos.lat, geoPos.lon, 0.0, xyz, EarthModel.WGS84);
     }
 
@@ -31,7 +31,7 @@ public final class GeoUtils
      * @param xyz The xyz coordinates of the given pixel.
      * @param geoSystem The geodetic system.
      */
-    public static void geo2xyz(GeoPos geoPos, double xyz[], EarthModel geoSystem) {
+    public static void geo2xyz(final GeoPos geoPos, final double xyz[], final EarthModel geoSystem) {
         geo2xyz(geoPos.lat, geoPos.lon, 0.0, xyz, geoSystem);
     }
 
@@ -43,7 +43,8 @@ public final class GeoUtils
      * @param xyz The xyz coordinates of the given pixel.
      * @param geoSystem The geodetic system.
      */
-    public static void geo2xyz(double latitude, double longitude, double altitude, double xyz[], EarthModel geoSystem) {
+    public static void geo2xyz(final double latitude, final double longitude, final double altitude,
+                               final double xyz[], final EarthModel geoSystem) {
 
         double a = 0.0;
         double earthFlatCoef = 0.0;
@@ -81,7 +82,7 @@ public final class GeoUtils
      * @param xyz The xyz coordinate of the given pixel.
      * @param geoPos The geodetic coordinate of the given pixel.
      */
-    public static void xyz2geo(double xyz[], GeoPos geoPos) {
+    public static void xyz2geo(final double xyz[], final GeoPos geoPos) {
         xyz2geo(xyz, geoPos, EarthModel.WGS84);
     }
 
@@ -91,7 +92,7 @@ public final class GeoUtils
      * @param geoPos The geodetic coordinate of the given pixel.
      * @param geoSystem The geodetic system.
      */
-    public static void xyz2geo(double xyz[], GeoPos geoPos, EarthModel geoSystem) {
+    public static void xyz2geo(final double xyz[], final GeoPos geoPos, final EarthModel geoSystem) {
 
         double a = 0.0;
         double b = 0.0;
@@ -153,7 +154,7 @@ public final class GeoUtils
      // head2:	azimuth in degree measured in the direction North east south west
      //			from (GLON2,GLAT2) to (GLON1, GLAT1)
      */
-    public static LatLonHeading vincenty_direct(double lon1, double lat1, double dist, double head1) {
+    public static LatLonHeading vincenty_direct(double lon1, double lat1, final double dist, final double head1) {
 
         final LatLonHeading pos = new LatLonHeading();
 

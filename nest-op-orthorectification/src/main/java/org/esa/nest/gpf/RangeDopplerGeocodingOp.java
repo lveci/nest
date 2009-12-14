@@ -1336,7 +1336,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      */
     public static double computeSlantRange(final double time, final double[] timeArray, final double[] xPosArray,
                                            final double[] yPosArray, final double[] zPosArray,
-                                           final double[] earthPoint, double[] sensorPos) {
+                                           final double[] earthPoint, final double[] sensorPos) {
 
         sensorPos[0] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, xPosArray, time);
         sensorPos[1] = MathUtils.lagrangeInterpolatingPolynomial(timeArray, yPosArray, time);
@@ -1790,7 +1790,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     public static void computeLocalIncidenceAngle(
             final LocalGeometry lg, final float demNoDataValue, final boolean saveLocalIncidenceAngle,
             final boolean saveProjectedLocalIncidenceAngle, final boolean saveSigmaNought, final int x0,
-            final int y0, final int x, final int y, final float[][] localDEM, double[] localIncidenceAngles) {
+            final int y0, final int x, final int y, final float[][] localDEM, final double[] localIncidenceAngles) {
 
         // Note: For algorithm and notation of the following implementation, please see Andrea's email dated
         //       May 29, 2009 and Marcus' email dated June 3, 2009, or see Eq (14.10) and Eq (14.11) on page

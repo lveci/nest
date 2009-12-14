@@ -1,5 +1,5 @@
 /*
- * $Id: MaskViewerToolView.java,v 1.2 2009-12-04 19:06:45 lveci Exp $
+ * $Id: MaskViewerToolView.java,v 1.3 2009-12-14 21:03:50 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -18,12 +18,14 @@ package org.esa.beam.visat.toolviews.mask;
 
 import org.esa.beam.framework.ui.application.support.AbstractToolView;
 
+import javax.swing.event.ListSelectionListener;
+
 public class MaskViewerToolView extends MaskToolView {
 
     public static final String ID = MaskViewerToolView.class.getName();
 
     @Override
-    protected MaskForm createMaskForm(AbstractToolView maskToolView) {
-        return new MaskViewerForm();
+    protected MaskForm createMaskForm(AbstractToolView maskToolView, ListSelectionListener selectionListener) {
+        return new MaskViewerForm(selectionListener);
     }
 }

@@ -48,8 +48,6 @@
                     <id>open</id>
                     <id>createAsarNrcsBands</id>
                     <id>selectionTool</id>
-                    <id>convertROIToShape</id>
-                    <id>deleteShape</id>
                     <id>showHomePage</id>
                     <id>about</id>
                     <id>projection</id>
@@ -64,8 +62,6 @@
                 </excludedActions>
                 <excludedToolViews>
                     <id>org.esa.beam.visat.toolviews.spectrum.SpectrumToolView</id>
-                    <!--id>org.esa.beam.scripting.visat.ScriptConsoleToolView</id>
-                    <id>org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView</id-->
                     <id>org.esa.beam.visat.toolviews.worldmap.WorldMapToolView</id>
                 </excludedToolViews>
             </applicationDescriptor>

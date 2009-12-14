@@ -1,5 +1,5 @@
 /*
- * $Id: MaskViewerForm.java,v 1.1 2009-11-04 17:04:33 lveci Exp $
+ * $Id: MaskViewerForm.java,v 1.2 2009-12-14 21:03:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -19,12 +19,13 @@ package org.esa.beam.visat.toolviews.mask;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.event.ListSelectionListener;
 import java.awt.BorderLayout;
 
 class MaskViewerForm extends MaskForm {
 
-    public MaskViewerForm() {
-        super(false);
+    public MaskViewerForm(ListSelectionListener selectionListener) {
+        super(false, selectionListener);
     }
 
     @Override

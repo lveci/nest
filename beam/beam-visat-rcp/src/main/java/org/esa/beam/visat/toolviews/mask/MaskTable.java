@@ -1,5 +1,5 @@
 /*
- * $Id: MaskTable.java,v 1.3 2009-12-04 19:06:45 lveci Exp $
+ * $Id: MaskTable.java,v 1.4 2009-12-14 21:03:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -77,7 +77,7 @@ class MaskTable extends JTable {
 
     Mask getSelectedMask() {
         int selectedRow = getSelectedRow();
-        return getMask(selectedRow);
+        return selectedRow >= 0 ? getMask(selectedRow) : null;
     }
 
     Mask[] getSelectedMasks() {
