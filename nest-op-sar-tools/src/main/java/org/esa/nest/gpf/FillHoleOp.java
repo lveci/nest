@@ -43,7 +43,7 @@ public final class FillHoleOp extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
-    String[] sourceBandNames;
+    private String[] sourceBandNames;
 
     @Parameter(label="No Data Value", defaultValue = "0.0")
     private double NoDataValue = 0.0;

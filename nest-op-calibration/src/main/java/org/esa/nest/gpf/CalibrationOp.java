@@ -52,7 +52,7 @@ public class CalibrationOp extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Band")
-    String[] sourceBandNames;
+    private String[] sourceBandNames;
 
     @Parameter(description = "The antenne elevation pattern gain auxiliary data file.", label="External Aux File")
     private File externalAuxFile = null;
@@ -68,7 +68,7 @@ public class CalibrationOp extends Operator {
 
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>(2);
 
-    Calibrator calibrator = null;
+    private Calibrator calibrator = null;
 
     /**
      * Default constructor. The graph processing framework

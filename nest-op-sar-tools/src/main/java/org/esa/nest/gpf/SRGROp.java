@@ -49,7 +49,7 @@ public class SRGROp extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
-    String[] sourceBandNames;
+    private String[] sourceBandNames;
 
     @Parameter(description = "The order of WARP polynomial function", interval = "[1, *)", defaultValue = "4",
                 label="Warp Polynomial Order")

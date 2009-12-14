@@ -50,7 +50,7 @@ public class SpeckleFilterOp extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band", 
             sourceProductId="source", label="Source Bands")
-    String[] sourceBandNames;
+    private String[] sourceBandNames;
 
     @Parameter(valueSet = {MEAN_SPECKLE_FILTER, MEDIAN_SPECKLE_FILTER, FROST_SPECKLE_FILTER,
             GAMMA_MAP_SPECKLE_FILTER, LEE_SPECKLE_FILTER, LEE_REFINED_FILTER}, defaultValue = MEAN_SPECKLE_FILTER,
@@ -73,8 +73,6 @@ public class SpeckleFilterOp extends Operator {
 
     private double enl;
     private double cu, cu2;
-    private double[] neighborValues;
-    private double[] mask;
 
     static final String MEAN_SPECKLE_FILTER = "Mean";
     static final String MEDIAN_SPECKLE_FILTER = "Median";
@@ -296,7 +294,7 @@ public class SpeckleFilterOp extends Operator {
      */
     private void computeMean(Tile sourceRaster, Tile targetTile, int x0, int y0, int w, int h, ProgressMonitor pm) {
 
-        neighborValues = new double[filterSizeX*filterSizeY];
+        final double[] neighborValues = new double[filterSizeX*filterSizeY];
         final ProductData trgData = targetTile.getDataBuffer();
 
         final int maxY = y0 + h;
@@ -304,7 +302,7 @@ public class SpeckleFilterOp extends Operator {
         for (int y = y0; y < maxY; ++y) {
             for (int x = x0; x < maxX; ++x) {
 
-                getNeighborValues(x, y, sourceRaster);
+                getNeighborValues(x, y, sourceRaster, neighborValues);
 
                 trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getMeanValue(neighborValues));
             }
@@ -326,7 +324,7 @@ public class SpeckleFilterOp extends Operator {
      */
     private void computeMedian(Tile sourceRaster, Tile targetTile, int x0, int y0, int w, int h, ProgressMonitor pm) {
 
-        neighborValues = new double[filterSizeX*filterSizeY];
+        final double[] neighborValues = new double[filterSizeX*filterSizeY];
         final ProductData trgData = targetTile.getDataBuffer();
 
         final int maxY = y0 + h;
@@ -334,9 +332,9 @@ public class SpeckleFilterOp extends Operator {
         for (int y = y0; y < maxY; ++y) {
             for (int x = x0; x < maxX; ++x) {
 
-                getNeighborValues(x, y, sourceRaster);
+                getNeighborValues(x, y, sourceRaster, neighborValues);
 
-                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getMedianValue());
+                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getMedianValue(neighborValues));
             }
         }
     }
@@ -355,20 +353,20 @@ public class SpeckleFilterOp extends Operator {
      */
     private void computeFrost(Tile sourceRaster, Tile targetTile, int x0, int y0, int w, int h, ProgressMonitor pm) {
 
-        neighborValues = new double[filterSizeX*filterSizeY];
-        mask = new double[filterSizeX*filterSizeY];
+        final double[] neighborValues = new double[filterSizeX*filterSizeY];
+        final double[] mask = new double[filterSizeX*filterSizeY];
         final ProductData trgData = targetTile.getDataBuffer();
 
-        getFrostMask();
+        getFrostMask(mask);
 
         final int maxY = y0 + h;
         final int maxX = x0 + w;
         for (int y = y0; y < maxY; ++y) {
             for (int x = x0; x < maxX; ++x) {
 
-                getNeighborValues(x, y, sourceRaster);
+                getNeighborValues(x, y, sourceRaster, neighborValues);
 
-                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getFrostValue());
+                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getFrostValue(neighborValues, mask));
             }
         }
     }
@@ -387,20 +385,20 @@ public class SpeckleFilterOp extends Operator {
      */
     private void computeGammaMap(Tile sourceRaster, Tile targetTile, int x0, int y0, int w, int h, ProgressMonitor pm) {
 
-        neighborValues = new double[filterSizeX*filterSizeY];
-        mask = new double[filterSizeX*filterSizeY];
+        final double[] neighborValues = new double[filterSizeX*filterSizeY];
+        final double[] mask = new double[filterSizeX*filterSizeY];
         final ProductData trgData = targetTile.getDataBuffer();
 
-        getFrostMask();
+        getFrostMask(mask);
 
         final int maxY = y0 + h;
         final int maxX = x0 + w;
         for (int y = y0; y < maxY; ++y) {
             for (int x = x0; x < maxX; ++x) {
 
-                getNeighborValues(x, y, sourceRaster);
+                getNeighborValues(x, y, sourceRaster, neighborValues);
 
-                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getGammaMapValue());
+                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getGammaMapValue(neighborValues));
             }
         }
     }
@@ -419,7 +417,7 @@ public class SpeckleFilterOp extends Operator {
      */
     private void computeLee(Tile sourceRaster, Tile targetTile, int x0, int y0, int w, int h, ProgressMonitor pm) {
 
-        neighborValues = new double[filterSizeX*filterSizeY];
+        final double[] neighborValues = new double[filterSizeX*filterSizeY];
         final ProductData trgData = targetTile.getDataBuffer();
 
         final int maxY = y0 + h;
@@ -427,9 +425,9 @@ public class SpeckleFilterOp extends Operator {
         for (int y = y0; y < maxY; ++y) {
             for (int x = x0; x < maxX; ++x) {
 
-                getNeighborValues(x, y, sourceRaster);
+                getNeighborValues(x, y, sourceRaster, neighborValues);
 
-                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getLeeValue());
+                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getLeeValue(neighborValues));
             }
         }
     }
@@ -442,7 +440,7 @@ public class SpeckleFilterOp extends Operator {
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in obtaining the pixel values.
      */
-    private void getNeighborValues(final int x, final int y, final Tile sourceRaster) {
+    private void getNeighborValues(final int x, final int y, final Tile sourceRaster, final double[] neighborValues) {
 
         final ProductData srcData = sourceRaster.getDataBuffer();
         for (int i = 0; i < filterSizeX; ++i) {
@@ -516,7 +514,7 @@ public class SpeckleFilterOp extends Operator {
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the median value.
      */
-    private double getMedianValue() {
+    private double getMedianValue(final double[] neighborValues) {
 
         Arrays.sort(neighborValues);
 
@@ -529,7 +527,7 @@ public class SpeckleFilterOp extends Operator {
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the Frost mask.
      */
-    private void getFrostMask() {
+    private void getFrostMask(final double[] mask) {
 
         for (int i = 0; i < filterSizeX; i++) {
 
@@ -550,7 +548,7 @@ public class SpeckleFilterOp extends Operator {
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the Frost filtered value.
      */
-    private double getFrostValue() {
+    private double getFrostValue(final double[] neighborValues, final double[] mask) {
 
         final double mean = getMeanValue(neighborValues);
         if (Double.compare(mean, Double.MIN_VALUE) <= 0) {
@@ -580,7 +578,7 @@ public class SpeckleFilterOp extends Operator {
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the Gamma filtered value.
      */
-    private double getGammaMapValue() {
+    private double getGammaMapValue(final double[] neighborValues) {
 
         final double mean = getMeanValue(neighborValues);
         if (Double.compare(mean, Double.MIN_VALUE) <= 0) {
@@ -618,7 +616,7 @@ public class SpeckleFilterOp extends Operator {
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the Lee filtered value.
      */
-    private double getLeeValue() {
+    private double getLeeValue(final double[] neighborValues) {
 
         final double mean = getMeanValue(neighborValues);
         if (Double.compare(mean, Double.MIN_VALUE) <= 0) {

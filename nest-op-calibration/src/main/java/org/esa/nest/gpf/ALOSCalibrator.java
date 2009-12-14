@@ -38,11 +38,11 @@ public class ALOSCalibrator implements Calibrator {
 
     private boolean outputImageScaleInDb = false;
 
-    protected MetadataElement abstractedMetadata = null;
+    private MetadataElement abstractedMetadata = null;
     private String sampleType = null;
     private double calibrationFactor = 0;
 
-    protected static final double underFlowFloat = 1.0e-30;
+    private static final double underFlowFloat = 1.0e-30;
 
     /**
      * Default constructor. The graph processing framework

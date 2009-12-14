@@ -50,7 +50,7 @@ public class OversamplingOp extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
-    String[] sourceBandNames;
+    private String[] sourceBandNames;
 
     @Parameter(valueSet = {UndersamplingOp.IMAGE_SIZE, UndersamplingOp.RATIO, UndersamplingOp.PIXEL_SPACING},
             defaultValue = UndersamplingOp.IMAGE_SIZE, label="Output Image By:")
@@ -71,9 +71,6 @@ public class OversamplingOp extends Operator {
     @Parameter(description = "The azimuth pixel spacing", defaultValue = "12.5", label="Azimuth Spacing")
     private float azimuthSpacing = 12.5f;
 
-    private Band sourceBand1;
-    private Band sourceBand2;
-
     private MetadataElement abs; // root of the abstracted metadata
     private String sampleType;
     private String productFormat;
@@ -85,8 +82,6 @@ public class OversamplingOp extends Operator {
 
     private float srcRangeSpacing; // range pixel spacing of source image
     private float srcAzimuthSpacing; // azimuth pixel spacing of source image
-    private double[][] tmpI;
-    private double[][] tmpQ;
 
     private double prf; // pulse repetition frequency in Hz
     private double[] dopplerCentroidFreq; // Doppler centroid frequencies for all columns in a range line
@@ -179,7 +174,7 @@ public class OversamplingOp extends Operator {
      */
     private void getProductFormat() throws Exception {
 
-        String productType = abs.getAttributeString(AbstractMetadata.PRODUCT_TYPE);
+        final String productType = abs.getAttributeString(AbstractMetadata.PRODUCT_TYPE);
         if (productType.contains("ERS")) {
             productFormat = CEOS;
         } else if (productType.contains("ASA") || productType.contains("SAR")) {
@@ -238,7 +233,7 @@ public class OversamplingOp extends Operator {
             throw new OperatorException("Cross track Doppler frequency centroid quadratic term not found");
         }
         double a2 = attr.getData().getElemDouble();
-        System.out.println("Doppler frequency polynomial coefficients are " + a0 + ", " + a1 + ", " + a2);
+        //System.out.println("Doppler frequency polynomial coefficients are " + a0 + ", " + a1 + ", " + a2);
 
         // compute Doppler centroid frequencies
         dopplerCentroidFreq = new double[sourceImageWidth];
@@ -426,29 +421,29 @@ public class OversamplingOp extends Operator {
 
     private void addGeoCoding() {
 
-        TiePointGrid lat = OperatorUtils.getLatitude(sourceProduct);
-        TiePointGrid lon = OperatorUtils.getLongitude(sourceProduct);
-        TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
-        TiePointGrid slantRgTime = OperatorUtils.getSlantRangeTime(sourceProduct);
+        final TiePointGrid lat = OperatorUtils.getLatitude(sourceProduct);
+        final TiePointGrid lon = OperatorUtils.getLongitude(sourceProduct);
+        final TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
+        final TiePointGrid slantRgTime = OperatorUtils.getSlantRangeTime(sourceProduct);
         if (lat == null || lon == null || incidenceAngle == null || slantRgTime == null) { // for unit test
             ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
             ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
             return;
         }
 
-        int gridWidth = 11;
-        int gridHeight = 11;
-        float subSamplingX = targetImageWidth / (gridWidth - 1.0f);
-        float subSamplingY = targetImageHeight / (gridHeight - 1.0f);
-        PixelPos[] newTiePointPos = new PixelPos[gridWidth*gridHeight];
+        final int gridWidth = 11;
+        final int gridHeight = 11;
+        final float subSamplingX = targetImageWidth / (gridWidth - 1.0f);
+        final float subSamplingY = targetImageHeight / (gridHeight - 1.0f);
+        final PixelPos[] newTiePointPos = new PixelPos[gridWidth*gridHeight];
 
         int k = 0;
         for (int j = 0; j < gridHeight; j++) {
-            float ty = Math.min(j*subSamplingY, targetImageHeight - 1);
-            float y = (int)(ty / heightRatio + 0.5f);
+            final float ty = Math.min(j*subSamplingY, targetImageHeight - 1);
+            final float y = (int)(ty / heightRatio + 0.5f);
             for (int i = 0; i < gridWidth; i++) {
-                float tx = Math.min(i*subSamplingX, targetImageWidth - 1);
-                float x = (int)(tx / widthRatio + 0.5f);
+                final float tx = Math.min(i*subSamplingX, targetImageWidth - 1);
+                final float x = (int)(tx / widthRatio + 0.5f);
                 newTiePointPos[k] = new PixelPos();
                 newTiePointPos[k].x = x;
                 newTiePointPos[k].y = y;
@@ -496,7 +491,6 @@ public class OversamplingOp extends Operator {
 
             final Band[] targetBands = targetProduct.getBands();
             for (int i = 0; i < targetBands.length; i++) {
-
                 checkForCancelation(pm);
 
                 if (targetBands[i].getUnit().contains("real")) {
@@ -544,8 +538,8 @@ public class OversamplingOp extends Operator {
         final int sourceTileWidth = sourceTileRectangle.width;
         final int sourceTileHeight = sourceTileRectangle.height;
 
-        tmpI = new double[targetTileHeight][sourceTileWidth];
-        tmpQ = new double[targetTileHeight][sourceTileWidth];
+        final double[][]tmpI = new double[targetTileHeight][sourceTileWidth];
+        final double[][]tmpQ = new double[targetTileHeight][sourceTileWidth];
 
         final Band srcBand = sourceProduct.getBand(targetBandName);
         final Tile srcRaster = getSourceTile(srcBand, sourceTileRectangle, pm);
@@ -573,11 +567,11 @@ public class OversamplingOp extends Operator {
         final DoubleFFT_1D src_col_fft = new DoubleFFT_1D(sourceTileHeight);
         final DoubleFFT_1D tgt_col_fft = new DoubleFFT_1D(targetTileHeight);
         for (int x = 0; x < sourceTileWidth; x++) {
-            getColData(x, sourceTileHeight, colArray);
+            getColData(x, sourceTileHeight, colArray, tmpI, tmpQ);
             src_col_fft.complexForward(colArray);
             paddingZeros(colArray, sourceTileHeight, targetTileHeight, d, zeroPaddedColSpec);
             tgt_col_fft.complexInverse(zeroPaddedColSpec, true);
-            saveOverSampledCol(zeroPaddedColSpec, x, targetTileHeight);
+            saveOverSampledCol(zeroPaddedColSpec, x, targetTileHeight, tmpI, tmpQ);
         }
 
         final double[] tgtRow = new double[targetTileWidth*2];
@@ -585,7 +579,7 @@ public class OversamplingOp extends Operator {
         // perform 1-D IFFT on each row
         final DoubleFFT_1D tgt_row_fft = new DoubleFFT_1D(targetTileWidth);
         for (int y = 0; y < targetTileHeight; y++) {
-            getRowData(y, sourceTileWidth, targetTileWidth, tgtRow);
+            getRowData(y, sourceTileWidth, targetTileWidth, tgtRow, tmpI, tmpQ);
             tgt_row_fft.complexInverse(tgtRow, true);
             saveOverSampledComplexImage(tgtRow, ty0 + y, tx0, targetTileWidth,
                                         widthRatioByHeightRatio, tgtData, targetTile);
@@ -625,8 +619,8 @@ public class OversamplingOp extends Operator {
         final int sourceTileWidth = sourceTileRectangle.width;
         final int sourceTileHeight = sourceTileRectangle.height;
 
-        tmpI = new double[targetTileHeight][sourceTileWidth];
-        tmpQ = new double[targetTileHeight][sourceTileWidth];
+        final double[][]tmpI = new double[targetTileHeight][sourceTileWidth];
+        final double[][]tmpQ = new double[targetTileHeight][sourceTileWidth];
 
         final Band iBand = sourceProduct.getBand(iBandName);
         final Band qBand = sourceProduct.getBand(qBandName);
@@ -660,7 +654,7 @@ public class OversamplingOp extends Operator {
         final DoubleFFT_1D src_col_fft = new DoubleFFT_1D(sourceTileHeight);
         final DoubleFFT_1D tgt_col_fft = new DoubleFFT_1D(targetTileHeight);
         for (int x = 0; x < sourceTileWidth; x++) {
-            getColData(x, sourceTileHeight, colArray);
+            getColData(x, sourceTileHeight, colArray, tmpI, tmpQ);
             src_col_fft.complexForward(colArray);
 
             final int idxFdc = (int)(dopplerCentroidFreq[sx0 + x] * heightByPRF + 0.5);
@@ -668,7 +662,7 @@ public class OversamplingOp extends Operator {
 
             paddingZeros(colArray, sourceTileHeight, targetTileHeight, d, zeroPaddedColSpec);
             tgt_col_fft.complexInverse(zeroPaddedColSpec, true);
-            saveOverSampledCol(zeroPaddedColSpec, x, targetTileHeight);
+            saveOverSampledCol(zeroPaddedColSpec, x, targetTileHeight, tmpI, tmpQ);
         }
 
         final double[] tgtRow = new double[targetTileWidth*2];
@@ -676,7 +670,7 @@ public class OversamplingOp extends Operator {
         // perform 1-D IFFT on each row
         final DoubleFFT_1D tgt_row_fft = new DoubleFFT_1D(targetTileWidth);
         for (int y = 0; y < targetTileHeight; y++) {
-            getRowData(y, sourceTileWidth, targetTileWidth, tgtRow);
+            getRowData(y, sourceTileWidth, targetTileWidth, tgtRow, tmpI, tmpQ);
             tgt_row_fft.complexInverse(tgtRow, true);
             saveOverSampledComplexImage(tgtRow, ty0 + y, tx0, targetTileWidth, widthRatioByHeightRatio,
                                         iTgtData, qTgtData, iTargetTile);
@@ -709,7 +703,8 @@ public class OversamplingOp extends Operator {
         }
     }
 
-    private void getColData(final int x, final int sourceTileHeight, final double[] array) {
+    private static void getColData(final int x, final int sourceTileHeight, final double[] array,
+                            final double[][] tmpI, final double[][] tmpQ) {
 
         int k = 0;
         for (int y = 0; y < sourceTileHeight; ++y) {
@@ -730,7 +725,8 @@ public class OversamplingOp extends Operator {
         System.arraycopy(colSpec, s2, array, S2, (sourceTileHeight - d)*2);
     }
 
-    private void saveOverSampledCol(final double[] overSampledCol, final int x, final int targetTileHeight) {
+    private static void saveOverSampledCol(final double[] overSampledCol, final int x, final int targetTileHeight,
+                                    final double[][] tmpI, final double[][] tmpQ) {
 
         int k = 0;
         for (int y = 0; y < targetTileHeight; ++y) {
@@ -739,7 +735,8 @@ public class OversamplingOp extends Operator {
         }
     }
 
-    private void getRowData(final int y, final int sourceTileWidth, final int targetTileWidth, final double[] array) {
+    private static void getRowData(final int y, final int sourceTileWidth, final int targetTileWidth, final double[] array,
+                            final double[][] tmpI, final double[][] tmpQ) {
 
         Arrays.fill(array, 0.0);
 

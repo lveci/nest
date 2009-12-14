@@ -50,7 +50,7 @@ public class FilterOperator extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
-    String[] sourceBandNames;
+    private String[] sourceBandNames;
     
     @Parameter
     private String selectedFilterName = null;
@@ -199,10 +199,10 @@ public class FilterOperator extends Operator {
     }
 
     private KernelFilter getUserDefinedFilter(File userDefinedKernelFile) {
-        float[][] kernelData = UndersamplingOp.readFile(userDefinedKernelFile.getAbsolutePath());
+        final float[][] kernelData = UndersamplingOp.readFile(userDefinedKernelFile.getAbsolutePath());
         final int filterWidth = kernelData.length;
         final int filterHeight = kernelData[0].length;
-        double[] data = new double[filterWidth*filterHeight];
+        final double[] data = new double[filterWidth*filterHeight];
         int k = 0;
         for (int r = 0; r < filterHeight; r++) {
             for (int c = 0; c < filterWidth; c++) {

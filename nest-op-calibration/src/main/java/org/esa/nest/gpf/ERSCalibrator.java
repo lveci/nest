@@ -73,9 +73,6 @@ public final class ERSCalibrator implements Calibrator {
     private String pafID; // processing facility identifier
     private String psID;  // processing system identifier
     private String pvID;  // processing version identifier
-    private String missionType;
-    private String sampleType;
-    private String productType;
     private String extXCAFileName;
 
     private int sourceImageWidth;
@@ -483,7 +480,7 @@ public final class ERSCalibrator implements Calibrator {
      */
     private void getMissionType() {
 
-        missionType = absRoot.getAttributeString(AbstractMetadata.MISSION);
+        final String missionType = absRoot.getAttributeString(AbstractMetadata.MISSION);
         if (!missionType.contains("ERS1") && !missionType.contains("ERS2")) {
             throw new OperatorException(missionType + " is not a valid mission for ERS Calibration");
         }
@@ -498,7 +495,7 @@ public final class ERSCalibrator implements Calibrator {
      */
     private void getSampleType() {
 
-        sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
+        final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
         if(sampleType.contains("DETECTED"))
             isDetectedSampleType = true;
         //System.out.println("Sample type is " + sampleType);
@@ -509,7 +506,7 @@ public final class ERSCalibrator implements Calibrator {
      */
     private void getProductType() {
 
-        productType = absRoot.getAttributeString(AbstractMetadata.PRODUCT_TYPE);
+        final String productType = absRoot.getAttributeString(AbstractMetadata.PRODUCT_TYPE);
 
         if (productType.contains("ERS")) {
             isCEOSFormat = true;

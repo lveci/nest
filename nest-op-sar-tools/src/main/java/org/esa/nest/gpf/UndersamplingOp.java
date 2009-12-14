@@ -88,7 +88,7 @@ public class UndersamplingOp extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
-    String[] sourceBandNames;
+    private String[] sourceBandNames;
 
     @Parameter(valueSet = {SUB_SAMPLING, KERNEL_FILTERING}, defaultValue = KERNEL_FILTERING, label="Under-Sampling Method")
     private String method = KERNEL_FILTERING;
@@ -187,8 +187,8 @@ public class UndersamplingOp extends Operator {
     private void initializeForSubSampling() throws OperatorException {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) {
-            Band[] bands = sourceProduct.getBands();
-            ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+            final Band[] bands = sourceProduct.getBands();
+            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
             for (Band band : bands) {
                 bandNameList.add(band.getName());
             }
@@ -208,7 +208,7 @@ public class UndersamplingOp extends Operator {
         }
 
         subsetReader = new ProductSubsetBuilder();
-        ProductSubsetDef subsetDef = new ProductSubsetDef();
+        final ProductSubsetDef subsetDef = new ProductSubsetDef();
 
         subsetDef.addNodeNames(sourceProduct.getTiePointGridNames());
         subsetDef.addNodeNames(sourceBandNames);
@@ -242,7 +242,7 @@ public class UndersamplingOp extends Operator {
         rangeSpacing = srcRangeSpacing * sourceImageWidth / targetImageWidth;
         azimuthSpacing = srcAzimuthSpacing * sourceImageHeight / targetImageHeight;
 
-        MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
+        final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_spacing, azimuthSpacing);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_spacing, rangeSpacing);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);
@@ -594,29 +594,29 @@ public class UndersamplingOp extends Operator {
 
     private void addGeoCoding() {
 
-        TiePointGrid lat = OperatorUtils.getLatitude(sourceProduct);
-        TiePointGrid lon = OperatorUtils.getLongitude(sourceProduct);
-        TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
-        TiePointGrid slantRgTime = OperatorUtils.getSlantRangeTime(sourceProduct);
+        final TiePointGrid lat = OperatorUtils.getLatitude(sourceProduct);
+        final TiePointGrid lon = OperatorUtils.getLongitude(sourceProduct);
+        final TiePointGrid incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
+        final TiePointGrid slantRgTime = OperatorUtils.getSlantRangeTime(sourceProduct);
         if (lat == null || lon == null || incidenceAngle == null || slantRgTime == null) { // for unit test
             ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
             ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
             return;
         }
 
-        int gridWidth = 11;
-        int gridHeight = 11;
-        float subSamplingX = targetImageWidth / (gridWidth - 1.0f);
-        float subSamplingY = targetImageHeight / (gridHeight - 1.0f);
-        PixelPos[] newTiePointPos = new PixelPos[gridWidth*gridHeight];
+        final int gridWidth = 11;
+        final int gridHeight = 11;
+        final float subSamplingX = targetImageWidth / (gridWidth - 1.0f);
+        final float subSamplingY = targetImageHeight / (gridHeight - 1.0f);
+        final PixelPos[] newTiePointPos = new PixelPos[gridWidth*gridHeight];
 
         int k = 0;
         for (int j = 0; j < gridHeight; j++) {
-            float ty = Math.min(j*subSamplingY, targetImageHeight - 1);
-            float y = (int)(ty*stepAzimuth + 0.5) + (int)(filterHeight*0.5);
+            final float ty = Math.min(j*subSamplingY, targetImageHeight - 1);
+            final float y = (int)(ty*stepAzimuth + 0.5) + (int)(filterHeight*0.5);
             for (int i = 0; i < gridWidth; i++) {
-                float tx = Math.min(i*subSamplingX, targetImageWidth - 1);
-                float x = (int)(tx*stepRange + 0.5) + (int)(filterWidth*0.5);
+                final float tx = Math.min(i*subSamplingX, targetImageWidth - 1);
+                final float x = (int)(tx*stepRange + 0.5) + (int)(filterWidth*0.5);
                 newTiePointPos[k] = new PixelPos();
                 newTiePointPos[k].x = x;
                 newTiePointPos[k].y = y;
@@ -639,7 +639,7 @@ public class UndersamplingOp extends Operator {
      */
     private void updateTargetProductMetadata() throws Exception {
 
-        MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
+        final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_spacing, azimuthSpacing);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_spacing, rangeSpacing);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);

@@ -38,10 +38,8 @@ public class Radarsat2Calibrator implements Calibrator {
 
     private boolean outputImageScaleInDb = false;
 
-    protected MetadataElement abstractedMetadata = null;
-    private String sampleType = null;
     private boolean isComplex = false;
-    protected static final double underFlowFloat = 1.0e-30;
+    private static final double underFlowFloat = 1.0e-30;
 
     private static final String lutsigma = "lutsigma";
     private static final String lutgamma = "lutgamma";
@@ -86,7 +84,7 @@ public class Radarsat2Calibrator implements Calibrator {
             sourceProduct = srcProduct;
             targetProduct = tgtProduct;
 
-            abstractedMetadata = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+            final MetadataElement abstractedMetadata = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
             final String mission = abstractedMetadata.getAttributeString(AbstractMetadata.MISSION);
             if(!mission.equals("RS2"))
@@ -96,7 +94,7 @@ public class Radarsat2Calibrator implements Calibrator {
                 throw new OperatorException("Absolute radiometric calibration has already been applied to the product");
             }
 
-            sampleType = abstractedMetadata.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
+            final String sampleType = abstractedMetadata.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
             if(sampleType.equals("COMPLEX")) {
                 isComplex = true;
             }
