@@ -186,7 +186,7 @@ public class PCAMinOp extends Operator {
         final SingularValueDecomposition Svd = Cov.svd(); // Cov = USV'
         final Matrix S = Svd.getS();
         final Matrix U = Svd.getU();
-        final Matrix V = Svd.getV();
+        //final Matrix V = Svd.getV();
 
         totalEigenvalues = 0.0;
         for (int i = 0; i < numOfSourceBands; i++) {
@@ -218,16 +218,9 @@ public class PCAMinOp extends Operator {
                                     sourceProduct.getProductType(),
                                     sourceProduct.getSceneRasterWidth(),
                                     sourceProduct.getSceneRasterHeight());
+        OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
-        //targetProduct.setPreferredTileSize(JAI.getDefaultTileSize());
-        targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 10);
-
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        targetProduct.setStartTime(sourceProduct.getStartTime());
-        targetProduct.setEndTime(sourceProduct.getEndTime());
+        //targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 10);
     }
 
     /**
@@ -253,6 +246,14 @@ public class PCAMinOp extends Operator {
         }
     }
 
+    private synchronized void initStats() {
+        if(!reloadStats) return;
+        if(getStatistics()) {
+            setInitialValues();
+        }
+        reloadStats = false;
+    }
+
     /**
      * Called by the framework in order to compute a tile for the given target band.
      * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
@@ -268,10 +269,7 @@ public class PCAMinOp extends Operator {
                                 throws OperatorException {
 
         if(reloadStats) {
-            if(getStatistics()) {
-                setInitialValues();
-                reloadStats = false;
-            }
+            initStats();
         }
 
         try {
@@ -282,7 +280,7 @@ public class PCAMinOp extends Operator {
             }
             final int n = bandsRawSamples[0].getNumElems();
 
-            double[] tileMinPCA = new double[numOfSourceBands];
+            final double[] tileMinPCA = new double[numOfSourceBands];
             Arrays.fill(tileMinPCA, Double.MAX_VALUE);
 
             for (int i = 0; i < numPCA; i++) {

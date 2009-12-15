@@ -168,15 +168,9 @@ public class PCAImageOp extends Operator {
                                     sourceProduct.getProductType(),
                                     sourceProduct.getSceneRasterWidth(),
                                     sourceProduct.getSceneRasterHeight());
+        OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
-        targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 10);
-
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        targetProduct.setStartTime(sourceProduct.getStartTime());
-        targetProduct.setEndTime(sourceProduct.getEndTime());
+        //targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 10);
 
         final MetadataElement root = targetProduct.getMetadataRoot();
         final MetadataElement tempElemRoot = root.getElement("temporary metadata");
@@ -206,6 +200,12 @@ public class PCAImageOp extends Operator {
         }
     }
 
+    private synchronized void initStats() {
+        if(!reloadStats) return;
+        getStatistics();
+        reloadStats = false;
+    }
+
     /**
      * Called by the framework in order to compute a tile for the given target band.
      * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
@@ -221,9 +221,7 @@ public class PCAImageOp extends Operator {
                                 throws OperatorException {
 
         if(reloadStats) {
-            if(getStatistics()) {
-                reloadStats = false;
-            }
+            initStats();
         }
 
         try {

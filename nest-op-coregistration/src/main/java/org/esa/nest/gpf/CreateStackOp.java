@@ -341,22 +341,18 @@ public class CreateStackOp extends Operator {
         final Band sourceRaster = sourceRasterMap.get(targetBand);
         final Product srcProduct = sourceRaster.getProduct();
 
-        if (srcProduct == masterProduct || srcProduct.isCompatibleProduct(masterProduct, 1.0e-3f)) {
-            targetTile.setRawSamples(getSourceTile(sourceRaster, targetTile.getRectangle(), pm).getRawSamples());
-        } else {
-            final PixelPos[] sourcePixelPositions = ProductUtils.computeSourcePixelCoordinates(
-                    srcProduct.getGeoCoding(),
-                    srcProduct.getSceneRasterWidth(),
-                    srcProduct.getSceneRasterHeight(),
-                    masterProduct.getGeoCoding(),
-                    targetTile.getRectangle());
-            final Rectangle sourceRectangle = getBoundingBox(
-                    sourcePixelPositions,
-                    srcProduct.getSceneRasterWidth(),
-                    srcProduct.getSceneRasterHeight());
+        final PixelPos[] sourcePixelPositions = ProductUtils.computeSourcePixelCoordinates(
+                srcProduct.getGeoCoding(),
+                srcProduct.getSceneRasterWidth(),
+                srcProduct.getSceneRasterHeight(),
+                masterProduct.getGeoCoding(),
+                targetTile.getRectangle());
+        final Rectangle sourceRectangle = getBoundingBox(
+                sourcePixelPositions,
+                srcProduct.getSceneRasterWidth(),
+                srcProduct.getSceneRasterHeight());
 
-            collocateSourceBand(sourceRaster, sourceRectangle, sourcePixelPositions, targetTile, pm);
-        }
+        collocateSourceBand(sourceRaster, sourceRectangle, sourcePixelPositions, targetTile, pm);
     }
 
     private void collocateSourceBand(RasterDataNode sourceBand, Rectangle sourceRectangle, PixelPos[] sourcePixelPositions,

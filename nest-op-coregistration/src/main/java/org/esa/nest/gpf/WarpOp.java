@@ -261,6 +261,9 @@ public class WarpOp extends Operator {
         for(int i=0; i < numSrcBands; i+=inc) {
             final Band srcBand = sourceProduct.getBandAt(i);
             final Band targetBand = targetProduct.addBand(srcBand.getName(), ProductData.TYPE_FLOAT32);
+            if(srcBand == masterBand || srcBand == masterBand2) {
+                targetBand.setSourceImage(srcBand.getSourceImage());
+            }
             ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
             sourceRasterMap.put(targetBand, srcBand);
 
@@ -307,43 +310,21 @@ public class WarpOp extends Operator {
             //System.out.println("WARPOperator: x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
             final Band srcBand = sourceRasterMap.get(targetBand);
-            if(srcBand == masterBand || srcBand == masterBand2) {
+            Band realSrcBand = complexSrcMap.get(srcBand);
+            if(realSrcBand == null)
+                realSrcBand = srcBand;
 
-                final Tile masterRaster = getSourceTile(srcBand, targetTileRectangle, pm);
-                final ProductData masterData = masterRaster.getDataBuffer();
-                final ProductData targetData = targetTile.getDataBuffer();
-                for (int y = y0; y < y0 + h; y++) {
-                    for (int x = x0; x < x0 + w; x++) {
-                        final int index = masterRaster.getDataBufferIndex(x, y);
-                        targetData.setElemFloatAt(index, masterData.getElemFloatAt(index));
-                    }
-                }
-                /* The following code has problem that is cannot handle the last tile at right and bottom
-                final ProductData masterData = masterRaster.getRawSamples();
-                final ProductData targetData = targetTile.getRawSamples();
-                final int n = masterData.getNumElems();
-                for (int i = 0; i < n; ++i) {
-                    targetData.setElemFloatAt(i, masterData.getElemFloatAt(i));
-                }
-                */
-            } else {
+            // create source image
+            final Tile sourceRaster = getSourceTile(srcBand, targetTileRectangle, pm);
+            final RenderedImage srcImage = sourceRaster.getRasterDataNode().getSourceImage();
 
-                Band realSrcBand = complexSrcMap.get(srcBand);
-                if(realSrcBand == null)
-                    realSrcBand = srcBand;
+            // get warped image
+            final RenderedOp warpedImage = createWarpImage(warpDataMap.get(realSrcBand).warp, srcImage);
 
-                // create source image
-                final Tile sourceRaster = getSourceTile(srcBand, targetTileRectangle, pm);
-                final RenderedImage srcImage = sourceRaster.getRasterDataNode().getSourceImage();
+            // copy warped image data to target
+            final float[] dataArray = warpedImage.getData(targetTileRectangle).getSamples(x0, y0, w, h, 0, (float[])null);
+            targetTile.setRawSamples(ProductData.createInstance(dataArray));
 
-                // get warped image
-                final RenderedOp warpedImage = createWarpImage(warpDataMap.get(realSrcBand).warp, srcImage);
-
-                // copy warped image data to target
-                final float[] dataArray = warpedImage.getData(targetTileRectangle).getSamples(x0, y0, w, h, 0, (float[])null);
-                final ProductData rawTargetData = ProductData.createInstance(dataArray);
-                targetTile.setRawSamples(rawTargetData);
-            }
         } catch(Exception e) {
             throw new OperatorException(e);
         }

@@ -76,7 +76,6 @@ public class PCAStatisticsOp extends Operator {
     private boolean subtractMeanImage = false;
 
     private boolean statsCalculated = false;
-    private boolean virtualBandCreated = false;
     private int numOfPixels = 0;        // total number of pixel values
     private int numOfSourceBands = 0;   // number of user selected bands
     private double[] sum = null;        // summation of pixel values for each band
@@ -87,8 +86,6 @@ public class PCAStatisticsOp extends Operator {
     public static final String EIGENVALUE_THRESHOLD = "Eigenvalue Threshold";
     public static final String NUMBER_EIGENVALUES = "Number of Eigenvalues";
     private static final String meanImageBandName = "Mean_Image";
-
-    private Band meanImageBand;
 
 //    private final HashMap<String, Integer> statisticsBandIndex = new HashMap<String, Integer>();
 
@@ -148,16 +145,9 @@ public class PCAStatisticsOp extends Operator {
                                     sourceProduct.getProductType(),
                                     sourceProduct.getSceneRasterWidth(),
                                     sourceProduct.getSceneRasterHeight());
+        OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
-        //targetProduct.setPreferredTileSize(JAI.getDefaultTileSize());
-        targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 10);
-
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        targetProduct.setStartTime(sourceProduct.getStartTime());
-        targetProduct.setEndTime(sourceProduct.getEndTime());
+        //targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 10);
     }
 
     /**
@@ -189,13 +179,17 @@ public class PCAStatisticsOp extends Operator {
                 throw new OperatorException("Source band not found: " + bandName);
             }
 
-            Band targetBand = new Band(bandName,
+            final Band targetBand = new Band(bandName,
                                        sourceBand.getDataType(),
                                        sourceBand.getRasterWidth(),
                                        sourceBand.getRasterHeight());
 
             targetBand.setUnit(sourceBand.getUnit());
             targetProduct.addBand(targetBand);
+        }
+
+        if (subtractMeanImage) {
+            createMeanImageVirtualBand(sourceProduct, sourceBandNames, meanImageBandName);
         }
     }
 
@@ -281,24 +275,18 @@ public class PCAStatisticsOp extends Operator {
             System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
             */
 
-            if (subtractMeanImage && !virtualBandCreated) {
-                createMeanImageVirtualBand(sourceProduct, sourceBandNames, meanImageBandName);
-                meanImageBand = sourceProduct.getBand(meanImageBandName);
-                virtualBandCreated = true;
-            }
-
-            ProductData[] bandsRawSamples = new ProductData[numOfSourceBands];
+            final ProductData[] bandsRawSamples = new ProductData[numOfSourceBands];
             for (int i = 0; i < numOfSourceBands; i++) {
                 bandsRawSamples[i] =
                         getSourceTile(sourceProduct.getBand(sourceBandNames[i]), targetRectangle, pm).getRawSamples();
             }
 
-            double[] tileSum = new double[numOfSourceBands];
-            double[][] tileSumCross = new double[numOfSourceBands][numOfSourceBands];
+            final double[] tileSum = new double[numOfSourceBands];
+            final double[][] tileSumCross = new double[numOfSourceBands][numOfSourceBands];
 
-            if (subtractMeanImage && virtualBandCreated) {
+            if (subtractMeanImage) {
 
-                ProductData meanBandRawSamples =
+                final ProductData meanBandRawSamples =
                         getSourceTile(sourceProduct.getBand(meanImageBandName), targetRectangle, pm).getRawSamples();
 
                 computeTileStatisticsWithMeanImageSubstract(
@@ -446,8 +434,9 @@ public class PCAStatisticsOp extends Operator {
 
         completeStatistics();
 
-        if (virtualBandCreated) {
-            sourceProduct.removeBand(meanImageBand);
+        final Band virtBand = sourceProduct.getBand(meanImageBandName);
+        if (virtBand != null) {
+            sourceProduct.removeBand(virtBand);
         }
         writeStatsToMetadata();
     }
