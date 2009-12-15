@@ -15,7 +15,10 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.internal.OperatorContext;
@@ -24,8 +27,8 @@ import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
 
 import java.awt.*;
-import java.util.HashMap;
 import java.io.File;
+import java.util.HashMap;
 
 /**
  * Calibration for ALOS PALSAR data products.

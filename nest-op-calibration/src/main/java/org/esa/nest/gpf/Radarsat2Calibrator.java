@@ -24,8 +24,8 @@ import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
 
 import java.awt.*;
-import java.util.HashMap;
 import java.io.File;
+import java.util.HashMap;
 
 /**
  * Calibration for Radarsat2 data products.

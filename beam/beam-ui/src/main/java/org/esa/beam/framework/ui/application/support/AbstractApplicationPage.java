@@ -291,7 +291,7 @@ public abstract class AbstractApplicationPage extends AbstractControlFactory imp
             return;
         }
 
-        Debug.trace("setActiveComponent: pageComponent = " + pageComponent);
+        //Debug.trace("setActiveComponent: pageComponent = " + pageComponent);
         if (settingActiveComponent) {
             return;
         }

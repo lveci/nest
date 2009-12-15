@@ -15,34 +15,25 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.dataio.envisat.EnvisatAuxReader;
-import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.Tile;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.Operator;
+import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.Tile;
+import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
+import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
-import org.esa.beam.framework.gpf.internal.OperatorContext;
-import org.esa.beam.util.math.MathUtils;
-import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.CalibrationFactory;
 import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
-import org.esa.nest.datamodel.CalibrationFactory;
-import org.esa.nest.util.Constants;
-import org.esa.nest.util.GeoUtils;
-import org.esa.nest.util.Settings;
 
-import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Pre-Calibration for ASAR products.
@@ -51,17 +42,16 @@ import java.util.ArrayList;
 public class PreCalibrationOp extends Operator {
 
     @SourceProduct(alias="source")
-    protected Product sourceProduct;
+    private Product sourceProduct;
     @TargetProduct
-    protected Product targetProduct;
+    private Product targetProduct;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId = "source", label = "Source Bands")
     private String[] sourceBandNames = null;
 
     private final HashMap<String, String> targetBandNameToSourceBandName = new HashMap<String, String>();
-    protected MetadataElement absRoot = null;
-    Calibrator calibrator = null;
+    private Calibrator calibrator = null;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -80,8 +70,6 @@ public class PreCalibrationOp extends Operator {
     public void initialize() throws OperatorException {
 
         try {
-            absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
-
             createTargetProduct();
 
             calibrator = CalibrationFactory.createCalibrator(sourceProduct);

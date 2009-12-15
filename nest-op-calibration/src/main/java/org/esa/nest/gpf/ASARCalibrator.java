@@ -85,9 +85,8 @@ public class ASARCalibrator implements Calibrator {
     private float[][] newAntennaPatternSingleSwath = null; // new antenna pattern gains for single swath product, in dB
     private float[][] newAntennaPatternWideSwath = null; // new antenna pattern gains for single swath product, in dB
 
-    protected int numMPPRecords; // number of MPP ADSR records
-    protected int[] lastLineIndex = null; // the index of the last line covered by each MPP ADSR record
-    protected String swath;
+    private int numMPPRecords; // number of MPP ADSR records
+    private String swath;
     private AbstractMetadata.OrbitStateVector[] orbitStateVectors = null;
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
 
@@ -95,7 +94,7 @@ public class ASARCalibrator implements Calibrator {
                                                // polarization in the aux file
     private double refSlantRange = 800000.0; //  m
     private double halfLightSpeedByRefSlantRange = Constants.halfLightSpeed / refSlantRange;
-    private final double refSlantRange800km = 800000.0; //  m
+    private static final double refSlantRange800km = 800000.0; //  m
     private static final double underFlowFloat = 1.0e-30;
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
     private static final int INVALID_SUB_SWATH_INDEX = -1;

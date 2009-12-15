@@ -66,9 +66,6 @@ public final class ERSCalibrator implements Calibrator {
 
     private boolean outputImageScaleInDb = false;
 
-    private Band sourceBand1;
-    private Band sourceBand2;
-
     private MetadataElement absRoot = null;
     private String pafID; // processing facility identifier
     private String psID;  // processing system identifier
@@ -90,7 +87,7 @@ public final class ERSCalibrator implements Calibrator {
     private boolean isDetectedSampleType = false;
     private boolean isCEOSFormat = false;
     private boolean isAntPattAvailable = false;
-    private boolean adcTestFlag = false;
+    private boolean adcHasBeenTestedFlag = false;
     private boolean antennaPatternCorrectionFlag = false;
     private boolean rangeSpreadingLossCompFlag = false;
     private boolean adcSourceTileTopExtFlag = false;
@@ -174,7 +171,7 @@ public final class ERSCalibrator implements Calibrator {
      * Set flag indicating if target image is output in dB scale.
      */
     @Override
-    public void setOutputImageIndB(boolean flag) {
+    public void setOutputImageIndB(final boolean flag) {
         outputImageScaleInDb = flag;
     }
 
@@ -182,7 +179,7 @@ public final class ERSCalibrator implements Calibrator {
      * Set external auxiliary file.
      */
     @Override
-    public void setExternalAuxFile(File file) throws OperatorException {
+    public void setExternalAuxFile(final File file) throws OperatorException {
         if (file != null) {
             throw new OperatorException("No external auxiliary file should be selected for ERS product");
         }
@@ -191,8 +188,8 @@ public final class ERSCalibrator implements Calibrator {
     /**
 
      */
-    public void initialize(Product srcProduct, Product tgtProduct,
-                           boolean mustPerformRetroCalibration, boolean mustUpdateMetadata)
+    public void initialize(final Product srcProduct, final Product tgtProduct,
+                           final boolean mustPerformRetroCalibration, final boolean mustUpdateMetadata)
             throws OperatorException {
 
         try {
@@ -285,6 +282,8 @@ public final class ERSCalibrator implements Calibrator {
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
         final ProductData trgData = targetTile.getDataBuffer();
+        Band sourceBand1 = null;
+        Band sourceBand2 = null;
         Tile sourceRaster1 = null;
         Tile sourceRaster2 = null;
         ProductData srcData1 = null;
@@ -314,18 +313,10 @@ public final class ERSCalibrator implements Calibrator {
 
         if (applyAntennaPatternCorrection && !isAntPattAvailable) {
             computeAntennaPatternCorrectionFactors(0, sourceImageWidth);
-            isAntPattAvailable = true;
         }
 
-        if (applyADCSaturationCorrection && !adcTestFlag) {
-            if (!isADCNeeded(srcBandNames, bandUnit, pm)) {
-                applyADCSaturationCorrection = false;
-            }
-
-            if (applyADCSaturationCorrection && antennaPatternCorrectionFlag) {
-                computeAntennaPatternGain(0, sourceImageWidth);
-            }
-            adcTestFlag = true;
+        if (applyADCSaturationCorrection && !adcHasBeenTestedFlag) {
+            testADC(sourceBand1, sourceBand2, bandUnit, pm);
         }
 
         if (applyADCSaturationCorrection && (h < blockHeight || w < blockWidth)) {
@@ -333,7 +324,7 @@ public final class ERSCalibrator implements Calibrator {
         }
 
         if (applyADCSaturationCorrection) {
-            computeADCPowerLossValuesForCurrentTile(x0, y0, w, h, pm, srcBandNames, bandUnit);
+            computeADCPowerLossValuesForCurrentTile(sourceBand1, sourceBand2, x0, y0, w, h, pm, bandUnit);
         }
 
         final double k = calibrationConstant * Math.sin(referenceIncidenceAngle);
@@ -399,6 +390,19 @@ public final class ERSCalibrator implements Calibrator {
     }
     }
 
+    private synchronized void testADC(final Band sourceBand1, final Band sourceBand2,
+                                final Unit.UnitType bandUnit, final ProgressMonitor pm) {
+        if(adcHasBeenTestedFlag) return;
+        if (!isADCNeeded(sourceBand1, sourceBand2, bandUnit, pm)) {
+            applyADCSaturationCorrection = false;
+        }
+
+        if (applyADCSaturationCorrection && antennaPatternCorrectionFlag) {
+            computeAntennaPatternGain(0, sourceImageWidth);
+        }
+        adcHasBeenTestedFlag = true;
+    }
+
     /**
      * Compute some important times (in second). The time zone of GMT is always assumed.
      */
@@ -451,7 +455,7 @@ public final class ERSCalibrator implements Calibrator {
      * @param utcTime The UTC time string.
      * @return The time in second.
      */
-    private static double convertUTCTimes(String utcTime) {
+    private static double convertUTCTimes(final String utcTime) {
 
         double timeInSecond = 0.0;
         SimpleDateFormat simpledateformat;
@@ -928,7 +932,7 @@ public final class ERSCalibrator implements Calibrator {
      * @param fileName The auxiliary data file name.
      * @throws OperatorException The exceptions.
      */
-    private void getAntennaPatternGainFromAuxData(String fileName) throws OperatorException {
+    private void getAntennaPatternGainFromAuxData(final String fileName) throws OperatorException {
 
         // Note: ERS-1/2 predate swath-selection, in the Envisat-world all ERS image-data is IS2 VV.
         //       See Andrea and Marcus' email dated Nov. 5, 2008.
@@ -1084,10 +1088,6 @@ public final class ERSCalibrator implements Calibrator {
 
         double deltaPsi = groundRangeSpacing/rt; // in radian
 
-        double rtPlusH = 0.0;
-        double rtPlusH2 = 0.0;
-        double theta1 = 0.0;
-        double psi1 = 0.0;
         double psi = 0.0;
         double alpha = 0.0;
         double ri = 0.0;
@@ -1095,10 +1095,10 @@ public final class ERSCalibrator implements Calibrator {
 
             // Method 1 in Appendix B1
             final double r1 = halfLightSpeed * getSlantRangeTimeToFirstRangePixel();
-            rtPlusH = Math.sqrt(rt2 + r1*r1 + 2.0*rt*r1*Math.cos(alpha1));
-            rtPlusH2 = rtPlusH*rtPlusH;
-            theta1 = Math.acos((r1 + rt*Math.cos(alpha1))/rtPlusH);
-            psi1 = alpha1 - theta1;
+            final double rtPlusH = Math.sqrt(rt2 + r1*r1 + 2.0*rt*r1*Math.cos(alpha1));
+            final double rtPlusH2 = rtPlusH*rtPlusH;
+            final double theta1 = Math.acos((r1 + rt*Math.cos(alpha1))/rtPlusH);
+            final double psi1 = alpha1 - theta1;
             psi = psi1;
             for (int i = 0; i < sourceImageWidth; i++) {
                 ri = Math.sqrt(rt2 + rtPlusH2 - 2.0*rt*rtPlusH*Math.cos(psi));
@@ -1123,13 +1123,13 @@ public final class ERSCalibrator implements Calibrator {
             final int k = (int)((middleLineTime - firstLineTime) / del + 0.5);
             final double[] positionVector = new double[3];
             getPositionVector(k, positionVector);
-            double x = positionVector[0];
-            double y = positionVector[1];
-            double z = positionVector[2];
-            rtPlusH = Math.sqrt(x*x + y*y + z*z);
-            rtPlusH2 = rtPlusH*rtPlusH;
-            theta1 = Math.asin(Math.sin(alpha1)*rt/rtPlusH);
-            psi1 = alpha1 - theta1;
+            final double x = positionVector[0];
+            final double y = positionVector[1];
+            final double z = positionVector[2];
+            final double rtPlusH = Math.sqrt(x*x + y*y + z*z);
+            final double rtPlusH2 = rtPlusH*rtPlusH;
+            final double theta1 = Math.asin(Math.sin(alpha1)*rt/rtPlusH);
+            final double psi1 = alpha1 - theta1;
             psi = psi1;
             for (int i = 0; i < sourceImageWidth; i++) {
                 ri = Math.sqrt(rt2 + rtPlusH2 - 2.0*rt*rtPlusH*Math.cos(psi));
@@ -1265,7 +1265,7 @@ public final class ERSCalibrator implements Calibrator {
      * @param k The data point index
      * @param array The length-3 1D array holding position coordinates (x,y,z)
      */
-    private void getPositionVector(int k, double[] array) {
+    private void getPositionVector(final int k, final double[] array) {
 
         if (k > getNumOfDataPoints()) {
             throw new OperatorException("Invalid data point index");
@@ -1352,8 +1352,10 @@ public final class ERSCalibrator implements Calibrator {
      * @param x0 The x coordinate for the pixel at the upper left corner
      * @param w The width of the tile
      */
-    private void computeAntennaPatternCorrectionFactors(int x0, int w) {
+    private synchronized void computeAntennaPatternCorrectionFactors(final int x0, final int w) {
 
+        if(isAntPattAvailable) return;
+        
         antennaPatternCorrFactor = new double[w];
 
         if (psID.contains(VMP)) {
@@ -1361,6 +1363,7 @@ public final class ERSCalibrator implements Calibrator {
         } else { // PGS (CEOS or ENVISAT)
             computeAntennaPatternCorrectionFactorsForPGSProduct(x0, w);
         }
+        isAntPattAvailable = true;
     }
 
     /**
@@ -1368,7 +1371,7 @@ public final class ERSCalibrator implements Calibrator {
      * @param x0 The x coordinate for the pixel at the upper left corner.
      * @param w The width of the tile.
      */
-    private void computeAntennaPatternCorrectionFactorsForVMPProduct(int x0, int w) {
+    private void computeAntennaPatternCorrectionFactorsForVMPProduct(final int x0, final int w) {
 
         // This function implements Appendix C.
         if (processingTime.compareTo(time19950716) >= 0) {
@@ -1454,7 +1457,7 @@ public final class ERSCalibrator implements Calibrator {
     }
 
 
-    private void computeAntennaPatternCorrectionFactorsForPGSProduct(int x0, int w) {
+    private void computeAntennaPatternCorrectionFactorsForPGSProduct(final int x0, final int w) {
 
         final double[] antennaPatternGain = new double[w];
         getPGSAntennaPatternGainForCurrentTile(x0, w, antennaPatternGain);
@@ -1464,7 +1467,7 @@ public final class ERSCalibrator implements Calibrator {
         }
     }
 
-    private void getPGSAntennaPatternGainForCurrentTile(int x0, int w, double[] array) {
+    private void getPGSAntennaPatternGainForCurrentTile(final int x0, final int w, final double[] array) {
 
         final double delta = 0.05;
 
@@ -1495,7 +1498,7 @@ public final class ERSCalibrator implements Calibrator {
      * @param lookAngle The look angle (in degree)
      * @return The antenna pattern gain (in linear scale)
      */
-    private double g2Init(double lookAngle) {
+    private double g2Init(final double lookAngle) {
 
         return getAntennaPatternGain(lookAngle, appendixG1);
     }
@@ -1505,7 +1508,7 @@ public final class ERSCalibrator implements Calibrator {
      * @param lookAngle The look angle (in degree)
      * @return The antenna pattern gain (in linear scale)
      */
-    private double g2Im(double lookAngle) {
+    private double g2Im(final double lookAngle) {
 
         return getAntennaPatternGain(lookAngle, appendixG2);
     }
@@ -1526,7 +1529,7 @@ public final class ERSCalibrator implements Calibrator {
      * @param array 2-D array holding antenna pattern data given in Appendix G1 or G2
      * @return The antenna pattern gain (in linear scale)
      */
-    private static double getAntennaPatternGain(double lookAngle, double[][] array) {
+    private static double getAntennaPatternGain(final double lookAngle, final double[][] array) {
 
         final int numRows = array.length;
         final int numCols = array[0].length;
@@ -1569,7 +1572,7 @@ public final class ERSCalibrator implements Calibrator {
      * @param lookAngle The look angle (in degree)
      * @return The antenna pattern gain (in linear scale)
      */
-    private double ec(double lookAngle) {
+    private double ec(final double lookAngle) {
 
         final int numRows = appendixH.length;
         final int numCols = appendixH[0].length;
@@ -1670,7 +1673,8 @@ public final class ERSCalibrator implements Calibrator {
         }
     }
 
-    private boolean isADCNeeded(String[] srcBandNames, Unit.UnitType bandUnit, ProgressMonitor pm) {
+    private boolean isADCNeeded(final Band sourceBand1, final Band sourceBand2,
+                                final Unit.UnitType bandUnit, final ProgressMonitor pm) {
 
         final int w = Math.min(windowWidth, sourceImageWidth);
         final int h = Math.min(windowHeight, sourceImageHeight);
@@ -1678,12 +1682,9 @@ public final class ERSCalibrator implements Calibrator {
         final int y0 = (sourceImageHeight - h)/2;
 
         final Rectangle sourceTileRectangle = new Rectangle(x0, y0, w, h);
-        Tile sourceRaster1 = null;
+        final Tile sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
         Tile sourceRaster2 = null;
-        if (srcBandNames.length == 1) {
-            sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
-        } else {
-            sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
+        if(sourceBand2 != null) {
             sourceRaster2 = getSourceTile(sourceBand2, sourceTileRectangle, pm);
         }
 
@@ -1722,11 +1723,7 @@ public final class ERSCalibrator implements Calibrator {
             return false;
         }
 
-        if (!isERS1Mission && sigma <= ers2ApplyADCThreshold) {
-                return false;
-        }
-
-        return true;
+        return !(!isERS1Mission && sigma <= ers2ApplyADCThreshold);
     }
 
     /**
@@ -1735,7 +1732,7 @@ public final class ERSCalibrator implements Calibrator {
      * @param x0 The x coordinate for the pixel at the upper left corner
      * @param w The width of the tile
      */
-    private void computeAntennaPatternGain(int x0, int w) {
+    private void computeAntennaPatternGain(final int x0, final int w) {
 
         antennaPatternGain = new double[w];
 
@@ -1746,7 +1743,7 @@ public final class ERSCalibrator implements Calibrator {
         }
     }
 
-    private void computeAntennaPatternGainForVMPProduct(int x0, int w) {
+    private void computeAntennaPatternGainForVMPProduct(final int x0, final int w) {
 
         // This function implements Appendix E.
         double theta = 0.0;
@@ -1812,7 +1809,7 @@ public final class ERSCalibrator implements Calibrator {
         }
     }
 
-    private void computeAntennaPatternGainForPGSProduct(int x0, int w) {
+    private void computeAntennaPatternGainForPGSProduct(final int x0, final int w) {
 
         final double[] antennaPatternGainArray = new double[w];
         getPGSAntennaPatternGainForCurrentTile(x0, w, antennaPatternGainArray);
@@ -1822,14 +1819,15 @@ public final class ERSCalibrator implements Calibrator {
         }
     }
 
-    private void computeADCPowerLossValuesForCurrentTile(
-            int tx0, int ty0, int tw, int th, ProgressMonitor pm, String[] srcBandNames, Unit.UnitType bandUnit) {
+    private void computeADCPowerLossValuesForCurrentTile(final Band sourceBand1, final Band sourceBand2,
+            final int tx0, final int ty0, final int tw, final int th,
+            final ProgressMonitor pm, final Unit.UnitType bandUnit) {
 
         // 1. Get source tile rectangle
         Rectangle sourceTileRectangle = getSourceTileRectangle(tx0, ty0, tw, th);
 
         // 2. Compute intensity image
-        RenderedImage intendityImage = getIntensityImage(sourceTileRectangle, pm, srcBandNames, bandUnit);
+        RenderedImage intendityImage = getIntensityImage(sourceBand1, sourceBand2, sourceTileRectangle, pm, bandUnit);
         //System.out.println("intendityImage width: " + intendityImage.getWidth());
         //System.out.println("intendityImage height: " + intendityImage.getHeight());
         //outputRealImage(intendityImage, 0, 999);
@@ -1862,7 +1860,7 @@ public final class ERSCalibrator implements Calibrator {
         computeADCPowerLossValue(squaredImage);
     }
 
-    private Rectangle getSourceTileRectangle(int tx0, int ty0, int tw, int th) {
+    private Rectangle getSourceTileRectangle(final int tx0, final int ty0, final int tw, final int th) {
 
         // The tile height should have window height more pixels than the target tile height
         final int halfWindowHeight = windowHeight/2;
@@ -1902,8 +1900,8 @@ public final class ERSCalibrator implements Calibrator {
         return new Rectangle(sx0, sy0, sw, sh);
     }
 
-    private RenderedImage getIntensityImage(
-            Rectangle sourceTileRectangle, ProgressMonitor pm, String[] srcBandNames, Unit.UnitType bandUnit) {
+    private RenderedImage getIntensityImage(final Band sourceBand1, final Band sourceBand2,
+            final Rectangle sourceTileRectangle, final ProgressMonitor pm, final Unit.UnitType bandUnit) {
 
         final int sx0 = sourceTileRectangle.x;
         final int sy0 = sourceTileRectangle.y;
@@ -1911,12 +1909,9 @@ public final class ERSCalibrator implements Calibrator {
         final int sh = sourceTileRectangle.height;
         final double[] array = new double[sw*sh];
 
-        Tile sourceRaster1 = null;
+        final Tile sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
         Tile sourceRaster2 = null;
-        if (srcBandNames.length == 1) {
-            sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
-        } else {
-            sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
+        if(sourceBand2 != null) {
             sourceRaster2 = getSourceTile(sourceBand2, sourceTileRectangle, pm);
         }
 
@@ -1952,7 +1947,7 @@ public final class ERSCalibrator implements Calibrator {
         return createRenderedImage(array, sw, sh);
     }
 
-    private static RenderedImage createRenderedImage(double[] array, int width, int height) {
+    private static RenderedImage createRenderedImage(final double[] array, final int width, final int height) {
 
         // create rendered image with demension being width by height
         final SampleModel sampleModel = RasterFactory.createBandedSampleModel(DataBuffer.TYPE_DOUBLE, width, height, 1);
@@ -1969,7 +1964,7 @@ public final class ERSCalibrator implements Calibrator {
         return SubsampleAverageDescriptor.create(intendityImage, scaleX, scaleY, null);
     }
 
-    private RenderedImage removeFactorsApplied(RenderedImage downSampledImage, Rectangle sourceTileRectangle) {
+    private RenderedImage removeFactorsApplied(final RenderedImage downSampledImage, final Rectangle sourceTileRectangle) {
 
         final int sx0 = sourceTileRectangle.x;
         final int w = downSampledImage.getWidth();
@@ -2003,7 +1998,7 @@ public final class ERSCalibrator implements Calibrator {
         return createRenderedImage(array, w, h);
     }
 
-    private RenderedImage smoothImage(RenderedImage rawImage) {
+    private RenderedImage smoothImage(final RenderedImage rawImage) {
 
         final int slidingWindowWidth = windowWidth/blockWidth;
         final int slidingWindowHeight = windowHeight/blockHeight;
@@ -2020,7 +2015,7 @@ public final class ERSCalibrator implements Calibrator {
         return JAI.create("boxfilter", pb, hints);
     }
 
-    private RenderedImage getSquaredImage(RenderedImage smoothedImage) {
+    private RenderedImage getSquaredImage(final RenderedImage smoothedImage) {
 
         final ParameterBlock pb1 = new ParameterBlock();
         pb1.addSource(smoothedImage);
@@ -2034,7 +2029,7 @@ public final class ERSCalibrator implements Calibrator {
         return JAI.create("dividebyconst", pb2, null);
     }
 
-    private void computeADCPowerLossValue(RenderedImage squaredImage) {
+    private void computeADCPowerLossValue(final RenderedImage squaredImage) {
 
         final int delH = (windowHeight / 2) / blockHeight;
         final int delW = (windowWidth / 2) / blockWidth;
@@ -2087,7 +2082,7 @@ public final class ERSCalibrator implements Calibrator {
     }
 
     // This function is for debugging only.
-    private static void outputRealImage(RenderedImage I, int startIdx, int endIdx) {
+    private static void outputRealImage(final RenderedImage I, final int startIdx, final int endIdx) {
 
         final Raster data = I.getData();
         final double[] real = data.getSamples(0, 0, I.getWidth(), I.getHeight(), 0, (double[])null);
@@ -2104,7 +2099,7 @@ public final class ERSCalibrator implements Calibrator {
      * @param array 2-D array holding ADC power loss value data given in Appendix F1 or F2
      * @return The ADC power loss value (in linear scale)
      */
-    private static double getPowerLossValue(double dn, double[][] array) {
+    private static double getPowerLossValue(final double dn, final double[][] array) {
 
         final int numRows = array.length;
         final int numCols = array[0].length;
@@ -2418,7 +2413,7 @@ public final class ERSCalibrator implements Calibrator {
     public double applyCalibration(
             final double v, final int rangeIndex, final double slantRange, final double satelliteHeight,
             final double sceneToEarthCentre, final double localIncidenceAngle, final int bandPolar,
-            final Unit.UnitType bandUnit, int[] subSwathIndex) {
+            final Unit.UnitType bandUnit, final int[] subSwathIndex) {
 
         // For both detectec and slant range products,
         //   1) local incidence angle (Remember that for ERS the correction is sin(theta_loc)/sin(theta_ref))
@@ -2454,7 +2449,7 @@ public final class ERSCalibrator implements Calibrator {
      * @param rangeIndex The x coordinate for the pixel
      * @return The antenna pattern gain square.
      */
-    private double getNewAntennaPatternGainSquare(int rangeIndex) {
+    private double getNewAntennaPatternGainSquare(final int rangeIndex) {
 
         if (psID.contains(VMP)) {
             return getNewAntennaPatternGainSquareForVMPProduct(rangeIndex);
@@ -2468,11 +2463,11 @@ public final class ERSCalibrator implements Calibrator {
      * @param rangeIndex The x coordinate for the pixel
      * @return The antenna pattern gain square.
      */
-    private double getNewAntennaPatternGainSquareForVMPProduct(int rangeIndex) {
+    private double getNewAntennaPatternGainSquareForVMPProduct(final int rangeIndex) {
         return g2Im(lookAngles[rangeIndex] * MathUtils.RTOD);
     }
 
-    private double getNewAntennaPatternGainSquareForPGSProduct(int rangeIndex) {
+    private double getNewAntennaPatternGainSquareForPGSProduct(final int rangeIndex) {
         final double delta = 0.05;
         final double theta = lookAngles[rangeIndex] * MathUtils.RTOD; // in degree
         final int k = (int) ((theta - elevationAngle + 5.0) / delta);
@@ -2507,25 +2502,23 @@ public final class ERSCalibrator implements Calibrator {
         final ProductData trgData = targetTile.getDataBuffer();
 //        System.out.println("RetroOp: tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
 
-        sourceBand1 = sourceProduct.getBand(srcBandName);
-        Tile sourceTile = getSourceTile(sourceBand1, targetTileRectangle, pm);
-        ProductData srcData = sourceTile.getDataBuffer();
+        final Band sourceBand1 = sourceProduct.getBand(srcBandName);
+        final Tile sourceTile = getSourceTile(sourceBand1, targetTileRectangle, pm);
+        final ProductData srcData = sourceTile.getDataBuffer();
+        final String[] srcBandNames = {targetBand.getName()};
+        Band sourceBand2 = null;
+        if (srcBandNames.length > 1) {
+            sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
+        }
 
         final Unit.UnitType bandUnit = Unit.getUnitType(sourceBand1);
-        final String[] srcBandNames = {targetBand.getName()};
-        if (applyADCSaturationCorrection && !adcTestFlag) {
-            if (!isADCNeeded(srcBandNames, bandUnit, pm)) {
-                applyADCSaturationCorrection = false;
-            }
 
-            if (applyADCSaturationCorrection && antennaPatternCorrectionFlag) {
-                computeAntennaPatternGain(0, sourceImageWidth);
-            }
-            adcTestFlag = true;
+        if (applyADCSaturationCorrection && !adcHasBeenTestedFlag) {
+            testADC(sourceBand1, sourceBand2, bandUnit, pm);
         }
 
         if (applyADCSaturationCorrection) {
-            computeADCPowerLossValuesForCurrentTile(tx0, ty0, tw, th, pm, srcBandNames, bandUnit);
+            computeADCPowerLossValuesForCurrentTile(sourceBand1, sourceBand2, tx0, ty0, tw, th, pm, bandUnit);
         }
 
         double sigma = 0.0;

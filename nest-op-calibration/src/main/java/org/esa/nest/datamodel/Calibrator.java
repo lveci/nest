@@ -1,14 +1,13 @@
 package org.esa.nest.datamodel;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
 
-import java.util.HashMap;
 import java.io.File;
-
-import com.bc.ceres.core.ProgressMonitor;
+import java.util.HashMap;
 
 /**
 * The abstract base class for all calibration operators intended to be extended by clients.
