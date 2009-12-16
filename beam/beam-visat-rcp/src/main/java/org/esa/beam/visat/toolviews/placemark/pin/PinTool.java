@@ -1,5 +1,5 @@
 /*
- * $Id: PinTool.java,v 1.1 2009-04-27 13:08:26 lveci Exp $
+ * $Id: PinTool.java,v 1.2 2009-12-16 16:15:19 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -24,6 +24,8 @@ import org.esa.beam.visat.toolviews.placemark.PlacemarkTool;
 /**
  * A tool used to create (single click), select (single click on a pin) or edit (double click on a pin) the pins
  * displayed in product scene view.
+ *
+ * @deprecated since BEAM 4.7, replaced by InsertPinInteractor
  */
 public class PinTool extends PlacemarkTool {
 

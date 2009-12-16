@@ -1,5 +1,5 @@
 /*
- * $Id: NewVectorDataNodeAction.java,v 1.1 2009-12-14 21:03:50 lveci Exp $
+ * $Id: NewVectorDataNodeAction.java,v 1.2 2009-12-16 16:15:19 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -109,7 +109,11 @@ public class NewVectorDataNodeAction extends ExecCommand {
      */
     @Override
     public void updateState() {
-        Product product = VisatApp.getApp().getSelectedProduct();
+        VisatApp app = VisatApp.getApp();
+        Product product = null;
+        if (app != null) {
+            product = app.getSelectedProduct();
+        }
         setEnabled(product != null);
     }
 

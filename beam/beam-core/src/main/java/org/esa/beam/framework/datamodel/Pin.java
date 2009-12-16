@@ -1,5 +1,5 @@
 /*
- * $Id: Pin.java,v 1.3 2009-12-14 21:03:50 lveci Exp $
+ * $Id: Pin.java,v 1.4 2009-12-16 16:15:19 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -50,7 +50,7 @@ import java.text.MessageFormat;
  * be imported and exported.
  *
  * @author Sabine Embacher
- * @version $Revision: 1.3 $ $Date: 2009-12-14 21:03:50 $
+ * @version $Revision: 1.4 $ $Date: 2009-12-16 16:15:19 $
  */
 public class Pin extends ProductNode {
 
@@ -60,6 +60,17 @@ public class Pin extends ProductNode {
     public static final String PROPERTY_NAME_PINSYMBOL = "pinSymbol";
 
     private final SimpleFeature feature;
+
+    /**
+     * Returns the type of features underlying all GCPs.
+     *
+     * @return the type of features underlying all GCPs.
+     *
+     * @since BEAM 4.7
+     */
+    public static SimpleFeatureType getGcpFeatureType() {
+        return Holder.GCP_FEATURE_TYPE;
+    }
 
     /**
      * Returns the type of features underlying all pins.
@@ -563,5 +574,7 @@ public class Pin extends ProductNode {
         private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
         private static final SimpleFeatureType PIN_FEATURE_TYPE =
                 createPlacemarkFeatureType(Product.PIN_FEATURE_TYPE_NAME, PROPERTY_NAME_PIXELPOS);
+        private static final SimpleFeatureType GCP_FEATURE_TYPE =
+                createPlacemarkFeatureType(Product.GCP_FEATURE_TYPE_NAME, PROPERTY_NAME_GEOPOS);
     }
 }

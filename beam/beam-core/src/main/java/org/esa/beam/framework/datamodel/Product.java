@@ -1,5 +1,5 @@
 /*
- * $Id: Product.java,v 1.12 2009-12-14 21:03:50 lveci Exp $
+ * $Id: Product.java,v 1.13 2009-12-16 16:15:19 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -25,7 +25,6 @@ import com.bc.jexp.Symbol;
 import com.bc.jexp.Term;
 import com.bc.jexp.WritableNamespace;
 import com.bc.jexp.impl.ParserImpl;
-import com.vividsolutions.jts.geom.Point;
 import org.esa.beam.framework.dataio.ProductFlipper;
 import org.esa.beam.framework.dataio.ProductProjectionBuilder;
 import org.esa.beam.framework.dataio.ProductReader;
@@ -49,8 +48,6 @@ import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.math.MathUtils;
 import org.geotools.feature.CollectionEvent;
 import org.geotools.feature.CollectionListener;
-import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
@@ -79,7 +76,7 @@ import java.util.TreeSet;
  * necessarily store data in the same format. Furthermore, it is not mandatory for a product to have both of them.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.12 $ $Date: 2009-12-14 21:03:50 $
+ * @version $Revision: 1.13 $ $Date: 2009-12-16 16:15:19 $
  */
 public class Product extends ProductNode {
 
@@ -275,8 +272,7 @@ public class Product extends ProductNode {
         final VectorDataNode pinVectorDataNode = new VectorDataNode("pins", Pin.getPinFeatureType());
         this.vectorDataGroup.add(pinVectorDataNode);
         final VectorDataNode gcpVectorDataNode = new VectorDataNode("ground_control_points",
-                                                                    createPlacemarkFeatureType(GCP_FEATURE_TYPE_NAME,
-                                                                                               "geoPoint"));
+                                                                     Pin.getGcpFeatureType());
         this.vectorDataGroup.add(gcpVectorDataNode);
         this.pinGroup = new SynchronizedProductNodeGroup("pinGroup", pinVectorDataNode);
         this.gcpGroup = new SynchronizedProductNodeGroup("gcpGroup", gcpVectorDataNode);
@@ -293,18 +289,6 @@ public class Product extends ProductNode {
                 }
             }
         });
-    }
-
-    private static SimpleFeatureType createPlacemarkFeatureType(String typeName, String defaultGeometryName) {
-        SimpleFeatureTypeBuilder ftb = new SimpleFeatureTypeBuilder();
-        DefaultGeographicCRS crs = DefaultGeographicCRS.WGS84;
-        ftb.setCRS(crs);
-        ftb.setName(typeName);
-        ftb.add("label", String.class);
-        ftb.add("geoPoint", Point.class, crs);
-        ftb.add("pixelPoint", Point.class, crs);
-        ftb.setDefaultGeometry(defaultGeometryName);
-        return ftb.buildFeatureType();
     }
 
     private void handleGeoCodingChange() {
