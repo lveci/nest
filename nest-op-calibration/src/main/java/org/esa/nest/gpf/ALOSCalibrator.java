@@ -246,5 +246,8 @@ public class ALOSCalibrator implements Calibrator {
 
     public void removeFactorsForCurrentTile(Band targetBand, Tile targetTile, String srcBandName, ProgressMonitor pm) throws OperatorException {
 
-    }    
+        Band sourceBand = sourceProduct.getBand(targetBand.getName());
+        Tile sourceTile = OperatorContext.getSourceTile(sourceBand, targetTile.getRectangle(), pm);
+        targetTile.setRawSamples(sourceTile.getRawSamples());
+    }
 }
