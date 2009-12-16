@@ -11,7 +11,7 @@ public class Axis {
     public static final int RIGHT_Y = 4;
     public static final int RADIAL = 5;
 
-    private AxisGraphics gr = null;
+    private AbstractAxisDisplay gr = null;
     private boolean isX = true;
     private boolean ticksInside = false;
     private boolean withGrid = false;
@@ -34,7 +34,7 @@ public class Axis {
     private int spacing = Math.abs(tickLength);
     private String tickNames[] = {"0", "0.5", "1"};
     private double tickValues[] = {0.0D, 0.5D, 1.0D};
-    private int tickPositions[] = null;
+    private int tickPos[] = null;
     private Font font;
     private Font titleFont;
     private Color axisColor;
@@ -69,7 +69,7 @@ public class Axis {
         return unit;
     }
 
-    public AxisGraphics getAxisGraphics(Graphics g) {
+    public AbstractAxisDisplay getAxisGraphics(Graphics g) {
         gr.setGraphics(g);
         return gr;
     }
@@ -215,7 +215,7 @@ public class Axis {
         tickNames[0] = valueToString(minValue, exponent);
         tickValues[lastTickIndex] = maxValue;
         tickNames[lastTickIndex] = valueToString(maxValue, exponent);
-        computeTickPositions();
+        getTickPositions();
     }
 
     final void setLocation(int orientation) {
@@ -223,23 +223,23 @@ public class Axis {
             case TOP_X:
             default:
                 isX = true;
-                gr = new AxisGraphics.XAxisGraphics(false);
+                gr = new AbstractAxisDisplay.XAxisDisplay(false);
                 break;
             case BOTTOM_X:
                 isX = true;
-                gr = new AxisGraphics.XAxisGraphics(true);
+                gr = new AbstractAxisDisplay.XAxisDisplay(true);
                 break;
             case LEFT_Y:
                 isX = false;
-                gr = new AxisGraphics.YAxisGraphics(true);
+                gr = new AbstractAxisDisplay.YAxisDisplay(true);
                 break;
             case RIGHT_Y:
                 isX = false;
-                gr = new AxisGraphics.YAxisGraphics(false);
+                gr = new AbstractAxisDisplay.YAxisDisplay(false);
                 break;
             case RADIAL:
                 isX = true;
-                gr = new AxisGraphics.XAxisGraphics(false);
+                gr = new AbstractAxisDisplay.XAxisDisplay(false);
                 break;
         }
     }
@@ -261,7 +261,7 @@ public class Axis {
         this.breadth = breadth;
         if (length != this.length) {
             this.length = length;
-            computeTickPositions();
+            getTickPositions();
         }
     }
 
@@ -287,21 +287,21 @@ public class Axis {
         else if (tickCount < minTickCount)
             setTickCount(minTickCount);
         for (int i = 0; i < tickCount; i++) {
-            gr.drawTick(tickPositions[i], tickLength);
+            gr.drawTick(tickPos[i], tickLength);
         }
         g.setColor(labelColor);
         g.setFont(font);
         for (int i = 0; i < tickCount; i++) {
-            gr.drawMultiLineTickName(tickNames[i], tickPositions[i], tickLength, fm);
+            gr.drawMultiLineTickName(tickNames[i], tickPos[i], tickLength, fm);
         }
 
         g.setFont(titleFont);
-        gr.drawAxisTitle(title, titleFont, length);
+        gr.drawTitle(title, titleFont, length);
         if (!withGrid)
             return;
         g.setColor(gridColor);
         for (int i = 0; i < tickCount; i++) {
-            gr.drawTick(tickPositions[i], breadth);
+            gr.drawTick(tickPos[i], breadth);
         }
     }
 
@@ -314,20 +314,20 @@ public class Axis {
         return Float.toString((float) v);
     }
 
-    public final int computeScreenPoint(double value) {
+    public final int getScreenPoint(double value) {
         final int p = spacing + (int) (((double) length * (value - minValue)) / axisRange);
         if (isX) return p;
         return -p;
     }
 
-    private void computeTickPositions() {
-        if (tickPositions == null || tickPositions.length != tickCount)
-            tickPositions = new int[tickCount];
+    private void getTickPositions() {
+        if (tickPos == null || tickPos.length != tickCount)
+            tickPos = new int[tickCount];
         for (int i = 0; i < tickCount; i++) {
             if (isX)
-                tickPositions[i] = computeScreenPoint(tickValues[i]);
+                tickPos[i] = getScreenPoint(tickValues[i]);
             else
-                tickPositions[i] = -computeScreenPoint(tickValues[i]);
+                tickPos[i] = -getScreenPoint(tickValues[i]);
         }
         TouchId++;
     }

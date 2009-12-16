@@ -56,8 +56,8 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
 
     private int currentRecord = 0;
 
-    private enum Unit { REAL, IMAGINARY, BOTH, AMPLITUDE, INTENSITY, MULTIPLIED }
-    private final String[] unitTypes = new String[] { "Real", "Imaginary", "Both", "Amplitude", "Intensity", "Multiplied" };
+    private enum Unit { REAL, IMAGINARY, AMPLITUDE, INTENSITY }
+    private final String[] unitTypes = new String[] { "Real", "Imaginary", "Amplitude", "Intensity" };
     private enum WaveProductType { CROSS_SPECTRA, WAVE_SPECTRA }
 
     private final ControlPanel controlPanel;
@@ -97,7 +97,7 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
 
         this.setLayout(new BorderLayout());
 
-        polarPanel = new PolarPanel(this);
+        polarPanel = new PolarPanel();
         this.add(polarPanel, BorderLayout.CENTER);
         controlPanel = new ControlPanel(this);
         this.add(controlPanel, BorderLayout.SOUTH);
@@ -229,34 +229,22 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
                     }
                 }
             }
-        } else if (graphUnit == Unit.AMPLITUDE || graphUnit == Unit.INTENSITY ||
-                graphUnit == Unit.BOTH || graphUnit == Unit.MULTIPLIED) {
+        } else if (graphUnit == Unit.AMPLITUDE || graphUnit == Unit.INTENSITY) {
             // complex data
             final float imagSpectrum[][] = getSpectrum(1, rec, false);
             minValue = Float.MAX_VALUE;
             maxValue = Float.MIN_VALUE;
-            final int semiCircle = spectrum.length / 2;
             for (int i = 0; i < spectrum.length; i++) {
                 for (int j = 0; j < spectrum[0].length; j++) {
                     final float realVal = spectrum[i][j];
                     final float imagVal = imagSpectrum[i][j];
-                    float val = realVal;
-                    if (graphUnit == Unit.BOTH) {
-                        if (i >= semiCircle)
-                            val = imagVal;
-                    } else if (graphUnit == Unit.MULTIPLIED) {
-                        if (sign(realVal) == sign(imagVal))
-                            val *= imagVal;
-                        else
-                            val = 0.0F;
-                    } else {
-                        if (sign(realVal) == sign(imagVal))
-                            val = realVal * realVal + imagVal * imagVal;
-                        else
-                            val = 0.0F;
-                        if (graphUnit == Unit.AMPLITUDE)
-                            val = (float) Math.sqrt(val);
-                    }
+                    float val;
+                    if (sign(realVal) == sign(imagVal))
+                        val = realVal * realVal + imagVal * imagVal;
+                    else
+                        val = 0.0F;
+                    if (graphUnit == Unit.AMPLITUDE)
+                        val = (float) Math.sqrt(val);
                     spectrum[i][j] = val;
                     minValue = Math.min(minValue, val);
                     maxValue = Math.max(maxValue, val);
@@ -366,26 +354,6 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
         return f < 0.0F ? -1 : 1;
     }
 
-    /**
-     * Paints the panel component
-     *
-    // * @param g The Graphics
-     */
- /*   @Override
-    protected void paintComponent(java.awt.Graphics g) {
-        super.paintComponent(g);
-
-        ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-
-        //graphView.setSize(getWidth(), getHeight());
-        //graphView.paint(g);
-
-        polarPanel.paint(g);
-        readoutView.paint(g);
-        controlPanel.paint(g);
-    }       */
-
     @Override
     public JPopupMenu createPopupMenu(Component component) {
         return null;
@@ -415,10 +383,8 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
         } else {
             createCheckedMenuItem(unitTypes[Unit.REAL.ordinal()], unitMenu, graphUnit == Unit.REAL);
             createCheckedMenuItem(unitTypes[Unit.IMAGINARY.ordinal()], unitMenu, graphUnit == Unit.IMAGINARY);
-            //createCheckedMenuItem(unitTypes[Unit.BOTH.ordinal()], unitMenu, graphUnit == Unit.BOTH);
             createCheckedMenuItem(unitTypes[Unit.AMPLITUDE.ordinal()], unitMenu, graphUnit == Unit.AMPLITUDE);
             createCheckedMenuItem(unitTypes[Unit.INTENSITY.ordinal()], unitMenu, graphUnit == Unit.INTENSITY);
-            //createCheckedMenuItem(unitTypes[Unit.MULTIPLIED.ordinal()], unitMenu, graphUnit == Unit.MULTIPLIED);
         }
 
         popup.setLabel("Justification");
@@ -463,17 +429,11 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
         } else if(event.getActionCommand().equals("Imaginary")) {
             graphUnit = Unit.IMAGINARY;
             createPlot(currentRecord);
-        } else if(event.getActionCommand().equals("Both")) {
-            graphUnit = Unit.BOTH;
-            createPlot(currentRecord);
         } else if(event.getActionCommand().equals("Amplitude")) {
             graphUnit = Unit.AMPLITUDE;
             createPlot(currentRecord);
         } else if(event.getActionCommand().equals("Intensity")) {
             graphUnit = Unit.INTENSITY;
-            createPlot(currentRecord);
-        } else if(event.getActionCommand().equals("Multiplied")) {
-            graphUnit = Unit.MULTIPLIED;
             createPlot(currentRecord);
         }
     }

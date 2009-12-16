@@ -4,14 +4,14 @@ import org.esa.beam.visat.VisatApp;
 
 import java.awt.*;
 
-abstract class AxisGraphics {
+abstract class AbstractAxisDisplay {
 
     Graphics g = null;
     private Color backgroundColor;
 
     public static final int MAX_POINTS = 16380;
 
-    AxisGraphics() {
+    AbstractAxisDisplay() {
         backgroundColor = VisatApp.getApp().getDesktopPane().getBackground();
     }
 
@@ -25,23 +25,23 @@ abstract class AxisGraphics {
 
     abstract void drawLine(int i, int j, int k, int l);
 
-    abstract void drawAxisTitle(String title, Font titleFont, int length);
+    abstract void drawTitle(String title, Font titleFont, int length);
 
-    abstract Rectangle getTickNameBB(String s, int i, int j, int k, int l, FontMetrics fontmetrics);
+    abstract Rectangle getTickName(String s, int i, int j, int k, int l, FontMetrics fontmetrics);
 
     abstract void drawTickName(String s, int i, int j, int k, int l, int i1, int j1);
 
     abstract int maxTickSize(String[] tickNames, int tickCount, Font font);
 
-    void setGraphics(Graphics g) {
+    protected void setGraphics(Graphics g) {
         this.g = g;
     }
 
-    void drawTick(int tickPixel, int tickLength) {
+    protected void drawTick(int tickPixel, int tickLength) {
         drawLine(tickPixel, 0, tickPixel, tickLength);
     }
 
-    void drawMultiLineTickName(String name, int tickPixel, int tickLength, FontMetrics fm) {
+    protected void drawMultiLineTickName(String name, int tickPixel, int tickLength, FontMetrics fm) {
         final int leading = Math.max(fm.getLeading(), 3);
         int lineCount = 0;
         int p = 0;
@@ -55,17 +55,17 @@ abstract class AxisGraphics {
             if (p < 0)
                 p = name.length();
             final String text = name.substring(f, p);
-            final Rectangle bb = getTickNameBB(text, tickPixel, tickLength, i, lineCount, fm);
+            final Rectangle box = getTickName(text, tickPixel, tickLength, i, lineCount, fm);
             final Color col = g.getColor();
             g.setColor(backgroundColor);
-            g.fillRect(bb.x - leading, bb.y, bb.width + 2 * leading, bb.height + leading);
+            g.fillRect(box.x - leading, box.y, box.width + 2 * leading, box.height + leading);
             g.setColor(col);
-            g.drawString(text, bb.x, bb.y + fm.getAscent());
+            g.drawString(text, box.x, box.y + fm.getAscent());
             f = p + 1;
         }
     }
 
-    Dimension getTickLabelBounds(String name, Font font) {
+    protected Dimension getTickLabelBounds(String name, Font font) {
         final FontMetrics fm = g.getFontMetrics(font);
         int maxWidth = 0;
         int height = 0;
@@ -85,10 +85,10 @@ abstract class AxisGraphics {
         return new Dimension(maxWidth, height);
     }
 
-    public static class XAxisGraphics extends AxisGraphics {
+    public static class XAxisDisplay extends AbstractAxisDisplay {
         final boolean isBottomLeft;
 
-        public XAxisGraphics(boolean bottomLeft) {
+        public XAxisDisplay(boolean bottomLeft) {
             isBottomLeft = bottomLeft;
         }
 
@@ -101,17 +101,15 @@ abstract class AxisGraphics {
         }
 
         @Override
-        void drawAxisTitle(String title, Font titleFont, int length) {
+        void drawTitle(String title, Font titleFont, int length) {
             if (title != null) {
                 final FontMetrics tfm = g.getFontMetrics(titleFont);
-                final int x = (length - tfm.stringWidth(title)) / 2;
-                final int y = tfm.getHeight() * 3;
-                g.drawString(title, x, y);
+                g.drawString(title, (length - tfm.stringWidth(title)) / 2, tfm.getHeight() * 3);
             }
         }
 
         @Override
-        Rectangle getTickNameBB(String name, int tickPixel, int tickLength, int lineNumber, int lineCount, FontMetrics fm) {
+        Rectangle getTickName(String name, int tickPixel, int tickLength, int lineNumber, int lineCount, FontMetrics fm) {
             final int height = fm.getAscent();
             final int width = fm.stringWidth(name);
             int x = tickPixel;
@@ -150,10 +148,10 @@ abstract class AxisGraphics {
         }
     }
 
-    public static class YAxisGraphics extends AxisGraphics {
+    public static class YAxisDisplay extends AbstractAxisDisplay {
         final boolean isBottomLeft;
 
-        public YAxisGraphics(boolean bottomLeft) {
+        public YAxisDisplay(boolean bottomLeft) {
             isBottomLeft = bottomLeft;
         }
 
@@ -166,7 +164,7 @@ abstract class AxisGraphics {
         }
 
         @Override
-        void drawAxisTitle(String title, Font titleFont, int length) {
+        void drawTitle(String title, Font titleFont, int length) {
             if (title != null) {
                 final FontMetrics fm = g.getFontMetrics(titleFont);
                 final int y = length + fm.getHeight();
@@ -177,7 +175,7 @@ abstract class AxisGraphics {
         }
 
         @Override
-        Rectangle getTickNameBB(String name, int tickPixel, int tickLength, int lineNumber, int lineCount, FontMetrics fm) {
+        Rectangle getTickName(String name, int tickPixel, int tickLength, int lineNumber, int lineCount, FontMetrics fm) {
             final int height = fm.getAscent();
             final int width = fm.stringWidth(name);
             int y = tickPixel;

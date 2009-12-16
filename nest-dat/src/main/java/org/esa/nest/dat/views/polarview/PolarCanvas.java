@@ -253,7 +253,7 @@ public class PolarCanvas extends Container {
         if (rings != null) {
             int ri = 0;
             for (double ring : rings) {
-                final int rad = radialAxis.computeScreenPoint(ring);
+                final int rad = radialAxis.getScreenPoint(ring);
                 final int rad2 = rad + rad;
                 graphics.setColor(Color.lightGray);
                 graphics.drawOval(-rad, -rad, rad2, rad2);

@@ -8,13 +8,10 @@ import java.awt.*;
  */
 public class PolarPanel extends JPanel {
 
-    private final PolarView polarView;
     private final PolarCanvas polarCanvas;
     private final ReadoutCanvas readoutCanvas;
 
-    PolarPanel(PolarView theView) {
-        this.polarView = theView;
-
+    PolarPanel() {
         polarCanvas = new PolarCanvas();
         readoutCanvas = new ReadoutCanvas();
     }

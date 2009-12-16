@@ -171,7 +171,7 @@ public class PolarData {
                 if (points[i] == null || points[i].length != n)
                     points[i] = new int[n];
                 for (int j = 0; j < n; j++) {
-                    points[i][j] = axis.computeScreenPoint(values[i][j]);
+                    points[i][j] = axis.getScreenPoint(values[i][j]);
                 }
             }
         }
