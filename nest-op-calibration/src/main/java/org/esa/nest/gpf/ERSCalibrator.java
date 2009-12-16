@@ -90,10 +90,6 @@ public final class ERSCalibrator implements Calibrator {
     private boolean adcHasBeenTestedFlag = false;
     private boolean antennaPatternCorrectionFlag = false;
     private boolean rangeSpreadingLossCompFlag = false;
-    private boolean adcSourceTileTopExtFlag = false;
-    private boolean adcSourceTileBottomExtFlag = false;
-    private boolean adcSourceTileLeftExtFlag = false;
-    private boolean adcSourceTileRightExtFlag = false;
     private boolean useExtXCAFile = false;
 
     private double rangeSpacing; // m
@@ -127,7 +123,6 @@ public final class ERSCalibrator implements Calibrator {
     private double[] antennaPatternCorrFactor = null; // for a range line in current tile, in linear scale
     private double[] antennaPatternGain = null; // used in ADC, for a range line in current tile, in linear scale
     private double[][] appendixF1 = null; // ERS-1 SAR ADC Power Loss Correction Look-up Table, in dB
-    private double[][] adcPowerLoss = null;
     private double[][] appendixF2 = null; // ERS-2 SAR ADC Power Loss Correction Look-up Table, in dB
     private double[][] appendixG1 = null; // initial ERS-1 SAR antenna pattern gain, in dB
     private double[][] appendixG2 = null; // improved ERS-1 SAR antenna pattern gain, in dB
@@ -319,12 +314,14 @@ public final class ERSCalibrator implements Calibrator {
             testADC(sourceBand1, sourceBand2, bandUnit, pm);
         }
 
-        if (applyADCSaturationCorrection && (h < blockHeight || w < blockWidth)) {
-            applyADCSaturationCorrection = false;
+        boolean applyADCSaturationCorrectionToCurrentTile = false;
+        if (applyADCSaturationCorrection && h >= blockHeight && w >= blockWidth) {
+            applyADCSaturationCorrectionToCurrentTile = true;
         }
 
-        if (applyADCSaturationCorrection) {
-            computeADCPowerLossValuesForCurrentTile(sourceBand1, sourceBand2, x0, y0, w, h, pm, bandUnit);
+        double[][] adcPowerLoss = null;
+        if (applyADCSaturationCorrectionToCurrentTile) {
+            adcPowerLoss = computeADCPowerLossValuesForCurrentTile(sourceBand1, sourceBand2, x0, y0, w, h, pm, bandUnit);
         }
 
         final double k = calibrationConstant * Math.sin(referenceIncidenceAngle);
@@ -336,7 +333,7 @@ public final class ERSCalibrator implements Calibrator {
             OperatorContext.checkForCancelation(pm);
 
             final double sinIncidenceAngleByK = Math.sin(incidenceAngles[x]) / k;
-            if (applyADCSaturationCorrection) {
+            if (applyADCSaturationCorrectionToCurrentTile) {
                 adcJ = Math.min(((x - x0) / blockWidth), adcPowerLoss[0].length - 1);
             }
 
@@ -369,7 +366,7 @@ public final class ERSCalibrator implements Calibrator {
                     sigma *= replicaPulseVariationsCorrectionFactor;
                 }
 
-                if (applyADCSaturationCorrection) {
+                if (applyADCSaturationCorrectionToCurrentTile) {
                     final int adcI = Math.min(((y - y0) / blockHeight), adcPowerLoss.length - 1);
                     sigma *= adcPowerLoss[adcI][adcJ];
                 }
@@ -688,6 +685,10 @@ public final class ERSCalibrator implements Calibrator {
                 }
                 applyADCSaturationCorrection = true;
             }
+        }
+
+        if (applyADCSaturationCorrection) {
+            adcHasBeenTestedFlag = false;
         }
     }
 
@@ -1355,7 +1356,7 @@ public final class ERSCalibrator implements Calibrator {
     private synchronized void computeAntennaPatternCorrectionFactors(final int x0, final int w) {
 
         if(isAntPattAvailable) return;
-        
+
         antennaPatternCorrFactor = new double[w];
 
         if (psID.contains(VMP)) {
@@ -1819,12 +1820,13 @@ public final class ERSCalibrator implements Calibrator {
         }
     }
 
-    private void computeADCPowerLossValuesForCurrentTile(final Band sourceBand1, final Band sourceBand2,
+    private double[][] computeADCPowerLossValuesForCurrentTile(final Band sourceBand1, final Band sourceBand2,
             final int tx0, final int ty0, final int tw, final int th,
             final ProgressMonitor pm, final Unit.UnitType bandUnit) {
 
         // 1. Get source tile rectangle
-        Rectangle sourceTileRectangle = getSourceTileRectangle(tx0, ty0, tw, th);
+        TileDescriptionFlags tileDescriptionFlags = new TileDescriptionFlags();
+        Rectangle sourceTileRectangle = getSourceTileRectangle(tx0, ty0, tw, th, tileDescriptionFlags);
 
         // 2. Compute intensity image
         RenderedImage intendityImage = getIntensityImage(sourceBand1, sourceBand2, sourceTileRectangle, pm, bandUnit);
@@ -1857,10 +1859,11 @@ public final class ERSCalibrator implements Calibrator {
         //outputRealImage(squaredImage, 25000, 25999);
 
         // 7. Generating ADC compensation file using look-up table in Appendix F (F1 or F2) and interpolation.
-        computeADCPowerLossValue(squaredImage);
+        return computeADCPowerLossValue(squaredImage, tileDescriptionFlags);
     }
 
-    private Rectangle getSourceTileRectangle(final int tx0, final int ty0, final int tw, final int th) {
+    private Rectangle getSourceTileRectangle(final int tx0, final int ty0, final int tw, final int th,
+                                             TileDescriptionFlags tileDescriptionFlags) {
 
         // The tile height should have window height more pixels than the target tile height
         final int halfWindowHeight = windowHeight/2;
@@ -1870,30 +1873,30 @@ public final class ERSCalibrator implements Calibrator {
         int sw = tw;
         int sh = th;
 
-        adcSourceTileTopExtFlag = false;
-        adcSourceTileBottomExtFlag = false;
-        adcSourceTileLeftExtFlag = false;
-        adcSourceTileRightExtFlag = false;
+        tileDescriptionFlags.adcSourceTileTopExtFlag = false;
+        tileDescriptionFlags.adcSourceTileBottomExtFlag = false;
+        tileDescriptionFlags.adcSourceTileLeftExtFlag = false;
+        tileDescriptionFlags.adcSourceTileRightExtFlag = false;
 
         if (ty0 >= halfWindowHeight) {
-            adcSourceTileTopExtFlag = true;
+            tileDescriptionFlags.adcSourceTileTopExtFlag = true;
             sy0 = ty0 - halfWindowHeight;
             sh += halfWindowHeight;
         }
 
         if (ty0 + th + halfWindowHeight <= sourceImageHeight) {
-            adcSourceTileBottomExtFlag = true;
+            tileDescriptionFlags.adcSourceTileBottomExtFlag = true;
             sh += halfWindowHeight;
         }
 
         if (tx0 >= halfWindowWidth) {
-            adcSourceTileLeftExtFlag = true;
+            tileDescriptionFlags.adcSourceTileLeftExtFlag = true;
             sx0 = tx0 - halfWindowWidth;
             sw += halfWindowWidth;
         }
 
         if (tx0 + tw + halfWindowWidth <= sourceImageWidth) {
-            adcSourceTileRightExtFlag = true;
+            tileDescriptionFlags.adcSourceTileRightExtFlag = true;
             sw += halfWindowWidth;
         }
 
@@ -2029,7 +2032,8 @@ public final class ERSCalibrator implements Calibrator {
         return JAI.create("dividebyconst", pb2, null);
     }
 
-    private void computeADCPowerLossValue(final RenderedImage squaredImage) {
+    private double[][] computeADCPowerLossValue(final RenderedImage squaredImage,
+                                                final TileDescriptionFlags tileDescriptionFlags) {
 
         final int delH = (windowHeight / 2) / blockHeight;
         final int delW = (windowWidth / 2) / blockWidth;
@@ -2038,27 +2042,27 @@ public final class ERSCalibrator implements Calibrator {
         int y0 = 0;
         int w = squaredImage.getWidth();
         int h = squaredImage.getHeight();
-        if (adcSourceTileTopExtFlag) {
+        if (tileDescriptionFlags.adcSourceTileTopExtFlag) {
             y0 = delH;
             h -= delH;
         }
-        if (adcSourceTileBottomExtFlag) {
+        if (tileDescriptionFlags.adcSourceTileBottomExtFlag) {
             h -= delH;
         }
         if(h <= 0)
             h = 1;
 
-        if (adcSourceTileLeftExtFlag) {
+        if (tileDescriptionFlags.adcSourceTileLeftExtFlag) {
             x0 = delW;
             w -= delW;
         }
-        if (adcSourceTileRightExtFlag) {
+        if (tileDescriptionFlags.adcSourceTileRightExtFlag) {
             w -= delW;
         }
         if(w <= 0)
             w = 1;
 
-        adcPowerLoss = new double[h][w];
+        double[][] adcPowerLoss = new double[h][w];
 
         Raster data = squaredImage.getData();
 
@@ -2079,6 +2083,7 @@ public final class ERSCalibrator implements Calibrator {
         }
         System.out.println();
         */
+        return adcPowerLoss;
     }
 
     // This function is for debugging only.
@@ -2517,8 +2522,16 @@ public final class ERSCalibrator implements Calibrator {
             testADC(sourceBand1, sourceBand2, bandUnit, pm);
         }
 
-        if (applyADCSaturationCorrection) {
-            computeADCPowerLossValuesForCurrentTile(sourceBand1, sourceBand2, tx0, ty0, tw, th, pm, bandUnit);
+
+        boolean applyADCSaturationCorrectionToCurrentTile = false;
+        if (applyADCSaturationCorrection && th >= blockHeight && tw >= blockWidth) {
+            applyADCSaturationCorrectionToCurrentTile = true;
+        }
+
+        double[][] adcPowerLoss = null;
+        if (applyADCSaturationCorrectionToCurrentTile) {
+            adcPowerLoss = computeADCPowerLossValuesForCurrentTile(
+                    sourceBand1, sourceBand2, tx0, ty0, tw, th, pm, bandUnit);
         }
 
         double sigma = 0.0;
@@ -2531,7 +2544,7 @@ public final class ERSCalibrator implements Calibrator {
                 antennaPatternByRangeSpreadingLoss = antennaPatternGain[x] / rangeSpreadingLoss[x];
             }
 
-            if (applyADCSaturationCorrection) {
+            if (applyADCSaturationCorrectionToCurrentTile) {
                 adcJ = Math.min(((x - tx0) / blockWidth), adcPowerLoss[0].length - 1);
             }
 
@@ -2557,13 +2570,23 @@ public final class ERSCalibrator implements Calibrator {
                     sigma /= replicaPulseVariationsCorrectionFactor;
                 }
 
-                if (applyADCSaturationCorrection) {
+                if (applyADCSaturationCorrectionToCurrentTile) {
                     final int adcI = Math.min(((y - ty0) / blockHeight), adcPowerLoss.length - 1);
                     sigma *= adcPowerLoss[adcI][adcJ];
                 }
 
                 trgData.setElemDoubleAt(index, sigma);
             }
+        }
+    }
+
+    public static class TileDescriptionFlags {
+        public boolean adcSourceTileTopExtFlag;
+        public boolean adcSourceTileBottomExtFlag;
+        public boolean adcSourceTileLeftExtFlag;
+        public boolean adcSourceTileRightExtFlag;
+
+        public TileDescriptionFlags() {
         }
     }
 
