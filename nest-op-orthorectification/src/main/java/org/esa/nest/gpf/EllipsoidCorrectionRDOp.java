@@ -20,7 +20,6 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.util.ProductUtils;
 
 /**
  * This operator performs the same terrain correction as RangeDopplerGeocodingOp does except that it uses average
@@ -51,7 +50,8 @@ public final class EllipsoidCorrectionRDOp extends RangeDopplerGeocodingOp {
      * Create target product.
      * @throws OperatorException The exception.
      */
-    protected void createTargetProduct() throws OperatorException {
+    /*
+    protected void createTargetProduct() throws OperatorException, IOException {
 
         super.targetProduct = new Product(super.sourceProduct.getName() + this.PRODUCT_SUFFIX,
                                     super.sourceProduct.getProductType(),
@@ -63,10 +63,10 @@ public final class EllipsoidCorrectionRDOp extends RangeDopplerGeocodingOp {
         addGeoCoding();
 
         // addLayoverShadowBitmasks(super.targetProduct);
-
+        
         ProductUtils.copyMetadata(super.sourceProduct, super.targetProduct);
     }
-
+    */
     /**
      * The SPI is used to register this operator in the graph processing framework
      * via the SPI configuration file
