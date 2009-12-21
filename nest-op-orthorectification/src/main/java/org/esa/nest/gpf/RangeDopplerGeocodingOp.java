@@ -347,16 +347,32 @@ public class RangeDopplerGeocodingOp extends Operator {
         wavelength = getRadarFrequency(absRoot);
 
         rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
+        if (rangeSpacing <= 0.0) {
+            throw new OperatorException("Invalid input for range pixel spacing: " + rangeSpacing);
+        }
+
         azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
+        if (rangeSpacing <= 0.0 || azimuthSpacing <= 0.0) {
+            throw new OperatorException("Invalid input for azimuth pixel spacing: " + azimuthSpacing);
+        }
 
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
         lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD(); // in days
         lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
+        if (lastLineUTC == 0.0) {
+            throw new OperatorException("Invalid input for Line Time Interval: " + lineTimeInterval);
+        }
 
         orbitStateVectors = AbstractMetadata.getOrbitStateVectors(absRoot);
+        if (orbitStateVectors == null) {
+            throw new OperatorException("Invalid Obit State Vectors");
+        }
 
         if (srgrFlag) {
             srgrConvParams = AbstractMetadata.getSRGRCoefficients(absRoot);
+            if (srgrConvParams == null) {
+                throw new OperatorException("Invalid SRGR Coefficients");
+            }
         } else {
             nearEdgeSlantRange = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.slant_range_to_first_pixel);
         }
@@ -408,7 +424,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     public static double getRadarFrequency(final MetadataElement absRoot) throws Exception {
         final double radarFreq = AbstractMetadata.getAttributeDouble(absRoot,
                                                     AbstractMetadata.radar_frequency)*Constants.oneMillion; // Hz
-        if (Double.compare(radarFreq, 0.0) == 0) {
+        if (Double.compare(radarFreq, 0.0) <= 0) {
             throw new OperatorException("Invalid radar frequency: " + radarFreq);
         }
         return Constants.lightSpeed / radarFreq;
