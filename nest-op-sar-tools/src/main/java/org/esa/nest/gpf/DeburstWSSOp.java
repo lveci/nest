@@ -13,6 +13,7 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.awt.*;
 import java.util.*;
@@ -41,9 +42,9 @@ public class DeburstWSSOp extends Operator {
     private final Vector<Integer> startLine = new Vector<Integer>(5);
     private static final double zeroThreshold = 1000;
     private static final double zeroThresholdSmall = 500;
-    private final Vector<LineTime[]> lineTimeList = new Vector<LineTime[]>(5);
+    private LineTime[] lineTimes = null;
+    private boolean lineTimesSorted = false;
 
-    private int numberOfDatasets = 0;
     private final Map<Band, ComplexBand> bandMap = new HashMap<Band, ComplexBand>(5);
 
     private final static String SS1 = "SS1";
@@ -51,6 +52,10 @@ public class DeburstWSSOp extends Operator {
     private final static String SS3 = "SS3";
     private final static String SS4 = "SS4";
     private final static String SS5 = "SS5";
+
+    private int subSwathBandNum;
+    private int targetWidth;
+    private int targetHeight;
 
     /**
      * Default constructor. The graph processing framework
@@ -74,42 +79,86 @@ public class DeburstWSSOp extends Operator {
      */
     @Override
     public void initialize() throws OperatorException {
+        try {
+            // check product type
+            if (!sourceProduct.getProductType().equals("ASA_WSS_1P")) {
+                throw new OperatorException("Source product is not an ASA_WSS_1P");
+            }
 
-        // check product type
-        if (!sourceProduct.getProductType().equals("ASA_WSS_1P")) {
-            throw new OperatorException("Source product is not an ASA_WSS_1P");
+            getSourceMetadata();
+
+            targetProduct = new Product(sourceProduct.getName() + "_" + subSwath,
+                    sourceProduct.getProductType(),
+                    targetWidth,
+                    targetHeight);
+
+            targetProduct.setPreferredTileSize(targetWidth, 20);
+
+            subSwathBandNum = getRealBandNumFromSubSwath(subSwath);
+            final Band[] sourceBands = sourceProduct.getBands();
+
+            if (produceIntensitiesOnly) {
+                final Band tgtBand = targetProduct.addBand("Intensity_" + subSwath, ProductData.TYPE_FLOAT32);
+                tgtBand.setUnit(Unit.INTENSITY);
+                bandMap.put(tgtBand, new ComplexBand(sourceBands[subSwathBandNum], sourceBands[subSwathBandNum+1]));
+            } else {
+                final Band trgI = targetProduct.addBand("i_" +subSwath, sourceBands[subSwathBandNum].getDataType());
+                trgI.setUnit(Unit.REAL);
+                final Band trgQ = targetProduct.addBand("q_" +subSwath, sourceBands[subSwathBandNum+1].getDataType());
+                trgQ.setUnit(Unit.IMAGINARY);
+                bandMap.put(trgI, new ComplexBand(sourceBands[subSwathBandNum], sourceBands[subSwathBandNum+1]));
+                ReaderUtils.createVirtualIntensityBand(targetProduct, trgI, trgQ, subSwath);
+                ReaderUtils.createVirtualPhaseBand(targetProduct, trgI, trgQ, subSwath);
+            }
+
+            copyMetaData(sourceProduct.getMetadataRoot(), targetProduct.getMetadataRoot());
+            ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
+            ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
+            ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+            targetProduct.setStartTime(sourceProduct.getStartTime());
+            targetProduct.setEndTime(sourceProduct.getEndTime());
+
+            // update the metadata with the affect of the processing
+            updateTargetProductMetadata();
+        } catch (Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
         }
+    }
 
-        final int targetHeight = (int) (sourceProduct.getSceneRasterHeight() / 2.9);
+    /**
+     * Compute mean pixel spacing (in m).
+     * @throws Exception The exception.
+     */
+    private void getSourceMetadata() throws Exception {
+        final MetadataElement srcMetadataRoot = sourceProduct.getMetadataRoot();
+        final MetadataElement mppRootElem = srcMetadataRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
+        final MetadataElement mpp = mppRootElem.getElementAt(subSwathBandNum);
 
-        targetProduct = new Product(sourceProduct.getName() + "_" + subSwath,
-                sourceProduct.getProductType(),
-                sourceProduct.getSceneRasterWidth(),
-                targetHeight);
+        targetHeight = mpp.getAttributeInt("num_output_lines") / 3;
+        targetWidth = mpp.getAttributeInt("num_samples_per_line");
 
-        final int bandNum = getRealBandNumFromSubSwath(subSwath);
-        final Band[] sourceBands = sourceProduct.getBands();
 
-        if (produceIntensitiesOnly) {
-            final Band tgtBand = targetProduct.addBand("Intensity_" + subSwath, ProductData.TYPE_FLOAT32);
-            tgtBand.setUnit(Unit.INTENSITY);
-            bandMap.put(tgtBand, new ComplexBand(sourceBands[bandNum], sourceBands[bandNum+1]));
-        } else {
-            final Band trgI = targetProduct.addBand("i_" +subSwath, sourceBands[bandNum].getDataType());
-            trgI.setUnit(Unit.REAL);
-            final Band trgQ = targetProduct.addBand("q_" +subSwath, sourceBands[bandNum+1].getDataType());
-            trgQ.setUnit(Unit.IMAGINARY);
-            bandMap.put(trgI, new ComplexBand(sourceBands[bandNum], sourceBands[bandNum+1]));
-            ReaderUtils.createVirtualIntensityBand(targetProduct, trgI, trgQ, subSwath);
-            ReaderUtils.createVirtualPhaseBand(targetProduct, trgI, trgQ, subSwath);
-        }
+    }
 
-        copyMetaData(sourceProduct.getMetadataRoot(), targetProduct.getMetadataRoot());
-        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        targetProduct.setStartTime(sourceProduct.getStartTime());
-        targetProduct.setEndTime(sourceProduct.getEndTime());
+    /**
+     * Update metadata in the target product.
+     */
+    private void updateTargetProductMetadata() {
+
+        final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetHeight);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetWidth);
+
+        final MetadataElement srcMetadataRoot = sourceProduct.getMetadataRoot();
+        final MetadataElement mppRootElem = srcMetadataRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
+        final MetadataElement mpp = mppRootElem.getElementAt(subSwathBandNum);
+
+        absTgt.setAttributeUTC(AbstractMetadata.first_line_time,
+                mpp.getAttributeUTC("first_zero_doppler_time", new ProductData.UTC(0)));
+        absTgt.setAttributeUTC(AbstractMetadata.last_line_time,
+                mpp.getAttributeUTC("last_zero_doppler_time", new ProductData.UTC(0)));
+        absTgt.setAttributeDouble(AbstractMetadata.line_time_interval, mpp.getAttributeDouble(AbstractMetadata.line_time_interval));
+
     }
 
     private static int getRealBandNumFromSubSwath(final String subSwath) {
@@ -143,110 +192,97 @@ public class DeburstWSSOp extends Operator {
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          if an error occurs during computation of the target rasters.
      */
+   // @Override
+   // public synchronized void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
+
+    /**
+     * Called by the framework in order to compute a tile for the given target band.
+     * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
+     *
+     * @param targetBand The target band.
+     * @param targetTile The current tile associated with the target band to be computed.
+     * @param pm         A progress monitor which should be used to determine computation cancelation requests.
+     * @throws org.esa.beam.framework.gpf.OperatorException
+     *          If an error occurs during computation of the target raster.
+     */
     @Override
-    public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
-
+    public synchronized void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         Tile targetTileI = null, targetTileQ = null, targetTileIntensity = null;
-
+        final Rectangle targetRectangle = targetTile.getRectangle();
         //System.out.println("targetRect " + targetRectangle.x + " " + targetRectangle.y + " w "
         //        + targetRectangle.width + " h " + targetRectangle.height);
 
         try {
+            ComplexBand cBand;
+            if (produceIntensitiesOnly) {
+                final Band tgtBand = targetProduct.getBandAt(0);
+                targetTileIntensity = targetTile;//targetTiles.get(tgtBand);
+                cBand = bandMap.get(tgtBand);
+            } else {
+                final Band tgtBandI = targetProduct.getBandAt(0);
+                final Band tgtBandQ = targetProduct.getBandAt(1);
+                targetTileI = targetTile;//targetTiles.get(tgtBandI);
+                //targetTileQ = targetTiles.get(tgtBandQ);
+                cBand = bandMap.get(tgtBandI);
+            }
 
-            pm.beginTask("de-bursting WSS product", numberOfDatasets);
-            for (int index = 0, cplxIndex = 0; index < numberOfDatasets; ++index, cplxIndex += 4) {
+            if (!lineTimesSorted) {
+                sortLineTimes(sourceProduct, cBand.i);
+            }
 
-                Band srcBandI, srcBandQ;
-                if (produceIntensitiesOnly) {
-                    final Band tgtBand = targetProduct.getBandAt(index);
-                    targetTileIntensity = targetTiles.get(tgtBand);
-                    final ComplexBand cBand = bandMap.get(tgtBand);
-                    srcBandI = cBand.i;
-                    srcBandQ = cBand.q;
-                } else {
-                    final Band tgtBandI = targetProduct.getBandAt(cplxIndex);
-                    final Band tgtBandQ = targetProduct.getBandAt(cplxIndex + 1);
-                    targetTileI = targetTiles.get(tgtBandI);
-                    targetTileQ = targetTiles.get(tgtBandQ);
-                    final ComplexBand cBand = bandMap.get(tgtBandI);
-                    srcBandI = sourceProduct.getBand(cBand.i.getName());
-                    srcBandQ = sourceProduct.getBand(cBand.q.getName());
-                    // skip virtual intensity band
+            int targetLine = targetRectangle.y;
+            final int maxX = targetRectangle.x + targetRectangle.width;
+
+            //final double threshold = 0.000000139;
+            final double threshold = 0.000000135;
+            //final double threshold = 0.000000035;
+
+            //int startLineForBand = 0;
+            int i = 0;
+            pm.beginTask("de-bursting WSS product", lineTimes.length-i);
+            while (i < lineTimes.length) {
+                pm.worked(1);
+                if (lineTimes[i].visited) {
+                    ++i;
+                    continue;
                 }
 
-                final int rasterWidth = srcBandI.getRasterWidth();
-                final int srcRectX = Math.min(targetRectangle.x, rasterWidth);
-                final int srcRectWidth = Math.min(targetRectangle.width, rasterWidth - srcRectX);
-                if (srcRectWidth < 1) continue;
+                final Vector<Integer> burstLines = new Vector<Integer>(4);
+                burstLines.add(lineTimes[i].line);
+                lineTimes[i].visited = true;
+                //startLineForBand = i;
 
-                try {
-                    //synchronized(this) {
-                        if (lineTimeList.size() <= index) {
-                            sortLineTimes(sourceProduct, srcBandI);
-                        } else {
-                            //LineTime[] lineTimes = lineTimeList.get(index);
-                            //for (LineTime lt : lineTimes) {
-                            //    lt.visited = false;
-                            //}
-                        }
-                   // }
-                } catch (Exception e) {
-                    System.out.print("getImageRecord " + e.toString());
-                    System.out.println();
-                }
-
-                final LineTime[] lineTimes = lineTimeList.get(index);
-
-                int targetLine =0;
-                final int maxX = targetRectangle.x + targetRectangle.width;
-
-                //final double threshold = 0.000000139;
-                final double threshold = 0.000000135;
-
-                int startLineForBand = startLine.get(index);
-                int i = startLineForBand;
-                while (i < lineTimes.length) {
-                    if (lineTimes[i].visited) {
-                        ++i;
+                int j = i + 1;
+                while (j < lineTimes.length) {// && j < i + 10 && burstLines.size() < 3) {
+                    if (lineTimes[j].visited) {
+                        ++j;
                         continue;
                     }
 
-                    final Vector<Integer> burstLines = new Vector<Integer>(4);
-                    burstLines.add(lineTimes[i].line);
-                    lineTimes[i].visited = true;
-                    startLineForBand = i;
-
-                    int j = i + 1;
-                    while (j < lineTimes.length && j < i + 10 && burstLines.size() < 3) {
-                        if (lineTimes[j].visited) {
-                            ++j;
-                            continue;
-                        }
-
-                        final double diff = lineTimes[j].time - lineTimes[i].time;
-                        if (diff < threshold) {
-                            burstLines.add(lineTimes[j].line);
-                            lineTimes[j].visited = true;
-                        }
-                        ++j;
+                    final double diff = lineTimes[j].time - lineTimes[i].time;
+                    if (diff < threshold) {
+                        burstLines.add(lineTimes[j].line);
+                        lineTimes[j].visited = true;
                     }
-                    ++i;
-
-                    if (!burstLines.isEmpty()) {
-
-                        final boolean ok = deburstTile(burstLines, targetLine, targetRectangle.x, maxX, srcBandI, srcBandQ,
-                                targetTileI, targetTileQ, targetTileIntensity, pm);
-                        if(ok)
-                            ++targetLine;
-                    }
-
-                    if(targetLine >= targetRectangle.height)
-                        break;
+                    ++j;
                 }
-                startLine.set(index, startLineForBand);
+                ++i;
 
-                pm.worked(1);
+                //System.out.println(targetLine+" found "+ burstLines.size() + " burstlines");
+
+                if (!burstLines.isEmpty()) {
+
+                    final boolean ok = deburstTile(burstLines, targetLine, targetRectangle.x, maxX, cBand.i, cBand.q,
+                            targetTileI, targetTileQ, targetTileIntensity, pm);
+                    if(ok)
+                        ++targetLine;
+                }
+
+                if(targetLine >= targetRectangle.y + targetRectangle.height)
+                    break;
             }
+            //startLine.set(index, startLineForBand);
+
             pm.done();
 
         } catch (Exception e) {
@@ -254,24 +290,25 @@ public class DeburstWSSOp extends Operator {
         }
     }
 
-    private void sortLineTimes(final Product srcProduct, final Band srcBand) {
+    private synchronized void sortLineTimes(final Product srcProduct, final Band srcBand) {
+        if(lineTimesSorted) return;
+
         final MetadataElement imgRecElem = srcProduct.getMetadataRoot().getElement("Image Record");
         final MetadataElement bandElem = imgRecElem.getElement(srcBand.getName());
 
         final MetadataAttribute attrib = bandElem.getAttribute("t");
         final double[] timeData = (double[])attrib.getData().getElems();
-        final LineTime[] lineTimes = new LineTime[timeData.length];
-        lineTimeList.add(lineTimes);
-        startLine.add(0);
+        lineTimes = new LineTime[timeData.length];
 
         for(int y=0; y < timeData.length; ++y) {
             lineTimes[y] = new LineTime(y, timeData[y]);
         }
 
         Arrays.sort(lineTimes, new LineTimeComparator());
+        lineTimesSorted = true;
     }
 
-    private boolean deburstTile(final Vector<Integer> burstLines, final int targetLine, final int startX, final int endX,
+    private synchronized boolean deburstTile(final Vector<Integer> burstLines, final int targetLine, final int startX, final int endX,
                               final Band srcBandI, final Band srcBandQ,
                               final Tile targetTileI, final Tile targetTileQ,
                               final Tile targetTileIntensity, final ProgressMonitor pm) {
@@ -287,7 +324,6 @@ public class DeburstWSSOp extends Operator {
         Arrays.fill(peakLine, -Float.MAX_VALUE);
         Arrays.fill(sumLine, 0.0);
         Arrays.fill(avgTotals, 0);
-
         double Ival, Qval, intensity;
 
         final Vector<short[]> srcDataListI = new Vector<short[]>(3);
@@ -320,30 +356,30 @@ public class DeburstWSSOp extends Operator {
                     }
 
                     if (average) {
-                        // average with neighbours
                         if(!isInvalid(Ival, Qval, zeroThresholdSmall)) {
                             sumLine[i] += intensity;
                             avgTotals[i] += 1;
-                        } if(i > 0) {
-                            addToAverage(i, srcDataI[i-1], srcDataQ[i-1], sumLine, avgTotals);
-                        } if(i < srcDataI.length-1) {
-                            addToAverage(i, srcDataI[i+1], srcDataQ[i+1], sumLine, avgTotals);
-                        }
+                        }// if(i > 0) {
+                         //   addToAverage(i, srcDataI[i-1], srcDataQ[i-1], sumLine, avgTotals);
+                        //} if(i < srcDataI.length-1) {
+                        //    addToAverage(i, srcDataI[i+1], srcDataQ[i+1], sumLine, avgTotals);
+                        //}
                     }
                 }
+
+                //System.out.println("y="+targetLine+" i="+i+" avgTotals="+avgTotals[i]);
 
                 if(average && avgTotals[i] > 1)
                     sumLine[i] /= avgTotals[i];
             }
 
             if (produceIntensitiesOnly) {
-                final ProductData rawData = targetTileIntensity.getRawSamples();
-                final int stride = targetLine * targetTileIntensity.getWidth();
+                final ProductData data = targetTileIntensity.getDataBuffer();
 
                 if (average) {
 
                     for (int x = startX, i = 0; x < endX; ++x, ++i) {
-                        rawData.setElemDoubleAt(stride + x, sumLine[i]);
+                        data.setElemDoubleAt(targetTileIntensity.getDataBufferIndex(x, targetLine), sumLine[i]);
                     }
                 } else {
                     for (int x = startX, i = 0; x < endX; ++x, ++i) {
@@ -351,7 +387,7 @@ public class DeburstWSSOp extends Operator {
                             peakLine[i] = 0;
                             //System.out.println("uninitPeak " + i + " at " + targetLine);
                         }
-                        rawData.setElemDoubleAt(stride + x, peakLine[i]);
+                        data.setElemDoubleAt(targetTileIntensity.getDataBufferIndex(x, targetLine), peakLine[i]);
                     }
                 }
             } else {
@@ -371,7 +407,7 @@ public class DeburstWSSOp extends Operator {
             return true;
 
         } catch (Exception e) {
-            System.out.println("deburstTile " + e.toString());
+            System.out.println("deburstTile2 " + e.toString());
         }
         return false;
     }
@@ -393,7 +429,7 @@ public class DeburstWSSOp extends Operator {
             sourceRasterQ = getSourceTile(srcBandQ, sourceRectangle, pm);
             final short[] srcDataQ = (short[]) sourceRasterQ.getRawSamples().getElems();
 
-            int invalidCount = 0;
+       /*     int invalidCount = 0;
             int total = 0;
             final int max = Math.min(srcBandWidth, srcDataI.length);
             for(int i=500; i < max; i+= 50) {
@@ -404,7 +440,7 @@ public class DeburstWSSOp extends Operator {
             if(invalidCount / (float)total > 0.4)  {
                 //System.out.println("skipping " + y);
                 continue;
-            }
+            }           */
 
             srcDataListI.add(srcDataI);
             srcDataListQ.add(srcDataQ);

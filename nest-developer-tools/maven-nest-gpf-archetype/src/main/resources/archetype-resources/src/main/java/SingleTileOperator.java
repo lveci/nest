@@ -100,7 +100,7 @@ public class SingleTileOperator extends Operator {
      * Compute mean pixel spacing (in m).
      * @throws Exception The exception.
      */
-    public void getSourceMetadata() throws Exception {
+    private void getSourceMetadata() throws Exception {
         final MetadataElement abs = AbstractMetadata.getAbstractedMetadata(sourceProduct);
         final double rangeSpacing = AbstractMetadata.getAttributeDouble(abs, AbstractMetadata.range_spacing);
         final double azimuthSpacing = AbstractMetadata.getAttributeDouble(abs, AbstractMetadata.azimuth_spacing);

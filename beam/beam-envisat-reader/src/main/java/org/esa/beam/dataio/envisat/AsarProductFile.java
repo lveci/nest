@@ -1,5 +1,5 @@
 /*
- * $Id: AsarProductFile.java,v 1.7 2009-11-05 19:13:43 lveci Exp $
+ * $Id: AsarProductFile.java,v 1.8 2009-12-21 21:08:18 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -34,7 +34,7 @@ import java.util.Arrays;
  * ASAR data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.7 $ $Date: 2009-11-05 19:13:43 $
+ * @version $Revision: 1.8 $ $Date: 2009-12-21 21:08:18 $
  * @see org.esa.beam.dataio.envisat.ProductFile
  */
 public class AsarProductFile extends ProductFile {
@@ -783,6 +783,9 @@ public class AsarProductFile extends ProductFile {
     private void processWSSImageRecordMetadata(Product product) {
 
         for (Band band : product.getBands()) {
+
+            if(band.getUnit().equals("imaginary"))
+                continue;
 
             MetadataElement imgRecElem = product.getMetadataRoot().getElement("Image Record");
             if (imgRecElem == null) {
