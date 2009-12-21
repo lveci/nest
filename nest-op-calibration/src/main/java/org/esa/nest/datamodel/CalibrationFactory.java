@@ -31,8 +31,10 @@ public class CalibrationFactory {
             return new ALOSCalibrator();
         } else if(mission.equals("RS2")) {
             return new Radarsat2Calibrator();
+        } else if(mission.equals("TSX1")) {
+            throw new OperatorException("Mission TerraSAR-X is currently not supported for calibration.");
+        } else {
+            throw new OperatorException("Mission " + mission + " is currently not supported for calibration.");
         }
-        return null;
     }
-
 }
