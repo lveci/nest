@@ -12,6 +12,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.datamodel.Unit;
 
 import java.awt.*;
 import java.util.*;
@@ -19,19 +20,18 @@ import java.util.*;
 /**
  * De-Burst a WSS product
  */
-@OperatorMetadata(alias = "WSS-Deburst",
+@OperatorMetadata(alias = "DeburstWSS",
         category = "SAR Tools",
-        description="Merges the bursts of an ASAR WSS product")
-public class WSSDeBurstOp extends Operator {
+        description="Debursts an ASAR WSS product")
+public class DeburstWSSOp extends Operator {
 
     @SourceProduct(alias="source")
     private Product sourceProduct;
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
-            sourceProductId="source", label="Source Band")
-    private String[] sourceBandNames;
+    @Parameter(valueSet = { SS1, SS2, SS3, SS4, SS5 }, defaultValue = SS1, label="Sub Swath:")
+    private String subSwath = SS1;
 
     @Parameter(defaultValue = "true", label="Produce Intensities Only")
     private boolean produceIntensitiesOnly = true;
@@ -46,11 +46,17 @@ public class WSSDeBurstOp extends Operator {
     private int numberOfDatasets = 0;
     private final Map<Band, ComplexBand> bandMap = new HashMap<Band, ComplexBand>(5);
 
+    private final static String SS1 = "SS1";
+    private final static String SS2 = "SS2";
+    private final static String SS3 = "SS3";
+    private final static String SS4 = "SS4";
+    private final static String SS5 = "SS5";
+
     /**
      * Default constructor. The graph processing framework
      * requires that an operator has a default constructor.
      */
-    public WSSDeBurstOp() {
+    public DeburstWSSOp() {
     }
 
     /**
@@ -69,65 +75,33 @@ public class WSSDeBurstOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        // check product type 
+        // check product type
         if (!sourceProduct.getProductType().equals("ASA_WSS_1P")) {
             throw new OperatorException("Source product is not an ASA_WSS_1P");
         }
 
         final int targetHeight = (int) (sourceProduct.getSceneRasterHeight() / 2.9);
 
-        targetProduct = new Product(sourceProduct.getName() + "_deburst",
+        targetProduct = new Product(sourceProduct.getName() + "_" + subSwath,
                 sourceProduct.getProductType(),
                 sourceProduct.getSceneRasterWidth(),
                 targetHeight);
 
-        if (sourceBandNames == null || sourceBandNames.length == 0) {
-            final Band[] bands = sourceProduct.getBands();
-            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
-            for (Band band : bands) {
-                bandNameList.add(band.getName());
-            }
-            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
-        }
+        final int bandNum = getRealBandNumFromSubSwath(subSwath);
+        final Band[] sourceBands = sourceProduct.getBands();
 
-        final Band[] sourceBands = new Band[sourceBandNames.length];
-        for (int i = 0; i < sourceBandNames.length; i++) {
-            final String sourceBandName = sourceBandNames[i];
-            final Band sourceBand = sourceProduct.getBand(sourceBandName);
-            if (sourceBand == null) {
-                throw new OperatorException("Source band not found: " + sourceBandName);
-            }
-            sourceBands[i] = sourceBand;
-        }
-
-        if((sourceBands.length & 1) != 0) {
-            throw new OperatorException("Please select correct real, imaginary band pairs");
-        }
-
-        for (int i = 0, count = 1; i < sourceBands.length - 1; i += 2, ++count) {
-
-            final String SSnum = sourceBands[i].getName().substring(2);
-            if(!sourceBands[i].getUnit().equals("real") ||
-               !sourceBands[i+1].getUnit().equals("imaginary") ||
-               !SSnum.equals(sourceBands[i+1].getName().substring(2)))
-                    throw new OperatorException("Please select correct real, imaginary band pairs");
-
-            final String countStr = "_SS" + SSnum;
-
-            if (produceIntensitiesOnly) {
-                final Band tgtBand = targetProduct.addBand("Intensity" + countStr, ProductData.TYPE_FLOAT32);
-                tgtBand.setUnit("intensity");
-                bandMap.put(tgtBand, new ComplexBand(sourceBands[i], sourceBands[i+1]));
-            } else {
-                final Band trgI = targetProduct.addBand('i' +countStr, sourceBands[i].getDataType());
-                trgI.setUnit("real");
-                final Band trgQ = targetProduct.addBand('q' +countStr, sourceBands[i+1].getDataType());
-                trgQ.setUnit("imagainary");
-                bandMap.put(trgI, new ComplexBand(sourceBands[i], sourceBands[i+1]));
-                ReaderUtils.createVirtualIntensityBand(targetProduct, trgI, trgQ, countStr);
-                ReaderUtils.createVirtualPhaseBand(targetProduct, trgI, trgQ, countStr);
-            }
-            ++numberOfDatasets;
+        if (produceIntensitiesOnly) {
+            final Band tgtBand = targetProduct.addBand("Intensity_" + subSwath, ProductData.TYPE_FLOAT32);
+            tgtBand.setUnit(Unit.INTENSITY);
+            bandMap.put(tgtBand, new ComplexBand(sourceBands[bandNum], sourceBands[bandNum+1]));
+        } else {
+            final Band trgI = targetProduct.addBand("i_" +subSwath, sourceBands[bandNum].getDataType());
+            trgI.setUnit(Unit.REAL);
+            final Band trgQ = targetProduct.addBand("q_" +subSwath, sourceBands[bandNum+1].getDataType());
+            trgQ.setUnit(Unit.IMAGINARY);
+            bandMap.put(trgI, new ComplexBand(sourceBands[bandNum], sourceBands[bandNum+1]));
+            ReaderUtils.createVirtualIntensityBand(targetProduct, trgI, trgQ, subSwath);
+            ReaderUtils.createVirtualPhaseBand(targetProduct, trgI, trgQ, subSwath);
         }
 
         copyMetaData(sourceProduct.getMetadataRoot(), targetProduct.getMetadataRoot());
@@ -136,6 +110,18 @@ public class WSSDeBurstOp extends Operator {
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
+    }
+
+    private static int getRealBandNumFromSubSwath(final String subSwath) {
+        if(subSwath.equals(SS1))
+            return 0;
+        else if(subSwath.equals(SS2))
+            return 2;
+        else if(subSwath.equals(SS3))
+            return 4;
+        else if(subSwath.equals(SS4))
+            return 6;
+        return 8;
     }
 
     private static void copyMetaData(final MetadataElement source, final MetadataElement target) {
@@ -213,7 +199,7 @@ public class WSSDeBurstOp extends Operator {
 
                 int targetLine =0;
                 final int maxX = targetRectangle.x + targetRectangle.width;
-                
+
                 //final double threshold = 0.000000139;
                 final double threshold = 0.000000135;
 
@@ -471,12 +457,12 @@ public class WSSDeBurstOp extends Operator {
      * {@code META-INF/services/org.esa.beam.framework.gpf.OperatorSpi}.
      * This class may also serve as a factory for new operator instances.
      *
-     * @see OperatorSpi#createOperator()
-     * @see OperatorSpi#createOperator(java.util.Map, java.util.Map)
+     * @see org.esa.beam.framework.gpf.OperatorSpi#createOperator()
+     * @see org.esa.beam.framework.gpf.OperatorSpi#createOperator(java.util.Map, java.util.Map)
      */
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(WSSDeBurstOp.class);
+            super(DeburstWSSOp.class);
         }
     }
 }
