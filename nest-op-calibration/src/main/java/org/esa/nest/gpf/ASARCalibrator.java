@@ -1000,12 +1000,12 @@ public class ASARCalibrator implements Calibrator {
      * @param band The band index.
      */
     private void computeSingleSwathAntennaPatternForCurrentTile(final int x0, final int y0, final int w, final int h,
-                                                              final double[][] targetTileNewAntPat,
                                                               final double[][] targetTileOldAntPat,
+                                                              final double[][] targetTileNewAntPat,
                                                               final double[][] targetTileSlantRange,
                                                               final int band) {
 
-        final int yMax = y0+h;
+        final int yMax = y0 + h;
         for (int y = y0; y < yMax; y++) {
 
             final double zeroDopplerTime = firstLineUTC + y*lineTimeInterval;
@@ -1016,11 +1016,11 @@ public class ASARCalibrator implements Calibrator {
                 srgrConvParam = getSRGRCoefficientsForARangeLine(zeroDopplerTime);
             }
 
-            final int yy = y-y0;
-            final int xMax = x0 +w;
+            final int yy = y - y0;
+            final int xMax = x0 + w;
             for (int x = x0; x < xMax; x++) {
 
-                final int xx = x-x0;
+                final int xx = x - x0;
                 targetTileSlantRange[yy][xx] =  computeSlantRange(x, y, srgrConvParam); // in m
 
                 final double localEarthRadius = getEarthRadius(x, y);
@@ -1048,11 +1048,11 @@ public class ASARCalibrator implements Calibrator {
      * @param h The height of the current tile.
      */
     private void computeWideSwathAntennaPatternForCurrentTile(final int x0, final int y0, final int w, final int h,
-                                                              final double[][] targetTileNewAntPat,
                                                               final double[][] targetTileOldAntPat,
+                                                              final double[][] targetTileNewAntPat,
                                                               final double[][] targetTileSlantRange) {
 
-        final int yMax = y0+h;
+        final int yMax = y0 + h;
         for (int y = y0; y < yMax; y++) {
 
             final double zeroDopplerTime = firstLineUTC + y*lineTimeInterval;
@@ -1063,8 +1063,8 @@ public class ASARCalibrator implements Calibrator {
                 srgrConvParam = getSRGRCoefficientsForARangeLine(zeroDopplerTime);
             }
 
-            final int yy = y-y0;
-            final int xMax = x0 +w;
+            final int yy = y - y0;
+            final int xMax = x0 + w;
             for (int x = x0; x < xMax; x++) {
 
                 final int xx = x-x0;
