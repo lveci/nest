@@ -1,5 +1,5 @@
 /*
- * $Id: ProductUtils.java,v 1.11 2009-12-14 21:03:50 lveci Exp $
+ * $Id: ProductUtils.java,v 1.12 2009-12-21 16:13:40 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,6 +17,7 @@
 package org.esa.beam.util;
 
 import Jama.Matrix;
+
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
@@ -26,6 +27,7 @@ import com.bc.jexp.ParseException;
 import com.bc.jexp.Parser;
 import com.bc.jexp.Term;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.TopologyException;
 
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.BitmaskDef;
@@ -65,7 +67,7 @@ import org.esa.beam.framework.dataop.maptransf.MapTransform;
 import org.esa.beam.framework.dataop.maptransf.StereographicDescriptor;
 import org.esa.beam.framework.dataop.maptransf.TransverseMercatorDescriptor;
 import org.esa.beam.framework.dataop.maptransf.UTM;
-import org.esa.beam.glayer.BitmaskLayerType;
+import org.esa.beam.glayer.MaskLayerType;
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.geotiff.EPSGCodes;
 import org.esa.beam.util.geotiff.GeoTIFFCodes;
@@ -73,7 +75,7 @@ import org.esa.beam.util.geotiff.GeoTIFFMetadata;
 import org.esa.beam.util.jai.JAIUtils;
 import org.esa.beam.util.math.IndexValidator;
 import org.esa.beam.util.math.MathUtils;
-import org.geotools.data.store.ReprojectingFeatureCollection;
+import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.geometry.jts.GeometryCoordinateSequenceTransformer;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
@@ -82,8 +84,6 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
-import javax.media.jai.PlanarImage;
-import javax.media.jai.ROI;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -110,6 +110,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.media.jai.PlanarImage;
+
 /**
  * This class provides many static factory methods to be used in conjunction with data products.
  *
@@ -129,144 +131,6 @@ public class ProductUtils {
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Basic Image Creation Routines
     //////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Creates an bitmask-overlayed image for the given product and the given array of band indices. If no bitmasks are
-     * defined, a non-overlayed image is created.
-     * <p/>
-     * <p>The given parameter <code>bandIndices</code> specifies the bands to be used for image creation. If it just
-     * contains one element, a greyscale/palette based on-band image is created. If it has three elements an RGB image
-     * will be created.
-     * <p/>
-     * <p>The method uses the image display information given by the <code>{@link ImageInfo
-     * ImageInfo}</code> and <code>{@link org.esa.beam.framework.datamodel.BitmaskOverlayInfo BitmaskOverlayInfo}</code>
-     * properties of each of the bands.
-     *
-     * @param product           the source product
-     * @param bandIndices       the band indices to be used for image creation
-     * @param histogramMatching the optional histogram matching to be performed: can be either
-     *                          <code>ImageInfo.HISTOGRAM_MATCHING_EQUALIZE</code> or <code>ImageInfo.HISTOGRAM_MATCHING_NORMALIZE</code>.
-     *                          If this parameter is <code>null</code> or any other value, no histogram matching is
-     *                          applied.
-     *
-     * @return a greyscale/palette-based or RGB image
-     *
-     * @throws IOException if the given raster data is not loaded and reload causes an I/O error
-     * @see RasterDataNode#setImageInfo
-     * @see RasterDataNode#setBitmaskOverlayInfo
-     * @deprecated since BEAM 4.2, use {@link #createRgbImage(RasterDataNode[], ImageInfo, com.bc.ceres.core.ProgressMonitor)}
-     */
-    @Deprecated
-    public static RenderedImage createOverlayedImage(final Product product,
-                                                     final int[] bandIndices,
-                                                     final String histogramMatching) throws IOException {
-        Assert.notNull(product, "product");
-        Assert.notNull(bandIndices, "bandIndices");
-        if (bandIndices.length != 1 && bandIndices.length != 3) {
-            throw new IllegalArgumentException("bandIndices.length is not 1 and not 3");
-        }
-        final Band[] bands = new Band[bandIndices.length];
-        for (int i = 0; i < bands.length; i++) {
-            bands[i] = product.getBandAt(bandIndices[i]);
-        }
-        return createOverlayedImage(bands, histogramMatching, ProgressMonitor.NULL);
-    }
-
-    /**
-     * Creates an image from the given <code>{@link RasterDataNode}</code>s. If no
-     * bitmasks are defined, a non-overlayed image is created.
-     * <p/>
-     * <p>Depending on the number of <code>RasterDataNode</code>s given in the array a greyscale/palette-based or RGB
-     * image is created.
-     * <p/>
-     * <p>The method uses the image display information given by the <code>{@link ImageInfo
-     * ImageInfo}</code> and <code>{@link org.esa.beam.framework.datamodel.BitmaskOverlayInfo BitmaskOverlayInfo}</code>
-     * properties of each of the bands.
-     *
-     * @param rasters               the array of raster data nodes to be used for image creation, if length is one a
-     *                              greyscale/palette-based image is created, if the length is three, a RGB image is
-     *                              created
-     * @param histogramMatchingMode the optional histogram matching to be performed: can be either
-     *                              <code>ImageInfo.HISTOGRAM_MATCHING_EQUALIZE</code> or <code>ImageInfo.HISTOGRAM_MATCHING_NORMALIZE</code>.
-     *                              If this parameter is <code>null</code> or any other value, no histogram matching is
-     *                              applied.
-     * @param pm                    a monitor to inform the user about progress
-     *
-     * @return a greyscale/palette-based or RGB image depending on the number of raster data nodes given
-     *
-     * @throws IOException if the given raster data is not loaded and reload causes an I/O error
-     * @see RasterDataNode#setImageInfo
-     * @see RasterDataNode#setBitmaskOverlayInfo
-     * @see ImageInfo
-     * @deprecated since BEAM 4.2, use {@link #createRgbImage(RasterDataNode[], ImageInfo, com.bc.ceres.core.ProgressMonitor)} )}
-     */
-    @Deprecated
-    public static RenderedImage createOverlayedImage(final RasterDataNode[] rasters,
-                                                     final String histogramMatchingMode,
-                                                     final ProgressMonitor pm) throws IOException {
-        pm.beginTask(MSG_CREATING_IMAGE, 4);
-        try {
-            ImageInfo imageInfo = createImageInfo(rasters, true, SubProgressMonitor.create(pm, 1));
-            imageInfo.setHistogramMatching(ImageInfo.getHistogramMatching(histogramMatchingMode));
-            return createRgbImage(rasters, imageInfo, SubProgressMonitor.create(pm, 3));
-        } finally {
-            pm.done();
-        }
-    }
-
-    /**
-     * Creates a RGB image from the given array of <code>{@link RasterDataNode}</code>s.
-     * The given array <code>rasterDataNodes</code> contain three raster data nodes to be used for the red, green and
-     * blue components of the RGB image to be created.
-     *
-     * @param rasters an array of exactly three raster nodes to be used for the R,G and B component.
-     * @param pm      a monitor to inform the user about progress
-     *
-     * @return the RGB image
-     *
-     * @throws IOException if the given raster data is not loaded and reload causes an I/O error
-     * @see RasterDataNode#setImageInfo
-     * @deprecated since BEAM 4.2, use {@link #createRgbImage(RasterDataNode[], ImageInfo, com.bc.ceres.core.ProgressMonitor)} instead
-     */
-    @Deprecated
-    public static BufferedImage createRgbImage(RasterDataNode[] rasters, ProgressMonitor pm) throws IOException {
-        pm.beginTask(MSG_CREATING_IMAGE, 4);
-        try {
-            ImageInfo imageInfo = createImageInfo(rasters, true, SubProgressMonitor.create(pm, 1));
-            return createRgbImage(rasters, imageInfo, SubProgressMonitor.create(pm, 3));
-        } finally {
-            pm.done();
-        }
-    }
-
-    /**
-     * Creates a RGB image from the given array of <code>{@link RasterDataNode}</code>s.
-     * The given array <code>rasterDataNodes</code> contain three raster data nodes to be used for the red, green and
-     * blue components of the RGB image to be created.
-     *
-     * @param rasters     an array of exactly three raster nodes to be used for the R,G and B component.
-     * @param noDataColor the no-data color, if {@code null}, no-data areas will be transparent
-     * @param pm          a monitor to inform the user about progress
-     *
-     * @return the RGB image
-     *
-     * @throws IOException if the given raster data is not loaded and reload causes an I/O error
-     * @see RasterDataNode#setImageInfo
-     * @deprecated since BEAM 4.2, use {@link #createRgbImage(RasterDataNode[], ImageInfo, com.bc.ceres.core.ProgressMonitor)} instead
-     */
-    @Deprecated
-    public static BufferedImage createRgbImage(final RasterDataNode[] rasters,
-                                               Color noDataColor,
-                                               ProgressMonitor pm) throws IOException {
-        pm.beginTask(MSG_CREATING_IMAGE, 4);
-        try {
-            ImageInfo imageInfo = createImageInfo(rasters, true, SubProgressMonitor.create(pm, 1));
-            imageInfo.setNoDataColor(noDataColor == null ? ImageInfo.NO_COLOR : noDataColor);
-            return createRgbImage(rasters, imageInfo, SubProgressMonitor.create(pm, 3));
-        } finally {
-            pm.done();
-        }
-    }
 
     /**
      * Creates image creation information.
@@ -306,6 +170,20 @@ public class ProductUtils {
         }
     }
 
+    /**
+     * Creates a RGB image from the given array of <code>{@link RasterDataNode}</code>s.
+     * The given array <code>rasters</code> containing one or three raster data nodes. If three rasters are given
+     * RGB image is created, if only one raster is provided a gray scale image created.
+     *
+     * @param rasters an array of one or three raster nodes.
+     * @param imageInfo the image info provides the information how to create the image
+     * @param pm      a monitor to inform the user about progress
+     *
+     * @return the created image
+     *
+     * @throws IOException if the given raster data is not loaded and reload causes an I/O error
+     * @see RasterDataNode#setImageInfo
+     */
     public static BufferedImage createRgbImage(final RasterDataNode[] rasters,
                                                final ImageInfo imageInfo,
                                                final ProgressMonitor pm) throws IOException {
@@ -313,8 +191,8 @@ public class ProductUtils {
         Assert.argument(rasters.length == 1 || rasters.length == 3, "rasters.length == 1 || rasters.length == 3");
 
         final RasterDataNode raster0 = rasters[0];
-        BitmaskDef[] bitmaskDefs = raster0.getBitmaskDefs();
-        pm.beginTask(MSG_CREATING_IMAGE, 3 + 3 + bitmaskDefs.length);
+        ProductNodeGroup<Mask> maskGroup = raster0.getOverlayMaskGroup();
+        pm.beginTask(MSG_CREATING_IMAGE, 3 + 3 + maskGroup.getNodeCount());
         try {
             BufferedImage overlayBIm;
             if (rasters.length == 1) {
@@ -322,8 +200,8 @@ public class ProductUtils {
             } else {
                 overlayBIm = create3BandRgbImage(rasters, imageInfo, SubProgressMonitor.create(pm, 3));
             }
-            if (bitmaskDefs.length > 0) {
-                overlayBIm = overlayBitmasks(raster0, overlayBIm, SubProgressMonitor.create(pm, bitmaskDefs.length));
+            if (maskGroup.getNodeCount() > 0) {
+                overlayBIm = overlayMasks(raster0, overlayBIm, SubProgressMonitor.create(pm, maskGroup.getNodeCount()));
             }
             return overlayBIm;
         } finally {
@@ -1288,7 +1166,7 @@ public class ProductUtils {
             copyOverlayMasks(sourceNode, targetProduct);
         }
     }
-    
+
     /**
      * Copies the ROI {@link Mask}s from the source product's raster data nodes to
      * the target product's raster data nodes.
@@ -1319,7 +1197,7 @@ public class ProductUtils {
             addMasksToGroup(maskNames, maskGroup, overlayMaskGroup);
         }
     }
-    
+
     private static void copyRoiMasks(final RasterDataNode sourceNode, final Product targetProduct) {
         String[] maskNames = sourceNode.getRoiMaskGroup().getNodeNames();
         RasterDataNode targetNode = targetProduct.getRasterDataNode(sourceNode.getName());
@@ -1330,8 +1208,9 @@ public class ProductUtils {
         }
     }
 
-    
-    private static void addMasksToGroup(String[] maskNames, ProductNodeGroup<Mask> maskGroup, ProductNodeGroup<Mask> specialMaskGroup) {
+
+    private static void addMasksToGroup(String[] maskNames, ProductNodeGroup<Mask> maskGroup,
+                                        ProductNodeGroup<Mask> specialMaskGroup) {
         for (String maskName : maskNames) {
             final Mask mask = maskGroup.get(maskName);
             if (mask != null) {
@@ -1488,30 +1367,6 @@ public class ProductUtils {
         targetBand.setSolarFlux(sourceBand.getSolarFlux());
     }
 
-    /**
-     * Copies the spectral attributes from source band to target band. These attributes are:
-     * <ul>
-     * <li>{@link org.esa.beam.framework.datamodel.Band#getSpectralBandIndex() spectral band index},</li>
-     * <li>{@link org.esa.beam.framework.datamodel.Band#getSpectralWavelength() the central wavelength},</li>
-     * <li>{@link org.esa.beam.framework.datamodel.Band#getSpectralBandwidth() the spectral bandwidth} and</li>
-     * <li>{@link org.esa.beam.framework.datamodel.Band#getSolarFlux() the solar spectral flux}.</li>
-     * </ul>
-     *
-     * @param source the source band
-     * @param target the target band
-     *
-     * @deprecated since BEAM 4.2, use {@link #copySpectralBandProperties(org.esa.beam.framework.datamodel.Band, org.esa.beam.framework.datamodel.Band)}
-     */
-    @Deprecated
-    public static void copySpectralAttributes(Band source, Band target) {
-        Guardian.assertNotNull("source", source);
-        Guardian.assertNotNull("target", target);
-
-        target.setSpectralBandIndex(source.getSpectralBandIndex());
-        target.setSpectralWavelength(source.getSpectralWavelength());
-        target.setSpectralBandwidth(source.getSpectralBandwidth());
-        target.setSolarFlux(source.getSolarFlux());
-    }
 
     /**
      * Copies the geocoding from the source product to target product.
@@ -1544,43 +1399,58 @@ public class ProductUtils {
             targetProduct.addTiePointGrid(srcTPG.cloneTiePointGrid());
         }
     }
-    
+
     public static void copyVectorData(Product sourceProduct, Product targetProduct) {
         ProductNodeGroup<VectorDataNode> vectorDataGroup = sourceProduct.getVectorDataGroup();
-        RasterDataNode sourceRDN = getRasterDataNode(sourceProduct);
-        RasterDataNode targetRDN = getRasterDataNode(targetProduct);
-        if (sourceRDN == null || targetRDN == null || sourceProduct.getGeoCoding() == null || targetProduct.getGeoCoding() == null) {
+        if (sourceProduct.getGeoCoding() == null || targetProduct.getGeoCoding() == null) {
             return;
         }
-        Geometry sourceGeometry = FeatureCollectionClipper.createGeoBoundaryPolygon(sourceRDN);
-        Geometry targetGeometry = FeatureCollectionClipper.createGeoBoundaryPolygon(targetRDN);
-        CoordinateReferenceSystem targetCRS = ImageManager.getModelCrs(targetProduct.getGeoCoding());
-        for (int i = 0; i < vectorDataGroup.getNodeCount(); i++) {
-            VectorDataNode vectorDataNode = vectorDataGroup.get(i);
-            String name = vectorDataNode.getName();
-            if (!sourceProduct.isInternalNode(vectorDataNode)) {
-                FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = vectorDataNode.getFeatureCollection();
-                ReprojectingFeatureCollection wgs84Collection = new ReprojectingFeatureCollection(featureCollection, DefaultGeographicCRS.WGS84);
-                FeatureCollection<SimpleFeatureType, SimpleFeature> clippedToSource = FeatureCollectionClipper.doOperation(wgs84Collection, sourceGeometry, null, null);
-                FeatureCollection<SimpleFeatureType, SimpleFeature> clippedToTarget = FeatureCollectionClipper.doOperation(clippedToSource, targetGeometry, null, targetCRS);
-                VectorDataNode targetVDN = new VectorDataNode(name, clippedToTarget);
-                targetVDN.setDefaultCSS(vectorDataNode.getDefaultCSS());
-                targetVDN.setDescription(vectorDataNode.getDescription());
-                targetProduct.getVectorDataGroup().add(targetVDN);
+        if (sourceProduct.isCompatibleProduct(targetProduct, 1.0e-3f)) {
+            for (int i = 0; i < vectorDataGroup.getNodeCount(); i++) {
+                VectorDataNode vectorDataNode = vectorDataGroup.get(i);
+                String name = vectorDataNode.getName();
+                if (!sourceProduct.isInternalNode(vectorDataNode)) {
+                    FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = vectorDataNode.getFeatureCollection();
+                    featureCollection = new DefaultFeatureCollection(featureCollection);
+                    VectorDataNode targetVDN = new VectorDataNode(name, featureCollection);
+                    targetVDN.setDefaultCSS(vectorDataNode.getDefaultCSS());
+                    targetVDN.setDescription(vectorDataNode.getDescription());
+                    targetProduct.getVectorDataGroup().add(targetVDN);
+                }
+            }
+        } else {
+            Geometry sourceGeometryWGS84 = FeatureCollectionClipper.createGeoBoundaryPolygon(sourceProduct);
+            Geometry targetGeometryWGS84 = FeatureCollectionClipper.createGeoBoundaryPolygon(targetProduct);
+            Geometry productIntersectionGeom;
+            try {
+                productIntersectionGeom = sourceGeometryWGS84.intersection(targetGeometryWGS84);
+            } catch (TopologyException e) {
+                return;
+            }
+        
+            CoordinateReferenceSystem srcModelCrs = ImageManager.getModelCrs(sourceProduct.getGeoCoding());
+            CoordinateReferenceSystem targetModelCrs = ImageManager.getModelCrs(targetProduct.getGeoCoding());
+            GeometryCoordinateSequenceTransformer srcTransform = FeatureCollectionClipper.getTransform(DefaultGeographicCRS.WGS84, srcModelCrs);
+            Geometry clipGeometry;
+            try {
+                clipGeometry = srcTransform.transform(productIntersectionGeom);
+            } catch (TransformException e) {
+                return;
+            }
+        
+            for (int i = 0; i < vectorDataGroup.getNodeCount(); i++) {
+                VectorDataNode vectorDataNode = vectorDataGroup.get(i);
+                String name = vectorDataNode.getName();
+                if (!sourceProduct.isInternalNode(vectorDataNode)) {
+                    FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = vectorDataNode.getFeatureCollection();
+                    featureCollection = FeatureCollectionClipper.doOperation(featureCollection, clipGeometry, null, targetModelCrs);
+                    VectorDataNode targetVDN = new VectorDataNode(name, featureCollection);
+                    targetVDN.setDefaultCSS(vectorDataNode.getDefaultCSS());
+                    targetVDN.setDescription(vectorDataNode.getDescription());
+                    targetProduct.getVectorDataGroup().add(targetVDN);
+                }
             }
         }
-    }
-    
-    private static RasterDataNode getRasterDataNode(Product product) {
-        Band[] bands = product.getBands();
-        if (bands.length > 0) {
-            return bands[0];
-        }
-        TiePointGrid[] tiePointGrids = product.getTiePointGrids();
-        if (tiePointGrids.length > 0) {
-            return tiePointGrids[0];
-        }
-        return null;
     }
 
     /**
@@ -1607,29 +1477,6 @@ public class ProductUtils {
         return raster != null
                && raster.getGeoCoding() != null
                && raster.getGeoCoding().canGetPixelPos();
-    }
-
-    /**
-     * @deprecated in 4.0, use {@link #createScatterPlotImage(RasterDataNode, float, float, RasterDataNode, float, float, RenderedImage, int, int, Color, BufferedImage, ProgressMonitor)} instead
-     */
-    public static BufferedImage createScatterPlotImage(final RasterDataNode raster1,
-                                                       final float sampleMin1,
-                                                       final float sampleMax1,
-                                                       final RasterDataNode raster2,
-                                                       final float sampleMin2,
-                                                       final float sampleMax2,
-                                                       final ROI roi,
-                                                       final int width,
-                                                       final int height,
-                                                       final Color background,
-                                                       BufferedImage image) throws IOException {
-        return createScatterPlotImage(raster1, sampleMin1, sampleMax1,
-                                      raster2, sampleMin2, sampleMax2,
-                                      roi.getAsImage(),
-                                      width, height,
-                                      background,
-                                      image,
-                                      ProgressMonitor.NULL);
     }
 
     /**
@@ -1714,13 +1561,6 @@ public class ProductUtils {
     }
 
     /**
-     * @deprecated in 4.0, use {@link #overlayBitmasks(RasterDataNode,javax.media.jai.PlanarImage,com.bc.ceres.core.ProgressMonitor)} instead
-     */
-    public static PlanarImage overlayBitmasks(RasterDataNode raster, PlanarImage overlayPIm) throws IOException {
-        return overlayBitmasks(raster, overlayPIm, ProgressMonitor.NULL);
-    }
-
-    /**
      * Draws all the activated bitmasks to the given ovelayPIm image.
      * The returned image is a new instance of planar image, not the given image!
      *
@@ -1731,6 +1571,7 @@ public class ProductUtils {
      * @return a new planar image which contains the source image and all the activated bitmasks.
      *
      * @throws IOException if any reading process fails.
+     * @deprecated since BEAM 4.7
      */
     public static PlanarImage overlayBitmasks(RasterDataNode raster, PlanarImage overlayPIm, ProgressMonitor pm) throws
                                                                                                                  IOException {
@@ -1813,23 +1654,42 @@ public class ProductUtils {
      * @return the modified given overlaBImm which contains all the activated bitmasks.
      *
      * @throws IOException if any reading process fails.
+     * @deprecated since BEAM 4.7, use {@link ProductUtils#overlayMasks}
      */
+    @Deprecated
     public static BufferedImage overlayBitmasks(final RasterDataNode raster, final BufferedImage overlayBIm,
                                                 ProgressMonitor pm) throws IOException {
-        BitmaskDef[] bitmaskDefs = raster.getBitmaskDefs();
-        if (bitmaskDefs.length == 0) {
+        return overlayMasks(raster, overlayBIm, pm);
+    }
+
+    /**
+     * Draws all the masks contained overlay mask group of the given raster to the ovelayBIm image.
+     *
+     * @param raster     the raster data node which contains all the activated bitmask definitions
+     * @param overlayBIm the source image which is used as base image for all the overlays.
+     * @param pm         a monitor to inform the user about progress
+     *
+     * @return the modified given overlayBImm which contains all the activated masks.
+     *
+     * @see RasterDataNode#getOverlayMaskGroup()
+     */
+
+    public static BufferedImage overlayMasks(final RasterDataNode raster, final BufferedImage overlayBIm,
+                                             ProgressMonitor pm) {
+        ProductNodeGroup<Mask> maskGroup = raster.getOverlayMaskGroup();
+        if (maskGroup.getNodeCount() == 0) {
             return overlayBIm;
         }
 
         final BufferedImageRendering imageRendering = new BufferedImageRendering(overlayBIm);
 
-        pm.beginTask("Creating bitmasks ...", bitmaskDefs.length);
+        pm.beginTask("Creating masks ...", maskGroup.getNodeCount());
         try {
-            for (BitmaskDef bitmaskDef : bitmaskDefs) {
-                pm.setSubTaskName(String.format("Applying bitmask '%s'", bitmaskDef.getName()));
+            final Mask[] masks = maskGroup.toArray(new Mask[maskGroup.getNodeCount()]);
+            for (Mask mask : masks) {
+                pm.setSubTaskName(String.format("Applying mask '%s'", mask.getName()));
                 final GeoCoding geoCoding = raster.getGeoCoding();
-                AffineTransform transform = ImageManager.getImageToModelTransform(geoCoding);
-                final Layer layer = BitmaskLayerType.createBitmaskLayer(raster, bitmaskDef, transform);
+                final Layer layer = MaskLayerType.createLayer(raster, mask);
                 layer.render(imageRendering);
                 pm.worked(1);
             }

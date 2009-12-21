@@ -138,7 +138,7 @@ public class ProductsToolView extends AbstractToolView {
                 return layer instanceof VectorDataLayer && ((VectorDataLayer) layer).getVectorDataNode() == vectorDataNode;
             }
         };
-        Layer layer = LayerUtils.getChildLayer(sceneView.getRootLayer(), layerFilter, LayerUtils.SearchMode.DEEP);
+        Layer layer = LayerUtils.getChildLayer(sceneView.getRootLayer(), LayerUtils.SEARCH_DEEP, layerFilter);
         if (layer != null) {
             sceneView.setSelectedLayer(layer);
         }
@@ -346,7 +346,6 @@ public class ProductsToolView extends AbstractToolView {
                 final Product product = raster.getProduct();
                 if (raster instanceof Mask) {
                     product.getMaskGroup().remove((Mask) raster);
-                    // todo - if type==Vector also remove vector data node (nf)
                 } else if (raster instanceof Band) {
                     product.removeBand((Band) raster);
                 } else if (raster instanceof TiePointGrid) {

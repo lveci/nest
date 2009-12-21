@@ -1,5 +1,5 @@
 /*
- * $Id: ProductFile.java,v 1.4 2009-12-03 15:29:56 lveci Exp $
+ * $Id: ProductFile.java,v 1.5 2009-12-21 16:13:40 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -40,7 +40,7 @@ import java.util.logging.Logger;
  * product files which have been opened for <i>read-only</i> access.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2009-12-03 15:29:56 $
+ * @version $Revision: 1.5 $ $Date: 2009-12-21 16:13:40 $
  */
 public abstract class ProductFile {
 
@@ -721,7 +721,7 @@ public abstract class ProductFile {
      * @return the geophysical band reader, or <code>null</code> if this product doesn't support reading band data or if
      *         the a band with the given name was not found
      */
-    public BandLineReader getBandLineReader(final Band band) {
+    public synchronized BandLineReader getBandLineReader(final Band band) {
         if (_bandLineReaderMap == null) {
             _bandLineReaderMap = new java.util.Hashtable<Band, BandLineReader>();
             BandLineReader[] bandLineReaders = getBandLineReaders();

@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductReader.java,v 1.9 2009-12-14 21:03:50 lveci Exp $
+ * $Id: DimapProductReader.java,v 1.10 2009-12-21 16:13:40 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -68,7 +68,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
  *
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.9 $ $Date: 2009-12-14 21:03:50 $
+ * @version $Revision: 1.10 $ $Date: 2009-12-21 16:13:40 $
  * @see org.esa.beam.dataio.dimap.DimapProductReaderPlugIn
  */
 public class DimapProductReader extends AbstractProductReader {
@@ -188,7 +188,7 @@ public class DimapProductReader extends AbstractProductReader {
                 continue;
             }
             final File dataFile = bandDataFiles.get(band);
-            if (dataFile == null) {
+            if (dataFile == null || !dataFile.canRead()) {
                 product.removeBand(band);
                 BeamLogManager.getSystemLogger().warning(
                         "DimapProductReader: Unable to read file '" + dataFile + "' referenced by '" + band.getName() + "'.");
@@ -396,6 +396,7 @@ public class DimapProductReader extends AbstractProductReader {
                     if (modelCrs != null) {
                         featureCollection = new ForceCoordinateSystemFeatureResults(featureCollection, modelCrs);
                     }
+                    // Must create a new FeatureCollection because the one we get is read-only
                     DefaultFeatureCollection defaultFeatureCollection = new DefaultFeatureCollection(featureCollection);
                     VectorDataNode vectorDataNode = new VectorDataNode(name, defaultFeatureCollection);
                     product.getVectorDataGroup().add(vectorDataNode);

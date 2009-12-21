@@ -1,5 +1,5 @@
 /*
- * $Id: BitmaskCollectionLayer.java,v 1.5 2009-12-11 20:46:13 lveci Exp $
+ * $Id: BitmaskCollectionLayer.java,v 1.6 2009-12-21 16:13:40 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -33,6 +33,9 @@ import java.awt.geom.AffineTransform;
 import java.util.List;
 
 
+/**
+ * @deprecated since BEAM 4.7, replaced by MaskCollectionLayerType
+ */
 @Deprecated
 public class BitmaskCollectionLayer extends CollectionLayer {
 

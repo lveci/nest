@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataNode.java,v 1.12 2009-12-14 21:03:50 lveci Exp $
+ * $Id: RasterDataNode.java,v 1.13 2009-12-21 16:13:40 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -1678,7 +1678,6 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
      *
      * @throws IOException if the raster data is not loaded so far and reload causes an I/O error
      * @see #setImageInfo
-     * @see org.esa.beam.util.ProductUtils#createRgbImage
      */
     public BufferedImage createRgbImage(ProgressMonitor pm) throws IOException {
         if (imageInfo != null) {
@@ -1978,7 +1977,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
         if (oldValue != sourceImage) {
             this.sourceImage = sourceImage;
             resetGeophysicalImage();
-            fireProductNodeChanged("sourceImage", oldValue);
+            fireProductNodeChanged("sourceImage", oldValue, sourceImage);
         }
     }
 
@@ -2149,7 +2148,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
         final Stx oldValue = this.stx;
         if (oldValue != stx) {
             this.stx = stx;
-            fireProductNodeChanged(PROPERTY_NAME_STX, oldValue);
+            fireProductNodeChanged(PROPERTY_NAME_STX, oldValue, stx);
         }
     }
 
@@ -2576,7 +2575,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
                 this.geophysicalImage.dispose();
             }
             this.geophysicalImage = geophysicalImage;
-            fireProductNodeChanged("geophysicalImage", oldValue);
+            fireProductNodeChanged("geophysicalImage", oldValue, geophysicalImage);
         }
     }
 
@@ -2595,7 +2594,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
             this.validMaskImage.dispose();
             this.validMaskImage = validMaskImage;
             validMaskROI = null;
-            fireProductNodeChanged("validMaskImage", oldValue);
+            fireProductNodeChanged("validMaskImage", oldValue, validMaskImage);
         }
     }
 

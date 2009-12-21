@@ -1,5 +1,5 @@
 /*
- * $Id: ProductNode.java,v 1.7 2009-12-11 20:46:13 lveci Exp $
+ * $Id: ProductNode.java,v 1.8 2009-12-21 16:13:40 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,7 +27,7 @@ import org.esa.beam.util.ObjectUtils;
  * product itself.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.7 $ $Date: 2009-12-11 20:46:13 $
+ * @version $Revision: 1.8 $ $Date: 2009-12-21 16:13:40 $
  */
 public abstract class ProductNode {
 
@@ -117,7 +117,7 @@ public abstract class ProductNode {
     private void setNodeName(String trimmedName) {
         final String oldName = name;
         name = trimmedName;
-        fireProductNodeChanged(PROPERTY_NAME_NAME, oldName);
+        fireProductNodeChanged(PROPERTY_NAME_NAME, oldName, name);
         setModified(true);
     }
 
@@ -155,11 +155,8 @@ public abstract class ProductNode {
     /**
      * Sets this node's modified flag.
      * <p/>
-     * <p>If the modified flag changes to true and this node has an owner, the owner's modified flag is also set to
+     * If the modified flag changes to true and this node has an owner, the owner's modified flag is also set to
      * true.
-     * <p/>
-     * <p>If the modified flag changes and if this node is part of a <code>Product</code>, the method fires a
-     * 'NodeChange' event on the product.
      *
      * @param modified whether or not this node is beeing marked as modified.
      *
@@ -375,13 +372,18 @@ public abstract class ProductNode {
     }
 
     public void fireProductNodeChanged(final String propertyName) {
-        fireProductNodeChanged(propertyName, null);
+        fireProductNodeChanged(propertyName, null, null);
     }
 
+    @Deprecated // Since BEAM 4.7
     public void fireProductNodeChanged(String propertyName, final Object oldValue) {
+        fireProductNodeChanged(propertyName, oldValue, null);
+    }
+
+    public void fireProductNodeChanged(String propertyName, final Object oldValue, final Object newValue) {
         final Product product = getProduct();
         if (product != null) {
-            product.fireNodeChanged(this, propertyName, oldValue);
+            product.fireNodeChanged(this, propertyName, oldValue, newValue);
         }
     }
 

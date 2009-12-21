@@ -12,19 +12,28 @@ import com.vividsolutions.jts.geom.Polygon;
 import java.awt.Shape;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AwtGeomToJtsGeomConverter {
 
-    private GeometryFactory geometryFactory;
+    private final GeometryFactory geometryFactory;
+    private final double flatness;
 
     public AwtGeomToJtsGeomConverter() {
-        this(new GeometryFactory());
+        this(new GeometryFactory(), -1.0);
     }
 
-    AwtGeomToJtsGeomConverter(GeometryFactory geometryFactory) {
+    /**
+     * Contructor.
+     * @param geometryFactory The geometry factory.
+     * @param flatness Used to decompose curved shapes into linear segments. If less than or equal to
+     * zero, then actual flatness will be computed from shape bounds. 
+     */
+    public AwtGeomToJtsGeomConverter(GeometryFactory geometryFactory, double flatness) {
         this.geometryFactory = geometryFactory;
+        this.flatness = flatness;
     }
 
     public Point createPoint(Point2D point) {
@@ -32,13 +41,13 @@ public class AwtGeomToJtsGeomConverter {
     }
 
     public MultiLineString createMultiLineString(Shape shape) {
-        List<LineString> lineStringList = createLineStringList(shape, 1.0);
+        List<LineString> lineStringList = createLineStringList(shape);
         LineString[] lineStrings = lineStringList.toArray(new LineString[lineStringList.size()]);
         return geometryFactory.createMultiLineString(lineStrings);
     }
 
     public Polygon createPolygon(Shape shape) {
-        List<LinearRing> linearRings = createLinearRingList(shape, 1.0);
+        List<LinearRing> linearRings = createLinearRingList(shape);
         LinearRing exteriorRing = linearRings.get(0);
         LinearRing[] interiorRings = null;
         if (linearRings.size() > 1) {
@@ -49,7 +58,7 @@ public class AwtGeomToJtsGeomConverter {
     }
 
     public MultiPolygon createMultiPolygon(Shape shape) {
-        List<LinearRing> linearRings = createLinearRingList(shape, 1.0);
+        List<LinearRing> linearRings = createLinearRingList(shape);
         Polygon[] polygons = new Polygon[linearRings.size()];
         for (int i = 0; i < linearRings.size(); i++) {
             LinearRing linearRing = linearRings.get(i);
@@ -58,8 +67,8 @@ public class AwtGeomToJtsGeomConverter {
         return geometryFactory.createMultiPolygon(polygons);
     }
 
-    public List<LinearRing> createLinearRingList(Shape shape, double flatness) {
-        List<List<Coordinate>> pathList = createPathList(shape, flatness, true);
+    public List<LinearRing> createLinearRingList(Shape shape) {
+        List<List<Coordinate>> pathList = createPathList(shape, true);
         List<LinearRing> linearRingList = new ArrayList<LinearRing>();
         for (List<Coordinate> path : pathList) {
             Coordinate[] pathCoordinates = path.toArray(new Coordinate[path.size()]);
@@ -68,8 +77,8 @@ public class AwtGeomToJtsGeomConverter {
         return linearRingList;
     }
 
-    public List<LineString> createLineStringList(Shape geometry, double flatness) {
-        List<List<Coordinate>> pathList = createPathList(geometry, flatness, false);
+    public List<LineString> createLineStringList(Shape geometry) {
+        List<List<Coordinate>> pathList = createPathList(geometry, false);
         List<LineString> strings = new ArrayList<LineString>();
         for (List<Coordinate> path : pathList) {
             strings.add(geometryFactory.createLineString(path.toArray(new Coordinate[path.size()])));
@@ -77,15 +86,19 @@ public class AwtGeomToJtsGeomConverter {
         return strings;
     }
 
-    public List<List<Coordinate>> createPathList(Shape geometry, double flatness, boolean forceClosedPaths) {
+    public List<List<Coordinate>> createPathList(Shape shape, boolean forceClosedPaths) {
+        return createPathList(shape, flatness, forceClosedPaths);
+    }
+
+    private List<List<Coordinate>> createPathList(Shape shape, double flatness, boolean forceClosedPaths) {
         List<Coordinate> path = new ArrayList<Coordinate>(16);
         List<List<Coordinate>> pathList = new ArrayList<List<Coordinate>>(4);
         PathIterator pathIterator;
-        if (flatness > 0.0) {
-            pathIterator = geometry.getPathIterator(null, flatness);
-        } else {
-            pathIterator = geometry.getPathIterator(null);
+        if (flatness <= 0.0) {
+            Rectangle2D d = shape.getBounds2D();
+            flatness = Math.max(d.getWidth(), d.getHeight()) / 100.0;
         }
+        pathIterator = shape.getPathIterator(null, flatness);
         double[] seg = new double[6];
         int segType = -1;
         while (!pathIterator.isDone()) {

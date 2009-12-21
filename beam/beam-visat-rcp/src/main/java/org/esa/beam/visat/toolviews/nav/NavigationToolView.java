@@ -1,5 +1,5 @@
 /*
- * $Id: NavigationToolView.java,v 1.2 2009-10-02 14:19:55 lveci Exp $
+ * $Id: NavigationToolView.java,v 1.3 2009-12-21 16:13:41 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -250,7 +250,7 @@ public class NavigationToolView extends AbstractToolView {
             }
         });
         rotationAngleField.setColumns(6);
-        rotationAngleField.setEditable(false);
+        rotationAngleField.setEditable(true);
         rotationAngleField.setHorizontalAlignment(JTextField.CENTER);
         rotationAngleField.addActionListener(new ActionListener() {
             @Override

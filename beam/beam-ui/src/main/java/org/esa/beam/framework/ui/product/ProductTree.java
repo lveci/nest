@@ -1,5 +1,5 @@
 /*
- * $Id: ProductTree.java,v 1.12 2009-12-14 21:03:50 lveci Exp $
+ * $Id: ProductTree.java,v 1.13 2009-12-21 16:13:40 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -71,7 +71,7 @@ import java.util.Set;import java.io.File;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.12 $ $Date: 2009-12-14 21:03:50 $
+ * @version $Revision: 1.13 $ $Date: 2009-12-21 16:13:40 $
  * @see org.esa.beam.framework.ui.product.ProductTreeListener
  * @see org.esa.beam.framework.datamodel.Product
  */
@@ -596,8 +596,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
         ImageIcon bandFlagsInvisibleIcon;
         ImageIcon bandIndexedVisibleIcon;
         ImageIcon bandIndexedInvisibleIcon;
-        ImageIcon vectorDataNormalIcon;
-        ImageIcon vectorDataFocusedIcon;
+        ImageIcon vectorDataIcon;
 
         Font normalFont;
         Font boldFont;
@@ -620,8 +619,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
             bandFlagsInvisibleIcon = UIUtils.loadImageIcon("icons/RsBandFlags16Disabled.gif");
             bandVirtualVisibleIcon = UIUtils.loadImageIcon("icons/RsBandVirtual16.gif");
             bandVirtualInvisibleIcon = UIUtils.loadImageIcon("icons/RsBandVirtual16Disabled.gif");
-            vectorDataNormalIcon = UIUtils.loadImageIcon("icons/RsVectorData16.gif");
-            vectorDataFocusedIcon = UIUtils.loadImageIcon("icons/RsVectorDataFocus16.gif");
+            vectorDataIcon = UIUtils.loadImageIcon("icons/RsVectorData16.gif");
             // Uncomment for debugging masks:
             // maskIcon = UIUtils.loadImageIcon("icons/RsMask16.gif");
         }
@@ -764,11 +762,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
                     toolTipBuffer.append(grid.getRasterHeight());
                 } else if (productNode instanceof VectorDataNode) {
                     VectorDataNode grid = (VectorDataNode) productNode;
-                    if (active) {
-                        this.setIcon(vectorDataFocusedIcon);
-                    } else {
-                        this.setIcon(vectorDataNormalIcon);
-                    }
+                    this.setIcon(vectorDataIcon);
                     toolTipBuffer.append(", type = ");
                     toolTipBuffer.append(grid.getFeatureType().getTypeName());
                     toolTipBuffer.append(", #features = ");

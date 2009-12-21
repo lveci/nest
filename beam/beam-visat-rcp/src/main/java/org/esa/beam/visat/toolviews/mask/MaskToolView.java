@@ -1,5 +1,5 @@
 /*
- * $Id: MaskToolView.java,v 1.5 2009-12-14 21:03:50 lveci Exp $
+ * $Id: MaskToolView.java,v 1.6 2009-12-21 16:13:41 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -30,7 +30,6 @@ import org.esa.beam.framework.ui.application.support.AbstractToolView;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.framework.ui.product.ProductTreeListenerAdapter;
 import org.esa.beam.visat.VisatApp;
-import org.esa.beam.visat.actions.NewVectorDataNodeAction;
 
 import javax.swing.AbstractButton;
 import javax.swing.JComponent;
@@ -119,7 +118,7 @@ public abstract class MaskToolView extends AbstractToolView {
                         VectorDataNode vectorDataNode = Mask.VectorDataType.getVectorData(selectedMask);
                         if (vectorDataNode != null) {
                             VisatApp.getApp().setSelectedProductNode(vectorDataNode);
-                            NewVectorDataNodeAction.setSelectedVectorDataNode(sceneView, vectorDataNode);
+                            sceneView.selectVectorDataLayer(vectorDataNode);
                         }
                     }
                 }

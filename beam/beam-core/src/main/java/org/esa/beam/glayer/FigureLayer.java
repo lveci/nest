@@ -1,5 +1,5 @@
 /*
- * $Id: FigureLayer.java,v 1.4 2009-12-11 20:46:13 lveci Exp $
+ * $Id: FigureLayer.java,v 1.5 2009-12-21 16:13:40 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,6 +32,10 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
+/**
+ * @deprecated since BEAM 4.7, replaced by VectorDataLayer
+ */
+@Deprecated
 public class FigureLayer extends Layer {
 
     public static final String PROPERTY_NAME_FIGURE_LIST = "figureList";

@@ -1,5 +1,5 @@
 /*
- * $Id: VisatPreferencesDialog.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: VisatPreferencesDialog.java,v 1.2 2009-12-21 16:13:40 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -20,6 +20,7 @@ package org.esa.beam.visat;
 import com.bc.ceres.glayer.support.ImageLayer;
 import com.bc.ceres.swing.update.ConnectionConfigData;
 import com.bc.ceres.swing.update.ConnectionConfigPane;
+import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.param.ParamChangeEvent;
 import org.esa.beam.framework.param.ParamChangeListener;
 import org.esa.beam.framework.param.ParamExceptionHandler;
@@ -34,10 +35,8 @@ import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.config.ConfigDialog;
 import org.esa.beam.framework.ui.config.DefaultConfigPage;
 import org.esa.beam.framework.ui.product.ProductSceneView;
-import org.esa.beam.glayer.FigureLayer;
 import org.esa.beam.util.PropertyMap;
 import org.esa.beam.util.SystemUtils;
-import static org.esa.beam.visat.VisatApp.*;
 import org.esa.beam.visat.actions.ShowModuleManagerAction;
 
 import javax.swing.BorderFactory;
@@ -57,6 +56,8 @@ import java.awt.GridBagConstraints;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 
+import static org.esa.beam.visat.VisatApp.*;
+
 public class VisatPreferencesDialog extends ConfigDialog {
 
     private static final int _PAGE_INSET_TOP = 15;
@@ -74,11 +75,8 @@ public class VisatPreferencesDialog extends ConfigDialog {
         final LayerPropertiesPage layerPropertiesPage = new LayerPropertiesPage();
         layerPropertiesPage.addSubPage(new ImageDisplayPage());
         layerPropertiesPage.addSubPage(new NoDataOverlayPage());
+        layerPropertiesPage.addSubPage(new MaskOverlayPage());
         layerPropertiesPage.addSubPage(new GraticuleOverlayPage());
-        layerPropertiesPage.addSubPage(new PinOverlayPage());
-        layerPropertiesPage.addSubPage(new GCPOverlayPage());
-        layerPropertiesPage.addSubPage(new ShapeFigureOverlayPage());
-        layerPropertiesPage.addSubPage(new ROIOverlayPage());
         addRootPage(layerPropertiesPage);
         addRootPage(new RGBImageProfilePage());
         addRootPage(new LoggingPage());
@@ -1066,6 +1064,10 @@ public class VisatPreferencesDialog extends ConfigDialog {
         }
     }
 
+    /**
+     * @deprecated since BEAM 4.7
+     */
+    @Deprecated
     public static class PinOverlayPage extends DefaultConfigPage {
 
         public PinOverlayPage() {
@@ -1149,6 +1151,10 @@ public class VisatPreferencesDialog extends ConfigDialog {
         }
     }
 
+    /**
+     * @deprecated since BEAM 4.7
+     */
+    @Deprecated
     public static class GCPOverlayPage extends DefaultConfigPage {
 
         public GCPOverlayPage() {
@@ -1232,147 +1238,10 @@ public class VisatPreferencesDialog extends ConfigDialog {
         }
     }
 
-    public static class ShapeFigureOverlayPage extends DefaultConfigPage {
-
-        public ShapeFigureOverlayPage() {
-            setTitle("Shape Layer");
-        }
-
-        @Override
-        protected void initConfigParams(ParamGroup configParams) {
-            Parameter param;
-
-            final ParamChangeListener paramChangeListener = new ParamChangeListener() {
-
-                @Override
-                public void parameterValueChanged(ParamChangeEvent event) {
-                    updatePageUI();
-                }
-            };
-
-            param = new Parameter("shape.outlined", FigureLayer.DEFAULT_SHAPE_OUTLINED);
-            param.getProperties().setLabel("Outline shape"); /*I18N*/
-            param.addParamChangeListener(paramChangeListener);
-            configParams.addParameter(param);
-
-            param = new Parameter("shape.outl.transparency", FigureLayer.DEFAULT_SHAPE_OUTL_TRANSPARENCY);
-            param.getProperties().setLabel("Shape outline transparency"); /*I18N*/
-            param.getProperties().setMinValue(0.0);
-            param.getProperties().setMaxValue(0.95);
-            configParams.addParameter(param);
-
-            param = new Parameter("shape.outl.color", FigureLayer.DEFAULT_SHAPE_OUTL_COLOR);
-            param.getProperties().setLabel("Shape outline colour"); /*I18N*/
-            configParams.addParameter(param);
-
-            param = new Parameter("shape.outl.width", FigureLayer.DEFAULT_SHAPE_OUTL_WIDTH);
-            param.getProperties().setLabel("Shape outline width"); /*I18N*/
-            param.getProperties().setMinValue(0.0);
-            param.getProperties().setMaxValue(50.0);
-            configParams.addParameter(param);
-
-            param = new Parameter("shape.filled", FigureLayer.DEFAULT_SHAPE_FILLED);
-            param.getProperties().setLabel("Fill shape"); /*I18N*/
-            param.addParamChangeListener(paramChangeListener);
-            configParams.addParameter(param);
-
-            param = new Parameter("shape.fill.transparency", FigureLayer.DEFAULT_SHAPE_FILL_TRANSPARENCY);
-            param.getProperties().setLabel("Shape fill transparency"); /*I18N*/
-            param.getProperties().setMinValue(0.0);
-            param.getProperties().setMaxValue(0.95);
-            configParams.addParameter(param);
-
-            param = new Parameter("shape.fill.color", FigureLayer.DEFAULT_SHAPE_FILL_COLOR);
-            param.getProperties().setLabel("Shape fill colour"); /*I18N*/
-            configParams.addParameter(param);
-        }
-
-        @Override
-        protected void initPageUI() {
-            JPanel pageUI = createPageUI();
-            setPageUI(pageUI);
-            updatePageUI();
-        }
-
-        private JPanel createPageUI() {
-            Parameter param;
-
-            JPanel pageUI = GridBagUtils.createPanel();
-
-            GridBagConstraints gbc = GridBagUtils.createConstraints("fill=HORIZONTAL,anchor=WEST");
-            gbc.gridy = 0;
-
-            param = getConfigParam("shape.outlined");
-            gbc.gridwidth = 2;
-            gbc.weightx = 1;
-            pageUI.add(param.getEditor().getEditorComponent(), gbc);
-            gbc.gridwidth = 1;
-            gbc.gridy++;
-
-            gbc.insets.top = _LINE_INSET_TOP;
-
-            param = getConfigParam("shape.outl.color");
-            gbc.weightx = 0;
-            pageUI.add(param.getEditor().getLabelComponent(), gbc);
-            gbc.weightx = 1;
-            pageUI.add(param.getEditor().getEditorComponent(), gbc);
-            gbc.gridy++;
-
-            param = getConfigParam("shape.outl.transparency");
-            gbc.weightx = 0;
-            pageUI.add(param.getEditor().getLabelComponent(), gbc);
-            gbc.weightx = 1;
-            pageUI.add(param.getEditor().getEditorComponent(), gbc);
-            gbc.gridy++;
-
-            param = getConfigParam("shape.outl.width");
-            gbc.weightx = 0;
-            pageUI.add(param.getEditor().getLabelComponent(), gbc);
-            gbc.weightx = 1;
-            pageUI.add(param.getEditor().getEditorComponent(), gbc);
-            gbc.gridy++;
-
-            gbc.insets.top = 3 * _LINE_INSET_TOP;
-
-            param = getConfigParam("shape.filled");
-            gbc.gridwidth = 2;
-            gbc.weightx = 1;
-            pageUI.add(param.getEditor().getEditorComponent(), gbc);
-            gbc.gridwidth = 1;
-            gbc.gridy++;
-
-            gbc.insets.top = _LINE_INSET_TOP;
-
-            param = getConfigParam("shape.fill.color");
-            gbc.weightx = 0;
-            pageUI.add(param.getEditor().getLabelComponent(), gbc);
-            gbc.weightx = 1;
-            pageUI.add(param.getEditor().getEditorComponent(), gbc);
-            gbc.gridy++;
-
-            param = getConfigParam("shape.fill.transparency");
-            gbc.weightx = 0;
-            pageUI.add(param.getEditor().getLabelComponent(), gbc);
-            gbc.weightx = 1;
-            pageUI.add(param.getEditor().getEditorComponent(), gbc);
-            gbc.gridy++;
-
-            return createPageUIContentPane(pageUI);
-        }
-
-        @Override
-        public void updatePageUI() {
-            boolean outlined = (Boolean) getConfigParam("shape.outlined").getValue();
-            setConfigParamUIEnabled("shape.outl.transparency", outlined);
-            setConfigParamUIEnabled("shape.outl.color", outlined);
-            setConfigParamUIEnabled("shape.outl.width", outlined);
-
-            boolean filled = (Boolean) getConfigParam("shape.filled").getValue();
-            setConfigParamUIEnabled("shape.fill.transparency", filled);
-            setConfigParamUIEnabled("shape.fill.color", filled);
-        }
-    }
-
+    /**
+     * @deprecated since BEAM 4.7, replaced by MaskOverlayPage
+     */
+    @Deprecated
     public static class ROIOverlayPage extends DefaultConfigPage {
 
         public ROIOverlayPage() {
@@ -1431,6 +1300,65 @@ public class VisatPreferencesDialog extends ConfigDialog {
 
         @Override
         public void updatePageUI() {
+        }
+    }
+
+    public static class MaskOverlayPage extends DefaultConfigPage {
+
+        private static final String PARAMETER_NAME_MASK_COLOR = "mask.color";
+        private static final String PARAMETER_NAME_MASK_TRANSPARENCY = "mask.transparency";
+
+        public MaskOverlayPage() {
+            setTitle("Mask Layer");
+        }
+
+        @Override
+        protected void initConfigParams(ParamGroup configParams) {
+
+            Parameter param = new Parameter(PARAMETER_NAME_MASK_COLOR, Mask.ImageType.DEFAULT_COLOR.RED);
+            param.getProperties().setLabel("Mask colour"); /*I18N*/
+            configParams.addParameter(param);
+
+            param = new Parameter(PARAMETER_NAME_MASK_TRANSPARENCY, Mask.ImageType.DEFAULT_TRANSPARENCY);
+            param.getProperties().setLabel("Mask transparency"); /*I18N*/
+            param.getProperties().setMinValue(0.0);
+            param.getProperties().setMaxValue(0.95);
+            configParams.addParameter(param);
+        }
+
+        @Override
+        protected void initPageUI() {
+            JPanel pageUI = createPageUI();
+            setPageUI(pageUI);
+            updatePageUI();
+        }
+
+        private JPanel createPageUI() {
+            Parameter param;
+
+            JPanel pageUI = GridBagUtils.createPanel();
+            //pageUI.setBorder(UIUtils.createGroupBorder("ROI Overlay")); /*I18N*/
+
+            GridBagConstraints gbc = GridBagUtils.createConstraints("fill=HORIZONTAL,anchor=WEST");
+            gbc.gridy = 0;
+
+            param = getConfigParam(PARAMETER_NAME_MASK_COLOR);
+            gbc.weightx = 0;
+            pageUI.add(param.getEditor().getLabelComponent(), gbc);
+            gbc.weightx = 1;
+            pageUI.add(param.getEditor().getEditorComponent(), gbc);
+            gbc.gridy++;
+
+            gbc.insets.top = _LINE_INSET_TOP;
+
+            param = getConfigParam(PARAMETER_NAME_MASK_TRANSPARENCY);
+            gbc.weightx = 0;
+            pageUI.add(param.getEditor().getLabelComponent(), gbc);
+            gbc.weightx = 1;
+            pageUI.add(param.getEditor().getEditorComponent(), gbc);
+            gbc.gridy++;
+
+            return createPageUIContentPane(pageUI);
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: NewVectorDataNodeAction.java,v 1.2 2009-12-16 16:15:19 lveci Exp $
+ * $Id: NewVectorDataNodeAction.java,v 1.3 2009-12-21 16:13:40 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -21,19 +21,14 @@ import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.Validator;
-import com.bc.ceres.glayer.LayerFilter;
-import com.bc.ceres.glayer.Layer;
-import com.bc.ceres.glayer.support.LayerUtils;
-import com.vividsolutions.jts.geom.Geometry;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.VectorDataNode;
+import org.esa.beam.framework.datamodel.PlainFeatureFactory;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.PropertyPane;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
-import org.esa.beam.framework.ui.product.SimpleFeatureFigureFactory;
 import org.esa.beam.framework.ui.product.ProductSceneView;
-import org.esa.beam.framework.ui.product.VectorDataLayer;
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.visat.VisatApp;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -50,24 +45,19 @@ import java.text.MessageFormat;
  * @since BEAM 4.7
  */
 public class NewVectorDataNodeAction extends ExecCommand {
-    private static final String DIALOG_TITLE = "New Geometry";
+    private static final String DIALOG_TITLE = "New Geometry Container";
 
-    public static final String VECTOR_DATA_NAME = "vectorDataName";
 
     // todo - add help (nf)
     private static final String HELP_ID = "";
     static int numItems = 0;
-
-    public String getVectorDataName() {
-        return (String) getProperty(VECTOR_DATA_NAME);
-    }
 
     @Override
     public void actionPerformed(CommandEvent event) {
         run();
     }
 
-    public void run() {
+    public VectorDataNode run() {
         final Product product = VisatApp.getApp().getSelectedProduct();
         DialogData dialogData = new DialogData();
         PropertySet propertySet = PropertyContainer.createObjectBacked(dialogData);
@@ -83,23 +73,22 @@ public class NewVectorDataNodeAction extends ExecCommand {
         dialog.setContent(panel);
         int i = dialog.show();
         if (i == ModalDialog.ID_OK) {
-            createVectorDataNode(product, dialogData.name, dialogData.description);
-            setProperty(VECTOR_DATA_NAME, dialogData.name);
+            return createDefaultVectorDataNode(product, dialogData.name, dialogData.description);
         } else {
-            setProperty(VECTOR_DATA_NAME, null);
+            return null;
         }
     }
 
-    public static VectorDataNode createVectorDataNode(Product product, String name, String description) {
+    public static VectorDataNode createDefaultVectorDataNode(Product product, String name, String description) {
         CoordinateReferenceSystem modelCrs = ImageManager.getModelCrs(product.getGeoCoding());
-        SimpleFeatureType type = SimpleFeatureFigureFactory.createSimpleFeatureType(Product.GEOMETRY_FEATURE_TYPE_NAME, Geometry.class, modelCrs);
+        SimpleFeatureType type = PlainFeatureFactory.createDefaultFeatureType(modelCrs);
         VectorDataNode vectorDataNode = new VectorDataNode(name, type);
         vectorDataNode.setDescription(description);
         product.getVectorDataGroup().add(vectorDataNode);
         final ProductSceneView sceneView = VisatApp.getApp().getSelectedProductSceneView();
         if (sceneView != null) {
             VisatApp.getApp().setSelectedProductNode(vectorDataNode);
-            setSelectedVectorDataNode(sceneView, vectorDataNode);
+            sceneView.selectVectorDataLayer(vectorDataNode);
         }
         return vectorDataNode;
     }
@@ -117,21 +106,6 @@ public class NewVectorDataNodeAction extends ExecCommand {
         setEnabled(product != null);
     }
 
-    // todo - same code in org.esa.beam.visat.ProductsToolView (nf)
-    public static void setSelectedVectorDataNode(ProductSceneView sceneView, final VectorDataNode vectorDataNode) {
-        final LayerFilter layerFilter = new LayerFilter() {
-            @Override
-            public boolean accept(Layer layer) {
-                return layer instanceof VectorDataLayer && ((VectorDataLayer) layer).getVectorDataNode() == vectorDataNode;
-            }
-        };
-        Layer layer = LayerUtils.getChildLayer(sceneView.getRootLayer(), layerFilter, LayerUtils.SearchMode.DEEP);
-        if (layer != null) {
-            layer.setVisible(true);
-            sceneView.setSelectedLayer(layer);
-        }
-    }
-
     private static class NameValidator implements Validator {
         private final Product product;
 
@@ -143,7 +117,7 @@ public class NewVectorDataNodeAction extends ExecCommand {
         public void validateValue(Property property, Object value) throws ValidationException {
             String name = (String) value;
             if (product.getVectorDataGroup().contains(name)) {
-                final String pattern = "A geometry collection with name ''{0}'' already exists.\n" +
+                final String pattern = "A geometry container with name ''{0}'' already exists.\n" +
                         "Please choose another one.";
                 throw new ValidationException(MessageFormat.format(pattern, name));
             }

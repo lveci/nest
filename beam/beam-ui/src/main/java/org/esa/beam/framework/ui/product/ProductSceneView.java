@@ -4,7 +4,9 @@ import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
+import com.bc.ceres.glayer.LayerFilter;
 import com.bc.ceres.glayer.support.ImageLayer;
+import com.bc.ceres.glayer.support.LayerUtils;
 import com.bc.ceres.glayer.swing.AdjustableViewScrollPane;
 import com.bc.ceres.glayer.swing.LayerCanvas;
 import com.bc.ceres.glevel.MultiLevelSource;
@@ -17,19 +19,12 @@ import com.bc.ceres.swing.figure.FigureChangeListener;
 import com.bc.ceres.swing.figure.FigureCollection;
 import com.bc.ceres.swing.figure.FigureEditor;
 import com.bc.ceres.swing.figure.FigureEditorAware;
-import com.bc.ceres.swing.figure.FigureFactory;
-import com.bc.ceres.swing.figure.FigureStyle;
 import com.bc.ceres.swing.figure.Handle;
-import com.bc.ceres.swing.figure.PointFigure;
 import com.bc.ceres.swing.figure.ShapeFigure;
-import com.bc.ceres.swing.figure.support.DefaultFigureEditor;
-import com.bc.ceres.swing.figure.support.DefaultFigureStyle;
+import com.bc.ceres.swing.figure.FigureSelection;
 import com.bc.ceres.swing.selection.SelectionContext;
 import com.bc.ceres.swing.undo.UndoContext;
 import com.bc.ceres.swing.undo.support.DefaultUndoContext;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.MultiLineString;
-import com.vividsolutions.jts.geom.Polygon;
 import org.esa.beam.framework.datamodel.ImageInfo;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
@@ -51,13 +46,9 @@ import org.esa.beam.glayer.MaskCollectionLayer;
 import org.esa.beam.glayer.NoDataLayerType;
 import org.esa.beam.glayer.ProductLayerContext;
 import org.esa.beam.glevel.MaskImageMultiLevelSource;
-import org.esa.beam.util.AwtGeomToJtsGeomConverter;
 import org.esa.beam.util.PropertyMap;
 import org.esa.beam.util.PropertyMapChangeListener;
 import org.esa.beam.util.SystemUtils;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
 
 import javax.swing.AbstractButton;
 import javax.swing.JMenuItem;
@@ -86,8 +77,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Vector;
 
 /**
@@ -185,8 +174,8 @@ public class ProductSceneView extends BasicView
 
     private AdjustableViewScrollPane scrollPane;
     private UndoContext undoContext;
-    private DefaultFigureEditor figureEditor;
-    private MyFigureFactory figureFactory;
+    private ProductSceneViewFigureEditor figureEditor;
+    //private SimpleFeatureFigureFactory2 figureFactory;
 
     public ProductSceneView(ProductSceneImage sceneImage) {
         Assert.notNull(sceneImage, "sceneImage");
@@ -222,42 +211,7 @@ public class ProductSceneView extends BasicView
             }
         });
 
-        figureFactory = new MyFigureFactory();
-        figureEditor = new DefaultFigureEditor(layerCanvas, viewport, undoContext, NullFigureCollection.INSTANCE,
-                                               figureFactory) {
-            @Override
-            public void insertFigures(boolean performInsert, Figure... figures) {
-                super.insertFigures(performInsert, figures);
-                System.out.println("PSV: insertFigures " + performInsert + ", " + figures.length);
-                figureFactory.getVectorData().getFeatureCollection().addAll(toSimpleFeatureList(figures));
-            }
-
-            @Override
-            public void deleteFigures(boolean performDelete, Figure... figures) {
-                super.deleteFigures(performDelete, figures);
-                System.out.println("PSV: deleteFigures " + performDelete + ", " + figures.length);
-                figureFactory.getVectorData().getFeatureCollection().removeAll(toSimpleFeatureList(figures));
-            }
-
-            @Override
-            public void changeFigure(Figure figure, Object figureMemento, String presentationName) {
-                super.changeFigure(figure, figureMemento, presentationName);
-                System.out.println("PSV: changeFigure " + figure + ", " + presentationName);
-                figureFactory.getVectorData().fireFeatureCollectionChanged();
-            }
-
-            private List<SimpleFeature> toSimpleFeatureList(Figure[] figures) {
-                SimpleFeature[] features = new SimpleFeature[figures.length];
-                for (int i = 0, figuresLength = figures.length; i < figuresLength; i++) {
-                    Figure figure = figures[i];
-                    if (figure instanceof SimpleFeatureFigure) {
-                        SimpleFeatureFigure simpleFeatureFigure = (SimpleFeatureFigure) figure;
-                        features[i] = simpleFeatureFigure.getSimpleFeature();
-                    }
-                }
-                return Arrays.asList(features);
-            }
-        };
+        figureEditor = new ProductSceneViewFigureEditor(this);
 
         this.scrollBarsShown = sceneImage.getConfiguration().getPropertyBool(PROPERTY_KEY_IMAGE_SCROLL_BARS_SHOWN,
                                                                              false);
@@ -274,6 +228,10 @@ public class ProductSceneView extends BasicView
         getRaster().getProduct().addProductNodeListener(rasterChangeHandler);
 
         setMaskOverlayEnabled(true);
+    }
+
+    public UndoContext getUndoContext() {
+        return undoContext;
     }
 
     @Override
@@ -579,33 +537,43 @@ public class ProductSceneView extends BasicView
     }
 
     public boolean isPinOverlayEnabled() {
-        final Layer pinLayer = getPinLayer(false);
+        Layer pinLayer = getPinLayer(false);
         return pinLayer != null && pinLayer.isVisible();
     }
 
     public void setPinOverlayEnabled(boolean enabled) {
         if (isPinOverlayEnabled() != enabled) {
-            getPinLayer(true).setVisible(enabled);
+            Layer layer = getPinLayer(true);
+            layer.setVisible(enabled);
+            setSelectedLayer(layer);
         }
     }
 
     public boolean isGcpOverlayEnabled() {
-        final Layer gcpLayer = getGcpLayer(false);
+        Layer gcpLayer = getGcpLayer(false);
         return gcpLayer != null && gcpLayer.isVisible();
     }
 
     public void setGcpOverlayEnabled(boolean enabled) {
         if (isGcpOverlayEnabled() != enabled) {
-            getGcpLayer(true).setVisible(enabled);
+            Layer layer = getGcpLayer(true);
+            layer.setVisible(enabled);
+            setSelectedLayer(layer);
         }
     }
 
+    /**
+     * @deprecated since BEAM 4.7
+     */
     @Deprecated
     public boolean isBitmaskOverlayEnabled() {
         final Layer bitmaskLayer = getBitmaskLayer(false);
         return bitmaskLayer != null && bitmaskLayer.isVisible();
     }
 
+    /**
+     * @deprecated since BEAM 4.7
+     */
     @Deprecated
     public void setBitmaskOverlayEnabled(boolean enabled) {
         if (isBitmaskOverlayEnabled() != enabled) {
@@ -635,25 +603,27 @@ public class ProductSceneView extends BasicView
         }
     }
 
-    @Deprecated
+    // todo - replace by getCurrentGeometry() (nf)
     public ShapeFigure getCurrentShapeFigure() {
-        return null;
-    }
-
-    @Deprecated
-    public void setCurrentShapeFigure(Figure currentShapeFigure) {
-        /*
-        setShapeOverlayEnabled(true);
-        final Figure oldShapeFigure = getCurrentShapeFigure();
-        if (currentShapeFigure != oldShapeFigure) {
-            if (oldShapeFigure != null && getFigureLayer(false) != null) {
-                getFigureLayer(false).removeFigure(oldShapeFigure);
+        FigureSelection figureSelection = getFigureEditor().getFigureSelection();
+        if (figureSelection .getFigureCount() > 0) {
+            Figure figure = figureSelection.getFigure(0);
+            if (figure instanceof ShapeFigure) {
+                return (ShapeFigure) figure;
             }
-            if (currentShapeFigure != null) {
-                getFigureLayer(true).addFigure(currentShapeFigure);
+        } else {
+            Layer layer = getSelectedLayer();
+            if (layer instanceof VectorDataLayer) {
+                final VectorDataLayer vectorDataLayer = (VectorDataLayer) layer;
+                if (vectorDataLayer.getFigureCollection().getFigureCount() > 0) {
+                    Figure figure = vectorDataLayer.getFigureCollection().getFigure(0);
+                    if (figure instanceof ShapeFigure) {
+                        return (ShapeFigure) figure;
+                    }
+                }
             }
         }
-        */
+        return null;
     }
 
     public boolean areScrollBarsShown() {
@@ -746,15 +716,21 @@ public class ProductSceneView extends BasicView
         }
     }
 
+    public VectorDataLayer selectVectorDataLayer(VectorDataNode vectorDataNode) {
+        LayerFilter layerFilter = new VectorDataLayerFilter(vectorDataNode);
+        VectorDataLayer layer = (VectorDataLayer)LayerUtils.getChildLayer(getRootLayer(),
+                                                                          LayerUtils.SEARCH_DEEP,
+                                                                          layerFilter);
+        if (layer != null) {
+            setSelectedLayer(layer);
+        }
+        return layer;
+    }
+
     private void maybeUpdateFigureEditor() {
         if (selectedLayer instanceof VectorDataLayer) {
             VectorDataLayer vectorDataLayer = (VectorDataLayer) selectedLayer;
-            figureEditor.setFigureCollection(vectorDataLayer.getFigureCollection());
-            figureFactory.setVectorData(vectorDataLayer.getVectorDataNode());
-            final DefaultFigureStyle style = new DefaultFigureStyle();
-            style.fromCssString(vectorDataLayer.getVectorDataNode().getDefaultCSS());
-            figureEditor.setDefaultLineStyle(style);
-            figureEditor.setDefaultPolygonStyle(style);
+            figureEditor.vectorDataLayerSelected(vectorDataLayer);
         }
     }
 
@@ -895,7 +871,8 @@ public class ProductSceneView extends BasicView
 
     public int getFirstImageLayerIndex() {
         return sceneImage.getFirstImageLayerIndex();
-    }
+    }// todo - same code in org.esa.beam.visat.ProductsToolView (nf)
+
 
     /**
      * A band that is used as an RGB channel for RGB image views.
@@ -1157,6 +1134,11 @@ public class ProductSceneView extends BasicView
         }
 
         @Override
+        public boolean isCollection() {
+            return false;
+        }
+
+        @Override
         public boolean contains(Figure figure) {
             return false;
         }
@@ -1173,7 +1155,7 @@ public class ProductSceneView extends BasicView
 
         @Override
         public Rank getRank() {
-            return Figure.Rank.COLLECTION;
+            return Figure.Rank.NOT_SPECIFIED;
         }
 
         @Override
@@ -1325,59 +1307,17 @@ public class ProductSceneView extends BasicView
         }
     }
 
-    public static class MyFigureFactory implements FigureFactory {
+    private static class VectorDataLayerFilter implements LayerFilter {
+        private final VectorDataNode vectorDataNode;
 
-        private VectorDataNode vectorDataNode;
-        private AwtGeomToJtsGeomConverter toJtsGeom;
-        private long currentFeatureId;
-
-        MyFigureFactory() {
-            this.toJtsGeom = new AwtGeomToJtsGeomConverter();
-            this.currentFeatureId = System.nanoTime();
-        }
-
-        public VectorDataNode getVectorData() {
-            return vectorDataNode;
-        }
-
-        public void setVectorData(VectorDataNode vectorDataNode) {
+        public VectorDataLayerFilter(VectorDataNode vectorDataNode) {
             this.vectorDataNode = vectorDataNode;
         }
 
         @Override
-        public PointFigure createPointFigure(Point2D point, FigureStyle style) {
-            return new SimpleFeaturePointFigure(createSimpleFeature(toJtsGeom.createPoint(point)), style);
-        }
-
-        @Override
-        public ShapeFigure createLineFigure(Shape shape, FigureStyle style) {
-            MultiLineString multiLineString = toJtsGeom.createMultiLineString(shape);
-            if (multiLineString.getNumGeometries() == 1) {
-                return createShapeFigure(multiLineString.getGeometryN(0), style);
-            } else {
-                return createShapeFigure(multiLineString, style);
-            }
-        }
-
-        @Override
-        public ShapeFigure createPolygonFigure(Shape shape, FigureStyle style) {
-            Polygon polygon = toJtsGeom.createPolygon(shape);
-            return createShapeFigure(polygon, style);
-        }
-
-        private ShapeFigure createShapeFigure(Geometry geometry, FigureStyle style) {
-            return new SimpleFeatureShapeFigure(createSimpleFeature(geometry), style);
-        }
-
-        private SimpleFeature createSimpleFeature(Geometry geometry) {
-            SimpleFeatureType ft = vectorDataNode.getFeatureType();
-            SimpleFeatureBuilder sfb = new SimpleFeatureBuilder(ft);
-            sfb.set(ft.getGeometryDescriptor().getLocalName(), geometry);
-            return sfb.buildFeature(createFeatureId(ft));
-        }
-
-        private String createFeatureId(SimpleFeatureType ft) {
-            return ft.getName() + "_" + Long.toHexString(currentFeatureId++);
+            public boolean accept(Layer layer) {
+            return layer instanceof VectorDataLayer && ((VectorDataLayer) layer).getVectorDataNode() == vectorDataNode;
         }
     }
+
 }

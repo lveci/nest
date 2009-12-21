@@ -1,5 +1,6 @@
 package org.esa.beam.framework.datamodel;
 
+import com.bc.ceres.core.Assert;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.geotools.feature.CollectionEvent;
 import org.geotools.feature.CollectionListener;
@@ -7,7 +8,6 @@ import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import com.bc.ceres.core.Assert;
 
 /**
  * A container which allows to store vector data in the BEAM product model.
@@ -15,27 +15,40 @@ import com.bc.ceres.core.Assert;
  * This is a preliminary API under construction for BEAM 4.7. Not intended for public use.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2009-12-14 21:03:50 $
+ * @version $Revision: 1.5 $ $Date: 2009-12-21 16:13:40 $
  * @see Product#getVectorDataGroup()
  * @since BEAM 4.7
  */
 public class VectorDataNode extends ProductNode {
 
     public static final String PROPERTY_NAME_FEATURE_COLLECTION = "featureCollection";
+    public static final String PROPERTY_NAME_FEATURE = "feature";
 
-    private static final String DEFAULT_STYLE = "fill:#00ff00; fill-opacity:0.5; stroke:#ffffff; stroke-opacity:1.0; stroke-width:1.0";
+    private static final String DEFAULT_STYLE_FORMAT = "fill:%s; fill-opacity:0.5; stroke:#ffffff; stroke-opacity:1.0; stroke-width:1.0";
+    private static final String[] FILL_COLORS = {
+            "#ff0000", // red
+            "#00ff00", // green
+            "#0000ff", // blue
+            "#aaff00",
+            "#00aaff",
+            "#ffaa00",
+            "#ff00aa",
+            "#aa00ff",
+            "#00ffaa",
+    };
+    static int fillColorIndex;
+
 
     private final SimpleFeatureType featureType;
-    private final FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection;
+    private final ChangeEmittingFeatureCollection featureCollection;
     private final CollectionListener featureCollectionListener;
-    private String defaultCSS = DEFAULT_STYLE;
+    private String defaultCSS;
 
     /**
      * Constructs a new vector data node for the given feature collection.
      *
      * @param name        The node name.
      * @param featureType The feature type.
-     *
      * @throws IllegalArgumentException if the given name is not a valid node identifier
      */
     public VectorDataNode(String name, SimpleFeatureType featureType) {
@@ -47,25 +60,48 @@ public class VectorDataNode extends ProductNode {
      *
      * @param name              The node name.
      * @param featureCollection A feature collection.
-     *
      * @throws IllegalArgumentException if the given name is not a valid node identifier
      */
     public VectorDataNode(String name, FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection) {
         super(name, "");
         this.featureType = featureCollection.getSchema();
-        this.featureCollection = featureCollection;
+        this.featureCollection = new ChangeEmittingFeatureCollection(featureCollection);
         this.featureCollectionListener = new CollectionListener() {
             @Override
             public void collectionChanged(CollectionEvent tce) {
-                fireFeatureCollectionChanged();
+                if (tce.getEventType() == CollectionEvent.FEATURES_ADDED) {
+                    fireFeatureCollectionChanged(null, tce.getFeatures());
+                } else if (tce.getEventType() == CollectionEvent.FEATURES_REMOVED) {
+                    fireFeatureCollectionChanged(tce.getFeatures(), null);
+                } else if (tce.getEventType() == CollectionEvent.FEATURES_CHANGED) {
+                    fireFeatureCollectionChanged(tce.getFeatures(), tce.getFeatures());
+                }
             }
         };
         this.featureCollection.addListener(featureCollectionListener);
+        this.defaultCSS = String.format(DEFAULT_STYLE_FORMAT, FILL_COLORS[(fillColorIndex++) % FILL_COLORS.length]);
     }
 
-    public void fireFeatureCollectionChanged() {
-        System.out.println("VectorDataNode '" + getName() + "': fireProductNodeChanged");
-        fireProductNodeChanged(PROPERTY_NAME_FEATURE_COLLECTION);
+    /**
+     * Informs clients which have registered a {@link ProductNodeListener}
+     * with this {@link VectorDataNode} that one or more underlying
+     * OpenGIS {@code SimpleFeature}s have changed.
+     * <p/>
+     * The method fires a product node property change event. The property name is always
+     * {@link #PROPERTY_NAME_FEATURE_COLLECTION}. The following conventions apply for
+     * the {@code oldValue} and {@code newValue} fields of the fired
+     * {@link ProductNodeEvent}:
+     * <ol>
+     * <li>Features added: {@code oldValue} is {@code null}, {@code newValue} is the array containing all added features.</li>
+     * <li>Features removed: {@code oldValue} is the array containing all removed features, {@code newValue} is {@code null}.</li>
+     * <li>Features changed: {@code oldValue} is same as {@code newValue} which is the array containing all changed features.</li>
+     * </ol>
+     *
+     * @param oldFeatures The {@code oldValue} of the node event to be fired.
+     * @param newFeatures The {@code newValue} of the node event to be fired.
+     */
+    public void fireFeatureCollectionChanged(SimpleFeature[] oldFeatures, SimpleFeature[] newFeatures) {
+        fireProductNodeChanged(PROPERTY_NAME_FEATURE_COLLECTION, oldFeatures, newFeatures);
     }
 
     /**
@@ -78,7 +114,7 @@ public class VectorDataNode extends ProductNode {
     /**
      * @return The feature collection.
      */
-    public FeatureCollection<SimpleFeatureType, SimpleFeature> getFeatureCollection() {
+    public ChangeEmittingFeatureCollection getFeatureCollection() {
         return featureCollection;
     }
 
