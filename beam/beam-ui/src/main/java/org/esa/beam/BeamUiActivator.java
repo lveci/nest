@@ -1,5 +1,5 @@
 /*
- * $Id: BeamUiActivator.java,v 1.2 2009-09-24 19:32:51 lveci Exp $
+ * $Id: BeamUiActivator.java,v 1.3 2009-12-22 17:30:01 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -30,6 +30,8 @@ import org.esa.beam.framework.ui.application.ApplicationDescriptor;
 import org.esa.beam.framework.ui.application.ToolViewDescriptor;
 import org.esa.beam.framework.ui.application.ToolViewDescriptorRegistry;
 import org.esa.beam.framework.ui.command.Command;
+import org.esa.beam.framework.ui.layer.LayerEditorDescriptor;
+import org.esa.beam.framework.ui.layer.LayerSourceDescriptor;
 import org.esa.beam.util.TreeNode;
 
 import javax.help.HelpSet;
@@ -48,7 +50,7 @@ import java.util.logging.Logger;
  *
  * @author Marco Peters
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-09-24 19:32:51 $
+ * @version $Revision: 1.3 $ $Date: 2009-12-22 17:30:01 $
  */
 public class BeamUiActivator implements Activator, ToolViewDescriptorRegistry {
 
@@ -57,6 +59,7 @@ public class BeamUiActivator implements Activator, ToolViewDescriptorRegistry {
     private TreeNode<HelpSet> helpSetRegistry;
     private Map<String, Command> actionRegistry;
     private Map<String, ToolViewDescriptor> toolViewDescriptorRegistry;
+    private Map<String, LayerSourceDescriptor> layerSourcesRegistry;
     private ApplicationDescriptor applicationDescriptor;
     private int helpSetNo;
 
@@ -68,6 +71,8 @@ public class BeamUiActivator implements Activator, ToolViewDescriptorRegistry {
         registerToolViews(moduleContext);
         registerActions(moduleContext);
         registerApplicationDescriptors(moduleContext);
+        registerLayerEditors(moduleContext);
+        registerLayerSources(moduleContext);
     }
 
     @Override
@@ -133,6 +138,11 @@ public class BeamUiActivator implements Activator, ToolViewDescriptorRegistry {
         return toolViewDescriptorRegistry.get(viewDescriptorId);
     }
 
+    public LayerSourceDescriptor[] getLayerSources() {
+        return layerSourcesRegistry.values().toArray(
+                new LayerSourceDescriptor[layerSourcesRegistry.values().size()]);
+    }
+
     public void removeToolViewDescriptor(String viewDescriptorId) {
         toolViewDescriptorRegistry.remove(viewDescriptorId);
     }
@@ -170,6 +180,31 @@ public class BeamUiActivator implements Activator, ToolViewDescriptorRegistry {
                 moduleContext.getLogger().info(String.format("Action [%s] has been redeclared!\n", actionId));
             }
             actionRegistry.put(actionId, action);
+        }
+    }
+
+    private void registerLayerEditors(ModuleContext moduleContext) {
+        BeamCoreActivator.loadExecutableExtensions(moduleContext,
+                                                   "layerEditors",
+                                                   "layerEditor",
+                                                   LayerEditorDescriptor.class);
+    }
+
+    private void registerLayerSources(ModuleContext moduleContext) {
+        List<LayerSourceDescriptor> layerSourceListDescriptor =
+                BeamCoreActivator.loadExecutableExtensions(moduleContext,
+                                                           "layerSources",
+                                                           "layerSource",
+                                                           LayerSourceDescriptor.class);
+        layerSourcesRegistry = new HashMap<String, LayerSourceDescriptor>(2 * layerSourceListDescriptor.size());
+        for (LayerSourceDescriptor layerSourceDescriptor : layerSourceListDescriptor) {
+            final String id = layerSourceDescriptor.getId();
+            final LayerSourceDescriptor existingLayerSourceDescriptor = layerSourcesRegistry.get(id);
+            if (existingLayerSourceDescriptor
+                != null) {
+                moduleContext.getLogger().info(String.format("Layer source [%s] has been redeclared!\n", id));
+            }
+            layerSourcesRegistry.put(id, layerSourceDescriptor);
         }
     }
 

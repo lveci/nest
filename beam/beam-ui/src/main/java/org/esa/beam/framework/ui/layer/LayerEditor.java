@@ -1,4 +1,4 @@
-package org.esa.beam.visat.toolviews.layermanager;
+package org.esa.beam.framework.ui.layer;
 
 import com.bc.ceres.glayer.Layer;
 
@@ -12,7 +12,7 @@ import javax.swing.JComponent;
  * <i>Note: This API is not public yet and may significantly change in the future. Use it at your own risk.</i>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-06-01 19:52:04 $
+ * @version $Revision: 1.1 $ $Date: 2009-12-22 17:30:01 $
  * @since BEAM 4.6
  */
 public interface LayerEditor {

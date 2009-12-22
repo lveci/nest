@@ -2,28 +2,28 @@
 package org.esa.nest.dat.actions;
 
 import org.esa.beam.framework.ui.command.CommandEvent;
-import org.esa.beam.visat.VisatActivator;
+import org.esa.beam.framework.ui.layer.LayerSourceAssistantPane;
+import org.esa.beam.framework.ui.layer.LayerSourceDescriptor;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.actions.AbstractVisatAction;
-import org.esa.beam.visat.toolviews.layermanager.LayerSourceDescriptor;
-import org.esa.beam.visat.toolviews.layermanager.layersrc.LayerSourceAssistantPane;
 import org.esa.beam.visat.toolviews.layermanager.layersrc.SelectLayerSourceAssistantPage;
+import org.esa.beam.BeamUiActivator;
 
 /**
  * This action opens a vector dataset
  *
  * @author lveci
- * @version $Revision: 1.3 $ $Date: 2009-06-25 17:24:03 $
+ * @version $Revision: 1.4 $ $Date: 2009-12-22 17:30:01 $
  */
 public class OpenVectorAction extends AbstractVisatAction {
 
     @Override
     public void actionPerformed(final CommandEvent event) {
 
-        LayerSourceAssistantPane pane = new LayerSourceAssistantPane(VisatApp.getApp().getApplicationWindow(),
+        final LayerSourceAssistantPane pane = new LayerSourceAssistantPane(VisatApp.getApp().getApplicationWindow(),
                 "Add Layer",
                 getAppContext());
-        LayerSourceDescriptor[] layerSourceDescriptors = VisatActivator.getInstance().getLayerSources();
+        final LayerSourceDescriptor[] layerSourceDescriptors = BeamUiActivator.getInstance().getLayerSources();
         pane.show(new SelectLayerSourceAssistantPage(layerSourceDescriptors));
     }
 

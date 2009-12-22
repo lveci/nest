@@ -1,5 +1,5 @@
 /*
- * $Id: ProductIO.java,v 1.3 2009-05-27 21:09:23 lveci Exp $
+ * $Id: ProductIO.java,v 1.4 2009-12-22 17:30:01 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -47,7 +47,7 @@ import java.util.Iterator;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.3 $ $Date: 2009-05-27 21:09:23 $
+ * @version $Revision: 1.4 $ $Date: 2009-12-22 17:30:01 $
  */
 public class ProductIO {
 
@@ -222,9 +222,17 @@ public class ProductIO {
         if (!file.exists()) {
             throw new FileNotFoundException("File not found: " + file.getPath());
         }
+        final Product cachedProduct = ProductCache.instance().getProduct(file);
+        if(cachedProduct != null) {
+            ProductCache.instance().addProduct(file, cachedProduct);
+            return cachedProduct;
+        }
+
         final ProductReader productReader = getProductReaderForFile(file);
         if (productReader != null) {
-            return productReader.readProductNodes(file, subsetDef);
+            final Product product = productReader.readProductNodes(file, subsetDef);
+            ProductCache.instance().addProduct(file, product);
+            return product;
         }
         return null;
     }

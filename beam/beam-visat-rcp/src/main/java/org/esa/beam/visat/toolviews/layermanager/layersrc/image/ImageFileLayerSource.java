@@ -1,5 +1,5 @@
 /*
- * $Id: ImageFileLayerSource.java,v 1.5 2009-12-11 20:46:14 lveci Exp $
+ * $Id: ImageFileLayerSource.java,v 1.6 2009-12-22 17:30:01 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -20,10 +20,10 @@ import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerTypeRegistry;
 import org.esa.beam.framework.ui.product.ProductSceneView;
+import org.esa.beam.framework.ui.layer.LayerSource;
+import org.esa.beam.framework.ui.layer.LayerSourcePageContext;
 import org.esa.beam.util.io.FileUtils;
-import org.esa.beam.visat.toolviews.layermanager.LayerSource;
-import org.esa.beam.visat.toolviews.layermanager.layersrc.AbstractLayerSourceAssistantPage;
-import org.esa.beam.visat.toolviews.layermanager.layersrc.LayerSourcePageContext;
+import org.esa.beam.framework.ui.layer.AbstractLayerSourceAssistantPage;
 
 import java.awt.geom.AffineTransform;
 import java.io.File;
@@ -35,7 +35,7 @@ import java.io.File;
  * the orientation relative to the existing layers has to be given by hand.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.5 $ $Date: 2009-12-11 20:46:14 $
+ * @version $Revision: 1.6 $ $Date: 2009-12-22 17:30:01 $
  * @since BEAM 4.6
  */
 public class ImageFileLayerSource implements LayerSource {

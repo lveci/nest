@@ -7,6 +7,7 @@ import org.esa.beam.framework.gpf.*;
 import org.esa.beam.framework.gpf.internal.OperatorContext;
 import org.esa.beam.framework.gpf.internal.OperatorImage;
 import org.esa.beam.framework.gpf.internal.OperatorConfiguration;
+import org.esa.beam.framework.dataio.ProductCache;
 
 import java.lang.reflect.Field;
 
@@ -127,8 +128,10 @@ public class NodeContext {
             operator = null;
         }
         if (targetProduct != null) {
-            targetProduct.dispose();
-            targetProduct = null;
+            if(targetProduct.getFileLocation() == null || ProductCache.instance().getProduct(targetProduct.getFileLocation()) == null) {
+                targetProduct.dispose();
+                targetProduct = null;
+            }
         }
     }
 }

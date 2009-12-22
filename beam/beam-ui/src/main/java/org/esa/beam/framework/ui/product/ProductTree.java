@@ -1,5 +1,5 @@
 /*
- * $Id: ProductTree.java,v 1.13 2009-12-21 16:13:40 lveci Exp $
+ * $Id: ProductTree.java,v 1.14 2009-12-22 17:30:01 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -21,6 +21,7 @@ import org.esa.beam.framework.datamodel.AbstractBand;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.IndexCoding;
+import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
@@ -71,7 +72,7 @@ import java.util.Set;import java.io.File;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.13 $ $Date: 2009-12-21 16:13:40 $
+ * @version $Revision: 1.14 $ $Date: 2009-12-22 17:30:01 $
  * @see org.esa.beam.framework.ui.product.ProductTreeListener
  * @see org.esa.beam.framework.datamodel.Product
  */
@@ -1032,11 +1033,10 @@ public class ProductTree extends JTree implements PopupMenuFactory {
 
     private DefaultMutableTreeNode getGroupTNode(ProductNode sourceNode, DefaultMutableTreeNode productTNode) {
         DefaultMutableTreeNode groupTNode = null;
-// Uncomment for debugging masks:
-        /*if (sourceNode instanceof Mask) {
-            groupTNode = getTNode(productTNode, MASKS);
-        } else*/
-        if (sourceNode instanceof AbstractBand) {
+        if (sourceNode instanceof Mask) {
+            // Uncomment for debugging masks:
+            // groupTNode = getTNode(productTNode, MASKS);
+        } else if (sourceNode instanceof AbstractBand) {
             groupTNode = getTNode(productTNode, BANDS);
         } else if (sourceNode instanceof TiePointGrid) {
             groupTNode = getTNode(productTNode, TIE_POINT_GRIDS);

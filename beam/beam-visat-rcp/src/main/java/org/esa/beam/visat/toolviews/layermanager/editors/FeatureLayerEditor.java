@@ -4,7 +4,7 @@ import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.swing.TableLayout;
 
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.visat.toolviews.layermanager.LayerEditor;
+import org.esa.beam.framework.ui.layer.LayerEditor;
 import org.esa.beam.visat.toolviews.layermanager.layersrc.shapefile.FeatureLayer;
 
 import javax.swing.JComponent;
@@ -22,7 +22,7 @@ import java.util.Hashtable;
  * @author Ralf Quast
  * @author Marco Zühlke
  * @author Marco Peters
- * @version $Revision: 1.3 $ $Date: 2009-05-12 12:56:42 $
+ * @version $Revision: 1.4 $ $Date: 2009-12-22 17:30:01 $
  * @since BEAM 4.6
  */
 public class FeatureLayerEditor implements LayerEditor {

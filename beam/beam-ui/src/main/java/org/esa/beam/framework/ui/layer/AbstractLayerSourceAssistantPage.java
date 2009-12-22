@@ -1,7 +1,7 @@
-package org.esa.beam.visat.toolviews.layermanager.layersrc;
+package org.esa.beam.framework.ui.layer;
 
 import org.esa.beam.framework.ui.assistant.AbstractAssistantPage;
-import org.esa.beam.visat.toolviews.layermanager.LayerSource;
+import org.esa.beam.framework.ui.layer.LayerSource;
 
 /**
  * <i>Note: This API is not public yet and may significantly change in the future. Use it at your own risk.</i>

@@ -1,5 +1,5 @@
 /*
- * $Id: VisatApp.java,v 1.19 2009-12-21 16:13:40 lveci Exp $
+ * $Id: VisatApp.java,v 1.20 2009-12-22 17:30:01 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -46,10 +46,7 @@ import com.jidesoft.swing.JideBoxLayout;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.dataio.dimap.DimapProductHelpers;
 import org.esa.beam.dataio.dimap.DimapProductReader;
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.dataio.ProductIOPlugIn;
-import org.esa.beam.framework.dataio.ProductIOPlugInManager;
-import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.framework.dataio.*;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.GcpDescriptor;
@@ -154,7 +151,7 @@ import java.util.logging.Level;
  * @author Norman Fomferra
  * @author Marco Peters
  * @author Sabine Embacher
- * @version $Revision: 1.19 $ $Date: 2009-12-21 16:13:40 $
+ * @version $Revision: 1.20 $ $Date: 2009-12-22 17:30:01 $
  */
 public class VisatApp extends BasicApp implements AppContext {
 
@@ -766,6 +763,7 @@ public class VisatApp extends BasicApp implements AppContext {
      */
     public void disposeProduct(final Product product) {
         removeProduct(product);
+        ProductCache.instance().removeProduct(product.getFileLocation());
         product.dispose();
     }
 
@@ -1969,9 +1967,9 @@ public class VisatApp extends BasicApp implements AppContext {
                 "pinTool",
                 "gcpTool",
                 "drawLineTool",
+                "drawPolylineTool",
                 "drawRectangleTool",
                 "drawEllipseTool",
-                "drawPolylineTool",
                 "drawPolygonTool",
 // todo - activate magic stick (nf)
 //                "magicStickTool",

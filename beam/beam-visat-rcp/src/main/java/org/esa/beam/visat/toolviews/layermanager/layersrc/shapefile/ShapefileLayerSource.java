@@ -1,5 +1,5 @@
 /*
- * $Id: ShapefileLayerSource.java,v 1.3 2009-05-27 13:12:23 lveci Exp $
+ * $Id: ShapefileLayerSource.java,v 1.4 2009-12-22 17:30:01 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,9 +16,9 @@
  */
 package org.esa.beam.visat.toolviews.layermanager.layersrc.shapefile;
 
-import org.esa.beam.visat.toolviews.layermanager.LayerSource;
-import org.esa.beam.visat.toolviews.layermanager.layersrc.AbstractLayerSourceAssistantPage;
-import org.esa.beam.visat.toolviews.layermanager.layersrc.LayerSourcePageContext;
+import org.esa.beam.framework.ui.layer.LayerSource;
+import org.esa.beam.framework.ui.layer.LayerSourcePageContext;
+import org.esa.beam.framework.ui.layer.AbstractLayerSourceAssistantPage;
 
 /**
  * A layer source for ESRI shape files.
@@ -26,7 +26,7 @@ import org.esa.beam.visat.toolviews.layermanager.layersrc.LayerSourcePageContext
  * Unstable API. Use at own risk.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.3 $ $Date: 2009-05-27 13:12:23 $
+ * @version $Revision: 1.4 $ $Date: 2009-12-22 17:30:01 $
  * @since BEAM 4.6
  */
 public class ShapefileLayerSource implements LayerSource {

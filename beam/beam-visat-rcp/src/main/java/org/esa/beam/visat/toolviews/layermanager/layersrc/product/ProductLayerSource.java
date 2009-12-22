@@ -1,5 +1,5 @@
 /*
- * $Id: ProductLayerSource.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: ProductLayerSource.java,v 1.2 2009-12-22 17:30:01 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,16 +16,16 @@
  */
 package org.esa.beam.visat.toolviews.layermanager.layersrc.product;
 
-import org.esa.beam.visat.toolviews.layermanager.LayerSource;
-import org.esa.beam.visat.toolviews.layermanager.layersrc.AbstractLayerSourceAssistantPage;
-import org.esa.beam.visat.toolviews.layermanager.layersrc.LayerSourcePageContext;
+import org.esa.beam.framework.ui.layer.LayerSource;
+import org.esa.beam.framework.ui.layer.AbstractLayerSourceAssistantPage;
+import org.esa.beam.framework.ui.layer.LayerSourcePageContext;
 
 /**
  * A layer source that adds band or tie-point-grids
  * from compatible products as new bands.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2009-12-22 17:30:01 $
  * @since BEAM 4.6
  */
 public class ProductLayerSource implements LayerSource {

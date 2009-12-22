@@ -15,7 +15,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
  * This is a preliminary API under construction for BEAM 4.7. Not intended for public use.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.5 $ $Date: 2009-12-21 16:13:40 $
+ * @version $Revision: 1.6 $ $Date: 2009-12-22 17:30:01 $
  * @see Product#getVectorDataGroup()
  * @since BEAM 4.7
  */
@@ -84,7 +84,7 @@ public class VectorDataNode extends ProductNode {
 
     /**
      * Informs clients which have registered a {@link ProductNodeListener}
-     * with this {@link VectorDataNode} that one or more underlying
+     * with the {@link Product} containing this {@link VectorDataNode}, that one or more underlying
      * OpenGIS {@code SimpleFeature}s have changed.
      * <p/>
      * The method fires a product node property change event. The property name is always

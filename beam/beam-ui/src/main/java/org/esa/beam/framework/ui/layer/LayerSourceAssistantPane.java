@@ -1,9 +1,9 @@
-package org.esa.beam.visat.toolviews.layermanager.layersrc;
+package org.esa.beam.framework.ui.layer;
 
 import com.bc.ceres.glayer.LayerContext;
 import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.framework.ui.layer.LayerSource;
 import org.esa.beam.framework.ui.assistant.AssistantPane;
-import org.esa.beam.visat.toolviews.layermanager.LayerSource;
 
 import java.awt.Window;
 import java.util.HashMap;

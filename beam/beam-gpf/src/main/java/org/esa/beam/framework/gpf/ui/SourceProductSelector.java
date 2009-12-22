@@ -37,7 +37,7 @@ import java.util.Iterator;
  * todo - add capability to specify optional sources
  *
  * @author Ralf Quast
- * @version $Revision: 1.4 $ $Date: 2009-12-02 16:52:11 $
+ * @version $Revision: 1.5 $ $Date: 2009-12-22 17:30:01 $
  */
 public class SourceProductSelector {
 
@@ -165,7 +165,7 @@ public class SourceProductSelector {
             productListModel.setSelectedItem(product);
         } else {
             if (productFilter.accept(product)) {
-                if (extraProduct != null) {
+                if (extraProduct != null && !extraProduct.getName().equals(product.getName())) {
                     productListModel.removeElement(extraProduct);
                     extraProduct.dispose();
                 }
