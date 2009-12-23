@@ -69,8 +69,6 @@ public class MosaicOp extends Operator {
 
     private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
 
-    private Resampling resampling = null;
-
     @Override
     public void initialize() throws OperatorException {
         try {
@@ -85,8 +83,6 @@ public class MosaicOp extends Operator {
             for (Band srcBand : srcBands) {
                 srcBandMap.put(srcBand.getProduct(), srcBand);
             }
-
-            resampling = ResamplingFactory.createResampling(resamplingMethod);
 
             computeImageGeoBoundary(sourceProduct, scnProp);
 
@@ -428,6 +424,8 @@ public class MosaicOp extends Operator {
                 }
             }
 
+            final Resampling resampling = ResamplingFactory.createResampling(resamplingMethod);
+
             final ArrayList<SourceData> validSourceData = new ArrayList<SourceData>(validProducts.size());
             int index = 0;
             for (Product srcProduct : validProducts) {
@@ -454,7 +452,7 @@ public class MosaicOp extends Operator {
             }
 
             if(!validSourceData.isEmpty()) {
-                collocateSourceBand(validSourceData, targetTile, pm);
+                collocateSourceBand(validSourceData, resampling, targetTile, pm);
             }
         } catch (Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
@@ -463,8 +461,8 @@ public class MosaicOp extends Operator {
         }
     }
 
-    private void collocateSourceBand(ArrayList<SourceData> validSourceData,
-                                     Tile targetTile, ProgressMonitor pm) throws OperatorException {
+    private void collocateSourceBand(final ArrayList<SourceData> validSourceData, final Resampling resampling,
+                                     final Tile targetTile, final ProgressMonitor pm) throws OperatorException {
         try {
             final Rectangle targetRectangle = targetTile.getRectangle();
             final ProductData trgBuffer = targetTile.getDataBuffer();
@@ -592,8 +590,9 @@ public class MosaicOp extends Operator {
         final double srcMax;
         final double srcMin;
 
-        public SourceData(Band sourceBand, Rectangle sourceRectangle, PixelPos[] pixPos, Resampling resampling,
-                          double min, double max, double mean) {
+        public SourceData(final Band sourceBand, final Rectangle sourceRectangle,
+                          final PixelPos[] pixPos, final Resampling resampling,
+                          final double min, final double max, final double mean) {
             srcBand = sourceBand;
             srcTile = getSourceTile(sourceBand, sourceRectangle, ProgressMonitor.NULL);
             resamplingRaster = new ResamplingRaster(srcTile);

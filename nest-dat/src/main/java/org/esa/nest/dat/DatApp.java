@@ -329,6 +329,7 @@ public final class DatApp extends VisatApp {
                 //"drawPolylineTool",
                 "drawPolygonTool",
                 //"magicStickTool",
+                "createVectorDataNode",
                 null,
         });
 

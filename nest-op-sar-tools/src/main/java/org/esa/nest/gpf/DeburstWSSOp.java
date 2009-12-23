@@ -10,6 +10,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.Unit;
@@ -54,6 +55,7 @@ public class DeburstWSSOp extends Operator {
     private final static String SS5 = "SS5";
 
     private int subSwathBandNum;
+    private int subSwathNum;
     private int targetWidth;
     private int targetHeight;
 
@@ -85,6 +87,9 @@ public class DeburstWSSOp extends Operator {
                 throw new OperatorException("Source product is not an ASA_WSS_1P");
             }
 
+            subSwathBandNum = getRealBandNumFromSubSwath(subSwath);
+            subSwathNum = getSubSwathNumber(subSwath);
+
             getSourceMetadata();
 
             targetProduct = new Product(sourceProduct.getName() + "_" + subSwath,
@@ -94,7 +99,6 @@ public class DeburstWSSOp extends Operator {
 
             targetProduct.setPreferredTileSize(targetWidth, 20);
 
-            subSwathBandNum = getRealBandNumFromSubSwath(subSwath);
             final Band[] sourceBands = sourceProduct.getBands();
 
             if (produceIntensitiesOnly) {
@@ -112,11 +116,12 @@ public class DeburstWSSOp extends Operator {
             }
 
             copyMetaData(sourceProduct.getMetadataRoot(), targetProduct.getMetadataRoot());
-            ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
             ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-            ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
             targetProduct.setStartTime(sourceProduct.getStartTime());
             targetProduct.setEndTime(sourceProduct.getEndTime());
+            targetProduct.setDescription(sourceProduct.getDescription());
+
+            createTiePointGrids();
 
             // update the metadata with the affect of the processing
             updateTargetProductMetadata();
@@ -132,7 +137,7 @@ public class DeburstWSSOp extends Operator {
     private void getSourceMetadata() throws Exception {
         final MetadataElement srcMetadataRoot = sourceProduct.getMetadataRoot();
         final MetadataElement mppRootElem = srcMetadataRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
-        final MetadataElement mpp = mppRootElem.getElementAt(subSwathBandNum);
+        final MetadataElement mpp = mppRootElem.getElementAt(subSwathNum);
 
         targetHeight = mpp.getAttributeInt("num_output_lines") / 3;
         targetWidth = mpp.getAttributeInt("num_samples_per_line");
@@ -151,14 +156,115 @@ public class DeburstWSSOp extends Operator {
 
         final MetadataElement srcMetadataRoot = sourceProduct.getMetadataRoot();
         final MetadataElement mppRootElem = srcMetadataRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
-        final MetadataElement mpp = mppRootElem.getElementAt(subSwathBandNum);
+        final MetadataElement mpp = mppRootElem.getElementAt(subSwathNum);
 
-        absTgt.setAttributeUTC(AbstractMetadata.first_line_time,
-                mpp.getAttributeUTC("first_zero_doppler_time", new ProductData.UTC(0)));
-        absTgt.setAttributeUTC(AbstractMetadata.last_line_time,
-                mpp.getAttributeUTC("last_zero_doppler_time", new ProductData.UTC(0)));
+        final ProductData.UTC startTime = mpp.getAttributeUTC("first_zero_doppler_time", new ProductData.UTC(0));
+        final ProductData.UTC endTime = mpp.getAttributeUTC("last_zero_doppler_time", new ProductData.UTC(0));
+        absTgt.setAttributeUTC(AbstractMetadata.first_line_time, startTime);
+        absTgt.setAttributeUTC(AbstractMetadata.last_line_time, endTime);
         absTgt.setAttributeDouble(AbstractMetadata.line_time_interval, mpp.getAttributeDouble(AbstractMetadata.line_time_interval));
 
+        final MetadataElement tgtMetadataRoot = targetProduct.getMetadataRoot();
+        final MetadataElement tgtMppRootElem = tgtMetadataRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
+        tgtMetadataRoot.removeElement(tgtMppRootElem);
+        tgtMetadataRoot.addElement(mpp);
+
+        targetProduct.setStartTime(startTime);
+        targetProduct.setEndTime(endTime);
+    }
+
+    private void createTiePointGrids() {
+        final MetadataElement srcMetadataRoot = sourceProduct.getMetadataRoot();
+        final MetadataElement geolocRootElem = srcMetadataRoot.getElement("GEOLOCATION_GRID_ADS");
+        final MetadataElement[] geolocElems = geolocRootElem.getElements();
+
+        int subSamplingX = 1, subSamplingY = 1;
+        final ArrayList<Float> lats = new ArrayList<Float>(121);
+        final ArrayList<Float> lons = new ArrayList<Float>(121);
+        final ArrayList<Float> slant = new ArrayList<Float>(121);
+        final ArrayList<Float> incidence = new ArrayList<Float>(121);
+
+        for(MetadataElement geolocElem : geolocElems) {
+            final String swathStr = geolocElem.getAttributeString("swath_number");
+            if(swathStr.equalsIgnoreCase(subSwath)) {
+                subSamplingX = geolocElem.getAttribute("ASAR_Geo_Grid_ADSR.sd/first_line_tie_points.samp_numbers")
+                        .getData().getElemIntAt(1) - 1;
+                subSamplingY = geolocElem.getAttributeInt("num_lines");
+
+                addTiePoints(geolocElem, "ASAR_Geo_Grid_ADSR.sd/first_line_tie_points.lats", lats);
+                addTiePoints(geolocElem, "ASAR_Geo_Grid_ADSR.sd/first_line_tie_points.longs", lons);
+                addTiePoints(geolocElem, "ASAR_Geo_Grid_ADSR.sd/first_line_tie_points.slant_range_times", slant);
+                addTiePoints(geolocElem, "ASAR_Geo_Grid_ADSR.sd/first_line_tie_points.angles", incidence);
+            }
+        }
+
+        final float million = 1000000.0f;
+        final int length = lats.size();
+        final float[] latList = new float[length];
+        final float[] lonList = new float[length];
+        final float[] slantList = new float[length];
+        final float[] incList = new float[length];
+        for(int i=0; i < length; ++i) {
+            latList[i] = lats.get(i) / million;
+            lonList[i] = lons.get(i) / million;
+            slantList[i] = slant.get(i);
+            incList[i] = incidence.get(i);
+        }
+
+        final int gridWidth = 11;
+        final int gridHeight = length / 11;
+        final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE,
+                gridWidth, gridHeight, 0, 0,
+                subSamplingX, subSamplingY, latList);
+        latGrid.setUnit(Unit.DEGREES);
+        final TiePointGrid lonGrid = new TiePointGrid(OperatorUtils.TPG_LONGITUDE,
+                gridWidth, gridHeight, 0, 0,
+                subSamplingX, subSamplingY, lonList, TiePointGrid.DISCONT_AT_180);
+        lonGrid.setUnit(Unit.DEGREES);
+        final TiePointGrid slantGrid = new TiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME,
+                gridWidth, gridHeight, 0, 0,
+                subSamplingX, subSamplingY, slantList);
+        slantGrid.setUnit(Unit.NANOSECONDS);
+        final TiePointGrid incGrid = new TiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE,
+                gridWidth, gridHeight, 0, 0,
+                subSamplingX, subSamplingY, incList);
+        incGrid.setUnit(Unit.DEGREES);
+
+        targetProduct.addTiePointGrid(latGrid);
+        targetProduct.addTiePointGrid(lonGrid);
+        targetProduct.addTiePointGrid(slantGrid);
+        targetProduct.addTiePointGrid(incGrid);
+
+        targetProduct.setGeoCoding(new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84));
+    }
+
+    private static void addTiePoints(final MetadataElement elem, final String tag, final ArrayList<Float> array) {
+        final MetadataAttribute attrib = elem.getAttribute(tag);
+        if(attrib != null) {
+            if(attrib.getDataType() == ProductData.TYPE_FLOAT32) {
+                final float[] fList = (float[])attrib.getData().getElems();
+                for(float f : fList) {
+                    array.add((float)f);
+                }
+            } else {
+                final int[] iList = (int[])attrib.getData().getElems();
+                for(int i : iList) {
+                    array.add((float)i);
+                }
+            }
+        }
+    }
+
+    private static int getSubSwathNumber(final String subSwath) {
+        if(subSwath.equals(SS1))
+            return 0;
+        else if(subSwath.equals(SS2))
+            return 1;
+        else if(subSwath.equals(SS3))
+            return 2;
+        else if(subSwath.equals(SS4))
+            return 3;
+        return 4;
     }
 
     private static int getRealBandNumFromSubSwath(final String subSwath) {

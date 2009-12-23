@@ -142,6 +142,7 @@ public class OperatorUtils {
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
+        targetProduct.setDescription(sourceProduct.getDescription());
     }
 
     public static void copyVirtualBand(final Product product, final VirtualBand srcBand, final String name) {
