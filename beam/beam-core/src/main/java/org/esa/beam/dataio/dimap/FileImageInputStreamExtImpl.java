@@ -311,10 +311,10 @@ public final class FileImageInputStreamExtImpl extends ImageInputStreamImpl
      */
     @Override
     public void seek(long pos) throws IOException {
-        checkClosed();
-        if (pos < flushedPos) {
-            throw new IllegalArgumentException("pos < flushedPos!");
-        }
+        //checkClosed();
+        //if (pos < flushedPos) {
+        //    throw new IllegalArgumentException("pos < flushedPos!");
+        //}
         bitOffset = 0;
         streamPos = eraf.seek(pos);
     }

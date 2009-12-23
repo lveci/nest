@@ -1,5 +1,5 @@
 /*
- * $Id: Field.java,v 1.1 2009-04-28 14:37:13 lveci Exp $
+ * $Id: Field.java,v 1.2 2009-12-23 19:55:02 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,12 +31,12 @@ import java.io.IOException;
  * <code>readFrom</code> operation of all of its fields.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:13 $
+ * @version $Revision: 1.2 $ $Date: 2009-12-23 19:55:02 $
  * @see org.esa.beam.dataio.envisat.Record
  * @see org.esa.beam.dataio.envisat.FieldInfo
  * @see org.esa.beam.framework.datamodel.ProductData
  */
-public class Field {
+public final class Field {
 
     /**
      * The info for this field.
@@ -199,7 +199,7 @@ public class Field {
      * @throws java.io.IOException if an I/O error occurs
      */
     public void readFrom(ImageInputStream dataInputStream) throws IOException {
-        getData().readFrom(dataInputStream);
+        _data.readFrom(dataInputStream);
     }
 
     /**

@@ -35,9 +35,9 @@ public class DeburstWSSOp extends Operator {
     @Parameter(valueSet = { SS1, SS2, SS3, SS4, SS5 }, defaultValue = SS1, label="Sub Swath:")
     private String subSwath = SS1;
 
-    @Parameter(defaultValue = "true", label="Produce Intensities Only")
-    private boolean produceIntensitiesOnly = true;
-    @Parameter(defaultValue = "true", label="Mean Average Intensities")
+    @Parameter(defaultValue = "false", label="Produce Intensities Only")
+    private boolean produceIntensitiesOnly = false;
+    @Parameter(defaultValue = "false", label="Mean Average Intensities")
     private boolean average = false;
 
     private final Vector<Integer> startLine = new Vector<Integer>(5);
@@ -54,7 +54,6 @@ public class DeburstWSSOp extends Operator {
     private final static String SS4 = "SS4";
     private final static String SS5 = "SS5";
 
-    private int subSwathBandNum;
     private int subSwathNum;
     private int targetWidth;
     private int targetHeight;
@@ -87,7 +86,7 @@ public class DeburstWSSOp extends Operator {
                 throw new OperatorException("Source product is not an ASA_WSS_1P");
             }
 
-            subSwathBandNum = getRealBandNumFromSubSwath(subSwath);
+            final int subSwathBandNum = getRealBandNumFromSubSwath(subSwath);
             subSwathNum = getSubSwathNumber(subSwath);
 
             getSourceMetadata();
@@ -97,7 +96,7 @@ public class DeburstWSSOp extends Operator {
                     targetWidth,
                     targetHeight);
 
-            targetProduct.setPreferredTileSize(targetWidth, 20);
+            targetProduct.setPreferredTileSize(targetWidth, 10);
 
             final Band[] sourceBands = sourceProduct.getBands();
 
@@ -111,8 +110,8 @@ public class DeburstWSSOp extends Operator {
                 final Band trgQ = targetProduct.addBand("q_" +subSwath, sourceBands[subSwathBandNum+1].getDataType());
                 trgQ.setUnit(Unit.IMAGINARY);
                 bandMap.put(trgI, new ComplexBand(sourceBands[subSwathBandNum], sourceBands[subSwathBandNum+1]));
-                ReaderUtils.createVirtualIntensityBand(targetProduct, trgI, trgQ, subSwath);
-                ReaderUtils.createVirtualPhaseBand(targetProduct, trgI, trgQ, subSwath);
+                ReaderUtils.createVirtualIntensityBand(targetProduct, trgI, trgQ, '_'+subSwath);
+                ReaderUtils.createVirtualPhaseBand(targetProduct, trgI, trgQ, '_'+subSwath);
             }
 
             copyMetaData(sourceProduct.getMetadataRoot(), targetProduct.getMetadataRoot());
@@ -142,7 +141,6 @@ public class DeburstWSSOp extends Operator {
         targetHeight = mpp.getAttributeInt("num_output_lines") / 3;
         targetWidth = mpp.getAttributeInt("num_samples_per_line");
 
-
     }
 
     /**
@@ -153,24 +151,83 @@ public class DeburstWSSOp extends Operator {
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetHeight);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetWidth);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.SWATH, subSwath);
+        if(produceIntensitiesOnly)
+            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.SAMPLE_TYPE, "DETECTED");
 
         final MetadataElement srcMetadataRoot = sourceProduct.getMetadataRoot();
-        final MetadataElement mppRootElem = srcMetadataRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
-        final MetadataElement mpp = mppRootElem.getElementAt(subSwathNum);
+        final MetadataElement srcMPPRootElem = srcMetadataRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
+        final MetadataElement srcMPP = srcMPPRootElem.getElementAt(subSwathNum);
 
-        final ProductData.UTC startTime = mpp.getAttributeUTC("first_zero_doppler_time", new ProductData.UTC(0));
-        final ProductData.UTC endTime = mpp.getAttributeUTC("last_zero_doppler_time", new ProductData.UTC(0));
+        final ProductData.UTC startTime = srcMPP.getAttributeUTC("first_zero_doppler_time", new ProductData.UTC(0));
+        final ProductData.UTC endTime = srcMPP.getAttributeUTC("last_zero_doppler_time", new ProductData.UTC(0));
         absTgt.setAttributeUTC(AbstractMetadata.first_line_time, startTime);
         absTgt.setAttributeUTC(AbstractMetadata.last_line_time, endTime);
-        absTgt.setAttributeDouble(AbstractMetadata.line_time_interval, mpp.getAttributeDouble(AbstractMetadata.line_time_interval));
+        absTgt.setAttributeDouble(AbstractMetadata.line_time_interval, srcMPP.getAttributeDouble(AbstractMetadata.line_time_interval));
 
         final MetadataElement tgtMetadataRoot = targetProduct.getMetadataRoot();
         final MetadataElement tgtMppRootElem = tgtMetadataRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
         tgtMetadataRoot.removeElement(tgtMppRootElem);
-        tgtMetadataRoot.addElement(mpp);
+        final MetadataElement tgtmds1RootElem = tgtMetadataRoot.getElement("MDS1_SQ_ADS");
+        tgtMetadataRoot.removeElement(tgtmds1RootElem);
+
+        final MetadataElement srcMDS1RootElem = srcMetadataRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
+        final MetadataElement srcMDS1 = srcMDS1RootElem.getElementAt(subSwathNum);
+
+        final MetadataElement tgtMPP = srcMDS1.createDeepClone();
+        tgtMPP.setName("MAIN_PROCESSING_PARAMS_ADS");
+        tgtMetadataRoot.addElement(tgtMPP);
+
+        final MetadataElement tgtMDS1 = srcMPP.createDeepClone();
+        tgtMDS1.setName("MDS1_SQ_ADS");
+        tgtMetadataRoot.addElement(tgtMDS1);
 
         targetProduct.setStartTime(startTime);
         targetProduct.setEndTime(endTime);
+
+        updateOrbitStateVectors(absTgt, subSwathNum);
+    }
+
+    private static void updateOrbitStateVectors(final MetadataElement absTgt, final int subSwathNum) {
+
+        final MetadataElement orbVectorsElem = absTgt.getElement(AbstractMetadata.orbit_state_vectors);
+        if(subSwathNum == 0) {
+            final int[] nums = { 1, 2, 3, 4, 5 };
+            removeAndRenameOrbitStateVectors(orbVectorsElem, nums);
+        } else if(subSwathNum == 1) {
+            final int[] nums = { 6, 7, 8, 9, 10 };
+            removeAndRenameOrbitStateVectors(orbVectorsElem, nums);
+        } else if(subSwathNum == 2) {
+            final int[] nums = { 11, 12, 13, 14, 15 };
+            removeAndRenameOrbitStateVectors(orbVectorsElem, nums);
+        } else if(subSwathNum == 3) {
+            final int[] nums = { 16, 17, 18, 19, 20 };
+            removeAndRenameOrbitStateVectors(orbVectorsElem, nums);
+        } else if(subSwathNum == 4) {
+            final int[] nums = { 21, 22, 23, 24, 25 };
+            removeAndRenameOrbitStateVectors(orbVectorsElem, nums);
+        }
+    }
+
+    private static void removeAndRenameOrbitStateVectors(final MetadataElement orbVectorsElem, final int[] nums) {
+        int i = 1;
+        for(int n=1; n <= 25; ++n) {
+            final MetadataElement orbElem = orbVectorsElem.getElement(AbstractMetadata.orbit_vector+n);
+            if(!contains(nums, n)) {
+                orbVectorsElem.removeElement(orbElem);
+            } else {
+                orbElem.setName(AbstractMetadata.orbit_vector+i);
+                ++i;
+            }
+        }
+    }
+
+    private static boolean contains(final int[] nums, final int n) {
+        for(int i : nums) {
+            if(i == n)
+                return true;
+        }
+        return false;
     }
 
     private void createTiePointGrids() {
@@ -298,8 +355,8 @@ public class DeburstWSSOp extends Operator {
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          if an error occurs during computation of the target rasters.
      */
-   // @Override
-   // public synchronized void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
+    @Override
+    public synchronized void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
     /**
      * Called by the framework in order to compute a tile for the given target band.
@@ -311,10 +368,10 @@ public class DeburstWSSOp extends Operator {
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs during computation of the target raster.
      */
-    @Override
-    public synchronized void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+    //@Override
+    //public synchronized void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         Tile targetTileI = null, targetTileQ = null, targetTileIntensity = null;
-        final Rectangle targetRectangle = targetTile.getRectangle();
+        //final Rectangle targetRectangle = targetTile.getRectangle();
         //System.out.println("targetRect " + targetRectangle.x + " " + targetRectangle.y + " w "
         //        + targetRectangle.width + " h " + targetRectangle.height);
 
@@ -322,13 +379,13 @@ public class DeburstWSSOp extends Operator {
             ComplexBand cBand;
             if (produceIntensitiesOnly) {
                 final Band tgtBand = targetProduct.getBandAt(0);
-                targetTileIntensity = targetTile;//targetTiles.get(tgtBand);
+                targetTileIntensity = targetTiles.get(tgtBand);
                 cBand = bandMap.get(tgtBand);
             } else {
                 final Band tgtBandI = targetProduct.getBandAt(0);
                 final Band tgtBandQ = targetProduct.getBandAt(1);
-                targetTileI = targetTile;//targetTiles.get(tgtBandI);
-                //targetTileQ = targetTiles.get(tgtBandQ);
+                targetTileI = targetTiles.get(tgtBandI);
+                targetTileQ = targetTiles.get(tgtBandQ);
                 cBand = bandMap.get(tgtBandI);
             }
 
@@ -341,7 +398,6 @@ public class DeburstWSSOp extends Operator {
 
             //final double threshold = 0.000000139;
             final double threshold = 0.000000135;
-            //final double threshold = 0.000000035;
 
             //int startLineForBand = 0;
             int i = 0;
@@ -465,15 +521,9 @@ public class DeburstWSSOp extends Operator {
                         if(!isInvalid(Ival, Qval, zeroThresholdSmall)) {
                             sumLine[i] += intensity;
                             avgTotals[i] += 1;
-                        }// if(i > 0) {
-                         //   addToAverage(i, srcDataI[i-1], srcDataQ[i-1], sumLine, avgTotals);
-                        //} if(i < srcDataI.length-1) {
-                        //    addToAverage(i, srcDataI[i+1], srcDataQ[i+1], sumLine, avgTotals);
-                        //}
+                        }
                     }
                 }
-
-                //System.out.println("y="+targetLine+" i="+i+" avgTotals="+avgTotals[i]);
 
                 if(average && avgTotals[i] > 1)
                     sumLine[i] /= avgTotals[i];
@@ -497,17 +547,18 @@ public class DeburstWSSOp extends Operator {
                     }
                 }
             } else {
-                final ProductData rawDataI = targetTileI.getRawSamples();
-                final ProductData rawDataQ = targetTileQ.getRawSamples();
-                final int stride = targetLine * targetTileI.getWidth();
+                final ProductData dataI = targetTileI.getDataBuffer();
+                final ProductData dataQ = targetTileQ.getDataBuffer();
 
                 for (int x = startX, i = 0; x < endX; ++x, ++i) {
-                    if(peakLineI[i] == -Float.MAX_VALUE) {
+                    if(peakLine[i] == -Float.MAX_VALUE) {
                         peakLineI[i] = 0;
                         peakLineQ[i] = 0;
+                        System.out.println("uninitPeak " + i + " at " + targetLine);
                     }
-                    rawDataI.setElemDoubleAt(stride + x, peakLineI[i]);
-                    rawDataQ.setElemDoubleAt(stride + x, peakLineQ[i]);
+                    final int index = targetTileI.getDataBufferIndex(x, targetLine);
+                    dataI.setElemDoubleAt(index, peakLineI[i]);
+                    dataQ.setElemDoubleAt(index, peakLineQ[i]);
                 }
             }
             return true;
@@ -535,7 +586,7 @@ public class DeburstWSSOp extends Operator {
             sourceRasterQ = getSourceTile(srcBandQ, sourceRectangle, pm);
             final short[] srcDataQ = (short[]) sourceRasterQ.getRawSamples().getElems();
 
-       /*     int invalidCount = 0;
+          /*  int invalidCount = 0;
             int total = 0;
             final int max = Math.min(srcBandWidth, srcDataI.length);
             for(int i=500; i < max; i+= 50) {
@@ -544,9 +595,9 @@ public class DeburstWSSOp extends Operator {
                 ++total;
             }
             if(invalidCount / (float)total > 0.4)  {
-                //System.out.println("skipping " + y);
+                System.out.println("skipping " + y);
                 continue;
-            }           */
+            }   */
 
             srcDataListI.add(srcDataI);
             srcDataListQ.add(srcDataQ);
