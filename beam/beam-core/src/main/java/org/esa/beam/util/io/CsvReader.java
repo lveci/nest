@@ -1,5 +1,5 @@
 /*
- * $Id: CsvReader.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: CsvReader.java,v 1.2 2009-12-23 16:42:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -108,7 +108,7 @@ public class CsvReader extends LineNumberReader {
      */
     public String[] readRecord() throws IOException {
 
-        String line = null;
+        String line;
 
         while (true) {
             line = readLine();

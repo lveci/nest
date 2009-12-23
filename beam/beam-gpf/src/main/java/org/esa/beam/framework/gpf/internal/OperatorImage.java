@@ -120,7 +120,7 @@ public class OperatorImage extends SourcelessOpImage {
 
     @Override
     public synchronized void dispose() {
-        band = null;
+        //band = null;
         progressMonitor = null;
         super.dispose();
     }

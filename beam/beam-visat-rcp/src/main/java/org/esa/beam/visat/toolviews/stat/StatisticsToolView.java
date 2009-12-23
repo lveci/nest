@@ -1,12 +1,15 @@
 package org.esa.beam.visat.toolviews.stat;
 
-import org.esa.beam.framework.ui.application.support.AbstractToolView;
-import org.esa.beam.framework.ui.product.ProductTree;
-import org.esa.beam.framework.ui.product.ProductTreeListener;
-import org.esa.beam.framework.ui.product.ProductSceneView;
-import org.esa.beam.framework.ui.product.ProductTreeListenerAdapter;
+import com.bc.ceres.glayer.Layer;
+import com.bc.ceres.glayer.support.AbstractLayerListener;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductNode;
+import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.help.HelpSys;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.ui.application.support.AbstractToolView;
+import org.esa.beam.framework.ui.product.ProductSceneView;
+import org.esa.beam.framework.ui.product.ProductTree;
+import org.esa.beam.framework.ui.product.ProductTreeListenerAdapter;
 import org.esa.beam.util.Debug;
 import org.esa.beam.visat.VisatApp;
 
@@ -16,11 +19,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.geom.Rectangle2D;
-
-import com.bc.ceres.glayer.support.AbstractLayerListener;
-import com.bc.ceres.glayer.Layer;
 
 /**
  * The window containing all statistics.
@@ -49,11 +50,6 @@ public class StatisticsToolView extends AbstractToolView {
             "coordinateListDialog"
     };
 
-    public static final Color DIAGRAM_BG_COLOR = new Color(200, 200, 255);
-    public static final Color DIAGRAM_FG_COLOR = new Color(0, 0, 100);
-    public static final Color DIAGRAM_TEXT_COLOR = Color.black;
-    public static final int DIAGRAM_MIN_INSETS = 5;
-
     private int currTabIndex;
 
     private JTabbedPane tabbedPane;
@@ -71,7 +67,7 @@ public class StatisticsToolView extends AbstractToolView {
     }
 
     public void show(final int tabIndex) {
-        VisatApp.getApp().getPage().showToolView(StatisticsToolView.ID);
+        VisatApp.getApp().getApplicationPage().showToolView(StatisticsToolView.ID);
         if (!isValidTabIndex(tabIndex)) {
             throw new IllegalArgumentException("illegal tab-index");
         }
@@ -204,7 +200,7 @@ public class StatisticsToolView extends AbstractToolView {
 
     private void selectionChanged(Product product, RasterDataNode node) {
         this.product = product;
-        final PagePanel[] panels = StatisticsToolView.this.pagePanels;
+        final PagePanel[] panels = pagePanels;
         for (PagePanel panel : panels) {
             panel.selectionChanged(product, node);
         }
@@ -213,25 +209,15 @@ public class StatisticsToolView extends AbstractToolView {
 
     private class PagePanelPTL extends ProductTreeListenerAdapter {
         @Override
-        public void productAdded(Product product) {
-        }
-
-        @Override
-        public void productRemoved(Product product) {
-            selectionChanged(null, null);
-        }
-
-        @Override
         public void productNodeSelected(ProductNode productNode, int clickCount) {
-            selectionChanged(productNode.getProduct(),
-                             productNode instanceof  RasterDataNode ? (RasterDataNode) productNode : null);
+            if(VisatApp.getApp().getSelectedProductSceneView() == null) {
+                selectionChanged(productNode.getProduct(),
+                                 productNode instanceof  RasterDataNode ? (RasterDataNode) productNode : null);
+            }
         }
     }
 
     private class PagePanelIFL extends InternalFrameAdapter {
-
-        public PagePanelIFL() {
-        }
 
         @Override
         public void internalFrameActivated(InternalFrameEvent e) {

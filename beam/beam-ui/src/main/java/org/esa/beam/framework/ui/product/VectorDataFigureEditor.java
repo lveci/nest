@@ -6,17 +6,17 @@ import com.bc.ceres.swing.figure.support.DefaultFigureStyle;
 import org.esa.beam.framework.datamodel.VectorDataNode;
 import org.esa.beam.util.Debug;
 import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.Feature;
 
 import java.util.Arrays;
 import java.util.List;
 
 
-public class ProductSceneViewFigureEditor extends DefaultFigureEditor {
-    private ProductSceneView productSceneView;
+public class VectorDataFigureEditor extends DefaultFigureEditor {
+
+    private final ProductSceneView productSceneView;
     private VectorDataNode currentVectorDataNode;
 
-    public ProductSceneViewFigureEditor(ProductSceneView productSceneView) {
+    public VectorDataFigureEditor(ProductSceneView productSceneView) {
         super(productSceneView.getLayerCanvas(),
               productSceneView.getLayerCanvas().getViewport(),
               productSceneView.getUndoContext(),
@@ -30,7 +30,7 @@ public class ProductSceneViewFigureEditor extends DefaultFigureEditor {
     }
 
     public void vectorDataLayerSelected(VectorDataLayer vectorDataLayer) {
-        Debug.trace("ProductSceneViewFigureEditor.vectorDataLayerSelected: " + vectorDataLayer.getName());
+        Debug.trace("VectorDataFigureEditor.vectorDataLayerSelected: " + vectorDataLayer.getName());
 
         this.currentVectorDataNode = vectorDataLayer.getVectorDataNode();
 
@@ -45,7 +45,7 @@ public class ProductSceneViewFigureEditor extends DefaultFigureEditor {
 
     @Override
     public void insertFigures(boolean performInsert, Figure... figures) {
-        Debug.trace("ProductSceneViewFigureEditor.insertFigures " + performInsert + ", " + figures.length);
+        Debug.trace("VectorDataFigureEditor.insertFigures " + performInsert + ", " + figures.length);
         super.insertFigures(performInsert, figures);
         if (currentVectorDataNode != null) {
             currentVectorDataNode.getFeatureCollection().addAll(toSimpleFeatureList(figures));
@@ -56,7 +56,7 @@ public class ProductSceneViewFigureEditor extends DefaultFigureEditor {
 
     @Override
     public void deleteFigures(boolean performDelete, Figure... figures) {
-        Debug.trace("ProductSceneViewFigureEditor.deleteFigures " + performDelete + ", " + figures.length);
+        Debug.trace("VectorDataFigureEditor.deleteFigures " + performDelete + ", " + figures.length);
         super.deleteFigures(performDelete, figures);
         if (currentVectorDataNode != null) {
             currentVectorDataNode.getFeatureCollection().removeAll(toSimpleFeatureList(figures));
@@ -67,13 +67,12 @@ public class ProductSceneViewFigureEditor extends DefaultFigureEditor {
 
     @Override
     public void changeFigure(Figure figure, Object figureMemento, String presentationName) {
-        Debug.trace("ProductSceneViewFigureEditor.changeFigure " + figure + ", " + presentationName);
+        Debug.trace("VectorDataFigureEditor.changeFigure " + figure + ", " + presentationName);
         super.changeFigure(figure, figureMemento, presentationName);
         if (currentVectorDataNode != null) {
             if (figure instanceof SimpleFeatureFigure) {
                 SimpleFeatureFigure featureFigure = (SimpleFeatureFigure) figure;
-                SimpleFeature[] features = {featureFigure.getSimpleFeature()};
-                currentVectorDataNode.fireFeatureCollectionChanged(features, features);
+                currentVectorDataNode.fireFeaturesChanged(featureFigure.getSimpleFeature());
             }
         } else {
             // warn

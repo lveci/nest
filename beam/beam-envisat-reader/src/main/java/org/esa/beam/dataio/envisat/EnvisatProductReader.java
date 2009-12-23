@@ -1,5 +1,5 @@
 /*
- * $Id: EnvisatProductReader.java,v 1.8 2009-12-08 16:08:33 lveci Exp $
+ * $Id: EnvisatProductReader.java,v 1.9 2009-12-23 16:42:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -44,7 +44,7 @@ import java.util.Vector;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.8 $ $Date: 2009-12-08 16:08:33 $
+ * @version $Revision: 1.9 $ $Date: 2009-12-23 16:42:11 $
  * @see org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn
  */
 public class EnvisatProductReader extends AbstractProductReader {
@@ -201,6 +201,7 @@ public class EnvisatProductReader extends AbstractProductReader {
         Debug.assertTrue(getSceneRasterHeight() > 0);
 
         File file = getProductFile().getFile();
+        System.out.println("Reading Envisat "+ file.getName());
         String productName;
         if (file != null) {
             final String mission = AsarAbstractMetadata.getMission(getProductFile().getProductType(), file);

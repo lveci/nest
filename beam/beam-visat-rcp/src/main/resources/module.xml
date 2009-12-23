@@ -1323,7 +1323,7 @@
 
         <action>
             <id>createVectorDataNode</id>
-            <class>org.esa.beam.visat.actions.NewVectorDataNodeAction</class>
+            <class>org.esa.beam.visat.actions.CreateVectorDataNodeAction</class>
             <text>Create Geometry Container...</text>
             <shortDescr>Create a new geometry container</shortDescr>
             <description>Create a new geometry container for drawing line strings and polygons.</description>
@@ -1441,6 +1441,7 @@
             <id>selectTool</id>
             <class>org.esa.beam.visat.actions.ToolAction</class>
             <interactor>com.bc.ceres.swing.figure.interactions.SelectionInteractor</interactor>
+            <interactorListener>org.esa.beam.visat.actions.SelectionInteractorInterceptor</interactorListener>
             <parent>tools</parent>
             <text>Select</text>
             <shortDescr>Selection Tool</shortDescr>

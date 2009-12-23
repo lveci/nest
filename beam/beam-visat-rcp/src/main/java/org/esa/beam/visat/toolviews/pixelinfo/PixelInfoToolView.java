@@ -234,8 +234,7 @@ public class PixelInfoToolView extends AbstractToolView {
 
     private void setToSelectedPin(ProductSceneView sceneView) {
         if (sceneView != null) {
-            final Product product = sceneView.getProduct();
-            final Pin pin = product.getPinGroup().getSelectedNode();
+            final Pin pin = sceneView.getSelectedPin();
             if (pin == null) {
                 pixelInfoView.updatePixelValues(sceneView, -1, -1, 0, false);
             } else {
@@ -352,8 +351,7 @@ public class PixelInfoToolView extends AbstractToolView {
         @Override
         public void nodeChanged(ProductNodeEvent event) {
             if (isActive()) {
-                if (Pin.PROPERTY_NAME_SELECTED.equals(event.getPropertyName()) ||
-                    Pin.PROPERTY_NAME_PIXELPOS.equals(event.getPropertyName())) {
+                if (Pin.PROPERTY_NAME_PIXELPOS.equals(event.getPropertyName())) {
                     updatePin(event);
                 }
             }
@@ -381,8 +379,9 @@ public class PixelInfoToolView extends AbstractToolView {
         }
 
         private void updatePin(ProductNodeEvent event) {
-            final ProductNode sourceNode = event.getSourceNode();
-            if (sourceNode instanceof Pin && sourceNode.isSelected()) {
+            ProductNode sourceNode = event.getSourceNode();
+            Pin pin = currentView.getSelectedPin();
+            if (sourceNode == pin) {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {

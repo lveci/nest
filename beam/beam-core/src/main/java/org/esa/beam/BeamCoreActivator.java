@@ -1,5 +1,5 @@
 /*
- * $Id: BeamCoreActivator.java,v 1.2 2009-06-04 20:29:34 lveci Exp $
+ * $Id: BeamCoreActivator.java,v 1.3 2009-12-23 16:42:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -41,7 +41,7 @@ import java.util.logging.Level;
  * It is invoked by the {@link ModuleRuntime ceres runtime} to activate the {@code beam-core} module.</i>
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2009-06-04 20:29:34 $
+ * @version $Revision: 1.3 $ $Date: 2009-12-23 16:42:11 $
  */
 public class BeamCoreActivator implements Activator {
 
@@ -51,18 +51,20 @@ public class BeamCoreActivator implements Activator {
         return moduleContext != null;
     }
 
-    public static <T> void loadServices(ServiceRegistry<T> registry)  {
+    public static <T> void loadServices(ServiceRegistry<T> registry) {
         Iterable<T> iterable = SystemUtils.loadServices(registry.getServiceType());
         for (T service : iterable) {
             registry.addService(service);
         }
     }
 
+    @Override
     public void start(ModuleContext moduleContext) throws CoreException {
         this.moduleContext = moduleContext;
         registerRGBProfiles(moduleContext);
     }
 
+    @Override
     public void stop(ModuleContext moduleContext) throws CoreException {
         this.moduleContext = null;
     }

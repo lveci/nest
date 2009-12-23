@@ -7,7 +7,7 @@ import java.awt.Point;
  * Created by Marco Peters.
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2009-12-23 16:42:11 $
  */
 public class PinDescriptor implements PlacemarkDescriptor {
 
@@ -43,7 +43,7 @@ public class PinDescriptor implements PlacemarkDescriptor {
 
 
     @Override
-    public ProductNodeGroup<Pin> getPlacemarkGroup(Product product) {
+    public PlacemarkGroup getPlacemarkGroup(Product product) {
         return product.getPinGroup();
     }
 

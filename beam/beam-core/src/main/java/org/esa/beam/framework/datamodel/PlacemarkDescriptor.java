@@ -7,7 +7,7 @@ import java.awt.Point;
  * Created by Marco Peters.
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2009-12-23 16:42:11 $
  */
 public interface PlacemarkDescriptor {
 
@@ -19,7 +19,7 @@ public interface PlacemarkDescriptor {
 
     Image getCursorImage();
 
-    ProductNodeGroup<Pin> getPlacemarkGroup(Product product);
+    PlacemarkGroup getPlacemarkGroup(Product product);
 
     PlacemarkSymbol createDefaultSymbol();
 

@@ -1,5 +1,5 @@
 /*
- * $Id: ProductProjectionBuilder.java,v 1.4 2009-12-07 21:39:44 lveci Exp $
+ * $Id: ProductProjectionBuilder.java,v 1.5 2009-12-23 16:42:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -453,7 +453,7 @@ public class ProductProjectionBuilder extends AbstractProductBuilder {
         for (Pin placemark : placemarks) {
             final Pin pin1 = new Pin(placemark.getName(), placemark.getLabel(),
                                      placemark.getDescription(), null, placemark.getGeoPos(),
-                                     symbol);
+                                     symbol, targetPlacemarkGroup.getProduct().getGeoCoding());
             targetPlacemarkGroup.add(pin1);
         }
     }

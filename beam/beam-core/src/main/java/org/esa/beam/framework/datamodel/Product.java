@@ -1,5 +1,5 @@
 /*
- * $Id: Product.java,v 1.15 2009-12-22 17:30:01 lveci Exp $
+ * $Id: Product.java,v 1.16 2009-12-23 16:42:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -41,7 +41,6 @@ import org.esa.beam.util.ObjectUtils;
 import org.esa.beam.util.StopWatch;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.math.MathUtils;
-import org.opengis.feature.simple.SimpleFeatureType;
 
 import java.awt.Dimension;
 import java.awt.geom.Point2D;
@@ -68,7 +67,7 @@ import java.util.TreeSet;
  * necessarily store data in the same format. Furthermore, it is not mandatory for a product to have both of them.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.15 $ $Date: 2009-12-22 17:30:01 $
+ * @version $Revision: 1.16 $ $Date: 2009-12-23 16:42:11 $
  */
 public class Product extends ProductNode {
 
@@ -80,8 +79,6 @@ public class Product extends ProductNode {
     public static final String PROPERTY_NAME_POINTING = "pointing";
     public static final String PROPERTY_NAME_PRODUCT_TYPE = "productType";
 
-    public static final String PIN_FEATURE_TYPE_NAME = "Pin";
-    public static final String GCP_FEATURE_TYPE_NAME = "GCP";
     public static final String GEOMETRY_FEATURE_TYPE_NAME = PlainFeatureFactory.DEFAULT_TYPE_NAME;
 
     /**
@@ -141,8 +138,8 @@ public class Product extends ProductNode {
     private final ProductNodeGroup<FlagCoding> flagCodingGroup;
     private final ProductNodeGroup<IndexCoding> indexCodingGroup;
     private final ProductNodeGroup<Mask> maskGroup;
-    private final ProductNodeGroup<Pin> pinGroup;
-    private final ProductNodeGroup<Pin> gcpGroup;
+    private final PlacemarkGroup pinGroup;
+    private final PlacemarkGroup gcpGroup;
     private final Map<Band, ProductNodeGroup<Pin>> bandGCPGroup = new HashMap<Band, ProductNodeGroup<Pin>>();
 
     /**
@@ -260,14 +257,12 @@ public class Product extends ProductNode {
         this.indexCodingGroup = new ProductNodeGroup<IndexCoding>(this, "indexCodingGroup", true);
         this.flagCodingGroup = new ProductNodeGroup<FlagCoding>(this, "flagCodingGroup", true);
         this.maskGroup = new ProductNodeGroup<Mask>(this, "maskGroup", true);
-        final VectorDataNode pinVectorDataNode = new VectorDataNode("pins",
-                                                                    Pin.getPlacemarkFeatureType());
+        final VectorDataNode pinVectorDataNode = new VectorDataNode("pins", Pin.getFeatureType());
         this.vectorDataGroup.add(pinVectorDataNode);
-        final VectorDataNode gcpVectorDataNode = new VectorDataNode("ground_control_points",
-                                                                    Pin.getPlacemarkFeatureType());
+        final VectorDataNode gcpVectorDataNode = new VectorDataNode("ground_control_points", Pin.getFeatureType());
         this.vectorDataGroup.add(gcpVectorDataNode);
-        this.pinGroup = new PinGroup(this, "pinGroup", pinVectorDataNode);
-        this.gcpGroup = new PinGroup(this, "gcpGroup", gcpVectorDataNode);
+        this.pinGroup = new PlacemarkGroup(this, "pinGroup", pinVectorDataNode);
+        this.gcpGroup = new PlacemarkGroup(this, "gcpGroup", gcpVectorDataNode);
 
         setModified(false);
 
@@ -1046,9 +1041,7 @@ public class Product extends ProductNode {
     }
 
     public boolean isInternalNode(VectorDataNode vectorDataNode) {
-        final SimpleFeatureType simpleFeatureType = vectorDataNode.getFeatureType();
-        final String typeName = simpleFeatureType.getTypeName();
-        return PIN_FEATURE_TYPE_NAME.equals(typeName) || GCP_FEATURE_TYPE_NAME.equals(typeName);
+        return vectorDataNode.getFeatureType() == Pin.getFeatureType();
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -1101,7 +1094,7 @@ public class Product extends ProductNode {
      *
      * @return the GCP group.
      */
-    public ProductNodeGroup<Pin> getGcpGroup() {
+    public PlacemarkGroup getGcpGroup() {
         return gcpGroup;
     }
 
@@ -1122,7 +1115,7 @@ public class Product extends ProductNode {
      *
      * @return the pin group.
      */
-    public ProductNodeGroup<Pin> getPinGroup() {
+    public PlacemarkGroup getPinGroup() {
         return pinGroup;
     }
 

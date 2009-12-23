@@ -36,7 +36,7 @@ import java.util.concurrent.ExecutionException;
  * GCP geo-coding form.
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:26 $
+ * @version $Revision: 1.2 $ $Date: 2009-12-23 16:42:11 $
  */
 class GcpGeoCodingForm extends JPanel {
 
@@ -288,8 +288,7 @@ class GcpGeoCodingForm extends JPanel {
 
         public void nodeChanged(ProductNodeEvent event) {
             // exclude geo-coding changes to prevent recursion
-            if (!Product.PROPERTY_NAME_GEOCODING.equals(event.getPropertyName()) &&
-                !ProductNode.PROPERTY_NAME_SELECTED.equals(event.getPropertyName())) {
+            if (!Product.PROPERTY_NAME_GEOCODING.equals(event.getPropertyName())) {
                 updateGcpGeoCoding();
             }
         }

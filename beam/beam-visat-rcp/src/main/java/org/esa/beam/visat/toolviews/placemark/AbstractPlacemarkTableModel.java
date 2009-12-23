@@ -1,7 +1,15 @@
 package org.esa.beam.visat.toolviews.placemark;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.Pin;
+import org.esa.beam.framework.datamodel.PixelPos;
+import org.esa.beam.framework.datamodel.PlacemarkDescriptor;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductNodeEvent;
+import org.esa.beam.framework.datamodel.ProductNodeListenerAdapter;
+import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.util.math.MathUtils;
 
 import javax.swing.table.DefaultTableModel;
@@ -39,8 +47,8 @@ public abstract class AbstractPlacemarkTableModel extends DefaultTableModel {
         return placemarkList.toArray(new Pin[placemarkList.size()]);
     }
 
-    public Pin getPlacemarkAt(int i) {
-        return placemarkList.get(i);
+    public Pin getPlacemarkAt(int modelRow) {
+        return placemarkList.get(modelRow);
     }
 
     public PlacemarkDescriptor getPlacemarkDescriptor() {
@@ -229,7 +237,8 @@ public abstract class AbstractPlacemarkTableModel extends DefaultTableModel {
                     }
                     placemark.setPixelPos(new PixelPos((Float) value, pixelY));
                     GeoPos geoPos = placemarkDescriptor.updateGeoPos(product.getGeoCoding(),
-                                                                     placemark.getPixelPos(), placemark.getGeoPos());
+                                                                     placemark.getPixelPos(),
+                                                                     placemark.getGeoPos());
                     placemark.setGeoPos(geoPos);
                 }
             } else if (columnIndex == 1) {
@@ -242,7 +251,8 @@ public abstract class AbstractPlacemarkTableModel extends DefaultTableModel {
                     }
                     placemark.setPixelPos(new PixelPos(pixelX, (Float) value));
                     GeoPos geoPos = placemarkDescriptor.updateGeoPos(product.getGeoCoding(),
-                                                                     placemark.getPixelPos(), placemark.getGeoPos());
+                                                                     placemark.getPixelPos(),
+                                                                     placemark.getGeoPos());
                     placemark.setGeoPos(geoPos);
                 }
             } else if (columnIndex == 2) {
@@ -255,7 +265,8 @@ public abstract class AbstractPlacemarkTableModel extends DefaultTableModel {
                     }
                     placemark.setGeoPos(new GeoPos(lat, (Float) value));
                     PixelPos pixelPos = placemarkDescriptor.updatePixelPos(product.getGeoCoding(),
-                                                                           placemark.getGeoPos(), placemark.getPixelPos());
+                                                                           placemark.getGeoPos(),
+                                                                           placemark.getPixelPos());
                     placemark.setPixelPos(pixelPos);
                 }
             } else if (columnIndex == 3) {
@@ -268,7 +279,8 @@ public abstract class AbstractPlacemarkTableModel extends DefaultTableModel {
                     }
                     placemark.setGeoPos(new GeoPos((Float) value, lon));
                     PixelPos pixelPos = placemarkDescriptor.updatePixelPos(product.getGeoCoding(),
-                                                                           placemark.getGeoPos(), placemark.getPixelPos());
+                                                                           placemark.getGeoPos(),
+                                                                           placemark.getPixelPos());
                     placemark.setPixelPos(pixelPos);
                 }
             } else if (columnIndex == getStandardColumnNames().length - 1) {
@@ -317,9 +329,7 @@ public abstract class AbstractPlacemarkTableModel extends DefaultTableModel {
         }
 
         private void fireTableDataChanged(ProductNodeEvent event) {
-            if (event.getSourceNode() instanceof Pin &&
-                !ProductNode.PROPERTY_NAME_SELECTED.equals(
-                        event.getPropertyName())) {
+            if (event.getSourceNode() instanceof Pin) {
                 Pin placemark = (Pin) event.getSourceNode();
                 if (placemarkList.contains(placemark)) {
                     AbstractPlacemarkTableModel.this.fireTableDataChanged();
