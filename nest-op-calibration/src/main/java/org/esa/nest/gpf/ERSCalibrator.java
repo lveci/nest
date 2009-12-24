@@ -394,7 +394,8 @@ public final class ERSCalibrator implements Calibrator {
             applyADCSaturationCorrection = false;
         }
 
-        if (applyADCSaturationCorrection && antennaPatternCorrectionFlag) {
+//        if (applyADCSaturationCorrection && antennaPatternCorrectionFlag) {
+        if (antennaPatternCorrectionFlag) {
             computeAntennaPatternGain(0, sourceImageWidth);
         }
         adcHasBeenTestedFlag = true;
