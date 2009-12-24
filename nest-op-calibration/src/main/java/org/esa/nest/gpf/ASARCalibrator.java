@@ -60,6 +60,7 @@ public class ASARCalibrator implements Calibrator {
 
     private boolean srgrFlag = false;
     private boolean multilookFlag = false;
+    private boolean antElevCorrFlag = false;
     private boolean wideSwathProductFlag = false;
     private boolean retroCalibrationFlag = false;
     private boolean applyAntennaPatternCorr = false;
@@ -157,10 +158,11 @@ public class ASARCalibrator implements Calibrator {
 
             checkXCAFileExsitence(mustPerformRetroCalibration);
 
-            if (retroCalibrationFlag) {
-
+            if (srgrFlag) {
                 getSrgrCoeff();
+            }
 
+            if (retroCalibrationFlag) {
                 getOldAntennaPattern();
             }
 
@@ -204,7 +206,8 @@ public class ASARCalibrator implements Calibrator {
             !productType.contains("ASA_APP_1") && !productType.contains("ASA_APM_1") &&
             !productType.contains("ASA_WSM_1") && !productType.contains("ASA_IMG_1") &&
             !productType.contains("ASA_APG_1") && !productType.contains("ASA_IMS_1") &&
-            !productType.contains("ASA_APS_1") && !productType.contains("ASA_GM")) {
+            !productType.contains("ASA_APS_1") && !productType.contains("ASA_GM") &&
+            !productType.contains("ASA_WSS_1")) {
 
             throw new OperatorException(productType + " is not a valid ASAR product type for calibration.");
         }
@@ -220,13 +223,12 @@ public class ASARCalibrator implements Calibrator {
             throw new OperatorException("The product has already been calibrated.");
         }
 
-        if (AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.ant_elev_corr_flag) != srgrFlag) {
-            throw new OperatorException("The ant_elev_corr_flag is not consistent with srgr_flag in metadata.");
-        }
+        antElevCorrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.ant_elev_corr_flag);
 
         if (AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.range_spread_comp_flag) != srgrFlag) {
             throw new OperatorException("The range_spread_comp_flag is not consistent with srgr_flag in metadata.");
         }
+
     }
 
     /**
@@ -259,7 +261,7 @@ public class ASARCalibrator implements Calibrator {
      */
     private void setCalibrationFlags() {
 
-        if (srgrFlag) {
+        if (antElevCorrFlag) {
             if (multilookFlag) {
                 retroCalibrationFlag = false;
                 System.out.println("Only constant and incidence angle corrections will be performed for radiometric calibration");
@@ -544,7 +546,7 @@ public class ASARCalibrator implements Calibrator {
                     calibrationFactorName = "ext_cal_ap_pri_" + mdsPolar[i];
                 } else if (productType.contains("ASA_APM_1")) {
                     calibrationFactorName = "ext_cal_ap_med_" + mdsPolar[i];
-                } else if (productType.contains("ASA_WSM_1")) {
+                } else if (productType.contains("ASA_WS")) {
                     calibrationFactorName = "ext_cal_ws_" + mdsPolar[i];
                 } else if (productType.contains("ASA_GM1_1")) {
                     calibrationFactorName = "ext_cal_gm_" + mdsPolar[i];
@@ -563,25 +565,25 @@ public class ASARCalibrator implements Calibrator {
                 final ProductData factorData = reader.getAuxData(calibrationFactorName);
                 final float[] factors = (float[]) factorData.getElems();
 
-                if (productType.contains("ASA_WSM_1") || productType.contains("ASA_GM1")) {
+                if (productType.contains("ASA_WS") || productType.contains("ASA_GM1")) {
                     calibrationFactor[i] = factors[0];
                 } else {
                     if (factors.length != numOfSwaths) {
                         throw new OperatorException("Incorrect array length for " + calibrationFactorName);
                     }
-                    if (swath.contains("IS1")) {
+                    if (swath.contains("S1")) {
                         calibrationFactor[i] = factors[0];
-                    } else if (swath.contains("IS2")) {
+                    } else if (swath.contains("S2")) {
                         calibrationFactor[i] = factors[1];
-                    } else if (swath.contains("IS3")) {
+                    } else if (swath.contains("S3")) {
                         calibrationFactor[i] = factors[2];
-                    } else if (swath.contains("IS4")) {
+                    } else if (swath.contains("S4")) {
                         calibrationFactor[i] = factors[3];
-                    } else if (swath.contains("IS5")) {
+                    } else if (swath.contains("S5")) {
                         calibrationFactor[i] = factors[4];
-                    } else if (swath.contains("IS6")) {
+                    } else if (swath.contains("S6")) {
                         calibrationFactor[i] = factors[5];
-                    } else if (swath.contains("IS7")) {
+                    } else if (swath.contains("S7")) {
                         calibrationFactor[i] = factors[6];
                     } else {
                         throw new OperatorException("Invalid swath");
@@ -715,19 +717,19 @@ public class ASARCalibrator implements Calibrator {
             reader.readProduct(fileName);
 
             String swathName;
-            if (swath.contains("IS1")) {
+            if (swath.contains("S1")) {
                 swathName = "is1";
-            } else if (swath.contains("IS2")) {
+            } else if (swath.contains("S2")) {
                 swathName = "is2";
-            } else if (swath.contains("IS3")) {
+            } else if (swath.contains("S3")) {
                 swathName = "is3_ss2";
-            } else if (swath.contains("IS4")) {
+            } else if (swath.contains("S4")) {
                 swathName = "is4_ss3";
-            } else if (swath.contains("IS5")) {
+            } else if (swath.contains("S5")) {
                 swathName = "is5_ss4";
-            } else if (swath.contains("IS6")) {
+            } else if (swath.contains("S6")) {
                 swathName = "is6_ss5";
-            } else if (swath.contains("IS7")) {
+            } else if (swath.contains("S7")) {
                 swathName = "is7";
             } else {
                 throw new OperatorException("Invalid swath");
@@ -815,7 +817,7 @@ public class ASARCalibrator implements Calibrator {
      */
     private void setRangeSpreadingLossCompPower() {
         rangeSpreadingCompPower = 3.0;
-        if (productType.contains("ASA_APS_1")) {
+        if (productType.contains("ASA_APS_1") || productType.contains("ASA_WSS")) {
             rangeSpreadingCompPower = 4.0;
         }
         halfRangeSpreadingCompPower = rangeSpreadingCompPower / 2.0;
@@ -1021,7 +1023,12 @@ public class ASARCalibrator implements Calibrator {
             for (int x = x0; x < xMax; x++) {
 
                 final int xx = x - x0;
-                targetTileSlantRange[yy][xx] =  computeSlantRange(x, y, srgrConvParam); // in m
+                if (srgrFlag) {
+                    targetTileSlantRange[yy][xx] = computeSlantRange(x, y, srgrConvParam); // in m
+                } else {
+                    targetTileSlantRange[yy][xx] = Constants.halfLightSpeed *
+                            slantRangeTime.getPixelDouble(x, y, TiePointGrid.InterpMode.QUADRATIC)/1000000000.0; // in m
+                }
 
                 final double localEarthRadius = getEarthRadius(x, y);
 
