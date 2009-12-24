@@ -18,6 +18,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.awt.*;
 import java.util.*;
+import java.text.ParseException;
 
 /**
  * De-Burst a WSS product
@@ -231,22 +232,46 @@ public class DeburstWSSOp extends Operator {
     }
 
     private void createTiePointGrids() {
+
         final MetadataElement srcMetadataRoot = sourceProduct.getMetadataRoot();
         final MetadataElement geolocRootElem = srcMetadataRoot.getElement("GEOLOCATION_GRID_ADS");
         final MetadataElement[] geolocElems = geolocRootElem.getElements();
+        final MetadataElement mainProcRootElem = srcMetadataRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
+        final MetadataElement[] mainProcElems = mainProcRootElem.getElements();
 
-        int subSamplingX = 1, subSamplingY = 1;
-        final ArrayList<Float> lats = new ArrayList<Float>(121);
-        final ArrayList<Float> lons = new ArrayList<Float>(121);
-        final ArrayList<Float> slant = new ArrayList<Float>(121);
-        final ArrayList<Float> incidence = new ArrayList<Float>(121);
+        Double lineTimeInterval = 0.0;
+        for(MetadataElement mainProcElem : mainProcElems) {
+            final String swathStr = mainProcElem.getAttributeString("swath_num");
+            if(swathStr.equalsIgnoreCase(subSwath)) {
+                lineTimeInterval = mainProcElem.getAttribute("line_time_interval").getData().getElemDouble();
+                break;
+            }
+        }
+
+        int subSamplingX = 1;
+        final ArrayList<Double> time = new ArrayList<Double>(13);
+        final ArrayList<Float> lats = new ArrayList<Float>(143);
+        final ArrayList<Float> lons = new ArrayList<Float>(143);
+        final ArrayList<Float> slant = new ArrayList<Float>(143);
+        final ArrayList<Float> incidence = new ArrayList<Float>(143);
 
         for(MetadataElement geolocElem : geolocElems) {
             final String swathStr = geolocElem.getAttributeString("swath_number");
             if(swathStr.equalsIgnoreCase(subSwath)) {
                 subSamplingX = geolocElem.getAttribute("ASAR_Geo_Grid_ADSR.sd/first_line_tie_points.samp_numbers")
                         .getData().getElemIntAt(1) - 1;
-                subSamplingY = geolocElem.getAttributeInt("num_lines");
+
+                final MetadataAttribute attrib = geolocElem.getAttribute("first_zero_doppler_time");
+                if(attrib != null) {
+                    final String timeStr = attrib.getData().getElemString();
+                    double timeMJD = 0.0;
+                    try {
+                        timeMJD = ProductData.UTC.parse(timeStr).getMJD();
+                    } catch (ParseException e) {
+                        throw new IllegalArgumentException("Unable to parse metadata attribute " + timeStr);
+                    }
+                    time.add(timeMJD*24.0*3600.0);
+                }
 
                 addTiePoints(geolocElem, "ASAR_Geo_Grid_ADSR.sd/first_line_tie_points.lats", lats);
                 addTiePoints(geolocElem, "ASAR_Geo_Grid_ADSR.sd/first_line_tie_points.longs", lons);
@@ -254,6 +279,8 @@ public class DeburstWSSOp extends Operator {
                 addTiePoints(geolocElem, "ASAR_Geo_Grid_ADSR.sd/first_line_tie_points.angles", incidence);
             }
         }
+
+        final int subSamplingY = (int)((time.get(1) - time.get(0))/lineTimeInterval + 0.5);
 
         final float million = 1000000.0f;
         final int length = lats.size();
