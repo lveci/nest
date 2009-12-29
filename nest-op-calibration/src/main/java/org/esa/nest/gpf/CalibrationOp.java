@@ -250,8 +250,11 @@ public class CalibrationOp extends Operator {
      */
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-
-        calibrator.computeTile(targetBand, targetTile, targetBandNameToSourceBandName, pm);
+        try {
+            calibrator.computeTile(targetBand, targetTile, targetBandNameToSourceBandName, pm);
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
+        }
     }
 
     /**

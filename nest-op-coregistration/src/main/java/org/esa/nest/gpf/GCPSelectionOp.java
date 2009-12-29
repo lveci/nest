@@ -167,43 +167,47 @@ public class GCPSelectionOp extends Operator {
     @Override
     public void initialize() throws OperatorException
     {
-        cWindowWidth = Integer.parseInt(coarseRegistrationWindowWidth);
-        cWindowHeight = Integer.parseInt(coarseRegistrationWindowHeight);
-        cHalfWindowWidth = cWindowWidth / 2;
-        cHalfWindowHeight = cWindowHeight / 2;
+        try {
+            cWindowWidth = Integer.parseInt(coarseRegistrationWindowWidth);
+            cWindowHeight = Integer.parseInt(coarseRegistrationWindowHeight);
+            cHalfWindowWidth = cWindowWidth / 2;
+            cHalfWindowHeight = cWindowHeight / 2;
 
-        rowUpSamplingFactor = Integer.parseInt(rowInterpFactor);
-        colUpSamplingFactor = Integer.parseInt(columnInterpFactor);
+            rowUpSamplingFactor = Integer.parseInt(rowInterpFactor);
+            colUpSamplingFactor = Integer.parseInt(columnInterpFactor);
 
-        final double achievableAccuracy = 1.0 / (double)Math.max(rowUpSamplingFactor, colUpSamplingFactor);
-        if (gcpTolerance < achievableAccuracy) {
-            throw new OperatorException("The achievable accuracy with current interpolation factors is " +
-                    achievableAccuracy + ", GCP Tolerance is below it.");
-        }
+            final double achievableAccuracy = 1.0 / (double)Math.max(rowUpSamplingFactor, colUpSamplingFactor);
+            if (gcpTolerance < achievableAccuracy) {
+                throw new OperatorException("The achievable accuracy with current interpolation factors is " +
+                        achievableAccuracy + ", GCP Tolerance is below it.");
+            }
 
-        masterBand1 = sourceProduct.getBandAt(0);
-        if(masterBand1.getUnit()!= null && masterBand1.getUnit().equals(Unit.REAL) && sourceProduct.getNumBands() > 1) {
-            masterBand2 = sourceProduct.getBandAt(1);
-            complexCoregistration = true;
-        }
+            masterBand1 = sourceProduct.getBandAt(0);
+            if(masterBand1.getUnit()!= null && masterBand1.getUnit().equals(Unit.REAL) && sourceProduct.getNumBands() > 1) {
+                masterBand2 = sourceProduct.getBandAt(1);
+                complexCoregistration = true;
+            }
 
-        sourceImageWidth = sourceProduct.getSceneRasterWidth();
-        sourceImageHeight = sourceProduct.getSceneRasterHeight();
+            sourceImageWidth = sourceProduct.getSceneRasterWidth();
+            sourceImageHeight = sourceProduct.getSceneRasterHeight();
 
-        createTargetProduct();
+            createTargetProduct();
 
-        masterGcpGroup = sourceProduct.getGcpGroup(masterBand1);
-        if (masterGcpGroup.getNodeCount() <= 0) {
-            addGCPGrid(sourceImageWidth, sourceImageHeight, numGCPtoGenerate, masterGcpGroup);
-        }
+            masterGcpGroup = sourceProduct.getGcpGroup(masterBand1);
+            if (masterGcpGroup.getNodeCount() <= 0) {
+                addGCPGrid(sourceImageWidth, sourceImageHeight, numGCPtoGenerate, masterGcpGroup);
+            }
 
-        OperatorUtils.copyGCPsToTarget(masterGcpGroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
-        
-        if (complexCoregistration) {
-            fWindowWidth = Integer.parseInt(fineRegistrationWindowWidth);
-            fWindowHeight = Integer.parseInt(fineRegistrationWindowHeight);
-            fHalfWindowWidth = fWindowWidth / 2;
-            fHalfWindowHeight = fWindowHeight / 2;
+            OperatorUtils.copyGCPsToTarget(masterGcpGroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
+
+            if (complexCoregistration) {
+                fWindowWidth = Integer.parseInt(fineRegistrationWindowWidth);
+                fWindowHeight = Integer.parseInt(fineRegistrationWindowHeight);
+                fHalfWindowWidth = fWindowWidth / 2;
+                fHalfWindowHeight = fWindowHeight / 2;
+            }
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
@@ -296,8 +300,8 @@ public class GCPSelectionOp extends Operator {
                 pm.worked(1);
             }
 
-        } catch (Exception e){
-            throw new OperatorException(e);
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();
         }
@@ -312,10 +316,13 @@ public class GCPSelectionOp extends Operator {
      * @param targetRectangle The coordinates of the current tile.
      * @param pm progress monitor
      */
-    private void computeSlaveGCPs (final Band slaveBand, final Band slaveBand2, final Band targetBand,
+    private void computeSlaveGCPs(final Band slaveBand, final Band slaveBand2, final Band targetBand,
                                    final Rectangle targetRectangle, final ProgressMonitor pm) {
      try {
         final ProductNodeGroup<Pin> targetGCPGroup = targetProduct.getGcpGroup(targetBand);
+        final GeoCoding tgtGeoCoding = targetProduct.getGeoCoding();
+        final GeoCoding slaveGeoCoding = slaveBand.getGeoCoding();
+
         final int numberOfMasterGCPs = masterGcpGroup.getNodeCount();
         pm.beginTask("computeSlaveGCPs ", numberOfMasterGCPs);
         for(int i = 0; i < numberOfMasterGCPs; ++i) {
@@ -326,7 +333,7 @@ public class GCPSelectionOp extends Operator {
             if (checkMasterGCPValidity(mGCPPixelPos, targetRectangle)) {
 
                 final GeoPos mGCPGeoPos = mPin.getGeoPos();
-                final PixelPos sGCPPixelPos = slaveBand.getGeoCoding().getPixelPos(mGCPGeoPos, null);
+                final PixelPos sGCPPixelPos = slaveGeoCoding.getPixelPos(mGCPGeoPos, null);
 
                 if (!checkSlaveGCPValidity(sGCPPixelPos)) {
                     //System.out.println("GCP(" + i + ") is outside slave image.");
@@ -348,7 +355,8 @@ public class GCPSelectionOp extends Operator {
                                        mPin.getDescription(),
                                        sGCPPixelPos,
                                        mGCPGeoPos,
-                                       mPin.getSymbol());
+                                       mPin.getSymbol(),
+                                       tgtGeoCoding);
 
                     targetGCPGroup.add(sPin);
                     //System.out.println("final slave gcp[" + i + "] = " + "(" + sGCPPixelPos.x + "," + sGCPPixelPos.y + ")");
@@ -360,6 +368,8 @@ public class GCPSelectionOp extends Operator {
             }
             pm.worked(1);
         }
+     } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId()+ " computeSlaveGCPs ", e);
      } finally {
         pm.done();
      }
@@ -394,41 +404,46 @@ public class GCPSelectionOp extends Operator {
     private boolean getCoarseSlaveGCPPosition(final Band slaveBand, final Band slaveBand2,
                                               final PixelPos mGCPPixelPos, final PixelPos sGCPPixelPos) {
 
-        final double[] mI = getMasterImagette(mGCPPixelPos);
-        //System.out.println("Master imagette:");
-        //outputRealImage(mI);
+        try {
+            final double[] mI = getMasterImagette(mGCPPixelPos);
+            //System.out.println("Master imagette:");
+            //outputRealImage(mI);
 
-        double rowShift = gcpTolerance + 1;
-        double colShift = gcpTolerance + 1;
-        int numIter = 0;
+            double rowShift = gcpTolerance + 1;
+            double colShift = gcpTolerance + 1;
+            int numIter = 0;
 
-        while (Math.abs(rowShift) >= gcpTolerance || Math.abs(colShift) >= gcpTolerance) {
+            while (Math.abs(rowShift) >= gcpTolerance || Math.abs(colShift) >= gcpTolerance) {
 
-            if (numIter >= maxIteration) {
-                return false;
+                if (numIter >= maxIteration) {
+                    return false;
+                }
+
+                if (!checkSlaveGCPValidity(sGCPPixelPos)) {
+                    return false;
+                }
+
+                final double[] sI = getSlaveImagette(slaveBand, slaveBand2, sGCPPixelPos);
+                //System.out.println("Slave imagette:");
+                //outputRealImage(sI);
+
+                final double[] shift = {0,0};
+                if (!getSlaveGCPShift(shift, mI, sI)) {
+                    return false;
+                }
+
+                rowShift = shift[0];
+                colShift = shift[1];
+                sGCPPixelPos.x += (float) colShift;
+                sGCPPixelPos.y += (float) rowShift;
+                numIter++;
             }
 
-            if (!checkSlaveGCPValidity(sGCPPixelPos)) {
-                return false;
-            }
-
-            final double[] sI = getSlaveImagette(slaveBand, slaveBand2, sGCPPixelPos);
-            //System.out.println("Slave imagette:");
-            //outputRealImage(sI);
-
-            final double[] shift = {0,0};
-            if (!getSlaveGCPShift(shift, mI, sI)) {
-                return false;
-            }
-
-            rowShift = shift[0];
-            colShift = shift[1];
-            sGCPPixelPos.x += (float) colShift;
-            sGCPPixelPos.y += (float) rowShift;
-            numIter++;
+            return true;
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId()+ " getCoarseSlaveGCPPosition ", e);
         }
-
-        return true;
+        return false;
     }
 
     private double[] getMasterImagette(final PixelPos gcpPixelPos) throws OperatorException {
@@ -465,6 +480,7 @@ public class GCPSelectionOp extends Operator {
             return mI;
 
         } catch (Exception e){
+            System.out.println("Error in getMasterImagette");
             throw new OperatorException(e);
         }
     }
@@ -508,6 +524,7 @@ public class GCPSelectionOp extends Operator {
             return sI;
 
         } catch (Exception e){
+            System.out.println("Error in getSlaveImagette");
             throw new OperatorException(e);
         }
     }
@@ -518,14 +535,20 @@ public class GCPSelectionOp extends Operator {
         final int x1 = x0 + 1;
         final int y0 = (int)y;
         final int y1 = y0 + 1;
-        final double v00 = slaveData.getElemDoubleAt(slaveRaster.getDataBufferIndex(x0, y0));
-        final double v01 = slaveData.getElemDoubleAt(slaveRaster.getDataBufferIndex(x0, y1));
-        final double v10 = slaveData.getElemDoubleAt(slaveRaster.getDataBufferIndex(x1, y0));
-        final double v11 = slaveData.getElemDoubleAt(slaveRaster.getDataBufferIndex(x1, y1));
-        final double wy = (double)(y - y0);
-        final double wx = (double)(x - x0);
 
-        return MathUtils.interpolate2D(wy, wx, v00, v01, v10, v11);
+        try {
+            final double v00 = slaveData.getElemDoubleAt(slaveRaster.getDataBufferIndex(x0, y0));
+            final double v01 = slaveData.getElemDoubleAt(slaveRaster.getDataBufferIndex(x0, y1));
+            final double v10 = slaveData.getElemDoubleAt(slaveRaster.getDataBufferIndex(x1, y0));
+            final double v11 = slaveData.getElemDoubleAt(slaveRaster.getDataBufferIndex(x1, y1));
+            final double wy = (double)(y - y0);
+            final double wx = (double)(x - x0);
+
+            return MathUtils.interpolate2D(wy, wx, v00, v01, v10, v11);
+        } catch (Exception e){
+            System.out.println("Error in getInterpolatedSampleValue");
+            throw new OperatorException(e);
+        }
     }
 
     private boolean getSlaveGCPShift(final double[] shift, final double[] mI, final double[] sI) {
@@ -828,41 +851,45 @@ public class GCPSelectionOp extends Operator {
 
     private boolean getFineSlaveGCPPosition(final Band slaveBand1, final Band slaveBand2,
                                             final PixelPos mGCPPixelPos, final PixelPos sGCPPixelPos) {
+        try {
+            //System.out.println("mGCP = (" + mGCPPixelPos.x + ", " + mGCPPixelPos.y + ")");
+            //System.out.println("Initial sGCP = (" + sGCPPixelPos.x + ", " + sGCPPixelPos.y + ")");
 
-        //System.out.println("mGCP = (" + mGCPPixelPos.x + ", " + mGCPPixelPos.y + ")");
-        //System.out.println("Initial sGCP = (" + sGCPPixelPos.x + ", " + sGCPPixelPos.y + ")");
+            final ComplexCoregData compleData = new ComplexCoregData();
+            getComplexMasterImagette(compleData, mGCPPixelPos);
+            /*
+            System.out.println("Real part of master imagette:");
+            outputRealImage(compleData.mII);
+            System.out.println("Imaginary part of master imagette:");
+            outputRealImage(compleData.mIQ);
+            */
 
-        final ComplexCoregData compleData = new ComplexCoregData();
-        getComplexMasterImagette(compleData, mGCPPixelPos);
-        /*
-        System.out.println("Real part of master imagette:");
-        outputRealImage(compleData.mII);
-        System.out.println("Imaginary part of master imagette:");
-        outputRealImage(compleData.mIQ);
-        */
+            getInitialComplexSlaveImagette(compleData, slaveBand1, slaveBand2, sGCPPixelPos);
+            /*
+            System.out.println("Real part of initial slave imagette:");
+            outputRealImage(compleData.sII0);
+            System.out.println("Imaginary part of initial slave imagette:");
+            outputRealImage(compleData.sIQ0);
+            */
 
-        getInitialComplexSlaveImagette(compleData, slaveBand1, slaveBand2, sGCPPixelPos);
-        /*
-        System.out.println("Real part of initial slave imagette:");
-        outputRealImage(compleData.sII0);
-        System.out.println("Imaginary part of initial slave imagette:");
-        outputRealImage(compleData.sIQ0);
-        */
+            final double[] p = {sGCPPixelPos.x, sGCPPixelPos.y};
 
-        final double[] p = {sGCPPixelPos.x, sGCPPixelPos.y};
+            final double coherence = powell(compleData, p);
+            //System.out.println("Final sGCP = (" + p[0] + ", " + p[1] + "), coherence = " + (1-coherence));
 
-        final double coherence = powell(compleData, p);
-        //System.out.println("Final sGCP = (" + p[0] + ", " + p[1] + "), coherence = " + (1-coherence));
-
-        if (1 - coherence < coherenceThreshold) {
-            //System.out.println("Invalid GCP");
-            return false;
-        } else {
-            sGCPPixelPos.x = (float)p[0];
-            sGCPPixelPos.y = (float)p[1];
-            //System.out.println("Valid GCP");
-            return true;
+            if (1 - coherence < coherenceThreshold) {
+                //System.out.println("Invalid GCP");
+                return false;
+            } else {
+                sGCPPixelPos.x = (float)p[0];
+                sGCPPixelPos.y = (float)p[1];
+                //System.out.println("Valid GCP");
+                return true;
+            }
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId()+ " getFineSlaveGCPPosition ", e);
         }
+        return false;
     }
 
     private void getComplexMasterImagette(final ComplexCoregData compleData, final PixelPos gcpPixelPos) {

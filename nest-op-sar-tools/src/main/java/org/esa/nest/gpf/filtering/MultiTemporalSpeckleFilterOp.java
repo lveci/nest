@@ -119,44 +119,48 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        sourceImageWidth = sourceProduct.getSceneRasterWidth();
-        sourceImageHeight = sourceProduct.getSceneRasterHeight();
+        try {
+            sourceImageWidth = sourceProduct.getSceneRasterWidth();
+            sourceImageHeight = sourceProduct.getSceneRasterHeight();
 
-        targetProduct = new Product(sourceProduct.getName(),
-                                    sourceProduct.getProductType(),
-                                    sourceProduct.getSceneRasterWidth(),
-                                    sourceProduct.getSceneRasterHeight());
+            targetProduct = new Product(sourceProduct.getName(),
+                                        sourceProduct.getProductType(),
+                                        sourceProduct.getSceneRasterWidth(),
+                                        sourceProduct.getSceneRasterHeight());
 
-        OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
+            OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
-        addSelectedBands();
+            addSelectedBands();
 
-        // The tile width has to be the image width, otherwise the index calculation in the last tile is not correct.
-        //targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 50);
+            // The tile width has to be the image width, otherwise the index calculation in the last tile is not correct.
+            //targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 50);
 
-        int windowWidth = 0;
-        int windowHeight = 0;
-        if (windowSize.equals(WINDOW_SIZE_3x3)) {
-            windowWidth = 3;
-            windowHeight = 3;
-        } else if (windowSize.equals(WINDOW_SIZE_5x5)) {
-            windowWidth = 5;
-            windowHeight = 5;
-        } else if (windowSize.equals(WINDOW_SIZE_7x7)) {
-            windowWidth = 7;
-            windowHeight = 7;
-        } else if (windowSize.equals(WINDOW_SIZE_9x9)) {
-            windowWidth = 9;
-            windowHeight = 9;
-        } else if (windowSize.equals(WINDOW_SIZE_11x11)) {
-            windowWidth = 11;
-            windowHeight = 11;
-        } else {
-            throw new OperatorException("Unknown filter size: " + windowSize);
+            int windowWidth = 0;
+            int windowHeight = 0;
+            if (windowSize.equals(WINDOW_SIZE_3x3)) {
+                windowWidth = 3;
+                windowHeight = 3;
+            } else if (windowSize.equals(WINDOW_SIZE_5x5)) {
+                windowWidth = 5;
+                windowHeight = 5;
+            } else if (windowSize.equals(WINDOW_SIZE_7x7)) {
+                windowWidth = 7;
+                windowHeight = 7;
+            } else if (windowSize.equals(WINDOW_SIZE_9x9)) {
+                windowWidth = 9;
+                windowHeight = 9;
+            } else if (windowSize.equals(WINDOW_SIZE_11x11)) {
+                windowWidth = 11;
+                windowHeight = 11;
+            } else {
+                throw new OperatorException("Unknown filter size: " + windowSize);
+            }
+
+            halfWindowWidth = windowWidth/2;
+            halfWindowHeight = windowHeight/2;
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
         }
-
-        halfWindowWidth = windowWidth/2;
-        halfWindowHeight = windowHeight/2;
     }
 
     /**

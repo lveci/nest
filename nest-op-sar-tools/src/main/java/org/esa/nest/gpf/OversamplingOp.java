@@ -126,7 +126,7 @@ public class OversamplingOp extends Operator {
             createTargetProduct();
 
         } catch(Exception e) {
-            throw new OperatorException(e.getMessage());
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
@@ -514,8 +514,8 @@ public class OversamplingOp extends Operator {
                 }
             }
 
-        } catch (Exception e){
-            throw new OperatorException(e);
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();
         }

@@ -103,13 +103,15 @@ public class Project extends Observable {
 
         for(File f : files) {
             if(f.isDirectory()) {
-                final ProjectSubFolder newProjFolder = projSubFolder.addSubFolder(f.getName());
+                if(!f.getName().endsWith(".data")) {
+                    final ProjectSubFolder newProjFolder = projSubFolder.addSubFolder(f.getName());
 
-                if(!f.getName().endsWith(".data") && findSubFolders(f, newProjFolder))
-                    hasProducts = true;
-                else if(!newProjFolder.isCreatedByUser())
-                    projSubFolder.removeSubFolder(newProjFolder);
-            } else {
+                    if(findSubFolders(f, newProjFolder))
+                        hasProducts = true;
+                    //else if(!newProjFolder.isCreatedByUser())
+                        //projSubFolder.removeSubFolder(newProjFolder);
+                }
+            } else if(!projSubFolder.containsFile(f)) {
                 boolean found = false;
                 final ProjectSubFolder.FolderType folderType = projSubFolder.getFolderType();
                 if(folderType == ProjectSubFolder.FolderType.PRODUCT) {
@@ -121,11 +123,11 @@ public class Project extends Observable {
                 }
 
                 if(found) {
+                    hasProducts = true;
                     final ProjectFile newFile = new ProjectFile(f, f.getName());
                     boolean added = projSubFolder.addFile(newFile);
-                    hasProducts = true;
 
-                    if(added) {
+                    if (added) {
                         newFile.setFolderType(folderType);
                     }
                 }
@@ -208,8 +210,8 @@ public class Project extends Observable {
         timer.scheduleAtFixedRate(new TimerTask() {
                 public void run() {
                     if(IsProjectOpen()) {
-                        refreshProjectTree();
-                        notifyEvent(true);
+                        if(refreshProjectTree())
+                            notifyEvent(SAVE_PROJECT);
                     }
                 }
             }, 2000, 1000*5);
@@ -237,15 +239,39 @@ public class Project extends Observable {
         newFile.setFolderType(ProjectSubFolder.FolderType.PRODUCT);
     }
 
-    public void refreshProjectTree() {
+    public boolean refreshProjectTree() {
+        boolean found = false;
         final ProjectSubFolder productSetsFolder = projectSubFolders.findFolder("ProductSets");
-        findSubFolders(productSetsFolder.getPath(), productSetsFolder);
+        if(findSubFolders(productSetsFolder.getPath(), productSetsFolder))
+            found = true;
+        pruneNonExistantFiles(productSetsFolder);
         final ProjectSubFolder graphsFolder = projectSubFolders.findFolder("Graphs");
-        findSubFolders(graphsFolder.getPath(), graphsFolder);
+        if(findSubFolders(graphsFolder.getPath(), graphsFolder))
+            found = true;
+        pruneNonExistantFiles(graphsFolder);
         final ProjectSubFolder importedFolder = projectSubFolders.findFolder("Imported Products");
-        findSubFolders(importedFolder.getPath(), importedFolder);
+        if(findSubFolders(importedFolder.getPath(), importedFolder))
+            found = true;
+        pruneNonExistantFiles(importedFolder);
         final ProjectSubFolder processedFolder = projectSubFolders.findFolder("Processed Products");
-        findSubFolders(processedFolder.getPath(), processedFolder);
+        if(findSubFolders(processedFolder.getPath(), processedFolder))
+                found = true;
+        pruneNonExistantFiles(processedFolder);
+        return found;
+    }
+
+    private static void pruneNonExistantFiles(final ProjectSubFolder projSubFolder) {
+        // check for files to remove
+        final ProjectFile[] fileList = projSubFolder.getFileList().toArray(new ProjectFile[projSubFolder.getFileList().size()]);
+        for(ProjectFile projFile : fileList) {
+            final File f = projFile.getFile();
+            if(!f.exists() || f.getName().endsWith(".data")) {
+                projSubFolder.removeFile(f);
+            }
+        }
+        for(ProjectSubFolder subFolder : projSubFolder.getSubFolders()) {
+            pruneNonExistantFiles(subFolder);
+        }
     }
 
     public void createNewFolder(final ProjectSubFolder subFolder) {
@@ -270,6 +296,7 @@ public class Project extends Observable {
             newFile.setFolderType(ProjectSubFolder.FolderType.PRODUCTSET);
             subFolder.addFile(newFile);
             notifyEvent(SAVE_PROJECT);
+            refreshProjectTree();
         }
     }
 

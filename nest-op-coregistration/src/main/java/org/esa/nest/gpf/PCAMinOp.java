@@ -103,7 +103,7 @@ public class PCAMinOp extends Operator {
             }
 
         } catch(Exception e) {
-            throw new OperatorException(e);
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
@@ -297,8 +297,8 @@ public class PCAMinOp extends Operator {
 
             computePCAMin(tileMinPCA);
 
-        } catch (Exception e){
-            throw new OperatorException(e);
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();
         }

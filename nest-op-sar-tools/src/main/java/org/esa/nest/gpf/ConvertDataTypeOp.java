@@ -90,24 +90,28 @@ public class ConvertDataTypeOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        targetProduct = new Product(sourceProduct.getName(),
-                                    sourceProduct.getProductType(),
-                                    sourceProduct.getSceneRasterWidth(),
-                                    sourceProduct.getSceneRasterHeight());
+        try {
+            targetProduct = new Product(sourceProduct.getName(),
+                                        sourceProduct.getProductType(),
+                                        sourceProduct.getSceneRasterWidth(),
+                                        sourceProduct.getSceneRasterHeight());
 
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        targetProduct.setStartTime(sourceProduct.getStartTime());
-        targetProduct.setEndTime(sourceProduct.getEndTime());
+            ProductUtils.copyMetadata(sourceProduct, targetProduct);
+            ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
+            ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
+            ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+            targetProduct.setStartTime(sourceProduct.getStartTime());
+            targetProduct.setEndTime(sourceProduct.getEndTime());
 
-        dataType = ProductData.getType(targetDataType);
-        targetScaling = getScaling(targetScalingStr);
+            dataType = ProductData.getType(targetDataType);
+            targetScaling = getScaling(targetScalingStr);
 
-        addSelectedBands();
+            addSelectedBands();
 
-        updateMetadata();
+            updateMetadata();
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
+        }
     }
 
     private static ScalingType getScaling(final String scalingStr) {

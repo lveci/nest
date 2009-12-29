@@ -116,7 +116,7 @@ public final class MultilookOp extends Operator {
             createTargetProduct();
 
         } catch(Exception e) {
-            throw new OperatorException(e);
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
@@ -148,23 +148,29 @@ public final class MultilookOp extends Operator {
         //System.out.println("tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        Tile sourceRaster1;
-        Tile sourceRaster2 = null;
-        final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
-        Band sourceBand1;
-        if (srcBandNames.length == 1) {
-            sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
-            sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
-        } else {
-            sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
-            Band sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
-            sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
-            sourceRaster2 = getSourceTile(sourceBand2, sourceTileRectangle, pm);
+        try {
+            Tile sourceRaster1;
+            Tile sourceRaster2 = null;
+            final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
+            Band sourceBand1;
+            if (srcBandNames.length == 1) {
+                sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
+                sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
+            } else {
+                sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
+                Band sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
+                sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
+                sourceRaster2 = getSourceTile(sourceBand2, sourceTileRectangle, pm);
+            }
+
+            final Unit.UnitType bandUnitType = Unit.getUnitType(sourceBand1);
+
+            computeMultiLookImageUsingTimeDomainMethod(tx0, ty0, tw, th, sourceRaster1, sourceRaster2, targetTile, bandUnitType);
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
+        } finally {
+            pm.done();
         }
-
-        final Unit.UnitType bandUnitType = Unit.getUnitType(sourceBand1);
-
-        computeMultiLookImageUsingTimeDomainMethod(tx0, ty0, tw, th, sourceRaster1, sourceRaster2, targetTile, bandUnitType);
     }
 
     /**

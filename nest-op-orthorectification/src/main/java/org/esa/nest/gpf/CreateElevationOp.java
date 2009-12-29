@@ -117,7 +117,7 @@ public final class CreateElevationOp extends Operator {
             elevationBand.setDescription(demDescriptor.getName());
 
         } catch(Exception e) {
-            throw new OperatorException(e);
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
@@ -164,54 +164,60 @@ public final class CreateElevationOp extends Operator {
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
-        final int x0 = targetRectangle.x;
-        final int y0 = targetRectangle.y;
-        final int w = targetRectangle.width;
-        final int h = targetRectangle.height;
+        try {
+            final int x0 = targetRectangle.x;
+            final int y0 = targetRectangle.y;
+            final int w = targetRectangle.width;
+            final int h = targetRectangle.height;
 
-        final GeoCoding geoCoding = targetProduct.getGeoCoding();
+            final GeoCoding geoCoding = targetProduct.getGeoCoding();
 
-        final Set<Band> keys = targetTiles.keySet();
-        for(Band targetBand : keys) {
-            final Tile targetTile = targetTiles.get(targetBand);
+            final Set<Band> keys = targetTiles.keySet();
+            for(Band targetBand : keys) {
+                final Tile targetTile = targetTiles.get(targetBand);
 
-            if(targetBand == elevationBand) {
-                final ProductData trgData = targetTile.getDataBuffer();
+                if(targetBand == elevationBand) {
+                    final ProductData trgData = targetTile.getDataBuffer();
 
-                pm.beginTask("Computing elevations from " + demName + "...", h);
-                try {
-                    final GeoPos geoPos = new GeoPos();
-                    final PixelPos pixelPos = new PixelPos();
-                    float elevation;
+                    pm.beginTask("Computing elevations from " + demName + "...", h);
+                    try {
+                        final GeoPos geoPos = new GeoPos();
+                        final PixelPos pixelPos = new PixelPos();
+                        float elevation;
 
-                    for (int y = y0; y < y0 + h; ++y) {
-                        for (int x = x0; x < x0 + w; ++x) {
+                        for (int y = y0; y < y0 + h; ++y) {
+                            for (int x = x0; x < x0 + w; ++x) {
 
-                            pixelPos.setLocation(x + 0.5f, y + 0.5f);
-                            geoCoding.getGeoPos(pixelPos, geoPos);
-                            try {
-                                if(fileElevationModel != null) {
-                                    elevation = fileElevationModel.getElevation(geoPos);
-                                } else {
-                                    elevation = dem.getElevation(geoPos);
+                                pixelPos.setLocation(x + 0.5f, y + 0.5f);
+                                geoCoding.getGeoPos(pixelPos, geoPos);
+                                try {
+                                    if(fileElevationModel != null) {
+                                        elevation = fileElevationModel.getElevation(geoPos);
+                                    } else {
+                                        elevation = dem.getElevation(geoPos);
+                                    }
+                                } catch (Exception e) {
+                                    elevation = noDataValue;
                                 }
-                            } catch (Exception e) {
-                                elevation = noDataValue;
-                            }
 
-                            trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), (short) Math.round(elevation));
+                                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), (short) Math.round(elevation));
+                            }
+                            pm.worked(1);
                         }
-                        pm.worked(1);
+                    } finally {
+                        pm.done();
                     }
-                } finally {
-                    pm.done();
+                } else if(targetBand instanceof VirtualBand) {
+                    //System.out.println("skipping virtual band");
+                } else {
+                    final Band sourceBand = sourceRasterMap.get(targetBand);
+                    targetTile.setRawSamples(getSourceTile(sourceBand, targetRectangle, pm).getRawSamples());
                 }
-            } else if(targetBand instanceof VirtualBand) {
-                //System.out.println("skipping virtual band");
-            } else {
-                final Band sourceBand = sourceRasterMap.get(targetBand);
-                targetTile.setRawSamples(getSourceTile(sourceBand, targetRectangle, pm).getRawSamples());    
             }
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
+        } finally {
+            pm.done();
         }
     }
 

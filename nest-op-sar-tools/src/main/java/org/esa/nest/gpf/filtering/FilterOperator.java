@@ -26,6 +26,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.gpf.UndersamplingOp;
+import org.esa.nest.gpf.OperatorUtils;
 
 import java.awt.*;
 import java.text.MessageFormat;
@@ -96,66 +97,70 @@ public class FilterOperator extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        targetProduct = new Product(sourceProduct.getName(),
-                                    sourceProduct.getProductType(),
-                                    sourceProduct.getSceneRasterWidth(),
-                                    sourceProduct.getSceneRasterHeight());
+        try {
+            targetProduct = new Product(sourceProduct.getName(),
+                                        sourceProduct.getProductType(),
+                                        sourceProduct.getSceneRasterWidth(),
+                                        sourceProduct.getSceneRasterHeight());
 
-        Filter selectedFilter = null;
-        if (userDefinedKernelFile != null) {
-            selectedFilter = getUserDefinedFilter(userDefinedKernelFile);
-        } else if(selectedFilterName != null) {
-            selectedFilter = filterMap.get(selectedFilterName);
-        }
-
-        if(selectedFilter == null)
-            return;
-
-        bandMap = new HashMap<Band, Band>(5);
-        if (sourceBandNames == null || sourceBandNames.length == 0) {
-            final Band[] bands = sourceProduct.getBands();
-            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
-            for (Band band : bands) {
-                bandNameList.add(band.getName());
+            Filter selectedFilter = null;
+            if (userDefinedKernelFile != null) {
+                selectedFilter = getUserDefinedFilter(userDefinedKernelFile);
+            } else if(selectedFilterName != null) {
+                selectedFilter = filterMap.get(selectedFilterName);
             }
-            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
-        }
 
-        final Band[] sourceBands = new Band[sourceBandNames.length];
-        for (int i = 0; i < sourceBandNames.length; i++) {
-            final String sourceBandName = sourceBandNames[i];
-            final Band sourceBand = sourceProduct.getBand(sourceBandName);
-            if (sourceBand == null) {
-                throw new OperatorException("Source band not found: " + sourceBandName);
+            if(selectedFilter == null)
+                return;
+
+            bandMap = new HashMap<Band, Band>(5);
+            if (sourceBandNames == null || sourceBandNames.length == 0) {
+                final Band[] bands = sourceProduct.getBands();
+                final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+                for (Band band : bands) {
+                    bandNameList.add(band.getName());
+                }
+                sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
             }
-            sourceBands[i] = sourceBand;
+
+            final Band[] sourceBands = new Band[sourceBandNames.length];
+            for (int i = 0; i < sourceBandNames.length; i++) {
+                final String sourceBandName = sourceBandNames[i];
+                final Band sourceBand = sourceProduct.getBand(sourceBandName);
+                if (sourceBand == null) {
+                    throw new OperatorException("Source band not found: " + sourceBandName);
+                }
+                sourceBands[i] = sourceBand;
+            }
+
+            for(Band srcBand : sourceBands) {
+                final Band targetBand = new Band(srcBand.getName(), ProductData.TYPE_FLOAT32,
+                        sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+                targetBand.setUnit(srcBand.getUnit());
+                targetProduct.addBand(targetBand);
+
+                final String filterBandName = "tmp_filter_" + srcBand.getName();
+                final FilterBand filterBand = createFilterBand(selectedFilter, filterBandName, srcBand);
+                bandMap.put(targetBand, filterBand);
+
+                final Band existingBand = sourceProduct.getBand(filterBandName);
+                if(existingBand != null)
+                    sourceProduct.removeBand(existingBand);
+                sourceProduct.addBand(filterBand);
+            }
+
+            // copy meta data from source to target
+            ProductUtils.copyMetadata(sourceProduct, targetProduct);
+            ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
+            ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
+            ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+            targetProduct.setStartTime(sourceProduct.getStartTime());
+            targetProduct.setEndTime(sourceProduct.getEndTime());
+
+            targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 512);
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
         }
-
-        for(Band srcBand : sourceBands) {
-            final Band targetBand = new Band(srcBand.getName(), ProductData.TYPE_FLOAT32,
-                    sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
-            targetBand.setUnit(srcBand.getUnit());
-            targetProduct.addBand(targetBand);
-
-            final String filterBandName = "tmp_filter_" + srcBand.getName();
-            final FilterBand filterBand = createFilterBand(selectedFilter, filterBandName, srcBand);
-            bandMap.put(targetBand, filterBand);
-
-            final Band existingBand = sourceProduct.getBand(filterBandName);
-            if(existingBand != null)
-                sourceProduct.removeBand(existingBand);
-            sourceProduct.addBand(filterBand);
-        }
-
-        // copy meta data from source to target
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        targetProduct.setStartTime(sourceProduct.getStartTime());
-        targetProduct.setEndTime(sourceProduct.getEndTime());
-
-        targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 512);
     }
 
     /**

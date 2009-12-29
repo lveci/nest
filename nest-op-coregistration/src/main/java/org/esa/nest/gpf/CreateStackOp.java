@@ -338,21 +338,25 @@ public class CreateStackOp extends Operator {
 
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-        final Band sourceRaster = sourceRasterMap.get(targetBand);
-        final Product srcProduct = sourceRaster.getProduct();
+        try {
+            final Band sourceRaster = sourceRasterMap.get(targetBand);
+            final Product srcProduct = sourceRaster.getProduct();
 
-        final PixelPos[] sourcePixelPositions = ProductUtils.computeSourcePixelCoordinates(
-                srcProduct.getGeoCoding(),
-                srcProduct.getSceneRasterWidth(),
-                srcProduct.getSceneRasterHeight(),
-                masterProduct.getGeoCoding(),
-                targetTile.getRectangle());
-        final Rectangle sourceRectangle = getBoundingBox(
-                sourcePixelPositions,
-                srcProduct.getSceneRasterWidth(),
-                srcProduct.getSceneRasterHeight());
+            final PixelPos[] sourcePixelPositions = ProductUtils.computeSourcePixelCoordinates(
+                    srcProduct.getGeoCoding(),
+                    srcProduct.getSceneRasterWidth(),
+                    srcProduct.getSceneRasterHeight(),
+                    masterProduct.getGeoCoding(),
+                    targetTile.getRectangle());
+            final Rectangle sourceRectangle = getBoundingBox(
+                    sourcePixelPositions,
+                    srcProduct.getSceneRasterWidth(),
+                    srcProduct.getSceneRasterHeight());
 
-        collocateSourceBand(sourceRaster, sourceRectangle, sourcePixelPositions, targetTile, pm);
+            collocateSourceBand(sourceRaster, sourceRectangle, sourcePixelPositions, targetTile, pm);
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
+        }
     }
 
     private void collocateSourceBand(RasterDataNode sourceBand, Rectangle sourceRectangle, PixelPos[] sourcePixelPositions,

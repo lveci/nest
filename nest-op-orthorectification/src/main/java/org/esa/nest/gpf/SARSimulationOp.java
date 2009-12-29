@@ -171,10 +171,8 @@ public final class SARSimulationOp extends Operator {
 
             createTargetProduct();
 
-            //checkIfDEMInstalled();
-
         } catch(Exception e) {
-            throw new OperatorException(e);
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 

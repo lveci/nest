@@ -75,7 +75,7 @@ public final class FillHoleOp extends Operator {
             createTargetProduct();
 
         } catch(Exception e) {
-            throw new OperatorException(e);
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
@@ -147,30 +147,36 @@ public final class FillHoleOp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
-        final Rectangle targetTileRectangle = targetTile.getRectangle();
-        final int x0 = targetTileRectangle.x;
-        final int y0 = targetTileRectangle.y;
-        final int w  = targetTileRectangle.width;
-        final int h  = targetTileRectangle.height;
-        //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+        try {
+            final Rectangle targetTileRectangle = targetTile.getRectangle();
+            final int x0 = targetTileRectangle.x;
+            final int y0 = targetTileRectangle.y;
+            final int w  = targetTileRectangle.width;
+            final int h  = targetTileRectangle.height;
+            //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        final Rectangle sourceTileRectangle = getSourceRectangle(x0, y0, w, h);
-        final Band sourceBand = sourceProduct.getBand(targetBand.getName());
-        final Tile sourceTile = getSourceTile(sourceBand, sourceTileRectangle, pm);
-        final ProductData srcData = sourceTile.getDataBuffer();
-        final ProductData trgData = targetTile.getDataBuffer();
+            final Rectangle sourceTileRectangle = getSourceRectangle(x0, y0, w, h);
+            final Band sourceBand = sourceProduct.getBand(targetBand.getName());
+            final Tile sourceTile = getSourceTile(sourceBand, sourceTileRectangle, pm);
+            final ProductData srcData = sourceTile.getDataBuffer();
+            final ProductData trgData = targetTile.getDataBuffer();
 
-        final int maxY = y0 + h;
-        final int maxX = x0 + w;
-        double v;
-        for (int y = y0; y < maxY; ++y) {
-            for (int x = x0; x < maxX; ++x) {
-                v = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x, y));
-                if (v == NoDataValue) {
-                    v = getPixelValueByInterpolation(x, y, srcData, sourceTile);
+            final int maxY = y0 + h;
+            final int maxX = x0 + w;
+            double v;
+            for (int y = y0; y < maxY; ++y) {
+                for (int x = x0; x < maxX; ++x) {
+                    v = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x, y));
+                    if (v == NoDataValue) {
+                        v = getPixelValueByInterpolation(x, y, srcData, sourceTile);
+                    }
+                    trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), v);
                 }
-                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), v);
             }
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
+        } finally {
+            pm.done();
         }
     }
 

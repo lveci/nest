@@ -217,10 +217,9 @@ public class WarpOp extends Operator {
 
                 addSlaveGCPs(warpData, srcBand.getName());
             }
-
         } catch(Exception e) {
             openResidualsFile = true;
-            throw new OperatorException(e);
+            OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             if(openResidualsFile) {
                 final File residualsFile = getResidualsFile(sourceProduct);
@@ -326,7 +325,9 @@ public class WarpOp extends Operator {
             targetTile.setRawSamples(ProductData.createInstance(dataArray));
 
         } catch(Exception e) {
-            throw new OperatorException(e);
+            OperatorUtils.catchOperatorException(getId(), e);
+        } finally {
+            pm.done();
         }
     }
 

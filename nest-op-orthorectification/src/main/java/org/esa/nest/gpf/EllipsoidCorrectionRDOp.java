@@ -47,27 +47,6 @@ public final class EllipsoidCorrectionRDOp extends RangeDopplerGeocodingOp {
     }
 
     /**
-     * Create target product.
-     * @throws OperatorException The exception.
-     */
-    /*
-    protected void createTargetProduct() throws OperatorException, IOException {
-
-        super.targetProduct = new Product(super.sourceProduct.getName() + this.PRODUCT_SUFFIX,
-                                    super.sourceProduct.getProductType(),
-                                    targetImageWidth,
-                                    targetImageHeight);
-
-        addSelectedBands();
-
-        addGeoCoding();
-
-        // addLayoverShadowBitmasks(super.targetProduct);
-        
-        ProductUtils.copyMetadata(super.sourceProduct, super.targetProduct);
-    }
-    */
-    /**
      * The SPI is used to register this operator in the graph processing framework
      * via the SPI configuration file
      * {@code META-INF/services/org.esa.beam.framework.gpf.OperatorSpi}.

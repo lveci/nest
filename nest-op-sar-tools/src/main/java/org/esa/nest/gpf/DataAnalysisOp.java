@@ -103,17 +103,17 @@ public class DataAnalysisOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         try {
-        //final MetadataElement abs = OperatorUtils.getAbstractedMetadata(sourceProduct);
-        //sampleTypeIsComplex = abs.getAttributeString("sample_type").contains("COMPLEX");
+            //final MetadataElement abs = OperatorUtils.getAbstractedMetadata(sourceProduct);
+            //sampleTypeIsComplex = abs.getAttributeString("sample_type").contains("COMPLEX");
 
-        getNumOfBandsForStatistics();
+            getNumOfBandsForStatistics();
 
-        setInitialValues();
+            setInitialValues();
 
-        createTargetProduct();
+            createTargetProduct();
 
         } catch(Exception e) {
-            throw new OperatorException(e.getMessage());
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 

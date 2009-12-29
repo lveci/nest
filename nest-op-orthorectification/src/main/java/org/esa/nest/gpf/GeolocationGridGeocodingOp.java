@@ -164,7 +164,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
             }
 
         } catch(Exception e) {
-            throw new OperatorException(e);
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
@@ -519,7 +519,9 @@ public final class GeolocationGridGeocodingOp extends Operator {
                 }
             }
         } catch(Exception e) {
-            throw new OperatorException(e);
+            OperatorUtils.catchOperatorException(getId(), e);
+        } finally {
+            pm.done();
         }
     }
 

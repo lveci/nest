@@ -130,24 +130,28 @@ public class SpeckleFilterOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
 
-        sourceImageWidth = sourceProduct.getSceneRasterWidth();
-        sourceImageHeight = sourceProduct.getSceneRasterHeight();
+        try {
+            sourceImageWidth = sourceProduct.getSceneRasterWidth();
+            sourceImageHeight = sourceProduct.getSceneRasterHeight();
 
-        targetProduct = new Product(sourceProduct.getName(),
-                                    sourceProduct.getProductType(),
-                                    sourceProduct.getSceneRasterWidth(),
-                                    sourceProduct.getSceneRasterHeight());
-        OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
+            targetProduct = new Product(sourceProduct.getName(),
+                                        sourceProduct.getProductType(),
+                                        sourceProduct.getSceneRasterWidth(),
+                                        sourceProduct.getSceneRasterHeight());
+            OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
-        addSelectedBands();
+            addSelectedBands();
 
-        if(filter.equals(LEE_REFINED_FILTER)) {
-            filterSizeX = 7;
-            filterSizeY = 7;
+            if(filter.equals(LEE_REFINED_FILTER)) {
+                filterSizeX = 7;
+                filterSizeY = 7;
+            }
+
+            halfSizeX = filterSizeX / 2;
+            halfSizeY = filterSizeY / 2;
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
         }
-
-        halfSizeX = filterSizeX / 2;
-        halfSizeY = filterSizeY / 2;
     }
 
     private void addSelectedBands() {

@@ -94,7 +94,7 @@ public final class CreateCoherenceImageOp extends Operator {
 
             createTargetProduct();
         } catch(Exception e) {
-            throw new OperatorException(e.getMessage());
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
@@ -264,9 +264,8 @@ public final class CreateCoherenceImageOp extends Operator {
             }
 
         } catch(Exception e) {
-            throw new OperatorException(e);
+            OperatorUtils.catchOperatorException(getId(), e);
         }
-
     }
 
     private float[] createCoherenceImage(Rectangle targetTileRectangle, Band slaveBand, ProgressMonitor pm) {

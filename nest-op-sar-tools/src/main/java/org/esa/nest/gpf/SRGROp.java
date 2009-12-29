@@ -144,7 +144,7 @@ public class SRGROp extends Operator {
             }
 
         } catch(Exception e) {
-            throw new OperatorException("SRGR:"+e.getMessage());
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
@@ -261,8 +261,10 @@ public class SRGROp extends Operator {
             }
         }
       } catch(Exception e) {
-        throw new OperatorException("SRGR:"+e.getMessage());
-      }
+            OperatorUtils.catchOperatorException(getId(), e);
+        } finally {
+            pm.done();
+        }
     }
 
     /**

@@ -472,10 +472,10 @@ public class DeburstWSSOp extends Operator {
             }
             //startLine.set(index, startLineForBand);
 
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
+        } finally {
             pm.done();
-
-        } catch (Exception e) {
-            System.out.print("WSSDeburst.computeTileStack " + e.toString());
         }
     }
 

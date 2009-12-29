@@ -186,37 +186,37 @@ public class UndersamplingOp extends Operator {
      */
     private void initializeForSubSampling() throws OperatorException {
 
-        if (sourceBandNames == null || sourceBandNames.length == 0) {
-            final Band[] bands = sourceProduct.getBands();
-            final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
-            for (Band band : bands) {
-                bandNameList.add(band.getName());
+        try {
+            if (sourceBandNames == null || sourceBandNames.length == 0) {
+                final Band[] bands = sourceProduct.getBands();
+                final ArrayList<String> bandNameList = new ArrayList<String>(sourceProduct.getNumBands());
+                for (Band band : bands) {
+                    bandNameList.add(band.getName());
+                }
+                sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
             }
-            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
-        }
 
-        for (int i = 0; i < sourceBandNames.length; i++) {
-            final String unit1 = sourceProduct.getBand(sourceBandNames[i]).getUnit();
-            if (unit1 != null && unit1.contains(Unit.REAL)) {
-                if (i+1 < sourceBandNames.length &&
-                    sourceProduct.getBand(sourceBandNames[i+1]).getUnit().contains(Unit.IMAGINARY)) {
-                    i++;
-                } else {
-                    throw new OperatorException("Real and imaginary bands should be selected in pairs");
+            for (int i = 0; i < sourceBandNames.length; i++) {
+                final String unit1 = sourceProduct.getBand(sourceBandNames[i]).getUnit();
+                if (unit1 != null && unit1.contains(Unit.REAL)) {
+                    if (i+1 < sourceBandNames.length &&
+                        sourceProduct.getBand(sourceBandNames[i+1]).getUnit().contains(Unit.IMAGINARY)) {
+                        i++;
+                    } else {
+                        throw new OperatorException("Real and imaginary bands should be selected in pairs");
+                    }
                 }
             }
-        }
 
-        subsetReader = new ProductSubsetBuilder();
-        final ProductSubsetDef subsetDef = new ProductSubsetDef();
+            subsetReader = new ProductSubsetBuilder();
+            final ProductSubsetDef subsetDef = new ProductSubsetDef();
 
-        subsetDef.addNodeNames(sourceProduct.getTiePointGridNames());
-        subsetDef.addNodeNames(sourceBandNames);
-        subsetDef.setSubSampling(subSamplingX, subSamplingY);
-        subsetDef.setIgnoreMetadata(false);
-        subsetDef.setTreatVirtualBandsAsRealBands(true);
+            subsetDef.addNodeNames(sourceProduct.getTiePointGridNames());
+            subsetDef.addNodeNames(sourceBandNames);
+            subsetDef.setSubSampling(subSamplingX, subSamplingY);
+            subsetDef.setIgnoreMetadata(false);
+            subsetDef.setTreatVirtualBandsAsRealBands(true);
 
-        try {
             targetProduct = subsetReader.readProductNodes(sourceProduct, subsetDef);
 
             ProductUtils.copyMetadata(sourceProduct, targetProduct);
@@ -227,8 +227,8 @@ public class UndersamplingOp extends Operator {
 
             updateTargetProductMetadata(subSamplingX, subSamplingY);
 
-        } catch (Throwable t) {
-            throw new OperatorException(t);
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
         }
     }
 
@@ -661,12 +661,18 @@ public class UndersamplingOp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
-        if (method.equals(SUB_SAMPLING)) {
-            computeTileUsingSubSampling(targetBand, targetTile, pm);
-        } else if (method.equals(KERNEL_FILTERING)) {
-            computeTileUsingKernelFiltering(targetBand, targetTile, pm);
-        } else {
-            throw new OperatorException("Unknown undersampling method: " + method);
+        try {
+            if (method.equals(SUB_SAMPLING)) {
+                computeTileUsingSubSampling(targetBand, targetTile, pm);
+            } else if (method.equals(KERNEL_FILTERING)) {
+                computeTileUsingKernelFiltering(targetBand, targetTile, pm);
+            } else {
+                throw new OperatorException("Unknown undersampling method: " + method);
+            }
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
+        } finally {
+            pm.done();
         }
     }
 
