@@ -2470,7 +2470,11 @@ public final class ERSCalibrator implements Calibrator {
      * @return The antenna pattern gain square.
      */
     private double getNewAntennaPatternGainSquareForVMPProduct(final int rangeIndex) {
-        return g2Im(lookAngles[rangeIndex] * MathUtils.RTOD);
+        if (isERS1Mission) { // ERS-1
+            return g2Im(lookAngles[rangeIndex] * MathUtils.RTOD);
+        } else {
+            return g2ERS2(lookAngles[rangeIndex] * MathUtils.RTOD);
+        }
     }
 
     private double getNewAntennaPatternGainSquareForPGSProduct(final int rangeIndex) {
@@ -2506,7 +2510,7 @@ public final class ERSCalibrator implements Calibrator {
         final int tw = targetTileRectangle.width;
         final int th = targetTileRectangle.height;
         final ProductData trgData = targetTile.getDataBuffer();
-//        System.out.println("RetroOp: tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
+        //System.out.println("RetroOp: tx0 = " + tx0 + ", ty0 = " + ty0 + ", tw = " + tw + ", th = " + th);
 
         final Band sourceBand1 = sourceProduct.getBand(srcBandName);
         final Tile sourceTile = getSourceTile(sourceBand1, targetTileRectangle, pm);
@@ -2550,6 +2554,7 @@ public final class ERSCalibrator implements Calibrator {
             }
 
             for (int y = ty0; y < ty0 + th; y++) {
+
                 final int index = targetTile.getDataBufferIndex(x, y);
 
                 if (bandUnit == Unit.UnitType.AMPLITUDE) {
