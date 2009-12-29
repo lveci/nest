@@ -1,5 +1,5 @@
 /*
- * $Id: FigureChangeEvent.java,v 1.3 2009-12-22 17:30:01 lveci Exp $
+ * $Id: FigureChangeEvent.java,v 1.4 2009-12-29 14:18:36 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -47,11 +47,11 @@ public class FigureChangeEvent extends EventObject {
     /**
      * Figures have been added to a (source-) figure.
      */
-    public final static Type FIGURES_ADDED = Type.FIGURE_CHANGED;
+    public final static Type FIGURES_ADDED = Type.FIGURES_ADDED;
     /**
      * Figures have been removed from a (source-) figure.
      */
-    public final static Type FIGURES_REMOVED = Type.FIGURE_CHANGED;
+    public final static Type FIGURES_REMOVED = Type.FIGURES_REMOVED;
     /**
      * A (source-) figure has changed.
      */
