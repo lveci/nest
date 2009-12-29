@@ -212,7 +212,7 @@ public class Project extends Observable {
                         notifyEvent(true);
                     }
                 }
-            }, 5000, 1000*30);
+            }, 2000, 1000*5);
     }
 
     private void addProductLink(final Product product) {

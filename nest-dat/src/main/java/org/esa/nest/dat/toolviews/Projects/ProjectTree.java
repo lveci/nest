@@ -106,7 +106,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                 createMenuItem(popup, "Close Project");
                 createMenuItem(popup, "Refresh Project");
                 addSeparator(popup);
-                createMenuItem(popup, "Import Dataset");                
+                createMenuItem(popup, "Import Datasets");
             } else {
                 addSeparator(popup);
                 createMenuItem(popup, "Create Folder");
@@ -171,11 +171,12 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
     public void actionPerformed(ActionEvent e) {
 
         final DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
+        final String actionCmd = e.getActionCommand();
 
-        if (e.getActionCommand().equals("Create Folder")) {
+        if (actionCmd.equals("Create Folder")) {
             final ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
             project.createNewFolder(subFolder);
-        } else if(e.getActionCommand().equals("Remove Folder")) {
+        } else if(actionCmd.equals("Remove Folder")) {
             if (parentNode != null) {
                 final Object context = parentNode.getUserObject();
                 if (context != null) {
@@ -184,7 +185,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                     project.deleteFolder(parentFolder, subFolder);
                 }
             }
-        } else if(e.getActionCommand().equals("Rename Folder")) {
+        } else if(actionCmd.equals("Rename Folder")) {
             if (parentNode != null) {
                 final Object context = parentNode.getUserObject();
                 if (context != null) {
@@ -192,7 +193,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                     project.renameFolder(subFolder);
                 }
             }
-        } else if(e.getActionCommand().equals("Remove")) {
+        } else if(actionCmd.equals("Remove")) {
             final ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
             if (parentNode != null && parentFolder != null) {
                 final ProjectFile file = (ProjectFile) menuContext;
@@ -201,48 +202,48 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
                 if (status == JOptionPane.YES_OPTION)
                     project.removeFile(parentFolder, file.getFile());
             }
-        } else if(e.getActionCommand().equals("Open")) {
+        } else if(actionCmd.equals("Open")) {
             final ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
             final ProjectFile file = (ProjectFile) menuContext;
             Project.openFile(parentFolder, file.getFile());
-        } else if(e.getActionCommand().equals("Open Subset")) {
+        } else if(actionCmd.equals("Open Subset")) {
             final ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
             final ProjectFile file = (ProjectFile) menuContext;
             Project.openSubset(parentFolder, file.getFile());
-        } else if(e.getActionCommand().equals("Import as DIMAP")) {
+        } else if(actionCmd.equals("Import as DIMAP")) {
             final ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
             final ProjectFile file = (ProjectFile) menuContext;
             project.importFile(parentFolder, file.getFile());
-        } else if(e.getActionCommand().equals("Import Subset as DIMAP")) {
+        } else if(actionCmd.equals("Import Subset as DIMAP")) {
             final ProjectSubFolder parentFolder = (ProjectSubFolder)parentNode.getUserObject();
             final ProjectFile file = (ProjectFile) menuContext;
             project.importSubset(parentFolder, file.getFile());
-        } else if(e.getActionCommand().equals("Import Datasets")) {
+        } else if(actionCmd.equals("Import Datasets")) {
             ImportBrowserAction.getInstance().ShowImportBrowser();
-        } else if(e.getActionCommand().equals("Clear")) {
+        } else if(actionCmd.equals("Clear")) {
             final ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
             project.clearFolder(subFolder);
-        } else if(e.getActionCommand().equals("Expand All")) {
+        } else if(actionCmd.equals("Expand All")) {
             expandAll();
-        } else if(e.getActionCommand().equals("Expand")) {
+        } else if(actionCmd.equals("Expand")) {
             expandPath(selectedPath);
-        } else if(e.getActionCommand().equals("Collapse")) {
+        } else if(actionCmd.equals("Collapse")) {
             collapsePath(selectedPath);
-        } else if(e.getActionCommand().equals("New Project...")) {
+        } else if(actionCmd.equals("New Project...")) {
             project.CreateNewProject();
-        } else if(e.getActionCommand().equals("Load Project...")) {
+        } else if(actionCmd.equals("Load Project...")) {
             project.LoadProject();
-        } else if(e.getActionCommand().equals("Save Project As...")) {
+        } else if(actionCmd.equals("Save Project As...")) {
             project.SaveProjectAs();
-        } else if(e.getActionCommand().equals("Close Project")) {
+        } else if(actionCmd.equals("Close Project")) {
             project.CloseProject();
-        } else if(e.getActionCommand().equals("Refresh Project")) {
+        } else if(actionCmd.equals("Refresh Project")) {
             project.refreshProjectTree();
             project.notifyEvent(true);
-        } else if(e.getActionCommand().equals("New ProductSet...")) {
+        } else if(actionCmd.equals("New ProductSet...")) {
             final ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
             project.createNewProductSet(subFolder);
-        } else if(e.getActionCommand().equals("New Graph...")) {
+        } else if(actionCmd.equals("New Graph...")) {
             final ProjectSubFolder subFolder = (ProjectSubFolder) menuContext;
             Project.createNewGraph(subFolder);
         }
