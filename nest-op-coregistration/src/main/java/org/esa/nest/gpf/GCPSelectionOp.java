@@ -282,6 +282,13 @@ public class GCPSelectionOp extends Operator {
     public void computeTileStack(Map<Band, Tile> targetTileMap, Rectangle targetRectangle, ProgressMonitor pm)
                                 throws OperatorException {
         try {
+            /*
+            int x0 = targetRectangle.x;
+            int y0 = targetRectangle.y;
+            int w = targetRectangle.width;
+            int h = targetRectangle.height;
+            System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
+            */
             for(Band targetBand : targetProduct.getBands()) {
                 final Tile targetTile = targetTileMap.get(targetBand);
                 if(targetTile == null) continue;
@@ -491,9 +498,9 @@ public class GCPSelectionOp extends Operator {
         final double[] sI = new double[cWindowWidth*cWindowHeight];
         final float x0 = gcpPixelPos.x;
         final float y0 = gcpPixelPos.y;
-        final int xul = (int)x0 - cHalfWindowWidth + 1;
-        final int yul = (int)y0 - cHalfWindowHeight + 1;
-        final Rectangle slaveImagetteRectangle = new Rectangle(xul, yul, cWindowWidth + 1, cWindowHeight + 1);
+        final int xul = (int)x0 - cHalfWindowWidth;
+        final int yul = (int)y0 - cHalfWindowHeight;
+        final Rectangle slaveImagetteRectangle = new Rectangle(xul, yul, cWindowWidth + 3, cWindowHeight + 3);
         int k = 0;
 
         try {
