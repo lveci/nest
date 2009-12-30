@@ -77,6 +77,15 @@
             <parent>sartools</parent>
             <helpId>MultilookOp</helpId>
         </action>
+		
+		<action>
+            <id>TileStackOp</id>
+            <class>org.esa.nest.dat.TileStackOpAction</class>
+            <text>TileStack</text>
+            <shortDescr>TileStack</shortDescr>
+            <parent>sartools</parent>
+            <helpId>TileStackOp</helpId>
+        </action>
 
         <!--action>
             <id>FocusingAdjustmentOp</id>
@@ -187,8 +196,8 @@
         <action>
             <id>WSSMosaicOp</id>
             <class>org.esa.nest.dat.WSSMosaicOpAction</class>
-            <text>WSS Mosaic (coming soon)</text>
-            <shortDescr>Invoke the ASAR WSS Mosaic operator.</shortDescr>
+            <text>WSS Deburst, Detect and Mosaic</text>
+            <shortDescr>Graph to deburst, detect and mosaic a WSS product</shortDescr>
             <parent>ASARWSS</parent>
             <placeAfter>WSSDeBurstOp</placeAfter>
             <helpId>WSSMosiacOp</helpId>

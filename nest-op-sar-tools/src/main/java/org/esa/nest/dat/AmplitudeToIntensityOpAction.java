@@ -73,9 +73,16 @@ public class AmplitudeToIntensityOpAction extends AbstractVisatAction {
     }
 
     private static String replaceName(String bandName, final String fromName, final String toName) {
-        bandName = bandName.replace(fromName, toName);
-        if(bandName.equals("Sigma0") || bandName.equals("Gamma0") || bandName.equals("Beta0")) {
-            bandName = toName;
+        if(bandName.contains(fromName)) {
+            bandName = bandName.replace(fromName, toName);
+        } else if(bandName.contains("Sigma0")) {
+            bandName = bandName.replace("Sigma0", toName);
+        } else if(bandName.contains("Gamma0")) {
+            bandName = bandName.replace("Gamma0", toName);
+        } else if(bandName.contains("Beta0")) {
+            bandName = bandName.replace("Beta0", toName);
+        } else {
+            bandName = toName +'_'+ bandName;
         }
         return bandName;
     }

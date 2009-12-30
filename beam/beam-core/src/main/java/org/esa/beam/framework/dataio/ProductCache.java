@@ -12,6 +12,7 @@ import java.util.ArrayList;
  */
 public final class ProductCache {
     private final Map<File, Product> productMap = new HashMap<File, Product>(10);
+    private final Map<File, Long> timeStampMap = new HashMap<File, Long>(10);
     private final ArrayList<File> fileList = new ArrayList<File>(10);
     private static final ProductCache theInstance = new ProductCache();
 
@@ -24,6 +25,7 @@ public final class ProductCache {
 
     public void addProduct(final File file, final Product p) {
         productMap.put(file, p);
+        //timeStampMap.put(file, file.lastModified());
 
         fileList.remove(file);
         fileList.add(0, file);
@@ -36,7 +38,10 @@ public final class ProductCache {
     }
 
     public Product getProduct(final File file) {
-        return productMap.get(file);
+        final Product prod = productMap.get(file);
+        if(prod != null && file.lastModified() == prod.getFileLocation().lastModified())
+            return prod;
+        return null;
     }
 
     public void removeProduct(final File file) {

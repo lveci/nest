@@ -335,7 +335,7 @@ public final class SARSimulationOp extends Operator {
     private void addSelectedBands() {
 
         // add master band first
-        Band targetBand = new Band("intensity_mst",
+        Band targetBand = new Band("Intensity_mst",
                                    ProductData.TYPE_FLOAT32,
                                    sourceImageWidth,
                                    sourceImageHeight);
@@ -419,8 +419,8 @@ public final class SARSimulationOp extends Operator {
         final int h  = targetRectangle.height;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        final Tile targetTile = targetTiles.get(targetProduct.getBand("intensity_mst"));
-        final ProductData masterBuffer = targetTiles.get(targetProduct.getBand("intensity_mst")).getDataBuffer();
+        final Tile targetTile = targetTiles.get(targetProduct.getBand("Intensity_mst"));
+        final ProductData masterBuffer = targetTiles.get(targetProduct.getBand("Intensity_mst")).getDataBuffer();
         ProductData layoverShadowMaskBuffer = null;
         if (saveLayoverShadowMask) {
             layoverShadowMaskBuffer = targetTiles.get(targetProduct.getBand("layover_shadow_mask")).getDataBuffer();

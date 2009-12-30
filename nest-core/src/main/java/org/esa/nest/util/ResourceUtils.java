@@ -36,7 +36,8 @@ public final class ResourceUtils {
                 deleteDir(new File(dir, aChild));
             }
         }
-        dir.delete();
+        if(!dir.delete())
+            System.out.println("Could not delete "+dir.getName());
 	}
 
     public static File GetFilePath(String title, String formatName, String extension, String description,
