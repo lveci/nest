@@ -1,5 +1,5 @@
 /*
- * $Id: AsarProductFile.java,v 1.8 2009-12-21 21:08:18 lveci Exp $
+ * $Id: AsarProductFile.java,v 1.9 2009-12-30 21:03:00 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -22,6 +22,7 @@ import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.Debug;
 
 import javax.imageio.stream.ImageInputStream;
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -34,7 +35,7 @@ import java.util.Arrays;
  * ASAR data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.8 $ $Date: 2009-12-21 21:08:18 $
+ * @version $Revision: 1.9 $ $Date: 2009-12-30 21:03:00 $
  * @see org.esa.beam.dataio.envisat.ProductFile
  */
 public class AsarProductFile extends ProductFile {
@@ -782,7 +783,7 @@ public class AsarProductFile extends ProductFile {
 
     private void processWSSImageRecordMetadata(Product product) {
 
-        for (Band band : product.getBands()) {
+        for (final Band band : product.getBands()) {
 
             if(band.getUnit().equals("imaginary"))
                 continue;
@@ -798,36 +799,50 @@ public class AsarProductFile extends ProductFile {
                 bandElem = new MetadataElement(band.getName());
                 imgRecElem.addElement(bandElem);
             }
+            final MetadataElement bandElemement = bandElem;
 
             final RecordInfo recInfo = new RecordInfo("Line");
             recInfo.add("t", ProductData.TYPE_UTC, 1, "", "");
             final Record lineRecord = Record.create(recInfo);
 
-            try {
-                final BandLineReader bandLineReader = getBandLineReader(band);
-                final RecordReader recReader = bandLineReader.getPixelDataReader();
-                final ImageInputStream istream = getDataInputStream();
+            final SwingWorker worker = new SwingWorker() {
 
-                final long datasetOffset = recReader.getDSD().getDatasetOffset();
-                final long recordSize = recReader.getDSD().getRecordSize();
+                @Override
+                protected Object doInBackground() throws Exception {
+                    try {
+                        final BandLineReader bandLineReader = getBandLineReader(band);
+                        final RecordReader recReader = bandLineReader.getPixelDataReader();
+                        final ImageInputStream istream = getDataInputStream();
 
-                final int height = band.getRasterHeight();
-                final double[] timeData = new double[height];
-                for (int y = 0; y < height; ++y) {
+                        final long datasetOffset = recReader.getDSD().getDatasetOffset();
+                        final long recordSize = recReader.getDSD().getRecordSize();
 
-                    istream.seek(datasetOffset + (y * recordSize));
-                    lineRecord.readFrom(istream);
+                        final int height = band.getRasterHeight();
+                        final double[] timeData = new double[height];
+                        for (int y = 0; y < height; ++y) {
 
-                    timeData[y] = ((ProductData.UTC) lineRecord.getFieldAt(0).getData()).getMJD();
+                            istream.seek(datasetOffset + (y * recordSize));
+                            lineRecord.readFrom(istream);
+
+                            timeData[y] = ((ProductData.UTC) lineRecord.getFieldAt(0).getData()).getMJD();
+                        }
+
+                        final MetadataAttribute attribute = new MetadataAttribute("t", ProductData.TYPE_FLOAT64, height);
+                        attribute.setDataElems(timeData);
+                        bandElemement.addAttribute(attribute);
+
+                    } catch (IOException e) {
+                        System.out.print("processWSSImageRecordMetadata " + e.toString());
+                    }
+                    return null;
                 }
 
-                final MetadataAttribute attribute = new MetadataAttribute("t", ProductData.TYPE_FLOAT64, height);
-                attribute.setDataElems(timeData);
-                bandElem.addAttribute(attribute);
+                @Override
+                public void done() {
 
-            } catch (IOException e) {
-                System.out.print("processWSSImageRecordMetadata " + e.toString());
-            }
+                }
+            };
+            worker.execute();
         }
     }
 

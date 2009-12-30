@@ -85,7 +85,11 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         graphEx.addObserver(this);
 
         initUI();
-        super.getJDialog().setMinimumSize(new Dimension(600, 500));
+        if(this.allowGraphBuilding) {
+            super.getJDialog().setMinimumSize(new Dimension(600, 700));
+        } else {
+            super.getJDialog().setMinimumSize(new Dimension(600, 500));
+        }
     }
 
     /**

@@ -259,11 +259,14 @@ public class WarpOp extends Operator {
             inc = 2;
         for(int i=0; i < numSrcBands; i+=inc) {
             final Band srcBand = sourceProduct.getBandAt(i);
-            final Band targetBand = targetProduct.addBand(srcBand.getName(), ProductData.TYPE_FLOAT32);
+            Band targetBand;
             if(srcBand == masterBand || srcBand == masterBand2) {
+                targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct);
                 targetBand.setSourceImage(srcBand.getSourceImage());
+            } else {
+                targetBand = targetProduct.addBand(srcBand.getName(), ProductData.TYPE_FLOAT32);
+                ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
             }
-            ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
             sourceRasterMap.put(targetBand, srcBand);
 
             if(complexCoregistration) {

@@ -142,6 +142,29 @@ public class DeburstWSSOp extends Operator {
         targetHeight = mpp.getAttributeInt("num_output_lines") / 3;
         targetWidth = mpp.getAttributeInt("num_samples_per_line");
 
+        final int numReadyBands = getNumReadyBands(sourceProduct);
+        final int numRealBands = sourceProduct.getNumBands()/2;
+        if(numReadyBands != numRealBands) {
+            throw new OperatorException("Source product has not completed reading time codes. ("+
+                    numReadyBands+" of "+numRealBands+ " read) Please try again.");
+        }
+    }
+
+    private static int getNumReadyBands(final Product srcProduct) {
+        final MetadataElement imgRecElem = srcProduct.getMetadataRoot().getElement("Image Record");
+        int cnt = 0;
+        if(imgRecElem == null) return cnt;
+        for(Band srcBand : srcProduct.getBands()) {
+            if(!srcBand.getUnit().equals(Unit.REAL))
+                continue;
+            final MetadataElement bandElem = imgRecElem.getElement(srcBand.getName());
+            if(bandElem == null) return cnt;
+
+            final MetadataAttribute attrib = bandElem.getAttribute("t");
+            if(attrib == null) return cnt;
+            ++cnt;
+        }
+        return cnt;
     }
 
     /**
@@ -385,18 +408,6 @@ public class DeburstWSSOp extends Operator {
     @Override
     public synchronized void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
-    /**
-     * Called by the framework in order to compute a tile for the given target band.
-     * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
-     *
-     * @param targetBand The target band.
-     * @param targetTile The current tile associated with the target band to be computed.
-     * @param pm         A progress monitor which should be used to determine computation cancelation requests.
-     * @throws org.esa.beam.framework.gpf.OperatorException
-     *          If an error occurs during computation of the target raster.
-     */
-    //@Override
-    //public synchronized void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         Tile targetTileI = null, targetTileQ = null, targetTileIntensity = null;
         //final Rectangle targetRectangle = targetTile.getRectangle();
         //System.out.println("targetRect " + targetRectangle.x + " " + targetRectangle.y + " w "
