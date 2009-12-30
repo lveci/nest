@@ -1023,12 +1023,7 @@ public class ASARCalibrator implements Calibrator {
             for (int x = x0; x < xMax; x++) {
 
                 final int xx = x - x0;
-                if (srgrFlag) {
-                    targetTileSlantRange[yy][xx] = computeSlantRange(x, y, srgrConvParam); // in m
-                } else {
-                    targetTileSlantRange[yy][xx] = Constants.halfLightSpeed *
-                            slantRangeTime.getPixelDouble(x, y, TiePointGrid.InterpMode.QUADRATIC)/1000000000.0; // in m
-                }
+                targetTileSlantRange[yy][xx] = computeSlantRange(x, y, srgrConvParam); // in m
 
                 final double localEarthRadius = getEarthRadius(x, y);
 
@@ -1351,7 +1346,10 @@ public class ASARCalibrator implements Calibrator {
         final double zeroDopplerTime = firstLineUTC + y*lineTimeInterval;
         final double satelitteHeight = computeSatelliteHeight(zeroDopplerTime, orbitStateVectors);
 
-        AbstractMetadata.SRGRCoefficientList srgrConvParam = getSRGRCoefficientsForARangeLine(zeroDopplerTime);
+        AbstractMetadata.SRGRCoefficientList srgrConvParam = null;
+        if (srgrFlag) {
+            srgrConvParam = getSRGRCoefficientsForARangeLine(zeroDopplerTime);
+        }
 
         final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
 
