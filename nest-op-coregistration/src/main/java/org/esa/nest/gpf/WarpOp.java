@@ -194,7 +194,7 @@ public class WarpOp extends Operator {
                 int parseIdex = 0;
                 computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute initial warp polynomial
                 outputCoRegistrationInfo(
-                        sourceProduct, warpPolynomialOrder, warpData, i!=0, 0.0f, parseIdex, srcBand.getName());
+                        sourceProduct, warpPolynomialOrder, warpData, i!=1, 0.0f, parseIdex, srcBand.getName());
 
                 if (warpData.rmsMean > rmsThreshold && eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
                     final float threshold = (float)warpData.rmsMean;
