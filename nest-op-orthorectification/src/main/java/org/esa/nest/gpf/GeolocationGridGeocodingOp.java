@@ -442,6 +442,9 @@ public final class GeolocationGridGeocodingOp extends Operator {
      */
     private void getTiePointGrids() {
         slantRangeTime = OperatorUtils.getSlantRangeTime(sourceProduct);
+        if (slantRangeTime == null) {
+            throw new OperatorException("Product without slant range time tie point grid");
+        }
     }
 
 

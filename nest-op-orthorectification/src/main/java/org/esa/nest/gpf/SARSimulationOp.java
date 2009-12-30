@@ -278,7 +278,15 @@ public final class SARSimulationOp extends Operator {
      */
     private void getTiePointGrid() {
         latitudeTPG = OperatorUtils.getLatitude(sourceProduct);
+        if (latitudeTPG == null) {
+            throw new OperatorException("Product without latitude tie point grid");
+        }
+
         longitudeTPG = OperatorUtils.getLongitude(sourceProduct);
+        if (longitudeTPG == null) {
+            throw new OperatorException("Product without longitude tie point grid");
+        }
+
     }
 
     /**

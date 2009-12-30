@@ -330,7 +330,14 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     private void getTiePointGrid() {
         latitude = OperatorUtils.getLatitude(sourceProduct);
+        if (latitude == null) {
+            throw new OperatorException("Product without latitude tie point grid");
+        }
+
         longitude = OperatorUtils.getLongitude(sourceProduct);
+        if (longitude == null) {
+            throw new OperatorException("Product without longitude tie point grid");
+        }
     }
 
     /**
