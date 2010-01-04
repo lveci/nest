@@ -1,13 +1,11 @@
 package org.esa.nest.dat.layersrc;
 
+import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.glayer.Layer;
-import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.glevel.MultiLevelImage;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
-import com.bc.ceres.binding.PropertyContainer;
-import com.bc.ceres.binding.PropertySet;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.gpf.oceantools.WindFieldEstimationOp;

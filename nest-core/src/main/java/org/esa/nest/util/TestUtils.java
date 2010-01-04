@@ -1,9 +1,9 @@
 package org.esa.nest.util;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
@@ -87,7 +87,7 @@ public class TestUtils {
             throwErr(name + " is " + val + ", expecting " + trueValue);
     }
 
-    public static void compareMetadata(Product testProduct, Product expectedProduct, String[] excemptionList) throws Exception {
+    private static void compareMetadata(Product testProduct, Product expectedProduct, String[] excemptionList) throws Exception {
         final MetadataElement testAbsRoot = AbstractMetadata.getAbstractedMetadata(testProduct);
         if(testAbsRoot == null)
             throwErr("Metadata is null");
@@ -181,7 +181,7 @@ public class TestUtils {
         }
     }
 
-    static void throwErr(String description) throws Exception {
+    private static void throwErr(String description) throws Exception {
         throw new Exception(description);
     }
 }

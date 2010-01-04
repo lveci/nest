@@ -44,7 +44,7 @@ public final class ProductSet {
         return productSetFile;
     }
 
-    public boolean addProduct(final File file) {
+    boolean addProduct(final File file) {
         final ProductReader reader = ProductIO.getProductReaderForFile(file);
         if (reader != null) {
             fileList.add(file);
@@ -82,7 +82,7 @@ public final class ProductSet {
         XMLSupport.SaveXML(doc, productSetFile.getAbsolutePath());
     }
 
-    public boolean Load(final File file) {
+    boolean Load(final File file) {
 
         if(!file.exists())
             return false;

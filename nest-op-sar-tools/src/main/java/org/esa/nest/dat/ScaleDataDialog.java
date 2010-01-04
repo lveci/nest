@@ -1,11 +1,11 @@
 package org.esa.nest.dat;
 
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.ModelessDialog;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.VirtualBand;
-import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.DialogUtils;
 
@@ -15,7 +15,7 @@ import java.awt.*;
 /**
  * Scale data action dialog
  */
-public class ScaleDataDialog extends ModelessDialog {
+class ScaleDataDialog extends ModelessDialog {
 
     private JTextField gainField = new JTextField("1");
     private JTextField biasField = new JTextField("0");

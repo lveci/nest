@@ -174,7 +174,7 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
     }
 
 
-    class RadioListener implements ActionListener {
+    private class RadioListener implements ActionListener {
 
         public void actionPerformed(ActionEvent e) {
 

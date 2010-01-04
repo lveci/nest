@@ -17,11 +17,11 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDescriptor {
+class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDescriptor {
 
-    public static final String NAME = "ACE2_5Min";
-    public static final String DB_FILE_SUFFIX = "_5M.ACE2";
-    public static final String ARCHIVE_URL_PATH = "http://nest.s3.amazonaws.com/data/5M_HEIGHTS.zip";
+    private static final String NAME = "ACE2_5Min";
+    private static final String DB_FILE_SUFFIX = "_5M.ACE2";
+    private static final String ARCHIVE_URL_PATH = "http://nest.s3.amazonaws.com/data/5M_HEIGHTS.zip";
     public static final int NUM_X_TILES = 24;
     public static final int NUM_Y_TILES = 12;
     public static final int DEGREE_RES = 15;
@@ -29,7 +29,7 @@ public class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDes
     public static final int NO_DATA_VALUE = -500;
     public static final int RASTER_WIDTH = NUM_X_TILES * PIXEL_RES;
     public static final int RASTER_HEIGHT = NUM_Y_TILES * PIXEL_RES;
-    public static final Datum DATUM = Datum.WGS_84;
+    private static final Datum DATUM = Datum.WGS_84;
 
     private File aceDemInstallDir = null;
 
@@ -72,32 +72,24 @@ public class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDes
 
     @Deprecated
     public ElevationModel createDem() {
-        try {
-            if(!isDemInstalled()) {
-                installDemFiles(null);
-            }
-            return new ACE2_5MinElevationModel(this, Resampling.NEAREST_NEIGHBOUR);
-        } catch (IOException e) {
-            return null;
+        if (!isDemInstalled()) {
+            installDemFiles(null);
         }
+        return new ACE2_5MinElevationModel(this, Resampling.NEAREST_NEIGHBOUR);
     }
 
     public ElevationModel createDem(Resampling resamplingMethod) {
-        try {
-            if(!isDemInstalled()) {
-                installDemFiles(null);
-            }
-            return new ACE2_5MinElevationModel(this, resamplingMethod);
-        } catch (IOException e) {
-            return null;
+        if (!isDemInstalled()) {
+            installDemFiles(null);
         }
+        return new ACE2_5MinElevationModel(this, resamplingMethod);
     }
 
     public File getTileFile(int minLon, int minLat) {
         return new File(getDemInstallDir(), createTileFilename(minLat, minLon));
     }
 
-    public static String createTileFilename(int minLat, int minLon) {
+    private static String createTileFilename(int minLat, int minLon) {
         String latString = minLat < 0 ? Math.abs(minLat) + "S" : minLat + "N";
         while (latString.length() < 3) {
             latString = '0' + latString;

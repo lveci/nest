@@ -8,7 +8,7 @@ import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
  * Map Projection action.
  *
  */
-public class MapProjectionOpAction extends AbstractVisatAction {
+class MapProjectionOpAction extends AbstractVisatAction {
 
     private NestSingleTargetProductDialog dialog = null;
 

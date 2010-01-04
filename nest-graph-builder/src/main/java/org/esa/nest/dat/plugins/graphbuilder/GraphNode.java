@@ -191,7 +191,7 @@ public class GraphNode {
         return hotSpotSize;
     }
 
-    public int getHalfNodeWidth() {
+    int getHalfNodeWidth() {
         return halfNodeWidth;
     }
 

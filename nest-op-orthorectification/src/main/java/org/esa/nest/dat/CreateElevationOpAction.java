@@ -8,7 +8,7 @@ import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
  * CreateElevationOp action.
  *
  */
-public class CreateElevationOpAction extends AbstractVisatAction {
+class CreateElevationOpAction extends AbstractVisatAction {
 
     private NestSingleTargetProductDialog dialog = null;
 

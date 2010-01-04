@@ -1,12 +1,12 @@
 package org.esa.nest.dat.layersrc;
 
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.Pin;
-import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.Pin;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductNodeGroup;
+import org.esa.beam.framework.ui.layer.AbstractLayerSourceAssistantPage;
 import org.esa.beam.framework.ui.layer.LayerSource;
 import org.esa.beam.framework.ui.layer.LayerSourcePageContext;
-import org.esa.beam.framework.ui.layer.AbstractLayerSourceAssistantPage;
 
 /**
  * A source for {@link org.esa.nest.dat.layersrc.GCPVectorLayer}s.

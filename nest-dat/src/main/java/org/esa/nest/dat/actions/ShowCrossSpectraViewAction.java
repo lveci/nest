@@ -31,7 +31,7 @@ public class ShowCrossSpectraViewAction extends ExecCommand {
         openProductSceneView((RasterDataNode) visatApp.getSelectedProductNode());
     }
 
-    public void openProductSceneView(final RasterDataNode selectedProductNode) {
+    void openProductSceneView(final RasterDataNode selectedProductNode) {
         final VisatApp visatApp = VisatApp.getApp();
         visatApp.setStatusBarMessage("Creating polar view...");
         UIUtils.setRootFrameWaitCursor(visatApp.getMainFrame());

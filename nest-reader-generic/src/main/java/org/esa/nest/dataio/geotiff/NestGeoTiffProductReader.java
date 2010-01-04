@@ -9,7 +9,7 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import java.io.File;
 import java.io.IOException;
 
-public class NestGeoTiffProductReader extends GeoTiffProductReader {
+class NestGeoTiffProductReader extends GeoTiffProductReader {
 
     public NestGeoTiffProductReader(ProductReaderPlugIn readerPlugIn) {
         super(readerPlugIn);

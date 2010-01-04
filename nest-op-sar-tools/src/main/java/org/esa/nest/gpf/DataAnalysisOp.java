@@ -189,6 +189,10 @@ public class DataAnalysisOp extends Operator {
 
     /**
      * Compute statistics for given source tile.
+     * @param targetBand
+     * @param targetTile
+     * @param targetTileRectangle
+     * @param pm
      */
     void computeStatistics(Band targetBand, Tile targetTile, Rectangle targetTileRectangle, ProgressMonitor pm) {
 

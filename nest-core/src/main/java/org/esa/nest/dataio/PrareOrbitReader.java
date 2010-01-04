@@ -4,7 +4,6 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.nest.util.MathUtils;
 import org.esa.nest.util.ResourceUtils;
 
-import java.util.zip.GZIPInputStream;
 import java.io.*;
 import java.util.Arrays;
 
@@ -371,7 +370,7 @@ public final class PrareOrbitReader {
      * @return The UTC time.
      * @throws IOException The exception.
      */
-    public double TDT2UTC(double tdt) throws IOException {
+    double TDT2UTC(double tdt) throws IOException {
         double tai = tdt - 32.184/secondToDay;
 
         if (tai >= 54832.0) {                 /* 2009 Jan 1 */

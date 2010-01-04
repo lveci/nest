@@ -8,9 +8,9 @@ import org.esa.beam.framework.ui.command.ExecCommand;
  * This does nothing
  *
  * @author lveci
- * @version $Revision: 1.1 $ $Date: 2009-10-14 20:40:14 $
+ * @version $Revision: 1.2 $ $Date: 2010-01-04 14:23:42 $
  */
-public class ComingSoonAction extends ExecCommand {
+class ComingSoonAction extends ExecCommand {
 
     @Override
     public void actionPerformed(final CommandEvent event) {

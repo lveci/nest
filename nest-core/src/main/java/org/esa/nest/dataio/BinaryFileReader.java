@@ -113,7 +113,7 @@ public final class BinaryFileReader {
             _stream.readFully(array, 0, array.length);
     }
 
-    public void read(final long[] array) throws IOException, IllegalBinaryFormatException {
+    public void read(final long[] array) throws IOException {
             _stream.readFully(array, 0, array.length);
     }
 

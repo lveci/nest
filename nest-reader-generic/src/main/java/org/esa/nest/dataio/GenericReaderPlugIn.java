@@ -14,10 +14,10 @@ import java.util.Locale;
  */
 public class GenericReaderPlugIn implements ProductReaderPlugIn {
 
-	final static String[] FORMAT_NAMES = { "Generic Binary" };
-	final static String[] FORMAT_FILE_EXTENSIONS = { "bin", "bil", "bsq", "bip", "img", "ras", "dat" };
-    final static String PLUGIN_DESCRIPTION = "Generic Binary";
-    Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
+	private final static String[] FORMAT_NAMES = { "Generic Binary" };
+	private final static String[] FORMAT_FILE_EXTENSIONS = { "bin", "bil", "bsq", "bip", "img", "ras", "dat" };
+    private final static String PLUGIN_DESCRIPTION = "Generic Binary";
+    private final Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
 
     /**
      * Checks whether the given object is an acceptable input for this product reader and if so, the method checks if it

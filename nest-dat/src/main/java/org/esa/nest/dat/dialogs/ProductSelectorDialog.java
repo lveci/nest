@@ -15,7 +15,7 @@ import java.awt.*;
  */
 public class ProductSelectorDialog extends ModalDialog {
 
-    private JList list;
+    private final JList list;
     private boolean ok = false;
 
     public ProductSelectorDialog(String title, String[] productNames) {

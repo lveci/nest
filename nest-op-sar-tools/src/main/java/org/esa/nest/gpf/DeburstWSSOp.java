@@ -2,6 +2,7 @@ package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -10,15 +11,14 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.dataio.ReaderUtils;
-import org.esa.nest.datamodel.Unit;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
 
 import java.awt.*;
-import java.util.*;
 import java.text.ParseException;
+import java.util.*;
 
 /**
  * De-Burst a WSS product
@@ -26,7 +26,7 @@ import java.text.ParseException;
 @OperatorMetadata(alias = "DeburstWSS",
         category = "SAR Tools",
         description="Debursts an ASAR WSS product")
-public class DeburstWSSOp extends Operator {
+public final class DeburstWSSOp extends Operator {
 
     @SourceProduct(alias="source")
     private Product sourceProduct;
@@ -132,9 +132,8 @@ public class DeburstWSSOp extends Operator {
 
     /**
      * Compute mean pixel spacing (in m).
-     * @throws Exception The exception.
      */
-    private void getSourceMetadata() throws Exception {
+    private void getSourceMetadata() {
         final MetadataElement srcMetadataRoot = sourceProduct.getMetadataRoot();
         final MetadataElement mppRootElem = srcMetadataRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
         final MetadataElement mpp = mppRootElem.getElementAt(subSwathNum);
@@ -351,7 +350,7 @@ public class DeburstWSSOp extends Operator {
             if(attrib.getDataType() == ProductData.TYPE_FLOAT32) {
                 final float[] fList = (float[])attrib.getData().getElems();
                 for(float f : fList) {
-                    array.add((float)f);
+                    array.add(f);
                 }
             } else {
                 final int[] iList = (int[])attrib.getData().getElems();

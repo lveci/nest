@@ -4,8 +4,8 @@ import org.esa.beam.framework.ui.GridBagUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
 

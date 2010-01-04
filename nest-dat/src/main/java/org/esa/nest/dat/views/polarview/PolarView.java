@@ -35,7 +35,7 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
     private float dirBinStep = 0;
     private float firstWLBin = 0;
     private float lastWLBin = 0;
-    private double minRadius = -10;
+    private final double minRadius = -10;
 
     private ProductData.UTC zeroDopplerTime = null;
     private double minSpectrum = 0;

@@ -1,7 +1,7 @@
 package org.esa.nest.gpf;
 
-import org.esa.nest.util.DialogUtils;
 import org.esa.beam.framework.ui.AppContext;
+import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
 import java.awt.*;

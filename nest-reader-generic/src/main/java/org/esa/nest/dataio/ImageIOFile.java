@@ -128,7 +128,7 @@ public class ImageIOFile {
         return ProductData.TYPE_UNDEFINED;
     }
 
-    public final void createIndexedImageInfo(ColorModel colorModel) {
+    final void createIndexedImageInfo(ColorModel colorModel) {
         final IndexColorModel indexColorModel = (IndexColorModel)colorModel;
         indexCoding = new IndexCoding("color_map");
         final int colorCount = indexColorModel.getMapSize();
@@ -212,9 +212,9 @@ public class ImageIOFile {
     }
 
     public static class BandInfo {
-        public int imageID;
-        public int bandSampleOffset;
-        public ImageIOFile img;
+        public final int imageID;
+        public final int bandSampleOffset;
+        public final ImageIOFile img;
         
         public BandInfo(ImageIOFile imgFile, int id, int offset) {
             img = imgFile;

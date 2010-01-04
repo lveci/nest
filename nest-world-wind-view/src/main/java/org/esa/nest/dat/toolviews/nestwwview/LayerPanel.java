@@ -9,12 +9,11 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
-public class LayerPanel extends JPanel {
+class LayerPanel extends JPanel {
     private JPanel layersPanel;
     private JPanel westPanel;
     private JScrollPane scrollPane;
     private Font defaultFont;
-    private Font atMaxFont;
 
     public LayerPanel(WorldWindow wwd) {
         // Make a panel at a default size.
@@ -67,7 +66,6 @@ public class LayerPanel extends JPanel {
 
             if (defaultFont == null) {
                 this.defaultFont = jcb.getFont();
-                this.atMaxFont = this.defaultFont.deriveFont(Font.ITALIC);
             }
         }
     }
@@ -86,9 +84,9 @@ public class LayerPanel extends JPanel {
     }
 
     private static class LayerAction extends AbstractAction {
-        WorldWindow wwd;
-        private Layer layer;
-        private boolean selected;
+        final WorldWindow wwd;
+        private final Layer layer;
+        private final boolean selected;
 
         public LayerAction(Layer layer, WorldWindow wwd, boolean selected) {
             super(layer.getName());

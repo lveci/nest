@@ -6,7 +6,7 @@ import java.awt.*;
 /**
 
  */
-public class PolarPanel extends JPanel {
+class PolarPanel extends JPanel {
 
     private final PolarCanvas polarCanvas;
     private final ReadoutCanvas readoutCanvas;

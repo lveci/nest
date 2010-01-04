@@ -3,13 +3,12 @@ package org.esa.nest.dataio.ceos.ers;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.nest.dataio.BinaryFileReader;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
+import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.BaseSceneHeaderRecord;
-import org.esa.nest.dataio.ceos.CeosHelper;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
-import java.util.Calendar;
 
 /**
  * This class represents a leader file of a product.
@@ -17,12 +16,12 @@ import java.util.Calendar;
  */
 class ERSLeaderFile {
 
-    public final BaseRecord _leaderFDR;
-    public final BaseSceneHeaderRecord _sceneHeaderRecord;
-    public final BaseRecord _mapProjRecord;
-    public final BaseRecord _platformPositionRecord;
-    public final BaseRecord _facilityRecord;
-    public final BaseRecord _facilityRelatedPCSRecord;
+    private final BaseRecord _leaderFDR;
+    private final BaseSceneHeaderRecord _sceneHeaderRecord;
+    private final BaseRecord _mapProjRecord;
+    private final BaseRecord _platformPositionRecord;
+    private final BaseRecord _facilityRecord;
+    private final BaseRecord _facilityRelatedPCSRecord;
 
     private final static String mission = "ers";
     private final static String leader_recordDefinitionFile = "leader_file.xml";
@@ -59,14 +58,6 @@ class ERSLeaderFile {
         return _sceneHeaderRecord.getAttributeString("Scene reference number").trim();
     }
 
-    public Calendar getDateImageWasTaken() {
-        return _sceneHeaderRecord.getDateImageWasTaken();
-    }
-
-    public String getProductType() {
-        return _sceneHeaderRecord.getAttributeString("Product type specifier");
-    }
-
     public final BaseRecord getSceneRecord() {
         return _sceneHeaderRecord;
     }
@@ -83,7 +74,7 @@ class ERSLeaderFile {
         return _platformPositionRecord;
     }
 
-    public float[] getLatCorners() throws IOException, IllegalBinaryFormatException {
+    public float[] getLatCorners() {
         if(_mapProjRecord == null) return null;
 
         final double latUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic latitude");
@@ -93,7 +84,7 @@ class ERSLeaderFile {
         return new float[]{(float)latUL, (float)latUR, (float)latLL, (float)latLR};
     }
 
-    public float[] getLonCorners() throws IOException, IllegalBinaryFormatException {
+    public float[] getLonCorners() {
         if(_mapProjRecord == null) return null;
 
         final double lonUL = _mapProjRecord.getAttributeDouble("1st line 1st pixel geodetic longitude");

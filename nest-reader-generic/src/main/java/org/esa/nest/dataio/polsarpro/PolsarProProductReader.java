@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class PolsarProProductReader extends NestEnviProductReader {
+class PolsarProProductReader extends NestEnviProductReader {
 
     PolsarProProductReader(ProductReaderPlugIn readerPlugIn) {
         super(readerPlugIn);

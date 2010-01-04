@@ -2,19 +2,19 @@ package org.esa.nest.dat.dialogs;
 
 import com.bc.ceres.binding.*;
 import com.bc.ceres.swing.TableLayout;
-import com.bc.ceres.swing.selection.SelectionChangeListener;
-import com.bc.ceres.swing.selection.SelectionChangeEvent;
 import com.bc.ceres.swing.selection.AbstractSelectionChangeListener;
 import com.bc.ceres.swing.selection.Selection;
+import com.bc.ceres.swing.selection.SelectionChangeEvent;
+import com.bc.ceres.swing.selection.SelectionChangeListener;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductFilter;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.OperatorUI;
-import org.esa.beam.framework.gpf.internal.RasterDataNodeValues;
 import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.esa.beam.framework.gpf.internal.RasterDataNodeValues;
 import org.esa.beam.framework.gpf.ui.SingleTargetProductDialog;
 import org.esa.beam.framework.gpf.ui.SourceProductSelector;
 import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
@@ -22,17 +22,17 @@ import org.esa.beam.framework.ui.AppContext;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.awt.*;
 
 /**
  */
 public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
-    private String operatorName;
+    private final String operatorName;
     private List<SourceProductSelector> sourceProductSelectorList;
     private Map<Field, SourceProductSelector> sourceProductSelectorMap;
     private final Map<String, Object> parameterMap = new HashMap<String, Object>(17);
@@ -221,7 +221,7 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
         return sourceProducts;
     }
 
-    public String getTargetProductNameSuffix() {
+    String getTargetProductNameSuffix() {
         return targetProductNameSuffix;
     }
 

@@ -7,9 +7,9 @@ import org.esa.nest.dataio.NetCDFReaderPlugIn;
  */
 public class GTOPO30ReaderPlugIn extends NetCDFReaderPlugIn {
 
-    final static String[] GTOPO30_FORMAT_NAMES = {"GTOPO30"};
-    final static String[] GTOPO30_FORMAT_FILE_EXTENSIONS = {"dem"};
-    final static String GTOPO30_PLUGIN_DESCRIPTION = "GTOPO30 DEM Tiles";
+    private final static String[] GTOPO30_FORMAT_NAMES = {"GTOPO30"};
+    private final static String[] GTOPO30_FORMAT_FILE_EXTENSIONS = {"dem"};
+    private final static String GTOPO30_PLUGIN_DESCRIPTION = "GTOPO30 DEM Tiles";
 
     public GTOPO30ReaderPlugIn() {
         FORMAT_NAMES = GTOPO30_FORMAT_NAMES;

@@ -16,7 +16,7 @@ import java.awt.*;
  * Displays the layer list in a viewport corner.
  *
  */
-public class LayerPanelLayer extends LayerManagerLayer
+class LayerPanelLayer extends LayerManagerLayer
 {
     private Layer virtualEarthAerialLayer = null;
     private Layer virtualEarthRoadsLayer = null;

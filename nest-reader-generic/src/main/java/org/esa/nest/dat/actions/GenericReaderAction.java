@@ -35,10 +35,10 @@ public class GenericReaderAction extends ExecCommand {
 
     private ProductReaderPlugIn readerPlugIn = null;
     private ProductFileChooser fileChooser = null;
-    private String formatName = "Generic Binary";
+    private final String formatName = "Generic Binary";
     private String lastDirKey = null;
-    private boolean useAllFileFilter = true;
-    private boolean useFilesAndFolders = false;
+    private final boolean useAllFileFilter = true;
+    private final boolean useFilesAndFolders = false;
 
     @Override
     public void actionPerformed(final CommandEvent event) {
@@ -48,7 +48,7 @@ public class GenericReaderAction extends ExecCommand {
         importProduct();
     }
 
-    protected void importProduct() {
+    void importProduct() {
 
         VisatApp visatApp = VisatApp.getApp();
 
@@ -91,7 +91,7 @@ public class GenericReaderAction extends ExecCommand {
     }
 
 
-    protected File promptForFile() {
+    File promptForFile() {
         if (lastDirKey == null) {
             lastDirKey = "user." + formatName.toLowerCase().replace(' ', '_') + ".import.dir";
         }
@@ -209,7 +209,7 @@ public class GenericReaderAction extends ExecCommand {
         return super.showDialog(parent, approveButtonText);
     }
 
-    protected void createUI() {
+    void createUI() {
 
         setDialogType(OPEN_DIALOG);
         setDialogTitle(VisatApp.getApp().getAppName() + " - Import " + formatName + " Product"); /*I18N*/

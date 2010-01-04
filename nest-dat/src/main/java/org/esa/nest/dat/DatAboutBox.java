@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * This class pertains to the "about" dialog box for the VISAT application.
  */
-public class DatAboutBox extends ModalDialog {
+class DatAboutBox extends ModalDialog {
 
     public DatAboutBox() {
         this(new JButton[]{

@@ -5,11 +5,11 @@ import java.io.File;
 /**
  * Several constants used for reading TerraSarX products.
  */
-public class TerraSarXConstants  {
+class TerraSarXConstants  {
 
-    final static String[] FORMAT_NAMES = new String[]{"TerraSarX"};
-    final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
-    final static String PLUGIN_DESCRIPTION = "TerraSarX Products";      /*I18N*/
+    private final static String[] FORMAT_NAMES = new String[]{"TerraSarX"};
+    private final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
+    private final static String PLUGIN_DESCRIPTION = "TerraSarX Products";      /*I18N*/
     final static String PRODUCT_TYPE_PREFIX = "";
     final static String PRODUCT_HEADER_PREFIX = "TSX1_SAR";
 

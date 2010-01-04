@@ -8,7 +8,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
-public class ProductPanel extends JPanel {
+class ProductPanel extends JPanel {
     private final ProductLayer productLayer;
     private JPanel layersPanel;
     private JPanel westPanel;
@@ -80,10 +80,10 @@ public class ProductPanel extends JPanel {
     }
 
     private static class LayerAction extends AbstractAction {
-        WorldWindow wwd;
-        private ProductLayer layer;
-        private boolean selected;
-        private String name;
+        final WorldWindow wwd;
+        private final ProductLayer layer;
+        private final boolean selected;
+        private final String name;
 
         public LayerAction(ProductLayer layer, WorldWindow wwd, String name, boolean selected) {
             super(name);

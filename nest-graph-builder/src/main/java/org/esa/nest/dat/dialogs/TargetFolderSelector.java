@@ -1,18 +1,17 @@
 package org.esa.nest.dat.dialogs;
 
+import com.bc.ceres.swing.TableLayout;
 import org.esa.beam.framework.gpf.ui.TargetProductSelector;
 
 import javax.swing.*;
 import java.awt.*;
-
-import com.bc.ceres.swing.TableLayout;
 
 /**
  * NEST
  * User: lveci
  * Date: Jul 28, 2009
  */
-public class TargetFolderSelector extends TargetProductSelector {
+class TargetFolderSelector extends TargetProductSelector {
 
 
     public JPanel createPanel() {

@@ -5,41 +5,41 @@ import java.awt.*;
 public class Axis {
     private static final double stepValues[] = {0.1D, 1.0D, 2D, 3D, 5D, 10D};
 
-    public static final int TOP_X = 1;
-    public static final int BOTTOM_X = 2;
-    public static final int LEFT_Y = 3;
+    private static final int TOP_X = 1;
+    private static final int BOTTOM_X = 2;
+    private static final int LEFT_Y = 3;
     public static final int RIGHT_Y = 4;
     public static final int RADIAL = 5;
 
     private AbstractAxisDisplay gr = null;
     private boolean isX = true;
-    private boolean ticksInside = false;
-    private boolean withGrid = false;
+    private final boolean ticksInside = false;
+    private final boolean withGrid = false;
     private double minValue = 0.0;
     private double maxValue = 1.0;
     private double axisRange = maxValue - minValue;
     private double tickRange = maxValue - minValue;
     private double minData = 0.0;
     private double maxData = 1.0;
-    private double minRange = 0.0;
-    private boolean visible = true;
+    private final double minRange = 0.0;
+    private final boolean visible = true;
     private boolean autoRange = true;
     private int length = 0;
     private int breadth = 0;
     private int TouchId = 0;
     private String title = null;
-    private int tickLength = -5;
+    private final int tickLength = -5;
     private int tickCount = 3;
     private int bestTickCount = 3;
     private int spacing = Math.abs(tickLength);
     private String tickNames[] = {"0", "0.5", "1"};
     private double tickValues[] = {0.0D, 0.5D, 1.0D};
     private int tickPos[] = null;
-    private Font font;
-    private Font titleFont;
-    private Color axisColor;
-    private Color labelColor;
-    private Color gridColor;
+    private final Font font;
+    private final Font titleFont;
+    private final Color axisColor;
+    private final Color labelColor;
+    private final Color gridColor;
     private String unit = "";
 
     public Axis(int orientation) {

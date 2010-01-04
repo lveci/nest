@@ -1,7 +1,6 @@
 package org.esa.nest.dataio.ceos;
 
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ReaderUtils;
@@ -51,14 +50,14 @@ public abstract class CEOSProductDirectory {
         return isProductSLC;
     }
     
-    public String getSampleType() {
+    protected String getSampleType() {
         if(isProductSLC)
             return "COMPLEX";
         else
             return "DETECTED";
     }
 
-    public String getProductType() {
+    protected String getProductType() {
         return productType;
     }
 

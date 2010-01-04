@@ -26,13 +26,12 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.util.ProductUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * The operator evaluates some local statistics for every pair of user selected source bands.
@@ -55,6 +54,7 @@ public class PCAStatisticsOp extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
+    private
     String[] sourceBandNames;
 
     @Parameter(valueSet = {EIGENVALUE_THRESHOLD, NUMBER_EIGENVALUES},
@@ -199,7 +199,7 @@ public class PCAStatisticsOp extends Operator {
      * @param sourceBandNames The user selected band names.
      * @param meanImageBandName The mean image band name.
      */
-    public static void createMeanImageVirtualBand(
+    private static void createMeanImageVirtualBand(
             Product sourceProduct, String[] sourceBandNames, String meanImageBandName) {
 
         if (sourceProduct.getBand(meanImageBandName) != null) {
@@ -317,8 +317,7 @@ public class PCAStatisticsOp extends Operator {
      * @throws Exception The exceptions.
      */
     private void computeTileStatisticsWithoutMeanImageSubstract (
-            ProductData[] bandsRawSamples, double[] tileSum, double[][] tileSumCross, ProgressMonitor pm)
-            throws Exception {
+            ProductData[] bandsRawSamples, double[] tileSum, double[][] tileSumCross, ProgressMonitor pm) {
 
         Arrays.fill(tileSum, 0.0);
         final int n = bandsRawSamples[0].getNumElems();
@@ -363,7 +362,7 @@ public class PCAStatisticsOp extends Operator {
      */
     private void computeTileStatisticsWithMeanImageSubstract (
             ProductData[] bandsRawSamples, ProductData meanBandRawSamples,
-            double[] tileSum, double[][] tileSumCross, ProgressMonitor pm) throws Exception {
+            double[] tileSum, double[][] tileSumCross, ProgressMonitor pm) {
 
         Arrays.fill(tileSum, 0.0);
         final int n = bandsRawSamples[0].getNumElems();
@@ -406,8 +405,7 @@ public class PCAStatisticsOp extends Operator {
      * @param pm A progress monitor which should be used to determine computation cancelation requests.
      * @throws Exception The exceptions.
      */
-    private synchronized void computeImageStatistics (double[] tileSum, double[][] tileSumCross, ProgressMonitor pm)
-            throws Exception {
+    private synchronized void computeImageStatistics (double[] tileSum, double[][] tileSumCross, ProgressMonitor pm) {
 
         for (int i = 0; i < numOfSourceBands; i++) {
             checkForCancelation(pm);

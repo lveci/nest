@@ -2,8 +2,8 @@ package org.esa.nest.dataio.ceos.alos;
 
 import Jama.Matrix;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.util.Guardian;
 import org.esa.beam.util.Debug;
+import org.esa.beam.util.Guardian;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ReaderUtils;
@@ -36,7 +36,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
     private int _sceneWidth = 0;
     private int _sceneHeight = 0;
 
-    private transient Map<String, AlosPalsarImageFile> bandImageFileMap = new HashMap<String, AlosPalsarImageFile>(1);
+    private final transient Map<String, AlosPalsarImageFile> bandImageFileMap = new HashMap<String, AlosPalsarImageFile>(1);
 
     public AlosPalsarProductDirectory(final File dir) {
         Guardian.assertNotNull("dir", dir);
@@ -75,7 +75,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         return true;
     }
 
-    public static String getMission() {
+    private static String getMission() {
         return "ALOS";
     }
 

@@ -19,12 +19,12 @@ import java.util.Map;
  * The product reader for ImageIO products.
  *
  */
-public class ImageIOReader extends AbstractProductReader {
+class ImageIOReader extends AbstractProductReader {
 
-    ImageIOFile imgIOFile = null;
-    String productType = "productType";
+    private ImageIOFile imgIOFile = null;
+    private String productType = "productType";
 
-    private transient Map<Band, ImageIOFile.BandInfo> bandMap = new HashMap<Band, ImageIOFile.BandInfo>(3);
+    private final transient Map<Band, ImageIOFile.BandInfo> bandMap = new HashMap<Band, ImageIOFile.BandInfo>(3);
 
     /**
      * Constructs a new abstract product reader.

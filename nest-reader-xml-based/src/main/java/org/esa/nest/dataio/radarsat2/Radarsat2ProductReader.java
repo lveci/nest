@@ -10,17 +10,15 @@ import org.esa.nest.dataio.ImageIOFile;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.util.XMLSupport;
 import org.jdom.Element;
-import org.jdom.Attribute;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * The product reader for Radarsat2 products.
  *
  */
-public class Radarsat2ProductReader extends AbstractProductReader {
+class Radarsat2ProductReader extends AbstractProductReader {
 
     private Radarsat2ProductDirectory _dataDir = null;
 

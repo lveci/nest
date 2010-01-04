@@ -367,7 +367,7 @@ public final class OrbitalDataRecordReader {
      * @return The arc number.
      * @throws IOException The exceptions.
      */
-    public static int getArcNumber(File file, Date productDate) throws IOException {
+    public static int getArcNumber(File file, Date productDate) {
 
         final String fileName = file.getAbsolutePath();
 

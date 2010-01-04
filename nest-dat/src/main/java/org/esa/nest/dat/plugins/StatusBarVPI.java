@@ -16,7 +16,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 
-public class StatusBarVPI extends AbstractVisatPlugIn {
+class StatusBarVPI extends AbstractVisatPlugIn {
 
     private VisatApp _visatApp;
     private LabelStatusBarItem _dimensionStatusBarItem;
@@ -80,7 +80,7 @@ public class StatusBarVPI extends AbstractVisatPlugIn {
 
     private class PixelPosHandler implements PixelPositionListener {
 
-        private StringBuilder _text;
+        private final StringBuilder _text;
         private final String _EMPTYSTR = "";
 
         public PixelPosHandler(String refString) {

@@ -2,9 +2,9 @@ package org.esa.nest.dat.views.polarview;
 
 import java.awt.*;
 
-public class ReadoutCanvas {
+class ReadoutCanvas {
 
-    private Point readoutOrigin = new Point(20, 40);
+    private final Point readoutOrigin = new Point(20, 40);
     private String[] readoutList = null;
     private String[] metadataList = null;
 

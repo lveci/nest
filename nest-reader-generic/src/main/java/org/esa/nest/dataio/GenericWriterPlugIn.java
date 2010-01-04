@@ -9,10 +9,10 @@ import java.io.File;
 import java.util.Locale;
 
 
-public class GenericWriterPlugIn implements ProductWriterPlugIn {
+class GenericWriterPlugIn implements ProductWriterPlugIn {
 
-    public static final String FORMAT_NAME = "Generic Binary";
-    public final static String FILE_EXTENSION = ".bin";
+    private static final String FORMAT_NAME = "Generic Binary";
+    private final static String FILE_EXTENSION = ".bin";
 
 
     /**

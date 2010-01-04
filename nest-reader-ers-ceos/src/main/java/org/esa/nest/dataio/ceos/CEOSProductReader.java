@@ -28,7 +28,7 @@ public abstract class CEOSProductReader extends AbstractProductReader {
      * @param readerPlugIn the reader plug-in which created this reader, can be <code>null</code> for internal reader
      *                     implementations
      */
-    public CEOSProductReader(final ProductReaderPlugIn readerPlugIn) {
+    protected CEOSProductReader(final ProductReaderPlugIn readerPlugIn) {
        super(readerPlugIn);
     }
  

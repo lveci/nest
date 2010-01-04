@@ -2,10 +2,8 @@
 package org.esa.nest.dataio.dem.ace2_5min;
 
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.resamp.Resampling;
@@ -16,26 +14,26 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class ACE2_5MinElevationModel implements ElevationModel, Resampling.Raster {
+class ACE2_5MinElevationModel implements ElevationModel, Resampling.Raster {
 
-    public static final int NUM_X_TILES = ACE2_5MinElevationModelDescriptor.NUM_X_TILES;
-    public static final int NUM_Y_TILES = ACE2_5MinElevationModelDescriptor.NUM_Y_TILES;
-    public static final int DEGREE_RES = ACE2_5MinElevationModelDescriptor.DEGREE_RES;
-    public static final int NUM_PIXELS_PER_TILE = ACE2_5MinElevationModelDescriptor.PIXEL_RES;
-    public static final int NO_DATA_VALUE = ACE2_5MinElevationModelDescriptor.NO_DATA_VALUE;
-    public static final int RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
-    public static final int RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
+    private static final int NUM_X_TILES = ACE2_5MinElevationModelDescriptor.NUM_X_TILES;
+    private static final int NUM_Y_TILES = ACE2_5MinElevationModelDescriptor.NUM_Y_TILES;
+    private static final int DEGREE_RES = ACE2_5MinElevationModelDescriptor.DEGREE_RES;
+    private static final int NUM_PIXELS_PER_TILE = ACE2_5MinElevationModelDescriptor.PIXEL_RES;
+    private static final int NO_DATA_VALUE = ACE2_5MinElevationModelDescriptor.NO_DATA_VALUE;
+    private static final int RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
+    private static final int RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
 
     private static final float DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES * (1.0f/NUM_PIXELS_PER_TILE);
 
     private final ACE2_5MinElevationModelDescriptor _descriptor;
     private final ACE2_5MinElevationTile[][] _elevationTiles;
     private final List _elevationTileCache;
-    private Resampling _resampling;
-    private Resampling.Index _resamplingIndex;
+    private final Resampling _resampling;
+    private final Resampling.Index _resamplingIndex;
     private final Resampling.Raster _resamplingRaster;
 
-    public ACE2_5MinElevationModel(ACE2_5MinElevationModelDescriptor descriptor, Resampling resamplingMethod) throws IOException {
+    public ACE2_5MinElevationModel(ACE2_5MinElevationModelDescriptor descriptor, Resampling resamplingMethod) {
         _descriptor = descriptor;
         _resampling = resamplingMethod;
         _resamplingIndex = _resampling.createIndex();

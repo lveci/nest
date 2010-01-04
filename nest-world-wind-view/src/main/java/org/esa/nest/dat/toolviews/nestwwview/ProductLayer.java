@@ -13,15 +13,13 @@ import org.esa.beam.framework.dataop.maptransf.MapInfo;
 import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.util.GeoUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.util.GeoUtils;
 
 import javax.swing.*;
-import java.awt.image.BufferedImage;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
@@ -30,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
 
  */
-public class ProductLayer extends RenderableLayer {
+class ProductLayer extends RenderableLayer {
     private Product selectedProduct = null;
     private final static double million = 1000000.0;
     private final boolean enableSurfaceImages;
@@ -88,7 +86,7 @@ public class ProductLayer extends RenderableLayer {
         return selectedProduct;
     }
 
-    public void addProduct(final Product product) throws IOException {
+    public void addProduct(final Product product) {
         final String name = product.getName();
         if (this.outlineTable.get(name) != null)
             return;

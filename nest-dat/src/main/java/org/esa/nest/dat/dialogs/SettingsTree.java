@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * A tree-view component for Settings
  */
-public class SettingsTree extends JTree implements PopupMenuFactory, ActionListener {
+class SettingsTree extends JTree implements PopupMenuFactory, ActionListener {
 
     private Object menuContext;
     private DefaultMutableTreeNode selectedNode;
@@ -76,7 +76,7 @@ public class SettingsTree extends JTree implements PopupMenuFactory, ActionListe
         return null;
     }
 
-    public JPopupMenu createPopup(final Object context) {
+    JPopupMenu createPopup(final Object context) {
 
         final JPopupMenu popup = new JPopupMenu();
         menuContext = context;
@@ -109,7 +109,7 @@ public class SettingsTree extends JTree implements PopupMenuFactory, ActionListe
 
     }
 
-    public void expandAll() {
+    void expandAll() {
         final TreeNode root = (TreeNode) getModel().getRoot();
         expandAll(this, new TreePath(root), true);
     }

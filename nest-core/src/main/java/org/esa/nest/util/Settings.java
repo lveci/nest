@@ -23,7 +23,7 @@ public final class Settings {
     private final Map<String, String> settingMap = new HashMap<String, String>(100);
 
     private Element rootXML = null;
-    org.jdom.Document doc = null;
+    private org.jdom.Document doc = null;
 
     public static final String SETTINGS = "Settings";
     public static final String VALUE = "value";

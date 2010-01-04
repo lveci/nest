@@ -1,5 +1,5 @@
 /*
- * $Id: VersionCheckerVPI.java,v 1.4 2009-06-25 17:24:03 lveci Exp $
+ * $Id: VersionCheckerVPI.java,v 1.5 2010-01-04 14:23:42 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -28,7 +28,7 @@ import java.net.URISyntaxException;
 import java.text.MessageFormat;
 import java.util.concurrent.ExecutionException;
 
-public class VersionCheckerVPI extends AbstractVisatPlugIn {
+class VersionCheckerVPI extends AbstractVisatPlugIn {
 
     private static final String MESSAGE_BOX_TITLE = "Software Version Check";  /*I18N*/
     private static final int DELAY_MILLIS = 5 * 1000;  // 5 seconds delay

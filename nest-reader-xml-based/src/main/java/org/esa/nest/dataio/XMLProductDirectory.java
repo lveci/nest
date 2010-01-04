@@ -1,19 +1,18 @@
 package org.esa.nest.dataio;
 
-import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.dataop.maptransf.Datum;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.Guardian;
 import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.datamodel.Unit;
 import org.esa.nest.datamodel.AbstractMetadataIO;
+import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.XMLSupport;
-import org.jdom.Attribute;
 import org.jdom.Element;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,7 +36,7 @@ public class XMLProductDirectory {
     protected transient final Map<String, ImageIOFile> bandImageFileMap = new HashMap<String, ImageIOFile>(1);
     protected transient final Map<Band, ImageIOFile.BandInfo> bandMap = new HashMap<Band, ImageIOFile.BandInfo>(3);
 
-    public XMLProductDirectory(final File headerFile, final File imageFolder) {
+    protected XMLProductDirectory(final File headerFile, final File imageFolder) {
         Guardian.assertNotNull("headerFile", headerFile);
 
         _xmlHeader = headerFile;
@@ -69,7 +68,7 @@ public class XMLProductDirectory {
         _sceneHeight = height;
     }
 
-    public Product createProduct() throws IOException {
+    public Product createProduct() {
         final Product product = new Product(getProductName(),
                                             getProductType(),
                                             _sceneWidth, _sceneHeight);
@@ -125,7 +124,7 @@ public class XMLProductDirectory {
 
     }
 
-    private void addMetaData(final Product product) throws IOException {
+    private void addMetaData(final Product product) {
         final MetadataElement root = product.getMetadataRoot();
         final Element rootElement = xmlDoc.getRootElement();
         AbstractMetadataIO.AddXMLMetadata(rootElement, root);

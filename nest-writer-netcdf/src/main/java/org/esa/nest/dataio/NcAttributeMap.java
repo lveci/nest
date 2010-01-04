@@ -16,13 +16,13 @@ import java.util.Map;
  */
 public class NcAttributeMap {
 
-    private Map<String, Attribute> _map;
+    private final Map<String, Attribute> _map;
 
-    public NcAttributeMap(int initialCapacity) {
+    private NcAttributeMap(int initialCapacity) {
         _map = new HashMap<String, Attribute>(initialCapacity);
     }
 
-    public NcAttributeMap(Attribute[] attributes) {
+    private NcAttributeMap(Attribute[] attributes) {
         this((3 * attributes.length) / 2 + 1);
         for (Attribute attribute : attributes) {
             put(attribute);
@@ -45,11 +45,11 @@ public class NcAttributeMap {
         return new NcAttributeMap(variable.getAttributes());
     }
 
-    public Attribute get(String name) {
+    Attribute get(String name) {
         return _map.get(name);
     }
 
-    public void put(Attribute attribute) {
+    void put(Attribute attribute) {
         _map.put(attribute.getName(), attribute);
     }
 

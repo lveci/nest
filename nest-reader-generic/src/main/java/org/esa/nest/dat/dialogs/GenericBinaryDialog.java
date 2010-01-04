@@ -41,7 +41,7 @@ public class GenericBinaryDialog extends ModalDialog {
     private final JComboBox byteOrderBox = new JComboBox(new String[] {  "BIG ENDIAN", "LITTLE ENDIAN" } );
 
     private final JComboBox interleaveBox = new JComboBox(new String[] {  BSQ } );
-    final static String BSQ = "BSQ";
+    private final static String BSQ = "BSQ";
     final static String BIP = "BIP";
     final static String BIL = "BIL";
 
@@ -107,11 +107,6 @@ public class GenericBinaryDialog extends ModalDialog {
     }
 
     @Override
-    protected void onCancel() {
-        super.onCancel();
-    }
-
-    @Override
     protected void onOK() {
         super.onOK();
 
@@ -138,7 +133,7 @@ public class GenericBinaryDialog extends ModalDialog {
         return b && valid;
     }
 
-    class ProteryListener implements PropertyChangeListener {
+    private class ProteryListener implements PropertyChangeListener {
         /** Called when a field's "value" property changes. */
         public void propertyChange(PropertyChangeEvent e) {
             final Object source = e.getSource();

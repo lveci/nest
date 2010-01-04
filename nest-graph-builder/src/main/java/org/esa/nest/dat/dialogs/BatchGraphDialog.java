@@ -8,7 +8,6 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
-import org.esa.beam.visat.VisatApp;
 import org.esa.beam.util.io.FileChooserFactory;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
@@ -33,16 +32,16 @@ import java.util.Date;
  */
 public class BatchGraphDialog extends ModelessDialog {
 
-    protected final AppContext appContext;
-    protected final ProductSetPanel productSetPanel;
-    protected final ArrayList<GraphExecuter> graphExecuterList = new ArrayList<GraphExecuter>(10);
+    private final AppContext appContext;
+    private final ProductSetPanel productSetPanel;
+    private final ArrayList<GraphExecuter> graphExecuterList = new ArrayList<GraphExecuter>(10);
 
     private final static String homeUrl = System.getProperty("nest.home", ".");
     private final static File graphPath = new File(homeUrl, File.separator + "graphs");
     private final static String internalFormat = DimapProductConstants.DIMAP_FORMAT_NAME;
 
     private final JPanel mainPanel;
-    protected final JTabbedPane tabbedPane;
+    private final JTabbedPane tabbedPane;
     private final JLabel statusLabel;
     private final JPanel progressPanel;
     private final JProgressBar progressBar;
@@ -143,14 +142,14 @@ public class BatchGraphDialog extends ModelessDialog {
         productSetPanel.setFileList(files);
     }
 
-    public void setGraphFile(File file) {
+    void setGraphFile(File file) {
         graphFile = file;
 
         initGraphs();
         addGraphTabs("", true);
     }
 
-    public static File getFilePath(Component component, String title) {
+    private static File getFilePath(Component component, String title) {
 
         final JFileChooser chooser = FileChooserFactory.getInstance().createFileChooser(graphPath);
         chooser.setMultiSelectionEnabled(false);
@@ -181,7 +180,7 @@ public class BatchGraphDialog extends ModelessDialog {
      * Validates the input and then call the GPF to execute the graph
      * @throws org.esa.beam.framework.gpf.graph.GraphException on assignParameters
      */
-    private void DoProcessing() throws GraphException {
+    private void DoProcessing() {
 
         if(ValidateAllNodes()) {
 
@@ -216,7 +215,7 @@ public class BatchGraphDialog extends ModelessDialog {
      * @param executer the GraphExcecuter
      * @param file the graph file to load
      */
-    public void LoadGraph(final GraphExecuter executer, final File file) {
+    void LoadGraph(final GraphExecuter executer, final File file) {
         try {
             executer.loadGraph(file, true);
 
@@ -271,7 +270,7 @@ public class BatchGraphDialog extends ModelessDialog {
         productSetPanel.setTargetProductNameSuffix(suffix);
     }
 
-    protected void createGraphs() throws GraphException {
+    void createGraphs() throws GraphException {
         try {
             final GraphExecuter graphEx = new GraphExecuter();
             LoadGraph(graphEx, graphFile);
@@ -312,7 +311,7 @@ public class BatchGraphDialog extends ModelessDialog {
         }
     }
 
-    protected void assignParameters() throws GraphException {
+    void assignParameters() {
         final File[] fileList = productSetPanel.getFileList();
         int graphIndex = 0;
         for(File f : fileList) {
@@ -344,7 +343,7 @@ public class BatchGraphDialog extends ModelessDialog {
         }
     }
 
-    protected void cloneGraphs() {
+    void cloneGraphs() {
         final GraphExecuter graphEx = graphExecuterList.get(0);
         for(int graphIndex = 1; graphIndex < graphExecuterList.size(); ++graphIndex) {
             final GraphExecuter cloneGraphEx = graphExecuterList.get(graphIndex);
@@ -368,7 +367,7 @@ public class BatchGraphDialog extends ModelessDialog {
         }
     }
 
-    protected void cleanUpTempFiles() {
+    void cleanUpTempFiles() {
 
     }
 

@@ -6,10 +6,10 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.datamodel.AbstractMetadataIO;
-import org.esa.nest.datamodel.AbstractMetadata;
-import org.esa.nest.util.ResourceUtils;
 import org.esa.nest.dat.dialogs.ProductSelectorDialog;
+import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.AbstractMetadataIO;
+import org.esa.nest.util.ResourceUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
  * This action replaces the Metadata with that of another product
  *
  * @author lveci
- * @version $Revision: 1.1 $ $Date: 2009-10-14 19:16:21 $
+ * @version $Revision: 1.2 $ $Date: 2010-01-04 14:23:42 $
  */
 public class ReplaceMetadataAction extends ExecCommand {
 

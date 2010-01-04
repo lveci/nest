@@ -31,7 +31,7 @@ import java.util.Comparator;
  * Description of WorldMapProvider
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2009-06-25 17:24:03 $
+ * @version $Revision: 1.3 $ $Date: 2010-01-04 14:23:42 $
  */
 public class WorldMapProvider implements DataProvider {
 
@@ -40,7 +40,7 @@ public class WorldMapProvider implements DataProvider {
     private static final String KEY_PRODUCT_CENTER_LON = ".worldMap.centerLon";
 
     private TableColumn worldMapColumn = null;
-    private boolean createWorldMapFile;
+    private final boolean createWorldMapFile;
     private final static Comparator worldMapComparator = new WorldMapComparator();
 
     public WorldMapProvider(final boolean createWorldMapFile) {
@@ -248,7 +248,7 @@ public class WorldMapProvider implements DataProvider {
         private final int cellWidth;
         private final int cellHeight;
 
-        private WorldMapPainter wmPainter;
+        private final WorldMapPainter wmPainter;
         private JLabel cellComponent;
 
         public WorldMapCellRenderer(final int cellWidth) {
@@ -325,7 +325,7 @@ public class WorldMapProvider implements DataProvider {
 
         private final WorldMapPainter wmPainter;
         private final JScrollPane scrollPane;
-        private Image scaledImage;
+        private final Image scaledImage;
 
         public WorldMapCellEditor() {
             scrollPane = new JScrollPane();

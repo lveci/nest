@@ -2,7 +2,6 @@ package org.esa.nest.dataio.radarsat2;
 
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
-import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.ImageIOFile;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.XMLProductDirectory;
@@ -20,10 +19,10 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
 
     private String productName = "Radarsat2";
     private String productType = "Radarsat2";
-    private String productDescription = "";
+    private final String productDescription = "";
 
     private boolean isSLC = false;
-    private transient Map<String, String> polarizationMap = new HashMap<String, String>(4);
+    private final transient Map<String, String> polarizationMap = new HashMap<String, String>(4);
 
     private final static String timeFormat = "yyyy-MM-dd HH:mm:ss";
 
@@ -492,7 +491,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         slantRangeGrid.setUnit(Unit.NANOSECONDS);
     }
 
-    public static String getMission() {
+    private static String getMission() {
         return "RS2";
     }
 

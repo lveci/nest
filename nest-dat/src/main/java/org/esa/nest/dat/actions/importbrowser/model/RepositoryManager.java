@@ -28,9 +28,9 @@ import java.util.List;
  */
 public class RepositoryManager {
 
-    private List<Repository> repositoryList;
-    private List<DataProvider> dataProviderList;
-    private List<RepositoryManagerListener> listenerList;
+    private final List<Repository> repositoryList;
+    private final List<DataProvider> dataProviderList;
+    private final List<RepositoryManagerListener> listenerList;
     private ProgressMonitor pm;
     private Repository repositoryShown;
 
@@ -232,9 +232,9 @@ public class RepositoryManager {
 
     private class UpdateProcess extends SwingWorker<List<ExceptionObject>, Object> {
 
-        private Repository repository;
-        private Runnable uiRunnable;
-        private ProgressMonitor pm;
+        private final Repository repository;
+        private final Runnable uiRunnable;
+        private final ProgressMonitor pm;
 
         public UpdateProcess(final Repository repository, final ProgressMonitor pm, final Callback uiCallback) {
             this.pm = pm;
@@ -378,8 +378,8 @@ public class RepositoryManager {
 
     private static class ExceptionObject {
 
-        Throwable throwable;
-        String productFileName;
+        final Throwable throwable;
+        final String productFileName;
 
         public ExceptionObject(final String productFileName, final Throwable throwable) {
             this.productFileName = productFileName;

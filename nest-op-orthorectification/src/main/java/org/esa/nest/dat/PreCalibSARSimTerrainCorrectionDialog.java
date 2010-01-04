@@ -14,7 +14,7 @@ import java.io.File;
 /**
  *  Provides the User Interface for Automated Terrain Correction
  */
-public class PreCalibSARSimTerrainCorrectionDialog extends MultiGraphDialog {
+class PreCalibSARSimTerrainCorrectionDialog extends MultiGraphDialog {
 
     private final static String homeUrl = System.getProperty("nest.home", ".");
     private final static File graphPath = new File(homeUrl, File.separator + "graphs" + File.separator + "internal");

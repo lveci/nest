@@ -14,7 +14,7 @@ import java.io.File;
 /**
  *  Provides the User Interface for Coregistration
  */
-public class CoregistrationDialog extends MultiGraphDialog {
+class CoregistrationDialog extends MultiGraphDialog {
 
     private final static String homeUrl = System.getProperty("nest.home", ".");
     private final static File graphPath = new File(homeUrl, File.separator + "graphs" + File.separator + "internal");

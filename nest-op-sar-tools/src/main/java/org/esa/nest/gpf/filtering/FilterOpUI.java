@@ -5,8 +5,8 @@ import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.GridBagUtils;
 import org.esa.beam.visat.VisatApp;
-import org.esa.nest.util.DialogUtils;
 import org.esa.nest.gpf.OperatorUIUtils;
+import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -14,11 +14,11 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.Enumeration;
 import java.util.Map;
-import java.io.File;
 
 /**
  * Created by IntelliJ IDEA.
@@ -36,7 +36,7 @@ public class FilterOpUI extends BaseOperatorUI {
     private final JLabel filterLabel = new JLabel("Filters:");
     private final JLabel kernelFileLabel = new JLabel("User Defined Kernel File:");
     private final JTextField kernelFile = new JTextField("");
-    protected final JButton kernelFileBrowseButton = new JButton("...");
+    private final JButton kernelFileBrowseButton = new JButton("...");
 
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
 

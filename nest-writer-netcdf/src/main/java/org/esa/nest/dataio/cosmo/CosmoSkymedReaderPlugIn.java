@@ -12,10 +12,10 @@ import java.io.File;
  */
 public class CosmoSkymedReaderPlugIn extends NetCDFReaderPlugIn {
 
-	final static String[] COSMO_FORMAT_NAMES = { "CosmoSkymed" };
-	final static String[] COSMO_FORMAT_FILE_EXTENSIONS = { "h5"};
-    final static String COSMO_PLUGIN_DESCRIPTION = "Cosmo-Skymed Products";
-    final static String COSMO_FILE_PREFIX = "cs";
+	private final static String[] COSMO_FORMAT_NAMES = { "CosmoSkymed" };
+	private final static String[] COSMO_FORMAT_FILE_EXTENSIONS = { "h5"};
+    private final static String COSMO_PLUGIN_DESCRIPTION = "Cosmo-Skymed Products";
+    private final static String COSMO_FILE_PREFIX = "cs";
 
     public CosmoSkymedReaderPlugIn() {
         FORMAT_NAMES = COSMO_FORMAT_NAMES;

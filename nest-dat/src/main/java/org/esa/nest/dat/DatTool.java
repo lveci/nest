@@ -3,7 +3,7 @@ package org.esa.nest.dat;
 
 import org.esa.beam.framework.ui.tool.AbstractTool;
 
-public abstract class DatTool extends AbstractTool {
+abstract class DatTool extends AbstractTool {
 
     private final DatApp _datApp;
 

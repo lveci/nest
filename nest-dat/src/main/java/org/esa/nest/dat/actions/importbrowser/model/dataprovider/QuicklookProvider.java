@@ -3,8 +3,8 @@ package org.esa.nest.dat.actions.importbrowser.model.dataprovider;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
-import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.dat.actions.importbrowser.model.Repository;
 import org.esa.nest.dat.actions.importbrowser.model.RepositoryEntry;
@@ -90,7 +90,7 @@ public class QuicklookProvider implements DataProvider {
         return SubsampleAverageDescriptor.create(image, scaleX, scaleY, null);
     }
 
-    static BufferedImage average(BufferedImage image) {
+    private static BufferedImage average(BufferedImage image) {
 
         final int rangeFactor = 4;
         final int azimuthFactor = 4;
@@ -126,7 +126,7 @@ public class QuicklookProvider implements DataProvider {
         return createRenderedImage(data, w, h, raster);
     }
     
-    static BufferedImage createRenderedImage(byte[] array, int w, int h, Raster raster) {
+    private static BufferedImage createRenderedImage(byte[] array, int w, int h, Raster raster) {
 
         // create rendered image with demension being width by height
         SampleModel sm = RasterFactory.createBandedSampleModel(DataBuffer.TYPE_BYTE, w, h, 1);
@@ -208,7 +208,7 @@ public class QuicklookProvider implements DataProvider {
 
     private static class QuickLookRenderer extends DefaultTableCellRenderer {
 
-        private int rowHeight;
+        private final int rowHeight;
         private JLabel tableComponent;
 
         public QuickLookRenderer(final int height) {
@@ -282,7 +282,7 @@ public class QuicklookProvider implements DataProvider {
 
     public static class QuickLookEditor extends AbstractCellEditor implements TableCellEditor {
 
-        private JScrollPane scrollPane;
+        private final JScrollPane scrollPane;
 
         public QuickLookEditor() {
 

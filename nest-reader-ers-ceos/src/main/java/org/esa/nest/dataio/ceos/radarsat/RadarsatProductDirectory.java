@@ -1,9 +1,10 @@
 package org.esa.nest.dataio.ceos.radarsat;
 
+import Jama.Matrix;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
-import org.esa.beam.util.Guardian;
 import org.esa.beam.util.Debug;
+import org.esa.beam.util.Guardian;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ReaderUtils;
@@ -13,16 +14,14 @@ import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.GeoUtils;
-import org.esa.nest.gpf.OperatorUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import Jama.Matrix;
 
 /**
  * This class represents a product directory.
@@ -520,8 +519,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         }
     }
 
-    private static void addRSATTiePointGrids(final Product product, final BaseRecord sceneRec, final BaseRecord detProcRec)
-            throws IllegalBinaryFormatException, IOException {
+    private static void addRSATTiePointGrids(final Product product, final BaseRecord sceneRec, final BaseRecord detProcRec) {
 
         if(detProcRec == null)
             return;
@@ -875,7 +873,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
      * @param zVelArray Array holding z velocities for sensor positions in all state vectors.
      * @return The orbit information.
      */
-    public static OrbitData getOrbitData(final double utc, final double[] timeArray,
+    private static OrbitData getOrbitData(final double utc, final double[] timeArray,
                                          final double[] xPosArray, final double[] yPosArray, final double[] zPosArray,
                                          final double[] xVelArray, final double[] yVelArray, final double[] zVelArray) {
 

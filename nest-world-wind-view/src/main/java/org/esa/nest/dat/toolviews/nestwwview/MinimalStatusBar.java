@@ -7,7 +7,7 @@ import gov.nasa.worldwind.util.StatusBar;
  * User: lveci
  * Date: Apr 9, 2009
  */
-public class MinimalStatusBar extends StatusBar {
+class MinimalStatusBar extends StatusBar {
 
     MinimalStatusBar() {
         super();

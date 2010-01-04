@@ -22,12 +22,12 @@ import java.util.Enumeration;
 /**
  * A tree-view component for Projects
  */
-public class ProjectTree extends JTree implements PopupMenuFactory, ActionListener {
+class ProjectTree extends JTree implements PopupMenuFactory, ActionListener {
 
     private Object menuContext;
     private DefaultMutableTreeNode selectedNode;
     private TreePath selectedPath;
-    private Project project = Project.instance();
+    private final Project project = Project.instance();
 
     /**
      * Constructs a new single selection <code>ProductTree</code>.
@@ -84,7 +84,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
         return null;
     }
 
-    public JPopupMenu createPopup(final Object context) {
+    JPopupMenu createPopup(final Object context) {
 
         final JPopupMenu popup = new JPopupMenu();
         menuContext = context;
@@ -249,7 +249,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
         }
     }
 
-    public void expandAll() {
+    void expandAll() {
         final TreeNode root = (TreeNode) getModel().getRoot();
         expandAll(this, new TreePath(root), true);
     }
@@ -378,7 +378,7 @@ public class ProjectTree extends JTree implements PopupMenuFactory, ActionListen
         }
     }
 
-    public static class TreeTransferHandler extends TransferHandler {
+    private static class TreeTransferHandler extends TransferHandler {
 
         public boolean canImport(TransferHandler.TransferSupport info) {
             return info.isDataFlavorSupported(DataFlavor.stringFlavor);

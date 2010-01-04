@@ -10,8 +10,8 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 
-public class ColorBar implements ImageProducer {
-    private ColourScale colourScale;
+class ColorBar implements ImageProducer {
+    private final ColourScale colourScale;
     private ColorModel model;
     private static final Dimension barSize = new Dimension(24, 256);
     private static final byte barPixels[] = new byte[barSize.height];
@@ -110,7 +110,7 @@ public class ColorBar implements ImageProducer {
         resend(imageArea);
     }
 
-    public void updatedColorMap() {
+    void updatedColorMap() {
         model = colourScale.getColorModel();
         resendColorModel();
         resend();

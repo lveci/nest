@@ -1,7 +1,9 @@
 package org.esa.nest.dataio.ceos.ers;
 
-import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.dataop.maptransf.TransverseMercatorDescriptor;
 import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
@@ -14,7 +16,6 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 
-import javax.imageio.stream.FileImageInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -72,7 +73,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
         return productType.contains("ERS2") || productType.contains("ERS-2") || productType.contains("ERS_2");
     }
 
-    public String getMission() {
+    String getMission() {
         if(isERS1())
             return "ERS1";
         else if(isERS2())

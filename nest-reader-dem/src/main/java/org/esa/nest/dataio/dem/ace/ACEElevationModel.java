@@ -16,23 +16,23 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class ACEElevationModel implements ElevationModel, Resampling.Raster {
+class ACEElevationModel implements ElevationModel, Resampling.Raster {
 
-    public static final int NUM_X_TILES = ACEElevationModelDescriptor.NUM_X_TILES;
-    public static final int NUM_Y_TILES = ACEElevationModelDescriptor.NUM_Y_TILES;
-    public static final int DEGREE_RES = ACEElevationModelDescriptor.DEGREE_RES;
-    public static final int NUM_PIXELS_PER_TILE = ACEElevationModelDescriptor.PIXEL_RES;
-    public static final int NO_DATA_VALUE = ACEElevationModelDescriptor.NO_DATA_VALUE;
-    public static final int RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
-    public static final int RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
+    private static final int NUM_X_TILES = ACEElevationModelDescriptor.NUM_X_TILES;
+    private static final int NUM_Y_TILES = ACEElevationModelDescriptor.NUM_Y_TILES;
+    private static final int DEGREE_RES = ACEElevationModelDescriptor.DEGREE_RES;
+    private static final int NUM_PIXELS_PER_TILE = ACEElevationModelDescriptor.PIXEL_RES;
+    private static final int NO_DATA_VALUE = ACEElevationModelDescriptor.NO_DATA_VALUE;
+    private static final int RASTER_WIDTH = NUM_X_TILES * NUM_PIXELS_PER_TILE;
+    private static final int RASTER_HEIGHT = NUM_Y_TILES * NUM_PIXELS_PER_TILE;
 
     private static final float DEGREE_RES_BY_NUM_PIXELS_PER_TILE = DEGREE_RES * (1.0f/NUM_PIXELS_PER_TILE);
 
     private final ACEElevationModelDescriptor _descriptor;
     private final ACEElevationTile[][] _elevationTiles;
     private final List _elevationTileCache;
-    private Resampling _resampling;
-    private Resampling.Index _resamplingIndex;
+    private final Resampling _resampling;
+    private final Resampling.Index _resamplingIndex;
     private final Resampling.Raster _resamplingRaster;
 
     public ACEElevationModel(ACEElevationModelDescriptor descriptor, Resampling resamplingMethod) throws IOException {

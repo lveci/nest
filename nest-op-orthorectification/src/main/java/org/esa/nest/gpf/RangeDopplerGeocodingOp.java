@@ -15,6 +15,7 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.beam.framework.dataio.ProductProjectionBuilder;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
@@ -29,7 +30,6 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.dataio.ProductProjectionBuilder;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.ReaderUtils;
@@ -83,12 +83,13 @@ public class RangeDopplerGeocodingOp extends Operator {
     public static final String PRODUCT_SUFFIX = "_TC";
 
     @SourceProduct(alias="source")
-    protected Product sourceProduct;
+    Product sourceProduct;
     @TargetProduct
-    protected Product targetProduct;
+    Product targetProduct;
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
+    private
     String[] sourceBandNames = null;
 
     @Parameter(valueSet = {"ACE", "GETASSE30", "SRTM 3Sec GeoTiff"}, description = "The digital elevation model.",
@@ -159,12 +160,12 @@ public class RangeDopplerGeocodingOp extends Operator {
     private boolean isElevationModelAvailable = false;
     private boolean usePreCalibrationOp = false;
 
-    private String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
+    private final String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
 
     private int sourceImageWidth = 0;
     private int sourceImageHeight = 0;
-    protected int targetImageWidth = 0;
-    protected int targetImageHeight = 0;
+    private int targetImageWidth = 0;
+    private int targetImageHeight = 0;
 
     private double avgSceneHeight = 0.0; // in m
     private double wavelength = 0.0; // in m
@@ -191,9 +192,9 @@ public class RangeDopplerGeocodingOp extends Operator {
     private final HashMap<String, Band[]> targetBandNameToSourceBand = new HashMap<String, Band[]>();
     private final Map<String, Boolean> targetBandApplyRadiometricNormalizationFlag = new HashMap<String, Boolean>();
     private final Map<String, Boolean> targetBandApplyRetroCalibrationFlag = new HashMap<String, Boolean>();
-    protected TiePointGrid incidenceAngle = null;
-    protected TiePointGrid latitude = null;
-    protected TiePointGrid longitude = null;
+    private TiePointGrid incidenceAngle = null;
+    private TiePointGrid latitude = null;
+    private TiePointGrid longitude = null;
 
     private static final double NonValidZeroDopplerTime = -99999.0;
     private static final double halfLightSpeedInMetersPerDay = Constants.halfLightSpeed * 86400.0;
@@ -203,9 +204,9 @@ public class RangeDopplerGeocodingOp extends Operator {
     private ResampleMethod imgResampling = null;
 
     boolean useAvgSceneHeight = false;
-    Calibrator calibrator = null;
-    boolean orthoDataProduced = false;  // check if any ortho data is actually produced
-    boolean processingStarted = false;
+    private Calibrator calibrator = null;
+    private boolean orthoDataProduced = false;  // check if any ortho data is actually produced
+    private boolean processingStarted = false;
 
     public static final String USE_INCIDENCE_ANGLE_FROM_DEM = "Use projected local incidence angle from DEM";
     public static final String USE_INCIDENCE_ANGLE_FROM_ELLIPSOID = "Use incidence angle from Ellipsoid";
@@ -371,7 +372,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
 
         orbitStateVectors = AbstractMetadata.getOrbitStateVectors(absRoot);
-        if (orbitStateVectors == null) {
+        if (orbitStateVectors == null || orbitStateVectors.length == 0) {
             throw new OperatorException("Invalid Obit State Vectors");
         }
 
@@ -405,9 +406,8 @@ public class RangeDopplerGeocodingOp extends Operator {
      * Get the mission type.
      * @param absRoot the AbstractMetadata
      * @return the mission string
-     * @throws Exception The exceptions.
      */
-    public static String getMissionType(final MetadataElement absRoot) throws Exception {
+    public static String getMissionType(final MetadataElement absRoot) {
         String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
 
         if (mission.contains("TSX1")) {
@@ -442,10 +442,9 @@ public class RangeDopplerGeocodingOp extends Operator {
      * latitude/longitude.
      * @param sourceProduct the input product
      * @param geoBoundary to pass back the max/min lat/lon
-     * @throws Exception The exceptions.
      */
     public static void computeImageGeoBoundary(final Product sourceProduct,
-                                               final ImageGeoBoundary geoBoundary) throws Exception {
+                                               final ImageGeoBoundary geoBoundary) {
 
         final int sourceW = sourceProduct.getSceneRasterWidth();
         final int sourceH = sourceProduct.getSceneRasterHeight();
@@ -614,7 +613,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * Create target product.
      * @throws OperatorException The exception.
      */
-    protected void createTargetProduct() throws OperatorException, IOException {
+    void createTargetProduct() throws OperatorException, IOException {
 
         final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(
                                                 sourceProduct,
@@ -653,7 +652,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * Add the user selected bands to target product.
      * @throws OperatorException The exceptions.
      */
-    protected void addSelectedBands() throws OperatorException {
+    void addSelectedBands() throws OperatorException {
 
         final Band[] sourceBands = OperatorUtils.getSourceBands(sourceProduct, sourceBandNames);
 
@@ -1492,11 +1491,9 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param bandUnit The corresponding source band unit.
      * @param subSwathIndex The subSwath index.
      * @return The pixel value.
-     * @throws IOException from readPixels
      */
     private double getPixelValue(final double azimuthIndex, final double rangeIndex,
-                                 final TileData tileData, Unit.UnitType bandUnit, int[] subSwathIndex)
-            throws IOException {
+                                 final TileData tileData, Unit.UnitType bandUnit, int[] subSwathIndex) {
 
         final Band[] srcBands = targetBandNameToSourceBand.get(tileData.bandName);
         final Band iSrcBand = srcBands[0];

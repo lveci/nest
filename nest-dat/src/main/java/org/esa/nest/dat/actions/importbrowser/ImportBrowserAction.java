@@ -24,13 +24,12 @@ public class ImportBrowserAction extends ExecCommand {
     private static final String ID = "importBrowser";
     private static final String HELP_ID = ID;
 
-    private static ImportBrowserAction instance;
+    private static final ImportBrowserAction instance = new ImportBrowserAction();
     private RepositoryManager repositoryManager = null;
     private ImportBrowser importBrowser = null;
 
     public ImportBrowserAction() {
         super(ID);
-        instance = this;
     }
 
     /**

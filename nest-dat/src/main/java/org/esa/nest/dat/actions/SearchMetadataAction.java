@@ -13,29 +13,29 @@ import org.esa.beam.visat.dialogs.PromptDialog;
  * This action to searches the Metadata
  *
  * @author lveci
- * @version $Revision: 1.5 $ $Date: 2009-11-05 19:13:43 $
+ * @version $Revision: 1.6 $ $Date: 2010-01-04 14:23:42 $
  */
 public class SearchMetadataAction extends ExecCommand {
 
     @Override
     public void actionPerformed(final CommandEvent event) {
 
-        PromptDialog dlg = new PromptDialog("Search Metadata", "tag", "", false);
+        final PromptDialog dlg = new PromptDialog("Search Metadata", "tag", "", false);
         dlg.show();
         if(dlg.IsOK()) {
-                String tag = dlg.getValue().toUpperCase();
-                MetadataElement resultElem = new MetadataElement("Search result ("+dlg.getValue()+')');
+                final String tag = dlg.getValue().toUpperCase();
+                final MetadataElement resultElem = new MetadataElement("Search result ("+dlg.getValue()+')');
 
                /* ProductMetadataView metadataView = VisatApp.getApp().getSelectedProductMetadataView();
                 if(metadataView != null) {
-                    MetadataElement elem = metadataView.getMetadataElement();
+                    final MetadataElement elem = metadataView.getMetadataElement();
                     resultElem.setOwner(elem.getProduct());
                     
                     searchMetadata(resultElem, elem, tag);
 
                 } else {  */
-                    Product product = VisatApp.getApp().getSelectedProduct();
-                    MetadataElement root = product.getMetadataRoot();
+                    final Product product = VisatApp.getApp().getSelectedProduct();
+                    final MetadataElement root = product.getMetadataRoot();
                     resultElem.setOwner(product);
 
                     searchMetadata(resultElem, root, tag);
@@ -56,16 +56,30 @@ public class SearchMetadataAction extends ExecCommand {
         setEnabled(n > 0);
     }
 
-    private static void searchMetadata(MetadataElement resultElem, MetadataElement elem, String tag) {
+    private static void searchMetadata(final MetadataElement resultElem, final MetadataElement elem, final String tag) {
 
-            MetadataElement[] elemList = elem.getElements();
+            final MetadataElement[] elemList = elem.getElements();
             for(MetadataElement e : elemList) {
                 searchMetadata(resultElem, e, tag);
             }
-            MetadataAttribute[] attribList = elem.getAttributes();
+            final MetadataAttribute[] attribList = elem.getAttributes();
             for(MetadataAttribute attrib : attribList) {
-                if(attrib.getName().toUpperCase().contains(tag))
-                    resultElem.addAttribute(attrib);
+                if(attrib.getName().toUpperCase().contains(tag)) {
+                    final MetadataAttribute newAttrib = attrib.createDeepClone();
+                    newAttrib.setDescription(getAttributePath(attrib));
+                    resultElem.addAttribute(newAttrib);
+                }
             }
+    }
+
+    private static String getAttributePath(final MetadataAttribute attrib) {
+        MetadataElement parentElem = attrib.getParentElement();
+        String path = parentElem.getName();
+        while(parentElem != null && !parentElem.getName().equals("metadata")) {
+            parentElem = parentElem.getParentElement();
+            if(parentElem != null)
+                path = parentElem.getName() + "/" + path;
+        }
+        return path;
     }
 }

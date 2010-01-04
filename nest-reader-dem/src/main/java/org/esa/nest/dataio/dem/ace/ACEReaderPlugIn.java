@@ -18,12 +18,12 @@ import java.util.Locale;
 public class ACEReaderPlugIn implements ProductReaderPlugIn {
 
     public static final String FORMAT_NAME = "ACE";
-    public static final String[] FILE_EXTENSIONS = new String[]{ ".ACE" };
-    public static final Class[] INPUT_TYPES = new Class[]{
+    private static final String[] FILE_EXTENSIONS = new String[]{ ".ACE" };
+    private static final Class[] INPUT_TYPES = new Class[]{
             String.class,
             File.class,
     };
-    public static final String DESCRIPTION = "ACE Data Product Tile";
+    private static final String DESCRIPTION = "ACE Data Product Tile";
 
     public ACEReaderPlugIn() {
     }

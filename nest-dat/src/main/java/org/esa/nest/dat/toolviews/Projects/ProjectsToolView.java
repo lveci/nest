@@ -23,7 +23,7 @@ public class ProjectsToolView extends AbstractToolView implements Observer {
 
     private ProjectTree projectTree;
     private DefaultMutableTreeNode rootNode;
-    private Project project = Project.instance();
+    private final Project project = Project.instance();
 
     public ProjectsToolView() {
         Project.instance().addObserver(this);

@@ -87,7 +87,7 @@ public class SpeckleFilterOp extends Operator {
     private int sourceImageWidth;
     private int sourceImageHeight;
 
-    static final double NonValidPixelValue = -1.0;
+    private static final double NonValidPixelValue = -1.0;
 
     /**
      * Default constructor. The graph processing framework
@@ -441,6 +441,7 @@ public class SpeckleFilterOp extends Operator {
      * @param x            x coordinate of a given pixel.
      * @param y            y coordinate of a given pixel.
      * @param sourceRaster The source tile.
+     * @param neighborValues
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in obtaining the pixel values.
      */
@@ -514,6 +515,7 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Get the median value of pixel intensities in a given rectanglar region.
+     * @param neighborValues
      * @return median The median value.
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the median value.
@@ -528,6 +530,7 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Get Frost mask for given Frost filter size.
+     * @param mask
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the Frost mask.
      */
@@ -548,6 +551,8 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Get the Frost filtered pixel intensity for pixels in a given rectanglar region.
+     * @param neighborValues
+     * @param mask
      * @return val The Frost filtered value.
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the Frost filtered value.
@@ -578,6 +583,7 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Get the Gamma filtered pixel intensity for pixels in a given rectanglar region.
+     * @param neighborValues
      * @return val The Gamma filtered value.
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the Gamma filtered value.
@@ -616,6 +622,7 @@ public class SpeckleFilterOp extends Operator {
 
     /**
      * Get the Lee filtered pixel intensity for pixels in a given rectanglar region.
+     * @param neighborValues
      * @return val The Lee filtered value.
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in computation of the Lee filtered value.

@@ -8,8 +8,6 @@ import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
-import gov.nasa.worldwind.event.RenderingEvent;
-import gov.nasa.worldwind.event.RenderingListener;
 import gov.nasa.worldwind.examples.ClickAndGoSelectListener;
 import gov.nasa.worldwind.examples.WMSLayersPanel;
 import gov.nasa.worldwind.geom.LatLon;
@@ -58,7 +56,7 @@ import java.net.URISyntaxException;
 /**
  * The window displaying the world map.
  *
- * @version $Revision: 1.15 $ $Date: 2009-08-07 14:25:03 $
+ * @version $Revision: 1.16 $ $Date: 2010-01-04 14:23:42 $
  */
 public class NestWWToolView extends AbstractToolView {
 
@@ -66,7 +64,7 @@ public class NestWWToolView extends AbstractToolView {
     //private static final ImageIcon loadDEMIcon = ResourceUtils.LoadIcon("org/esa/nest/icons/dem24.gif");
 
     private final VisatApp datApp = VisatApp.getApp();
-    private Dimension canvasSize = new Dimension(800, 600);
+    private final Dimension canvasSize = new Dimension(800, 600);
 
     private AppPanel wwjPanel = null;
     private LayerPanel layerPanel = null;
@@ -77,7 +75,7 @@ public class NestWWToolView extends AbstractToolView {
 
     private final Dimension wmsPanelSize = new Dimension(400, 600);
 
-    private JTabbedPane tabbedPane = new JTabbedPane();
+    private final JTabbedPane tabbedPane = new JTabbedPane();
     private int previousTabIndex = 0;
 
     private static final boolean includeStatusBar = true;
@@ -163,11 +161,11 @@ public class NestWWToolView extends AbstractToolView {
         return mainPane;
     }
 
-    public WorldWindowGLCanvas getWwd() {
+    WorldWindowGLCanvas getWwd() {
         return wwjPanel.getWwd();
     }
 
-    public static void insertTiledLayer(WorldWindow wwd, Layer layer) {
+    private static void insertTiledLayer(WorldWindow wwd, Layer layer) {
         int position = 0;
         final LayerList layers = wwd.getModel().getLayers();
         for (Layer l : layers) {
@@ -264,7 +262,7 @@ public class NestWWToolView extends AbstractToolView {
         //_eventListener.LoadDEM();
     }
 
-    public void setSelectedProduct(Product product) {
+    void setSelectedProduct(Product product) {
         if(productLayer != null)
             productLayer.setSelectedProduct(product);
         if(productPanel != null)
@@ -274,13 +272,13 @@ public class NestWWToolView extends AbstractToolView {
         }
     }
 
-    public Product getSelectedProduct() {
+    Product getSelectedProduct() {
         if(productLayer != null)
             return productLayer.getSelectedProduct();
         return null;
     }
 
-    public void setProducts(Product[] products) {
+    void setProducts(Product[] products) {
         if(productLayer != null) {
             for (Product prod : products) {
                 try {
@@ -298,7 +296,7 @@ public class NestWWToolView extends AbstractToolView {
         }
     }
 
-    public void removeProduct(Product product) {
+    void removeProduct(Product product) {
         if(getSelectedProduct() == product)
             setSelectedProduct(null);
         if(productLayer != null)

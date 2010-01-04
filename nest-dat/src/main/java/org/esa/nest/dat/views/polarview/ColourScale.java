@@ -9,9 +9,9 @@ import java.util.Vector;
 public class ColourScale {
 
     private ColorModel cm = null;
-    private Color[] colors;
-    private int thresholdCount;
-    private int[] colorIndexThresholds;
+    private final Color[] colors;
+    private final int thresholdCount;
+    private final int[] colorIndexThresholds;
     private final Vector<ColorBar> coloredClients = new Vector<ColorBar>();
 
     private double colorIndexValues[] = null;
@@ -21,7 +21,7 @@ public class ColourScale {
     private double lightestIndex = 0;
     private double scale = 0;
 
-    ColourScale(Color colorTable[]) {
+    private ColourScale(Color colorTable[]) {
         thresholdCount = colorTable.length;
         colorIndexThresholds = new int[thresholdCount];
         colorIndexThresholds[0] = 0;
@@ -40,7 +40,7 @@ public class ColourScale {
         return new ColourScale(PolarView.colourTable, range);
     }
 
-    ColourScale(Color colorTable[], double range[]) {
+    private ColourScale(Color colorTable[], double range[]) {
         this(colorTable);
         colorIndexValues = new double[thresholdCount];
         setRange(range[0], range[1]);
@@ -69,15 +69,15 @@ public class ColourScale {
         updateRange();
     }
 
-    public byte getColorIndex(int value) {
+    byte getColorIndex(int value) {
         return getColorIndex((double) value);
     }
 
-    public byte getColorIndex(float value) {
+    byte getColorIndex(float value) {
         return getColorIndex((double) value);
     }
 
-    public byte getColorIndex(double value) {
+    byte getColorIndex(double value) {
         double val = value - darkestValue;
         if (val < 0.0D)
             return (byte) (int) darkestIndex;

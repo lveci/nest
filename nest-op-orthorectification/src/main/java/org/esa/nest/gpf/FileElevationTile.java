@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileElevationTile {
+class FileElevationTile {
 
     private CachingObjectArray _linesCache;
     private Product _product;

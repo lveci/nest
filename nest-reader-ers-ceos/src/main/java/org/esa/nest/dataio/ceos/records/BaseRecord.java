@@ -16,7 +16,6 @@ public class BaseRecord {
 
     private CeosDB db;
     private final static String sep = File.separator;
-    private final static String ceosDBPath = sep+"org"+sep+"esa"+sep+"nest"+sep+"ceos_db";
     private final int recordLength;
 
     public BaseRecord(final BinaryFileReader reader, final long startPos,
@@ -39,26 +38,6 @@ public class BaseRecord {
 
         final String resPath = mission + sep + recordDefinitionFileName;
         db = new CeosDB(getResFile(resPath).getAbsolutePath());
-        db.readRecord(reader);
-
-        recordLength = getAttributeInt("Record Length");
-    }
-
-    /*
-    Quick read using exiting ceosDB for ImageRecord
-     */
-    public BaseRecord(final BinaryFileReader reader, final long startPos, CeosDB theDB)
-            throws IOException, IllegalBinaryFormatException {
-        _reader = reader;
-        // reposition start if needed
-        if (startPos != -1) {
-            _startPos = startPos;
-            reader.seek(startPos);
-        } else {
-            _startPos = reader.getCurrentPos();
-        }
-        
-        db = theDB;
         db.readRecord(reader);
 
         recordLength = getAttributeInt("Record Length");
@@ -112,7 +91,7 @@ public class BaseRecord {
         }
     }
 
-    protected static MetadataElement createMetadataElement(final String name, final String suffix) {
+    static MetadataElement createMetadataElement(final String name, final String suffix) {
         final MetadataElement elem;
         if (suffix != null && suffix.trim().length() > 0) {
             elem = new MetadataElement(name + ' ' + suffix.trim());

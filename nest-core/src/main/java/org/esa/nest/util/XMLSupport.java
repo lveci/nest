@@ -103,7 +103,7 @@ public class XMLSupport {
             childDomElem.setAttribute(tag, val);
     }
 
-    public static void domElementToMetadataElement(final Element domElem, final MetadataElement metadataElem) {
+    private static void domElementToMetadataElement(final Element domElem, final MetadataElement metadataElem) {
 
         final List children = domElem.getContent();
         for (Object aChild : children) {

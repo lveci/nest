@@ -5,20 +5,20 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.jidesoft.icons.IconsFactory;
 import com.jidesoft.swing.JideScrollPane;
 import com.jidesoft.swing.JideSplitPane;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.framework.ui.UIUtils;
-import org.esa.beam.framework.ui.WorldMapPaneDataModel;
 import org.esa.beam.framework.ui.WorldMapPane;
+import org.esa.beam.framework.ui.WorldMapPaneDataModel;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
-import org.esa.beam.framework.datamodel.Product;
+import org.esa.nest.dat.DatContext;
 import org.esa.nest.dat.actions.importbrowser.model.*;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.ProductPropertiesProvider;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.QuicklookProvider;
 import org.esa.nest.dat.actions.importbrowser.util.Callback;
-import org.esa.nest.dat.toolviews.Projects.Project;
 import org.esa.nest.dat.dialogs.BatchGraphDialog;
-import org.esa.nest.dat.DatContext;
+import org.esa.nest.dat.toolviews.Projects.Project;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -469,7 +469,7 @@ public class ImportBrowser {
         button.setName(getClass().getName() + name);
     }
 
-    public JComponent createRepositoryTreeControl() {
+    JComponent createRepositoryTreeControl() {
         final JScrollPane prjScrollPane = new JideScrollPane(createTree());
         prjScrollPane.setPreferredSize(new Dimension(320, 480));
         prjScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);

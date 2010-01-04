@@ -29,7 +29,6 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 
-import javax.media.jai.JAI;
 import java.util.ArrayList;
 
 /**
@@ -48,6 +47,7 @@ public class ConvertDataTypeOp extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
+    private
     String[] sourceBandNames;
 
     @Parameter(valueSet = { ProductData.TYPESTRING_INT8,
@@ -68,7 +68,7 @@ public class ConvertDataTypeOp extends Operator {
 
     protected final static String SCALING_TRUNCATE = "Truncate";
     protected final static String SCALING_LINEAR = "Linear (slope and intercept)";
-    protected final static String SCALING_LINEAR2 = "Linear (between min max)";
+    private final static String SCALING_LINEAR2 = "Linear (between min max)";
     protected final static String SCALING_LOGARITHMIC = "Logarithmic";
 
     private enum ScalingType { NONE, TRUNC, LINEAR, LINEAR2, LOGARITHMIC }

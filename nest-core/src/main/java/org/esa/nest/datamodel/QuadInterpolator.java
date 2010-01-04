@@ -11,7 +11,7 @@ import org.esa.nest.util.MathUtils;
  * Time: 5:31:11 PM
  * To change this template use File | Settings | File Templates.
  */
-public class QuadInterpolator {
+class QuadInterpolator {
 
     private final float subSamplinX;
     private final float subSamplinY;

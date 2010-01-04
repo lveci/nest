@@ -5,11 +5,11 @@ import java.io.File;
 /**
  * Several constants used for reading Radarsat2 products.
  */
-public class Radarsat2Constants {
+class Radarsat2Constants {
 
-    final static String[] FORMAT_NAMES = new String[]{"Radarsat 2"};
-    final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
-    final static String PLUGIN_DESCRIPTION = "Radarsat2 Products";      /*I18N*/
+    private final static String[] FORMAT_NAMES = new String[]{"Radarsat 2"};
+    private final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
+    private final static String PLUGIN_DESCRIPTION = "Radarsat2 Products";      /*I18N*/
     final static String PRODUCT_TYPE_PREFIX = "";
     final static String PRODUCT_HEADER_PREFIX = "PRODUCT";
 

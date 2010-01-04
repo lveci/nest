@@ -9,8 +9,8 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.PropertyMap;
 import org.esa.nest.dat.actions.importbrowser.model.Repository;
 import org.esa.nest.dat.actions.importbrowser.model.RepositoryEntry;
-import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -174,7 +174,7 @@ public class ProductPropertiesProvider implements DataProvider {
 
         private static final int ROW_HEIGHT = 100;
         private final JPanel centeringPanel = new JPanel(new BorderLayout());
-        private Font valueFont;
+        private final Font valueFont;
 
         public ProductPropertiesRenderer() {
             final DefaultTableModel dataModel = new DefaultTableModel();

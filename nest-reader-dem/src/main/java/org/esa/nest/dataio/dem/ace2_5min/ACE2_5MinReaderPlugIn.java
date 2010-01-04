@@ -14,15 +14,15 @@ import java.util.Locale;
  * A plugin for a product reader for ACE data.
  *
  */
-public class ACE2_5MinReaderPlugIn implements ProductReaderPlugIn {
+class ACE2_5MinReaderPlugIn implements ProductReaderPlugIn {
 
     public static final String FORMAT_NAME = "ACE2";
-    public static final String[] FILE_EXTENSIONS = new String[]{ ".ACE2" };
-    public static final Class[] INPUT_TYPES = new Class[]{
+    private static final String[] FILE_EXTENSIONS = new String[]{ ".ACE2" };
+    private static final Class[] INPUT_TYPES = new Class[]{
             String.class,
             File.class,
     };
-    public static final String DESCRIPTION = "ACE2 Data Product Tile";
+    private static final String DESCRIPTION = "ACE2 Data Product Tile";
 
     public ACE2_5MinReaderPlugIn() {
     }

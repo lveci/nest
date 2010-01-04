@@ -31,6 +31,7 @@ public class SubsetOp extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
+    private
     String[] sourceBandNames;
 
     @Parameter(label = "X", defaultValue="0")

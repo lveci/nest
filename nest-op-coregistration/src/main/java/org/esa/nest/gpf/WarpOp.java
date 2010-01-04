@@ -563,6 +563,8 @@ public class WarpOp extends Operator {
 
     /**
      * Output co-registration information to file.
+     * @param sourceProduct
+     * @param warpPolynomialOrder
      * @param warpData Stores the warp information per band.
      * @param appendFlag Boolean flag indicating if the information is output to file in appending mode.
      * @param threshold The threshold for elinimating GCPs.
@@ -570,7 +572,7 @@ public class WarpOp extends Operator {
      * @param bandName the band name
      * @throws OperatorException The exceptions.
      */
-    public static void outputCoRegistrationInfo(final Product sourceProduct, final int warpPolynomialOrder,
+    private static void outputCoRegistrationInfo(final Product sourceProduct, final int warpPolynomialOrder,
                                                 final WarpData warpData, final boolean appendFlag,
                                                 final float threshold, final int parseIndex, final String bandName)
             throws OperatorException {
@@ -665,7 +667,7 @@ public class WarpOp extends Operator {
         }
     }
 
-    public static File getResidualsFile(final Product sourceProduct) {
+    private static File getResidualsFile(final Product sourceProduct) {
         String fileName = sourceProduct.getName() + "_residual.txt";
         final File appUserDir = new File(ResourceUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
         if(!appUserDir.exists()) {

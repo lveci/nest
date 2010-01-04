@@ -25,15 +25,15 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
-import org.esa.nest.gpf.UndersamplingOp;
 import org.esa.nest.gpf.OperatorUtils;
+import org.esa.nest.gpf.UndersamplingOp;
 
 import java.awt.*;
+import java.io.File;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.ArrayList;
-import java.io.File;
 
 /**
  * The sample operator implementation for an algorithm

@@ -35,10 +35,10 @@ public class CEOSLeaderFile {
     protected final static String detailedProcessing_recordDefinitionFile = "detailed_processing_record.xml";
     protected final static String facility_recordDefinitionFile = "facility_record.xml";
 
-    public CEOSLeaderFile() {
+    protected CEOSLeaderFile() {
     }
 
-    public CEOSLeaderFile(final ImageInputStream stream, final String mission, final String defnFile)
+    protected CEOSLeaderFile(final ImageInputStream stream, final String mission, final String defnFile)
             throws IOException, IllegalBinaryFormatException {
         final BinaryFileReader reader = new BinaryFileReader(stream);
 

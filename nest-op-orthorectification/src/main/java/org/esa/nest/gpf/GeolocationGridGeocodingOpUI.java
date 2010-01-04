@@ -1,25 +1,17 @@
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
-import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
-import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.dataop.maptransf.MapProjection;
 import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.io.File;
-import java.util.Map;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * User interface for RangeDopplerGeocodingOp
@@ -27,8 +19,8 @@ import java.util.Arrays;
 public class GeolocationGridGeocodingOpUI extends BaseOperatorUI {
 
     private final JList bandList = new JList();
-    protected final JComboBox projectionName = new JComboBox();
-    protected final JComboBox imgResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+    private final JComboBox projectionName = new JComboBox();
+    private final JComboBox imgResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
                                                                            ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
                                                                            ResamplingFactory.CUBIC_CONVOLUTION_NAME});
 
@@ -71,7 +63,7 @@ public class GeolocationGridGeocodingOpUI extends BaseOperatorUI {
         paramMap.put("projectionName", projectionName.getSelectedItem());
     }
 
-    protected JComponent createPanel() {
+    JComponent createPanel() {
 
         final JPanel contentPane = new JPanel();
         contentPane.setLayout(new GridBagLayout());

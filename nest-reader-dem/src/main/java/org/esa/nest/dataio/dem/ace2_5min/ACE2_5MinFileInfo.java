@@ -108,7 +108,7 @@ public class ACE2_5MinFileInfo {
         }
     }
 
-    public void setFromData(final String fileName, final long fileSize) throws IOException {
+    void setFromData(final String fileName, final long fileSize) throws IOException {
         _fileName = fileName;
         _fileSize = fileSize;
 
@@ -133,7 +133,7 @@ public class ACE2_5MinFileInfo {
         _noDataValue = ACE2_5MinElevationModelDescriptor.NO_DATA_VALUE;
     }
 
-    public static int[] parseEastingNorthing(final String text) throws ParseException {
+    private static int[] parseEastingNorthing(final String text) throws ParseException {
         Guardian.assertNotNullOrEmpty("text", text);
         if (text.length() == 0) {
             return null;

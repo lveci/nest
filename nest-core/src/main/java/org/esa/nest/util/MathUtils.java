@@ -217,7 +217,7 @@ public final class MathUtils
      * @param x The input variable.
      * @return The sinc function value.
      */
-    public static double sinc(final double x) {
+    private static double sinc(final double x) {
 
         if (Double.compare(x, 0.0) == 0) {
             return 1.0;

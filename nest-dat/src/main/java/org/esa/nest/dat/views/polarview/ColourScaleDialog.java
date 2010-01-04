@@ -10,7 +10,7 @@ import java.awt.*;
 /**
 
  */
-public class ColourScaleDialog extends ModalDialog {
+class ColourScaleDialog extends ModalDialog {
 
     private final JTextField min = new JTextField("");
     private final JTextField max = new JTextField("");

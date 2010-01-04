@@ -31,7 +31,7 @@ import java.util.zip.ZipFile;
  *
  * @author Norman Fomferra
  */
-public class ACE2_5MinReader extends AbstractProductReader {
+class ACE2_5MinReader extends AbstractProductReader {
 
     private ZipFile _zipFile = null;
     private ImageInputStream _imageInputStream = null;

@@ -15,6 +15,7 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.beam.framework.dataio.ProductProjectionBuilder;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.beam.framework.dataop.maptransf.MapInfo;
@@ -28,13 +29,12 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.dataio.ProductProjectionBuilder;
 import org.esa.beam.util.ProductUtils;
+import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.MathUtils;
-import org.esa.nest.dataio.ReaderUtils;
 
 import java.awt.*;
 import java.io.IOException;
@@ -80,6 +80,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
+    private
     String[] sourceBandNames = null;
 
     @Parameter(valueSet = {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
@@ -104,7 +105,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
     private GeoCoding targetGeoCoding = null;
 
     private double rangeSpacing = 0.0;
-    private double azimuthSpacing = 0.0;
     private double firstLineUTC = 0.0; // in days
     private double lineTimeInterval = 0.0; // in days
     private final RangeDopplerGeocodingOp.ImageGeoBoundary imageGeoBoundary = new RangeDopplerGeocodingOp.ImageGeoBoundary();
@@ -180,7 +180,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
         srgrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.srgr_flag);
 
         rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
-        azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
 
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
 
@@ -653,10 +652,9 @@ public final class GeolocationGridGeocodingOp extends Operator {
      * @param azimuthIndex The azimuth index for pixel in source image.
      * @param rangeIndex The range index for pixel in source image.
      * @return The pixel value.
-     * @throws IOException from readPixels
      */
 
-    private double getPixelValue(final double azimuthIndex, final double rangeIndex) throws IOException {
+    private double getPixelValue(final double azimuthIndex, final double rangeIndex) {
 
         Unit.UnitType bandUnit = Unit.getUnitType(sourceBand);
         if (imgResampling.equals(ResampleMethod.RESAMPLE_NEAREST_NEIGHBOUR)) {

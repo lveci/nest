@@ -33,7 +33,7 @@ public final class CeosDB {
          B2(6),
          Debug(-1);
 
-         private int theValue;
+         private final int theValue;
          int value() {return theValue;}
 
          CeosDBTypes(int value){
@@ -41,13 +41,11 @@ public final class CeosDB {
          }
      }
 
-    private Map<String, Object> metaMap;
+    private final Map<String, Object> metaMap;
     private org.jdom.Document xmlDoc = null;
-    private final String definitionFile;
 
     public CeosDB(String defFile) throws IOException {
 
-        definitionFile = defFile;
         try {
             xmlDoc = XMLSupport.LoadXML(defFile);
         } catch(Exception e) {

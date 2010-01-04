@@ -5,16 +5,11 @@ import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.esa.beam.visat.VisatApp;
-import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
-import org.esa.beam.framework.datamodel.Product;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
-import java.util.Calendar;
-import java.util.concurrent.ExecutionException;
 
 
 public final class ftpUtils {
@@ -27,7 +22,7 @@ public final class ftpUtils {
         this(server, "anonymous", "anonymous");
     }
 
-    public ftpUtils(String server, String user, String password) throws IOException {
+    private ftpUtils(String server, String user, String password) throws IOException {
         ftpClient.connect(server);
         ftpClient.login(user, password);
 

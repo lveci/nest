@@ -20,12 +20,12 @@ public class AbstractMetadata {
 
     public static final int NO_METADATA = 99999;
     //public static final short NO_METADATA_BYTE = 99;
-    public static final short NO_METADATA_BYTE = 0;
+    private static final short NO_METADATA_BYTE = 0;
     public static final String NO_METADATA_STRING = " ";
 
     public static final String ABSTRACT_METADATA_ROOT = "Abstracted_Metadata";
     @Deprecated
-    public static final String ABSTRACT_METADATA_ROOT_OLD = "Abstracted Metadata";
+    private static final String ABSTRACT_METADATA_ROOT_OLD = "Abstracted Metadata";
 
     public static final String SLAVE_METADATA_ROOT = "Slave Metadata";
 
@@ -39,10 +39,10 @@ public class AbstractMetadata {
     public static final String REL_ORBIT = "REL_ORBIT";
     public static final String ABS_ORBIT = "ABS_ORBIT";
     public static final String STATE_VECTOR_TIME = "STATE_VECTOR_TIME";
-    public static final String VECTOR_SOURCE = "VECTOR_SOURCE";
+    private static final String VECTOR_SOURCE = "VECTOR_SOURCE";
 
     // SPH
-    public static final String NUM_SLICES = "NUM_SLICES";
+    private static final String NUM_SLICES = "NUM_SLICES";
     public static final String first_line_time = "first_line_time";
     public static final String last_line_time = "last_line_time";
     public static final String first_near_lat = "first_near_lat";
@@ -114,8 +114,8 @@ public class AbstractMetadata {
     public static final String is_terrain_corrected = "is_terrain_corrected";
     public static final String DEM = "DEM";
     public static final String geo_ref_system = "geo_ref_system";
-    public static final String lat_pixel_res = "lat_pixel_res";
-    public static final String lon_pixel_res = "lon_pixel_res";
+    private static final String lat_pixel_res = "lat_pixel_res";
+    private static final String lon_pixel_res = "lon_pixel_res";
     public static final String slant_range_to_first_pixel = "slant_range_to_first_pixel";
 
     /**
@@ -244,7 +244,10 @@ public class AbstractMetadata {
     public static void setAttribute(final MetadataElement dest, final String tag, final String value) {
         final MetadataAttribute attrib = dest.getAttribute(tag);
         if(attrib != null && value != null) {
-            attrib.getData().setElems(value);
+            if(value.isEmpty())
+                attrib.getData().setElems(NO_METADATA_STRING);
+            else
+                attrib.getData().setElems(value);
         } else {
             if(attrib == null)
                 System.out.println(tag + " not found in metadata");
@@ -418,7 +421,7 @@ public class AbstractMetadata {
      * @return orbitStateVectors Array of orbit state vectors.
      * @throws Exception The exceptions.
      */
-    public static OrbitStateVector[] getOrbitStateVectors(final MetadataElement absRoot) throws Exception {
+    public static OrbitStateVector[] getOrbitStateVectors(final MetadataElement absRoot) {
 
         final MetadataElement elemRoot = absRoot.getElement(orbit_state_vectors);
         final int numElems = elemRoot.getNumElements();
@@ -471,7 +474,7 @@ public class AbstractMetadata {
      * @return orbitStateVectors Array of orbit state vectors.
      * @throws Exception The exceptions.
      */
-    public static SRGRCoefficientList[] getSRGRCoefficients(final MetadataElement absRoot) throws Exception {
+    public static SRGRCoefficientList[] getSRGRCoefficients(final MetadataElement absRoot) {
 
         final MetadataElement elemRoot = absRoot.getElement(srgr_coefficients);
         final MetadataElement[] srgr_coef_listElem = elemRoot.getElements();

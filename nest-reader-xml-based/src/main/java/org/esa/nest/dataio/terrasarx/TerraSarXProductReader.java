@@ -19,7 +19,7 @@ import java.io.IOException;
  * The product reader for TerraSarX products.
  *
  */
-public class TerraSarXProductReader extends AbstractProductReader {
+class TerraSarXProductReader extends AbstractProductReader {
 
     private TerraSarXProductDirectory _dataDir = null;
 
@@ -129,7 +129,7 @@ public class TerraSarXProductReader extends AbstractProductReader {
     }
 
     
-    public static void readBandRasterDataSLCShort(final int sourceOffsetX, final int sourceOffsetY,
+    private static void readBandRasterDataSLCShort(final int sourceOffsetX, final int sourceOffsetY,
                                       final int sourceWidth, final int sourceHeight,
                                       final int sourceStepX, final int sourceStepY,
                                       final int imageStartOffset, int imageRecordLength,

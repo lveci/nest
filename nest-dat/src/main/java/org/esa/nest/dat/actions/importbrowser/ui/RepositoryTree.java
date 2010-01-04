@@ -21,7 +21,7 @@ import java.util.Enumeration;
 /**
  * A tree-view component for Repositories
  */
-public class RepositoryTree extends JTree implements PopupMenuFactory, ActionListener {
+class RepositoryTree extends JTree implements PopupMenuFactory, ActionListener {
 
     private Object menuContext;
     private DefaultMutableTreeNode selectedNode;
@@ -41,7 +41,7 @@ public class RepositoryTree extends JTree implements PopupMenuFactory, ActionLis
      *
      * @param multipleSelect whether or not the tree is multiple selection capable
      */
-    public RepositoryTree(final boolean multipleSelect) {
+    private RepositoryTree(final boolean multipleSelect) {
 
         getSelectionModel().setSelectionMode(multipleSelect
                 ? TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION
@@ -215,7 +215,7 @@ public class RepositoryTree extends JTree implements PopupMenuFactory, ActionLis
         return null;
     }
 
-    public JPopupMenu createPopup(final Object context) {
+    JPopupMenu createPopup(final Object context) {
 
         JPopupMenu popup = new JPopupMenu();
         menuContext = context;
@@ -289,7 +289,7 @@ public class RepositoryTree extends JTree implements PopupMenuFactory, ActionLis
         importBrowser.UpdateUI();
     }
 
-    public void expandAll() {
+    void expandAll() {
         TreeNode root = (TreeNode) getModel().getRoot();
         expandAll(this, new TreePath(root), true);
     }
@@ -392,9 +392,9 @@ public class RepositoryTree extends JTree implements PopupMenuFactory, ActionLis
 
     private static class PTCellRenderer extends DefaultTreeCellRenderer {
 
-        ImageIcon productIcon;
-        ImageIcon groupOpenIcon;
-        ImageIcon projectIcon;
+        final ImageIcon productIcon;
+        final ImageIcon groupOpenIcon;
+        final ImageIcon projectIcon;
 
         public PTCellRenderer() {
             productIcon = UIUtils.loadImageIcon("icons/RsProduct16.gif");
@@ -425,7 +425,7 @@ public class RepositoryTree extends JTree implements PopupMenuFactory, ActionLis
         }
     }
 
-    public static class TreeTransferHandler extends TransferHandler {
+    private static class TreeTransferHandler extends TransferHandler {
 
         public boolean canImport(TransferSupport info) {
             return info.isDataFlavorSupported(DataFlavor.stringFlavor);
@@ -492,8 +492,8 @@ public class RepositoryTree extends JTree implements PopupMenuFactory, ActionLis
     }
 
     private static class RepoTreeNode {
-        private File _baseDir;
-        private String _name;
+        private final File _baseDir;
+        private final String _name;
 
         RepoTreeNode(File baseDir, String name) {
             _baseDir = baseDir;

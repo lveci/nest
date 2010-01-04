@@ -12,7 +12,7 @@ import java.io.File;
 /**
  *  Provides the User Interface for PCA
  */
-public class PCADialog extends MultiGraphDialog {
+class PCADialog extends MultiGraphDialog {
 
     private final static String homeUrl = System.getProperty("nest.home", ".");
     private final static File graphPath = new File(homeUrl, File.separator + "graphs" + File.separator + "internal");
@@ -79,7 +79,7 @@ public class PCADialog extends MultiGraphDialog {
                 "3-Write", ioPanel.getTargetFile(), ioPanel.getTargetFormat());
     }
 
-    private static void setIO(final GraphExecuter graphEx, final String readID, final File readPath) throws GraphException {
+    private static void setIO(final GraphExecuter graphEx, final String readID, final File readPath) {
         setIO(graphEx, readID, readPath, null, null, null);
     }
 

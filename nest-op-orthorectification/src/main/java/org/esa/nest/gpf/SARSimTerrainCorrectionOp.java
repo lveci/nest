@@ -15,6 +15,7 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.beam.framework.dataio.ProductProjectionBuilder;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
@@ -32,7 +33,6 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.dataio.ProductProjectionBuilder;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.dataio.ReaderUtils;
@@ -47,9 +47,9 @@ import org.esa.nest.util.ResourceUtils;
 
 import java.awt.*;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -85,9 +85,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
     public static final String PRODUCT_SUFFIX = "_SimTC";
     
     @SourceProduct(alias="source")
-    protected Product sourceProduct;
+    private Product sourceProduct;
     @TargetProduct
-    protected Product targetProduct;
+    private Product targetProduct;
 
     @Parameter(description = "The RMS threshold for eliminating invalid GCPs", interval = "(0, *)", defaultValue = "1.0",
                 label="RMS Threshold")
@@ -189,9 +189,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
     private final Map<String, Boolean> targetBandapplyRadiometricNormalizationFlag = new HashMap<String, Boolean>();
     private final Map<String, Boolean> targetBandApplyRetroCalibrationFlag = new HashMap<String, Boolean>();
-    protected TiePointGrid incidenceAngle = null;
-    protected TiePointGrid latitude = null;
-    protected TiePointGrid longitude = null;
+    private TiePointGrid incidenceAngle = null;
+    private TiePointGrid latitude = null;
+    private TiePointGrid longitude = null;
 
     private static final double NonValidZeroDopplerTime = -99999.0;
     private static final int INVALID_SUB_SWATH_INDEX = -1;
@@ -203,8 +203,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private Calibrator calibrator = null;
     private Band maskBand = null;
 
-    boolean orthoDataProduced = false;  // check if any ortho data is actually produced
-    boolean processingStarted = false;
+    private boolean orthoDataProduced = false;  // check if any ortho data is actually produced
+    private boolean processingStarted = false;
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -1573,7 +1573,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
     }
 
-    public static File getShiftsFile(final Product sourceProduct) {
+    private static File getShiftsFile(final Product sourceProduct) {
         String fileName = sourceProduct.getName() + "_shift.txt";
         final File appUserDir = new File(ResourceUtils.getApplicationUserDir(true).getAbsolutePath() + File.separator + "log");
         if(!appUserDir.exists()) {

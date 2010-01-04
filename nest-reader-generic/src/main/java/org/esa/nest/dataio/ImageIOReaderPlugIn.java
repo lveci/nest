@@ -17,11 +17,11 @@ import java.util.Locale;
  */
 public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
 
-	final static String[] FORMAT_NAMES = ImageIO.getReaderFormatNames();
-	final static String[] FORMAT_FILE_EXTENSIONS = getFormatFileExtensions();
-    final static String[] IMAGEIO_FILE_EXTENSIONS = getPrunedImageIOExtensions();
-    final static String PLUGIN_DESCRIPTION = "ImageIO Products";
-    Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
+	private final static String[] FORMAT_NAMES = ImageIO.getReaderFormatNames();
+	private final static String[] FORMAT_FILE_EXTENSIONS = getFormatFileExtensions();
+    private final static String[] IMAGEIO_FILE_EXTENSIONS = getPrunedImageIOExtensions();
+    private final static String PLUGIN_DESCRIPTION = "ImageIO Products";
+    private final Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
 
     private static String[] getFormatFileExtensions() {
 
@@ -82,7 +82,7 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
         return DecodeQualification.UNABLE;
     }
 
-    protected static DecodeQualification checkProductQualification(File file) {
+    private static DecodeQualification checkProductQualification(File file) {
         for(String ext : FORMAT_FILE_EXTENSIONS) {
             if(!ext.isEmpty() && file.getName().toLowerCase().endsWith(ext.toLowerCase())) {
                 if(ext.equalsIgnoreCase("tif") || ext.equalsIgnoreCase("tiff"))

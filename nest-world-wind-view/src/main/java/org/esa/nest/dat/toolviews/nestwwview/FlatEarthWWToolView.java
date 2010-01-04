@@ -31,7 +31,7 @@ import java.awt.*;
 public class FlatEarthWWToolView extends AbstractToolView {
 
     private final VisatApp datApp = VisatApp.getApp();
-    private Dimension canvasSize = new Dimension(800, 600);
+    private final Dimension canvasSize = new Dimension(800, 600);
     private AppPanel wwjPanel = null;
 
     private final ProductLayer productLayer = new ProductLayer(false);
@@ -76,7 +76,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
         return mainPane;
     }
 
-    public WorldWindowGLCanvas getWwd() {
+    WorldWindowGLCanvas getWwd() {
         return wwjPanel.getWwd();
     }
 
@@ -102,7 +102,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
         }
     }
 
-    public void setSelectedProduct(Product product) {
+    void setSelectedProduct(Product product) {
         if(productLayer != null)
             productLayer.setSelectedProduct(product);
 
@@ -112,13 +112,13 @@ public class FlatEarthWWToolView extends AbstractToolView {
         }
     }
 
-    public Product getSelectedProduct() {
+    Product getSelectedProduct() {
         if(productLayer != null)
             return productLayer.getSelectedProduct();
         return null;
     }
 
-    public void setProducts(Product[] products) {
+    void setProducts(Product[] products) {
         if(productLayer != null) {
             for (Product prod : products) {
                 try {
@@ -134,7 +134,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
         }
     }
 
-    public void removeProduct(Product product) {
+    void removeProduct(Product product) {
         if(getSelectedProduct() == product)
             setSelectedProduct(null);
         if(productLayer != null)

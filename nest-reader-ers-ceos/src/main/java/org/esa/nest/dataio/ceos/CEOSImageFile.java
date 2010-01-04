@@ -1,25 +1,21 @@
 package org.esa.nest.dataio.ceos;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.util.CachingObjectArray;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.BinaryFileReader;
-import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.ImageRecord;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.HashMap;
 
 
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.25 $ $Date: 2009-10-13 20:26:50 $
+ * @version $Revision: 1.26 $ $Date: 2010-01-04 14:23:42 $
  */
 public abstract class CEOSImageFile {
 
@@ -30,13 +26,6 @@ public abstract class CEOSImageFile {
     protected int _imageRecordLength = 0;
     protected long _startPosImageRecords = 0;
     protected int _imageHeaderLength = 0;
-
-    private final static int cacheSize = 1024;
-    private final Object[] linesCache = new Object[cacheSize];
-    private final int[] indexList = new int[cacheSize];
-    private Integer cachePos = 0;
-    private final HashMap<Integer, Integer> indexMap = new HashMap<Integer, Integer>(cacheSize);
-
 
     public BaseRecord getImageFileDescriptor() {
         return _imageFDR;
@@ -78,8 +67,7 @@ public abstract class CEOSImageFile {
                                         final int sourceWidth, final int sourceHeight,
                                         final int sourceStepX, final int sourceStepY,
                                         final int destWidth, final ProductData destBuffer, ProgressMonitor pm)
-                                        throws IOException, IllegalBinaryFormatException
-    {
+                                        throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * ProductData.getElemSize(destBuffer.getType());
         final long xpos = _startPosImageRecords +_imageHeaderLength + x;
@@ -125,8 +113,7 @@ public abstract class CEOSImageFile {
                                              final int sourceStepX, final int sourceStepY,
                                              final int destWidth, final ProductData destBuffer,
                                              final ProgressMonitor pm)
-                                             throws IOException, IllegalBinaryFormatException
-    {
+                                             throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * ProductData.getElemSize(destBuffer.getType());
         final long xpos = _startPosImageRecords +_imageHeaderLength + x;
@@ -170,8 +157,7 @@ public abstract class CEOSImageFile {
                                              final int sourceStepX, final int sourceStepY,
                                              final int destWidth, final ProductData destBuffer,
                                              final ProgressMonitor pm)
-                                             throws IOException, IllegalBinaryFormatException
-    {
+                                             throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * ProductData.getElemSize(destBuffer.getType());
         final long xpos = _startPosImageRecords +_imageHeaderLength + x;
@@ -214,8 +200,7 @@ public abstract class CEOSImageFile {
                                        final int sourceWidth, final int sourceHeight,
                                        final int sourceStepX, final int sourceStepY,
                                        final int destWidth, final ProductData destBuffer, ProgressMonitor pm)
-                                        throws IOException, IllegalBinaryFormatException
-    {
+                                        throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * ProductData.getElemSize(destBuffer.getType());
         final long xpos = _startPosImageRecords +_imageHeaderLength + x;
@@ -260,8 +245,7 @@ public abstract class CEOSImageFile {
                                       final int sourceWidth, final int sourceHeight,
                                       final int sourceStepX, final int sourceStepY,
                                       final int destWidth, final ProductData destBuffer, boolean oneOf2,
-                                      ProgressMonitor pm) throws IOException, IllegalBinaryFormatException
-    {
+                                      ProgressMonitor pm) throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 4;
         final long xpos = _startPosImageRecords +_imageHeaderLength + x;
@@ -327,8 +311,7 @@ public abstract class CEOSImageFile {
                                            final int sourceWidth, final int sourceHeight,
                                            final int sourceStepX, final int sourceStepY,
                                            final int destWidth, final ProductData destBuffer, boolean oneOf2,
-                                           ProgressMonitor pm) throws IOException, IllegalBinaryFormatException
-    {
+                                           ProgressMonitor pm) throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 8;
         final long xpos = _startPosImageRecords +_imageHeaderLength + x;
@@ -369,8 +352,7 @@ public abstract class CEOSImageFile {
                                           final int sourceWidth, final int sourceHeight,
                                           final int sourceStepX, final int sourceStepY,
                                           final int destWidth, final ProductData destBuffer, boolean oneOf2,
-                                          ProgressMonitor pm) throws IOException, IllegalBinaryFormatException
-    {
+                                          ProgressMonitor pm) throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 2;
         final long xpos = _startPosImageRecords +_imageHeaderLength + x;
@@ -407,56 +389,56 @@ public abstract class CEOSImageFile {
         }
     }
 
-    protected static void copyLine(final short[] srcLine, final short[] destLine,
+    private static void copyLine(final short[] srcLine, final short[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[i];
         }
     }
 
-    protected static void copyLine(final byte[] srcLine, final byte[] destLine,
+    private static void copyLine(final byte[] srcLine, final byte[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[i];
         }
     }
 
-    protected static void copyLine(final int[] srcLine, final int[] destLine,
+    private static void copyLine(final int[] srcLine, final int[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[i];
         }
     }
 
-    protected static void copyLine(final float[] srcLine, final float[] destLine,
+    private static void copyLine(final float[] srcLine, final float[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[i];
         }
     }
 
-    protected static void copyLine1Of2(final short[] srcLine, final short[] destLine,
+    private static void copyLine1Of2(final short[] srcLine, final short[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[i << 1];
         }
     }
 
-    protected static void copyLine1Of2(final byte[] srcLine, final byte[] destLine,
+    private static void copyLine1Of2(final byte[] srcLine, final byte[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[i << 1];
         }
     }
 
-    protected static void copyLine1Of2(final float[] srcLine, final float[] destLine,
+    private static void copyLine1Of2(final float[] srcLine, final float[] destLine,
                           final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = (int)srcLine[i << 1];
         }
     }
 
-    protected static void copyLine2Of2(final short[] srcLine, final short[] destLine,
+    private static void copyLine2Of2(final short[] srcLine, final short[] destLine,
                           final int sourceStepX) {
         final int length = destLine.length;
         for (int x = 0, i = 0; x < length; ++x, i += sourceStepX) {
@@ -464,7 +446,7 @@ public abstract class CEOSImageFile {
         }
     }
 
-    protected static void copyLine2Of2(final byte[] srcLine, final byte[] destLine,
+    private static void copyLine2Of2(final byte[] srcLine, final byte[] destLine,
                           final int sourceStepX) {
         final int length = destLine.length;
         for (int x = 0, i = 0; x < length; ++x, i += sourceStepX) {
@@ -472,7 +454,7 @@ public abstract class CEOSImageFile {
         }
     }
 
-    protected static void copyLine2Of2(final float[] srcLine, final float[] destLine,
+    private static void copyLine2Of2(final float[] srcLine, final float[] destLine,
                           final int sourceStepX) {
         final int length = destLine.length;
         for (int x = 0, i = 0; x < length; ++x, i += sourceStepX) {

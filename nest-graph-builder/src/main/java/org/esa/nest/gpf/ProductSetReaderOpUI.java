@@ -143,7 +143,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         panel.add(clearButton);
     }
 
-    public static File[] GetFilePath(Component component, String title) {
+    private static File[] GetFilePath(Component component, String title) {
 
         File[] files = null;
         final File openDir = new File(VisatApp.getApp().getPreferences().

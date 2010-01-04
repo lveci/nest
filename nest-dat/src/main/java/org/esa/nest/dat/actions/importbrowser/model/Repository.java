@@ -14,15 +14,15 @@ import java.util.List;
 
 public class Repository {
 
-    public static final String REPOSITORY_CACHE_DIR_NAME = ".productGrabber-Cache";
-    public static final String PROPERTIES_FILE_NAME = "repository.properties";
+    private static final String REPOSITORY_CACHE_DIR_NAME = ".productGrabber-Cache";
+    private static final String PROPERTIES_FILE_NAME = "repository.properties";
     private DataProvider[] _dataProviders = null;
     private PropertyMap _propertyMap = null;
     private File _storageDir = null;
-    private File _baseDir;
-    private File _recursionBaseDir;
-    private List _entryList;
-    private List _listenerList;
+    private final File _baseDir;
+    private final File _recursionBaseDir;
+    private final List _entryList;
+    private final List _listenerList;
 
     public Repository(final File baseDir, final File recursionBaseDir) {
         _baseDir = baseDir;
@@ -92,6 +92,7 @@ public class Repository {
     /**
      * Sets the <code>DataProviders</code> to this <code>Repository</code>.
      * A call to this method is only allowed once, other wise an {@link IllegalStateException} is thrown.
+     * @param providers
      */
     public void setDataProviders(final DataProvider[] providers) {
         if (_dataProviders != null) {

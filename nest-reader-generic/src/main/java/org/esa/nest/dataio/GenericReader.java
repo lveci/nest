@@ -32,7 +32,7 @@ public class GenericReader extends AbstractProductReader {
     private ByteOrder byteOrder = ByteOrder.nativeOrder();
 
     private int imageRecordLength = rasterWidth;
-    private int _startPosImageRecords = 0;
+    private final int _startPosImageRecords = 0;
     private int _imageHeaderLength = 0;
     private ImageInputStream imageInputStream = null;
     
@@ -144,7 +144,7 @@ public class GenericReader extends AbstractProductReader {
                                destBand, destWidth, destBuffer, pm);
     }
 
-    public static void readBandRasterData(final int sourceOffsetX, final int sourceOffsetY,
+    private static void readBandRasterData(final int sourceOffsetX, final int sourceOffsetY,
                                           final int sourceWidth, final int sourceHeight,
                                           final int sourceStepX, final int sourceStepY,
                                           final long bandOffset, final ImageInputStream imageInputStream,
@@ -242,8 +242,7 @@ public class GenericReader extends AbstractProductReader {
                                         final int imageStartOffset, int imageRecordLength,
                                         final int destWidth, final ProductData destBuffer,
                                         final BinaryFileReader binaryReader, final ProgressMonitor pm)
-                                        throws IOException, IllegalBinaryFormatException
-    {
+                                        throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 2;
         final long xpos = imageStartOffset + x;
@@ -290,8 +289,7 @@ public class GenericReader extends AbstractProductReader {
                                         final int imageStartOffset, int imageRecordLength,
                                         final int destWidth, final ProductData destBuffer,
                                         final BinaryFileReader binaryReader, final ProgressMonitor pm)
-                                        throws IOException, IllegalBinaryFormatException
-    {
+                                        throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 4;
         final long xpos = imageStartOffset + x;
@@ -337,8 +335,7 @@ public class GenericReader extends AbstractProductReader {
                                        final int imageStartOffset, int imageRecordLength,
                                        final int destWidth, final ProductData destBuffer,
                                        final BinaryFileReader binaryReader, final ProgressMonitor pm)
-                                       throws IOException, IllegalBinaryFormatException
-    {
+                                       throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 1;
         final long xpos = imageStartOffset + x;
@@ -437,8 +434,7 @@ public class GenericReader extends AbstractProductReader {
                                              final int imageStartOffset, int imageRecordLength,
                                              final int destWidth, final ProductData destBuffer,
                                              final BinaryFileReader binaryReader, final ProgressMonitor pm)
-                                             throws IOException, IllegalBinaryFormatException
-    {
+                                             throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 4;
         final long xpos = imageStartOffset + x;
@@ -485,8 +481,7 @@ public class GenericReader extends AbstractProductReader {
                                              final int imageStartOffset, int imageRecordLength,
                                              final int destWidth, final ProductData destBuffer,
                                              final BinaryFileReader binaryReader, final ProgressMonitor pm)
-                                             throws IOException, IllegalBinaryFormatException
-    {
+                                             throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 4;
         final long xpos = imageStartOffset + x;
@@ -581,8 +576,7 @@ public class GenericReader extends AbstractProductReader {
                                              final int imageStartOffset, int imageRecordLength,
                                              final int destWidth, final ProductData destBuffer,
                                              final BinaryFileReader binaryReader, final ProgressMonitor pm)
-                                             throws IOException, IllegalBinaryFormatException
-    {
+                                             throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 8;
         final long xpos = imageStartOffset + x;
@@ -629,8 +623,7 @@ public class GenericReader extends AbstractProductReader {
                                       final int imageStartOffset, int imageRecordLength,
                                       final int destWidth, final ProductData destBuffer, boolean oneOf2,
                                       final BinaryFileReader binaryReader, final ProgressMonitor pm)
-                                        throws IOException, IllegalBinaryFormatException
-    {
+                                        throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 4;
         final long xpos = imageStartOffset + x;
@@ -673,8 +666,7 @@ public class GenericReader extends AbstractProductReader {
                                            final int imageStartOffset, int imageRecordLength,
                                            final int destWidth, final ProductData destBuffer, boolean oneOf2,
                                            final BinaryFileReader binaryReader, final ProgressMonitor pm)
-                                            throws IOException, IllegalBinaryFormatException
-    {
+                                            throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 8;
         final long xpos = imageStartOffset + x;
@@ -717,8 +709,7 @@ public class GenericReader extends AbstractProductReader {
                                           final int imageStartOffset, int imageRecordLength,
                                           final int destWidth, final ProductData destBuffer, boolean oneOf2,
                                           final BinaryFileReader binaryReader, final ProgressMonitor pm)
-                                          throws IOException, IllegalBinaryFormatException
-    {
+                                          throws IOException {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 2;
         final long xpos = imageStartOffset + x;
@@ -809,7 +800,7 @@ public class GenericReader extends AbstractProductReader {
         }
     }
 
-    public static void copyLine1Of2(final byte[] srcLine, final byte[] destLine, final int sourceStepX) {
+    private static void copyLine1Of2(final byte[] srcLine, final byte[] destLine, final int sourceStepX) {
         for (int x = 0, i = 0; x < destLine.length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[i << 1];
         }
@@ -834,7 +825,7 @@ public class GenericReader extends AbstractProductReader {
         }
     }
 
-    public static void copyLine2Of2(final byte[] srcLine, final byte[] destLine, final int sourceStepX) {
+    private static void copyLine2Of2(final byte[] srcLine, final byte[] destLine, final int sourceStepX) {
         final int length = destLine.length;
         for (int x = 0, i = 0; x < length; ++x, i += sourceStepX) {
             destLine[x] = srcLine[(i << 1) + 1];

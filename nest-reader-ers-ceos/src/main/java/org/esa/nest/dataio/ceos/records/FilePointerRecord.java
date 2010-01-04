@@ -21,10 +21,6 @@ public class FilePointerRecord extends BaseRecord {
         super(reader, startPos, mission, recordDefinitionFile);
     }
 
-    public boolean isImageFileRecord() {
-        return getAttributeString("File class code").toUpperCase().startsWith(IMAGE_FILE_CLASS_CODE);
-    }
-
     public void assignMetadataTo(final MetadataElement root, final String suffix) {
         final MetadataElement elem = createMetadataElement("FilePointerRecord", suffix);
         root.addElement(elem);

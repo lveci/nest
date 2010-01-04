@@ -22,7 +22,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 
 
-public class ImageIOWriter extends AbstractProductWriter {
+class ImageIOWriter extends AbstractProductWriter {
 
     private ImageOutputStream _outputStream;
     private ImageIOFile imgIOFile = null;
@@ -33,6 +33,7 @@ public class ImageIOWriter extends AbstractProductWriter {
      * Construct a new instance of a product writer for the given product writer plug-in.
      *
      * @param writerPlugIn the given product writer plug-in, must not be <code>null</code>
+     * @param format
      */
     public ImageIOWriter(final ProductWriterPlugIn writerPlugIn, final String format) {
         super(writerPlugIn);

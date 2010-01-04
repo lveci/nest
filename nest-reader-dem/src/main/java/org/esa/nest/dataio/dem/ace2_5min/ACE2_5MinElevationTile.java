@@ -2,15 +2,15 @@ package org.esa.nest.dataio.dem.ace2_5min;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.util.CachingObjectArray;
+import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.dataio.ProductReader;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 
-public class ACE2_5MinElevationTile {
+class ACE2_5MinElevationTile {
 
     private ACE2_5MinElevationModel dem;
     private CachingObjectArray linesCache = null;

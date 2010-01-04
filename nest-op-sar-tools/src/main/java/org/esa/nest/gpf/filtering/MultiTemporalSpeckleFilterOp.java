@@ -26,8 +26,8 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.nest.gpf.OperatorUtils;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.gpf.OperatorUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -90,11 +90,11 @@ public class MultiTemporalSpeckleFilterOp extends Operator {
     private int sourceImageWidth = 0;
     private int sourceImageHeight = 0;
 
-    public static final String WINDOW_SIZE_3x3 = "3x3";
-    public static final String WINDOW_SIZE_5x5 = "5x5";
-    public static final String WINDOW_SIZE_7x7 = "7x7";
-    public static final String WINDOW_SIZE_9x9 = "9x9";
-    public static final String WINDOW_SIZE_11x11 = "11x11";
+    private static final String WINDOW_SIZE_3x3 = "3x3";
+    private static final String WINDOW_SIZE_5x5 = "5x5";
+    private static final String WINDOW_SIZE_7x7 = "7x7";
+    private static final String WINDOW_SIZE_9x9 = "9x9";
+    private static final String WINDOW_SIZE_11x11 = "11x11";
 
     /**
      * Default constructor. The graph processing framework

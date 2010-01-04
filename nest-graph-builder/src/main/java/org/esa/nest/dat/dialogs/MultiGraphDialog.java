@@ -137,7 +137,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
      * Validates the input and then call the GPF to execute the graph
      * @throws GraphException on assignParameters
      */
-    private void DoProcessing() throws GraphException {
+    private void DoProcessing() {
 
         if(ValidateAllNodes()) {
 

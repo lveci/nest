@@ -113,7 +113,7 @@ public class IOPanel {
         return targetProductSelector.getModel().getFormatName();
     }
 
-    public String getTargetProductNameSuffix() {
+    String getTargetProductNameSuffix() {
         return targetProductNameSuffix;
     }
 

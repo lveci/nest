@@ -1,6 +1,9 @@
 package org.esa.nest.dataio.ceos.jers;
 
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ReaderUtils;
@@ -31,9 +34,9 @@ class JERSProductDirectory extends CEOSProductDirectory {
     private int _sceneWidth = 0;
     private int _sceneHeight = 0;
 
-    private transient Map<String, JERSImageFile> bandImageFileMap = new HashMap<String, JERSImageFile>(1);
+    private final transient Map<String, JERSImageFile> bandImageFileMap = new HashMap<String, JERSImageFile>(1);
 
-    public JERSProductDirectory(final File dir) throws IOException, IllegalBinaryFormatException {
+    public JERSProductDirectory(final File dir) {
         Guardian.assertNotNull("dir", dir);
 
         constants = new JERSConstants();
@@ -137,7 +140,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
         return band;
     }
 
-    private void addMetaData(final Product product) throws IOException, IllegalBinaryFormatException {
+    private void addMetaData(final Product product) throws IOException {
         final MetadataElement root = product.getMetadataRoot();
 
         final MetadataElement leadMetadata = new MetadataElement("Leader");
@@ -298,7 +301,7 @@ class JERSProductDirectory extends CEOSProductDirectory {
         return _volumeDirectoryFile.getProductName();
     }
 
-    private String getProductDescription() throws IOException, IllegalBinaryFormatException {
+    private String getProductDescription() {
         BaseRecord sceneRecord = _leaderFile.getSceneRecord();
         
         String level = "";

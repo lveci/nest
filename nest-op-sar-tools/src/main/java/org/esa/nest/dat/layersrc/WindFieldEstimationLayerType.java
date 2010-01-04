@@ -1,14 +1,14 @@
 package org.esa.nest.dat.layersrc;
 
+import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertyDescriptor;
+import com.bc.ceres.binding.PropertySet;
+import com.bc.ceres.binding.accessors.DefaultPropertyAccessor;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.glayer.LayerTypeRegistry;
-import com.bc.ceres.binding.PropertyContainer;
-import com.bc.ceres.binding.PropertyDescriptor;
-import com.bc.ceres.binding.Property;
-import com.bc.ceres.binding.PropertySet;
-import com.bc.ceres.binding.accessors.DefaultPropertyAccessor;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 
@@ -16,7 +16,7 @@ import org.esa.beam.framework.datamodel.Product;
  * The type descriptor of the {@link org.esa.nest.dat.layersrc.WindFieldEstimationLayer}.
  *
  */
-public class WindFieldEstimationLayerType extends LayerType {
+class WindFieldEstimationLayerType extends LayerType {
 
     static LayerType instance = new WindFieldEstimationLayerType();
 

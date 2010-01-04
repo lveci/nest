@@ -30,8 +30,8 @@ public class SettingsDialog extends ModelessDialog {
     private SettingsTree settingsTree;
     private DefaultMutableTreeNode rootNode;
 
-    private JLabel editLabel = new JLabel("Value:");
-    private JTextField editField = new JTextField("");
+    private final JLabel editLabel = new JLabel("Value:");
+    private final JTextField editField = new JTextField("");
     private Element selectedElement = null;
 
     public SettingsDialog(String title) {

@@ -1,14 +1,14 @@
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
-import java.io.File;
 
 /**
  * Created by IntelliJ IDEA.

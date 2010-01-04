@@ -13,7 +13,7 @@ public class ProgressBarProgressMonitor implements ProgressMonitor {
 
         private final JProgressBar progressBar;
         private final JLabel messageLabel;
-        final JPanel progressPanel;
+        private final JPanel progressPanel;
 
         private double currentWork;
         private double totalWork;

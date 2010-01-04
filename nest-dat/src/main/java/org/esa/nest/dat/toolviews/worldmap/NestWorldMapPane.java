@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
  * Paints the given world map with the given products on top.
  * The selected product is painted highlighted.
  */
-public class NestWorldMapPane extends WorldMapPane {
+class NestWorldMapPane extends WorldMapPane {
 
     public NestWorldMapPane(final BufferedImage image) {
         super(image);

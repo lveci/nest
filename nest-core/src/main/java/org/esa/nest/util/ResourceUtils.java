@@ -1,11 +1,11 @@
 package org.esa.nest.util;
 
 import com.bc.ceres.core.runtime.internal.RuntimeActivator;
+import org.esa.beam.framework.dataio.IllegalFileFormatException;
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.visat.VisatApp;
-import org.esa.beam.framework.dataio.IllegalFileFormatException;
 
 import javax.swing.*;
 import java.io.File;
@@ -13,10 +13,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipEntry;
-import java.util.zip.GZIPInputStream;
 import java.util.Enumeration;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * Look up paths to resources
@@ -123,7 +123,7 @@ public final class ResourceUtils {
         return dir;
     }
 
-    public static String getContextID() {
+    private static String getContextID() {
         if (RuntimeActivator.getInstance() != null
                 && RuntimeActivator.getInstance().getModuleContext() != null) {
             return RuntimeActivator.getInstance().getModuleContext().getRuntimeConfig().getContextId();
@@ -157,7 +157,7 @@ public final class ResourceUtils {
         return findConfigFile(filename);
     }
 
-    public static File findConfigFile(String filename) {
+    private static File findConfigFile(String filename) {
         final String homeDir = System.getProperty(getContextID()+".home");
         if (homeDir != null && homeDir.length() > 0) {
             final File homeDirFile = new File(homeDir);

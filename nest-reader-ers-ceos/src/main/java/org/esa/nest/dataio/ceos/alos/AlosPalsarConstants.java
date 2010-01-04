@@ -7,11 +7,11 @@ import org.esa.nest.dataio.ceos.CEOSConstants;
  */
 public class AlosPalsarConstants implements CEOSConstants {
 
-    final static String[] FORMAT_NAMES = new String[]{"ALOS PALSAR CEOS"};
-    final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
-    final static String PLUGIN_DESCRIPTION = "ALOS PALSAR CEOS Products";      /*I18N*/
+    private final static String[] FORMAT_NAMES = new String[]{"ALOS PALSAR CEOS"};
+    private final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
+    private final static String PLUGIN_DESCRIPTION = "ALOS PALSAR CEOS Products";      /*I18N*/
     final static String PRODUCT_TYPE_PREFIX = "";
-    final static String VOLUME_FILE_PREFIX = "VOL";
+    private final static String VOLUME_FILE_PREFIX = "VOL";
 
     final static String MISSION = "alos";
 
@@ -43,7 +43,7 @@ public class AlosPalsarConstants implements CEOSConstants {
      */
     final static float WAVELENGTH_BAND_4 = 760.0F;
 
-    final static float BANDWIDTH_BAND_1 = 80.0F;
+    private final static float BANDWIDTH_BAND_1 = 80.0F;
     final static float BANDWIDTH_BAND_2 = BANDWIDTH_BAND_1;
     final static float BANDWIDTH_BAND_3 = BANDWIDTH_BAND_1;
     final static float BANDWIDTH_BAND_4 = 130.0F;

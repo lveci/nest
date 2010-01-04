@@ -191,7 +191,7 @@ public class GraphExecuter extends Observable {
         graph.setAppData("Presentation", presentationXML);
     }
 
-    public boolean IsGraphComplete() {
+    boolean IsGraphComplete() {
         int nodesWithoutSources = 0;
         for(GraphNode n : nodeList) {
             if(!n.HasSources()) {

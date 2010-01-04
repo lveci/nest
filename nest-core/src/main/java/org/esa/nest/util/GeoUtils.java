@@ -153,6 +153,11 @@ public final class GeoUtils
      // GLAT2:	latitude
      // head2:	azimuth in degree measured in the direction North east south west
      //			from (GLON2,GLAT2) to (GLON1, GLAT1)
+     * @param lon1
+     * @param lat1
+     * @param dist
+     * @param head1
+     * @return
      */
     public static LatLonHeading vincenty_direct(double lon1, double lat1, final double dist, final double head1) {
 
@@ -237,6 +242,11 @@ public final class GeoUtils
      * //			from (lon1,lat1) to (lon2, lat2)
      * // head2:	azimuth in degrees mesured in the direction North east south west
      * //			from (lon2,lat2) to (lon1, lat1)
+     * @param lon1
+     * @param lat1
+     * @param lon2
+     * @param lat2
+     * @return
      */
     public static DistanceHeading vincenty_inverse(double lon1, double lat1, double lon2, double lat2) {
 

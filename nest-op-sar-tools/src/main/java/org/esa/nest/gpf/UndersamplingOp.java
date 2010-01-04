@@ -152,7 +152,7 @@ public class UndersamplingOp extends Operator {
     public static final String HIGH_PASS = "High Pass";
     public static final String HORIZONTAL = "Horizontal";
     public static final String VERTICAL = "Vertical";
-    public static final String USER_DEFINED = "User Defined";
+    private static final String USER_DEFINED = "User Defined";
 
     public static final String IMAGE_SIZE = "Image Size";
     public static final String RATIO = "Ratio";
@@ -297,7 +297,7 @@ public class UndersamplingOp extends Operator {
      * Get the range and azimuth spacings (in meter).
      * @throws Exception when metadata is missing
      */
-    void getSrcImagePixelSpacings() throws Exception {
+    void getSrcImagePixelSpacings() {
 
         srcRangeSpacing = (float)absSrc.getAttributeDouble(AbstractMetadata.range_spacing);
         //System.out.println("Range spacing is " + srcRangeSpacing);
@@ -479,6 +479,7 @@ public class UndersamplingOp extends Operator {
 
     /**
      * Create target product.
+     * @throws Exception
      */
     private void createTargetProduct() throws Exception {
 
@@ -637,7 +638,7 @@ public class UndersamplingOp extends Operator {
     /**
      * Update metadata in the target product.
      */
-    private void updateTargetProductMetadata() throws Exception {
+    private void updateTargetProductMetadata() {
 
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_spacing, azimuthSpacing);

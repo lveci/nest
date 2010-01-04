@@ -2,7 +2,6 @@ package org.esa.nest.dataio.terrasarx;
 
 import org.esa.beam.dataio.dimap.FileImageInputStreamExtImpl;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.util.Guardian;
 import org.esa.nest.dataio.ImageIOFile;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.XMLProductDirectory;
@@ -24,7 +23,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
     private String productName = "TerraSar-X";
     private String productType = "TerraSar-X";
-    private String productDescription = "";
+    private final String productDescription = "";
 
     private final float[] latCorners = new float[4];
     private final float[] lonCorners = new float[4];

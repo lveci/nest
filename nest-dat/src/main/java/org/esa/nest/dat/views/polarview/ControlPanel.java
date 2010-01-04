@@ -10,7 +10,7 @@ import java.util.TimerTask;
 /**
 
  */
-public class ControlPanel extends JPanel {
+class ControlPanel extends JPanel {
 
     private final PolarView polarView;
     private final JButton prevBtn = new JButton("Prev");

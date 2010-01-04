@@ -7,13 +7,13 @@ import org.esa.nest.dataio.ceos.CEOSConstants;
  */
 public class RadarsatConstants implements CEOSConstants {
 
-    final String[] FORMAT_NAMES = new String[]{"Radarsat 1 CEOS"};
-    final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
-    static final String PLUGIN_DESCRIPTION = "Radarsat 1 CEOS Products";      /*I18N*/
+    private final String[] FORMAT_NAMES = new String[]{"Radarsat 1 CEOS"};
+    private final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
+    private static final String PLUGIN_DESCRIPTION = "Radarsat 1 CEOS Products";      /*I18N*/
     final static String PRODUCT_TYPE_PREFIX = "";
-    static final String VOLUME_FILE_PREFIX = "VDF";
+    private static final String VOLUME_FILE_PREFIX = "VDF";
 
-    final static String MISSION = "radarsat";
+    private final static String MISSION = "radarsat";
 
     final static String PRODUCT_DESCRIPTION_PREFIX = "Radarsat product ";
 

@@ -13,7 +13,7 @@ import java.io.File;
 import java.io.IOException;
 
 
-public class GenericWriter extends AbstractProductWriter {
+class GenericWriter extends AbstractProductWriter {
 
     private ImageOutputStream _outputStream = null;
 

@@ -12,7 +12,7 @@ import org.esa.beam.framework.dataop.resamp.Resampling;
 import java.io.File;
 import java.io.IOException;
 
-public class FileElevationModel implements Resampling.Raster {
+class FileElevationModel implements Resampling.Raster {
 
     private Resampling _resampling;
     private Resampling.Index _resamplingIndex;
@@ -24,7 +24,7 @@ public class FileElevationModel implements Resampling.Raster {
     private final int RASTER_WIDTH;
     private final int RASTER_HEIGHT;
     private float noDataValue = 0;
-    private PixelPos pix = new PixelPos();
+    private final PixelPos pix = new PixelPos();
 
     public FileElevationModel(File file, Resampling resamplingMethod) throws IOException {
 

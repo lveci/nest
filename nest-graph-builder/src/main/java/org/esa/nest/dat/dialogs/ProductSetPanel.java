@@ -1,10 +1,9 @@
 package org.esa.nest.dat.dialogs;
 
 import com.bc.ceres.swing.TableLayout;
+import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.BasicApp;
-import org.esa.beam.framework.gpf.ui.TargetProductSelector;
-import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
 import org.esa.beam.util.SystemUtils;
 import org.esa.nest.gpf.ProductSetReaderOpUI;
 
@@ -68,7 +67,7 @@ public class ProductSetPanel {
         //appContext.getPreferences().setPropertyString(BasicApp.PROPERTY_KEY_APP_LAST_SAVE_DIR, productDir);
     }
 
-    public String getTargetProductNameSuffix() {
+    String getTargetProductNameSuffix() {
         return targetProductNameSuffix;
     }
 

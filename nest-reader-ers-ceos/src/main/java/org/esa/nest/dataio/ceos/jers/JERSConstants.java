@@ -7,13 +7,13 @@ import org.esa.nest.dataio.ceos.CEOSConstants;
  */
 public class JERSConstants implements CEOSConstants {
 
-    final static String[] FORMAT_NAMES = new String[]{"JERS CEOS"};
-    final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
-    final static String PLUGIN_DESCRIPTION = "JERS CEOS Products";      /*I18N*/
+    private final static String[] FORMAT_NAMES = new String[]{"JERS CEOS"};
+    private final static String[] FORMAT_FILE_EXTENSIONS = new String[]{""};
+    private final static String PLUGIN_DESCRIPTION = "JERS CEOS Products";      /*I18N*/
     final static String PRODUCT_TYPE_PREFIX = "";
-    final static String VOLUME_FILE_PREFIX = "VDF";
+    private final static String VOLUME_FILE_PREFIX = "VDF";
 
-    final static String MISSION = "jers";
+    private final static String MISSION = "jers";
 
     final static String PRODUCT_DESCRIPTION_PREFIX = "JERS product ";
 

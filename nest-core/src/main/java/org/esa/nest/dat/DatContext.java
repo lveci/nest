@@ -18,7 +18,7 @@ import java.awt.*;
  * To change this template use File | Settings | File Templates.
  */
 public class DatContext implements AppContext {
-        private String toolTitle;
+        private final String toolTitle;
 
         public DatContext(String toolTitle) {
             this.toolTitle = toolTitle;

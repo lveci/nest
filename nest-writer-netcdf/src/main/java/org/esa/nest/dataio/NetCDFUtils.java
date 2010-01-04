@@ -167,7 +167,7 @@ public class NetCDFUtils {
         return new MapInfoX(mapInfo, yFlipped);
     }
 
-    public static int getRasterDataType(final Variable variable) {
+    private static int getRasterDataType(final Variable variable) {
         //NetcdfDataTypeWorkarounds workarounds = NetcdfDataTypeWorkarounds.getInstance();
         //if (workarounds.hasWorkaroud(variable.getName(), variable.getDataType())) {
         //    return workarounds.getRasterDataType(variable.getName(), variable.getDataType());
@@ -175,15 +175,15 @@ public class NetCDFUtils {
         return getRasterDataType(variable.getDataType(), variable.isUnsigned());
     }
 
-    public static boolean isValidRasterDataType(final DataType dataType) {
+    private static boolean isValidRasterDataType(final DataType dataType) {
         return getRasterDataType(dataType, false) != -1;
     }
 
-    public static int getRasterDataType(final DataType dataType, final boolean unsigned) {
+    private static int getRasterDataType(final DataType dataType, final boolean unsigned) {
         return getProductDataType(dataType, unsigned, true);
     }
 
-    public static int getProductDataType(final DataType dataType, final boolean unsigned, final boolean rasterDataOnly) {
+    private static int getProductDataType(final DataType dataType, final boolean unsigned, final boolean rasterDataOnly) {
         if (dataType == DataType.BYTE) {
             return unsigned ? ProductData.TYPE_UINT8 : ProductData.TYPE_INT8;
         } else if (dataType == DataType.SHORT) {
@@ -225,14 +225,14 @@ public class NetCDFUtils {
         }
     }
 
-    public static void addAttributes(final MetadataElement parentElem, final Group parentGroup) {
+    private static void addAttributes(final MetadataElement parentElem, final Group parentGroup) {
         final List<Attribute> attribList = parentGroup.getAttributes();
         for(Attribute at : attribList) {
             createMetadataAttributes(parentElem, at, at.getName());
         }
     }
 
-    public static void createMetadataAttributes(final MetadataElement parentElem, final Attribute attribute,
+    private static void createMetadataAttributes(final MetadataElement parentElem, final Attribute attribute,
                                                 final String name) {
         // todo - note that we still do not support NetCDF data type 'char' here!
 
@@ -266,9 +266,12 @@ public class NetCDFUtils {
     }
 
     public static String getProductType(final NcAttributeMap attMap, final String defaultType) {
-        String productType = attMap.getStringValue("Conventions");
+        String productType = attMap.getStringValue("Product Type");
         if (productType == null) {
-            productType = defaultType;
+            productType = attMap.getStringValue("Conventions");
+            if (productType == null) {
+                productType = defaultType;
+            }
         }
         return productType;
     }
@@ -296,7 +299,7 @@ public class NetCDFUtils {
                                   NetcdfConstants.STOP_TIME_ATT_NAME);
     }
 
-    public static ProductData.UTC getSceneRasterTime(NcAttributeMap globalAttributes,
+    private static ProductData.UTC getSceneRasterTime(NcAttributeMap globalAttributes,
                                                      final String dateAttName,
                                                      final String timeAttName) {
         final String dateStr = globalAttributes.getStringValue(dateAttName);
@@ -315,7 +318,7 @@ public class NetCDFUtils {
         return null;
     }
 
-    public static String getDateTimeString(String dateStr, String timeStr) {
+    private static String getDateTimeString(String dateStr, String timeStr) {
         if (dateStr != null && dateStr.endsWith("UTC")) {
             dateStr = dateStr.substring(0, dateStr.length() - 3).trim();
         }
@@ -334,7 +337,7 @@ public class NetCDFUtils {
         return null;
     }
 
-    public static ProductData.UTC parseDateTime(String dateTimeStr) throws ParseException {
+    private static ProductData.UTC parseDateTime(String dateTimeStr) throws ParseException {
         return ProductData.UTC.parse(dateTimeStr, NetcdfConstants.DATE_TIME_PATTERN);
     }
 
@@ -378,7 +381,6 @@ public class NetCDFUtils {
         final String[] bandNames = { "amplitude", "intensity", "phase", "band", "proc_data" };
 
         NcRasterDim bestRasterDim = null;
-        List<Variable> bestVarList = null;
         for (final NcRasterDim rasterDim : keys) {
             // CF-Convention for regular lat/lon grids
             if (rasterDim.isTypicalRasterDim()) {

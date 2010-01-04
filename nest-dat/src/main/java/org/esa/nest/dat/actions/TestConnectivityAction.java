@@ -5,11 +5,6 @@ import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.Settings;
 import org.esa.nest.util.ftpUtils;
-import org.apache.commons.net.ftp.FTPFile;
-
-import java.awt.*;
-import java.io.IOException;
-import java.net.URI;
 
 /**
  * This action test if FTP is working

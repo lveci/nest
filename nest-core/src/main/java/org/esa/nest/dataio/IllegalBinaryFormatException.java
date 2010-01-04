@@ -10,7 +10,7 @@ package org.esa.nest.dataio;
  */
 public class IllegalBinaryFormatException extends Exception {
 
-    private long _streamPos;
+    private final long _streamPos;
 
     /**
      * Constructs a new exception with the specified detail message.  The
@@ -19,6 +19,7 @@ public class IllegalBinaryFormatException extends Exception {
      *
      * @param message the detail message. The detail message is saved for
      *                later retrieval by the {@link #getMessage()} method.
+     * @param streamPos
      */
     public IllegalBinaryFormatException(final String message, final long streamPos) {
         super(message);
@@ -33,6 +34,7 @@ public class IllegalBinaryFormatException extends Exception {
      *
      * @param message the detail message (which is saved for later retrieval
      *                by the {@link #getMessage()} method).
+     * @param streamPos
      * @param cause   the cause (which is saved for later retrieval by the
      *                {@link #getCause()} method).  (A <tt>null</tt> value is
      *                permitted, and indicates that the cause is nonexistent or

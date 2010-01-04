@@ -71,7 +71,7 @@ public class SelectionProvider implements DataProvider {
     }
 
     private static class CheckBoxCellEditor extends AbstractCellEditor implements TableCellEditor {
-        protected final JCheckBox checkBox;
+        final JCheckBox checkBox;
         private RepositoryEntry entry = null;
 
         public CheckBoxCellEditor() {

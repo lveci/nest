@@ -16,7 +16,6 @@ import org.esa.nest.dat.actions.LoadTabbedLayoutAction;
 import org.esa.nest.dat.actions.importbrowser.ImportBrowserAction;
 import org.esa.nest.dat.actions.importbrowser.model.Repository;
 import org.esa.nest.dat.actions.importbrowser.ui.ImportBrowser;
-import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
 import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.dat.views.polarview.PolarView;
 import org.esa.nest.util.ResourceUtils;

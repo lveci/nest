@@ -1,14 +1,13 @@
 package org.esa.nest.dataio.ceos.alos;
 
-import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.BinaryFileReader;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.CEOSLeaderFile;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.BaseSceneHeaderRecord;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;
-import java.util.Calendar;
 
 /**
  * This class represents a leader file of a product.
@@ -124,10 +123,6 @@ class AlosPalsarLeaderFile extends CEOSLeaderFile {
                 productLevel = AlosPalsarConstants.LEVEL4_2;
         }
         return productLevel;
-    }
-
-    public Calendar getDateImageWasTaken() {
-        return _sceneHeaderRecord.getDateImageWasTaken();
     }
 
     public String getProductType() {

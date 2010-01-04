@@ -40,7 +40,7 @@ public class ProjectFile {
         }
     }
 
-    public static Graph readGraph(String filepath) {
+    private static Graph readGraph(String filepath) {
         FileReader fileReader = null;
         try {
             fileReader = new FileReader(filepath);
@@ -70,7 +70,7 @@ public class ProjectFile {
         return tooltipText;
     }
 
-    public void setToolTipText(String text) {
+    void setToolTipText(String text) {
         tooltipText = text;
     }
 }

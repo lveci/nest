@@ -1,12 +1,8 @@
 package org.esa.nest.dataio.ceos.radarsat;
 
-import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.IllegalBinaryFormatException;
-import org.esa.nest.dataio.ceos.CEOSImageFile;
 import org.esa.nest.dataio.ceos.CEOSProductDirectory;
 import org.esa.nest.dataio.ceos.CEOSProductReader;
 

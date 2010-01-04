@@ -72,7 +72,6 @@ public class OversamplingOp extends Operator {
     private float azimuthSpacing = 12.5f;
 
     private MetadataElement abs; // root of the abstracted metadata
-    private String sampleType;
     private String productFormat;
 
     private boolean isDetectedSampleType = false;
@@ -132,9 +131,8 @@ public class OversamplingOp extends Operator {
 
     /**
      * Get the range and azimuth spacings (in meter).
-     * @throws Exception when metadata not found
      */
-    private void getSrcImagePixelSpacings() throws Exception {
+    private void getSrcImagePixelSpacings() {
 
         srcRangeSpacing = (float)abs.getAttributeDouble(AbstractMetadata.range_spacing);
         //System.out.println("Range spacing is " + srcRangeSpacing);
@@ -145,20 +143,18 @@ public class OversamplingOp extends Operator {
 
     /**
      * Get the sample type.
-     * @throws Exception when metadata not found
      */
-    void getSampleType() throws Exception {
+    void getSampleType() {
 
-        sampleType = abs.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
+        final String sampleType = abs.getAttributeString(AbstractMetadata.SAMPLE_TYPE);
         //System.out.println("Sample type is " + sampleType);
         isDetectedSampleType = sampleType.contains("DETECTED");
     }
 
     /**
      * Get the pulse repetition frequency.
-     * @throws Exception when metadata not found
      */
-    void getPRF() throws Exception {
+    void getPRF() {
 
         prf = abs.getAttributeDouble(AbstractMetadata.pulse_repetition_frequency);
         if(prf == 0) {
@@ -170,9 +166,8 @@ public class OversamplingOp extends Operator {
 
     /**
      * Get Product format.
-     * @throws Exception when metadata not found
      */
-    private void getProductFormat() throws Exception {
+    private void getProductFormat() {
 
         final String productType = abs.getAttributeString(AbstractMetadata.PRODUCT_TYPE);
         if (productType.contains("ERS")) {
@@ -204,7 +199,7 @@ public class OversamplingOp extends Operator {
      * Compute Doppler centroid frequency for all columns for ERS product.
      * @throws Exception when metadata not found
      */
-    private void computeDopplerCentroidFreqForERSProd() throws Exception {
+    private void computeDopplerCentroidFreqForERSProd() {
 
         // get range sampling rate (in Hz)
         final double samplingRate = abs.getAttributeDouble(AbstractMetadata.range_sampling_rate);
@@ -461,7 +456,7 @@ public class OversamplingOp extends Operator {
                 newTiePointPos);
     }
 
-    private void updateTargetProductMetadata() throws Exception {
+    private void updateTargetProductMetadata() {
 
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_spacing, azimuthSpacing);
@@ -521,8 +516,7 @@ public class OversamplingOp extends Operator {
         }
     }
 
-    private void computeOverSampledTileForRealImage(String targetBandName, Tile targetTile, ProgressMonitor pm)
-                 throws Exception {
+    private void computeOverSampledTileForRealImage(String targetBandName, Tile targetTile, ProgressMonitor pm) {
 
         final ProductData tgtData = targetTile.getDataBuffer();
 
@@ -601,8 +595,7 @@ public class OversamplingOp extends Operator {
     //==================================================================================================================
 
     private void computeOverSampledTileForComplexImage(
-            String iBandName, String qBandName, Tile iTargetTile, Tile qTargetTile, ProgressMonitor pm)
-        throws Exception {
+            String iBandName, String qBandName, Tile iTargetTile, Tile qTargetTile, ProgressMonitor pm) {
 
         final ProductData iTgtData = iTargetTile.getDataBuffer();
         final ProductData qTgtData = qTargetTile.getDataBuffer();

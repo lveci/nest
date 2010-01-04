@@ -33,15 +33,15 @@ abstract class AbstractAxisDisplay {
 
     abstract int maxTickSize(String[] tickNames, int tickCount, Font font);
 
-    protected void setGraphics(Graphics g) {
+    void setGraphics(Graphics g) {
         this.g = g;
     }
 
-    protected void drawTick(int tickPixel, int tickLength) {
+    void drawTick(int tickPixel, int tickLength) {
         drawLine(tickPixel, 0, tickPixel, tickLength);
     }
 
-    protected void drawMultiLineTickName(String name, int tickPixel, int tickLength, FontMetrics fm) {
+    void drawMultiLineTickName(String name, int tickPixel, int tickLength, FontMetrics fm) {
         final int leading = Math.max(fm.getLeading(), 3);
         int lineCount = 0;
         int p = 0;
@@ -65,7 +65,7 @@ abstract class AbstractAxisDisplay {
         }
     }
 
-    protected Dimension getTickLabelBounds(String name, Font font) {
+    Dimension getTickLabelBounds(String name, Font font) {
         final FontMetrics fm = g.getFontMetrics(font);
         int maxWidth = 0;
         int height = 0;

@@ -162,7 +162,7 @@ public class MultilookOpUI extends BaseOperatorUI {
         return contentPane;
     }
 
-    class RadioListener implements ActionListener {
+    private class RadioListener implements ActionListener {
 
         public void actionPerformed(ActionEvent e) {
 

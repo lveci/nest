@@ -18,7 +18,7 @@ public class PolarData {
     private Object[] cValues = null;
     private float dirOffset = 0;
 
-    private Color backgroundColor = VisatApp.getApp().getDesktopPane().getBackground();
+    private final Color backgroundColor = VisatApp.getApp().getDesktopPane().getBackground();
     private Color[][] colors;
     private ColourScale cScale = null;
     private int plotCount = 0;
@@ -42,7 +42,7 @@ public class PolarData {
         this.dirOffset = dirOffset;
     }
 
-    public void preparePlot() {
+    void preparePlot() {
         plotCount = cValues.length;
         prepareColors(cValues);
         prepareRTPoints();

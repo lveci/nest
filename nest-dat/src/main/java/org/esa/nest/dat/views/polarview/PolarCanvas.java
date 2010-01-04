@@ -5,14 +5,14 @@ import org.esa.beam.util.math.MathUtils;
 
 import java.awt.*;
 
-public class PolarCanvas extends Container {
+class PolarCanvas extends Container {
 
-    private Axis radialAxis;
-    private Axis colourAxis;
+    private final Axis radialAxis;
+    private final Axis colourAxis;
     private PolarData data = null;
     private double rings[] = null;
     private String ringText[] = null;
-    private float dirOffset;
+    private final float dirOffset;
     private int plotRadius;
     private double windDirection = 0;
     private boolean showWindDirection = false;

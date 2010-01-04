@@ -108,7 +108,7 @@ public class ACEFileInfo {
         }
     }
 
-    public void setFromData(final String fileName, final long fileSize) throws IOException {
+    void setFromData(final String fileName, final long fileSize) throws IOException {
         _fileName = fileName;
         _fileSize = fileSize;
 

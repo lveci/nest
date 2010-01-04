@@ -64,7 +64,7 @@ public class Project extends Observable {
             SaveProject();
     }
 
-    public static void showProjectsView() {
+    private static void showProjectsView() {
         final ExecCommand command = VisatApp.getApp().getCommandManager().
                 getExecCommand("org.esa.nest.dat.toolviews.Projects.ProjectsToolView.showCmd");
         command.execute();
@@ -140,7 +140,7 @@ public class Project extends Observable {
         return projectFolder;
     }
 
-    public String getProjectName() {
+    String getProjectName() {
         final String name = projectFile.getName();
         if(name.endsWith(".xml"))
             return name.substring(0, name.length()-4);
@@ -514,7 +514,7 @@ public class Project extends Observable {
         SaveProject();
     }
 
-    public void SaveProject() {
+    void SaveProject() {
         if(projectSubFolders == null)
             return;
 

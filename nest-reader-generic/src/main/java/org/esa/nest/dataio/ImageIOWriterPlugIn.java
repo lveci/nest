@@ -11,7 +11,7 @@ import java.util.Locale;
 
 public class ImageIOWriterPlugIn implements ProductWriterPlugIn {
 
-    public static final String FORMAT_NAME = "ImageIO";
+    private static final String FORMAT_NAME = "ImageIO";
 
     /**
      * Constructs a new product writer plug-in instance.

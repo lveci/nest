@@ -61,13 +61,13 @@ public final class MultilookOp extends Operator {
 
     @Parameter(description = "The list of source bands.", alias = "sourceBands", itemAlias = "band",
             sourceProductId="source", label="Source Bands")
-    String[] sourceBandNames;
+    private String[] sourceBandNames;
 
     @Parameter(description = "The user defined number of range looks", interval = "[1, *)", defaultValue = "1",
                 label="Number of Range Looks")
     private int nRgLooks = 1;
 
-     @Parameter(description = "The user defined number of azimuth looks", interval = "[1, *)", defaultValue = "1",
+    @Parameter(description = "The user defined number of azimuth looks", interval = "[1, *)", defaultValue = "1",
                 label="Number of Azimuth Looks")
     private int nAzLooks = 1;
 
@@ -277,9 +277,8 @@ public final class MultilookOp extends Operator {
 
     /**
      * Update metadata in the target product.
-     * @throws Exception The exception.
      */
-    private void updateTargetProductMetadata() throws Exception {
+    private void updateTargetProductMetadata() {
 
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.multilook_flag, 1);
@@ -445,6 +444,8 @@ public final class MultilookOp extends Operator {
      * @param sourceRaster1 The source raster for the 1st band.
      * @param srcData1 The product data for i band in case of complex product.
      * @param srcData2 The product data for q band in case of complex product.
+     * @param nRgLooks
+     * @param nAzLooks
      * @param bandUnit Integer indicating the unit of source data.
      * @return The mean value.
      */

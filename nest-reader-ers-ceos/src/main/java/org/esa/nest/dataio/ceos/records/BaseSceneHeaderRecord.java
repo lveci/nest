@@ -27,12 +27,6 @@ public class BaseSceneHeaderRecord extends BaseRecord {
         MONTH_TABLE.put("Dec", 12);
     }
 
-    public BaseSceneHeaderRecord(final BinaryFileReader reader,
-                                 String mission, String definitionFile)
-            throws IOException, IllegalBinaryFormatException {
-        this(reader, -1, mission, definitionFile);
-    }
-
     public BaseSceneHeaderRecord(final BinaryFileReader reader, final long startPos,
                                  String mission, String definitionFile)
             throws IOException, IllegalBinaryFormatException {

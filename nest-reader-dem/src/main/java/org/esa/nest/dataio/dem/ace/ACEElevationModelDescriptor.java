@@ -15,9 +15,9 @@ import java.net.URL;
 
 public class ACEElevationModelDescriptor extends AbstractElevationModelDescriptor {
 
-    public static final String NAME = "ACE";
-    public static final String DB_FILE_SUFFIX = ".ACE";
-    public static final String ARCHIVE_URL_PATH = SystemUtils.BEAM_HOME_PAGE + "data/ACE.zip";
+    private static final String NAME = "ACE";
+    private static final String DB_FILE_SUFFIX = ".ACE";
+    private static final String ARCHIVE_URL_PATH = SystemUtils.BEAM_HOME_PAGE + "data/ACE.zip";
     public static final int NUM_X_TILES = 24;
     public static final int NUM_Y_TILES = 12;
     public static final int DEGREE_RES = 15;
@@ -25,7 +25,7 @@ public class ACEElevationModelDescriptor extends AbstractElevationModelDescripto
     public static final int NO_DATA_VALUE = -500;
     public static final int RASTER_WIDTH = NUM_X_TILES * PIXEL_RES;
     public static final int RASTER_HEIGHT = NUM_Y_TILES * PIXEL_RES;
-    public static final Datum DATUM = Datum.WGS_84;
+    private static final Datum DATUM = Datum.WGS_84;
 
     private File aceDemInstallDir = null;
 

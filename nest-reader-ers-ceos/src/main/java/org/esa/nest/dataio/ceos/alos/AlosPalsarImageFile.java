@@ -43,7 +43,7 @@ class AlosPalsarImageFile extends CEOSImageFile {
         
     }
 
-    public ImageRecord getImageRecord(int line) throws IOException, IllegalBinaryFormatException {
+    ImageRecord getImageRecord(int line) throws IOException, IllegalBinaryFormatException {
         if(_imageRecords[line] == null) {
 
             binaryReader.seek(_imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()));

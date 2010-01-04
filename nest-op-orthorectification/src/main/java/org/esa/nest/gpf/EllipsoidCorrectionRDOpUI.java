@@ -1,8 +1,8 @@
 package org.esa.nest.gpf;
 
-import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.dataop.maptransf.MapProjection;
 import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
@@ -10,8 +10,8 @@ import org.esa.nest.util.DialogUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Map;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * User interface for EllipsoidCorrectionRDOp
@@ -19,7 +19,7 @@ import java.util.Arrays;
 public class EllipsoidCorrectionRDOpUI extends BaseOperatorUI {
 
     private final JList bandList = new JList();
-    protected final JComboBox projectionName = new JComboBox();
+    private final JComboBox projectionName = new JComboBox();
     private final JComboBox imgResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
                                                                            ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
                                                                            ResamplingFactory.CUBIC_CONVOLUTION_NAME});

@@ -6,7 +6,6 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.io.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -47,7 +46,7 @@ public class RepositoryEntry {
         return _productFile;
     }
 
-    public void openProduct() throws IOException {
+    public void openProduct() {
         try {
             // temporary - don't open wss products
             final String name = _productFile.getName().toUpperCase();

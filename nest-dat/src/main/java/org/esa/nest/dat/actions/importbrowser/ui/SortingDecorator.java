@@ -107,7 +107,7 @@ class SortingDecorator extends AbstractTableModel {
         }
     }
 
-    public boolean isSorting() {
+    boolean isSorting() {
         return !sortingColumns.isEmpty();
     }
 
@@ -151,7 +151,7 @@ class SortingDecorator extends AbstractTableModel {
 
     private class SortableHeaderRenderer implements TableCellRenderer {
 
-        private TableCellRenderer tableCellRenderer;
+        private final TableCellRenderer tableCellRenderer;
 
         public SortableHeaderRenderer(final TableCellRenderer tableCellRenderer) {
             this.tableCellRenderer = tableCellRenderer;
@@ -205,8 +205,8 @@ class SortingDecorator extends AbstractTableModel {
 
     private static class Directive {
 
-        private int column;
-        private int direction;
+        private final int column;
+        private final int direction;
 
         public Directive(final int column, final int direction) {
             this.column = column;
@@ -216,9 +216,9 @@ class SortingDecorator extends AbstractTableModel {
 
     private static class Arrow implements Icon {
 
-        private boolean descending;
-        private int size;
-        private int priority;
+        private final boolean descending;
+        private final int size;
+        private final int priority;
 
         public Arrow(final boolean descending, final int size, final int priority) {
             this.descending = descending;
@@ -270,7 +270,7 @@ class SortingDecorator extends AbstractTableModel {
 
     private class Row implements Comparable {
 
-        private int modelIndex;
+        private final int modelIndex;
 
         public Row(final int index) {
             modelIndex = index;

@@ -16,9 +16,9 @@ import java.util.Set;
  */
 public class NcVariableMap {
 
-    private Map<String, Variable> _map;
+    private final Map<String, Variable> _map;
 
-    public NcVariableMap(int initialCapacity) {
+    private NcVariableMap(int initialCapacity) {
         _map = new HashMap<String, Variable>(initialCapacity);
     }
 
@@ -57,7 +57,7 @@ public class NcVariableMap {
      *
      * @param variable The variable.
      */
-    public void put(Variable variable) {
+    void put(Variable variable) {
         _map.put(variable.getName(), variable);
     }
 

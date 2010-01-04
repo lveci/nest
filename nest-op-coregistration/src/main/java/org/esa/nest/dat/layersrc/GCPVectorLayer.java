@@ -1,20 +1,17 @@
 package org.esa.nest.dat.layersrc;
 
-import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.glayer.Layer;
-import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.glevel.MultiLevelImage;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
+import org.esa.beam.framework.datamodel.*;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.image.RenderedImage;
-
-import org.esa.beam.framework.datamodel.*;
 
 /**
  * Shows the movement of GCP in a coregistered image
@@ -95,7 +92,7 @@ public class GCPVectorLayer extends Layer {
         }
     }
 
-    public static void createArrow(int x, int y, int xx, int yy, int i1, double[] ipts)
+    private static void createArrow(int x, int y, int xx, int yy, int i1, double[] ipts)
     {
         ipts[0] = x;
         ipts[1] = y;

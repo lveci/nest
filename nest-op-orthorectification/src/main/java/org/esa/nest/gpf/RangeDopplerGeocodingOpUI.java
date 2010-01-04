@@ -2,15 +2,12 @@ package org.esa.nest.gpf;
 
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.dem.ElevationModelRegistry;
-import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.dataop.maptransf.MapProjection;
 import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
+import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.DialogUtils;
 
@@ -18,8 +15,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.util.Map;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * User interface for RangeDopplerGeocodingOp
@@ -27,36 +24,36 @@ import java.util.Arrays;
 public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
     private final JList bandList = new JList();
-    protected final JComboBox demName = new JComboBox();
-    protected final JComboBox projectionName = new JComboBox();
+    private final JComboBox demName = new JComboBox();
+    final JComboBox projectionName = new JComboBox();
     private static final String externalDEMStr = "External DEM";
 
-    protected final JComboBox demResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+    private final JComboBox demResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
                                                                            ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
                                                                            ResamplingFactory.CUBIC_CONVOLUTION_NAME});
-    protected final JComboBox imgResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
+    final JComboBox imgResamplingMethod = new JComboBox(new String[] {ResamplingFactory.NEAREST_NEIGHBOUR_NAME,
                                                                            ResamplingFactory.BILINEAR_INTERPOLATION_NAME,
                                                                            ResamplingFactory.CUBIC_CONVOLUTION_NAME});
-    protected final JComboBox incidenceAngleForGamma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM,
+    final JComboBox incidenceAngleForGamma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM,
                                                                            RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID});
-    protected final JComboBox incidenceAngleForSigma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM,
+    final JComboBox incidenceAngleForSigma0 = new JComboBox(new String[] {RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_DEM,
                                                                            RangeDopplerGeocodingOp.USE_INCIDENCE_ANGLE_FROM_ELLIPSOID});
 
-    protected final JTextField pixelSpacing = new JTextField("");
-    protected final JTextField externalDEMFile = new JTextField("");
-    protected final JTextField externalDEMNoDataValue = new JTextField("");
-    protected final JButton externalDEMBrowseButton = new JButton("...");
-    protected final JLabel externalDEMFileLabel = new JLabel("External DEM:");
-    protected final JLabel externalDEMNoDataValueLabel = new JLabel("DEM No Data Value:");
+    final JTextField pixelSpacing = new JTextField("");
+    private final JTextField externalDEMFile = new JTextField("");
+    private final JTextField externalDEMNoDataValue = new JTextField("");
+    private final JButton externalDEMBrowseButton = new JButton("...");
+    private final JLabel externalDEMFileLabel = new JLabel("External DEM:");
+    private final JLabel externalDEMNoDataValueLabel = new JLabel("DEM No Data Value:");
 
-    protected final JCheckBox saveDEMCheckBox = new JCheckBox("Save DEM as a band");
-    protected final JCheckBox saveLocalIncidenceAngleCheckBox = new JCheckBox("Save local incidence angle as a band");
-    protected final JCheckBox saveProjectedLocalIncidenceAngleCheckBox = new JCheckBox("Save projected local incidence angle as a band");
-    protected final JCheckBox saveSelectedSourceBandCheckBox = new JCheckBox("Save selected source band");
-    protected final JCheckBox applyRadiometricNormalizationCheckBox = new JCheckBox("Apply radiometric normalization");
-    protected final JCheckBox saveBetaNoughtCheckBox = new JCheckBox("Save Beta0 as a band");
-    protected final JCheckBox saveGammaNoughtCheckBox = new JCheckBox("Save Gamma0 as a band");
-    protected final JCheckBox saveSigmaNoughtCheckBox = new JCheckBox("Save Sigma0 as a band");
+    final JCheckBox saveDEMCheckBox = new JCheckBox("Save DEM as a band");
+    final JCheckBox saveLocalIncidenceAngleCheckBox = new JCheckBox("Save local incidence angle as a band");
+    final JCheckBox saveProjectedLocalIncidenceAngleCheckBox = new JCheckBox("Save projected local incidence angle as a band");
+    final JCheckBox saveSelectedSourceBandCheckBox = new JCheckBox("Save selected source band");
+    final JCheckBox applyRadiometricNormalizationCheckBox = new JCheckBox("Apply radiometric normalization");
+    final JCheckBox saveBetaNoughtCheckBox = new JCheckBox("Save Beta0 as a band");
+    final JCheckBox saveGammaNoughtCheckBox = new JCheckBox("Save Gamma0 as a band");
+    final JCheckBox saveSigmaNoughtCheckBox = new JCheckBox("Save Sigma0 as a band");
 
     private boolean saveDEM = false;
     private boolean saveLocalIncidenceAngle = false;
@@ -297,7 +294,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         paramMap.put("saveSigmaNought", saveSigmaNought);
     }
 
-    protected JComponent createPanel() {
+    JComponent createPanel() {
 
         final JPanel contentPane = new JPanel();
         contentPane.setLayout(new GridBagLayout());

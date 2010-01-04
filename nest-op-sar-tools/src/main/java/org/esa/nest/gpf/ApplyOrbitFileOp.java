@@ -101,13 +101,13 @@ public final class ApplyOrbitFileOp extends Operator {
     private TiePointGrid latitude = null;
     private TiePointGrid longitude = null;
 
-    public static final String DORIS_POR = "DORIS_POR";
-    public static final String DORIS_VOR = "DORIS_VOR";
-    public static final String DELFT_ENVISAT = "DELFT_PRECISE_ENVISAT";
-    public static final String DELFT_ERS_1 = "DELFT_PRECISE_ERS_1";
-    public static final String DELFT_ERS_2 = "DELFT_PRECISE_ERS_2";
-    public static final String PRARE_ERS_1 = "PRARE_PRECISE_ERS_1";
-    public static final String PRARE_ERS_2 = "PRARE_PRECISE_ERS_2";
+    private static final String DORIS_POR = "DORIS_POR";
+    private static final String DORIS_VOR = "DORIS_VOR";
+    private static final String DELFT_ENVISAT = "DELFT_PRECISE_ENVISAT";
+    private static final String DELFT_ERS_1 = "DELFT_PRECISE_ERS_1";
+    private static final String DELFT_ERS_2 = "DELFT_PRECISE_ERS_2";
+    private static final String PRARE_ERS_1 = "PRARE_PRECISE_ERS_1";
+    private static final String PRARE_ERS_2 = "PRARE_PRECISE_ERS_2";
 
     private ftpUtils ftp = null;
     private FTPFile[] remoteFileList = null;
@@ -205,9 +205,8 @@ public final class ApplyOrbitFileOp extends Operator {
 
     /**
      * Get the first line UTC in days.
-     * @throws Exception The exceptions.
      */
-    private void getFirstLineUTC() throws Exception {
+    private void getFirstLineUTC() {
 
         firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
         lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
@@ -216,9 +215,8 @@ public final class ApplyOrbitFileOp extends Operator {
 
     /**
      * Create target product.
-     * @throws Exception The exception.
      */
-    void createTargetProduct() throws Exception {
+    void createTargetProduct() {
 
         targetProduct = new Product(sourceProduct.getName(),
                                     sourceProduct.getProductType(),
