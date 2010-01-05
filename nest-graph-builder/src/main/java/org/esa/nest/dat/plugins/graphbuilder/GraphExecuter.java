@@ -31,6 +31,7 @@ public class GraphExecuter extends Observable {
     private GraphContext graphContext = null;
     private final GraphProcessor processor;
     private String graphDescription = "";
+    private File lastLoadedGraphFile = null;
 
     private int idCount = 0;
     private final ArrayList<GraphNode> nodeList = new ArrayList<GraphNode>();
@@ -54,6 +55,7 @@ public class GraphExecuter extends Observable {
     public void ClearGraph() {
         graph = null;
         graph = new Graph("Graph");
+        lastLoadedGraphFile = null;
         nodeList.clear();
         idCount = 0;
     }
@@ -266,7 +268,10 @@ public class GraphExecuter extends Observable {
 
     void saveGraph() throws GraphException {
 
-        final File filePath = ResourceUtils.GetFilePath("Save Graph", "XML", "xml", "Graph", true);
+        String filename = "myGraph";
+        if(lastLoadedGraphFile != null)
+            filename = lastLoadedGraphFile.getAbsolutePath();
+        final File filePath = ResourceUtils.GetFilePath("Save Graph", "XML", "xml", filename, "Graph", true);
         if(filePath != null)
             writeGraph(filePath.getAbsolutePath());
     }
@@ -301,6 +306,7 @@ public class GraphExecuter extends Observable {
             if(graphFromFile != null) {
                 graph = graphFromFile;
                 nodeList.clear();
+                lastLoadedGraphFile = filePath;
 
                 final Xpp3Dom presentationXML = graph.getApplicationData("Presentation");
                 if(presentationXML != null) {

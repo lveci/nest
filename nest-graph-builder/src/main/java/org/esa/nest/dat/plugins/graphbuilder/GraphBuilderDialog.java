@@ -49,7 +49,6 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private boolean initGraphEnabled = true;
 
     private final GraphExecuter graphEx;
-    private int graphCount = 0;
     private boolean isProcessing = false;
     private boolean allowGraphBuilding = true;
 
@@ -277,22 +276,22 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
      */
     private void SaveGraph() {
 
-        if(ValidateAllNodes()) {
+        //if(ValidateAllNodes()) {
             try {
                 graphEx.saveGraph();
             } catch(GraphException e) {
                 showErrorDialog(e.getMessage());
             }
-        } else {
-            showErrorDialog(statusLabel.getText());
-        }
+        //} else {
+        //    showErrorDialog(statusLabel.getText());
+        //}
     }
 
     /**
      * Loads a new graph from a file
      */
     private void LoadGraph() {
-        final File file = ResourceUtils.GetFilePath("Load Graph", "XML", "xml", "Graph", false);
+        final File file = ResourceUtils.GetFilePath("Load Graph", "XML", "xml", "", "Graph", false);
         if(file == null) return;
 
         LoadGraph(file);

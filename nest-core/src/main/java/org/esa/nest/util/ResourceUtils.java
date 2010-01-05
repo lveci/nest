@@ -40,15 +40,15 @@ public final class ResourceUtils {
             System.out.println("Could not delete "+dir.getName());
 	}
 
-    public static File GetFilePath(String title, String formatName, String extension, String description,
-                                     boolean isSave) {
+    public static File GetFilePath(final String title, final String formatName, final String extension,
+                                   final String fileName, final String description, final boolean isSave) {
         BeamFileFilter fileFilter = null;
         if(!extension.isEmpty()) {
             fileFilter = new BeamFileFilter(formatName, extension, description);
         }
         File file;
         if (isSave)
-            file = VisatApp.getApp().showFileSaveDialog(title, false, fileFilter, '.' + extension, description);
+            file = VisatApp.getApp().showFileSaveDialog(title, false, fileFilter, '.' + extension, fileName);
         else
             file = VisatApp.getApp().showFileOpenDialog(title, false, fileFilter);
         if (file == null) {

@@ -121,46 +121,6 @@
             <parent>geometry</parent>
             <helpId>MosaicOp</helpId>
         </action>
-
-        <action>
-            <id>openPreCalibRangeDopplerTerrainCorrectionDialog</id>
-            <class>org.esa.nest.dat.PreCalibRangeDopplerTerrainCorrectionAction</class>
-            <parent>TerrainCorrection</parent>
-            <text>PreCalibration Range Doppler Terrain Correction</text>
-            <shortDescr>Perform PreCalibration and Range Doppler Terrain Correction</shortDescr>
-            <placeAfter>openOrthorectificationDialog</placeAfter>
-            <helpId>RangeDopplerGeocodingOp</helpId>
-        </action>
-
-        <action>
-            <id>openPreCalibMultilookRangeDopplerTerrainCorrectionDialog</id>
-            <class>org.esa.nest.dat.PreCalibMultilookRangeDopplerTerrainCorrectionAction</class>
-            <parent>TerrainCorrection</parent>
-            <text>PreCalibration Multilook Range Doppler Terrain Correction</text>
-            <shortDescr>Perform PreCalibration Multilook and Range Doppler Terrain Correction</shortDescr>
-            <placeAfter>openPreCalibRangeDopplerTerrainCorrectionDialog</placeAfter>
-            <helpId>RangeDopplerGeocodingOp</helpId>
-        </action>
-
-        <action>
-            <id>openPreCalibSARSimTerrainCorrectionDialog</id>
-            <class>org.esa.nest.dat.PreCalibSARSimTerrainCorrectionAction</class>
-            <parent>TerrainCorrection</parent>
-            <text>PreCalibration SAR-Simulation Terrain Correction</text>
-            <shortDescr>Perform PreCalibration SAR-Simulation and Terrain Correction</shortDescr>
-            <placeAfter>openPreCalibMultilookRangeDopplerTerrainCorrectionDialog</placeAfter>
-            <helpId>SARSimGeocodingOp</helpId>
-        </action>
-
-        <action>
-            <id>openPreCalibMultilookSARSimTerrainCorrectionDialog</id>
-            <class>org.esa.nest.dat.PreCalibMultilookSARSimTerrainCorrectionAction</class>
-            <parent>TerrainCorrection</parent>
-            <text>PreCalibration Multilook SAR-Simulation Terrain Correction</text>
-            <shortDescr>Perform PreCalibration Multilook SAR-Simulation and Terrain Correction</shortDescr>
-            <placeAfter>openPreCalibSARSimTerrainCorrectionDialog</placeAfter>
-            <helpId>SARSimGeocodingOp</helpId>
-        </action>
 		
     </extension>
 

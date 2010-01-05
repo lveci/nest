@@ -71,7 +71,7 @@ public class Project extends Observable {
     }
 
     public void CreateNewProject() {
-        final File file = ResourceUtils.GetFilePath("Create Project", "xml", "xml", "Project File", true);
+        final File file = ResourceUtils.GetFilePath("Create Project", "xml", "xml", "myProject", "Project File", true);
 
         if(file != null) {
             final String prjName = file.getName();
@@ -505,7 +505,7 @@ public class Project extends Observable {
     }
 
     public void SaveProjectAs() {
-        final File file = ResourceUtils.GetFilePath("Save Project", "XML", "xml", "Project File", true);
+        final File file = ResourceUtils.GetFilePath("Save Project", "XML", "xml", getProjectName(), "Project File", true);
         if(file == null) return;
         
         projectFile = file;
@@ -535,7 +535,7 @@ public class Project extends Observable {
 
     public void LoadProject() {
 
-        final File file = ResourceUtils.GetFilePath("Load Project", "XML", "xml", "Project File", false);
+        final File file = ResourceUtils.GetFilePath("Load Project", "XML", "xml", "", "Project File", false);
         if(file == null) return;
 
         initProject(file);

@@ -51,6 +51,16 @@
         </action>
 
         <action>
+            <id>RemoveAntennaPatternOp</id>
+            <class>org.esa.nest.dat.RemoveAntennaPatternOpAction</class>
+            <text>Remove Antenna Pattern</text>
+            <shortDescr>Remove the Antenna Pattern for ASAR and ERS products</shortDescr>
+            <parent>Calibration</parent>
+            <placeAfter>CalibrationOp</placeAfter>
+            <helpId>CalibrationOp</helpId>
+        </action>
+
+        <action>
             <id>importXCAProduct</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
             <formatName>ENVISAT</formatName>
@@ -70,7 +80,7 @@
             <text>Sigma0 to Gamma0</text>
             <shortDescr>Add a Gamma0 virtual band</shortDescr>
             <parent>Calibration</parent>
-            <placeAfter>CalibrationOp</placeAfter>
+            <placeAfter>RemoveAntennaPatternOp</placeAfter>
             <context>band</context>
             <helpId>Sigma0toGamma0</helpId>
         </action>

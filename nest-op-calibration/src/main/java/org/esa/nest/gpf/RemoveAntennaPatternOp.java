@@ -36,10 +36,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Pre-Calibration for ASAR products.
+ * RemoveAntennaPattern for ASAR & ERS products.
  */
-@OperatorMetadata(alias = "Pre-Calibration", category = "SAR Tools", description = "Pre-Calibration")
-public class PreCalibrationOp extends Operator {
+@OperatorMetadata(alias = "RemoveAntennaPattern", category = "SAR Tools", description = "Remove Antenna Pattern")
+public class RemoveAntennaPatternOp extends Operator {
 
     @SourceProduct(alias="source")
     private Product sourceProduct;
@@ -148,7 +148,7 @@ public class PreCalibrationOp extends Operator {
             }
 
             if(targetProduct.getBand(targetBandName) == null) {
-                Band targetBand = new Band(targetBandName,
+                final Band targetBand = new Band(targetBandName,
                                            ProductData.TYPE_FLOAT32,
                                            sourceProduct.getSceneRasterWidth(),
                                            sourceProduct.getSceneRasterHeight());
@@ -188,7 +188,7 @@ public class PreCalibrationOp extends Operator {
      */
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(PreCalibrationOp.class);
+            super(RemoveAntennaPatternOp.class);
         }
     }
 }

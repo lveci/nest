@@ -347,7 +347,7 @@ public class GraphNode {
         } else if (tail.x < head.x + halfNodeWidth && head.y > tail.y) {
             drawArrow(g, tail.x + halfNodeWidth, tail.y + nodeHeight,
                     head.x + src.getHalfNodeWidth(), head.y);
-        } else if (tail.x < head.x + halfNodeWidth && head.y < tail.y) {
+        } else if (tail.x < head.x + nodeWidth && head.y < tail.y) {
             drawArrow(g, tail.x + halfNodeWidth, tail.y,
                     head.x + src.getHalfNodeWidth(), head.y + nodeHeight);
         } else {
