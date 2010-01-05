@@ -52,10 +52,6 @@ public class CEOSLeaderFile {
             _mapProjRecord = new BaseRecord(reader, -1, mission, mapproj_recordDefinitionFile);
             reader.seek(_mapProjRecord.getRecordEndPosition());
         }
-        for(int i=0; i < _leaderFDR.getAttributeInt("Number of platform pos. data records"); ++i) {
-            _platformPositionRecord = new BaseRecord(reader, -1, mission, platformPosition_recordDefinitionFile);
-            reader.seek(_platformPositionRecord.getRecordEndPosition());
-        }
         for(int i=0; i < _leaderFDR.getAttributeInt("Number of data quality summary records"); ++i) {
             _dataQualityRecord = new BaseRecord(reader, -1, mission, dataQuality_recordDefinitionFile);
             reader.seek(_dataQualityRecord.getRecordEndPosition());
@@ -67,6 +63,10 @@ public class CEOSLeaderFile {
         for(int i=0; i < _leaderFDR.getAttributeInt("Number of det. processing records"); ++i) {
             _detailedProcessingRecord = new BaseRecord(reader, -1, mission, detailedProcessing_recordDefinitionFile);
             reader.seek(_detailedProcessingRecord.getRecordEndPosition());
+        }
+        for(int i=0; i < _leaderFDR.getAttributeInt("Number of platform pos. data records"); ++i) {
+            _platformPositionRecord = new BaseRecord(reader, -1, mission, platformPosition_recordDefinitionFile);
+            reader.seek(_platformPositionRecord.getRecordEndPosition());
         }
         for(int i=0; i < _leaderFDR.getAttributeInt("Number of attitude data records"); ++i) {
             _attitudeRecord = new BaseRecord(reader, -1, mission, attitude_recordDefinitionFile);

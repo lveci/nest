@@ -422,37 +422,40 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
     protected static void addOrbitStateVectors(final MetadataElement absRoot, final BaseRecord platformPosRec) {
         if(platformPosRec == null) return;
 
-        final MetadataElement orbitVectorListElem = absRoot.getElement(AbstractMetadata.orbit_state_vectors);
-        final int numPoints = platformPosRec.getAttributeInt("Number of data points");
-        final double theta = platformPosRec.getAttributeDouble("Greenwich mean hour angle");
+        try {
+            final MetadataElement orbitVectorListElem = absRoot.getElement(AbstractMetadata.orbit_state_vectors);
+            final int numPoints = platformPosRec.getAttributeInt("Number of data points");
+            final double theta = platformPosRec.getAttributeDouble("Greenwich mean hour angle");
 
-        final double firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
-        final double lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD();
-        int startIdx = 0;
-        int endIdx = 0;
-        for (int i = 1; i <= numPoints; i++) {
-            double time = getOrbitTime(platformPosRec, i).getMJD();
-            if (time < firstLineUTC) {
-                startIdx = i;
+            final double firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
+            final double lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD();
+            int startIdx = 0;
+            int endIdx = 0;
+            for (int i = 1; i <= numPoints; i++) {
+                double time = getOrbitTime(platformPosRec, i).getMJD();
+                if (time < firstLineUTC) {
+                    startIdx = i;
+                }
+
+                if (time < lastLineUTC) {
+                    endIdx = i;
+                }
+            }
+            startIdx = Math.max(startIdx - 1, 1);
+            endIdx = Math.min(endIdx+1, numPoints);
+    
+            for(int i=startIdx; i <= endIdx; ++i) {
+                addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, theta, i, startIdx);
             }
 
-            if (time < lastLineUTC) {
-                endIdx = i;
+            if(absRoot.getAttributeUTC(AbstractMetadata.STATE_VECTOR_TIME, new ProductData.UTC(0)).
+                    equalElems(new ProductData.UTC(0))) {
+
+                AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
+                    getOrbitTime(platformPosRec, 1));
             }
-        }
-        startIdx = Math.max(startIdx - 1, 1);
-        endIdx = Math.min(endIdx+1, numPoints);
-
-//        for(int i=1; i <= numPoints; ++i) {
-        for(int i=startIdx; i <= endIdx; ++i) {
-            addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, theta, i, startIdx);
-        }
-
-        if(absRoot.getAttributeUTC(AbstractMetadata.STATE_VECTOR_TIME, new ProductData.UTC(0)).
-                equalElems(new ProductData.UTC(0))) {
-
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.STATE_VECTOR_TIME,
-                getOrbitTime(platformPosRec, 1));
+        } catch(Exception e) {
+            // continue without state vectors
         }
     }
 
@@ -547,7 +550,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             srgCoefList = null;
         }
 
-        if(srgCoefList != null) {
+        if(srgCoefList != null && srgCoefList.length > 0) {
 
             final double dRg = subSamplingX * pixelSpacing;
             final float[] rangeDist = new float[gridWidth*gridHeight];
@@ -572,16 +575,21 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                     idx = i;
                 }
 
-                final double[] coeff = new double[srgCoefList[idx].coefficients.length];
-                if (idx == srgCoefList.length - 1) {
-                    idx--;
-                }
+                double[] coeff;
+                if(srgCoefList.length > 1) {
+                    coeff = new double[srgCoefList[idx].coefficients.length];
+                    if (idx == srgCoefList.length - 1) {
+                        idx--;
+                    }
 
-                final double mu = (curLineUTC - srgCoefList[idx].timeMJD) /
-                                  (srgCoefList[idx+1].timeMJD - srgCoefList[idx].timeMJD);
-                for (int i = 0; i < coeff.length; i++) {
-                    coeff[i] = org.esa.nest.util.MathUtils.interpolationLinear(
-                            srgCoefList[idx].coefficients[i], srgCoefList[idx+1].coefficients[i], mu);
+                    final double mu = (curLineUTC - srgCoefList[idx].timeMJD) /
+                                      (srgCoefList[idx+1].timeMJD - srgCoefList[idx].timeMJD);
+                    for (int i = 0; i < coeff.length; i++) {
+                        coeff[i] = org.esa.nest.util.MathUtils.interpolationLinear(
+                                srgCoefList[idx].coefficients[i], srgCoefList[idx+1].coefficients[i], mu);
+                    }
+                } else {
+                    coeff = srgCoefList[idx].coefficients;
                 }
 
                 for(int i = 0; i < gridWidth; i++) {
@@ -672,6 +680,9 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         } catch (Exception e) {
             throw new IOException(e.getMessage());
         }
+
+        if(orbitStateVectors == null || orbitStateVectors.length == 0)
+            return;
 
         final int numVectors = orbitStateVectors.length;
         int startIdx = 0;

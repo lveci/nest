@@ -48,6 +48,7 @@ public final class CeosDB {
 
         try {
             xmlDoc = XMLSupport.LoadXML(defFile);
+            //System.out.println(defFile);
         } catch(Exception e) {
             System.out.println(e.toString());
         }
@@ -78,7 +79,6 @@ public final class CeosDB {
     public void readRecord(BinaryFileReader reader) throws IOException, IllegalBinaryFormatException
     {
         final Element root = xmlDoc.getRootElement();
-        //System.out.println(definitionFile);
         
         final List children = root.getContent();
         for (Object aChild : children) {
@@ -187,7 +187,7 @@ public final class CeosDB {
             }
 
         } catch(Exception e) {
-            System.out.println(e.toString() + " for "+ name);
+            System.out.println(" " +e.toString() + " for "+ name);
 
             //throw new IllegalBinaryFormatException(e.toString(), reader.getCurrentPos());
         }
