@@ -23,7 +23,7 @@ import java.util.List;
  * Time: 2:45:16 PM
  * To change this template use File | Settings | File Templates.
  */
-public class XMLSupport {
+public final class XMLSupport {
 
     public static void SaveXML(final Document doc, final String filePath) {
 

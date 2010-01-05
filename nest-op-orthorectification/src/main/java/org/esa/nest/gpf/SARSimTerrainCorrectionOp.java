@@ -406,8 +406,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
         } else {
             minAbsLat = 0.0;
         }
-        delLat = spacing / MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
-        delLon = spacing / (MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
+        delLat = spacing / Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
+        delLon = spacing / (Constants.MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
         delLat = Math.min(delLat, delLon);
         delLon = delLat;
         */

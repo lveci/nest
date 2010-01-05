@@ -17,7 +17,7 @@ import java.util.Arrays;
 /**
  * Common functions for readers
  */
-public class ReaderUtils {
+public final class ReaderUtils {
 
 
     public static void createVirtualPhaseBand(Product product, Band bandI, Band bandQ, String countStr) {

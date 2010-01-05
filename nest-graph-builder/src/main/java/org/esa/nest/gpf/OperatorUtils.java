@@ -13,7 +13,7 @@ import java.util.ArrayList;
 /**
  * Helper methods for working with Operators
  */
-public class OperatorUtils {
+public final class OperatorUtils {
 
     public static final String TPG_SLANT_RANGE_TIME = "slant_range_time";
     public static final String TPG_INCIDENT_ANGLE = "incident_angle";

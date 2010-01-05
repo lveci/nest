@@ -17,6 +17,7 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.util.Constants;
 
 import java.awt.*;
 import java.text.MessageFormat;
@@ -66,8 +67,6 @@ public class MosaicOp extends Operator {
     private final SceneProperties scnProp = new SceneProperties();
     private final static Map<Product, Band> srcBandMap = new HashMap<Product, Band>(10);
     private final static Map<Product, Rectangle> srcRectMap = new HashMap<Product, Rectangle>(10);
-
-    private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
 
     @Override
     public void initialize() throws OperatorException {
@@ -173,7 +172,7 @@ public class MosaicOp extends Operator {
         return bandList.toArray(new Band[bandList.size()]);
     }
 
-    private Product getProduct(String productName) {
+    private Product getProduct(final String productName) {
         for (Product prod : sourceProduct) {
             if (prod.getName().equals(productName)) {
                 return prod;
@@ -238,15 +237,15 @@ public class MosaicOp extends Operator {
         }
     }
 
-    public static void getSceneDimensions(double minSpacing, SceneProperties scnProp) {
+    public static void getSceneDimensions(final double minSpacing, final SceneProperties scnProp) {
         double minAbsLat;
         if (scnProp.latMin * scnProp.latMax > 0) {
             minAbsLat = Math.min(Math.abs(scnProp.latMin), Math.abs(scnProp.latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
         } else {
             minAbsLat = 0.0;
         }
-        double delLat = minSpacing / MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
-        double delLon = minSpacing / (MeanEarthRadius * Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
+        double delLat = minSpacing / Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
+        double delLon = minSpacing / (Constants.MeanEarthRadius * Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
         delLat = Math.min(delLat, delLon);
         delLon = delLat;
 
@@ -257,7 +256,7 @@ public class MosaicOp extends Operator {
     /**
      * Add geocoding to the target product.
      */
-    private void addGeoCoding(SceneProperties scnProp) {
+    private void addGeoCoding(final SceneProperties scnProp) {
 
         final float[] latTiePoints = {(float) scnProp.latMax, (float) scnProp.latMax,
                 (float) scnProp.latMin, (float) scnProp.latMin};
@@ -333,8 +332,9 @@ public class MosaicOp extends Operator {
         return getBoundingBox(pixelPos, 0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE);
     }
 
-    private static Rectangle getBoundingBox(PixelPos[] pixelPositions,
-                                            int minOffsetX, int minOffsetY, int maxWidth, int maxHeight) {
+    private static Rectangle getBoundingBox(final PixelPos[] pixelPositions,
+                                            final int minOffsetX, final int minOffsetY,
+                                            final int maxWidth, final int maxHeight) {
         int minX = Integer.MAX_VALUE;
         int maxX = Integer.MIN_VALUE;
         int minY = Integer.MAX_VALUE;

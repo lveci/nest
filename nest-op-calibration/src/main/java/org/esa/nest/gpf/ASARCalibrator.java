@@ -97,7 +97,6 @@ public class ASARCalibrator implements Calibrator {
     private double halfLightSpeedByRefSlantRange = Constants.halfLightSpeed / refSlantRange;
     private static final double refSlantRange800km = 800000.0; //  m
     private static final double underFlowFloat = 1.0e-30;
-    private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
     private static final int INVALID_SUB_SWATH_INDEX = -1;
 
     public ASARCalibrator() {
@@ -1273,8 +1272,8 @@ public class ASARCalibrator implements Calibrator {
         } else {
             minAbsLat = 0.0;
         }
-        delLat = minSpacing / MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
-        final double delLon = minSpacing / (MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
+        delLat = minSpacing / Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
+        final double delLon = minSpacing / (Constants.MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
         delLat = Math.min(delLat, delLon);
 
         final int h = (int)((latMax - latMin)/delLat) + 1;

@@ -528,8 +528,8 @@ public class RangeDopplerGeocodingOp extends Operator {
         } else {
             minAbsLat = 0.0;
         }
-        delLat = spacing / MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
-        delLon = spacing / (MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
+        delLat = spacing / Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
+        delLon = spacing / (Constants.MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
         delLat = Math.min(delLat, delLon);
         delLon = delLat;
         */
@@ -1227,9 +1227,9 @@ public class RangeDopplerGeocodingOp extends Operator {
             return  false;
         }
 
-        GeoPos sensorGeoPos = new GeoPos();
+        final GeoPos sensorGeoPos = new GeoPos();
         GeoUtils.xyz2geo(sensorPos, sensorGeoPos, GeoUtils.EarthModel.WGS84);
-        double delLatMax = Math.abs(lat - sensorGeoPos.lat);
+        final double delLatMax = Math.abs(lat - sensorGeoPos.lat);
         double delLonMax;
         if (lon < 0 && sensorGeoPos.lon > 0) {
             delLonMax = Math.abs(360 + lon - sensorGeoPos.lon);
@@ -1239,8 +1239,8 @@ public class RangeDopplerGeocodingOp extends Operator {
             delLonMax = Math.abs(lon - sensorGeoPos.lon);
         }
 
-        double delLat = Math.abs(lat - latitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
-        double srcLon = longitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex);
+        final double delLat = Math.abs(lat - latitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
+        final double srcLon = longitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex);
         double delLon;
         if (lon < 0 && srcLon > 0) {
             delLon = Math.abs(360 + lon - srcLon);

@@ -16,7 +16,7 @@ import java.text.ParseException;
  * Date: Aug 12, 2008
  * To change this template use File | Settings | File Templates.
  */
-public class AbstractMetadata {
+public final class AbstractMetadata {
 
     public static final int NO_METADATA = 99999;
     //public static final short NO_METADATA_BYTE = 99;

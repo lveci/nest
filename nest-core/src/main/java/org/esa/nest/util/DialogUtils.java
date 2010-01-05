@@ -14,7 +14,7 @@ import java.text.NumberFormat;
  * User: lveci
  * Date: Jan 8, 2009
  */
-public class DialogUtils {
+public final class DialogUtils {
 
 
     public static void enableComponents(JComponent label, JComponent field, boolean flag) {

@@ -17,7 +17,7 @@ import java.util.Map;
  * Time: 1:05:18 PM
  * To change this template use File | Settings | File Templates.
  */
-public class OperatorUIUtils {
+public final class OperatorUIUtils {
 
 
     public static void initBandList(JList bandList, String[] bandNames) {

@@ -113,7 +113,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
-    private static final double MeanEarthRadius = 6371008.7714; // in m (WGS84)
 
     private enum ResampleMethod { RESAMPLE_NEAREST_NEIGHBOUR, RESAMPLE_BILINEAR, RESAMPLE_CUBIC }
     private ResampleMethod imgResampling = null;
@@ -208,16 +207,16 @@ public final class GeolocationGridGeocodingOp extends Operator {
         } else {
             minAbsLat = 0.0;
         }
-        delLat = minSpacing / MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
-        delLon = minSpacing / (MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
+        delLat = minSpacing / Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
+        delLon = minSpacing / (Constants.MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
         delLat = Math.min(delLat, delLon);
         delLon = delLat;
         */
         /*
         final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
         final double minAbsLat = Math.min(Math.abs(latMin), Math.abs(latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
-        delLat = minSpacing / MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
-        delLon = minSpacing / (MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
+        delLat = minSpacing / Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
+        delLon = minSpacing / (Constants.MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
         delLat = Math.min(delLat, delLon);
         delLon = delLat;
         */

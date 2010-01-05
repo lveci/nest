@@ -9,7 +9,7 @@ import org.esa.beam.framework.datamodel.Band;
  * Time: 3:25:19 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Unit {
+public final class Unit {
 
     public static final String AMPLITUDE = "amplitude";
     public static final String INTENSITY = "intensity";

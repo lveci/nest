@@ -20,7 +20,7 @@ import java.util.StringTokenizer;
  * Date: Aug 12, 2008
  * To change this template use File | Settings | File Templates.
  */
-public class AbstractMetadataIO {
+public final class AbstractMetadataIO {
 
      public static void Save(final Product product, final MetadataElement metadataElem, final File metadataFile) {
 
