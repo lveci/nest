@@ -272,6 +272,87 @@ class CosmoSkymedReader extends AbstractProductReader {
         } else {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.srgr_flag, 1);
         }
+
+        addOrbitStateVectors(absRoot, globalElem);
+        addSRGRCoefficients(absRoot, globalElem);
+    }
+
+    private void addOrbitStateVectors(final MetadataElement absRoot, final MetadataElement globalElem) {
+
+        final MetadataElement orbitVectorListElem = absRoot.getElement(AbstractMetadata.orbit_state_vectors);
+        final ProductData.UTC referenceUTC = ReaderUtils.getTime(globalElem, "Reference UTC", timeFormat);
+        final int numPoints = globalElem.getAttributeInt("Number of State Vectors");
+
+        for (int i = 0; i < numPoints; i++) {
+            final double stateVectorTime = globalElem.getAttribute("State Vectors Times").getData().getElemDoubleAt(i);
+            final ProductData.UTC orbitTime =
+                    new ProductData.UTC(referenceUTC.getMJD() + stateVectorTime/86400.0);
+
+            final double satellitePositionX =
+                    globalElem.getAttribute("ECEF Satellite Position").getData().getElemDoubleAt(3*i);
+            final double satellitePositionY =
+                    globalElem.getAttribute("ECEF Satellite Position").getData().getElemDoubleAt(3*i+1);
+            final double satellitePositionZ =
+                    globalElem.getAttribute("ECEF Satellite Position").getData().getElemDoubleAt(3*i+2);
+            final double satelliteVelocityX =
+                    globalElem.getAttribute("ECEF Satellite Velocity").getData().getElemDoubleAt(3*i);
+            final double satelliteVelocityY =
+                    globalElem.getAttribute("ECEF Satellite Velocity").getData().getElemDoubleAt(3*i+1);
+            final double satelliteVelocityZ =
+                    globalElem.getAttribute("ECEF Satellite Velocity").getData().getElemDoubleAt(3*i+2);
+
+            final MetadataElement orbitVectorElem = new MetadataElement(AbstractMetadata.orbit_vector + (i+1));
+
+            orbitVectorElem.setAttributeUTC(AbstractMetadata.orbit_vector_time, orbitTime);
+            orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_x_pos, satellitePositionX);
+            orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_y_pos, satellitePositionY);
+            orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_z_pos, satellitePositionZ);
+            orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_x_vel, satelliteVelocityX);
+            orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_y_vel, satelliteVelocityY);
+            orbitVectorElem.setAttributeDouble(AbstractMetadata.orbit_vector_z_vel, satelliteVelocityZ);
+
+            orbitVectorListElem.addElement(orbitVectorElem);
+        }
+    }
+
+    private void addSRGRCoefficients(final MetadataElement absRoot, final MetadataElement globalElem) {
+
+        // For detail of ground range to slant range conversion, please see P80 in COSMO-SkyMed SAR Products Handbook.
+        final MetadataAttribute attribute = globalElem.getAttribute("Ground Projection Polynomial Reference Range");
+        if (attribute == null) {
+            return;
+        }
+
+        final double referenceRange = attribute.getData().getElemDouble();
+        final double rangeSpacing = globalElem.getAttributeDouble("Ground Range Geometric Resolution");
+
+        final MetadataElement srgrCoefficientsElem = absRoot.getElement(AbstractMetadata.srgr_coefficients);
+        final MetadataElement srgrListElem = new MetadataElement(AbstractMetadata.srgr_coef_list);
+        srgrCoefficientsElem.addElement(srgrListElem);
+
+        final ProductData.UTC utcTime = absRoot.getAttributeUTC(AbstractMetadata.first_line_time, new ProductData.UTC(0));
+        srgrListElem.setAttributeUTC(AbstractMetadata.srgr_coef_time, utcTime);
+        AbstractMetadata.addAbstractedAttribute(srgrListElem, AbstractMetadata.ground_range_origin,
+                ProductData.TYPE_FLOAT64, "m", "Ground Range Origin");
+        AbstractMetadata.setAttribute(srgrListElem, AbstractMetadata.ground_range_origin, 0.0);
+        
+        final int numCoeffs = 6;
+        for (int i = 0; i < numCoeffs; i++) {
+            double srgrCoeff = globalElem.getAttribute("Ground to Slant Polynomial").getData().getElemDoubleAt(i);
+            if (i == 0) {
+                srgrCoeff += referenceRange;
+            } else {
+                srgrCoeff /= Math.pow(rangeSpacing, i);
+            }
+
+            final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient + '.' + (i+1));
+            srgrListElem.addElement(coefElem);
+
+            AbstractMetadata.addAbstractedAttribute(coefElem, AbstractMetadata.srgr_coef,
+                    ProductData.TYPE_FLOAT64, "", "SRGR Coefficient");
+
+            AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, srgrCoeff);
+        }
     }
 
     private String getSampleType(final MetadataElement globalElem) {
