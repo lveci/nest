@@ -91,7 +91,7 @@ public abstract class CEOSProductReader extends AbstractProductReader {
      * {@inheritDoc}
      */
     @Override
-    protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight,
+    protected synchronized void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight,
                                           int sourceStepX, int sourceStepY, Band destBand, int destOffsetX,
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
@@ -134,9 +134,9 @@ public abstract class CEOSProductReader extends AbstractProductReader {
             }
 
         } catch (Exception e) {
-            final IOException ioException = new IOException(e.getMessage());
-            ioException.initCause(e);
-            throw ioException;
+            //final IOException ioException = new IOException(e.getMessage());
+            //ioException.initCause(e);
+            //throw ioException;
         }
 
     }

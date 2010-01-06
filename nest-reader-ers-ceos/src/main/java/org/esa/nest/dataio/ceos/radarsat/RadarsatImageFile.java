@@ -34,6 +34,7 @@ class RadarsatImageFile extends CEOSImageFile {
 
         _imageRecordLength = _imageRecords[0].getRecordLength();
         _startPosImageRecords = _imageRecords[0].getStartPos();
+        _imageHeaderLength = _imageFDR.getAttributeInt("Number of bytes of prefix data per record");
     }
 
 }
