@@ -114,8 +114,8 @@ public final class AbstractMetadata {
     public static final String is_terrain_corrected = "is_terrain_corrected";
     public static final String DEM = "DEM";
     public static final String geo_ref_system = "geo_ref_system";
-    private static final String lat_pixel_res = "lat_pixel_res";
-    private static final String lon_pixel_res = "lon_pixel_res";
+    public static final String lat_pixel_res = "lat_pixel_res";
+    public static final String lon_pixel_res = "lon_pixel_res";
     public static final String slant_range_to_first_pixel = "slant_range_to_first_pixel";
 
     /**
