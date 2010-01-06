@@ -1,6 +1,7 @@
 package org.esa.nest.dataio.terrasarx;
 
 import org.esa.beam.dataio.dimap.FileImageInputStreamExtImpl;
+import org.esa.beam.dataio.dimap.FileImageInputStreamExt;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.nest.dataio.ImageIOFile;
 import org.esa.nest.dataio.ReaderUtils;
@@ -122,9 +123,9 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks,
                 imageRaster.getAttributeDouble("rangeLooks", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines,
-                imageRaster.getAttributeInt("numberOfRows", defInt));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
                 imageRaster.getAttributeInt("numberOfColumns", defInt));
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_samples_per_line,
+                imageRaster.getAttributeInt("numberOfRows", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(product));
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
