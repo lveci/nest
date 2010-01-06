@@ -13,6 +13,7 @@ import org.esa.nest.dataio.ceos.CeosHelper;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.util.Constants;
 
 import java.io.File;
 import java.io.IOException;
@@ -255,9 +256,8 @@ class JERSProductDirectory extends CEOSProductDirectory {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.radar_frequency,
                     sceneRec.getAttributeDouble("Radar frequency") * 1000.0);
             final double slantRangeTime = sceneRec.getAttributeDouble("Zero-doppler range time of first range pixel")*0.001; //s
-            final double lightSpeed = 299792458.0; //  m / s
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
-                    slantRangeTime*lightSpeed*0.5);
+                    slantRangeTime* Constants.lightSpeed*0.5);
 
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_sampling_rate,
                     sceneRec.getAttributeDouble("Range sampling rate"));

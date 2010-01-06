@@ -14,6 +14,7 @@ import org.esa.nest.datamodel.Unit;
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteOrder;
 
 /**
  * The product reader for TerraSarX products.
@@ -109,41 +110,44 @@ class TerraSarXProductReader extends AbstractProductReader {
                                           int sourceStepX, int sourceStepY, Band destBand, int destOffsetX,
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
+        try {
+            final ImageIOFile.BandInfo bandInfo = _dataDir.getBandInfo(destBand);
+            if(bandInfo != null && bandInfo.img != null) {
+                bandInfo.img.readImageIORasterBand(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceStepX, sourceStepY,
+                        destBuffer, destOffsetX, destOffsetY, destWidth, destHeight,
+                        pm, bandInfo.imageID);
+            } else {
+                boolean oneOfTwo = true;
+                if(destBand.getUnit().equals(Unit.IMAGINARY))
+                    oneOfTwo = false;
 
-        final ImageIOFile.BandInfo bandInfo = _dataDir.getBandInfo(destBand);
-        if(bandInfo != null && bandInfo.img != null) {
-            bandInfo.img.readImageIORasterBand(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceStepX, sourceStepY,
-                    destBuffer, destOffsetX, destOffsetY, destWidth, destHeight,
-                    pm, bandInfo.imageID);
-        } else {
-            boolean oneOfTwo = true;
-            if(destBand.getUnit().equals(Unit.IMAGINARY))
-                oneOfTwo = false;
+                readBandRasterDataSLCShort(sourceOffsetX, sourceOffsetY,
+                                                 sourceWidth, sourceHeight,
+                                                 sourceStepX, sourceStepY,
+                                                 0, destBand.getSceneRasterHeight(), destWidth, destHeight, destBuffer,
+                                                 oneOfTwo, _dataDir.getCosarImageInputStream(destBand), pm);
+            }
+        } catch(Exception e) {
             
-            readBandRasterDataSLCShort(sourceOffsetX, sourceOffsetY,
-                                             sourceWidth, sourceHeight,
-                                             sourceStepX, sourceStepY,
-                                             0, destBand.getSceneRasterWidth(), destWidth,  destBuffer,
-                                             oneOfTwo, _dataDir.getCosarImageInputStream(destBand), pm);
         }
     }
 
-    
-    private static void readBandRasterDataSLCShort(final int sourceOffsetX, final int sourceOffsetY,
+    private static synchronized void readBandRasterDataSLCShort(final int sourceOffsetX, final int sourceOffsetY,
                                       final int sourceWidth, final int sourceHeight,
                                       final int sourceStepX, final int sourceStepY,
                                       final int imageStartOffset, int imageRecordLength,
-                                      final int destWidth, final ProductData destBuffer, boolean oneOf2,
+                                      final int destWidth, final int destHeight, final ProductData destBuffer, boolean oneOf2,
                                       final ImageInputStream iiStream, final ProgressMonitor pm)
                                         throws IOException
     {
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 4;
         final long xpos = imageStartOffset + x;
-
+        iiStream.setByteOrder(ByteOrder.BIG_ENDIAN);
+        
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
         try {
-            final short[] srcLine = new short[sourceWidth * 2];
+            final short[] srcLine = new short[sourceWidth*2];
             final short[] destLine = new short[destWidth];
             for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
@@ -171,5 +175,5 @@ class TerraSarXProductReader extends AbstractProductReader {
         } finally {
             pm.done();
         }
-    }
+    }   
 }

@@ -114,6 +114,8 @@ class CosmoSkymedReader extends AbstractProductReader {
         addBandsToProduct(rasterVariables);
         addTiePointGridsToProduct(tiePointGridVariables);
         addGeoCodingToProduct(rasterDim);
+        addSlantRangeToFirstPixel();
+
         product.setModified(false);
 
         return product;
@@ -258,12 +260,12 @@ class CosmoSkymedReader extends AbstractProductReader {
         if(s01Elem != null) {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
                 s01Elem.getAttributeDouble("PRF", defInt));
-           AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
                 s01Elem.getAttributeString("Polarisation", defStr));
         }
         final MetadataElement s02Elem = globalElem.getElement("S02");
         if(s02Elem != null) {
-           AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds2_tx_rx_polar,
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds2_tx_rx_polar,
                 s02Elem.getAttributeString("Polarisation", defStr));
         }
 
@@ -275,6 +277,16 @@ class CosmoSkymedReader extends AbstractProductReader {
 
         addOrbitStateVectors(absRoot, globalElem);
         addSRGRCoefficients(absRoot, globalElem);
+    }
+
+    private void addSlantRangeToFirstPixel() {
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        final MetadataElement bandElem = getBandElement(product.getBandAt(0));
+        if(bandElem != null) {
+            final double slantRangeTime = bandElem.getAttributeDouble("Zero Doppler Range First Time", 0); //s
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
+                slantRangeTime*Constants.lightSpeed*0.5);
+        }
     }
 
     private void addOrbitStateVectors(final MetadataElement absRoot, final MetadataElement globalElem) {

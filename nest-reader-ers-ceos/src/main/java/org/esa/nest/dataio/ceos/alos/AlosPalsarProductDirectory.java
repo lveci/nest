@@ -418,7 +418,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
     private static double getRadarFrequency(BaseRecord sceneRec) {
         final double wavelength = sceneRec.getAttributeDouble("Radar wavelength");
-        return (299792458.0 / wavelength) / 1000000;  // MHz
+        return (Constants.lightSpeed / wavelength) / Constants.oneMillion; // MHz
     }
 
     private int isGroundRange() {
