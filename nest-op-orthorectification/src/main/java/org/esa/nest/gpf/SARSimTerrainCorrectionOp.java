@@ -382,11 +382,14 @@ public class SARSimTerrainCorrectionOp extends Operator {
      */
     private void computeDEMTraversalSampleInterval() {
 
+        /*
         double mapW = imageGeoBoundary.lonMax - imageGeoBoundary.lonMin;
         double mapH = imageGeoBoundary.latMax - imageGeoBoundary.latMin;
 
         delLat = Math.min(mapW / sourceImageWidth, mapH / sourceImageHeight);
         delLon = delLat;
+        */
+
         /*
         double spacing = 0.0;
         if (pixelSpacing > 0.0) {
@@ -398,7 +401,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 spacing = Math.min(rangeSpacing/Math.sin(getIncidenceAngleAtCentreRangePixel(sourceProduct)), azimuthSpacing);
             }
         }
-
+        */
+        double spacing = pixelSpacing;
         double minAbsLat;
         if (imageGeoBoundary.latMin*imageGeoBoundary.latMax > 0) {
             minAbsLat = Math.min(Math.abs(imageGeoBoundary.latMin),
@@ -410,7 +414,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
         delLon = spacing / (Constants.MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
         delLat = Math.min(delLat, delLon);
         delLon = delLat;
-        */
     }
 
     /**
@@ -499,7 +502,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * Create target product.
      * @throws OperatorException The exception.
      */
-    private void createTargetProduct() throws OperatorException, IOException {
+    private void createTargetProduct() throws OperatorException, IOException, Exception {
 
         final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(
                                                 sourceProduct,
@@ -507,8 +510,33 @@ public class SARSimTerrainCorrectionOp extends Operator {
                                                 0.0,
                                                 sourceProduct.getBandAt(0).getNoDataValue());
 
-        targetProduct = ProductProjectionBuilder.createProductProjection(sourceProduct, false, false, mapInfo,
-                                                                  sourceProduct.getName() + PRODUCT_SUFFIX, "");
+//        if (Double.compare(pixelSpacing, RangeDopplerGeocodingOp.getPixelSpacing(sourceProduct)) != 0) {
+        if (pixelSpacing > 0.0) {
+            RangeDopplerGeocodingOp.computeImageGeoBoundary(sourceProduct, projectionName, imageGeoBoundary);
+            computeDEMTraversalSampleInterval();
+            mapInfo.setPixelSizeX((float)delLat);
+            mapInfo.setPixelSizeY((float)delLon);
+
+            final Dimension outputRasterSize = ProductUtils.getOutputRasterSize(
+                    sourceProduct, null, mapInfo.getMapProjection().getMapTransform(), (float)delLat, (float)delLon);
+            mapInfo.setSceneWidth(outputRasterSize.width);
+            mapInfo.setSceneHeight(outputRasterSize.height);
+            mapInfo.setPixelX(0.5f*outputRasterSize.width);
+            mapInfo.setPixelY(0.5f*outputRasterSize.height);
+            mapInfo.setSceneSizeFitted(true);
+
+        } else {
+            delLat = mapInfo.getPixelSizeX();
+            delLon = mapInfo.getPixelSizeY();
+        }
+
+        targetProduct = ProductProjectionBuilder.createProductProjection(
+                                                sourceProduct,
+                                                false,
+                                                false,
+                                                mapInfo,
+                                                sourceProduct.getName() + PRODUCT_SUFFIX,
+                                                "");
 
         targetImageWidth = targetProduct.getSceneRasterWidth();
         targetImageHeight = targetProduct.getSceneRasterHeight();
@@ -747,8 +775,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         // map projection too
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.geo_ref_system, "WGS84");
-//        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lat_pixel_res, delLat);
-//        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lon_pixel_res, delLon);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lat_pixel_res, delLat);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lon_pixel_res, delLon);
     }
 
     private void computeWARPFunction() {
