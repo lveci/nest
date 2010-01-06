@@ -255,6 +255,9 @@ public abstract class CEOSProductDirectory {
         float second = ((float)minutesf - minute) * 60f;
 
         final double interval = platformPosRec.getAttributeDouble("Time interval between DATA points");
+        if (interval <= 0.0) {
+            System.out.println("CEOSProductDirectory: Time interval between DATA points in Platform Position Data is " + interval);
+        }
         second += interval * (num-1);
 
         return AbstractMetadata.parseUTC(String.valueOf(year)+'-'+month+'-'+day+' '+
