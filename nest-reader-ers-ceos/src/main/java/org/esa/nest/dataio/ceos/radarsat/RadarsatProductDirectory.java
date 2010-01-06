@@ -426,7 +426,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             final MetadataElement orbitVectorListElem = absRoot.getElement(AbstractMetadata.orbit_state_vectors);
             final int numPoints = platformPosRec.getAttributeInt("Number of data points");
             final double theta = platformPosRec.getAttributeDouble("Greenwich mean hour angle");
-
+            /*
             final double firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
             final double lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD();
             int startIdx = 0;
@@ -443,9 +443,9 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             }
             startIdx = Math.max(startIdx - 1, 1);
             endIdx = Math.min(endIdx+1, numPoints);
-    
-            for(int i=startIdx; i <= endIdx; ++i) {
-                addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, theta, i, startIdx);
+            */
+            for(int i = 1; i <= numPoints; ++i) {
+                addVector(AbstractMetadata.orbit_vector, orbitVectorListElem, platformPosRec, theta, i);
             }
 
             if(absRoot.getAttributeUTC(AbstractMetadata.STATE_VECTOR_TIME, new ProductData.UTC(0)).
@@ -460,17 +460,17 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
     }
 
     private static void addVector(String name, MetadataElement orbitVectorListElem,
-                                  BaseRecord platformPosRec, double theta, int num, int startIdx) {
+                                  BaseRecord platformPosRec, double theta, int num) {
 
-        final MetadataElement orbitVectorElem = new MetadataElement(name+(num-startIdx+1));
+        final MetadataElement orbitVectorElem = new MetadataElement(name + num);
 
-        final double xPosECI = platformPosRec.getAttributeDouble("Position vector X "+num);
-        final double yPosECI = platformPosRec.getAttributeDouble("Position vector Y "+num);
-        final double zPosECI = platformPosRec.getAttributeDouble("Position vector Z "+num);
+        final double xPosECI = platformPosRec.getAttributeDouble("Position vector X " + num);
+        final double yPosECI = platformPosRec.getAttributeDouble("Position vector Y " + num);
+        final double zPosECI = platformPosRec.getAttributeDouble("Position vector Z " + num);
 
-        final double xVelECI = platformPosRec.getAttributeDouble("Velocity vector X' "+num);
-        final double yVelECI = platformPosRec.getAttributeDouble("Velocity vector Y' "+num);
-        final double zVelECI = platformPosRec.getAttributeDouble("Velocity vector Z' "+num);
+        final double xVelECI = platformPosRec.getAttributeDouble("Velocity vector X' " + num);
+        final double yVelECI = platformPosRec.getAttributeDouble("Velocity vector Y' " + num);
+        final double zVelECI = platformPosRec.getAttributeDouble("Velocity vector Z' " + num);
 
         final double thetaInRd = theta*MathUtils.DTOR;
         final double cosTheta = Math.cos(thetaInRd);
@@ -660,10 +660,11 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         final int gridHeight = 11;
         final float[] targetLatTiePoints = new float[gridWidth*gridHeight];
         final float[] targetLonTiePoints = new float[gridWidth*gridHeight];
-        final int sourceImageWidth = product.getSceneRasterHeight();
+        final int sourceImageWidth = product.getSceneRasterWidth();
+        final int sourceImageHeight = product.getSceneRasterHeight();
 
-        final float subSamplingX = product.getSceneRasterWidth() / (float)(gridWidth - 1);
-        final float subSamplingY = sourceImageWidth / (float)(gridHeight - 1);
+        final float subSamplingX = sourceImageWidth / (float)(gridWidth - 1);
+        final float subSamplingY = sourceImageHeight / (float)(gridHeight - 1);
 
         final TiePointGrid slantRangeTime = product.getTiePointGrid("slant_range_time");
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
@@ -689,17 +690,27 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         int endIdx = 0;
         for (int i = 0; i < numVectors; i++) {
             double time = orbitStateVectors[i].time_mjd;
-            if (time < firstLineUTC) {
-                startIdx = i;
-            }
+            if (lineTimeInterval > 0) {
+                if (time < firstLineUTC) {
+                    startIdx = i;
+                }
 
-            if (time < lastLineUTC) {
-                endIdx = i;
+                if (time < lastLineUTC) {
+                    endIdx = i;
+                }
+            } else {
+                if (time > firstLineUTC) {
+                    startIdx = i;
+                }
+
+                if (time > lastLineUTC) {
+                    endIdx = i;
+                }
             }
         }
         startIdx = Math.max(startIdx - 1, 0);
-        endIdx = Math.min(endIdx + 1, numVectors-1);
-        final int numVectorsUsed = endIdx - startIdx + 1;
+        endIdx = Math.min(endIdx + 1, numVectors - 1);
+        final int numVectorsUsed = Math.abs(endIdx - startIdx) + 1;
 
         final double[] timeArray = new double[numVectorsUsed];
         final double[] xPosArray = new double[numVectorsUsed];
@@ -725,7 +736,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             // get the zero Doppler time for the rth line
             int y;
             if (r == gridHeight - 1) { // last row
-                y = product.getSceneRasterHeight() - 1;
+                y = sourceImageHeight - 1;
             } else { // other rows
                 y = (int)(r * subSamplingY);
             }
