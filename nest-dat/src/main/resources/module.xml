@@ -199,6 +199,20 @@
             <helpID>productGrabber</helpID>
       </action>
 
+      <action>
+            <parent>file</parent>
+            <id>createSubset</id>
+            <class>org.esa.beam.visat.actions.NewAction</class>
+            <text>Create Subset</text>
+            <shortDescr>Create a new Subset data product.</shortDescr>
+            <description>Create a new Subset data product.</description>
+            <smallIcon>icons/New16.gif</smallIcon>
+            <largeIcon>icons/New24.gif</largeIcon>
+            <helpId>new</helpId>
+            <context>product</context>
+            <placeAfter>openRaster</placeAfter>
+      </action>
+
       <!--action>
             <id>openVector</id>
             <class>org.esa.nest.dat.actions.OpenVectorAction</class>
