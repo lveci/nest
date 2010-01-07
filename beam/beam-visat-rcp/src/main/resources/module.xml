@@ -337,21 +337,6 @@
             <initSide>SOUTH</initSide>
             <initIndex>0</initIndex>
         </toolView>
--->
-        <toolView>
-            <id>org.esa.beam.visat.toolviews.mask.MaskManagerToolView</id>
-            <class>org.esa.beam.visat.toolviews.mask.MaskManagerToolView</class>
-            <title>Mask / ROI Manager</title>
-            <mnemonic>M</mnemonic>
-            <accelerator>ctrl alt M</accelerator>
-            <description>Manage binary data masks and ROIs.</description>
-            <smallIcon>/org/esa/beam/resources/images/icons/MaskManager16.png</smallIcon>
-            <largeIcon>/org/esa/beam/resources/images/icons/MaskManager24.png</largeIcon>
-            <helpId>showMaskManagerWnd</helpId>
-            <initState>HIDDEN</initState>
-            <initSide>SOUTH</initSide>
-            <initIndex>0</initIndex>
-        </toolView>
 
         <toolView>
             <id>org.esa.beam.visat.toolviews.mask.MaskViewerToolView</id>
@@ -363,6 +348,22 @@
             <smallIcon>/org/esa/beam/resources/images/icons/BitmaskOverlay16.png</smallIcon>
             <largeIcon>/org/esa/beam/resources/images/icons/BitmaskOverlay24.png</largeIcon>
             <helpId>showMaskOverlayWnd</helpId>
+            <initState>HIDDEN</initState>
+            <initSide>SOUTH</initSide>
+            <initIndex>0</initIndex>
+        </toolView>
+        
+-->
+        <toolView>
+            <id>org.esa.beam.visat.toolviews.mask.MaskManagerToolView</id>
+            <class>org.esa.beam.visat.toolviews.mask.MaskManagerToolView</class>
+            <title>Mask / ROI Manager</title>
+            <mnemonic>M</mnemonic>
+            <accelerator>ctrl alt M</accelerator>
+            <description>Manage binary data masks and ROIs.</description>
+            <smallIcon>/org/esa/beam/resources/images/icons/MaskManager16.png</smallIcon>
+            <largeIcon>/org/esa/beam/resources/images/icons/MaskManager24.png</largeIcon>
+            <helpId>showMaskManagerWnd</helpId>
             <initState>HIDDEN</initState>
             <initSide>SOUTH</initSide>
             <initIndex>0</initIndex>
@@ -674,14 +675,14 @@
         <!--####################-->
 
         <action>
-            <id>importShape</id>
-            <class>org.esa.beam.visat.actions.ImportShapeAction</class>
+            <id>importGeometry</id>
+            <class>org.esa.beam.visat.actions.ImportGeometryAction</class>
             <parent>import</parent>
-            <text>Import Shape...</text>
+            <text>Import Geometry...</text>
             <mnemonic>S</mnemonic>
-            <shortDescr>Import shape from plain text or ESRI shapefile.</shortDescr>
-            <description>Import shape from plain text or ESRI shapefile.</description>
-            <helpId>importShape</helpId>
+            <shortDescr>Import geometry from plain text or ESRI shapefile.</shortDescr>
+            <description>Import geometry from plain text or ESRI shapefile.</description>
+            <helpId>importGeometry</helpId>
             <separatorAfter>true</separatorAfter>
         </action>
 
@@ -695,7 +696,7 @@
             <shortDescr>Import a BEAM-DIMAP data product or product subset.</shortDescr>
             <description>Import a BEAM-DIMAP data product or product subset.</description>
             <helpId>importDimapProduct</helpId>
-            <placeAfter>importShape</placeAfter>
+            <placeAfter>importGeometry</placeAfter>
         </action>
 
         <!--####################-->
@@ -768,14 +769,14 @@
 
         <action>
             <parent>export</parent>
-            <id>exportROIPixels</id>
-            <class>org.esa.beam.visat.actions.ExportROIPixelsAction</class>
-            <text>Export ROI-Mask Pixels...</text>
+            <id>exportMaskPixels</id>
+            <class>org.esa.beam.visat.actions.ExportMaskPixelsAction</class>
+            <text>Export Mask Pixels...</text>
             <mnemonic>R</mnemonic>
-            <shortDescr>Export the pixels of a ROI-Mask.</shortDescr>
-            <description>Export the pixels of a ROI_mask as tab-separated text.</description>
+            <shortDescr>Export the pixels of a Mask.</shortDescr>
+            <description>Export the pixels of a mask as tab-separated text.</description>
             <accelerator>shift control P</accelerator>
-            <helpId>exportROIPixels</helpId>
+            <helpId>exportMaskPixels</helpId>
         </action>
 
         <action>
@@ -786,7 +787,7 @@
             <mnemonic>T</mnemonic>
             <shortDescr>Export transect pixels.</shortDescr>
             <description>Export transect pixels as tab-separated text.</description>
-            <helpId>exportEnviGcpFile</helpId>
+            <helpId>exportTransectPixels</helpId>
         </action>
 
         <action>
@@ -855,11 +856,11 @@
 
         <action>
             <parent>data</parent>
-            <id>computeRoiArea</id>
-            <class>org.esa.beam.visat.actions.ComputeRoiAreaAction</class>
-            <text>Compute ROI-Mask Area...</text>
+            <id>computeMaskArea</id>
+            <class>org.esa.beam.visat.actions.ComputeMaskAreaAction</class>
+            <text>Compute Mask Area...</text>
             <mnemonic>A</mnemonic>
-            <helpId>computeRoiArea</helpId>
+            <helpId>computeMaskArea</helpId>
         </action>
 
         <action>
@@ -963,7 +964,7 @@
             <id>showToolViews</id>
             <class>org.esa.beam.visat.actions.ActionGroup</class>
             <separatorBefore>true</separatorBefore>
-            <placeAfter>computeRoiArea</placeAfter>
+            <placeAfter>computeMaskArea</placeAfter>
             <placeBefore>toolBars</placeBefore>
             <text>Tool Windows</text>
         </action>
@@ -1165,8 +1166,6 @@
             <shortDescr>Open transect profile plot dialog.</shortDescr>
             <description>Open transect profile plot dialog.</description>
             <context>band,tiePointGrid</context>
-            <smallIcon></smallIcon>
-            <largeIcon></largeIcon>
             <helpId>profilePlotDialog</helpId>
         </action>
 
@@ -1180,26 +1179,23 @@
             <shortDescr>Open transect coordinate list dialog.</shortDescr>
             <description>Open transect coordinate list dialog.</description>
             <context>band,tiePointGrid</context>
-            <smallIcon></smallIcon>
-            <largeIcon></largeIcon>
             <helpId>coordinateListDialog</helpId>
         </action>
 
         <action>
-            <parent>tools</parent>
             <id>bandArithmetic</id>
+            <parent>tools</parent>
             <class>org.esa.beam.visat.actions.BandArithmeticAction</class>
-            <placeBefore>projection</placeBefore>
-            <text>Band Arithmetic...</text>
-            <shortDescr>Apply Band Arithmetic</shortDescr>
+            <text>Create Band from Expression...</text>
+            <shortDescr>Create a band using a arithmetic expression</shortDescr>
             <context>band,tiePointGrid</context>
-            <separatorBefore>true</separatorBefore>
-            <separatorAfter>false</separatorAfter>
             <smallIcon>icons/BAritmethic16.gif</smallIcon>
             <largeIcon>icons/BAritmethic24.gif</largeIcon>
+            <placeBefore>createElevationBand</placeBefore>
             <helpId>bandArithmetic</helpId>
         </action>
 
+<!--
         <action>
             <id>projection</id>
             <class>org.esa.beam.visat.actions.ProjectionAction</class>
@@ -1219,57 +1215,7 @@
             <shortDescr>Apply Orthorectification</shortDescr>
             <helpId>orthorectification</helpId>
         </action>
-
-        <action>
-            <id>flipping</id>
-            <class>org.esa.beam.visat.actions.FlippingAction</class>
-            <parent>tools</parent>
-            <placeAfter>projection</placeAfter>
-            <text>Data Flip...</text>
-            <shortDescr>Apply Data Flip</shortDescr>
-            <helpId>flipDialog</helpId>
-        </action>
-
-        <action>
-            <id>attachPixelGeoCoding</id>
-            <class>org.esa.beam.visat.actions.AttachPixelGeoCodingAction</class>
-            <text>Attach Pixel Geo-Coding...</text>
-            <shortDescr>Attaches a pixel based geo-coding</shortDescr>
-            <description>Attaches a pixel based geo-coding to the selected product</description>
-            <context>attachPixelGeoCoding</context>
-            <helpId>attachPixelGeoCoding</helpId>
-            <parent>tools</parent>
-            <placeAfter>flipping</placeAfter>
-            <placeBefore>detachPixelGeoCoding</placeBefore>
-            <separatorBefore>true</separatorBefore>
-        </action>
-
-        <action>
-            <id>detachPixelGeoCoding</id>
-            <class>org.esa.beam.visat.actions.DetachPixelGeoCodingAction</class>
-            <text>Detach Pixel Geo-Coding...</text>
-            <shortDescr>Detaches a pixel based geo-coding</shortDescr>
-            <description>Detaches a pixel based geo-coding from the selected product</description>
-            <context>detachPixelGeoCoding</context>
-            <helpId>detachPixelGeoCoding</helpId>
-            <parent>tools</parent>
-            <placeAfter>attachPixelGeoCoding</placeAfter>
-            <separatorAfter>true</separatorAfter>
-        </action>
-
-        <action>
-            <id>createSubsetFromView</id>
-            <class>org.esa.beam.visat.actions.CreateSubsetFromViewAction</class>
-            <text>Create Subset from View...</text>
-            <shortDescr>Creates a product subset from the selected view</shortDescr>
-            <description>Creates a product subset from the selected view by preselecting the subset area from view</description>
-            <context>image</context>
-            <helpId>subsetFromView</helpId>
-            <parent>tools</parent>
-            <placeAfter>detachPixelGeoCoding</placeAfter>
-            <placeBefore>createElevationBand</placeBefore>
-            <separatorBefore>true</separatorBefore>
-        </action>
+-->
 
         <action>
             <id>createElevationBand</id>
@@ -1280,8 +1226,8 @@
             <context>product</context>
             <helpId>createElevationBand</helpId>
             <parent>tools</parent>
-            <placeAfter>createSubsetFromView</placeAfter>
-            <separatorBefore>createAsarNrcsBands</separatorBefore>
+            <placeBefore>createAsarNrcsBands</placeBefore>
+            <placeAfter>bandArithmetic</placeAfter>
         </action>
 <!--
         <action>
@@ -1333,8 +1279,61 @@
             <context>product</context>
             <parent>tools</parent>
             <placeAfter>createFilteredBand</placeAfter>
+            <placeBefore>attachPixelGeoCoding</placeBefore>
             <separatorAfter>true</separatorAfter>
         </action>
+
+        <action>
+            <id>attachPixelGeoCoding</id>
+            <class>org.esa.beam.visat.actions.AttachPixelGeoCodingAction</class>
+            <text>Attach Pixel Geo-Coding...</text>
+            <shortDescr>Attaches a pixel based geo-coding</shortDescr>
+            <description>Attaches a pixel based geo-coding to the selected product</description>
+            <context>attachPixelGeoCoding</context>
+            <helpId>attachPixelGeoCoding</helpId>
+            <parent>tools</parent>
+            <placeAfter>createVectorDataNode</placeAfter>
+            <placeBefore>detachPixelGeoCoding</placeBefore>
+            <separatorBefore>true</separatorBefore>
+        </action>
+
+        <action>
+            <id>detachPixelGeoCoding</id>
+            <class>org.esa.beam.visat.actions.DetachPixelGeoCodingAction</class>
+            <text>Detach Pixel Geo-Coding...</text>
+            <shortDescr>Detaches a pixel based geo-coding</shortDescr>
+            <description>Detaches a pixel based geo-coding from the selected product</description>
+            <context>detachPixelGeoCoding</context>
+            <helpId>detachPixelGeoCoding</helpId>
+            <parent>tools</parent>
+            <placeAfter>attachPixelGeoCoding</placeAfter>
+            <separatorAfter>true</separatorAfter>
+        </action>
+
+        <action>
+            <id>createSubsetFromView</id>
+            <class>org.esa.beam.visat.actions.CreateSubsetFromViewAction</class>
+            <text>Spatial Subset from View...</text>
+            <shortDescr>Creates a product subset from the selected view</shortDescr>
+            <description>Creates a product subset from the selected view by preselecting the subset area from view</description>
+            <context>image</context>
+            <helpId>subsetFromView</helpId>
+            <parent>tools</parent>
+            <placeAfter>detachPixelGeoCoding</placeAfter>
+            <placeBefore>flipping</placeBefore>
+        </action>
+
+        <action>
+            <id>flipping</id>
+            <class>org.esa.beam.visat.actions.FlippingAction</class>
+            <parent>tools</parent>
+            <placeAfter>createSubsetFromView</placeAfter>
+            <placeBefore>reprojectionAction</placeBefore>
+            <text>Data Flip...</text>
+            <shortDescr>Apply Data Flip</shortDescr>
+            <helpId>flipDialog</helpId>
+        </action>
+
 
         <action>
             <id>helpTopics</id>

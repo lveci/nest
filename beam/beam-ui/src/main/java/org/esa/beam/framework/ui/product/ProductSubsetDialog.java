@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetDialog.java,v 1.3 2009-12-07 21:39:44 lveci Exp $
+ * $Id: ProductSubsetDialog.java,v 1.4 2010-01-07 16:40:00 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -29,15 +29,7 @@ import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
 import com.bc.jexp.ParseException;
 import com.bc.jexp.Term;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.Mask;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductNode;
-import org.esa.beam.framework.datamodel.ProductNodeGroup;
-import org.esa.beam.framework.datamodel.RasterDataNode;
-import org.esa.beam.framework.datamodel.TiePointGrid;
-import org.esa.beam.framework.datamodel.VirtualBand;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.barithm.BandArithmetic;
 import org.esa.beam.framework.dataop.barithm.RasterDataSymbol;
 import org.esa.beam.framework.param.ParamChangeEvent;
@@ -494,6 +486,10 @@ public class ProductSubsetDialog extends ModalDialog {
         private Parameter paramY2;
         private Parameter paramSX;
         private Parameter paramSY;
+        private Parameter paramLat1;
+        private Parameter paramLon1;
+        private Parameter paramLat2;
+        private Parameter paramLon2;
 
         private SliderBoxImageDisplay imageCanvas;
         private JCheckBox fixSceneWidthCheck;
@@ -617,42 +613,64 @@ public class ProductSubsetDialog extends ModalDialog {
                                     gbc, "gridx=1,gridy=5");
 
             GridBagUtils.setAttributes(gbc, "insets.top=4");
-            GridBagUtils.addToPanel(textInputPane, new JLabel("Subset scene width:"),
+            GridBagUtils.addToPanel(textInputPane, new JLabel("Scene start Lat:"),
                                     gbc, "gridx=0,gridy=6");/*I18N*/
-            GridBagUtils.addToPanel(textInputPane, subsetWidthLabel,
+            GridBagUtils.addToPanel(textInputPane, UIUtils.createSpinner(paramLat1, 0.0001, "#0.000000"),
                                     gbc, "gridx=1,gridy=6");
+            GridBagUtils.setAttributes(gbc, "insets.top=0");
+            GridBagUtils.addToPanel(textInputPane, new JLabel("Scene start Lon:"),
+                                    gbc, "gridx=0,gridy=7");/*I18N*/
+            GridBagUtils.addToPanel(textInputPane, UIUtils.createSpinner(paramLon1, 0.0001, "#0.000000"),
+                                    gbc, "gridx=1,gridy=7");
+
+            GridBagUtils.setAttributes(gbc, "insets.top=4");
+            GridBagUtils.addToPanel(textInputPane, new JLabel("Scene end Lat:"),
+                                    gbc, "gridx=0,gridy=8");/*I18N*/
+            GridBagUtils.addToPanel(textInputPane, UIUtils.createSpinner(paramLat2, 0.0001, "#0.000000"),
+                                    gbc, "gridx=1,gridy=8");
+            GridBagUtils.setAttributes(gbc, "insets.top=0");
+            GridBagUtils.addToPanel(textInputPane, new JLabel("Scene end Lon:"),
+                                    gbc, "gridx=0,gridy=9");/*I18N*/
+            GridBagUtils.addToPanel(textInputPane, UIUtils.createSpinner(paramLon2, 0.0001, "#0.000000"),
+                                    gbc, "gridx=1,gridy=9");
+
+            GridBagUtils.setAttributes(gbc, "insets.top=4");
+            GridBagUtils.addToPanel(textInputPane, new JLabel("Subset scene width:"),
+                                    gbc, "gridx=0,gridy=10");/*I18N*/
+            GridBagUtils.addToPanel(textInputPane, subsetWidthLabel,
+                                    gbc, "gridx=1,gridy=10");
 
             GridBagUtils.setAttributes(gbc, "insets.top=0");
             GridBagUtils.addToPanel(textInputPane, new JLabel("Subset scene height:"),
-                                    gbc, "gridx=0,gridy=7");/*I18N*/
+                                    gbc, "gridx=0,gridy=11");/*I18N*/
             GridBagUtils.addToPanel(textInputPane, subsetHeightLabel,
-                                    gbc, "gridx=1,gridy=7");
+                                    gbc, "gridx=1,gridy=11");
 
             GridBagUtils.setAttributes(gbc, "insets.top=4,gridwidth=1");
             GridBagUtils.addToPanel(textInputPane, new JLabel("Source scene width:"),
-                                    gbc, "gridx=0,gridy=8");/*I18N*/
+                                    gbc, "gridx=0,gridy=12");/*I18N*/
             GridBagUtils.addToPanel(textInputPane, new JLabel(String.valueOf(product.getSceneRasterWidth()),
                                                               JLabel.RIGHT),
-                                    gbc, "gridx=1,gridy=8");
+                                    gbc, "gridx=1,gridy=12");
 
             GridBagUtils.setAttributes(gbc, "insets.top=0");
             GridBagUtils.addToPanel(textInputPane, new JLabel("Source scene height:"),
-                                    gbc, "gridx=0,gridy=9");/*I18N*/
+                                    gbc, "gridx=0,gridy=13");/*I18N*/
             GridBagUtils.addToPanel(textInputPane, new JLabel(String.valueOf(product.getSceneRasterHeight()),
                                                               JLabel.RIGHT),
-                                    gbc, "gridx=1,gridy=9");
+                                    gbc, "gridx=1,gridy=13");
 
             GridBagUtils.setAttributes(gbc, "insets.top=7,gridwidth=1, gridheight=2");
             GridBagUtils.addToPanel(textInputPane, setToVisibleButton,
-                                    gbc, "gridx=0,gridy=10");
+                                    gbc, "gridx=0,gridy=14");
 
             GridBagUtils.setAttributes(gbc, "insets.top=7,gridwidth=1, gridheight=1");
             GridBagUtils.addToPanel(textInputPane, fixSceneWidthCheck,
-                                    gbc, "gridx=1,gridy=10");
+                                    gbc, "gridx=1,gridy=15");
 
             GridBagUtils.setAttributes(gbc, "insets.top=0,gridwidth=1");
             GridBagUtils.addToPanel(textInputPane, fixSceneHeightCheck,
-                                    gbc, "gridx=1,gridy=11");
+                                    gbc, "gridx=1,gridy=16");
 
             setLayout(new BorderLayout(7, 7));
             add(imageScrollPane, BorderLayout.WEST);
@@ -724,6 +742,51 @@ public class ProductSubsetDialog extends ModalDialog {
             paramY1.setValue(y1, null);
             paramX2.setValue(x2, null);
             paramY2.setValue(y2, null);
+
+            updateLatLon(x1, y1, x2, y2);
+        }
+
+        private void updateLatLon(final int x1, final int y1, final int x2, final int y2) {
+            final GeoCoding geoCoding = product.getGeoCoding();
+            if(geoCoding != null) {
+                final PixelPos pnt1 = new PixelPos(x1, y1);
+                final PixelPos pnt2 = new PixelPos(x2, y2);
+                final GeoPos geo1 = new GeoPos();
+                final GeoPos geo2 = new GeoPos();
+                geoCoding.getGeoPos(pnt1, geo1);
+                geoCoding.getGeoPos(pnt2, geo2);
+
+                paramLat1.setValue(geo1.getLat(), null);
+                paramLon1.setValue(geo1.getLon(), null);
+                paramLat2.setValue(geo2.getLat(), null);
+                paramLon2.setValue(geo2.getLon(), null);
+            }
+        }
+
+        private void updateXYFromLatLon() {
+            final GeoCoding geoCoding = product.getGeoCoding();
+            if(geoCoding != null) {
+                final PixelPos pnt1 = new PixelPos();
+                final PixelPos pnt2 = new PixelPos();
+                final GeoPos geo1 = new GeoPos(Float.valueOf(paramLat1.getValueAsText()),
+                                                Float.valueOf(paramLon1.getValueAsText()));
+                final GeoPos geo2 = new GeoPos(Float.valueOf(paramLat2.getValueAsText()),
+                                                Float.valueOf(paramLon2.getValueAsText()));
+                geoCoding.getPixelPos(geo1, pnt1);
+                geoCoding.getPixelPos(geo2, pnt2);
+
+                final int w = product.getSceneRasterWidth();
+                final int h = product.getSceneRasterHeight();
+                final int x1 = Math.min(w-1,(int)pnt1.getX());
+                final int y1 = Math.min(h-1,(int)pnt1.getY());
+                final int x2 = Math.min(w-1,(int)pnt2.getX());
+                final int y2 = Math.min(h-1,(int)pnt2.getY());
+
+                paramX1.setValue(Math.max(0, x1), null);
+                paramY1.setValue(Math.max(0, y1), null);
+                paramX2.setValue(Math.max(0, x2), null);
+                paramY2.setValue(Math.max(0, y2), null);
+            }
         }
 
         /**
@@ -755,7 +818,14 @@ public class ProductSubsetDialog extends ModalDialog {
          */
         @Override
         public void parameterValueChanged(ParamChangeEvent event) {
-            updateUIState();
+            if(event.getParameter() == paramLat1 ||
+               event.getParameter() == paramLon1 ||
+               event.getParameter() == paramLat2 ||
+               event.getParameter() == paramLon2) {
+                //updateXYFromLatLon();
+            } else {
+                updateUIState();
+            }
         }
 
         private void initParameters() {
@@ -822,6 +892,26 @@ public class ProductSubsetDialog extends ModalDialog {
             paramSY.getProperties().setMinValue(1);
             paramSY.getProperties().setMaxValue(h / hMin + 1);
 
+            final GeoCoding geoCoding = product.getGeoCoding();
+            if(geoCoding != null) {
+                final PixelPos pnt1 = new PixelPos(x1, y1);
+                final PixelPos pnt2 = new PixelPos(x2, y2);
+                final GeoPos geo1 = new GeoPos();
+                geoCoding.getGeoPos(pnt1, geo1);  
+                final GeoPos geo2 = new GeoPos();
+                geoCoding.getGeoPos(pnt2, geo2);
+
+                paramLat1 = new Parameter("source_lat1", geo1.getLat());
+                paramLon1 = new Parameter("source_lon1", geo1.getLon());
+                paramLat2 = new Parameter("source_lat2", geo2.getLat());
+                paramLon2 = new Parameter("source_lon2", geo2.getLon());
+            } else {
+                paramLat1 = new Parameter("source_lat1", 0);
+                paramLon1 = new Parameter("source_lon1", 0);
+                paramLat2 = new Parameter("source_lat2", 0);
+                paramLon2 = new Parameter("source_lon2", 0);
+            }
+
             ParamGroup pg = new ParamGroup();
             pg.addParameter(paramX1);
             pg.addParameter(paramY1);
@@ -829,6 +919,10 @@ public class ProductSubsetDialog extends ModalDialog {
             pg.addParameter(paramY2);
             pg.addParameter(paramSX);
             pg.addParameter(paramSY);
+            pg.addParameter(paramLat1);
+            pg.addParameter(paramLon1);
+            pg.addParameter(paramLat2);
+            pg.addParameter(paramLon2);
             pg.addParamChangeListener(this);
         }
 
@@ -839,6 +933,8 @@ public class ProductSubsetDialog extends ModalDialog {
             int y2 = ((Number) paramY2.getValue()).intValue();
             int sx = ((Number) paramSX.getValue()).intValue();
             int sy = ((Number) paramSY.getValue()).intValue();
+
+            updateLatLon(x1, y1, x2, y2);
 
             updateSubsetDefRegion(x1, y1, x2, y2, sx, sy);
 

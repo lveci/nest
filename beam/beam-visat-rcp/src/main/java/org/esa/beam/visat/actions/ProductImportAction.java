@@ -1,5 +1,5 @@
 /*
- * $Id: ProductImportAction.java,v 1.3 2009-11-04 17:04:32 lveci Exp $
+ * $Id: ProductImportAction.java,v 1.4 2010-01-07 16:40:00 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -61,7 +61,7 @@ import java.util.Iterator;
  * This action imports a product of the associated format.
  *
  * @author Marco Peters
- * @version $Revision: 1.3 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.4 $ $Date: 2010-01-07 16:40:00 $
  */
 public class ProductImportAction extends ExecCommand {
 
@@ -142,7 +142,7 @@ public class ProductImportAction extends ExecCommand {
 
         String placeAfter = getPlaceAfter();
         if (placeAfter == null) {
-            setPlaceAfter("importTransectData");
+            setPlaceAfter("importGeometry");
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: ProductTree.java,v 1.14 2009-12-22 17:30:01 lveci Exp $
+ * $Id: ProductTree.java,v 1.15 2010-01-07 16:40:00 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -72,7 +72,7 @@ import java.util.Set;import java.io.File;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.14 $ $Date: 2009-12-22 17:30:01 $
+ * @version $Revision: 1.15 $ $Date: 2010-01-07 16:40:00 $
  * @see org.esa.beam.framework.ui.product.ProductTreeListener
  * @see org.esa.beam.framework.datamodel.Product
  */
@@ -154,11 +154,18 @@ public class ProductTree extends JTree implements PopupMenuFactory {
         }
     }
 
+    public void expand(Object toExpand) {
+        final TreePath path = getTreePath(toExpand);
+        if (path != null) {
+            makeVisible(path);
+        }
+    }
+
     /**
      * Notifies this product tree, that a product scene view has opened.
      *
      * @param view The view.
-     * @deprecated since BEAM 4.7, use {@link #registerOpenedProductNodes(org.esa.beam.framework.datamodel.ProductNode[])} instead
+     * @deprecated since BEAM 4.7, use {@link #registerOpenedProductNodes(org.esa.beam.framework.datamodel.ProductNode...)} instead
      */
     @Deprecated
     public void sceneViewOpened(ProductSceneView view) {
@@ -169,7 +176,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
      * Notifies this product tree, that a product scene view has closed.
      *
      * @param view The view.
-     * @deprecated since BEAM 4.7, use {@link #deregisterOpenedProductNodes(org.esa.beam.framework.datamodel.ProductNode[])} instead
+     * @deprecated since BEAM 4.7, use {@link #deregisterOpenedProductNodes(org.esa.beam.framework.datamodel.ProductNode...)} instead
      */
     @Deprecated
     public void sceneViewClosed(ProductSceneView view) {
@@ -181,7 +188,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
      * Opened product nodes may be diffently displayed.
      *
      * @param nodes The products nodes which are in process.
-     * @see #registerActiveProductNodes(org.esa.beam.framework.datamodel.ProductNode[])
+     * @see #registerActiveProductNodes(org.esa.beam.framework.datamodel.ProductNode...)
      */
     public void registerOpenedProductNodes(ProductNode... nodes) {
         for (ProductNode node : nodes) {
@@ -199,7 +206,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
      * Opened product nodes may be diffently displayed.
      *
      * @param nodes The products nodes which are in process.
-     * @see #deregisterActiveProductNodes(org.esa.beam.framework.datamodel.ProductNode[])
+     * @see #deregisterActiveProductNodes(org.esa.beam.framework.datamodel.ProductNode...) 
      */
     public void deregisterOpenedProductNodes(ProductNode... nodes) {
         boolean changed = false;
@@ -277,11 +284,8 @@ public class ProductTree extends JTree implements PopupMenuFactory {
         DefaultMutableTreeNode productTreeNode = createProductTreeNode(product);
         rootNode.add(productTreeNode);
         getTreeModel().nodesWereInserted(rootNode, new int[]{rootNode.getIndex(productTreeNode)});
-//        final TreePath lastLeafPath = new TreePath(productTreeNode.getLastLeaf().getPath());
-//        makeVisible(lastLeafPath);
         final TreePath productTreeNodePath = new TreePath(productTreeNode.getPath());
         expandPath(productTreeNodePath);
-//        makeVisible(productTreeNodePath);
         scrollPathToVisible(productTreeNodePath);
         invalidate();
         doLayout();
@@ -343,6 +347,12 @@ public class ProductTree extends JTree implements PopupMenuFactory {
         this.commandUIFactory = commandUIFactory;
     }
 
+    /**
+     * This method does not have any effect.
+     * @param exceptionHandler is ignored
+     *
+     *@deprecated since BEAM 4.7, no replacement
+     */
     @Deprecated
     public void setExceptionHandler(ExceptionHandler exceptionHandler) {
     }
@@ -605,7 +615,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
         // Uncomment for debugging masks:
         // ImageIcon maskIcon;
 
-        public PTCellRenderer() {
+        private PTCellRenderer() {
             productIcon = UIUtils.loadImageIcon("icons/RsProduct16.gif");
             productIconModified = UIUtils.loadImageIcon("icons/RsProduct16-red.gif");
             productIconOrigFormat = UIUtils.loadImageIcon("icons/RsProduct16-yellow.gif");
@@ -666,7 +676,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
                 }
 
                 String text = productNode.getName();
-                final StringBuffer toolTipBuffer = new StringBuffer(32);
+                final StringBuilder toolTipBuffer = new StringBuilder(32);
 
                 final String prefix = productNode.getProductRefString();
                 if (prefix != null) {
@@ -777,7 +787,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
         }
     }
 
-    private static void addDN(Band band, StringBuffer toolTipBuffer) {
+    private static void addDN(Band band, StringBuilder toolTipBuffer) {
         final Product product = band.getProduct();
         final MetadataElement absRoot = product.getMetadataRoot().getElement("Abstracted_Metadata");
         boolean calibrated = false;

@@ -1,5 +1,5 @@
 /*
- * $Id: PopupMenuHandler.java,v 1.2 2009-05-15 12:46:55 lveci Exp $
+ * $Id: PopupMenuHandler.java,v 1.3 2010-01-07 16:40:00 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -40,7 +40,7 @@ import java.util.Comparator;
  * popup-menu is created by the <code>PopupMenuFactory</code> instance passed to the constructor of this class.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $  $Date: 2009-05-15 12:46:55 $
+ * @version $Revision: 1.3 $  $Date: 2010-01-07 16:40:00 $
  * @see PopupMenuFactory
  */
 public class PopupMenuHandler implements MouseListener, KeyListener {
@@ -127,8 +127,10 @@ public class PopupMenuHandler implements MouseListener, KeyListener {
         if (popupMenu == null) {
             popupMenu = _popupMenuFactory.createPopupMenu(event);
         }
-        rearrangeMenuItems(popupMenu);
-        UIUtils.showPopup(popupMenu, event);
+        if (popupMenu != null) {
+            rearrangeMenuItems(popupMenu);
+            UIUtils.showPopup(popupMenu, event);
+        }
     }
 
     private void rearrangeMenuItems(JPopupMenu popupMenu) {
