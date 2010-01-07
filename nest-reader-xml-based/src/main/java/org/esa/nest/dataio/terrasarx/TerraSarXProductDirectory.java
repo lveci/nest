@@ -249,9 +249,8 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         final Element numRows = getElement(imageRaster, "numberOfRows");
         final Element numColumns = getElement(imageRaster, "numberOfColumns");
 
-
-        final int width = Integer.parseInt(getElementText(numRows).getValue());
-        final int height = Integer.parseInt(getElementText(numColumns).getValue());
+        final int height = Integer.parseInt(getElementText(numRows).getValue());
+        final int width = Integer.parseInt(getElementText(numColumns).getValue());
         setSceneWidthHeight(width, height);
     }
 
@@ -338,8 +337,8 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
         if(!cosarFileList.isEmpty()) {
             final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-            final int width = absRoot.getAttributeInt(AbstractMetadata.num_samples_per_line, 0);
-            final int height = absRoot.getAttributeInt(AbstractMetadata.num_output_lines, 0);
+            final int height = absRoot.getAttributeInt(AbstractMetadata.num_samples_per_line, 0);
+            final int width = absRoot.getAttributeInt(AbstractMetadata.num_output_lines, 0);
 
             for (final File file : cosarFileList) {
 

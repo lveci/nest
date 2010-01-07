@@ -15,6 +15,7 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
 /**
  * The product reader for TerraSarX products.
@@ -124,7 +125,7 @@ class TerraSarXProductReader extends AbstractProductReader {
                 readBandRasterDataSLCShort(sourceOffsetX, sourceOffsetY,
                                                  sourceWidth, sourceHeight,
                                                  sourceStepX, sourceStepY,
-                                                 0, destBand.getSceneRasterHeight(), destWidth, destHeight, destBuffer,
+                                                 destWidth, destBuffer,
                                                  oneOfTwo, _dataDir.getCosarImageInputStream(destBand), pm);
             }
         } catch(Exception e) {
@@ -135,21 +136,36 @@ class TerraSarXProductReader extends AbstractProductReader {
     private static synchronized void readBandRasterDataSLCShort(final int sourceOffsetX, final int sourceOffsetY,
                                       final int sourceWidth, final int sourceHeight,
                                       final int sourceStepX, final int sourceStepY,
-                                      final int imageStartOffset, int imageRecordLength,
-                                      final int destWidth, final int destHeight, final ProductData destBuffer, boolean oneOf2,
+                                      final int destWidth, final ProductData destBuffer, boolean oneOf2,
                                       final ImageInputStream iiStream, final ProgressMonitor pm)
                                         throws IOException
     {
+        iiStream.seek(0);
+        final int bib = iiStream.readInt();
+        final int rsri = iiStream.readInt();
+        final int rs = iiStream.readInt();
+        final int as = iiStream.readInt();
+        final int bi = iiStream.readInt();
+        final int rtnb = iiStream.readInt();
+        final int tnl = iiStream.readInt();
+        //System.out.println("bib"+bib+" rsri"+rsri+" rs"+rs+" as"+as+" bi"+bi+" rtbn"+rtnb+" tnl"+tnl);
+        
+        final int imageRecordLength = rtnb;
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
         final int x = sourceOffsetX * 4;
-        final long xpos = imageStartOffset + x;
+        final int filler = 2;
+        final int asri = rs;
+        final int asfv = rs;
+        final int aslv = rs;
+        final long xpos = rtnb + x + ((filler + asri +filler+ asfv +filler+ aslv +filler+filler)*4);
         iiStream.setByteOrder(ByteOrder.BIG_ENDIAN);
-        
+
         pm.beginTask("Reading band...", sourceMaxY - sourceOffsetY);
+        final short[] destLine = new short[destWidth];
+        int y=0;
         try {
             final short[] srcLine = new short[sourceWidth*2];
-            final short[] destLine = new short[destWidth];
-            for (int y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
+            for (y = sourceOffsetY; y <= sourceMaxY; y += sourceStepY) {
                 if (pm.isCanceled()) {
                     break;
                 }
@@ -171,7 +187,11 @@ class TerraSarXProductReader extends AbstractProductReader {
 
                 pm.worked(1);
             }
-
+        } catch(Exception e) {
+            System.out.println(e.toString());  
+            final int currentLineIndex = (y - sourceOffsetY) * destWidth;
+            Arrays.fill(destLine, (short)0);
+            System.arraycopy(destLine, 0, destBuffer.getElems(), currentLineIndex, destWidth);
         } finally {
             pm.done();
         }
