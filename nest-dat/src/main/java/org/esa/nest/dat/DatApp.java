@@ -84,16 +84,7 @@ public final class DatApp extends VisatApp {
         final SwingWorker worker = new SwingWorker() {
 
             @Override
-            protected Object doInBackground() throws Exception {
-               /* try {
-                    NestSingleTargetProductDialog dialog =
-                            new NestSingleTargetProductDialog("Multilook", VisatApp.getApp(), "Multilook", null);
-                    dialog = new NestSingleTargetProductDialog(
-                        "Terrain-Correction", VisatApp.getApp(), "Terrain-Correction", null);
-                } catch(Exception e) {
-                    VisatApp.getApp().showErrorDialog(e.getMessage());
-                }   */
-                
+            protected Object doInBackground() throws Exception {                
                 try {
                     final ImportBrowser ib = ImportBrowserAction.getInstance().getImportBrowser();
                     ib.getFrame().setVisible(false);

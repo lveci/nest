@@ -271,6 +271,7 @@
             <smallIcon>icons/SaveAs16.gif</smallIcon>
             <largeIcon>icons/SaveAs24.gif</largeIcon>
             <helpId>saveAs</helpId>
+            <context>product</context>
         </action>
 
         <action>

@@ -146,7 +146,7 @@ class ProductLayer extends RenderableLayer {
                     addRenderable(si);
                     imageTable.put(name, si);
                 } catch (Exception e) {
-                    VisatApp.getApp().showErrorDialog(e.getMessage());
+                    //VisatApp.getApp().showErrorDialog(e.getMessage());
                 }
             }
         };

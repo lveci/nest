@@ -1,5 +1,5 @@
 /*
- * $Id: CachingObjectArray.java,v 1.4 2009-11-16 17:26:48 lveci Exp $
+ * $Id: CachingObjectArray.java,v 1.5 2010-01-07 20:33:45 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -10,6 +10,7 @@ public class CachingObjectArray {
 
     private ObjectFactory _objectFactory;
     private ObjectArray _objectArray;
+    private int minIndex, maxIndex;
 
     public CachingObjectArray(ObjectFactory objectFactory) {
         if (objectFactory == null) {
@@ -37,10 +38,12 @@ public class CachingObjectArray {
             objectArrayOld.clear();
         }
         _objectArray = objectArray;
+        minIndex = _objectArray.getMinIndex();
+        maxIndex = _objectArray.getMaxIndex();
     }
 
-    public synchronized final Object getObject(int index) throws Exception {
-        if (index < _objectArray.getMinIndex() || index > _objectArray.getMaxIndex()) {
+    public synchronized final Object getObject(final int index) throws Exception {
+        if (index < minIndex || index > maxIndex) {
             return _objectFactory.createObject(index);
         } else {
             Object object = _objectArray.getObject(index);
@@ -52,7 +55,7 @@ public class CachingObjectArray {
         }
     }
 
-    public final void setObject(int index, Object o) {
+    public final void setObject(final int index, final Object o) {
         final Object object = _objectArray.getObject(index);
         if (object == null) {
              _objectArray.setObject(index, o);

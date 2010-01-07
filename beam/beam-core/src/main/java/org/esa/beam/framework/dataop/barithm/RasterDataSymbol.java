@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataSymbol.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
+ * $Id: RasterDataSymbol.java,v 1.3 2010-01-07 20:33:45 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -33,7 +33,7 @@ import org.esa.beam.framework.datamodel.Mask;
  * The resulting term in this case is an instance of <code>{@link com.bc.jexp.Term.Ref}</code>.
  *
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
- * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.3 $ $Date: 2010-01-07 20:33:45 $
  */
 public class RasterDataSymbol implements Symbol {
     public static final Source RAW = Source.RAW;
@@ -122,25 +122,21 @@ public class RasterDataSymbol implements Symbol {
 
     @Override
     public boolean evalB(final EvalEnv env) throws EvalException {
-        final int elemIndex = ((RasterDataEvalEnv) env).getElemIndex();
-        return Term.toB(data.getElemDoubleAt(elemIndex));
+        return Term.toB(data.getElemDoubleAt(((RasterDataEvalEnv) env).getElemIndex()));
     }
 
     @Override
     public int evalI(final EvalEnv env) throws EvalException {
-        final int elemIndex = ((RasterDataEvalEnv) env).getElemIndex();
-        return data.getElemIntAt(elemIndex);
+        return data.getElemIntAt(((RasterDataEvalEnv) env).getElemIndex());
     }
 
     @Override
     public double evalD(final EvalEnv env) throws EvalException {
-        final int elemIndex = ((RasterDataEvalEnv) env).getElemIndex();
-        return data.getElemDoubleAt(elemIndex);
+        return data.getElemDoubleAt(((RasterDataEvalEnv) env).getElemIndex());
     }
 
     @Override
     public String evalS(EvalEnv env) throws EvalException {
-        final double value = evalD(env);
-        return Double.toString(value);
+        return Double.toString(evalD(env));
     }
 }
