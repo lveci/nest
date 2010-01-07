@@ -1,5 +1,4 @@
 /*
- * $Id: ExpressionEditor.java,v 1.4 2009-12-11 20:46:14 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -39,7 +38,6 @@ import java.awt.event.ActionListener;
  * A value editor for band arithmetic expressions
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.4 $ $Date: 2009-12-11 20:46:14 $
  * @since BEAM 4.6
  */
 public class ExpressionEditor extends PropertyEditor {

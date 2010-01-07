@@ -1,5 +1,4 @@
 /*
- * $Id: ProductFileChooser.java,v 1.2 2009-09-01 20:27:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -43,7 +42,6 @@ import java.io.IOException;
  * A file chooser designed for data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $  $Date: 2009-09-01 20:27:12 $
  */
 public class ProductFileChooser extends BeamFileChooser {
 

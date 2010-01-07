@@ -1,5 +1,4 @@
 /*
- * $Id: ProductNodeView.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

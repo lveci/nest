@@ -1,5 +1,4 @@
 /*
- * $Id: ProductTreeListener2.java,v 1.2 2009-12-11 20:46:14 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,7 +26,6 @@ import org.esa.beam.framework.datamodel.VectorDataNode;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.2 $ $Date: 2009-12-11 20:46:14 $
  * @see ProductTree
  * @since BEAM 4.7
  */

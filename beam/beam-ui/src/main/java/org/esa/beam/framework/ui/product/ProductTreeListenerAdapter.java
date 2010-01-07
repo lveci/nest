@@ -1,5 +1,4 @@
 /*
- * $Id: ProductTreeListenerAdapter.java,v 1.2 2009-12-11 20:46:14 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

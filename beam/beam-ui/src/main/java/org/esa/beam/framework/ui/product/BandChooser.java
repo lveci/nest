@@ -1,5 +1,4 @@
 /*
- * $Id: BandChooser.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

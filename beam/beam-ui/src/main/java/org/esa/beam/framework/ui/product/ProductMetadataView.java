@@ -1,5 +1,4 @@
 /*
- * $Id: ProductMetadataView.java,v 1.3 2009-12-02 16:52:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

@@ -1,5 +1,4 @@
 /*
- * $Id: ProductTreeListener.java,v 1.2 2009-10-15 20:30:19 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +30,6 @@ import java.util.EventListener;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.2 $ $Date: 2009-10-15 20:30:19 $
  * @see org.esa.beam.framework.ui.product.ProductTree
  */
 public interface ProductTreeListener extends EventListener {
