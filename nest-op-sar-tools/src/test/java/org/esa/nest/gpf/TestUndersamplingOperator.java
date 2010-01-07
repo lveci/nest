@@ -99,7 +99,7 @@ public class TestUndersamplingOperator extends TestCase {
         band.readPixels(0, 0, 4, 2, floatValues, ProgressMonitor.NULL);
 
         // compare with expected outputs:
-        float[] expectedValues = {126.0f, 153.0f,   180.0f, 207.0f, 450.0f, 477.0f, 504.0f, 531.0f};
+        float[] expectedValues = {14.0f, 17.0f, 20.0f, 23.0f, 50.0f, 53.0f, 56.0f, 59.0f};
         assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
@@ -139,7 +139,7 @@ public class TestUndersamplingOperator extends TestCase {
         band.readPixels(0, 0, 4, 2, floatValues, ProgressMonitor.NULL);
 
         // compare with expected outputs:
-        float[] expectedValues = {14.0f, 17.0f, 20.0f, 23.0f, 50.0f, 53.0f, 56.0f, 59.0f};
+        float[] expectedValues = {1.5555555f, 1.8888888f, 2.222222f, 2.5555553f, 5.5555553f, 5.8888884f, 6.222222f, 6.5555553f};
         assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
@@ -219,7 +219,7 @@ public class TestUndersamplingOperator extends TestCase {
         band.readPixels(0, 0, 4, 2, floatValues, ProgressMonitor.NULL);
 
         // compare with expected outputs:
-        float[] expectedValues = {126.0f, 153.0f, 180.0f, 207.0f, 450.0f, 477.0f, 504.0f, 531.0f};
+        float[] expectedValues = {13.999999f, 16.999998f, 19.999998f, 22.999998f, 49.999996f, 52.999996f, 55.999996f, 58.999996f};
         assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
@@ -339,7 +339,7 @@ public class TestUndersamplingOperator extends TestCase {
         band.readPixels(0, 0, 4, 2, floatValues, ProgressMonitor.NULL);
 
         // compare with expected outputs:
-        float[] expectedValues = {28.0f, 34.0f, 40.0f, 46.0f, 100.0f, 106.0f, 112.0f, 118.0f};
+        float[] expectedValues = {3.1111116f, 3.7777786f, 4.4444456f, 5.111112f, 11.111114f, 11.777781f, 12.444447f, 13.111114f};
         assertTrue(Arrays.equals(expectedValues, floatValues));
 
         // compare updated metadata
