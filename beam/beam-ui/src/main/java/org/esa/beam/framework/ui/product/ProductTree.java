@@ -1,5 +1,4 @@
 /*
- * $Id: ProductTree.java,v 1.15 2010-01-07 16:40:00 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -72,7 +71,6 @@ import java.util.Set;import java.io.File;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.15 $ $Date: 2010-01-07 16:40:00 $
  * @see org.esa.beam.framework.ui.product.ProductTreeListener
  * @see org.esa.beam.framework.datamodel.Product
  */
@@ -401,13 +399,9 @@ public class ProductTree extends JTree implements PopupMenuFactory {
 // Uncomment for debugging masks:
 //        productTreeNode.add(createMaskNodes(product));
 
-        final DefaultMutableTreeNode vectorDataGroupTreeNode = createVectorDataNodes(product);
-        if(vectorDataGroupTreeNode != null) {
-            productTreeNode.add(vectorDataGroupTreeNode);
-        }
-
+        productTreeNode.add(createVectorDataNodes(product));
         productTreeNode.add(createBandNodes(product));
-		
+
         return productTreeNode;
     }
 
@@ -501,13 +495,10 @@ public class ProductTree extends JTree implements PopupMenuFactory {
 // Uncomment for debugging masks:
 /*
     private static DefaultMutableTreeNode createMaskNodes(Product product) {
-        final DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode(MASKS);
-        final ProductNodeGroup<Mask> productNodeGroup = product.getMaskGroup();
-        if (productNodeGroup.getNodeCount() == 0) {
-            return null;
-        }
+        DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode(MASKS);
+        ProductNodeGroup<Mask> productNodeGroup = product.getMaskGroup();
         for (int i = 0; i < productNodeGroup.getNodeCount(); i++) {
-            final DefaultMutableTreeNode childTreeNode = new DefaultMutableTreeNode(productNodeGroup.get(i));
+            DefaultMutableTreeNode childTreeNode = new DefaultMutableTreeNode(productNodeGroup.get(i));
             treeNode.add(childTreeNode);
         }
         return treeNode;
@@ -515,17 +506,11 @@ public class ProductTree extends JTree implements PopupMenuFactory {
 */
 
     private static DefaultMutableTreeNode createVectorDataNodes(Product product) {
-        final DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode(VECTOR_DATA);
-        final ProductNodeGroup<VectorDataNode> vectorDataGroup = product.getVectorDataGroup();
+        DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode(VECTOR_DATA);
+        ProductNodeGroup<VectorDataNode> vectorDataGroup = product.getVectorDataGroup();
         for (int i = 0; i < vectorDataGroup.getNodeCount(); i++) {
-            final VectorDataNode childVector = vectorDataGroup.get(i);
-            if(!childVector.getFeatureCollection().isEmpty()) {
-                final DefaultMutableTreeNode childTreeNode = new DefaultMutableTreeNode(childVector);
-                treeNode.add(childTreeNode);
-            }
-        }
-        if(vectorDataGroup.getNodeCount() == 0 || treeNode.getChildCount() == 0) {
-            return null;
+            DefaultMutableTreeNode childTreeNode = new DefaultMutableTreeNode(vectorDataGroup.get(i));
+            treeNode.add(childTreeNode);
         }
         return treeNode;
     }
@@ -1033,10 +1018,6 @@ public class ProductTree extends JTree implements PopupMenuFactory {
             getTreeModel().nodeStructureChanged(groupTNode);
             if (selectedTNode != null) {
                 select(selectedTNode.getUserObject());
-                if(groupTNode == null) {
-                    groupTNode = new DefaultMutableTreeNode(BANDS);
-                    productTNode.add(groupTNode);
-                }
             }
         }
     }
