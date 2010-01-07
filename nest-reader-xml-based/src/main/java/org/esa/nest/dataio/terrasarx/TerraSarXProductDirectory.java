@@ -8,6 +8,7 @@ import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.XMLProductDirectory;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.util.Constants;
 import org.jdom.Element;
 import org.jdom.Text;
 
@@ -150,6 +151,9 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         final MetadataElement processingFlags = processing.getElement("processingFlags");
         setFlag(processingFlags, "rangeSpreadingLossCorrectedFlag", "true", absRoot, AbstractMetadata.range_spread_comp_flag);
         setFlag(processingFlags, "elevationPatternCorrectedFlag", "true", absRoot, AbstractMetadata.ant_elev_corr_flag);
+
+         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
+                (slantRangeCorners[0] / 1000000000.0) * Constants.halfLightSpeed);
 
         final MetadataElement calibration = level1Elem.getElement("calibration");
         if(calibration != null) {

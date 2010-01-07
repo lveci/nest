@@ -11,16 +11,12 @@ import org.esa.nest.gpf.RangeDopplerGeocodingOp;
  */
 public class RangeDopplerGeocodingOpAction extends AbstractVisatAction {
 
-    private NestSingleTargetProductDialog dialog = null;
-
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        if (dialog == null) {
-            dialog = new NestSingleTargetProductDialog(
+        NestSingleTargetProductDialog dialog = new NestSingleTargetProductDialog(
                     "Terrain-Correction", getAppContext(), "Terrain-Correction", getHelpId());
-            dialog.setTargetProductNameSuffix(RangeDopplerGeocodingOp.PRODUCT_SUFFIX);
-        }
+        dialog.setTargetProductNameSuffix(RangeDopplerGeocodingOp.PRODUCT_SUFFIX);
         dialog.show();
 
     }

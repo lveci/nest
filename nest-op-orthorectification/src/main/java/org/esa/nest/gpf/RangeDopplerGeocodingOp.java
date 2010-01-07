@@ -408,12 +408,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @return the mission string
      */
     public static String getMissionType(final MetadataElement absRoot) {
-        String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
-
-        if (mission.contains("TSX1")) {
-            throw new OperatorException("TerraSar-X product is not supported yet");
-        }
-
+        final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
         if (mission.contains("ALOS")) {
             if(!absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE).contains("COMPLEX")) {
                 throw new OperatorException("Only level 1.1 ALOS PALSAR product is supported");
