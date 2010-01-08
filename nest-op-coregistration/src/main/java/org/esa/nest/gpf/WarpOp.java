@@ -135,6 +135,12 @@ public class WarpOp extends Operator {
     public void initialize() throws OperatorException
     {
         try {
+            // clear any old residual file
+            final File residualsFile = getResidualsFile(sourceProduct);
+            if(residualsFile.exists()) {
+                residualsFile.delete();
+            }
+
             masterBand = sourceProduct.getBandAt(0);
             masterGCPGroup = sourceProduct.getGcpGroup(masterBand);
             if(masterBand.getUnit() != null && masterBand.getUnit().equals(Unit.REAL) && sourceProduct.getNumBands() > 1) {
@@ -223,7 +229,7 @@ public class WarpOp extends Operator {
         } finally {
             if(openResidualsFile) {
                 final File residualsFile = getResidualsFile(sourceProduct);
-                if(Desktop.isDesktopSupported()) {
+                if(Desktop.isDesktopSupported() && residualsFile.exists()) {
                     try {
                         Desktop.getDesktop().open(residualsFile);
                     } catch(Exception e) {
@@ -271,8 +277,14 @@ public class WarpOp extends Operator {
 
             if(complexCoregistration) {
                 final Band srcBandQ = sourceProduct.getBandAt(i+1);
-                final Band targetBandQ = targetProduct.addBand(srcBandQ.getName(), ProductData.TYPE_FLOAT32);
-                ProductUtils.copyRasterDataNodeProperties(srcBandQ, targetBandQ);
+                Band targetBandQ;
+                if(srcBand == masterBand || srcBand == masterBand2) {
+                    targetBandQ = ProductUtils.copyBand(srcBandQ.getName(), sourceProduct, targetProduct);
+                    targetBandQ.setSourceImage(srcBandQ.getSourceImage());
+                } else {
+                    targetBandQ = targetProduct.addBand(srcBandQ.getName(), ProductData.TYPE_FLOAT32);
+                    ProductUtils.copyRasterDataNodeProperties(srcBandQ, targetBandQ);
+                }
                 sourceRasterMap.put(targetBandQ, srcBandQ);
 
                 complexSrcMap.put(srcBandQ, srcBand);
@@ -286,8 +298,6 @@ public class WarpOp extends Operator {
 
         // coregistrated image should have the same geo-coding as the master image
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
-
-        //targetProduct.setPreferredTileSize(sourceProduct.getSceneRasterWidth(), 20);
     }
 
     /**
