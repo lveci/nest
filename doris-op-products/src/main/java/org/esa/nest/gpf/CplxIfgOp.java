@@ -122,10 +122,13 @@ public class CplxIfgOp extends Operator {
                             masterBand0.getDisplayName() + "_" +
                             srcBandI.getDisplayName();
                 }
-                final Band targetBandI = targetProduct.addBand(iBandName, ProductData.TYPE_FLOAT32);
-                ProductUtils.copyRasterDataNodeProperties(srcBandI, targetBandI);
+                Band targetBandI;
                 if(srcBandI == masterBand0) {
+                    targetBandI = ProductUtils.copyBand(srcBandI.getName(), sourceProduct, targetProduct);
                     targetBandI.setSourceImage(srcBandI.getSourceImage());
+                } else {
+                    targetBandI = targetProduct.addBand(iBandName, ProductData.TYPE_FLOAT32);
+                    ProductUtils.copyRasterDataNodeProperties(srcBandI, targetBandI);
                 }
                 sourceRasterMap.put(targetBandI, srcBandI);
 
@@ -137,10 +140,13 @@ public class CplxIfgOp extends Operator {
                             srcBandQ.getDisplayName();
                 }
 
-                final Band targetBandQ = targetProduct.addBand(qBandName, ProductData.TYPE_FLOAT32);
-                ProductUtils.copyRasterDataNodeProperties(srcBandQ, targetBandQ);
+                Band targetBandQ;
                 if(srcBandQ == masterBand1) {
+                    targetBandQ = ProductUtils.copyBand(srcBandQ.getName(), sourceProduct, targetProduct);
                     targetBandQ.setSourceImage(srcBandQ.getSourceImage());
+                } else {
+                    targetBandQ = targetProduct.addBand(qBandName, ProductData.TYPE_FLOAT32);
+                    ProductUtils.copyRasterDataNodeProperties(srcBandQ, targetBandQ);
                 }
                 sourceRasterMap.put(targetBandQ, srcBandQ);
 
@@ -257,7 +263,6 @@ public class CplxIfgOp extends Operator {
                         targetData.setElemFloatAt(index,
                                 (masterDataI.getElemFloatAt(index) * (-1)*slaveDataQ.getElemFloatAt(index)) +
                                         (masterDataQ.getElemFloatAt(index) * slaveDataI.getElemFloatAt(index)));
-
 
                     }
                 }
