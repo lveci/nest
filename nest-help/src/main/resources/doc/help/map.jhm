@@ -83,6 +83,8 @@
     <mapID target="showWorldMapWnd" url="visat/WorldMap.html"/>
 	<mapID target="WorldWind" url="visat/WorldWind.html"/>
 	<mapID target="productGrabber" url="visat/ProductGrabber.html"/>
+	
+	<mapID target="geometryManagement" url="visat/GeometryManagement.html"/>
     <mapID target="showGcpManagerWnd" url="visat/GcpManagement.html"/>
     <mapID target="showPinManagerWnd" url="visat/PinManagement.html"/>
     <mapID target="noDataOverlay" url="visat/NoDataOverlay.html"/>
@@ -94,13 +96,13 @@
     <mapID target="scatterplotDialog" url="visat/ScatterplotDialog.html"/>
     <mapID target="profilePlotDialog" url="visat/ProfilePlotDialog.html"/>
     <mapID target="coordinateListDialog" url="visat/CoordinateListDialog.html"/>
-    <mapID target="computeRoiArea" url="visat/computeRoiArea.html"/>
+    <mapID target="computeMaskArea" url="visat/ComputeMaskArea.html"/>
     <mapID target="createFilteredBand" url="visat/CreateFilteredBand.html"/>
     <mapID target="bitmaskEditor" url="visat/BitmaskEditor.html"/>
     <mapID target="expressionEditor" url="visat/ExpressionEditor.html"/>
     <mapID target="rgbImageProfile" url="visat/RGBImageProfile.html"/>
     <mapID target="bandArithmetic" url="visat/BandArithmetics.html"/>
-    <mapID target="mapProjection" url="visat/MapProjection.html"/>
+    <mapID target="reprojectionAction" url="visat/Reprojection.html"/>
     <mapID target="projectionDialog" url="visat/MapProjection.html"/>
     <mapID target="orthorectificationDialog" url="visat/OrthorectificationDialog.html"/>
     <mapID target="orthorectification" url="visat/Orthorectification.html"/>
