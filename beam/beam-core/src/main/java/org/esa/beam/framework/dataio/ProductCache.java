@@ -6,14 +6,16 @@ import java.io.File;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * a cache of recently used Products
  */
 public final class ProductCache {
-    private final Map<File, Product> productMap = new HashMap<File, Product>(10);
-    private final Map<File, Long> timeStampMap = new HashMap<File, Long>(10);
-    private final ArrayList<File> fileList = new ArrayList<File>(10);
+    private final static int cacheSize = 200;
+    private final Map<File, Product> productMap = new HashMap<File, Product>(cacheSize);
+    private final Map<File, Long> timeStampMap = new HashMap<File, Long>(cacheSize);
+    private final ArrayList<File> fileList = new ArrayList<File>(cacheSize);
     private static final ProductCache theInstance = new ProductCache();
 
     private ProductCache() {
@@ -23,13 +25,13 @@ public final class ProductCache {
         return theInstance;
     }
 
-    public void addProduct(final File file, final Product p) {
+    public synchronized void addProduct(final File file, final Product p) {
         productMap.put(file, p);
         //timeStampMap.put(file, file.lastModified());
 
         fileList.remove(file);
         fileList.add(0, file);
-        if (fileList.size() > 10) {
+        if (fileList.size() > cacheSize) {
             final int index = fileList.size() - 1;
             final File lastFile = fileList.get(index);
             productMap.remove(lastFile);
@@ -44,9 +46,22 @@ public final class ProductCache {
         return null;
     }
 
-    public void removeProduct(final File file) {
+    public synchronized void removeProduct(final File file) {
+        if(file == null) return;
         productMap.remove(file);
         fileList.remove(file);
+    }
+
+    public synchronized void clearCache() {
+        final ArrayList<File> toDelete = (ArrayList<File>)fileList.clone();
+        for(File f : toDelete) {
+            final Product prod = productMap.get(f);
+            if(prod != null)
+                prod.dispose();
+        }
+        toDelete.clear();
+        productMap.clear();
+        fileList.clear();
     }
 
 }

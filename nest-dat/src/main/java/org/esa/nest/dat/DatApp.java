@@ -9,6 +9,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.application.ApplicationDescriptor;
+import org.esa.beam.framework.dataio.ProductCache;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.toolviews.diag.TileCacheDiagnosisToolView;
 import org.esa.beam.visat.toolviews.stat.StatisticsToolView;
@@ -100,6 +101,37 @@ public final class DatApp extends VisatApp {
             }
         };
         worker.execute();
+    }
+
+    /**
+     * Closes the all open products.
+     */
+    @Override
+    public synchronized void closeAllProducts() {
+        final Product[] products = getProductManager().getProducts();
+        for (int i = products.length - 1; i >= 0; i--) {
+            final Product product = products[i];
+            closeProduct(product);
+        }
+        
+        ProductCache.instance().clearCache();
+        // free cache
+        JAI.getDefaultInstance().getTileCache().flush();
+        System.gc();
+    }
+
+    /**
+     * Removes and disposes the given product and performs a garbage collection. After calling this method, the product
+     * object cannot be used anymore.
+     *
+     * @param product the product to be disposed
+     * @see org.esa.beam.framework.datamodel.Product#dispose
+     */
+    @Override
+    public void disposeProduct(final Product product) {
+        removeProduct(product);
+        ProductCache.instance().removeProduct(product.getFileLocation());
+        product.dispose();
     }
 
     @Override

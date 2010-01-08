@@ -92,14 +92,16 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
         final JScrollPane scrollPane = new JScrollPane(table);
         fileListPanel.add(scrollPane, BorderLayout.CENTER);
 
-        final JPanel buttonPanel = new JPanel();
-        initButtonPanel(buttonPanel, table, fileModel);
+        final JPanel buttonPanel = initButtonPanel(table, fileModel);
         fileListPanel.add(buttonPanel, BorderLayout.EAST);
 
         return fileListPanel;
     }
 
-    private static void initButtonPanel(final JPanel panel, final JTable table, final FileModel fileModel) {
+    private static JPanel initButtonPanel(final JTable table, final FileModel fileModel) {
+        final JPanel panel = new JPanel();
+        final JLabel countLabel = new JLabel();
+
         panel.setLayout(new GridLayout(10, 1));
 
         final JButton addButton = DialogUtils.CreateButton("addButton", "Add", null, panel);
@@ -112,6 +114,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
                         final ProductReader reader = ProductIO.getProductReaderForFile(file);
                         if (reader != null) {
                             fileModel.addFile(file);
+                            countLabel.setText(fileModel.getRowCount()+" Products");
                         }
                     }
                 }
@@ -125,6 +128,7 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
                 final int selRow = table.getSelectedRow();
                 if(selRow >= 0) {
                     fileModel.removeFile(selRow);
+                    countLabel.setText(fileModel.getRowCount()+" Products");
                 }
             }
 
@@ -135,12 +139,16 @@ public class ProductSetReaderOpUI extends BaseOperatorUI {
 
             public void actionPerformed(final ActionEvent e) {
                 fileModel.clear();
+                countLabel.setText("");
             }
         });
 
         panel.add(addButton);
         panel.add(removeButton);
         panel.add(clearButton);
+        panel.add(countLabel);
+
+        return panel;
     }
 
     private static File[] GetFilePath(Component component, String title) {

@@ -1,5 +1,5 @@
 /*
- * $Id: VisatApp.java,v 1.21 2010-01-07 16:40:00 lveci Exp $
+ * $Id: VisatApp.java,v 1.22 2010-01-08 20:50:14 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -147,7 +147,7 @@ import java.util.logging.Level;
  * @author Norman Fomferra
  * @author Marco Peters
  * @author Sabine Embacher
- * @version $Revision: 1.21 $ $Date: 2010-01-07 16:40:00 $
+ * @version $Revision: 1.22 $ $Date: 2010-01-08 20:50:14 $
  */
 public class VisatApp extends BasicApp implements AppContext {
 
@@ -759,7 +759,6 @@ public class VisatApp extends BasicApp implements AppContext {
      */
     public void disposeProduct(final Product product) {
         removeProduct(product);
-        ProductCache.instance().removeProduct(product.getFileLocation());
         product.dispose();
     }
 
@@ -1255,9 +1254,6 @@ public class VisatApp extends BasicApp implements AppContext {
             final Product product = products[i];
             closeProduct(product);
         }
-        // free cache
-        JAI.getDefaultInstance().getTileCache().flush();
-        System.gc();
     }
 
     /**

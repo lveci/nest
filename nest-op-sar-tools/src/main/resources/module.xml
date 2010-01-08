@@ -78,14 +78,14 @@
             <helpId>MultilookOp</helpId>
         </action>
 		
-		<action>
+		<!--action>
             <id>TileStackOp</id>
             <class>org.esa.nest.dat.TileStackOpAction</class>
             <text>TileStack</text>
             <shortDescr>TileStack</shortDescr>
             <parent>sartools</parent>
             <helpId>TileStackOp</helpId>
-        </action>
+        </action-->
 
         <!--action>
             <id>FocusingAdjustmentOp</id>
