@@ -1,5 +1,5 @@
 /*
- * $Id: ProductImportAction.java,v 1.4 2010-01-07 16:40:00 lveci Exp $
+ * $Id: ProductImportAction.java,v 1.5 2010-01-08 18:37:25 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -61,7 +61,7 @@ import java.util.Iterator;
  * This action imports a product of the associated format.
  *
  * @author Marco Peters
- * @version $Revision: 1.4 $ $Date: 2010-01-07 16:40:00 $
+ * @version $Revision: 1.5 $ $Date: 2010-01-08 18:37:25 $
  */
 public class ProductImportAction extends ExecCommand {
 
@@ -126,8 +126,11 @@ public class ProductImportAction extends ExecCommand {
             }
         }
 
-        Boolean useAllFileFilterObj = getConfigBoolean(config, "useAllFileFilter");
+        final Boolean useAllFileFilterObj = getConfigBoolean(config, "useAllFileFilter");
         useAllFileFilter = useAllFileFilterObj != null ? useAllFileFilterObj : false;
+
+        final Boolean useFilesAndFoldersObj = getConfigBoolean(config, "useFilesAndFolders");
+        useFilesAndFolders = useFilesAndFoldersObj != null ? useFilesAndFoldersObj : false;
 
         String text = getText();
         if (text == null) {
@@ -221,8 +224,6 @@ public class ProductImportAction extends ExecCommand {
         }
         if (fileChooser == null) {
             fileChooser = new ProductFileChooser();
-            if(useFilesAndFolders)
-                fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             fileChooser.setAcceptAllFileFilterUsed(useAllFileFilter);
             if(!useFilesAndFolders) {
                 BeamFileFilter fileFilter = readerPlugIn.getProductFileFilter();
@@ -232,6 +233,8 @@ public class ProductImportAction extends ExecCommand {
             }
             HelpSys.enableHelpKey(fileChooser, getHelpId());
         }
+        if(useFilesAndFolders)
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         fileChooser.setCurrentDirectory(currentDir);
 
         File file = null;

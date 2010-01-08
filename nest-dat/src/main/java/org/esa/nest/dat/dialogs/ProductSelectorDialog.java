@@ -40,7 +40,13 @@ public class ProductSelectorDialog extends ModalDialog {
     }
 
     public String getSelectedProductName() {
-        return (String)list.getSelectedValue();
+        Object selection = list.getSelectedValue();
+        if(selection == null) {
+            if(list.getModel().getSize() > 0) {
+                selection = list.getModel().getElementAt(0);
+            }
+        }
+        return (String)selection;
     }
 
     protected void onOK() {
