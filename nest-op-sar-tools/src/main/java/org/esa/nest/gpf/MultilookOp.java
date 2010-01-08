@@ -156,11 +156,17 @@ public final class MultilookOp extends Operator {
             if (srcBandNames.length == 1) {
                 sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
                 sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
+                if (sourceRaster1 == null) {
+                    throw new OperatorException("Cannot get source tile");
+                }
             } else {
                 sourceBand1 = sourceProduct.getBand(srcBandNames[0]);
                 Band sourceBand2 = sourceProduct.getBand(srcBandNames[1]);
                 sourceRaster1 = getSourceTile(sourceBand1, sourceTileRectangle, pm);
                 sourceRaster2 = getSourceTile(sourceBand2, sourceTileRectangle, pm);
+                if (sourceRaster1 == null || sourceRaster2 == null) {
+                    throw new OperatorException("Cannot get source tile");
+                }
             }
 
             final Unit.UnitType bandUnitType = Unit.getUnitType(sourceBand1);
