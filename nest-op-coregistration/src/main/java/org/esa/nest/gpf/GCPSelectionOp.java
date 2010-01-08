@@ -99,9 +99,9 @@ public class GCPSelectionOp extends Operator {
     @Parameter(description = "The coherence threshold", interval = "(0, *)", defaultValue = "0.6",
                 label="Coherence Threshold")
     private double coherenceThreshold = 0.6;
-    @Parameter(description = "Use sliding window for coherence calculation", defaultValue = "true",
+    @Parameter(description = "Use sliding window for coherence calculation", defaultValue = "false",
                 label="Compute coherence with sliding window")
-    private boolean useSlidingWindow = true;
+    private boolean useSlidingWindow = false;
 
 //    @Parameter(description = "The coherence function tolerance", interval = "(0, *)", defaultValue = "1.e-6",
 //                label="Coherence Function Tolerance")
@@ -248,15 +248,23 @@ public class GCPSelectionOp extends Operator {
                                     sourceImageHeight);
 
         final int numSrcBands = sourceProduct.getNumBands();
+        boolean oneSlaveSelected = false;          // all other use setSourceImage
         for(int i=0; i < numSrcBands; ++i) {
             final Band srcBand = sourceProduct.getBandAt(i);
             final Band targetBand = targetProduct.addBand(srcBand.getName(), srcBand.getDataType());
             ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
             sourceRasterMap.put(targetBand, srcBand);
-            final String unit = srcBand.getUnit();
-            if((unit != null && srcBand.getUnit().contains(Unit.IMAGINARY)) || srcBand == masterBand1) {
+            if(srcBand == masterBand1 || srcBand == masterBand2 || oneSlaveSelected) {
                 targetBand.setSourceImage(srcBand.getSourceImage());
+            } else {
+                final String unit = srcBand.getUnit();
+                if(oneSlaveSelected==false && unit != null && !unit.contains(Unit.IMAGINARY)) {
+                    oneSlaveSelected = true;
+                } else {
+                    targetBand.setSourceImage(srcBand.getSourceImage());
+                }
             }
+
             if(complexCoregistration) {
                 if(srcBand.getUnit() != null && srcBand.getUnit().equals(Unit.REAL)) {
                     if(i + 1 < numSrcBands)
@@ -290,20 +298,25 @@ public class GCPSelectionOp extends Operator {
             System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
             */
             for(Band targetBand : targetProduct.getBands()) {
-                final Tile targetTile = targetTileMap.get(targetBand);
-                if(targetTile == null) continue;
-                
                 final Band slaveBand = sourceRasterMap.get(targetBand);
-                if (slaveBand != masterBand1 && slaveBand != masterBand2) {
-                    if(complexCoregistration) {
-                        computeSlaveGCPs(slaveBand, complexSrcMap.get(slaveBand), targetBand, targetRectangle,
-                                    SubProgressMonitor.create(pm, 1));
-                    } else {
-                        computeSlaveGCPs(slaveBand, null, targetBand, targetRectangle, SubProgressMonitor.create(pm, 1));
-                    }
+                if (slaveBand == masterBand1 || slaveBand == masterBand2)
+                    continue;
+                final String unit = slaveBand.getUnit();
+                if(unit != null && unit.contains(Unit.IMAGINARY))
+                    continue;
+
+                if(complexCoregistration) {
+                    computeSlaveGCPs(slaveBand, complexSrcMap.get(slaveBand), targetBand, targetRectangle,
+                            SubProgressMonitor.create(pm, 1));
+                } else {
+                    computeSlaveGCPs(slaveBand, null, targetBand, targetRectangle, SubProgressMonitor.create(pm, 1));
                 }
+
                 // copy slave data to target
-                targetTile.setRawSamples(getSourceTile(slaveBand, targetRectangle, pm).getRawSamples());
+                final Tile targetTile = targetTileMap.get(targetBand);
+                if(targetTile != null) {
+                    targetTile.setRawSamples(getSourceTile(slaveBand, targetRectangle, pm).getRawSamples());
+                }
                 pm.worked(1);
             }
 
