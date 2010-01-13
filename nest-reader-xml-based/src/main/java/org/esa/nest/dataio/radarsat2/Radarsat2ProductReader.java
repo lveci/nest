@@ -116,7 +116,7 @@ class Radarsat2ProductReader extends AbstractProductReader {
         final double offset = Double.parseDouble(offsetElem.getValue());
 
         final Element gainsElem = rootElement.getChild("gains");
-        final double[] gainsArray = StringUtils.toDoubleArray(gainsElem.getValue(), " ");
+        final double[] gainsArray = StringUtils.toDoubleArray(gainsElem.getValue().trim(), " ");
 
         final MetadataElement lut = new MetadataElement(lutName);
         root.addElement(lut);
