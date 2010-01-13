@@ -682,7 +682,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             throw new IOException(e.getMessage());
         }
 
-        if(orbitStateVectors == null || orbitStateVectors.length == 0)
+        if(!checkStateVectorValidity(orbitStateVectors))
             return;
 
         final int numVectors = orbitStateVectors.length;
@@ -769,6 +769,24 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
         product.setGeoCoding(tpGeoCoding);
+    }
+
+    private static boolean checkStateVectorValidity(AbstractMetadata.OrbitStateVector[] orbitStateVectors) {
+
+        if(orbitStateVectors == null) {
+            return false;
+        }
+        if(orbitStateVectors.length <= 1) {
+            return false;
+        }
+
+        for (int i = 1; i < orbitStateVectors.length; i++) {
+            if (orbitStateVectors[i].time_mjd == orbitStateVectors[0].time_mjd) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static void setLatLonMetadata(final Product product, final MetadataElement absRoot) {
