@@ -3,6 +3,7 @@ package org.esa.nest.dataio.terrasarx;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.AbstractProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
+import org.esa.beam.framework.dataio.ProductFlipper;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
@@ -100,6 +101,10 @@ class TerraSarXProductReader extends AbstractProductReader {
         product.setProductReader(this);
         product.setModified(false);
 
+        if(_dataDir.isComplex()) {
+            return product.createFlippedProduct(ProductFlipper.FLIP_HORIZONTAL, product.getName(), product.getDescription());
+        }
+
         return product;
     }
 
@@ -129,7 +134,7 @@ class TerraSarXProductReader extends AbstractProductReader {
                                                  oneOfTwo, _dataDir.getCosarImageInputStream(destBand), pm);
             }
         } catch(Exception e) {
-            
+            //
         }
     }
 

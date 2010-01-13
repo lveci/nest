@@ -244,6 +244,10 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
         }
     }
 
+    public boolean isComplex() {
+        return !cosarFileList.isEmpty();
+    }
+
     private void setSceneDimensions() throws IOException {
 
         final Element root = getXMLRootElement();
@@ -317,7 +321,6 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
     @Override
     protected void addBands(final Product product) {
-        int bandCnt = 1;
         final Set ImageKeys = bandImageFileMap.keySet();                           // The set of keys in the map.
         for (Object key : ImageKeys) {
             final ImageIOFile img = bandImageFileMap.get(key);
