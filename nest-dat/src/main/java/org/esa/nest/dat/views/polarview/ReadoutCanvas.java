@@ -1,6 +1,10 @@
 package org.esa.nest.dat.views.polarview;
 
 import java.awt.*;
+import java.io.PrintStream;
+import java.io.FileOutputStream;
+import java.io.File;
+import java.io.IOException;
 
 class ReadoutCanvas {
 
@@ -41,6 +45,24 @@ class ReadoutCanvas {
             for(String str : metadataList) {
                 g.drawString(str, x, y);
                 y += 20;
+            }
+        }
+    }
+
+    public void exportReadout(final File file) throws IOException {
+        if(metadataList != null) {
+            final FileOutputStream out = new FileOutputStream(file.getAbsolutePath(), false);
+            // Connect print stream to the output stream
+            final PrintStream p = new PrintStream(out);
+
+            if(readoutList != null) {
+                for(String str : readoutList) {
+                    p.println(str +",");
+                }
+            }
+
+            for(String str : metadataList) {
+                p.println(str +",");
             }
         }
     }

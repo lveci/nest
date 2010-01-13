@@ -2,6 +2,8 @@ package org.esa.nest.dat.views.polarview;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 
 /**
 
@@ -43,5 +45,9 @@ class PolarPanel extends JPanel {
 
     public void setReadout(String[] readoutList) {
         readoutCanvas.setReadout(readoutList);
+    }
+
+    public void exportReadout(final File file) throws IOException {
+        readoutCanvas.exportReadout(file);
     }
 }

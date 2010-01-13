@@ -4,6 +4,8 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.ui.BasicView;
 import org.esa.beam.framework.ui.product.ProductNodeView;
 import org.esa.beam.framework.ui.product.ProductSceneImage;
+import org.esa.beam.visat.VisatApp;
+import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
@@ -12,6 +14,7 @@ import javax.swing.event.PopupMenuListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
@@ -387,6 +390,9 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
             createCheckedMenuItem(unitTypes[Unit.INTENSITY.ordinal()], unitMenu, graphUnit == Unit.INTENSITY);
         }
 
+        final JMenuItem itemExportReadout = createMenuItem("Export Readouts");
+        popup.add(itemExportReadout);
+
         popup.setLabel("Justification");
         popup.setBorder(new BevelBorder(BevelBorder.RAISED));
         popup.addPopupMenuListener(this);
@@ -422,7 +428,9 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
         } else if(event.getActionCommand().equals("Previous")) {
             showPreviousPlot();
         } else if(event.getActionCommand().equals("Colour Scale")) {
-            callColourScaleDlg();  
+            callColourScaleDlg();
+        } else if(event.getActionCommand().equals("Export Readouts")) {
+            exportReadouts();
         } else if(event.getActionCommand().equals("Real")) {
             graphUnit = Unit.REAL;
             createPlot(currentRecord);
@@ -473,6 +481,16 @@ public final class PolarView extends BasicView implements ProductNodeView, Actio
         final PolarCanvas polarCanvas = polarPanel.getPolarCanvas();
         final ColourScaleDialog dlg = new ColourScaleDialog(polarCanvas.getColourAxis());
         dlg.show();
+    }
+
+    private void exportReadouts() {
+        final File file = ResourceUtils.GetFilePath("Export Wave Mode Readout", "txt", "txt",
+                                   product.getName()+"_rec"+currentRecord, "Wave mode readout", true);
+        try {
+            polarPanel.exportReadout(file);
+        } catch(Exception e) {
+            VisatApp.getApp().showErrorDialog(e.getMessage());
+        }
     }
 
     private void checkPopup(MouseEvent e) {
