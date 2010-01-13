@@ -119,8 +119,11 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         final MetadataElement orbitInformation = orbitAndAttitude.getElement("orbitInformation");
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS,
                 orbitInformation.getAttributeString("passDirection", defStr).toUpperCase());
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.orbit_state_vector_file,
-                orbitInformation.getAttributeString("orbitDataFile", defStr));
+        final String orbitFile = orbitInformation.getAttributeString("orbitDataFile", defStr);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.orbit_state_vector_file, orbitFile);
+
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT,
+                Integer.parseInt(orbitFile.substring(0, orbitFile.indexOf("_")).trim()));
 
         // imageGenerationParameters
         final MetadataElement imageGenerationParameters = productElem.getElement("imageGenerationParameters");
