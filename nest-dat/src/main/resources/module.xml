@@ -437,14 +437,14 @@
             <separatorBefore>true</separatorBefore>
         </action>
 
-        <action>
+        <!--action>
             <id>nestProjection</id>
             <class>org.esa.nest.dat.actions.ProjectionAction</class>
             <parent>geometry</parent>
             <text>Map Projection...</text>
             <shortDescr>Apply Map Projection</shortDescr>
             <helpId>projectionDialog</helpId>
-        </action>
+        </action-->
 
         <action>
             <id>attachNestPixelGeoCoding</id>

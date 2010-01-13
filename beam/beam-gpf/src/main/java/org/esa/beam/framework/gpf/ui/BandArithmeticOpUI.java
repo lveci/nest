@@ -1,6 +1,6 @@
 package org.esa.beam.framework.gpf.ui;
 
-import org.esa.beam.framework.gpf.operators.common.BandArithmeticOp;
+import org.esa.beam.framework.gpf.operators.common.BandMathOp;
 import org.esa.beam.framework.ui.*;
 import org.esa.beam.framework.ui.product.ProductExpressionPane;
 import org.esa.beam.framework.param.*;
@@ -37,7 +37,7 @@ public class BandArithmeticOpUI extends BaseOperatorUI {
     private JComponent panel = null;
     private String errorText = "";
 
-    private BandArithmeticOp.BandDescriptor bandDesc = new BandArithmeticOp.BandDescriptor();
+    private BandMathOp.BandDescriptor bandDesc = new BandMathOp.BandDescriptor();
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -61,7 +61,7 @@ public class BandArithmeticOpUI extends BaseOperatorUI {
         if(bandDescriptors == null)
             bandDescriptors = (Object[])paramMap.get("targetBandDescriptors");
         if(bandDescriptors !=null && bandDescriptors.length > 0) {
-            bandDesc = (BandArithmeticOp.BandDescriptor)bandDescriptors[0];
+            bandDesc = (BandMathOp.BandDescriptor)bandDescriptors[0];
             bandDesc.type = ProductData.TYPESTRING_FLOAT32;
 
             try {
@@ -102,7 +102,7 @@ public class BandArithmeticOpUI extends BaseOperatorUI {
         bandDesc.name = _paramBand.getValueAsText();
         bandDesc.expression = _paramExpression.getValueAsText();
 
-        final BandArithmeticOp.BandDescriptor[] bandDescriptors = new BandArithmeticOp.BandDescriptor[1];
+        final BandMathOp.BandDescriptor[] bandDescriptors = new BandMathOp.BandDescriptor[1];
         bandDescriptors[0] = bandDesc;
         paramMap.put("targetBandDescriptors", bandDescriptors);
     }

@@ -12,9 +12,9 @@ import org.esa.beam.visat.dialogs.BandArithmetikDialog;
  * VISAT's band arithmetic feature.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-06-03 18:47:31 $
+ * @version $Revision: 1.1 $ $Date: 2010-01-13 16:39:23 $
  */
-public class BandArithmeticAction extends ExecCommand {
+public class BandMathAction extends ExecCommand {
 
     @Override
     public void actionPerformed(final CommandEvent event) {
@@ -24,7 +24,7 @@ public class BandArithmeticAction extends ExecCommand {
     @Override
     public void updateState(final CommandEvent event) {
         final int n = VisatApp.getApp().getProductManager().getProductCount();
-        setEnabled(n > 0 && VisatApp.getApp().getSelectedProduct() != null);
+        setEnabled(n > 0 && VisatApp.getApp().getSelectedProduct() != null); 
     }
 
    
