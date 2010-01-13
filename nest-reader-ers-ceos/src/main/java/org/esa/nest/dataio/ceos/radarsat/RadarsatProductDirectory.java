@@ -688,29 +688,24 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         final int numVectors = orbitStateVectors.length;
         int startIdx = 0;
         int endIdx = 0;
+        final double t1 = Math.min(firstLineUTC, lastLineUTC);
+        final double t2 = Math.max(firstLineUTC, lastLineUTC);
         for (int i = 0; i < numVectors; i++) {
             double time = orbitStateVectors[i].time_mjd;
-            if (lineTimeInterval > 0) {
-                if (time < firstLineUTC) {
-                    startIdx = i;
-                }
+            if (time < t1) {
+                startIdx = i;
+            }
 
-                if (time < lastLineUTC) {
-                    endIdx = i;
-                }
-            } else {
-                if (time > firstLineUTC) {
-                    startIdx = i;
-                }
-
-                if (time > lastLineUTC) {
-                    endIdx = i;
-                }
+            if (time < t2) {
+                endIdx = i;
             }
         }
-        startIdx = Math.max(startIdx - 1, 0);
-        endIdx = Math.min(endIdx + 1, numVectors - 1);
-        final int numVectorsUsed = Math.abs(endIdx - startIdx) + 1;
+
+        while (endIdx - startIdx + 1 < Math.min(5, numVectors)) {
+            startIdx = Math.max(startIdx - 1, 0);
+            endIdx = Math.min(endIdx + 1, numVectors - 1);
+        }
+        final int numVectorsUsed = endIdx - startIdx + 1;
 
         final double[] timeArray = new double[numVectorsUsed];
         final double[] xPosArray = new double[numVectorsUsed];
