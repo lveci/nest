@@ -14,7 +14,7 @@ import java.util.Locale;
  * A plugin for a product reader for ACE data.
  *
  */
-class ACE2_5MinReaderPlugIn implements ProductReaderPlugIn {
+public class ACE2_5MinReaderPlugIn implements ProductReaderPlugIn {
 
     public static final String FORMAT_NAME = "ACE2";
     private static final String[] FILE_EXTENSIONS = new String[]{ ".ACE2" };

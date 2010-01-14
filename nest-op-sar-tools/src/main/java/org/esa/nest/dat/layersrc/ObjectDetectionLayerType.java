@@ -16,7 +16,7 @@ import org.esa.beam.framework.datamodel.Product;
  * The type descriptor of the {@link org.esa.nest.dat.layersrc.ObjectDetectionLayer}.
  *
  */
-class ObjectDetectionLayerType extends LayerType {
+public class ObjectDetectionLayerType extends LayerType {
 
     static LayerType instance = new ObjectDetectionLayerType();
 

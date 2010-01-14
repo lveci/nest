@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
 
  */
-class ProductLayer extends RenderableLayer {
+public class ProductLayer extends RenderableLayer {
     private Product selectedProduct = null;
     private final static double million = 1000000.0;
     private final boolean enableSurfaceImages;

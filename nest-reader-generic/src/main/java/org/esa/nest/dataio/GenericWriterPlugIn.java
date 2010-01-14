@@ -9,7 +9,7 @@ import java.io.File;
 import java.util.Locale;
 
 
-class GenericWriterPlugIn implements ProductWriterPlugIn {
+public class GenericWriterPlugIn implements ProductWriterPlugIn {
 
     private static final String FORMAT_NAME = "Generic Binary";
     private final static String FILE_EXTENSION = ".bin";

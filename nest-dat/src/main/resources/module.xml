@@ -104,8 +104,8 @@
         <toolView>
             <id>org.esa.nest.dat.toolviews.worldmap.NestWorldMapToolView</id>
             <class>org.esa.nest.dat.toolviews.worldmap.NestWorldMapToolView</class>
-            <title>Old World Map</title>
-            <tabTitle>Old World Map</tabTitle>
+            <title>Beam World Map</title>
+            <tabTitle>Beam World Map</tabTitle>
             <mnemonic>W</mnemonic>
             <accelerator>ctrl alt W</accelerator>
             <description>Display product boundaries in a world map.</description>

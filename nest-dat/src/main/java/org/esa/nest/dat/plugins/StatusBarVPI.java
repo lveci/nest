@@ -16,7 +16,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 
-class StatusBarVPI extends AbstractVisatPlugIn {
+public class StatusBarVPI extends AbstractVisatPlugIn {
 
     private VisatApp _visatApp;
     private LabelStatusBarItem _dimensionStatusBarItem;

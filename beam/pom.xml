@@ -564,7 +564,6 @@
                     <version>2.3-bc</version>
                     <configuration>
                         <downloadSources>true</downloadSources>
-                        <downloadJavadocs>true</downloadJavadocs>
                     </configuration>
                 </plugin>
 
@@ -602,7 +601,7 @@
                     </descriptors>
                 </configuration>
             </plugin>
-            
+
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
                 <configuration>
@@ -613,7 +612,7 @@
                                 <include>**/*</include>
                             </includes>
                         </fileset>
-                    </filesets>                        
+                    </filesets>
                 </configuration>
             </plugin>
         </plugins>
@@ -667,18 +666,18 @@
             </roles>
         </developer>
         <developer>
-            <id>tom</id>
-            <name>Thomas Block</name>
-            <email>thomas.block@brockmann-consult.de</email>
+            <id>sabine</id>
+            <name>Sabine Embacher</name>
+            <email>sabine.embacher@brockmann-consult.de</email>
             <organization>Brockmann Consult</organization>
             <roles>
                 <role>Java Developer</role>
             </roles>
         </developer>
         <developer>
-            <id>sabine</id>
-            <name>Sabine Embacher</name>
-            <email>sabine.embacher@brockmann-consult.de</email>
+            <id>tom</id>
+            <name>Thomas Block</name>
+            <email>thomas.block@brockmann-consult.de</email>
             <organization>Brockmann Consult</organization>
             <roles>
                 <role>Java Developer</role>

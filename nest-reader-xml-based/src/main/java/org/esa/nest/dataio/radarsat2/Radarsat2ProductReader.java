@@ -18,7 +18,7 @@ import java.io.IOException;
  * The product reader for Radarsat2 products.
  *
  */
-class Radarsat2ProductReader extends AbstractProductReader {
+public class Radarsat2ProductReader extends AbstractProductReader {
 
     private Radarsat2ProductDirectory _dataDir = null;
 

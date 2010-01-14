@@ -16,7 +16,7 @@ import org.esa.beam.framework.datamodel.Product;
  * The type descriptor of the {@link org.esa.nest.dat.layersrc.WindFieldEstimationLayer}.
  *
  */
-class WindFieldEstimationLayerType extends LayerType {
+public class WindFieldEstimationLayerType extends LayerType {
 
     static LayerType instance = new WindFieldEstimationLayerType();
 

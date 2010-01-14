@@ -22,7 +22,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 
 
-class ImageIOWriter extends AbstractProductWriter {
+public class ImageIOWriter extends AbstractProductWriter {
 
     private ImageOutputStream _outputStream;
     private ImageIOFile imgIOFile = null;

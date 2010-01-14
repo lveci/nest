@@ -7,7 +7,7 @@ import org.esa.beam.framework.datamodel.Product;
 
 import java.io.IOException;
 
-class ACEElevationTile {
+public class ACEElevationTile {
 
     private ACEElevationModel _dem;
     private CachingObjectArray _linesCache;

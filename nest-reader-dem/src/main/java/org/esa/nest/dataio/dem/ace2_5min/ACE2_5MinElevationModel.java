@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-class ACE2_5MinElevationModel implements ElevationModel, Resampling.Raster {
+public class ACE2_5MinElevationModel implements ElevationModel, Resampling.Raster {
 
     private static final int NUM_X_TILES = ACE2_5MinElevationModelDescriptor.NUM_X_TILES;
     private static final int NUM_Y_TILES = ACE2_5MinElevationModelDescriptor.NUM_Y_TILES;

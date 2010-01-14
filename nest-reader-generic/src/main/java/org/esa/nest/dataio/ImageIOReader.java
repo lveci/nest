@@ -19,7 +19,7 @@ import java.util.Map;
  * The product reader for ImageIO products.
  *
  */
-class ImageIOReader extends AbstractProductReader {
+public class ImageIOReader extends AbstractProductReader {
 
     private ImageIOFile imgIOFile = null;
     private String productType = "productType";

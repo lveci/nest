@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-class ACEElevationModel implements ElevationModel, Resampling.Raster {
+public class ACEElevationModel implements ElevationModel, Resampling.Raster {
 
     private static final int NUM_X_TILES = ACEElevationModelDescriptor.NUM_X_TILES;
     private static final int NUM_Y_TILES = ACEElevationModelDescriptor.NUM_Y_TILES;

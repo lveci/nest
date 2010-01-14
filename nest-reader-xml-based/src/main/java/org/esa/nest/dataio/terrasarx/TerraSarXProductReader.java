@@ -22,7 +22,7 @@ import java.util.Arrays;
  * The product reader for TerraSarX products.
  *
  */
-class TerraSarXProductReader extends AbstractProductReader {
+public class TerraSarXProductReader extends AbstractProductReader {
 
     private TerraSarXProductDirectory _dataDir = null;
 

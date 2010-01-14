@@ -16,7 +16,7 @@ import java.io.File;
 import java.io.IOException;
 
 
-class NetCDFWriter extends AbstractProductWriter {
+public class NetCDFWriter extends AbstractProductWriter {
 
     private File _outputFile = null;
     private NetcdfFileWriteable netCDFWriteable = null;

@@ -10,7 +10,7 @@ import org.esa.beam.framework.datamodel.Product;
 import java.io.File;
 import java.io.IOException;
 
-class ACE2_5MinElevationTile {
+public class ACE2_5MinElevationTile {
 
     private ACE2_5MinElevationModel dem;
     private CachingObjectArray linesCache = null;

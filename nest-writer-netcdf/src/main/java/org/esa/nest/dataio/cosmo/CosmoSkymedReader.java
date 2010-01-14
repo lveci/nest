@@ -29,7 +29,7 @@ import java.util.Map;
  * The product reader for CosmoSkymed products.
  *
  */
-class CosmoSkymedReader extends AbstractProductReader {
+public class CosmoSkymedReader extends AbstractProductReader {
 
     private NetcdfFile netcdfFile = null;
     private Product product = null;

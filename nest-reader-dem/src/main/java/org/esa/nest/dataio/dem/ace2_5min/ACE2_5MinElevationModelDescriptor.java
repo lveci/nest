@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDescriptor {
+public class ACE2_5MinElevationModelDescriptor extends AbstractElevationModelDescriptor {
 
     private static final String NAME = "ACE2_5Min";
     private static final String DB_FILE_SUFFIX = "_5M.ACE2";

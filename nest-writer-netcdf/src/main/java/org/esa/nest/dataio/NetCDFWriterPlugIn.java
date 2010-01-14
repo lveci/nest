@@ -9,7 +9,7 @@ import java.io.File;
 import java.util.Locale;
 
 
-class NetCDFWriterPlugIn implements ProductWriterPlugIn {
+public class NetCDFWriterPlugIn implements ProductWriterPlugIn {
 
     /**
      * Constructs a new product writer plug-in instance.

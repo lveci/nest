@@ -16,7 +16,7 @@ import org.esa.beam.framework.datamodel.Product;
  * The type descriptor of the {@link org.esa.nest.dat.layersrc.GCPVectorLayer}.
  *
  */
-class GCPVectorLayerType extends LayerType {
+public class GCPVectorLayerType extends LayerType {
 
     static LayerType instance = new GCPVectorLayerType();
 
