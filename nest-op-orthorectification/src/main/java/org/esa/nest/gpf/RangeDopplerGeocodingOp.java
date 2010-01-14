@@ -620,7 +620,8 @@ public class RangeDopplerGeocodingOp extends Operator {
                                                 0.0,
                                                 sourceProduct.getBandAt(0).getNoDataValue());
 
-        if (Double.compare(pixelSpacing, getPixelSpacing(sourceProduct)) != 0) {
+        if (Double.compare(pixelSpacing, 0.0) != 0 &&
+            Double.compare(pixelSpacing, getPixelSpacing(sourceProduct)) != 0) {
             computeImageGeoBoundary(sourceProduct, projectionName, imageGeoBoundary);
             computeDEMTraversalSampleInterval();
             mapInfo.setPixelSizeX((float)delLat);
