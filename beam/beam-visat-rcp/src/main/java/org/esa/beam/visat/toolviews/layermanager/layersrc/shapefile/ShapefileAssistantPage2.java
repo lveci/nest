@@ -154,7 +154,8 @@ class ShapefileAssistantPage2 extends AbstractLayerSourceAssistantPage {
             if (value != null) {
                 Style style = (Style) value;
                 InternationalString title = style.getDescription().getTitle();
-                text = title.toString();
+                if(title != null)
+                    text = title.toString();
             }
             label.setText(text);
             return label;
