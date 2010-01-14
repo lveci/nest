@@ -877,14 +877,20 @@ public class RangeDopplerGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.srgr_flag, 1);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_output_lines, targetImageHeight);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.num_samples_per_line, targetImageWidth);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_lat, AbstractMetadata.NO_METADATA);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_lat, AbstractMetadata.NO_METADATA);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_lat, AbstractMetadata.NO_METADATA);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_lat, AbstractMetadata.NO_METADATA);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_long, AbstractMetadata.NO_METADATA);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_long, AbstractMetadata.NO_METADATA);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, AbstractMetadata.NO_METADATA);
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, AbstractMetadata.NO_METADATA);
+
+        final GeoPos geoPosFirstNear = targetGeoCoding.getGeoPos(new PixelPos(0,0), null);
+        final GeoPos geoPosFirstFar = targetGeoCoding.getGeoPos(new PixelPos(targetImageWidth-1, 0), null);
+        final GeoPos geoPosLastNear = targetGeoCoding.getGeoPos(new PixelPos(0,targetImageHeight-1), null);
+        final GeoPos geoPosLastFar = targetGeoCoding.getGeoPos(new PixelPos(targetImageWidth-1, targetImageHeight-1), null);
+
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_lat, geoPosFirstNear.getLat());
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_lat, geoPosFirstFar.getLat());
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_lat, geoPosLastNear.getLat());
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_lat, geoPosLastFar.getLat());
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_near_long, geoPosFirstNear.getLon());
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_far_long, geoPosFirstFar.getLon());
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_near_long, geoPosLastNear.getLon());
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.last_far_long, geoPosLastFar.getLon());
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.TOT_SIZE, ReaderUtils.getTotalSize(targetProduct));
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, IdentityTransformDescriptor.NAME);
         if (!useAvgSceneHeight) {
