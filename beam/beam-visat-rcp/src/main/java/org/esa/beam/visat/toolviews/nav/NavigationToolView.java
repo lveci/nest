@@ -1,5 +1,5 @@
 /*
- * $Id: NavigationToolView.java,v 1.3 2009-12-21 16:13:41 lveci Exp $
+ * $Id: NavigationToolView.java,v 1.4 2010-01-14 20:35:27 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -240,7 +240,7 @@ public class NavigationToolView extends AbstractToolView {
         final JSpinner.NumberEditor editor = (JSpinner.NumberEditor) rotationAngleSpinner.getEditor();
         rotationAngleField = editor.getTextField();
         final DecimalFormat rotationFormat;
-        rotationFormat = new DecimalFormat("#####.##°", decimalFormatSymbols);
+        rotationFormat = new DecimalFormat("#####.##", decimalFormatSymbols);
         rotationFormat.setGroupingUsed(false);
         rotationFormat.setDecimalSeparatorAlwaysShown(false);
         rotationAngleField.setFormatterFactory(new JFormattedTextField.AbstractFormatterFactory() {
