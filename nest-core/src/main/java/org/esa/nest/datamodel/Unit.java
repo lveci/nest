@@ -57,4 +57,7 @@ public final class Unit {
 
     public static final String DEGREES = "deg";
     public static final String NANOSECONDS = "ns";
+
+    // temporary unit, should be removed later and use bit mask
+    public static final String BIT = "bit";
 }
