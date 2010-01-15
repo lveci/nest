@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGeoCoding.java,v 1.6 2009-11-11 20:19:25 lveci Exp $
+ * $Id: TiePointGeoCoding.java,v 1.7 2010-01-15 21:45:01 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -49,6 +49,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
     private TiePointGrid _normalizedLonGrid; // TODO - remove instance!
 
     private Approximation[] _approximations;
+    private boolean approximationsInitialized = false;
     private float _latMin;
     private float _latMax;
 
@@ -95,7 +96,6 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         // detection disabled, mz,mp 18.03.2008
         // test show big improvements for AVHRR and small ones for MERIS
 //        _swathResampling = detectSwathResampling();
-        initApproximations();
     }
 
     /**
@@ -125,7 +125,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      * @return the number of approximations, zero if no approximations could be computed
      */
     public int getNumApproximations() {
-        return _approximations != null ? _approximations.length : 0;
+        return getApproximations() != null ? getApproximations().length : 0;
     }
 
     /**
@@ -136,7 +136,14 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      * @return the approximation, never null
      */
     public Approximation getApproximation(int index) {
-        return _approximations[index];
+        return getApproximations()[index];
+    }
+
+    private Approximation[] getApproximations() {
+        if(!approximationsInitialized) {
+            initApproximations();
+        }
+        return _approximations;
     }
 
     /**
@@ -156,7 +163,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public boolean canGetPixelPos() {
-        return _approximations != null;
+        return getApproximations() != null;
     }
 
     /**
@@ -208,7 +215,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
-        final Approximation[] approximations = _approximations;
+        final Approximation[] approximations = getApproximations();
         if (approximations != null) {
             float lat = normalizeLat(geoPos.lat);
             float lon = normalizeLon(geoPos.lon);
@@ -464,6 +471,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
             }
             _approximations[i] = approximation;
         }
+        approximationsInitialized = true;
     }
 
     private static FXYSum getBestPolynomial(double[][] data, int[] indices) {
