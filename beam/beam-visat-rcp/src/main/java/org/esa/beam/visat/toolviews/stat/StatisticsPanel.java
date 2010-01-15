@@ -165,12 +165,12 @@ class StatisticsPanel extends TextPagePanel implements MultipleRoiComputePanel.C
         sb.append("\n");
         
         if (maskUsed) {
-            sb.append("ROI-Mask name:  \t");
+            sb.append("ROI-Mask name:  \t\t");
             sb.append(mask.getName());
             sb.append("\n");
         }
 
-        sb.append("Number of pixels total:      \t");
+        sb.append("Number of pixels total:      \t\t");
         sb.append(numPixelTotal);
         sb.append("\n");
 
@@ -186,13 +186,13 @@ class StatisticsPanel extends TextPagePanel implements MultipleRoiComputePanel.C
 
         sb.append("\n");
 
-        sb.append("Minimum:  \t");
+        sb.append("Minimum:  \t\t\t");
         sb.append(getMin(stat));
         sb.append("\t ");
         sb.append(unit);
         sb.append("\n");
 
-        sb.append("Maximum:  \t");
+        sb.append("Maximum:  \t\t\t");
         sb.append(getMax(stat));
         sb.append("\t ");
         sb.append(unit);
@@ -200,17 +200,31 @@ class StatisticsPanel extends TextPagePanel implements MultipleRoiComputePanel.C
 
         sb.append("\n");
 
-        sb.append("Mean:     \t");
+        sb.append("Mean:     \t\t\t");
         sb.append(getMean(stat));
         sb.append("\t ");
         sb.append(unit);
         sb.append("\n");
 
-        sb.append("Std-Dev:  \t");
+        sb.append("Std-Dev:  \t\t\t");
         sb.append(getStandardDeviation(stat));
         sb.append("\t ");
         sb.append(unit);
         sb.append("\n");
+
+        sb.append("Coefficient of Variation:\t\t");
+        sb.append(stat.getCoefficientOfVariation());
+        sb.append("\t ");
+        sb.append(unit);
+        sb.append("\n");
+
+        if (maskUsed) {
+            sb.append("Equivilant Number of Looks:\t");
+            sb.append(stat.getEquivilantNumberOfLooks());
+            sb.append("\t ");
+            sb.append("looks");
+            sb.append("\n");
+        }
         return sb.toString();
     }
 
