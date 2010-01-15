@@ -21,7 +21,7 @@ import java.util.Map;
 
 /**
  */
-@OperatorMetadata(alias="TileStackOp")
+@OperatorMetadata(alias="TileStackOp", internal=true)
 public class TileStackOp extends Operator {
 
     @SourceProduct(alias="source")

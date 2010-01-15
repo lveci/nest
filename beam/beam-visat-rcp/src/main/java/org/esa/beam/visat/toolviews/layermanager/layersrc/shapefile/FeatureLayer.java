@@ -10,8 +10,8 @@ import org.geotools.map.DefaultMapContext;
 import org.geotools.map.MapContext;
 import org.geotools.map.MapLayer;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.geotools.renderer.label.LabelCacheImpl;
 import org.geotools.renderer.lite.LabelCache;
-import org.geotools.renderer.lite.LabelCacheDefault;
 import org.geotools.renderer.lite.StreamingRenderer;
 import org.geotools.styling.Fill;
 import org.geotools.styling.PolygonSymbolizer;
@@ -40,7 +40,7 @@ import java.util.Map;
  *
  * @author Marco Peters
  * @author Marco Zühlke
- * @version $Revision: 1.10 $ $Date: 2009-12-11 20:46:14 $
+ * @version $Revision: 1.11 $ $Date: 2010-01-15 14:18:33 $
  * @since BEAM 4.6
  */
 public class FeatureLayer extends Layer {
@@ -133,7 +133,7 @@ public class FeatureLayer extends Layer {
         if (hints.containsKey(StreamingRenderer.LABEL_CACHE_KEY)) {
             labelCache = (LabelCache) hints.get(StreamingRenderer.LABEL_CACHE_KEY);
         } else {
-            labelCache = new LabelCacheDefault();
+            labelCache = new LabelCacheImpl();
             hints.put(StreamingRenderer.LABEL_CACHE_KEY, labelCache);
         }
         renderer.setRendererHints(hints);

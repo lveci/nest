@@ -172,6 +172,10 @@ public final class SARSimulationOp extends Operator {
 
             createTargetProduct();
 
+            if(externalDEMFile == null) {
+                RangeDopplerGeocodingOp.checkIfDEMInstalled(demName);
+            }
+
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
@@ -220,20 +224,6 @@ public final class SARSimulationOp extends Operator {
     private void getSourceImageDimension() {
         sourceImageWidth = sourceProduct.getSceneRasterWidth();
         sourceImageHeight = sourceProduct.getSceneRasterHeight();
-    }
-
-    private void checkIfDEMInstalled() {
-        if(externalDEMFile == null) {
-            final ElevationModelRegistry elevationModelRegistry = ElevationModelRegistry.getInstance();
-            final ElevationModelDescriptor demDescriptor = elevationModelRegistry.getDescriptor(demName);
-            if (demDescriptor == null) {
-                throw new OperatorException("The DEM '" + demName + "' is not supported.");
-            }
-
-            if (!demDescriptor.isInstallingDem() && !demDescriptor.isDemInstalled()) {
-                demDescriptor.installDemFiles(VisatApp.getApp());
-            }
-        }
     }
 
     /**

@@ -278,6 +278,9 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             updateTargetProductMetadata();
 
+            if(externalDEMFile == null) {
+                checkIfDEMInstalled(demName);
+            }
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
@@ -598,6 +601,21 @@ public class RangeDopplerGeocodingOp extends Operator {
             demNoDataValue = dem.getDescriptor().getNoDataValue();
         }
         isElevationModelAvailable = true;
+    }
+
+    public static void checkIfDEMInstalled(final String demName) {
+
+        final ElevationModelRegistry elevationModelRegistry = ElevationModelRegistry.getInstance();
+        final ElevationModelDescriptor demDescriptor = elevationModelRegistry.getDescriptor(demName);
+        if (demDescriptor == null) {
+            throw new OperatorException("The DEM '" + demName + "' is not supported.");
+        }
+
+        if (!demDescriptor.isInstallingDem() && !demDescriptor.isDemInstalled()) {
+            if(!demDescriptor.installDemFiles(VisatApp.getApp())) {
+                throw new OperatorException("DEM "+ demName +" must be installed first");                          
+            }
+        }
     }
 
     /**
