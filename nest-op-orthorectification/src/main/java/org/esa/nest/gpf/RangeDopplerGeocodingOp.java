@@ -399,8 +399,8 @@ public class RangeDopplerGeocodingOp extends Operator {
             }
         } else {
             if (applyRadiometricNormalization && mission.contains("ERS")) {
-                throw new OperatorException("For radiometric normalization of ERS product, please use 'PreCalibration" +
-                        " Range Doppler Terrain Correction' or 'PreCalibration SAR-Sim Terrain Correction'");
+                throw new OperatorException("For radiometric normalization of ERS product, please use 'Remove Antenna" +
+                        " Pattern' first to remove calibration factors applied and to apply ADC correction");
             }
         }
     }
