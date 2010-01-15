@@ -18,8 +18,6 @@ import org.esa.beam.framework.datamodel.Product;
  */
 public class WindFieldEstimationLayerType extends LayerType {
 
-    static LayerType instance = new WindFieldEstimationLayerType();
-
     public static WindFieldEstimationLayer createLayer(final Product product, final Band band) {
         final LayerType type = LayerTypeRegistry.getLayerType(WindFieldEstimationLayerType.class);
         final PropertySet template = type.createLayerConfig(null);

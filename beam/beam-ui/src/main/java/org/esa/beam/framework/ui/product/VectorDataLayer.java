@@ -1,5 +1,5 @@
 /*
- * $Id: VectorDataLayer.java,v 1.7 2010-01-13 16:39:23 lveci Exp $
+ * $Id: VectorDataLayer.java,v 1.8 2010-01-15 16:23:03 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -19,6 +19,7 @@ package org.esa.beam.framework.ui.product;
 import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
+import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.swing.figure.Figure;
 import com.bc.ceres.swing.figure.FigureChangeEvent;
@@ -43,7 +44,7 @@ import java.util.Map;
 
 public class VectorDataLayer extends Layer {
 
-    private static final VectorDataLayerType TYPE = new VectorDataLayerType();
+    private static final VectorDataLayerType TYPE = LayerTypeRegistry.getLayerType(VectorDataLayerType.class);
     private VectorDataNode vectorDataNode;
     private final SimpleFeatureFigureFactory figureFactory;
     private FigureCollection figureCollection;

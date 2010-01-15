@@ -26,7 +26,7 @@
     </dependency>
 
 
-    <extension point="beam-visat-rcp:layerSources">
+    <extension point="beam-ui:layerSources">
         <layerSource>
             <id>gcp-vector-layer-source</id>
             <name>GCP Movement Vector</name>

@@ -31,16 +31,13 @@
     <categories>Processing</categories>
 
 
-    <extension point="beam-visat-rcp:layerSources">
+    <extension point="beam-ui:layerSources">
         <layerSource>
             <id>object-detection-layer-source</id>
             <name>Object Detection Results</name>
             <description>Shows detected objects</description>
             <class>org.esa.nest.dat.layersrc.ObjectDetectionLayerSource</class>
         </layerSource>
-    </extension>
-	
-    <extension point="beam-visat-rcp:layerSources">
         <layerSource>
             <id>wind-field-estimation-layer-source</id>
             <name>Wind Field Estimation Results</name>

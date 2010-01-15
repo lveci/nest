@@ -18,8 +18,6 @@ import org.esa.beam.framework.datamodel.Product;
  */
 public class GCPVectorLayerType extends LayerType {
 
-    static LayerType instance = new GCPVectorLayerType();
-
     public static GCPVectorLayer createLayer(final Product product, final Band band) {
         final LayerType type = LayerTypeRegistry.getLayerType(GCPVectorLayerType.class);
         final PropertySet template = type.createLayerConfig(null);

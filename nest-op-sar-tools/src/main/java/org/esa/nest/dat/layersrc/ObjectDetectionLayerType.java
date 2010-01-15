@@ -18,8 +18,6 @@ import org.esa.beam.framework.datamodel.Product;
  */
 public class ObjectDetectionLayerType extends LayerType {
 
-    static LayerType instance = new ObjectDetectionLayerType();
-
     public static ObjectDetectionLayer createLayer(final Product product, final Band band) {
         final LayerType type = LayerTypeRegistry.getLayerType(ObjectDetectionLayerType.class);
         final PropertySet template = type.createLayerConfig(null);
