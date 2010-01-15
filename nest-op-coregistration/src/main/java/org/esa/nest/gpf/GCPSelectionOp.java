@@ -302,7 +302,7 @@ public class GCPSelectionOp extends Operator {
                 if (slaveBand == masterBand1 || slaveBand == masterBand2)
                     continue;
                 final String unit = slaveBand.getUnit();
-                if(unit != null && unit.contains(Unit.IMAGINARY))
+                if(unit != null && (unit.contains(Unit.IMAGINARY) || unit.contains(Unit.BIT)))
                     continue;
 
                 if(complexCoregistration) {
