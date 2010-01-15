@@ -242,8 +242,6 @@ public class WarpOp extends Operator {
     }
 
     private void addSlaveGCPs(final WarpData warpData, final String bandName) {
-        targetProduct.getGcpGroup(targetProduct.getBand(bandName));
-
         OperatorUtils.copyGCPsToTarget(warpData.slaveGCPGroup,
                 targetProduct.getGcpGroup(targetProduct.getBand(bandName)));
     }
