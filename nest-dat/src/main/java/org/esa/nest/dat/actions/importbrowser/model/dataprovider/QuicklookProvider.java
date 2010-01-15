@@ -29,7 +29,7 @@ import java.util.Comparator;
 
 public class QuicklookProvider implements DataProvider {
 
-    private final Comparator quickLookComparator = new QuickLookComparator();
+    private final static Comparator quickLookComparator = new QuickLookComparator();
     private final int maxWidth;
     private TableColumn quickLookColumn;
 
@@ -73,9 +73,9 @@ public class QuicklookProvider implements DataProvider {
     }
 
     static BufferedImage averageWithJAI(BufferedImage image) {
-        int width = 8;
-        int height = 8;
-        RenderedOp rendered = JAI.create("boxfilter", image,
+        final int width = 8;
+        final int height = 8;
+        final RenderedOp rendered = JAI.create("boxfilter", image,
                                  width, height,
                                  width/2, height/2);
 
@@ -84,9 +84,9 @@ public class QuicklookProvider implements DataProvider {
 
     static RenderedImage downSampleImage(RenderedImage image) {
 
-        int size = 4;
-        double scaleX = 1.0 / size;
-        double scaleY = 1.0 / size;
+        final int size = 4;
+        final double scaleX = 1.0 / size;
+        final double scaleY = 1.0 / size;
         return SubsampleAverageDescriptor.create(image, scaleX, scaleY, null);
     }
 
@@ -129,10 +129,10 @@ public class QuicklookProvider implements DataProvider {
     private static BufferedImage createRenderedImage(byte[] array, int w, int h, Raster raster) {
 
         // create rendered image with demension being width by height
-        SampleModel sm = RasterFactory.createBandedSampleModel(DataBuffer.TYPE_BYTE, w, h, 1);
-        ColorModel cm = PlanarImage.createColorModel(sm);
-        DataBufferByte dataBuffer = new DataBufferByte(array, array.length);
-        WritableRaster writeraster = RasterFactory.createWritableRaster(sm, dataBuffer, new Point(0,0));
+        final SampleModel sm = RasterFactory.createBandedSampleModel(DataBuffer.TYPE_BYTE, w, h, 1);
+        final ColorModel cm = PlanarImage.createColorModel(sm);
+        final DataBufferByte dataBuffer = new DataBufferByte(array, array.length);
+        final WritableRaster writeraster = RasterFactory.createWritableRaster(sm, dataBuffer, new Point(0,0));
 
         return new BufferedImage(cm, writeraster, cm.isAlphaPremultiplied(), null);
     }
@@ -173,7 +173,7 @@ public class QuicklookProvider implements DataProvider {
 
     private BufferedImage createQuickLook(final Product product) throws IOException {
         final ProductSubsetDef productSubsetDef = new ProductSubsetDef("subset");
-        int scaleFactor = product.getSceneRasterWidth() / maxWidth;
+        int scaleFactor = Math.max(product.getSceneRasterWidth(), product.getSceneRasterHeight()) / maxWidth;
         if (scaleFactor < 1) {
             scaleFactor = 1;
         }
@@ -252,9 +252,14 @@ public class QuicklookProvider implements DataProvider {
             if (data.quickLook != null) {
                 final BufferedImage image = data.quickLook;
                 final TableColumn tableColumn = table.getColumnModel().getColumn(column);
-                final int cellWidth = tableColumn.getWidth();
+                int cellWidth = tableColumn.getWidth();
+                int cellHeight = tableColumn.getWidth();
+                if(image.getHeight() > image.getWidth())
+                    cellWidth = -1;
+                else
+                    cellHeight = -1;
                 tableComponent.setIcon(
-                        new ImageIcon(image.getScaledInstance(cellWidth, -1, BufferedImage.SCALE_DEFAULT)));
+                        new ImageIcon(image.getScaledInstance(cellWidth, cellHeight, BufferedImage.SCALE_FAST)));
                 tableComponent.setText("");
                 setTableRowHeight(table, row);
             } else {
@@ -304,10 +309,8 @@ public class QuicklookProvider implements DataProvider {
             if (image == null) {
                 return null;
             }
-            final TableColumn tableColumn = table.getColumnModel().getColumn(column);
-            final int cellWidth = tableColumn.getWidth();
             scrollPane.setViewportView(
-                    new JLabel(new ImageIcon(image.getScaledInstance(cellWidth, -1, BufferedImage.SCALE_DEFAULT))));
+                    new JLabel(new ImageIcon(image.getScaledInstance(-1, -1, BufferedImage.SCALE_AREA_AVERAGING))));
             final Color backgroundColor = table.getSelectionBackground();
             scrollPane.setBackground(backgroundColor);
             scrollPane.setBorder(BorderFactory.createLineBorder(backgroundColor, 3));

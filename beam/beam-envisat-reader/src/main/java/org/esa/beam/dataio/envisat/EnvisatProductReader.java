@@ -1,5 +1,5 @@
 /*
- * $Id: EnvisatProductReader.java,v 1.9 2009-12-23 16:42:11 lveci Exp $
+ * $Id: EnvisatProductReader.java,v 1.10 2010-01-15 21:45:20 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -44,7 +44,7 @@ import java.util.Vector;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.9 $ $Date: 2009-12-23 16:42:11 $
+ * @version $Revision: 1.10 $ $Date: 2010-01-15 21:45:20 $
  * @see org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn
  */
 public class EnvisatProductReader extends AbstractProductReader {
@@ -481,17 +481,17 @@ public class EnvisatProductReader extends AbstractProductReader {
     private void addDatasetAnnotationsToProduct(Product product) throws IOException {
         Debug.assertNotNull(_productFile);
         Debug.assertNotNull(product);
-        String[] datasetNames = _productFile.getValidDatasetNames();
+        final String[] datasetNames = _productFile.getValidDatasetNames();
         for (String datasetName : datasetNames) {
-            DSD dsd = _productFile.getDSD(datasetName);
+            final DSD dsd = _productFile.getDSD(datasetName);
             if (dsd.getDatasetType() == EnvisatConstants.DS_TYPE_ANNOTATION
                 || dsd.getDatasetType() == EnvisatConstants.DS_TYPE_GLOBAL_ANNOTATION) {
-                RecordReader recordReader = _productFile.getRecordReader(datasetName);
+                final RecordReader recordReader = _productFile.getRecordReader(datasetName);
                 if (recordReader.getNumRecords() == 1) {
-                    MetadataElement table = createDatasetTable(datasetName, recordReader);
+                    final MetadataElement table = createDatasetTable(datasetName, recordReader);
                     product.getMetadataRoot().addElement(table);
                 } else if (recordReader.getNumRecords() > 1) {
-                    MetadataElement group = createMetadataTableGroup(datasetName, recordReader);
+                    final MetadataElement group = createMetadataTableGroup(datasetName, recordReader);
                     product.getMetadataRoot().addElement(group);
                 }
             }
@@ -613,15 +613,14 @@ public class EnvisatProductReader extends AbstractProductReader {
         Debug.assertTrue(name != null);
         Debug.assertTrue(recordReader != null);
 
-        MetadataElement metadataTableGroup = new MetadataElement(name);
-        StringBuffer sb = new StringBuffer(16);
+        final MetadataElement metadataTableGroup = new MetadataElement(name);
+        final StringBuffer sb = new StringBuffer(16);
         for (int i = 0; i < recordReader.getNumRecords(); i++) {
-            Record record = recordReader.readRecord(i);
             sb.setLength(0);
             sb.append(name);
             sb.append('.');
             sb.append(i + 1);
-            metadataTableGroup.addElement(createMetadataGroup(sb.toString(), record));
+            metadataTableGroup.addElement(createMetadataGroup(sb.toString(), recordReader.readRecord(i)));
         }
 
         return metadataTableGroup;
@@ -636,20 +635,21 @@ public class EnvisatProductReader extends AbstractProductReader {
         final int numFields = record.getNumFields();
         for (int i = 0; i < numFields; i++) {
             final Field field = record.getFieldAt(i);
+            final FieldInfo info = field.getInfo();
 
-            final String description = field.getInfo().getDescription();
+            final String description = info.getDescription();
             if (description != null) {
                 if ("Spare".equalsIgnoreCase(description)) {
                     continue;
                 }
             }
 
-            final MetadataAttribute attribute = new MetadataAttribute(field.getName(), field.getData(), true);
-            if (field.getInfo().getPhysicalUnit() != null) {
-                attribute.setUnit(field.getInfo().getPhysicalUnit());
+            final MetadataAttribute attribute = new MetadataAttribute(info.getName(), field.getData(), true);
+            if (info.getPhysicalUnit() != null) {
+                attribute.setUnit(info.getPhysicalUnit());
             }
             //if (description != null) {
-                //attribute.setDescription(field.getInfo().getDescription());
+                //attribute.setDescription(info.getDescription());
             //}
 
             metadataGroup.addAttribute(attribute);
