@@ -139,6 +139,7 @@ public final class SARSimulationOp extends Operator {
     private AbstractMetadata.SRGRCoefficientList[] srgrConvParams = null;
 
     private static final double halfLightSpeedInMetersPerDay = Constants.halfLightSpeed * 86400.0;
+    private static String SIMULATED_BAND_NAME = "Simulated_Intensity";
 
     /**
      * Initializes this operator and sets the one and only target product.
@@ -342,25 +343,14 @@ public final class SARSimulationOp extends Operator {
 
     private void addSelectedBands() {
 
-        // add master band first
-        Band targetBand = new Band("Intensity_mst",
+        // add simulated band first (which will be the master in GCP selection in SAR Sim TC)
+        Band targetBand = new Band(SIMULATED_BAND_NAME,
                                    ProductData.TYPE_FLOAT32,
                                    sourceImageWidth,
                                    sourceImageHeight);
 
         targetBand.setUnit(Unit.INTENSITY);
         targetProduct.addBand(targetBand);
-
-        // add layover/shadow mask band
-        if (saveLayoverShadowMask) {
-            targetBand = new Band(layoverShadowMaskBandName,
-                                  ProductData.TYPE_INT8,
-                                  sourceImageWidth,
-                                  sourceImageHeight);
-
-            targetBand.setUnit(Unit.AMPLITUDE);
-            targetProduct.addBand(targetBand);
-        }
 
         // add selected slave bands
         boolean bandSlected = false;
@@ -399,6 +389,17 @@ public final class SARSimulationOp extends Operator {
             targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct);
             targetBand.setSourceImage(srcBand.getSourceImage());
         }
+
+        // add layover/shadow mask band
+        if (saveLayoverShadowMask) {
+            targetBand = new Band(layoverShadowMaskBandName,
+                                  ProductData.TYPE_INT8,
+                                  sourceImageWidth,
+                                  sourceImageHeight);
+
+            targetBand.setUnit(Unit.BIT);
+            targetProduct.addBand(targetBand);
+        }
     }
 
     /**
@@ -427,8 +428,8 @@ public final class SARSimulationOp extends Operator {
         final int h  = targetRectangle.height;
         //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
-        final Tile targetTile = targetTiles.get(targetProduct.getBand("Intensity_mst"));
-        final ProductData masterBuffer = targetTiles.get(targetProduct.getBand("Intensity_mst")).getDataBuffer();
+        final Tile targetTile = targetTiles.get(targetProduct.getBand(SIMULATED_BAND_NAME));
+        final ProductData masterBuffer = targetTiles.get(targetProduct.getBand(SIMULATED_BAND_NAME)).getDataBuffer();
         ProductData layoverShadowMaskBuffer = null;
         if (saveLayoverShadowMask) {
             layoverShadowMaskBuffer = targetTiles.get(targetProduct.getBand("layover_shadow_mask")).getDataBuffer();
