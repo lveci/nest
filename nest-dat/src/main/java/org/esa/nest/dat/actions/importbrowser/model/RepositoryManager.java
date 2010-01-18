@@ -2,14 +2,20 @@ package org.esa.nest.dat.actions.importbrowser.model;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.util.Debug;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.nest.dat.actions.importbrowser.ImportBrowserAction;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.DataProvider;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.FileNameProvider;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.SelectionProvider;
 import org.esa.nest.dat.actions.importbrowser.util.Callback;
+import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.gpf.OperatorUtils;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -201,7 +207,7 @@ public class RepositoryManager {
 
         this.pm = pm;
 
-        final UpdateProcess updateProcess = new UpdateProcess(repository, pm, uiCallback);
+        final UpdateProcess updateProcess = new UpdateProcess(repository, pm, uiCallback, this);
         updateProcess.execute();
     }
 
@@ -230,15 +236,24 @@ public class RepositoryManager {
         }
     }
 
+    private void fireUpdateRepositoryUI() {
+        for (final RepositoryManagerListener listener : listenerList) {
+            listener.updateRepositoryUI();
+        }
+    }
+
     private class UpdateProcess extends SwingWorker<List<ExceptionObject>, Object> {
 
         private final Repository repository;
         private final Runnable uiRunnable;
         private final ProgressMonitor pm;
+        private final RepositoryManager repoMan;
 
-        public UpdateProcess(final Repository repository, final ProgressMonitor pm, final Callback uiCallback) {
+        public UpdateProcess(final Repository repository, final ProgressMonitor pm, final Callback uiCallback,
+                             final RepositoryManager repoMan) {
             this.pm = pm;
             this.repository = repository;
+            this.repoMan = repoMan;
             uiRunnable = new Runnable() {
                 public void run() {
                     uiCallback.callback();
@@ -285,12 +300,14 @@ public class RepositoryManager {
                     }
                     final RepositoryEntry entry = repository.getEntry(i);
                     try {
+                        if (pm.isCanceled()) {
+                            return exceptionList;
+                        }
+
                         if (!entry.getProductFile().exists()) {
                             // start at product properties, we already have name and size
                             for (int j = 2; j <= maxProvider; j++) {
-                                if (pm.isCanceled()) {
-                                    return exceptionList;
-                                }
+
                                 final DataProvider dataProvider = dataProviderList.get(j);
                                 messageArgs[2] = dataProvider.getTableColumn().getHeaderValue();
                                 pm.setSubTaskName(
@@ -301,40 +318,11 @@ public class RepositoryManager {
                                 pm.worked(1);
                             }
                         } else {
-                            try {
-                                if (entry.getProduct() == null) {
-                                    entry.openProduct();
-                                }
+                            pm.setSubTaskName(MessageFormat.format("Updating repository entry {0} of {1}",
+                                        messageArgs)); /*I18N*/
 
-                                // start at product properties, we already have name and size
-                                for (int j = 2; j <= maxProvider; j++) {
-                                    if (pm.isCanceled()) {
-                                        return exceptionList;
-                                    }
-                                    final DataProvider dataProvider = dataProviderList.get(j);
-                                    messageArgs[2] = dataProvider.getTableColumn().getHeaderValue();
-                                    pm.setSubTaskName(
-                                            MessageFormat.format("Updating repository entry {0} of {1}: {2}...",
-                                                                 messageArgs)); /*I18N*/
-                                    if (dataProvider.mustCreateData(entry, repository)) {
-                                        if (entry.getProduct() == null) {
-                                            entry.openProduct();
-                                            if (entry.getProduct() == null) {
-                                                pm.worked(maxProvider - j);
-                                                break;
-                                            }
-                                        }
-
-                                        dataProvider.createData(entry, repository);
-                                    }
-                                    final Object data = dataProvider.getData(entry, repository);
-                                    entry.setData(dataProvider.getTableColumn().getModelIndex(), data);
-                                    pm.worked(1);
-                                }
-                            } catch (Exception e) {
-                                exceptionList.add(new ExceptionObject(entry.getProductFile().getName(), e));
-                                entriesToRemove.add(entry);
-                            }
+                            updateDataProviders(entry, maxProvider, repository, dataProviderList, repoMan);
+                            pm.worked(1);
                         }
                     } finally {
                         //entry.closeProduct();
@@ -361,6 +349,7 @@ public class RepositoryManager {
                 exceptionList = new ArrayList<ExceptionObject>(1);
                 exceptionList.add(new ExceptionObject("", e));
             }
+            /*
             if (exceptionList != null && exceptionList.size() != 0) {
                 final StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append("Not able to read the following file(s):\n\n");
@@ -371,9 +360,54 @@ public class RepositoryManager {
                 }
                 final String message = stringBuilder.toString();
                 final JFrame pgFrame = ImportBrowserAction.getInstance().getImportBrowser().getFrame();
-                //JOptionPane.showMessageDialog(pgFrame, message, "I/O Errors", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(pgFrame, message, "I/O Errors", JOptionPane.ERROR_MESSAGE);
             }
+            */
         }
+    }
+
+    private static void updateDataProviders(final RepositoryEntry entry, final int maxProvider, final Repository repository,
+                                            final List<DataProvider> dataProviderList,
+                                            final RepositoryManager repoMan) {
+
+        final SwingWorker worker = new SwingWorker() {
+            @Override
+            protected Object doInBackground() throws Exception {
+                try {
+                    if (entry.getProduct() == null) {
+                        entry.openProduct();
+                    }
+
+                    // start at product properties, we already have name and size
+                    for (int j = 2; j <= maxProvider; j++) {
+
+                        final DataProvider dataProvider = dataProviderList.get(j);
+
+                        if (dataProvider.mustCreateData(entry, repository)) {
+                            if (entry.getProduct() == null) {
+                                entry.openProduct();
+                                if (entry.getProduct() == null) {
+                                    break;
+                                }
+                            }
+
+                            dataProvider.createData(entry, repository);
+                        }
+                        final Object data = dataProvider.getData(entry, repository);
+                        entry.setData(dataProvider.getTableColumn().getModelIndex(), data);
+                    }
+                } catch (Exception e) {
+                    //
+                }
+                return null;
+            }
+
+            @Override
+            public void done() {
+                repoMan.fireUpdateRepositoryUI();
+            }
+        };
+        worker.execute();
     }
 
     private static class ExceptionObject {

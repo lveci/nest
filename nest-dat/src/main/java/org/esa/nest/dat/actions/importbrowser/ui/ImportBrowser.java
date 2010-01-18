@@ -819,6 +819,10 @@ public class ImportBrowser {
             repositoryTree.RemoveRepository(repository);
             pgConfig.setRepositories(repositoryManager.getRepositories());
         }
+
+        public void updateRepositoryUI() {
+            UpdateUI();
+        }
     }
 
 

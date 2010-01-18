@@ -63,7 +63,7 @@ public class Repository {
      */
     public void savePropertyMap() {
         try {
-            _propertyMap.store(getPropertiesFile(), null);
+            getPropertyMap().store(getPropertiesFile(), null);
         } catch (IOException e) {
             e.printStackTrace();
         }

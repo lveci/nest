@@ -31,4 +31,5 @@ public interface RepositoryManagerListener {
      */
     void repositoryRemoved(Repository repository);
 
+    void updateRepositoryUI();
 }

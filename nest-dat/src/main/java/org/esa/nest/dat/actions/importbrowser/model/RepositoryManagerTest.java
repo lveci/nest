@@ -162,6 +162,10 @@ public class RepositoryManagerTest extends TestCase {
         public void dataProviderAdded(final DataProvider dataProvider) {
             countedEvents++;
         }
+
+        public void updateRepositoryUI() {
+            
+        }
     }
 
 }
