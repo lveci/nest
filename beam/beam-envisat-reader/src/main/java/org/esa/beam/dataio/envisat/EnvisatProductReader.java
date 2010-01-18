@@ -1,5 +1,5 @@
 /*
- * $Id: EnvisatProductReader.java,v 1.10 2010-01-15 21:45:20 lveci Exp $
+ * $Id: EnvisatProductReader.java,v 1.11 2010-01-18 20:00:59 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -44,7 +44,7 @@ import java.util.Vector;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.10 $ $Date: 2010-01-15 21:45:20 $
+ * @version $Revision: 1.11 $ $Date: 2010-01-18 20:00:59 $
  * @see org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn
  */
 public class EnvisatProductReader extends AbstractProductReader {
@@ -201,7 +201,6 @@ public class EnvisatProductReader extends AbstractProductReader {
         Debug.assertTrue(getSceneRasterHeight() > 0);
 
         File file = getProductFile().getFile();
-        System.out.println("Reading Envisat "+ file.getName());
         String productName;
         if (file != null) {
             final String mission = AsarAbstractMetadata.getMission(getProductFile().getProductType(), file);
@@ -285,7 +284,7 @@ public class EnvisatProductReader extends AbstractProductReader {
 
                 if (bandLineReader instanceof BandLineReader.Virtual) {
                     final BandLineReader.Virtual virtual = ((BandLineReader.Virtual) bandLineReader);
-                    band = new VirtualBand(bandName, ProductData.TYPE_FLOAT64,//bandInfo.getDataType(),
+                    band = new VirtualBand(bandName, ProductData.TYPE_FLOAT32,//bandInfo.getDataType(),
                                            width, height,
                                            virtual.getExpression());
                 } else {

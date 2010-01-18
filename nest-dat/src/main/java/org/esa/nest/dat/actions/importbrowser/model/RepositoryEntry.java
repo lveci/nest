@@ -18,10 +18,19 @@ public class RepositoryEntry {
     private final ArrayList _dataList;
     private Product _product;
     private boolean _selected;
+    private boolean dataProviderMustCreateData = false;
 
     public RepositoryEntry(final String productFilePath) {
         _productFile = new File(productFilePath);
         _dataList = new ArrayList();
+    }
+
+    public void setDataProviderMustCreateData(final boolean flag) {
+        dataProviderMustCreateData = flag;
+    }
+
+    public boolean getDataProviderMustCreateData() {
+        return dataProviderMustCreateData;
     }
 
     /**

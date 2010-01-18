@@ -35,6 +35,7 @@ public class ProductPropertiesProvider implements DataProvider {
     private static final String KEY_PRODUCT_IMAGE_SIZE = ".productProperties.ImageSize";
     private static final String KEY_PRODUCT_PIXEL_SIZE = ".productProperties.PixelSize";
     private static final String KEY_PRODUCT_SIZE = ".productproperties.Size";
+    private static final String KEY_PRODUCT_LAST_MODIFIED = ".productproperties.lastModified";
     private static final String[] PROPERTY_KEYS = new String[]{
             KEY_PRODUCT_TYPE,
             KEY_PRODUCT_SIZE,
@@ -43,6 +44,7 @@ public class ProductPropertiesProvider implements DataProvider {
             KEY_PRODUCT_START_TIME,
             KEY_PRODUCT_CENTER_LAT,
             KEY_PRODUCT_CENTER_LON,
+            //KEY_PRODUCT_LAST_MODIFIED,
     };
     private final String[] propertyLables = new String[]{
             "Type:",
@@ -52,6 +54,7 @@ public class ProductPropertiesProvider implements DataProvider {
             "Start time:",
             "Center lat.:",
             "Center lon.:",
+            //"Last Modified:",
     };
 
     private static final String NOT_AVAILABLE = "not available";
@@ -112,6 +115,8 @@ public class ProductPropertiesProvider implements DataProvider {
                 }
             }
 
+            final String lastModifiedStr = ""+entry.getProductFile().lastModified();
+
             propertyMap.setPropertyString(productName + KEY_PRODUCT_TYPE, productType);
             propertyMap.setPropertyString(productName + KEY_PRODUCT_IMAGE_SIZE, imageSizeString);
             propertyMap.setPropertyString(productName + KEY_PRODUCT_CENTER_LAT, latString);
@@ -119,6 +124,7 @@ public class ProductPropertiesProvider implements DataProvider {
             propertyMap.setPropertyString(productName + KEY_PRODUCT_START_TIME, timeString);
             propertyMap.setPropertyString(productName + KEY_PRODUCT_SIZE, sizeString);
             propertyMap.setPropertyString(productName + KEY_PRODUCT_PIXEL_SIZE, pixelSizeStr);
+            propertyMap.setPropertyString(productName + KEY_PRODUCT_LAST_MODIFIED, lastModifiedStr);
         } catch(Exception e) {
             System.out.println("ProductProperties createData failed :"+e.getMessage());
             throw new IOException(e);
@@ -133,7 +139,6 @@ public class ProductPropertiesProvider implements DataProvider {
         for (final String propertyKey : PROPERTY_KEYS) {
             final String typeString = propertyMap.getPropertyString(productName + propertyKey, null);
             properties.setPropertyString(propertyKey, typeString);
-
         }
         return properties;
     }
@@ -210,6 +215,7 @@ public class ProductPropertiesProvider implements DataProvider {
                 final String timeString = propertyMap.getPropertyString(KEY_PRODUCT_START_TIME, null);
                 final String latString = propertyMap.getPropertyString(KEY_PRODUCT_CENTER_LAT, null);
                 final String lonString = propertyMap.getPropertyString(KEY_PRODUCT_CENTER_LON, null);
+                final String lastModifiedStr = propertyMap.getPropertyString(KEY_PRODUCT_LAST_MODIFIED, "");
 
                 values = new String[]{typeString, sizeString, imageSizeString, pixelSizeString,
                                     timeString, latString, lonString};
@@ -221,7 +227,7 @@ public class ProductPropertiesProvider implements DataProvider {
                     setValueAt(null, i, 1);
                 }
             } else {
-                throw new IllegalStateException("!(value instanceof PropertyMap)");
+                //throw new IllegalStateException("!(value instanceof PropertyMap)");
             }
 
             final Color backgroundColor;

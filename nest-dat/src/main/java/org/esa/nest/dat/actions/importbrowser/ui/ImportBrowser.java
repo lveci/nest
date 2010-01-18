@@ -149,13 +149,15 @@ public class ImportBrowser {
         final int[] selectedRows = getSelectedRows();
         if(repository.getEntryCount() > selectedRows[0]) {
             final RepositoryEntry entry = repository.getEntry(selectedRows[0]);
+            if(entry.getProduct() == null) {
+                entry.openProduct();
+            }
             worldMapDataModel.setSelectedProduct(entry.getProduct());
         }
     }
 
     private void performOpenAction() {
         if (openHandler != null) {
-            //final Repository repository = (Repository) repositoryListCombo.getSelectedItem();
             final Repository repository = repositoryManager.getRepositoryShown();
             if (repository == null) {
                 return;
@@ -480,6 +482,7 @@ public class ImportBrowser {
 
     public void UpdateUI() {
         repositoryTable.updateUI();
+        updateWorldMap();
     }
 
     private RepositoryTree createTree() {
@@ -570,7 +573,7 @@ public class ImportBrowser {
         //repositoryManager.addDataProvider(new WorldMapProvider(false));
     }
 
-    public void ShowRepository(Repository repository) {
+    public void ShowRepository(final Repository repository) {
         repositoryManager.setRepositoryShown(repository);
         pgConfig.setLastSelectedRepository(repository);
         final RepositoryTableModel tableModel = new RepositoryTableModel(repository);
@@ -581,18 +584,27 @@ public class ImportBrowser {
                 new ProgressBarProgressMonitor(progressBar, statusLabel),
                 uiCallBack);
 
-        final ArrayList<Product> productList = new ArrayList<Product>(repository.getEntryCount());
-        for(int i=0; i < repository.getEntryCount(); ++i) {
-            final Product prod = repository.getEntry(i).getProduct();
-            if(prod != null) {
-                productList.add(prod);
+        updateWorldMap();
+    }
+
+    private void updateWorldMap() {
+        final Repository repository = repositoryManager.getRepositoryShown();
+        if(repository != null && worldMapDataModel != null) {
+
+            final ArrayList<Product> productList = new ArrayList<Product>(repository.getEntryCount());
+            for(int i=0; i < repository.getEntryCount(); ++i) {
+                final RepositoryEntry entry = repository.getEntry(i);
+                final Product prod = entry.getProduct();
+                if(prod != null) {
+                    productList.add(prod);
+                }
+            }
+            if(!productList.isEmpty()) {
+                worldMapDataModel.setProducts(productList.toArray(new Product[productList.size()]));
             }
         }
-        if(worldMapDataModel != null && !productList.isEmpty()) {
-            worldMapDataModel.setProducts(productList.toArray(new Product[productList.size()]));
-        }
     }
-    
+
     private class RepositoryChangeHandler implements ItemListener {
 
         public void itemStateChanged(final ItemEvent e) {

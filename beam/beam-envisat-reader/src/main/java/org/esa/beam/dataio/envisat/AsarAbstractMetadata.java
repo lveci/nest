@@ -105,7 +105,7 @@ public final class AsarAbstractMetadata {
 
             addAbstractedAttribute(sph, "SWATH", absRoot, "Swath name");
             addAbstractedAttribute(sph, "PASS", absRoot, "ASCENDING or DESCENDING");
-            addAbstractedAttribute(sph, "SAMPLE_TYPE", absRoot, "DETECTED or COMPLEX");
+            addAbstractedAttribute("SAMPLE_TYPE", sph.getAttributeString("SAMPLE_TYPE").trim(), absRoot, "DETECTED or COMPLEX");
 
             String mds1_tx_rx_polar = sph.getAttributeString("mds1_tx_rx_polar", "");
             mds1_tx_rx_polar = mds1_tx_rx_polar.replace("/","");

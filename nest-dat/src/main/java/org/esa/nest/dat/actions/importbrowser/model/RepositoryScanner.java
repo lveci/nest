@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.Iterator;
 
-public class RepositoryScanner {
+public final class RepositoryScanner {
 
 
     public static void collectEntries(final Repository repository) {
@@ -25,9 +25,9 @@ public class RepositoryScanner {
 
     public static class ProductFileFilter implements FileFilter {
 
-        final String[] skipExt = { ".txt", ".brs", ".ps", ".xsd" };
-        final String[] passExt = { ".n1", ".e1", ".e2", ".tif", ".dim", ".hdf", ".h5", ".nc" };
-        final String[] passPrefix = { "vol-alp", "vdf" };
+        final static String[] skipExt = { ".txt", ".brs", ".ps", ".xsd", ".xsl", ".self", ".kml", ".kmz", ".doc" };
+        final static String[] passExt = { ".n1", ".e1", ".e2", ".tif", ".dim", ".hdf", ".h5", ".nc" };
+        final static String[] passPrefix = { "vol-alp", "vdf" };
 
         public boolean accept(final File file) {
             if(file.isDirectory())
@@ -61,8 +61,18 @@ public class RepositoryScanner {
 
     public static class DirectoryFileFilter implements FileFilter {
 
+        final static String[] skip = { "annotation", "auxraster", "imagedata", "preview", "support", "schemas" };
+
         public boolean accept(final File file) {
-            return file.isDirectory() && !file.getName().endsWith(".data");
+            if(!file.isDirectory()) return false;
+            final String name = file.getName().toLowerCase();
+            if(name.endsWith(".data"))
+                return false;
+            for(String ext : skip) {
+                if(name.equalsIgnoreCase(ext))
+                    return false;
+            }                  
+            return true;
         }
     }
 }

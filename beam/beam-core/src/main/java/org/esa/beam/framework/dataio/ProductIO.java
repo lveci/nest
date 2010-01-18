@@ -1,5 +1,5 @@
 /*
- * $Id: ProductIO.java,v 1.4 2009-12-22 17:30:01 lveci Exp $
+ * $Id: ProductIO.java,v 1.5 2010-01-18 20:00:59 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -47,7 +47,7 @@ import java.util.Iterator;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.4 $ $Date: 2009-12-22 17:30:01 $
+ * @version $Revision: 1.5 $ $Date: 2010-01-18 20:00:59 $
  */
 public class ProductIO {
 
@@ -230,6 +230,7 @@ public class ProductIO {
 
         final ProductReader productReader = getProductReaderForFile(file);
         if (productReader != null) {
+            System.out.println("Reading "+file.getName());
             final Product product = productReader.readProductNodes(file, subsetDef);
             ProductCache.instance().addProduct(file, product);
             return product;

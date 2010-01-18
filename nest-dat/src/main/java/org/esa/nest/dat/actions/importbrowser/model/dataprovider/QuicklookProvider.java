@@ -5,10 +5,13 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.VirtualBand;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.ProductUtils;
 import org.esa.nest.dat.actions.importbrowser.model.Repository;
 import org.esa.nest.dat.actions.importbrowser.model.RepositoryEntry;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
 
 import javax.imageio.ImageIO;
 import javax.media.jai.JAI;
@@ -180,9 +183,18 @@ public class QuicklookProvider implements DataProvider {
         productSubsetDef.setSubSampling(scaleFactor, scaleFactor);
 
         final String quicklookBandName = ProductUtils.findSuitableQuicklookBandName(product);
+        final String expression = quicklookBandName + "==0 ? 0 : 10 * log10(abs("+quicklookBandName+"))";
+        final VirtualBand virtBand = new VirtualBand("QuickLook",
+                ProductData.TYPE_FLOAT32,
+                product.getSceneRasterWidth(),
+                product.getSceneRasterHeight(),
+                expression);
+        virtBand.setSynthetic(true);
+        product.addBand(virtBand);
+        
         final Product productSubset = product.createSubset(productSubsetDef, null, null);
 
-        return ProductUtils.createColorIndexedImage(productSubset.getBand(quicklookBandName), ProgressMonitor.NULL);
+        return ProductUtils.createColorIndexedImage(productSubset.getBand(virtBand.getName()), ProgressMonitor.NULL);
     }
 
     public TableColumn getTableColumn() {

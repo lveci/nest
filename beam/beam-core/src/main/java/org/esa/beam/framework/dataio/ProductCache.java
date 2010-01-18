@@ -41,7 +41,7 @@ public final class ProductCache {
 
     public Product getProduct(final File file) {
         final Product prod = productMap.get(file);
-        if(prod != null && file.lastModified() == prod.getFileLocation().lastModified())
+        if(prod != null && prod.getFileLocation() != null && file.lastModified() == prod.getFileLocation().lastModified())
             return prod;
         return null;
     }

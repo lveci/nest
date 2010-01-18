@@ -282,15 +282,23 @@ public class RepositoryManager {
                 // display file name and file size first
                 for (int i = 0; i < maxRepEntries; i++) {
                     final RepositoryEntry entry = repository.getEntry(i);
-                    for (int j = 0; j <= 1; j++) {
+                    for (int j = 0; j <= maxProvider; j++) {
                         final DataProvider dataProvider = dataProviderList.get(j);
                         try {
-                            final Object data = dataProvider.getData(entry, repository);
-                            entry.setData(dataProvider.getTableColumn().getModelIndex(), data);
+                            if (!dataProvider.mustCreateData(entry, repository)) {
+                                final Object data = dataProvider.getData(entry, repository);
+                                entry.setData(dataProvider.getTableColumn().getModelIndex(), data);
+                                entry.setDataProviderMustCreateData(false);
+                            } else {
+                                entry.setDataProviderMustCreateData(true);
+                            }
                         } catch (IOException e) {
                             exceptionList.add(new ExceptionObject(entry.getProductFile().getName(), e));
                         }
                     }
+                    messageArgs[0] = i + 1;
+                    pm.setSubTaskName(MessageFormat.format("Reading repository entry {0} of {1}",
+                                        messageArgs));
                 }
                 pm.worked(1);
 
@@ -301,10 +309,6 @@ public class RepositoryManager {
                     }
                     final RepositoryEntry entry = repository.getEntry(i);
                     try {
-                        if (pm.isCanceled()) {
-                            return exceptionList;
-                        }
-
                         if (!entry.getProductFile().exists()) {
                             // start at product properties, we already have name and size
                             for (int j = 2; j <= maxProvider; j++) {
@@ -322,36 +326,46 @@ public class RepositoryManager {
                             pm.setSubTaskName(MessageFormat.format("Updating repository entry {0} of {1}",
                                         messageArgs)); /*I18N*/
 
-                            if (entry.getProduct() == null) {
-                                entry.openProduct();
-                            }
+                            if(entry.getDataProviderMustCreateData()) {
 
-                            // start at product properties, we already have name and size
-                            for (int j = 2; j <= maxProvider; j++) {
+                                //final String lastMod = repository.getPropertyMap().getPropertyString(
+                                //    entry.getProductFile().getName() + ".productproperties.lastModified");
 
-                                final DataProvider dataProvider = dataProviderList.get(j);
-                                if(dataProvider instanceof QuicklookProvider) {
-                                    updateQuicklookProvider(entry, repository, dataProvider, repoMan);
-                                    continue;
-                                }
-
-                                if (dataProvider.mustCreateData(entry, repository)) {
+                                //if(!lastMod.equals(String.valueOf(entry.getProductFile().lastModified()))){
                                     if (entry.getProduct() == null) {
                                         entry.openProduct();
-                                        if (entry.getProduct() == null) {
-                                            break;
-                                        }
                                     }
 
-                                    dataProvider.createData(entry, repository);
-                                }
-                                final Object data = dataProvider.getData(entry, repository);
-                                entry.setData(dataProvider.getTableColumn().getModelIndex(), data);
+                                    // start at product properties, we already have name and size
+                                    for (int j = 2; j <= maxProvider; j++) {
+
+                                        final DataProvider dataProvider = dataProviderList.get(j);
+                                        if(dataProvider instanceof QuicklookProvider) {
+                                            updateQuicklookProvider(entry, repository, dataProvider, repoMan, pm);
+                                            continue;
+                                        }
+
+                                        if (dataProvider.mustCreateData(entry, repository)) {
+                                            if (entry.getProduct() == null) {
+                                                entry.openProduct();
+                                                if (entry.getProduct() == null) {
+                                                    break;
+                                                }
+                                            }
+
+                                            dataProvider.createData(entry, repository);
+                                        }
+                                        final Object data = dataProvider.getData(entry, repository);
+                                        entry.setData(dataProvider.getTableColumn().getModelIndex(), data);
+                                        pm.worked(1);
+                                    }
+                                //}
+                            } else {
+                                pm.worked(maxProvider);        
                             }
-                            pm.worked(1);
                         }
                     } finally {
-                        //entry.closeProduct();
+                        entry.closeProduct();
                         repository.savePropertyMap();
                         SwingUtilities.invokeLater(uiRunnable);
                     }
@@ -394,12 +408,17 @@ public class RepositoryManager {
 
     private static void updateQuicklookProvider(final RepositoryEntry entry, final Repository repository,
                                                 final DataProvider dataProvider,
-                                                final RepositoryManager repoMan) {
+                                                final RepositoryManager repoMan,
+                                                final ProgressMonitor pm) {
 
         final SwingWorker worker = new SwingWorker() {
             @Override
             protected Object doInBackground() throws Exception {
                 try {
+                    if (pm == null || pm.isCanceled()) {
+                        return null;
+                    }
+
                     if (dataProvider.mustCreateData(entry, repository)) {
                         if (entry.getProduct() == null) {
                             entry.openProduct();
@@ -412,7 +431,7 @@ public class RepositoryManager {
                     }
                     final Object data = dataProvider.getData(entry, repository);
                     entry.setData(dataProvider.getTableColumn().getModelIndex(), data);
-
+                    entry.closeProduct();
                 } catch (Exception e) {
                     //
                 }
