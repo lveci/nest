@@ -8,6 +8,7 @@ import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.nest.dat.actions.importbrowser.ImportBrowserAction;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.DataProvider;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.FileNameProvider;
+import org.esa.nest.dat.actions.importbrowser.model.dataprovider.QuicklookProvider;
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.SelectionProvider;
 import org.esa.nest.dat.actions.importbrowser.util.Callback;
 import org.esa.nest.datamodel.AbstractMetadata;
@@ -321,7 +322,32 @@ public class RepositoryManager {
                             pm.setSubTaskName(MessageFormat.format("Updating repository entry {0} of {1}",
                                         messageArgs)); /*I18N*/
 
-                            updateDataProviders(entry, maxProvider, repository, dataProviderList, repoMan);
+                            if (entry.getProduct() == null) {
+                                entry.openProduct();
+                            }
+
+                            // start at product properties, we already have name and size
+                            for (int j = 2; j <= maxProvider; j++) {
+
+                                final DataProvider dataProvider = dataProviderList.get(j);
+                                if(dataProvider instanceof QuicklookProvider) {
+                                    updateQuicklookProvider(entry, repository, dataProvider, repoMan);
+                                    continue;
+                                }
+
+                                if (dataProvider.mustCreateData(entry, repository)) {
+                                    if (entry.getProduct() == null) {
+                                        entry.openProduct();
+                                        if (entry.getProduct() == null) {
+                                            break;
+                                        }
+                                    }
+
+                                    dataProvider.createData(entry, repository);
+                                }
+                                final Object data = dataProvider.getData(entry, repository);
+                                entry.setData(dataProvider.getTableColumn().getModelIndex(), data);
+                            }
                             pm.worked(1);
                         }
                     } finally {
@@ -366,36 +392,27 @@ public class RepositoryManager {
         }
     }
 
-    private static void updateDataProviders(final RepositoryEntry entry, final int maxProvider, final Repository repository,
-                                            final List<DataProvider> dataProviderList,
-                                            final RepositoryManager repoMan) {
+    private static void updateQuicklookProvider(final RepositoryEntry entry, final Repository repository,
+                                                final DataProvider dataProvider,
+                                                final RepositoryManager repoMan) {
 
         final SwingWorker worker = new SwingWorker() {
             @Override
             protected Object doInBackground() throws Exception {
                 try {
-                    if (entry.getProduct() == null) {
-                        entry.openProduct();
-                    }
-
-                    // start at product properties, we already have name and size
-                    for (int j = 2; j <= maxProvider; j++) {
-
-                        final DataProvider dataProvider = dataProviderList.get(j);
-
-                        if (dataProvider.mustCreateData(entry, repository)) {
+                    if (dataProvider.mustCreateData(entry, repository)) {
+                        if (entry.getProduct() == null) {
+                            entry.openProduct();
                             if (entry.getProduct() == null) {
-                                entry.openProduct();
-                                if (entry.getProduct() == null) {
-                                    break;
-                                }
+                                return null;
                             }
-
-                            dataProvider.createData(entry, repository);
                         }
-                        final Object data = dataProvider.getData(entry, repository);
-                        entry.setData(dataProvider.getTableColumn().getModelIndex(), data);
+
+                        dataProvider.createData(entry, repository);
                     }
+                    final Object data = dataProvider.getData(entry, repository);
+                    entry.setData(dataProvider.getTableColumn().getModelIndex(), data);
+
                 } catch (Exception e) {
                     //
                 }
