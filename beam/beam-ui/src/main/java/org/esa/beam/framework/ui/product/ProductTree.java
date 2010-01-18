@@ -774,6 +774,7 @@ public class ProductTree extends JTree implements PopupMenuFactory {
 
     private static void addDN(Band band, StringBuilder toolTipBuffer) {
         final Product product = band.getProduct();
+        if(product == null) return;
         final MetadataElement absRoot = product.getMetadataRoot().getElement("Abstracted_Metadata");
         boolean calibrated = false;
         if(absRoot != null) {
