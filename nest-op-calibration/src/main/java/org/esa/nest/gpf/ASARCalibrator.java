@@ -1499,29 +1499,28 @@ public class ASARCalibrator implements Calibrator {
 
         final int maxY = y0 + h;
         final int maxX = x0 + w;
-        double gain, slantRange, sigma;
-        int index;
-
+        double gain, slantRange, v;
         for (int y = y0, yy = 0; y < maxY; ++y, ++yy) {
             for (int x = x0, xx = 0; x < maxX; ++x, ++xx) {
-
-                index = sourceTile.getDataBufferIndex(x, y);
+                v = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x, y));
                 gain = targetTileOldAntPat[yy][xx];
                 slantRange = targetTileSlantRange[yy][xx];
 
                 if (bandUnit == Unit.UnitType.AMPLITUDE) {
-                    final double dn = srcData.getElemDoubleAt(index);
-                    sigma = dn*dn;
+                    v *= gain*Math.pow(refSlantRange800km / slantRange, 0.5*rangeSpreadingCompPower);
+                } else if (bandUnit == Unit.UnitType.AMPLITUDE_DB) {
+                    v = Math.pow(10, v/10.0)*gain*Math.pow(refSlantRange800km / slantRange, 0.5*rangeSpreadingCompPower);
+                    v = 10.0*Math.log10(v);
                 } else if (bandUnit == Unit.UnitType.INTENSITY) {
-                    sigma = srcData.getElemDoubleAt(index);
+                    v *= gain*gain*Math.pow(refSlantRange800km / slantRange, rangeSpreadingCompPower);
                 } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
-                    sigma = Math.pow(10, srcData.getElemDoubleAt(index)/10.0);
+                    v = Math.pow(10, v/10.0)*gain*gain*Math.pow(refSlantRange800km / slantRange, rangeSpreadingCompPower);
+                    v = 10.0*Math.log10(v);
                 } else {
                     throw new OperatorException("Unknown band unit");
                 }
 
-                sigma *= gain*gain*Math.pow(refSlantRange800km / slantRange, rangeSpreadingCompPower);
-                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), sigma);
+                trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), v);
             }
         }
     }

@@ -2555,17 +2555,18 @@ public final class ERSCalibrator implements Calibrator {
 
             for (int y = ty0; y < ty0 + th; y++) {
 
-                final int index = targetTile.getDataBufferIndex(x, y);
-
+                final int srcIndex = sourceTile.getDataBufferIndex(x, y);
                 if (bandUnit == Unit.UnitType.AMPLITUDE) {
-                    final double dn = srcData.getElemDoubleAt(index);
+                    final double dn = srcData.getElemDoubleAt(srcIndex);
                     sigma = dn*dn;
+                } else if (bandUnit == Unit.UnitType.AMPLITUDE_DB) {
+                    sigma = Math.pow(10, srcData.getElemDoubleAt(srcIndex)/5.0);
                 } else if (bandUnit == Unit.UnitType.INTENSITY) {
-                    sigma = srcData.getElemDoubleAt(index);
+                    sigma = srcData.getElemDoubleAt(srcIndex);
                 } else  if (bandUnit == Unit.UnitType.INTENSITY_DB) {
-                    sigma = Math.pow(10, srcData.getElemDoubleAt(index)/10.0);
+                    sigma = Math.pow(10, srcData.getElemDoubleAt(srcIndex)/10.0);
                 } else {
-                    throw new OperatorException("ERSCalibrator: Uknown band unit");
+                    throw new OperatorException("ERSCalibrator: Unknown band unit");
                 }
 
                 if (isDetectedSampleType) { // ground range
@@ -2581,7 +2582,16 @@ public final class ERSCalibrator implements Calibrator {
                     sigma *= adcPowerLoss[adcI][adcJ];
                 }
 
-                trgData.setElemDoubleAt(index, sigma);
+                final int tgtIndex = targetTile.getDataBufferIndex(x, y);
+                if (bandUnit == Unit.UnitType.AMPLITUDE) {
+                    trgData.setElemDoubleAt(tgtIndex, Math.sqrt(sigma));
+                } else if (bandUnit == Unit.UnitType.AMPLITUDE_DB) {
+                    trgData.setElemDoubleAt(tgtIndex, 5.0*Math.log10(sigma));
+                } else if (bandUnit == Unit.UnitType.INTENSITY) {
+                    trgData.setElemDoubleAt(tgtIndex, sigma);
+                } else  if (bandUnit == Unit.UnitType.INTENSITY_DB) {
+                    trgData.setElemDoubleAt(tgtIndex, 10.0*Math.log10(sigma));
+                }
             }
         }
     }

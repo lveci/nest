@@ -50,7 +50,6 @@ public class RemoveAntennaPatternOp extends Operator {
             sourceProductId = "source", label = "Source Bands")
     private String[] sourceBandNames = null;
 
-    private final HashMap<String, String> targetBandNameToSourceBandName = new HashMap<String, String>();
     private Calibrator calibrator = null;
 
     /**
@@ -139,23 +138,14 @@ public class RemoveAntennaPatternOp extends Operator {
                 throw new OperatorException("Please select amplitude or intensity band.");
             }
 
-            String targetBandName;
-            final String pol = OperatorUtils.getPolarizationFromBandName(srcBandName);
-            if (pol != null) {
-                targetBandName = "Sigma0_" + pol.toUpperCase();
-            } else {
-                targetBandName = "Sigma0";
-            }
+            if(targetProduct.getBand(srcBandName) == null) {
+                final Band targetBand = new Band(srcBandName,
+                                                 ProductData.TYPE_FLOAT32,
+                                                 sourceProduct.getSceneRasterWidth(),
+                                                 sourceProduct.getSceneRasterHeight());
 
-            if(targetProduct.getBand(targetBandName) == null) {
-                final Band targetBand = new Band(targetBandName,
-                                           ProductData.TYPE_FLOAT32,
-                                           sourceProduct.getSceneRasterWidth(),
-                                           sourceProduct.getSceneRasterHeight());
-
-                targetBand.setUnit(Unit.INTENSITY);
+                targetBand.setUnit(unit);
                 targetProduct.addBand(targetBand);
-                targetBandNameToSourceBandName.put(targetBandName, srcBandName);
             }
         }
     }
@@ -174,7 +164,7 @@ public class RemoveAntennaPatternOp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         try {
-            final String srcBandName = targetBandNameToSourceBandName.get(targetBand.getName());
+            final String srcBandName = targetBand.getName();
             calibrator.removeFactorsForCurrentTile(targetBand, targetTile, srcBandName, pm);
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
