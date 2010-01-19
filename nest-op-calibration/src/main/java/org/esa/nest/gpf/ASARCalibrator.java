@@ -1517,7 +1517,7 @@ public class ASARCalibrator implements Calibrator {
                 } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
                     sigma = Math.pow(10, srcData.getElemDoubleAt(index)/10.0);
                 } else {
-                    throw new OperatorException("Uknown band unit");
+                    throw new OperatorException("Unknown band unit");
                 }
 
                 sigma *= gain*gain*Math.pow(refSlantRange800km / slantRange, rangeSpreadingCompPower);
