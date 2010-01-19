@@ -21,7 +21,7 @@ import java.util.Map;
 
 /**
  */
-@OperatorMetadata(alias="TileStackOp", internal=true)
+@OperatorMetadata(alias="TileStackOp", internal=false)
 public class TileStackOp extends Operator {
 
     @SourceProduct(alias="source")
@@ -81,6 +81,8 @@ public class TileStackOp extends Operator {
 
             // update the metadata with the affect of the processing
             updateTargetProductMetadata();
+
+            targetProduct.setPreferredTileSize(targetProduct.getSceneRasterWidth(), 50);
     }
 
     /**
@@ -118,6 +120,11 @@ public class TileStackOp extends Operator {
 
             final Band targetBand = ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct);
 
+            // copy first band by setSourceImage to avoid computing it
+            if(srcBand == sourceProduct.getBandAt(0)) {
+                targetBand.setSourceImage(srcBand.getSourceImage());
+            }
+
             targetBandToSourceBandMap.put(targetBand, srcBand);
         }
     }
@@ -135,7 +142,7 @@ public class TileStackOp extends Operator {
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
-        final Band[] targetBands = targetProduct.getBands();
+        final Band[] targetBands = targetTiles.keySet().toArray(new Band[targetTiles.keySet().size()]);
         final Tile sourceRaster = getSourceTile(targetBandToSourceBandMap.get(targetBands[0]), targetRectangle, pm);
 
         final int x0 = targetRectangle.x;
