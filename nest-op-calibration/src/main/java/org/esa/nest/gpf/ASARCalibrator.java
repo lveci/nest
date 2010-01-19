@@ -1505,7 +1505,7 @@ public class ASARCalibrator implements Calibrator {
         for (int y = y0, yy = 0; y < maxY; ++y, ++yy) {
             for (int x = x0, xx = 0; x < maxX; ++x, ++xx) {
 
-                index = targetTile.getDataBufferIndex(x, y);
+                index = sourceTile.getDataBufferIndex(x, y);
                 gain = targetTileOldAntPat[yy][xx];
                 slantRange = targetTileSlantRange[yy][xx];
 
