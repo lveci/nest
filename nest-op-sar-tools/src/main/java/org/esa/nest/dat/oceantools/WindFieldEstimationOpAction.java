@@ -3,6 +3,9 @@ package org.esa.nest.dat.oceantools;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.visat.actions.AbstractVisatAction;
 import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
+import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
+
+import java.io.File;
 
 /**
  * Wind Field Estimation action.
@@ -10,16 +13,15 @@ import org.esa.nest.dat.dialogs.NestSingleTargetProductDialog;
  */
 public class WindFieldEstimationOpAction extends AbstractVisatAction {
 
-    private NestSingleTargetProductDialog dialog;
-
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        if (dialog == null) {
-            dialog = new NestSingleTargetProductDialog("Wind-Field-Estimation", getAppContext(), "Wind-Field-Estimation", getHelpId());
-        }
-        dialog.setTargetProductNameSuffix("_wind");
+        final GraphBuilderDialog dialog = new GraphBuilderDialog(getAppContext(), "Wind-Field-Estimation", "Wind-Field-Estimation", false);
         dialog.show();
 
+        final File graphPath = GraphBuilderDialog.getInternalGraphFolder();
+        final File graphFile =  new File(graphPath, "WindFieldEstimationGraph.xml");
+
+        dialog.LoadGraph(graphFile);
     }
 }
