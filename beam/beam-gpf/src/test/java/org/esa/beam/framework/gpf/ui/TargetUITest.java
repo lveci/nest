@@ -60,7 +60,7 @@ public class TargetUITest extends TestCase {
 
         targetUI.CreateOpTab("testOp", parameterMap, appContext);
         UIValidation valid = targetUI.validateParameters();
-        assertFalse(valid.getState());
+        assertFalse(valid.getState() == UIValidation.State.OK);
 
         targetUI.targetProductSelector.getModel().setProductName("abc");
         //todo need an existing file?

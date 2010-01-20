@@ -63,7 +63,7 @@ public class SourceUITest  extends TestCase {
 
         sourceUI.CreateOpTab("testOp", parameterMap, appContext);
         UIValidation valid = sourceUI.validateParameters();
-        assertTrue(valid.getState());
+        assertTrue(valid.getState() == UIValidation.State.OK);
     }
 
     public void testUpdateParameters() {

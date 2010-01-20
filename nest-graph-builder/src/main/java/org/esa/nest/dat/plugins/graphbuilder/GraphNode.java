@@ -265,7 +265,7 @@ public class GraphNode {
     public UIValidation validateParameterMap() {
         if(operatorUI != null)
             return operatorUI.validateParameters();
-        return new UIValidation(true,"");
+        return new UIValidation(UIValidation.State.OK,"");
     }
 
     void setSourceProducts(final Product[] products) {

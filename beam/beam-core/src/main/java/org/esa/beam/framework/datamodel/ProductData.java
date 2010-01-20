@@ -1,5 +1,5 @@
 /*
- * $Id: ProductData.java,v 1.4 2009-07-21 14:09:28 lveci Exp $
+ * $Id: ProductData.java,v 1.5 2010-01-20 20:22:43 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -57,7 +57,7 @@ import java.util.*;
  * <code>float</code>, <code>double</code> and <code>String</code>.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2009-07-21 14:09:28 $
+ * @version $Revision: 1.5 $ $Date: 2010-01-20 20:22:43 $
  */
 public abstract class ProductData implements Cloneable {
 
@@ -2699,6 +2699,7 @@ public abstract class ProductData implements Cloneable {
          *
          * @see #createCalendar
          * @see #createDateFormat
+         * @return a formated UTC date/time string
          */
         public String format() {
             final Calendar calendar = createCalendar();

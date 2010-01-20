@@ -1,5 +1,5 @@
 /*
- * $Id: PixelGeoCoding.java,v 1.3 2009-12-21 16:13:40 lveci Exp $
+ * $Id: PixelGeoCoding.java,v 1.4 2010-01-20 20:22:43 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -745,7 +745,7 @@ public class PixelGeoCoding extends AbstractGeoCoding {
     }
 
     private RenderedImage getSourceImage(ProductSubsetDef subsetDef, Band band) {
-        RenderedImage image = band.createSourceImage();
+        RenderedImage image = band.getSourceImage();
         if (subsetDef != null) {
             final Rectangle region = subsetDef.getRegion();
             if (region != null) {

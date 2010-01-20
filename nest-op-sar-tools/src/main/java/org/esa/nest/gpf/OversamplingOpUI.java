@@ -66,7 +66,7 @@ public class OversamplingOpUI extends BaseOperatorUI {
 
     public UIValidation validateParameters() {
 
-        return new UIValidation(true, "");
+        return new UIValidation(UIValidation.State.OK, "");
     }
 
     public void updateParameters() {

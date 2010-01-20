@@ -8,15 +8,17 @@ package org.esa.beam.framework.gpf.ui;
  */
 public class UIValidation {
 
-    private boolean state = false;
+    private State state = State.OK;
     private String msg = "";
 
-    public UIValidation(boolean theState, String theMessage) {
+    public enum State { OK, ERROR, WARNING }
+
+    public UIValidation(State theState, String theMessage) {
         state = theState;
         msg = theMessage;
     }
 
-    public boolean getState() {
+    public State getState() {
         return state;
     }
 

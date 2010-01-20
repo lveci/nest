@@ -59,7 +59,7 @@ public class DefaultUI extends BaseOperatorUI {
     public UIValidation validateParameters() {
 
         //todo how to validate generated UIs? should be in operator initialize
-        return new UIValidation(true, "");
+        return new UIValidation(UIValidation.State.OK, "");
     }
 
     @Override

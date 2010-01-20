@@ -33,7 +33,7 @@ import java.util.Map;
  * This is a preliminary API under construction for BEAM 4.7. Not intended for public use.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.9 $ $Date: 2009-12-21 16:13:40 $
+ * @version $Revision: 1.10 $ $Date: 2010-01-20 20:22:43 $
  * @since BEAM 4.7
  */
 public class Mask extends Band {
@@ -370,10 +370,12 @@ public class Mask extends Band {
      */
     public static class VectorDataType extends ImageType {
 
+        public static final String TYPE_NAME = "Geometry";
+
         public static final String PROPERTY_NAME_VECTOR_DATA = "vectorData";
 
         public VectorDataType() {
-            super("Geometry");
+            super(TYPE_NAME);
         }
 
         /**

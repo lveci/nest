@@ -77,9 +77,9 @@ public class SourceUI extends BaseOperatorUI {
     public UIValidation validateParameters() {
         if(sourceProductSelector != null) {
             if(sourceProductSelector.getSelectedProduct() == null)
-                return new UIValidation(false, "Source product not selected");
+                return new UIValidation(UIValidation.State.ERROR, "Source product not selected");
         }
-        return new UIValidation(true, "");
+        return new UIValidation(UIValidation.State.OK, "");
     }
 
     @Override

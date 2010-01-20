@@ -92,7 +92,7 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
     @Override
     public UIValidation validateParameters() {
 
-        return new UIValidation(true, "");
+        return new UIValidation(UIValidation.State.OK, "");
     }
 
     @Override

@@ -255,7 +255,6 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private boolean InitGraph() {
         boolean result = true;
         try {
-            statusLabel.setText("");
             if(initGraphEnabled) {
                 result = graphEx.InitGraph();
             }
@@ -357,19 +356,26 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         if(isProcessing) return false;
 
         boolean isValid = true;
-        final StringBuilder msg = new StringBuilder(100);
+        final StringBuilder errorMsg = new StringBuilder(100);
+        final StringBuilder warningMsg = new StringBuilder(100);
         for(GraphNode n : graphEx.GetGraphNodes()) {
             final UIValidation validation = n.validateParameterMap();
-            if(!validation.getState()) {
+            if(validation.getState() == UIValidation.State.ERROR) {
                 isValid = false;
-                msg.append(validation.getMsg()).append('\n');
+                errorMsg.append(validation.getMsg()).append('\n');
+            } else if(validation.getState() == UIValidation.State.WARNING) {
+                warningMsg.append(validation.getMsg()).append('\n');
             }
         }
 
+        statusLabel.setForeground(new Color(255,0,0));
+        statusLabel.setText("");
         if(!isValid) {
-
-            statusLabel.setText(msg.toString());
-            //return false;
+            statusLabel.setText(errorMsg.toString());
+            return false;
+        } else if(!warningMsg.toString().isEmpty()) {
+            statusLabel.setForeground(new Color(0,100,255));
+            statusLabel.setText("Warning: "+warningMsg.toString());
         }
 
         return InitGraph();

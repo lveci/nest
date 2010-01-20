@@ -58,12 +58,12 @@ public class TargetUI extends BaseOperatorUI {
 
         final String productName = targetProductSelector.getModel().getProductName();
         if(productName == null || productName.isEmpty())
-            return new UIValidation(false, "Target file not specified");
+            return new UIValidation(UIValidation.State.ERROR, "Target file not specified");
         final File file = targetProductSelector.getModel().getProductFile();
         if(file == null)
-            return new UIValidation(false, "Target file not specified");
+            return new UIValidation(UIValidation.State.ERROR, "Target file not specified");
 
-        return new UIValidation(true, "");
+        return new UIValidation(UIValidation.State.OK, "");
     }
 
     @Override
