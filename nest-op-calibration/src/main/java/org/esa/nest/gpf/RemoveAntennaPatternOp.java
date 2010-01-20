@@ -69,6 +69,8 @@ public class RemoveAntennaPatternOp extends Operator {
     public void initialize() throws OperatorException {
 
         try {
+            getProductType();
+
             createTargetProduct();
 
             calibrator = CalibrationFactory.createCalibrator(sourceProduct);
@@ -77,6 +79,18 @@ public class RemoveAntennaPatternOp extends Operator {
 
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
+        }
+    }
+
+    /**
+     * Get product type.
+     * @throws OperatorException The exceptions.
+     */
+    private void getProductType() throws OperatorException {
+
+        String productType = sourceProduct.getProductType();
+        if (productType.contains("ASA_IMS_1") && !productType.contains("ASA_APS_1")) {
+            throw new OperatorException(productType + " is not a valid ASAR product type for the operator.");
         }
     }
 
@@ -184,6 +198,7 @@ public class RemoveAntennaPatternOp extends Operator {
     public static class Spi extends OperatorSpi {
         public Spi() {
             super(RemoveAntennaPatternOp.class);
+            super.setOperatorUI(RemoveAntennaPatternOpUI.class);            
         }
     }
 }
