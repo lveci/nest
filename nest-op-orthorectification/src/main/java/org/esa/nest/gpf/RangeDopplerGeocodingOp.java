@@ -1188,7 +1188,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                             if (v != tileData.noDataValue && tileData.applyRadiometricNormalization) {
                                 if (localIncidenceAngles[1] != NonValidIncidenceAngle) {
                                     v = calibrator.applyCalibration(
-                                            v, (int)rangeIndex, slantRange, satelliteHeight, sceneToEarthCentre,
+                                            v, rangeIndex, azimuthIndex, slantRange, satelliteHeight, sceneToEarthCentre,
                                             localIncidenceAngles[1], tileData.bandPolar, bandUnit, subSwathIndex); // use projected incidence angle
                                 } else {
                                     v = tileData.noDataValue;
