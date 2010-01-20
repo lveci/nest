@@ -269,7 +269,7 @@ public class ASARCalibrator implements Calibrator {
             }
         }
 
-        applyAntennaPatternCorr = !srgrFlag || retroCalibrationFlag;
+        applyAntennaPatternCorr = !srgrFlag || retroCalibrationFlag || !antElevCorrFlag;
         applyRangeSpreadingCorr = !srgrFlag;
         if(productType.contains("ASA_GM")) {
             applyRangeSpreadingCorr = true;   
@@ -1357,7 +1357,7 @@ public class ASARCalibrator implements Calibrator {
         } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
             return 10.0*Math.log10(Math.pow(10, v/10.0)*gain*gain*Math.pow(refSlantRange800km/slantRange, rangeSpreadingCompPower));
         } else {
-            throw new OperatorException("Uknown band unit");
+            throw new OperatorException("Unknown band unit");
         }
     }
 
@@ -1405,22 +1405,24 @@ public class ASARCalibrator implements Calibrator {
      * @return The calibrated pixel value.
      */
     public double applyCalibration(
-            final double v, final int rangeIndex, final double slantRange, final double satelliteHeight, 
-            final double sceneToEarthCentre, final double localIncidenceAngle, final int bandPolar,
-            final Unit.UnitType bandUnit, int[] subSwathIndex) {
+            final double v, final double rangeIndex, final double azimuthIndex, final double slantRange,
+            final double satelliteHeight, final double sceneToEarthCentre, final double localIncidenceAngle,
+            final int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
 
         double sigma = 0.0;
         if (bandUnit == Unit.UnitType.AMPLITUDE) {
             sigma = v*v;
+        } else if (bandUnit == Unit.UnitType.AMPLITUDE_DB) {
+            sigma = Math.pow(10, v/5.0); // convert dB to linear scale, then square
         } else if (bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
             sigma = v;
         } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
             sigma = Math.pow(10, v/10.0); // convert dB to linear scale
         } else {
-            throw new OperatorException("Uknown band unit");
+            throw new OperatorException("Unknown band unit");
         }
 
-        if (multilookFlag) { // calibration constant and incidence angle corrections only
+        if (multilookFlag && antElevCorrFlag) { // calibration constant and incidence angle corrections only
             return sigma / newCalibrationConstant[bandPolar] *
                    Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
         }
@@ -1429,6 +1431,9 @@ public class ASARCalibrator implements Calibrator {
 
         double gain;
         if (wideSwathProductFlag) {
+            if (subSwathIndex[0] == INVALID_SUB_SWATH_INDEX) { // Rem(AP+RSL)/ApplyADC Op is used
+                computeSubSwathIndex(rangeIndex, azimuthIndex, newRefElevationAngle, subSwathIndex);
+            }
             gain = getAntennaPatternGain(
                     elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternWideSwath, false, subSwathIndex);
         } else {
@@ -1440,6 +1445,32 @@ public class ASARCalibrator implements Calibrator {
                Math.pow(slantRange/refSlantRange, rangeSpreadingCompPower) *
                Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
     }
+
+    private void computeSubSwathIndex(final double rangeIndex, final double azimuthIndex,
+                                       final double[] refElevationAngle, int[] subSwathIndex) {
+
+        final int x = (int)(rangeIndex + 0.5);
+        final int y = (int)(azimuthIndex + 0.5);
+
+        final double zeroDopplerTime = firstLineUTC + y*lineTimeInterval;
+        final double satelitteHeight = computeSatelliteHeight(zeroDopplerTime, orbitStateVectors);
+
+        AbstractMetadata.SRGRCoefficientList srgrConvParam = null;
+        if (srgrFlag) {
+            srgrConvParam = getSRGRCoefficientsForARangeLine(zeroDopplerTime);
+        }
+
+        final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
+
+        int i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y, TiePointGrid.InterpMode.QUADRATIC))/delLat + 0.5);
+        if (i < 0) {
+            i = 0;
+        }
+
+        final double elevationAngle = computeElevationAngle(slantRange, satelitteHeight, avgSceneHeight+earthRadius[i]);
+        subSwathIndex[0] = findSubSwath(elevationAngle, refElevationAngle);
+    }
+
 
     public void removeFactorsForCurrentTile(Band targetBand, Tile targetTile, String srcBandName, ProgressMonitor pm) throws OperatorException {
 
