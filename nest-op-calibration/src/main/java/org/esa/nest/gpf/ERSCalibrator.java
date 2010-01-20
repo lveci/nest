@@ -2430,12 +2430,14 @@ public final class ERSCalibrator implements Calibrator {
         double sigma = 0.0;
         if (bandUnit == Unit.UnitType.AMPLITUDE) {
             sigma = v*v;
+        } else if (bandUnit == Unit.UnitType.AMPLITUDE_DB) {
+            sigma = Math.pow(10, v/5.0); // convert dB to linear scale, then square
         } else if (bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
             sigma = v;
         } else if (bandUnit == Unit.UnitType.INTENSITY_DB) {
             sigma = Math.pow(10, v/10.0); // convert dB to linear scale
         } else {
-            throw new OperatorException("Uknown band unit");
+            throw new OperatorException("Unknown band unit");
         }
 
         sigma *= Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR) /
