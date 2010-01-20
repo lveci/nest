@@ -2417,9 +2417,9 @@ public final class ERSCalibrator implements Calibrator {
     }
 
     public double applyCalibration(
-            final double v, final int rangeIndex, final double slantRange, final double satelliteHeight,
-            final double sceneToEarthCentre, final double localIncidenceAngle, final int bandPolar,
-            final Unit.UnitType bandUnit, final int[] subSwathIndex) {
+            final double v, final double rangeIndex, final double azimuthIndex, final double slantRange,
+            final double satelliteHeight, final double sceneToEarthCentre, final double localIncidenceAngle,
+            final int bandPolar, final Unit.UnitType bandUnit, final int[] subSwathIndex) {
 
         // For both detectec and slant range products,
         //   1) local incidence angle (Remember that for ERS the correction is sin(theta_loc)/sin(theta_ref))
@@ -2441,9 +2441,9 @@ public final class ERSCalibrator implements Calibrator {
         sigma *= Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR) /
                  Math.sin(referenceIncidenceAngle);
 
-        sigma /= getNewAntennaPatternGainSquare(rangeIndex);
+        sigma /= getNewAntennaPatternGainSquare((int)rangeIndex);
 
-        sigma *= rangeSpreadingLoss[rangeIndex];
+        sigma *= rangeSpreadingLoss[(int)rangeIndex];
 
         sigma *= replicaPulseVariationsCorrectionFactor;
 

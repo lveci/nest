@@ -242,9 +242,9 @@ public class Radarsat2Calibrator implements Calibrator {
     }
 
     public double applyCalibration(
-            final double v, final int rangeIndex, final double slantRange, final double satelliteHeight,
-            final double sceneToEarthCentre,final double localIncidenceAngle, final int bandPolar,
-            final Unit.UnitType bandUnit, int[] subSwathIndex) {
+            final double v, final double rangeIndex, final double azimuthIndex, final double slantRange,
+            final double satelliteHeight, final double sceneToEarthCentre,final double localIncidenceAngle,
+            final int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
 
         double sigma = 0.0;
         if (bandUnit == Unit.UnitType.AMPLITUDE) {
@@ -259,12 +259,12 @@ public class Radarsat2Calibrator implements Calibrator {
 
         if(isComplex) {
             if(gains != null) {
-                sigma /= (gains[rangeIndex] * gains[rangeIndex]);
+                sigma /= (gains[(int)rangeIndex] * gains[(int)rangeIndex]);
             }
         } else {
             sigma += offset;
             if(gains != null) {
-                sigma /= gains[rangeIndex];
+                sigma /= gains[(int)rangeIndex];
             }
         }
 
