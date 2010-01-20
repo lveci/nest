@@ -146,7 +146,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private ProductNodeGroup<Pin> masterGCPGroup = null;
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
-    private WarpOp.WarpData warpData = null;
     private FileElevationModel fileElevationModel = null;
     private GeoCoding targetGeoCoding = null;
 
@@ -189,6 +188,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private final HashMap<String, String[]> targetBandNameToSourceBandName = new HashMap<String, String[]>();
     private final Map<String, Boolean> targetBandapplyRadiometricNormalizationFlag = new HashMap<String, Boolean>();
     private final Map<String, Boolean> targetBandApplyRetroCalibrationFlag = new HashMap<String, Boolean>();
+    private final static Map<Band, WarpOp.WarpData> warpDataMap = new HashMap<Band, WarpOp.WarpData>(10);
+
+
     private TiePointGrid incidenceAngle = null;
     private TiePointGrid latitude = null;
     private TiePointGrid longitude = null;
@@ -786,31 +788,44 @@ public class SARSimTerrainCorrectionOp extends Operator {
     }
 
     private void computeWARPFunction() {
-
+        // for all slave bands or band pairs compute a warp
         final Band masterBand = sourceProduct.getBandAt(0);
         masterGCPGroup = sourceProduct.getGcpGroup(masterBand);
+        final int numSrcBands = sourceProduct.getNumBands();
+        boolean appendFlag = false;
+        for(int i = 1; i < numSrcBands; ++i) { // loop through all slave bands
 
-        final Band slaveBand = sourceProduct.getBandAt(1);
-        final ProductNodeGroup<Pin> slaveGCPGroup = sourceProduct.getGcpGroup(slaveBand);
-        if(slaveGCPGroup.getNodeCount() < 3) {
-            throw new OperatorException(slaveGCPGroup.getNodeCount() +
-                    " GCPs survived. Try using more GCPs or a larger window");
+            final Band srcBand = sourceProduct.getBandAt(i);
+            final String unit = srcBand.getUnit();
+            if(unit != null && unit.contains(Unit.BIT)) // skip layover_shadow_mask band
+                continue;
+
+            final ProductNodeGroup<Pin> slaveGCPGroup = sourceProduct.getGcpGroup(srcBand);
+            if(slaveGCPGroup.getNodeCount() < 3) {
+                throw new OperatorException(slaveGCPGroup.getNodeCount() +
+                        " GCPs survived. Try using more GCPs or a larger window");
+            }
+
+            final WarpOp.WarpData warpData = new WarpOp.WarpData(slaveGCPGroup);
+            warpDataMap.put(srcBand, warpData);
+
+            WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute initial warp polynomial
+
+            if (warpData.rmsMean > rmsThreshold && WarpOp.eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
+                WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 2nd warp polynomial
+            }
+
+            if (warpData.rmsMean > rmsThreshold && WarpOp.eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
+                WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 3rd warp polynomial
+            }
+
+            WarpOp.eliminateGCPsBasedOnRMS(warpData, rmsThreshold);
+            WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute final warp polynomial
+            outputCoRegistrationInfo(warpData, srcBand.getName(), appendFlag);
+            if (!appendFlag) {
+                appendFlag = true;
+            }
         }
-
-        warpData = new WarpOp.WarpData(slaveGCPGroup);
-        WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute initial warp polynomial
-
-        if (warpData.rmsMean > rmsThreshold && WarpOp.eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
-            WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 2nd warp polynomial
-        }
-
-        if (warpData.rmsMean > rmsThreshold && WarpOp.eliminateGCPsBasedOnRMS(warpData, (float)warpData.rmsMean)) {
-            WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute 3rd warp polynomial
-        }
-
-        WarpOp.eliminateGCPsBasedOnRMS(warpData, rmsThreshold);
-        WarpOp.computeWARPPolynomial(warpData, warpPolynomialOrder, masterGCPGroup); // compute final warp polynomial
-        outputCoRegistrationInfo(warpData, slaveBand.getName());
 
         if(openShiftsFile) {
             final File shiftsFile = getShiftsFile(sourceProduct);
@@ -987,8 +1002,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                             srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC, rangeSpacing,
                             zeroDopplerTimeWithoutBias, slantRange, nearEdgeSlantRange, srgrConvParams);
 
-                    final PixelPos pixelPos = new PixelPos(0.0f,0.0f);
-                    if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, srcMaxRange, srcMaxAzimuth, pixelPos, sensorPos)) {
+                    if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, srcMaxRange, srcMaxAzimuth, sensorPos)) {
                         saveNoDataValueToTarget(index, trgTiles);
                     } else {
                         double[] localIncidenceAngles =
@@ -1025,12 +1039,22 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
                         if (saveIncidenceAngleFromEllipsoid) {
                             incidenceAngleFromEllipsoidBuffer.setElemDoubleAt(
-                                    index, (double)incidenceAngle.getPixelFloat(pixelPos.x, pixelPos.y));
+                                    index, (double)incidenceAngle.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
                         }
 
                         for(TileData tileData : trgTiles) {
 
                             Unit.UnitType bandUnit = getBandUnit(tileData.bandName);
+                            final String[] srcBandName = targetBandNameToSourceBandName.get(tileData.bandName);
+                            final Band srcBand = sourceProduct.getBand(srcBandName[0]);
+                            final PixelPos pixelPos = new PixelPos(0.0f,0.0f);
+                            WarpOp.getWarpedCoords(warpDataMap.get(srcBand).warp, warpPolynomialOrder,
+                                                  (float)rangeIndex, (float)azimuthIndex, pixelPos);
+                            if (pixelPos.x < 0.0 || pixelPos.x >= srcMaxRange || pixelPos.y < 0.0 || pixelPos.y >= srcMaxAzimuth) {
+                                tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
+                                continue;
+                            }
+
                             int[] subSwathIndex = {INVALID_SUB_SWATH_INDEX};
                             double v = getPixelValue(pixelPos.y, pixelPos.x, tileData, bandUnit, subSwathIndex);
 
@@ -1120,18 +1144,11 @@ public class SARSimTerrainCorrectionOp extends Operator {
         return demNoDataValue;
     }
 
-    private boolean isValidCell(final double rangeIndex, final double azimuthIndex,
-                                final double lat, final double lon,
-                                final int srcMaxRange, final int srcMaxAzimuth,
-                                final PixelPos pixelPos, final double[] sensorPos) {
+    private boolean isValidCell(final double rangeIndex, final double azimuthIndex, final double lat, final double lon,
+                                final int srcMaxRange, final int srcMaxAzimuth, final double[] sensorPos) {
 
         if (rangeIndex < 0.0 || rangeIndex >= srcMaxRange || azimuthIndex < 0.0 || azimuthIndex >= srcMaxAzimuth) {
             return  false;
-        }
-
-        WarpOp.getWarpedCoords(warpData.warp, warpPolynomialOrder, (float)rangeIndex, (float)azimuthIndex, pixelPos);
-        if (pixelPos.x < 0.0 || pixelPos.x >= srcMaxRange || pixelPos.y < 0.0 || pixelPos.y >= srcMaxAzimuth) {
-            return false;
         }
 
         GeoPos sensorGeoPos = new GeoPos();
@@ -1146,8 +1163,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
             delLonMax = Math.abs(lon - sensorGeoPos.lon);
         }
 
-        double delLat = Math.abs(lat - latitude.getPixelFloat(pixelPos.x, pixelPos.y));
-        double srcLon = longitude.getPixelFloat(pixelPos.x, pixelPos.y);
+        double delLat = Math.abs(lat - latitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
+        double srcLon = longitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex);
         double delLon;
         if (lon < 0 && srcLon > 0) {
             delLon = Math.abs(360 + lon - srcLon);
@@ -1543,14 +1560,15 @@ public class SARSimTerrainCorrectionOp extends Operator {
         }
     }
 
-    private void outputCoRegistrationInfo(final WarpOp.WarpData warpData, final String bandName)
+    private void outputCoRegistrationInfo(
+            final WarpOp.WarpData warpData, final String bandName, boolean appendFlag)
             throws OperatorException {
 
         final File residualFile = getShiftsFile(sourceProduct);
         PrintStream p = null; // declare a print stream object
 
         try {
-            final FileOutputStream out = new FileOutputStream(residualFile.getAbsolutePath());
+            final FileOutputStream out = new FileOutputStream(residualFile.getAbsolutePath(), appendFlag);
 
             // Connect print stream to the output stream
             p = new PrintStream(out);
