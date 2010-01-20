@@ -95,6 +95,7 @@ public class RemoveAntennaPatternOp extends Operator {
         OperatorUtils.copyProductNodes(sourceProduct, targetProduct);
 
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.ant_elev_corr_flag, 0);
         absTgt.setAttributeInt("retro-calibration performed flag", 1);
     }
 
