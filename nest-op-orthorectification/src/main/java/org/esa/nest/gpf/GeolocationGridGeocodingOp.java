@@ -715,18 +715,14 @@ public final class GeolocationGridGeocodingOp extends Operator {
         final int y0 = (int)azimuthIndex;
 
         double v = 0.0;
-        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.INTENSITY_DB) {
-
-            v = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
-
-        } else if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+        if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
 
             final double vi = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
             final double vq = sourceTile2.getDataBuffer().getElemDoubleAt(sourceTile2.getDataBufferIndex(x0, y0));
             v = vi*vi + vq*vq;
 
         } else {
-            throw new OperatorException("Uknown band unit");
+            v = sourceTile.getDataBuffer().getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
         }
 
         return v;
@@ -758,14 +754,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
         final ProductData srcData = sourceTile.getDataBuffer();
 
         double v00, v01, v10, v11;
-        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.INTENSITY_DB) {
-
-            v00 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
-            v01 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y0));
-            v10 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y1));
-            v11 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y1));
-
-        } else if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+        if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
 
             final ProductData srcData2 = sourceTile2.getDataBuffer();
 
@@ -785,7 +774,11 @@ public final class GeolocationGridGeocodingOp extends Operator {
             v11 = vi11*vi11 + vq11*vq11;
 
         } else {
-            throw new OperatorException("Uknown band unit");
+
+            v00 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y0));
+            v01 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y0));
+            v10 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x0, y1));
+            v11 = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x1, y1));
         }
 
         return MathUtils.interpolationBiLinear(v00, v01, v10, v11, dx, dy);
@@ -822,15 +815,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
         final ProductData srcData = sourceTile.getDataBuffer();
 
         final double[][] v = new double[4][4];
-        if (bandUnit == Unit.UnitType.AMPLITUDE || bandUnit == Unit.UnitType.INTENSITY || bandUnit == Unit.UnitType.INTENSITY_DB) {
-
-            for (int i = 0; i < y.length; i++) {
-                for (int j = 0; j < x.length; j++) {
-                    v[i][j] = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x[j], y[i]));
-                }
-            }
-
-        } else if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
+        if (bandUnit == Unit.UnitType.REAL || bandUnit == Unit.UnitType.IMAGINARY) {
 
             final ProductData srcData2 = sourceTile2.getDataBuffer();
             for (int i = 0; i < y.length; i++) {
@@ -842,7 +827,12 @@ public final class GeolocationGridGeocodingOp extends Operator {
             }
 
         } else {
-            throw new OperatorException("Uknown band unit");
+
+            for (int i = 0; i < y.length; i++) {
+                for (int j = 0; j < x.length; j++) {
+                    v[i][j] = srcData.getElemDoubleAt(sourceTile.getDataBufferIndex(x[j], y[i]));
+                }
+            }
         }
 
         return MathUtils.interpolationBiCubic(v, rangeIndex - x[1], azimuthIndex - y[1]);
