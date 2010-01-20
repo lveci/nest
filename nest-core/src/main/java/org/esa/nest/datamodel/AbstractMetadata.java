@@ -59,6 +59,10 @@ public final class AbstractMetadata {
     public static final String SAMPLE_TYPE = "SAMPLE_TYPE";
     public static final String mds1_tx_rx_polar = "mds1_tx_rx_polar";
     public static final String mds2_tx_rx_polar = "mds2_tx_rx_polar";
+    public static final String mds3_tx_rx_polar = "mds3_tx_rx_polar";
+    public static final String mds4_tx_rx_polar = "mds4_tx_rx_polar";
+    public static final String[] polarTags = { AbstractMetadata.mds1_tx_rx_polar,AbstractMetadata.mds2_tx_rx_polar,
+                                               AbstractMetadata.mds3_tx_rx_polar,AbstractMetadata.mds4_tx_rx_polar };
     public static final String algorithm = "algorithm";
     public static final String azimuth_looks = "azimuth_looks";
     public static final String range_looks = "range_looks";
@@ -161,6 +165,8 @@ public final class AbstractMetadata {
         addAbstractedAttribute(absRoot, SAMPLE_TYPE, ProductData.TYPE_ASCII, "", "DETECTED or COMPLEX");
         addAbstractedAttribute(absRoot, mds1_tx_rx_polar, ProductData.TYPE_ASCII, "", "Polarization");
         addAbstractedAttribute(absRoot, mds2_tx_rx_polar, ProductData.TYPE_ASCII, "", "Polarization");
+        addAbstractedAttribute(absRoot, mds3_tx_rx_polar, ProductData.TYPE_ASCII, "", "Polarization");
+        addAbstractedAttribute(absRoot, mds4_tx_rx_polar, ProductData.TYPE_ASCII, "", "Polarization");
         addAbstractedAttribute(absRoot, algorithm, ProductData.TYPE_ASCII, "", "Processing algorithm");
         addAbstractedAttribute(absRoot, azimuth_looks, ProductData.TYPE_FLOAT64, "", "");
         addAbstractedAttribute(absRoot, range_looks, ProductData.TYPE_FLOAT64, "", "");

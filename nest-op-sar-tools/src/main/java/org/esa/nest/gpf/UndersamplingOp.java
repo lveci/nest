@@ -128,7 +128,7 @@ public class UndersamplingOp extends Operator {
     private float azimuthSpacing = 12.5f;
 
     private ProductReader subsetReader = null;
-    private MetadataElement absSrc = null;
+    private MetadataElement absRoot = null;
 
     private int filterWidth;
     private int filterHeight;
@@ -168,7 +168,7 @@ public class UndersamplingOp extends Operator {
         sourceImageWidth = sourceProduct.getSceneRasterWidth();
         sourceImageHeight = sourceProduct.getSceneRasterHeight();
 
-        absSrc = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+        absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
 
         if (method.equals(SUB_SAMPLING)) {
             initializeForSubSampling();
@@ -299,10 +299,10 @@ public class UndersamplingOp extends Operator {
      */
     void getSrcImagePixelSpacings() {
 
-        srcRangeSpacing = (float)absSrc.getAttributeDouble(AbstractMetadata.range_spacing);
+        srcRangeSpacing = (float)absRoot.getAttributeDouble(AbstractMetadata.range_spacing);
         //System.out.println("Range spacing is " + srcRangeSpacing);
 
-        srcAzimuthSpacing = (float)absSrc.getAttributeDouble(AbstractMetadata.azimuth_spacing);
+        srcAzimuthSpacing = (float)absRoot.getAttributeDouble(AbstractMetadata.azimuth_spacing);
         //System.out.println("Azimuth spacing is " + srcAzimuthSpacing);
     }
 
@@ -557,8 +557,8 @@ public class UndersamplingOp extends Operator {
                 final String[] srcBandNames = new String[2];
                 srcBandNames[0] = srcBand.getName();
                 srcBandNames[1] = sourceBands[i+1].getName();
-                final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
-                if (pol != null) {
+                final String pol = OperatorUtils.getBandPolarization(srcBandNames[0], absRoot);
+                if (pol != null && !pol.isEmpty()) {
                     targetBandName = "Intensity_" + pol.toUpperCase();
                 } else {
                     targetBandName = "Intensity";

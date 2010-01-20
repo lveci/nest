@@ -92,11 +92,9 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
         final MetadataElement acquisitionInfo = productInfo.getElement("acquisitionInfo");
         final MetadataElement polarisationList = acquisitionInfo.getElement("polarisationList");
-        MetadataAttribute[] polList = polarisationList.getAttributes();
-        if(polList.length > 0) {
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar, polList[0].getData().getElemString());
-        } if(polList.length > 1) {
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds2_tx_rx_polar, polList[1].getData().getElemString());
+        final MetadataAttribute[] polList = polarisationList.getAttributes();
+        for(int i=0; i < polList.length; ++i) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.polarTags[i], polList[i].getData().getElemString());
         }
 
         final ProductData.UTC startTime = ReaderUtils.getTime(sceneInfo.getElement("start"), "timeUTC", timeFormat);

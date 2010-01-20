@@ -78,43 +78,44 @@ public final class OperatorUtils {
         return getTiePointGrid(sourceProduct, TPG_LONGITUDE);
     }
 
-    public static String getPolarizationFromBandName(final String bandName) {
+    public static String getBandPolarization(final String bandName, final MetadataElement absRoot) {
+        final String pol = OperatorUtils.getPolarizationFromBandName(bandName);
+        if (pol != null) {
+            return pol;
+        } else {
+            final String[] mdsPolar = getProductPolarization(absRoot);
+            return mdsPolar[0];
+        }
+    }
+
+    private static String getPolarizationFromBandName(final String bandName) {
 
         final int idx = bandName.lastIndexOf('_');
         if (idx != -1) {
             final String pol = bandName.substring(idx+1).toLowerCase();
-            if (!pol.contains("hh") && !pol.contains("vv") && !pol.contains("hv") && !pol.contains("vh")) {
-                return null;
-            } else {
+            if (pol.contains("hh") || pol.contains("vv") || pol.contains("hv") || pol.contains("vh")) {
                 return pol;
-            }
-        } else {
-            return null;
+            } 
         }
+        return null;
     }
 
     /**
      * Get product polarizations for each band in the product.
      * @param absRoot the AbstractMetadata
-     * @param mdsPolar the string array to hold the polarization names
-     * @throws Exception The exceptions.
+     * @return mdsPolar the string array to hold the polarization names
      */
-    public static void getProductPolarization(final MetadataElement absRoot, final String[] mdsPolar) throws Exception {
+    public static String[] getProductPolarization(final MetadataElement absRoot) {
 
-        if(mdsPolar == null || mdsPolar.length < 2) {
-            throw new Exception("mdsPolar is not valid");
+        final String[] mdsPolar = new String[4];
+        for(int i=0; i < mdsPolar.length; ++i) {
+            final String polarName = absRoot.getAttributeString(AbstractMetadata.polarTags[i], "").toLowerCase();
+            mdsPolar[i] = "";
+            if (polarName.contains("hh") || polarName.contains("hv") || polarName.contains("vh") || polarName.contains("vv")) {
+                mdsPolar[i] = polarName;
+            }
         }
-        String polarName = absRoot.getAttributeString(AbstractMetadata.mds1_tx_rx_polar);
-        mdsPolar[0] = null;
-        if (polarName.contains("HH") || polarName.contains("HV") || polarName.contains("VH") || polarName.contains("VV")) {
-            mdsPolar[0] = polarName.toLowerCase();
-        }
-
-        mdsPolar[1] = null;
-        polarName = absRoot.getAttributeString(AbstractMetadata.mds2_tx_rx_polar);
-        if (polarName.contains("HH") || polarName.contains("HV") || polarName.contains("VH") || polarName.contains("VV")) {
-            mdsPolar[1] = polarName.toLowerCase();
-        }
+        return mdsPolar;
     }
 
     public static String getSuffixFromBandName(final String bandName) {

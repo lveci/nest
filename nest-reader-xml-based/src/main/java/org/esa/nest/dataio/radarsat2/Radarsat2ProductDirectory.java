@@ -189,13 +189,13 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
                 sampledLineSpacing.getAttributeDouble("sampledLineSpacing", defInt));
 
         // polarizations
-        getPolarizations(imageAttributes);
+        getPolarizations(absRoot, imageAttributes);
 
         addOrbitStateVectors(absRoot, orbitInformation);
         addSRGRCoefficients(absRoot, imageGenerationParameters);
     }
 
-    private static int getFlag(MetadataElement elem, String tag) {
+    private static int getFlag(final MetadataElement elem, String tag) {
         String valStr = elem.getAttributeString(tag, " ").toUpperCase();
         if(valStr.equals("FALSE") || valStr.equals("0"))
             return 0;
@@ -204,25 +204,28 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         return -1;
     }
 
-    private void getPolarizations(MetadataElement imageAttributes) {
+    private void getPolarizations(final MetadataElement absRoot, final MetadataElement imageAttributes) {
         final MetadataElement[] imageAttribElems = imageAttributes.getElements();
+        int i = 0;
         for(MetadataElement elem : imageAttribElems) {
             if(elem.getName().equals("fullResolutionImageData")) {
 
-                polarizationMap.put(elem.getAttributeString("fullResolutionImageData", "").toLowerCase(),
-                                    elem.getAttributeString("pole", "").toUpperCase());
+                final String pol = elem.getAttributeString("pole", "").toUpperCase();
+                polarizationMap.put(elem.getAttributeString("fullResolutionImageData", "").toLowerCase(), pol);
+                absRoot.setAttributeString(AbstractMetadata.polarTags[i], pol);
+                ++i;
             }
         }
     }
 
-    private static String getDataType(MetadataElement rasterAttributes) {
+    private static String getDataType(final MetadataElement rasterAttributes) {
         final String dataType = rasterAttributes.getAttributeString("dataType", AbstractMetadata.NO_METADATA_STRING).toUpperCase();
         if(dataType.contains("COMPLEX"))
             return "COMPLEX";
         return "DETECTED";
     }
 
-    private static void addOrbitStateVectors(MetadataElement absRoot, MetadataElement orbitInformation) {
+    private static void addOrbitStateVectors(final MetadataElement absRoot, final MetadataElement orbitInformation) {
         final MetadataElement orbitVectorListElem = absRoot.getElement(AbstractMetadata.orbit_state_vectors);
 
         final MetadataElement[] stateVectorElems = orbitInformation.getElements();

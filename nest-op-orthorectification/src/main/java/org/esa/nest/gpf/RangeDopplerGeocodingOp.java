@@ -160,7 +160,7 @@ public class RangeDopplerGeocodingOp extends Operator {
     private boolean isElevationModelAvailable = false;
     private boolean usePreCalibrationOp = false;
 
-    private final String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
+    private String[] mdsPolar; // polarizations for the two bands in the product
 
     private int sourceImageWidth = 0;
     private int sourceImageHeight = 0;
@@ -273,7 +273,7 @@ public class RangeDopplerGeocodingOp extends Operator {
             if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
                 calibrator.initialize(sourceProduct, targetProduct, true, true);
-                OperatorUtils.getProductPolarization(absRoot, mdsPolar);
+                mdsPolar = OperatorUtils.getProductPolarization(absRoot);
             }
 
             updateTargetProductMetadata();
@@ -725,10 +725,10 @@ public class RangeDopplerGeocodingOp extends Operator {
                 final Band[] srcBands = new Band[2];
                 srcBands[0] = srcBand;
                 srcBands[1] = sourceBands[i+1];
-                final String pol = OperatorUtils.getPolarizationFromBandName(srcBand.getName());
+                final String pol = OperatorUtils.getBandPolarization(srcBand.getName(), absRoot);
 
                 if (saveSigmaNought) {
-                    if (pol != null) {
+                    if (pol != null && !pol.isEmpty()) {
                         targetBandName = "Sigma0_" + pol.toUpperCase();
                     } else {
                         targetBandName = "Sigma0";
@@ -745,7 +745,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 }
 
                 if (saveSelectedSourceBand) {
-                    if (pol != null) {
+                    if (pol != null && !pol.isEmpty()) {
                         targetBandName = "Intensity_" + pol.toUpperCase();
                     } else {
                         targetBandName = "Intensity";
@@ -761,9 +761,9 @@ public class RangeDopplerGeocodingOp extends Operator {
             } else {
 
                 final Band[] srcBands = {srcBand};
-                final String pol = OperatorUtils.getPolarizationFromBandName(srcBand.getName());
+                final String pol = OperatorUtils.getBandPolarization(srcBand.getName(), absRoot);
                 if (saveSigmaNought) {
-                    if (pol != null) {
+                    if (pol != null && !pol.isEmpty()) {
                         targetBandName = "Sigma0_" + pol.toUpperCase();
                     } else {
                         targetBandName = "Sigma0";
@@ -1076,7 +1076,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 td.applyRadiometricNormalization = targetBandApplyRadiometricNormalizationFlag.get(targetBand.getName());
                 td.applyRetroCalibration = targetBandApplyRetroCalibrationFlag.get(targetBand.getName());
 
-                final String pol = OperatorUtils.getPolarizationFromBandName(srcBands[0].getName());
+                final String pol = OperatorUtils.getBandPolarization(srcBands[0].getName(), absRoot);
                 td.bandPolar = 0;
                 if (pol != null && mdsPolar[1] != null && pol.contains(mdsPolar[1])) {
                     td.bandPolar = 1;

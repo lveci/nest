@@ -52,7 +52,7 @@ public class ASARCalibrator implements Calibrator {
     private String oldXCAFileName = null; // the old XCA file
     private String newXCAFileName = null; // XCA file for radiometric calibration
     private String newXCAFilePath = null; // absolute path for XCA file
-    private final String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
+    private String[] mdsPolar; // polarizations for the two bands in the product
 
     private TiePointGrid incidenceAngle = null;
     private TiePointGrid slantRangeTime = null;
@@ -147,7 +147,7 @@ public class ASARCalibrator implements Calibrator {
 
             setCalibrationFlags();
 
-            getProductPolarization();
+            mdsPolar = OperatorUtils.getProductPolarization(absRoot);
 
             getRangeAzimuthSpacing();
             
@@ -291,25 +291,6 @@ public class ASARCalibrator implements Calibrator {
     private void getRangeAzimuthSpacing() throws Exception {
         rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
         azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
-    }
-
-    /**
-     * Get product polarizations for each band in the product.
-     * @throws Exception The exceptions.
-     */
-    private void getProductPolarization() throws Exception {
-
-        String polarName = absRoot.getAttributeString(AbstractMetadata.mds1_tx_rx_polar);
-        mdsPolar[0] = null;
-        if (polarName.contains("HH") || polarName.contains("HV") || polarName.contains("VH") || polarName.contains("VV")) {
-            mdsPolar[0] = polarName.toLowerCase();
-        }
-
-        mdsPolar[1] = null;
-        polarName = absRoot.getAttributeString(AbstractMetadata.mds2_tx_rx_polar);
-        if (polarName.contains("HH") || polarName.contains("HV") || polarName.contains("VH") || polarName.contains("VV")) {
-            mdsPolar[1] = polarName.toLowerCase();
-        }
     }
 
     /**
@@ -900,7 +881,7 @@ public class ASARCalibrator implements Calibrator {
             return;
         }
 
-        final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
+        final String pol = OperatorUtils.getBandPolarization(srcBandNames[0], absRoot);
         int prodBand = 0;
         if (pol != null && mdsPolar[1] != null && pol.contains(mdsPolar[1])) {
             prodBand = 1;
@@ -1479,7 +1460,7 @@ public class ASARCalibrator implements Calibrator {
         final Unit.UnitType bandUnit = Unit.getUnitType(sourceBand);
         final ProductData trgData = targetTile.getDataBuffer();
 
-        final String pol = OperatorUtils.getPolarizationFromBandName(targetBand.getName());
+        final String pol = OperatorUtils.getBandPolarization(targetBand.getName(), absRoot);
         int prodBand = 0;
         if (pol != null && mdsPolar[1] != null && pol.contains(mdsPolar[1])) {
             prodBand = 1;

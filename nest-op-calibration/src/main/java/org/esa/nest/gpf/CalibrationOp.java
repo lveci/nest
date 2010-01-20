@@ -15,10 +15,7 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.VirtualBand;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -30,6 +27,7 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.nest.datamodel.CalibrationFactory;
 import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -152,6 +150,7 @@ public class CalibrationOp extends Operator {
             sourceBands[i] = sourceBand;
         }
 
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
         String targetBandName;
         for (int i = 0; i < sourceBands.length; i++) {
 
@@ -190,15 +189,7 @@ public class CalibrationOp extends Operator {
                 final String[] srcBandNames = new String[2];
                 srcBandNames[0] = srcBand.getName();
                 srcBandNames[1] = sourceBands[i+1].getName();
-                final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
-                if (pol != null) {
-                    targetBandName = "Sigma0_" + pol.toUpperCase();
-                } else {
-                    targetBandName = "Sigma0";
-                }
-                if(outputImageScaleInDb) {
-                    targetBandName += "_dB";
-                }
+                targetBandName = createTargetBandName(srcBandNames[0], absRoot);
                 ++i;
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
@@ -207,16 +198,7 @@ public class CalibrationOp extends Operator {
             } else {
 
                 final String[] srcBandNames = {srcBand.getName()};
-                final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
-                if (pol != null) {
-                    targetBandName = "Sigma0_" + pol.toUpperCase();
-                } else {
-                    targetBandName = "Sigma0";
-                }
-
-                if(outputImageScaleInDb) {
-                    targetBandName += "_dB";
-                }
+                targetBandName = createTargetBandName(srcBandNames[0], absRoot);
                 if(targetProduct.getBand(targetBandName) == null) {
                     targetBandNameToSourceBandName.put(targetBandName, srcBandNames);
                 }
@@ -236,6 +218,18 @@ public class CalibrationOp extends Operator {
                 targetProduct.addBand(targetBand);
             }
         }
+    }
+
+    private String createTargetBandName(final String srcBandName, final MetadataElement absRoot) {
+        final String pol = OperatorUtils.getBandPolarization(srcBandName, absRoot);
+        String targetBandName = "Sigma0";
+        if (pol != null && !pol.isEmpty()) {
+            targetBandName = "Sigma0_" + pol.toUpperCase();
+        }
+        if(outputImageScaleInDb) {
+            targetBandName += "_dB";
+        }
+        return targetBandName;
     }
 
     /**

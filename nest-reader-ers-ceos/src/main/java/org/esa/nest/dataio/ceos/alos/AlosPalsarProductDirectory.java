@@ -371,12 +371,11 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
                 sceneRec.getAttributeString("Processing algorithm identifier"));
 
-        if(_imageFiles.length > 0 && _imageFiles[0] != null)
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
-                _imageFiles[0].getPolarization());
-        if(_imageFiles.length > 1 && _imageFiles[1] != null)
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds2_tx_rx_polar,
-                _imageFiles[1].getPolarization());
+        for(int i=0; i < _imageFiles.length; ++i) {
+            if(_imageFiles[i] != null) {
+                AbstractMetadata.setAttribute(absRoot, AbstractMetadata.polarTags[i], _imageFiles[i].getPolarization());
+            }
+        }
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
                 sceneRec.getAttributeDouble("Nominal number of looks processed in azimuth"));

@@ -420,7 +420,7 @@ public class GraphProcessor {
         public void tileCancelled(Object eventSource, TileRequest[] requests, PlanarImage image, int tileX,
                                   int tileY) {
             semaphore.release();
-            throw new OperatorException("Operation cancelled.");
+            throw new OperatorException("Operation cancelled by user.");
         }
 
         @Override

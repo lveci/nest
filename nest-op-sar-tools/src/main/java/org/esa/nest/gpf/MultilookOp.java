@@ -365,8 +365,8 @@ public final class MultilookOp extends Operator {
                 final String[] srcBandNames = new String[2];
                 srcBandNames[0] = srcBand.getName();
                 srcBandNames[1] = sourceBands[i+1].getName();
-                final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
-                if (pol != null) {
+                final String pol = OperatorUtils.getBandPolarization(srcBandNames[0], absRoot);
+                if (pol != null && !pol.isEmpty()) {
                     targetBandName = "Intensity_" + pol.toUpperCase();
                 } else {
                     final String suff = OperatorUtils.getSuffixFromBandName(srcBandNames[0]);

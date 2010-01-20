@@ -155,7 +155,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private boolean saveIncidenceAngleFromEllipsoid = false;
     private boolean usePreCalibrationOp = false;
 
-    private String[] mdsPolar = new String[2]; // polarizations for the two bands in the product
+    private String[] mdsPolar; // polarizations for the two bands in the product
     private String demName = null;
 
     private int sourceImageWidth = 0;
@@ -275,7 +275,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
                 calibrator.initialize(sourceProduct, targetProduct, true, true);
-                OperatorUtils.getProductPolarization(absRoot, mdsPolar);
+                mdsPolar = OperatorUtils.getProductPolarization(absRoot);
             }
 
             updateTargetProductMetadata();
@@ -936,7 +936,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             td.applyRadiometricNormalization = targetBandapplyRadiometricNormalizationFlag.get(targetBand.getName());
             td.applyRetroCalibration = targetBandApplyRetroCalibrationFlag.get(targetBand.getName());
 
-            final String pol = OperatorUtils.getPolarizationFromBandName(srcBandNames[0]);
+            final String pol = OperatorUtils.getBandPolarization(srcBandNames[0], absRoot);
             td.bandPolar = 0;
             if (pol != null && mdsPolar[1] != null && pol.contains(mdsPolar[1])) {
                 td.bandPolar = 1;
