@@ -10,6 +10,7 @@ import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.visat.dialogs.PromptDialog;
+import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.DialogUtils;
 import org.esa.nest.util.ResourceUtils;
 
@@ -42,6 +43,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     private final AppContext appContext;
     private GraphPanel graphPanel = null;
     private JLabel statusLabel = null;
+    private String lastWarningMsg = "";
 
     private JPanel progressPanel = null;
     private JProgressBar progressBar = null;
@@ -370,12 +372,18 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
         statusLabel.setForeground(new Color(255,0,0));
         statusLabel.setText("");
+        final String warningStr = warningMsg.toString();
         if(!isValid) {
             statusLabel.setText(errorMsg.toString());
             return false;
-        } else if(!warningMsg.toString().isEmpty()) {
-            statusLabel.setForeground(new Color(0,100,255));
-            statusLabel.setText("Warning: "+warningMsg.toString());
+        } else if(!warningStr.isEmpty()) {
+            if(warningStr.length() > 100 && !warningStr.equals(lastWarningMsg)) {
+                VisatApp.getApp().showWarningDialog(warningStr);
+                lastWarningMsg = warningStr;
+            } else {
+                statusLabel.setForeground(new Color(0,100,255));
+                statusLabel.setText("Warning: "+warningStr);
+            }
         }
 
         return InitGraph();
