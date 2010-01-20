@@ -136,6 +136,22 @@ public abstract class BaseOperatorUI implements OperatorUI {
         return bandNames.toArray(new String[bandNames.size()]);
     }
 
+    protected String[] getGeometries() {
+        final ArrayList<String> geometryNames = new ArrayList<String>(5);
+        if(sourceProducts != null) {
+            for(Product prod : sourceProducts) {
+                if(sourceProducts.length > 1) {
+                    for(String name : prod.getMaskGroup().getNodeNames()) {
+                        geometryNames.add(name+"::"+prod.getName());
+                    }
+                } else {
+                    geometryNames.addAll(Arrays.asList(prod.getMaskGroup().getNodeNames()));
+                }
+            }
+        }
+        return geometryNames.toArray(new String[geometryNames.size()]);
+    }
+
     public void convertFromDOM() {
 
         final Property[] properties = valueContainer.getProperties();
