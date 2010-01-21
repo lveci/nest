@@ -16,7 +16,7 @@ public class WindFieldEstimationOpAction extends AbstractVisatAction {
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        final GraphBuilderDialog dialog = new GraphBuilderDialog(getAppContext(), "Wind-Field-Estimation", "Wind-Field-Estimation", false);
+        final GraphBuilderDialog dialog = new GraphBuilderDialog(getAppContext(), "Wind-Field-Estimation", getHelpId(), false);
         dialog.show();
 
         final File graphPath = GraphBuilderDialog.getInternalGraphFolder();

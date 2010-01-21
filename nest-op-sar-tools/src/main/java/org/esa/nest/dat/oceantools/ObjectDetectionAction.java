@@ -15,7 +15,7 @@ public class ObjectDetectionAction extends AbstractVisatAction {
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        final GraphBuilderDialog dialog = new GraphBuilderDialog(getAppContext(), "ObjectDetection", "ObjectDetection", false);
+        final GraphBuilderDialog dialog = new GraphBuilderDialog(getAppContext(), "ObjectDetection", getHelpId(), false);
         dialog.show();
 
         final File graphPath = GraphBuilderDialog.getInternalGraphFolder();
