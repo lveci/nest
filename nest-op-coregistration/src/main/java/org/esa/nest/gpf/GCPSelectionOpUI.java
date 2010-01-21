@@ -11,6 +11,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
 import java.util.Map;
 
 /**
@@ -32,6 +34,7 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
     private final JTextField gcpTolerance = new JTextField("");
 
     // for complex products
+    final JCheckBox skipFineRegistrationCheckBox = new JCheckBox("Skip Fine Registration");
     private final JComboBox fineRegistrationWindowWidth = new JComboBox(
             new String[] { "32","64","128","256","512","1024" } );
     private final JComboBox fineRegistrationWindowHeight = new JComboBox(
@@ -43,6 +46,7 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
     private final JRadioButton useSlidingWindow = new JRadioButton("Compute Coherence with Sliding Window");
 
     private boolean isComplex = false;
+    private boolean skipFineRegistration = true;
 
     @Override
     public JComponent CreateOpTab(String operatorName, Map<String, Object> parameterMap, AppContext appContext) {
@@ -50,6 +54,13 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
         initializeOperatorUI(operatorName, parameterMap);
         final JComponent panel = createPanel();
         initParameters();
+
+        skipFineRegistrationCheckBox.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    skipFineRegistration = (e.getStateChange() == ItemEvent.SELECTED);
+                    enableComplexFields();
+                }
+        });
 
         return new JScrollPane(panel);
     }
@@ -68,10 +79,16 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
         checkIfComplex();
 
         if(isComplex) {
-            fineRegistrationWindowWidth.setSelectedItem(paramMap.get("fineRegistrationWindowWidth"));
-            fineRegistrationWindowHeight.setSelectedItem(paramMap.get("fineRegistrationWindowHeight"));
-            coherenceWindowSize.setText(String.valueOf(paramMap.get("coherenceWindowSize")));
-            coherenceThreshold.setText(String.valueOf(paramMap.get("coherenceThreshold")));
+            skipFineRegistration = (Boolean)paramMap.get("skipFineRegistration");
+            skipFineRegistrationCheckBox.getModel().setPressed(skipFineRegistration);
+            skipFineRegistrationCheckBox.setSelected(skipFineRegistration);
+            
+//            if (!skipFineRegistration) {
+                fineRegistrationWindowWidth.setSelectedItem(paramMap.get("fineRegistrationWindowWidth"));
+                fineRegistrationWindowHeight.setSelectedItem(paramMap.get("fineRegistrationWindowHeight"));
+                coherenceWindowSize.setText(String.valueOf(paramMap.get("coherenceWindowSize")));
+                coherenceThreshold.setText(String.valueOf(paramMap.get("coherenceThreshold")));
+//            }
         }
         enableComplexFields();
     }
@@ -107,14 +124,18 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
         paramMap.put("gcpTolerance", Double.parseDouble(gcpTolerance.getText()));
 
         if(isComplex) {
-            paramMap.put("fineRegistrationWindowWidth", fineRegistrationWindowWidth.getSelectedItem());
-            paramMap.put("fineRegistrationWindowHeight", fineRegistrationWindowHeight.getSelectedItem());
-            paramMap.put("coherenceThreshold", Double.parseDouble(coherenceThreshold.getText()));
-            if(useSlidingWindow.isSelected()) {
-                paramMap.put("useSlidingWindow", true);
-                paramMap.put("coherenceWindowSize", Integer.parseInt(coherenceWindowSize.getText()));
-            } else {
-                paramMap.put("useSlidingWindow", false);
+            paramMap.put("skipFineRegistration", skipFineRegistration);
+
+            if (!skipFineRegistration) {
+                paramMap.put("fineRegistrationWindowWidth", fineRegistrationWindowWidth.getSelectedItem());
+                paramMap.put("fineRegistrationWindowHeight", fineRegistrationWindowHeight.getSelectedItem());
+                paramMap.put("coherenceThreshold", Double.parseDouble(coherenceThreshold.getText()));
+                if(useSlidingWindow.isSelected()) {
+                    paramMap.put("useSlidingWindow", true);
+                    paramMap.put("coherenceWindowSize", Integer.parseInt(coherenceWindowSize.getText()));
+                } else {
+                    paramMap.put("useSlidingWindow", false);
+                }
             }
         }
     }
@@ -140,6 +161,9 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "GCP Tolerance:", gcpTolerance);
 
+        gbc.gridx = 0;
+        gbc.gridy++;
+        contentPane.add(skipFineRegistrationCheckBox, gbc);        
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Coherence Window Size:", coherenceWindowSize);
         gbc.gridy++;
@@ -166,11 +190,12 @@ public class GCPSelectionOpUI extends BaseOperatorUI {
     }
 
     private void enableComplexFields() {
-        fineRegistrationWindowWidth.setEnabled(isComplex);
-        fineRegistrationWindowHeight.setEnabled(isComplex);
-        coherenceWindowSize.setEnabled(isComplex);
-        coherenceThreshold.setEnabled(isComplex);
-        useSlidingWindow.setEnabled(isComplex);
+        skipFineRegistrationCheckBox.setEnabled(isComplex);
+        fineRegistrationWindowWidth.setEnabled(isComplex&&!skipFineRegistration);
+        fineRegistrationWindowHeight.setEnabled(isComplex&&!skipFineRegistration);
+        coherenceWindowSize.setEnabled(isComplex&&!skipFineRegistration);
+        coherenceThreshold.setEnabled(isComplex&&!skipFineRegistration);
+        useSlidingWindow.setEnabled(isComplex&&!skipFineRegistration);
     }
 
 

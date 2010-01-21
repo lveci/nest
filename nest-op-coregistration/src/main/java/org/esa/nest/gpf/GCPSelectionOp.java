@@ -89,6 +89,9 @@ public class GCPSelectionOp extends Operator {
     private double gcpTolerance = 0.5;
 
     // ==================== input parameters used for complex co-registration ==================
+    @Parameter(defaultValue="true", label="Skip Fine Registration")
+    private boolean skipFineRegistration = true;
+
     @Parameter(valueSet = {"32","64","128","256","512","1024"}, defaultValue = "128", label="Fine Registration Window Width")
     private String fineRegistrationWindowWidth = "128";
     @Parameter(valueSet = {"32","64","128","256","512","1024"}, defaultValue = "128", label="Fine Registration Window Height")
@@ -200,7 +203,7 @@ public class GCPSelectionOp extends Operator {
 
             OperatorUtils.copyGCPsToTarget(masterGcpGroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
 
-            if (complexCoregistration) {
+            if (complexCoregistration && !skipFineRegistration) {
                 fWindowWidth = Integer.parseInt(fineRegistrationWindowWidth);
                 fWindowHeight = Integer.parseInt(fineRegistrationWindowHeight);
                 fHalfWindowWidth = fWindowWidth / 2;
@@ -249,7 +252,7 @@ public class GCPSelectionOp extends Operator {
 
         final int numSrcBands = sourceProduct.getNumBands();
         boolean oneSlaveSelected = false;          // all other use setSourceImage
-        for(int i=0; i < numSrcBands; ++i) {
+        for(int i = 0; i < numSrcBands; ++i) {
             final Band srcBand = sourceProduct.getBandAt(i);
             final Band targetBand = targetProduct.addBand(srcBand.getName(), srcBand.getDataType());
             ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
@@ -364,7 +367,7 @@ public class GCPSelectionOp extends Operator {
 
                 boolean getSlaveGCP = getCoarseSlaveGCPPosition(slaveBand, slaveBand2, mGCPPixelPos, sGCPPixelPos);
 
-                if (getSlaveGCP && complexCoregistration) {
+                if (getSlaveGCP && complexCoregistration && !skipFineRegistration) {
                     getSlaveGCP = getFineSlaveGCPPosition(slaveBand, slaveBand2, mGCPPixelPos, sGCPPixelPos);
                 }
 
@@ -379,6 +382,7 @@ public class GCPSelectionOp extends Operator {
                                        tgtGeoCoding);
 
                     targetGCPGroup.add(sPin);
+                    System.out.println("slave band: " + targetBand.getName() + ", gcp[" + i + "] = " + "(" + sGCPPixelPos.x + "," + sGCPPixelPos.y + ")");
                     //System.out.println("final slave gcp[" + i + "] = " + "(" + sGCPPixelPos.x + "," + sGCPPixelPos.y + ")");
                     //System.out.println();
 
