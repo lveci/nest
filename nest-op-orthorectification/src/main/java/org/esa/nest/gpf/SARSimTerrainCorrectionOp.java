@@ -155,7 +155,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private boolean saveIncidenceAngleFromEllipsoid = false;
     private boolean usePreCalibrationOp = false;
 
-    private String[] mdsPolar; // polarizations for the two bands in the product
     private String demName = null;
 
     private int sourceImageWidth = 0;
@@ -275,7 +274,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
             if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
                 calibrator.initialize(sourceProduct, targetProduct, true, true);
-                mdsPolar = OperatorUtils.getProductPolarization(absRoot);
             }
 
             updateTargetProductMetadata();

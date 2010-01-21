@@ -883,7 +883,7 @@ public class ASARCalibrator implements Calibrator {
 
         final String pol = OperatorUtils.getBandPolarization(srcBandNames[0], absRoot);
         int prodBand = 0;
-        if (pol != null && mdsPolar[1] != null && pol.contains(mdsPolar[1])) {
+        if (pol != null && mdsPolar[1] != null && mdsPolar[1].contains(pol)) {
             prodBand = 1;
         }
 
@@ -1324,7 +1324,7 @@ public class ASARCalibrator implements Calibrator {
         }
 
         int bandPolarIdx = 0;
-        if (bandPolar != null && mdsPolar[1] != null && bandPolar.contains(mdsPolar[1])) {
+        if (bandPolar != null && mdsPolar[1] != null && mdsPolar[1].contains(bandPolar)) {
             bandPolarIdx = 1;
         }
 
@@ -1415,7 +1415,7 @@ public class ASARCalibrator implements Calibrator {
             final String bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
 
         int bandPolarIdx = 0;
-        if (bandPolar != null && mdsPolar[1] != null && bandPolar.contains(mdsPolar[1])) {
+        if (bandPolar != null && mdsPolar[1] != null && mdsPolar[1].contains(bandPolar)) {
             bandPolarIdx = 1;
         }
 
@@ -1503,7 +1503,7 @@ public class ASARCalibrator implements Calibrator {
 
         final String pol = OperatorUtils.getBandPolarization(targetBand.getName(), absRoot);
         int prodBand = 0;
-        if (pol != null && mdsPolar[1] != null && pol.contains(mdsPolar[1])) {
+        if (pol != null && mdsPolar[1] != null && mdsPolar[1].contains(pol)) {
             prodBand = 1;
         }
 

@@ -160,8 +160,6 @@ public class RangeDopplerGeocodingOp extends Operator {
     private boolean isElevationModelAvailable = false;
     private boolean usePreCalibrationOp = false;
 
-    private String[] mdsPolar; // polarizations for the two bands in the product
-
     private int sourceImageWidth = 0;
     private int sourceImageHeight = 0;
     private int targetImageWidth = 0;
@@ -273,7 +271,6 @@ public class RangeDopplerGeocodingOp extends Operator {
             if (saveSigmaNought) {
                 calibrator = CalibrationFactory.createCalibrator(sourceProduct);
                 calibrator.initialize(sourceProduct, targetProduct, true, true);
-                mdsPolar = OperatorUtils.getProductPolarization(absRoot);
             }
 
             updateTargetProductMetadata();
