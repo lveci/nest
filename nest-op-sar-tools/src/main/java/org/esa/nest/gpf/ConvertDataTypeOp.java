@@ -189,7 +189,7 @@ public class ConvertDataTypeOp extends Operator {
             final double newMax = getMax(dataType);
             final double newRange = newMax - newMin;
 
-            if(origMax <= newMax && origMin >= newMin)
+            if(origMax <= newMax && origMin >= newMin && sourceBand.getDataType() < ProductData.TYPE_FLOAT32)
                 scaling = ScalingType.NONE;
             
             final ProductData srcData = srcTile.getRawSamples();
