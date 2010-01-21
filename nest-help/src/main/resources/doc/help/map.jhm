@@ -162,6 +162,7 @@
 	<mapID target="ObjectDetection" url="operators/ObjectDetection.html"/>
 	<mapID target="OilSpillDetection" url="operators/OilSpillDetectionOp.html"/>
 	<mapID target="CreateLandMask" url="operators/CreateLandMask.html"/>
+	<mapID target="WindFieldEstimation" url="operators/WindFieldEstimationOp.html"/>
 	
 	<!--Tutorials-->
 	<mapID target="remote_sensing" url="tutorials/remote_sensing.html"/>

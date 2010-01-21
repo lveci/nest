@@ -177,6 +177,7 @@
 			<tocitem text="Object Detection" target="ObjectDetection"/>
 			<tocitem text="Oil Spill Detection" target="OilSpillDetection"/>
 			<tocitem text="Create Land Mask" target="CreateLandMask"/>
+			<tocitem text="Wind Field Estimation" target="WindFieldEstimation"/>
 		</tocitem>
 	</tocitem>
 	
