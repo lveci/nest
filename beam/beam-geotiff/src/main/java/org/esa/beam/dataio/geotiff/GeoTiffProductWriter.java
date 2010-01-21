@@ -1,5 +1,5 @@
 /*
- * $Id: GeoTiffProductWriter.java,v 1.1 2009-04-28 14:37:14 lveci Exp $
+ * $Id: GeoTiffProductWriter.java,v 1.2 2010-01-21 20:25:42 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -37,7 +37,7 @@ import java.io.IOException;
  * @author Marco Peters
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:14 $
+ * @version $Revision: 1.2 $ $Date: 2010-01-21 20:25:42 $
  */
 public class GeoTiffProductWriter extends AbstractProductWriter {
 
@@ -97,6 +97,7 @@ public class GeoTiffProductWriter extends AbstractProductWriter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public synchronized void writeBandRasterData(final Band sourceBand,
                                     final int sourceOffsetX,
                                     final int sourceOffsetY,
@@ -119,6 +120,7 @@ public class GeoTiffProductWriter extends AbstractProductWriter {
     /**
      * Deletes the physically representation of the given product from the hard disk.
      */
+    @Override
     public void deleteOutput() {
         if (outputFile != null && outputFile.isFile()) {
             outputFile.delete();
@@ -130,6 +132,7 @@ public class GeoTiffProductWriter extends AbstractProductWriter {
      *
      * @throws java.io.IOException on failure
      */
+    @Override
     public void flush() throws IOException {
         if (outputStream != null) {
             outputStream.flush();
@@ -141,6 +144,7 @@ public class GeoTiffProductWriter extends AbstractProductWriter {
      *
      * @throws java.io.IOException on failure
      */
+    @Override
     public void close() throws IOException {
         if (bandWriter != null) {
             bandWriter.dispose();

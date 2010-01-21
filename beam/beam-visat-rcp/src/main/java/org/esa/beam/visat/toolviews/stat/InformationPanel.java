@@ -137,7 +137,10 @@ class InformationPanel extends TextPagePanel {
     }
 
     private static String getProductFormatName(final Product product) {
-        if(product==null) return null;
+        if(product==null)
+            return null;
+        if(product.getProductReader() == null)
+            return null;
         final ProductReaderPlugIn readerPlugIn = product.getProductReader().getReaderPlugIn();
         if (readerPlugIn != null) {
             return getProductFormatName(readerPlugIn);

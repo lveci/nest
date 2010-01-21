@@ -1,5 +1,5 @@
 /*
- * $Id: DimapHeaderWriter.java,v 1.10 2009-12-14 21:03:50 lveci Exp $
+ * $Id: DimapHeaderWriter.java,v 1.11 2010-01-21 20:25:42 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -19,8 +19,6 @@ package org.esa.beam.dataio.dimap;
 import org.esa.beam.dataio.dimap.spi.DimapPersistable;
 import org.esa.beam.dataio.dimap.spi.DimapPersistence;
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.BitmaskDef;
-import org.esa.beam.framework.datamodel.BitmaskOverlayInfo;
 import org.esa.beam.framework.datamodel.ColorPaletteDef;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.FXYGeoCoding;
@@ -395,7 +393,7 @@ public final class DimapHeaderWriter extends XmlWriter {
                 } else {
                     pw.printLine(indent + 1, DimapProductConstants.TAG_TIE_POINT_GRID_INDEX, i);
                 }
-                
+
                 final String[][] attributes = new String[1][];
                 if (roiMaskGroup.getNodeCount() > 0) {
                     attributes[0] = new String[]{
@@ -555,23 +553,22 @@ public final class DimapHeaderWriter extends XmlWriter {
     private void writeGeoCoding(final GeoCoding geoCoding, final int indent, final int index) {
         if (geoCoding != null) {
             if (geoCoding instanceof TiePointGeoCoding) {
-                writeTiePointGeoCoding(geoCoding, indent);
+                writeGeoCoding((TiePointGeoCoding) geoCoding, indent);
             } else if (geoCoding instanceof MapGeoCoding) {
-                writeMapGeoCoding(geoCoding, indent);
+                writeGeoCoding((MapGeoCoding) geoCoding, indent);
             } else if (geoCoding instanceof PixelGeoCoding) {
-                writePixelGeoCoding(geoCoding, indent, index);
+                writeGeoCoding((PixelGeoCoding) geoCoding, indent, index);
             } else if (geoCoding instanceof FXYGeoCoding) {
-                writeFXYGeoCoding(geoCoding, indent, index);
+                writeGeoCoding((FXYGeoCoding) geoCoding, indent, index);
             } else if (geoCoding instanceof GcpGeoCoding) {
-                writeGcpGeoCoding(geoCoding, indent, index);
+                writeGeoCoding((GcpGeoCoding) geoCoding, indent, index);
             } else if (geoCoding instanceof CrsGeoCoding) {
-                writeCrsGeoCoding(geoCoding, indent, index);
+                writeGeoCoding((CrsGeoCoding) geoCoding, indent);
             }
         }
     }
 
-    private void writeCrsGeoCoding(GeoCoding geoCoding, int indent, int index) {
-        final CrsGeoCoding crsGeoCoding = (CrsGeoCoding) geoCoding;
+    private void writeGeoCoding(final CrsGeoCoding crsGeoCoding, int indent) {
         final CoordinateReferenceSystem crs = crsGeoCoding.getMapCRS();
         final double[] matrix = new double[6];
         final MathTransform transform = crsGeoCoding.getImageToMapTransform();
@@ -599,8 +596,7 @@ public final class DimapHeaderWriter extends XmlWriter {
 
     }
 
-    private void writeGcpGeoCoding(GeoCoding geoCoding, int indent, int index) {
-        final GcpGeoCoding gcpPointGeoCoding = (GcpGeoCoding) geoCoding;
+    private void writeGeoCoding(final GcpGeoCoding gcpPointGeoCoding, int indent, int index) {
         final GeoCoding originalGeoCoding = gcpPointGeoCoding.getOriginalGeoCoding();
 
         if (originalGeoCoding == null || originalGeoCoding instanceof GcpGeoCoding) {
@@ -612,8 +608,7 @@ public final class DimapHeaderWriter extends XmlWriter {
         writeGeoCoding(originalGeoCoding, indent, index);
     }
 
-    private void writeTiePointGeoCoding(final GeoCoding geoCoding, final int indent) {
-        final TiePointGeoCoding tiePointGeoCoding = (TiePointGeoCoding) geoCoding;
+    private void writeGeoCoding(final TiePointGeoCoding tiePointGeoCoding, final int indent) {
         final String latGridName = tiePointGeoCoding.getLatGrid().getName();
         final String lonGridName = tiePointGeoCoding.getLonGrid().getName();
         if (latGridName == null || lonGridName == null) {
@@ -635,8 +630,7 @@ public final class DimapHeaderWriter extends XmlWriter {
         }
     }
 
-    private void writeMapGeoCoding(final GeoCoding geoCoding, int indent) {
-        final MapGeoCoding mapGeoCoding = (MapGeoCoding) geoCoding;
+    private void writeGeoCoding(final MapGeoCoding mapGeoCoding, int indent) {
         final MapInfo info = mapGeoCoding.getMapInfo();
         if (info == null) {
             return;
@@ -765,8 +759,7 @@ public final class DimapHeaderWriter extends XmlWriter {
         println(crsTags[1]);
     }
 
-    private void writePixelGeoCoding(final GeoCoding geoCoding, final int indent, final int index) {
-        final PixelGeoCoding pixelGeoCoding = (PixelGeoCoding) geoCoding;
+    private void writeGeoCoding(final PixelGeoCoding pixelGeoCoding, final int indent, final int index) {
         final String latBandName = pixelGeoCoding.getLatBand().getName();
         final String lonBandName = pixelGeoCoding.getLonBand().getName();
         final String validMask = pixelGeoCoding.getValidMask();
@@ -791,8 +784,7 @@ public final class DimapHeaderWriter extends XmlWriter {
         println(geopositionTags[1]);
     }
 
-    private void writeFXYGeoCoding(final GeoCoding geoCoding, int indent, final int index) {
-        final FXYGeoCoding fxyGeoCoding = (FXYGeoCoding) geoCoding;
+    private void writeGeoCoding(final FXYGeoCoding fxyGeoCoding, int indent, final int index) {
 
         if (index <= 0) {
             indent = writeFXYCoordRefSystem(fxyGeoCoding, indent);
