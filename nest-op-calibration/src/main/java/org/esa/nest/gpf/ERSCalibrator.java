@@ -2412,14 +2412,14 @@ public final class ERSCalibrator implements Calibrator {
     //==================================== pixel calibration used by RD ======================================
 
     public double applyRetroCalibration(
-            int x, int y, double v, int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
+            int x, int y, double v, String bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
         return v;
     }
 
     public double applyCalibration(
             final double v, final double rangeIndex, final double azimuthIndex, final double slantRange,
             final double satelliteHeight, final double sceneToEarthCentre, final double localIncidenceAngle,
-            final int bandPolar, final Unit.UnitType bandUnit, final int[] subSwathIndex) {
+            final String bandPolar, final Unit.UnitType bandUnit, final int[] subSwathIndex) {
 
         // For both detectec and slant range products,
         //   1) local incidence angle (Remember that for ERS the correction is sin(theta_loc)/sin(theta_ref))

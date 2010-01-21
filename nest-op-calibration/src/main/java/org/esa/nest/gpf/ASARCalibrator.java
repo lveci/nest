@@ -1317,12 +1317,17 @@ public class ASARCalibrator implements Calibrator {
      * @param subSwathIndex The sub swath index for current pixel for wide swath product case.
      * @return The pixel value with antenna pattern compensation and range spreading loss correction removed.
      */
-    public double applyRetroCalibration(int x, int y, double v, int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
+    public double applyRetroCalibration(int x, int y, double v, String bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
 
         if (!retroCalibrationFlag) {
             return v;
         }
-        
+
+        int bandPolarIdx = 0;
+        if (bandPolar != null && mdsPolar[1] != null && bandPolar.contains(mdsPolar[1])) {
+            bandPolarIdx = 1;
+        }
+
         final double zeroDopplerTime = firstLineUTC + y*lineTimeInterval;
         final double satelitteHeight = computeSatelliteHeight(zeroDopplerTime, orbitStateVectors);
 
@@ -1343,9 +1348,9 @@ public class ASARCalibrator implements Calibrator {
         double gain = 0.0;
         if (wideSwathProductFlag) {
             gain = getAntennaPatternGain(
-                    elevationAngle, bandPolar, oldRefElevationAngle, oldAntennaPatternWideSwath, true, subSwathIndex);
+                    elevationAngle, bandPolarIdx, oldRefElevationAngle, oldAntennaPatternWideSwath, true, subSwathIndex);
         } else {
-            gain = computeAntPatGain(elevationAngle, oldRefElevationAngle[0], oldAntennaPatternSingleSwath[bandPolar]);
+            gain = computeAntPatGain(elevationAngle, oldRefElevationAngle[0], oldAntennaPatternSingleSwath[bandPolarIdx]);
         }
 
         if (bandUnit == Unit.UnitType.AMPLITUDE) {
@@ -1407,7 +1412,12 @@ public class ASARCalibrator implements Calibrator {
     public double applyCalibration(
             final double v, final double rangeIndex, final double azimuthIndex, final double slantRange,
             final double satelliteHeight, final double sceneToEarthCentre, final double localIncidenceAngle,
-            final int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
+            final String bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
+
+        int bandPolarIdx = 0;
+        if (bandPolar != null && mdsPolar[1] != null && bandPolar.contains(mdsPolar[1])) {
+            bandPolarIdx = 1;
+        }
 
         double sigma = 0.0;
         if (bandUnit == Unit.UnitType.AMPLITUDE) {
@@ -1423,7 +1433,7 @@ public class ASARCalibrator implements Calibrator {
         }
 
         if (multilookFlag && antElevCorrFlag) { // calibration constant and incidence angle corrections only
-            return sigma / newCalibrationConstant[bandPolar] *
+            return sigma / newCalibrationConstant[bandPolarIdx] *
                    Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
         }
 
@@ -1435,13 +1445,13 @@ public class ASARCalibrator implements Calibrator {
                 computeSubSwathIndex(rangeIndex, azimuthIndex, newRefElevationAngle, subSwathIndex);
             }
             gain = getAntennaPatternGain(
-                    elevationAngle, bandPolar, newRefElevationAngle, newAntennaPatternWideSwath, false, subSwathIndex);
+                    elevationAngle, bandPolarIdx, newRefElevationAngle, newAntennaPatternWideSwath, false, subSwathIndex);
         } else {
             gain = computeAntPatGain(
-                    elevationAngle, newRefElevationAngle[0], newAntennaPatternSingleSwath[bandPolar]);
+                    elevationAngle, newRefElevationAngle[0], newAntennaPatternSingleSwath[bandPolarIdx]);
         }
 
-        return sigma / newCalibrationConstant[bandPolar] / (gain*gain) *
+        return sigma / newCalibrationConstant[bandPolarIdx] / (gain*gain) *
                Math.pow(slantRange/refSlantRange, rangeSpreadingCompPower) *
                Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
     }

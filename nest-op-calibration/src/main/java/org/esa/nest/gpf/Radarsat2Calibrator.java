@@ -244,7 +244,7 @@ public class Radarsat2Calibrator implements Calibrator {
     public double applyCalibration(
             final double v, final double rangeIndex, final double azimuthIndex, final double slantRange,
             final double satelliteHeight, final double sceneToEarthCentre,final double localIncidenceAngle,
-            final int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
+            final String bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
 
         double sigma = 0.0;
         if (bandUnit == Unit.UnitType.AMPLITUDE) {
@@ -271,7 +271,7 @@ public class Radarsat2Calibrator implements Calibrator {
         return sigma;
     }
 
-    public double applyRetroCalibration(int x, int y, double v, int bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
+    public double applyRetroCalibration(int x, int y, double v, String bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
         return v;
     }
 

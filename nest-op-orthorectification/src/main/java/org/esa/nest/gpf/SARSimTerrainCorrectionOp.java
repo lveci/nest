@@ -897,7 +897,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
         final double halfLightSpeedInMetersPerDay = Constants.halfLightSpeed * 86400.0;
 
-        final ArrayList<TileData> trgTileList = new ArrayList<TileData>();
+        final ArrayList<RangeDopplerGeocodingOp.TileData> trgTileList = new ArrayList<RangeDopplerGeocodingOp.TileData>();
         final Set<Band> keySet = targetTiles.keySet();
         for(Band targetBand : keySet) {
 
@@ -928,22 +928,17 @@ public class SARSimTerrainCorrectionOp extends Operator {
 
             final String[] srcBandNames = targetBandNameToSourceBandName.get(targetBand.getName());
 
-            final TileData td = new TileData();
+            final RangeDopplerGeocodingOp.TileData td = new RangeDopplerGeocodingOp.TileData();
             td.targetTile = targetTiles.get(targetBand);
             td.tileDataBuffer = td.targetTile.getDataBuffer();
             td.bandName = targetBand.getName();
             td.noDataValue = sourceProduct.getBand(srcBandNames[0]).getNoDataValue();
             td.applyRadiometricNormalization = targetBandapplyRadiometricNormalizationFlag.get(targetBand.getName());
             td.applyRetroCalibration = targetBandApplyRetroCalibrationFlag.get(targetBand.getName());
-
-            final String pol = OperatorUtils.getBandPolarization(srcBandNames[0], absRoot);
-            td.bandPolar = 0;
-            if (pol != null && mdsPolar[1] != null && pol.contains(mdsPolar[1])) {
-                td.bandPolar = 1;
-            }
+            td.bandPolar = OperatorUtils.getBandPolarization(srcBandNames[0], absRoot);
             trgTileList.add(td);
         }
-        final TileData[] trgTiles = trgTileList.toArray(new TileData[trgTileList.size()]);
+        final RangeDopplerGeocodingOp.TileData[] trgTiles = trgTileList.toArray(new RangeDopplerGeocodingOp.TileData[trgTileList.size()]);
 
         try {
             for (int y = y0; y < y0 + h; y++) {
@@ -1042,7 +1037,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
                                     index, (double)incidenceAngle.getPixelFloat((float)rangeIndex, (float)azimuthIndex));
                         }
 
-                        for(TileData tileData : trgTiles) {
+                        for(RangeDopplerGeocodingOp.TileData tileData : trgTiles) {
 
                             Unit.UnitType bandUnit = getBandUnit(tileData.bandName);
                             final String[] srcBandName = targetBandNameToSourceBandName.get(tileData.bandName);
@@ -1182,8 +1177,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * @param index The pixel index in target image.
      * @param trgTiles The target tiles.
      */
-    private static void saveNoDataValueToTarget(final int index, TileData[] trgTiles) {
-        for(TileData tileData : trgTiles) {
+    private static void saveNoDataValueToTarget(final int index, RangeDopplerGeocodingOp.TileData[] trgTiles) {
+        for(RangeDopplerGeocodingOp.TileData tileData : trgTiles) {
             tileData.tileDataBuffer.setElemDoubleAt(index, tileData.noDataValue);
         }
     }
@@ -1275,7 +1270,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * @throws IOException from readPixels
      */
     private double getPixelValue(final double azimuthIndex, final double rangeIndex,
-                                 final TileData tileData, Unit.UnitType bandUnit, int[] subSwathIndex)
+                                 final RangeDopplerGeocodingOp.TileData tileData, Unit.UnitType bandUnit, int[] subSwathIndex)
             throws IOException {
 
         final String[] srcBandNames = targetBandNameToSourceBandName.get(tileData.bandName);
@@ -1333,7 +1328,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * @return The pixel value.
      */
     private double getPixelValueUsingNearestNeighbourInterp(final double azimuthIndex, final double rangeIndex,
-            final TileData tileData, final Unit.UnitType bandUnit, final Tile sourceTile, final Tile sourceTile2,
+            final RangeDopplerGeocodingOp.TileData tileData, final Unit.UnitType bandUnit, final Tile sourceTile, final Tile sourceTile2,
             int[] subSwathIndex) {
 
         final int x0 = (int)rangeIndex;
@@ -1378,7 +1373,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * @return The pixel value.
      */
     private double getPixelValueUsingBilinearInterp(final double azimuthIndex, final double rangeIndex,
-                                                    final TileData tileData, final Unit.UnitType bandUnit,
+                                                    final RangeDopplerGeocodingOp.TileData tileData, final Unit.UnitType bandUnit,
                                                     final int sceneRasterWidth, final int sceneRasterHeight,
                                                     final Tile sourceTile, final Tile sourceTile2, int[] subSwathIndex) {
 
@@ -1482,7 +1477,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
      * @return The pixel value.
      */
     private double getPixelValueUsingBicubicInterp(final double azimuthIndex, final double rangeIndex,
-                                                   final TileData tileData, final Unit.UnitType bandUnit,
+                                                   final RangeDopplerGeocodingOp.TileData tileData, final Unit.UnitType bandUnit,
                                                    final int sceneRasterWidth, final int sceneRasterHeight,
                                                    final Tile sourceTile, final Tile sourceTile2, int[] subSwathIndex) {
 
@@ -1632,16 +1627,6 @@ public class SARSimTerrainCorrectionOp extends Operator {
             appUserDir.mkdirs();
         }
         return new File(appUserDir.toString(), fileName);
-    }
-
-    private static class TileData {
-        Tile targetTile = null;
-        ProductData tileDataBuffer = null;
-        String bandName = null;
-        int bandPolar = 0;
-        double noDataValue = 0;
-        boolean applyRadiometricNormalization = false;
-        boolean applyRetroCalibration = false;
     }
 
     /**

@@ -1075,12 +1075,7 @@ public class RangeDopplerGeocodingOp extends Operator {
                 td.noDataValue = srcBands[0].getNoDataValue();
                 td.applyRadiometricNormalization = targetBandApplyRadiometricNormalizationFlag.get(targetBand.getName());
                 td.applyRetroCalibration = targetBandApplyRetroCalibrationFlag.get(targetBand.getName());
-
-                final String pol = OperatorUtils.getBandPolarization(srcBands[0].getName(), absRoot);
-                td.bandPolar = 0;
-                if (pol != null && mdsPolar[1] != null && pol.contains(mdsPolar[1])) {
-                    td.bandPolar = 1;
-                }
+                td.bandPolar = OperatorUtils.getBandPolarization(srcBands[0].getName(), absRoot);
                 trgTileList.add(td);
             }
             final TileData[] trgTiles = trgTileList.toArray(new TileData[trgTileList.size()]);
@@ -1978,11 +1973,11 @@ public class RangeDopplerGeocodingOp extends Operator {
         sourceBandNames = names;
     }
 
-    private static class TileData {
+    public static class TileData {
         Tile targetTile = null;
         ProductData tileDataBuffer = null;
         String bandName = null;
-        int bandPolar = 0;
+        String bandPolar = "";
         double noDataValue = 0;
         boolean applyRadiometricNormalization = false;
         boolean applyRetroCalibration = false;
