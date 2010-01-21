@@ -57,11 +57,15 @@ public class CreateStackOp extends Operator {
     private String resamplingType = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
     private Resampling selectedResampling = Resampling.NEAREST_NEIGHBOUR;
 
-    @Parameter(valueSet = {"Master", "Minimum", "Maximum"},
-               defaultValue = "Master",
+    @Parameter(valueSet = {MASTER_EXTENT, MIN_EXTENT }, //, MAX_EXTENT
+               defaultValue = MASTER_EXTENT,
                description = "The output image extents.",
                label="Output Extents")
-    private String extent = "Master";
+    private String extent = MASTER_EXTENT;
+
+    private final static String MASTER_EXTENT = "Master";
+    private final static String MIN_EXTENT = "Minimum";
+    private final static String MAX_EXTENT = "Maximum";
 
     private final static Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
 
@@ -108,6 +112,10 @@ public class CreateStackOp extends Operator {
             if(masterProduct == null || slaveBandList.length == 0 || slaveBandList[0] == null) {
                 targetProduct = OperatorUtils.createDummyTargetProduct(sourceProduct);
                 return;
+            }
+
+            if(extent.equals(MIN_EXTENT)) {
+                determinMinimumExtents();
             }
 
             targetProduct = new Product(masterProduct.getName(),
@@ -334,6 +342,23 @@ public class CreateStackOp extends Operator {
         if(name.contains("::"))
             return name.substring(name.indexOf("::")+2, name.length());
         return sourceProduct[0].getName();
+    }
+
+    /**
+     * Minimum extents consists of the overlapping area
+     */
+    private void determinMinimumExtents() {
+        final GeoCoding masterGeocoding = masterProduct.getGeoCoding();
+        final PixelPos p = new PixelPos();
+
+        for(final Product slvProd : sourceProduct) {
+            if(slvProd == masterProduct) continue;
+
+            final GeoPos[] geoBoundary = ProductUtils.createGeoBoundary(slvProd, 10);
+            for(GeoPos g : geoBoundary) {
+                //masterGeocoding.getPixelPos(g, p);
+            }
+        }
     }
 
     @Override

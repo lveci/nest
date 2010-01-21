@@ -2,6 +2,8 @@ package org.esa.nest.util;
 
 import com.bc.ceres.core.runtime.internal.RuntimeActivator;
 import org.esa.beam.framework.dataio.IllegalFileFormatException;
+import org.esa.beam.framework.dataio.ProductCache;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
@@ -35,6 +37,11 @@ public final class ResourceUtils {
             for (String aChild : dir.list()) {
                 deleteDir(new File(dir, aChild));
             }
+        }
+        final Product prod = ProductCache.instance().getProduct(dir);
+        if(prod != null) {
+            ProductCache.instance().removeProduct(dir);
+            prod.dispose();
         }
         if(!dir.delete())
             System.out.println("Could not delete "+dir.getName());
