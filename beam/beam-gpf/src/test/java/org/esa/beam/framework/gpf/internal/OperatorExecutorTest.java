@@ -1,5 +1,5 @@
 /*
- * $Id: OperatorExecutorTest.java,v 1.3 2009-12-02 16:52:11 lveci Exp $
+ * $Id: OperatorExecutorTest.java,v 1.4 2010-01-22 14:15:31 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -135,9 +135,6 @@ public class OperatorExecutorTest extends TestCase {
         }
     }
 
-    private TileScheduler defaultTileScheduler;
-    private RecordingTileScheduler recordingTileScheduler;
-
     private class TestOP extends Operator {
         
         @SourceProduct
@@ -159,6 +156,9 @@ public class OperatorExecutorTest extends TestCase {
         }
         
     }
+    
+    private TileScheduler defaultTileScheduler;
+    private RecordingTileScheduler recordingTileScheduler;
     
     @Override
     protected void setUp() throws Exception {

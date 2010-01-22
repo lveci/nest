@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGrid.java,v 1.8 2009-09-01 18:13:54 lveci Exp $
+ * $Id: TiePointGrid.java,v 1.9 2010-01-22 14:15:31 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -22,7 +22,6 @@ import com.bc.ceres.glevel.MultiLevelImage;
 import com.bc.ceres.glevel.MultiLevelModel;
 import com.bc.ceres.glevel.support.AbstractMultiLevelSource;
 import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
-
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.jai.TiePointGridOpImage;
@@ -44,7 +43,7 @@ import Jama.Matrix;
  * Usually, tie-point grids are a sub-sampling of a data product's scene resolution.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.8 $ $Date: 2009-09-01 18:13:54 $
+ * @version $Revision: 1.9 $ $Date: 2010-01-22 14:15:31 $
  */
 public class TiePointGrid extends RasterDataNode {
 
@@ -833,6 +832,7 @@ public class TiePointGrid extends RasterDataNode {
                                               this.getSubSamplingY(),
                                               destTiePoints,
                                               this.getDiscontinuity());
+        clone.setUnit(getUnit());
         clone.setDescription(getDescription());
         return clone;
 
