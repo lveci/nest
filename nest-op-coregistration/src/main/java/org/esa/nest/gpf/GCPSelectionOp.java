@@ -89,8 +89,8 @@ public class GCPSelectionOp extends Operator {
     private double gcpTolerance = 0.5;
 
     // ==================== input parameters used for complex co-registration ==================
-    @Parameter(defaultValue="true", label="Skip Fine Registration")
-    private boolean skipFineRegistration = true;
+    @Parameter(defaultValue="true", label="Apply Fine Registration")
+    private boolean applyFineRegistration = true;
 
     @Parameter(valueSet = {"32","64","128","256","512","1024"}, defaultValue = "128", label="Fine Registration Window Width")
     private String fineRegistrationWindowWidth = "128";
@@ -203,7 +203,7 @@ public class GCPSelectionOp extends Operator {
 
             OperatorUtils.copyGCPsToTarget(masterGcpGroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
 
-            if (complexCoregistration && !skipFineRegistration) {
+            if (complexCoregistration && applyFineRegistration) {
                 fWindowWidth = Integer.parseInt(fineRegistrationWindowWidth);
                 fWindowHeight = Integer.parseInt(fineRegistrationWindowHeight);
                 fHalfWindowWidth = fWindowWidth / 2;
@@ -367,7 +367,7 @@ public class GCPSelectionOp extends Operator {
 
                 boolean getSlaveGCP = getCoarseSlaveGCPPosition(slaveBand, slaveBand2, mGCPPixelPos, sGCPPixelPos);
 
-                if (getSlaveGCP && complexCoregistration && !skipFineRegistration) {
+                if (getSlaveGCP && complexCoregistration && applyFineRegistration) {
                     getSlaveGCP = getFineSlaveGCPPosition(slaveBand, slaveBand2, mGCPPixelPos, sGCPPixelPos);
                 }
 
@@ -382,7 +382,6 @@ public class GCPSelectionOp extends Operator {
                                        tgtGeoCoding);
 
                     targetGCPGroup.add(sPin);
-                    System.out.println("slave band: " + targetBand.getName() + ", gcp[" + i + "] = " + "(" + sGCPPixelPos.x + "," + sGCPPixelPos.y + ")");
                     //System.out.println("final slave gcp[" + i + "] = " + "(" + sGCPPixelPos.x + "," + sGCPPixelPos.y + ")");
                     //System.out.println();
 
