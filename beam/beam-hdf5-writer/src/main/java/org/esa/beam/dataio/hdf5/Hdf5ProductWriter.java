@@ -1,5 +1,5 @@
 /*
- * $Id: Hdf5ProductWriter.java,v 1.3 2009-12-02 16:52:11 lveci Exp $
+ * $Id: Hdf5ProductWriter.java,v 1.4 2010-01-22 17:53:20 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -56,7 +56,7 @@ import java.util.Map;
  * A product writer implementation for the HDF5 format.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-12-02 16:52:11 $
+ * @version $Revision: 1.4 $ $Date: 2010-01-22 17:53:20 $
  */
 public class Hdf5ProductWriter extends AbstractProductWriter {
 
@@ -414,13 +414,61 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
 
         int groupID = createH5G(locationID, element.getName());
         try {
+            final Map<String, Integer> dupeCntAtrib = new HashMap<String, Integer>();
+
             for (int i = 0; i < element.getNumAttributes(); i++) {
-                MetadataAttribute attribute = element.getAttributeAt(i);
+                final MetadataAttribute attribute = element.getAttributeAt(i);
+                final String name = attribute.getName();
+                boolean lastDupe = true;
+                for (int j = i+1; j < element.getNumAttributes(); j++) {
+                    final MetadataAttribute dupeAtrib = element.getAttributeAt(j);
+                    if(dupeAtrib.getName().equals(name)) {
+                        Integer cnt = dupeCntAtrib.get(name);
+                        if(cnt == null)
+                            dupeCntAtrib.put(name, 1);
+                        else {
+                            ++cnt;
+                            dupeCntAtrib.put(name, cnt);
+                        }
+                        lastDupe = false;
+                        break;
+                    }
+                }
+                if(dupeCntAtrib.get(name) != null) {
+                    int cnt = dupeCntAtrib.get(name);
+                    if(lastDupe)
+                        ++cnt;
+                    attribute.setName(attribute.getName()+"."+cnt);
+                }
                 writeMetadataAttribute(groupID, attribute);
             }
 
+            final Map<String, Integer> dupeCntElem = new HashMap<String, Integer>();
+
             for (int i = 0; i < element.getNumElements(); i++) {
-                MetadataElement subElement = element.getElementAt(i);
+                final MetadataElement subElement = element.getElementAt(i);
+                final String name = subElement.getName();
+                boolean lastDupe = true;
+                for (int j = i+1; j < element.getNumElements(); j++) {
+                    final MetadataElement dupeElement = element.getElementAt(j);
+                    if(dupeElement.getName().equals(name)) {
+                        Integer cnt = dupeCntElem.get(name);
+                        if(cnt == null)
+                            dupeCntElem.put(name, 1);
+                        else {
+                            ++cnt;
+                            dupeCntElem.put(name, cnt);
+                        }
+                        lastDupe = false;
+                        break;
+                    }
+                }
+                if(dupeCntElem.get(name) != null) {
+                    int cnt = dupeCntElem.get(name);
+                    if(lastDupe)
+                        ++cnt;
+                    subElement.setName(subElement.getName()+"."+cnt);
+                }
                 writeMetadataElement(groupID, subElement);
             }
         } catch (IOException e) {

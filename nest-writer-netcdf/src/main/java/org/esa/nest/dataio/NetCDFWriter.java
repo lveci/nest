@@ -14,6 +14,8 @@ import ucar.nc2.NetcdfFileWriteable;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.HashMap;
 
 
 public class NetCDFWriter extends AbstractProductWriter {
@@ -100,7 +102,8 @@ public class NetCDFWriter extends AbstractProductWriter {
                                     rootGroup.findDimension(NetcdfConstants.LON_VAR_NAMES[0])});
             if(band.getDescription() != null)
                 netCDFWriteable.addVariableAttribute(name, "description", band.getDescription());
-            netCDFWriteable.addVariableAttribute(name, "unit", band.getUnit());
+            if(band.getUnit() != null)
+                netCDFWriteable.addVariableAttribute(name, "unit", band.getUnit());
         }
 
         for(TiePointGrid tpg : product.getTiePointGrids()) {
@@ -247,28 +250,78 @@ public class NetCDFWriter extends AbstractProductWriter {
     }
 
     private void addElements(final MetadataElement parentElem, final Group parentGroup) {
-        final MetadataElement[] elemList = parentElem.getElements();
-        for(MetadataElement child : elemList) {
-            final Group newGroup = new Group(netCDFWriteable, parentGroup, child.getName());
-            addAttributes(child, newGroup);
+        final Map<String, Integer> dupeCntElem = new HashMap<String, Integer>();
+
+        for (int i = 0; i < parentElem.getNumElements(); i++) {
+            final MetadataElement subElement = parentElem.getElementAt(i);
+            final String name = subElement.getName();
+            boolean lastDupe = true;
+            for (int j = i+1; j < parentElem.getNumElements(); j++) {
+                final MetadataElement dupeElement = parentElem.getElementAt(j);
+                if(dupeElement.getName().equals(name)) {
+                    Integer cnt = dupeCntElem.get(name);
+                    if(cnt == null)
+                        dupeCntElem.put(name, 1);
+                    else {
+                        ++cnt;
+                        dupeCntElem.put(name, cnt);
+                    }
+                    lastDupe = false;
+                    break;
+                }
+            }
+            if(dupeCntElem.get(name) != null) {
+                int cnt = dupeCntElem.get(name);
+                if(lastDupe)
+                    ++cnt;
+                subElement.setName(subElement.getName()+"."+cnt);
+            }
+
+            final Group newGroup = new Group(netCDFWriteable, parentGroup, subElement.getName());
+            addAttributes(subElement, newGroup);
             // recurse
-            addElements(child, newGroup);
+            addElements(subElement, newGroup);
 
             netCDFWriteable.addGroup(parentGroup, newGroup);
         }
     }
 
     private void addAttributes(final MetadataElement elem, final Group newGroup) {
-        final MetadataAttribute[] attributes = elem.getAttributes();
-            for(MetadataAttribute attrib : attributes) {
-                final int dataType = attrib.getDataType();
-                if(dataType == ProductData.TYPE_FLOAT32 || dataType == ProductData.TYPE_FLOAT64) {
-                    newGroup.addAttribute(new Attribute(attrib.getName(), elem.getAttributeDouble(attrib.getName(), 0)));
-                } else if(dataType > ProductData.TYPE_INT8 && dataType < ProductData.TYPE_FLOAT32) {
-                    newGroup.addAttribute(new Attribute(attrib.getName(), elem.getAttributeInt(attrib.getName(), 0)));
-                } else {
-                    newGroup.addAttribute(new Attribute(attrib.getName(), elem.getAttributeString(attrib.getName(), " ")));
+        final Map<String, Integer> dupeCntAtrib = new HashMap<String, Integer>();
+
+        for (int i = 0; i < elem.getNumAttributes(); i++) {
+            final MetadataAttribute attrib = elem.getAttributeAt(i);
+            final String name = attrib.getName();
+            boolean lastDupe = true;
+            for (int j = i+1; j < elem.getNumAttributes(); j++) {
+                final MetadataAttribute dupeAtrib = elem.getAttributeAt(j);
+                if(dupeAtrib.getName().equals(name)) {
+                    Integer cnt = dupeCntAtrib.get(name);
+                    if(cnt == null)
+                        dupeCntAtrib.put(name, 1);
+                    else {
+                        ++cnt;
+                        dupeCntAtrib.put(name, cnt);
+                    }
+                    lastDupe = false;
+                    break;
                 }
             }
+            if(dupeCntAtrib.get(name) != null) {
+                int cnt = dupeCntAtrib.get(name);
+                if(lastDupe)
+                    ++cnt;
+                attrib.setName(attrib.getName()+"."+cnt);
+            }
+
+            final int dataType = attrib.getDataType();
+            if(dataType == ProductData.TYPE_FLOAT32 || dataType == ProductData.TYPE_FLOAT64) {
+                newGroup.addAttribute(new Attribute(attrib.getName(), elem.getAttributeDouble(attrib.getName(), 0)));
+            } else if(dataType > ProductData.TYPE_INT8 && dataType < ProductData.TYPE_FLOAT32) {
+                newGroup.addAttribute(new Attribute(attrib.getName(), elem.getAttributeInt(attrib.getName(), 0)));
+            } else {
+                newGroup.addAttribute(new Attribute(attrib.getName(), elem.getAttributeString(attrib.getName(), " ")));
+            }
+        }
     }
 }
