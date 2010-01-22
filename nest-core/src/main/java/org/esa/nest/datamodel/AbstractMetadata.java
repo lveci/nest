@@ -399,7 +399,7 @@ public final class AbstractMetadata {
         if (abstractedMetadata == null) {
             abstractedMetadata = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT_OLD);
             if (abstractedMetadata == null) {
-                throw new OperatorException("Abstracted Metadata not found");
+                return null;
             }
         }
         return abstractedMetadata;

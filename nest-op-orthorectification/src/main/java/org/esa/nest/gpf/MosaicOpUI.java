@@ -86,9 +86,12 @@ public class MosaicOpUI extends BaseOperatorUI {
         resamplingMethod.setSelectedItem(paramMap.get("resamplingMethod"));
         //projectionName.setSelectedItem(paramMap.get("projectionName"));
 
-        double pixSize = (Double)paramMap.get("pixelSize");
-        int width = (Integer)paramMap.get("sceneWidth");
-        int height = (Integer)paramMap.get("sceneHeight");
+        Double pixSize = (Double)paramMap.get("pixelSize");
+        if(pixSize == null) pixSize = 0.0;
+        Integer width = (Integer)paramMap.get("sceneWidth");
+        if(width == null) width = 0;
+        Integer height = (Integer)paramMap.get("sceneHeight");
+        if(height == null) height = 0;
 
         if(!changedByUser && sourceProducts != null) {
             try {
