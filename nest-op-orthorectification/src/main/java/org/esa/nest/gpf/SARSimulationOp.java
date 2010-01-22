@@ -444,7 +444,6 @@ public final class SARSimulationOp extends Operator {
                 final boolean[] savePixel = new boolean[w];
 
                 for (int x = x0; x < x0 + w; x++) {
-
                     final double alt = localDEM[y-ymin+1][x-x0+1];
                     if (alt == demNoDataValue) {
                         savePixel[x - x0] = false;
@@ -466,9 +465,15 @@ public final class SARSimulationOp extends Operator {
                     slantRange = RangeDopplerGeocodingOp.computeSlantRange(
                             zeroDopplerTimeWithoutBias,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    final int rangeIndex = (int)(RangeDopplerGeocodingOp.computeRangeIndex(
+                    double rangeIndex = RangeDopplerGeocodingOp.computeRangeIndex(
                             srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC, rangeSpacing, zeroDopplerTimeWithoutBias,
-                            slantRange, nearEdgeSlantRange, srgrConvParams) + 0.5);
+                            slantRange, nearEdgeSlantRange, srgrConvParams);
+
+                    if (rangeIndex <= 0.0) {
+                        continue;
+                    }
+
+                    rangeIndex = (int)(rangeIndex + 0.5);
 
                     slrs[x - x0] = slantRange;
 
@@ -489,7 +494,7 @@ public final class SARSimulationOp extends Operator {
 
                     final double v = computeBackscatteredPower(localIncidenceAngles[0]);
 
-                    index[x - x0] = targetTile.getDataBufferIndex(rangeIndex, azimuthIndex);
+                    index[x - x0] = targetTile.getDataBufferIndex((int)rangeIndex, azimuthIndex);
 
                     if (rangeIndex >= x0 && rangeIndex < x0+w && azimuthIndex >= y0 && azimuthIndex < y0+h) {
                         masterBuffer.setElemDoubleAt(index[x - x0], v + masterBuffer.getElemDoubleAt(index[x - x0]));
