@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGrid.java,v 1.9 2010-01-22 14:15:31 lveci Exp $
+ * $Id: TiePointGrid.java,v 1.10 2010-01-23 15:46:01 junlu Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -43,7 +43,7 @@ import Jama.Matrix;
  * Usually, tie-point grids are a sub-sampling of a data product's scene resolution.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.9 $ $Date: 2010-01-22 14:15:31 $
+ * @version $Revision: 1.10 $ $Date: 2010-01-23 15:46:01 $
  */
 public class TiePointGrid extends RasterDataNode {
 
@@ -1072,7 +1072,10 @@ public class TiePointGrid extends RasterDataNode {
             if (_quadraticInterpCoeffs == null) {
                 computeQuadraticInterpCoeffs();
             }
-            final int r = (int) ((y - _offsetY) / _subSamplingY);
+            int r = (int) ((y - _offsetY) / _subSamplingY);
+            if (r >= _quadraticInterpCoeffs.length) {
+                r = _quadraticInterpCoeffs.length - 1;
+            }
             return (float)(_quadraticInterpCoeffs[r][0] + _quadraticInterpCoeffs[r][1]*x + _quadraticInterpCoeffs[r][2]*x*x);
 
         } else if (interpMethod == InterpMode.BIQUADRATIC) {
