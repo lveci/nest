@@ -335,7 +335,7 @@ public final class DatApp extends VisatApp {
                 // These IDs are defined in the module.xml
                 "selectTool",
                 //"crossHairTool",
-                //"rangeFinder",
+                "rangeFinder",
                 "zoomTool",
                 "pannerTool",
                 null,
