@@ -117,17 +117,21 @@ public class EnvisatAuxReader {
     public static File getFile(String filePath) throws FileNotFoundException {
         File file = null;
 
-        final String[] exts = new String[] {"", ".gz", ".zip"};
+        final String[] exts = new String[] {".zip", ".gz", ""};
         for (String ext : exts) {
             file = new File(filePath + ext);
             if (file.exists()) {
                 break;
             }
-            final URI fileUri = getFileURI(filePath + ext);
-            if (fileUri != null) {
-                file = new File(fileUri);
-                if (file.exists()) {
-                    break;
+        }
+        if(file == null) {
+            for (String ext : exts) {
+                final URI fileUri = getFileURI(filePath + ext);
+                if (fileUri != null) {
+                    file = new File(fileUri);
+                    if (file.exists()) {
+                        break;
+                    }
                 }
             }
         }
