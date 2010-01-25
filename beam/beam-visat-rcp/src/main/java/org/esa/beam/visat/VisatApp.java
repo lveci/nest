@@ -1,5 +1,5 @@
 /*
- * $Id: VisatApp.java,v 1.22 2010-01-08 20:50:14 lveci Exp $
+ * $Id: VisatApp.java,v 1.23 2010-01-25 15:12:15 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -147,7 +147,7 @@ import java.util.logging.Level;
  * @author Norman Fomferra
  * @author Marco Peters
  * @author Sabine Embacher
- * @version $Revision: 1.22 $ $Date: 2010-01-08 20:50:14 $
+ * @version $Revision: 1.23 $ $Date: 2010-01-25 15:12:15 $
  */
 public class VisatApp extends BasicApp implements AppContext {
 
@@ -1952,8 +1952,7 @@ public class VisatApp extends BasicApp implements AppContext {
         addCommandsToToolBar(toolBar, new String[]{
                 // These IDs are defined in the module.xml
                 "selectTool",
-// todo - reactivate range-finder (nf)
-//                "rangeFinder",
+                "rangeFinder",
                 "zoomTool",
                 "pannerTool",
                 "pinTool",
