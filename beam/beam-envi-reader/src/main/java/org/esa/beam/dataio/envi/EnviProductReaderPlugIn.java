@@ -41,7 +41,7 @@ public class EnviProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     public String[] getDefaultFileExtensions() {
-        return new String[]{".hdr", ".zip"};
+        return EnviConstants.VALID_EXTENSIONS;
     }
 
     public Class[] getInputTypes() {
@@ -117,6 +117,16 @@ public class EnviProductReaderPlugIn implements ProductReaderPlugIn {
 
     private static DecodeQualification checkDecodeQualificationOnFile(File headerFile) {
         try {
+            final String fileName = headerFile.getName().toLowerCase();
+            boolean validExt = false;
+            for(String ext : EnviConstants.VALID_EXTENSIONS) {
+                if(fileName.endsWith(ext)) {
+                    validExt = true;
+                    break;
+                }
+            }
+            if(!validExt) return DecodeQualification.UNABLE;
+
             if (isCompressedFile(headerFile)) {
                 final ZipFile productZip = new ZipFile(headerFile, ZipFile.OPEN_READ);
 

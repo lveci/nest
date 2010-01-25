@@ -20,6 +20,7 @@ class EnviConstants {
     static final String FORMAT_NAME = "ENVI";
     static final String DESCRIPTION = "BEAM ENVI product reader";
 
+    static final String[] VALID_EXTENSIONS = {".hdr", ".zip"};
     static final String ZIP = "zip";
     static final int TYPE_ID_BYTE = 1;
     static final int TYPE_ID_INT16 = 2;

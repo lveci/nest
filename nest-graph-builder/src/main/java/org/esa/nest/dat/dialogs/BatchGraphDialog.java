@@ -134,7 +134,7 @@ public class BatchGraphDialog extends ModelessDialog {
 
         final File file = getFilePath(this.getContent(), "Graph File");
         if(file != null) {
-            setGraphFile(file);
+            LoadGraphFile(file);
         }
     }
 
@@ -142,7 +142,7 @@ public class BatchGraphDialog extends ModelessDialog {
         productSetPanel.setFileList(files);
     }
 
-    void setGraphFile(File file) {
+    public void LoadGraphFile(File file) {
         graphFile = file;
 
         initGraphs();

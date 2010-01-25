@@ -18,6 +18,7 @@ import org.esa.nest.dat.actions.importbrowser.model.dataprovider.ProductProperti
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.QuicklookProvider;
 import org.esa.nest.dat.actions.importbrowser.util.Callback;
 import org.esa.nest.dat.dialogs.BatchGraphDialog;
+import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.dat.toolviews.Projects.Project;
 
 import javax.swing.*;
@@ -215,17 +216,7 @@ public class ImportBrowser {
     }
 
     private void performBatchProcessSelectedAction() {
-        final Vector<File> fileList = getSelectedFiles();
-
-        if(!fileList.isEmpty()) {
-            final File[] productFiles = new File[fileList.size()];
-            fileList.toArray(productFiles);
-
-            final BatchGraphDialog batchDlg = new BatchGraphDialog(new DatContext(""),
-                        "Batch Processing", "batchProcessing");
-            batchDlg.setInputFiles(productFiles);
-            batchDlg.show();
-        }
+        batchProcess(getSelectedFiles(), null);
     }
 
     private void performAddToProjectAction() {
@@ -237,6 +228,55 @@ public class ImportBrowser {
 
             Project.instance().ImportFileList(productFilesToOpen);
             unselectAll();
+        }
+    }
+
+    private JPopupMenu createPopup() {
+        final String homeUrl = System.getProperty("nest.home", ".");
+        final File graphPath = new File(homeUrl, File.separator + "graphs");
+
+        final JPopupMenu popup = new JPopupMenu();
+        if(graphPath.exists()) {
+            createGraphMenu(popup, graphPath);
+        }
+        return popup;
+    }
+
+    private void createGraphMenu(final JPopupMenu menu, final File path) {
+        final File[] filesList = path.listFiles();
+        if(filesList == null || filesList.length == 0) return;
+
+        for (final File file : filesList) {
+            final String name = file.getName();
+            if(file.isDirectory() && !file.isHidden() && !name.equalsIgnoreCase("internal")) {
+                //final JPopupMenu subMenu = new JPopupMenu(name);
+                //menu.add(subMenu);
+                createGraphMenu(menu, file);
+            } else if(name.toLowerCase().endsWith(".xml")) {
+                final JMenuItem item = new JMenuItem(name.substring(0, name.indexOf(".xml")));
+                item.addActionListener(new ActionListener() {
+
+                    public void actionPerformed(final ActionEvent e) {
+                        batchProcess(getSelectedFiles(), file);
+                    }
+                });
+                menu.add(item);
+            }
+        }
+    }
+
+    private static void batchProcess(final Vector<File> fileList, final File graphFile) {
+        if(!fileList.isEmpty()) {
+            final File[] productFiles = new File[fileList.size()];
+            fileList.toArray(productFiles);
+
+            final BatchGraphDialog batchDlg = new BatchGraphDialog(new DatContext(""),
+                        "Batch Processing", "batchProcessing");
+            batchDlg.setInputFiles(productFiles);
+            if(graphFile != null) {
+                batchDlg.LoadGraphFile(graphFile);
+            }
+            batchDlg.show();
         }
     }
 
@@ -408,6 +448,7 @@ public class ImportBrowser {
         batchProcessButton = new JButton();
         setComponentName(batchProcessButton, "batchProcessButton");
         batchProcessButton.setText("Batch Process");
+        batchProcessButton.setComponentPopupMenu(createPopup());
         batchProcessButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(final ActionEvent e) {
