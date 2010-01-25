@@ -207,15 +207,15 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         incidenceAngleForSigma0.setSelectedItem(paramMap.get("incidenceAngleForSigma0"));
         incidenceAngleForSigma0.setEnabled(false);
 
-        Double pix = (Double)paramMap.get("pixelSpacing");
         if((!changedByUser || pixelSpacing.getText().isEmpty()) && sourceProducts != null) {
+            Double pix;
             try {
                 pix = RangeDopplerGeocodingOp.getPixelSpacing(sourceProducts[0]);
             } catch (Exception e) {
                 pix = 0.0;
             }
+            pixelSpacing.setText(String.valueOf(pix));
         }
-        pixelSpacing.setText(String.valueOf(pix));
 
         final File extFile = (File)paramMap.get("externalDEMFile");
         if(extFile != null) {

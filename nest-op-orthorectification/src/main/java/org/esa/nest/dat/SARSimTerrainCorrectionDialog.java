@@ -1,7 +1,9 @@
 package org.esa.nest.dat;
 
 import org.esa.beam.dataio.dimap.DimapProductConstants;
+import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.graph.GraphException;
+import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.nest.dat.dialogs.MultiGraphDialog;
 import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
@@ -88,6 +90,13 @@ class SARSimTerrainCorrectionDialog extends MultiGraphDialog {
         setIO(graphExecuterList.get(1),
                 "1-Read", tmpFile1,
                 "3-Write", ioPanel.getTargetFile(), ioPanel.getTargetFormat());
+
+        final GraphNode tcNode = graphExecuterList.get(1).findGraphNode("2-SARSim-Terrain-Correction");
+        if (tcNode != null) {
+            final BaseOperatorUI ui = (BaseOperatorUI)tcNode.GetOperatorUI();
+            //ui.overrideParameterMap("pixelSpacing", 4.0);
+            ui.setSourceProducts(new Product[] { ioPanel.getSelectedSourceProduct() });
+        }
     }
 
     private static void setIO(final GraphExecuter graphEx,

@@ -42,8 +42,6 @@ public abstract class BaseOperatorUI implements OperatorUI {
 
     public abstract void updateParameters();
 
-    private String warningMsg = "";
-
     protected void initializeOperatorUI(final String operatorName, final Map<String, Object> parameterMap) {
 
         final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi(operatorName);
@@ -203,13 +201,5 @@ public abstract class BaseOperatorUI implements OperatorUI {
             return alias;
         }
         return p.getDescriptor().getName();
-    }
-
-    protected void setWarningMessage(final String str) {
-        warningMsg = str;
-    }
-
-    public String getWarningMessage() {
-        return warningMsg;
     }
 }

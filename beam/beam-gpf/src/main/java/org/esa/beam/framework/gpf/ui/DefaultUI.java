@@ -7,6 +7,7 @@ import javax.swing.*;
 import com.bc.ceres.binding.*;
 import com.bc.ceres.binding.swing.BindingContext;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -27,6 +28,21 @@ public class DefaultUI extends BaseOperatorUI {
 
     @Override
     public void initParameters() {
+        updateSourceBands();
+    }
+
+    @Override
+    public UIValidation validateParameters() {
+
+        return new UIValidation(UIValidation.State.OK, "");
+    }
+
+    @Override
+    public void updateParameters() {
+
+    }
+
+    private void updateSourceBands() {
         if(valueContainer == null) return;
 
         final Property[] properties = valueContainer.getProperties();
@@ -49,21 +65,9 @@ public class DefaultUI extends BaseOperatorUI {
                         }
                     } catch(ValidationException e) {
                         System.out.println(e.toString());
-                    }  
+                    }
                 }
             }
         }
-    }
-
-    @Override
-    public UIValidation validateParameters() {
-
-        //todo how to validate generated UIs? should be in operator initialize
-        return new UIValidation(UIValidation.State.OK, "");
-    }
-
-    @Override
-    public void updateParameters() {
-
     }
 }
