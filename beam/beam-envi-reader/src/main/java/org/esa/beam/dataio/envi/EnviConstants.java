@@ -21,6 +21,8 @@ class EnviConstants {
     static final String DESCRIPTION = "BEAM ENVI product reader";
 
     static final String[] VALID_EXTENSIONS = {".hdr", ".zip"};
+    static final String[] IMAGE_EXTENSIONS = {".img", ".dat", ".bin", ".bip", ".bil", ".bsq"};
+
     static final String ZIP = "zip";
     static final int TYPE_ID_BYTE = 1;
     static final int TYPE_ID_INT16 = 2;

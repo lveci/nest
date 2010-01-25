@@ -42,21 +42,11 @@ public class EnviProductReader extends AbstractProductReader {
         final String hdrName = headerFile.getName();
         final String imgName = hdrName.substring(0, hdrName.indexOf('.'));
         final File parentFolder = headerFile.getParentFile();
-        File imgFile = new File(parentFolder, imgName + ".img");
-        if (imgFile.exists())
-            return imgFile;
-        imgFile = new File(parentFolder, imgName + ".bin");
-        if (imgFile.exists())
-            return imgFile;
-        imgFile = new File(parentFolder, imgName + ".bip");
-        if (imgFile.exists())
-            return imgFile;
-        imgFile = new File(parentFolder, imgName + ".bil");
-        if (imgFile.exists())
-            return imgFile;
-        imgFile = new File(parentFolder, imgName + ".bsq");
-        if (imgFile.exists())
-            return imgFile;
+        for(final String ext : EnviConstants.IMAGE_EXTENSIONS) {
+            final File imgFile = new File(parentFolder, imgName + ext);
+            if (imgFile.exists())
+                return imgFile;
+        }
         
         final File[] files = parentFolder.listFiles();
         for(File f : files) {
@@ -64,7 +54,7 @@ public class EnviProductReader extends AbstractProductReader {
                 return f;
             }
         }
-        return imgFile;
+        return new File(parentFolder, imgName);
     }
 
     @Override
