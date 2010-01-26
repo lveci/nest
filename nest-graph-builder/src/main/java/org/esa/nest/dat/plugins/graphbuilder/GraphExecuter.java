@@ -282,6 +282,7 @@ public class GraphExecuter extends Observable {
             final FileWriter fileWriter = new FileWriter(filePath);
 
             try {
+                AssignAllParameters();
                 GraphIO.write(graph, fileWriter);
             } finally {
                 fileWriter.close();
