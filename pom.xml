@@ -2,10 +2,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-
+	
 	<properties>
+        <!--
+	           In version 3.0 of Maven the sourceEncoding property will be embedded in the
+	           build tag. For now the convention is to that it as property.
+	           TODO: Move the sourceEncoding property to the build tag if version 3.0 is released
+	           -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<beam.version>4.7-SNAPSHOT</beam.version>
+        <ceres.version>0.10-SNAPSHOT</ceres.version>
+        <geotools.version>2.6.1</geotools.version>
 		<nest.version>3C</nest.version>
-	</properties>
+    </properties>
 	
     <name>NEST Project</name>
     <url>http://www.array.ca/nest</url>
@@ -126,43 +136,43 @@
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-launcher</artifactId>
-                <version>0.10-SNAPSHOT</version>
+                <version>${ceres.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-core</artifactId>
-                <version>0.10-SNAPSHOT</version>
+                <version>${ceres.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-binding</artifactId>
-                <version>0.10-SNAPSHOT</version>
+                <version>${ceres.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-ui</artifactId>
-                <version>0.10-SNAPSHOT</version>
+                <version>${ceres.version}</version>
             </dependency>
 
 			<dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-binio</artifactId>
-                <version>0.10-SNAPSHOT</version>
+                <version>${ceres.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-glayer</artifactId>
-                <version>0.10-SNAPSHOT</version>
+                <version>${ceres.version}</version>
             </dependency>
 			
 			<dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-jai</artifactId>
-                <version>0.10-SNAPSHOT</version>
+                <version>${ceres.version}</version>
             </dependency>
 			
             <!-- BEAM System Level Modules ############################################# -->
@@ -170,22 +180,22 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-core</artifactId>
-				<version>4.7-SNAPSHOT</version>
+				<version>${beam.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-gpf</artifactId>
-				<version>4.7-SNAPSHOT</version>
+				<version>${beam.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-ui</artifactId>
-				<version>4.7-SNAPSHOT</version>
+				<version>${beam.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-visat-rcp</artifactId>
-				<version>4.7-SNAPSHOT</version>
+				<version>${beam.version}</version>
             </dependency>
 
             <!-- BEAM Modules ############################################# -->
@@ -239,42 +249,47 @@
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-api</artifactId>
-                <version>2.6.0</version>
+                <version>${geotools.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-referencing</artifactId>
-                <version>2.6.0</version>
+                <version>${geotools.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-main</artifactId>
-                <version>2.6.0</version>
+                <version>${geotools.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-epsg-hsql</artifactId>
-                <version>2.6.0</version>
+                <version>${geotools.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-wms</artifactId>
-                <version>2.6.0</version>
+                <version>${geotools.version}</version>
             </dependency>
             <dependency>
               <groupId>org.geotools</groupId>
               <artifactId>gt-shapefile</artifactId>
-              <version>2.6.0</version>
+              <version>${geotools.version}</version>
             </dependency>
             <dependency>
               <groupId>org.geotools</groupId>
               <artifactId>gt-render</artifactId>
-              <version>2.6.0</version>
+              <version>${geotools.version}</version>
             </dependency>
 			<dependency>
               <groupId>org.geotools</groupId>
               <artifactId>gt-property</artifactId>
-              <version>2.6.0</version>
+              <version>${geotools.version}</version>
+            </dependency>
+			<dependency>
+              <groupId>org.geotools</groupId>
+              <artifactId>gt-geotiff</artifactId>
+              <version>${geotools.version}</version>
             </dependency>
 			
             <!-- JAI Libraries ############################################# -->
