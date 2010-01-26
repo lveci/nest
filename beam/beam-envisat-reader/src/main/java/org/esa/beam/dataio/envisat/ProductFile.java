@@ -1,5 +1,5 @@
 /*
- * $Id: ProductFile.java,v 1.5 2009-12-21 16:13:40 lveci Exp $
+ * $Id: ProductFile.java,v 1.6 2010-01-26 20:50:49 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -40,7 +40,7 @@ import java.util.logging.Logger;
  * product files which have been opened for <i>read-only</i> access.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.5 $ $Date: 2009-12-21 16:13:40 $
+ * @version $Revision: 1.6 $ $Date: 2010-01-26 20:50:49 $
  */
 public abstract class ProductFile {
 
@@ -1004,7 +1004,7 @@ public abstract class ProductFile {
 
         try {
             mph = HeaderParser.getInstance().parseHeader("MPH", mphBytes);
-            Debug.trace("ProductFile: " + mph);
+            //Debug.trace("ProductFile: " + mph);
             productId = mph.getParamString("PRODUCT");
             productSize = mph.getParamInt("TOT_SIZE");
             sphSize = mph.getParamInt("SPH_SIZE");
@@ -1059,7 +1059,7 @@ public abstract class ProductFile {
 
         try {
             sph = HeaderParser.getInstance().parseHeader("SPH", sphBytes);
-            Debug.trace("ProductFile: " + sph);
+            //Debug.trace("ProductFile: " + sph);
 
             dsdCountValid = 0;
             byte[] dsdBytes = new byte[dsdSize];
@@ -1087,7 +1087,7 @@ public abstract class ProductFile {
                                       dsSize,
                                       numDsr,
                                       dsrSize);
-                Debug.trace("ProductFile: " + dsdArray[i]);
+                //Debug.trace("ProductFile: " + dsdArray[i]);
                 dsdCountValid++;
             }
         } catch (HeaderParseException e) {
@@ -1120,7 +1120,7 @@ public abstract class ProductFile {
         } else {
             gads = null;
         }
-        Debug.trace("ProductFile: GADS = " + gads);
+        //Debug.trace("ProductFile: GADS = " + gads);
     }
 
     /**
@@ -1167,7 +1167,7 @@ public abstract class ProductFile {
         while (it.hasNext()) {
             Object name = it.next().toString();
             Object value = parameters.get(name);
-            Debug.trace("  " + name + " = " + value);
+            //Debug.trace("  " + name + " = " + value);
         }
         Debug.trace("}");
     }

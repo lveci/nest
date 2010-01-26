@@ -1,5 +1,5 @@
 /*
- * $Id: DDDB.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
+ * $Id: DDDB.java,v 1.3 2010-01-26 20:50:49 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -36,7 +36,7 @@ import java.util.Vector;
  * <p> Note this class has public access as a side-effect of the implementation.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.3 $ $Date: 2010-01-26 20:50:49 $
  * @see org.esa.beam.dataio.envisat.RecordInfo
  */
 public class DDDB {
@@ -317,8 +317,8 @@ public class DDDB {
                                 if (fieldSize > 0 && numDataElems == 1) {
                                     numDataElems = fieldSize;
                                     fieldSize = 1;
-                                    Debug.trace(
-                                            "DDDB: spares detected and adjusted: numDataElems = " + numDataElems); /*I18N*/
+                                    //Debug.trace(
+                                    //        "DDDB: spares detected and adjusted: numDataElems = " + numDataElems); /*I18N*/
                                 }
                             }
                             if (dataType != ProductData.TYPE_ASCII) {
@@ -334,7 +334,7 @@ public class DDDB {
                                                             + FieldInfo.getDataTypeElemSize(dataType));
                                 }
                             } else {
-                                Debug.trace("DDDB files ASCII - name: " + fieldName + " fieldSize: " + fieldSize);
+                                //Debug.trace("DDDB files ASCII - name: " + fieldName + " fieldSize: " + fieldSize);
                                 // because of the String type handling in ASAR and AATSR
                                 numDataElems = fieldSize;
                             }
@@ -942,7 +942,7 @@ public class DDDB {
 
     static URL getDatabaseResource(String resourcePath) throws DDDBException {
         String databasePath = DB_DIR_PATH + "/" + resourcePath;
-        Debug.trace("DDDB: searching for resource file '" + databasePath + "'"); /*I18N*/
+        //Debug.trace("DDDB: searching for resource file '" + databasePath + "'"); /*I18N*/
 
         URL url = DDDB.class.getResource(databasePath);
         if (url == null) {
