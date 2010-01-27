@@ -221,7 +221,11 @@ public final class ERSCalibrator implements Calibrator {
             getCalibrationConstantFromENVISAT(); // MPP
         }
 
-        setCorrectionFlags();
+        if (absRoot.getAttribute("retro-calibration performed flag") != null) { // product from removeAntennaPatternOp
+            setCalibrationFlags();
+        } else { // normal product
+            setCorrectionFlags();
+        }
 
         if (applyADCSaturationCorrection) {
             prepareForADCCorrection();
@@ -635,6 +639,16 @@ public final class ERSCalibrator implements Calibrator {
         rangeSpreadingLossCompFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.range_spread_comp_flag);
         //System.out.println("Antenna pattern correction flag is " + antennaPatternCorrectionFlag);
         //System.out.println("Range spreding loss compensation flag is " + rangeSpreadingLossCompFlag);
+    }
+
+    /**
+     * Set correction flags in case source product is from removeAntennaPatternOp.
+     */
+    private void setCalibrationFlags() {
+        applyAntennaPatternCorrection = true;
+        applyRangeSpreadingLossCorrection = true;
+        applyReplicaPowerCorrection = true;
+        applyADCSaturationCorrection = false;
     }
 
     /**
@@ -2426,6 +2440,7 @@ public final class ERSCalibrator implements Calibrator {
         //   2) antenna pattern
         //   3) range spreading loss
         //   4) replica pulse power (for both ERS-1 and ERS-2 since for ERS2 it has been removed in the pre-calibration step)
+        //   5) calibration constant
 
         double sigma = 0.0;
         if (bandUnit == Unit.UnitType.AMPLITUDE) {
@@ -2448,6 +2463,8 @@ public final class ERSCalibrator implements Calibrator {
         sigma *= rangeSpreadingLoss[(int)rangeIndex];
 
         sigma *= replicaPulseVariationsCorrectionFactor;
+
+        sigma /= calibrationConstant;
 
         return sigma;
     }
@@ -2498,12 +2515,12 @@ public final class ERSCalibrator implements Calibrator {
         //    a) remove antenna pattern gain
         //    b) remove range spreading loss corrections
         //    c) remove replica pulse variation (ERS-2 only)
-        //    d) multiply calibration constant
+        //    d) multiply calibration constant (done in applyCalibration)
         //    e) apply ADC power loss correction
         //
         // For slant range complex product,
         //    c) remove replica pulse variation (ERS-2 only)
-        //    d) multiply calibration constant
+        //    d) multiply calibration constant (done in applyCalibration)
         //    e) apply ADC power loss correction
 
         final Rectangle targetTileRectangle = targetTile.getRectangle();
