@@ -61,6 +61,7 @@ public class ASARCalibrator implements Calibrator {
     private boolean srgrFlag = false;
     private boolean multilookFlag = false;
     private boolean antElevCorrFlag = false;
+    private boolean rangeSpreadCompFlag = false;
     private boolean wideSwathProductFlag = false;
     private boolean retroCalibrationFlag = false;
     private boolean applyAntennaPatternCorr = false;
@@ -223,11 +224,7 @@ public class ASARCalibrator implements Calibrator {
         }
 
         antElevCorrFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.ant_elev_corr_flag);
-
-        if (AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.range_spread_comp_flag) != srgrFlag) {
-            throw new OperatorException("The range_spread_comp_flag is not consistent with srgr_flag in metadata.");
-        }
-
+        rangeSpreadCompFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.range_spread_comp_flag);
     }
 
     /**
@@ -270,7 +267,7 @@ public class ASARCalibrator implements Calibrator {
         }
 
         applyAntennaPatternCorr = !srgrFlag || retroCalibrationFlag || !antElevCorrFlag;
-        applyRangeSpreadingCorr = !srgrFlag;
+        applyRangeSpreadingCorr = !rangeSpreadCompFlag;
         if(productType.contains("ASA_GM")) {
             applyRangeSpreadingCorr = true;   
         }
@@ -1009,7 +1006,11 @@ public class ASARCalibrator implements Calibrator {
 
                 final double theta = computeElevationAngle(
                         targetTileSlantRange[yy][xx], satelitteHeight, avgSceneHeight + localEarthRadius); // in degree
-
+                /*
+                double alpha = incidenceAngle.getPixelFloat(x, y); // in degree
+                double gamma = Math.asin(targetTileSlantRange[yy][xx]*Math.sin(alpha*MathUtils.DTOR)/satelitteHeight)*MathUtils.RTOD; // in degree
+                double theta = alpha - gamma; // in degree
+                */
                 targetTileNewAntPat[yy][xx] = computeAntPatGain(
                         theta, newRefElevationAngle[0], newAntennaPatternSingleSwath[band]);
 
