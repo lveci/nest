@@ -1,5 +1,5 @@
 /*
- * $Id: ProductNode.java,v 1.9 2009-12-23 16:42:11 lveci Exp $
+ * $Id: ProductNode.java,v 1.10 2010-01-27 18:25:19 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,7 +27,7 @@ import org.esa.beam.util.ObjectUtils;
  * product itself.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.9 $ $Date: 2009-12-23 16:42:11 $
+ * @version $Revision: 1.10 $ $Date: 2010-01-27 18:25:19 $
  */
 public abstract class ProductNode {
 
@@ -94,7 +94,7 @@ public abstract class ProductNode {
     /**
      * @return The owner node of this node.
      */
-    public ProductNode getOwner() {
+    public final ProductNode getOwner() {
         return owner;
     }
 

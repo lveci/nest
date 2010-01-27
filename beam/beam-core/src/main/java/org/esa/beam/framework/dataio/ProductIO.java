@@ -1,5 +1,5 @@
 /*
- * $Id: ProductIO.java,v 1.5 2010-01-18 20:00:59 lveci Exp $
+ * $Id: ProductIO.java,v 1.6 2010-01-27 18:25:19 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -47,7 +47,7 @@ import java.util.Iterator;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.5 $ $Date: 2010-01-18 20:00:59 $
+ * @version $Revision: 1.6 $ $Date: 2010-01-27 18:25:19 $
  */
 public class ProductIO {
 
@@ -218,16 +218,27 @@ public class ProductIO {
      * @see #readProduct(URL, ProductSubsetDef)
      */
     public static Product readProduct(File file, ProductSubsetDef subsetDef) throws IOException {
-        Guardian.assertNotNull("file", file);
-        if (!file.exists()) {
-            throw new FileNotFoundException("File not found: " + file.getPath());
+
+        final Product cachedProduct = ProductCache.instance().getProduct(file);
+        if(cachedProduct != null) {
+            ProductCache.instance().addProduct(file, cachedProduct);
+            return cachedProduct;
         }
+        return readandCacheProduct(file, subsetDef);
+    }
+
+    private synchronized static Product readandCacheProduct(final File file, final ProductSubsetDef subsetDef) throws IOException {
+
         final Product cachedProduct = ProductCache.instance().getProduct(file);
         if(cachedProduct != null) {
             ProductCache.instance().addProduct(file, cachedProduct);
             return cachedProduct;
         }
 
+        Guardian.assertNotNull("file", file);
+        if (!file.exists()) {
+            throw new FileNotFoundException("File not found: " + file.getPath());
+        }
         final ProductReader productReader = getProductReaderForFile(file);
         if (productReader != null) {
             System.out.println("Reading "+file.getName());

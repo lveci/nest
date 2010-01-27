@@ -89,14 +89,12 @@ public class MosaicOp extends Operator {
 
                 final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct[0]);
 
-                if(pixelSize == 0) {
+                if(pixelSize == 0 && absRoot != null) {
                     final double rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
                     final double azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
-                    final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
-                    getSceneDimensions(minSpacing, scnProp);
-                } else {
-                    getSceneDimensions(pixelSize, scnProp);
+                    pixelSize = Math.min(rangeSpacing, azimuthSpacing);
                 }
+                getSceneDimensions(pixelSize, scnProp);
 
                 sceneWidth = scnProp.sceneWidth;
                 sceneHeight = scnProp.sceneHeight;
@@ -127,9 +125,23 @@ public class MosaicOp extends Operator {
                 srcRectMap.put(srcProduct, srcRect);
             }
 
+            updateTargetProductMetadata();
+
         } catch (Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
         }
+    }
+
+    /**
+     * Update metadata in the target product.
+     */
+    private void updateTargetProductMetadata() {
+        MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(targetProduct);
+        if(absRoot == null) {
+            absRoot = AbstractMetadata.addAbstractedMetadataHeader(targetProduct.getMetadataRoot());
+        }
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing, pixelSize);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing, pixelSize);
     }
 
     private Band[] getSourceBands() throws OperatorException {
@@ -401,13 +413,14 @@ public class MosaicOp extends Operator {
             final int maxY = targetRect.y + targetRect.height - 1;
 
             int coordIndex = 0;
+            int index;
             for (int y = targetRect.y; y <= maxY; ++y) {
                 for (int x = targetRect.x; x <= maxX; ++x) {
                     pixelPos.x = x + 0.5f;
                     pixelPos.y = y + 0.5f;
                     targetGeoCoding.getGeoPos(pixelPos, geoPos);
 
-                    int index = 0;
+                    index = 0;
                     for (Product srcProduct : validProducts) {
                         srcProduct.getGeoCoding().getPixelPos(geoPos, pixelPos);
                         if (pixelPos.x >= 0.0f && pixelPos.y >= 0.0f &&
@@ -425,9 +438,9 @@ public class MosaicOp extends Operator {
             }
 
             final Resampling resampling = ResamplingFactory.createResampling(resamplingMethod);
-
             final ArrayList<SourceData> validSourceData = new ArrayList<SourceData>(validProducts.size());
-            int index = 0;
+
+            index = 0;
             for (Product srcProduct : validProducts) {
                 final PixelPos[] pixPos = srcPixelCoords.get(index);
                 final Rectangle sourceRectangle = getBoundingBox(

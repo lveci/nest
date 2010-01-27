@@ -1,5 +1,5 @@
 /*
- * $Id: ProductData.java,v 1.5 2010-01-20 20:22:43 lveci Exp $
+ * $Id: ProductData.java,v 1.6 2010-01-27 18:25:19 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -57,7 +57,7 @@ import java.util.*;
  * <code>float</code>, <code>double</code> and <code>String</code>.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.5 $ $Date: 2010-01-20 20:22:43 $
+ * @version $Revision: 1.6 $ $Date: 2010-01-27 18:25:19 $
  */
 public abstract class ProductData implements Cloneable {
 
@@ -310,7 +310,7 @@ public abstract class ProductData implements Cloneable {
     /**
      * Returns this value's type ID.
      */
-    public int getType() {
+    public final int getType() {
         return _type;
     }
 
@@ -347,7 +347,7 @@ public abstract class ProductData implements Cloneable {
      *
      * @return the size of a single element in bytes
      */
-    public int getElemSize() {
+    public final int getElemSize() {
         return getElemSize(getType());
     }
 
@@ -1989,7 +1989,7 @@ public abstract class ProductData implements Cloneable {
      * <p/>
      * <p> Internally, data is stored in an array of the type <code>float[]</code>.
      */
-    public static class Float extends ProductData {
+    public final static class Float extends ProductData {
 
         /**
          * The internal data array holding this value's data elements.
@@ -2207,7 +2207,7 @@ public abstract class ProductData implements Cloneable {
      * <p/>
      * <p> Internally, data is stored in an array of the type <code>double[]</code>.
      */
-    public static class Double extends ProductData {
+    public final static class Double extends ProductData {
 
         /**
          * The internal data array holding this value's data elements.
@@ -2409,7 +2409,7 @@ public abstract class ProductData implements Cloneable {
      * <p/>
      * <p> Internally, data is stored in an array of the type <code>byte[]</code>.
      */
-    public static class ASCII extends Byte {
+    public final static class ASCII extends Byte {
 
         /**
          * Constructs a new <code>ASCII</code> value.
@@ -2511,7 +2511,7 @@ public abstract class ProductData implements Cloneable {
      * @see org.esa.beam.framework.datamodel.ProductData.UTC#getSecondsFraction()
      * @see org.esa.beam.framework.datamodel.ProductData.UTC#getMicroSecondsFraction()
      */
-    public static class UTC extends UInt {
+    public final static class UTC extends UInt {
 
         /**
          * The default UTC time zone used by this class.
