@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractDialog.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: AbstractDialog.java,v 1.2 2010-01-27 21:19:48 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -197,7 +197,7 @@ public abstract class AbstractDialog {
     }
 
     /**
-     * Gest the button for the given identifier.
+     * Gets the button for the given identifier.
      * @param buttonID The button identifier.
      * @return The button, or {@code null}.
      */

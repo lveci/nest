@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGeoCoding.java,v 1.7 2010-01-15 21:45:01 lveci Exp $
+ * $Id: TiePointGeoCoding.java,v 1.8 2010-01-27 21:19:48 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -718,11 +718,19 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public boolean transferGeoCoding(final Scene srcScene, final Scene destScene, final ProductSubsetDef subsetDef) {
-        final String latGridName = this.getLatGrid().getName();
-        final String lonGridName = this.getLonGrid().getName();
+        final String latGridName = getLatGrid().getName();
+        final String lonGridName = getLonGrid().getName();
         final Product destProduct = destScene.getProduct();
-        final TiePointGrid latGrid = destProduct.getTiePointGrid(latGridName);
-        final TiePointGrid lonGrid = destProduct.getTiePointGrid(lonGridName);
+        TiePointGrid latGrid = destProduct.getTiePointGrid(latGridName);
+        if(latGrid == null) {
+            latGrid = TiePointGrid.createSubset(getLatGrid(), subsetDef);
+            destProduct.addTiePointGrid(latGrid);
+        }
+        TiePointGrid lonGrid = destProduct.getTiePointGrid(lonGridName);
+        if(lonGrid == null) {
+            lonGrid = TiePointGrid.createSubset(getLonGrid(), subsetDef);
+            destProduct.addTiePointGrid(lonGrid);
+        }
         if (latGrid != null && lonGrid != null) {
             destScene.setGeoCoding(new TiePointGeoCoding(latGrid, lonGrid, getDatum()));
             return true;

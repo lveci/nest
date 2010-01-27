@@ -1,5 +1,5 @@
 /*
- * $Id: GraticuleLayerEditor.java,v 1.4 2009-12-22 17:30:01 lveci Exp $
+ * $Id: GraticuleLayerEditor.java,v 1.5 2010-01-27 21:19:48 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +31,7 @@ import java.awt.Color;
  * Editor for graticule layer.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.4 $ $Date: 2009-12-22 17:30:01 $
+ * @version $Revision: 1.5 $ $Date: 2010-01-27 21:19:48 $
  * @since BEAM 4.6
  */
 public class GraticuleLayerEditor extends AbstractLayerConfigurationEditor {
@@ -85,7 +85,7 @@ public class GraticuleLayerEditor extends AbstractLayerConfigurationEditor {
         vd6.setValueRange(new ValueRange(0, 1));
         vd6.setDisplayName("Line transparency");
         vd6.setDefaultConverter();
-        vd6.setAttribute("valueEditor", propertyEditorRegistry.getValueEditor(RangeEditor.class.getName()));
+        vd6.setAttribute("valueEditor", propertyEditorRegistry.getPropertyEditor(RangeEditor.class.getName()));
         addPropertyDescriptor(vd6);
 
         PropertyDescriptor vd7 = new PropertyDescriptor(GraticuleLayerType.PROPERTY_NAME_TEXT_ENABLED, Boolean.class);
@@ -111,7 +111,7 @@ public class GraticuleLayerEditor extends AbstractLayerConfigurationEditor {
         vd10.setValueRange(new ValueRange(0, 1));
         vd10.setDisplayName("Text background transparency");
         vd10.setDefaultConverter();
-        vd10.setAttribute("valueEditor", propertyEditorRegistry.getValueEditor(RangeEditor.class.getName()));
+        vd10.setAttribute("valueEditor", propertyEditorRegistry.getPropertyEditor(RangeEditor.class.getName()));
         addPropertyDescriptor(vd10);
 
         boolean resAuto = (Boolean) bindingContext.getPropertySet().getValue(

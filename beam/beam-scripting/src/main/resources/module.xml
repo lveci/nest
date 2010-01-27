@@ -27,6 +27,10 @@
         <module>beam-gpf</module>
     </dependency>
     <dependency>
+        <module>lib-jep</module>
+        <optional>true</optional>
+    </dependency>
+    <dependency>
         <module>beam-visat</module>
     </dependency>
 

@@ -1,5 +1,5 @@
 /*
- * $Id: BandArithmetikDialog.java,v 1.14 2010-01-13 16:39:23 lveci Exp $
+ * $Id: BandArithmetikDialog.java,v 1.15 2010-01-27 21:19:48 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -251,7 +251,7 @@ public class BandArithmetikDialog extends ModalDialog {
 
     private JComponent[] createComponents(String propertyName, Class<? extends PropertyEditor> editorClass) {
         PropertyDescriptor descriptor = bindingContext.getPropertySet().getDescriptor(propertyName);
-        PropertyEditor editor = PropertyEditorRegistry.getInstance().getValueEditor(editorClass.getName());
+        PropertyEditor editor = PropertyEditorRegistry.getInstance().getPropertyEditor(editorClass.getName());
         return editor.createComponents(descriptor, bindingContext);
     }
 

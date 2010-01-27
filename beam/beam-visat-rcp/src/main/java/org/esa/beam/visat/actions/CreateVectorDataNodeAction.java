@@ -1,5 +1,5 @@
 /*
- * $Id: CreateVectorDataNodeAction.java,v 1.2 2010-01-07 16:40:00 lveci Exp $
+ * $Id: CreateVectorDataNodeAction.java,v 1.3 2010-01-27 21:19:48 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -58,16 +58,18 @@ public class CreateVectorDataNodeAction extends ExecCommand {
 
     // todo - add help (nf)
     private static final String HELP_ID = "";
-    private static int numItems = 0;
+    private static int numItems = 1;
 
     @Override
     public void actionPerformed(CommandEvent event) {
-        run();
+        if (VisatApp.getApp().getSelectedProduct() != null) {
+            run();
+        }
     }
 
     public VectorDataNode run() {
-        final Product product = VisatApp.getApp().getSelectedProduct();
-        DialogData dialogData = new DialogData();
+        Product product = VisatApp.getApp().getSelectedProduct();
+        DialogData dialogData = new DialogData(product.getVectorDataGroup());
         PropertySet propertySet = PropertyContainer.createObjectBacked(dialogData);
         propertySet.getDescriptor("name").setNotNull(true);
         propertySet.getDescriptor("name").setNotEmpty(true);
@@ -182,10 +184,18 @@ public class CreateVectorDataNodeAction extends ExecCommand {
         }
     }
 
-    // todo - add validators (nf)
     private static class DialogData {
-        private String name = getDefaultVectorDataNodeName() + "_" + (++numItems);
-        private String description = "";
+        private String name;
+        private String description;
+        
+        private DialogData(ProductNodeGroup<VectorDataNode> vectorGroup) {
+            String defaultPrefix = getDefaultVectorDataNodeName() + "_";
+            name = defaultPrefix + (numItems++);
+            while(vectorGroup.contains(name)) {
+                name = defaultPrefix + (numItems++);    
+            }
+            description = "";
+        }
     }
 
 

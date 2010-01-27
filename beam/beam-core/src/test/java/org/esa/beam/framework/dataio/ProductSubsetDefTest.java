@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetInfoTest.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ProductSubsetDefTest.java,v 1.1 2010-01-27 21:19:48 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,33 +17,29 @@
 
 package org.esa.beam.framework.dataio;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-public class ProductSubsetInfoTest extends TestCase {
+import java.awt.Dimension;
+import java.awt.Rectangle;
+
+public class ProductSubsetDefTest extends TestCase {
 
     private ProductSubsetDef _subset;
     private static final float EPS = 1e-5f;
 
-    public ProductSubsetInfoTest(String testName) {
+    public ProductSubsetDefTest(String testName) {
         super(testName);
     }
 
     public static Test suite() {
-        return new TestSuite(ProductSubsetInfoTest.class);
+        return new TestSuite(ProductSubsetDefTest.class);
     }
 
     @Override
     protected void setUp() {
         _subset = new ProductSubsetDef("undefined");
-    }
-
-    @Override
-    protected void tearDown() {
     }
 
     public void testAddBandName() {

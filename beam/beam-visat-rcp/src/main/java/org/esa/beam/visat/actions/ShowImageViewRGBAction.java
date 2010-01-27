@@ -1,5 +1,5 @@
 /*
- * $Id: ShowImageViewRGBAction.java,v 1.5 2009-12-04 19:06:45 lveci Exp $
+ * $Id: ShowImageViewRGBAction.java,v 1.6 2010-01-27 21:19:48 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -39,7 +39,7 @@ import java.awt.Cursor;
  * This action opens an RGB image view on the currently selected Product.
  *
  * @author Marco Peters
- * @version $Revision: 1.5 $ $Date: 2009-12-04 19:06:45 $
+ * @version $Revision: 1.6 $ $Date: 2010-01-27 21:19:48 $
  */
 public class ShowImageViewRGBAction extends ExecCommand {
 
@@ -106,9 +106,6 @@ public class ShowImageViewRGBAction extends ExecCommand {
                 visatApp.clearStatusBarMessage();
 
                 ProductSceneView productSceneView = new ProductSceneView(productSceneImage);
-                productSceneView.setNoDataOverlayEnabled(false);
-                productSceneView.setGraticuleOverlayEnabled(false);
-                productSceneView.setPinOverlayEnabled(false);
                 productSceneView.setLayerProperties(visatApp.getPreferences());
                 openInternalFrame(productSceneView);
             }
@@ -159,6 +156,8 @@ public class ShowImageViewRGBAction extends ExecCommand {
                                                       rgbBands[2].band,
                                                       visatApp.getPreferences(),
                                                       SubProgressMonitor.create(pm, 1));
+            productSceneImage.initVectorDataCollectionLayer();
+            productSceneImage.initMaskCollectionLayer();
         } catch (Exception e) {
             errorOccured = true;
             throw e;
