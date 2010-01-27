@@ -458,8 +458,10 @@ public class MosaicOp extends Operator {
                         max = stats.getMax();
                     }
 
-                    validSourceData.add(new SourceData(srcBand, sourceRectangle, pixPos, resampling,
-                                                        min, max, mean));
+                    final Tile srcTile = getSourceTile(srcBand, sourceRectangle, ProgressMonitor.NULL);
+                    if(srcTile != null) {
+                        validSourceData.add(new SourceData(srcTile, pixPos, resampling, min, max, mean));
+                    }
                 }
                 ++index;
             }
@@ -591,7 +593,6 @@ public class MosaicOp extends Operator {
     }
 
     private static class SourceData {
-        final Band srcBand;
         final Tile srcTile;
         final ResamplingRaster resamplingRaster;
         final Resampling.Index resamplingIndex;
@@ -603,17 +604,16 @@ public class MosaicOp extends Operator {
         final double srcMax;
         final double srcMin;
 
-        public SourceData(final Band sourceBand, final Rectangle sourceRectangle,
+        public SourceData(final Tile tile,
                           final PixelPos[] pixPos, final Resampling resampling,
                           final double min, final double max, final double mean) {
-            srcBand = sourceBand;
-            srcTile = getSourceTile(sourceBand, sourceRectangle, ProgressMonitor.NULL);
+            srcTile = tile;
             resamplingRaster = new ResamplingRaster(srcTile);
             resamplingIndex = resampling.createIndex();
-            nodataValue = sourceBand.getNoDataValue();
+            nodataValue = tile.getRasterDataNode().getNoDataValue();
             srcPixPos = pixPos;
 
-            final Product srcProduct = sourceBand.getProduct();
+            final Product srcProduct = tile.getRasterDataNode().getProduct();
             srcRasterHeight = srcProduct.getSceneRasterHeight();
             srcRasterWidth = srcProduct.getSceneRasterWidth();
             srcMin = min;
