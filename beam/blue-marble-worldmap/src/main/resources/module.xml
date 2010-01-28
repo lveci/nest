@@ -33,7 +33,7 @@
     </dependency>
 
     <dependency>
-        <module>beam-visat-rcp</module>
+        <module>beam-ui</module>
         <optional>true</optional>
     </dependency>
 

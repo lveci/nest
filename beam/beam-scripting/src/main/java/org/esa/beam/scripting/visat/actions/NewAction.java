@@ -1,7 +1,6 @@
 package org.esa.beam.scripting.visat.actions;
 
 import org.esa.beam.scripting.visat.ScriptConsoleForm;
-import org.esa.beam.scripting.visat.ScriptManager;
 
 import javax.script.ScriptEngineFactory;
 import javax.swing.JButton;
@@ -19,17 +18,18 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 public class NewAction extends ScriptConsoleAction {
+    public static final String ID = "scriptConsole.new";
 
     public NewAction(ScriptConsoleForm scriptConsoleForm) {
         super(scriptConsoleForm,
               "New",
-              "scriptConsole.new",
+              ID,
               "/org/esa/beam/scripting/visat/icons/document-new-16.png");
     }
 
 
     public void actionPerformed(ActionEvent e) {
-        ScriptEngineFactory[] scriptEngineFactories = getScriptManager().getAvailableScriptEngineFactories();
+        ScriptEngineFactory[] scriptEngineFactories = getScriptManager().getEngineFactories();
         final Item[] items = new Item[scriptEngineFactories.length];
         for (int i = 0; i < scriptEngineFactories.length; i++) {
             ScriptEngineFactory scriptEngineFactory = scriptEngineFactories[i];
@@ -42,7 +42,7 @@ public class NewAction extends ScriptConsoleAction {
             getScriptConsoleForm().showErrorMessage("No scripting language available.");
         }
         if (selectedItem != null) {
-            getScriptConsoleForm().newScript(selectedItem.scriptEngineFactory.getScriptEngine());
+            getScriptConsoleForm().newScript(selectedItem.scriptEngineFactory);
         }
     }
 
