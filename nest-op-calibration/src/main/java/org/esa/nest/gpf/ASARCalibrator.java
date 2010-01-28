@@ -948,8 +948,11 @@ public class ASARCalibrator implements Calibrator {
                 sigma *= Math.sin(incidenceAnglesArray[xx] * MathUtils.DTOR) / theCalibrationFactor;
 
                 if (applyRangeSpreadingCorr) { // apply range spreading loss compensation
+                    /*
                     time = slantRangeTimeArray[xx] / 1000000000.0; //convert ns to s
                     sigma *= Math.pow(time * halfLightSpeedByRefSlantRange, rangeSpreadingCompPower);
+                    */
+                    sigma *= Math.pow(targetTileSlantRange[yy][xx] / refSlantRange800km, rangeSpreadingCompPower);
                 }
 
                 if (applyAntennaPatternCorr) { // apply antenna pattern correction
