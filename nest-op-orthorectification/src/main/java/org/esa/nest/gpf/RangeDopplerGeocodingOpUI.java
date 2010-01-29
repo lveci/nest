@@ -8,8 +8,10 @@ import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
 import org.esa.beam.framework.gpf.ui.BaseOperatorUI;
 import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.visat.VisatApp;
 import org.esa.nest.util.DialogUtils;
+import org.esa.nest.datamodel.AbstractMetadata;
 
 import javax.swing.*;
 import java.awt.*;
@@ -258,6 +260,16 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     @Override
     public UIValidation validateParameters() {
 
+        if (sourceProducts != null) {
+            MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProducts[0]);
+            boolean antElevCorrFlag = absRoot.getAttributeInt(AbstractMetadata.ant_elev_corr_flag) != 0;
+            boolean multilookFlag = absRoot.getAttributeInt(AbstractMetadata.multilook_flag) != 0;
+
+            if (applyRadiometricNormalization && antElevCorrFlag && multilookFlag) {
+                return new UIValidation(UIValidation.State.WARNING, "The product has been multilooked, therefore only" +
+                        " constant and incidence angle corrections will be performed for radiometric normalization");
+            }
+        }
         return new UIValidation(UIValidation.State.OK, "");
     }
 
