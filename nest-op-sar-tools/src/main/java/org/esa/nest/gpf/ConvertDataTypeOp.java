@@ -28,6 +28,8 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.util.math.Histogram;
+import org.esa.beam.util.math.Range;
 
 import java.util.ArrayList;
 
@@ -62,16 +64,16 @@ public class ConvertDataTypeOp extends Operator {
     private String targetDataType = ProductData.TYPESTRING_FLOAT32;
     private int dataType = ProductData.TYPE_FLOAT32;
 
-    @Parameter(valueSet = { SCALING_TRUNCATE, SCALING_LINEAR, SCALING_LOGARITHMIC },
+    @Parameter(valueSet = { SCALING_TRUNCATE, SCALING_LINEAR, SCALING_LINEAR_CLIPPED, SCALING_LOGARITHMIC },
             defaultValue = SCALING_LINEAR, label="Scaling")
     private String targetScalingStr = SCALING_LINEAR;
 
     protected final static String SCALING_TRUNCATE = "Truncate";
     protected final static String SCALING_LINEAR = "Linear (slope and intercept)";
-    private final static String SCALING_LINEAR2 = "Linear (between min max)";
+    protected final static String SCALING_LINEAR_CLIPPED = "Linear (between 95% clipped Histogram)";
     protected final static String SCALING_LOGARITHMIC = "Logarithmic";
 
-    private enum ScalingType { NONE, TRUNC, LINEAR, LINEAR2, LOGARITHMIC }
+    private enum ScalingType { NONE, TRUNC, LINEAR, LINEAR_CLIPPED, LOGARITHMIC }
     private ScalingType targetScaling = ScalingType.LINEAR;
 
     /**
@@ -117,8 +119,8 @@ public class ConvertDataTypeOp extends Operator {
     private static ScalingType getScaling(final String scalingStr) {
         if(scalingStr.equals(SCALING_LINEAR))
             return ScalingType.LINEAR;
-        else if(scalingStr.equals(SCALING_LINEAR2))
-            return ScalingType.LINEAR2;
+        else if(scalingStr.equals(SCALING_LINEAR_CLIPPED))
+            return ScalingType.LINEAR_CLIPPED;
         else if(scalingStr.equals(SCALING_LOGARITHMIC))
             return ScalingType.LOGARITHMIC;
         else if(scalingStr.equals(SCALING_TRUNCATE))
@@ -180,11 +182,10 @@ public class ConvertDataTypeOp extends Operator {
             final Tile srcTile = getSourceTile(sourceBand, targetTile.getRectangle(), pm);
 
             final Stx stx = sourceBand.getStx();
-            final double origMin = stx.getMin();
-            final double origMax = stx.getMax();
+            double origMin = stx.getMin();
+            double origMax = stx.getMax();
             ScalingType scaling = verifyScaling(targetScaling, dataType);
 
-            final double origRange = origMax - origMin;
             final double newMin = getMin(dataType);
             final double newMax = getMax(dataType);
             final double newRange = newMax - newMin;
@@ -198,8 +199,17 @@ public class ConvertDataTypeOp extends Operator {
             final double srcNoDataValue = sourceBand.getNoDataValue();
             final double destNoDataValue = targetBand.getNoDataValue();
 
+            if(scaling == ScalingType.LINEAR_CLIPPED) {
+                final Histogram histogram = new Histogram(stx.getHistogramBins(), origMin, origMax);
+                final Range autoStretchRange = histogram.findRangeFor95Percent();
+                origMin = autoStretchRange.getMin();
+                origMax = autoStretchRange.getMax();
+            }
+            final double origRange = origMax - origMin;
+
             final int numElem = dstData.getNumElems();
             double srcValue;
+            pm.beginTask(getId(), numElem);
             for(int i=0; i < numElem; ++i) {
                 srcValue = srcData.getElemDoubleAt(i);
                 if(srcValue == srcNoDataValue) {
@@ -214,11 +224,14 @@ public class ConvertDataTypeOp extends Operator {
                     else
                         dstData.setElemDoubleAt(i, scale(srcValue, origMin, newMin, origRange, newRange));
                 }
+                pm.worked(1);
             }
 
             targetTile.setRawSamples(dstData);
         } catch(Exception e) {
             throw new OperatorException(e.getMessage());
+        } finally {
+            pm.done();
         }
     }
 

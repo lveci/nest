@@ -1,5 +1,5 @@
 /*
- * $Id: OperatorExecutor.java,v 1.5 2009-12-02 16:52:11 lveci Exp $
+ * $Id: OperatorExecutor.java,v 1.6 2010-01-28 22:28:09 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -96,7 +96,7 @@ public class OperatorExecutor {
     
     public void execute(ExecutionOrder executionOrder, int parallelism, ProgressMonitor pm) {
         final Semaphore semaphore = new Semaphore(parallelism, true);
-        final TileComputationListener tcl = new OperatorTileComputationListener(semaphore);
+        final TileComputationListener tcl = new OperatorTileComputationListener(semaphore, parallelism);
         final TileComputationListener[] listeners = new TileComputationListener[] { tcl };
         
         if (executionOrder == ExecutionOrder.ROW_BAND_COLUMN) {
@@ -234,9 +234,11 @@ public class OperatorExecutor {
     private static class OperatorTileComputationListener implements TileComputationListener {
 
         private final Semaphore semaphore;
+        private final int parallelism;
 
-        OperatorTileComputationListener(Semaphore scheduledTiles) {
+        OperatorTileComputationListener(Semaphore scheduledTiles, int parallelism) {
             this.semaphore = scheduledTiles;
+            this.parallelism = parallelism;
         }
 
         @Override
@@ -247,14 +249,14 @@ public class OperatorExecutor {
 
         @Override
         public void tileCancelled(Object eventSource, TileRequest[] requests, PlanarImage image, int tileX, int tileY) {
-            semaphore.release();
+            semaphore.release(parallelism);
             throw new OperatorException("Operation cancelled.");
         }
 
         @Override
         public void tileComputationFailure(Object eventSource, TileRequest[] requests, PlanarImage image, int tileX,
                                            int tileY, Throwable situation) {
-            semaphore.release();
+            semaphore.release(parallelism);
             throw new OperatorException("Operation failed.", situation);
         }
     }

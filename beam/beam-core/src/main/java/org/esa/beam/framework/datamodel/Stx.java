@@ -5,6 +5,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.jai.NoDataRaster;
 import org.esa.beam.jai.ImageManager;
+import org.esa.beam.util.math.MathUtils;
 
 import javax.media.jai.Histogram;
 import javax.media.jai.PixelAccessor;
@@ -35,6 +36,7 @@ public class Stx {
     private final double mean;
     private final double coefficientOfVariation;
     private final double enl;
+	private double median;
 
     public static Stx create(RasterDataNode raster, int level, ProgressMonitor pm) {
         return create(raster, level, null, DEFAULT_BIN_COUNT, pm);
@@ -116,6 +118,7 @@ public class Stx {
         this.histogram = histogram;
         this.resolutionLevel = resolutionLevel;
         this.sampleCount = computeSum(histogram.getBins(0));
+		this.median = computeMedian(histogram, this.sampleCount);
         this.coefficientOfVariation = coeffOfVariation;
         this.enl = enl;
     }
@@ -130,6 +133,10 @@ public class Stx {
 
     public double getMean() {
         return mean;
+    }
+
+    public double getMedian() {
+        return median;
     }
 
     public double getStandardDeviation() {
@@ -185,6 +192,43 @@ public class Stx {
         }
         return sum;
     }
+
+    private static double computeMedian(Histogram histogram, long sampleCount) {
+        boolean isEven = sampleCount % 2 == 0;
+        long halfSampleCount = MathUtils.ceilLong(sampleCount / 2.0);
+        final int bandIndex = 0;
+        int[] bins = histogram.getBins(bandIndex);
+        long currentSampleCount = 0;
+        int lastConsideredBinIndex = 0;
+        for (int i = 0, binsLength = bins.length; i < binsLength; i++) {
+            currentSampleCount += bins[i];
+
+            if (currentSampleCount > halfSampleCount) {
+                if (isEven) {
+                    double binValue = getMeanOfBin(histogram, bandIndex, i);
+                    double lastBinValue = getMeanOfBin(histogram, bandIndex, lastConsideredBinIndex);
+                    return (lastBinValue + binValue) / 2;
+                } else {
+                    final double binLowValue = histogram.getBinLowValue(bandIndex, i);
+                    final double binMaxValue = histogram.getBinLowValue(bandIndex, i + 1);
+                    final double previousSampleCount = currentSampleCount - bins[i];
+                    double weight = (halfSampleCount - previousSampleCount) / (currentSampleCount - previousSampleCount);
+                    return binLowValue * (1 - weight) + binMaxValue * weight;
+                }
+            }
+            if (bins[i] > 0) {
+                lastConsideredBinIndex = i;
+            }
+        }
+        return Double.NaN;
+    }
+
+    private static double getMeanOfBin(Histogram histogram, int bandIndex, int binIndex) {
+        final double binLowValue = histogram.getBinLowValue(bandIndex, binIndex);
+        final double binMaxValue = histogram.getBinLowValue(bandIndex, binIndex + 1);
+        return (binLowValue + binMaxValue) / 2;
+    }
+
 
     private static Stx create(RasterDataNode raster, int level, RenderedImage roiImage, int binCount,
                               ProgressMonitor pm) {

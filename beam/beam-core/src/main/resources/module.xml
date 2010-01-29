@@ -27,7 +27,9 @@
         <![CDATA[
         <p>Changes in 4.7:<br/>
         [BEAM-1065] Method TiePointGrid.cloneTiePointGrid() does not consider the unit<br/>
-        [BEAM-1042] Pin pixels exported using BEAM 4.6.1 not correct<br/> 
+        [BEAM-1050] Preserve special geo-codings in all data processors<br/>
+        [BEAM-1047] BandArithmetic operator does not consider geo-coding<br/>
+        [BEAM-1042] Pin pixels exported using BEAM 4.6.1 not correct<br/>
         [BEAM-1040] Exchange 'no data' with 'NaN' in text exports<br/>
         [BEAM-1035] BandArithmetic.NamespaceExtender should not hold references to products<br/>
         [BEAM-1033] DIMAP should preserve PixelGeoCoding<br/>
@@ -48,7 +50,8 @@
         [BEAM-1002] Editing bitmask overlays is not possible using the nimbus or gtk look & feel<br/>
         [BEAM-1001] SelectedProduct can be null in BandArithmetic<br/>
         [BEAM-1000] Spelling error in band arithmetic<br/>
-        [BEAM-991] Yaxis of scatterplot does not show the right values<br/>
+        [BEAM-991] Y-axis of scatterplot does not show the right values<br/>
+        [BEAM-809] Add 'median' and 'coefficient of variation' to statistics<br/>
         [BEAM-456] ROI includes also no-data pixels if "Include pixel by conditions" is selected<br/>
         </p>
         <p>Changes in 4.6:<br/>
