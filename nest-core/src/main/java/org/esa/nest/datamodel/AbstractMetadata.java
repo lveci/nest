@@ -425,11 +425,14 @@ public final class AbstractMetadata {
      * Get orbit state vectors.
      * @param absRoot Abstracted metadata root.
      * @return orbitStateVectors Array of orbit state vectors.
-     * @throws Exception The exceptions.
+     * @throws OperatorException The exceptions.
      */
-    public static OrbitStateVector[] getOrbitStateVectors(final MetadataElement absRoot) {
+    public static OrbitStateVector[] getOrbitStateVectors(final MetadataElement absRoot) throws OperatorException {
 
         final MetadataElement elemRoot = absRoot.getElement(orbit_state_vectors);
+        if(elemRoot == null) {
+            throw new OperatorException("This product has no orbit state vectors");
+        }
         final int numElems = elemRoot.getNumElements();
         final OrbitStateVector[] orbitStateVectors = new OrbitStateVector[numElems];
         for (int i = 0; i < numElems; i++) {
