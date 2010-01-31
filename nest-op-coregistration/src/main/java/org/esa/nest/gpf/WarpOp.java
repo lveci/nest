@@ -242,8 +242,21 @@ public class WarpOp extends Operator {
     }
 
     private void addSlaveGCPs(final WarpData warpData, final String bandName) {
-        OperatorUtils.copyGCPsToTarget(warpData.slaveGCPGroup,
-                targetProduct.getGcpGroup(targetProduct.getBand(bandName)));
+
+        final ProductNodeGroup<Pin> targetGCPGroup = targetProduct.getGcpGroup(targetProduct.getBand(bandName));
+        targetGCPGroup.removeAll();
+
+        for(int i = 0; i < warpData.slaveGCPList.size(); ++i) {
+            final Pin sPin = warpData.slaveGCPList.get(i);
+            final Pin tPin = new Pin(sPin.getName(),
+                                     sPin.getLabel(),
+                                     sPin.getDescription(),
+                                     sPin.getPixelPos(),
+                                     sPin.getGeoPos(),
+                                     sPin.getSymbol());
+
+            targetGCPGroup.add(tPin);
+        }
     }
 
     /**
@@ -369,7 +382,7 @@ public class WarpOp extends Operator {
     private static void getNumOfValidGCPs(
             final WarpData warpData, final int warpPolynomialOrder) throws OperatorException {
 
-        warpData.numValidGCPs = warpData.slaveGCPGroup.getNodeCount();
+        warpData.numValidGCPs = warpData.slaveGCPList.size();
         final int requiredGCPs = (warpPolynomialOrder + 2)*(warpPolynomialOrder + 1) / 2;
         if (warpData.numValidGCPs < requiredGCPs) {
             throw new OperatorException("Order " + warpPolynomialOrder + " requires " + requiredGCPs +
@@ -390,7 +403,7 @@ public class WarpOp extends Operator {
 
         for(int i = 0; i < warpData.numValidGCPs; ++i) {
 
-            final Pin sPin = warpData.slaveGCPGroup.get(i);
+            final Pin sPin = warpData.slaveGCPList.get(i);
             final PixelPos sGCPPos = sPin.getPixelPos();
             //System.out.println("WARP: slave gcp[" + i + "] = " + "(" + sGCPPos.x + "," + sGCPPos.y + ")");
 
@@ -483,20 +496,20 @@ public class WarpOp extends Operator {
      * Eliminate master and slave GCP pairs that have root mean square error greater than given threshold.
      * @param warpData Stores the warp information per band.
      * @param threshold Threshold for eliminating GCPs.
-     * @return Boolean flag that is true if the GCP list is not empty after elimination, false otherwise.
+     * @return True if some GCPs are eliminated, false otherwise.
      */
     public static boolean eliminateGCPsBasedOnRMS(final WarpData warpData, final float threshold) {
 
         final ArrayList<Pin> pinList = new ArrayList<Pin>();
         for (int i = 0; i < warpData.rms.length; i++) {
             if (warpData.rms[i] >= threshold) {
-                pinList.add(warpData.slaveGCPGroup.get(i));
+                pinList.add(warpData.slaveGCPList.get(i));
                 //System.out.println("WARP: slave gcp[" + i + "] is eliminated");
             }
         }
 
         for (Pin aPin : pinList) {
-            warpData.slaveGCPGroup.remove(aPin);
+            warpData.slaveGCPList.remove(aPin);
         }
 
         return !pinList.isEmpty();
@@ -707,7 +720,7 @@ public class WarpOp extends Operator {
     }
 
     public static class WarpData {
-        public final ProductNodeGroup<Pin> slaveGCPGroup;
+        public final ArrayList<Pin> slaveGCPList = new ArrayList<Pin>();
         public WarpPolynomial warp = null;
 
         public int numValidGCPs = 0;
@@ -725,7 +738,9 @@ public class WarpOp extends Operator {
         public double colResidualMean = 0;
 
         public WarpData(ProductNodeGroup<Pin> slaveGCPGroup) {
-            this.slaveGCPGroup = slaveGCPGroup;
+            for (int i = 0; i < slaveGCPGroup.getNodeCount(); ++i) {
+                slaveGCPList.add(slaveGCPGroup.get(i));
+            }
         }
     }
 
