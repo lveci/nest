@@ -1581,7 +1581,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             for (int i = 0; i < warpData.numValidGCPs; i++) {
 
                 // get final slave GCP position
-                final Pin sPin = warpData.slaveGCPGroup.get(i);
+                final Pin sPin = warpData.slaveGCPList.get(i);
                 final PixelPos sGCPPos = sPin.getPixelPos();
 
                 // get initial slave GCP position
