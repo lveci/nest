@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGeoCoding.java,v 1.8 2010-01-27 21:19:48 lveci Exp $
+ * $Id: TiePointGeoCoding.java,v 1.9 2010-02-01 16:04:16 junlu Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -52,6 +52,10 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
     private boolean approximationsInitialized = false;
     private float _latMin;
     private float _latMax;
+    private final float _offsetX;
+    private final float _offsetY;
+    private final float _subSamplingX;
+    private final float _subSamplingY;
 
     private float _overlapStart;
     private float _overlapEnd;
@@ -90,6 +94,11 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         _datum = datum;
         sceneRasterWidth = _latGrid.getSceneRasterWidth();
         sceneRasterHeight = _latGrid.getSceneRasterHeight();
+
+        _offsetX = _latGrid.getOffsetX();
+        _offsetY = _latGrid.getOffsetY();
+        _subSamplingX = _latGrid.getSubSamplingX();
+        _subSamplingY = _latGrid.getSubSamplingY();
 
         initNormalizedLonGrid();
         initLatLonMinMax();
@@ -246,6 +255,70 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
                 }
             }
         }
+        return pixelPos;
+    }
+
+    public PixelPos getAccuratePixelPos(GeoPos geoPos, PixelPos pixelPos) {
+
+        PixelPos approximatedPixelPos = new PixelPos();
+        getPixelPos(geoPos, approximatedPixelPos);
+        pixelPos.x = approximatedPixelPos.x;
+        pixelPos.y = approximatedPixelPos.y;
+
+        final int i1 = (int)((approximatedPixelPos.x - _offsetX) / _subSamplingX);
+        final int j1 = (int)((approximatedPixelPos.y - _offsetY) / _subSamplingY);
+
+        final float x1 = i1*_subSamplingX;
+        final float x2 = x1 + _subSamplingX;
+        final float y1 = j1*_subSamplingY;
+        final float y2 = y1 + _subSamplingY;
+
+        final double lat = (double)geoPos.lat;
+        final double lon = (double)geoPos.lon;
+        final double lat11 = _latGrid.getPixelFloat(x1, y1);
+        final double lat12 = _latGrid.getPixelFloat(x2, y1);
+        final double lat21 = _latGrid.getPixelFloat(x1, y2);
+        final double lat22 = _latGrid.getPixelFloat(x2, y2);
+
+        final double lon11 = _lonGrid.getPixelFloat(x1, y1);
+        final double lon12 = _lonGrid.getPixelFloat(x2, y1);
+        final double lon21 = _lonGrid.getPixelFloat(x1, y2);
+        final double lon22 = _lonGrid.getPixelFloat(x2, y2);
+
+        final double a0 = x2*y2*lat11 - x2*y1*lat21 - x1*y2*lat12 + x1*y1*lat22 - (x2 - x1)*(y2 - y1)*lat;
+        final double a1 = -x2*lat11 + x2*lat21 + x1*lat12 - x1*lat22;
+        final double a2 = -y2*lat11 + y1*lat21 + y2*lat12 - y1*lat22;
+        final double a3 = lat11 - lat21 - lat12 + lat22;
+
+        final double b0 = x2*y2*lon11 - x2*y1*lon21 - x1*y2*lon12 + x1*y1*lon22 - (x2 - x1)*(y2 - y1)*lon;
+        final double b1 = -x2*lon11 + x2*lon21 + x1*lon12 - x1*lon22;
+        final double b2 = -y2*lon11 + y1*lon21 + y2*lon12 - y1*lon22;
+        final double b3 = lon11 - lon21 - lon12 + lon22;
+
+        final double c0 = a2*b0 - a0*b2;
+        final double c1 = a3*b0 + a2*b1 - a1*b2 - a0*b3;
+        final double c2 = a3*b1 - a1*b3;
+
+        double y = (-c1 - Math.sqrt(c1*c1 - 4*c2*c0))/(2*c2); // root 2
+        double x = (-a1*y - a0)/(a3*y + a2);
+        int yPos = (int)(y + 0.5);
+        int xPos = (int)(x + 0.5);
+        if (xPos >= 0 && xPos < sceneRasterWidth && yPos >= 0 && yPos < sceneRasterHeight) {
+            pixelPos.x = (float)xPos;
+            pixelPos.y = (float)yPos;
+            return pixelPos;
+        }
+
+        y = (-c1 + Math.sqrt(c1*c1 - 4*c2*c0))/(2*c2); // root 1
+        x = (-a1*y - a0)/(a3*y + a2);
+        yPos = (int)y;
+        xPos = (int)x;
+        if (xPos >= 0 && xPos < sceneRasterWidth && yPos >= 0 && yPos < sceneRasterHeight) {
+            pixelPos.x = (float)xPos;
+            pixelPos.y = (float)yPos;
+            return pixelPos;
+        }
+
         return pixelPos;
     }
 
