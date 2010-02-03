@@ -627,12 +627,12 @@ public class WarpOp extends Operator {
             p.println();
             p.println("WARP coefficients:");
             for (float xCoeff : xCoeffs) {
-                p.format("%10.5f, ", xCoeff);
+                p.print(xCoeff + ", ");
             }
 
             p.println();
             for (float yCoeff : yCoeffs) {
-                p.format("%10.5f, ", yCoeff);
+                p.print(yCoeff + ", ");
             }
             p.println();
 
