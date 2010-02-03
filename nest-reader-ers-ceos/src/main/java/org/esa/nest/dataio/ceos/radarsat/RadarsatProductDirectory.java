@@ -468,9 +468,9 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         final double yPosECI = platformPosRec.getAttributeDouble("Position vector Y " + num);
         final double zPosECI = platformPosRec.getAttributeDouble("Position vector Z " + num);
 
-        final double xVelECI = platformPosRec.getAttributeDouble("Velocity vector X' " + num);
-        final double yVelECI = platformPosRec.getAttributeDouble("Velocity vector Y' " + num);
-        final double zVelECI = platformPosRec.getAttributeDouble("Velocity vector Z' " + num);
+        final double xVelECI = platformPosRec.getAttributeDouble("Velocity vector X' " + num)/1000.0; // mm to m
+        final double yVelECI = platformPosRec.getAttributeDouble("Velocity vector Y' " + num)/1000.0;
+        final double zVelECI = platformPosRec.getAttributeDouble("Velocity vector Z' " + num)/1000.0;
 
         final double thetaInRd = theta*MathUtils.DTOR;
         final double cosTheta = Math.cos(thetaInRd);
@@ -480,8 +480,14 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         final double yPosECEF = -sinTheta*xPosECI + cosTheta*yPosECI;
         final double zPosECEF = zPosECI;
 
-        final double xVelECEF =  cosTheta*xVelECI + sinTheta*yVelECI;
-        final double yVelECEF = -sinTheta*xVelECI + cosTheta*yVelECI;
+        double t = getOrbitTime(platformPosRec, num).getMJD() / 36525.0; // Julian centuries
+        double a1 = 876600.0*3600.0 + 8640184.812866;
+        double a2 = 0.093104;
+        double a3 = -6.2e-6;
+        double thp = ((a1 + 2.0*a2*t + 3.0*a3*t*t)/240.0*Math.PI/180.0)/(36525.0*86400.0);
+
+        final double xVelECEF = -sinTheta*thp*xPosECI + cosTheta*thp*yPosECI + cosTheta*xVelECI + sinTheta*yVelECI;
+        final double yVelECEF = -cosTheta*thp*xPosECI - sinTheta*thp*yPosECI - sinTheta*xVelECI + cosTheta*yVelECI;
         final double zVelECEF = zVelECI;
 
         orbitVectorElem.setAttributeUTC(AbstractMetadata.orbit_vector_time, getOrbitTime(platformPosRec, num));
