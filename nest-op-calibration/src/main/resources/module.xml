@@ -57,7 +57,7 @@
             <shortDescr>Remove the Antenna Pattern for ASAR and ERS products</shortDescr>
             <parent>Calibration</parent>
             <placeAfter>CalibrationOp</placeAfter>
-            <helpId>CalibrationOp</helpId>
+            <helpId>RemoveAntennaPatternOp</helpId>
         </action>
 
         <action>

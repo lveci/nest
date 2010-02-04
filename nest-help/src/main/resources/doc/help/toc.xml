@@ -137,6 +137,7 @@
 		<tocitem text="SAR Operators">
 			<tocitem text="Apply Orbit Correction" target="ApplyOrbitFileOp"/>
 			<tocitem text="Calibration" target="CalibrationOp"/>
+			<tocitem text="Remove Antenna Pattern" target="RemoveAntennaPatternOp"/>
 			<tocitem text="GCP Selection" target="GCPSelectionOp"/>			
 			<tocitem text="Multilook" target="MultilookOp"/>			
 	        <tocitem text="Speckle Filter" target="SpeckleFilterOp"/>			

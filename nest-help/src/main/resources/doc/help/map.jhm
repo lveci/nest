@@ -122,6 +122,7 @@
 	<!--SAR Operators-->
 	<mapID target="ApplyOrbitFileOp" url="operators/ApplyOrbitFileOp.html"/>
 	<mapID target="CalibrationOp" url="operators/CalibrationOp.html"/>	
+	<mapID target="RemoveAntennaPatternOp" url="operators/RemoveAntennaPatternOp.html"/>	
 	<mapID target="GCPSelectionOp" url="operators/GCPSelectionOp.html"/>	
 	<mapID target="MultilookOp" url="operators/MultilookOp.html"/>	
 	<mapID target="SpeckleFilterOp" url="operators/SpeckleFilterOp.html"/>	
