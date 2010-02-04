@@ -149,11 +149,12 @@ public class WindFieldEstimationLayer extends Layer {
         graphics.setColor(Color.RED);
 
         final AffineTransform m2v = vp.getModelToViewTransform();
-        final double[] ipts = new double[8];
-        final double[] mpts = new double[8];
-        final double[] vpts = new double[8];
+        final double[] ipts = new double[12]; // [8]
+        final double[] mpts = new double[12]; // [8]
+        final double[] vpts = new double[12]; // [8]
 
-        double arrowSize = 10.0;
+        double arrowSize = 100.0;
+        /*
         if (targetList.size() > 1) {
             WindFieldEstimationOp.WindFieldRecord target0 = targetList.get(0);
             geo.setLocation((float)target0.lat, (float)target0.lon);
@@ -167,14 +168,14 @@ public class WindFieldEstimationLayer extends Layer {
             float y1 = pix.y;
             arrowSize = Math.sqrt((x0 - x1)*(x0 - x1) + (y0 - y1)*(y0 - y1))/2.5;
         }
-
+        */
         for(WindFieldEstimationOp.WindFieldRecord target : targetList) {
 
             geo.setLocation((float)target.lat, (float)target.lon);
             geoCoding.getPixelPos(geo, pix);
             double dx = arrowSize*target.dx;
             double dy = arrowSize*target.dy;
-
+            /*
             ipts[0] = pix.getX();
             ipts[1] = pix.getY();
             ipts[2] = ipts[0] + dx;
@@ -192,6 +193,33 @@ public class WindFieldEstimationLayer extends Layer {
             graphics.draw(new Line2D.Double(vpts[0], vpts[1], vpts[2], vpts[3]));
             graphics.draw(new Line2D.Double(vpts[4], vpts[5], vpts[2], vpts[3]));
             graphics.draw(new Line2D.Double(vpts[6], vpts[7], vpts[2], vpts[3]));
+            */
+
+            ipts[0] = pix.getX() - dx;
+            ipts[1] = pix.getY() - dy;
+            ipts[2] = pix.getX() + dx;
+            ipts[3] = pix.getY() + dy;
+
+            ipts[4] = ipts[2] - (1.732*dx - dy)/6;
+            ipts[5] = ipts[3] - (1.732*dy + dx)/6;
+            ipts[6] = ipts[2] - (1.732*dx + dy)/6;
+            ipts[7] = ipts[3] - (1.732*dy - dx)/6;
+
+            ipts[8] = ipts[0] + (1.732*dx - dy)/6;
+            ipts[9] = ipts[1] + (1.732*dy + dx)/6;
+            ipts[10] = ipts[0] + (1.732*dx + dy)/6;
+            ipts[11] = ipts[1] + (1.732*dy - dx)/6;
+
+            i2m.transform(ipts, 0, mpts, 0, 6);
+            m2v.transform(mpts, 0, vpts, 0, 6);
+
+            graphics.setColor(Color.RED);
+            graphics.draw(new Line2D.Double(vpts[0], vpts[1], vpts[2], vpts[3]));
+            graphics.draw(new Line2D.Double(vpts[4], vpts[5], vpts[2], vpts[3]));
+            graphics.draw(new Line2D.Double(vpts[6], vpts[7], vpts[2], vpts[3]));
+
+            graphics.draw(new Line2D.Double(vpts[8], vpts[9], vpts[0], vpts[1]));
+            graphics.draw(new Line2D.Double(vpts[10], vpts[11], vpts[0], vpts[1]));
         }
     }
 }
