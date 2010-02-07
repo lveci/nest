@@ -2,7 +2,6 @@
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>3C</version>
-    <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>beam/res/NEST_Splash.png</splashImage>
     <postInstallationActionList>
@@ -20,7 +19,7 @@
             <value>${installdir}</value>
         </addEnvironmentVariable>
         <changePermissions>
-            <files>*/*.sh;*/*.bin;${InstallDir}/dat.sh;${InstallDir}/gpt.sh;${InstallDir}/jre/bin/*;${InstallDir}/*.so</files>
+            <files>*/*.sh;*/*.bin;*/*.command;${InstallDir}/dat.sh;${InstallDir}/gpt.sh;${InstallDir}/jre/bin/*;${InstallDir}/*.so</files>
             <permissions>755</permissions>
         </changePermissions>
         <addDirectoryToPath>
@@ -231,6 +230,38 @@
                         <distributionDirectory>
                             <origin>../dist/jdk7/linux64/jre</origin>
                         </distributionDirectory>
+                    </distributionFileList>
+                </folder>
+                <folder>
+                    <description>Program Files</description>
+                    <destination>${installdir}</destination>
+                    <name>programfilesmacOSX</name>
+                    <platforms>osx</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <origin>target/nest-3C-bin-mac.dir/dat.command</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3C-bin-mac.dir/gpt.command</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3C-bin-mac.dir/libgluegen-rt.jnilib</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3C-bin-mac.dir/libjhdf.jnilib</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3C-bin-mac.dir/libjhdf5.jnilib</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3C-bin-mac.dir/libjogl.jnilib</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3C-bin-mac.dir/libjogl_awt.jnilib</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>target/nest-3C-bin-mac.dir/libjogl_cg.jnilib</origin>
+                        </distributionFile>
                     </distributionFileList>
                 </folder>
             </folderList>

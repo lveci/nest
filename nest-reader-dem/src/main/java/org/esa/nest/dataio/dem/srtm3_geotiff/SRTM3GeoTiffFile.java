@@ -25,6 +25,7 @@ public final class SRTM3GeoTiffFile {
     private final ProductReader productReader;
     private boolean localFileExists = false;
     private boolean remoteFileExists = true;
+    private boolean errorInLocalFile = false;
     private SRTM3GeoTiffElevationTile tile = null;
     private ftpUtils ftp = null;
     private FTPFile[] remoteFileList = null;
@@ -37,10 +38,6 @@ public final class SRTM3GeoTiffFile {
         this.demModel = model;
         this.localFile = localFile;
         this.productReader = reader;
-
-        if (localFile.exists() && localFile.isFile()) {
-            localFileExists = true;
-        }
     }
 
     public void dispose() {
@@ -69,7 +66,11 @@ public final class SRTM3GeoTiffFile {
     private synchronized void getFile() throws IOException {
         try {
             if(tile != null) return;
-
+            if(!localFileExists && !errorInLocalFile) {
+                if (localFile.exists() && localFile.isFile()) {
+                    localFileExists = true;
+                }
+            }
             if(localFileExists) {
                 final File dataFile = getFileFromZip(localFile);
                 if(dataFile != null) {
@@ -89,16 +90,19 @@ public final class SRTM3GeoTiffFile {
             }
             if(tile != null) {
                 demModel.updateCache(tile);
+                errorInLocalFile = false;
             } else {
                 if(!remoteFileExists && localFileExists) {
                     System.out.println("SRTM unable to reader product "+localFile.getAbsolutePath());
                 }
                 localFileExists = false;
+                errorInLocalFile = true;
             }
         } catch(Exception e) {
             System.out.println(e.getMessage());
             tile = null;
             localFileExists = false;
+            errorInLocalFile = true;
             if(unrecoverableError) {
                 throw new IOException(e);
             }
