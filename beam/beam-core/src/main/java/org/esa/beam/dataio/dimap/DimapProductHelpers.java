@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductHelpers.java,v 1.13 2009-12-14 21:03:50 lveci Exp $
+ * $Id: DimapProductHelpers.java,v 1.14 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -18,7 +18,35 @@ package org.esa.beam.dataio.dimap;
 
 import org.esa.beam.dataio.dimap.spi.DimapPersistable;
 import org.esa.beam.dataio.dimap.spi.DimapPersistence;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.BitmaskDef;
+import org.esa.beam.framework.datamodel.BitmaskOverlayInfo;
+import org.esa.beam.framework.datamodel.ColorPaletteDef;
+import org.esa.beam.framework.datamodel.CrsGeoCoding;
+import org.esa.beam.framework.datamodel.FXYGeoCoding;
+import org.esa.beam.framework.datamodel.FlagCoding;
+import org.esa.beam.framework.datamodel.GeoCoding;
+import org.esa.beam.framework.datamodel.ImageInfo;
+import org.esa.beam.framework.datamodel.IndexCoding;
+import org.esa.beam.framework.datamodel.MapGeoCoding;
+import org.esa.beam.framework.datamodel.Mask;
+import org.esa.beam.framework.datamodel.MetadataAttribute;
+import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.Pin;
+import org.esa.beam.framework.datamodel.PixelGeoCoding;
+import org.esa.beam.framework.datamodel.PlacemarkSymbol;
+import org.esa.beam.framework.datamodel.PointingFactory;
+import org.esa.beam.framework.datamodel.PointingFactoryRegistry;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.ProductNodeGroup;
+import org.esa.beam.framework.datamodel.ROIDefinition;
+import org.esa.beam.framework.datamodel.RasterDataNode;
+import org.esa.beam.framework.datamodel.SampleCoding;
+import org.esa.beam.framework.datamodel.Stx;
+import org.esa.beam.framework.datamodel.TiePointGeoCoding;
+import org.esa.beam.framework.datamodel.TiePointGrid;
+import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.dataop.maptransf.Ellipsoid;
 import org.esa.beam.framework.dataop.maptransf.MapInfo;
@@ -72,7 +100,7 @@ import java.util.logging.Level;
  * @author Sabine Embacher
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.13 $ $Date: 2009-12-14 21:03:50 $
+ * @version $Revision: 1.14 $ $Date: 2010-02-08 21:57:50 $
  */
 public class DimapProductHelpers {
 
@@ -700,6 +728,122 @@ public class DimapProductHelpers {
         }
         return null;
     }
+    
+    static void addPins(Document dom, Product product) {
+        Element pinGroup = dom.getRootElement().getChild(DimapProductConstants.TAG_PIN_GROUP);
+        List pinElements;
+        if (pinGroup != null) {
+            pinElements = pinGroup.getChildren(DimapProductConstants.TAG_PLACEMARK);
+        } else {
+            // get pins of old DIMAP files prior version 2.3
+            pinElements = dom.getRootElement().getChildren(DimapProductConstants.TAG_PIN);
+        }
+        for (Object pinElement : pinElements) {
+            final Element pinElem = (Element) pinElement;
+            final Pin pin = Pin.createPlacemark(pinElem, PlacemarkSymbol.createDefaultPinSymbol(), product.getGeoCoding());
+            if (pin != null) {
+                pin.updatePixelPos(product.getGeoCoding());
+                product.getPinGroup().add(pin);
+            }
+        }
+    }
+
+    static void addGcps(Document dom, Product product) {
+        final Element gcpGroupElement = dom.getRootElement().getChild(DimapProductConstants.TAG_GCP_GROUP);
+        addGCPsToGroup(gcpGroupElement, product.getGcpGroup(), product);
+
+        final List bandGCGroupElements = dom.getRootElement().getChildren(DimapProductConstants.TAG_BAND_GCP_GROUP);
+        for(Object o : bandGCGroupElements) {
+            final Element groupElem = (Element)o;
+            final Attribute bandAttrib = groupElem.getAttribute("band");
+            final Band band = product.getBand(bandAttrib.getValue());
+            addGCPsToGroup(groupElem, product.getGcpGroup(band), product);
+        }
+    }
+
+    private static void addGCPsToGroup(Element gcpGroupElement, ProductNodeGroup<Pin> group, Product product) {
+        List gcpElements;
+        if (gcpGroupElement != null) {
+            gcpElements = gcpGroupElement.getChildren(DimapProductConstants.TAG_PLACEMARK);
+        } else {
+            gcpElements = Collections.EMPTY_LIST;
+        }
+        for (Object gcpElement : gcpElements) {
+            final Element gcpElem = (Element) gcpElement;
+            final Pin gcp = Pin.createPlacemark(gcpElem, PlacemarkSymbol.createDefaultGcpSymbol(), product.getGeoCoding());
+            if (gcp != null) {
+                group.add(gcp);
+            }
+        }
+    }
+    
+    static void addMaskUsages(Document dom, Product product) {
+        final List<Element> imageDisplayElems = dom.getRootElement().getChildren(DimapProductConstants.TAG_IMAGE_DISPLAY);
+        for (Element child : imageDisplayElems) {
+            addMaskUsage(dom.getRootElement(), child, product);
+        }
+    }
+  
+    private static void addMaskUsage(Element rootElement, Element imageDisplayElem, Product product) {
+        final List<Element> maskUsages = imageDisplayElem.getChildren(DimapProductConstants.TAG_MASK_USAGE);
+
+        for (final Element usageElem : maskUsages) {
+            final Element overlayNamesElem = usageElem.getChild(DimapProductConstants.TAG_OVERLAY);
+            String[] overlayNames = null;
+            if (overlayNamesElem != null) {
+                final String overlayNamesCSV = overlayNamesElem.getAttributeValue(DimapProductConstants.ATTRIB_NAMES);
+                if (overlayNamesCSV != null && overlayNamesCSV.length() != 0) {
+                    overlayNames = StringUtils.csvToArray(overlayNamesCSV);
+                }
+            }
+            final Element roiNamesElem = usageElem.getChild(DimapProductConstants.TAG_ROI);
+            String[] roiNames = null;
+            if (roiNamesElem != null) {
+                final String roiNamesCSV = roiNamesElem.getAttributeValue(DimapProductConstants.ATTRIB_NAMES);
+                if (roiNamesCSV != null && roiNamesCSV.length() != 0) {
+                    roiNames = StringUtils.csvToArray(roiNamesCSV);
+                }
+            }
+            
+            final Element bandIndexElem = usageElem.getChild(DimapProductConstants.TAG_BAND_INDEX);
+            if (bandIndexElem != null) {
+                final String bandName = getBandName(rootElement, bandIndexElem.getTextTrim());
+                if (bandName != null) {
+                    final Band band = product.getBand(bandName);
+                    if (band != null) {
+                        ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
+                        addMasksToGroup(maskGroup, band.getOverlayMaskGroup(), overlayNames);
+                        addMasksToGroup(maskGroup, band.getRoiMaskGroup(), roiNames);
+                    }
+                }
+            }
+            final Element tpgIndexElem = usageElem.getChild(DimapProductConstants.TAG_TIE_POINT_GRID_INDEX);
+            if (tpgIndexElem != null) {
+                final String tpgName = getTiePointGridName(rootElement, tpgIndexElem.getTextTrim());
+                if (tpgName != null) {
+                    final TiePointGrid tiePointGrid = product.getTiePointGrid(tpgName);
+                    if (tiePointGrid != null) {
+                        ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
+                        addMasksToGroup(maskGroup, tiePointGrid.getOverlayMaskGroup(), overlayNames);
+                        addMasksToGroup(maskGroup, tiePointGrid.getRoiMaskGroup(), roiNames);
+                    }
+                }
+            }
+        }
+    }
+    
+    private static void addMasksToGroup(ProductNodeGroup<Mask> maskGroup, ProductNodeGroup<Mask> usageMaskGroup, String[] maskNames) {
+        if (maskNames == null) {
+            return;
+        }
+        for (String name : maskNames) {
+            Mask mask = maskGroup.get(name);
+            if (mask != null) {
+                usageMaskGroup.add(mask);
+            }
+        }
+    }
+
 
     /**
      * Creates a {@link FileFilter} for BEAM-DIMAP files.
@@ -806,8 +950,6 @@ public class DimapProductHelpers {
             addTiePointGrids(product);
             addDisplayInfosToBandsAndTiePointGrids(product);
             addAnnotationDataset(product);
-            addPins(product);
-            addGcps(product);
             addPointingFactory(product);
             return product;
         }
@@ -817,54 +959,6 @@ public class DimapProductHelpers {
             PointingFactory pointingFactory = registry.getPointingFactory(product.getProductType());
             product.setPointingFactory(pointingFactory);
 
-        }
-
-        private void addPins(Product product) {
-            Element pinGroup = getRootElement().getChild(DimapProductConstants.TAG_PIN_GROUP);
-            List pinElements;
-            if (pinGroup != null) {
-                pinElements = pinGroup.getChildren(DimapProductConstants.TAG_PLACEMARK);
-            } else {
-                // get pins of old DIMAP files prior version 2.3
-                pinElements = getRootElement().getChildren(DimapProductConstants.TAG_PIN);
-            }
-            for (Object pinElement : pinElements) {
-                final Element pinElem = (Element) pinElement;
-                final Pin pin = Pin.createPin(pinElem);
-                if (pin != null) {
-                    pin.updatePixelPos(product.getGeoCoding());
-                    product.getPinGroup().add(pin);
-                }
-            }
-        }
-
-        private void addGcps(Product product) {
-            final Element gcpGroupElement = getRootElement().getChild(DimapProductConstants.TAG_GCP_GROUP);
-            addGCPsToGroup(gcpGroupElement, product.getGcpGroup());
-
-            final List bandGCGroupElements = getRootElement().getChildren(DimapProductConstants.TAG_BAND_GCP_GROUP);
-            for(Object o : bandGCGroupElements) {
-                Element groupElem = (Element)o;
-                Attribute bandAttrib = groupElem.getAttribute("band");
-                Band band = product.getBand(bandAttrib.getValue());
-                addGCPsToGroup(groupElem, product.getGcpGroup(band));
-            }
-        }
-
-        private void addGCPsToGroup(Element gcpGroupElement, ProductNodeGroup<Pin> group) {
-            List gcpElements;
-            if (gcpGroupElement != null) {
-                gcpElements = gcpGroupElement.getChildren(DimapProductConstants.TAG_PLACEMARK);
-            } else {
-                gcpElements = Collections.EMPTY_LIST;
-            }
-            for (Object gcpElement : gcpElements) {
-                final Element gcpElem = (Element) gcpElement;
-                final Pin gcp = Pin.createGcp(gcpElem);
-                if (gcp != null) {
-                    group.add(gcp);
-                }
-            }
         }
 
         private void addAnnotationDataset(Product product) {
@@ -1000,7 +1094,6 @@ public class DimapProductHelpers {
                 addBandStatistics(imageDisplayElem, product);
                 addBitmaskOverlays(imageDisplayElem, product);
                 addRoiDefinitions(imageDisplayElem, product);
-                addMaskUsages(imageDisplayElem, product);
             }
         }
 
@@ -1055,67 +1148,6 @@ public class DimapProductHelpers {
             }
         }
         
-        private void addMaskUsages(Element imageDisplayElem, Product product) {
-            final List<Element> maskUsages = imageDisplayElem.getChildren(DimapProductConstants.TAG_MASK_USAGE);
-
-            for (final Element usageElem : maskUsages) {
-                final Element overlayNamesElem = usageElem.getChild(DimapProductConstants.TAG_OVERLAY);
-                if (overlayNamesElem == null) {
-                    continue;
-                }
-                final String overlayNamesCSV = overlayNamesElem.getAttributeValue(DimapProductConstants.ATTRIB_NAMES);
-                if (overlayNamesCSV == null || overlayNamesCSV.length() == 0) {
-                    continue;
-                }
-                final String[] overlayNames = StringUtils.csvToArray(overlayNamesCSV);
-                
-                final Element roiNamesElem = usageElem.getChild(DimapProductConstants.TAG_ROI);
-                if (roiNamesElem == null) {
-                    continue;
-                }
-                final String roiNamesCSV = roiNamesElem.getAttributeValue(DimapProductConstants.ATTRIB_NAMES);
-                if (roiNamesCSV == null || roiNamesCSV.length() == 0) {
-                    continue;
-                }
-                final String[] roiNames = StringUtils.csvToArray(roiNamesCSV);
-                
-                final Element bandIndexElem = usageElem.getChild(DimapProductConstants.TAG_BAND_INDEX);
-                if (bandIndexElem != null) {
-                    final String bandName = getBandName(getRootElement(), bandIndexElem.getTextTrim());
-                    if (bandName != null) {
-                        final Band band = product.getBand(bandName);
-                        if (band != null) {
-                            ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
-                            addMasksToGroup(maskGroup, band.getOverlayMaskGroup(), overlayNames);
-                            addMasksToGroup(maskGroup, band.getRoiMaskGroup(), roiNames);
-                        }
-                    }
-                }
-                final Element tpgIndexElem = usageElem.getChild(DimapProductConstants.TAG_TIE_POINT_GRID_INDEX);
-                if (tpgIndexElem != null) {
-                    final String tpgName = getTiePointGridName(getRootElement(), tpgIndexElem.getTextTrim());
-                    if (tpgName != null) {
-                        final TiePointGrid tiePointGrid = product.getTiePointGrid(tpgName);
-                        if (tiePointGrid != null) {
-                            ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
-                            addMasksToGroup(maskGroup, tiePointGrid.getOverlayMaskGroup(), overlayNames);
-                            addMasksToGroup(maskGroup, tiePointGrid.getRoiMaskGroup(), roiNames);
-                        }
-                    }
-                }
-            }
-        }
-        
-        private void addMasksToGroup(ProductNodeGroup<Mask> maskGroup, ProductNodeGroup<Mask> usageMaskGroup, String[] maskNames) {
-            for (String name : maskNames) {
-                Mask mask = maskGroup.get(name);
-                if (mask != null) {
-                    usageMaskGroup.add(mask);
-                }
-            }
-        }
-
-
         private void setBitmaskOverlayInfo(RasterDataNode rasterDataNode, String[] bitmaskNames) {
             final BitmaskOverlayInfo overlayInfo = new BitmaskOverlayInfo();
             if (rasterDataNode.getBitmaskOverlayInfo() != null) {
@@ -1385,7 +1417,7 @@ public class DimapProductHelpers {
             }
         }
 
-        @Deprecated
+        // needed for backward compatibility
         private void addBitmaskDefinitions(Product product) {
             final Element bitmaskDefs = getRootElement().getChild(DimapProductConstants.TAG_BITMASK_DEFINITIONS);
             List bitmaskDefList;

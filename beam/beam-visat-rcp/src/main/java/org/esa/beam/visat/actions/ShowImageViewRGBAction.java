@@ -1,5 +1,5 @@
 /*
- * $Id: ShowImageViewRGBAction.java,v 1.6 2010-01-27 21:19:48 lveci Exp $
+ * $Id: ShowImageViewRGBAction.java,v 1.7 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -39,7 +39,7 @@ import java.awt.Cursor;
  * This action opens an RGB image view on the currently selected Product.
  *
  * @author Marco Peters
- * @version $Revision: 1.6 $ $Date: 2010-01-27 21:19:48 $
+ * @version $Revision: 1.7 $ $Date: 2010-02-08 21:57:50 $
  */
 public class ShowImageViewRGBAction extends ExecCommand {
 
@@ -93,9 +93,10 @@ public class ShowImageViewRGBAction extends ExecCommand {
             protected void done() {
                 visatApp.getMainFrame().setCursor(Cursor.getDefaultCursor());
 
-                final ProductSceneImage productSceneImage;
                 try {
-                    productSceneImage = get();
+                    ProductSceneView productSceneView = new ProductSceneView(get());
+                    productSceneView.setLayerProperties(visatApp.getPreferences());
+                    openInternalFrame(productSceneView);
                 } catch (OutOfMemoryError e) {
                     visatApp.showOutOfMemoryErrorDialog("The RGB image view could not be created."); /*I18N*/
                     return;
@@ -104,10 +105,6 @@ public class ShowImageViewRGBAction extends ExecCommand {
                     return;
                 }
                 visatApp.clearStatusBarMessage();
-
-                ProductSceneView productSceneView = new ProductSceneView(productSceneImage);
-                productSceneView.setLayerProperties(visatApp.getPreferences());
-                openInternalFrame(productSceneView);
             }
         };
         visatApp.setStatusBarMessage("Creating RGB image view...");  /*I18N*/

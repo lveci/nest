@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetBuilder.java,v 1.18 2010-01-27 21:19:48 lveci Exp $
+ * $Id: ProductSubsetBuilder.java,v 1.19 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +31,7 @@ import java.util.Arrays;
  * A special-purpose product reader used to build subsets of data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.18 $ $Date: 2010-01-27 21:19:48 $
+ * @version $Revision: 1.19 $ $Date: 2010-02-08 21:57:50 $
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
@@ -493,7 +493,8 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                                                  placemark.getDescription(),
                                                  new PixelPos(x, y),
                                                  placemark.getGeoPos(),
-                                                 symbol));
+                                                 symbol,
+                                                 targetPlacemarkGroup.getProduct().getGeoCoding()));
             }
         }
     }

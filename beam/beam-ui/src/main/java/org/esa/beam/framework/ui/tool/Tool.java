@@ -1,5 +1,5 @@
 /*
- * $Id: Tool.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: Tool.java,v 1.2 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,9 +16,9 @@
  */
 package org.esa.beam.framework.ui.tool;
 
-import java.awt.Cursor;
-
 import org.esa.beam.framework.draw.Drawable;
+
+import java.awt.Cursor;
 
 /**
  * A tool is used to let a user operate on a, usually graphical, view.
@@ -29,8 +29,10 @@ import org.esa.beam.framework.draw.Drawable;
  * tools are usually mutually exclusive - only one tool can be activated at the same time.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $  $Date: 2009-04-28 14:17:18 $
+ * @version $Revision: 1.2 $  $Date: 2010-02-08 21:57:50 $
+ * @deprecated since BEAM 4.7, no replacement
  */
+@Deprecated
 public interface Tool {
 
     /**

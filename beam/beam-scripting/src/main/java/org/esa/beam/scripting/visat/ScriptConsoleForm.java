@@ -24,7 +24,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Window;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -39,7 +38,7 @@ import java.util.Map;
 public class ScriptConsoleForm {
 
     // View
-    private final Window window;
+    private final ScriptConsoleToolView toolView;
     private Map<String, Action> actionMap;
     private JTextArea inputTextArea;
     private JTextArea outputTextArea;
@@ -49,8 +48,8 @@ public class ScriptConsoleForm {
     private PrintWriter output;
     private File file;
 
-    public ScriptConsoleForm(Window window) {
-        this.window = window;
+    public ScriptConsoleForm(ScriptConsoleToolView toolView) {
+        this.toolView = toolView;
         this.actionMap = new HashMap<String, Action>();
 
         registerAction(new NewAction(this));
@@ -124,10 +123,6 @@ public class ScriptConsoleForm {
         actionMap.put(action.getValue(Action.ACTION_COMMAND_KEY).toString(), action);
     }
 
-    public Window getWindow() {
-        return window;
-    }
-
     public JPanel getContentPanel() {
         return contentPanel;
     }
@@ -155,11 +150,12 @@ public class ScriptConsoleForm {
     }
 
     public void stopScript() {
-        // todo?
+        scriptManager.reset();
+        getAction(StopAction.ID).setEnabled(false);
     }
 
     public void showErrorMessage(String message) {
-        JOptionPane.showMessageDialog(window,
+        JOptionPane.showMessageDialog(toolView.getContext().getPage().getWindow(),
                                       message, "Script Console - Error",
                                       JOptionPane.ERROR_MESSAGE);
     }
@@ -216,18 +212,18 @@ public class ScriptConsoleForm {
                 return;
             }
 
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             try {
                 LineNumberReader reader = new LineNumberReader(new FileReader(file));
                 try {
                     String line;
                     while ((line = reader.readLine()) != null) {
                         sb.append(line);
+                        sb.append("\n");
                     }
                 } finally {
                     reader.close();
                 }
-                setFile(file);
             } catch (IOException e) {
                 showErrorMessage(MessageFormat.format("I/O error:\n{0}", e.getMessage()));
                 return;
@@ -235,6 +231,7 @@ public class ScriptConsoleForm {
 
             inputTextArea.setText(sb.toString());
             scriptManager.setEngine(scriptEngine);
+            setFile(file);
         } finally {
             enableRun(true);
         }
@@ -246,7 +243,22 @@ public class ScriptConsoleForm {
 
     private void setFile(File file) {
         this.file = file;
-        // todo - set title
+        updateTitle();
+    }
+
+    private void updateTitle() {
+
+        ScriptEngine scriptEngine = scriptManager.getEngine();
+        if (scriptEngine != null) {
+            String languageName = scriptEngine.getFactory().getLanguageName();
+            if (file != null) {
+                toolView.setTitle(MessageFormat.format("{0} - [{1}] - [{2}]", toolView.getTitleBase(), languageName, file));
+            } else {
+                toolView.setTitle(MessageFormat.format("{0} - [{1}] - [unnamed]", toolView.getTitleBase(), languageName));
+            }
+        } else {
+            toolView.setTitle(toolView.getTitleBase());
+        }
     }
 
     public void saveScriptAs(File file) {

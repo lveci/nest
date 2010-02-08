@@ -1,5 +1,5 @@
 /*
- * $Id: VisatMain.java,v 1.3 2009-11-04 17:04:32 lveci Exp $
+ * $Id: VisatMain.java,v 1.4 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -26,6 +26,7 @@ import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.application.ApplicationDescriptor;
 import org.esa.beam.util.Debug;
+import org.esa.beam.util.SystemUtils;
 import org.esa.beam.visat.actions.session.OpenSessionAction;
 import org.esa.beam.BeamUiActivator;
 
@@ -47,7 +48,7 @@ import java.util.Locale;
  * <i>file</i></code> sets the logfile for VISAT to <i>file</i> </ld>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.4 $ $Date: 2010-02-08 21:57:50 $
  */
 public class VisatMain implements RuntimeRunnable {
     /**
@@ -115,8 +116,8 @@ public class VisatMain implements RuntimeRunnable {
                 }
             });
         }
-        JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
-
+        SystemUtils.initThirdPartyLibraries();
+        
         final VisatApp app = createApplication(applicationDescriptor);
         app.startUp(progressMonitor);
         openSession(app, sessionFile);

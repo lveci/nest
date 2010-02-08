@@ -8,9 +8,9 @@ import Jama.SingularValueDecomposition;
  * function.
  *
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2010-02-08 21:57:50 $
  */
-class RationalFunctionModel implements Cloneable {
+public class RationalFunctionModel implements Cloneable {
 
     private final int maxDegree;
     private final int termCount;

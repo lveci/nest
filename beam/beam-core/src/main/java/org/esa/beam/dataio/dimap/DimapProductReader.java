@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductReader.java,v 1.11 2009-12-23 16:42:11 lveci Exp $
+ * $Id: DimapProductReader.java,v 1.12 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,11 +32,13 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.framework.datamodel.VectorDataNode;
 import org.esa.beam.framework.datamodel.VirtualBand;
+import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 import org.jdom.Document;
 import org.jdom.input.DOMBuilder;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
@@ -58,7 +60,7 @@ import java.util.Map;
  *
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.11 $ $Date: 2009-12-23 16:42:11 $
+ * @version $Revision: 1.12 $ $Date: 2010-02-08 21:57:50 $
  * @see org.esa.beam.dataio.dimap.DimapProductReaderPlugIn
  */
 public class DimapProductReader extends AbstractProductReader {
@@ -142,7 +144,10 @@ public class DimapProductReader extends AbstractProductReader {
         bindBandsToFiles(dom);
         if (product == null) {
             initGeoCodings(dom);
+            DimapProductHelpers.addPins(dom, this.product);
+            DimapProductHelpers.addGcps(dom, this.product);
             readVectorData();
+            DimapProductHelpers.addMaskUsages(dom, this.product);
         }
         this.product.setProductReader(this);
         this.product.setFileLocation(inputFile);
@@ -375,9 +380,10 @@ public class DimapProductReader extends AbstractProductReader {
                     return name.endsWith(VectorDataNodeIO.FILENAME_EXTENSION);
                 }
             });
+            CoordinateReferenceSystem modelCrs = ImageManager.getModelCrs(product.getGeoCoding());
             for (File vectorFile : vectorFiles) {
                 try {
-                    VectorDataNodeReader nodeReader = new VectorDataNodeReader();
+                    VectorDataNodeReader nodeReader = new VectorDataNodeReader(modelCrs);
                     VectorDataNode vectorDataNode = nodeReader.read(vectorFile);
                     product.getVectorDataGroup().add(vectorDataNode);
                 } catch (IOException e) {

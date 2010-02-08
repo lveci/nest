@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetDialog.java,v 1.4 2010-01-07 16:40:00 lveci Exp $
+ * $Id: ProductSubsetDialog.java,v 1.5 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -41,6 +41,7 @@ import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.SliderBoxImageDisplay;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.glevel.BandImageMultiLevelSource;
+import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.BeamConstants;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
@@ -69,6 +70,7 @@ import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -509,15 +511,13 @@ public class ProductSubsetDialog extends ModalDialog {
         private void createUI() {
 
             setThumbnailSubsampling();
-            final Dimension imgSize = new Dimension((product.getSceneRasterWidth() - 1) / thumbNailSubSampling + 1,
-                                                    (product.getSceneRasterHeight() - 1) / thumbNailSubSampling + 1);
-
+            final Dimension imageSize = getScaledImageSize();
             thumbnailLoader = new ProgressMonitorSwingWorker<BufferedImage, Object>(this,
                                                                                     "Loading thumbnail image...") {
 
                 @Override
                 protected BufferedImage doInBackground(ProgressMonitor pm) throws Exception {
-                    return createThumbNailImage(imgSize, pm);
+                    return createThumbNailImage(imageSize, pm);
                 }
 
                 @Override
@@ -539,9 +539,8 @@ public class ProductSubsetDialog extends ModalDialog {
 
             };
             thumbnailLoader.execute();
-
-            imageCanvas = new SliderBoxImageDisplay(imgSize.width, imgSize.height, this);
-            imageCanvas.setSize(imgSize.width, imgSize.height);
+            imageCanvas = new SliderBoxImageDisplay(imageSize.width, imageSize.height, this);
+            imageCanvas.setSize(imageSize.width, imageSize.height);
             setComponentName(imageCanvas, "ImageCanvas");
 
 
@@ -949,7 +948,24 @@ public class ProductSubsetDialog extends ModalDialog {
             int sliderBoxY2 = y2 / thumbNailSubSampling;
             int sliderBoxW = sliderBoxX2 - sliderBoxX1 + 1;
             int sliderBoxH = sliderBoxY2 - sliderBoxY1 + 1;
-            imageCanvas.setSliderBoxBounds(sliderBoxX1, sliderBoxY1, sliderBoxW, sliderBoxH);
+            Rectangle box = getScaledRectangle(new Rectangle(sliderBoxX1, sliderBoxY1, sliderBoxW, sliderBoxH));
+            imageCanvas.setSliderBoxBounds(box);
+        }
+
+        private Dimension getScaledImageSize() {
+            final int w = (product.getSceneRasterWidth() - 1) / thumbNailSubSampling + 1;
+            final int h = (product.getSceneRasterHeight() - 1) / thumbNailSubSampling + 1;
+            final Rectangle rectangle = new Rectangle(w, h);
+            return getScaledRectangle(rectangle).getSize();
+        }
+
+        private Rectangle getScaledRectangle(Rectangle rectangle) {
+            final AffineTransform i2mTransform = ImageManager.getImageToModelTransform(product.getGeoCoding());
+            final double scaleX = i2mTransform.getScaleX();
+            final double scaleY = i2mTransform.getScaleY();
+            double scaleFactorY = Math.abs(scaleY / scaleX);
+            final AffineTransform scaleTransform = AffineTransform.getScaleInstance(1.0, scaleFactorY);
+            return scaleTransform.createTransformedShape(rectangle).getBounds();
         }
 
         private BufferedImage createThumbNailImage(Dimension imgSize, ProgressMonitor pm) {

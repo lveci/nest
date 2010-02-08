@@ -1,5 +1,5 @@
 /*
- * $Id: Figure.java,v 1.2 2009-05-11 16:17:36 lveci Exp $
+ * $Id: Figure.java,v 1.3 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -34,10 +34,12 @@ import java.util.Map;
  * <p>A default implementation for the Figure interface are provided by the <code>AbstractFigure</code> class.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $  $Date: 2009-05-11 16:17:36 $
+ * @version $Revision: 1.3 $  $Date: 2010-02-08 21:57:50 $
  * @see FigureHandle
  * @see AbstractFigure
+ * @deprecated since BEAM 4.7, no replacement
  */
+@Deprecated
 public interface Figure extends Drawable, Cloneable, Serializable {
 
     /**

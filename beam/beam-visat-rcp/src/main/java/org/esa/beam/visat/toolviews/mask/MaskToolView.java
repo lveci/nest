@@ -1,5 +1,5 @@
 /*
- * $Id: MaskToolView.java,v 1.7 2010-01-05 15:56:48 lveci Exp $
+ * $Id: MaskToolView.java,v 1.8 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -24,6 +24,7 @@ import org.esa.beam.framework.datamodel.ProductNodeEvent;
 import org.esa.beam.framework.datamodel.ProductNodeListener;
 import org.esa.beam.framework.datamodel.ProductNodeListenerAdapter;
 import org.esa.beam.framework.datamodel.RasterDataNode;
+import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.framework.datamodel.VectorDataNode;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.application.support.AbstractToolView;
@@ -196,6 +197,12 @@ public abstract class MaskToolView extends AbstractToolView {
         @Override
         public void bandSelected(Band band, int clickCount) {
             maskForm.reconfigureMaskTable(band.getProduct(), band);
+            setSceneView(null);
+        }
+        
+        @Override
+        public void tiePointGridSelected(TiePointGrid tiePointGrid, int clickCount) {
+            maskForm.reconfigureMaskTable(tiePointGrid.getProduct(), tiePointGrid);
             setSceneView(null);
         }
     }

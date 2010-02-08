@@ -1,5 +1,5 @@
 /*
- * $Id: TabSeparatedPinPixelsWriter.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: TabSeparatedPinPixelsWriter.java,v 1.2 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -29,8 +29,8 @@ import java.awt.Point;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * The TabSeperatedPixelsWriter can be used to write pixel values to an output data stream.
@@ -59,13 +59,13 @@ class TabSeparatedPinPixelsWriter {
     /**
      * Writes the pixel values an annotation data into the output stream.
      */
-    boolean writePinPixels(final int size, final String expression, final HashMap pixelMap, ProgressMonitor pm) throws
+    boolean writePinPixels(final int size, final String expression, final Map<Pin, Object[]> pixelMap, ProgressMonitor pm) throws
                                                                                                                 IOException {
         boolean success = true;
         Point[] pixels;
         Boolean[] pixelRelevanceInformation = null;
         writeAnnotationData(size, expression);
-        Iterator iterator = pixelMap.keySet().iterator();
+        Iterator<Pin> iterator = pixelMap.keySet().iterator();
 
         pm.beginTask("Writing pixel data...", pixelMap.size());
         try {
@@ -75,7 +75,7 @@ class TabSeparatedPinPixelsWriter {
                     success = false;
                     break;
                 }
-                Pin keyPin = (Pin) iterator.next();
+                Pin keyPin = iterator.next();
                 Object pixelDataObject = pixelMap.get(keyPin);
                 if (pixelDataObject != null && pixelDataObject instanceof Point[]) {
                     pixels = (Point[]) pixelDataObject;
@@ -219,12 +219,16 @@ class TabSeparatedPinPixelsWriter {
         }
         for (int i = 0; i < bands.length; i++) {
             final Band band = bands[i];
-            if (band.isFloatingPointType()) {
-                band.readPixels(pixel.x, pixel.y, 1, 1, floatPixel, ProgressMonitor.NULL);
-                out.print(floatPixel[0]);
+            if (band.isPixelValid(pixel.x, pixel.y)) {
+                if (band.isFloatingPointType()) {
+                    band.readPixels(pixel.x, pixel.y, 1, 1, floatPixel, ProgressMonitor.NULL);
+                    out.print(floatPixel[0]);
+                } else {
+                    band.readPixels(pixel.x, pixel.y, 1, 1, intPixel, ProgressMonitor.NULL);
+                    out.print(intPixel[0]);
+                }
             } else {
-                band.readPixels(pixel.x, pixel.y, 1, 1, intPixel, ProgressMonitor.NULL);
-                out.print(intPixel[0]);
+                out.print("NaN");
             }
             if (i < bands.length - 1) {
                 out.print("\t");

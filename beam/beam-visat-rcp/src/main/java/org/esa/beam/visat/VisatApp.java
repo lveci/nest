@@ -1,5 +1,5 @@
 /*
- * $Id: VisatApp.java,v 1.23 2010-01-25 15:12:15 lveci Exp $
+ * $Id: VisatApp.java,v 1.24 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -147,7 +147,7 @@ import java.util.logging.Level;
  * @author Norman Fomferra
  * @author Marco Peters
  * @author Sabine Embacher
- * @version $Revision: 1.23 $ $Date: 2010-01-25 15:12:15 $
+ * @version $Revision: 1.24 $ $Date: 2010-02-08 21:57:50 $
  */
 public class VisatApp extends BasicApp implements AppContext {
 
@@ -566,6 +566,9 @@ public class VisatApp extends BasicApp implements AppContext {
         return applicationPage;
     }
 
+    /**
+     * @deprecated since BEAM 4.7 use {@link #getApplicationPage()} instead.
+     */
     @Deprecated
     public final ApplicationPage getPage() {
         return applicationPage;
@@ -2276,7 +2279,12 @@ public class VisatApp extends BasicApp implements AppContext {
         } else {
             frame.setSize(640, 480);
         }
-        desktopPane.addFrame(frame);
+        try {
+            desktopPane.addFrame(frame);
+        } catch (RuntimeException e) {
+            frame.dispose();
+            throw e;
+        }
         try {
             // try to resize frame so that it completely fits into desktopPane
             frame.setMaximum(true);

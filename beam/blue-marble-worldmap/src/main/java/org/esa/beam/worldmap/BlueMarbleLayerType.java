@@ -18,7 +18,7 @@ import java.net.URL;
 
 /**
  * @author Marco Peters
- * @version $Revision: 1.5 $ $Date: 2009-12-11 20:46:14 $
+ * @version $Revision: 1.6 $ $Date: 2010-02-08 21:57:50 $
  * @since BEAM 4.6
  */
 public class BlueMarbleLayerType extends ImageLayer.Type {
@@ -60,11 +60,6 @@ public class BlueMarbleLayerType extends ImageLayer.Type {
         return layer;
     }
 
-    @Override
-    public PropertySet createLayerConfig(LayerContext ctx) {
-        return new PropertyContainer();
-    }
-
     private static MultiLevelSource createMultiLevelSource() {
         String dirPath = System.getProperty(WORLD_IMAGE_DIR_PROPERTY_NAME);
         if (dirPath == null || dirPath.isEmpty()) {
@@ -75,7 +70,7 @@ public class BlueMarbleLayerType extends ImageLayer.Type {
         }
         final MultiLevelSource multiLevelSource;
         try {
-            multiLevelSource = TiledFileMultiLevelSource.create(new File(dirPath), false);
+            multiLevelSource = TiledFileMultiLevelSource.create(new File(dirPath));
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

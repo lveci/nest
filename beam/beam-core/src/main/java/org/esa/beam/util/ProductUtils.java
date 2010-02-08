@@ -1,5 +1,5 @@
 /*
- * $Id: ProductUtils.java,v 1.14 2010-02-01 16:05:43 junlu Exp $
+ * $Id: ProductUtils.java,v 1.15 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -1223,7 +1223,9 @@ public class ProductUtils {
             FlagCoding coding;
 
             copyFlagCodings(sourceProduct, targetProduct);
-            copyBitmaskDefs(sourceProduct, targetProduct);
+            copyMasks(sourceProduct, targetProduct);
+            copyOverlayMasks(sourceProduct, targetProduct);
+
 
 // loop over bands and check if they have a flags coding attached
             for (int i = 0; i < sourceProduct.getNumBands(); i++) {

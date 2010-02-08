@@ -1,5 +1,5 @@
 /*
- * $Id: ShowImageViewAction.java,v 1.8 2009-12-21 16:13:40 lveci Exp $
+ * $Id: ShowImageViewAction.java,v 1.9 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -48,7 +48,7 @@ import java.util.ArrayList;
  * This action opens an image view of the currently selected raster.
  *
  * @author Marco Peters
- * @version $Revision: 1.8 $ $Date: 2009-12-21 16:13:40 $
+ * @version $Revision: 1.9 $ $Date: 2010-02-08 21:57:50 $
  */
 public class ShowImageViewAction extends ExecCommand {
 
@@ -105,19 +105,14 @@ public class ShowImageViewAction extends ExecCommand {
                 UIUtils.setRootFrameDefaultCursor(visatApp.getMainFrame());
                 visatApp.clearStatusBarMessage();
 
-                final ProductSceneImage productSceneImage;
                 try {
-                    productSceneImage = get();
+                    ProductSceneView view = new ProductSceneView(get());
+                    openInternalFrame(view);
                 } catch (OutOfMemoryError ignored) {
                     visatApp.showOutOfMemoryErrorDialog("The image view could not be created.");
-                    return;
                 } catch (Exception e) {
                     visatApp.handleUnknownException(e);
-                    return;
                 }
-
-                ProductSceneView view = new ProductSceneView(productSceneImage);
-                openInternalFrame(view);
             }
         };
         visatApp.getExecutorService().submit(worker);

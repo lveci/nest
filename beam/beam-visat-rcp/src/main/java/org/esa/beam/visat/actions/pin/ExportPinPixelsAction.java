@@ -1,5 +1,5 @@
 /*
- * $Id: ExportPinPixelsAction.java,v 1.2 2009-12-23 16:42:11 lveci Exp $
+ * $Id: ExportPinPixelsAction.java,v 1.3 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -21,13 +21,15 @@ import com.bc.ceres.swing.progress.DialogProgressMonitor;
 import com.bc.jexp.ParseException;
 import org.esa.beam.framework.datamodel.Pin;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductNodeEvent;
 import org.esa.beam.framework.datamodel.ProductNodeGroup;
+import org.esa.beam.framework.datamodel.ProductNodeListener;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.SelectExportMethodDialog;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
-import org.esa.beam.framework.ui.product.ProductSceneView;
+import org.esa.beam.framework.ui.product.ProductTreeListenerAdapter;
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.visat.VisatApp;
@@ -44,46 +46,92 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * This action exports pins and thier surrounding pixels.
+ * This action exports pins and their surrounding pixels.
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2009-12-23 16:42:11 $
+ * @version $Revision: 1.3 $ $Date: 2010-02-08 21:57:50 $
  */
 public class ExportPinPixelsAction extends ExecCommand {
+
+    private class PTL extends ProductTreeListenerAdapter{
+
+        @Override
+        public void productRemoved(final Product product) {
+            if (selectedProduct == product) {
+                selectedProduct.removeProductNodeListener(pnl);
+                selectedProduct = null;
+            }
+        }
+    }
+    
+    private class PNL implements ProductNodeListener {
+
+        @Override
+        public void nodeAdded(ProductNodeEvent event) {
+            checkEnabledState();
+        }
+
+        @Override
+        public void nodeChanged(ProductNodeEvent event) {
+            checkEnabledState();
+        }
+
+        @Override
+        public void nodeDataChanged(ProductNodeEvent event) {
+            checkEnabledState();
+        }
+
+        @Override
+        public void nodeRemoved(ProductNodeEvent event) {
+            checkEnabledState();
+        }
+    }
+    
 
     private static final String ERR_MSG_BASE = "Pin pixels cannot be exported:\n";
     private static final String COMMAND_NAME = "Export Pin Pixels";
 
     private ExportPinPixelsDialog dialog;
-    private Product product;
+    private Product selectedProduct;
+    private AtomicBoolean initialized = new AtomicBoolean();
+    private ProductNodeListener pnl;
 
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void actionPerformed(final CommandEvent event) {
-        exportPinPixels();
+        exportPinPixels(getSelectedProduct());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void updateState(final CommandEvent event) {
-        boolean enabled = false;
+        if (initialized.compareAndSet(false, true)) {
+            pnl = new PNL();
+            VisatApp.getApp().getProductTree().addProductTreeListener(new PTL());
+        }
+        
         final Product product = getSelectedProduct();
-        if (product != null) {
-            enabled = product.getPinGroup().getNodeCount() > 0;
+        if (selectedProduct != product) {
+            if (selectedProduct != null) {
+                selectedProduct.removeProductNodeListener(pnl);
+            }
+            selectedProduct = product;
+            if (selectedProduct != null) {
+                selectedProduct.addProductNodeListener(pnl);
+            }
+        }
+        checkEnabledState();
+    }
+    
+    private void checkEnabledState() {
+        boolean enabled = false;
+        if (selectedProduct != null) {
+            enabled = selectedProduct.getPinGroup().getNodeCount() > 0;
         }
         setEnabled(enabled);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void updateComponentTreeUI() {
         if (dialog != null) {
@@ -94,13 +142,12 @@ public class ExportPinPixelsAction extends ExecCommand {
 
     /**
      * Performs the "Export Pin Pixels" command.
+     * @param product 
      */
-    private void exportPinPixels() {
-        product = getSelectedProduct();
-
+    private void exportPinPixels(Product product) {
         VisatApp visatApp = VisatApp.getApp();
         if (dialog == null) {
-            dialog = new ExportPinPixelsDialog(visatApp, product);
+            dialog = new ExportPinPixelsDialog(visatApp);
         }
 
         // shows a dialog which lets the user specify the region he wants to export.
@@ -111,7 +158,7 @@ public class ExportPinPixelsAction extends ExecCommand {
             return;
         }
 
-        final HashMap pinPixels = assignControllParameters();
+        final Map<Pin, Object[]> pinPixels = assignControllParameters(product);
         if (getNumPixelsToExport(pinPixels) == 0) {
             visatApp.showErrorDialog("There are no pixels to export."); /* I18N */
             return;
@@ -143,7 +190,7 @@ public class ExportPinPixelsAction extends ExecCommand {
     /**
      * Gets a target Writer for the export data.
      */
-    private Writer getOutputWriter(final HashMap pinPixels, final Product product) {
+    private Writer getOutputWriter(final Map<Pin, Object[]> pinPixels, final Product product) {
         // Get export method from user
         final int method = getExportMethod(getNumPixelsToExport(pinPixels));
         VisatApp visatApp = VisatApp.getApp();
@@ -211,8 +258,9 @@ public class ExportPinPixelsAction extends ExecCommand {
     /**
      * Creates the export Data. Can be <code>null</code> if an error occures while reading the
      * product data or user input.
+     * @param product 
      */
-    private HashMap assignControllParameters() {
+    private Map<Pin, Object[]> assignControllParameters(Product product) {
 
         final Pin[] exportPins;
         if (dialog.isExportSelectedPinsOnly()) {
@@ -231,10 +279,8 @@ public class ExportPinPixelsAction extends ExecCommand {
             useExpressionAsFilter = dialog.isUseExpressionAsFilter();
         }
 
-        HashMap exportData = null;
-
         try {
-            exportData = generateOutputData(regionSize, expression, exportPins, useExpressionAsFilter);
+            return generateOutputData(regionSize, expression, exportPins, useExpressionAsFilter, product);
         } catch (IOException e) {
             VisatApp.getApp().showErrorDialog("An I/O error occured:\n" + e.getMessage()); /* I18N */
             return null;
@@ -243,11 +289,9 @@ public class ExportPinPixelsAction extends ExecCommand {
                     "Please check the expression you have entered.\nIt is not valid."); /* I18N */
             return null;
         }
-
-        return exportData;
     }
 
-    private SwingWorker createWorkerInstance(final HashMap regions, final TabSeparatedPinPixelsWriter regionWriter,
+    private SwingWorker createWorkerInstance(final Map<Pin, Object[]> regions, final TabSeparatedPinPixelsWriter regionWriter,
                                              final Writer out, final ProgressMonitor pm) {
         // Create a progress monitor and adds them to the progress controller pool in order to show
         // export progress
@@ -315,11 +359,7 @@ public class ExportPinPixelsAction extends ExecCommand {
      * Returns the product the user has selected in beam. Can be <code>null</code>.
      */
     private static Product getSelectedProduct() {
-        final ProductSceneView view = VisatApp.getApp().getSelectedProductSceneView();
-        if (view != null) {
-            return view.getProduct();
-        }
-        return null;
+        return VisatApp.getApp().getSelectedProduct();
     }
 
     /**
@@ -331,15 +371,16 @@ public class ExportPinPixelsAction extends ExecCommand {
      * @param expression            an arithmetic expression for classifying pixel relevance
      * @param pins                  the pins defining the center of the pixels regions
      * @param useExpressionAsFilter toggle between filter pixels or mark relevance in an additional column
+     * @param product               the product that contains these pins
      *
-     * @return a hashmap providing the pixel coordinates
+     * @return a map providing the pixel coordinates
      *
      * @throws java.io.IOException
      * @throws com.bc.jexp.ParseException
      */
-    private HashMap generateOutputData(final int size, final String expression, final Pin[] pins,
-                                       final boolean useExpressionAsFilter) throws IOException, ParseException {
-        HashMap<Pin, Object[]> outputData = new HashMap<Pin, Object[]>();
+    private Map<Pin, Object[]> generateOutputData(final int size, final String expression, final Pin[] pins,
+                                       final boolean useExpressionAsFilter, final Product product) throws IOException, ParseException {
+        Map<Pin, Object[]> outputData = new HashMap<Pin, Object[]>();
         for (int i = 0; i < pins.length; i++) {
             Point actualPin = new Point((int) pins[i].getPixelPos().x, (int) pins[i].getPixelPos().y);
             PinPixelsGenerator pinPixels = new PinPixelsGenerator(product);
@@ -363,18 +404,14 @@ public class ExportPinPixelsAction extends ExecCommand {
      *
      * @return the number of pixels stored in the hashMap
      */
-    private static int getNumPixelsToExport(final HashMap pinPixels) {
+    private static int getNumPixelsToExport(final Map<Pin, Object[]> pinPixels) {
         int numPixels = 0;
-        for (Object o : pinPixels.entrySet()) {
-            Map.Entry entry = (Map.Entry) o;
-            Object pixelDataObject = entry.getValue();
-            if (pixelDataObject != null && pixelDataObject instanceof Point[]) {
-                Point[] pixels = (Point[]) entry.getValue();
-                if (pixels != null) {
-                    numPixels += pixels.length;
-                }
-            } else if (pixelDataObject != null) {
-                Object[] pixelData = (Object[]) entry.getValue();
+        for (Map.Entry<Pin, Object[]> entry: pinPixels.entrySet()) {
+            Object[] pixelData = entry.getValue();
+            if (pixelData != null && pixelData instanceof Point[]) {
+                Point[] pixels = (Point[]) pixelData;
+                numPixels += pixels.length;
+            } else if (pixelData != null) {
                 Point[] pixels = (Point[]) pixelData[0];
                 if (pixels != null) {
                     numPixels += pixels.length;

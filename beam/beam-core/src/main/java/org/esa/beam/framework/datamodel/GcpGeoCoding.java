@@ -4,14 +4,15 @@ import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 
 import java.awt.geom.Point2D;
-import static java.lang.Math.*;
 import java.util.Arrays;
+
+import static java.lang.Math.*;
 
 /**
  * Ground control point (GCP) geo-coding.
  *
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2010-02-08 21:57:50 $
  */
 public class GcpGeoCoding extends AbstractGeoCoding {
 
@@ -332,7 +333,7 @@ public class GcpGeoCoding extends AbstractGeoCoding {
         private final RationalFunctionModel um;
         private final RationalFunctionModel vm;
 
-        public RationalFunctionMap2D(int degreeP, int degreeQ, double[] x, double[] y, double[] u, double[] v) {
+        RationalFunctionMap2D(int degreeP, int degreeQ, double[] x, double[] y, double[] u, double[] v) {
             um = new RationalFunctionModel(degreeP, degreeQ, x, y, u);
             vm = new RationalFunctionModel(degreeP, degreeQ, x, y, v);
         }
@@ -359,7 +360,7 @@ public class GcpGeoCoding extends AbstractGeoCoding {
      * Class representing the approximation methods used for the GCP geo-coding.
      *
      * @author Ralf Quast
-     * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+     * @version $Revision: 1.2 $ $Date: 2010-02-08 21:57:50 $
      */
     public enum Method {
 

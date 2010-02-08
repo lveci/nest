@@ -17,7 +17,7 @@ import java.lang.ref.WeakReference;
  * resets itsself whenever the referred vector data have changed.
  *
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-12-11 20:46:13 $
+ * @version $Revision: 1.2 $ $Date: 2010-02-08 21:57:50 $
  * @since BEAM 4.7
  */
 class VectorDataMultiLevelImage extends DefaultMultiLevelImage implements ProductNodeListener {
@@ -58,12 +58,18 @@ class VectorDataMultiLevelImage extends DefaultMultiLevelImage implements Produc
         super(multiLevelSource);
 
         this.vectorDataReference = new WeakReference<VectorDataNode>(vectorDataNode);
-        this.vectorDataReference.get().getProduct().addProductNodeListener(this);
+        vectorDataNode.getProduct().addProductNodeListener(this);
     }
 
     @Override
     public void dispose() {
-        vectorDataReference.get().getProduct().removeProductNodeListener(this);
+        VectorDataNode vectorDataNode = vectorDataReference.get();
+        if (vectorDataNode != null) {
+            Product product = vectorDataNode.getProduct();
+            if (product != null) {
+                product.removeProductNodeListener(this);
+            }
+        }
         vectorDataReference.clear();
         super.dispose();
     }

@@ -1,5 +1,5 @@
 /*
- * $Id: Pin.java,v 1.6 2009-12-23 16:42:11 lveci Exp $
+ * $Id: Pin.java,v 1.7 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -53,7 +53,7 @@ import java.util.List;
  * be imported and exported.
  *
  * @author Sabine Embacher
- * @version $Revision: 1.6 $ $Date: 2009-12-23 16:42:11 $
+ * @version $Revision: 1.7 $ $Date: 2010-02-08 21:57:50 $
  */
 public class Pin extends ProductNode {
 
@@ -70,7 +70,6 @@ public class Pin extends ProductNode {
      * Returns the type of features underlying all pins.
      *
      * @return the type of features underlying all pins.
-     *
      * @since BEAM 4.7
      */
     public static SimpleFeatureType getFeatureType() {
@@ -83,7 +82,6 @@ public class Pin extends ProductNode {
      * @param name     the pin's name.
      * @param label    the pin's label.
      * @param pixelPos the pin's pixel position.
-     *
      * @deprecated since 4.1, use {@link Pin#Pin(String, String, String, PixelPos, GeoPos, PlacemarkSymbol)}
      */
     @Deprecated
@@ -97,7 +95,6 @@ public class Pin extends ProductNode {
      * @param name   the pin's name.
      * @param label  the pin's label.
      * @param geoPos the pin's geo-position.
-     *
      * @deprecated since 4.1, use {@link Pin#Pin(String, String, String, PixelPos, GeoPos, PlacemarkSymbol)}
      */
     @Deprecated
@@ -114,7 +111,6 @@ public class Pin extends ProductNode {
      * @param pixelPos    the pin's pixel position
      * @param geoPos      the pin's geo-position.
      * @param symbol      the pin's symbol.
-     *
      * @deprecated since 4.7, use {@link Pin#Pin(String, String, String, PixelPos, GeoPos, PlacemarkSymbol, GeoCoding)}
      */
     @Deprecated
@@ -123,6 +119,17 @@ public class Pin extends ProductNode {
         this(name, label, description, pixelPos, geoPos, symbol, null);
     }
 
+    /**
+     * Creates a new pin.
+     *
+     * @param name        the pin's name.
+     * @param label       the pin's label.
+     * @param description the pin's description
+     * @param pixelPos    the pin's pixel position
+     * @param geoPos      the pin's geo-position.
+     * @param symbol      the pin's symbol.
+     * @param geoCoding   the pin's geo-coding.
+     */
     public Pin(String name, String label, String description, PixelPos pixelPos, GeoPos geoPos,
                PlacemarkSymbol symbol, GeoCoding geoCoding) {
         super(name, description);
@@ -146,7 +153,6 @@ public class Pin extends ProductNode {
      * Returns the {@link SimpleFeature}, underlying this pin.
      *
      * @return the {@link SimpleFeature} underlying this pin.
-     *
      * @since BEAM 4.7
      */
     public final SimpleFeature getFeature() {
@@ -181,7 +187,6 @@ public class Pin extends ProductNode {
      * Returns an estimated, raw storage size in bytes of this pin.
      *
      * @param subsetDef if not {@code null} the subset may limit the size returned.
-     *
      * @return the estimated size in bytes.
      */
     @Override
@@ -303,14 +308,32 @@ public class Pin extends ProductNode {
         writer.println(colorTags[1]);
     }
 
-    // todo - move this methods away from here
-
+    /**
+     * Creates a new GCP from an XML element.
+     *
+     * @param element the element.
+     * @return the GCP created.
+     * @throws NullPointerException     if element is null
+     * @throws IllegalArgumentException if element is invalid
+     * @deprecated since BEAM 4.7, use {@link #createPlacemark(Element, PlacemarkSymbol, GeoCoding)} instead
+     */
+    @Deprecated
     public static Pin createGcp(Element element) {
-        return createPlacemark(element, PlacemarkSymbol.createDefaultGcpSymbol());
+        return createPlacemark(element, PlacemarkSymbol.createDefaultGcpSymbol(), null);
     }
 
+    /**
+     * Creates a new pin from an XML element.
+     *
+     * @param element the element.
+     * @return the pin created.
+     * @throws NullPointerException     if element is null
+     * @throws IllegalArgumentException if element is invalid
+     * @deprecated since BEAM 4.7, use {@link #createPlacemark(org.jdom.Element, PlacemarkSymbol, GeoCoding)} instead
+     */
+    @Deprecated
     public static Pin createPin(Element element) {
-        return createPlacemark(element, PlacemarkSymbol.createDefaultPinSymbol());
+        return createPlacemark(element, PlacemarkSymbol.createDefaultPinSymbol(), null);
     }
 
     /**
@@ -318,15 +341,30 @@ public class Pin extends ProductNode {
      *
      * @param element the element.
      * @param symbol  the symbol.
+     * @return the pin created.
+     * @throws NullPointerException     if element is null
+     * @throws IllegalArgumentException if element is invalid
+     * @deprecated since BEAM 4.7, use {@link #createPlacemark(Element, PlacemarkSymbol, GeoCoding)} instead
+     */
+    @Deprecated
+    public static Pin createPlacemark(Element element, PlacemarkSymbol symbol) {
+        return createPlacemark(element, symbol, null);
+    }
+    /**
+     * Creates a new pin from an XML element and a given symbol.
+     *
+     * @param element the element.
+     * @param symbol  the symbol.
+     * @param geoCoding the geoCoding to used by the placemark. Can be <code>null</code>.
      *
      * @return the pin created.
      *
      * @throws NullPointerException     if element is null
      * @throws IllegalArgumentException if element is invalid
      */
-    public static Pin createPlacemark(Element element, PlacemarkSymbol symbol) {
+    public static Pin createPlacemark(Element element, PlacemarkSymbol symbol, GeoCoding geoCoding) {
         if (!DimapProductConstants.TAG_PLACEMARK.equals(element.getName()) &&
-            !DimapProductConstants.TAG_PIN.equals(element.getName())) {
+                !DimapProductConstants.TAG_PIN.equals(element.getName())) {
             throw new IllegalArgumentException(MessageFormat.format("Element ''{0}'' or ''{1}'' expected.",
                                                                     DimapProductConstants.TAG_PLACEMARK,
                                                                     DimapProductConstants.TAG_PIN));
@@ -382,7 +420,7 @@ public class Pin extends ProductNode {
             symbol.setOutlineColor(outlineColor);
         }
 
-        return new Pin(name, label, description, pixelPos, geoPos, symbol);
+        return new Pin(name, label, description, pixelPos, geoPos, symbol, geoCoding);
     }
 
     // todo - move this method into a new DimapPersistable
@@ -550,7 +588,7 @@ public class Pin extends ProductNode {
         if (imagePos == null && geoCoding != null && geoCoding.canGetPixelPos()) {
             imagePos = geoCoding.getPixelPos(geoPos, imagePos);
         }
-        if(imagePos == null) {
+        if (imagePos == null) {
             imagePos = new PixelPos();
             imagePos.setInvalid();
         }

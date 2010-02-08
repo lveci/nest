@@ -1,5 +1,5 @@
 /*
- * $Id: LineFigure.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: LineFigure.java,v 1.2 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -21,7 +21,10 @@ import java.util.Map;
 
 /**
  * A shape figure that represents a one-dimensional line.
+ *
+ * @deprecated since BEAM 4.7, no replacement
  */
+@Deprecated
 public class LineFigure extends ShapeFigure {
 
     public LineFigure(Shape shape, Map<String, Object> attributes) {

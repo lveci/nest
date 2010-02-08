@@ -44,12 +44,16 @@ public class ImageLayer extends Layer {
     public static final String PROPERTY_NAME_BORDER_SHOWN = "borderShown";
     public static final String PROPERTY_NAME_BORDER_WIDTH = "borderWidth";
     public static final String PROPERTY_NAME_BORDER_COLOR = "borderColor";
-    // tdod - remove
-    public static final String PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM = "imageToModelTransform";
 
     public static final boolean DEFAULT_BORDER_SHOWN = false;
     public static final double DEFAULT_BORDER_WIDTH = 1.0;
     public static final Color DEFAULT_BORDER_COLOR = new Color(204, 204, 255);
+
+    /**
+     * @deprecated since BEAM 4.7, no replacement; kept for compatibility of sessions
+     */
+    @Deprecated
+    private static final String PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM = "imageToModelTransform";
 
     private MultiLevelSource multiLevelSource;
 
@@ -264,8 +268,6 @@ public class ImageLayer extends Layer {
 
     private static PropertySet initConfiguration(PropertySet configuration, MultiLevelSource multiLevelSource) {
         configuration.setValue(PROPERTY_NAME_MULTI_LEVEL_SOURCE, multiLevelSource);
-        final AffineTransform imageToModelTransform = multiLevelSource.getModel().getImageToModelTransform(0);
-        configuration.setValue(PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM, imageToModelTransform);
         return configuration;
     }
 
@@ -298,11 +300,15 @@ public class ImageLayer extends Layer {
         }
 
         private static Property addImageToModelTransformModel(PropertyContainer configuration) {
-            if (configuration.getProperty(PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM) == null) {
-                configuration.addProperty(Property.create(PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM, AffineTransform.class));
+            Property property = configuration.getProperty(PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM);
+            if (property == null) {
+                 property = Property.create(PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM, AffineTransform.class);
+                configuration.addProperty(property);
             }
-            return configuration.getProperty(PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM);
-        }
+            property.getDescriptor().setTransient(true);
+            return property;
+         }
+
 
         private static Property addMultiLevelSourceModel(PropertyContainer configuration) {
             if (configuration.getProperty(PROPERTY_NAME_MULTI_LEVEL_SOURCE) == null) {

@@ -19,8 +19,10 @@ import org.esa.beam.framework.gpf.graph.Node;
 import org.esa.beam.framework.gpf.graph.NodeSource;
 import org.esa.beam.framework.gpf.operators.common.ReadOp;
 import org.esa.beam.framework.gpf.operators.common.WriteOp;
+import org.esa.beam.util.SystemUtils;
 
 import javax.media.jai.JAI;
+import javax.media.jai.TileCache;
 
 import java.io.File;
 import java.io.IOException;
@@ -86,9 +88,9 @@ class CommandLineTool {
     }
 
     private void run(CommandLineArgs lineArgs) throws ValidationException, ConversionException, IOException, GraphException {
-        JAI jaiInstance = JAI.getDefaultInstance();
-        jaiInstance.getTileCache().setMemoryCapacity(lineArgs.getTileCacheCapacity());
-        jaiInstance.getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
+        TileCache tileCache = JAI.getDefaultInstance().getTileCache();
+        tileCache.setMemoryCapacity(lineArgs.getTileCacheCapacity());
+        SystemUtils.initThirdPartyLibraries();
         
         if (lineArgs.getOperatorName() != null) {
             Map<String, Object> parameters = getParameterMap(lineArgs);

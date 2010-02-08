@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractTool.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: AbstractTool.java,v 1.2 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,21 +16,22 @@
  */
 package org.esa.beam.framework.ui.tool;
 
+import org.esa.beam.framework.draw.Drawable;
+
+import javax.swing.event.EventListenerList;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
-import javax.swing.event.EventListenerList;
-
-import org.esa.beam.framework.draw.Drawable;
-
 /**
  * An abstract implementation of the tool interface.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $  $Date: 2009-04-28 14:17:18 $
+ * @version $Revision: 1.2 $  $Date: 2010-02-08 21:57:50 $
+ * @deprecated since BEAM 4.7, no replacement
  */
+@Deprecated
 public abstract class AbstractTool implements Tool, Drawable {
 
     private boolean _active;

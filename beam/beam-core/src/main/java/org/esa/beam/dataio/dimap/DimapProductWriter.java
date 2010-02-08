@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductWriter.java,v 1.8 2009-12-23 16:42:11 lveci Exp $
+ * $Id: DimapProductWriter.java,v 1.9 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -50,7 +50,7 @@ import java.util.Map;
  * The product writer for BEAM DIMAP products.
  *
  * @author Sabine Embacher
- * @version $Revision: 1.8 $ $Date: 2009-12-23 16:42:11 $
+ * @version $Revision: 1.9 $ $Date: 2010-02-08 21:57:50 $
  */
 public class DimapProductWriter extends AbstractProductWriter {
 
@@ -494,16 +494,15 @@ public class DimapProductWriter extends AbstractProductWriter {
                 break;
             }
         }
-        if (hasVectorData) {
-            File vectorDataDir = new File(_dataOutputDir, "vector_data");
-            if (vectorDataDir.exists()) {
-                File[] files = vectorDataDir.listFiles();
-                for (File file : files) {
-                    file.delete();
-                }
-            } else {
-                vectorDataDir.mkdirs();
+        File vectorDataDir = new File(_dataOutputDir, "vector_data");
+        if (vectorDataDir.exists()) {
+            File[] files = vectorDataDir.listFiles();
+            for (File file : files) {
+                file.delete();
             }
+        } 
+        if (hasVectorData) {
+            vectorDataDir.mkdirs();
             for (int i = 0; i < vectorDataGroup.getNodeCount(); i++) {
                 VectorDataNode vectorDataNode = vectorDataGroup.get(i);
                 if (!product.isInternalNode(vectorDataNode)) {

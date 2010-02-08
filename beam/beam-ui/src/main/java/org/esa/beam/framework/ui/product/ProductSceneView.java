@@ -109,6 +109,7 @@ public class ProductSceneView extends BasicView
     /**
      * @deprecated since BEAM 4.7
      */
+    @Deprecated
     public static final String BITMASK_LAYER_ID = "org.esa.beam.layers.bitmask";
     /**
      * @deprecated since BEAM 4.7
@@ -649,9 +650,11 @@ public class ProductSceneView extends BasicView
             final Layer selLayer = getSelectedLayer();
             if (selLayer instanceof VectorDataLayer) {
                 final VectorDataLayer vectorLayer = (VectorDataLayer) selLayer;
-                final String typeName = vectorLayer.getVectorDataNode().getFeatureType().getTypeName();
-                if (Product.GEOMETRY_FEATURE_TYPE_NAME.equals(typeName)) {
-                    layer = vectorLayer;
+                if (vectorLayer.getVectorDataNode() != null) {
+                    final String typeName = vectorLayer.getVectorDataNode().getFeatureType().getTypeName();
+                    if (Product.GEOMETRY_FEATURE_TYPE_NAME.equals(typeName)) {
+                        layer = vectorLayer;
+                    }
                 }
             }
 
@@ -710,6 +713,10 @@ public class ProductSceneView extends BasicView
         final ImageLayer imageLayer = getBaseImageLayer();
         if (imageLayer != null) {
             ProductSceneImage.setBaseImageLayerStyle(configuration, imageLayer);
+        }
+        final Layer noDataLayer = getNoDataLayer(false);
+        if (noDataLayer != null) {
+            ProductSceneImage.setNoDataLayerStyle(configuration, noDataLayer);
         }
         final Layer collectionLayer = getVectorDataCollectionLayer(false);
         if (collectionLayer != null) {

@@ -1,5 +1,5 @@
 /*
- * $Id: GeoTiffProductReader.java,v 1.7 2010-01-26 18:59:57 lveci Exp $
+ * $Id: GeoTiffProductReader.java,v 1.8 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -500,7 +500,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
             final String name = gcpDescriptor.getRoleName() + "_" + i;
             final String label = gcpDescriptor.getRoleLabel() + "_" + i;
-            final Pin gcp = new Pin(name, label, "", pixelPos, geoPos, symbol);
+            final Pin gcp = new Pin(name, label, "", pixelPos, geoPos, symbol, product.getGeoCoding());
             gcpGroup.add(gcp);
         }
 

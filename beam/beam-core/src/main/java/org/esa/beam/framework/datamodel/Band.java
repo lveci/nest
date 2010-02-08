@@ -1,5 +1,5 @@
 /*
- * $Id: Band.java,v 1.3 2009-05-28 14:17:58 lveci Exp $
+ * $Id: Band.java,v 1.4 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -58,7 +58,7 @@ import java.util.Random;
  * and <code>writePixel</code> perform the inverse operations in this case.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-05-28 14:17:58 $
+ * @version $Revision: 1.4 $ $Date: 2010-02-08 21:57:50 $
  * @see ProductData
  * @see #getPixels
  * @see #setPixels
@@ -282,7 +282,7 @@ public class Band extends AbstractBand {
 
     @Override
     protected RenderedImage createSourceImage() {
-        final MultiLevelModel model = ImageManager.getInstance().getMultiLevelModel(this);
+        final MultiLevelModel model = ImageManager.getMultiLevelModel(this);
 
         if (hasRasterData()) {
             // This code is for backward compatibility only

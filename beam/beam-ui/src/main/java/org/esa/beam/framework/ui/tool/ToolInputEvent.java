@@ -1,5 +1,5 @@
 /*
- * $Id: ToolInputEvent.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: ToolInputEvent.java,v 1.2 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -28,8 +28,10 @@ import java.util.EventObject;
  * keyboard.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $  $Date: 2009-04-28 14:17:18 $
+ * @version $Revision: 1.2 $  $Date: 2010-02-08 21:57:50 $
+ * @deprecated since BEAM 4.7, no replacement
  */
+@Deprecated
 public class ToolInputEvent extends EventObject {
 
     private static final long serialVersionUID = 2919123041717315375L;
