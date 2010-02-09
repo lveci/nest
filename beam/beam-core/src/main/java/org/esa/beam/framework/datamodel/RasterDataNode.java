@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataNode.java,v 1.14 2010-02-08 21:57:50 lveci Exp $
+ * $Id: RasterDataNode.java,v 1.15 2010-02-08 22:13:38 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -674,7 +674,11 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
     }
 
 
-    protected void resetValidMask() {
+    /**
+     * Resets the valid mask of this raster.
+     * The mask will be lazily regenerated when requested the next time.
+     */
+    public void resetValidMask() {
         validMaskROI = null;
         validMaskImage = null;
         stx = null;
