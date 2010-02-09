@@ -56,7 +56,7 @@ import java.util.List;
  *
  * @author Ralf Quast
  * @author Norman Fomferra
- * @version $Revision: 1.13 $ $Date: 2009-12-11 20:46:14 $
+ * @version $Revision: 1.14 $ $Date: 2010-02-09 14:10:28 $
  * @since BEAM 4.6
  */
 @XStreamAlias("session")
@@ -546,7 +546,7 @@ public class Session {
         final LayerRef[] children;
 
         public LayerRef(Layer layer, int zOrder, DomElement configuration, LayerRef[] children) {
-            this.layerTypeName = layer.getLayerType().getClass().getName();
+            this.layerTypeName = layer.getLayerType().getName();
             this.id = layer.getId();
             this.name = layer.getName();
             this.visible = layer.isVisible();

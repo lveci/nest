@@ -5,6 +5,7 @@ import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
+import com.bc.ceres.glayer.support.AbstractLayerListener;
 import com.bc.ceres.glayer.support.ImageLayer;
 import com.bc.ceres.glevel.MultiLevelSource;
 import org.esa.beam.framework.datamodel.RasterDataNode;
@@ -12,6 +13,7 @@ import org.esa.beam.glevel.MaskImageMultiLevelSource;
 
 import java.awt.Color;
 import java.awt.geom.AffineTransform;
+import java.beans.PropertyChangeEvent;
 
 /**
  * A layer used to display the no-data mask of a raster data node.
@@ -27,6 +29,19 @@ public class NoDataLayerType extends ImageLayer.Type {
     public static final String PROPERTY_NAME_RASTER = "raster";
     public static final Color DEFAULT_COLOR = Color.ORANGE;
 
+    private static final String TYPE_NAME = "NoDataLayerType";
+    private static final String[] ALIASES = {"org.esa.beam.glayer.NoDataLayerType"};
+
+    @Override
+    public String getName() {
+        return TYPE_NAME;
+    }
+    
+    @Override
+    public String[] getAliases() {
+        return ALIASES;
+    }
+    
     @Override
     public Layer createLayer(LayerContext ctx, PropertySet configuration) {
         final Color color = (Color) configuration.getValue(PROPERTY_NAME_COLOR);
@@ -47,8 +62,15 @@ public class NoDataLayerType extends ImageLayer.Type {
             configuration.setValue(ImageLayer.PROPERTY_NAME_MULTI_LEVEL_SOURCE, multiLevelSource);
         }
 
-        final ImageLayer noDataLayer;
-        noDataLayer = new ImageLayer(this, multiLevelSource, configuration);
+        final ImageLayer noDataLayer = new ImageLayer(this, multiLevelSource, configuration);
+        noDataLayer.addListener(new AbstractLayerListener() {
+            @Override
+            public void handleLayerPropertyChanged(Layer layer, PropertyChangeEvent event) {
+                if(event.getPropertyName().equals(PROPERTY_NAME_COLOR)) {
+                  noDataLayer.regenerate();
+                }
+            }
+        });
         noDataLayer.setName("No-Data Layer");
         noDataLayer.setId(NO_DATA_LAYER_ID);
         noDataLayer.setVisible(false);

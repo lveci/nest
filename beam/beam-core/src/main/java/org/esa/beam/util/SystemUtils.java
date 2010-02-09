@@ -1,5 +1,5 @@
 /*
- * $Id: SystemUtils.java,v 1.4 2010-02-08 21:57:50 lveci Exp $
+ * $Id: SystemUtils.java,v 1.5 2010-02-09 14:10:28 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -49,7 +49,7 @@ import java.util.StringTokenizer;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.4 $ $Date: 2010-02-08 21:57:50 $
+ * @version $Revision: 1.5 $ $Date: 2010-02-09 14:10:28 $
  */
 public class SystemUtils {
 
@@ -526,7 +526,6 @@ public class SystemUtils {
      * Initialize third party libraries of BEAM
       */
     public static void initThirdPartyLibraries() {
-        System.setProperty("com.sun.media.jai.disableMediaLib", "true"); 
         JAI.getDefaultInstance().getTileScheduler().setParallelism(Runtime.getRuntime().availableProcessors());
         File epsgDir = new File(SystemUtils.getApplicationDataDir(true), EPSG_DATABASE_DIR_NAME);
         System.setProperty(HsqlEpsgDatabase.DIRECTORY_KEY, epsgDir.getAbsolutePath());

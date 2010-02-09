@@ -1,5 +1,4 @@
 /*
- * $Id: OperatorExecutor.java,v 1.7 2010-02-08 21:57:50 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -269,7 +268,7 @@ public class OperatorExecutor {
         @Override
         public boolean errorOccurred(String message, Throwable thrown, Object where, boolean isRetryable)
                                                                                                          throws RuntimeException {
-            if (error == null) {
+            if (error == null && !thrown.getClass().getSimpleName().equals("MediaLibLoadException")) {
                 error = new OperatorException(thrown);
             }
             return false;

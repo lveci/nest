@@ -1,5 +1,5 @@
 /*
- * $Id: OperatorSpiRegistryImpl.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
+ * $Id: OperatorSpiRegistryImpl.java,v 1.3 2010-02-09 14:10:28 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -36,8 +36,8 @@ import java.util.Set;
  */
 public class OperatorSpiRegistryImpl implements OperatorSpiRegistry {
 
-    private ServiceRegistry<OperatorSpi> serviceRegistry;
-    private Map<String, String> aliases;
+    private final ServiceRegistry<OperatorSpi> serviceRegistry;
+    private final Map<String, String> aliases;
 
     /**
      * The provate singleton constructor.
