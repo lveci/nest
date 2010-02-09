@@ -584,8 +584,8 @@ public class WarpOp extends Operator {
 
     /**
      * Output co-registration information to file.
-     * @param sourceProduct
-     * @param warpPolynomialOrder
+     * @param sourceProduct The source product.
+     * @param warpPolynomialOrder The order of Warp polinomial.
      * @param warpData Stores the warp information per band.
      * @param appendFlag Boolean flag indicating if the information is output to file in appending mode.
      * @param threshold The threshold for elinimating GCPs.
@@ -594,8 +594,8 @@ public class WarpOp extends Operator {
      * @throws OperatorException The exceptions.
      */
     private static void outputCoRegistrationInfo(final Product sourceProduct, final int warpPolynomialOrder,
-                                                final WarpData warpData, final boolean appendFlag,
-                                                final float threshold, final int parseIndex, final String bandName)
+                                                 final WarpData warpData, final boolean appendFlag,
+                                                 final float threshold, final int parseIndex, final String bandName)
             throws OperatorException {
 
         final float[] xCoeffs = warpData.warp.getXCoeffs();
@@ -618,11 +618,9 @@ public class WarpOp extends Operator {
                 p.println();
             }
 
-            p.println("Band: "+bandName);
             p.println();
-            p.print("------------------------------------------------ Parse " + parseIndex +
-                    " ------------------------------------------------");
-            p.println();
+            p.print("------------------------ Band: " + bandName + " (Parse " + parseIndex + ") ------------------------");
+            p.println();                                              
 
             p.println();
             p.println("WARP coefficients:");
@@ -664,21 +662,24 @@ public class WarpOp extends Operator {
             }
 
             p.println();
-            p.format("Row residual mean = %8.3f", warpData.rowResidualMean);
+            p.print("Row residual mean = " + warpData.rowResidualMean);
             p.println();
-            p.format("Row residual std = %8.3f", warpData.rowResidualStd);
-            p.println();
-
-            p.println();
-            p.format("Col residual mean = %8.3f", warpData.colResidualMean);
-            p.println();
-            p.format("Col residual std = %8.3f", warpData.colResidualStd);
+            p.print("Row residual std = " + warpData.rowResidualStd);
             p.println();
 
             p.println();
-            p.format("RMS mean = %8.3f", warpData.rmsMean);
+            p.print("Col residual mean = " + warpData.colResidualMean);
             p.println();
-            p.format("RMS std = %8.3f", warpData.rmsStd);
+            p.print("Col residual std = " + warpData.colResidualStd);
+            p.println();
+
+            p.println();
+            p.print("RMS mean = " + warpData.rmsMean);
+            p.println();
+            p.print("RMS std = " + warpData.rmsStd);
+            p.println();
+            p.println();
+            p.println();
 
         } catch(IOException exc) {
             throw new OperatorException(exc);
