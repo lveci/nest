@@ -78,7 +78,7 @@ public final class DatApp extends VisatApp {
         JAI.setDefaultTileSize(new Dimension(tileSize, tileSize));
 
 
-        prefetchClasses();
+        //prefetchClasses();
     }
 
     private static void prefetchClasses() {
