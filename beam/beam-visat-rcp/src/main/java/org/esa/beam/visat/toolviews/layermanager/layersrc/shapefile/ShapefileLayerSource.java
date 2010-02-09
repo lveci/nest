@@ -1,5 +1,5 @@
 /*
- * $Id: ShapefileLayerSource.java,v 1.4 2009-12-22 17:30:01 lveci Exp $
+ * $Id: ShapefileLayerSource.java,v 1.5 2010-02-09 18:03:39 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,9 +16,9 @@
  */
 package org.esa.beam.visat.toolviews.layermanager.layersrc.shapefile;
 
+import org.esa.beam.framework.ui.layer.AbstractLayerSourceAssistantPage;
 import org.esa.beam.framework.ui.layer.LayerSource;
 import org.esa.beam.framework.ui.layer.LayerSourcePageContext;
-import org.esa.beam.framework.ui.layer.AbstractLayerSourceAssistantPage;
 
 /**
  * A layer source for ESRI shape files.
@@ -26,19 +26,20 @@ import org.esa.beam.framework.ui.layer.AbstractLayerSourceAssistantPage;
  * Unstable API. Use at own risk.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.4 $ $Date: 2009-12-22 17:30:01 $
+ * @version $Revision: 1.5 $ $Date: 2010-02-09 18:03:39 $
  * @since BEAM 4.6
  */
 public class ShapefileLayerSource implements LayerSource {
 
     static final String PROPERTY_NAME_FILE_PATH = "fileName";
     static final String PROPERTY_NAME_FEATURE_COLLECTION = "featureCollection";
+    static final String PROPERTY_NAME_FEATURE_COLLECTION_CRS = "featureCollectionCrs";
     static final String PROPERTY_NAME_STYLES = "styles";
     static final String PROPERTY_NAME_SELECTED_STYLE = "selectedStyle";
 
     @Override
     public boolean isApplicable(LayerSourcePageContext pageContext) {
-        return true;
+        return pageContext.getAppContext().getSelectedProduct().getGeoCoding() == null;
     }
 
     @Override

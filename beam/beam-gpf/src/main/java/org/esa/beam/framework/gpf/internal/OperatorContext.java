@@ -1,5 +1,5 @@
 /*
- * $Id: OperatorContext.java,v 1.10 2010-01-14 17:22:47 lveci Exp $
+ * $Id: OperatorContext.java,v 1.11 2010-02-09 18:03:39 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -519,6 +519,9 @@ public class OperatorContext {
         }
         targetImageMap = new HashMap<Band, OperatorImage>(targetBands.length * 2);
         for (final Band targetBand : targetBands) {
+            if (!isRegularBand(targetBand)) {
+                continue;
+            }
             final OperatorImage image;
             if (operatorMustComputeTileStack()) {
                 image = new OperatorImageTileStack(targetBand, this, locks);
@@ -535,7 +538,7 @@ public class OperatorContext {
             // by using the band's source images. Otherwise the WriteOp.computeTile()
             // method would never be called.
             //
-            if (isRegularBand(targetBand) && !targetBand.isSourceImageSet()) {
+            if (!targetBand.isSourceImageSet()) {
                 targetBand.setSourceImage(image);
             }
         }
