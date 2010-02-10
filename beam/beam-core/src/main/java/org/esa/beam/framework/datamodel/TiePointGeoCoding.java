@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGeoCoding.java,v 1.9 2010-02-01 16:04:16 junlu Exp $
+ * $Id: TiePointGeoCoding.java,v 1.10 2010-02-10 16:43:43 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -260,7 +260,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
 
     public PixelPos getAccuratePixelPos(GeoPos geoPos, PixelPos pixelPos) {
 
-        PixelPos approximatedPixelPos = new PixelPos();
+        final PixelPos approximatedPixelPos = new PixelPos();
         getPixelPos(geoPos, approximatedPixelPos);
         pixelPos.x = approximatedPixelPos.x;
         pixelPos.y = approximatedPixelPos.y;
@@ -285,12 +285,18 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         final double lon21 = _lonGrid.getPixelFloat(x1, y2);
         final double lon22 = _lonGrid.getPixelFloat(x2, y2);
 
-        final double a0 = x2*y2*lat11 - x2*y1*lat21 - x1*y2*lat12 + x1*y1*lat22 - (x2 - x1)*(y2 - y1)*lat;
+        final double x2y2 = x2*y2;
+        final double x2y1 = x2*y1;
+        final double x1y2 = x1*y2;
+        final double x1y1 = x1*y1;
+        final double dxdy = (x2 - x1)*(y2 - y1);
+
+        final double a0 = x2y2*lat11 - x2y1*lat21 - x1y2*lat12 + x1y1*lat22 - dxdy*lat;
         final double a1 = -x2*lat11 + x2*lat21 + x1*lat12 - x1*lat22;
         final double a2 = -y2*lat11 + y1*lat21 + y2*lat12 - y1*lat22;
         final double a3 = lat11 - lat21 - lat12 + lat22;
 
-        final double b0 = x2*y2*lon11 - x2*y1*lon21 - x1*y2*lon12 + x1*y1*lon22 - (x2 - x1)*(y2 - y1)*lon;
+        final double b0 = x2y2*lon11 - x2y1*lon21 - x1y2*lon12 + x1y1*lon22 - dxdy*lon;
         final double b1 = -x2*lon11 + x2*lon21 + x1*lon12 - x1*lon22;
         final double b2 = -y2*lon11 + y1*lon21 + y2*lon12 - y1*lon22;
         final double b3 = lon11 - lon21 - lon12 + lon22;
@@ -299,7 +305,8 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         final double c1 = a3*b0 + a2*b1 - a1*b2 - a0*b3;
         final double c2 = a3*b1 - a1*b3;
 
-        double y = (-c1 - Math.sqrt(c1*c1 - 4*c2*c0))/(2*c2); // root 2
+        final double r = Math.sqrt(c1*c1 - 4*c2*c0);
+        double y = (-c1 - r)/(2*c2); // root 2
         double x = (-a1*y - a0)/(a3*y + a2);
         int yPos = (int)(y + 0.5);
         int xPos = (int)(x + 0.5);
@@ -309,7 +316,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
             return pixelPos;
         }
 
-        y = (-c1 + Math.sqrt(c1*c1 - 4*c2*c0))/(2*c2); // root 1
+        y = (-c1 + r)/(2*c2); // root 1
         x = (-a1*y - a0)/(a3*y + a2);
         yPos = (int)y;
         xPos = (int)x;
