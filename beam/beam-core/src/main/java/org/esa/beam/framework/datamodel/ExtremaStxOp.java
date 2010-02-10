@@ -10,7 +10,7 @@ import java.awt.Rectangle;
 *
 * @author Norman Fomferra
 * @author Marco Peters
-* @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+* @version $Revision: 1.2 $ $Date: 2010-02-10 15:21:58 $
 * @since BEAM 4.5.1
 */
 class ExtremaStxOp implements StxOp {
@@ -56,7 +56,7 @@ class ExtremaStxOp implements StxOp {
         return Math.sqrt(m4 - m2*m2) / m2;
     }
 
-    public double getEquivilantNumberOfLooks() {
+    public double getEquivalentNumberOfLooks() {
         final double m4 = power4Sum / numValues;
         final double m2 = sqrSum / numValues;
         final double m2m2 = m2*m2;

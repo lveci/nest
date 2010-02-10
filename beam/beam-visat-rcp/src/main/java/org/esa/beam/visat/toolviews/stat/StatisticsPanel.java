@@ -224,8 +224,8 @@ class StatisticsPanel extends TextPagePanel implements MultipleRoiComputePanel.C
         sb.append("\n");
 
         if (maskUsed) {
-            sb.append("Equivilant Number of Looks:\t");
-            sb.append(stat.getEquivilantNumberOfLooks());
+            sb.append("Equivalent Number of Looks:\t");
+            sb.append(stat.getEquivalentNumberOfLooks());
             sb.append("\t ");
             sb.append("looks");
             sb.append("\n");

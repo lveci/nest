@@ -174,7 +174,7 @@ public class Stx {
         return coefficientOfVariation;
     }
 
-    public double getEquivilantNumberOfLooks() {
+    public double getEquivalentNumberOfLooks() {
         return enl;
     }
 
@@ -241,7 +241,7 @@ public class Stx {
             double mean = extremaOp.getMean();
             long numValues = extremaOp.getNumValues();
             double coeffOfVariation = extremaOp.getCoefficientOfVariation();
-            double enl = extremaOp.getEquivilantNumberOfLooks();
+            double enl = extremaOp.getEquivalentNumberOfLooks();
 
             if (min == Double.MAX_VALUE && max == -Double.MAX_VALUE) {
                 final Histogram histogram = createHistogram(1, 0, 1);
