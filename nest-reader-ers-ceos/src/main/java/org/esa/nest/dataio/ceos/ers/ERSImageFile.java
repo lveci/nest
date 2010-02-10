@@ -12,7 +12,7 @@ import java.io.IOException;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.18 $ $Date: 2009-02-09 21:02:59 $
+ * @version $Revision: 1.19 $ $Date: 2010-02-10 15:08:32 $
  */
 class ERSImageFile extends CEOSImageFile {
 
@@ -25,11 +25,15 @@ class ERSImageFile extends CEOSImageFile {
         _imageFDR = new BaseRecord(binaryReader, -1, mission, image_DefinitionFile);
         binaryReader.seek(_imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()));
         _imageRecords = new ImageRecord[_imageFDR.getAttributeInt("Number of lines per data set")];
-        _imageRecords[0] = new ImageRecord(binaryReader, -1, mission, image_recordDefinition);
+        _imageRecords[0] = createNewImageRecord(0);
 
         _imageRecordLength = _imageRecords[0].getRecordLength();
         _startPosImageRecords = _imageRecords[0].getStartPos();
         _imageHeaderLength = 12;
     }
 
+    protected ImageRecord createNewImageRecord(final int line) throws IOException, IllegalBinaryFormatException {
+        final long pos = _imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()) + (line*_imageRecordLength);
+        return new ImageRecord(binaryReader, pos, mission, image_recordDefinition);
+    }
 }

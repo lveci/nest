@@ -4,8 +4,10 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.nest.dataio.BinaryFileReader;
+import org.esa.nest.dataio.IllegalBinaryFormatException;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.dataio.ceos.records.ImageRecord;
+import org.esa.nest.util.Constants;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,7 +17,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.26 $ $Date: 2010-01-04 14:23:42 $
+ * @version $Revision: 1.27 $ $Date: 2010-02-10 15:08:32 $
  */
 public abstract class CEOSImageFile {
 
@@ -46,10 +48,76 @@ public abstract class CEOSImageFile {
         return _imageFDR.getAttributeInt("Number of bits per sample");
     }
 
+    protected abstract ImageRecord createNewImageRecord(final int line) throws IOException, IllegalBinaryFormatException;
+
+    ImageRecord getImageRecord(int line) throws IOException, IllegalBinaryFormatException {
+        if(_imageRecords[line] == null) {
+
+            binaryReader.seek(_imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()));
+            _imageRecords[line] = createNewImageRecord(line);
+        }
+        return _imageRecords[line];
+    }
+
+    public int getSlantRangeToFirstPixel(int line) {
+        try {
+            final ImageRecord imgRec = getImageRecord(line);
+            return imgRec.getAttributeInt("Slant range to 1st pixel");
+        } catch(Exception e) {
+            return 0;
+        }
+    }
+
+    public int getSlantRangeToMidPixel(int line) {
+        try {
+            final ImageRecord imgRec = getImageRecord(line);
+            return imgRec.getAttributeInt("Slant range to mid-pixel");
+        } catch(Exception e) {
+            return 0;
+        }
+    }
+
+    public int getSlantRangeToLastPixel(int line) {
+        try {
+            final ImageRecord imgRec = getImageRecord(line);
+            return imgRec.getAttributeInt("Slant range to last pixel");
+        } catch(Exception e) {
+            return 0;
+        }
+    }
+
+    public float[] getLatCorners() throws IOException, IllegalBinaryFormatException {
+        final ImageRecord imgRec0 = getImageRecord(0);
+        final ImageRecord imgRecN = getImageRecord(_imageRecords.length-1);
+
+        final float latUL = imgRec0.getAttributeInt("First pixel latitude") / (float)Constants.oneMillion;
+        final float latUR = imgRec0.getAttributeInt("Last pixel latitude") / (float)Constants.oneMillion;
+        final float latLL = imgRecN.getAttributeInt("First pixel latitude") / (float)Constants.oneMillion;
+        final float latLR = imgRecN.getAttributeInt("Last pixel latitude") / (float)Constants.oneMillion;
+        return new float[]{latUL, latUR, latLL, latLR};
+    }
+
+    public float[] getLonCorners() throws IOException, IllegalBinaryFormatException {
+        final ImageRecord imgRec0 = getImageRecord(0);
+        final ImageRecord imgRecN = getImageRecord(_imageRecords.length-1);
+
+        final float lonUL = imgRec0.getAttributeInt("First pixel longitude") / (float)Constants.oneMillion;
+        final float lonUR = imgRec0.getAttributeInt("Last pixel longitude") / (float)Constants.oneMillion;
+        final float lonLL = imgRecN.getAttributeInt("First pixel longitude") / (float)Constants.oneMillion;
+        final float lonLR = imgRecN.getAttributeInt("Last pixel longitude") / (float)Constants.oneMillion;
+        return new float[]{lonUL, lonUR, lonLL, lonLR};
+    }
+
     public void assignMetadataTo(MetadataElement rootElem, int count) {
         final MetadataElement imgDescElem = new MetadataElement("Image Descriptor " + count);
         _imageFDR.assignMetadataTo(imgDescElem);
         rootElem.addElement(imgDescElem);
+
+        if(_imageRecords[0] != null) {
+            final MetadataElement imgRecElem = new MetadataElement("Image Record ");
+            _imageRecords[0].assignMetadataTo(imgRecElem);
+            imgDescElem.addElement(imgRecElem);
+        }
     }
 
     public static String[] getImageFileNames(File baseDir, String prefix) {

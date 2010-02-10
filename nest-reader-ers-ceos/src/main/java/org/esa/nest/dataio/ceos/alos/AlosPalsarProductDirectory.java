@@ -14,6 +14,7 @@ import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
+import org.esa.nest.gpf.OperatorUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -119,10 +120,6 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
     private void addTiePointGrids(final Product product) throws IllegalBinaryFormatException, IOException {
 
-        // slant range time (2-way)
-        final BaseRecord sceneRec = _leaderFile.getSceneRecord();
-        final double samplingRate = sceneRec.getAttributeDouble("Range sampling rate") * 1000000.0;  // MHz to Hz
-
         final int gridWidth = 11;
         final int gridHeight = 11;
         final int sceneWidth = product.getSceneRasterWidth();
@@ -132,7 +129,12 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         final float[] rangeDist = new float[gridWidth*gridHeight];
         final float[] rangeTime = new float[gridWidth*gridHeight];
 
+        final BaseRecord sceneRec = _leaderFile.getSceneRecord();
+
+        // slant range time (2-way)
         if(_leaderFile.getProductLevel() == AlosPalsarConstants.LEVEL1_1) {
+
+            final double samplingRate = sceneRec.getAttributeDouble("Range sampling rate") * 1000000.0;  // MHz to Hz
 
             final double tmp = subSamplingX * Constants.halfLightSpeed / samplingRate;
             int k = 0;
@@ -168,8 +170,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
              rangeTime[k] = (float)(rangeDist[k] / Constants.halfLightSpeed * 1000000000.0); // in ns
         }
 
-        final TiePointGrid slantRangeGrid = new TiePointGrid(
-                "slant_range_time", gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, rangeTime);
+        final TiePointGrid slantRangeGrid = new TiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME,
+                gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, rangeTime);
         slantRangeGrid.setUnit(Unit.NANOSECONDS);
         product.addTiePointGrid(slantRangeGrid);
 
@@ -194,8 +196,8 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             }
         }
 
-        final TiePointGrid incidentAngleGrid = new TiePointGrid(
-                "incident_angle", gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, angles);
+        final TiePointGrid incidentAngleGrid = new TiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE,
+                gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, angles);
 
         incidentAngleGrid.setUnit(Unit.DEGREES);
         product.addTiePointGrid(incidentAngleGrid);

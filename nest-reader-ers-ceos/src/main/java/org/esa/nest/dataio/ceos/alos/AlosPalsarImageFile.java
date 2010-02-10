@@ -13,8 +13,6 @@ import java.io.IOException;
 
 class AlosPalsarImageFile extends CEOSImageFile {
 
-    private BaseRecord _processedData = null;
-
     private final static String mission = "alos";
     private final static String image_DefinitionFile = "image_file.xml";
     private final static String image_recordDefinition = "image_record.xml";
@@ -31,58 +29,19 @@ class AlosPalsarImageFile extends CEOSImageFile {
         _imageFDR = new BaseRecord(binaryReader, -1, mission, image_DefinitionFile);
         binaryReader.seek(_imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()));
         _imageRecords = new ImageRecord[_imageFDR.getAttributeInt("Number of lines per data set")];
+        _imageRecords[0] = createNewImageRecord(0);
 
-        if(productLevel == AlosPalsarConstants.LEVEL1_5) {
-            _imageRecords[0] = new ImageRecord(binaryReader, -1, mission, processedData_recordDefinition);
-        } else {
-            _imageRecords[0] = new ImageRecord(binaryReader, -1, mission, image_recordDefinition);
-        }
         _imageRecordLength = _imageRecords[0].getRecordLength();
         _startPosImageRecords = _imageRecords[0].getStartPos();
-       _imageHeaderLength = _imageFDR.getAttributeInt("Number of bytes of prefix data per record");
-        
+       _imageHeaderLength = _imageFDR.getAttributeInt("Number of bytes of prefix data per record");         
     }
 
-    ImageRecord getImageRecord(int line) throws IOException, IllegalBinaryFormatException {
-        if(_imageRecords[line] == null) {
-
-            binaryReader.seek(_imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()));
-            if(productLevel == AlosPalsarConstants.LEVEL1_5)
-                _imageRecords[line] = new ImageRecord(binaryReader, -1, mission, processedData_recordDefinition);
-            else
-                _imageRecords[line] = new ImageRecord(binaryReader, -1, mission, image_recordDefinition);
-        }
-        return _imageRecords[line];
-    }
-
-    public int getSlantRangeToFirstPixel(int line) {
-        try {
-            final ImageRecord imgRec = getImageRecord(line);
-            if(productLevel == AlosPalsarConstants.LEVEL1_5)
-                return imgRec.getAttributeInt("Slant Range to 1st pixel");
-            else
-                return imgRec.getAttributeInt("Slant range to 1st data sample");
-        } catch(Exception e) {
-            return 0;
-        }
-    }
-
-    public int getSlantRangeToMidPixel(int line) {
-        try {
-            final ImageRecord imgRec = getImageRecord(line);
-            return imgRec.getAttributeInt("Slant Range to mid-pixel");
-        } catch(Exception e) {
-            return 0;
-        }
-    }
-
-    public int getSlantRangeToLastPixel(int line) {
-        try {
-            final ImageRecord imgRec = getImageRecord(line);
-            return imgRec.getAttributeInt("Slant Range to last-pixel");
-        } catch(Exception e) {
-            return 0;
-        }
+    protected ImageRecord createNewImageRecord(final int line) throws IOException, IllegalBinaryFormatException {
+        final long pos = _imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()) + (line*_imageRecordLength);
+        if(productLevel == AlosPalsarConstants.LEVEL1_5)
+            return new ImageRecord(binaryReader, pos, mission, processedData_recordDefinition);
+        else
+            return new ImageRecord(binaryReader, pos, mission, image_recordDefinition);
     }
 
     public String getPolarization() {
@@ -108,24 +67,4 @@ class AlosPalsarImageFile extends CEOSImageFile {
         }
         return "";
     }
-
-    @Override
-    public void assignMetadataTo(MetadataElement rootElem, int count) {
-        final MetadataElement imgDescElem = new MetadataElement("Image Descriptor " + count);
-        _imageFDR.assignMetadataTo(imgDescElem);
-        rootElem.addElement(imgDescElem);
-
-        if(_imageRecords[0] != null) {
-            final MetadataElement imgRecElem = new MetadataElement("Image Record ");
-            _imageRecords[0].assignMetadataTo(imgRecElem);
-            imgDescElem.addElement(imgRecElem);
-        }
-
-        if(_processedData != null) {
-            final MetadataElement procDataMetadata = new MetadataElement("Processed Data " + count);
-            _processedData.assignMetadataTo(procDataMetadata);
-            rootElem.addElement(procDataMetadata);    
-        }
-    }
-
 }

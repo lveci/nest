@@ -130,10 +130,16 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.slant_range_to_first_pixel,
                     slantRangeTime*Constants.halfLightSpeed);
         }
-        
-        if(_leaderFile.getLatCorners() != null && _leaderFile.getLonCorners() != null) {
-            ReaderUtils.addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
+
+        float[] latCorners = _leaderFile.getLatCorners();
+        float[] lonCorners = _leaderFile.getLonCorners();
+        if(latCorners == null || lonCorners == null) {
+            latCorners = _imageFiles[0].getLatCorners();
+            lonCorners = _imageFiles[0].getLonCorners();
         }
+        if(latCorners != null && lonCorners != null) {
+            ReaderUtils.addGeoCoding(product, latCorners, lonCorners);
+        }          
         
         if(product.getGeoCoding() == null) {
             addGeoCodingFromSceneLabel(product);
@@ -528,117 +534,84 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         }
     }
 
-    private static void addRSATTiePointGrids(final Product product, final BaseRecord sceneRec, final BaseRecord detProcRec) {
-
-        if(detProcRec == null)
-            return;
+    private void addRSATTiePointGrids(final Product product, final BaseRecord sceneRec, final BaseRecord detProcRec) {
 
         final int gridWidth = 11;
         final int gridHeight = 11;
+        final int sceneWidth = product.getSceneRasterWidth();
+        final int sceneHeight = product.getSceneRasterHeight();
+        final int subSamplingX = sceneWidth / (gridWidth - 1);
+        final int subSamplingY = sceneHeight / (gridHeight - 1);
+        final float[] rangeDist = new float[gridWidth*gridHeight];
+        final float[] rangeTime = new float[gridWidth*gridHeight];
 
-        final int subSamplingX = product.getSceneRasterWidth() / (gridWidth - 1);
-        final int subSamplingY = product.getSceneRasterHeight() / (gridHeight - 1);
+        int k = 0;
+        for (int j = 0; j < gridHeight; j++) {
+            final int y = Math.min(j*subSamplingY, sceneHeight-1);
+            final int slantRangeToFirstPixel = _imageFiles[0].getSlantRangeToFirstPixel(y); // meters
+            final int slantRangeToMidPixel = _imageFiles[0].getSlantRangeToMidPixel(y);
+            final int slantRangeToLastPixel = _imageFiles[0].getSlantRangeToLastPixel(y);
+            final double[] polyCoef = computePolynomialCoefficients(slantRangeToFirstPixel,
+                    slantRangeToMidPixel,
+                    slantRangeToLastPixel,
+                    sceneWidth);
+
+            for(int i = 0; i < gridWidth; i++) {
+                final int x = i*subSamplingX;
+                rangeDist[k++] = (float)(polyCoef[0] + polyCoef[1]*x + polyCoef[2]*x*x);
+            }
+        }
+
+        // get slant range time in nanoseconds from range distance in meters
+        for(k = 0; k < rangeDist.length; k++) {
+            rangeTime[k] = (float)(rangeDist[k] / Constants.halfLightSpeed)*1000000000;// in ns
+        }
+
+        final TiePointGrid slantRangeGrid = new TiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME,
+                gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, rangeTime);
+
+        slantRangeGrid.setUnit(Unit.NANOSECONDS);
+        product.addTiePointGrid(slantRangeGrid);
+
+        if(detProcRec == null)
+            return;
 
         final double r = calculateEarthRadius(sceneRec);    // earth radius
         final double eph_orb_data = detProcRec.getAttributeDouble("Ephemeris orbit data1");
         final double h = eph_orb_data - r;                  // orbital altitude
 
-        final double pixelSpacing = sceneRec.getAttributeDouble("Pixel spacing");
+        // incidence angle
+        final float[] angles = new float[gridWidth*gridHeight];
 
-        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-        final double firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
-        final double lineTimeInterval = absRoot.getAttributeDouble(AbstractMetadata.line_time_interval) / 86400.0; // s to day
-
-        AbstractMetadata.SRGRCoefficientList[] srgCoefList = null;
-        try {
-            srgCoefList = AbstractMetadata.getSRGRCoefficients(AbstractMetadata.getAbstractedMetadata(product));
-        } catch(Exception e) {
-            srgCoefList = null;
+        k = 0;
+        for(int j = 0; j < gridHeight; j++) {
+            for (int i = 0; i < gridWidth; i++) {
+                final double RS = rangeDist[k];
+                final double a = ( (h*h) - (RS*RS) + (2.0*r*h) ) / (2.0*RS*r);
+                angles[k] = (float)(Math.acos( a ) * MathUtils.RTOD);
+                k++;
+            }
         }
 
-        if(srgCoefList != null && srgCoefList.length > 0) {
+        final TiePointGrid incidentAngleGrid = new TiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE,
+                gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, angles);
 
-            final double dRg = subSamplingX * pixelSpacing;
-            final float[] rangeDist = new float[gridWidth*gridHeight];
-            final float[] rangeTime = new float[gridWidth*gridHeight];
+        incidentAngleGrid.setUnit(Unit.DEGREES);
+        product.addTiePointGrid(incidentAngleGrid);
+    }
 
-            // slant range distance in m
-            int k = 0;
-            for (int j = 0; j < gridHeight; j++) {
+    private static double[] computePolynomialCoefficients(
+                    int slantRangeToFirstPixel, int slantRangeToMidPixel, int slantRangeToLastPixel, int imageWidth) {
 
-                // get UTC for j
-                int y;
-                if (j == gridHeight - 1) { // last row
-                    y = product.getSceneRasterHeight() - 1;
-                } else { // other rows
-                    y = j * subSamplingY;
-                }
-                final double curLineUTC = firstLineUTC + y*lineTimeInterval;
-
-                // get SRGR coeffs for given utc using linear interpolation
-                int idx = 0;
-                for (int i = 0; i < srgCoefList.length && curLineUTC >= srgCoefList[i].timeMJD; i++) {
-                    idx = i;
-                }
-
-                double[] coeff;
-                if(srgCoefList.length > 1) {
-                    coeff = new double[srgCoefList[idx].coefficients.length];
-                    if (idx == srgCoefList.length - 1) {
-                        idx--;
-                    }
-
-                    final double mu = (curLineUTC - srgCoefList[idx].timeMJD) /
-                                      (srgCoefList[idx+1].timeMJD - srgCoefList[idx].timeMJD);
-                    for (int i = 0; i < coeff.length; i++) {
-                        coeff[i] = org.esa.nest.util.MathUtils.interpolationLinear(
-                                srgCoefList[idx].coefficients[i], srgCoefList[idx+1].coefficients[i], mu);
-                    }
-                } else {
-                    coeff = srgCoefList[idx].coefficients;
-                }
-
-                for(int i = 0; i < gridWidth; i++) {
-                    final double groundRange = i*dRg;
-                    rangeDist[k++] = (float)(coeff[0] +
-                                             groundRange * coeff[1] +
-                                             groundRange * groundRange * coeff[2] +
-                                             groundRange * groundRange * groundRange * coeff[3] +
-                                             groundRange * groundRange * groundRange * groundRange * coeff[4] +
-                                             groundRange * groundRange * groundRange * groundRange * groundRange * coeff[5]);
-                }
-            }
-
-            // get slant range time in nanoseconds from range distance in meters
-            for(k = 0; k < rangeDist.length; k++) {
-                 rangeTime[k] = (float)(rangeDist[k] / Constants.halfLightSpeed)*1000000000;// in ns
-            }
-
-            final TiePointGrid slantRangeGrid = new TiePointGrid(
-                    "slant_range_time", gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, rangeTime);
-
-            slantRangeGrid.setUnit(Unit.NANOSECONDS);
-            product.addTiePointGrid(slantRangeGrid);
-
-            // incidence angle
-            final float[] angles = new float[gridWidth*gridHeight];
-
-            k = 0;
-            for(int j = 0; j < gridHeight; j++) {
-                for (int i = 0; i < gridWidth; i++) {
-                    final double RS = rangeDist[k];
-                    final double a = ( (h*h) - (RS*RS) + (2.0*r*h) ) / (2.0*RS*r);
-                    angles[k] = (float)(Math.acos( a ) * MathUtils.RTOD);
-                    k++;
-                }
-            }
-
-            final TiePointGrid incidentAngleGrid = new TiePointGrid(
-                "incident_angle", gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, angles);
-
-            incidentAngleGrid.setUnit(Unit.DEGREES);
-            product.addTiePointGrid(incidentAngleGrid);
-        }
+        final int firstPixel = 0;
+        final int midPixel = imageWidth/2;
+        final int lastPixel = imageWidth - 1;
+        final double[] idxArray = {firstPixel, midPixel, lastPixel};
+        final double[] rangeArray = {slantRangeToFirstPixel, slantRangeToMidPixel, slantRangeToLastPixel};
+        final Matrix A = org.esa.nest.util.MathUtils.createVandermondeMatrix(idxArray, 2);
+        final Matrix b = new Matrix(rangeArray, 3);
+        final Matrix x = A.solve(b);
+        return x.getColumnPackedCopy();
     }
 
     private static double calculateEarthRadius(BaseRecord sceneRec) {

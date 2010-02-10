@@ -21,9 +21,15 @@ class JERSImageFile extends CEOSImageFile {
         _imageFDR = new BaseRecord(binaryReader, -1, mission, image_DefinitionFile);
         binaryReader.seek(_imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()));
         _imageRecords = new ImageRecord[_imageFDR.getAttributeInt("Number of lines per data set")];
-        _imageRecords[0] = new ImageRecord(binaryReader, -1, mission, image_recordDefinition);
+        _imageRecords[0] = createNewImageRecord(0);
+
         _imageRecordLength = _imageRecords[0].getRecordLength();
         _startPosImageRecords = _imageRecords[0].getStartPos();
+        _imageHeaderLength = 12;
     }
 
+    protected ImageRecord createNewImageRecord(final int line) throws IOException, IllegalBinaryFormatException {
+        final long pos = _imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()) + (line*_imageRecordLength);
+        return new ImageRecord(binaryReader, pos, mission, image_recordDefinition);
+    }
 }

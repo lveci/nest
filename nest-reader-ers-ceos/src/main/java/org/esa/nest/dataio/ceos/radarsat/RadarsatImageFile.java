@@ -30,11 +30,15 @@ class RadarsatImageFile extends CEOSImageFile {
             _imageFDR.getCeosDatabase().set("Number of lines per data set", height);
         }
         _imageRecords = new ImageRecord[getRasterHeight()];
-        _imageRecords[0] = new ImageRecord(binaryReader, -1, mission, image_recordDefinition);
+        _imageRecords[0] = createNewImageRecord(0);
 
         _imageRecordLength = _imageRecords[0].getRecordLength();
         _startPosImageRecords = _imageRecords[0].getStartPos();
         _imageHeaderLength = _imageFDR.getAttributeInt("Number of bytes of prefix data per record");
     }
 
+    protected ImageRecord createNewImageRecord(final int line) throws IOException, IllegalBinaryFormatException {
+        final long pos = _imageFDR.getAbsolutPosition(_imageFDR.getRecordLength()) + (line*_imageRecordLength);
+        return new ImageRecord(binaryReader, pos, mission, image_recordDefinition);
+    }
 }
