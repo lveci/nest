@@ -69,7 +69,7 @@ public class QuicklookProvider implements DataProvider {
         final MetadataElement root = product.getMetadataRoot();
         if(root != null) {
             final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-            if(absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE, "").equals("COMPLEX"))
+            if(absRoot != null && absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE, "").equals("COMPLEX"))
                 return true;
         }
         return false;

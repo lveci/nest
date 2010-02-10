@@ -83,8 +83,9 @@ public class ImageIOReaderPlugIn implements ProductReaderPlugIn {
     }
 
     private static DecodeQualification checkProductQualification(File file) {
+        final String fileExt = file.getName().toLowerCase();
         for(String ext : FORMAT_FILE_EXTENSIONS) {
-            if(!ext.isEmpty() && file.getName().toLowerCase().endsWith(ext.toLowerCase())) {
+            if(!ext.isEmpty() && fileExt.endsWith(ext.toLowerCase())) {
                 if(ext.equalsIgnoreCase("tif") || ext.equalsIgnoreCase("tiff"))
                     return DecodeQualification.SUITABLE;
                 return DecodeQualification.INTENDED;
