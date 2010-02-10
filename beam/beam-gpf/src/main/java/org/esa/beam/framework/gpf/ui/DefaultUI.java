@@ -1,13 +1,12 @@
 package org.esa.beam.framework.gpf.ui;
 
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.PropertyPane;
 
 import javax.swing.*;
 import com.bc.ceres.binding.*;
-import com.bc.ceres.binding.swing.BindingContext;
+import com.bc.ceres.swing.binding.BindingContext;
+import com.bc.ceres.swing.binding.PropertyPane;
 
-import java.util.Arrays;
 import java.util.Map;
 
 /**

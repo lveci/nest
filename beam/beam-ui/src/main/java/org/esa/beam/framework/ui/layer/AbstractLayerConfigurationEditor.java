@@ -6,11 +6,12 @@ import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.accessors.MapEntryAccessor;
-import com.bc.ceres.binding.swing.Binding;
-import com.bc.ceres.binding.swing.BindingContext;
 import com.bc.ceres.glayer.Layer;
+import com.bc.ceres.swing.binding.Binding;
+import com.bc.ceres.swing.binding.BindingContext;
+import com.bc.ceres.swing.binding.PropertyPane;
+
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.PropertyPane;
 
 import javax.swing.JComponent;
 import java.beans.PropertyChangeEvent;
@@ -22,7 +23,7 @@ import java.util.Map;
  * Base class for editors allowing to modify a layer's configuration.
  *
  * @author Marco Zühlke
- * @version $Revision: 1.1 $ $Date: 2009-12-22 17:30:01 $
+ * @version $Revision: 1.2 $ $Date: 2010-02-10 19:57:11 $
  * @since BEAM 4.6
  */
 public abstract class AbstractLayerConfigurationEditor implements LayerEditor {

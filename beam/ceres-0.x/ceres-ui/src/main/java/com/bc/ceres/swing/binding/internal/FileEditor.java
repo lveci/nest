@@ -1,4 +1,5 @@
 /*
+ * $Id: FileEditor.java,v 1.1 2010-02-10 19:57:11 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -13,50 +14,39 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package org.esa.beam.framework.ui.product;
+package com.bc.ceres.swing.binding.internal;
 
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.swing.binding.Binding;
 import com.bc.ceres.swing.binding.BindingContext;
 import com.bc.ceres.swing.binding.ComponentAdapter;
 import com.bc.ceres.swing.binding.PropertyEditor;
-import com.bc.ceres.swing.binding.internal.TextComponentAdapter;
 
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.ui.ModalDialog;
-import org.esa.beam.util.PropertyMap;
-
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 /**
- * A value editor for band arithmetic expressions
+ * An editor for file names using a file chooser dialog.
  *
  * @author Marco Zuehlke
+ * @version $Revision: 1.1 $ $Date: 2010-02-10 19:57:11 $
  * @since BEAM 4.6
  */
-public class ExpressionEditor extends PropertyEditor {
-    
-    private final Product[] sourceProducts;
-    private final Product currentProduct;
-    private final PropertyMap preferences;
-    private final boolean booleanExpr;
+public class FileEditor extends PropertyEditor {
 
-    
-    public ExpressionEditor(Product currentProduct, Product[] sourceProducts, PropertyMap preferences,
-                             boolean booleanExpr) {
-        this.currentProduct = currentProduct;
-        this.sourceProducts = sourceProducts != null ? sourceProducts: new Product[]{currentProduct};
-        this.preferences = preferences;
-        this.booleanExpr = booleanExpr;
+    @Override
+    public boolean isValidFor(PropertyDescriptor propertyDescriptor) {
+        return File.class.isAssignableFrom(propertyDescriptor.getType());
     }
-
+    
     @Override
     public JComponent createEditorComponent(PropertyDescriptor propertyDescriptor, BindingContext bindingContext) {
         JTextField textField = new JTextField();
@@ -66,16 +56,12 @@ public class ExpressionEditor extends PropertyEditor {
         subPanel.add(textField, BorderLayout.CENTER);
         JButton etcButton = new JButton("...");
         etcButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
-                ProductExpressionPane expressionPane;
-                if (booleanExpr) {
-                    expressionPane = ProductExpressionPane.createBooleanExpressionPane(sourceProducts, currentProduct, preferences);
-                }else {
-                    expressionPane = ProductExpressionPane.createGeneralExpressionPane(sourceProducts, currentProduct, preferences);
-                }
-                expressionPane.setCode((String) binding.getPropertyValue());
-                if (expressionPane.showModalDialog(null, "Expression Editor") == ModalDialog.ID_OK) {
-                    binding.setPropertyValue(expressionPane.getCode());
+                JFileChooser fileChooser = new JFileChooser();
+                int i = fileChooser.showDialog(subPanel, "Select");
+                if (i == JFileChooser.APPROVE_OPTION && fileChooser.getSelectedFile() != null) {
+                    binding.setPropertyValue(fileChooser.getSelectedFile());
                 }
             }
         });

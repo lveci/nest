@@ -1,5 +1,5 @@
 /*
- * $Id: ColorEditor.java,v 1.4 2010-02-10 19:57:11 lveci Exp $
+ * $Id: NumericEditor.java,v 1.1 2010-02-10 19:57:11 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -14,42 +14,52 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package org.esa.beam.framework.ui;
+package com.bc.ceres.swing.binding.internal;
 
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.swing.binding.BindingContext;
+import com.bc.ceres.swing.binding.ComponentAdapter;
 import com.bc.ceres.swing.binding.PropertyEditor;
-import com.jidesoft.combobox.ColorComboBox;
 
-import java.awt.Color;
+import java.awt.Font;
 
 import javax.swing.JComponent;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 /**
- * A value editor for colors.
+ * An editor for numeric values with an unlimited range.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.4 $ $Date: 2010-02-10 19:57:11 $
+ * @version $Revision: 1.1 $ $Date: 2010-02-10 19:57:11 $
  * @since BEAM 4.6
  */
-public class ColorEditor extends PropertyEditor {
+public class NumericEditor extends PropertyEditor {
 
     @Override
     public boolean isValidFor(PropertyDescriptor propertyDescriptor) {
         Class<?> type = propertyDescriptor.getType();
-        if (type.isAssignableFrom(Color.class)) {
-            return true;
-        }
-        return false;
+        return isNumericType(type);
     }
     
     @Override
     public JComponent createEditorComponent(PropertyDescriptor propertyDescriptor, BindingContext bindingContext) {
-        ColorComboBox colorComboBox = new ColorComboBox();
-        colorComboBox.setColorValueVisible(true);
-        colorComboBox.setAllowDefaultColor(true);
-        ColorComboBoxAdapter adapter = new ColorComboBoxAdapter(colorComboBox);
+        JTextField textField = new JTextField();
+        textField.setHorizontalAlignment(SwingConstants.RIGHT);
+        int fontSize = textField.getFont().getSize();
+        textField.setFont(new Font("Courier", Font.PLAIN, fontSize));
+        ComponentAdapter adapter = new TextComponentAdapter(textField);
         bindingContext.bind(propertyDescriptor.getName(), adapter);
-        return colorComboBox;
+        return textField;
+    }
+
+    protected static boolean isNumericType(Class<?> type) {
+        return Byte.TYPE.equals(type)
+        || Short.TYPE.equals(type)
+        || Integer.TYPE.equals(type)
+        || Long.TYPE.equals(type)
+        || Float.TYPE.equals(type)
+        || Double.TYPE.equals(type)
+        || Number.class.isAssignableFrom(type);
     }
 }

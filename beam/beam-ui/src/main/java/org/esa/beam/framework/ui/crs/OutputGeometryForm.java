@@ -1,5 +1,5 @@
 /*
- * $Id: OutputGeometryForm.java,v 1.2 2010-02-10 16:20:37 lveci Exp $
+ * $Id: OutputGeometryForm.java,v 1.3 2010-02-10 19:57:11 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,9 +17,10 @@
 package org.esa.beam.framework.ui.crs;
 
 import com.bc.ceres.binding.PropertyDescriptor;
-import com.bc.ceres.binding.swing.BindingContext;
-import com.bc.ceres.binding.swing.PropertyEditor;
-import com.bc.ceres.binding.swing.PropertyEditorRegistry;
+import com.bc.ceres.swing.binding.BindingContext;
+import com.bc.ceres.swing.binding.PropertyEditor;
+import com.bc.ceres.swing.binding.PropertyEditorRegistry;
+
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.ui.GridBagUtils;

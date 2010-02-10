@@ -1,5 +1,5 @@
 /*
- * $Id: ColorEditor.java,v 1.4 2010-02-10 19:57:11 lveci Exp $
+ * $Id: TextFieldEditor.java,v 1.1 2010-02-10 19:57:11 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -14,42 +14,34 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package org.esa.beam.framework.ui;
+package com.bc.ceres.swing.binding.internal;
 
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.swing.binding.BindingContext;
+import com.bc.ceres.swing.binding.ComponentAdapter;
 import com.bc.ceres.swing.binding.PropertyEditor;
-import com.jidesoft.combobox.ColorComboBox;
-
-import java.awt.Color;
 
 import javax.swing.JComponent;
+import javax.swing.JTextField;
 
 /**
- * A value editor for colors.
+ * A value editor that uses a text field.
+ * 
+ * This editor does not qualify itself 
+ * for any edit because it is the default editor.
+ * Otherwise it would take precedence over other editors.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.4 $ $Date: 2010-02-10 19:57:11 $
- * @since BEAM 4.6
+ * @version $Revision: 1.1 $ $Date: 2010-02-10 19:57:11 $
+ * @since Ceres 0.9
  */
-public class ColorEditor extends PropertyEditor {
+public class TextFieldEditor extends PropertyEditor {
 
     @Override
-    public boolean isValidFor(PropertyDescriptor propertyDescriptor) {
-        Class<?> type = propertyDescriptor.getType();
-        if (type.isAssignableFrom(Color.class)) {
-            return true;
-        }
-        return false;
-    }
-    
-    @Override
     public JComponent createEditorComponent(PropertyDescriptor propertyDescriptor, BindingContext bindingContext) {
-        ColorComboBox colorComboBox = new ColorComboBox();
-        colorComboBox.setColorValueVisible(true);
-        colorComboBox.setAllowDefaultColor(true);
-        ColorComboBoxAdapter adapter = new ColorComboBoxAdapter(colorComboBox);
+        JTextField textField = new JTextField();
+        ComponentAdapter adapter = new TextComponentAdapter(textField);
         bindingContext.bind(propertyDescriptor.getName(), adapter);
-        return colorComboBox;
+        return textField;
     }
 }

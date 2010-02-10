@@ -1,5 +1,5 @@
 /*
- * $Id: ImageInfoEditor.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
+ * $Id: ImageInfoEditor.java,v 1.3 2010-02-10 19:57:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -19,7 +19,7 @@ package org.esa.beam.framework.ui;
 import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.ValueRange;
-import com.bc.ceres.binding.swing.BindingContext;
+import com.bc.ceres.swing.binding.BindingContext;
 import com.jidesoft.combobox.ColorChooserPanel;
 import com.jidesoft.popup.JidePopup;
 import com.jidesoft.swing.JidePopupMenu;
@@ -58,7 +58,7 @@ import java.text.DecimalFormat;
  * Unstable interface. Do not use.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-11-04 17:04:32 $
+ * @version $Revision: 1.3 $ $Date: 2010-02-10 19:57:11 $
  * @since BEAM 4.5.1
  */
 public class ImageInfoEditor extends JPanel {

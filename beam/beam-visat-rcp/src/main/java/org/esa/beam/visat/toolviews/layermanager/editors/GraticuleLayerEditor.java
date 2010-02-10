@@ -1,5 +1,5 @@
 /*
- * $Id: GraticuleLayerEditor.java,v 1.5 2010-01-27 21:19:48 lveci Exp $
+ * $Id: GraticuleLayerEditor.java,v 1.6 2010-02-10 19:57:11 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -18,9 +18,10 @@ package org.esa.beam.visat.toolviews.layermanager.editors;
 
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.ValueRange;
-import com.bc.ceres.binding.swing.BindingContext;
-import com.bc.ceres.binding.swing.PropertyEditorRegistry;
-import com.bc.ceres.binding.swing.internal.RangeEditor;
+import com.bc.ceres.swing.binding.BindingContext;
+import com.bc.ceres.swing.binding.PropertyEditorRegistry;
+import com.bc.ceres.swing.binding.internal.RangeEditor;
+
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.layer.AbstractLayerConfigurationEditor;
 import org.esa.beam.glayer.GraticuleLayerType;
@@ -31,7 +32,7 @@ import java.awt.Color;
  * Editor for graticule layer.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.5 $ $Date: 2010-01-27 21:19:48 $
+ * @version $Revision: 1.6 $ $Date: 2010-02-10 19:57:11 $
  * @since BEAM 4.6
  */
 public class GraticuleLayerEditor extends AbstractLayerConfigurationEditor {

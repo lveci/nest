@@ -1,7 +1,7 @@
 package org.esa.beam.framework.gpf.ui;
 
-import com.bc.ceres.binding.swing.BindingContext;
 import com.bc.ceres.swing.TableLayout;
+import com.bc.ceres.swing.binding.BindingContext;
 
 import org.esa.beam.framework.dataio.ProductIOPlugInManager;
 import org.esa.beam.util.io.FileChooserFactory;
@@ -24,7 +24,7 @@ import java.io.File;
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Ralf Quast
- * @version $Revision: 1.3 $ $Date: 2009-12-02 16:52:11 $
+ * @version $Revision: 1.4 $ $Date: 2010-02-10 19:57:11 $
  */
 public class TargetProductSelector {
 

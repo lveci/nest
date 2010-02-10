@@ -1,6 +1,6 @@
 package org.esa.beam.framework.ui;
 
-import com.bc.ceres.binding.swing.ComponentAdapter;
+import com.bc.ceres.swing.binding.ComponentAdapter;
 import com.jidesoft.combobox.ColorComboBox;
 
 import org.esa.beam.framework.datamodel.ImageInfo;
@@ -15,7 +15,7 @@ import javax.swing.JComponent;
  * A binding for the JIDE {@link ColorComboBox}.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:17:18 $
+ * @version $Revision: 1.2 $ $Date: 2010-02-10 19:57:11 $
  * @since BEAM 4.2
  */
 public class ColorComboBoxAdapter extends ComponentAdapter implements PropertyChangeListener {

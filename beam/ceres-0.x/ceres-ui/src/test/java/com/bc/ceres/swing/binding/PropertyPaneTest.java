@@ -1,24 +1,20 @@
-package org.esa.beam.framework.ui;
+package com.bc.ceres.swing.binding;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.ValueRange;
 import com.bc.ceres.binding.ValueSet;
-import com.bc.ceres.binding.swing.BindingContext;
-import com.bc.ceres.binding.swing.BindingProblemListener;
-import com.bc.ceres.binding.swing.BindingProblem;
-import junit.framework.TestCase;
+
+import java.awt.Component;
+import java.io.File;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import java.awt.Component;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.File;
+
+import junit.framework.TestCase;
 
 
 public class PropertyPaneTest extends TestCase {
@@ -68,42 +64,6 @@ public class PropertyPaneTest extends TestCase {
         String resamplingMethod = "NN";
         String productDescription = "All purpose";
         File imageFile = new File(".").getAbsoluteFile();
-    }
-
-    public static void main(String[] args) throws ConversionException {
-        final ModalDialog dialog = new ModalDialog(null, "PropertyPaneTest", ModalDialog.ID_OK + ModalDialog.ID_CANCEL, null) {
-            @Override
-            protected void onOK() {
-                hide();
-            }
-
-            @Override
-            protected void onCancel() {
-                hide();
-            }
-        };
-
-        PropertyPane propertyPane = createPane(new BindingProblemListener() {
-            @Override
-            public void problemReported(BindingProblem newProblem, BindingProblem oldProblem) {
-                JOptionPane.showMessageDialog(dialog.getJDialog(), newProblem.getCause().getMessage());
-            }
-
-            @Override
-            public void problemCleared(BindingProblem oldProblem) {
-            }
-        });
-        JPanel panel = propertyPane.createPanel();
-        dialog.setContent(panel);
-        dialog.show();
-
-        propertyPane.getBindingContext().getPropertySet().addPropertyChangeListener(new PropertyChangeListener() {
-
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                System.out.println("PropertyContainer." + evt.getPropertyName() + " = " + evt.getNewValue());
-            }
-        });
     }
 
     private static PropertyPane createPane(BindingProblemListener bpl) throws ConversionException {

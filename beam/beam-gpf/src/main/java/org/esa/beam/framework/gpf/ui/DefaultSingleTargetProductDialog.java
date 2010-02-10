@@ -6,6 +6,7 @@ import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.ValueSet;
 import com.bc.ceres.swing.TableLayout;
+import com.bc.ceres.swing.binding.PropertyPane;
 import com.bc.ceres.swing.selection.AbstractSelectionChangeListener;
 import com.bc.ceres.swing.selection.Selection;
 import com.bc.ceres.swing.selection.SelectionChangeEvent;
@@ -20,7 +21,6 @@ import org.esa.beam.framework.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.internal.RasterDataNodeValues;
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.PropertyPane;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -38,7 +38,7 @@ import java.util.Map;
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.9 $ $Date: 2009-12-11 20:46:14 $
+ * @version $Revision: 1.10 $ $Date: 2010-02-10 19:57:11 $
  */
 public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog {
 

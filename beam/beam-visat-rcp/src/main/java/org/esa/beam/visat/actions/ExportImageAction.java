@@ -1,5 +1,5 @@
 /*
- * $Id: ExportImageAction.java,v 1.8 2009-12-11 20:46:14 lveci Exp $
+ * $Id: ExportImageAction.java,v 1.9 2010-02-10 19:57:11 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -21,12 +21,13 @@ import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.accessors.DefaultPropertyAccessor;
 import com.bc.ceres.binding.converters.IntegerConverter;
-import com.bc.ceres.binding.swing.BindingContext;
 import com.bc.ceres.glayer.support.ImageLayer;
 import com.bc.ceres.grender.Viewport;
 import com.bc.ceres.grender.support.BufferedImageRendering;
 import com.bc.ceres.grender.support.DefaultViewport;
-import org.esa.beam.framework.ui.PropertyPane;
+import com.bc.ceres.swing.binding.BindingContext;
+import com.bc.ceres.swing.binding.PropertyPane;
+
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.util.io.BeamFileChooser;
@@ -56,7 +57,7 @@ import java.awt.image.RenderedImage;
  *
  * @author Marco Peters
  * @author Ralf Quast
- * @version $Revision: 1.8 $ $Date: 2009-12-11 20:46:14 $
+ * @version $Revision: 1.9 $ $Date: 2010-02-10 19:57:11 $
  */
 public class ExportImageAction extends AbstractExportImageAction {
 
