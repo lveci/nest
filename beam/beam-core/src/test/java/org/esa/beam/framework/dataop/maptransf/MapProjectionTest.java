@@ -1,5 +1,5 @@
 /*
- * $Id: MapProjectionTest.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: MapProjectionTest.java,v 1.2 2010-02-10 16:20:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -50,7 +50,7 @@ public class MapProjectionTest extends TestCase {
     public void testOutputRasterSize() {
         Product product = null;
         try {
-            product = ProductIO.readProduct(MERIS_TEST_FILE, null);
+            product = ProductIO.readProduct(MERIS_TEST_FILE);
         } catch (IOException e) {
             throw new TestNotExecutableException(e);
         }

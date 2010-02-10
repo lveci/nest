@@ -1,5 +1,5 @@
 /*
- * $Id: ProcessorAction.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: ProcessorAction.java,v 1.2 2010-02-10 16:20:37 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -54,7 +54,7 @@ import java.util.logging.Level;
  * This action starts the associated processor.
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2010-02-10 16:20:37 $
  */
 public class ProcessorAction extends ExecCommand {
 
@@ -311,7 +311,7 @@ public class ProcessorAction extends ExecCommand {
                 }
 
                 try {
-                    Product product = ProductIO.readProduct(productFile, null);
+                    Product product = ProductIO.readProduct(productFile);
                     if (product != null) {
                         VisatApp.getApp().addProduct(product);
                     } else {

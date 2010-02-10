@@ -1,5 +1,5 @@
 /*
- * $Id: BandWriterMain.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: BandWriterMain.java,v 1.2 2010-02-10 16:20:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -131,7 +131,7 @@ public class BandWriterMain {
             throws IOException {
 
         // Read the product (note that only 'nodes' are read, not the entire data!)
-        Product product = ProductIO.readProduct(inputPath, null);
+        Product product = ProductIO.readProduct(inputPath);
         // Get the scene width
         int w = product.getSceneRasterWidth();
         // Get the scene height

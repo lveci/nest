@@ -1,5 +1,5 @@
 /*
- * $Id: Band.java,v 1.4 2010-02-08 21:57:50 lveci Exp $
+ * $Id: Band.java,v 1.5 2010-02-10 16:20:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -21,6 +21,7 @@ import com.bc.ceres.glevel.MultiLevelModel;
 import com.bc.ceres.glevel.support.AbstractMultiLevelSource;
 import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
 import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
+import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.dataio.ProductWriter;
 import org.esa.beam.jai.BandOpImage;
@@ -58,7 +59,7 @@ import java.util.Random;
  * and <code>writePixel</code> perform the inverse operations in this case.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2010-02-08 21:57:50 $
+ * @version $Revision: 1.5 $ $Date: 2010-02-10 16:20:36 $
  * @see ProductData
  * @see #getPixels
  * @see #setPixels
@@ -344,8 +345,16 @@ public class Band extends AbstractBand {
     }
 
     private boolean isProductReaderDirectlyUsable() {
-        return getProductReader() != null
-                && isSourceImageSet() && getSourceImage().getImage(0) instanceof BandOpImage;
+        final ProductReader productReader = getProductReader();
+        if(productReader != null) {
+            if(isSourceImageSet() && getSourceImage().getImage(0) instanceof BandOpImage) {
+                final BandOpImage bandOpImage = (BandOpImage) getSourceImage().getImage(0);
+                if(bandOpImage.getBand().getProductReader() == productReader) {
+                    return true;
+                }
+            }
+        }
+        return  false;
     }
 
     /**

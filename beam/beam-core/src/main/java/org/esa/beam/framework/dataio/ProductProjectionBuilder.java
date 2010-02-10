@@ -1,5 +1,5 @@
 /*
- * $Id: ProductProjectionBuilder.java,v 1.5 2009-12-23 16:42:11 lveci Exp $
+ * $Id: ProductProjectionBuilder.java,v 1.6 2010-02-10 16:20:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -22,7 +22,7 @@ import com.bc.util.CachingObjectArray;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.MapGeoCoding;
-import org.esa.beam.framework.datamodel.Pin;
+import org.esa.beam.framework.datamodel.Placemark;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.PlacemarkSymbol;
 import org.esa.beam.framework.datamodel.Pointing;
@@ -447,14 +447,14 @@ public class ProductProjectionBuilder extends AbstractProductBuilder {
         return product;
     }
 
-    private static void copyPlacemarks(ProductNodeGroup<Pin> sourcePlacemarkGroup,
-                                       ProductNodeGroup<Pin> targetPlacemarkGroup, PlacemarkSymbol symbol) {
-        final Pin[] placemarks = sourcePlacemarkGroup.toArray(new Pin[0]);
-        for (Pin placemark : placemarks) {
-            final Pin pin1 = new Pin(placemark.getName(), placemark.getLabel(),
+    private static void copyPlacemarks(ProductNodeGroup<Placemark> sourcePlacemarkGroup,
+                                       ProductNodeGroup<Placemark> targetPlacemarkGroup, PlacemarkSymbol symbol) {
+        final Placemark[] placemarks = sourcePlacemarkGroup.toArray(new Placemark[0]);
+        for (Placemark placemark : placemarks) {
+            final Placemark placemark1 = new Placemark(placemark.getName(), placemark.getLabel(),
                                      placemark.getDescription(), null, placemark.getGeoPos(),
                                      symbol, targetPlacemarkGroup.getProduct().getGeoCoding());
-            targetPlacemarkGroup.add(pin1);
+            targetPlacemarkGroup.add(placemark1);
         }
     }
 

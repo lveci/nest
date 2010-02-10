@@ -1,5 +1,5 @@
 /*
- * $Id: PlacemarkSymbol.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: PlacemarkSymbol.java,v 1.2 2010-02-10 16:20:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,10 +32,10 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 
 /**
- * This class represents a <code>{@link Pin}</code>'s shape.
+ * This class represents a <code>{@link Placemark}</code>'s shape.
  *
  * @author Sabine Embacher
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2010-02-10 16:20:36 $
  */
 public class PlacemarkSymbol extends ShapeFigure {
 

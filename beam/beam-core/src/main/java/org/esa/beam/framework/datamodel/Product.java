@@ -1,5 +1,5 @@
 /*
- * $Id: Product.java,v 1.17 2010-02-08 21:57:50 lveci Exp $
+ * $Id: Product.java,v 1.18 2010-02-10 16:20:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -67,7 +67,7 @@ import java.util.TreeSet;
  * necessarily store data in the same format. Furthermore, it is not mandatory for a product to have both of them.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.17 $ $Date: 2010-02-08 21:57:50 $
+ * @version $Revision: 1.18 $ $Date: 2010-02-10 16:20:36 $
  */
 public class Product extends ProductNode {
 
@@ -140,7 +140,7 @@ public class Product extends ProductNode {
     private final ProductNodeGroup<Mask> maskGroup;
     private final PlacemarkGroup pinGroup;
     private final PlacemarkGroup gcpGroup;
-    private final Map<Band, ProductNodeGroup<Pin>> bandGCPGroup = new HashMap<Band, ProductNodeGroup<Pin>>();
+    private final Map<Band, ProductNodeGroup<Placemark>> bandGCPGroup = new HashMap<Band, ProductNodeGroup<Placemark>>();
 
     /**
      * The internal reference number of this product
@@ -272,9 +272,9 @@ public class Product extends ProductNode {
         this.indexCodingGroup = new ProductNodeGroup<IndexCoding>(this, "indexCodingGroup", true);
         this.flagCodingGroup = new ProductNodeGroup<FlagCoding>(this, "flagCodingGroup", true);
         this.maskGroup = new ProductNodeGroup<Mask>(this, "maskGroup", true);
-        final VectorDataNode pinVectorDataNode = new VectorDataNode("pins", Pin.getFeatureType());
+        final VectorDataNode pinVectorDataNode = new VectorDataNode("pins", Placemark.getFeatureType());
         this.vectorDataGroup.add(pinVectorDataNode);
-        final VectorDataNode gcpVectorDataNode = new VectorDataNode("ground_control_points", Pin.getFeatureType());
+        final VectorDataNode gcpVectorDataNode = new VectorDataNode("ground_control_points", Placemark.getFeatureType());
         this.vectorDataGroup.add(gcpVectorDataNode);
         this.pinGroup = new PlacemarkGroup(this, "pinGroup", pinVectorDataNode);
         this.gcpGroup = new PlacemarkGroup(this, "gcpGroup", gcpVectorDataNode);
@@ -294,9 +294,9 @@ public class Product extends ProductNode {
     }
 
     private void handleGeoCodingChange() {
-        final ProductNodeGroup<Pin> pinGroup = getPinGroup();
+        final ProductNodeGroup<Placemark> pinGroup = getPinGroup();
         for (int i = 0; i < pinGroup.getNodeCount(); i++) {
-            final Pin pin = pinGroup.get(i);
+            final Placemark pin = pinGroup.get(i);
             final PinDescriptor pinDescriptor = PinDescriptor.INSTANCE;
             final GeoPos geoPos = pin.getGeoPos();
             final PixelPos pixelPos = pin.getPixelPos();
@@ -456,6 +456,22 @@ public class Product extends ProductNode {
     @Override
     public ProductWriter getProductWriter() {
         return writer;
+    }
+    
+    /**
+     * <p>Writes the header of a data product.<p/>
+     *
+     * @param output  an object representing a valid output for this writer, might be a <code>ImageOutputStream</code>
+     *                or a <code>File</code> or other <code>Object</code> to use for future decoding.
+     *
+     * @throws IllegalArgumentException if <code>output</code> is <code>null</code> or it's type is none of the
+     *                                  supported output types.
+     * @throws IOException              if an I/O error occurs
+     */
+    public void writeHeader(Object output) throws IOException {
+        Guardian.assertNotNull("output", output);
+        Guardian.assertNotNull("writer", writer);
+        writer.writeProductNodes(this, output);
     }
 
     /**
@@ -887,7 +903,7 @@ public class Product extends ProductNode {
         bandGroup.add(band);
 
         // add gcpGroup for this band
-        final ProductNodeGroup<Pin> thisBandgcpGroup = new ProductNodeGroup<Pin>(this,
+        final ProductNodeGroup<Placemark> thisBandgcpGroup = new ProductNodeGroup<Placemark>(this,
                 "ground_control_points", "The group which stores ground control points.");
         bandGCPGroup.put(band, thisBandgcpGroup);
     }
@@ -1056,7 +1072,7 @@ public class Product extends ProductNode {
     }
 
     public boolean isInternalNode(VectorDataNode vectorDataNode) {
-        return vectorDataNode.getFeatureType() == Pin.getFeatureType();
+        return vectorDataNode.getFeatureType() == Placemark.getFeatureType();
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -1118,7 +1134,7 @@ public class Product extends ProductNode {
      *
      * @return the GCP group.
      */
-    public ProductNodeGroup<Pin> getGcpGroup(Band band) {
+    public ProductNodeGroup<Placemark> getGcpGroup(Band band) {
         return bandGCPGroup.get(band);
     }
 

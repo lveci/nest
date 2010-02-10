@@ -1,5 +1,5 @@
 /*
- * $Id: Pin.java,v 1.7 2010-02-08 21:57:50 lveci Exp $
+ * $Id: Placemark.java,v 1.1 2010-02-10 16:20:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -41,21 +41,19 @@ import java.awt.geom.Point2D;
 import java.text.MessageFormat;
 import java.util.List;
 
-// todo - rename to Placemark (se - 20090126) 
-
 /**
- * This class represents a pin.
+ * This class represents a placemark.
  * <p/>
- * Pins are displayed as symbols at the image's pixel position corresponding to their geographical position. The name is
- * displayed as label next to the symbol. If the user moves the mouse over a pin, the textual description property shall
- * appear as tool-tip text. Single pins can be selected either by mouse-click or by the ? Prev./Next Pin tool. Pins are
- * contained in the active product and stored in DIMAP format. To share pins between products, the pins of a product can
- * be imported and exported.
+ * Placemarks are displayed as symbols at the image's pixel position corresponding to their geographical position. The name is
+ * displayed as label next to the symbol. If the user moves the mouse over a placemark, the textual description property shall
+ * appear as tool-tip text. Single placemarks can be selected either by mouse-click or by the ? Prev./Next Placemark tool. 
+ * Placemarks are contained in the active product and stored in DIMAP format. To share placemarks between products, 
+ * the placemarks of a product can be imported and exported.
  *
  * @author Sabine Embacher
- * @version $Revision: 1.7 $ $Date: 2010-02-08 21:57:50 $
+ * @version $Revision: 1.1 $ $Date: 2010-02-10 16:20:36 $
  */
-public class Pin extends ProductNode {
+public class Placemark extends ProductNode {
 
     public static final String PLACEMARK_FEATURE_TYPE_NAME = "Placemark";
 
@@ -67,9 +65,9 @@ public class Pin extends ProductNode {
     private SimpleFeature feature;
 
     /**
-     * Returns the type of features underlying all pins.
+     * Returns the type of features underlying all placemarks.
      *
-     * @return the type of features underlying all pins.
+     * @return the type of features underlying all placemarks.
      * @since BEAM 4.7
      */
     public static SimpleFeatureType getFeatureType() {
@@ -77,60 +75,34 @@ public class Pin extends ProductNode {
     }
 
     /**
-     * Creates a new pin.
+     * Creates a new placemark.
      *
-     * @param name     the pin's name.
-     * @param label    the pin's label.
-     * @param pixelPos the pin's pixel position.
-     * @deprecated since 4.1, use {@link Pin#Pin(String, String, String, PixelPos, GeoPos, PlacemarkSymbol)}
+     * @param name        the placemark's name.
+     * @param label       the placemark's label.
+     * @param description the placemark's description
+     * @param pixelPos    the placemark's pixel position
+     * @param geoPos      the placemark's geo-position.
+     * @param symbol      the placemark's symbol.
+     * @deprecated since 4.7, use {@link Placemark#Placemark(String, String, String, PixelPos, GeoPos, PlacemarkSymbol, GeoCoding)}
      */
     @Deprecated
-    public Pin(String name, String label, PixelPos pixelPos) {
-        this(name, label, "", pixelPos, null, PlacemarkSymbol.createDefaultPinSymbol());
-    }
-
-    /**
-     * Creates a new pin.
-     *
-     * @param name   the pin's name.
-     * @param label  the pin's label.
-     * @param geoPos the pin's geo-position.
-     * @deprecated since 4.1, use {@link Pin#Pin(String, String, String, PixelPos, GeoPos, PlacemarkSymbol)}
-     */
-    @Deprecated
-    public Pin(String name, String label, GeoPos geoPos) {
-        this(name, label, "", null, geoPos, PlacemarkSymbol.createDefaultPinSymbol());
-    }
-
-    /**
-     * Creates a new pin.
-     *
-     * @param name        the pin's name.
-     * @param label       the pin's label.
-     * @param description the pin's description
-     * @param pixelPos    the pin's pixel position
-     * @param geoPos      the pin's geo-position.
-     * @param symbol      the pin's symbol.
-     * @deprecated since 4.7, use {@link Pin#Pin(String, String, String, PixelPos, GeoPos, PlacemarkSymbol, GeoCoding)}
-     */
-    @Deprecated
-    public Pin(String name, String label, String description, PixelPos pixelPos, GeoPos geoPos,
+    public Placemark(String name, String label, String description, PixelPos pixelPos, GeoPos geoPos,
                PlacemarkSymbol symbol) {
         this(name, label, description, pixelPos, geoPos, symbol, null);
     }
 
     /**
-     * Creates a new pin.
+     * Creates a new placemark.
      *
-     * @param name        the pin's name.
-     * @param label       the pin's label.
-     * @param description the pin's description
-     * @param pixelPos    the pin's pixel position
-     * @param geoPos      the pin's geo-position.
-     * @param symbol      the pin's symbol.
-     * @param geoCoding   the pin's geo-coding.
+     * @param name        the placemark's name.
+     * @param label       the placemark's label.
+     * @param description the placemark's description
+     * @param pixelPos    the placemark's pixel position
+     * @param geoPos      the placemark's geo-position.
+     * @param symbol      the placemark's symbol.
+     * @param geoCoding   the placemark's geo-coding.
      */
-    public Pin(String name, String label, String description, PixelPos pixelPos, GeoPos geoPos,
+    public Placemark(String name, String label, String description, PixelPos pixelPos, GeoPos geoPos,
                PlacemarkSymbol symbol, GeoCoding geoCoding) {
         super(name, description);
         if (pixelPos == null && geoPos == null) {
@@ -144,15 +116,15 @@ public class Pin extends ProductNode {
         feature = createFeature(name, label, pixelPos, geoPos, symbol, geoCoding);
     }
 
-    Pin(SimpleFeature feature) {
+    Placemark(SimpleFeature feature) {
         super(feature.getID(), "");
         this.feature = feature;
     }
 
     /**
-     * Returns the {@link SimpleFeature}, underlying this pin.
+     * Returns the {@link SimpleFeature}, underlying this placemark.
      *
-     * @return the {@link SimpleFeature} underlying this pin.
+     * @return the {@link SimpleFeature} underlying this placemark.
      * @since BEAM 4.7
      */
     public final SimpleFeature getFeature() {
@@ -160,7 +132,7 @@ public class Pin extends ProductNode {
     }
 
     /**
-     * Sets this pin's label.
+     * Sets this placemark's label.
      *
      * @param label the label, if {@code null} an empty label is set.
      */
@@ -175,7 +147,7 @@ public class Pin extends ProductNode {
     }
 
     /**
-     * Returns this pin's label.
+     * Returns this placemark's label.
      *
      * @return the label, cannot be {@code null}.
      */
@@ -184,7 +156,7 @@ public class Pin extends ProductNode {
     }
 
     /**
-     * Returns an estimated, raw storage size in bytes of this pin.
+     * Returns an estimated, raw storage size in bytes of this placemark.
      *
      * @param subsetDef if not {@code null} the subset may limit the size returned.
      * @return the estimated size in bytes.
@@ -222,10 +194,10 @@ public class Pin extends ProductNode {
     }
 
     /**
-     * Returns this pin's pixel position.
+     * Returns this placemark's pixel position.
      *
-     * @return this pin's pixel position. If this pin's pixel position is {@code null}, the pixel
-     *         position returned is calculated from this pin's geo-position, if possible.
+     * @return this placemark's pixel position. If this placemark's pixel position is {@code null}, the pixel
+     *         position returned is calculated from this placemark's geo-position, if possible.
      */
     public PixelPos getPixelPos() {
         PixelPos pixelPos = toPixelPos(getPixelCoordinate());
@@ -312,57 +284,57 @@ public class Pin extends ProductNode {
      * Creates a new GCP from an XML element.
      *
      * @param element the element.
-     * @return the GCP created.
+     * @return the placemark created.
      * @throws NullPointerException     if element is null
      * @throws IllegalArgumentException if element is invalid
      * @deprecated since BEAM 4.7, use {@link #createPlacemark(Element, PlacemarkSymbol, GeoCoding)} instead
      */
     @Deprecated
-    public static Pin createGcp(Element element) {
+    public static Placemark createGcp(Element element) {
         return createPlacemark(element, PlacemarkSymbol.createDefaultGcpSymbol(), null);
     }
 
     /**
-     * Creates a new pin from an XML element.
+     * Creates a new Pin from an XML element.
      *
      * @param element the element.
-     * @return the pin created.
+     * @return the placemark created.
      * @throws NullPointerException     if element is null
      * @throws IllegalArgumentException if element is invalid
      * @deprecated since BEAM 4.7, use {@link #createPlacemark(org.jdom.Element, PlacemarkSymbol, GeoCoding)} instead
      */
     @Deprecated
-    public static Pin createPin(Element element) {
+    public static Placemark createPin(Element element) {
         return createPlacemark(element, PlacemarkSymbol.createDefaultPinSymbol(), null);
     }
 
     /**
-     * Creates a new pin from an XML element and a given symbol.
+     * Creates a new placemark from an XML element and a given symbol.
      *
      * @param element the element.
      * @param symbol  the symbol.
-     * @return the pin created.
+     * @return the placemark created.
      * @throws NullPointerException     if element is null
      * @throws IllegalArgumentException if element is invalid
      * @deprecated since BEAM 4.7, use {@link #createPlacemark(Element, PlacemarkSymbol, GeoCoding)} instead
      */
     @Deprecated
-    public static Pin createPlacemark(Element element, PlacemarkSymbol symbol) {
+    public static Placemark createPlacemark(Element element, PlacemarkSymbol symbol) {
         return createPlacemark(element, symbol, null);
     }
     /**
-     * Creates a new pin from an XML element and a given symbol.
+     * Creates a new placemark from an XML element and a given symbol.
      *
      * @param element the element.
      * @param symbol  the symbol.
      * @param geoCoding the geoCoding to used by the placemark. Can be <code>null</code>.
      *
-     * @return the pin created.
+     * @return the placemark created.
      *
      * @throws NullPointerException     if element is null
      * @throws IllegalArgumentException if element is invalid
      */
-    public static Pin createPlacemark(Element element, PlacemarkSymbol symbol, GeoCoding geoCoding) {
+    public static Placemark createPlacemark(Element element, PlacemarkSymbol symbol, GeoCoding geoCoding) {
         if (!DimapProductConstants.TAG_PLACEMARK.equals(element.getName()) &&
                 !DimapProductConstants.TAG_PIN.equals(element.getName())) {
             throw new IllegalArgumentException(MessageFormat.format("Element ''{0}'' or ''{1}'' expected.",
@@ -374,7 +346,7 @@ public class Pin extends ProductNode {
             throw new IllegalArgumentException(MessageFormat.format("Missing attribute ''{0}''.",
                                                                     DimapProductConstants.ATTRIB_NAME));
         }
-        if (!Pin.isValidNodeName(name)) {
+        if (!Placemark.isValidNodeName(name)) {
             throw new IllegalArgumentException(MessageFormat.format("Invalid placemark name ''{0}''.", name));
         }
 
@@ -420,7 +392,7 @@ public class Pin extends ProductNode {
             symbol.setOutlineColor(outlineColor);
         }
 
-        return new Pin(name, label, description, pixelPos, geoPos, symbol, geoCoding);
+        return new Placemark(name, label, description, pixelPos, geoPos, symbol, geoCoding);
     }
 
     // todo - move this method into a new DimapPersistable
@@ -571,9 +543,9 @@ public class Pin extends ProductNode {
             builder.add(descriptor);
         }
         builder.setName(name);
-        builder.add(Pin.PROPERTY_NAME_LABEL, String.class);
-        builder.add(Pin.PROPERTY_NAME_PIXELPOS, Point.class);
-        builder.add(Pin.PROPERTY_NAME_GEOPOS, Point.class);
+        builder.add(Placemark.PROPERTY_NAME_LABEL, String.class);
+        builder.add(Placemark.PROPERTY_NAME_PIXELPOS, Point.class);
+        builder.add(Placemark.PROPERTY_NAME_GEOPOS, Point.class);
         builder.add("symbol", PlacemarkSymbol.class);
 
         return builder.buildFeatureType();
@@ -596,15 +568,15 @@ public class Pin extends ProductNode {
         final SimpleFeature feature = PlainFeatureFactory.createPlainFeature(featureType, name, geometry, null);
 
         if (pixelPos != null) {
-            feature.setAttribute(Pin.PROPERTY_NAME_PIXELPOS, geometryFactory.createPoint(toCoordinate(pixelPos)));
+            feature.setAttribute(Placemark.PROPERTY_NAME_PIXELPOS, geometryFactory.createPoint(toCoordinate(pixelPos)));
         }
         if (geoPos != null) {
-            feature.setAttribute(Pin.PROPERTY_NAME_GEOPOS, geometryFactory.createPoint(toCoordinate(geoPos)));
+            feature.setAttribute(Placemark.PROPERTY_NAME_GEOPOS, geometryFactory.createPoint(toCoordinate(geoPos)));
         }
         if (label == null) {
-            feature.setAttribute(Pin.PROPERTY_NAME_LABEL, "");
+            feature.setAttribute(Placemark.PROPERTY_NAME_LABEL, "");
         } else {
-            feature.setAttribute(Pin.PROPERTY_NAME_LABEL, label);
+            feature.setAttribute(Placemark.PROPERTY_NAME_LABEL, label);
         }
         feature.setAttribute("symbol", symbol);
 

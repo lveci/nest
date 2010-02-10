@@ -1,5 +1,5 @@
 /*
- * $Id: DimapHeaderWriter.java,v 1.11 2010-01-21 20:25:42 lveci Exp $
+ * $Id: DimapHeaderWriter.java,v 1.12 2010-02-10 16:20:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -18,29 +18,7 @@ package org.esa.beam.dataio.dimap;
 
 import org.esa.beam.dataio.dimap.spi.DimapPersistable;
 import org.esa.beam.dataio.dimap.spi.DimapPersistence;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.ColorPaletteDef;
-import org.esa.beam.framework.datamodel.CrsGeoCoding;
-import org.esa.beam.framework.datamodel.FXYGeoCoding;
-import org.esa.beam.framework.datamodel.FilterBand;
-import org.esa.beam.framework.datamodel.FlagCoding;
-import org.esa.beam.framework.datamodel.GcpGeoCoding;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.IndexCoding;
-import org.esa.beam.framework.datamodel.MapGeoCoding;
-import org.esa.beam.framework.datamodel.Mask;
-import org.esa.beam.framework.datamodel.MetadataAttribute;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Pin;
-import org.esa.beam.framework.datamodel.PixelGeoCoding;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.ProductNodeGroup;
-import org.esa.beam.framework.datamodel.RasterDataNode;
-import org.esa.beam.framework.datamodel.SampleCoding;
-import org.esa.beam.framework.datamodel.TiePointGeoCoding;
-import org.esa.beam.framework.datamodel.TiePointGrid;
-import org.esa.beam.framework.datamodel.VirtualBand;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.dataop.maptransf.Ellipsoid;
 import org.esa.beam.framework.dataop.maptransf.MapInfo;
@@ -115,39 +93,39 @@ public final class DimapHeaderWriter extends XmlWriter {
     }
 
     protected void writePins(int indent) {
-        ProductNodeGroup<Pin> pinGroup = product.getPinGroup();
-        final Pin[] pins = pinGroup.toArray(new Pin[pinGroup.getNodeCount()]);
+        ProductNodeGroup<Placemark> pinGroup = product.getPinGroup();
+        final Placemark[] pins = pinGroup.toArray(new Placemark[pinGroup.getNodeCount()]);
         final String[] pinGroupTags = createTags(indent, DimapProductConstants.TAG_PIN_GROUP);
         if (pins.length > 0) {
             println(pinGroupTags[0]);
-            for (final Pin pin : pins) {
-                pin.writeXML(this, indent + 1);
+            for (final Placemark placemark : pins) {
+                placemark.writeXML(this, indent + 1);
             }
             println(pinGroupTags[1]);
         }
     }
 
     protected void writeGcps(int indent) {
-        ProductNodeGroup<Pin> gcpGroup = product.getGcpGroup();
-        final Pin[] gcps = gcpGroup.toArray(new Pin[gcpGroup.getNodeCount()]);
+        PlacemarkGroup gcpGroup = product.getGcpGroup();
+        final Placemark[] gcps = gcpGroup.toArray(new Placemark[gcpGroup.getNodeCount()]);
         final String[] gcpGroupTags = createTags(indent, DimapProductConstants.TAG_GCP_GROUP);
         if (gcps.length > 0) {
             println(gcpGroupTags[0]);
-            for (final Pin gcp : gcps) {
+            for (final Placemark gcp : gcps) {
                 gcp.writeXML(this, indent + 1);
             }
             println(gcpGroupTags[1]);
         }
 
         for(Band band : product.getBands()) {
-            ProductNodeGroup<Pin> bandGCPGroup = product.getGcpGroup(band);
-            final Pin[] bandGCPs = bandGCPGroup.toArray(new Pin[bandGCPGroup.getNodeCount()]);
+            ProductNodeGroup<Placemark> bandGCPGroup = product.getGcpGroup(band);
+            final Placemark[] bandGCPs = bandGCPGroup.toArray(new Placemark[bandGCPGroup.getNodeCount()]);
             final String[] bandGCPGroupTags = createTags(indent, DimapProductConstants.TAG_BAND_GCP_GROUP);
             if (bandGCPs.length > 0) {
                 String startTag = bandGCPGroupTags[0].substring(0, bandGCPGroupTags[0].length()-1)
                         + " band=\""+band.getName()+"\">";
                 println(startTag);
-                for (final Pin gcp : bandGCPs) {
+                for (final Placemark gcp : bandGCPs) {
                     gcp.writeXML(this, indent + 1);
                 }
                 println(bandGCPGroupTags[1]);

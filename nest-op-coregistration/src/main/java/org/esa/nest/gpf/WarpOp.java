@@ -97,7 +97,7 @@ public class WarpOp extends Operator {
     @Parameter(description = "Show the Residuals file in a text viewer", defaultValue = "false", label="Show Residuals")
     private boolean openResidualsFile = false;
 
-    private ProductNodeGroup<Pin> masterGCPGroup = null;
+    private ProductNodeGroup<Placemark> masterGCPGroup = null;
     private Band masterBand = null;
     private Band masterBand2 = null;
     private boolean complexCoregistration = false;
@@ -188,7 +188,7 @@ public class WarpOp extends Operator {
                 if(srcBand == masterBand || srcBand == masterBand2)
                     continue;
 
-                final ProductNodeGroup<Pin> slaveGCPGroup = sourceProduct.getGcpGroup(srcBand);
+                final ProductNodeGroup<Placemark> slaveGCPGroup = sourceProduct.getGcpGroup(srcBand);
                 if(slaveGCPGroup.getNodeCount() < 3) {
                     throw new OperatorException(slaveGCPGroup.getNodeCount() + 
                             " GCPs survived. Try using more GCPs or a larger window");
@@ -243,12 +243,12 @@ public class WarpOp extends Operator {
 
     private void addSlaveGCPs(final WarpData warpData, final String bandName) {
 
-        final ProductNodeGroup<Pin> targetGCPGroup = targetProduct.getGcpGroup(targetProduct.getBand(bandName));
+        final ProductNodeGroup<Placemark> targetGCPGroup = targetProduct.getGcpGroup(targetProduct.getBand(bandName));
         targetGCPGroup.removeAll();
 
         for(int i = 0; i < warpData.slaveGCPList.size(); ++i) {
-            final Pin sPin = warpData.slaveGCPList.get(i);
-            final Pin tPin = new Pin(sPin.getName(),
+            final Placemark sPin = warpData.slaveGCPList.get(i);
+            final Placemark tPin = new Placemark(sPin.getName(),
                                      sPin.getLabel(),
                                      sPin.getDescription(),
                                      sPin.getPixelPos(),
@@ -362,7 +362,7 @@ public class WarpOp extends Operator {
      * @param masterGCPGroup The master GCPs.
      */
     public static void computeWARPPolynomial(
-            final WarpData warpData, final int warpPolynomialOrder, final ProductNodeGroup<Pin> masterGCPGroup) {
+            final WarpData warpData, final int warpPolynomialOrder, final ProductNodeGroup<Placemark> masterGCPGroup) {
 
         getNumOfValidGCPs(warpData, warpPolynomialOrder);
 
@@ -396,18 +396,18 @@ public class WarpOp extends Operator {
      * @param masterGCPGroup The master GCPs.
      */
     private static void getMasterAndSlaveGCPCoordinates(
-            final WarpData warpData, final ProductNodeGroup<Pin> masterGCPGroup) {
+            final WarpData warpData, final ProductNodeGroup<Placemark> masterGCPGroup) {
 
         warpData.masterGCPCoords = new float[2*warpData.numValidGCPs];
         warpData.slaveGCPCoords = new float[2*warpData.numValidGCPs];
 
         for(int i = 0; i < warpData.numValidGCPs; ++i) {
 
-            final Pin sPin = warpData.slaveGCPList.get(i);
+            final Placemark sPin = warpData.slaveGCPList.get(i);
             final PixelPos sGCPPos = sPin.getPixelPos();
             //System.out.println("WARP: slave gcp[" + i + "] = " + "(" + sGCPPos.x + "," + sGCPPos.y + ")");
 
-            final Pin mPin = masterGCPGroup.get(sPin.getName());
+            final Placemark mPin = masterGCPGroup.get(sPin.getName());
             final PixelPos mGCPPos = mPin.getPixelPos();
             //System.out.println("WARP: master gcp[" + i + "] = " + "(" + mGCPPos.x + "," + mGCPPos.y + ")");
 
@@ -500,7 +500,7 @@ public class WarpOp extends Operator {
      */
     public static boolean eliminateGCPsBasedOnRMS(final WarpData warpData, final float threshold) {
 
-        final ArrayList<Pin> pinList = new ArrayList<Pin>();
+        final ArrayList<Placemark> pinList = new ArrayList<Placemark>();
         for (int i = 0; i < warpData.rms.length; i++) {
             if (warpData.rms[i] >= threshold) {
                 pinList.add(warpData.slaveGCPList.get(i));
@@ -508,7 +508,7 @@ public class WarpOp extends Operator {
             }
         }
 
-        for (Pin aPin : pinList) {
+        for (Placemark aPin : pinList) {
             warpData.slaveGCPList.remove(aPin);
         }
 
@@ -721,7 +721,7 @@ public class WarpOp extends Operator {
     }
 
     public static class WarpData {
-        public final ArrayList<Pin> slaveGCPList = new ArrayList<Pin>();
+        public final ArrayList<Placemark> slaveGCPList = new ArrayList<Placemark>();
         public WarpPolynomial warp = null;
 
         public int numValidGCPs = 0;
@@ -738,7 +738,7 @@ public class WarpOp extends Operator {
         public double colResidualStd = 0;
         public double colResidualMean = 0;
 
-        public WarpData(ProductNodeGroup<Pin> slaveGCPGroup) {
+        public WarpData(ProductNodeGroup<Placemark> slaveGCPGroup) {
             for (int i = 0; i < slaveGCPGroup.getNodeCount(); ++i) {
                 slaveGCPList.add(slaveGCPGroup.get(i));
             }

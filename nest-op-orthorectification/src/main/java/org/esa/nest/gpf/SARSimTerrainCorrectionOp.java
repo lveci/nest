@@ -143,7 +143,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
     @Parameter(description = "Show range and azimuth shifts file in a text viewer", defaultValue = "false", label="Show Range and Azimuth Shifts")
     private boolean openShiftsFile = false;
 
-    private ProductNodeGroup<Pin> masterGCPGroup = null;
+    private ProductNodeGroup<Placemark> masterGCPGroup = null;
     private MetadataElement absRoot = null;
     private ElevationModel dem = null;
     private FileElevationModel fileElevationModel = null;
@@ -798,7 +798,7 @@ public class SARSimTerrainCorrectionOp extends Operator {
             if(unit != null && unit.contains(Unit.BIT)) // skip layover_shadow_mask band
                 continue;
 
-            final ProductNodeGroup<Pin> slaveGCPGroup = sourceProduct.getGcpGroup(srcBand);
+            final ProductNodeGroup<Placemark> slaveGCPGroup = sourceProduct.getGcpGroup(srcBand);
             if(slaveGCPGroup.getNodeCount() < 3) {
                 throw new OperatorException(slaveGCPGroup.getNodeCount() +
                         " GCPs survived. Try using more GCPs or a larger window");
@@ -1581,13 +1581,13 @@ public class SARSimTerrainCorrectionOp extends Operator {
             for (int i = 0; i < warpData.numValidGCPs; i++) {
 
                 // get final slave GCP position
-                final Pin sPin = warpData.slaveGCPList.get(i);
+                final Placemark sPin = warpData.slaveGCPList.get(i);
                 final PixelPos sGCPPos = sPin.getPixelPos();
 
                 // get initial slave GCP position
                 // Note: master GCP position is the same as the initial slave GCP position because master and slave
                 //       now share the same geocoding.
-                final Pin mPin = masterGCPGroup.get(sPin.getName());
+                final Placemark mPin = masterGCPGroup.get(sPin.getName());
                 final PixelPos mGCPPos = mPin.getPixelPos();
 
                 // compute range and azimuth shifts

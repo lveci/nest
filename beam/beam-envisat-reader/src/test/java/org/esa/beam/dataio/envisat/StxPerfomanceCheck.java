@@ -9,7 +9,7 @@ import java.io.IOException;
 import com.bc.ceres.core.ProgressMonitor;
 
 /*
- * $Id: StxPerfomanceCheck.java,v 1.1 2009-04-28 14:37:14 lveci Exp $
+ * $Id: StxPerfomanceCheck.java,v 1.2 2010-02-10 16:20:37 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -37,7 +37,7 @@ public class StxPerfomanceCheck {
     }
 
     private static void performeBandTest(String filePath) throws IOException {
-        Product product = ProductIO.readProduct(filePath, null);
+        Product product = ProductIO.readProduct(filePath);
         Band band0 = product.getBandAt(0);
         double[] times = computeStx(band0);
         

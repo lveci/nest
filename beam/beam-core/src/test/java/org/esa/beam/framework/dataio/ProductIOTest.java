@@ -1,5 +1,5 @@
 /*
- * $Id: ProductIOTest.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ProductIOTest.java,v 1.2 2010-02-10 16:20:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -41,7 +41,7 @@ public class ProductIOTest extends TestCase {
 
     public void testReadProductArgsChecking() {
         try {
-            ProductIO.readProduct((File) null, null);
+            ProductIO.readProduct((File) null);
             fail();
         } catch (IOException expected) {
             fail();
@@ -49,7 +49,7 @@ public class ProductIOTest extends TestCase {
         }
 
         try {
-            ProductIO.readProduct("rallala", null);
+            ProductIO.readProduct("rallala");
             fail();
         } catch (IOException expected) {
         }

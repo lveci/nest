@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataNodeDeleter.java,v 1.1 2010-02-08 21:57:50 lveci Exp $
+ * $Id: RasterDataNodeDeleter.java,v 1.2 2010-02-10 16:20:37 lveci Exp $
  *
  * Copyright (C) 2010 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,6 +27,7 @@ import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.framework.datamodel.VectorDataNode;
 import org.esa.beam.framework.datamodel.VirtualBand;
+import org.esa.beam.framework.datamodel.Mask.ImageType;
 import org.esa.beam.util.Debug;
 import org.esa.beam.visat.VisatApp;
 
@@ -45,7 +46,7 @@ import javax.swing.JOptionPane;
  * Confirms Raster Data Node deletion by the user and performs them.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.1 $ $Date: 2010-02-08 21:57:50 $
+ * @version $Revision: 1.2 $ $Date: 2010-02-10 16:20:37 $
  * @since BEAM 4.7
  */
 public class RasterDataNodeDeleter {
@@ -146,6 +147,11 @@ public class RasterDataNodeDeleter {
                     for (TiePointGrid tiePointGrid : tiePointGrids) {
                         deleteMaskFromGroup(tiePointGrid.getRoiMaskGroup(), mask);
                         deleteMaskFromGroup(tiePointGrid.getOverlayMaskGroup(), mask);
+                    }
+                    ImageType imageType = mask.getImageType();
+                    if (imageType instanceof Mask.VectorDataType) {
+                        VectorDataNode vectorDataNode = Mask.VectorDataType.getVectorData(mask);
+                        product.getVectorDataGroup().remove(vectorDataNode);
                     }
                 } else if (raster instanceof Band) {
                     product.removeBand((Band) raster);

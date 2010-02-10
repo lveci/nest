@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractExpressionEditor.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: AbstractExpressionEditor.java,v 1.2 2010-02-10 16:20:37 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -133,7 +133,7 @@ public abstract class AbstractExpressionEditor extends TextFieldXEditor {
     }
 
     Product openProduct(final String path) throws IOException {
-        return ProductIO.readProduct(path, null);
+        return ProductIO.readProduct(path);
     }
 
     protected abstract ProductExpressionPane createProductExpressionPane(Product[] sourceProducts,

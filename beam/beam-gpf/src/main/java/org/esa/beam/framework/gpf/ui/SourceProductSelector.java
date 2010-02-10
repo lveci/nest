@@ -37,7 +37,7 @@ import java.util.Iterator;
  * todo - add capability to specify optional sources
  *
  * @author Ralf Quast
- * @version $Revision: 1.5 $ $Date: 2009-12-22 17:30:01 $
+ * @version $Revision: 1.6 $ $Date: 2010-02-10 16:20:37 $
  */
 public class SourceProductSelector {
 
@@ -277,7 +277,7 @@ public class SourceProductSelector {
 
                 Product product = null;
                 try {
-                    product = ProductIO.readProduct(file, null);
+                    product = ProductIO.readProduct(file);
                     if (product == null) {
                         throw new IOException(MessageFormat.format("File ''{0}'' could not be read.", file.getPath()));
                     }

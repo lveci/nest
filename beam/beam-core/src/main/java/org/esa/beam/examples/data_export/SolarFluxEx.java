@@ -1,7 +1,7 @@
 package org.esa.beam.examples.data_export;
 
 /*
- * $Id: SolarFluxEx.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: SolarFluxEx.java,v 1.2 2010-02-10 16:20:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +31,7 @@ public class SolarFluxEx {
 
     public static void main(String[] args) {
         try {
-            Product product = ProductIO.readProduct("C:/Projects/BEAM/data/MER_RR__1P_A.N1", null);
+            Product product = ProductIO.readProduct("C:/Projects/BEAM/data/MER_RR__1P_A.N1");
             float[] solarFlux = getSolarFlux(product);
             for (int i = 0; i < solarFlux.length; i++) {
                 System.out.println("solarFlux[" + i + "] = " + solarFlux[i]);

@@ -1,9 +1,9 @@
 package org.esa.nest.dat.layersrc;
 
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.Pin;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNodeGroup;
+import org.esa.beam.framework.datamodel.Placemark;
 import org.esa.beam.framework.ui.layer.AbstractLayerSourceAssistantPage;
 import org.esa.beam.framework.ui.layer.LayerSource;
 import org.esa.beam.framework.ui.layer.LayerSourcePageContext;
@@ -17,7 +17,7 @@ public class GCPVectorLayerSource implements LayerSource {
     @Override
     public boolean isApplicable(LayerSourcePageContext pageContext) {
         final Product product = pageContext.getAppContext().getSelectedProduct();
-        final ProductNodeGroup<Pin> masterGCPGroup = product.getGcpGroup(product.getBandAt(0));
+        final ProductNodeGroup<Placemark> masterGCPGroup = product.getGcpGroup(product.getBandAt(0));
         final Band band = product.getBand(pageContext.getAppContext().getSelectedProductSceneView().getRaster().getName());
 
         return (masterGCPGroup != null && masterGCPGroup.getNodeCount() > 0 &&

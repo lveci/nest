@@ -1,5 +1,5 @@
 /*
- * $Id: ExportPinPixelsAction.java,v 1.3 2010-02-08 21:57:50 lveci Exp $
+ * $Id: ExportPinPixelsAction.java,v 1.4 2010-02-10 16:20:37 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -19,7 +19,7 @@ package org.esa.beam.visat.actions.pin;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.swing.progress.DialogProgressMonitor;
 import com.bc.jexp.ParseException;
-import org.esa.beam.framework.datamodel.Pin;
+import org.esa.beam.framework.datamodel.Placemark;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNodeEvent;
 import org.esa.beam.framework.datamodel.ProductNodeGroup;
@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * This action exports pins and their surrounding pixels.
  *
  * @author Marco Peters
- * @version $Revision: 1.3 $ $Date: 2010-02-08 21:57:50 $
+ * @version $Revision: 1.4 $ $Date: 2010-02-10 16:20:37 $
  */
 public class ExportPinPixelsAction extends ExecCommand {
 
@@ -158,7 +158,7 @@ public class ExportPinPixelsAction extends ExecCommand {
             return;
         }
 
-        final Map<Pin, Object[]> pinPixels = assignControllParameters(product);
+        final Map<Placemark, Object[]> pinPixels = assignControllParameters(product);
         if (getNumPixelsToExport(pinPixels) == 0) {
             visatApp.showErrorDialog("There are no pixels to export."); /* I18N */
             return;
@@ -190,7 +190,7 @@ public class ExportPinPixelsAction extends ExecCommand {
     /**
      * Gets a target Writer for the export data.
      */
-    private Writer getOutputWriter(final Map<Pin, Object[]> pinPixels, final Product product) {
+    private Writer getOutputWriter(final Map<Placemark, Object[]> pinPixels, final Product product) {
         // Get export method from user
         final int method = getExportMethod(getNumPixelsToExport(pinPixels));
         VisatApp visatApp = VisatApp.getApp();
@@ -260,14 +260,14 @@ public class ExportPinPixelsAction extends ExecCommand {
      * product data or user input.
      * @param product 
      */
-    private Map<Pin, Object[]> assignControllParameters(Product product) {
+    private Map<Placemark, Object[]> assignControllParameters(Product product) {
 
-        final Pin[] exportPins;
+        final Placemark[] exportPins;
         if (dialog.isExportSelectedPinsOnly()) {
             exportPins = VisatApp.getApp().getSelectedProductSceneView().getSelectedPins();
         } else {
-            ProductNodeGroup<Pin> pinGroup = product.getPinGroup();
-            exportPins = pinGroup.toArray(new Pin[pinGroup.getNodeCount()]);
+            ProductNodeGroup<Placemark> pinGroup = product.getPinGroup();
+            exportPins = pinGroup.toArray(new Placemark[pinGroup.getNodeCount()]);
         }
 
         final int regionSize = dialog.getRegionSize();
@@ -291,7 +291,7 @@ public class ExportPinPixelsAction extends ExecCommand {
         }
     }
 
-    private SwingWorker createWorkerInstance(final Map<Pin, Object[]> regions, final TabSeparatedPinPixelsWriter regionWriter,
+    private SwingWorker createWorkerInstance(final Map<Placemark, Object[]> regions, final TabSeparatedPinPixelsWriter regionWriter,
                                              final Writer out, final ProgressMonitor pm) {
         // Create a progress monitor and adds them to the progress controller pool in order to show
         // export progress
@@ -309,7 +309,7 @@ public class ExportPinPixelsAction extends ExecCommand {
             @Override
             protected Object doInBackground() throws Exception {
                 try {
-                    final boolean success = regionWriter.writePinPixels(dialog.getRegionSize(), dialog
+                    final boolean success = regionWriter.writePlacemarkPixels(dialog.getRegionSize(), dialog
                             .getExpression(), regions, pm);
                     if (success) {
                         maybeCopyToClipboard(out);
@@ -378,9 +378,9 @@ public class ExportPinPixelsAction extends ExecCommand {
      * @throws java.io.IOException
      * @throws com.bc.jexp.ParseException
      */
-    private Map<Pin, Object[]> generateOutputData(final int size, final String expression, final Pin[] pins,
+    private Map<Placemark, Object[]> generateOutputData(final int size, final String expression, final Placemark[] pins,
                                        final boolean useExpressionAsFilter, final Product product) throws IOException, ParseException {
-        Map<Pin, Object[]> outputData = new HashMap<Pin, Object[]>();
+        Map<Placemark, Object[]> outputData = new HashMap<Placemark, Object[]>();
         for (int i = 0; i < pins.length; i++) {
             Point actualPin = new Point((int) pins[i].getPixelPos().x, (int) pins[i].getPixelPos().y);
             PinPixelsGenerator pinPixels = new PinPixelsGenerator(product);
@@ -404,9 +404,9 @@ public class ExportPinPixelsAction extends ExecCommand {
      *
      * @return the number of pixels stored in the hashMap
      */
-    private static int getNumPixelsToExport(final Map<Pin, Object[]> pinPixels) {
+    private static int getNumPixelsToExport(final Map<Placemark, Object[]> pinPixels) {
         int numPixels = 0;
-        for (Map.Entry<Pin, Object[]> entry: pinPixels.entrySet()) {
+        for (Map.Entry<Placemark, Object[]> entry: pinPixels.entrySet()) {
             Object[] pixelData = entry.getValue();
             if (pixelData != null && pixelData instanceof Point[]) {
                 Point[] pixels = (Point[]) pixelData;

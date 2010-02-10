@@ -1,5 +1,5 @@
 /*
- * $Id: BitmaskWriterMain.java,v 1.2 2009-12-02 16:52:11 lveci Exp $
+ * $Id: BitmaskWriterMain.java,v 1.3 2010-02-10 16:20:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -103,7 +103,7 @@ public class BitmaskWriterMain {
                    ParseException {
 
         // Read the product (note that only 'nodes' are read, not the entire data!)
-        Product product = ProductIO.readProduct(inputPath, null);
+        Product product = ProductIO.readProduct(inputPath);
 
         // Parse the given bit-mask expression string to a term which can efficiently
         // be evaluated by the framework

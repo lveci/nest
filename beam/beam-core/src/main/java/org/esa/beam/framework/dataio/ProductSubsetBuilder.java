@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetBuilder.java,v 1.20 2010-02-10 15:21:12 junlu Exp $
+ * $Id: ProductSubsetBuilder.java,v 1.21 2010-02-10 16:20:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -31,7 +31,6 @@ import java.util.Arrays;
  * A special-purpose product reader used to build subsets of data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.20 $ $Date: 2010-02-10 15:21:12 $
  */
 public class ProductSubsetBuilder extends AbstractProductBuilder {
 
@@ -457,10 +456,10 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         copyPlacemarks(getSourceProduct().getGcpGroup(), product.getGcpGroup(), gcpSymbol, true);
     }
 
-    private void copyPlacemarks(ProductNodeGroup<Pin> sourcePlacemarkGroup,
-                                ProductNodeGroup<Pin> targetPlacemarkGroup, PlacemarkSymbol symbol,
+    private void copyPlacemarks(ProductNodeGroup<Placemark> sourcePlacemarkGroup,
+                                ProductNodeGroup<Placemark> targetPlacemarkGroup, PlacemarkSymbol symbol,
                                 boolean copyAll) {
-        final Pin[] placemarks = new Pin[sourcePlacemarkGroup.getNodeCount()];
+        final Placemark[] placemarks = new Placemark[sourcePlacemarkGroup.getNodeCount()];
         sourcePlacemarkGroup.toArray(placemarks);
 
         final int offsetX;
@@ -483,12 +482,12 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             subSamplingY = 1;
         }
 
-        for (final Pin placemark : placemarks) {
+        for (final Placemark placemark : placemarks) {
             final float x = (placemark.getPixelPos().x - offsetX) / subSamplingX;
             final float y = (placemark.getPixelPos().y - offsetY) / subSamplingY;
 
             if (x >= 0 && x < getSceneRasterWidth() && y >= 0 && y < getSceneRasterHeight() || copyAll) {
-                targetPlacemarkGroup.add(new Pin(placemark.getName(),
+                targetPlacemarkGroup.add(new Placemark(placemark.getName(),
                                                  placemark.getLabel(),
                                                  placemark.getDescription(),
                                                  new PixelPos(x, y),

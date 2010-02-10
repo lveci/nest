@@ -1,5 +1,5 @@
 /*
- * $Id: VisatMain.java,v 1.4 2010-02-08 21:57:50 lveci Exp $
+ * $Id: VisatMain.java,v 1.5 2010-02-10 16:20:37 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -48,7 +48,7 @@ import java.util.Locale;
  * <i>file</i></code> sets the logfile for VISAT to <i>file</i> </ld>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2010-02-08 21:57:50 $
+ * @version $Revision: 1.5 $ $Date: 2010-02-10 16:20:37 $
  */
 public class VisatMain implements RuntimeRunnable {
     /**
@@ -159,7 +159,7 @@ public class VisatMain implements RuntimeRunnable {
         final File productFile = new File(productFilepath);
         final Product product;
         try {
-            product = ProductIO.readProduct(productFile, null);
+            product = ProductIO.readProduct(productFile);
             if (product == null) {
                 final MessageFormat mf = new MessageFormat("No reader found for data product\n''{0}''."); /*I18N*/
                 final Object[] args = new Object[]{productFile.getPath()};

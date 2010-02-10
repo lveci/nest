@@ -1,5 +1,5 @@
 /*
- * $Id: ExportPinPixelsDialog.java,v 1.4 2010-02-08 21:57:50 lveci Exp $
+ * $Id: ExportPinPixelsDialog.java,v 1.5 2010-02-10 16:20:37 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,7 +16,7 @@
  */
 package org.esa.beam.visat.actions.pin;
 
-import org.esa.beam.framework.datamodel.Pin;
+import org.esa.beam.framework.datamodel.Placemark;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.param.ParamChangeEvent;
 import org.esa.beam.framework.param.ParamChangeListener;
@@ -290,7 +290,7 @@ class ExportPinPixelsDialog extends ModalDialog {
         int numPinsTotal = selectedProduct.getPinGroup().getNodeCount();
         ProductSceneView sceneView = VisatApp.getApp().getSelectedProductSceneView();
         if (sceneView != null && sceneView.getProduct() == selectedProduct) {
-            Pin[] selectedPins = sceneView.getSelectedPins();
+            Placemark[] selectedPins = sceneView.getSelectedPins();
             numSelectedPins = selectedPins.length;
         }
         buttonExportSelectedPins.setEnabled(numSelectedPins > 0);

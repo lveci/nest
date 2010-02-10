@@ -1,5 +1,5 @@
 /*
- * $Id: SingleTargetProductDialog.java,v 1.4 2009-11-13 15:16:01 lveci Exp $
+ * $Id: SingleTargetProductDialog.java,v 1.5 2010-02-10 16:20:37 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -46,7 +46,7 @@ import java.awt.*;
  *
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.4 $ $Date: 2009-11-13 15:16:01 $
+ * @version $Revision: 1.5 $ $Date: 2010-02-10 16:20:37 $
  */
 public abstract class SingleTargetProductDialog extends ModelessDialog {
 
@@ -306,7 +306,7 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
                                      model.getFormatName(), SubProgressMonitor.create(pm, 95));
                 saveTime = System.currentTimeMillis() - t0;
                 if (model.isOpenInAppSelected()) {
-                    product = ProductIO.readProduct(model.getProductFile(), null);
+                    product = ProductIO.readProduct(model.getProductFile());
                     if (product == null) {
                         product = targetProduct; // todo - check - this cannot be ok!!! (nf)
                     }

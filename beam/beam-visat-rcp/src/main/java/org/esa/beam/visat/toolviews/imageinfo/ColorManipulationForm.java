@@ -1,5 +1,5 @@
 /*
- * $Id: ColorManipulationForm.java,v 1.2 2009-05-15 19:08:42 lveci Exp $
+ * $Id: ColorManipulationForm.java,v 1.3 2010-02-10 16:20:37 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -113,6 +113,7 @@ class ColorManipulationForm {
     private ImageInfo imageInfo; // our model!
     private MoreOptionsPane moreOptionsPane;
     private SceneViewImageInfoChangeListener sceneViewChangeListener;
+    private final String titlePrefix;
 
     public ColorManipulationForm(ColorManipulationToolView colorManipulationToolView) {
         this.toolView = colorManipulationToolView;
@@ -120,6 +121,7 @@ class ColorManipulationForm {
         preferences = visatApp.getPreferences();
         productNodeListener = new ColorManipulationPNL();
         sceneViewChangeListener = new SceneViewImageInfoChangeListener();
+        titlePrefix = getToolViewDescriptor().getTitle();
     }
 
     public ProductSceneView getProductSceneView() {
@@ -250,8 +252,7 @@ class ColorManipulationForm {
         if (productSceneView != null) {
             titlePostfix = " - " + productSceneView.getSceneName();
         }
-        // todo - this doesn't work at all!!!
-        toolView.setTitle(getToolViewDescriptor().getTitle() + titlePostfix);
+        toolView.setTitle( titlePrefix + titlePostfix);
     }
 
     private void updateToolButtons() {

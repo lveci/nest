@@ -1,5 +1,5 @@
 /*
- * $Id: BandTest.java,v 1.2 2009-05-28 14:17:58 lveci Exp $
+ * $Id: BandTest.java,v 1.3 2010-02-10 16:20:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -548,7 +548,7 @@ public class BandTest extends AbstractRasterDataNodeTest {
                                false,
                                ProgressMonitor.NULL);
 
-        product = ProductIO.readProduct(file, null);
+        product = ProductIO.readProduct(file);
 
         final DimapProductWriter dimapProductWriter = new DimapProductWriter(new DimapProductWriterPlugIn());
         assertNull(product.getProductWriter());

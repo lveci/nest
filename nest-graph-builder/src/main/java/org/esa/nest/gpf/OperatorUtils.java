@@ -177,12 +177,12 @@ public final class OperatorUtils {
      * @param group input master GCP group
      * @param targetGCPGroup output master GCP group
      */
-    public static void copyGCPsToTarget(final ProductNodeGroup<Pin> group, final ProductNodeGroup<Pin> targetGCPGroup) {
+    public static void copyGCPsToTarget(final ProductNodeGroup<Placemark> group, final ProductNodeGroup<Placemark> targetGCPGroup) {
         targetGCPGroup.removeAll();
 
         for(int i = 0; i < group.getNodeCount(); ++i) {
-            final Pin sPin = group.get(i);
-            final Pin tPin = new Pin(sPin.getName(),
+            final Placemark sPin = group.get(i);
+            final Placemark tPin = new Placemark(sPin.getName(),
                                sPin.getLabel(),
                                sPin.getDescription(),
                                sPin.getPixelPos(),

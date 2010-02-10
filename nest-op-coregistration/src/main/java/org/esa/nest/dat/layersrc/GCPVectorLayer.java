@@ -68,12 +68,12 @@ public class GCPVectorLayer extends Layer {
         final double[] mpts = new double[8];
         final double[] vpts = new double[8];
 
-        final ProductNodeGroup<Pin> slaveGCPGroup = product.getGcpGroup(band);
-        final ProductNodeGroup<Pin> masterGCPGroup = product.getGcpGroup(masterBand);
+        final ProductNodeGroup<Placemark> slaveGCPGroup = product.getGcpGroup(band);
+        final ProductNodeGroup<Placemark> masterGCPGroup = product.getGcpGroup(masterBand);
 
         for(int i=0; i < slaveGCPGroup.getNodeCount(); ++i) {
-            final Pin slaveGCP = slaveGCPGroup.get(i);
-            final Pin masterGCP = masterGCPGroup.get(slaveGCP.getName());
+            final Placemark slaveGCP = slaveGCPGroup.get(i);
+            final Placemark masterGCP = masterGCPGroup.get(slaveGCP.getName());
             if(masterGCP == null)
                 continue;
 

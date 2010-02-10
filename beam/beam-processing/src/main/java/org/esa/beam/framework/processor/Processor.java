@@ -1,5 +1,5 @@
 /*
- * $Id: Processor.java,v 1.4 2009-12-02 16:52:11 lveci Exp $
+ * $Id: Processor.java,v 1.5 2010-02-10 16:20:37 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -454,7 +454,7 @@ public abstract class Processor {
             throw new IOException(message);
         }
 
-        final Product inputProduct = ProductIO.readProduct(prodFile, null);
+        final Product inputProduct = ProductIO.readProduct(prodFile);
         if (inputProduct == null) {
             final String message = "Cannot open input product '" + prodRef.getFilePath() + "'";
             _logger.severe(message);

@@ -1,5 +1,5 @@
 /*
- * $Id: PlacemarkSymbolDialog.java,v 1.1 2009-04-27 13:08:26 lveci Exp $
+ * $Id: PlacemarkSymbolDialog.java,v 1.2 2010-02-10 16:20:37 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -39,7 +39,7 @@ public class PlacemarkSymbolDialog extends ModalDialog {
     private JButton _symbolButton;
 
     public PlacemarkSymbolDialog(Window parent) {
-        super(parent, "Pin symbol", ModalDialog.ID_OK_CANCEL, null);/*I18N*/
+        super(parent, "Placemark symbol", ModalDialog.ID_OK_CANCEL, null);/*I18N*/
         createParameter();
         creatUI();
     }

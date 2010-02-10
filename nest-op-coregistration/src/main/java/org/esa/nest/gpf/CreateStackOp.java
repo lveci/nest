@@ -170,7 +170,7 @@ public class CreateStackOp extends Operator {
             copySlaveMetadata();
 
             // copy GCPs if found to master band
-            final ProductNodeGroup<Pin> masterGCPgroup = masterProduct.getGcpGroup();
+            final ProductNodeGroup<Placemark> masterGCPgroup = masterProduct.getGcpGroup();
             if (masterGCPgroup.getNodeCount() > 0) {
                 OperatorUtils.copyGCPsToTarget(masterGCPgroup, targetProduct.getGcpGroup(targetProduct.getBandAt(0)));
             }

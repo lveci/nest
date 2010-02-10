@@ -1,7 +1,7 @@
 package org.esa.beam.examples.data_export;
 
 /*
- * $Id: GeoCodingEx.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: GeoCodingEx.java,v 1.2 2010-02-10 16:20:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -33,7 +33,7 @@ public class GeoCodingEx {
 
     public static void main(String[] args) {
         try {
-            Product product = ProductIO.readProduct("C:/Projects/BEAM/data/MER_RR__1P_A.N1", null);
+            Product product = ProductIO.readProduct("C:/Projects/BEAM/data/MER_RR__1P_A.N1");
             GeoCoding geoCoding = product.getGeoCoding();
             int width = product.getSceneRasterWidth();
             int height = product.getSceneRasterHeight();

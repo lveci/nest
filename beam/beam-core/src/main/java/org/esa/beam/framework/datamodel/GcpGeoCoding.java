@@ -12,7 +12,7 @@ import static java.lang.Math.*;
  * Ground control point (GCP) geo-coding.
  *
  * @author Ralf Quast
- * @version $Revision: 1.2 $ $Date: 2010-02-08 21:57:50 $
+ * @version $Revision: 1.3 $ $Date: 2010-02-10 16:20:36 $
  */
 public class GcpGeoCoding extends AbstractGeoCoding {
 
@@ -42,7 +42,7 @@ public class GcpGeoCoding extends AbstractGeoCoding {
      * @param sceneHeight the scene height.
      * @param datum       the datum.
      */
-    public GcpGeoCoding(Method method, Pin[] gcps, int sceneWidth, int sceneHeight, Datum datum) {
+    public GcpGeoCoding(Method method, Placemark[] gcps, int sceneWidth, int sceneHeight, Datum datum) {
         this.sceneWidth = sceneWidth;
         this.sceneHeight = sceneHeight;
         this.datum = datum;
@@ -215,7 +215,7 @@ public class GcpGeoCoding extends AbstractGeoCoding {
         return originalGeoCoding;
     }
 
-    public void setGcps(Pin[] gcps) {
+    public void setGcps(Placemark[] gcps) {
         initCoordinates(gcps);
         initTransformations(method);
         boundaryCrossingMeridianAt180 = isBoundaryCrossingMeridianAt180();
@@ -310,7 +310,7 @@ public class GcpGeoCoding extends AbstractGeoCoding {
         return new GeoPos((float) lat, (float) lon);
     }
 
-    private void initCoordinates(Pin[] gcps) {
+    private void initCoordinates(Placemark[] gcps) {
         x = new double[gcps.length];
         y = new double[gcps.length];
 
@@ -360,7 +360,7 @@ public class GcpGeoCoding extends AbstractGeoCoding {
      * Class representing the approximation methods used for the GCP geo-coding.
      *
      * @author Ralf Quast
-     * @version $Revision: 1.2 $ $Date: 2010-02-08 21:57:50 $
+     * @version $Revision: 1.3 $ $Date: 2010-02-10 16:20:36 $
      */
     public enum Method {
 

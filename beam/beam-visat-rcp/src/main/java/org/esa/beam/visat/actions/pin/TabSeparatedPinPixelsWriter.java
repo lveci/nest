@@ -1,5 +1,5 @@
 /*
- * $Id: TabSeparatedPinPixelsWriter.java,v 1.2 2010-02-08 21:57:50 lveci Exp $
+ * $Id: TabSeparatedPinPixelsWriter.java,v 1.3 2010-02-10 16:20:37 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -21,7 +21,7 @@ import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.Pin;
+import org.esa.beam.framework.datamodel.Placemark;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.util.Guardian;
 
@@ -59,13 +59,13 @@ class TabSeparatedPinPixelsWriter {
     /**
      * Writes the pixel values an annotation data into the output stream.
      */
-    boolean writePinPixels(final int size, final String expression, final Map<Pin, Object[]> pixelMap, ProgressMonitor pm) throws
+    boolean writePlacemarkPixels(final int size, final String expression, final Map<Placemark, Object[]> pixelMap, ProgressMonitor pm) throws
                                                                                                                 IOException {
         boolean success = true;
         Point[] pixels;
         Boolean[] pixelRelevanceInformation = null;
         writeAnnotationData(size, expression);
-        Iterator<Pin> iterator = pixelMap.keySet().iterator();
+        Iterator<Placemark> iterator = pixelMap.keySet().iterator();
 
         pm.beginTask("Writing pixel data...", pixelMap.size());
         try {
@@ -75,8 +75,8 @@ class TabSeparatedPinPixelsWriter {
                     success = false;
                     break;
                 }
-                Pin keyPin = iterator.next();
-                Object pixelDataObject = pixelMap.get(keyPin);
+                Placemark keyPlacemark = iterator.next();
+                Object pixelDataObject = pixelMap.get(keyPlacemark);
                 if (pixelDataObject != null && pixelDataObject instanceof Point[]) {
                     pixels = (Point[]) pixelDataObject;
                 } else if (pixelDataObject != null) {
@@ -84,7 +84,7 @@ class TabSeparatedPinPixelsWriter {
                     pixels = (Point[]) pixelData[0];
                     pixelRelevanceInformation = (Boolean[]) (pixelData[1]);
                 }
-                writeRegionName(keyPin.getLabel());
+                writeRegionName(keyPlacemark.getLabel());
 
                 if (pixels != null) {
                     writeHeaderLine(printWriter, geoCoding, bands, (pixelRelevanceInformation != null));

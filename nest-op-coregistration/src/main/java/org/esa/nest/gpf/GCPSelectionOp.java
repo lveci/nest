@@ -119,7 +119,7 @@ public class GCPSelectionOp extends Operator {
 
     private boolean complexCoregistration = false;
 
-    private ProductNodeGroup<Pin> masterGcpGroup = null;
+    private ProductNodeGroup<Placemark> masterGcpGroup = null;
 
     private int sourceImageWidth;
     private int sourceImageHeight;
@@ -215,7 +215,7 @@ public class GCPSelectionOp extends Operator {
     }
 
     private static void addGCPGrid(
-            final int width, final int height, final int numPins, final ProductNodeGroup<Pin> group) {
+            final int width, final int height, final int numPins, final ProductNodeGroup<Placemark> group) {
 
         final float ratio = width / (float)height;
         final float n = (float)Math.sqrt(numPins / ratio);
@@ -231,7 +231,7 @@ public class GCPSelectionOp extends Operator {
 
                 final String[] uniquePinNameAndLabel =
                         PlacemarkNameFactory.createUniqueNameAndLabel(GcpDescriptor.INSTANCE, group);
-                final Pin newPin = new Pin(uniquePinNameAndLabel[0],
+                final Placemark newPin = new Placemark(uniquePinNameAndLabel[0],
                              uniquePinNameAndLabel[1], "",
                              new PixelPos((int)x, (int)y), null,
                              GcpDescriptor.INSTANCE.createDefaultSymbol());
@@ -342,7 +342,7 @@ public class GCPSelectionOp extends Operator {
     private void computeSlaveGCPs(final Band slaveBand, final Band slaveBand2, final Band targetBand,
                                    final Rectangle targetRectangle, final ProgressMonitor pm) {
      try {
-        final ProductNodeGroup<Pin> targetGCPGroup = targetProduct.getGcpGroup(targetBand);
+        final ProductNodeGroup<Placemark> targetGCPGroup = targetProduct.getGcpGroup(targetBand);
         final GeoCoding tgtGeoCoding = targetProduct.getGeoCoding();
         final GeoCoding slaveGeoCoding = slaveBand.getGeoCoding();
 
@@ -350,7 +350,7 @@ public class GCPSelectionOp extends Operator {
         pm.beginTask("computeSlaveGCPs ", numberOfMasterGCPs);
         for(int i = 0; i < numberOfMasterGCPs; ++i) {
 
-            final Pin mPin = masterGcpGroup.get(i);
+            final Placemark mPin = masterGcpGroup.get(i);
             final PixelPos mGCPPixelPos = mPin.getPixelPos();
 
             if (checkMasterGCPValidity(mGCPPixelPos, targetRectangle)) {
@@ -373,7 +373,7 @@ public class GCPSelectionOp extends Operator {
 
                 if (getSlaveGCP) {
 
-                    final Pin sPin = new Pin(mPin.getName(),
+                    final Placemark sPin = new Placemark(mPin.getName(),
                                        mPin.getLabel(),
                                        mPin.getDescription(),
                                        sGCPPixelPos,

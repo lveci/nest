@@ -1,5 +1,5 @@
 /*
- * $Id: ShapefileLayerSource.java,v 1.5 2010-02-09 18:03:39 lveci Exp $
+ * $Id: ShapefileLayerSource.java,v 1.6 2010-02-10 16:20:37 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -26,7 +26,7 @@ import org.esa.beam.framework.ui.layer.LayerSourcePageContext;
  * Unstable API. Use at own risk.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.5 $ $Date: 2010-02-09 18:03:39 $
+ * @version $Revision: 1.6 $ $Date: 2010-02-10 16:20:37 $
  * @since BEAM 4.6
  */
 public class ShapefileLayerSource implements LayerSource {
@@ -39,7 +39,7 @@ public class ShapefileLayerSource implements LayerSource {
 
     @Override
     public boolean isApplicable(LayerSourcePageContext pageContext) {
-        return pageContext.getAppContext().getSelectedProduct().getGeoCoding() == null;
+        return pageContext.getAppContext().getSelectedProduct().getGeoCoding() != null;
     }
 
     @Override

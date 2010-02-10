@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductHelpers.java,v 1.14 2010-02-08 21:57:50 lveci Exp $
+ * $Id: DimapProductHelpers.java,v 1.15 2010-02-10 16:20:36 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,7 +32,7 @@ import org.esa.beam.framework.datamodel.MapGeoCoding;
 import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Pin;
+import org.esa.beam.framework.datamodel.Placemark;
 import org.esa.beam.framework.datamodel.PixelGeoCoding;
 import org.esa.beam.framework.datamodel.PlacemarkSymbol;
 import org.esa.beam.framework.datamodel.PointingFactory;
@@ -100,7 +100,7 @@ import java.util.logging.Level;
  * @author Sabine Embacher
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.14 $ $Date: 2010-02-08 21:57:50 $
+ * @version $Revision: 1.15 $ $Date: 2010-02-10 16:20:36 $
  */
 public class DimapProductHelpers {
 
@@ -740,10 +740,10 @@ public class DimapProductHelpers {
         }
         for (Object pinElement : pinElements) {
             final Element pinElem = (Element) pinElement;
-            final Pin pin = Pin.createPlacemark(pinElem, PlacemarkSymbol.createDefaultPinSymbol(), product.getGeoCoding());
-            if (pin != null) {
-                pin.updatePixelPos(product.getGeoCoding());
-                product.getPinGroup().add(pin);
+            final Placemark placemark = Placemark.createPlacemark(pinElem, PlacemarkSymbol.createDefaultPinSymbol(), product.getGeoCoding());
+            if (placemark != null) {
+                placemark.updatePixelPos(product.getGeoCoding());
+                product.getPinGroup().add(placemark);
             }
         }
     }
@@ -761,7 +761,7 @@ public class DimapProductHelpers {
         }
     }
 
-    private static void addGCPsToGroup(Element gcpGroupElement, ProductNodeGroup<Pin> group, Product product) {
+    private static void addGCPsToGroup(Element gcpGroupElement, ProductNodeGroup<Placemark> group, Product product) {
         List gcpElements;
         if (gcpGroupElement != null) {
             gcpElements = gcpGroupElement.getChildren(DimapProductConstants.TAG_PLACEMARK);
@@ -770,7 +770,7 @@ public class DimapProductHelpers {
         }
         for (Object gcpElement : gcpElements) {
             final Element gcpElem = (Element) gcpElement;
-            final Pin gcp = Pin.createPlacemark(gcpElem, PlacemarkSymbol.createDefaultGcpSymbol(), product.getGeoCoding());
+            final Placemark gcp = Placemark.createPlacemark(gcpElem, PlacemarkSymbol.createDefaultGcpSymbol(), product.getGeoCoding());
             if (gcp != null) {
                 group.add(gcp);
             }
