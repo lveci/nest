@@ -56,7 +56,7 @@ public class ACE2_5MinElevationModel implements ElevationModel, Resampling.Raste
         return _descriptor;
     }
 
-    public float getElevation(GeoPos geoPos) throws Exception {
+    public synchronized float getElevation(GeoPos geoPos) throws Exception {
         float pixelY = RASTER_HEIGHT - (geoPos.lat + 90.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5, y = (90 - lon) / DEGREE_RES * NUM_PIXELS_PER_TILE;
         float pixelX = (geoPos.lon + 180.0f) / DEGREE_RES_BY_NUM_PIXELS_PER_TILE; // todo (nf) - consider 0.5
         _resampling.computeIndex(pixelX, pixelY,

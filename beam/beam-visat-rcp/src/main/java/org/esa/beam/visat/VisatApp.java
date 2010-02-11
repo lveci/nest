@@ -1,5 +1,5 @@
 /*
- * $Id: VisatApp.java,v 1.24 2010-02-08 21:57:50 lveci Exp $
+ * $Id: VisatApp.java,v 1.25 2010-02-11 21:17:51 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -147,7 +147,7 @@ import java.util.logging.Level;
  * @author Norman Fomferra
  * @author Marco Peters
  * @author Sabine Embacher
- * @version $Revision: 1.24 $ $Date: 2010-02-08 21:57:50 $
+ * @version $Revision: 1.25 $ $Date: 2010-02-11 21:17:51 $
  */
 public class VisatApp extends BasicApp implements AppContext {
 
@@ -263,6 +263,16 @@ public class VisatApp extends BasicApp implements AppContext {
      * Default value for pixel offset's for display pixel positions
      */
     public static final boolean PROPERTY_DEFAULT_PIXEL_OFFSET_FOR_DISPLAY_SHOW_DECIMALS = false;
+
+    /**
+     * Preferences key for display style of geo-locations
+     */
+    public static final String PROPERTY_KEY_DISPLAY_GEOLOCATION_AS_DECIMAL = "geolocation.display.decimal";
+
+    /**
+     * Default value for display style of geo-locations.
+     */
+    public static final boolean PROPERTY_DEFAULT_DISPLAY_GEOLOCATION_AS_DECIMAL = false;
 
     /**
      * default value for preference save product annotations (ADS) or not

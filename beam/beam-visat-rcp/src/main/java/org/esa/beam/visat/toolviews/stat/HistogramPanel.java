@@ -101,7 +101,7 @@ class HistogramPanel extends PagePanel implements SingleRoiComputePanel.ComputeM
             histoMaxParam.setDefaultValue();
             chart.getXYPlot().setDataset(null);
             chart.fireChartChanged();
-			/*if(getRaster() != null) {                final Stx stat = getRaster().getStx();                if(stat != null) {                    setStx(stat);                }            }*/        }
+        }
     }
 
     @Override

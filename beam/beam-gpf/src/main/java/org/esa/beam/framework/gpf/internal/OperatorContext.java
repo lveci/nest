@@ -1,5 +1,5 @@
 /*
- * $Id: OperatorContext.java,v 1.11 2010-02-09 18:03:39 lveci Exp $
+ * $Id: OperatorContext.java,v 1.12 2010-02-11 21:17:51 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -51,8 +51,6 @@ import org.esa.beam.util.jai.JAIUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 
 import javax.media.jai.JAI;
-import javax.media.jai.PlanarImage;
-
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -183,7 +181,6 @@ public class OperatorContext {
         return null;
     }
 
-
     public Product getTargetProduct() throws OperatorException {
         if (targetProduct == null) {
             initializeOperator();
@@ -227,6 +224,27 @@ public class OperatorContext {
 
     public Operator getOperator() {
         return operator;
+    }
+
+
+    public Object getParameter(String name) {
+        Assert.notNull(name, "name");
+        if (parameters == null) {
+            return null;
+        }
+        return parameters.get(name);
+    }
+
+    public void setParameter(String name, Object value) {
+        Assert.notNull(name, "name");
+        if (value != null) {
+            if (parameters == null) {
+                parameters = new HashMap<String, Object>();
+            }
+            parameters.put(name, value);
+        } else if (parameters != null) {
+            parameters.remove(name);
+        }
     }
 
     public Map<String, Object> getParameters() {
@@ -330,7 +348,7 @@ public class OperatorContext {
                                         ProgressMonitor.class
                                 });
     }
-    
+
     private boolean operatorMustComputeTileStack() {
         return isComputeTileStackMethodUsable() && !isComputeTileMethodUsable();
     }
@@ -338,7 +356,7 @@ public class OperatorContext {
     private static boolean implementsMethod(Class<?> aClass, String methodName, Class[] methodParameterTypes) {
         while (true) {
             if (Operator.class.equals(aClass)
-                || !Operator.class.isAssignableFrom(aClass)) {
+                    || !Operator.class.isAssignableFrom(aClass)) {
                 return false;
             }
             try {
@@ -548,8 +566,8 @@ public class OperatorContext {
         Dimension tileSize = null;
         for (final Product sourceProduct : sourceProductList) {
             if (sourceProduct.getPreferredTileSize() != null &&
-                sourceProduct.getSceneRasterWidth() == targetProduct.getSceneRasterWidth() &&
-                sourceProduct.getSceneRasterHeight() == targetProduct.getSceneRasterHeight()) {
+                    sourceProduct.getSceneRasterWidth() == targetProduct.getSceneRasterWidth() &&
+                    sourceProduct.getSceneRasterHeight() == targetProduct.getSceneRasterHeight()) {
                 tileSize = sourceProduct.getPreferredTileSize();
                 break;
             }
@@ -644,7 +662,7 @@ public class OperatorContext {
     }
 
     private void processSourceProductField(Field declaredField, SourceProduct sourceProductAnnotation) throws
-                                                                                                       OperatorException {
+            OperatorException {
         if (declaredField.getType().equals(Product.class)) {
             Product sourceProduct = getSourceProduct(declaredField.getName());
             if (sourceProduct == null) {
@@ -674,7 +692,7 @@ public class OperatorContext {
     }
 
     private void processSourceProductsField(Field declaredField, SourceProducts sourceProductsAnnotation) throws
-                                                                                                          OperatorException {
+            OperatorException {
         if (declaredField.getType().equals(Product[].class)) {
             Product[] sourceProducts = getSourceProducts();
             if (sourceProducts.length > 0) {
@@ -823,8 +841,8 @@ public class OperatorContext {
     }
 
     private void configureOperator(Operator operator, OperatorConfiguration operatorConfiguration) throws
-                                                                                                   ValidationException,
-                                                                                                   ConversionException {
+            ValidationException,
+            ConversionException {
         ParameterDescriptorFactory parameterDescriptorFactory = new ParameterDescriptorFactory(sourceProductMap);
         DefaultDomConverter domConverter = new DefaultDomConverter(operator.getClass(), parameterDescriptorFactory);
         domConverter.convertDomToValue(operatorConfiguration.getConfiguration(), operator);
@@ -897,7 +915,6 @@ public class OperatorContext {
 
     /**
      * @param product The product.
-     *
      * @return The operator context for the given product, or null.
      */
     static OperatorContext getOperatorContext(Product product) {
@@ -926,5 +943,4 @@ public class OperatorContext {
             }
         }
     }
-
 }
