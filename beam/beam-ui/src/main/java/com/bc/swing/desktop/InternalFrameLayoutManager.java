@@ -1,5 +1,5 @@
 /*
- * $Id: InternalFrameLayoutManager.java,v 1.1 2009-04-28 14:17:17 lveci Exp $
+ * $Id: InternalFrameLayoutManager.java,v 1.2 2010-02-11 18:32:53 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -21,7 +21,7 @@ import javax.swing.JInternalFrame;
 
 /**
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:17:17 $
+ * @version $Revision: 1.2 $ $Date: 2010-02-11 18:32:53 $
  */
 public interface InternalFrameLayoutManager {
     void moveFrameToVisible(JDesktopPane desktopPane, JInternalFrame frame);
