@@ -1,5 +1,5 @@
 /*
- * $Id: MapTransformFactory.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: MapTransformFactory.java,v 1.2 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -20,7 +20,10 @@ import org.esa.beam.util.Guardian;
 
 /**
  * A factory for map transformation instances.
+ * 
+ * @deprecated since BEAM 4.7, use geotools instead.
  */
+@Deprecated
 public class MapTransformFactory {
 
     /**

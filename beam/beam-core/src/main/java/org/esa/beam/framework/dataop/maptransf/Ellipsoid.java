@@ -1,5 +1,5 @@
 /*
- * $Id: Ellipsoid.java,v 1.2 2009-05-27 21:09:23 lveci Exp $
+ * $Id: Ellipsoid.java,v 1.3 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -18,7 +18,10 @@ package org.esa.beam.framework.dataop.maptransf;
 
 /**
  * Represents an ellipsoid used to approximate the earth's surface.
+ * 
+ * @deprecated since BEAM 4.7, use {@link org.opengis.referencing.datum.Ellipsoid} instead.
  */
+@Deprecated
 public class Ellipsoid {
 
     /**

@@ -1,5 +1,5 @@
 /*
- * $Id: MapInfo.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: MapInfo.java,v 1.2 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,8 +27,11 @@ import java.awt.geom.AffineTransform;
  * raster co-ordinate system and back.
  *
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2010-02-11 17:02:24 $
+ * 
+ * @deprecated since BEAM 4.7, use geotools and {@link org.esa.beam.framework.datamodel.CrsGeoCoding} instead.
  */
+@Deprecated
 public class MapInfo implements Cloneable {
 
     public static final double DEFAULT_NO_DATA_VALUE = 9999;

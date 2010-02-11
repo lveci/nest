@@ -92,7 +92,7 @@ class ScaleDataDialog extends ModelessDialog {
         }
 
         if(isLog) {
-            expression = "log10( "+expression+" )";
+            expression = bandName+"==0 ? 0 : "+"log10( "+expression+" )";
         }
 
         final VirtualBand virtBand = new VirtualBand(targetName,
@@ -103,6 +103,7 @@ class ScaleDataDialog extends ModelessDialog {
         virtBand.setSynthetic(true);
         virtBand.setUnit(unit);
         virtBand.setDescription(band.getDescription());
+        virtBand.setNoDataValueUsed(true);
         product.addBand(virtBand);
     }
 

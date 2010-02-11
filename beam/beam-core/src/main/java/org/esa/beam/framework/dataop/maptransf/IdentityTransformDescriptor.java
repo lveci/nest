@@ -1,5 +1,5 @@
 /*
- * $Id: IdentityTransformDescriptor.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: IdentityTransformDescriptor.java,v 1.2 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -25,8 +25,11 @@ import org.esa.beam.framework.param.Parameter;
  * The descriptor for a map transformation which represents the identity transformation.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2010-02-11 17:02:24 $
+ * 
+ * @deprecated since BEAM 4.7, use geotools {@link org.geotools.referencing.operation.projection.PlateCarree.Provider} instead.
  */
+@Deprecated
 public class IdentityTransformDescriptor implements MapTransformDescriptor {
 
     public static final String TYPE_ID = "Identity";

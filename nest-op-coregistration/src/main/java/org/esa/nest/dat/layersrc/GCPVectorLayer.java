@@ -21,7 +21,7 @@ public class GCPVectorLayer extends Layer {
 
     private final Product product;
     private final Band band;
-    private final float lineThickness = 2.0f;
+    private final float lineThickness = 4.0f;
 
     public GCPVectorLayer(PropertySet configuration) {
         super(LayerTypeRegistry.getLayerType(GCPVectorLayerType.class.getName()), configuration);
@@ -51,14 +51,13 @@ public class GCPVectorLayer extends Layer {
         final Shape ibounds = m2i.createTransformedShape(mbounds);
 
         final RenderedImage ri = mli.getImage(level);
-
-        final int width = ri.getWidth();
-        final int height = ri.getHeight();
-        final Rectangle irect = ibounds.getBounds().intersection(new Rectangle(0, 0, width, height));
+        final Rectangle irect = ibounds.getBounds().intersection(new Rectangle(0, 0, ri.getWidth(), ri.getHeight()));
         if (irect.isEmpty()) {
             return;
         }
-
+        double zoom = rendering.getViewport().getZoomFactor();
+        System.out.println("zoom "+zoom);
+        
         final AffineTransform m2v = vp.getModelToViewTransform();
 
         final Graphics2D graphics = rendering.getGraphics();
@@ -80,19 +79,20 @@ public class GCPVectorLayer extends Layer {
             createArrow((int)slaveGCP.getPixelPos().getX(),
                         (int)slaveGCP.getPixelPos().getY(),
                         (int)masterGCP.getPixelPos().getX(),
-                        (int)masterGCP.getPixelPos().getY(), 5, ipts);
+                        (int)masterGCP.getPixelPos().getY(), 5, ipts, zoom);
 
             i2m.transform(ipts, 0, mpts, 0, 4);
             m2v.transform(mpts, 0, vpts, 0, 4);
 
             graphics.setColor(Color.RED);
-            graphics.draw(new Line2D.Double(vpts[0], vpts[1], vpts[2], vpts[3]));
             graphics.draw(new Line2D.Double(vpts[4], vpts[5], vpts[2], vpts[3]));
             graphics.draw(new Line2D.Double(vpts[6], vpts[7], vpts[2], vpts[3]));
+            graphics.setColor(Color.RED);
+            graphics.draw(new Line2D.Double(vpts[0], vpts[1], vpts[2], vpts[3]));
         }
     }
 
-    private static void createArrow(int x, int y, int xx, int yy, int i1, double[] ipts)
+    private static void createArrow(int x, int y, int xx, int yy, int i1, double[] ipts, double zoom)
     {
         ipts[0] = x;
         ipts[1] = y;
@@ -100,17 +100,23 @@ public class GCPVectorLayer extends Layer {
         ipts[3] = yy;
         final double d = xx - x;
         final double d1 = -(yy - y);
-        final double d2 = Math.sqrt(d * d + d1 * d1);
+        double mult = 5/zoom;
+        if(zoom > 2)
+            mult = 1;
+        double d2 = Math.sqrt(d * d + d1 * d1);
         final double d3;
+        final double size = 3.0;
         if(d2 > (3.0 * i1))
             d3 = i1;
         else
             d3 = d2 / 3.0;
+        if(d2 < 1.0)
+            d2 = 1.0;
         if(d2 >= 1.0) {
             final double d4 = (d3 * d) / d2;
             final double d5 = -((d3 * d1) / d2);
-            final double d6 = (double)xx - 3.0 * d4;
-            final double d7 = (double)yy - 3.0 * d5;
+            final double d6 = (double)xx - size * d4 * mult;
+            final double d7 = (double)yy - size * d5 * mult;
             ipts[4] = (int)(d6 - d5);
             ipts[5] = (int)(d7 + d4);
             ipts[6] = (int)(d6 + d5);

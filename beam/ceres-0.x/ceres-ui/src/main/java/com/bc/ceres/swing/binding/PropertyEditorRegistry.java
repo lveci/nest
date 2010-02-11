@@ -1,5 +1,5 @@
 /*
- * $Id: PropertyEditorRegistry.java,v 1.1 2010-02-10 19:57:11 lveci Exp $
+ * $Id: PropertyEditorRegistry.java,v 1.2 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -28,7 +28,7 @@ import java.util.ServiceLoader;
  * A registry for {@link PropertyEditor}.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.1 $ $Date: 2010-02-10 19:57:11 $
+ * @version $Revision: 1.2 $ $Date: 2010-02-11 17:02:24 $
  * @since BEAM 4.6
  */
 public class PropertyEditorRegistry {
@@ -73,7 +73,7 @@ public class PropertyEditorRegistry {
     /**
      * Finds a matching {@link PropertyEditor} for the given {@link com.bc.ceres.binding.PropertyDescriptor}.
      * <p/>
-     * At first , if set, the property {@code "valueEditor"} of the value descriptor
+     * At first , if set, the property {@code "propertyEditor"} of the property descriptor
      * is used. Afterwards all registered {@link PropertyEditor}s are tested,
      * whether the can provide an editor. As a fallback a {@link TextFieldEditor} is returned.
      *

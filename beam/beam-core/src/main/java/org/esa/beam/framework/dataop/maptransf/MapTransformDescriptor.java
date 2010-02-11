@@ -1,5 +1,5 @@
 /*
- * $Id: MapTransformDescriptor.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: MapTransformDescriptor.java,v 1.2 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -20,7 +20,10 @@ import org.esa.beam.framework.param.Parameter;
 
 /**
  * A descriptor for map transformation types.
+ * 
+ * @deprecated since BEAM 4.7, use geotools {@link org.geotools.referencing.operation.MathTransformProvider} instead.
  */
+@Deprecated
 public interface MapTransformDescriptor {
 
     /**

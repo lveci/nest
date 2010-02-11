@@ -1,5 +1,5 @@
 /*
- * $Id: AlbersEqualAreaConicDescriptor.java,v 1.2 2009-05-27 21:09:23 lveci Exp $
+ * $Id: AlbersEqualAreaConicDescriptor.java,v 1.3 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (C) 2005 by Roman Gerlach (Friedrich-Schiller-University Jena, Germany)
  *
@@ -21,6 +21,10 @@ import org.esa.beam.framework.param.Parameter;
 
 import java.awt.geom.Point2D;
 
+/*** 
+ * @deprecated since BEAM 4.7, use geotools {@link org.geotools.referencing.operation.projection.AlbersEqualArea.Provider} instead.
+ */
+@Deprecated
 public class AlbersEqualAreaConicDescriptor implements MapTransformDescriptor {
 
     /**
@@ -212,7 +216,10 @@ public class AlbersEqualAreaConicDescriptor implements MapTransformDescriptor {
         return new AEAC(parameterValues);
     }
 
-
+    /** 
+     * @deprecated since BEAM 4.7, use geotools {@link org.geotools.referencing.operation.projection.MapProjection} instead.
+     */
+    @Deprecated
     public class AEAC extends CartographicMapTransform {
 
         private static final double eps10 = 1e-10;

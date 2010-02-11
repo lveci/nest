@@ -1,5 +1,5 @@
 /*
- * $Id: MapProjectionRegistry.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
+ * $Id: MapProjectionRegistry.java,v 1.3 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,7 +27,10 @@ import java.util.Set;
 
 /**
  * A registry for map projection instances.
+ * 
+ * @deprecated since BEAM 4.7, use geotools and {@link org.esa.beam.framework.datamodel.CrsGeoCoding} instead.
  */
+@Deprecated
 public class MapProjectionRegistry {
 
     private static final ServiceRegistry<MapTransformDescriptor> descriptors;

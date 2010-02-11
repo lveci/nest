@@ -1,5 +1,5 @@
 /*
- * $Id: CartographicMapTransform.java,v 1.2 2009-05-26 19:44:50 lveci Exp $
+ * $Id: CartographicMapTransform.java,v 1.3 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -21,8 +21,11 @@ import org.esa.beam.framework.datamodel.GeoPos;
 import java.awt.geom.Point2D;
 
 /**
- * An abstract base class for cartograohic map-transformations.
+ * An abstract base class for cartographic map-transformations.
+ * 
+ * @deprecated since BEAM 4.7, use geotools {@link org.geotools.referencing.operation.projection.MapProjection} instead.
  */
+@Deprecated
 public abstract class CartographicMapTransform implements MapTransform {
 
     /**

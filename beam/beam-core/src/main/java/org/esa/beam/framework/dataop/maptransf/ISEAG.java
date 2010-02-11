@@ -7,8 +7,11 @@ package org.esa.beam.framework.dataop.maptransf;
  * <p><i>Note that this class is not yet public API and may change in future releases.</i></p>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2010-02-11 17:02:24 $
+ *
+ * @deprecated since BEAM 4.7, no replacement.
  */
+@Deprecated
 public class ISEAG {
 
     /**

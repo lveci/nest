@@ -1,5 +1,5 @@
 /*
- * $Id: ProductIO.java,v 1.7 2010-02-10 16:20:36 lveci Exp $
+ * $Id: ProductIO.java,v 1.8 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -47,7 +47,7 @@ import java.util.Iterator;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.7 $ $Date: 2010-02-10 16:20:36 $
+ * @version $Revision: 1.8 $ $Date: 2010-02-11 17:02:24 $
  */
 public class ProductIO {
 
@@ -136,7 +136,9 @@ public class ProductIO {
      * @see #readProduct(String)
      * @see #readProduct(File)
      * @since 4.0
+     * @deprecated since BEAM 4.7, no replacement
      */
+    @Deprecated
     public static Product readProduct(File file, ProductSubsetDef subsetDef, String[] formatNames) throws IOException {
         Guardian.assertNotNull("file", file);
 
@@ -334,7 +336,42 @@ public class ProductIO {
         }
         return null;        
     }
-    
+
+    private static Product readProductImpl(File file, ProductSubsetDef subsetDef, String[] formatNames) throws
+                                                                                                        IOException {
+        Guardian.assertNotNull("file", file);
+
+        if (!file.exists()) {
+            throw new FileNotFoundException("File not found: " + file.getPath());
+        }
+
+        final ProductIOPlugInManager registry = ProductIOPlugInManager.getInstance();
+
+        for (String formatName : formatNames) {
+            final Iterator<ProductReaderPlugIn> it = registry.getReaderPlugIns(formatName);
+
+            ProductReaderPlugIn selectedPlugIn = null;
+            while (it.hasNext()) {
+                ProductReaderPlugIn plugIn = it.next();
+                DecodeQualification decodeQualification = plugIn.getDecodeQualification(file);
+                if (decodeQualification == DecodeQualification.INTENDED) {
+                    selectedPlugIn = plugIn;
+                    break;
+                } else if (decodeQualification == DecodeQualification.SUITABLE) {
+                    selectedPlugIn = plugIn;
+                }
+            }
+            if (selectedPlugIn != null) {
+                ProductReader productReader = selectedPlugIn.createReaderInstance();
+                if (productReader != null) {
+                    return productReader.readProductNodes(file, subsetDef);
+                }
+            }
+        }
+
+        return readProductImpl(file, subsetDef);
+    }
+
     /**
      * Returns a product reader instance for the given file if any registered product reader can decode the given file.
      *

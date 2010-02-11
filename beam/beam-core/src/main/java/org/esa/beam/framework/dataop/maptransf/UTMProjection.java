@@ -1,5 +1,5 @@
 /*
- * $Id: UTMProjection.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: UTMProjection.java,v 1.2 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -8,7 +8,10 @@ package org.esa.beam.framework.dataop.maptransf;
 
 /**
  * This class represents the UTM map projection.
+ * 
+ * @deprecated since BEAM 4.7, use geotools {@link org.geotools.referencing.operation.projection.TransverseMercator} instead.
  */
+@Deprecated
 public class UTMProjection extends MapProjection {
 
     private final int _zoneIndex;

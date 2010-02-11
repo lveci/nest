@@ -1,5 +1,5 @@
 /*
- * $Id: TransverseMercatorDescriptor.java,v 1.2 2009-05-27 21:09:23 lveci Exp $
+ * $Id: TransverseMercatorDescriptor.java,v 1.3 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,8 +27,11 @@ import java.awt.geom.Point2D;
  * this transformation has taken from the proj4 map projection API (http://remotesensing.org/proj/).
  *
  * @author Tom Block
- * @version $Revision: 1.2 $ $Date: 2009-05-27 21:09:23 $
+ * @version $Revision: 1.3 $ $Date: 2010-02-11 17:02:24 $
+ * 
+ * @deprecated since BEAM 4.7, use geotools {@link org.geotools.referencing.operation.projection.TransverseMercator.Provider} instead.
  */
+@Deprecated
 public class TransverseMercatorDescriptor implements MapTransformDescriptor {
 
     public static final String TYPE_ID = "Transverse_Mercator";
@@ -192,7 +195,10 @@ public class TransverseMercatorDescriptor implements MapTransformDescriptor {
 
     /**
      * Implements the transverse mercator map-transformation.
+     * 
+     * @deprecated since BEAM 4.7, use geotools {@link org.geotools.referencing.operation.projection.MapProjection} instead.
      */
+    @Deprecated
     public class TMT extends CartographicMapTransform {
 
         private static final double _epsilon = 1.0e-10;

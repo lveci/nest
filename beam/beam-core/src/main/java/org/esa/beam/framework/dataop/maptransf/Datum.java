@@ -1,5 +1,5 @@
 /*
- * $Id: Datum.java,v 1.2 2009-05-27 21:09:23 lveci Exp $
+ * $Id: Datum.java,v 1.3 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -20,7 +20,10 @@ package org.esa.beam.framework.dataop.maptransf;
 /**
  * Represents a geodetic datum. Geodetic datums define the size and shape of the earth and the origin and orientation of
  * the coordinate systems used to map the earth.
+ * 
+ * @deprecated since BEAM 4.7, use {@link org.opengis.referencing.datum.GeodeticDatum} instead.
  */
+@Deprecated
 public class Datum implements Cloneable {
 
     /**

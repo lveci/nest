@@ -1,5 +1,5 @@
 /*
- * $Id: LambertConformalConicDescriptor.java,v 1.2 2009-05-27 21:09:23 lveci Exp $
+ * $Id: LambertConformalConicDescriptor.java,v 1.3 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (C) 2002,2003  by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,7 +17,10 @@ import org.esa.beam.framework.param.Parameter;
 import org.esa.beam.util.math.MathUtils;
 
 import java.awt.geom.Point2D;
-
+/**
+ * @deprecated since BEAM 4.7, use geotools {@link org.geotools.referencing.operation.projection.LambertConformal1SP.Provider} instead.
+ */
+@Deprecated
 public class LambertConformalConicDescriptor implements MapTransformDescriptor {
 
     /**
@@ -190,7 +193,10 @@ public class LambertConformalConicDescriptor implements MapTransformDescriptor {
         return new LCCT(parameterValues);
     }
 
-
+    /** 
+     * @deprecated since BEAM 4.7, use geotools {@link org.geotools.referencing.operation.projection.MapProjection} instead.
+     */
+    @Deprecated
     public class LCCT extends CartographicMapTransform {
 
         private static final double _epsilon = 1e-10;

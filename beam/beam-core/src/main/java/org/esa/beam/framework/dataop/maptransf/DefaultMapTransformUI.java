@@ -1,5 +1,5 @@
 /*
- * $Id: DefaultMapTransformUI.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: DefaultMapTransformUI.java,v 1.2 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -15,6 +15,10 @@ import org.esa.beam.framework.param.Parameter;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
 
+/**
+ * @deprecated since BEAM 4.7, replaced by GPF operator 'Reproject'
+ */
+@Deprecated
 public class DefaultMapTransformUI implements MapTransformUI {
 
     private MapTransform _transform;

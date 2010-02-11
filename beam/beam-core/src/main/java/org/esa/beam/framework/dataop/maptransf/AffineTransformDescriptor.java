@@ -1,5 +1,5 @@
 /*
- * $Id: AffineTransformDescriptor.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: AffineTransformDescriptor.java,v 1.2 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,8 +27,11 @@ import org.esa.beam.framework.param.Parameter;
  * A map transform which implements an affine transformation.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2010-02-11 17:02:24 $
+ * 
+ * @deprecated since BEAM 4.7, use geotools {@link org.geotools.referencing.operation.transform.ProjectiveTransform.ProviderAffine} instead.
  */
+@Deprecated
 public class AffineTransformDescriptor implements MapTransformDescriptor {
 
     public static final String TYPE_ID = "Affine";

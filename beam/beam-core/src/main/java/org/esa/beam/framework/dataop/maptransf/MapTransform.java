@@ -1,5 +1,5 @@
 /*
- * $Id: MapTransform.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: MapTransform.java,v 1.2 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -22,7 +22,10 @@ import java.awt.geom.Point2D;
 
 /**
  * Provides a parameterized, mathematical algorithm for a map transformation.
+ * 
+ * @deprecated since BEAM 4.7, use geotools {@link org.geotools.referencing.operation.projection.MapProjection} instead.
  */
+@Deprecated
 public interface MapTransform {
 
     /**

@@ -251,10 +251,6 @@ public class CosmoSkymedReader extends AbstractProductReader {
                 globalElem.getAttributeDouble("Range Processing Number of Looks", defInt));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
                 globalElem.getAttributeDouble("Azimuth Processing Number of Looks", defInt));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
-                globalElem.getAttributeDouble("Ground Range Geometric Resolution", defInt));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
-                globalElem.getAttributeDouble("Azimuth Geometric Resolution", defInt));
 
         final MetadataElement s01Elem = globalElem.getElement("S01");
         if(s01Elem != null) {
@@ -510,6 +506,8 @@ public class CosmoSkymedReader extends AbstractProductReader {
     private static void addGeocodingFromMetadata(final Product product, final MetadataElement bandElem) {
         if(bandElem == null) return;
 
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+
         try {
             String str = bandElem.getAttributeString("Top Left Geodetic Coordinates");
             final float latUL = Float.parseFloat(str.substring(0, str.indexOf(',')));
@@ -523,6 +521,20 @@ public class CosmoSkymedReader extends AbstractProductReader {
             str = bandElem.getAttributeString("Bottom Right Geodetic Coordinates");
             final float latLR = Float.parseFloat(str.substring(0, str.indexOf(',')));
             final float lonLR = Float.parseFloat(str.substring(str.indexOf(',')+1, str.lastIndexOf(',')));
+
+            absRoot.setAttributeDouble(AbstractMetadata.first_near_lat, latUL);
+            absRoot.setAttributeDouble(AbstractMetadata.first_near_long, lonUL);
+            absRoot.setAttributeDouble(AbstractMetadata.first_far_lat, latUR);
+            absRoot.setAttributeDouble(AbstractMetadata.first_far_long, lonUR);
+            absRoot.setAttributeDouble(AbstractMetadata.last_near_lat, latLL);
+            absRoot.setAttributeDouble(AbstractMetadata.last_near_long, lonLL);
+            absRoot.setAttributeDouble(AbstractMetadata.last_far_lat, latLR);
+            absRoot.setAttributeDouble(AbstractMetadata.last_far_long, lonLR);
+
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
+                    bandElem.getAttributeDouble("Column Spacing", AbstractMetadata.NO_METADATA));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
+                    bandElem.getAttributeDouble("Line Spacing", AbstractMetadata.NO_METADATA));
 
             final float[] latCorners = new float[]{latUL, latUR, latLL, latLR};
             final float[] lonCorners = new float[]{lonUL, lonUR, lonLL, lonLR};

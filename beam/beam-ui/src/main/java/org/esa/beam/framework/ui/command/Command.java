@@ -1,5 +1,5 @@
 /*
- * $Id: Command.java,v 1.2 2009-12-02 16:52:12 lveci Exp $
+ * $Id: Command.java,v 1.3 2010-02-11 17:02:24 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -42,7 +42,7 @@ import java.util.ResourceBundle;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.2 $  $Date: 2009-12-02 16:52:12 $
+ * @version $Revision: 1.3 $  $Date: 2010-02-11 17:02:24 $
  */
 public abstract class Command implements ConfigurableExtension {
 
@@ -364,7 +364,7 @@ public abstract class Command implements ConfigurableExtension {
             setProperty(ACTION_KEY_CONTEXT, resStrings);
         }
 
-        resString = getResourceString(resourceBundle, "helpID");
+        resString = getResourceString(resourceBundle, "helpId");
         if (resString != null) {
             setProperty(HELP_ID_KEY, resString);
         }

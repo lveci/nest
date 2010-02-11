@@ -91,6 +91,7 @@ public class LinearTodBOpAction extends AbstractVisatAction {
         virtBand.setSynthetic(true);
         virtBand.setUnit(unit);
         virtBand.setDescription(band.getDescription());
+        virtBand.setNoDataValueUsed(true);
         product.addBand(virtBand);
     }
 
