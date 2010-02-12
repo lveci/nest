@@ -96,13 +96,16 @@ public class WindFieldEstimationLayer extends Layer {
                                     if(dx == null) continue;
                                     final Attribute dy = targetElem.getAttribute("dy");
                                     if(dy == null) continue;
+                                    final Attribute ratio = targetElem.getAttribute("ratio");
+                                    if(ratio == null) continue;
 
                                     targetList.add(new WindFieldEstimationOp.WindFieldRecord(
                                             Double.parseDouble(lat.getValue()),
                                             Double.parseDouble(lon.getValue()),
                                             Double.parseDouble(speed.getValue()),
                                             Double.parseDouble(dx.getValue()),
-                                            Double.parseDouble(dy.getValue())));
+                                            Double.parseDouble(dy.getValue()),
+                                            Double.parseDouble(ratio.getValue())));
                                 }
                             }
                         }
@@ -153,28 +156,12 @@ public class WindFieldEstimationLayer extends Layer {
         final double[] mpts = new double[12]; // [8]
         final double[] vpts = new double[12]; // [8]
 
-        double arrowSize = 100.0;
-        /*
-        if (targetList.size() > 1) {
-            WindFieldEstimationOp.WindFieldRecord target0 = targetList.get(0);
-            geo.setLocation((float)target0.lat, (float)target0.lon);
-            geoCoding.getPixelPos(geo, pix);
-            float x0 = pix.x;
-            float y0 = pix.y;
-            WindFieldEstimationOp.WindFieldRecord target1 = targetList.get(1);
-            geo.setLocation((float)target1.lat, (float)target1.lon);
-            geoCoding.getPixelPos(geo, pix);
-            float x1 = pix.x;
-            float y1 = pix.y;
-            arrowSize = Math.sqrt((x0 - x1)*(x0 - x1) + (y0 - y1)*(y0 - y1))/2.5;
-        }
-        */
         for(WindFieldEstimationOp.WindFieldRecord target : targetList) {
 
             geo.setLocation((float)target.lat, (float)target.lon);
             geoCoding.getPixelPos(geo, pix);
-            double dx = arrowSize*target.dx;
-            double dy = arrowSize*target.dy;
+            double dx = target.dx;
+            double dy = target.dy;
             /*
             ipts[0] = pix.getX();
             ipts[1] = pix.getY();
