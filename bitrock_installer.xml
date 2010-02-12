@@ -2,6 +2,7 @@
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>3C</version>
+    <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>beam/res/NEST_Splash.png</splashImage>
     <postInstallationActionList>
@@ -19,7 +20,7 @@
             <value>${installdir}</value>
         </addEnvironmentVariable>
         <changePermissions>
-            <files>*/*.sh;*/*.bin;*/*.command;${InstallDir}/dat.sh;${InstallDir}/gpt.sh;${InstallDir}/jre/bin/*;${InstallDir}/*.so</files>
+            <files>*/*.sh;*/*.bin;*/*.command;${InstallDir}/dat.sh;${InstallDir}/gpt.sh;${InstallDir}/jre/bin/*;${InstallDir}/*.so;${InstallDir}/*.jnilib</files>
             <permissions>755</permissions>
         </changePermissions>
         <addDirectoryToPath>
