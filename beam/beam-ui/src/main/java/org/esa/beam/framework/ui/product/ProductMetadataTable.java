@@ -1,5 +1,5 @@
 /*
- * $Id: ProductMetadataTable.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: ProductMetadataTable.java,v 1.2 2010-02-12 20:18:31 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -253,17 +253,18 @@ public class ProductMetadataTable extends TreeTable {
 
         public void setValueAt(Object o, int column) {
             if(!attribute.isReadOnly() && column == VALUE_COL_INDEX) {
-                String value = (String) o;
+                final String value = (String) o;
 
                 try {
                     if(attribute.getData() instanceof ProductData.ASCII) {
                         attribute.getData().setElems(value);
                     } else if(attribute.getData() instanceof ProductData.UTC) {
-                        attribute.getData().setElems(ProductData.UTC.parse(value));
+                        attribute.getData().setElems(ProductData.UTC.parse(value).getElems());
                     } else {
                         attribute.getData().setElemDouble(Double.parseDouble(value));
                     }
                 } catch(Exception e) {
+                    System.out.println(e.getMessage());
                     // do nothing and value will revert to original
                 }
             }
