@@ -1,5 +1,5 @@
 /*
- * $Id: Product.java,v 1.19 2010-02-12 14:42:16 lveci Exp $
+ * $Id: Product.java,v 1.20 2010-02-12 19:05:40 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -67,7 +67,7 @@ import java.util.TreeSet;
  * necessarily store data in the same format. Furthermore, it is not mandatory for a product to have both of them.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.19 $ $Date: 2010-02-12 14:42:16 $
+ * @version $Revision: 1.20 $ $Date: 2010-02-12 19:05:40 $
  */
 public class Product extends ProductNode {
 
@@ -1068,10 +1068,6 @@ public class Product extends ProductNode {
 
     public ProductNodeGroup<VectorDataNode> getVectorDataGroup() {
         return vectorDataGroup;
-    }
-
-    public boolean isInternalNode(VectorDataNode vectorDataNode) {
-        return vectorDataNode.getFeatureType() == Placemark.getFeatureType();
     }
 
     //////////////////////////////////////////////////////////////////////////

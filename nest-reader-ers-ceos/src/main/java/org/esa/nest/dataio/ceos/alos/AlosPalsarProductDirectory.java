@@ -110,7 +110,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
         ReaderUtils.addGeoCoding(product, _leaderFile.getLatCorners(), _leaderFile.getLonCorners());
         addTiePointGrids(product);
         addMetaData(product);
-
+        
         if(product.getGeoCoding() == null) {
             addGeoCodingFromWorkReport(product);
         }
@@ -219,6 +219,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
 
     private static void addGeoCodingFromWorkReport(Product product) {
 
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         final MetadataElement workReportElem = product.getMetadataRoot().getElement("Work Report");
         if(workReportElem != null) {
 
@@ -234,6 +235,15 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 final float lonLL = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneLeftBottomLongitude", "0"));
                 final float lonLR = Float.parseFloat(workReportElem.getAttributeString("Brs_ImageSceneRightBottomLongitude", "0"));
                 final float[] lonCorners = new float[]{lonUL, lonUR, lonLL, lonLR};
+
+                absRoot.setAttributeDouble(AbstractMetadata.first_near_lat, latUL);
+                absRoot.setAttributeDouble(AbstractMetadata.first_near_long, lonUL);
+                absRoot.setAttributeDouble(AbstractMetadata.first_far_lat, latUR);
+                absRoot.setAttributeDouble(AbstractMetadata.first_far_long, lonUR);
+                absRoot.setAttributeDouble(AbstractMetadata.last_near_lat, latLL);
+                absRoot.setAttributeDouble(AbstractMetadata.last_near_long, lonLL);
+                absRoot.setAttributeDouble(AbstractMetadata.last_far_lat, latLR);
+                absRoot.setAttributeDouble(AbstractMetadata.last_far_long, lonLR);
 
                 ReaderUtils.addGeoCoding(product, latCorners, lonCorners);
             } catch(Exception e) {
@@ -356,7 +366,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long,
                     mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));
 
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec, sceneRec));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
                 mapProjRec.getAttributeDouble("Nominal inter-pixel distance in output scene"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
@@ -366,6 +376,7 @@ class AlosPalsarProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeDouble("Pixel spacing"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
                 sceneRec.getAttributeDouble("Line spacing"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec, sceneRec));
         }
 
         //sph

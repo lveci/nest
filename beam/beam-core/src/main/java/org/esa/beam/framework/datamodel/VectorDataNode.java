@@ -15,7 +15,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
  * This is a preliminary API under construction for BEAM 4.7. Not intended for public use.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.7 $ $Date: 2009-12-23 16:42:11 $
+ * @version $Revision: 1.8 $ $Date: 2010-02-12 19:05:40 $
  * @see Product#getVectorDataGroup()
  * @since BEAM 4.7
  */
@@ -176,4 +176,9 @@ public class VectorDataNode extends ProductNode {
         featureCollection.removeListener(featureCollectionListener);
         super.dispose();
     }
+
+    public boolean isInternalNode() {
+        return getFeatureType() == Placemark.getFeatureType();
+    }
 }
+

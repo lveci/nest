@@ -212,21 +212,6 @@ class ERSProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,
                 getProcTime(_volumeDirectoryFile.getVolumeDescriptorRecord()));
 
-        String psID = "VMP";
-        if(sceneRec != null) {
-            psID = sceneRec.getAttributeString("Processing system identifier").trim();
-            if (psID.contains("PGS")) {
-                AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier, "PGS");
-            } else { // VMP
-                AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier, "VMP");
-            }
-
-            final int absOrbit = Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim());
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.CYCLE, getCycle(absOrbit));
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT, getRelOrbit(absOrbit));
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT, absOrbit);
-        }
-
         final ProductData.UTC startTime = getUTCScanStartTime(sceneRec, null);
         final ProductData.UTC endTime = getUTCScanStopTime(sceneRec, null);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
@@ -252,7 +237,7 @@ class ERSProductDirectory extends CEOSProductDirectory {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long,
                     mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));
 
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec, sceneRec));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
                 mapProjRec.getAttributeDouble("Nominal inter-pixel distance in output scene"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
@@ -267,12 +252,23 @@ class ERSProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeDouble("Pixel spacing"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
                 sceneRec.getAttributeDouble("Line spacing"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec, sceneRec));
         }
 
         //sph
+        String psID = "VMP";
         if(sceneRec != null) {
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
-                    sceneRec.getAttributeString("Processing algorithm identifier"));
+            psID = sceneRec.getAttributeString("Processing system identifier").trim();
+            if (psID.contains("PGS")) {
+                AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier, "PGS");
+            } else { // VMP
+                AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ProcessingSystemIdentifier, "VMP");
+            }
+
+            final int absOrbit = Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim());
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.CYCLE, getCycle(absOrbit));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.REL_ORBIT, getRelOrbit(absOrbit));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT, absOrbit);
 
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
                     ReaderUtils.findPolarizationInBandName(

@@ -120,11 +120,24 @@ public abstract class CEOSProductDirectory {
         }
     }
 
-    protected static String getPass(BaseRecord mapProjRec) {
-        if(mapProjRec == null) return " ";
-        final double heading = mapProjRec.getAttributeDouble("Platform heading at nadir corresponding to scene centre");
-        if(heading > 90 && heading < 270) return "DESCENDING";
-        else return "ASCENDING";
+    protected static String getPass(final BaseRecord mapProjRec, final BaseRecord sceneRec) {
+        if(mapProjRec != null) {
+            final double heading = mapProjRec.getAttributeDouble("Platform heading at nadir corresponding to scene centre");
+            if(heading > 90 && heading < 270) return "DESCENDING";
+            else return "ASCENDING";
+        } else if(sceneRec != null) {
+            String pass = sceneRec.getAttributeString("Ascending or Descending flag");
+            if(pass == null) {
+                pass = sceneRec.getAttributeString("Time direction indicator along line direction");
+            }
+            if(pass != null) {
+                if(pass.toUpperCase().trim().startsWith("DESC"))
+                    return "DESCENDING";
+                else
+                    return "ASCENDING";
+            }
+        }
+        return " ";
     }
 
     protected static ProductData.UTC getUTCScanStartTime(final BaseRecord sceneRec, final BaseRecord detailProcRec) {

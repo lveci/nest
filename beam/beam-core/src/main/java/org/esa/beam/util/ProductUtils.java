@@ -1,5 +1,5 @@
 /*
- * $Id: ProductUtils.java,v 1.16 2010-02-09 18:03:39 lveci Exp $
+ * $Id: ProductUtils.java,v 1.17 2010-02-12 19:05:40 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -1397,7 +1397,7 @@ public class ProductUtils {
             for (int i = 0; i < vectorDataGroup.getNodeCount(); i++) {
                 VectorDataNode vectorDataNode = vectorDataGroup.get(i);
                 String name = vectorDataNode.getName();
-                if (!sourceProduct.isInternalNode(vectorDataNode)) {
+                if (!vectorDataNode.isInternalNode()) {
                     FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = vectorDataNode.getFeatureCollection();
                     featureCollection = new DefaultFeatureCollection(featureCollection);
                     VectorDataNode targetVDN = new VectorDataNode(name, featureCollection);
@@ -1422,7 +1422,7 @@ public class ProductUtils {
             for (int i = 0; i < vectorDataGroup.getNodeCount(); i++) {
                 VectorDataNode vectorDataNode = vectorDataGroup.get(i);
                 String name = vectorDataNode.getName();
-                if (!sourceProduct.isInternalNode(vectorDataNode)) {
+                if (!vectorDataNode.isInternalNode()) {
                     FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = vectorDataNode.getFeatureCollection();
                     featureCollection = FeatureCollectionClipper.doOperation(featureCollection, srcModelCrs,
                                                                              clipGeometry, DefaultGeographicCRS.WGS84,

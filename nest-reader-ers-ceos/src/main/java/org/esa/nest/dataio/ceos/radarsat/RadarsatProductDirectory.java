@@ -258,14 +258,6 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_line_time, startTime);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, endTime);
 
-        if(sceneRec != null) {
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
-                    sceneRec.getAttributeString("Processing algorithm identifier"));
-
-            final int absOrbit = Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim());
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT, absOrbit);
-        }
-
         if(mapProjRec != null) {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.first_near_lat,
                     mapProjRec.getAttributeDouble("1st line 1st pixel geodetic latitude"));
@@ -286,7 +278,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_far_long,
                     mapProjRec.getAttributeDouble("Last line last valid pixel geodetic longitude"));
 
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec, sceneRec));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_spacing,
                 mapProjRec.getAttributeDouble("Nominal inter-pixel distance in output scene"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
@@ -302,14 +294,16 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
                 sceneRec.getAttributeDouble("Pixel spacing"));
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_spacing,
                 sceneRec.getAttributeDouble("Line spacing"));
-            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS,
-                sceneRec.getAttributeString("Ascending or Descending flag"));
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PASS, getPass(mapProjRec, sceneRec));
         }
 
         //sph
         if(sceneRec != null) {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.algorithm,
                     sceneRec.getAttributeString("Processing algorithm identifier"));
+
+            final int absOrbit = Integer.parseInt(sceneRec.getAttributeString("Orbit number").trim());
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.ABS_ORBIT, absOrbit);
 
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.mds1_tx_rx_polar,
                     ReaderUtils.findPolarizationInBandName(

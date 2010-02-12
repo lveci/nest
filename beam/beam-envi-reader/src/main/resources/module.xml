@@ -33,6 +33,15 @@
             <shortDescr>Import an ENVI data product.</shortDescr>
             <shortDescr>Import an ENVI data product.</shortDescr>
         </action-->
+
+        <action>
+            <id>exportENVI</id>
+            <text>Export ENVI product</text>
+            <class>org.esa.beam.visat.actions.ProductExportAction</class>
+            <formatName>ENVI</formatName>
+            <shortDescr>Export ENVI product</shortDescr>
+            <helpId>exportENVI</helpId>
+        </action>
     </extension>
 
 </module>
