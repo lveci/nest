@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGrid.java,v 1.11 2010-01-27 21:19:48 lveci Exp $
+ * $Id: TiePointGrid.java,v 1.12 2010-02-12 14:42:16 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -44,7 +44,7 @@ import Jama.Matrix;
  * Usually, tie-point grids are a sub-sampling of a data product's scene resolution.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.11 $ $Date: 2010-01-27 21:19:48 $
+ * @version $Revision: 1.12 $ $Date: 2010-02-12 14:42:16 $
  */
 public class TiePointGrid extends RasterDataNode {
 
@@ -1044,7 +1044,9 @@ public class TiePointGrid extends RasterDataNode {
      * are computed. The 3 coefficients are saved in a row in _quadraticInterpCoeffs as {a0, a1, a2}. The
      * quadratic polynomial is given as f(x) = a0 + a1*x + a2*x^2.
      */
-    private void computeQuadraticInterpCoeffs() {
+    private synchronized void computeQuadraticInterpCoeffs() {
+
+        if (_quadraticInterpCoeffs != null) return;
 
         final int numCoeff = 3;
         final int width = getRasterWidth();
@@ -1065,10 +1067,11 @@ public class TiePointGrid extends RasterDataNode {
         final Matrix A = new Matrix(sampleIndexArray);
 
         _quadraticInterpCoeffs = new double[height][numCoeff];
+        final double[] tiePointArray = new double[width];
         for (int r = 0; r < height; r++) {
-            final double[] tiePointArray = new double[width];
+            final int rwidth = r*width;
             for (int c = 0; c < width; c++) {
-                tiePointArray[c] = (double)(_tiePoints[r*width + c]);
+                tiePointArray[c] = (double)(_tiePoints[rwidth + c]);
             }
             final Matrix b = new Matrix(tiePointArray, width);
             final Matrix x = A.solve(b);
@@ -1082,7 +1085,9 @@ public class TiePointGrid extends RasterDataNode {
      * _biquadraticInterpCoeffs = {a0, a1, a2, a3, a4, a5} and the biquadratic polynomial is given as
      * f(x,y) = a0 + a1*x + a2*y + a3*x^2 + a4*y*x + a5*y^2.
      */
-    private void computeBiquadraticInterpCoeffs() {
+    private synchronized void computeBiquadraticInterpCoeffs() {
+
+        if (_biquadraticInterpCoeffs != null) return;
 
         final int numCoeff = 6;
         final int w = getRasterWidth();
@@ -1092,18 +1097,20 @@ public class TiePointGrid extends RasterDataNode {
         // prepare matrix A
         final double[][] sampleIndexArray = new double[n][numCoeff];
         for (int i = 0; i < h; i++) {
+            final int y = (int)(i*_subSamplingY);
+            final double yy = y*y;
+            final int iw = i*w;
             for (int j = 0; j < w; j++) {
-                final int k = i*w + j;
+                final int k = iw + j;
 //                final int x = Math.min((int)(j*_subSamplingX), getSceneRasterWidth() - 1);
 //                final int y = Math.min((int)(i*_subSamplingY), getSceneRasterHeight() - 1);
                 final int x = (int)(j*_subSamplingX);
-                final int y = (int)(i*_subSamplingY);
                 sampleIndexArray[k][0] = 1.0;
                 sampleIndexArray[k][1] = (double)(x);
                 sampleIndexArray[k][2] = (double)(y);
                 sampleIndexArray[k][3] = (double)(x*x);
                 sampleIndexArray[k][4] = (double)(y*x);
-                sampleIndexArray[k][5] = (double)(y*y);
+                sampleIndexArray[k][5] = yy;
             }
         }
         final Matrix A = new Matrix(sampleIndexArray);
@@ -1210,8 +1217,10 @@ public class TiePointGrid extends RasterDataNode {
         } else if (interpMethod == InterpMode.QUADRATIC || interpMethod == InterpMode.BIQUADRATIC) {
 
             int k = 0;
-            for (int y = y0; y < y0 + h; y++) {
-                for (int x = x0; x < x0 + w; x++) {
+            final int maxY = y0 + h;
+            final int maxX = x0 + w;
+            for (int y = y0; y < maxY; y++) {
+                for (int x = x0; x < maxX; x++) {
                     pixels[k++] = getPixelFloat(x, y, interpMethod);
                 }
             }

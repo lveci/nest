@@ -1,5 +1,5 @@
 /*
- * $Id: Product.java,v 1.18 2010-02-10 16:20:36 lveci Exp $
+ * $Id: Product.java,v 1.19 2010-02-12 14:42:16 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -67,7 +67,7 @@ import java.util.TreeSet;
  * necessarily store data in the same format. Furthermore, it is not mandatory for a product to have both of them.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.18 $ $Date: 2010-02-10 16:20:36 $
+ * @version $Revision: 1.19 $ $Date: 2010-02-12 14:42:16 $
  */
 public class Product extends ProductNode {
 
@@ -234,20 +234,19 @@ public class Product extends ProductNode {
                 if (removed) {
                     final Mask[] masks = getMaskGroup().toArray(new Mask[getMaskGroup().getNodeCount()]);
                     for (final Mask mask : masks) {
-                        if (mask.getImageType() instanceof Mask.VectorDataType) {
-                            if (Mask.VectorDataType.getVectorData(mask) == vectorDataNode) {
-                                getMaskGroup().remove(mask);
-                                for (Band band : getBands()) {
-                                    deleteMaskFromGroup(band.getRoiMaskGroup(), mask);
-                                    deleteMaskFromGroup(band.getOverlayMaskGroup(), mask);
-                                }
-                                TiePointGrid[] tiePointGrids = getTiePointGrids();
-                                for (TiePointGrid tiePointGrid : tiePointGrids) {
-                                    deleteMaskFromGroup(tiePointGrid.getRoiMaskGroup(), mask);
-                                    deleteMaskFromGroup(tiePointGrid.getOverlayMaskGroup(), mask);
-                                }
-                                break;
+                        if (mask.getImageType()  == Mask.VectorDataType.INSTANCE &&
+                                Mask.VectorDataType.getVectorData(mask) == vectorDataNode) {
+                            getMaskGroup().remove(mask);
+                            for (Band band : getBands()) {
+                                deleteMaskFromGroup(band.getRoiMaskGroup(), mask);
+                                deleteMaskFromGroup(band.getOverlayMaskGroup(), mask);
                             }
+                            TiePointGrid[] tiePointGrids = getTiePointGrids();
+                            for (TiePointGrid tiePointGrid : tiePointGrids) {
+                                deleteMaskFromGroup(tiePointGrid.getRoiMaskGroup(), mask);
+                                deleteMaskFromGroup(tiePointGrid.getOverlayMaskGroup(), mask);
+                            }
+                            break;
                         }
                     }
                 }
@@ -258,7 +257,7 @@ public class Product extends ProductNode {
                 final Mask mask = new Mask(vectorDataNode.getName(),
                                            getSceneRasterWidth(),
                                            getSceneRasterHeight(),
-                                           new Mask.VectorDataType());
+                                           Mask.VectorDataType.INSTANCE);
                 Mask.VectorDataType.setVectorData(mask, vectorDataNode);
                 return mask;
             }

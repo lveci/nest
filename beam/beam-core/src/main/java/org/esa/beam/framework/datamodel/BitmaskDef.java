@@ -1,5 +1,5 @@
 /*
- * $Id: BitmaskDef.java,v 1.3 2009-12-11 20:46:13 lveci Exp $
+ * $Id: BitmaskDef.java,v 1.4 2010-02-12 14:42:16 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,7 +27,7 @@ import java.awt.Color;
  * transparancy.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.3 $ $Date: 2009-12-11 20:46:13 $
+ * @version $Revision: 1.4 $ $Date: 2010-02-12 14:42:16 $
  * @deprecated since BEAM 4.7, use {@code Mask} with {@code Mask.BandMathType} instead.
  */
 @Deprecated
@@ -280,11 +280,7 @@ public class BitmaskDef extends ProductNode {
     }
     
     public Mask createMask(int width, int height) {
-        final Mask mask = new Mask(getName(), width, height, new Mask.BandMathType());
-        mask.setDescription(getDescription());
-        mask.setImageColor(getColor());
-        mask.setImageTransparency(getTransparency());
-        BandMathType.setExpression(mask, getExpr());
-        return mask;
+        return Mask.BandMathType.create(getName(), getDescription(), width, height, 
+                                             getExpr(), getColor(), getTransparency());
     }
 }

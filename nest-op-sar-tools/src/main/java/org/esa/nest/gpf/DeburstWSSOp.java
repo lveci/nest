@@ -46,6 +46,8 @@ public final class DeburstWSSOp extends Operator {
     private static final double zeroThresholdSmall = 500;
     private LineTime[] lineTimes = null;
     private boolean lineTimesSorted = false;
+    private int margin = 50; // edge of target band where not to write
+    private double nodatavalue = 0;
 
     private final Map<Band, ComplexBand> bandMap = new HashMap<Band, ComplexBand>(5);
 
@@ -104,12 +106,18 @@ public final class DeburstWSSOp extends Operator {
             if (produceIntensitiesOnly) {
                 final Band tgtBand = targetProduct.addBand("Intensity_" + subSwath, ProductData.TYPE_FLOAT32);
                 tgtBand.setUnit(Unit.INTENSITY);
+                tgtBand.setNoDataValueUsed(true);
+                tgtBand.setNoDataValue(nodatavalue);
                 bandMap.put(tgtBand, new ComplexBand(sourceBands[subSwathBandNum], sourceBands[subSwathBandNum+1]));
             } else {
                 final Band trgI = targetProduct.addBand("i_" +subSwath, sourceBands[subSwathBandNum].getDataType());
                 trgI.setUnit(Unit.REAL);
+                trgI.setNoDataValueUsed(true);
+                trgI.setNoDataValue(nodatavalue);
                 final Band trgQ = targetProduct.addBand("q_" +subSwath, sourceBands[subSwathBandNum+1].getDataType());
                 trgQ.setUnit(Unit.IMAGINARY);
+                trgQ.setNoDataValueUsed(true);
+                trgQ.setNoDataValue(nodatavalue);
                 bandMap.put(trgI, new ComplexBand(sourceBands[subSwathBandNum], sourceBands[subSwathBandNum+1]));
                 ReaderUtils.createVirtualIntensityBand(targetProduct, trgI, trgQ, '_'+subSwath);
                 ReaderUtils.createVirtualPhaseBand(targetProduct, trgI, trgQ, '_'+subSwath);
@@ -141,29 +149,20 @@ public final class DeburstWSSOp extends Operator {
         targetHeight = mpp.getAttributeInt("num_output_lines") / 3;
         targetWidth = mpp.getAttributeInt("num_samples_per_line");
 
-        final int numReadyBands = getNumReadyBands(sourceProduct);
-        final int numRealBands = sourceProduct.getNumBands()/2;
-        if(numReadyBands != numRealBands) {
-            throw new OperatorException("Source product has not completed reading time codes. ("+
-                    numReadyBands+" of "+numRealBands+ " read) Please try again.");
+        if(!isBandReady(sourceProduct, subSwathNum)) {
+            throw new OperatorException("Time codes for "+subSwath+" not ready yet. Please try again.");
         }
     }
 
-    private static int getNumReadyBands(final Product srcProduct) {
+    private static boolean isBandReady(final Product srcProduct, final int subSwathNum) {
         final MetadataElement imgRecElem = srcProduct.getMetadataRoot().getElement("Image Record");
-        int cnt = 0;
-        if(imgRecElem == null) return cnt;
-        for(Band srcBand : srcProduct.getBands()) {
-            if(!srcBand.getUnit().equals(Unit.REAL))
-                continue;
-            final MetadataElement bandElem = imgRecElem.getElement(srcBand.getName());
-            if(bandElem == null) return cnt;
+        if(imgRecElem == null) return false;
 
-            final MetadataAttribute attrib = bandElem.getAttribute("t");
-            if(attrib == null) return cnt;
-            ++cnt;
-        }
-        return cnt;
+        final MetadataElement bandElem = imgRecElem.getElement(srcProduct.getBandAt(subSwathNum*2).getName());
+        if(bandElem == null) return false;
+
+        final MetadataAttribute attrib = bandElem.getAttribute("t");
+        return attrib != null;
     }
 
     /**
@@ -572,7 +571,11 @@ public final class DeburstWSSOp extends Operator {
                 if (average) {
 
                     for (int x = startX, i = 0; x < endX; ++x, ++i) {
-                        data.setElemDoubleAt(targetTileIntensity.getDataBufferIndex(x, targetLine), sumLine[i]);
+                        if(x < margin || x > targetWidth - margin) {
+                            data.setElemDoubleAt(targetTileIntensity.getDataBufferIndex(x, targetLine), nodatavalue);
+                        } else {
+                            data.setElemDoubleAt(targetTileIntensity.getDataBufferIndex(x, targetLine), sumLine[i]);
+                        }
                     }
                 } else {
                     for (int x = startX, i = 0; x < endX; ++x, ++i) {
@@ -580,7 +583,11 @@ public final class DeburstWSSOp extends Operator {
                             peakLine[i] = 0;
                             //System.out.println("uninitPeak " + i + " at " + targetLine);
                         }
-                        data.setElemDoubleAt(targetTileIntensity.getDataBufferIndex(x, targetLine), peakLine[i]);
+                        if(x < margin || x > targetWidth - margin) {
+                            data.setElemDoubleAt(targetTileIntensity.getDataBufferIndex(x, targetLine), nodatavalue);
+                        } else {
+                            data.setElemDoubleAt(targetTileIntensity.getDataBufferIndex(x, targetLine), peakLine[i]);
+                        }
                     }
                 }
             } else {
@@ -594,8 +601,13 @@ public final class DeburstWSSOp extends Operator {
                         System.out.println("uninitPeak " + i + " at " + targetLine);
                     }
                     final int index = targetTileI.getDataBufferIndex(x, targetLine);
-                    dataI.setElemDoubleAt(index, peakLineI[i]);
-                    dataQ.setElemDoubleAt(index, peakLineQ[i]);
+                    if(x < margin || x > targetWidth - margin) {
+                        dataI.setElemDoubleAt(index, nodatavalue);
+                        dataQ.setElemDoubleAt(index, nodatavalue);
+                    } else {
+                        dataI.setElemDoubleAt(index, peakLineI[i]);
+                        dataQ.setElemDoubleAt(index, peakLineQ[i]);
+                    }
                 }
             }
             return true;

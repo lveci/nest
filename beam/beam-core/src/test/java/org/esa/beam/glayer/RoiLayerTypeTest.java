@@ -1,5 +1,5 @@
 /*
- * $Id: RoiLayerTypeTest.java,v 1.2 2009-12-11 20:46:14 lveci Exp $
+ * $Id: RoiLayerTypeTest.java,v 1.3 2010-02-12 14:42:16 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -56,7 +56,7 @@ public class RoiLayerTypeTest extends LayerTypeTest {
         final Product product = new Product("N", "T", 10, 10);
         final Band raster = new VirtualBand("A", ProductData.TYPE_INT32, 10, 10, "42");
         product.addBand(raster);
-        final Mask mask = new Mask("A_roi", 10, 10, new Mask.BandMathType());
+        final Mask mask = new Mask("A_roi", 10, 10, Mask.BandMathType.INSTANCE);
         Mask.BandMathType.setExpression(mask, "A == 42");
         product.getMaskGroup().add(mask);
 

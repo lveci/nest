@@ -1,5 +1,5 @@
 /*
- * $Id: CopyMaskDialog.java,v 1.1 2009-12-04 19:06:45 lveci Exp $
+ * $Id: TransferMaskDialog.java,v 1.1 2010-02-12 14:42:16 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -17,34 +17,37 @@
 package org.esa.beam.visat.toolviews.mask;
 
 import com.bc.ceres.swing.TableLayout;
-
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.util.ProductUtils;
 
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JEditorPane;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
+import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.Window;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.ButtonGroup;
-import javax.swing.ButtonModel;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-
 /**
  * @author Marco Zuehlke
- * @version $Revision: 1.1 $ $Date: 2009-12-04 19:06:45 $
+ * @version $Revision: 1.1 $ $Date: 2010-02-12 14:42:16 $
  * @since BEAM 4.7
  */
-class CopyMaskDialog extends ModalDialog {
+class TransferMaskDialog extends ModalDialog {
 
     private final Mask[] selectedMasks;
     private final Product sourceProduct;
@@ -52,14 +55,15 @@ class CopyMaskDialog extends ModalDialog {
     private final Map<Product, ButtonModel> definitionMap;
     private final Map<Product, ButtonModel> dataMap;
 
-    CopyMaskDialog(Product product, Product[] allProducts, Mask[] selectedMasks) {
-        super(null, "Copy Mask(s)", ModalDialog.ID_OK_CANCEL | ModalDialog.ID_HELP, "copyMaskEditor");
+    TransferMaskDialog(Window window, Product product, Product[] allProducts, Mask[] selectedMasks) {
+        super(window, "Transfer Mask(s) to other product", ModalDialog.ID_OK_CANCEL | ModalDialog.ID_HELP, "transferMaskEditor");
         this.sourceProduct = product;
         this.allProducts = allProducts;
         this.selectedMasks = selectedMasks;
         definitionMap = new HashMap<Product, ButtonModel>();
         dataMap = new HashMap<Product, ButtonModel>();
-        getJDialog().setResizable(false);
+        getJDialog().setResizable(true);
+        
         setContent(createUI());
     }
     
@@ -93,9 +97,9 @@ class CopyMaskDialog extends ModalDialog {
         
         
         final JPanel panel = new JPanel(layout);
-        panel.add(new JLabel(" "));
-        panel.add(new JLabel("Definition"));
-        panel.add(new JLabel("Pixels"));
+        panel.add(new JLabel("<html><u>Target product</u></html>"));
+        panel.add(new JLabel("<html><u>Definition</u></html>"));
+        panel.add(new JLabel("<html><u>Pixels</u></html>"));
         int row = 1;
         for (Product targetProduct : allProducts) {
             if (targetProduct != sourceProduct) {
@@ -121,7 +125,23 @@ class CopyMaskDialog extends ModalDialog {
                 row++;
             }
         }
+        layout.setCellColspan(row, 0, 3);
+        panel.add(createHelpPanel());
         return panel;
+    }
+    
+    private JComponent createHelpPanel() {
+        JEditorPane helpPane = new JEditorPane("text/html", null);
+        helpPane.setEditable(false);
+        helpPane.setPreferredSize(new Dimension(400, 120));
+        helpPane.setText("<html><body>Copying the <b>definition</b> of a mask means the mathematical expression " +
+        		"is evaluated in the target product. This is only possible,  " +
+        		"if the bands which are used in this expression are present in the target product.<br/> " +
+        		"Copying the <b>pixel</b> means the data of the mask is transferred to the target product. " +
+        		"This is only possible when both product overlap spatially.</body></html>");
+        JScrollPane helpPanelScrollPane = new JScrollPane(helpPane);
+        helpPanelScrollPane.setBorder(BorderFactory.createTitledBorder("Description"));
+        return helpPanelScrollPane;
     }
 
     private static JCheckBox createCeckbox(final JPanel panel, boolean enabled) {
@@ -142,9 +162,9 @@ class CopyMaskDialog extends ModalDialog {
     }
     
     private static boolean intersectsWith(Product sourceProduct, Product targetProduct) {
-        final GeoCoding srcGeoCoding = sourceProduct.getGeoCoding();
-        final GeoCoding targetGeoCoding = targetProduct.getGeoCoding();
-        if (srcGeoCoding.canGetGeoPos() && targetGeoCoding.canGetGeoPos()) {
+        final GeoCoding srcGC = sourceProduct.getGeoCoding();
+        final GeoCoding targetGC = targetProduct.getGeoCoding();
+        if (srcGC != null && srcGC.canGetGeoPos() && targetGC != null && targetGC.canGetGeoPos()) {
             final GeneralPath[] sourcePath = ProductUtils.createGeoBoundaryPaths(sourceProduct);
             final GeneralPath[] targetPath = ProductUtils.createGeoBoundaryPaths(targetProduct);
             for (GeneralPath spath : sourcePath) {

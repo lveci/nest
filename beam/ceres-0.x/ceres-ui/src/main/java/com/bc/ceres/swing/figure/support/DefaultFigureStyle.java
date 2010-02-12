@@ -22,8 +22,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import static java.lang.Math.*;
 
 public class DefaultFigureStyle extends PropertyContainer implements FigureStyle {
     //
@@ -35,7 +34,7 @@ public class DefaultFigureStyle extends PropertyContainer implements FigureStyle
     public static final PropertyDescriptor STROKE_OPACITY = createStrokeOpacityDescriptor();
     public static final PropertyDescriptor STROKE_WIDTH = createStrokeWidthDescriptor();
 
-    private final static DefaultFigureStyle PROTOTYPE;
+    private static final DefaultFigureStyle PROTOTYPE;
 
     private String name;
     private Map<String, Object> values;
@@ -113,7 +112,7 @@ public class DefaultFigureStyle extends PropertyContainer implements FigureStyle
         }
         Property property = PROTOTYPE.getProperty(name);
         if (property != null) {
-            defineProperty(property, value);
+            defineProperty(property.getDescriptor(), value);
         } else {
             // be tolerant, do nothing!
             // todo - really do nothing or log warning, exception?  (nf)
@@ -292,7 +291,7 @@ public class DefaultFigureStyle extends PropertyContainer implements FigureStyle
                             Converter<?> converter = property.getDescriptor().getConverter();
                             if (converter != null) {
                                 Object value = converter.parse(textValue);
-                                defineProperty(property, value);
+                                defineProperty(property.getDescriptor(), value);
                             }
                         }
                     }
@@ -358,16 +357,16 @@ public class DefaultFigureStyle extends PropertyContainer implements FigureStyle
     // Only called once by prototype singleton
 
     private void initPrototypeProperties() {
-        Field[] declaredFields = FigureStyle.class.getDeclaredFields();
+        Field[] declaredFields = DefaultFigureStyle.class.getDeclaredFields();
         for (Field declaredField : declaredFields) {
-            if (declaredField.getType() == Property.class) {
+            if (declaredField.getType() == PropertyDescriptor.class) {
                 try {
-                    Property prototypeProperty = (Property) declaredField.get(null);
-                    prototypeProperty.getDescriptor().setDefaultConverter();
-                    if (Color.class.isAssignableFrom(prototypeProperty.getType())) {
-                        prototypeProperty.getDescriptor().setConverter(new CssColorConverter());
+                    PropertyDescriptor propertyDescriptor = (PropertyDescriptor) declaredField.get(null);
+                    propertyDescriptor.setDefaultConverter();
+                    if (Color.class.isAssignableFrom(propertyDescriptor.getType())) {
+                        propertyDescriptor.setConverter(new CssColorConverter());
                     }
-                    defineProperty(prototypeProperty, prototypeProperty.getValue());
+                    defineProperty(propertyDescriptor, propertyDescriptor.getDefaultValue());
                 } catch (IllegalAccessException e) {
                     throw new IllegalStateException(e);
                 }
@@ -380,9 +379,9 @@ public class DefaultFigureStyle extends PropertyContainer implements FigureStyle
         }
     }
 
-    private void defineProperty(Property prototypeProperty, Object value) {
-        MapEntryAccessor accessor = new MapEntryAccessor(values, prototypeProperty.getName());
-        Property property = new Property(prototypeProperty.getDescriptor(), accessor);
+    private void defineProperty(PropertyDescriptor propertyDescriptor, Object value) {
+        MapEntryAccessor accessor = new MapEntryAccessor(values, propertyDescriptor.getName());
+        Property property = new Property(propertyDescriptor, accessor);
         addProperty(property);
         setValue(property.getName(), value);
     }

@@ -33,7 +33,7 @@ import java.util.Map;
  * This is a preliminary API under construction for BEAM 4.7. Not intended for public use.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.10 $ $Date: 2010-01-20 20:22:43 $
+ * @version $Revision: 1.11 $ $Date: 2010-02-12 14:42:16 $
  * @since BEAM 4.7
  */
 public class Mask extends Band {
@@ -216,8 +216,10 @@ public class Mask extends Band {
 
         public static final String TYPE_NAME = "Math";
         public static final String PROPERTY_NAME_EXPRESSION = "expression";
+        
+        public static final BandMathType INSTANCE =  new BandMathType();
 
-        public BandMathType() {
+        private BandMathType() {
             super(TYPE_NAME);
         }
 
@@ -289,10 +291,8 @@ public class Mask extends Band {
                 final String maskName = getAvailableMaskName(originalMaskName, product.getMaskGroup());
                 final int w = product.getSceneRasterWidth();
                 final int h = product.getSceneRasterHeight();
-                final Mask newMask = new Mask(maskName, w, h, this);
-                newMask.setDescription(mask.getDescription());
-                setImageStyle(newMask.getImageConfig(), mask.getImageColor(), mask.getImageTransparency());
-                setExpression(newMask, expression);
+                Mask newMask = create(maskName, mask.getDescription(), w, h, 
+                                      expression, mask.getImageColor(), mask.getImageTransparency());
                 product.getMaskGroup().add(newMask);
 
                 return newMask;
@@ -363,6 +363,18 @@ public class Mask extends Band {
         public static String getExpression(Mask mask) {
             return (String) mask.getImageConfig().getValue(PROPERTY_NAME_EXPRESSION);
         }
+        
+        public static Mask create(String name, String description, int width, int height,
+                                  String expression, Color color, double transparency) {
+            final Mask mask = new Mask(name, width, height, Mask.BandMathType.INSTANCE);
+            if (description != null) {
+                mask.setDescription(description);
+            }
+            mask.setImageColor(color);
+            mask.setImageTransparency(transparency);
+            BandMathType.setExpression(mask, expression);
+            return mask;
+        }
     }
 
     /**
@@ -371,10 +383,11 @@ public class Mask extends Band {
     public static class VectorDataType extends ImageType {
 
         public static final String TYPE_NAME = "Geometry";
-
         public static final String PROPERTY_NAME_VECTOR_DATA = "vectorData";
 
-        public VectorDataType() {
+        public static final VectorDataType INSTANCE =  new VectorDataType();
+
+        private VectorDataType() {
             super(TYPE_NAME);
         }
 
@@ -424,8 +437,10 @@ public class Mask extends Band {
         public static final String PROPERTY_NAME_MINIMUM = "minimum";
         public static final String PROPERTY_NAME_MAXIMUM = "maximum";
         public static final String PROPERTY_NAME_RASTER = "rasterName";
+        
+        public static final RangeType INSTANCE =  new RangeType();
 
-        public RangeType() {
+        private RangeType() {
             super(TYPE_NAME);
         }
 

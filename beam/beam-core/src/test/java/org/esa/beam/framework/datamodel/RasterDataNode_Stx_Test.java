@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataNode_Stx_Test.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: RasterDataNode_Stx_Test.java,v 1.2 2010-02-12 14:42:16 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -56,7 +56,7 @@ public class RasterDataNode_Stx_Test {
     }
 
     @Test
-    public void testValues_1_2_3_4_5_6_NoDataVale_3() {
+    public void testValues_1_2_3_4_5_6_NoDataValue_3() {
         final int w = 3;
         final int h = 2;
         final float[] floats = {1, 2, 3, 4, 5, 6};
