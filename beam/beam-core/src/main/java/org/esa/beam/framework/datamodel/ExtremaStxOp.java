@@ -10,7 +10,7 @@ import java.awt.Rectangle;
 *
 * @author Norman Fomferra
 * @author Marco Peters
-* @version $Revision: 1.2 $ $Date: 2010-02-10 15:21:58 $
+* @version $Revision: 1.3 $ $Date: 2010-02-12 22:17:09 $
 * @since BEAM 4.5.1
 */
 class ExtremaStxOp implements StxOp {
@@ -20,6 +20,7 @@ class ExtremaStxOp implements StxOp {
     private long numValues;
     private double sqrSum;
     private double power4Sum;
+    private String unit;
 
     ExtremaStxOp() {
         this.lowValue = Double.MAX_VALUE;
@@ -28,6 +29,7 @@ class ExtremaStxOp implements StxOp {
         this.numValues = 0;
         this.sqrSum = 0;
         this.power4Sum = 0;
+        this.unit = "";
     }
 
     public String getName() {
@@ -51,19 +53,37 @@ class ExtremaStxOp implements StxOp {
     }
 
     public double getCoefficientOfVariation() {
-        final double m4 = power4Sum / numValues;
-        final double m2 = sqrSum / numValues;
-        return Math.sqrt(m4 - m2*m2) / m2;
+        double cv = 0.0;
+        if (unit.contains("intensity")) {
+            final double m = valueSum / numValues;
+            final double m2 = sqrSum / numValues;
+            cv = Math.sqrt(m2 - m*m) / m;
+        } else {
+            final double m4 = power4Sum / numValues;
+            final double m2 = sqrSum / numValues;
+            cv = Math.sqrt(m4 - m2*m2) / m2;
+        }
+        return cv;
     }
 
     public double getEquivalentNumberOfLooks() {
-        final double m4 = power4Sum / numValues;
-        final double m2 = sqrSum / numValues;
-        final double m2m2 = m2*m2;
-        return m2m2 / (m4 - m2m2);
+        double enl = 0.0;
+        if (unit.contains("intensity")) {
+            final double m = valueSum / numValues;
+            final double m2 = sqrSum / numValues;
+            final double mm = m*m;
+            enl = mm / (m2 - mm);
+        } else {
+            final double m4 = power4Sum / numValues;
+            final double m2 = sqrSum / numValues;
+            final double m2m2 = m2*m2;
+            enl = m2m2 / (m4 - m2m2);
+        }
+        return enl;
     }
 
-    public void accumulateDataUByte(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor, Raster maskTile, Rectangle r) {
+    public void accumulateDataUByte(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
+                                    Raster maskTile, Rectangle r, String unit) {
         double tmpLowValue = this.lowValue;
         double tmpHighValue = this.highValue;
         long tmpNumValues = this.numValues;
@@ -123,9 +143,11 @@ class ExtremaStxOp implements StxOp {
         this.valueSum = tmpValueSum;
         this.sqrSum = tmpSqrSum;
         this.power4Sum = tmpPower4Sum;
+        this.unit = unit;
     }
 
-    public void accumulateDataUShort(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor, Raster maskTile, Rectangle r) {
+    public void accumulateDataUShort(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
+                                     Raster maskTile, Rectangle r, String unit) {
         double tmpLowValue = this.lowValue;
         double tmpHighValue = this.highValue;
         long tmpNumValues = this.numValues;
@@ -186,9 +208,11 @@ class ExtremaStxOp implements StxOp {
         this.valueSum = tmpValueSum;
         this.sqrSum = tmpSqrSum;
         this.power4Sum = tmpPower4Sum;
+        this.unit = unit;
     }
 
-    public void accumulateDataShort(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor, Raster maskTile, Rectangle r) {
+    public void accumulateDataShort(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
+                                    Raster maskTile, Rectangle r, String unit) {
         double tmpLowValue = this.lowValue;
         double tmpHighValue = this.highValue;
         long tmpNumValues = this.numValues;
@@ -249,9 +273,11 @@ class ExtremaStxOp implements StxOp {
         this.numValues = tmpNumValues;
         this.sqrSum = tmpSqrSum;
         this.power4Sum = tmpPower4Sum;
+        this.unit = unit;
     }
 
-    public void accumulateDataInt(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor, Raster maskTile, Rectangle r) {
+    public void accumulateDataInt(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
+                                  Raster maskTile, Rectangle r, String unit) {
         double tmpLowValue = this.lowValue;
         double tmpHighValue = this.highValue;
         long tmpNumValues = this.numValues;
@@ -312,9 +338,11 @@ class ExtremaStxOp implements StxOp {
         this.valueSum = tmpValueSum;
         this.sqrSum = tmpSqrSum;
         this.power4Sum = tmpPower4Sum;
+        this.unit = unit;
     }
 
-    public void accumulateDataFloat(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor, Raster maskTile, Rectangle r) {
+    public void accumulateDataFloat(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
+                                    Raster maskTile, Rectangle r, String unit) {
         double tmpLowValue = this.lowValue;
         double tmpHighValue = this.highValue;
         long tmpNumValues = this.numValues;
@@ -375,9 +403,11 @@ class ExtremaStxOp implements StxOp {
         this.valueSum = tmpValueSum;
         this.sqrSum = tmpSqrSum;
         this.power4Sum = tmpPower4Sum;
+        this.unit = unit;
     }
 
-    public void accumulateDataDouble(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor, Raster maskTile, Rectangle r) {
+    public void accumulateDataDouble(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
+                                     Raster maskTile, Rectangle r, String unit) {
         double tmpLowValue = this.lowValue;
         double tmpHighValue = this.highValue;
         long tmpNumValues = this.numValues;
@@ -438,6 +468,7 @@ class ExtremaStxOp implements StxOp {
         this.valueSum = tmpValueSum;
         this.sqrSum = tmpSqrSum;
         this.power4Sum = tmpPower4Sum;
+        this.unit = unit;
     }
 
 }
