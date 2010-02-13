@@ -10,7 +10,7 @@ import java.awt.Rectangle;
 *
 * @author Norman Fomferra
 * @author Marco Peters
-* @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+* @version $Revision: 1.2 $ $Date: 2010-02-12 22:18:10 $
 * @since BEAM 4.5.1
 */
 class HistogramStxOp implements StxOp {
@@ -36,7 +36,8 @@ class HistogramStxOp implements StxOp {
         return bins;
     }
 
-    public void accumulateDataUByte(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor, Raster maskTile, Rectangle r) {
+    public void accumulateDataUByte(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
+                                    Raster maskTile, Rectangle r, String unit) {
         final int[] bins = this.bins;
         final double lowValue = this.lowValue;
         final double highValue = this.highValue;
@@ -84,7 +85,8 @@ class HistogramStxOp implements StxOp {
         }
     }
 
-    public void accumulateDataUShort(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor, Raster maskTile, Rectangle r) {
+    public void accumulateDataUShort(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
+                                     Raster maskTile, Rectangle r, String unit) {
         final int[] bins = this.bins;
         final double lowValue = this.lowValue;
         final double highValue = this.highValue;
@@ -132,7 +134,8 @@ class HistogramStxOp implements StxOp {
         }
     }
 
-    public void accumulateDataShort(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor, Raster maskTile, Rectangle r) {
+    public void accumulateDataShort(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
+                                    Raster maskTile, Rectangle r, String unit) {
         final int[] bins = this.bins;
         final double lowValue = this.lowValue;
         final double highValue = this.highValue;
@@ -180,7 +183,8 @@ class HistogramStxOp implements StxOp {
         }
     }
 
-    public void accumulateDataInt(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor, Raster maskTile, Rectangle r) {
+    public void accumulateDataInt(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
+                                  Raster maskTile, Rectangle r, String unit) {
         final int[] bins = this.bins;
         final double lowValue = this.lowValue;
         final double highValue = this.highValue;
@@ -228,7 +232,8 @@ class HistogramStxOp implements StxOp {
         }
     }
 
-    public void accumulateDataFloat(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor, Raster maskTile, Rectangle r) {
+    public void accumulateDataFloat(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
+                                    Raster maskTile, Rectangle r, String unit) {
         final int[] bins = this.bins;
         final double lowValue = this.lowValue;
         final double highValue = this.highValue;
@@ -277,7 +282,8 @@ class HistogramStxOp implements StxOp {
         }
     }
 
-    public void accumulateDataDouble(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor, Raster maskTile, Rectangle r) {
+    public void accumulateDataDouble(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
+                                     Raster maskTile, Rectangle r, String unit) {
         final int[] bins = this.bins;
         final double lowValue = this.lowValue;
         final double highValue = this.highValue;

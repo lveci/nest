@@ -9,7 +9,7 @@ import java.awt.Rectangle;
 /**
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2010-02-12 22:18:10 $
  * @since BEAM 4.5.1
  */
 class StdDevStxOp implements StxOp {
@@ -33,7 +33,7 @@ class StdDevStxOp implements StxOp {
     }
 
     public void accumulateDataUByte(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
-                                    Raster maskTile, Rectangle r) {
+                                    Raster maskTile, Rectangle r, String unit) {
         double tmpSumOfSquares = this.sumOfSquares;
 
         final UnpackedImageData duid = dataAccessor.getPixels(dataTile, r, DataBuffer.TYPE_BYTE, false);
@@ -81,7 +81,7 @@ class StdDevStxOp implements StxOp {
     }
 
     public void accumulateDataUShort(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
-                                     Raster maskTile, Rectangle r) {
+                                     Raster maskTile, Rectangle r, String unit) {
         double tmpSumOfSquares = this.sumOfSquares;
 
         final UnpackedImageData duid = dataAccessor.getPixels(dataTile, r, DataBuffer.TYPE_USHORT, false);
@@ -128,7 +128,7 @@ class StdDevStxOp implements StxOp {
     }
 
     public void accumulateDataShort(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
-                                    Raster maskTile, Rectangle r) {
+                                    Raster maskTile, Rectangle r, String unit) {
         double tmpSumOfSquares = this.sumOfSquares;
 
         final UnpackedImageData duid = dataAccessor.getPixels(dataTile, r, DataBuffer.TYPE_SHORT, false);
@@ -174,7 +174,7 @@ class StdDevStxOp implements StxOp {
     }
 
     public void accumulateDataInt(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
-                                  Raster maskTile, Rectangle r) {
+                                  Raster maskTile, Rectangle r, String unit) {
         double tmpSumOfSquares = this.sumOfSquares;
 
         final UnpackedImageData duid = dataAccessor.getPixels(dataTile, r, DataBuffer.TYPE_INT, false);
@@ -220,7 +220,7 @@ class StdDevStxOp implements StxOp {
     }
 
     public void accumulateDataFloat(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
-                                    Raster maskTile, Rectangle r) {
+                                    Raster maskTile, Rectangle r, String unit) {
         double tmpSumOfSquares = this.sumOfSquares;
 
         final UnpackedImageData duid = dataAccessor.getPixels(dataTile, r, DataBuffer.TYPE_FLOAT, false);
@@ -266,7 +266,7 @@ class StdDevStxOp implements StxOp {
     }
 
     public void accumulateDataDouble(PixelAccessor dataAccessor, Raster dataTile, PixelAccessor maskAccessor,
-                                     Raster maskTile, Rectangle r) {
+                                     Raster maskTile, Rectangle r, String unit) {
         double tmpSumOfSquares = this.sumOfSquares;
 
         final UnpackedImageData duid = dataAccessor.getPixels(dataTile, r, DataBuffer.TYPE_DOUBLE, false);

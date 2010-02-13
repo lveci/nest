@@ -328,6 +328,7 @@ public class Stx {
         Assert.argument(roiImage == null || level == 0, "level");
         Assert.notNull(pm, "pm");
 
+        String unit = raster.getUnit();
         final RenderedImage dataImage = ImageManager.getInstance().getSourceImage(raster, level);
         final SampleModel dataSampleModel = dataImage.getSampleModel();
         if (dataSampleModel.getNumBands() != 1) {
@@ -389,22 +390,22 @@ public class Stx {
                         switch (dataAccessor.sampleType) {
                             case PixelAccessor.TYPE_BIT:
                             case DataBuffer.TYPE_BYTE:
-                                op.accumulateDataUByte(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                op.accumulateDataUByte(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                 break;
                             case DataBuffer.TYPE_USHORT:
-                                op.accumulateDataUShort(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                op.accumulateDataUShort(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                 break;
                             case DataBuffer.TYPE_SHORT:
-                                op.accumulateDataShort(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                op.accumulateDataShort(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                 break;
                             case DataBuffer.TYPE_INT:
-                                op.accumulateDataInt(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                op.accumulateDataInt(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                 break;
                             case DataBuffer.TYPE_FLOAT:
-                                op.accumulateDataFloat(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                op.accumulateDataFloat(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                 break;
                             case DataBuffer.TYPE_DOUBLE:
-                                op.accumulateDataDouble(dataAccessor, dataTile, maskAccessor, maskTile, r);
+                                op.accumulateDataDouble(dataAccessor, dataTile, maskAccessor, maskTile, r, unit);
                                 break;
                         }
                     }
