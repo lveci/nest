@@ -218,7 +218,9 @@ public class SpeckleFilterOp extends Operator {
         final int h = targetTileRectangle.height;
 
         final Rectangle sourceTileRectangle = getSourceTileRectangle(x0, y0, w, h);
-        final Tile sourceRaster = getSourceTile(bandMap.get(targetBand), sourceTileRectangle, pm);
+        final Band srcBand = bandMap.get(targetBand);
+        final Tile sourceRaster = getSourceTile(srcBand, sourceTileRectangle, pm);
+        final String unit = srcBand.getUnit();
 
         if(filter.equals(MEAN_SPECKLE_FILTER)) {
 
@@ -234,12 +236,12 @@ public class SpeckleFilterOp extends Operator {
 
         } else if(filter.equals(GAMMA_MAP_SPECKLE_FILTER)) {
 
-            computeEquivalentNumberOfLooks(sourceRaster, x0, y0, w, h);
+            computeEquivalentNumberOfLooks(sourceRaster, x0, y0, w, h, unit);
             computeGammaMap(sourceRaster, targetTile, x0, y0, w, h, pm);
 
         } else if(filter.equals(LEE_SPECKLE_FILTER)) {
 
-            computeEquivalentNumberOfLooks(sourceRaster, x0, y0, w, h);
+            computeEquivalentNumberOfLooks(sourceRaster, x0, y0, w, h, unit);
             computeLee(sourceRaster, targetTile, x0, y0, w, h, pm);
 
         } else if(filter.equals(LEE_REFINED_FILTER)) {
@@ -657,29 +659,51 @@ public class SpeckleFilterOp extends Operator {
      * @param y0 Y coordinate of the upper left corner point of the target tile rectangle.
      * @param w The width of the target tile rectangle.
      * @param h The height of the target tile rectangle.
+     * @param unit The source band unit.
      */
     void computeEquivalentNumberOfLooks(final Tile sourceRaster,
-                                        final int x0, final int y0, final int w, final int h) {
+                                        final int x0, final int y0, final int w, final int h, final String unit) {
 
         final ProductData srcData = sourceRaster.getDataBuffer();
 
-        double sum2 = 0;
-        double sum4 = 0;
-        for (int y = y0; y < y0 + h; y++) {
-            for (int x = x0; x < x0 + w; x++) {
+        if (unit.contains(Unit.INTENSITY)) {
+            double sum = 0;
+            double sum2 = 0;
+            for (int y = y0; y < y0 + h; y++) {
+                for (int x = x0; x < x0 + w; x++) {
 
-                final double v = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x, y));
-                final double v2 = v*v;
-                sum2 += v2;
-                sum4 += v2*v2;
+                    final double v = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x, y));
+                    sum += v;
+                    sum2 += v*v;
+                }
             }
-        }
 
-        final double area = h * w;
-        final double m2 = sum2 / area;
-        final double m4 = sum4 / area;
-        final double m2m2 = m2*m2;
-        enl = m2m2 / (m4 - m2m2);
+            final double area = h * w;
+            final double m = sum / area;
+            final double m2 = sum2 / area;
+            final double mm = m*m;
+            enl = mm / (m2 - mm);
+
+        } else {
+
+            double sum2 = 0;
+            double sum4 = 0;
+            for (int y = y0; y < y0 + h; y++) {
+                for (int x = x0; x < x0 + w; x++) {
+
+                    final double v = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x, y));
+                    final double v2 = v*v;
+                    sum2 += v2;
+                    sum4 += v2*v2;
+                }
+            }
+
+            final double area = h * w;
+            final double m2 = sum2 / area;
+            final double m4 = sum4 / area;
+            final double m2m2 = m2*m2;
+            enl = m2m2 / (m4 - m2m2);
+        }
         cu = 1.0 / Math.sqrt(enl);
         cu2 = cu*cu;
     }
