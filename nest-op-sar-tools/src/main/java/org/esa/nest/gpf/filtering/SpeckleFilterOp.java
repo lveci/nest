@@ -666,7 +666,7 @@ public class SpeckleFilterOp extends Operator {
 
         final ProductData srcData = sourceRaster.getDataBuffer();
 
-        if (unit.contains(Unit.INTENSITY)) {
+        if (unit != null && unit.contains(Unit.INTENSITY)) {
             double sum = 0;
             double sum2 = 0;
             for (int y = y0; y < y0 + h; y++) {
