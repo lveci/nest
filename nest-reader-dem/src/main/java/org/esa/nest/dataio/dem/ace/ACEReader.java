@@ -14,6 +14,7 @@ import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.nest.dataio.ReaderUtils;
+import org.esa.nest.datamodel.Unit;
 
 import javax.imageio.stream.FileCacheImageInputStream;
 import javax.imageio.stream.FileImageInputStream;
@@ -193,7 +194,7 @@ public class ACEReader extends AbstractProductReader {
         _product.setGeoCoding(new MapGeoCoding(mapInfo));
         _product.setDescription("ACE DEM");
         final Band elevationBand = new Band("elevation", ProductData.TYPE_INT16, width, height);
-        elevationBand.setUnit("m");
+        elevationBand.setUnit(Unit.METERS);
         elevationBand.setDescription("ACE Elevation");
         // setting geo-physical no-data value to prevent for scaling
         elevationBand.setGeophysicalNoDataValue(_fileInfo.getNoDataValue());

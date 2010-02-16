@@ -9,6 +9,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.TestUtils;
 
 import java.util.Arrays;
@@ -86,7 +87,7 @@ public class TestOversamplingOperator extends TestCase {
 
         // create a Band: band1
         Band band1 = testProduct.addBand("band1", ProductData.TYPE_FLOAT32);
-        band1.setUnit("amplitude");
+        band1.setUnit(Unit.AMPLITUDE);
         band1.setSynthetic(true);
         float[] intValues = new float[w * h];
         for (int i = 0; i < w * h; i++) {
