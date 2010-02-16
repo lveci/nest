@@ -10,7 +10,7 @@ import java.awt.Rectangle;
 *
 * @author Norman Fomferra
 * @author Marco Peters
-* @version $Revision: 1.3 $ $Date: 2010-02-12 22:17:09 $
+* @version $Revision: 1.4 $ $Date: 2010-02-16 16:53:03 $
 * @since BEAM 4.5.1
 */
 class ExtremaStxOp implements StxOp {
@@ -54,7 +54,7 @@ class ExtremaStxOp implements StxOp {
 
     public double getCoefficientOfVariation() {
         double cv = 0.0;
-        if (unit.contains("intensity")) {
+        if (unit != null && unit.contains("intensity")) {
             final double m = valueSum / numValues;
             final double m2 = sqrSum / numValues;
             cv = Math.sqrt(m2 - m*m) / m;
@@ -68,7 +68,7 @@ class ExtremaStxOp implements StxOp {
 
     public double getEquivalentNumberOfLooks() {
         double enl = 0.0;
-        if (unit.contains("intensity")) {
+        if (unit != null && unit.contains("intensity")) {
             final double m = valueSum / numValues;
             final double m2 = sqrSum / numValues;
             final double mm = m*m;
