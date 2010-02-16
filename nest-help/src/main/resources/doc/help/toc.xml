@@ -53,6 +53,7 @@
 			<tocitem text="Open Radarsat-1 Data Product" target="ImportRadarsat1"/>
 			<tocitem text="Open Radarsat-2 Data Product" target="ImportRadarsat2"/>
 			<tocitem text="Open TerraSarX Data Product" target="ImportTerraSarX"/>
+			<tocitem text="Open Cosmo-Skymed Data Product" target="ImportCosmoSkymed"/>
 			<tocitem text="Open ENVI Data Product" target="ImportEnvi"/>
 			<tocitem text="Open PolsarPro Data Product" target="ImportPolsarPro"/>
 			<tocitem text="Open ALOS PALSAR Data Product" target="ImportAlosPalsar"/>

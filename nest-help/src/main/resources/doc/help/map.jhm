@@ -44,6 +44,7 @@
 	<mapID target="ImportRadarsat1" url="readers/ImportRadarsat1.html"/>
 	<mapID target="ImportRadarsat2" url="readers/ImportRadarsat2.html"/>
 	<mapID target="ImportTerraSarX" url="readers/ImportTerraSarX.html"/>
+	<mapID target="ImportCosmoSkymed" url="readers/ImportCosmoSkymed.html"/>
 	<mapID target="ImportEnvi" url="readers/ImportEnvi.html"/>
 	<mapID target="ImportPolsarPro" url="readers/ImportPolsarPro.html"/>
 	<mapID target="ImportAlosPalsar" url="readers/ImportAlosPalsar.html"/>
