@@ -159,6 +159,7 @@
 			<tocitem text="Convert Datatype" target="ConvertDatatypeOp"/>
 			<tocitem text="Over Sample" target="OverSampleOp"/>	
 			<tocitem text="Under Sample" target="UnderSampleOp"/>
+			<tocitem text="Fill DEM Hole" target="FillHoleOp"/>
 		</tocitem>	
 		<tocitem text="Geometry Operators">
 			<tocitem text="CreateElevation" target="CreateElevationOp"/>
