@@ -56,7 +56,7 @@ import java.net.URISyntaxException;
 /**
  * The window displaying the world map.
  *
- * @version $Revision: 1.16 $ $Date: 2010-01-04 14:23:42 $
+ * @version $Revision: 1.17 $ $Date: 2010-02-16 16:20:45 $
  */
 public class NestWWToolView extends AbstractToolView {
 
@@ -125,6 +125,7 @@ public class NestWWToolView extends AbstractToolView {
 
         // world wind canvas
         initialize(mainPane);
+        if(wwjPanel == null) return null;
 
         final MSVirtualEarthLayer virtualEarthLayerA = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_AERIAL);
         virtualEarthLayerA.setName("MS Virtual Earth Aerial");
@@ -162,6 +163,8 @@ public class NestWWToolView extends AbstractToolView {
     }
 
     WorldWindowGLCanvas getWwd() {
+        if(wwjPanel == null)
+            return null;
         return wwjPanel.getWwd();
     }
 
@@ -179,57 +182,61 @@ public class NestWWToolView extends AbstractToolView {
 
     private void initialize(JPanel mainPane) {
         // Create the WorldWindow.
-        wwjPanel = new AppPanel(canvasSize, includeStatusBar);
-        wwjPanel.setPreferredSize(canvasSize);
+        try {
+            wwjPanel = new AppPanel(canvasSize, includeStatusBar);
+            wwjPanel.setPreferredSize(canvasSize);
 
-        // Put the pieces together.
-        mainPane.add(wwjPanel, BorderLayout.CENTER);
-        if (includeLayerPanel) {
-            layerPanel = new LayerPanel(wwjPanel.getWwd(), null);
-            mainPane.add(layerPanel, BorderLayout.WEST);
+            // Put the pieces together.
+            mainPane.add(wwjPanel, BorderLayout.CENTER);
+            if (includeLayerPanel) {
+                layerPanel = new LayerPanel(wwjPanel.getWwd(), null);
+                mainPane.add(layerPanel, BorderLayout.WEST);
 
-            layerPanel.add(makeControlPanel(), BorderLayout.SOUTH);
-            layerPanel.update(getWwd());
-        }
-        if(includeProductPanel) {
-            productPanel = new ProductPanel(wwjPanel.getWwd(), productLayer);
-            mainPane.add(productPanel, BorderLayout.WEST);
-
-            productPanel.add(makeControlPanel(), BorderLayout.SOUTH);
-            productPanel.update(getWwd());
-        }
-        if(includeWMSPanel) {
-            tabbedPane.add(new JPanel());
-            tabbedPane.setTitleAt(0, "+");
-            tabbedPane.addChangeListener(new ChangeListener() {
-                public void stateChanged(ChangeEvent changeEvent) {
-                    if (tabbedPane.getSelectedIndex() != 0) {
-                        previousTabIndex = tabbedPane.getSelectedIndex();
-                        return;
-                    }
-
-                    final String server = JOptionPane.showInputDialog("Enter wms server URL");
-                    if (server == null || server.length() < 1) {
-                        tabbedPane.setSelectedIndex(previousTabIndex);
-                        return;
-                    }
-
-                    // Respond by adding a new WMSLayerPanel to the tabbed pane.
-                    if (addTab(tabbedPane.getTabCount(), server.trim()) != null)
-                        tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
-                }
-            });
-
-            // Create a tab for each server and add it to the tabbed panel.
-            for (int i = 0; i < servers.length; i++) {
-                this.addTab(i + 1, servers[i]); // i+1 to place all server tabs to the right of the Add Server tab
+                layerPanel.add(makeControlPanel(), BorderLayout.SOUTH);
+                layerPanel.update(getWwd());
             }
+            if(includeProductPanel) {
+                productPanel = new ProductPanel(wwjPanel.getWwd(), productLayer);
+                mainPane.add(productPanel, BorderLayout.WEST);
 
-            // Display the first server pane by default.
-            this.tabbedPane.setSelectedIndex(this.tabbedPane.getTabCount() > 0 ? 1 : 0);
-            this.previousTabIndex = this.tabbedPane.getSelectedIndex();
+                productPanel.add(makeControlPanel(), BorderLayout.SOUTH);
+                productPanel.update(getWwd());
+            }
+            if(includeWMSPanel) {
+                tabbedPane.add(new JPanel());
+                tabbedPane.setTitleAt(0, "+");
+                tabbedPane.addChangeListener(new ChangeListener() {
+                    public void stateChanged(ChangeEvent changeEvent) {
+                        if (tabbedPane.getSelectedIndex() != 0) {
+                            previousTabIndex = tabbedPane.getSelectedIndex();
+                            return;
+                        }
 
-            mainPane.add(tabbedPane, BorderLayout.EAST);
+                        final String server = JOptionPane.showInputDialog("Enter wms server URL");
+                        if (server == null || server.length() < 1) {
+                            tabbedPane.setSelectedIndex(previousTabIndex);
+                            return;
+                        }
+
+                        // Respond by adding a new WMSLayerPanel to the tabbed pane.
+                        if (addTab(tabbedPane.getTabCount(), server.trim()) != null)
+                            tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+                    }
+                });
+
+                // Create a tab for each server and add it to the tabbed panel.
+                for (int i = 0; i < servers.length; i++) {
+                    this.addTab(i + 1, servers[i]); // i+1 to place all server tabs to the right of the Add Server tab
+                }
+
+                // Display the first server pane by default.
+                this.tabbedPane.setSelectedIndex(this.tabbedPane.getTabCount() > 0 ? 1 : 0);
+                this.previousTabIndex = this.tabbedPane.getSelectedIndex();
+
+                mainPane.add(tabbedPane, BorderLayout.EAST);
+            }
+        } catch(Throwable e) {
+            System.out.println("Can't load openGL");   
         }
     }
 

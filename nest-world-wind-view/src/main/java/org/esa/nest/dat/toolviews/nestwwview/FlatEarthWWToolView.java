@@ -52,6 +52,8 @@ public class FlatEarthWWToolView extends AbstractToolView {
 
         // world wind canvas
         initialize(mainPane);
+        if(wwjPanel == null) return null;
+
         final LayerList layerList = getWwd().getModel().getLayers();
 
         final MSVirtualEarthLayer virtualEarthLayerA = new MSVirtualEarthLayer(MSVirtualEarthLayer.LAYER_AERIAL);
@@ -77,16 +79,22 @@ public class FlatEarthWWToolView extends AbstractToolView {
     }
 
     WorldWindowGLCanvas getWwd() {
+        if(wwjPanel == null)
+            return null;
         return wwjPanel.getWwd();
     }
 
     private void initialize(JPanel mainPane) {
         // Create the WorldWindow.
-        wwjPanel = new AppPanel(canvasSize, includeStatusBar);
-        wwjPanel.setPreferredSize(canvasSize);
+        try {
+            wwjPanel = new AppPanel(canvasSize, includeStatusBar);
+            wwjPanel.setPreferredSize(canvasSize);
 
-        // Put the pieces together.
-        mainPane.add(wwjPanel, BorderLayout.CENTER);
+            // Put the pieces together.
+            mainPane.add(wwjPanel, BorderLayout.CENTER);
+        } catch(Throwable e) {
+            System.out.println("Can't load openGL");
+        }
     }
 
     private void gotoProduct(Product product) {
@@ -146,7 +154,7 @@ public class FlatEarthWWToolView extends AbstractToolView {
     }
 
     public static class AppPanel extends JPanel {
-        private final WorldWindowGLCanvas wwd;
+        private WorldWindowGLCanvas wwd = null;
         private StatusBar statusBar = null;
 
         public AppPanel(Dimension canvasSize, boolean includeStatusBar) {
