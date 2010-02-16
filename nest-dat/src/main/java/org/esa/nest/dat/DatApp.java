@@ -45,8 +45,9 @@ public final class DatApp extends VisatApp {
 
     @Override
     protected String getMainFrameTitle() {
+        final String ver = System.getProperty("nest.version");
         //return getAppName() + " " + getAppVersion();
-        return getAppName() + " 3C-0.8 Beta";
+        return getAppName() + " "+ver;
     }
 
     // You can now override numerous createXXX() methods

@@ -509,7 +509,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         for(int i=1; i <= numSRGRCoefSets; ++i) {
 
-            final MetadataElement srgrListElem = new MetadataElement(AbstractMetadata.srgr_coef_list+" "+i);
+            final MetadataElement srgrListElem = new MetadataElement(AbstractMetadata.srgr_coef_list+"."+i);
             srgrCoefficientsElem.addElement(srgrListElem);
 
             final String updateTimeStr = detailedProcRec.getAttributeString("SRGR update date/time "+i);

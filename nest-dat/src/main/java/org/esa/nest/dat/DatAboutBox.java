@@ -88,14 +88,15 @@ class DatAboutBox extends ModalDialog {
     }
 
     private static String getVersionHtml() {
+        final String ver = System.getProperty("nest.version");
         final String pattern =
                 "<html>" +
-                "<b>NEST DAT Version {0}</b>" +
-                "<br>(c) Copyright 2007 by Array Systems Computing Inc. and contributors. All rights reserved." +
+                "<b>NEST DAT Version "+ver+"</b>" +
+                "<br>(c) Copyright 2007-2010 by Array Systems Computing Inc. and contributors. All rights reserved." +
                 "<br>Visit http://www.array.ca/nest" +
                 "<br>" +
                 "<b>BEAM </b>" +
-                "<br>(c) Copyright 2007 by Brockmann Consult and contributors. All rights reserved." +
+                "<br>(c) Copyright 2002-2010 by Brockmann Consult and contributors. All rights reserved." +
                 "<br>Visit http://www.brockmann-consult.de/beam/" +
                 "<br>" +
                 "<br>This program has been developed under contract to ESA (ESRIN)." +
@@ -111,7 +112,7 @@ class DatAboutBox extends ModalDialog {
                 "<br>This product includes software developed by Unidata and NCSA" +
                 "<br>Visit http://www.unidata.ucar.edu/ and http://hdf.ncsa.uiuc.edu/" +
                 "</html>";
-        return MessageFormat.format(pattern, DatApp.APP_VERSION); /*I18N*/
+        return pattern; /*I18N*/
     }
 
     private static String getCreditsHtml() {
@@ -149,6 +150,13 @@ class DatAboutBox extends ModalDialog {
                 "&nbsp;&nbsp;<b>Marco Zühlke</b> (programming)<br>" +
                 "</td></tr>" +
                 "</table>" +
+                 "<br><hr>The NEST-DORIS team at PPO.Labs/TU Delft is:" +
+                "<table border=0>" +
+                "<tr><td>" +
+                "&nbsp;&nbsp;<b>Ramon Hanssen</b> (project manager)<br>" +
+                "&nbsp;&nbsp;<b>Petar Marinkovic</b> (software lead/scientist)<br>" +
+                "</td></tr>" +
+                "</table>" +
                 "<br><hr>The NEST team at ESA/ESRIN is:" +
                 "<table border=0>" +
                 "<tr><td>" +
@@ -159,6 +167,7 @@ class DatAboutBox extends ModalDialog {
                 "</table>" +
                 "<br><hr>The NEST developers would also like to say thank you to" +
                 "<br>&nbsp;&nbsp;<b>Sun</b> for the beautiful programming language they have invented," +
+                "<br>&nbsp;&nbsp;<b>NASA</b> for the wonderful WorldWind Java SDK," +        
                 "<br>&nbsp;&nbsp;<b>IntelliJ</b> for the best IDE in the world," +
                 "<br>&nbsp;&nbsp;<b>Eclipse.org</b> for the second best IDE in the world," +
                 "<br>&nbsp;&nbsp;<b>JIDE Software</b> for a great docking framework," +

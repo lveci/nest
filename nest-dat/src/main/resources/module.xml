@@ -516,9 +516,19 @@
         <action>
             <id>exportProductMetadata</id>
             <class>org.esa.beam.visat.actions.ExportMetadataAction</class>
-            <text>Export Metadata</text>
+            <text>Export Metadata as Text</text>
             <shortDescr>Export the currently displayed metadata.</shortDescr>
             <description>Export the currently displayed metadata as tab-separated text.</description>
+            <helpId>exportMetadata</helpId>
+            <parent>MetadataTools</parent>
+        </action>
+
+        <action>
+            <id>exportProductMetadataXML</id>
+            <class>org.esa.nest.dat.actions.ExportMetadataXMLAction</class>
+            <text>Export Metadata as XML</text>
+            <shortDescr>Export the currently displayed metadata to XML.</shortDescr>
+            <description>Export the currently displayed metadata as XML.</description>
             <helpId>exportMetadata</helpId>
             <parent>MetadataTools</parent>
         </action>
