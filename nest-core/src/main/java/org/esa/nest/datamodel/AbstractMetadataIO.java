@@ -113,16 +113,20 @@ public final class AbstractMetadataIO {
         }
 
         final int type = metaAttrib.getDataType();
-        if(type == ProductData.TYPE_ASCII)
-            metaAttrib.getData().setElems(valueAttrib.getValue());
-        else if(type == ProductData.TYPE_UTC)
+        if(type == ProductData.TYPE_ASCII) {
+            String valStr = valueAttrib.getValue();
+            if(valStr == null || valStr.isEmpty())
+                valStr = " ";
+            metaAttrib.getData().setElems(valStr);
+        } else if(type == ProductData.TYPE_UTC) {
                 metaAttrib.getData().setElems(AbstractMetadata.parseUTC(valueAttrib.getValue()).getArray());
-        else if(type == ProductData.TYPE_FLOAT64 || type == ProductData.TYPE_FLOAT32)
+        } else if(type == ProductData.TYPE_FLOAT64 || type == ProductData.TYPE_FLOAT32) {
             metaAttrib.getData().setElemDouble(Double.parseDouble(valueAttrib.getValue()));
-        else if(type == ProductData.TYPE_INT8 && typeFromFile != null && typeFromFile == ProductData.TYPE_ASCII)
+        } else if(type == ProductData.TYPE_INT8 && typeFromFile != null && typeFromFile == ProductData.TYPE_ASCII) {
             metaAttrib.getData().setElems(valueAttrib.getValue());  
-        else
+        } else {
             metaAttrib.getData().setElemInt(Integer.parseInt(valueAttrib.getValue()));
+        }
 
         final Attribute unitAttrib = domElem.getAttribute("unit");
         final Attribute descAttrib = domElem.getAttribute("desc");
