@@ -161,6 +161,7 @@
 			<tocitem text="Over Sample" target="OverSampleOp"/>	
 			<tocitem text="Under Sample" target="UnderSampleOp"/>
 			<tocitem text="Fill DEM Hole" target="FillHoleOp"/>
+			<tocitem text="Image Filtering" target="FilterOperator"/>
 		</tocitem>	
 		<tocitem text="Geometry Operators">
 			<tocitem text="CreateElevation" target="CreateElevationOp"/>

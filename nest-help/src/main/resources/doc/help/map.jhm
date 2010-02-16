@@ -146,6 +146,7 @@
 	<mapID target="OverSampleOp" url="operators/OverSampleOp.html"/>
 	<mapID target="UnderSampleOp" url="operators/UnderSampleOp.html"/>
 	<mapID target="FillHoleOp" url="operators/FillHoleOp.html"/>
+	<mapID target="FilterOperator" url="visat/CreateFilteredBand.html"/>
 	
 	<!--Geometry Operators-->
 	<mapID target="CreateElevationOp" url="operators/CreateElevationOp.html"/>
