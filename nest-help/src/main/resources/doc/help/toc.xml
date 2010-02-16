@@ -144,7 +144,7 @@
 	        <tocitem text="Multi-Temporal Speckle Filter" target="MultiTemporalSpeckleFilterOp"/>			
 			<tocitem text="Warp" target="WarpOp"/>
 			<tocitem text="WSS Deburst" target="WSSDeburstOp"/>
-			<!--tocitem text="WSS Mosaic" target="WSSMosaicOp"/-->
+			<tocitem text="WSS Mosaic" target="WSSMosaic"/>
 		</tocitem>	
 		<tocitem text="Analysis Operators">
 			<tocitem text="Principle Component Analysis" target="PCAOp"/>	

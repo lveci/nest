@@ -129,7 +129,7 @@
 	<mapID target="MultiTemporalSpeckleFilterOp" url="operators/MultiTemporalSpeckleFilterOp.html"/>	
 	<mapID target="WarpOp" url="operators/WarpOp.html"/>	
 	<mapID target="WSSDeburstOp" url="operators/WSSDeburstOp.html"/>
-	<!--mapID target="WSSMosaicOp" url="operators/WSSMosaicOp.html"/-->
+	<mapID target="WSSMosaic" url="operators/WSSMosaicOp.html"/>
 	
 	<!--Analysis Operators-->
 	<mapID target="PCAOp" url="operators/PCAOp.html"/>
