@@ -164,12 +164,20 @@ public class ProductLayer extends RenderableLayer {
             final float[] floats = new float[2];
             final ArrayList<Position> positions = new ArrayList<Position>(4);
 
+            it.currentSegment(floats);
+            final Position firstPosition = new Position(Angle.fromDegreesLatitude(floats[1]),
+                                                        Angle.fromDegreesLongitude(floats[0]), 0.0);
+            positions.add(firstPosition);
+            it.next();
+
             while(!it.isDone()) {
                 it.currentSegment(floats);
                 positions.add(new Position(Angle.fromDegreesLatitude(floats[1]),
                                    Angle.fromDegreesLongitude(floats[0]), 0.0));
                 it.next();
             }
+            // close the loop
+            positions.add(firstPosition);
 
             polyLineList[i] = new Polyline();
             polyLineList[i].setFollowTerrain(true);
