@@ -64,8 +64,10 @@ public abstract class BaseOperatorUI implements OperatorUI {
     }
 
     public void setSourceProducts(final Product[] products) {
-        sourceProducts = products;
-        initParameters();
+        if(sourceProducts == null || !Arrays.equals(sourceProducts, products)) {
+            sourceProducts = products;
+            initParameters();
+        }
     }
 
     public void convertToDOM(final Xpp3DomElement parentElement) {

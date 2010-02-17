@@ -67,6 +67,7 @@ public class MosaicOp extends Operator {
     private final OperatorUtils.SceneProperties scnProp = new OperatorUtils.SceneProperties();
     private final Map<Product, Band> srcBandMap = new HashMap<Product, Band>(10);
     private final Map<Product, Rectangle> srcRectMap = new HashMap<Product, Rectangle>(10);
+    private Product[] selectedProducts = null;
 
     @Override
     public void initialize() throws OperatorException {
@@ -79,11 +80,14 @@ public class MosaicOp extends Operator {
             }
 
             final Band[] srcBands = getSourceBands();
+            final ArrayList<Product> selectedProductList = new ArrayList<Product>();
             for (Band srcBand : srcBands) {
                 srcBandMap.put(srcBand.getProduct(), srcBand);
+                selectedProductList.add(srcBand.getProduct());
             }
+            selectedProducts = selectedProductList.toArray(new Product[selectedProductList.size()]);
 
-            OperatorUtils.computeImageGeoBoundary(sourceProduct, scnProp);
+            OperatorUtils.computeImageGeoBoundary(selectedProducts, scnProp);
 
             if (sceneWidth == 0 || sceneHeight == 0) {
 
@@ -119,7 +123,7 @@ public class MosaicOp extends Operator {
             targetBand.setNoDataValueUsed(true);
             targetProduct.addBand(targetBand);
 
-            for (Product srcProduct : sourceProduct) {
+            for (Product srcProduct : selectedProducts) {
                 final Rectangle srcRect = getSrcRect(targetProduct.getGeoCoding(),
                         scnProp.srcCornerLatitudeMap.get(srcProduct),
                         scnProp.srcCornerLongitudeMap.get(srcProduct));
@@ -292,7 +296,7 @@ public class MosaicOp extends Operator {
             final Rectangle targetRect = targetTile.getRectangle();
             final ArrayList<Product> validProducts = new ArrayList<Product>(sourceProduct.length);
 
-            for (final Product srcProduct : sourceProduct) {
+            for (final Product srcProduct : selectedProducts) {
                 final Rectangle srcRect = srcRectMap.get(srcProduct);
                 if (srcRect == null || !srcRect.intersects(targetRect)) {
                     continue;
