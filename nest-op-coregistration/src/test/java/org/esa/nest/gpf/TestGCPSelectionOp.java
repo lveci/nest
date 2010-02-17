@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.nest.datamodel.Unit;
 
 /**
  * Unit test for GCPSelectionOp.
@@ -63,7 +64,7 @@ public class TestGCPSelectionOp extends TestCase {
 
         // create a band: sinc function centre is at (19, 19)
         final Band band = product.addBand("amplitude_mst", ProductData.TYPE_FLOAT32);
-        band.setUnit("amplitude");
+        band.setUnit(Unit.AMPLITUDE);
         band.setSynthetic(true);
         final float[] floatValues = new float[w * h];
         int i;
@@ -114,7 +115,7 @@ public class TestGCPSelectionOp extends TestCase {
 
         // create a band: sinc function centre is at (16, 21)
         final Band band = new Band("amplitude_slv", ProductData.TYPE_FLOAT32, w, h);
-        band.setUnit("amplitude");
+        band.setUnit(Unit.AMPLITUDE);
         band.setSynthetic(true);
         float[] floatValues = new float[w * h];
         int i;

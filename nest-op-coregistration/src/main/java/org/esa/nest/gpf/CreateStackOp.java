@@ -1,6 +1,8 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Coordinate;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.resamp.Resampling;
 import org.esa.beam.framework.dataop.resamp.ResamplingFactory;
@@ -12,8 +14,11 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.framework.dataio.ProductSubsetBuilder;
+import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.StringUtils;
+import org.esa.beam.util.FeatureCollectionClipper;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 
@@ -63,11 +68,11 @@ public class CreateStackOp extends Operator {
                label="Output Extents")
     private String extent = MASTER_EXTENT;
 
-    private final static String MASTER_EXTENT = "Master";
-    private final static String MIN_EXTENT = "Minimum";
-    private final static String MAX_EXTENT = "Maximum";
+    protected final static String MASTER_EXTENT = "Master";
+    protected final static String MIN_EXTENT = "Minimum";
+    protected final static String MAX_EXTENT = "Maximum";
 
-    private final static Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
+    private final Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
 
     @Override
     public void initialize() throws OperatorException {
@@ -84,7 +89,7 @@ public class CreateStackOp extends Operator {
                 }
             }
 
-            if(masterBandNames.length == 0) {
+            if(masterBandNames == null || masterBandNames.length == 0) {
                 final Product defaultProd = sourceProduct[0];
                 if(defaultProd != null) {
                     final Band defaultBand = defaultProd.getBandAt(0);
@@ -116,15 +121,16 @@ public class CreateStackOp extends Operator {
 
             if(extent.equals(MIN_EXTENT)) {
                 determinMinimumExtents();
+            } else {
+
+                targetProduct = new Product(masterProduct.getName(),
+                                            masterProduct.getProductType(),
+                                            masterProduct.getSceneRasterWidth(),
+                                            masterProduct.getSceneRasterHeight());
+
+                OperatorUtils.copyProductNodes(masterProduct, targetProduct);
             }
-
-            targetProduct = new Product(masterProduct.getName(),
-                                        masterProduct.getProductType(),
-                                        masterProduct.getSceneRasterWidth(),
-                                        masterProduct.getSceneRasterHeight());
-
-            OperatorUtils.copyProductNodes(masterProduct, targetProduct);
-
+            
             String suffix = "_mst";
             // add master bands first
             for (final Band srcBand : slaveBandList) {
@@ -136,8 +142,9 @@ public class CreateStackOp extends Operator {
                             targetProduct.getSceneRasterWidth(),
                             targetProduct.getSceneRasterHeight());
                     ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
-                    targetBand.setSourceImage(srcBand.getSourceImage());
-
+                    if(extent.equals(MASTER_EXTENT)) {
+                        targetBand.setSourceImage(srcBand.getSourceImage());
+                    }
                     sourceRasterMap.put(targetBand, srcBand);
                     targetProduct.addBand(targetBand);
                 }
@@ -157,7 +164,7 @@ public class CreateStackOp extends Operator {
                             targetProduct.getSceneRasterWidth(),
                             targetProduct.getSceneRasterHeight());
                     ProductUtils.copyRasterDataNodeProperties(srcBand, targetBand);
-                    if (srcProduct == masterProduct || srcProduct.isCompatibleProduct(masterProduct, 1.0e-3f)) {
+                    if (srcProduct == masterProduct || srcProduct.isCompatibleProduct(targetProduct, 1.0e-3f)) {
                         targetBand.setSourceImage(srcBand.getSourceImage());
                     }
 
@@ -260,7 +267,7 @@ public class CreateStackOp extends Operator {
         }
 
         // add slave bands
-        if(slaveBandNames.length == 0) {
+        if(slaveBandNames == null || slaveBandNames.length == 0) {
             for(Product slvProduct : sourceProduct) {
                 if(slvProduct == masterProduct) continue;
 
@@ -353,16 +360,63 @@ public class CreateStackOp extends Operator {
      * Minimum extents consists of the overlapping area
      */
     private void determinMinimumExtents() {
-        final GeoCoding masterGeocoding = masterProduct.getGeoCoding();
-        final PixelPos p = new PixelPos();
+
+        Geometry mstGeometry = FeatureCollectionClipper.createGeoBoundaryPolygon(masterProduct);
 
         for(final Product slvProd : sourceProduct) {
             if(slvProd == masterProduct) continue;
 
-            final GeoPos[] geoBoundary = ProductUtils.createGeoBoundary(slvProd, 10);
-            for(GeoPos g : geoBoundary) {
-                //masterGeocoding.getPixelPos(g, p);
+            final Geometry slvGeometry = FeatureCollectionClipper.createGeoBoundaryPolygon(slvProd);
+
+            mstGeometry = mstGeometry.intersection(slvGeometry);
+        }
+
+        final GeoCoding mstGeoCoding = masterProduct.getGeoCoding();
+        final PixelPos pixPos = new PixelPos();
+        final GeoPos geoPos = new GeoPos();
+        final float mstWidth = masterProduct.getSceneRasterWidth();
+        final float mstHeight = masterProduct.getSceneRasterHeight();
+
+        float maxX=0, maxY=0;
+        float minX = mstWidth;
+        float minY = mstHeight;
+        for(Coordinate c : mstGeometry.getCoordinates()) {
+            //System.out.println("geo "+c.x +", "+ c.y);
+            geoPos.setLocation((float)c.y, (float)c.x);
+            mstGeoCoding.getPixelPos(geoPos, pixPos);
+            //System.out.println("pix "+pixPos.x +", "+ pixPos.y);
+            if(pixPos.isValid() && pixPos.x != -1 && pixPos.y != -1) {
+                if(pixPos.x < minX) {
+                    minX = Math.max(0, pixPos.x);
+                }
+                if(pixPos.y < minY) {
+                    minY = Math.max(0, pixPos.y);
+                }
+                if(pixPos.x > maxX) {
+                    maxX = Math.min(mstWidth, pixPos.x);
+                }
+                if(pixPos.y > maxY) {
+                    maxY = Math.min(mstHeight, pixPos.y);
+                }
             }
+        }
+
+        final ProductSubsetBuilder subsetReader = new ProductSubsetBuilder();
+        final ProductSubsetDef subsetDef = new ProductSubsetDef();
+        subsetDef.addNodeNames(masterProduct.getTiePointGridNames());
+
+        subsetDef.setRegion((int)minX, (int)minY, (int)(maxX-minX), (int)(maxY-minY));
+        subsetDef.setSubSampling(1, 1);
+        subsetDef.setIgnoreMetadata(false);
+
+        try {
+            targetProduct = subsetReader.readProductNodes(masterProduct, subsetDef);
+            final Band[] bands = targetProduct.getBands();
+            for(Band b : bands) {
+                targetProduct.removeBand(b);
+            }
+        } catch (Throwable t) {
+            throw new OperatorException(t);
         }
     }
 
@@ -540,6 +594,11 @@ public class CreateStackOp extends Operator {
 
             return (float) sample;
         }
+    }
+
+    // for unit test
+    protected void setTestParameters(final String ext) {
+        extent = ext;
     }
 
     /**
