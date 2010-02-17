@@ -107,9 +107,9 @@ public class WarpOp extends Operator {
     private static final String BICUBIC = "Bicubic interpolation";
     private static final String BICUBIC2 = "Bicubic2 interpolation";
 
-    private final static Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
-    private final static Map<Band, Band> complexSrcMap = new HashMap<Band, Band>(10);
-    private final static Map<Band, WarpData> warpDataMap = new HashMap<Band, WarpData>(10);
+    private final Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
+    private final Map<Band, Band> complexSrcMap = new HashMap<Band, Band>(10);
+    private final Map<Band, WarpData> warpDataMap = new HashMap<Band, WarpData>(10);
 
     /**
      * Default constructor. The graph processing framework

@@ -382,7 +382,7 @@ public class GraphProcessor {
 
         } catch (GraphException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new GraphException(e.getMessage(), e);
         } finally {
             pm.done();

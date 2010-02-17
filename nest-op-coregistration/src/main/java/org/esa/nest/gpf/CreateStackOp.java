@@ -62,7 +62,7 @@ public class CreateStackOp extends Operator {
     private String resamplingType = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
     private Resampling selectedResampling = Resampling.NEAREST_NEIGHBOUR;
 
-    @Parameter(valueSet = {MASTER_EXTENT, MIN_EXTENT }, //, MAX_EXTENT
+    @Parameter(valueSet = {MASTER_EXTENT, MIN_EXTENT, MAX_EXTENT },
                defaultValue = MASTER_EXTENT,
                description = "The output image extents.",
                label="Output Extents")
@@ -121,6 +121,8 @@ public class CreateStackOp extends Operator {
 
             if(extent.equals(MIN_EXTENT)) {
                 determinMinimumExtents();
+            } else if(extent.equals(MAX_EXTENT)) {
+                determinMaximumExtents();
             } else {
 
                 targetProduct = new Product(masterProduct.getName(),
@@ -420,6 +422,40 @@ public class CreateStackOp extends Operator {
         }
     }
 
+    /**
+     * Maximum extents consists of overall area
+     */
+    private void determinMaximumExtents() throws Exception {
+        final OperatorUtils.SceneProperties scnProp = new OperatorUtils.SceneProperties();
+        OperatorUtils.computeImageGeoBoundary(sourceProduct, scnProp);
+
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct[0]);
+        if(absRoot == null) {
+            throw new OperatorException("Abstract Metadata missing");
+        }
+        final double rangeSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.range_spacing);
+        final double azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
+        final double pixelSize = Math.min(rangeSpacing, azimuthSpacing);
+
+        OperatorUtils.getSceneDimensions(pixelSize, scnProp);
+
+        int sceneWidth = scnProp.sceneWidth;
+        int sceneHeight = scnProp.sceneHeight;
+        final double ratio = sceneWidth / (double)sceneHeight;
+        long dim = (long) sceneWidth * (long) sceneHeight;
+        while (sceneWidth > 0 && sceneHeight > 0 && dim > Integer.MAX_VALUE) {
+            sceneWidth -= 1000;
+            sceneHeight = (int)(sceneWidth / ratio);
+            dim = (long) sceneWidth * (long) sceneHeight;
+        }
+
+        targetProduct = new Product(masterProduct.getName(),
+                                    masterProduct.getProductType(),
+                                    sceneWidth, sceneHeight);
+
+        OperatorUtils.addGeoCoding(targetProduct, scnProp);
+    }
+
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         try {
@@ -430,7 +466,7 @@ public class CreateStackOp extends Operator {
                     srcProduct.getGeoCoding(),
                     srcProduct.getSceneRasterWidth(),
                     srcProduct.getSceneRasterHeight(),
-                    masterProduct.getGeoCoding(),
+                    targetProduct.getGeoCoding(),
                     targetTile.getRectangle());
             final Rectangle sourceRectangle = getBoundingBox(
                     sourcePixelPositions,
@@ -472,8 +508,8 @@ public class CreateStackOp extends Operator {
                 final ResamplingRaster resamplingRaster = new ResamplingRaster(sourceTile);
 
                 for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
+                    checkForCancelation(pm);
                     for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
-                        checkForCancelation(pm);
                         final PixelPos sourcePixelPos = sourcePixelPositions[index];
 
                         final int trgIndex = targetTile.getDataBufferIndex(x, y);
@@ -497,8 +533,8 @@ public class CreateStackOp extends Operator {
                 }
             } else {
                 for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
+                    checkForCancelation(pm);
                     for (int x = targetRectangle.x; x < maxX; ++x, ++index) {
-                        checkForCancelation(pm);
                         trgBuffer.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), noDataValue);
                     }
                     pm.worked(1);

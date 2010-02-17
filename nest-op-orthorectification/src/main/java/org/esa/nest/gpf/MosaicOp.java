@@ -64,9 +64,9 @@ public class MosaicOp extends Operator {
     @Parameter(defaultValue = "0", description = "Target height", label = "Scene Height (pixels)")
     private int sceneHeight = 0;
 
-    private final SceneProperties scnProp = new SceneProperties();
-    private final static Map<Product, Band> srcBandMap = new HashMap<Product, Band>(10);
-    private final static Map<Product, Rectangle> srcRectMap = new HashMap<Product, Rectangle>(10);
+    private final OperatorUtils.SceneProperties scnProp = new OperatorUtils.SceneProperties();
+    private final Map<Product, Band> srcBandMap = new HashMap<Product, Band>(10);
+    private final Map<Product, Rectangle> srcRectMap = new HashMap<Product, Rectangle>(10);
 
     @Override
     public void initialize() throws OperatorException {
@@ -83,7 +83,7 @@ public class MosaicOp extends Operator {
                 srcBandMap.put(srcBand.getProduct(), srcBand);
             }
 
-            computeImageGeoBoundary(sourceProduct, scnProp);
+            OperatorUtils.computeImageGeoBoundary(sourceProduct, scnProp);
 
             if (sceneWidth == 0 || sceneHeight == 0) {
 
@@ -94,7 +94,7 @@ public class MosaicOp extends Operator {
                     final double azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
                     pixelSize = Math.min(rangeSpacing, azimuthSpacing);
                 }
-                getSceneDimensions(pixelSize, scnProp);
+                OperatorUtils.getSceneDimensions(pixelSize, scnProp);
 
                 sceneWidth = scnProp.sceneWidth;
                 sceneHeight = scnProp.sceneHeight;
@@ -109,7 +109,8 @@ public class MosaicOp extends Operator {
 
             targetProduct = new Product("mosiac", "mosiac", sceneWidth, sceneHeight);
 
-            addGeoCoding(scnProp);
+            OperatorUtils.addGeoCoding(targetProduct, scnProp);
+            ReaderUtils.createMapGeocoding(targetProduct, projectionName, 0);
 
             final Band targetBand = new Band("mosaic", ProductData.TYPE_FLOAT32, sceneWidth, sceneHeight);
 
@@ -203,105 +204,6 @@ public class MosaicOp extends Operator {
         if (name.contains("::"))
             return name.substring(name.indexOf("::") + 2, name.length());
         return sourceProduct[0].getName();
-    }
-
-    /**
-     * Compute source image geodetic boundary (minimum/maximum latitude/longitude) from the its corner
-     * latitude/longitude.
-     */
-    public static void computeImageGeoBoundary(final Product[] sourceProducts, final SceneProperties scnProp) {
-
-        scnProp.latMin = 90.0;
-        scnProp.latMax = -90.0;
-        scnProp.lonMin = 180.0;
-        scnProp.lonMax = -180.0;
-
-        for (final Product srcProd : sourceProducts) {
-            final GeoCoding geoCoding = srcProd.getGeoCoding();
-            final GeoPos geoPosFirstNear = geoCoding.getGeoPos(new PixelPos(0, 0), null);
-            final GeoPos geoPosFirstFar = geoCoding.getGeoPos(new PixelPos(srcProd.getSceneRasterWidth() - 1, 0), null);
-            final GeoPos geoPosLastNear = geoCoding.getGeoPos(new PixelPos(0, srcProd.getSceneRasterHeight() - 1), null);
-            final GeoPos geoPosLastFar = geoCoding.getGeoPos(new PixelPos(srcProd.getSceneRasterWidth() - 1,
-                    srcProd.getSceneRasterHeight() - 1), null);
-
-            final double[] lats = {geoPosFirstNear.getLat(), geoPosFirstFar.getLat(), geoPosLastNear.getLat(), geoPosLastFar.getLat()};
-            final double[] lons = {geoPosFirstNear.getLon(), geoPosFirstFar.getLon(), geoPosLastNear.getLon(), geoPosLastFar.getLon()};
-            scnProp.srcCornerLatitudeMap.put(srcProd, lats);
-            scnProp.srcCornerLongitudeMap.put(srcProd, lons);
-
-            for (double lat : lats) {
-                if (lat < scnProp.latMin) {
-                    scnProp.latMin = lat;
-                }
-                if (lat > scnProp.latMax) {
-                    scnProp.latMax = lat;
-                }
-            }
-
-            for (double lon : lons) {
-                if (lon < scnProp.lonMin) {
-                    scnProp.lonMin = lon;
-                }
-                if (lon > scnProp.lonMax) {
-                    scnProp.lonMax = lon;
-                }
-            }
-        }
-    }
-
-    public static void getSceneDimensions(final double minSpacing, final SceneProperties scnProp) {
-        double minAbsLat;
-        if (scnProp.latMin * scnProp.latMax > 0) {
-            minAbsLat = Math.min(Math.abs(scnProp.latMin), Math.abs(scnProp.latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
-        } else {
-            minAbsLat = 0.0;
-        }
-        double delLat = minSpacing / Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
-        double delLon = minSpacing / (Constants.MeanEarthRadius * Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
-        delLat = Math.min(delLat, delLon);
-        delLon = delLat;
-
-        scnProp.sceneWidth = (int) ((scnProp.lonMax - scnProp.lonMin) / delLon) + 1;
-        scnProp.sceneHeight = (int) ((scnProp.latMax - scnProp.latMin) / delLat) + 1;
-    }
-
-    /**
-     * Add geocoding to the target product.
-     */
-    private void addGeoCoding(final SceneProperties scnProp) {
-
-        final float[] latTiePoints = {(float) scnProp.latMax, (float) scnProp.latMax,
-                (float) scnProp.latMin, (float) scnProp.latMin};
-        final float[] lonTiePoints = {(float) scnProp.lonMin, (float) scnProp.lonMax,
-                (float) scnProp.lonMin, (float) scnProp.lonMax};
-
-        final int gridWidth = 10;
-        final int gridHeight = 10;
-
-        final float[] fineLatTiePoints = new float[gridWidth * gridHeight];
-        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latTiePoints, fineLatTiePoints);
-
-        float subSamplingX = (float) sceneWidth / (gridWidth - 1);
-        float subSamplingY = (float) sceneHeight / (gridHeight - 1);
-
-        final TiePointGrid latGrid = new TiePointGrid("latitude", gridWidth, gridHeight, 0.5f, 0.5f,
-                subSamplingX, subSamplingY, fineLatTiePoints);
-        latGrid.setUnit(Unit.DEGREES);
-
-        final float[] fineLonTiePoints = new float[gridWidth * gridHeight];
-        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonTiePoints, fineLonTiePoints);
-
-        final TiePointGrid lonGrid = new TiePointGrid("longitude", gridWidth, gridHeight, 0.5f, 0.5f,
-                subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
-        lonGrid.setUnit(Unit.DEGREES);
-
-        final TiePointGeoCoding tpGeoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
-
-        targetProduct.addTiePointGrid(latGrid);
-        targetProduct.addTiePointGrid(lonGrid);
-        targetProduct.setGeoCoding(tpGeoCoding);
-
-        ReaderUtils.createMapGeocoding(targetProduct, projectionName, 0);
     }
 
     private static Rectangle getSrcRect(final GeoCoding destGeoCoding,
@@ -582,14 +484,6 @@ public class MosaicOp extends Operator {
             }
             return (float) sample;
         }
-    }
-
-    public static class SceneProperties {
-        int sceneWidth, sceneHeight;
-        double latMin, lonMin, latMax, lonMax;
-
-        final Map<Product, double[]> srcCornerLatitudeMap = new HashMap<Product, double[]>(10);
-        final Map<Product, double[]> srcCornerLongitudeMap = new HashMap<Product, double[]>(10);
     }
 
     private static class SourceData {

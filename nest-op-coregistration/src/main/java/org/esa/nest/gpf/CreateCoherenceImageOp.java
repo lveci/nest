@@ -62,7 +62,7 @@ public final class CreateCoherenceImageOp extends Operator {
     private int sourceImageWidth;
     private int sourceImageHeight;
 
-    private final static Map<String, String[]> coherenceSlaveMap = new HashMap<String, String[]>(10);
+    private final Map<String, String[]> coherenceSlaveMap = new HashMap<String, String[]>(10);
 
     /**
      * Default constructor. The graph processing framework
