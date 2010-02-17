@@ -1,5 +1,5 @@
 /*
- * $Id: ProductUtils.java,v 1.17 2010-02-12 19:05:40 lveci Exp $
+ * $Id: ProductUtils.java,v 1.18 2010-02-17 16:45:38 junlu Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -2213,8 +2213,10 @@ public class ProductUtils {
         Guardian.assertEquals("destGeoCoding.canGetGeoPos()", destGeoCoding.canGetGeoPos(), true);
         Guardian.assertNotNull("destArea", destArea);
 
-        TiePointGeoCoding mstGeoCoding = (TiePointGeoCoding)destGeoCoding;
-        TiePointGeoCoding slvGeoCoding = (TiePointGeoCoding)sourceGeoCoding;
+        TiePointGeoCoding slvGeoCoding = null;
+        if (sourceGeoCoding instanceof TiePointGeoCoding) {
+            slvGeoCoding = (TiePointGeoCoding)sourceGeoCoding;
+        }
 
         final int minX = destArea.x;
         final int minY = destArea.y;
@@ -2230,8 +2232,12 @@ public class ProductUtils {
             for (int x = minX; x <= maxX; x++) {
                 pixelPos.x = (float)x;
                 pixelPos.y = (float)y;
-                mstGeoCoding.getGeoPos(pixelPos, geoPos);
-                slvGeoCoding.getAccuratePixelPos(geoPos, pixelPos);
+                destGeoCoding.getGeoPos(pixelPos, geoPos);
+                if (slvGeoCoding != null) {
+                    slvGeoCoding.getAccuratePixelPos(geoPos, pixelPos);
+                } else {
+                    sourceGeoCoding.getPixelPos(geoPos, pixelPos);
+                }
                 if (pixelPos.x >= 0.0f && pixelPos.x < sourceWidth
                     && pixelPos.y >= 0.0f && pixelPos.y < sourceHeight) {
                     pixelCoords[coordIndex] = new PixelPos(pixelPos.x, pixelPos.y);
