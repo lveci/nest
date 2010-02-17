@@ -32,7 +32,9 @@ public class EllipsoidCorrectionRDOpUI extends BaseOperatorUI {
         final String[] projectionsValueSet = getProjectionsValueSet();
         Arrays.sort(projectionsValueSet);
         for(String name : projectionsValueSet) {
-            projectionName.addItem(name);
+            if (!name.contains("UTM Automatic")) {
+                projectionName.addItem(name);
+            }
         }
 
         final JComponent panel = createPanel();
