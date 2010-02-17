@@ -370,8 +370,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
 //            }
         } else {
             if (applyRadiometricNormalization && mission.contains("ERS")) {
-                throw new OperatorException("For radiometric normalization of ERS product, please use 'PreCalibration" +
-                        " Range Doppler Terrain Correction' or 'PreCalibration SAR-Sim Terrain Correction'");
+                throw new OperatorException("For radiometric normalization of ERS product, please use one of the following\n" +
+                        " user graphs: 'RemoveAntPat_SARSim_GCPSelection' or 'RemoveAntPat_Multilook_SARSim_GCPSelection',\n" +
+                        " then apply 'SARSim Terrain Correction' operator to the output in the Graph Builder.");
             }
         }
     }

@@ -396,10 +396,10 @@ public class RangeDopplerGeocodingOp extends Operator {
             }
         } else {
             if (applyRadiometricNormalization && mission.contains("ERS")) {
-                throw new OperatorException("For radiometric normalization of ERS product, please use 'Remove\n" +
-                        " Antenna Pattern' operator to remove calibration factors applied and apply ADC, or use one of\n" +
-                        " the following user graphs: " +
-                        " 'RemoveAntPat_Orthorectify' or 'RemoveAntPat_Multilook_Orthorectify'.");
+                throw new OperatorException("For radiometric normalization of ERS product, please first use\n" +
+                        "  'Remove Antenna Pattern' operator to remove calibration factors applied and apply ADC,\n" +
+                        "  then apply 'Range-Doppler Terrain Correction' operator; or use one of the following\n" +
+                        "  user graphs: 'RemoveAntPat_Orthorectify' or 'RemoveAntPat_Multilook_Orthorectify'.");
             }
         }
     }
