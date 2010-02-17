@@ -71,6 +71,8 @@ public class RemoveAntennaPatternOp extends Operator {
         try {
             getProductType();
 
+            getMultilookFlag();
+
             createTargetProduct();
 
             calibrator = CalibrationFactory.createCalibrator(sourceProduct);
@@ -91,6 +93,17 @@ public class RemoveAntennaPatternOp extends Operator {
         String productType = sourceProduct.getProductType();
         if (productType.contains("ASA_IMS_1") && !productType.contains("ASA_APS_1")) {
             throw new OperatorException(productType + " is not a valid ASAR product type for the operator.");
+        }
+    }
+
+    /**
+     * Get multilook flag from the abstracted metadata.
+     * @throws Exception The exceptions.
+     */
+    private void getMultilookFlag() throws Exception {
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
+        if (AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.multilook_flag)) {
+            throw new OperatorException("Cannot apply the operator to multilooked product.");
         }
     }
 
