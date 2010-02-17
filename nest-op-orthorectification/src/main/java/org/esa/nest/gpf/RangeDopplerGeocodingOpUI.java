@@ -207,9 +207,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         demResamplingMethod.setSelectedItem(paramMap.get("demResamplingMethod"));
         imgResamplingMethod.setSelectedItem(paramMap.get("imgResamplingMethod"));
         incidenceAngleForGamma0.setSelectedItem(paramMap.get("incidenceAngleForGamma0"));
-        incidenceAngleForGamma0.setEnabled(false);
         incidenceAngleForSigma0.setSelectedItem(paramMap.get("incidenceAngleForSigma0"));
-        incidenceAngleForSigma0.setEnabled(false);
 
         if((!changedByUser || pixelSpacing.getText().isEmpty()) && sourceProducts != null) {
             Double pix;
@@ -257,6 +255,12 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
         saveSigmaNought = (Boolean)paramMap.get("saveSigmaNought");
         saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
         saveSigmaNoughtCheckBox.setSelected(saveSigmaNought);
+
+        incidenceAngleForGamma0.setEnabled(applyRadiometricNormalization);
+        incidenceAngleForSigma0.setEnabled(applyRadiometricNormalization);
+        saveSigmaNoughtCheckBox.setEnabled(applyRadiometricNormalization);
+        saveGammaNoughtCheckBox.setEnabled(applyRadiometricNormalization);
+        saveBetaNoughtCheckBox.setEnabled(applyRadiometricNormalization);
     }
 
     @Override
