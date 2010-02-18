@@ -272,7 +272,7 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
             boolean multilookFlag = absRoot.getAttributeInt(AbstractMetadata.multilook_flag) != 0;
 
             if (applyRadiometricNormalization && antElevCorrFlag && multilookFlag) {
-                return new UIValidation(UIValidation.State.WARNING, "The product has been multilooked, therefore only" +
+                return new UIValidation(UIValidation.State.WARNING, "For multilooked products only" +
                         " constant and incidence angle corrections will be performed for radiometric normalization");
             }
         }

@@ -18,7 +18,9 @@ import org.esa.beam.framework.gpf.internal.RasterDataNodeValues;
 import org.esa.beam.framework.gpf.ui.SingleTargetProductDialog;
 import org.esa.beam.framework.gpf.ui.SourceProductSelector;
 import org.esa.beam.framework.gpf.ui.TargetProductSelectorModel;
+import org.esa.beam.framework.gpf.ui.UIValidation;
 import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.visat.VisatApp;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -189,10 +191,27 @@ public class NestSingleTargetProductDialog extends SingleTargetProductDialog {
 
     @Override
     protected Product createTargetProduct() throws Exception {
-        opUI.updateParameters();
+        if(validateUI()) {
+            opUI.updateParameters();
 
-        final HashMap<String, Product> sourceProducts = createSourceProductsMap();
-        return GPF.createProduct(operatorName, parameterMap, sourceProducts);
+            final HashMap<String, Product> sourceProducts = createSourceProductsMap();
+            return GPF.createProduct(operatorName, parameterMap, sourceProducts);
+        }
+        return null;
+    }
+
+    private boolean validateUI() {
+        final UIValidation validation = opUI.validateParameters();
+        if(validation.getState() == UIValidation.State.WARNING) {
+            final String msg = "Warning: "+validation.getMsg()+
+                    "\n\nWould you like to continue?";
+            return VisatApp.getApp().showQuestionDialog(msg, null) == 0;
+        } else if(validation.getState() == UIValidation.State.ERROR) {
+            final String msg = "Error: "+validation.getMsg();
+            VisatApp.getApp().showErrorDialog(msg);
+            return false;
+        }
+        return true;
     }
 
     private void initSourceProductSelectors() {

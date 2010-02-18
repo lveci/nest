@@ -1,5 +1,5 @@
 /*
- * $Id: SingleTargetProductDialog.java,v 1.5 2010-02-10 16:20:37 lveci Exp $
+ * $Id: SingleTargetProductDialog.java,v 1.6 2010-02-18 15:59:30 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -46,7 +46,7 @@ import java.awt.*;
  *
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.5 $ $Date: 2010-02-10 16:20:37 $
+ * @version $Revision: 1.6 $ $Date: 2010-02-18 15:59:30 $
  */
 public abstract class SingleTargetProductDialog extends ModelessDialog {
 
@@ -126,7 +126,7 @@ public abstract class SingleTargetProductDialog extends ModelessDialog {
         try {
             targetProduct = createTargetProduct();
             if (targetProduct == null) {
-                throw new NullPointerException("Target product is null.");
+                //throw new NullPointerException("Target product is null.");
             }
         } catch (Throwable t) {
             handleInitialisationError(t);
