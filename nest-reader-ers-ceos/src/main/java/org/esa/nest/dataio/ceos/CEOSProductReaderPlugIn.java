@@ -40,15 +40,7 @@ public class CEOSProductReaderPlugIn implements ProductReaderPlugIn {
 
         final File parentDir = file.getParentFile();
         if (file.isFile() && parentDir.isDirectory()) {
-            final FilenameFilter filter = new FilenameFilter() {
-                public boolean accept(final File dir, final String name) {
-                    return name.contains(constants.getIndicationKey());
-                }
-            };
-            final File[] files = parentDir.listFiles(filter);
-            if (files != null && files.length >= constants.getMinimumNumFiles()) {
-                return checkProductQualification(file);
-            }
+            return checkProductQualification(file);
         }
         return DecodeQualification.UNABLE;
     }

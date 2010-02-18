@@ -48,15 +48,10 @@ public class AlosPalsarConstants implements CEOSConstants {
     final static float BANDWIDTH_BAND_3 = BANDWIDTH_BAND_1;
     final static float BANDWIDTH_BAND_4 = 130.0F;
 
-    private final static String INDICATION_KEY = "001";
     private final static int MINIMUM_FILES = 4;    // 4 image files + leader file + volume file + trailer file
 
     public String getVolumeFilePrefix() {
         return VOLUME_FILE_PREFIX;
-    }
-
-    public String getIndicationKey() {
-        return INDICATION_KEY;
     }
 
     public int getMinimumNumFiles() {

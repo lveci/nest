@@ -19,15 +19,10 @@ public class ERSConstants implements CEOSConstants {
 
     final static String SUMMARY_FILE_NAME = "summary.txt";
 
-    private final static String INDICATION_KEY = ".001";
     private final static int MINIMUM_FILES = 4;    // 4 image files + leader file + volume file + trailer file
 
     public String getVolumeFilePrefix() {
         return VOLUME_FILE_PREFIX;
-    }
-
-    public String getIndicationKey() {
-        return INDICATION_KEY;
     }
 
     public int getMinimumNumFiles() {

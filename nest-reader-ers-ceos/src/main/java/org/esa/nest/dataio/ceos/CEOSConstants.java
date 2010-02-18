@@ -10,7 +10,6 @@ public interface CEOSConstants {
     Class[] VALID_INPUT_TYPES = new Class[]{File.class, String.class};
 
     public String getVolumeFilePrefix();
-    public String getIndicationKey();
     public int getMinimumNumFiles();
 
     public String getPluginDescription();
