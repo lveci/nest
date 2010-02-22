@@ -91,7 +91,9 @@ public class TestSARSimulationOp extends TestCase {
                         System.out.println("Processing "+ file.toString());
 
                         final Product sourceProduct = reader.readProductNodes(file, null);
-
+                        if(OperatorUtils.isMapProjected(sourceProduct)) {
+                            continue;
+                        }
                         final SARSimulationOp op = (SARSimulationOp)spi.createOperator();
                         assertNotNull(op);
                         op.setSourceProduct(sourceProduct);
@@ -99,7 +101,7 @@ public class TestSARSimulationOp extends TestCase {
                         TestUtils.executeOperator(op);
                     }
                 } catch(Exception e) {
-                    if(e.getMessage().contains("already map projected")) {
+                    if(e.getMessage().contains("map projected")) {
                         continue;
                     } else {
                         System.out.println("Failed to process "+ file.toString());
