@@ -267,13 +267,15 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
     public UIValidation validateParameters() {
 
         if (sourceProducts != null) {
-            MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProducts[0]);
-            boolean antElevCorrFlag = absRoot.getAttributeInt(AbstractMetadata.ant_elev_corr_flag) != 0;
-            boolean multilookFlag = absRoot.getAttributeInt(AbstractMetadata.multilook_flag) != 0;
+            final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProducts[0]);
+            if(absRoot != null) {
+                final boolean antElevCorrFlag = absRoot.getAttributeInt(AbstractMetadata.ant_elev_corr_flag) != 0;
+                final boolean multilookFlag = absRoot.getAttributeInt(AbstractMetadata.multilook_flag) != 0;
 
-            if (applyRadiometricNormalization && antElevCorrFlag && multilookFlag) {
-                return new UIValidation(UIValidation.State.WARNING, "For multilooked products only" +
-                        " constant and incidence angle corrections will be performed for radiometric normalization");
+                if (applyRadiometricNormalization && antElevCorrFlag && multilookFlag) {
+                    return new UIValidation(UIValidation.State.WARNING, "For multilooked products only" +
+                            " constant and incidence angle corrections will be performed for radiometric normalization");
+                }
             }
         }
         return new UIValidation(UIValidation.State.OK, "");

@@ -211,42 +211,49 @@ public class SpeckleFilterOp extends Operator {
 
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
-        final Rectangle targetTileRectangle = targetTile.getRectangle();
-        final int x0 = targetTileRectangle.x;
-        final int y0 = targetTileRectangle.y;
-        final int w = targetTileRectangle.width;
-        final int h = targetTileRectangle.height;
+        try {
+            final Rectangle targetTileRectangle = targetTile.getRectangle();
+            final int x0 = targetTileRectangle.x;
+            final int y0 = targetTileRectangle.y;
+            final int w = targetTileRectangle.width;
+            final int h = targetTileRectangle.height;
 
-        final Rectangle sourceTileRectangle = getSourceTileRectangle(x0, y0, w, h);
-        final Band srcBand = bandMap.get(targetBand);
-        final Tile sourceRaster = getSourceTile(srcBand, sourceTileRectangle, pm);
-        final String unit = srcBand.getUnit();
+            final Rectangle sourceTileRectangle = getSourceTileRectangle(x0, y0, w, h);
+            final Band srcBand = bandMap.get(targetBand);
+            final Tile sourceRaster = getSourceTile(srcBand, sourceTileRectangle, pm);
+            final String unit = srcBand.getUnit();
 
-        if(filter.equals(MEAN_SPECKLE_FILTER)) {
+            if(filter.equals(MEAN_SPECKLE_FILTER)) {
 
-            computeMean(sourceRaster, targetTile, x0, y0, w, h, pm);
+                computeMean(sourceRaster, targetTile, x0, y0, w, h, pm);
 
-        } else if(filter.equals(MEDIAN_SPECKLE_FILTER)) {
+            } else if(filter.equals(MEDIAN_SPECKLE_FILTER)) {
 
-            computeMedian(sourceRaster, targetTile, x0, y0, w, h, pm);
+                computeMedian(sourceRaster, targetTile, x0, y0, w, h, pm);
 
-        } else if(filter.equals(FROST_SPECKLE_FILTER)) {
+            } else if(filter.equals(FROST_SPECKLE_FILTER)) {
 
-            computeFrost(sourceRaster, targetTile, x0, y0, w, h, pm);
+                computeFrost(sourceRaster, targetTile, x0, y0, w, h, pm);
 
-        } else if(filter.equals(GAMMA_MAP_SPECKLE_FILTER)) {
+            } else if(filter.equals(GAMMA_MAP_SPECKLE_FILTER)) {
 
-            computeEquivalentNumberOfLooks(sourceRaster, x0, y0, w, h, unit);
-            computeGammaMap(sourceRaster, targetTile, x0, y0, w, h, pm);
+                computeEquivalentNumberOfLooks(sourceRaster, x0, y0, w, h, unit);
+                computeGammaMap(sourceRaster, targetTile, x0, y0, w, h, pm);
 
-        } else if(filter.equals(LEE_SPECKLE_FILTER)) {
+            } else if(filter.equals(LEE_SPECKLE_FILTER)) {
 
-            computeEquivalentNumberOfLooks(sourceRaster, x0, y0, w, h, unit);
-            computeLee(sourceRaster, targetTile, x0, y0, w, h, pm);
+                computeEquivalentNumberOfLooks(sourceRaster, x0, y0, w, h, unit);
+                computeLee(sourceRaster, targetTile, x0, y0, w, h, pm);
 
-        } else if(filter.equals(LEE_REFINED_FILTER)) {
+            } else if(filter.equals(LEE_REFINED_FILTER)) {
 
-            computeRefinedLee(sourceRaster, targetTile, x0, y0, w, h, pm);
+                computeRefinedLee(sourceRaster, targetTile, x0, y0, w, h, pm);
+            }
+
+        } catch(Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
+        } finally {
+            pm.done();
         }
     }
 
