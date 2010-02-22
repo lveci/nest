@@ -1,5 +1,5 @@
 /*
- * $Id: ProductFlipper.java,v 1.2 2009-12-07 21:39:44 lveci Exp $
+ * $Id: ProductFlipper.java,v 1.3 2010-02-22 17:38:16 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -33,7 +33,7 @@ import java.io.IOException;
 
 /**
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-12-07 21:39:44 $
+ * @version $Revision: 1.3 $ $Date: 2010-02-22 17:38:16 $
  */
 public class ProductFlipper extends AbstractProductBuilder {
 
@@ -290,6 +290,8 @@ public class ProductFlipper extends AbstractProductBuilder {
         }
         ProductUtils.copyMasks(getSourceProduct(), product);
         ProductUtils.copyOverlayMasks(getSourceProduct(), product);
+        product.setStartTime(getSourceProduct().getStartTime());
+        product.setEndTime(getSourceProduct().getEndTime());
         return product;
     }
 
