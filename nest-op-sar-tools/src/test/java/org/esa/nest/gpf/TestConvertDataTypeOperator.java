@@ -61,7 +61,7 @@ public class TestConvertDataTypeOperator extends TestCase {
 
     public void testDoubleToUInt32Linear() throws Exception {
 
-        final double[] values = convert(ProductData.TYPESTRING_UINT32, ConvertDataTypeOp.SCALING_LINEAR);
+        final double[] values = convert(ProductData.TYPESTRING_UINT32, ConvertDataTypeOp.SCALING_TRUNCATE);
 
         final double[] expectedValues = {100000.0, 150000.0, 200000.0, 250000.0, 300000.0, 350000.0, 400000.0, 450000.0};
         assertTrue(Arrays.equals(expectedValues, values));

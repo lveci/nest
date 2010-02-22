@@ -17,7 +17,7 @@ import java.util.ArrayList;
 /**
  * This class represents an image file of a CEOS product.
  *
- * @version $Revision: 1.27 $ $Date: 2010-02-10 15:08:32 $
+ * @version $Revision: 1.28 $ $Date: 2010-02-22 17:15:23 $
  */
 public abstract class CEOSImageFile {
 
@@ -87,25 +87,33 @@ public abstract class CEOSImageFile {
     }
 
     public float[] getLatCorners() throws IOException, IllegalBinaryFormatException {
-        final ImageRecord imgRec0 = getImageRecord(0);
-        final ImageRecord imgRecN = getImageRecord(_imageRecords.length-1);
+        try {
+            final ImageRecord imgRec0 = getImageRecord(0);
+            final ImageRecord imgRecN = getImageRecord(_imageRecords.length-1);
 
-        final float latUL = imgRec0.getAttributeInt("First pixel latitude") / (float)Constants.oneMillion;
-        final float latUR = imgRec0.getAttributeInt("Last pixel latitude") / (float)Constants.oneMillion;
-        final float latLL = imgRecN.getAttributeInt("First pixel latitude") / (float)Constants.oneMillion;
-        final float latLR = imgRecN.getAttributeInt("Last pixel latitude") / (float)Constants.oneMillion;
-        return new float[]{latUL, latUR, latLL, latLR};
+            final float latUL = imgRec0.getAttributeInt("First pixel latitude") / (float)Constants.oneMillion;
+            final float latUR = imgRec0.getAttributeInt("Last pixel latitude") / (float)Constants.oneMillion;
+            final float latLL = imgRecN.getAttributeInt("First pixel latitude") / (float)Constants.oneMillion;
+            final float latLR = imgRecN.getAttributeInt("Last pixel latitude") / (float)Constants.oneMillion;
+            return new float[]{latUL, latUR, latLL, latLR};
+        } catch(Throwable e) {
+            return null;
+        }
     }
 
     public float[] getLonCorners() throws IOException, IllegalBinaryFormatException {
-        final ImageRecord imgRec0 = getImageRecord(0);
-        final ImageRecord imgRecN = getImageRecord(_imageRecords.length-1);
+        try {
+            final ImageRecord imgRec0 = getImageRecord(0);
+            final ImageRecord imgRecN = getImageRecord(_imageRecords.length-1);
 
-        final float lonUL = imgRec0.getAttributeInt("First pixel longitude") / (float)Constants.oneMillion;
-        final float lonUR = imgRec0.getAttributeInt("Last pixel longitude") / (float)Constants.oneMillion;
-        final float lonLL = imgRecN.getAttributeInt("First pixel longitude") / (float)Constants.oneMillion;
-        final float lonLR = imgRecN.getAttributeInt("Last pixel longitude") / (float)Constants.oneMillion;
-        return new float[]{lonUL, lonUR, lonLL, lonLR};
+            final float lonUL = imgRec0.getAttributeInt("First pixel longitude") / (float)Constants.oneMillion;
+            final float lonUR = imgRec0.getAttributeInt("Last pixel longitude") / (float)Constants.oneMillion;
+            final float lonLL = imgRecN.getAttributeInt("First pixel longitude") / (float)Constants.oneMillion;
+            final float lonLR = imgRecN.getAttributeInt("Last pixel longitude") / (float)Constants.oneMillion;
+            return new float[]{lonUL, lonUR, lonLL, lonLR};
+        } catch(Throwable e) {
+            return null;
+        }
     }
 
     public void assignMetadataTo(MetadataElement rootElem, int count) {
