@@ -94,7 +94,7 @@ public class BandArithmeticOpUI extends BaseOperatorUI {
     public UIValidation validateParameters() {
         if(!(_targetProduct == null || isValidExpression()))
             return new UIValidation(UIValidation.State.ERROR, "Expression is invalid. "+ errorText);
-        return new UIValidation(UIValidation.State.ERROR, "");
+        return new UIValidation(UIValidation.State.OK, "");
     }
 
     @Override
