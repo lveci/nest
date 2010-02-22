@@ -164,7 +164,7 @@ public final class ResourceUtils {
         return findConfigFile(filename);
     }
 
-    private static File findConfigFile(String filename) {
+    public static File findConfigFile(String filename) {
         final String homeDir = System.getProperty(getContextID()+".home");
         if (homeDir != null && homeDir.length() > 0) {
             final File homeDirFile = new File(homeDir);

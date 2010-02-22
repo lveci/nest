@@ -8,34 +8,50 @@ import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.gpf.Operator;
+import org.esa.beam.util.PropertyMap;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Utilities for Operator unit tests
- * In order to test the datasets at Array add this to the VM arguements
- * -Dnest.testReadersOnAllProducts=true -Dnest.testProcessingOnAllProducts=true
+ * In order to test the datasets at Array set the foloowing to true in the nest.config
+ * nest.test.ReadersOnAllProducts=true nest.test.ProcessingOnAllProducts=true
  */
 public class TestUtils {
 
-    public final static String rootPathTerraSarX = "P:\\nest\\nest\\ESA Data\\RADAR\\TerraSarX";
-    public final static String rootPathASAR= "P:\\nest\\nest\\ESA Data\\RADAR\\ASAR";
-    public final static String rootPathRadarsat2 = "P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat2";
-    public final static String rootPathRadarsat1 = "P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat1";
-    public final static String rootPathERS = "P:\\nest\\nest\\ESA Data\\RADAR\\ERS_products";
-    public final static String rootPathJERS = "P:\\nest\\nest\\ESA Data\\RADAR\\JERS";
-    public final static String rootPathALOS = "P:\\nest\\nest\\ESA Data\\RADAR\\ALOS PALSAR";
+    private static final PropertyMap testPreferences = createTestPreferences();
+
+    public final static String rootPathTerraSarX = testPreferences.getPropertyString("nest.test.rootPathTerraSarX");
+    public final static String rootPathASAR= testPreferences.getPropertyString("nest.test.rootPathASAR");
+    public final static String rootPathRadarsat2 = testPreferences.getPropertyString("nest.test.rootPathRadarsat2");
+    public final static String rootPathRadarsat1 = testPreferences.getPropertyString("nest.test.rootPathRadarsat1");
+    public final static String rootPathERS = testPreferences.getPropertyString("nest.test.rootPathERS");
+    public final static String rootPathJERS = testPreferences.getPropertyString("nest.test.rootPathJERS");
+    public final static String rootPathALOS = testPreferences.getPropertyString("nest.test.rootPathALOS");
+
+    private static PropertyMap createTestPreferences() {
+        final PropertyMap prefs = new PropertyMap();
+        try {
+            prefs.load(ResourceUtils.findConfigFile("nest.config"));
+        } catch(IOException e) {
+            System.out.println("Unable to load test preferences "+e.getMessage());
+        }
+        return prefs;
+    }
 
     public static boolean canTestReadersOnAllProducts() {
-        final String testAllProducts = System.getProperty("nest.testReadersOnAllProducts");
+        final String testAllProducts = testPreferences.getPropertyString("nest.test.ReadersOnAllProducts");
         return testAllProducts != null && testAllProducts.equalsIgnoreCase("true");
     }
 
     public static boolean canTestProcessingOnAllProducts() {
-        final String testAllProducts = System.getProperty("nest.testProcessingOnAllProducts");
+        final String testAllProducts = testPreferences.getPropertyString("nest.test.ProcessingOnAllProducts");
         return testAllProducts != null && testAllProducts.equalsIgnoreCase("true");
     }
 

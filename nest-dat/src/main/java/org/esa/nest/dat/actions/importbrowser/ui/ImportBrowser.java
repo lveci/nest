@@ -18,7 +18,6 @@ import org.esa.nest.dat.actions.importbrowser.model.dataprovider.ProductProperti
 import org.esa.nest.dat.actions.importbrowser.model.dataprovider.QuicklookProvider;
 import org.esa.nest.dat.actions.importbrowser.util.Callback;
 import org.esa.nest.dat.dialogs.BatchGraphDialog;
-import org.esa.nest.dat.plugins.graphbuilder.GraphBuilderDialog;
 import org.esa.nest.dat.toolviews.Projects.Project;
 
 import javax.swing.*;
