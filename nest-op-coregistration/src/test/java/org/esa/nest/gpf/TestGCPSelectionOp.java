@@ -42,7 +42,7 @@ public class TestGCPSelectionOp extends TestCase {
         final Product targetProduct = op.getTargetProduct();
         assertNotNull(targetProduct);
 
-        final Band band = targetProduct.getBandAt(0);
+        final Band band = targetProduct.getBandAt(1);
         assertNotNull(band);
 
         // readPixels gets computeTiles to be executed
