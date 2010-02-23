@@ -2,8 +2,6 @@ package org.esa.nest.dataio.terrasarx;
 
 import junit.framework.TestCase;
 import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.util.TestUtils;
 
 import java.io.File;
@@ -17,8 +15,6 @@ public class TestTerraSarXProductReader extends TestCase {
 
     private TerraSarXProductReaderPlugIn readerPlugin;
     private ProductReader reader;
-
-    private final static String filePath = "P:\\nest\\nest\\ESA Data\\RADAR\\TerraSarX\\2007-12-15_Toronto_EEC-SE\\TSX1_SAR__EEC_SE___SL_S_SRA_20071215T112105_20071215T112107\\TSX1_SAR__EEC_SE___SL_S_SRA_20071215T112105_20071215T112107.xml";
 
     public TestTerraSarXProductReader(String name) {
         super(name);
@@ -40,15 +36,6 @@ public class TestTerraSarXProductReader extends TestCase {
         readerPlugin = null;
     }
 
-    public void testOpen() throws Exception
-    {
-        final File file = new File(filePath);
-        if(!file.exists()) return;
-
-        final Product product = reader.readProductNodes(file, null);
-        ReaderUtils.verifyProduct(product, true);
-    }
-
     /**
      * Open all files in a folder recursively
      * @throws Exception anything
@@ -59,6 +46,6 @@ public class TestTerraSarXProductReader extends TestCase {
         if(!folder.exists()) return;
 
         if(TestUtils.canTestReadersOnAllProducts())
-            TestUtils.recurseReadFolder(folder, readerPlugin, reader);
+            TestUtils.recurseReadFolder(folder, readerPlugin, reader, null, null);
     }
 }

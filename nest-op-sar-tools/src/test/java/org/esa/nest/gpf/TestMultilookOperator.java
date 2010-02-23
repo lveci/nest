@@ -23,6 +23,7 @@ public class TestMultilookOperator extends TestCase {
     private final static String inputPathWSM =     "P:\\nest\\nest\\test\\input\\ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1";
     private final static String expectedPathWSM =  "P:\\nest\\nest\\test\\expected\\ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1_ML.dim";
 
+    private String[] productTypeExemptions = { "_BP", "XCA", "WVW", "WVI", "WVS", "WSS" };
 
     @Override
     protected void setUp() throws Exception {
@@ -142,5 +143,40 @@ public class TestMultilookOperator extends TestCase {
         testProduct.addTiePointGrid(new TiePointGrid("incident_angle", 16, 4, 0, 0, 1, 1, incidence_angle));
 
         return testProduct;
+    }
+
+    public void testProcessAllASAR() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathASAR, productTypeExemptions, null);
+    }
+
+    public void testProcessAllERS() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathERS, productTypeExemptions, null);
+    }
+
+    public void testProcessAllALOS() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathALOS, null, null);
+    }
+
+    public void testProcessAllRadarsat2() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathRadarsat2, null, null);
+    }
+
+    public void testProcessAllTerraSARX() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathTerraSarX, null, null);
+    }
+
+    public void testProcessAllCosmo() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathCosmoSkymed, null, null);
+    }
+
+    public void testProcessAllNestBox() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathMixProducts, productTypeExemptions, null);
     }
 }

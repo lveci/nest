@@ -1,7 +1,8 @@
-package org.esa.nest.dataio.radarsat2;
+package org.esa.nest.gpf;
 
 import junit.framework.TestCase;
 import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn;
 import org.esa.nest.util.TestUtils;
 
 import java.io.File;
@@ -11,12 +12,14 @@ import java.io.File;
  *
  * @author lveci
  */
-public class TestRadarsat2ProductReader extends TestCase {
+public class TestEnvisatReader extends TestCase {
 
-    private Radarsat2ProductReaderPlugIn readerPlugin;
+    private EnvisatProductReaderPlugIn readerPlugin;
     private ProductReader reader;
 
-    public TestRadarsat2ProductReader(String name) {
+    private String[] productTypeExemptions = { "WVW", "WVI", "WVS", "WSS" };
+
+    public TestEnvisatReader(String name) {
         super(name);
     }
 
@@ -24,7 +27,7 @@ public class TestRadarsat2ProductReader extends TestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        readerPlugin = new Radarsat2ProductReaderPlugIn();
+        readerPlugin = new EnvisatProductReaderPlugIn();
         reader = readerPlugin.createReaderInstance();
     }
 
@@ -42,12 +45,10 @@ public class TestRadarsat2ProductReader extends TestCase {
      */
     public void testOpenAll() throws Exception
     {
-        final File folder = new File(TestUtils.rootPathRadarsat2);
+        final File folder = new File(TestUtils.rootPathASAR);
         if(!folder.exists()) return;
 
         if(TestUtils.canTestReadersOnAllProducts())
-            TestUtils.recurseReadFolder(folder, readerPlugin, reader, null, null);
+            TestUtils.recurseReadFolder(folder, readerPlugin, reader, productTypeExemptions, null);
     }
-
-
 }

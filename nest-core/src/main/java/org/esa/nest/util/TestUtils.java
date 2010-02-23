@@ -8,6 +8,7 @@ import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.gpf.Operator;
+import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.util.PropertyMap;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
@@ -15,8 +16,6 @@ import org.esa.nest.datamodel.AbstractMetadata;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Map;
-import java.util.Properties;
 
 /**
  * Utilities for Operator unit tests
@@ -34,6 +33,8 @@ public class TestUtils {
     public final static String rootPathERS = testPreferences.getPropertyString("nest.test.rootPathERS");
     public final static String rootPathJERS = testPreferences.getPropertyString("nest.test.rootPathJERS");
     public final static String rootPathALOS = testPreferences.getPropertyString("nest.test.rootPathALOS");
+    public final static String rootPathCosmoSkymed = testPreferences.getPropertyString("nest.test.rootPathCosmoSkymed");
+    public final static String rootPathMixProducts = testPreferences.getPropertyString("nest.test.rootPathMixProducts");
 
     private static PropertyMap createTestPreferences() {
         final PropertyMap prefs = new PropertyMap();
@@ -55,7 +56,7 @@ public class TestUtils {
         return testAllProducts != null && testAllProducts.equalsIgnoreCase("true");
     }
 
-    public static Product createProduct(String type, int w, int h) {
+    public static Product createProduct(final String type, final int w, final int h) {
         Product product = new Product("name", type, w, h);
 
         product.setStartTime(AbstractMetadata.parseUTC("10-MAY-2008 20:30:46.890683"));
@@ -85,11 +86,13 @@ public class TestUtils {
         product.setGeoCoding(tpGeoCoding);
     }
 
-    public static void verifyProduct(Product product, boolean verifyTimes, boolean verifyGeoCoding) throws Exception {
+    public static void verifyProduct(final Product product, final boolean verifyTimes,
+                                     final boolean verifyGeoCoding) throws Exception {
         ReaderUtils.verifyProduct(product, verifyTimes, verifyGeoCoding);
     }
 
-    public static void attributeEquals(MetadataElement elem, String name, double trueValue) throws Exception {
+    public static void attributeEquals(final MetadataElement elem, final String name,
+                                       final double trueValue) throws Exception {
         double val = elem.getAttributeDouble(name, 0);
         if(Double.compare(val, trueValue) != 0) {
             if(Float.compare((float)val, (float)trueValue) != 0)
@@ -97,13 +100,15 @@ public class TestUtils {
         }
     }
 
-    public static void attributeEquals(MetadataElement elem, String name, String trueValue) throws Exception {
+    public static void attributeEquals(final MetadataElement elem, String name,
+                                       final String trueValue) throws Exception {
         String val = elem.getAttributeString(name, "");
         if(!val.equals(trueValue))
             throwErr(name + " is " + val + ", expecting " + trueValue);
     }
 
-    private static void compareMetadata(Product testProduct, Product expectedProduct, String[] excemptionList) throws Exception {
+    private static void compareMetadata(final Product testProduct, final Product expectedProduct,
+                                        final String[] excemptionList) throws Exception {
         final MetadataElement testAbsRoot = AbstractMetadata.getAbstractedMetadata(testProduct);
         if(testAbsRoot == null)
             throwErr("Metadata is null");
@@ -135,8 +140,8 @@ public class TestUtils {
         }
     }
 
-    public static void compareProducts(Operator op, Product targetProduct,
-                                       String expectedPath, String[] excemptionList) throws Exception {
+    public static void compareProducts(final Operator op, final Product targetProduct,
+                                       final String expectedPath, final String[] excemptionList) throws Exception {
 
         final Band targetBand = targetProduct.getBandAt(0);
         if(targetBand == null)
@@ -166,10 +171,10 @@ public class TestUtils {
         compareMetadata(targetProduct, expectedProduct, excemptionList);
     }
 
-    public static void executeOperator(Operator op) throws Exception {
+    public static void executeOperator(final Operator op) throws Exception {
         // get targetProduct: execute initialize()
         final Product targetProduct = op.getTargetProduct();
-        TestUtils.verifyProduct(targetProduct, false, true);
+        TestUtils.verifyProduct(targetProduct, false, !isAlos(targetProduct));
 
         final Band targetBand = targetProduct.getBandAt(0);
         if(targetBand == null)
@@ -180,14 +185,87 @@ public class TestUtils {
         targetBand.readPixels(100, 100, 100, 100, floatValues, ProgressMonitor.NULL);
     }
 
-    public static void recurseReadFolder(File folder, ProductReaderPlugIn readerPlugin, ProductReader reader) throws Exception {
+    private static boolean isAlos(Product prod) {
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(prod);
+        if(absRoot != null) {
+            return absRoot.getAttributeString(AbstractMetadata.MISSION).contains("ALOS");
+        }
+        return false;
+    }
+
+    public static void recurseProcessFolder(final OperatorSpi spi, final File folder,
+                                            final String[] productTypeExemptions,
+                                            final String[] exceptionExemptions) throws Exception {
         for(File file : folder.listFiles()) {
             if(file.isDirectory()) {
-                recurseReadFolder(file, readerPlugin, reader);
+                recurseProcessFolder(spi, file, productTypeExemptions, exceptionExemptions);
+            } else {
+                try {
+                    final ProductReader reader = ProductIO.getProductReaderForFile(file);
+                    if(reader != null) {
+                        final Product sourceProduct = reader.readProductNodes(file, null);
+                        if(contains(sourceProduct.getProductType(), productTypeExemptions))
+                            continue;
+
+                        final Operator op = spi.createOperator();
+                        op.setSourceProduct(sourceProduct);
+
+                        System.out.println(spi.getOperatorAlias()+" Processing "+ file.toString());
+                        TestUtils.executeOperator(op);
+                    }
+                } catch(Exception e) {
+                    System.out.println("Failed to process "+ file.toString());
+                    throw e;
+                }
+            }
+        }
+    }
+
+    private static boolean contains(final String value, final String[] exemptions) {
+        if(exemptions != null) {
+            for(String type : exemptions) {
+                if(value.contains(type))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Processes all products in a folder
+     * @param spi the OperatorSpi to create the operator
+     * @param folderPath the path to recurse through
+     * @param productTypeExemptions product types to ignore
+     * @param exceptionExemptions exceptions that are ok and can be ignored for the test
+     * @throws Exception general exception
+     */
+    public static void testProcessAllInPath(final OperatorSpi spi, final String folderPath,
+                                            final String[] productTypeExemptions,
+                                            final String[] exceptionExemptions) throws Exception
+    {
+        final File folder = new File(folderPath);
+        if(!folder.exists()) return;
+
+        if(TestUtils.canTestProcessingOnAllProducts())
+            TestUtils.recurseProcessFolder(spi, folder, productTypeExemptions, exceptionExemptions);
+    }
+
+    public static void recurseReadFolder(final File folder,
+                                         final ProductReaderPlugIn readerPlugin,
+                                         final ProductReader reader,
+                                         final String[] productTypeExemptions,
+                                         final String[] exceptionExemptions) throws Exception {
+        for(File file : folder.listFiles()) {
+            if(file.isDirectory()) {
+                recurseReadFolder(file, readerPlugin, reader, productTypeExemptions, exceptionExemptions);
             } else if(readerPlugin.getDecodeQualification(file) == DecodeQualification.INTENDED) {
 
                 try {
+                    System.out.println("Reading "+ file.toString());
+
                     final Product product = reader.readProductNodes(file, null);
+                    if(contains(product.getProductType(), productTypeExemptions))
+                            continue;
                     ReaderUtils.verifyProduct(product, true);
                 } catch(Exception e) {
                     System.out.println("Failed to read "+ file.toString());
@@ -197,7 +275,7 @@ public class TestUtils {
         }
     }
 
-    private static void throwErr(String description) throws Exception {
+    private static void throwErr(final String description) throws Exception {
         throw new Exception(description);
     }
 }

@@ -60,7 +60,7 @@ public class TestJERSProductReader extends TestCase {
         if(!folder.exists()) return;
 
         if(TestUtils.canTestReadersOnAllProducts())
-            TestUtils.recurseReadFolder(folder, readerPlugin, reader);
+            TestUtils.recurseReadFolder(folder, readerPlugin, reader, null, null);
     }
 
 }

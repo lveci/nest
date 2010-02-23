@@ -1,4 +1,4 @@
-package org.esa.nest.dataio.radarsat2;
+package org.esa.nest.dataio.cosmo;
 
 import junit.framework.TestCase;
 import org.esa.beam.framework.dataio.ProductReader;
@@ -11,12 +11,12 @@ import java.io.File;
  *
  * @author lveci
  */
-public class TestRadarsat2ProductReader extends TestCase {
+public class TestCosmoSkymedReader extends TestCase {
 
-    private Radarsat2ProductReaderPlugIn readerPlugin;
+    private CosmoSkymedReaderPlugIn readerPlugin;
     private ProductReader reader;
 
-    public TestRadarsat2ProductReader(String name) {
+    public TestCosmoSkymedReader(String name) {
         super(name);
     }
 
@@ -24,7 +24,7 @@ public class TestRadarsat2ProductReader extends TestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        readerPlugin = new Radarsat2ProductReaderPlugIn();
+        readerPlugin = new CosmoSkymedReaderPlugIn();
         reader = readerPlugin.createReaderInstance();
     }
 
@@ -42,12 +42,10 @@ public class TestRadarsat2ProductReader extends TestCase {
      */
     public void testOpenAll() throws Exception
     {
-        final File folder = new File(TestUtils.rootPathRadarsat2);
+        final File folder = new File(TestUtils.rootPathCosmoSkymed);
         if(!folder.exists()) return;
 
         if(TestUtils.canTestReadersOnAllProducts())
             TestUtils.recurseReadFolder(folder, readerPlugin, reader, null, null);
     }
-
-
 }
