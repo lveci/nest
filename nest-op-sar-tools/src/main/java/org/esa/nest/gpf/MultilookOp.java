@@ -302,15 +302,9 @@ public final class MultilookOp extends Operator {
         final double newNearEdgeSlantRange = oldNearEdgeSlantRange + rangeSpacing*(nRgLooks - 1)/2.0;
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.slant_range_to_first_pixel, newNearEdgeSlantRange);
 
-        final String oldFirstLineTime = absTgt.getAttributeString(AbstractMetadata.first_line_time);
-        final int idx = oldFirstLineTime.lastIndexOf(':') + 1;
-        final String oldSecondsStr = oldFirstLineTime.substring(idx);
-        final double oldSeconds = Double.parseDouble(oldSecondsStr);
-        final double newSeconds = oldSeconds + oldLineTimeInterval*((nAzLooks - 1)/2.0);
-        final String newFirstLineTime = String.valueOf(oldFirstLineTime.subSequence(0, idx)) + newSeconds + "000000";
-        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_line_time,
-            AbstractMetadata.parseUTC(newFirstLineTime.substring(0,27)));
-//        AbstractMetadata.parseUTC(newFirstLineTime.substring(0,27), "dd-MMM-yyyy HH:mm:ss"));
+        double oldFirstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD(); // in days
+        double newFirstLineUTC = oldFirstLineUTC + oldLineTimeInterval*((nAzLooks - 1)/2.0) / 86400.0;
+        AbstractMetadata.setAttribute(absTgt, AbstractMetadata.first_line_time, new ProductData.UTC(newFirstLineUTC));
     }
 
     private void addSelectedBands() throws OperatorException {
