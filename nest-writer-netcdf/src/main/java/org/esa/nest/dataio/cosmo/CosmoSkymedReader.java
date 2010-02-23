@@ -295,7 +295,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
             final double stateVectorTime = globalElem.getAttribute("State Vectors Times").getData().getElemDoubleAt(i);
             final ProductData.UTC orbitTime =
                     new ProductData.UTC(referenceUTC.getMJD() + stateVectorTime/86400.0);
-
+             
             final double satellitePositionX =
                     globalElem.getAttribute("ECEF Satellite Position").getData().getElemDoubleAt(3*i);
             final double satellitePositionY =
@@ -458,8 +458,8 @@ public class CosmoSkymedReader extends AbstractProductReader {
     private static void addIncidenceAnglesSlantRangeTime(final Product product, final MetadataElement bandElem) {
         if(bandElem == null) return;
 
-        final int gridWidth = 4;
-        final int gridHeight = 4;
+        final int gridWidth = 11;
+        final int gridHeight = 11;
         final float subSamplingX = (float)product.getSceneRasterWidth() / (float)(gridWidth - 1);
         final float subSamplingY = (float)product.getSceneRasterHeight() / (float)(gridHeight - 1);
 
@@ -562,7 +562,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
      * {@inheritDoc}
      */
     @Override
-    protected synchronized void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight,
+    protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight,
                                           int sourceStepX, int sourceStepY, Band destBand, int destOffsetX,
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {

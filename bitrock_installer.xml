@@ -2,7 +2,6 @@
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>3C</version>
-    <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>beam/res/NEST_Splash.png</splashImage>
     <postInstallationActionList>
@@ -44,11 +43,11 @@
             <desktopShortcutList>
                 <shortcut>
                     <comment>NEST Display and Analysis Tool</comment>
-                    <exec>dat.sh</exec>
-                    <icon>res/dat.png</icon>
+                    <exec>${installdir}/dat.sh</exec>
+                    <icon>${installdir}/res/dat.png</icon>
                     <name>NEST 3C</name>
                     <path> ${installdir}</path>
-                    <platforms>windows</platforms>
+                    <platforms>all</platforms>
                     <runInTerminal>0</runInTerminal>
                     <windowsExec>${installdir}/nest-dat.exe</windowsExec>
                     <windowsExecArgs></windowsExecArgs>

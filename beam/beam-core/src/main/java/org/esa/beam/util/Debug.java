@@ -1,5 +1,5 @@
 /*
- * $Id: Debug.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: Debug.java,v 1.2 2010-02-23 18:25:14 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -39,7 +39,7 @@ import org.esa.beam.util.logging.BeamLogManager;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2010-02-23 18:25:14 $
  * @see AssertionFailure
  */
 public class Debug {
@@ -48,8 +48,8 @@ public class Debug {
      * Set the DEBUG constant to false, if you want your Java compiler to completely remove method bodies caused by dead
      * code blocks.
      */
-    private static final boolean DEBUG = true;
-    //private static final boolean DEBUG = false;
+    //private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     /**
      * If false, debugging will be disabled.

@@ -627,9 +627,9 @@ public class RangeDopplerGeocodingOp extends Operator {
 
     /**
      * Create target product.
-     * @throws OperatorException, IOException, Exception The exception.
+     * @throws Exception The exception.
      */
-    void createTargetProduct() throws OperatorException, IOException, Exception {
+    void createTargetProduct() throws Exception {
 
         final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(
                                                 sourceProduct,
@@ -675,18 +675,6 @@ public class RangeDopplerGeocodingOp extends Operator {
         addSelectedBands();
 
         targetGeoCoding = targetProduct.getGeoCoding();
-
-        /*
-        targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
-                                    sourceProduct.getProductType(),
-                                    targetImageWidth,
-                                    targetImageHeight);
-
-        addSelectedBands();
-
-        addGeoCoding();
-        */
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
     }
 
     /**
