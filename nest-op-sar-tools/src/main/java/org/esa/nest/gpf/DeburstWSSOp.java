@@ -48,6 +48,7 @@ public final class DeburstWSSOp extends Operator {
     private boolean lineTimesSorted = false;
     private int margin = 50; // edge of target band where not to write
     private double nodatavalue = 0;
+    private double lineTimeInterval = 0;
 
     private final Map<Band, ComplexBand> bandMap = new HashMap<Band, ComplexBand>(5);
 
@@ -99,7 +100,7 @@ public final class DeburstWSSOp extends Operator {
                     targetWidth,
                     targetHeight);
 
-            targetProduct.setPreferredTileSize(targetWidth, 10);
+            targetProduct.setPreferredTileSize(targetWidth, 50);
 
             final Band[] sourceBands = sourceProduct.getBands();
 
@@ -185,7 +186,8 @@ public final class DeburstWSSOp extends Operator {
         final ProductData.UTC endTime = srcMPP.getAttributeUTC("last_zero_doppler_time", new ProductData.UTC(0));
         absTgt.setAttributeUTC(AbstractMetadata.first_line_time, startTime);
         absTgt.setAttributeUTC(AbstractMetadata.last_line_time, endTime);
-        absTgt.setAttributeDouble(AbstractMetadata.line_time_interval, srcMPP.getAttributeDouble(AbstractMetadata.line_time_interval));
+        lineTimeInterval = srcMPP.getAttributeDouble(AbstractMetadata.line_time_interval);
+        absTgt.setAttributeDouble(AbstractMetadata.line_time_interval, lineTimeInterval);
 
         final MetadataElement tgtMetadataRoot = targetProduct.getMetadataRoot();
         final MetadataElement tgtMppRootElem = tgtMetadataRoot.getElement("MAIN_PROCESSING_PARAMS_ADS");
@@ -404,7 +406,7 @@ public final class DeburstWSSOp extends Operator {
      *          if an error occurs during computation of the target rasters.
      */
     @Override
-    public synchronized void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
+    public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
 
         Tile targetTileI = null, targetTileQ = null, targetTileIntensity = null;
         //final Rectangle targetRectangle = targetTile.getRectangle();
@@ -429,38 +431,71 @@ public final class DeburstWSSOp extends Operator {
                 sortLineTimes(sourceProduct, cBand.i);
             }
 
-            int targetLine = targetRectangle.y;
+            //int targetLine = targetRectangle.y;
+            final int maxY = targetRectangle.y + targetRectangle.height;
             final int maxX = targetRectangle.x + targetRectangle.width;
+            //double startTime = targetLine * lineTimeInterval;
 
             //final double threshold = 0.000000139;
             final double threshold = 0.000000135;
 
-            //int startLineForBand = 0;
-            int i = 0;
+            final double start = targetProduct.getStartTime().getMJD();
+            final double end = targetProduct.getEndTime().getMJD();
+            final double interval = (end-start)/ targetHeight;
+            final Vector<Integer> burstLines = new Vector<Integer>(4);
+
+            for(int y = targetRectangle.y; y < maxY; ++y) {
+                double startTime = start + (y * interval);
+
+                burstLines.clear();
+                for(int i=0; i < lineTimes.length; ++i) {
+                    if (lineTimes[i].visited)
+                        continue;
+
+                    double t = lineTimes[i].time;
+                    final double diff = Math.abs(t - startTime);
+                    if (diff < threshold) {
+                        burstLines.add(lineTimes[i].line);
+                        setVisited(i);
+                    }
+
+                    if(burstLines.size() > 2)
+                        break;
+                }
+
+                //System.out.println(y+" found "+ burstLines.size() + " burstlines");
+
+                if (!burstLines.isEmpty()) {
+
+                    final boolean ok = deburstTile(burstLines, y, targetRectangle.x, maxX, cBand.i, cBand.q,
+                            targetTileI, targetTileQ, targetTileIntensity, pm);
+                }
+            }
+
+        /*    int i = 0;
             pm.beginTask("de-bursting WSS product", lineTimes.length-i);
             while (i < lineTimes.length) {
                 pm.worked(1);
-                if (lineTimes[i].visited) {
+                if (lineTimes[i].visited || lineTimes[i].time < startTime) {
                     ++i;
                     continue;
                 }
 
                 final Vector<Integer> burstLines = new Vector<Integer>(4);
                 burstLines.add(lineTimes[i].line);
-                lineTimes[i].visited = true;
-                //startLineForBand = i;
+                setVisited(i);
 
                 int j = i + 1;
-                while (j < lineTimes.length) {// && j < i + 10 && burstLines.size() < 3) {
+                while (j < lineTimes.length && burstLines.size() < 3) {
                     if (lineTimes[j].visited) {
                         ++j;
                         continue;
                     }
 
-                    final double diff = lineTimes[j].time - lineTimes[i].time;
+                    final double diff = Math.abs(lineTimes[j].time - lineTimes[i].time);
                     if (diff < threshold) {
                         burstLines.add(lineTimes[j].line);
-                        lineTimes[j].visited = true;
+                        setVisited(j);
                     }
                     ++j;
                 }
@@ -475,17 +510,21 @@ public final class DeburstWSSOp extends Operator {
                     if(ok)
                         ++targetLine;
                 }
+                startTime = targetLine * lineTimeInterval;
 
                 if(targetLine >= targetRectangle.y + targetRectangle.height)
                     break;
-            }
-            //startLine.set(index, startLineForBand);
+            }          */
 
         } catch(Exception e) {
             OperatorUtils.catchOperatorException(getId(), e);
         } finally {
             pm.done();
         }
+    }
+
+    private synchronized void setVisited(final int i) {
+        lineTimes[i].visited = true;
     }
 
     private synchronized void sortLineTimes(final Product srcProduct, final Band srcBand) {
@@ -506,7 +545,7 @@ public final class DeburstWSSOp extends Operator {
         lineTimesSorted = true;
     }
 
-    private synchronized boolean deburstTile(final Vector<Integer> burstLines, final int targetLine, final int startX, final int endX,
+    private boolean deburstTile(final Vector<Integer> burstLines, final int targetLine, final int startX, final int endX,
                               final Band srcBandI, final Band srcBandQ,
                               final Tile targetTileI, final Tile targetTileQ,
                               final Tile targetTileIntensity, final ProgressMonitor pm) {
@@ -526,6 +565,7 @@ public final class DeburstWSSOp extends Operator {
 
         final Vector<short[]> srcDataListI = new Vector<short[]>(3);
         final Vector<short[]> srcDataListQ = new Vector<short[]>(3);
+        final int widthMargin = targetWidth - margin;
 
         try {
             // get all burst lines
@@ -571,7 +611,7 @@ public final class DeburstWSSOp extends Operator {
                 if (average) {
 
                     for (int x = startX, i = 0; x < endX; ++x, ++i) {
-                        if(x < margin || x > targetWidth - margin) {
+                        if(x < margin || x > widthMargin) {
                             data.setElemDoubleAt(targetTileIntensity.getDataBufferIndex(x, targetLine), nodatavalue);
                         } else {
                             data.setElemDoubleAt(targetTileIntensity.getDataBufferIndex(x, targetLine), sumLine[i]);
@@ -583,7 +623,7 @@ public final class DeburstWSSOp extends Operator {
                             peakLine[i] = 0;
                             //System.out.println("uninitPeak " + i + " at " + targetLine);
                         }
-                        if(x < margin || x > targetWidth - margin) {
+                        if(x < margin || x > widthMargin) {
                             data.setElemDoubleAt(targetTileIntensity.getDataBufferIndex(x, targetLine), nodatavalue);
                         } else {
                             data.setElemDoubleAt(targetTileIntensity.getDataBufferIndex(x, targetLine), peakLine[i]);
@@ -601,7 +641,7 @@ public final class DeburstWSSOp extends Operator {
                         System.out.println("uninitPeak " + i + " at " + targetLine);
                     }
                     final int index = targetTileI.getDataBufferIndex(x, targetLine);
-                    if(x < margin || x > targetWidth - margin) {
+                    if(x < margin || x > widthMargin) {
                         dataI.setElemDoubleAt(index, nodatavalue);
                         dataQ.setElemDoubleAt(index, nodatavalue);
                     } else {
@@ -613,7 +653,7 @@ public final class DeburstWSSOp extends Operator {
             return true;
 
         } catch (Exception e) {
-            System.out.println("deburstTile2 " + e.toString());
+            System.out.println("deburstTile " + e.toString());
         }
         return false;
     }

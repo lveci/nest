@@ -266,16 +266,7 @@ public final class GeolocationGridGeocodingOp extends Operator {
         addSelectedBands();
 
         targetGeoCoding = targetProduct.getGeoCoding();
-        /*
-        targetProduct = new Product(sourceProduct.getName() + PRODUCT_SUFFIX,
-                                    sourceProduct.getProductType(),
-                                    targetImageWidth,
-                                    targetImageHeight);
 
-        addSelectedBands();
-
-        addGeoCoding();
-        */
         updateTargetProductMetadata();
     }
 
@@ -416,7 +407,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
      */
     private void updateTargetProductMetadata() throws OperatorException {
 
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.srgr_flag, 1);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.map_projection, IdentityTransformDescriptor.NAME);

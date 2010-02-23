@@ -15,11 +15,11 @@ public class WSSMosaicOpAction extends AbstractVisatAction {
     @Override
     public void actionPerformed(CommandEvent event) {
 
-        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "WSSMosaic", "WSSMosaic", true);
+        final GraphBuilderDialog dialog = new GraphBuilderDialog(new DatContext(""), "WSSDetect", "WSSMosaic", true);
         dialog.show();
 
         final File graphPath = GraphBuilderDialog.getInternalGraphFolder();
-        final File graphFile =  new File(graphPath, "WSSMosaicGraph.xml");
+        final File graphFile =  new File(graphPath, "WSSDetectGraph.xml");
 
         dialog.LoadGraph(graphFile);
     }
