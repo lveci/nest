@@ -308,6 +308,12 @@ public class SpeckleFilterOp extends Operator {
      */
     private void computeMean(Tile sourceRaster, Tile targetTile, int x0, int y0, int w, int h, ProgressMonitor pm) {
 
+        final Rectangle srcTileRectangle = sourceRaster.getRectangle();
+        final int sx0 = srcTileRectangle.x;
+        final int sy0 = srcTileRectangle.y;
+        final int sw = srcTileRectangle.width;
+        final int sh = srcTileRectangle.height;
+
         final double[] neighborValues = new double[filterSizeX*filterSizeY];
         final ProductData trgData = targetTile.getDataBuffer();
 
@@ -316,7 +322,7 @@ public class SpeckleFilterOp extends Operator {
         for (int y = y0; y < maxY; ++y) {
             for (int x = x0; x < maxX; ++x) {
 
-                getNeighborValues(x, y, sourceRaster, neighborValues);
+                getNeighborValues(x, y, sx0, sy0, sw, sh, sourceRaster, neighborValues);
 
                 trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getMeanValue(neighborValues));
             }
@@ -338,6 +344,12 @@ public class SpeckleFilterOp extends Operator {
      */
     private void computeMedian(Tile sourceRaster, Tile targetTile, int x0, int y0, int w, int h, ProgressMonitor pm) {
 
+        final Rectangle srcTileRectangle = sourceRaster.getRectangle();
+        final int sx0 = srcTileRectangle.x;
+        final int sy0 = srcTileRectangle.y;
+        final int sw = srcTileRectangle.width;
+        final int sh = srcTileRectangle.height;
+
         final double[] neighborValues = new double[filterSizeX*filterSizeY];
         final ProductData trgData = targetTile.getDataBuffer();
 
@@ -346,7 +358,7 @@ public class SpeckleFilterOp extends Operator {
         for (int y = y0; y < maxY; ++y) {
             for (int x = x0; x < maxX; ++x) {
 
-                getNeighborValues(x, y, sourceRaster, neighborValues);
+                getNeighborValues(x, y, sx0, sy0, sw, sh, sourceRaster, neighborValues);
 
                 trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getMedianValue(neighborValues));
             }
@@ -367,6 +379,12 @@ public class SpeckleFilterOp extends Operator {
      */
     private void computeFrost(Tile sourceRaster, Tile targetTile, int x0, int y0, int w, int h, ProgressMonitor pm) {
 
+        final Rectangle srcTileRectangle = sourceRaster.getRectangle();
+        final int sx0 = srcTileRectangle.x;
+        final int sy0 = srcTileRectangle.y;
+        final int sw = srcTileRectangle.width;
+        final int sh = srcTileRectangle.height;
+
         final double[] neighborValues = new double[filterSizeX*filterSizeY];
         final double[] mask = new double[filterSizeX*filterSizeY];
         final ProductData trgData = targetTile.getDataBuffer();
@@ -378,7 +396,7 @@ public class SpeckleFilterOp extends Operator {
         for (int y = y0; y < maxY; ++y) {
             for (int x = x0; x < maxX; ++x) {
 
-                getNeighborValues(x, y, sourceRaster, neighborValues);
+                getNeighborValues(x, y, sx0, sy0, sw, sh, sourceRaster, neighborValues);
 
                 trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getFrostValue(neighborValues, mask));
             }
@@ -399,6 +417,12 @@ public class SpeckleFilterOp extends Operator {
      */
     private void computeGammaMap(Tile sourceRaster, Tile targetTile, int x0, int y0, int w, int h, ProgressMonitor pm) {
 
+        final Rectangle srcTileRectangle = sourceRaster.getRectangle();
+        final int sx0 = srcTileRectangle.x;
+        final int sy0 = srcTileRectangle.y;
+        final int sw = srcTileRectangle.width;
+        final int sh = srcTileRectangle.height;
+
         final double[] neighborValues = new double[filterSizeX*filterSizeY];
         final double[] mask = new double[filterSizeX*filterSizeY];
         final ProductData trgData = targetTile.getDataBuffer();
@@ -410,7 +434,7 @@ public class SpeckleFilterOp extends Operator {
         for (int y = y0; y < maxY; ++y) {
             for (int x = x0; x < maxX; ++x) {
 
-                getNeighborValues(x, y, sourceRaster, neighborValues);
+                getNeighborValues(x, y, sx0, sy0, sw, sh, sourceRaster, neighborValues);
 
                 trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getGammaMapValue(neighborValues));
             }
@@ -431,6 +455,12 @@ public class SpeckleFilterOp extends Operator {
      */
     private void computeLee(Tile sourceRaster, Tile targetTile, int x0, int y0, int w, int h, ProgressMonitor pm) {
 
+        final Rectangle srcTileRectangle = sourceRaster.getRectangle();
+        final int sx0 = srcTileRectangle.x;
+        final int sy0 = srcTileRectangle.y;
+        final int sw = srcTileRectangle.width;
+        final int sh = srcTileRectangle.height;
+
         final double[] neighborValues = new double[filterSizeX*filterSizeY];
         final ProductData trgData = targetTile.getDataBuffer();
 
@@ -439,7 +469,7 @@ public class SpeckleFilterOp extends Operator {
         for (int y = y0; y < maxY; ++y) {
             for (int x = x0; x < maxX; ++x) {
 
-                getNeighborValues(x, y, sourceRaster, neighborValues);
+                getNeighborValues(x, y, sx0, sy0, sw, sh, sourceRaster, neighborValues);
 
                 trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getLeeValue(neighborValues));
             }
@@ -447,34 +477,39 @@ public class SpeckleFilterOp extends Operator {
     }
 
     /**
-     * Get pixel intensities in a filter size rectanglar region centered at the given pixel.
-     * @param x            x coordinate of a given pixel.
-     * @param y            y coordinate of a given pixel.
+     * Get pixel values in a filter size rectanglar region centered at the given pixel.
+     * @param x X coordinate of a given pixel.
+     * @param y Y coordinate of a given pixel.
+     * @param sx0 X coordinate of pixel at upper left corner of source tile.
+     * @param sy0 Y coordinate of pixel at upper left corner of source tile.
+     * @param sw Source tile width.
+     * @param sh Source tile height.
      * @param sourceRaster The source tile.
-     * @param neighborValues
+     * @param neighborValues Array holding the pixel values.
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in obtaining the pixel values.
      */
-    private void getNeighborValues(final int x, final int y, final Tile sourceRaster, final double[] neighborValues) {
+    private void getNeighborValues(final int x, final int y, final int sx0, final int sy0, final int sw, final int sh,
+                                   final Tile sourceRaster, final double[] neighborValues) {
 
         final ProductData srcData = sourceRaster.getDataBuffer();
         for (int i = 0; i < filterSizeX; ++i) {
 
             int xi = x - halfSizeX + i;
-            if (xi < 0) {
-                xi = 0;
-            } else if (xi >= sourceImageWidth) {
-                xi = sourceImageWidth - 1;
+            if (xi < sx0) {
+                xi = sx0;
+            } else if (xi >= sx0 + sw) {
+                xi = sx0 + sw - 1;
             }
 
             final int stride = i*filterSizeY;
             for (int j = 0; j < filterSizeY; ++j) {
 
                 int yj = y - halfSizeY + j;
-                if (yj < 0) {
-                    yj = 0;
-                } else if (yj >= sourceImageHeight) {
-                    yj = sourceImageHeight - 1;
+                if (yj < sy0) {
+                    yj = sy0;
+                } else if (yj >= sy0 + sh) {
+                    yj = sy0 + sh - 1;
                 }
 
                 neighborValues[j + stride] = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(xi, yj));
