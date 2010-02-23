@@ -217,6 +217,7 @@ public class SpeckleFilterOp extends Operator {
             final int y0 = targetTileRectangle.y;
             final int w = targetTileRectangle.width;
             final int h = targetTileRectangle.height;
+            //System.out.println("x0 = " + x0 + ", y0 = " + y0 + ", w = " + w + ", h = " + h);
 
             final Rectangle sourceTileRectangle = getSourceTileRectangle(x0, y0, w, h);
             final Band srcBand = bandMap.get(targetBand);
@@ -725,7 +726,14 @@ public class SpeckleFilterOp extends Operator {
      * @param h            Hight for the target_Tile_Rectangle.
      * @param pm           A progress monitor which should be used to determine computation cancelation requests.
      */
-    private void computeRefinedLee(Tile sourceRaster, Tile targetTile, int x0, int y0, int w, int h, ProgressMonitor pm) {
+    private void computeRefinedLee(final Tile sourceRaster, final Tile targetTile,
+                                   final int x0, final int y0, final int w, final int h, ProgressMonitor pm) {
+
+        final Rectangle srcTileRectangle = sourceRaster.getRectangle();
+        final int sx0 = srcTileRectangle.x;
+        final int sy0 = srcTileRectangle.y;
+        final int sw = srcTileRectangle.width;
+        final int sh = srcTileRectangle.height;
 
         final double[][] neighborPixelValues = new double[filterSizeY][filterSizeX];
         final ProductData trgData = targetTile.getDataBuffer();
@@ -734,9 +742,7 @@ public class SpeckleFilterOp extends Operator {
         final int maxX = x0 + w;
         for (int y = y0; y < maxY; ++y) {
             for (int x = x0; x < maxX; ++x) {
-
-                final int n = getNeighborValuesWithoutBorderExt(x, y, sourceRaster, neighborPixelValues);
-
+                final int n = getNeighborValuesWithoutBorderExt(x, y, sx0, sy0, sw, sh, sourceRaster, neighborPixelValues);
                 trgData.setElemDoubleAt(targetTile.getDataBufferIndex(x, y), getRefinedLeeValue(n, neighborPixelValues));
             }
             pm.worked(1);
@@ -747,14 +753,19 @@ public class SpeckleFilterOp extends Operator {
      * Get pixel intensities in a filter size rectanglar region centered at the given pixel.
      * @param x X coordinate of the given pixel.
      * @param y Y coordinate of the given pixel.
+     * @param sx0 X coordinate of pixel at upper left corner of source tile.
+     * @param sy0 Y coordinate of pixel at upper left corner of source tile.
+     * @param sw Source tile width.
+     * @param sh Source tile height.
      * @param sourceRaster The source tile.
      * @param neighborPixelValues 2-D array holding the pixel valuse.
      * @return The number of valid pixels.
      * @throws org.esa.beam.framework.gpf.OperatorException
      *          If an error occurs in obtaining the pixel values.
      */
-    private int getNeighborValuesWithoutBorderExt(
-            final int x, final int y, final Tile sourceRaster, double[][] neighborPixelValues) {
+    private int getNeighborValuesWithoutBorderExt(final int x, final int y, final int sx0, final int sy0,
+                                                  final int sw, final int sh, final Tile sourceRaster,
+                                                  double[][] neighborPixelValues) {
 
         final ProductData srcData = sourceRaster.getDataBuffer();
         int k = 0;
@@ -762,7 +773,7 @@ public class SpeckleFilterOp extends Operator {
             final int yj = y - halfSizeY + j;
             for (int i = 0; i < filterSizeX; ++i) {
                 final int xi = x - halfSizeX + i;
-                if (xi < 0 || xi >= sourceImageWidth || yj < 0 || yj >= sourceImageHeight) {
+                if (xi < sx0 || xi >= sx0 + sw || yj < sy0 || yj >= sy0 + sh) {
                     neighborPixelValues[j][i] = NonValidPixelValue;
                 } else {
                     neighborPixelValues[j][i] = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(xi, yj));
@@ -801,6 +812,9 @@ public class SpeckleFilterOp extends Operator {
     private double computePixelValueUsingLocalStatistics(final double[][] neighborPixelValues) {
         final double mean = getLocalMeanValue(neighborPixelValues);
         final double var = getLocalVarianceValue(mean, neighborPixelValues);
+        if (var == 0.0) {
+            return 0.0;
+        }
         final double sigmma = getLocalNoiseVarianceValue(neighborPixelValues);
         final double k = var / (var + sigmma);
         return mean + k*(neighborPixelValues[3][3] - mean);
