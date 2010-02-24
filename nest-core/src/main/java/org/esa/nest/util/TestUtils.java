@@ -37,9 +37,6 @@ public class TestUtils {
     public final static String rootPathCosmoSkymed = testPreferences.getPropertyString("nest.test.rootPathCosmoSkymed");
     public final static String rootPathMixProducts = testPreferences.getPropertyString("nest.test.rootPathMixProducts");
 
-    public final static String asarLazioPath = "P:\\nest\\nest\\ESA Data\\NestBox\\GTC_dataset\\ASAR_LAZIO";
-    public final static String ersLazioPath =  "P:\\nest\\nest\\ESA Data\\NestBox\\GTC_dataset\\ERS_LAZIO";
-
     private static String[] nonValidExtensions = { "xsd", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord", "tgz",
                                                    "tif", "tiff", "tfw", "gif", "jpg", "jgw", "hdr", "self", "report",
                                                    "log", "html", "htm", "png", "bmp", "ps", "aux", "ovr" };
