@@ -26,6 +26,7 @@ public class TestUtils {
 
     private static final PropertyMap testPreferences = createTestPreferences();
 
+    public final static String rootPathExpectedProducts = testPreferences.getPropertyString("nest.test.rootPathExpectedProducts");
     public final static String rootPathTerraSarX = testPreferences.getPropertyString("nest.test.rootPathTerraSarX");
     public final static String rootPathASAR= testPreferences.getPropertyString("nest.test.rootPathASAR");
     public final static String rootPathRadarsat2 = testPreferences.getPropertyString("nest.test.rootPathRadarsat2");
@@ -35,6 +36,11 @@ public class TestUtils {
     public final static String rootPathALOS = testPreferences.getPropertyString("nest.test.rootPathALOS");
     public final static String rootPathCosmoSkymed = testPreferences.getPropertyString("nest.test.rootPathCosmoSkymed");
     public final static String rootPathMixProducts = testPreferences.getPropertyString("nest.test.rootPathMixProducts");
+
+    public final static String asarLazioPath = "P:\\nest\\nest\\ESA Data\\NestBox\\GTC_dataset\\ASAR_LAZIO";
+    public final static String ersLazioPath =  "P:\\nest\\nest\\ESA Data\\NestBox\\GTC_dataset\\ERS_LAZIO";
+
+    private static String[] nonValidExtensions = { "xsd", "pdf", "txt", "doc", "ps", "db", "ief", "ord" };
 
     private static PropertyMap createTestPreferences() {
         final PropertyMap prefs = new PropertyMap();
@@ -201,6 +207,8 @@ public class TestUtils {
                 recurseProcessFolder(spi, file, productTypeExemptions, exceptionExemptions);
             } else {
                 try {
+                    if(isNotProduct(file))
+                        continue;
                     final ProductReader reader = ProductIO.getProductReaderForFile(file);
                     if(reader != null) {
                         final Product sourceProduct = reader.readProductNodes(file, null);
@@ -212,6 +220,8 @@ public class TestUtils {
 
                         System.out.println(spi.getOperatorAlias()+" Processing "+ file.toString());
                         TestUtils.executeOperator(op);
+                    } else {
+                        System.out.println(file.getName() + " is non valid");
                     }
                 } catch(Exception e) {
                     System.out.println("Failed to process "+ file.toString());
@@ -219,6 +229,15 @@ public class TestUtils {
                 }
             }
         }
+    }
+
+    private static boolean isNotProduct(final File file) {
+        final String name = file.getName().toLowerCase();
+        for(String ext : nonValidExtensions) {
+            if(name.endsWith(ext))
+                return true;
+        }
+        return false;
     }
 
     private static boolean contains(final String value, final String[] exemptions) {

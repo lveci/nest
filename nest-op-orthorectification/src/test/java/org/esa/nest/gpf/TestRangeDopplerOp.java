@@ -16,17 +16,14 @@ import java.io.File;
 public class TestRangeDopplerOp extends TestCase {
 
     private OperatorSpi spi;
-    private final static String inputPathWSM =     "P:\\nest\\nest\\test\\input\\ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1";
-    private final static String expectedPathWSM =  "P:\\nest\\nest\\test\\expected\\ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1_TC.dim";
+    private final static String inputPathWSM =     TestUtils.rootPathExpectedProducts+"\\input\\ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1";
+    private final static String expectedPathWSM =  TestUtils.rootPathExpectedProducts+"\\expected\\ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1_TC.dim";
 
-    private final static String inputPathIMS =     "P:\\nest\\nest\\test\\input\\ENVISAT-ASA_IMS_1PNDPA20050405_211952_000000162036_00115_16201_8523.dim";
-    private final static String expectedPathIMS =  "P:\\nest\\nest\\test\\expected\\ENVISAT-ASA_IMS_1PNDPA20050405_211952_000000162036_00115_16201_8523_TC.dim";
+    private final static String inputPathIMS =     TestUtils.rootPathExpectedProducts+"\\input\\ENVISAT-ASA_IMS_1PNDPA20050405_211952_000000162036_00115_16201_8523.dim";
+    private final static String expectedPathIMS =  TestUtils.rootPathExpectedProducts+"\\expected\\ENVISAT-ASA_IMS_1PNDPA20050405_211952_000000162036_00115_16201_8523_TC.dim";
 
-    private final static String inputPathAPM =     "P:\\nest\\nest\\test\\input\\ASA_APM_1PNIPA20030327_091853_000000152015_00036_05601_5422.N1";
-    private final static String expectedPathAPM =  "P:\\nest\\nest\\test\\expected\\ENVISAT-ASA_APM_1PNIPA20030327_091853_000000152015_00036_05601_5422.N1_TC.dim";
-
-    private final static String asarLazioPath = "P:\\nest\\nest\\ESA Data\\NestBox\\GTC_dataset\\ASAR_LAZIO";
-    private final static String ersLazioPath =  "P:\\nest\\nest\\ESA Data\\NestBox\\GTC_dataset\\ERS_LAZIO";
+    private final static String inputPathAPM =     TestUtils.rootPathExpectedProducts+"\\input\\ASA_APM_1PNIPA20030327_091853_000000152015_00036_05601_5422.N1";
+    private final static String expectedPathAPM =  TestUtils.rootPathExpectedProducts+"\\expected\\ENVISAT-ASA_APM_1PNIPA20030327_091853_000000152015_00036_05601_5422.N1_TC.dim";
 
     @Override
     protected void setUp() throws Exception {
@@ -116,7 +113,7 @@ public class TestRangeDopplerOp extends TestCase {
      */
     public void testProcessAllASAR() throws Exception
     {
-        final File folder = new File(asarLazioPath);
+        final File folder = new File(TestUtils.asarLazioPath);
         if(!folder.exists()) return;
 
         if(TestUtils.canTestProcessingOnAllProducts())
@@ -129,7 +126,7 @@ public class TestRangeDopplerOp extends TestCase {
      */
     public void testProcessAllERS() throws Exception
     {
-        final File folder = new File(ersLazioPath);
+        final File folder = new File(TestUtils.ersLazioPath);
         if(!folder.exists()) return;
 
         if(TestUtils.canTestProcessingOnAllProducts())

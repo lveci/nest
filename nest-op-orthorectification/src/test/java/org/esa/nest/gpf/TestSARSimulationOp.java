@@ -16,10 +16,8 @@ import java.io.File;
 public class TestSARSimulationOp extends TestCase {
 
     private OperatorSpi spi;
-    private final static String inputPathWSM =     "P:\\nest\\nest\\test\\input\\subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim";
-    private final static String expectedPathWSM =  "P:\\nest\\nest\\test\\expected\\subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977_SIM.dim";
-    private final static String asarLazioPath = "P:\\nest\\nest\\ESA Data\\NestBox\\GTC_dataset\\ASAR_LAZIO";
-    private final static String ersLazioPath =  "P:\\nest\\nest\\ESA Data\\NestBox\\GTC_dataset\\ERS_LAZIO";
+    private final static String inputPathWSM =     TestUtils.rootPathExpectedProducts+"\\input\\subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim";
+    private final static String expectedPathWSM =  TestUtils.rootPathExpectedProducts+"\\expected\\subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977_SIM.dim";
 
     @Override
     protected void setUp() throws Exception {
@@ -60,7 +58,7 @@ public class TestSARSimulationOp extends TestCase {
      */
     public void testProcessAllASAR() throws Exception
     {
-        final File folder = new File(asarLazioPath);
+        final File folder = new File(TestUtils.asarLazioPath);
         if(!folder.exists()) return;
 
         if(TestUtils.canTestProcessingOnAllProducts())
@@ -73,7 +71,7 @@ public class TestSARSimulationOp extends TestCase {
      */
     public void testProcessAllERS() throws Exception
     {
-        final File folder = new File(ersLazioPath);
+        final File folder = new File(TestUtils.ersLazioPath);
         if(!folder.exists()) return;
 
         if(TestUtils.canTestProcessingOnAllProducts())

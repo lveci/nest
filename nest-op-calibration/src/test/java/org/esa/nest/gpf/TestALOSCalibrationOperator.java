@@ -17,8 +17,8 @@ import java.io.File;
 public class TestALOSCalibrationOperator extends TestCase {
 
     private OperatorSpi spi;
-    private final static String inputPath =     "P:\\nest\\nest\\test\\input\\FBS1.1\\l1data\\VOL-ALPSRP037120700-H1.1__A";
-    private final static String expectedPath =  "P:\\nest\\nest\\test\\expected\\ALOS-H1.1__A-ORBIT__ALPSRP037120700_Calib.dim";
+    private final static String inputPath =     TestUtils.rootPathExpectedProducts+"\\input\\FBS1.1\\l1data\\VOL-ALPSRP037120700-H1.1__A";
+    private final static String expectedPath =  TestUtils.rootPathExpectedProducts+"\\expected\\ALOS-H1.1__A-ORBIT__ALPSRP037120700_Calib.dim";
 
 
     @Override
