@@ -19,8 +19,6 @@ public class TestJERSProductReader extends TestCase {
     private JERSProductReaderPlugIn readerPlugin;
     private ProductReader reader;
 
-    private final static String filePath = "P:\\nest\\nest\\ESA Data\\RADAR\\JERS\\acres\\ceos\\SCENE1\\VDF_DAT.001";
-
     public TestJERSProductReader(String name) {
         super(name);
     }
@@ -39,15 +37,6 @@ public class TestJERSProductReader extends TestCase {
 
         reader = null;
         readerPlugin = null;
-    }
-
-    public void testOpen() throws Exception
-    {
-        final File file = new File(filePath);
-        if(!file.exists()) return;
-
-        final Product product = reader.readProductNodes(file, null);
-        ReaderUtils.verifyProduct(product, true);
     }
 
     /**

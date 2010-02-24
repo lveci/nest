@@ -19,8 +19,6 @@ public class TestERSProductReader extends TestCase {
     private ERSProductReaderPlugIn readerPlugin;
     private ProductReader reader;
 
-    private final static String filePath = "P:\\nest\\nest\\ESA Data\\RADAR\\ERS_products\\ERS_VMP_CEOS\\E1_GEC_VMP CEOS_19980811_orbit 17297 frame 2493_UKpaf\\SCENE1\\VDF_DAT.001";
-
     public TestERSProductReader(String name) {
         super(name);
     }
@@ -41,15 +39,6 @@ public class TestERSProductReader extends TestCase {
         readerPlugin = null;
     }
 
-    public void testOpen() throws Exception
-    {
-        final File file = new File(filePath);
-        if(!file.exists()) return;
-
-        final Product product = reader.readProductNodes(file, null);
-        ReaderUtils.verifyProduct(product, true);
-    }
-
     /**
      * Open all files in a folder recursively
      * @throws Exception anything
@@ -60,23 +49,6 @@ public class TestERSProductReader extends TestCase {
         if(!folder.exists()) return;
 
         if(TestUtils.canTestReadersOnAllProducts())
-            recurseFolder(folder);
-    }
-
-    private void recurseFolder(File folder) throws Exception {
-        for(File file : folder.listFiles()) {
-            if(!file.getName().equalsIgnoreCase("raw") && file.isDirectory()) {
-                recurseFolder(file);
-            } else if(readerPlugin.getDecodeQualification(file) == DecodeQualification.INTENDED) {
-
-                try {
-                    final Product product = reader.readProductNodes(file, null);
-                    ReaderUtils.verifyProduct(product, true);
-                } catch(Exception e) {
-                    System.out.println("Failed to read "+ file.toString());
-                    throw e;
-                }
-            }
-        }
+            TestUtils.recurseReadFolder(folder, readerPlugin, reader, null, null);
     }
 }

@@ -58,7 +58,7 @@ public class TestSARSimulationOp extends TestCase {
      */
     public void testProcessAllASAR() throws Exception
     {
-        final File folder = new File(TestUtils.asarLazioPath);
+        final File folder = new File(TestUtils.rootPathASAR);
         if(!folder.exists()) return;
 
         if(TestUtils.canTestProcessingOnAllProducts())
@@ -71,7 +71,7 @@ public class TestSARSimulationOp extends TestCase {
      */
     public void testProcessAllERS() throws Exception
     {
-        final File folder = new File(TestUtils.ersLazioPath);
+        final File folder = new File(TestUtils.rootPathERS);
         if(!folder.exists()) return;
 
         if(TestUtils.canTestProcessingOnAllProducts())

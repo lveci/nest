@@ -20,8 +20,6 @@ public class TestAlosPalsarProductReader extends TestCase {
     private AlosPalsarProductReaderPlugIn readerPlugin;
     private ProductReader reader;
 
-    private final static String filePath = "P:\\nest\\nest\\ESA Data\\RADAR\\ALOS PALSAR\\acres\\solomon_islands_tsunami\\04651_03_PALSAR_WB1_west_PRE\\scene01\\VOL-ALPSRS042143750-W1.5GUD";
-
     public TestAlosPalsarProductReader(String name) {
         super(name);
     }
@@ -42,20 +40,24 @@ public class TestAlosPalsarProductReader extends TestCase {
         readerPlugin = null;
     }
 
-    public void testOpen() throws Exception
+    /**
+     * Open all files in a folder recursively
+     * @throws Exception anything
+     */
+    public void testOpenAll() throws Exception
     {
-        final File file = new File(filePath);
-        if(!file.exists()) return;
+        final File folder = new File(TestUtils.rootPathALOS);
+        if(!folder.exists()) return;
 
-        final Product product = reader.readProductNodes(file, null);
-        ReaderUtils.verifyProduct(product, true);
+        if(TestUtils.canTestReadersOnAllProducts())
+            TestUtils.recurseReadFolder(folder, readerPlugin, reader, null, null);
     }
 
     /**
      * Open all files in a folder recursively
      * @throws Exception anything
      */
-    public void testOpenAll() throws Exception
+    public void testOpenAll2() throws Exception
     {
         final File folder = new File(TestUtils.rootPathALOS);
         if(!folder.exists()) return;

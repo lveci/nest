@@ -42,7 +42,7 @@ public class TestUtils {
 
     private static String[] nonValidExtensions = { "xsd", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord", "tfw", 
                                                    "tif", "gif", "jpg", "jgw", "hdr", "self", "report", "log", "tgz",
-                                                   "html", "htm" };
+                                                   "html", "htm", "png", "ps", "aux", "ovr" };
     private static String[] nonValidprefixes = { "led", "trl", "nul", "lea", "dat", "img", "dfas", "dfdn", "lut" };
 
     private static PropertyMap createTestPreferences() {
@@ -227,8 +227,20 @@ public class TestUtils {
                       //  System.out.println(file.getName() + " is non valid");
                     //}
                 } catch(Exception e) {
-                    System.out.println("Failed to process "+ file.toString());
-                    throw e;
+                    boolean ok = false;
+                    if(exceptionExemptions != null) {
+                        for(String excemption : exceptionExemptions) {
+                            if(e.getMessage().contains(excemption)) {
+                                ok = true;
+                                System.out.println("Excemption for "+e.getMessage());
+                                break;
+                            }
+                        }
+                    }
+                    if(!ok) {
+                        System.out.println("Failed to process "+ file.toString());
+                        throw e;
+                    }
                 }
             }
         }
@@ -295,11 +307,13 @@ public class TestUtils {
                     ReaderUtils.verifyProduct(product, true);
                 } catch(Exception e) {
                     boolean ok = false;
-                    for(String excemption : exceptionExemptions) {
-                        if(e.getMessage().contains(excemption)) {
-                            ok = true;
-                            System.out.println("Excemption for "+e.getMessage());
-                            break;
+                    if(exceptionExemptions != null) {
+                        for(String excemption : exceptionExemptions) {
+                            if(e.getMessage().contains(excemption)) {
+                                ok = true;
+                                System.out.println("Excemption for "+e.getMessage());
+                                break;
+                            }
                         }
                     }
                     if(!ok) {

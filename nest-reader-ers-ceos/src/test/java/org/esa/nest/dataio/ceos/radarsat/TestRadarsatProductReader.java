@@ -19,9 +19,6 @@ public class TestRadarsatProductReader extends TestCase {
     private RadarsatProductReaderPlugIn readerPlugin;
     private ProductReader reader;
 
-    private final static String filePath = "P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat1\\acres\\std\\SCENE01\\VDF_DAT.001";
-    private final static String filePath2 = "P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat1\\AralSeaFeb102004\\Scene01\\VDF_DAT.001";
-
     public TestRadarsatProductReader(String name) {
         super(name);
     }
@@ -42,29 +39,24 @@ public class TestRadarsatProductReader extends TestCase {
         readerPlugin = null;
     }
 
-    public void testOpen() throws Exception
+    /**
+     * Open all files in a folder recursively
+     * @throws Exception anything
+     */
+    public void testOpenAll() throws Exception
     {
-        final File file = new File(filePath);
-        if(!file.exists()) return;
+        final File folder = new File(TestUtils.rootPathRadarsat1);
+        if(!folder.exists()) return;
 
-        //final Product product = reader.readProductNodes(file, null);
-        //ReaderUtils.verifyProduct(product);
-    }
-
-    public void testOpen2() throws Exception
-    {
-        final File file = new File(filePath2);
-        if(!file.exists()) return;
-
-        final Product product = reader.readProductNodes(file, null);
-        //ReaderUtils.verifyProduct(product);
+        if(TestUtils.canTestReadersOnAllProducts())
+            TestUtils.recurseReadFolder(folder, readerPlugin, reader, null, null);
     }
 
     /**
      * Open all files in a folder recursively
      * @throws Exception anything
      */
-    public void testOpenAll() throws Exception
+    public void testOpenAll2() throws Exception
     {
         final File folder = new File(TestUtils.rootPathRadarsat1);
         if(!folder.exists()) return;
