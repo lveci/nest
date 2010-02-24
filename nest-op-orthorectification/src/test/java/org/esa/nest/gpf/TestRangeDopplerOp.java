@@ -16,8 +16,8 @@ import java.io.File;
 public class TestRangeDopplerOp extends TestCase {
 
     private OperatorSpi spi;
-    private final static String inputPathWSM =     TestUtils.rootPathExpectedProducts+"\\input\\ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1";
-    private final static String expectedPathWSM =  TestUtils.rootPathExpectedProducts+"\\expected\\ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1_TC.dim";
+    private final static String inputPathWSM =     TestUtils.rootPathExpectedProducts+"\\input\\subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim";
+    private final static String expectedPathWSM =  TestUtils.rootPathExpectedProducts+"\\expected\\subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977_TC.dim";
 
     private final static String inputPathIMS =     TestUtils.rootPathExpectedProducts+"\\input\\ENVISAT-ASA_IMS_1PNDPA20050405_211952_000000162036_00115_16201_8523.dim";
     private final static String expectedPathIMS =  TestUtils.rootPathExpectedProducts+"\\expected\\ENVISAT-ASA_IMS_1PNDPA20050405_211952_000000162036_00115_16201_8523_TC.dim";
@@ -52,7 +52,9 @@ public class TestRangeDopplerOp extends TestCase {
         assertNotNull(op);
         op.setSourceProduct(sourceProduct);
         op.setApplyRadiometricCalibration(true);
-
+        String[] bandNames = {"Amplitude"};
+        op.setSourceBandNames(bandNames);
+        
         // get targetProduct: execute initialize()
         final Product targetProduct = op.getTargetProduct();
         TestUtils.verifyProduct(targetProduct, false, false);
@@ -75,7 +77,9 @@ public class TestRangeDopplerOp extends TestCase {
         assertNotNull(op);
         op.setSourceProduct(sourceProduct);
         op.setApplyRadiometricCalibration(true);
-
+        String[] bandNames = {"i", "q"};
+        op.setSourceBandNames(bandNames);
+        
         // get targetProduct: execute initialize()
         final Product targetProduct = op.getTargetProduct();
         TestUtils.verifyProduct(targetProduct, false, false);
