@@ -116,12 +116,12 @@ public class TestRangeDopplerOp extends TestCase {
 
     public void testProcessAllASAR() throws Exception
     {
-        TestUtils.testProcessAllInPath(spi, TestUtils.asarLazioPath, productTypeExemptions, exceptionExemptions);
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathASAR, productTypeExemptions, exceptionExemptions);
     }
 
     public void testProcessAllERS() throws Exception
     {
-        TestUtils.testProcessAllInPath(spi, TestUtils.ersLazioPath, productTypeExemptions, exceptionExemptions);
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathERS, productTypeExemptions, exceptionExemptions);
     }
 
     public void testProcessAllALOS() throws Exception

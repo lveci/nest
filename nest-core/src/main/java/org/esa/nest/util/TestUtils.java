@@ -45,6 +45,8 @@ public class TestUtils {
                                                    "log", "html", "htm", "png", "bmp", "ps", "aux", "ovr" };
     private static String[] nonValidprefixes = { "led", "trl", "nul", "lea", "dat", "img", "dfas", "dfdn", "lut" };
 
+    private static final int maxIteration = Integer.parseInt(testPreferences.getPropertyString("nest.test.maxProductsPerRootFolder"));
+
     private static PropertyMap createTestPreferences() {
         final PropertyMap prefs = new PropertyMap();
         try {
@@ -202,13 +204,16 @@ public class TestUtils {
         return false;
     }
 
-    public static void recurseProcessFolder(final OperatorSpi spi, final File folder,
+    public static int recurseProcessFolder(final OperatorSpi spi, final File folder, int iterations,
                                             final String[] productTypeExemptions,
                                             final String[] exceptionExemptions) throws Exception {
         for(File file : folder.listFiles()) {
+            if(maxIteration > 0 && iterations > maxIteration)
+                break;
+
             if(file.isDirectory()) {
                 if(!file.getName().contains("skipTest")) {
-                    recurseProcessFolder(spi, file, productTypeExemptions, exceptionExemptions);
+                    iterations = recurseProcessFolder(spi, file, iterations, productTypeExemptions, exceptionExemptions);
                 }
             } else {
                 try {
@@ -225,6 +230,8 @@ public class TestUtils {
 
                         System.out.println(spi.getOperatorAlias()+" Processing "+ file.toString());
                         TestUtils.executeOperator(op);
+
+                        ++iterations;
                     } //else {
                       //  System.out.println(file.getName() + " is non valid");
                     //}
@@ -246,6 +253,7 @@ public class TestUtils {
                 }
             }
         }
+        return iterations;
     }
 
     private static boolean isNotProduct(final File file) {
@@ -286,8 +294,10 @@ public class TestUtils {
         final File folder = new File(folderPath);
         if(!folder.exists()) return;
 
-        if(TestUtils.canTestProcessingOnAllProducts())
-            TestUtils.recurseProcessFolder(spi, folder, productTypeExemptions, exceptionExemptions);
+        if(canTestProcessingOnAllProducts()) {
+            int iterations = 0;
+            recurseProcessFolder(spi, folder, iterations, productTypeExemptions, exceptionExemptions);
+        }
     }
 
     public static void recurseReadFolder(final File folder,

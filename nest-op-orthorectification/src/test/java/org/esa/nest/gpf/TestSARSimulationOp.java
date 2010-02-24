@@ -55,64 +55,6 @@ public class TestSARSimulationOp extends TestCase {
         TestUtils.compareProducts(op, targetProduct, expectedPathWSM, null);
     }
 
-    /**
-     * Processes all products in a folder
-     * @throws Exception general exception
-     */
-    public void testProcessAllASAR2() throws Exception
-    {
-        final File folder = new File(TestUtils.rootPathASAR);
-        if(!folder.exists()) return;
-
-        if(TestUtils.canTestProcessingOnAllProducts())
-            recurseFolder(folder);
-    }
-
-    /**
-     * Processes all products in a folder
-     * @throws Exception general exception
-     */
-    public void testProcessAllERS2() throws Exception
-    {
-        final File folder = new File(TestUtils.rootPathERS);
-        if(!folder.exists()) return;
-
-        if(TestUtils.canTestProcessingOnAllProducts())
-            recurseFolder(folder);
-    }
-
-    private void recurseFolder(File folder) throws Exception {
-        for(File file : folder.listFiles()) {
-            if(file.isDirectory()) {
-                recurseFolder(file);
-            } else {
-                try {
-                    final ProductReader reader = ProductIO.getProductReaderForFile(file);
-                    if(reader != null) {
-                        System.out.println("Processing "+ file.toString());
-
-                        final Product sourceProduct = reader.readProductNodes(file, null);
-                        if(OperatorUtils.isMapProjected(sourceProduct)) {
-                            continue;
-                        }
-                        final SARSimulationOp op = (SARSimulationOp)spi.createOperator();
-                        assertNotNull(op);
-                        op.setSourceProduct(sourceProduct);
-
-                        TestUtils.executeOperator(op);
-                    }
-                } catch(Exception e) {
-                    if(e.getMessage().contains("map projected")) {
-                        continue;
-                    } else {
-                        System.out.println("Failed to process "+ file.toString());
-                        throw e;
-                    }
-                }
-            }
-        }
-    }
-
     public void testProcessAllASAR() throws Exception
     {
         TestUtils.testProcessAllInPath(spi, TestUtils.rootPathASAR, productTypeExemptions, exceptionExemptions);

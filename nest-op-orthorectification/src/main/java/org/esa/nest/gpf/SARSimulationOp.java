@@ -159,7 +159,7 @@ public final class SARSimulationOp extends Operator {
 
         try {
             if(OperatorUtils.isMapProjected(sourceProduct)) {
-                throw new OperatorException("SAR simulation cannot be performed for map projected source product");
+                throw new OperatorException("Source product already map projected");
             }
 
             getMetadata();
