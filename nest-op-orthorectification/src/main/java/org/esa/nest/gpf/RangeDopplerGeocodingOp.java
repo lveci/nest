@@ -239,12 +239,6 @@ public class RangeDopplerGeocodingOp extends Operator {
 
             getTiePointGrid();
 
-//            computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
-
-//            computeDEMTraversalSampleInterval();
-
-//            computedTargetImageDimension();
-
             if (useAvgSceneHeight) {
                 saveSigmaNought = false;
                 saveBetaNought = false;
@@ -1953,6 +1947,8 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param flag The flag.
      */
     void setApplyRadiometricCalibration(boolean flag) {
+        saveSelectedSourceBand = false;
+        applyRadiometricNormalization = flag;
         saveSigmaNought = flag;
     }
 
