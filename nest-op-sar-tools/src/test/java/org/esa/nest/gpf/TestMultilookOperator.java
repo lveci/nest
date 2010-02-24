@@ -20,10 +20,10 @@ import java.util.Arrays;
 public class TestMultilookOperator extends TestCase {
 
     private OperatorSpi spi;
-    private final static String inputPathWSM =     "P:\\nest\\nest\\test\\input\\ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1";
-    private final static String expectedPathWSM =  "P:\\nest\\nest\\test\\expected\\ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.N1_ML.dim";
+    private final static String inputPathWSM =     "P:\\nest\\nest\\test\\input\\subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim";
+    private final static String expectedPathWSM =  "P:\\nest\\nest\\test\\expected\\subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977_ML.dim";
 
-    private String[] productTypeExemptions = { "_BP", "XCA", "WVW", "WVI", "WVS", "WSS" };
+    private String[] productTypeExemptions = { "_BP", "XCA", "WVW", "WVI", "WVS", "WSS", "DOR_VOR_AX" };
 
     @Override
     protected void setUp() throws Exception {
@@ -89,7 +89,7 @@ public class TestMultilookOperator extends TestCase {
 
         final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
         final Product sourceProduct = reader.readProductNodes(inputFile, null);
-
+        
         final MultilookOp op = (MultilookOp)spi.createOperator();
         assertNotNull(op);
         op.setSourceProduct(sourceProduct);
