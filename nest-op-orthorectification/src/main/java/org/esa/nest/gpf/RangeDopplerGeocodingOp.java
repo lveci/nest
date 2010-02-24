@@ -1947,7 +1947,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * @param flag The flag.
      */
     void setApplyRadiometricCalibration(boolean flag) {
-        saveSelectedSourceBand = false;
+        saveSelectedSourceBand = !flag;
         applyRadiometricNormalization = flag;
         saveSigmaNought = flag;
     }
