@@ -37,7 +37,7 @@ public class JERSProductReader extends CEOSProductReader {
             final JERSProductDirectory jersDataDir = (JERSProductDirectory)_dataDir;
             if(jersDataDir.isJERS())
                 return DecodeQualification.INTENDED;
-            return DecodeQualification.SUITABLE;
+            return DecodeQualification.UNABLE;
             
         } catch (Exception e) {
             System.out.println(e.toString());

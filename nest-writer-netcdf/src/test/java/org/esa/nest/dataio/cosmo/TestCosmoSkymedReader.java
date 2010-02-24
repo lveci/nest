@@ -16,6 +16,8 @@ public class TestCosmoSkymedReader extends TestCase {
     private CosmoSkymedReaderPlugIn readerPlugin;
     private ProductReader reader;
 
+    private String[] exceptionExemptions = { "not supported" };
+
     public TestCosmoSkymedReader(String name) {
         super(name);
     }
@@ -46,6 +48,6 @@ public class TestCosmoSkymedReader extends TestCase {
         if(!folder.exists()) return;
 
         if(TestUtils.canTestReadersOnAllProducts())
-            TestUtils.recurseReadFolder(folder, readerPlugin, reader, null, null);
+            TestUtils.recurseReadFolder(folder, readerPlugin, reader, null, exceptionExemptions);
     }
 }

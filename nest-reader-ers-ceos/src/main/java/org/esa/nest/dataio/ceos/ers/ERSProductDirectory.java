@@ -66,11 +66,13 @@ class ERSProductDirectory extends CEOSProductDirectory {
     }
 
     private boolean isERS1() {
-        return productType.contains("ERS1") || productType.contains("ERS-1") || productType.contains("ERS_1");
+        return !productType.contains("RAW") &&
+                (productType.contains("ERS1") || productType.contains("ERS-1") || productType.contains("ERS_1"));
     }
 
     private boolean isERS2() {
-        return productType.contains("ERS2") || productType.contains("ERS-2") || productType.contains("ERS_2");
+        return !productType.contains("RAW") &&
+                (productType.contains("ERS2") || productType.contains("ERS-2") || productType.contains("ERS_2"));
     }
 
     String getMission() {

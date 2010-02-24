@@ -40,8 +40,6 @@ public class ACE2_5MinElevationModel implements ElevationModel, Resampling.Raste
         _resamplingRaster = this;
         _elevationTiles = createEleveationTiles();
         _elevationTileCache = new ArrayList();
-
-        System.out.println("ACE2 DEM created");
     }
 
     /**

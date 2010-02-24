@@ -159,7 +159,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
         }
     }
 
-    private void addMetadataToProduct() {
+    private void addMetadataToProduct() throws IOException {
 
         NetCDFUtils.addAttributes(product.getMetadataRoot(), NetcdfConstants.GLOBAL_ATTRIBUTES_NAME,
                                   netcdfFile.getGlobalAttributes());
@@ -199,7 +199,7 @@ public class CosmoSkymedReader extends AbstractProductReader {
         }
     }
 
-    private void addAbstractedMetadataHeader(Product product, MetadataElement root) {
+    private void addAbstractedMetadataHeader(Product product, MetadataElement root) throws IOException {
 
         final MetadataElement absRoot = AbstractMetadata.addAbstractedMetadataHeader(root);
 
@@ -209,9 +209,14 @@ public class CosmoSkymedReader extends AbstractProductReader {
         final MetadataElement globalElem = root.getElement(NetcdfConstants.GLOBAL_ATTRIBUTES_NAME);
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT, globalElem.getAttributeString("Product Filename", defStr));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, globalElem.getAttributeString("Product Type", defStr));
-        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR,
-                globalElem.getAttributeString("Acquisition Mode", defStr));
+        final String productType = globalElem.getAttributeString("Product Type", defStr);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PRODUCT_TYPE, productType);
+        final String mode = globalElem.getAttributeString("Acquisition Mode", defStr);
+        AbstractMetadata.setAttribute(absRoot, AbstractMetadata.SPH_DESCRIPTOR, mode);
+
+        if(mode.contains("HUGE") && productType.contains("SCS")) {
+            throw new IOException("Complex "+mode+" products are not supported for Cosmo-Skymed");    
+        }
 
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.MISSION, globalElem.getAttributeString("Satellite Id", "CSK"));
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.PROC_TIME,

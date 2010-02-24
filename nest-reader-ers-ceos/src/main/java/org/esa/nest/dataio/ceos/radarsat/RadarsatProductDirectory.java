@@ -159,7 +159,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
     public boolean isRadarsat() throws IOException, IllegalBinaryFormatException {
         if(productType == null || _volumeDirectoryFile == null)
             readVolumeDirectoryFile();
-        return (productType.contains("RSAT") || productType.contains("RADARSAT"));
+        return (productType.contains("RSAT") || productType.contains("RADARSAT")) && !productType.contains("RAW");
     }
 
     @Override

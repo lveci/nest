@@ -40,7 +40,10 @@ public class TestUtils {
     public final static String asarLazioPath = "P:\\nest\\nest\\ESA Data\\NestBox\\GTC_dataset\\ASAR_LAZIO";
     public final static String ersLazioPath =  "P:\\nest\\nest\\ESA Data\\NestBox\\GTC_dataset\\ERS_LAZIO";
 
-    private static String[] nonValidExtensions = { "xsd", "pdf", "txt", "doc", "ps", "db", "ief", "ord" };
+    private static String[] nonValidExtensions = { "xsd", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord", "tfw", 
+                                                   "tif", "gif", "jpg", "jgw", "hdr", "self", "report", "log", "tgz",
+                                                   "html", "htm" };
+    private static String[] nonValidprefixes = { "led", "trl", "nul", "lea", "dat", "img", "dfas", "dfdn", "lut" };
 
     private static PropertyMap createTestPreferences() {
         final PropertyMap prefs = new PropertyMap();
@@ -220,9 +223,9 @@ public class TestUtils {
 
                         System.out.println(spi.getOperatorAlias()+" Processing "+ file.toString());
                         TestUtils.executeOperator(op);
-                    } else {
-                        System.out.println(file.getName() + " is non valid");
-                    }
+                    } //else {
+                      //  System.out.println(file.getName() + " is non valid");
+                    //}
                 } catch(Exception e) {
                     System.out.println("Failed to process "+ file.toString());
                     throw e;
@@ -235,6 +238,10 @@ public class TestUtils {
         final String name = file.getName().toLowerCase();
         for(String ext : nonValidExtensions) {
             if(name.endsWith(ext))
+                return true;
+        }
+        for(String pre : nonValidprefixes) {
+            if(name.startsWith(pre))
                 return true;
         }
         return false;
@@ -287,8 +294,18 @@ public class TestUtils {
                             continue;
                     ReaderUtils.verifyProduct(product, true);
                 } catch(Exception e) {
-                    System.out.println("Failed to read "+ file.toString());
-                    throw e;
+                    boolean ok = false;
+                    for(String excemption : exceptionExemptions) {
+                        if(e.getMessage().contains(excemption)) {
+                            ok = true;
+                            System.out.println("Excemption for "+e.getMessage());
+                            break;
+                        }
+                    }
+                    if(!ok) {
+                        System.out.println("Failed to read "+ file.toString());
+                        throw e;
+                    }
                 }
             }
         }

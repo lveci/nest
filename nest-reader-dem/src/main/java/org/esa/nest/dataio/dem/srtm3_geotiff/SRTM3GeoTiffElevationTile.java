@@ -22,7 +22,7 @@ public final class SRTM3GeoTiffElevationTile {
         _linesCache = new CachingObjectArray(getLineFactory());
         _linesCache.setCachedRange(0, product.getSceneRasterHeight());
 
-        System.out.println("Dem Tile "+product.getName());
+        //System.out.println("Dem Tile "+product.getName());
         computeEGMArray();
     }
 

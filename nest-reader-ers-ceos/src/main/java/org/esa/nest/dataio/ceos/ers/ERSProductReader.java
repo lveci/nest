@@ -38,7 +38,7 @@ public class ERSProductReader extends CEOSProductReader {
             final ERSProductDirectory ersDataDir = (ERSProductDirectory)_dataDir;
             if(ersDataDir.isERS())
                 return DecodeQualification.INTENDED;
-            return DecodeQualification.SUITABLE;
+            return DecodeQualification.UNABLE;
             
         } catch (Exception e) {
             return DecodeQualification.UNABLE;

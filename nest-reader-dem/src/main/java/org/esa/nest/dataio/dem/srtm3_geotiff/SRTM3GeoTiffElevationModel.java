@@ -44,8 +44,6 @@ public final class SRTM3GeoTiffElevationModel implements ElevationModel, Resampl
         elevationFiles = createElevationFiles();
         noDataValue = _descriptor.getNoDataValue();
         this.elevationTileCache = new ArrayList<SRTM3GeoTiffElevationTile>();
-
-        System.out.println("SRTM DEM created");
     }
 
     /**
