@@ -37,6 +37,15 @@
       <artifactId>jtransforms</artifactId>
 	  <version>2.0</version>
     </dependency>
+    <dependency>
+      <groupId>org.esa.beam</groupId>
+      <artifactId>beam-envisat-reader</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.esa.nest</groupId>
+      <artifactId>nest-reader-ers-ceos</artifactId>
+      <version>${nest.version}</version>
+    </dependency>
   </dependencies>
 
 </project>
