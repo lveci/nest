@@ -40,9 +40,9 @@ public class TestUtils {
     public final static String asarLazioPath = "P:\\nest\\nest\\ESA Data\\NestBox\\GTC_dataset\\ASAR_LAZIO";
     public final static String ersLazioPath =  "P:\\nest\\nest\\ESA Data\\NestBox\\GTC_dataset\\ERS_LAZIO";
 
-    private static String[] nonValidExtensions = { "xsd", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord", "tfw", 
-                                                   "tif", "gif", "jpg", "jgw", "hdr", "self", "report", "log", "tgz",
-                                                   "html", "htm", "png", "ps", "aux", "ovr" };
+    private static String[] nonValidExtensions = { "xsd", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord", "tgz",
+                                                   "tif", "tiff", "tfw", "gif", "jpg", "jgw", "hdr", "self", "report",
+                                                   "log", "html", "htm", "png", "bmp", "ps", "aux", "ovr" };
     private static String[] nonValidprefixes = { "led", "trl", "nul", "lea", "dat", "img", "dfas", "dfdn", "lut" };
 
     private static PropertyMap createTestPreferences() {
@@ -207,7 +207,9 @@ public class TestUtils {
                                             final String[] exceptionExemptions) throws Exception {
         for(File file : folder.listFiles()) {
             if(file.isDirectory()) {
-                recurseProcessFolder(spi, file, productTypeExemptions, exceptionExemptions);
+                if(!file.getName().contains("skipTest")) {
+                    recurseProcessFolder(spi, file, productTypeExemptions, exceptionExemptions);
+                }
             } else {
                 try {
                     if(isNotProduct(file))
@@ -295,7 +297,9 @@ public class TestUtils {
                                          final String[] exceptionExemptions) throws Exception {
         for(File file : folder.listFiles()) {
             if(file.isDirectory()) {
-                recurseReadFolder(file, readerPlugin, reader, productTypeExemptions, exceptionExemptions);
+                if(!file.getName().contains("skipTest")) {
+                    recurseReadFolder(file, readerPlugin, reader, productTypeExemptions, exceptionExemptions);
+                }
             } else if(readerPlugin.getDecodeQualification(file) == DecodeQualification.INTENDED) {
 
                 try {

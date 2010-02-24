@@ -389,4 +389,5 @@ public class TestUndersamplingOperator extends TestCase {
 
         return testProduct;
     }
+
 }

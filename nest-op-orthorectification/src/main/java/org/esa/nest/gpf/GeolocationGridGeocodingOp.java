@@ -142,12 +142,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
             getSourceImageDimension();
 
-//            RangeDopplerGeocodingOp.computeImageGeoBoundary(sourceProduct, imageGeoBoundary);
-
-//            computeDEMTraversalSampleInterval();
-
-//            computedTargetImageDimension();
-
             createTargetProduct();
 
             getTiePointGrids();
@@ -199,35 +193,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
 
         delLat = Math.min(mapW / sourceImageWidth, mapH / sourceImageHeight);
         delLon = delLat;
-        /*
-        final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
-        double minAbsLat;
-        if (imageGeoBoundary.latMin*imageGeoBoundary.latMax > 0) {
-            minAbsLat = Math.min(Math.abs(imageGeoBoundary.latMin), Math.abs(imageGeoBoundary.latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
-        } else {
-            minAbsLat = 0.0;
-        }
-        delLat = minSpacing / Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
-        delLon = minSpacing / (Constants.MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
-        delLat = Math.min(delLat, delLon);
-        delLon = delLat;
-        */
-        /*
-        final double minSpacing = Math.min(rangeSpacing, azimuthSpacing);
-        final double minAbsLat = Math.min(Math.abs(latMin), Math.abs(latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
-        delLat = minSpacing / Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
-        delLon = minSpacing / (Constants.MeanEarthRadius*Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
-        delLat = Math.min(delLat, delLon);
-        delLon = delLat;
-        */
-    }
-
-    /**
-     * Compute target image dimension.
-     */
-    private void computedTargetImageDimension() {
-        targetImageWidth = (int)((imageGeoBoundary.lonMax - imageGeoBoundary.lonMin)/delLon) + 1;
-        targetImageHeight = (int)((imageGeoBoundary.latMax - imageGeoBoundary.latMin)/delLat) + 1;
     }
 
     /**
@@ -362,46 +327,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
     }
 
     /**
-     * Add geocoding to the target product.
-     */
-    private void addGeoCoding() {
-
-        final int gridWidth = 2;
-        final int gridHeight = 2;
-
-        final float subSamplingX = targetImageWidth;
-        final float subSamplingY = targetImageHeight;
-
-        final float[] latTiePoints = {(float)imageGeoBoundary.latMax, (float)imageGeoBoundary.latMax,
-                                      (float)imageGeoBoundary.latMin, (float)imageGeoBoundary.latMin};
-        float[] lonTiePoints = {(float)imageGeoBoundary.lonMin, (float)imageGeoBoundary.lonMax,
-                                      (float)imageGeoBoundary.lonMin, (float)imageGeoBoundary.lonMax};
-
-        final TiePointGrid latGrid = new TiePointGrid(
-                "latitude", gridWidth, gridHeight, 0.0f, 0.0f, subSamplingX, subSamplingY, latTiePoints);
-
-        final TiePointGrid lonGrid = new TiePointGrid(
-                "longitude", gridWidth, gridHeight, 0.0f, 0.0f, subSamplingX, subSamplingY, lonTiePoints);
-
-        targetProduct.addTiePointGrid(latGrid);
-        targetProduct.addTiePointGrid(lonGrid);
-
-        final TiePointGeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
-        targetProduct.setGeoCoding(gc);
-
-        final String[] srcBandNames = targetBandNameToSourceBandName.get(targetProduct.getBandAt(0).getName());
-
-        final MapInfo mapInfo = ProductUtils.createSuitableMapInfo(targetProduct,
-                                                MapProjectionRegistry.getProjection(IdentityTransformDescriptor.NAME),
-                                                0.0,
-                                                sourceProduct.getBand(srcBandNames[0]).getNoDataValue());
-        mapInfo.setSceneWidth(targetProduct.getSceneRasterWidth());
-        mapInfo.setSceneHeight(targetProduct.getSceneRasterHeight());
-
-        targetProduct.setGeoCoding(new MapGeoCoding(mapInfo));
-    }
-
-    /**
      * Update metadata in the target product.
      * @throws OperatorException The exception.
      */
@@ -442,7 +367,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
             throw new OperatorException("Product without slant range time tie point grid");
         }
     }
-
 
     /**
      * Called by the framework in order to compute a tile for the given target band.
@@ -595,55 +519,6 @@ public final class GeolocationGridGeocodingOp extends Operator {
         return rangeIndex;
     }
 
-    /**
-     * Compute orthorectified pixel value for given pixel.
-     * @param azimuthIndex The azimuth index for pixel in source image.
-     * @param rangeIndex The range index for pixel in source image.
-     * @return The pixel value.
-     * @throws IOException from readPixels
-     */
-    /*
-    private double getPixelValue(double azimuthIndex, double rangeIndex) throws IOException {
-
-        final int x0 = (int)rangeIndex;
-        final int y0 = (int)azimuthIndex;
-
-        final Tile sourceRaster = getSourceTile(sourceBand, new Rectangle(x0, y0, 2, 2), ProgressMonitor.NULL);
-        final ProductData srcData = sourceRaster.getDataBuffer();
-
-        final double v00, v01, v10, v11;
-
-        if (sourceBand.getUnit().contains(Unit.REAL)) {
-
-            final Tile sourceRaster2 = getSourceTile(sourceBand2, new Rectangle(x0, y0, 2, 2), ProgressMonitor.NULL);
-            final ProductData srcData2 = sourceRaster2.getDataBuffer();
-
-            final double vi00 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0));
-            final double vi01 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0+1, y0));
-            final double vi10 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0+1));
-            final double vi11 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0+1, y0+1));
-
-            final double vq00 = srcData2.getElemDoubleAt(sourceRaster2.getDataBufferIndex(x0, y0));
-            final double vq01 = srcData2.getElemDoubleAt(sourceRaster2.getDataBufferIndex(x0+1, y0));
-            final double vq10 = srcData2.getElemDoubleAt(sourceRaster2.getDataBufferIndex(x0, y0+1));
-            final double vq11 = srcData2.getElemDoubleAt(sourceRaster2.getDataBufferIndex(x0+1, y0+1));
-
-            v00 = vi00*vi00 + vq00*vq00;
-            v01 = vi01*vi01 + vq01*vq01;
-            v10 = vi10*vi10 + vq10*vq10;
-            v11 = vi11*vi11 + vq11*vq11;
-
-        } else {
-
-            v00 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0));
-            v01 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0+1, y0));
-            v10 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0, y0+1));
-            v11 = srcData.getElemDoubleAt(sourceRaster.getDataBufferIndex(x0+1, y0+1));
-        }
-
-        return MathUtils.interpolationBiLinear(v00, v01, v10, v11, rangeIndex - x0, azimuthIndex - y0);
-    }
-    */
     /**
      * Compute orthorectified pixel value for given pixel.
      * @param azimuthIndex The azimuth index for pixel in source image.

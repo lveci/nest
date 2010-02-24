@@ -25,6 +25,9 @@ public class TestRangeDopplerOp extends TestCase {
     private final static String inputPathAPM =     TestUtils.rootPathExpectedProducts+"\\input\\ASA_APM_1PNIPA20030327_091853_000000152015_00036_05601_5422.N1";
     private final static String expectedPathAPM =  TestUtils.rootPathExpectedProducts+"\\expected\\ENVISAT-ASA_APM_1PNIPA20030327_091853_000000152015_00036_05601_5422.N1_TC.dim";
 
+    private String[] productTypeExemptions = { "_BP", "XCA", "WVW", "WVI", "WVS", "WSS", "DOR_VOR_AX" };
+    private String[] exceptionExemptions = { "not supported", "already map projected" };
+
     @Override
     protected void setUp() throws Exception {
         spi = new RangeDopplerGeocodingOp.Spi();
@@ -111,60 +114,38 @@ public class TestRangeDopplerOp extends TestCase {
         TestUtils.compareProducts(op, targetProduct, expectedPathAPM, null);
     }
 
-    /**
-     * Processes all products in a folder
-     * @throws Exception general exception
-     */
     public void testProcessAllASAR() throws Exception
     {
-        final File folder = new File(TestUtils.asarLazioPath);
-        if(!folder.exists()) return;
-
-        if(TestUtils.canTestProcessingOnAllProducts())
-            recurseFolder(folder);
+        TestUtils.testProcessAllInPath(spi, TestUtils.asarLazioPath, productTypeExemptions, exceptionExemptions);
     }
 
-    /**
-     * Processes all products in a folder
-     * @throws Exception general exception
-     */
     public void testProcessAllERS() throws Exception
     {
-        final File folder = new File(TestUtils.ersLazioPath);
-        if(!folder.exists()) return;
-
-        if(TestUtils.canTestProcessingOnAllProducts())
-            recurseFolder(folder);
+        TestUtils.testProcessAllInPath(spi, TestUtils.ersLazioPath, productTypeExemptions, exceptionExemptions);
     }
 
-    private void recurseFolder(File folder) throws Exception {
-        for(File file : folder.listFiles()) {
-            if(file.isDirectory()) {
-                recurseFolder(file);
-            } else {
-                try {
-                    final ProductReader reader = ProductIO.getProductReaderForFile(file);
-                    if(reader != null) {
-                        System.out.println("Processing "+ file.toString());
+    public void testProcessAllALOS() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathALOS, null, exceptionExemptions);
+    }
 
-                        final Product sourceProduct = reader.readProductNodes(file, null);
+    public void testProcessAllRadarsat2() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathRadarsat2, null, exceptionExemptions);
+    }
 
-                        final RangeDopplerGeocodingOp op = (RangeDopplerGeocodingOp)spi.createOperator();
-                        assertNotNull(op);
-                        op.setSourceProduct(sourceProduct);
-                        op.setApplyRadiometricCalibration(false);
+    public void testProcessAllTerraSARX() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathTerraSarX, null, exceptionExemptions);
+    }
 
-                        TestUtils.executeOperator(op);
-                    }
-                } catch(Exception e) {
-                    if(e.getMessage().contains("already map projected")) {
-                        continue;
-                    } else {
-                        System.out.println("Failed to process "+ file.toString());
-                        throw e;
-                    }
-                }
-            }
-        }
+    public void testProcessAllCosmo() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathCosmoSkymed, null, exceptionExemptions);
+    }
+
+    public void testProcessAllNestBox() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathMixProducts, productTypeExemptions, exceptionExemptions);
     }
 }

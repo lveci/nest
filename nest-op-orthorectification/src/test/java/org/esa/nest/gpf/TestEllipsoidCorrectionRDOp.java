@@ -1,59 +1,29 @@
 package org.esa.nest.gpf;
 
 import junit.framework.TestCase;
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.nest.util.TestUtils;
 
-import java.io.File;
-
 /**
- * Unit test for Geolocation Grid.
+ * Unit test for EllipsoidCorrectionRDOp.
  */
-public class TestGeolocationGridOp extends TestCase {
+public class TestEllipsoidCorrectionRDOp extends TestCase {
 
     private OperatorSpi spi;
-    private final static String inputPathWSM =     TestUtils.rootPathExpectedProducts+"\\input\\subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim";
-    private final static String expectedPathWSM =  TestUtils.rootPathExpectedProducts+"\\expected\\subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977_EC.dim";
 
     private String[] productTypeExemptions = { "_BP", "XCA", "WVW", "WVI", "WVS", "WSS", "DOR_VOR_AX" };
     private String[] exceptionExemptions = { "not supported", "already map projected" };
 
     @Override
     protected void setUp() throws Exception {
-        spi = new GeolocationGridGeocodingOp.Spi();
+        spi = new EllipsoidCorrectionRDOp.Spi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(spi);
     }
 
     @Override
     protected void tearDown() throws Exception {
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(spi);
-    }
-
-    /**
-     * Processes a product and compares it to processed product known to be correct
-     * @throws Exception general exception
-     */
-    public void testProcessing() throws Exception {
-
-        final File inputFile = new File(inputPathWSM);
-        if(!inputFile.exists()) return;
-
-        final ProductReader reader = ProductIO.getProductReaderForFile(inputFile);
-        final Product sourceProduct = reader.readProductNodes(inputFile, null);
-
-        final GeolocationGridGeocodingOp op = (GeolocationGridGeocodingOp)spi.createOperator();
-        assertNotNull(op);
-        op.setSourceProduct(sourceProduct);
-
-        final String[] excemptionList = { "total_size" };
-        // get targetProduct: execute initialize()
-        final Product targetProduct = op.getTargetProduct();
-        TestUtils.verifyProduct(targetProduct, false, false);
-        TestUtils.compareProducts(op, targetProduct, expectedPathWSM, excemptionList);
     }
 
     public void testProcessAllASAR() throws Exception

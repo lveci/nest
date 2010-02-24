@@ -19,6 +19,9 @@ public class TestSARSimulationOp extends TestCase {
     private final static String inputPathWSM =     TestUtils.rootPathExpectedProducts+"\\input\\subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim";
     private final static String expectedPathWSM =  TestUtils.rootPathExpectedProducts+"\\expected\\subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977_SIM.dim";
 
+    private String[] productTypeExemptions = { "_BP", "XCA", "WVW", "WVI", "WVS", "WSS", "DOR_VOR_AX" };
+    private String[] exceptionExemptions = { "not supported", "already map projected" };
+
     @Override
     protected void setUp() throws Exception {
         spi = new SARSimulationOp.Spi();
@@ -56,7 +59,7 @@ public class TestSARSimulationOp extends TestCase {
      * Processes all products in a folder
      * @throws Exception general exception
      */
-    public void testProcessAllASAR() throws Exception
+    public void testProcessAllASAR2() throws Exception
     {
         final File folder = new File(TestUtils.rootPathASAR);
         if(!folder.exists()) return;
@@ -69,7 +72,7 @@ public class TestSARSimulationOp extends TestCase {
      * Processes all products in a folder
      * @throws Exception general exception
      */
-    public void testProcessAllERS() throws Exception
+    public void testProcessAllERS2() throws Exception
     {
         final File folder = new File(TestUtils.rootPathERS);
         if(!folder.exists()) return;
@@ -108,5 +111,40 @@ public class TestSARSimulationOp extends TestCase {
                 }
             }
         }
+    }
+
+    public void testProcessAllASAR() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathASAR, productTypeExemptions, exceptionExemptions);
+    }
+
+    public void testProcessAllERS() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathERS, productTypeExemptions, exceptionExemptions);
+    }
+
+    public void testProcessAllALOS() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathALOS, null, exceptionExemptions);
+    }
+
+    public void testProcessAllRadarsat2() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathRadarsat2, null, exceptionExemptions);
+    }
+
+    public void testProcessAllTerraSARX() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathTerraSarX, null, exceptionExemptions);
+    }
+
+    public void testProcessAllCosmo() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathCosmoSkymed, null, exceptionExemptions);
+    }
+
+    public void testProcessAllNestBox() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathMixProducts, productTypeExemptions, exceptionExemptions);
     }
 }

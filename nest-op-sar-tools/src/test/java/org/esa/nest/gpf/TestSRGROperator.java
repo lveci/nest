@@ -6,6 +6,7 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.nest.datamodel.AbstractMetadata;
+import org.esa.nest.util.TestUtils;
 
 import java.util.Arrays;
 
@@ -15,6 +16,9 @@ import java.util.Arrays;
 public class TestSRGROperator extends TestCase {
 
     private OperatorSpi spi;
+
+    private String[] productTypeExemptions = { "_BP", "XCA", "WVW", "WVI", "WVS", "WSS", "DOR_VOR_AX" };
+    private String[] exceptionExemptions = { "conversion has already been applied", "not supported", "GeoCoding is null" };
 
     @Override
     protected void setUp() throws Exception {
@@ -136,5 +140,40 @@ public class TestSRGROperator extends TestCase {
         // create geoCoding
         testProduct.setGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
         return testProduct;
+    }
+
+    public void testProcessAllASAR() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathASAR, productTypeExemptions, exceptionExemptions);
+    }
+
+    public void testProcessAllERS() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathERS, productTypeExemptions, exceptionExemptions);
+    }
+
+    public void testProcessAllALOS() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathALOS, null, exceptionExemptions);
+    }
+
+    public void testProcessAllRadarsat2() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathRadarsat2, null, exceptionExemptions);
+    }
+
+    public void testProcessAllTerraSARX() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathTerraSarX, null, exceptionExemptions);
+    }
+
+    public void testProcessAllCosmo() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathCosmoSkymed, null, exceptionExemptions);
+    }
+
+    public void testProcessAllNestBox() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathMixProducts, productTypeExemptions, exceptionExemptions);
     }
 }

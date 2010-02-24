@@ -407,7 +407,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
         if (mission.contains("ALOS")) {
             if(!absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE).contains("COMPLEX")) {
-                throw new OperatorException("Only level 1.1 ALOS PALSAR product is supported");
+                throw new OperatorException("Correction ALOS PALSAR products greater than level 1.1 is not supported");
             }
         }
         return mission;

@@ -282,4 +282,39 @@ public class SpeckleFilterOperatorTest extends TestCase {
         TestUtils.verifyProduct(targetProduct, false, false);
         TestUtils.compareProducts(op, targetProduct, expectedPathWSM, null);
     }
+
+    public void testProcessAllASAR() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathASAR, null, null);
+    }
+
+    public void testProcessAllERS() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathERS, null, null);
+    }
+
+    public void testProcessAllALOS() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathALOS, null, null);
+    }
+
+    public void testProcessAllRadarsat2() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathRadarsat2, null, null);
+    }
+
+    public void testProcessAllTerraSARX() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathTerraSarX, null, null);
+    }
+
+    public void testProcessAllCosmo() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathCosmoSkymed, null, null);
+    }
+
+    public void testProcessAllNestBox() throws Exception
+    {
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathMixProducts, null, null);
+    }
 }
