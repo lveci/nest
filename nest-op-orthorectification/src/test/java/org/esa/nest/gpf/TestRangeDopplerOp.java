@@ -152,7 +152,7 @@ public class TestRangeDopplerOp extends TestCase {
                         final RangeDopplerGeocodingOp op = (RangeDopplerGeocodingOp)spi.createOperator();
                         assertNotNull(op);
                         op.setSourceProduct(sourceProduct);
-                        op.setApplyRadiometricCalibration(true);
+                        op.setApplyRadiometricCalibration(false);
 
                         TestUtils.executeOperator(op);
                     }
