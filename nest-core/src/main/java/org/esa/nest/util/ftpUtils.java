@@ -75,7 +75,8 @@ public final class ftpUtils {
                         }
                     }
                 }
-                visatApp.setStatusBarMessage("");
+                if(visatApp != null)
+                    visatApp.setStatusBarMessage("");
             }
 
             ftpClient.completePendingCommand();
