@@ -118,7 +118,7 @@ public class TestSRGROperator extends TestCase {
         // create incidence angle tie point grid
         float[] incidence_angle = new float[w*h];
         Arrays.fill(incidence_angle, 30.0f);
-        testProduct.addTiePointGrid(new TiePointGrid("incident_angle", w, h, 0, 0, 1, 1, incidence_angle));
+        testProduct.addTiePointGrid(new TiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE, w, h, 0, 0, 1, 1, incidence_angle));
 
         // create lat/lon tie point grids
         float[] lat = new float[w*h];
@@ -130,8 +130,8 @@ public class TestSRGROperator extends TestCase {
                 lat[i] = 51.60f + y/10000.0f;
             }
         }
-        TiePointGrid latGrid = new TiePointGrid("latitude", w, h, 0, 0, 1, 1, lat);
-        TiePointGrid lonGrid = new TiePointGrid("longitude", w, h, 0, 0, 1, 1, lon);
+        TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE, w, h, 0, 0, 1, 1, lat);
+        TiePointGrid lonGrid = new TiePointGrid(OperatorUtils.TPG_LONGITUDE, w, h, 0, 0, 1, 1, lon);
         testProduct.addTiePointGrid(latGrid);
         testProduct.addTiePointGrid(lonGrid);
 

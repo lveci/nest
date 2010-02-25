@@ -123,7 +123,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
 
         // set slant_range_to_first_pixel in metadata
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-        final TiePointGrid slantRangeTimeTPG = product.getTiePointGrid("slant_range_time");
+        final TiePointGrid slantRangeTimeTPG = product.getTiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME);
         if(slantRangeTimeTPG != null) {
             final int numOutputLines = absRoot.getAttributeInt(AbstractMetadata.num_output_lines);
             final double slantRangeTime = slantRangeTimeTPG.getPixelFloat(numOutputLines/2, 0) / 1000000000.0; //s
@@ -639,7 +639,7 @@ class RadarsatProductDirectory extends CEOSProductDirectory {
         final float subSamplingX = sourceImageWidth / (float)(gridWidth - 1);
         final float subSamplingY = sourceImageHeight / (float)(gridHeight - 1);
 
-        final TiePointGrid slantRangeTime = product.getTiePointGrid("slant_range_time");
+        final TiePointGrid slantRangeTime = product.getTiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME);
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         final double firstLineUTC = absRoot.getAttributeUTC(AbstractMetadata.first_line_time).getMJD();
         final double lastLineUTC = absRoot.getAttributeUTC(AbstractMetadata.last_line_time).getMJD();

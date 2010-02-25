@@ -7,6 +7,7 @@ import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.ceos.records.BaseRecord;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.gpf.OperatorUtils;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
@@ -82,7 +83,7 @@ public abstract class CEOSProductDirectory {
 
             ReaderUtils.createFineTiePointGrid(3, 1, gridWidth, gridHeight, angles, fineAngles);
 
-            final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
+            final TiePointGrid incidentAngleGrid = new TiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE, gridWidth, gridHeight, 0, 0,
                     subSamplingX, subSamplingY, fineAngles);
             incidentAngleGrid.setUnit(Unit.DEGREES);
 
@@ -100,7 +101,7 @@ public abstract class CEOSProductDirectory {
 
             ReaderUtils.createFineTiePointGrid(3, 1, gridWidth, gridHeight, times, fineTimes);
 
-            final TiePointGrid slantRangeTimeGrid = new TiePointGrid("slant_range_time", gridWidth, gridHeight, 0, 0,
+            final TiePointGrid slantRangeTimeGrid = new TiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME, gridWidth, gridHeight, 0, 0,
                     subSamplingX, subSamplingY, fineTimes);
             slantRangeTimeGrid.setUnit(Unit.NANOSECONDS);
             

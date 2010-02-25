@@ -172,7 +172,7 @@ public final class OperatorUtils {
     }
 
     public static boolean isMapProjected(Product product) {
-        if(product.getGeoCoding() instanceof MapGeoCoding)
+        if(product.getGeoCoding() instanceof MapGeoCoding || product.getGeoCoding() instanceof CrsGeoCoding)
             return true;
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         return absRoot != null && !absRoot.getAttributeString(AbstractMetadata.map_projection, "").trim().isEmpty();
@@ -401,14 +401,14 @@ public final class OperatorUtils {
         float subSamplingX = (float) targetProduct.getSceneRasterWidth() / (gridWidth - 1);
         float subSamplingY = (float) targetProduct.getSceneRasterHeight() / (gridHeight - 1);
 
-        final TiePointGrid latGrid = new TiePointGrid("latitude", gridWidth, gridHeight, 0.5f, 0.5f,
+        final TiePointGrid latGrid = new TiePointGrid(TPG_LATITUDE, gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, fineLatTiePoints);
         latGrid.setUnit(Unit.DEGREES);
 
         final float[] fineLonTiePoints = new float[gridWidth * gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, lonTiePoints, fineLonTiePoints);
 
-        final TiePointGrid lonGrid = new TiePointGrid("longitude", gridWidth, gridHeight, 0.5f, 0.5f,
+        final TiePointGrid lonGrid = new TiePointGrid(TPG_LONGITUDE, gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, fineLonTiePoints, TiePointGrid.DISCONT_AT_180);
         lonGrid.setUnit(Unit.DEGREES);
 

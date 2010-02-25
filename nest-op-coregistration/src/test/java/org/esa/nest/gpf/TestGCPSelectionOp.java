@@ -89,8 +89,8 @@ public class TestGCPSelectionOp extends TestCase {
                 lat[i] = 51.60f;
             }
         }
-        final TiePointGrid latGrid = new TiePointGrid("latitude", w, h, 0, 0, 1, 1, lat);
-        final TiePointGrid lonGrid = new TiePointGrid("longitude", w, h, 0, 0, 1, 1, lon);
+        final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE, w, h, 0, 0, 1, 1, lat);
+        final TiePointGrid lonGrid = new TiePointGrid(OperatorUtils.TPG_LONGITUDE, w, h, 0, 0, 1, 1, lon);
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
 

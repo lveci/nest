@@ -7,6 +7,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.TestUtils;
+import org.esa.nest.gpf.OperatorUtils;
 
 import java.util.Arrays;
 
@@ -76,7 +77,7 @@ public class TestLinearTodB extends TestCase {
 
         final float[] incidence_angle = new float[64];
         Arrays.fill(incidence_angle, 30.0f);
-        testProduct.addTiePointGrid(new TiePointGrid("incident_angle", 16, 4, 0, 0, 1, 1, incidence_angle));
+        testProduct.addTiePointGrid(new TiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE, 16, 4, 0, 0, 1, 1, incidence_angle));
 
         return testProduct;
     }

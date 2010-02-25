@@ -9,6 +9,7 @@ import org.esa.nest.dataio.XMLProductDirectory;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
+import org.esa.nest.gpf.OperatorUtils;
 import org.jdom.Element;
 import org.jdom.Text;
 
@@ -300,7 +301,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, incidenceCorners, fineAngles);
 
-        final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
+        final TiePointGrid incidentAngleGrid = new TiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE, gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineAngles);
         incidentAngleGrid.setUnit(Unit.DEGREES);
 
@@ -310,7 +311,7 @@ public class TerraSarXProductDirectory extends XMLProductDirectory {
 
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, slantRangeCorners, fineSlantRange);
 
-        final TiePointGrid slantRangeGrid = new TiePointGrid("slant_range", gridWidth, gridHeight, 0, 0,
+        final TiePointGrid slantRangeGrid = new TiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME, gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineSlantRange);
         slantRangeGrid.setUnit(Unit.NANOSECONDS);
 

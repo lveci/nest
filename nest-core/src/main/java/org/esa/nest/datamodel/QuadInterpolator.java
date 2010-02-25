@@ -3,6 +3,7 @@ package org.esa.nest.datamodel;
 import Jama.Matrix;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.nest.util.MathUtils;
+import org.esa.nest.gpf.OperatorUtils;
 
 /**
  * Created by IntelliJ IDEA.
@@ -29,7 +30,8 @@ class QuadInterpolator {
 
         final String tiePointGridName = tpg.getName();
         boolean imageFlipped = false;
-        if ((tiePointGridName.contains("incidence_angle") || tiePointGridName.contains("slant_range_time")) &&
+        if ((tiePointGridName.equals(OperatorUtils.TPG_INCIDENT_ANGLE) ||
+             tiePointGridName.equals(OperatorUtils.TPG_SLANT_RANGE_TIME)) &&
             (tiePoints[0] > tiePoints[width - 1])) {
             imageFlipped = true;
         }

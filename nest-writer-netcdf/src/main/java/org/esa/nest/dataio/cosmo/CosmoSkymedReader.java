@@ -12,6 +12,7 @@ import org.esa.nest.datamodel.AbstractMetadataIO;
 import org.esa.nest.datamodel.Unit;
 import org.esa.nest.util.Constants;
 import org.esa.nest.util.XMLSupport;
+import org.esa.nest.gpf.OperatorUtils;
 import org.jdom.Element;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
@@ -483,12 +484,12 @@ public class CosmoSkymedReader extends AbstractProductReader {
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, incidenceCorners, fineAngles);
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, slantRange, fineTimes);
 
-        final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
+        final TiePointGrid incidentAngleGrid = new TiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE, gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineAngles);
         incidentAngleGrid.setUnit(Unit.DEGREES);
         product.addTiePointGrid(incidentAngleGrid);
 
-        final TiePointGrid slantRangeGrid = new TiePointGrid("slant_range_time", gridWidth, gridHeight, 0, 0,
+        final TiePointGrid slantRangeGrid = new TiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME, gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineTimes);
         slantRangeGrid.setUnit(Unit.NANOSECONDS);
         product.addTiePointGrid(slantRangeGrid);

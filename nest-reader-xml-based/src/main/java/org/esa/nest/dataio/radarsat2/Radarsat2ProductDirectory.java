@@ -7,6 +7,7 @@ import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.dataio.XMLProductDirectory;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Unit;
+import org.esa.nest.gpf.OperatorUtils;
 
 import java.io.File;
 import java.util.*;
@@ -345,11 +346,11 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
         float subSamplingX = (float)product.getSceneRasterWidth() / (gridWidth - 1);
         float subSamplingY = (float)product.getSceneRasterHeight() / (gridHeight - 1);
 
-        final TiePointGrid latGrid = new TiePointGrid("latitude", gridWidth, gridHeight, 0.5f, 0.5f,
+        final TiePointGrid latGrid = new TiePointGrid(OperatorUtils.TPG_LATITUDE, gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, latList);
         latGrid.setUnit(Unit.DEGREES);
 
-        final TiePointGrid lonGrid = new TiePointGrid("longitude", gridWidth, gridHeight, 0.5f, 0.5f,
+        final TiePointGrid lonGrid = new TiePointGrid(OperatorUtils.TPG_LONGITUDE, gridWidth, gridHeight, 0.5f, 0.5f,
                 subSamplingX, subSamplingY, lngList, TiePointGrid.DISCONT_AT_180);
         lonGrid.setUnit(Unit.DEGREES);
 
@@ -402,7 +403,7 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
 
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, incidenceCorners, fineAngles);
 
-        final TiePointGrid incidentAngleGrid = new TiePointGrid("incident_angle", gridWidth, gridHeight, 0, 0,
+        final TiePointGrid incidentAngleGrid = new TiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE, gridWidth, gridHeight, 0, 0,
                 subSamplingX, subSamplingY, fineAngles);
         incidentAngleGrid.setUnit(Unit.DEGREES);
 
@@ -490,8 +491,8 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
              rangeTime[i] = (float)(rangeDist[i] / halfSpeedOfLight * 1000000000.0); // in ns
         }
 
-        final TiePointGrid slantRangeGrid = new TiePointGrid(
-                "slant_range_time", gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, rangeTime);
+        final TiePointGrid slantRangeGrid = new TiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME,
+                gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, rangeTime);
 
         product.addTiePointGrid(slantRangeGrid);
         slantRangeGrid.setUnit(Unit.NANOSECONDS);
