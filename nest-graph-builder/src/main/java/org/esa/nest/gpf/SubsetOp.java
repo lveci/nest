@@ -7,6 +7,7 @@ import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -18,6 +19,8 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.Map;
+import java.util.HashMap;
 
 @OperatorMetadata(alias = "SubsetOp",
         category = "Utilities",
@@ -48,6 +51,7 @@ public class SubsetOp extends Operator {
     private int subSamplingY = 1;
 
     private ProductReader subsetReader = null;
+    private final Map<Band, Band> bandMap = new HashMap<Band, Band>();
 
     @Override
     public void initialize() throws OperatorException {
@@ -76,6 +80,19 @@ public class SubsetOp extends Operator {
 
         try {
             targetProduct = subsetReader.readProductNodes(sourceProduct, subsetDef);
+
+            // replace virtual bands with real bands
+            for(Band b : targetProduct.getBands()) {
+                if(b instanceof VirtualBand) {
+                    targetProduct.removeBand(b);
+                    final Band newBand = targetProduct.addBand(b.getName(), b.getDataType());
+                    newBand.setNoDataValue(b.getNoDataValue());
+                    newBand.setNoDataValueUsed(b.isNoDataValueUsed());
+                    newBand.setDescription(b.getDescription());
+                    newBand.setUnit(b.getUnit());
+                    bandMap.put(newBand, b);
+                }
+            }
         } catch (Throwable t) {
             throw new OperatorException(t);
         }
@@ -83,10 +100,10 @@ public class SubsetOp extends Operator {
 
     @Override
     public void computeTile(Band band, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-        ProductData destBuffer = targetTile.getRawSamples();
-        Rectangle rectangle = targetTile.getRectangle();
+        final ProductData destBuffer = targetTile.getRawSamples();
+        final Rectangle rectangle = targetTile.getRectangle();
         try {
-            subsetReader.readBandRasterData(band,
+            subsetReader.readBandRasterData(bandMap.get(band),
                                             rectangle.x,
                                             rectangle.y,
                                             rectangle.width,
