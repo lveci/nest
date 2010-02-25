@@ -43,7 +43,7 @@ import java.util.StringTokenizer;
 
 public class EarthGravitationalModel96 {
 
-    private static final String NAME = "ww15mgh.grd";
+    private static final String NAME = "ww15mgh_b.grd";
     private static final int NUM_LATS = 481; // 120*4 + 1  (cover 60 degree to -60 degree)
     private static final int NUM_LONS = 1441; // 360*4 + 1 (cover 0 degree to 360 degree)
     private static final int NUM_CHAR_PER_NORMAL_LINE = 74;
