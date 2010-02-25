@@ -398,11 +398,28 @@ public final class AbstractMetadata {
         MetadataElement abstractedMetadata = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT);
         if (abstractedMetadata == null) {
             abstractedMetadata = root.getElement(AbstractMetadata.ABSTRACT_METADATA_ROOT_OLD);
-            if (abstractedMetadata == null) {
-                return null;
+            if (abstractedMetadata != null) {
+                abstractedMetadata.setName(AbstractMetadata.ABSTRACT_METADATA_ROOT);
             }
         }
+        if(abstractedMetadata == null) {
+            abstractedMetadata = addAbstractedMetadataHeader(root);
+        }
+        patchMissingMetadata(abstractedMetadata);
+
         return abstractedMetadata;
+    }
+
+    private static void patchMissingMetadata(final MetadataElement abstractedMetadata) {
+        final MetadataElement tmpElem = new MetadataElement("tmp");
+        final MetadataElement completeMetadata = addAbstractedMetadataHeader(tmpElem);
+
+        final MetadataAttribute[] attribs = completeMetadata.getAttributes();
+        for(MetadataAttribute at : attribs) {
+            if(abstractedMetadata.getAttribute(at.getName()) == null) {
+                abstractedMetadata.addAttribute(at);   
+            }
+        }
     }
 
     /**

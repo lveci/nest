@@ -82,6 +82,8 @@ public final class AsarAbstractMetadata {
             mds1_tx_rx_polar = mds1_tx_rx_polar.replace("/","");
             addAbstractedAttribute("mds1_tx_rx_polar", mds1_tx_rx_polar, absRoot, "Polarization");
             addAbstractedAttribute("mds2_tx_rx_polar", "", absRoot, "Polarization");
+            addAbstractedAttribute("mds3_tx_rx_polar", "", absRoot, "Polarization");
+            addAbstractedAttribute("mds4_tx_rx_polar", "", absRoot, "Polarization");
 
             addAbstractedAttribute("srgr_flag", sph.getAttributeInt("SR_GR", 0), "flag", absRoot, "SRGR applied");
             addAbstractedAttribute("ant_elev_corr_flag", sph.getAttributeInt("antenna_corr", 0), "flag", absRoot,
@@ -113,6 +115,8 @@ public final class AsarAbstractMetadata {
             String mds2_tx_rx_polar = sph.getAttributeString("mds2_tx_rx_polar", "");
             mds2_tx_rx_polar = mds2_tx_rx_polar.replace("/","");
             addAbstractedAttribute("mds2_tx_rx_polar", mds2_tx_rx_polar, absRoot, "Polarization");
+            addAbstractedAttribute("mds3_tx_rx_polar", "", absRoot, "Polarization");
+            addAbstractedAttribute("mds4_tx_rx_polar", "", absRoot, "Polarization");
         }
 
         addAbstractedAttribute(sph, "ALGORITHM", absRoot, "Processing algorithm");
