@@ -5,6 +5,7 @@ import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.graph.GraphException;
+import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.nest.dat.plugins.graphbuilder.GraphExecuter;
@@ -176,7 +177,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
         try {
             executer.loadGraph(file, true);
 
-        } catch(GraphException e) {
+        } catch(Exception e) {
             showErrorDialog(e.getMessage());
         }
     }
@@ -194,12 +195,17 @@ public abstract class MultiGraphDialog extends ModelessDialog {
 
         boolean result;
         statusLabel.setText("");
-        try { 
+        try {
+            // check the all files have been saved
+            final Product srcProduct = ioPanel.getSelectedSourceProduct();
+            if(srcProduct.isModified() || srcProduct.getFileLocation() == null) {
+                throw new OperatorException("The source product has been modified. Please save it before using it in "+getTitle());
+            }
             assignParameters();
             // first graph must pass
             result = graphExecuterList.get(0).InitGraph();
 
-        } catch(GraphException e) {
+        } catch(Exception e) {
             statusLabel.setText(e.getMessage());
             result = false;
         }
@@ -215,7 +221,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
                     if (product != null) {
                         appContext.getProductManager().addProduct(product);
                     }
-                } catch(IOException e) {
+                } catch(Exception e) {
                     showErrorDialog(e.getMessage());
                 }
             }
