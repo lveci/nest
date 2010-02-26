@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.Map;
 
 /**
  * Holds information about a dem file.
@@ -28,7 +29,7 @@ public final class SRTM3GeoTiffFile {
     private boolean errorInLocalFile = false;
     private SRTM3GeoTiffElevationTile tile = null;
     private ftpUtils ftp = null;
-    private FTPFile[] remoteFileList = null;
+    private Map<String, Long> fileSizeMap = null;
     private boolean unrecoverableError = false;
 
     private static final String remoteFTP = Settings.instance().get("DEM/srtm3GeoTiffDEM_FTP");
@@ -113,19 +114,11 @@ public final class SRTM3GeoTiffFile {
         try {
             if(ftp == null) {
                 ftp = new ftpUtils(remoteFTP);
-
-                remoteFileList = ftp.getRemoteFileList(remotePath);
+                fileSizeMap = ftpUtils.readRemoteFileList(ftp, remoteFTP, remotePath);
             }
-
-            if(remoteFileList == null && ftp != null) {
-                remoteFileList = ftp.getRemoteFileList(remotePath);
-            }
-
-            if(remoteFileList == null)
-                throw new IOException("Unable to get remote file list");
 
             final String remoteFileName = localFile.getName();
-            final long fileSize = ftpUtils.getFileSize(remoteFileList, remoteFileName);
+            final Long fileSize = fileSizeMap.get(remoteFileName);
             
             final ftpUtils.FTPError result = ftp.retrieveFile(remotePath + remoteFileName, localFile, fileSize);
             if(result == ftpUtils.FTPError.OK) {
@@ -138,7 +131,6 @@ public final class SRTM3GeoTiffFile {
                 }
                 localFile.delete();
             }
-
             return false;
         } catch(Exception e) {
             System.out.println(e.getMessage());

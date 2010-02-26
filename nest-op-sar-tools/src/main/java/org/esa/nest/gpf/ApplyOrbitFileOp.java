@@ -39,6 +39,7 @@ import org.esa.nest.util.ftpUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * This operator applies orbit file to a given product.
@@ -110,7 +111,7 @@ public final class ApplyOrbitFileOp extends Operator {
     private static final String PRARE_ERS_2 = "PRARE_PRECISE_ERS_2";
 
     private ftpUtils ftp = null;
-    private FTPFile[] remoteFileList = null;
+    private Map<String, Long> fileSizeMap = null;
 
     /**
      * Default constructor. The graph processing framework
@@ -669,17 +670,13 @@ public final class ApplyOrbitFileOp extends Operator {
         try {
             if(ftp == null) {
                 ftp = new ftpUtils(remoteFTP);
-
-                remoteFileList = ftp.getRemoteFileList(remotePath);
+                fileSizeMap = ftpUtils.readRemoteFileList(ftp, remoteFTP, remotePath);
             }
 
-            if(remoteFileList == null)
-                throw new IOException("Unable to get remote file list from "+remoteFTP+'/'+remotePath);
-
             final String remoteFileName = localFile.getName();
-            final long fileSize = ftpUtils.getFileSize(remoteFileList, remoteFileName);
+            final Long fileSize = fileSizeMap.get(remoteFileName);
 
-            final ftpUtils.FTPError result = ftp.retrieveFile(remotePath + localFile.getName(), localFile, fileSize);
+            final ftpUtils.FTPError result = ftp.retrieveFile(remotePath + remoteFileName, localFile, fileSize);
             if(result == ftpUtils.FTPError.OK) {
                 return true;
             } else {

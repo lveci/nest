@@ -4,38 +4,55 @@ import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
+import org.apache.commons.net.ftp.FTPReply;
 import org.esa.beam.visat.VisatApp;
+import org.jdom.Element;
+import org.jdom.Document;
+import org.jdom.Attribute;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
 
 
 public final class ftpUtils {
 
     private final FTPClient ftpClient = new FTPClient();
+    private boolean ftpClientConnected = false;
 
     public enum FTPError { FILE_NOT_FOUND, OK, READ_ERROR }
 
-    public ftpUtils(String server) throws IOException {
+    public ftpUtils(final String server) throws IOException {
         this(server, "anonymous", "anonymous");
     }
 
-    private ftpUtils(String server, String user, String password) throws IOException {
+    private ftpUtils(final String server, final String user, final String password) throws IOException {
         ftpClient.connect(server);
-        ftpClient.login(user, password);
-
-        ftpClient.enterLocalPassiveMode();
-        ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-        ftpClient.setDataTimeout(30000);
+        int reply = ftpClient.getReplyCode();
+        if (FTPReply.isPositiveCompletion(reply))
+            ftpClientConnected = ftpClient.login(user, password);
+        if (!ftpClientConnected) {
+            disconnect();
+            throw new IOException("Unable to connect to "+server);
+        } else {
+            ftpClient.enterLocalPassiveMode();
+            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+            ftpClient.setDataTimeout(30000);
+        }
     }
 
     public void disconnect() throws IOException {
-        ftpClient.disconnect();
+        if(ftpClientConnected) {
+            ftpClient.logout();
+            ftpClient.disconnect();
+        }
     }
 
-    public FTPError retrieveFile(String remotePath, File localFile, long fileSize) {
+    public FTPError retrieveFile(final String remotePath, final File localFile, final Long fileSize) {
         FileOutputStream fos = null;
         InputStream fis = null;
         try {
@@ -67,11 +84,15 @@ public final class ftpUtils {
                 while ((n = fis.read(buf, 0, size)) > -1)  {
                     fos.write(buf, 0, n);
                     if(visatApp != null) {
-                        total += n;
-                        final int pct = (int)((total/(float)fileSize) * 100);
-                        if(pct >= lastPct + 10) {
-                            visatApp.setStatusBarMessage("Downloading "+localFile.getName()+"... "+pct+"%");
-                            lastPct = pct;
+                        if(fileSize != null) {
+                            total += n;
+                            final int pct = (int)((total/(float)fileSize) * 100);
+                            if(pct >= lastPct + 10) {
+                                visatApp.setStatusBarMessage("Downloading "+localFile.getName()+"... "+pct+"%");
+                                lastPct = pct;
+                            }
+                        } else {
+                            visatApp.setStatusBarMessage("Downloading "+localFile.getName()+"... ");
                         }
                     }
                 }
@@ -99,7 +120,7 @@ public final class ftpUtils {
         }
     }
 
-    public static long getFileSize(FTPFile[] fileList, String remoteFileName) {
+    public static long getFileSize(final FTPFile[] fileList, final String remoteFileName) {
         for(FTPFile file : fileList) {
             if(file.getName().equalsIgnoreCase(remoteFileName)) {
                 return file.getSize();
@@ -139,11 +160,11 @@ public final class ftpUtils {
         return (Boolean)worker.get();
     }
 
-    public FTPFile[] getRemoteFileList(String path) throws IOException {
+    private FTPFile[] getRemoteFileList(final String path) throws IOException {
         return ftpClient.listFiles(path);
     }
 
-    public static String getPathFromSettings(String tag) {
+    public static String getPathFromSettings(final String tag) {
         String path = Settings.instance().get(tag);
         path = path.replace("\\", "/");
         if(!path.endsWith("/"))
@@ -151,7 +172,91 @@ public final class ftpUtils {
         return path;
     }
 
-    public static boolean testFTP(String remoteFTP, String remotePath) {
+    public static Map<String, Long> readRemoteFileList(final ftpUtils ftp, final String server, final String remotePath) {
+
+        boolean useCachedListing = true;
+        final String tmpDirUrl = ResourceUtils.getApplicationUserTempDataDir().getAbsolutePath();
+        final File listingFile = new File(tmpDirUrl+"//"+server+".listing.xml");
+        if(!listingFile.exists())
+            useCachedListing = false;
+
+        final Map<String, Long> fileSizeMap = new HashMap<String, Long>(900);
+
+        if(useCachedListing) {
+            org.jdom.Document doc = null;
+            try {
+                doc = XMLSupport.LoadXML(listingFile.getAbsolutePath());
+            } catch(IOException e) {
+                useCachedListing = false;
+            }
+
+            if(useCachedListing) {
+                final Element root = doc.getRootElement();
+                boolean listingFound = false;
+
+                final List children1 = root.getContent();
+                for (Object c1 : children1) {
+                    if (!(c1 instanceof Element)) continue;
+                    final Element remotePathElem = (Element) c1;
+                    final Attribute pathAttrib = remotePathElem.getAttribute("path");
+                    if(pathAttrib != null && pathAttrib.getValue().equalsIgnoreCase(remotePath)) {
+                        listingFound = true;
+                        final List children2 = remotePathElem.getContent();
+                        for (Object c2 : children2) {
+                            if (!(c2 instanceof Element)) continue;
+                            final Element fileElem = (Element) c2;
+                            final Attribute attrib = fileElem.getAttribute("size");
+                            if(attrib != null) {
+                                try {
+                                    fileSizeMap.put(fileElem.getName(), attrib.getLongValue());
+                                } catch(Exception e) {
+                                    //
+                                }
+                            }
+                        }
+                    }
+                }
+                if(!listingFound)
+                    useCachedListing = false;
+            }
+        }
+        if(!useCachedListing) {
+            try {
+                final FTPFile[] remoteFileList = ftp.getRemoteFileList(remotePath);
+
+                writeRemoteFileList(remoteFileList, server, remotePath, listingFile);
+
+                for (FTPFile ftpFile : remoteFileList)  {
+                    fileSizeMap.put(ftpFile.getName(), ftpFile.getSize());
+                }                  
+            } catch(Exception e) {
+                System.out.println("Unable to get remote file list "+e.getMessage());
+            }
+        }
+
+        return fileSizeMap;
+    }
+
+    private static void writeRemoteFileList(final FTPFile[] remoteFileList, final String server,
+                                           final String remotePath, final File file) {
+
+        final Element root = new Element("remoteFileListing");
+        root.setAttribute("server", server);
+
+        final Document doc = new Document(root);
+        final Element remotePathElem = new Element("remotePath");
+        remotePathElem.setAttribute("path", remotePath);
+        root.addContent(remotePathElem);
+
+        for (FTPFile ftpFile : remoteFileList)  {
+            final Element fileElem = new Element(ftpFile.getName());
+            fileElem.setAttribute("size", String.valueOf(ftpFile.getSize()));
+            remotePathElem.addContent(fileElem);
+        }
+        XMLSupport.SaveXML(doc, file.getAbsolutePath());
+    }
+
+    public static boolean testFTP(final String remoteFTP, final String remotePath) {
         try {
             final ftpUtils ftp = new ftpUtils(remoteFTP);
 
