@@ -268,9 +268,11 @@ public class ASARCalibrator implements Calibrator {
 
         applyAntennaPatternCorr = !srgrFlag || retroCalibrationFlag || !antElevCorrFlag;
         applyRangeSpreadingCorr = !rangeSpreadCompFlag;
+        /* The following lines cause problem in calibration of GM product
         if(productType.contains("ASA_GM")) {
             applyRangeSpreadingCorr = true;   
         }
+        */
     }
 
     /**
