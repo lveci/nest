@@ -1085,7 +1085,7 @@ public class ASARCalibrator implements Calibrator {
      * @return The earth radius.
      */
     private double getEarthRadius(final int x, final int y) {
-
+        /*
         // use linear rather than quadratic interpolation for subset because quadratic interpolation
         // does not give accurate result in this case
         int i = 0;
@@ -1094,9 +1094,13 @@ public class ASARCalibrator implements Calibrator {
         } else {
             i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y, TiePointGrid.InterpMode.QUADRATIC))/delLat + 0.5);
         }
+        */
+        int i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y))/delLat + 0.5);
 
         if (i < 0) {
             i = 0;
+        } else if (i >= earthRadius.length) {
+            i = earthRadius.length - 1;
         }
 
         return earthRadius[i];
