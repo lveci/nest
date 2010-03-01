@@ -2,6 +2,7 @@
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>3C</version>
+    <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>beam/res/NEST_Splash.png</splashImage>
     <postInstallationActionList>
@@ -26,6 +27,15 @@
             <insertAt>end</insertAt>
             <path>${installdir}</path>
         </addDirectoryToPath>
+        <createSymLink>
+            <linkName>~/Desktop/NEST_DAT</linkName>
+            <target>${installdir}/dat.command</target>
+            <ruleList>
+                <platformTest>
+                    <type>osx</type>
+                </platformTest>
+            </ruleList>
+        </createSymLink>
     </postInstallationActionList>
     <compressionAlgorithm>lzma</compressionAlgorithm>
     <enableRollback>1</enableRollback>
@@ -46,7 +56,7 @@
                     <exec>${installdir}/dat.sh</exec>
                     <icon>${installdir}/res/dat.png</icon>
                     <name>NEST 3C</name>
-                    <path> ${installdir}</path>
+                    <path>.</path>
                     <platforms>all</platforms>
                     <runInTerminal>0</runInTerminal>
                     <windowsExec>${installdir}/nest-dat.exe</windowsExec>

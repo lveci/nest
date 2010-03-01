@@ -25,7 +25,7 @@ public class TestCalibrationOp extends TestCase {
     private final static String inputPathIMS =     TestUtils.rootPathExpectedProducts+"\\input\\subset_0_of_ERS-2_SAR_SLC-ORBIT_10249_DATE__06-APR-1997_03_09_34.dim";
     private final static String expectedPathIMS =  TestUtils.rootPathExpectedProducts+"\\expected\\subset_0_of_ERS-2_SAR_SLC-ORBIT_10249_DATE__06-APR-1997_03_09_34_Calib.dim";
 
-    private String[] productTypeExemptions = { "_BP", "XCA", "WVW", "WVI", "WVS", "WSS" };
+    private String[] productTypeExemptions = { "_BP", "XCA", "WVW", "WVI", "WVS", "WSS", "DOR" };
 
     @Override
     protected void setUp() throws Exception {
