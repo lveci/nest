@@ -70,9 +70,7 @@
 			<tocitem text="Open GTOPO30 Tile" target="importGTOPO30"/>
 			<tocitem text="Open ACE DEM Tile" target="importACE"/>
 			<tocitem text="Open SRTM DEM Tile" target="importSRTM"/>
-			
 			<tocitem text="Open Transect Data" target="importTransectData"/>
-			<tocitem text="Product Subset Dialog" target="subsetDialog"/>
 		</tocitem>
 		
 		<tocitem text="Product Writers">
@@ -111,6 +109,7 @@
         </tocitem>
 
         <tocitem text="Product Generation Tools">
+			<tocitem text="Product Subset Dialog" target="subsetDialog"/>
             <tocitem text="Band Arithmetic" target="bandArithmetic"/>
             <tocitem text="Arithmetic Expression Editor" target="expressionEditor"/>
             <tocitem text="Reprojection" target="mapProjection">
