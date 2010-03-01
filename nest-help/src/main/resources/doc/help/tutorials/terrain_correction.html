@@ -12,28 +12,99 @@ Tutorial</td>
 </tr>
 </tbody>
 </table>
-<h3>Terrain Correction</h3>The <a href="../operators/RangeDopplerGeocodingOp.html">Terrain Correction</a>
+<h3>Terrain Correction</h3><p><font size="-1">The <a href="../operators/RangeDopplerGeocodingOp.html">Terrain Correction</a>
 Operator will
 produce&nbsp;an orthorectified product in the WGS 84 geogreaphic
-coordinates. Optionally radiometric normalisation can be applied to the
-orthorectified image to produce &#963;<sup>0</sup>, &#947;<sup>0</sup> or &#946;<sup>0</sup>
-output. The radiometric normallizatin
-is&nbsp;currently only supported for ASAR product. For other products,
-the radiometric normalization consists of only the constant and
-incidence angle corrections.<br><br>The <a href="../operators/EllipsoidCorrectionRDOp.html">Ellipsoid Correction RD</a> and 
-<a href="../operators/GeolocationGridGeocodingOp.html">Ellipsoid Correction GG</a> Operators will&nbsp;produce ellipsoid corrected products in the WGS 84 geographic coordinates.<br><br>The Terrain Correction Operator should be used whenever DEM is available. The 
-Ellipsoid Correction (RD and GG) should be used only when DEM is not available.
-
-<br><br><br>The following steps should be followed to produce an orthorectified image:<br><p>1. From the Geometry menu select Terrain Correction. This will call up the dialog for the <a href="../operators/RangeDopplerGeocodingOp.html">Terrain Correction</a>
-Operator (Figure 1).</p><p>2. Select your source bands.</p><p>3.
-Select the Digital Elevation Model (DEM) to use. You can select 30
-second GETASSE30 or ACE DEMs if they are installed on your computer.</p><p>&nbsp;&nbsp;&nbsp;
-Preferably, select the SRTM 3 second DEM which has much better
+coordinates. The&nbsp;Range Doppler
+orthorectification method [1] is implemented for geocoding SAR images from a single 2D
+raster radar geometry. It uses available orbit
+state
+vector information in the metadata or <a href="../operators/ApplyOrbitFileOp.html">external
+precise orbit</a>, the radar timing annotations, the slant to ground range
+conversion parameters together with the reference DEM data to derive the precise
+geolocation information.&nbsp;Optionally radiometric normalisation can be applied to the
+orthorectified image to produce <span style="font-style: italic;">&#963;</span><sup style="font-style: italic;">0</sup>, <span style="font-style: italic;">&#947;</span><sup style="font-style: italic;">0</sup> or <span style="font-style: italic;">&#946;</span><sup style="font-style: italic;">0</sup>
+output.<br></font></p><br><p>The <a href="../operators/EllipsoidCorrectionRDOp.html">Ellipsoid Correction RD</a> and 
+<a href="../operators/GeolocationGridGeocodingOp.html">Ellipsoid Correction GG</a>
+Operators will&nbsp;produce ellipsoid corrected products in the WGS 84
+geographic coordinates. The Terrain Correction Operator should be used
+whenever DEM is available. The Ellipsoid Correction (RD and GG) should
+be used only when DEM is not available.
+</p><h4>Orthorectification Algorithm</h4><p>The
+Range Doppler Terrain Correction Operator implements the Range Doppler
+orthorectification method [1] for geocoding SAR images from a single 2D
+raster radar geometry. It uses available orbit
+state
+vector information in the metadata or <a href="../operators/ApplyOrbitFileOp.html">external
+precise orbit</a>, the radar timing annotations, the slant to ground range
+conversion parameters together with the reference DEM data to derive the precise
+geolocation information.&nbsp;</p><h4>Product Supported</h4><ul><li>ASAR (IMS, IMP, IMM, APP, APM, WSM) and ERS products (SLC, IMP) are fully supported.</li><li>Third party mission: only complex format products are supported.</li></ul><h4>DEM Supported</h4><p>Right now only the DEMs with geographic coordinates <span style="font-size: 11pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">(</span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">P</span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB">&#1488;</span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">, P</span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB">&#1488;</span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">, P</span><span style="font-size: 8pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">h</span></i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">)</span>&nbsp;referred to global geodetic ellipsoid reference WGS84 in meters are properly supported by NEXT.&nbsp;</p><p>By default the&nbsp;following DEMs are available:</p><ul><li> ACE</li><li>GETASSE30</li><li> SRTM 3Sec GeoTiff</li></ul><p>Since
+the SRTM height information is referred to geoid EGM96, not&nbsp;WGS84
+ellipsoid,&nbsp;correction has been applied to obtain height
+relative to the WGS84 ellipsoid.&nbsp;</p><p>User can also use external DEM file which, as specified above, must be WGS84 <span style="font-size: 11pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">(</span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">P</span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB">&#1488; </span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">, P</span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB">&#1488;</span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">, P</span><span style="font-size: 8pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">h</span></i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">)</span>&nbsp;DEM in meters.</p><h4>Radiometric Normalization</h4><p>This operator also implements the
+radiometric normalization and output <span style="font-style: italic;">&#963;</span><sup style="font-style: italic;"><sub>0</sub></sup>, <span style="font-style: italic;">&#947;</span><sup style="font-style: italic;"><sub>0</sub></sup> and <span style="font-style: italic;">&#946;</span><sup style="font-style: italic;"><sub>0</sub></sup>.
+Basically all the correction factors, such as antenna pattern gain and
+range spreading loss, applied to the original SAR image are removed
+first. Then new factors together with constant and incidence angle
+correction factors are applied during the orthorectification
+process.&nbsp; </p><p>It
+should be noted that this radiometric normalization and terrain
+correction process is not equivalent to apply Terrain Correction
+operator to a calibrated product. This is because the radiometric
+normalization implemented by this operator computes correction
+factors&nbsp;based on accurate geometric information, for example the local incidence angle is computed using local DEM.</p><p>As
+for the correction factors applied to each type of product, the
+radiometric normalization implemented in this operator agrees with that
+in Calibration operator. Reader is referred to&nbsp;<a href="../operators/CalibrationOp.html">Calibration operator</a> for details.</p><p>It should also be noted that <span style="font-weight: normal;">the
+radiometric normalization can be applied to ASAR standard slant range
+products (IMS,
+APS) and ASAR
+ground range imageries (IMP, APP, IMM, APM, WSM), but cannot be applied
+directly to ERS product. This is because the Analogue to Digital
+Converter (ADC) power less correction for ERS product is more
+convenient to be applied to the SAR image rather than the
+orthorectified image.&nbsp;</span><span style="font-weight: normal;"></span><span style="font-weight: normal;"></span></p><p><span style="font-weight: normal;">To
+apply radiometric normalization and terrain correction for ERS (or ASAR
+product), user can use one of the following user graphs</span><span style="font-weight: normal;">:&nbsp;</span></p><ul><li style="font-weight: bold;"><span style="font-weight: normal;"></span><span style="font-weight: normal;">RemoveAntPat_Orthorectify</span></li><li style="font-weight: bold;"><span style="font-weight: normal;"></span><span style="font-weight: normal;"></span><span style="font-weight: normal;">RemoveAntPat_Multilook_Orthorectify</span><span style="font-weight: normal;"></span></li><li style="font-weight: bold;"><span style="font-weight: normal;">RemoveAntPat_SARSim_GCPSelection</span></li><li style="font-weight: bold;"><span style="font-weight: normal;">RemoveAntPat_Multilook_SARSim_GCPSelection</span></li></ul><p>When '<span style="font-weight: normal;">RemoveAntPat_SARSim_GCPSelection</span>' or '<span style="font-weight: normal;">RemoveAntPat_Multilook_SARSim_GCPSelection</span>' is used, it should be used together with <span style="font-weight: normal;">SARSim Terrain Correction operator, i.e.&nbsp;</span><span style="font-weight: normal;">SARSim Terrain Correction operator</span><span style="font-weight: normal;"> should be applied to the graph output in the Graph Builder.</span> </p><p>In
+the above user graphs, Remove Antenna Pattern operator is employed to
+remove antenna pattern and other correction factors applied to the SAR
+image. For details of the Remove Antenna Pattern operator, the reader
+is referred
+to <a href="../operators/RemoveAntennaPatternOp.html">Remove Antenna Pattern Operator</a>.</p><p>For
+radiometric normalization of ALOS product, the operator applies only
+calibration constant correction.&nbsp;For RadarSAT2 product, the operator
+applies only antenna pattern gain correction. Other third paty products
+are currently not supported.</p><p>Note also that among&nbsp;<span style="font-style: italic;">&#963;</span><sup style="font-style: italic;"><sub>0</sub></sup>, <span style="font-style: italic;">&#947;</span><sup style="font-style: italic;"><sub>0</sub></sup> and <span style="font-style: italic;">&#946;</span><sup style="font-style: italic;"><sub>0</sub></sup> bands output in the target product, only <span style="font-style: italic;">&#963;</span><sup style="font-style: italic;"><sub>0</sub></sup>&nbsp;is real band while <span style="font-style: italic;">&#947;</span><sup style="font-style: italic;"><sub>0</sub></sup> and <span style="font-style: italic;">&#946;</span><sup style="font-style: italic;"><sub>0</sub></sup>&nbsp;are virtual bands expressed in terms of <span style="font-style: italic;">&#963;</span><sup style="font-style: italic;"><sub>0</sub></sup>&nbsp;and incidence angle. Therefore, <span style="font-style: italic;">&#963;</span><sup style="font-style: italic;"><sub>0</sub></sup> and incidence angle are&nbsp;automatically saved and output if  <span style="font-style: italic;">&#947;</span><sup style="font-style: italic;"><sub>0</sub></sup> or&nbsp;<span style="font-style: italic;">&#946;</span><sup style="font-style: italic;"><sub>0</sub></sup> is selected.&nbsp;</p><p>For&nbsp;<span style="font-style: italic;">&#963;</span><sup style="font-style: italic;"><sub>0</sub></sup> and <span style="font-style: italic;">&#947;</span><sup style="font-style: italic;"><sub>0</sub></sup>&nbsp;calculation,
+user can select using projected local incidence angle (local incidence angle projected onto range plane) or incidence
+angle from ellipsoid (incidence angle from tie points of
+the source product).</p><p>For all ASAR&nbsp;products, <span style="font-style: italic;">&#946;</span><sup style="font-style: italic;"><sub>0</sub></sup> is given as the follows:<br></p>&nbsp;<br><div style="margin-left: 40px;"><img style="width: 255px; height: 63px;" alt="" src="../operators/images/range_doppler_eq4.jpg"><br></div><h4>Radiometric Normalization with Multilook</h4><ul><li style="font-weight: bold;"> <span style="font-weight: normal;">Right now i</span><span style="font-weight: normal;"></span><span style="font-weight: normal;">f
+a detected product (such as ASAR IMP, APP, APM, WSM or ERS PRI) has
+already been multilooked, then the&nbsp;radiometric
+normalization does not correct the antenna pattern and range spreading
+loss. Only constant and incidence angle corrections are applied. This
+is because the original antenna pattern and the range spreading loss
+correction cannot be properly removed due to the pixel averaging by
+multilooking.</span></li><li style="font-weight: bold;"><span style="font-weight: normal;"></span><span style="font-weight: normal;"></span><span style="font-weight: normal;"></span><span style="font-weight: normal;"></span><span style="font-weight: normal;"></span><span style="font-weight: normal;"></span><span style="font-weight: normal;">If
+user needs to apply a rigorous radiometric normalization, multilook and terrain
+correction to a product, then user graphs
+'RemoveAntPat_Multilook_Orthorectify' or
+'RemoveAntPat_Multilook_SARSim_GCPSelection' should be used.</span></li></ul><h4>Steps to Produce Orthorectified Image</h4>
+&nbsp;&nbsp;&nbsp;The following steps should be followed to produce an orthorectified image:<br><ol><li>From the Geometry menu select Terrain Correction. This will call up the dialog for the <a href="../operators/RangeDopplerGeocodingOp.html">Terrain Correction</a>
+Operator (Figure 1).</li><li>Select your source bands.</li><li>Select
+the Digital Elevation Model (DEM) to use. You can select 30
+second GETASSE30 or ACE DEMs if they are installed on your
+computer.&nbsp;Preferably, select the SRTM 3 second DEM which has much
+better
 resolution and can be downloaded as need automaticaly by NEST if you
-have an internet connection.</p><p>&nbsp;&nbsp;&nbsp; Alternatively,
-you could also browse for an External DEM tile in any file format
-readable by NEST (GeoTIFF, HDF, NetCDF, GTOPO30, ...)</p><p>4. Select the interpolation methods to use for the DEM resampling and the target image resampling.</p><p>5. Optionally select to save the DEM as a band and the local incidence angle.</p><p>6.
-Optionlly select to apply Radiometric Normallizatin to output &#963;<sup>0</sup>, &#947;<sup>0</sup> or &#946;<sup>0</sup> of the orthorectified image.&nbsp;</p><p>7. Press Run to process the data.</p><p></p><br><div style="text-align: center;"><img style="width: 624px; height: 579px;" alt="" src="../operators/images/range_doppler_dlg.JPG"><br><br><span style="font-weight: bold;">Figure 1. Terrain Correction operator dialog box.</span><br></div><br><br><p><br>Below
+have an internet connection.&nbsp;Alternatively,
+you could also browse for an External DEM tile.&nbsp;Currently only WGS84-latlong
+<span style="font-size: 11pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">(</span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">P</span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB">&#1488; </span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">, P</span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB">&#1488;</span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">, P</span><span style="font-size: 8pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">h</span></i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">)</span>&nbsp;DEM&nbsp;in meters is accepted as geographic system and it could be in any file format
+readable by NEST (GeoTIFF, HDF, NetCDF, GTOPO30, ...)</li><li>Select the interpolation methods to use for the DEM resampling and the target image resampling.</li><li>Optionally
+select the Pixel Spacing in meters which is used in computing the pixel
+size of the orthorectified image. By default the pixel spacing of the
+original SAR image is used.</li><li>Optionally select Map Projection. The orthorectified image will be
+presented with the user selected map projection. By default the output
+image will be expressed in WGS84 latlong geographic coordinate.</li><li>Optionally select to save the DEM as a band and the local incidence angle.</li><li>Optionlly select to apply Radiometric Normallizatin to output <span style="font-style: italic;">&#963;</span><sup style="font-style: italic;">0</sup>, <span style="font-style: italic;">&#947;</span><sup style="font-style: italic;">0</sup> or <span style="font-style: italic;">&#946;</span><sup style="font-style: italic;">0</sup> of the orthorectified image.&nbsp;</li><li>Press Run to process the data.</li></ol><p></p><br><div style="text-align: center;"><img style="width: 624px; height: 579px;" alt="" src="../operators/images/range_doppler_dlg.JPG"><br><br><span style="font-weight: bold;">Figure 1. Terrain Correction operator dialog box.</span><br></div><br><br><p><br>Below
 are some sample images showing the Terrain Correction result of an ASAR
 IMS product
 ASA_IMS_1PNUPA20081003_092731_000000162072_00351_34473_2366.N1,
