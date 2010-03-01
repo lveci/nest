@@ -38,8 +38,12 @@ proposed. In NEST however one level detection is implemented.<br><br>&nbsp;A.
 S. Solberg, C. Brekke and R. Solberg, "Algorithms for oil spill
 detection in Radarsat and ENVISAT SAR images", Geoscience and Remote
 Sensing Symposium, 2004. IGARSS '04. Proceedings. 2004 IEEE
-International, 20-24 Sept. 2004, page 4909-4912, vol.7.</p><h4>Can I use the Apply-Orbit-File Operator on JERS-1, Radarsat-1. ALOS, etc.</h4><p>No. The orbit corrections are only for ENVISAT, ERS-1 and ERS-2.&nbsp;If the orbit state vectors in your products are not accurate then this
+International, 20-24 Sept. 2004, page 4909-4912, vol.7.</p><h4>Can I use the Apply-Orbit-File Operator on JERS-1, Radarsat-1. ALOS, etc.</h4><p>No.
+The orbit corrections are only for ENVISAT, ERS-1 and ERS-2.&nbsp;If
+the orbit state vectors in your products are not accurate then this
 would be a problem when orthorectifying. You should be using the
-SARSimulation Terrain Correction to coregister your image with a simulated SAR image generated from the DEM and then terrain correcting.</p><br><h4></h4><p></p>
+SARSimulation Terrain Correction to coregister your image with a
+simulated SAR image generated from the DEM and then terrain correcting.</p><h4>What external DEM does NEST support?</h4><p>Currently only WGS84-latlong
+<span style="font-size: 11pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">(</span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">P</span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB">&#1488; </span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">, P</span></i><span style="font-size: 7pt; font-family: Symbol;" lang="EN-GB">&#1488;</span><i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">, P</span><span style="font-size: 8pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">h</span></i><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;" lang="EN-GB">)</span>&nbsp;DEM&nbsp;in meters is accepted as geographic system. User can specify one tile (i.e. one file) of the DEM.</p><h4></h4><p></p>
 <hr>
 </body></html>
