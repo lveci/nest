@@ -9,6 +9,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.dataop.dem.ElevationModel;
 import org.esa.beam.framework.dataop.dem.ElevationModelDescriptor;
 import org.esa.beam.framework.dataop.resamp.Resampling;
+import org.esa.nest.dataio.dem.srtm3_geotiff.EarthGravitationalModel96;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +35,7 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
     private final Resampling _resampling;
     private final Resampling.Index _resamplingIndex;
     private final Resampling.Raster _resamplingRaster;
+    private static final EarthGravitationalModel96 egm = new EarthGravitationalModel96();
 
     public ACEElevationModel(ACEElevationModelDescriptor descriptor, Resampling resamplingMethod) throws IOException {
         _descriptor = descriptor;
@@ -142,5 +144,9 @@ public class ACEElevationModel implements ElevationModel, Resampling.Raster {
         final Iterator readerPlugIns = ProductIOPlugInManager.getInstance().getReaderPlugIns(
                 ACEReaderPlugIn.FORMAT_NAME);
         return (ACEReaderPlugIn) readerPlugIns.next();
+    }
+
+    public EarthGravitationalModel96 getEarthGravitationalModel96() {
+        return egm;
     }
 }
