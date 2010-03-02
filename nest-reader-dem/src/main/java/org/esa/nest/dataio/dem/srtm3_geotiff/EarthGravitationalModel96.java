@@ -44,7 +44,7 @@ import java.util.StringTokenizer;
 public class EarthGravitationalModel96 {
 
     private static final String NAME = "ww15mgh_b.grd";
-    private static final int NUM_LATS = 481; // 120*4 + 1  (cover 60 degree to -60 degree)
+    private static final int NUM_LATS = 721; // 180*4 + 1  (cover 90 degree to -90 degree)
     private static final int NUM_LONS = 1441; // 360*4 + 1 (cover 0 degree to 360 degree)
     private static final int NUM_CHAR_PER_NORMAL_LINE = 74;
     private static final int NUM_CHAR_PER_SHORT_LINE = 11;
@@ -76,8 +76,8 @@ public class EarthGravitationalModel96 {
         int rowIdx = 0;
         int colIdx = 0;
         try {
-            // skip the 1st 120 lat lines line (90 deg to 61 deg 45 min)
-            final int numLatLinesToSkip = 120; // (90 - 61 + 1)*4;
+
+            final int numLatLinesToSkip = 0;
             final int numCharInHeader = NUM_CHAR_PER_NORMAL_LINE + NUM_CHAR_PER_EMPTY_LINE;
             final int numCharInEachLatLine = NUM_OF_BLOCKS_PER_LAT * BLOCK_HEIGHT * NUM_CHAR_PER_NORMAL_LINE +
                                              (NUM_OF_BLOCKS_PER_LAT + 1) * NUM_CHAR_PER_EMPTY_LINE +
@@ -86,11 +86,11 @@ public class EarthGravitationalModel96 {
             final int totalCharToSkip = numCharInHeader + numCharInEachLatLine * numLatLinesToSkip;
             reader.skip(totalCharToSkip);
 
-            // get the lat lines from 60 deg to -60 deg 45 min
+            // get the lat lines from 90 deg to -90 deg 45 min
             final int numLinesInEachLatLine = NUM_OF_BLOCKS_PER_LAT * (BLOCK_HEIGHT + 1) + 2;
             final int numLinesToRead = NUM_LATS * numLinesInEachLatLine;
             int linesRead = 0;
-            for (int i = 0; i < numLinesToRead; i++) {
+            for (int i = 0; i < numLinesToRead - 1; i++) { // -1 because the last line read from file is null
 
                 line = reader.readLine();
                 linesRead++;
@@ -119,7 +119,7 @@ public class EarthGravitationalModel96 {
 
     public float getEGM(double lat, double lon) {
 
-        final double r = (60 - lat) / 0.25;
+        final double r = (90 - lat) / 0.25;
         final double c = (lon < 0? lon + 360 : lon)/ 0.25;
 
         final int r0 = (int)r;
