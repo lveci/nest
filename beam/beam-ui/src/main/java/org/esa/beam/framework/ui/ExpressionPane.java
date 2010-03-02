@@ -1,5 +1,5 @@
 /*
- * $Id: ExpressionPane.java,v 1.2 2009-12-02 16:52:11 lveci Exp $
+ * $Id: ExpressionPane.java,v 1.3 2010-03-02 16:00:14 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -105,6 +105,7 @@ public class ExpressionPane extends JPanel {
     };
 
     private static final String[] OPERATOR_PATTERNS = new String[]{
+            "IF @ THEN @ ELSE @",
             "@ ? @ : @",
             "@ || @",
             "@ or @",

@@ -1,5 +1,5 @@
 /*
- * $Id: ParserImpl.java,v 1.1 2009-04-28 14:39:32 lveci Exp $
+ * $Id: ParserImpl.java,v 1.2 2010-03-02 16:00:14 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -28,7 +28,7 @@ import com.bc.jexp.Term;
  * A default implementation for the {@link <code>com.bc.jexp.Parser</code>} interface.
  *
  * @author Norman Fomferra (norman.fomferra@brockmann-consult.de)
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:32 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-02 16:00:14 $
  */
 public final class ParserImpl implements Parser {
 
@@ -137,7 +137,7 @@ public final class ParserImpl implements Parser {
         if (namespace != null && namespace != defaultNamespace) {
             _defaultNamespace = new NamespaceImpl(namespace);
         }
-        _tokenizer = new Tokenizer(code);
+        _tokenizer = new Tokenizer(code.replace("IF",""));
         Term term = parseImpl();
         _tokenizer = null;
         _defaultNamespace = defaultNamespace;
@@ -202,10 +202,10 @@ public final class ParserImpl implements Parser {
     private Term parseConditional(final boolean required) throws ParseException {
         Term t1 = parseLogicalOr(required);
         int tt = _tokenizer.next();
-        if (tt == '?') {
+        if (tt == '?' || _tokenizer.getToken().equalsIgnoreCase("THEN")) {
             Term t2 = parseTerm(true);
             tt = _tokenizer.next();
-            if (tt == ':') {
+            if (tt == ':' || _tokenizer.getToken().equalsIgnoreCase("ELSE")) {
                 if (isTypeChecking() && !t1.isB()) {
                     reportError("Boolean operand expected before '?' in conditional '?:' term.");
                 }
