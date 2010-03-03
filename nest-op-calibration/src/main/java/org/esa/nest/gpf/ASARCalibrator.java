@@ -94,8 +94,8 @@ public class ASARCalibrator implements Calibrator {
 
     private static final int numOfGains = 201; // number of antenna pattern gain values for a given swath and
                                                // polarization in the aux file
-    private double refSlantRange = 800000.0; //  m
-    private double halfLightSpeedByRefSlantRange = Constants.halfLightSpeed / refSlantRange;
+//    private double refSlantRange = 800000.0; //  m
+//    private double halfLightSpeedByRefSlantRange = Constants.halfLightSpeed / refSlantRange;
     private static final double refSlantRange800km = 800000.0; //  m
     private static final double underFlowFloat = 1.0e-30;
     private static final int INVALID_SUB_SWATH_INDEX = -1;
@@ -268,11 +268,6 @@ public class ASARCalibrator implements Calibrator {
 
         applyAntennaPatternCorr = !srgrFlag || retroCalibrationFlag || !antElevCorrFlag;
         applyRangeSpreadingCorr = !rangeSpreadCompFlag;
-        /* The following lines cause problem in calibration of GM product
-        if(productType.contains("ASA_GM")) {
-            applyRangeSpreadingCorr = true;   
-        }
-        */
     }
 
     /**
@@ -358,13 +353,6 @@ public class ASARCalibrator implements Calibrator {
         slantRangeTime = OperatorUtils.getSlantRangeTime(sourceProduct);
         incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
         latitude = OperatorUtils.getLatitude(sourceProduct);
-
-        if (productType.contains("ASA_GM")) {
-            final double centreSlandRangeNS = slantRangeTime.getPixelDouble(sourceProduct.getSceneRasterWidth()/2,
-                                                                            sourceProduct.getSceneRasterHeight()/2);
-            refSlantRange = Constants.halfLightSpeed * (centreSlandRangeNS/ 1000000000.0); // ns to s;
-            halfLightSpeedByRefSlantRange = Constants.halfLightSpeed / refSlantRange;
-        }
     }
 
     /**
@@ -800,10 +788,6 @@ public class ASARCalibrator implements Calibrator {
             rangeSpreadingCompPower = 4.0;
         }
         halfRangeSpreadingCompPower = rangeSpreadingCompPower / 2.0;
-
-        if (productType.contains("ASA_GM")) {
-            rangeSpreadingCompPower = 5.0;
-        }
     }
 
     /**
@@ -1462,7 +1446,7 @@ public class ASARCalibrator implements Calibrator {
         }
 
         return sigma / newCalibrationConstant[bandPolarIdx] / (gain*gain) *
-               Math.pow(slantRange/refSlantRange, rangeSpreadingCompPower) *
+               Math.pow(slantRange/refSlantRange800km, rangeSpreadingCompPower) *
                Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR);
     }
 
