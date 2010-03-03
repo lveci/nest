@@ -354,7 +354,7 @@ public class RangeDopplerGeocodingOp extends Operator {
         }
 
         azimuthSpacing = AbstractMetadata.getAttributeDouble(absRoot, AbstractMetadata.azimuth_spacing);
-        if (rangeSpacing <= 0.0 || azimuthSpacing <= 0.0) {
+        if (azimuthSpacing <= 0.0) {
             throw new OperatorException("Invalid input for azimuth pixel spacing: " + azimuthSpacing);
         }
 
@@ -870,7 +870,7 @@ public class RangeDopplerGeocodingOp extends Operator {
      * Update metadata in the target product.
      * @throws OperatorException The exception.
      */
-    private void updateTargetProductMetadata() throws OperatorException {
+    private void updateTargetProductMetadata() throws OperatorException, Exception {
 
         final MetadataElement absTgt = AbstractMetadata.getAbstractedMetadata(targetProduct);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.srgr_flag, 1);
@@ -905,6 +905,12 @@ public class RangeDopplerGeocodingOp extends Operator {
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.geo_ref_system, "WGS84");
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lat_pixel_res, delLat);
         AbstractMetadata.setAttribute(absTgt, AbstractMetadata.lon_pixel_res, delLon);
+
+        if (Double.compare(pixelSpacing, 0.0) != 0 &&
+            Double.compare(pixelSpacing, getPixelSpacing(sourceProduct)) != 0) {
+            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.range_spacing, pixelSpacing);
+            AbstractMetadata.setAttribute(absTgt, AbstractMetadata.azimuth_spacing, pixelSpacing);
+        }        
     }
 
     /**
