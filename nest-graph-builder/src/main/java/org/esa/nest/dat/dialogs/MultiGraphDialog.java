@@ -198,7 +198,7 @@ public abstract class MultiGraphDialog extends ModelessDialog {
         try {
             // check the all files have been saved
             final Product srcProduct = ioPanel.getSelectedSourceProduct();
-            if(srcProduct.isModified() || srcProduct.getFileLocation() == null) {
+            if(srcProduct!=null && (srcProduct.isModified() || srcProduct.getFileLocation() == null)) {
                 throw new OperatorException("The source product has been modified. Please save it before using it in "+getTitle());
             }
             assignParameters();
