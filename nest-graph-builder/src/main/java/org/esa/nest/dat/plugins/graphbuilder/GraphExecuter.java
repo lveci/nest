@@ -455,6 +455,33 @@ public class GraphExecuter extends Observable {
         return fileList;
     }
 
+    /**
+     * Update the nodes in the graph with the given reader file and writer file
+     * @param graphEx
+     * @param readID
+     * @param readPath
+     * @param writeID
+     * @param writePath
+     * @param format
+     */
+    public static void setGraphIO(final GraphExecuter graphEx,
+                              final String readID, final File readPath,
+                              final String writeID, final File writePath,
+                              final String format) {
+        final GraphNode readNode = graphEx.findGraphNode(readID);
+        if (readNode != null) {
+            graphEx.setOperatorParam(readNode.getID(), "file", readPath.getAbsolutePath());
+        }
+
+        if (writeID != null) {
+            final GraphNode writeNode = graphEx.findGraphNode(writeID);
+            if (writeNode != null) {
+                graphEx.setOperatorParam(writeNode.getID(), "formatName", format);
+                graphEx.setOperatorParam(writeNode.getID(), "file", writePath.getAbsolutePath());
+            }
+        }
+    }
+
     private static class ProductSetData {
         String nodeID = null;
         final ArrayList<String> fileList = new ArrayList<String>(10);

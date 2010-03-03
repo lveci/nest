@@ -51,6 +51,11 @@
       <artifactId>nest-reader-ers-ceos</artifactId>
       <version>${nest.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.esa.nest</groupId>
+      <artifactId>nest-reader-dem</artifactId>
+      <version>${nest.version}</version>
+    </dependency>
   </dependencies>
   
 </project>

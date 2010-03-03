@@ -74,31 +74,13 @@ class PCADialog extends MultiGraphDialog {
                 "1-Read", ioPanel.getSelectedSourceProduct().getFileLocation());
 
         // third Graph - PCA-Image
-        setIO(graphExecuterList.get(2),
+        GraphExecuter.setGraphIO(graphExecuterList.get(2),
                 "1-Read", ioPanel.getSelectedSourceProduct().getFileLocation(),
                 "3-Write", ioPanel.getTargetFile(), ioPanel.getTargetFormat());
     }
 
     private static void setIO(final GraphExecuter graphEx, final String readID, final File readPath) {
-        setIO(graphEx, readID, readPath, null, null, null);
-    }
-
-    private static void setIO(final GraphExecuter graphEx,
-                       final String readID, final File readPath,
-                       final String writeID, final File writePath,
-                       final String format) {
-        final GraphNode readNode = graphEx.findGraphNode(readID);
-        if (readNode != null) {
-            graphEx.setOperatorParam(readNode.getID(), "file", readPath.getAbsolutePath());
-        }
-
-        if (writeID != null) {
-            final GraphNode writeNode = graphEx.findGraphNode(writeID);
-            if (writeNode != null) {
-                graphEx.setOperatorParam(writeNode.getID(), "formatName", format);
-                graphEx.setOperatorParam(writeNode.getID(), "file", writePath.getAbsolutePath());
-            }
-        }
+        GraphExecuter.setGraphIO(graphEx, readID, readPath, null, null, null);
     }
 
     @Override

@@ -82,12 +82,12 @@ class SARSimTerrainCorrectionDialog extends MultiGraphDialog {
     protected void assignParameters() throws GraphException {
         
         // first Graph - SAR Simulation
-        setIO(graphExecuterList.get(0),
+        GraphExecuter.setGraphIO(graphExecuterList.get(0),
                 "1-Read", ioPanel.getSelectedSourceProduct().getFileLocation(),
                 "4-Write", tmpFile1, internalFormat);
 
         // second Graph - Automated Terrain Correction
-        setIO(graphExecuterList.get(1),
+        GraphExecuter.setGraphIO(graphExecuterList.get(1),
                 "1-Read", tmpFile1,
                 "3-Write", ioPanel.getTargetFile(), ioPanel.getTargetFormat());
 
@@ -96,24 +96,6 @@ class SARSimTerrainCorrectionDialog extends MultiGraphDialog {
             final BaseOperatorUI ui = (BaseOperatorUI)tcNode.GetOperatorUI();
             //ui.overrideParameterMap("pixelSpacing", 4.0);
             ui.setSourceProducts(new Product[] { ioPanel.getSelectedSourceProduct() });
-        }
-    }
-
-    private static void setIO(final GraphExecuter graphEx,
-                              final String readID, final File readPath,
-                              final String writeID, final File writePath,
-                              final String format) {
-        final GraphNode readNode = graphEx.findGraphNode(readID);
-        if (readNode != null) {
-            graphEx.setOperatorParam(readNode.getID(), "file", readPath.getAbsolutePath());
-        }
-
-        if (writeID != null) {
-            final GraphNode writeNode = graphEx.findGraphNode(writeID);
-            if (writeNode != null) {
-                graphEx.setOperatorParam(writeNode.getID(), "formatName", format);
-                graphEx.setOperatorParam(writeNode.getID(), "file", writePath.getAbsolutePath());
-            }
         }
     }
 

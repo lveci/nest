@@ -34,22 +34,4 @@ public class TestCoregistrationGraph extends TestCase {
         graphEx.executeGraph(ProgressMonitor.NULL);   */
     }
 
-    private static void setIO(final GraphExecuter graphEx,
-                              final String readID, final File readPath,
-                              final String writeID, final File writePath,
-                              final String format) {
-        final GraphNode readNode = graphEx.findGraphNodeByOperator(readID);
-        if (readNode != null) {
-            graphEx.setOperatorParam(readNode.getID(), "file", readPath.getAbsolutePath());
-        }
-
-        if (writeID != null) {
-            final GraphNode writeNode = graphEx.findGraphNodeByOperator(writeID);
-            if (writeNode != null) {
-                graphEx.setOperatorParam(writeNode.getID(), "formatName", format);
-                graphEx.setOperatorParam(writeNode.getID(), "file", writePath.getAbsolutePath());
-            }
-        }
-    }
-
 }

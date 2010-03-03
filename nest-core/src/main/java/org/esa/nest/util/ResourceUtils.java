@@ -149,6 +149,11 @@ public final class ResourceUtils {
         return tmpDir;
     }
 
+    public static File getGraphFolder(final String subFolder) {
+        final String homeUrl = System.getProperty("nest.home", ".");
+        return new File(homeUrl, File.separator + "graphs" + File.separator + subFolder);
+    }
+
     public static File findUserAppFile(String filename)
     {
         // check userhome/.nest first
