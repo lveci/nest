@@ -205,7 +205,7 @@ public class TestUtils {
                                             final String[] productTypeExemptions,
                                             final String[] exceptionExemptions) throws Exception {
         for(File file : folder.listFiles()) {
-            if(maxIteration > 0 && iterations > maxIteration)
+            if(maxIteration > 0 && iterations >= maxIteration)
                 break;
 
             if(file.isDirectory()) {
