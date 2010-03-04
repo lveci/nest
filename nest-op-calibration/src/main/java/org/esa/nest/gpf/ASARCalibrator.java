@@ -1331,13 +1331,7 @@ public class ASARCalibrator implements Calibrator {
         }
 
         final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
-
-        int i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y, TiePointGrid.InterpMode.QUADRATIC))/delLat + 0.5);
-        if (i < 0) {
-            i = 0;
-        }
-
-        final double elevationAngle = computeElevationAngle(slantRange, satelitteHeight, avgSceneHeight+earthRadius[i]);
+        final double elevationAngle = computeElevationAngle(slantRange, satelitteHeight, avgSceneHeight+getEarthRadius(x,y));
 
         double gain = 0.0;
         if (wideSwathProductFlag) {
@@ -1465,13 +1459,7 @@ public class ASARCalibrator implements Calibrator {
         }
 
         final double slantRange = computeSlantRange(x, y, srgrConvParam); // in m
-
-        int i = (int)((latMax - latitude.getPixelFloat((float)x, (float)y, TiePointGrid.InterpMode.QUADRATIC))/delLat + 0.5);
-        if (i < 0) {
-            i = 0;
-        }
-
-        final double elevationAngle = computeElevationAngle(slantRange, satelitteHeight, avgSceneHeight+earthRadius[i]);
+        final double elevationAngle = computeElevationAngle(slantRange, satelitteHeight, avgSceneHeight+getEarthRadius(x,y));
         subSwathIndex[0] = findSubSwath(elevationAngle, refElevationAngle);
     }
 
