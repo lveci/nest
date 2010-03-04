@@ -87,7 +87,7 @@ public final class ftpUtils {
                         if(fileSize != null) {
                             total += n;
                             final int pct = (int)((total/(float)fileSize) * 100);
-                            if(pct >= lastPct + 10) {
+                            if(pct >= lastPct + 1) {
                                 visatApp.setStatusBarMessage("Downloading "+localFile.getName()+"... "+pct+"%");
                                 lastPct = pct;
                             }

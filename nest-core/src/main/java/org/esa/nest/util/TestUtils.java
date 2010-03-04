@@ -37,9 +37,9 @@ public class TestUtils {
     public final static String rootPathCosmoSkymed = testPreferences.getPropertyString("nest.test.rootPathCosmoSkymed");
     public final static String rootPathMixProducts = testPreferences.getPropertyString("nest.test.rootPathMixProducts");
 
-    private static String[] nonValidExtensions = { "xsd", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord", "tgz",
+    private static String[] nonValidExtensions = { "xsd", "xsl", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord", "tgz",
                                                    "tif", "tiff", "tfw", "gif", "jpg", "jgw", "hdr", "self", "report",
-                                                   "log", "html", "htm", "png", "bmp", "ps", "aux", "ovr" };
+                                                   "log", "html", "htm", "png", "bmp", "ps", "aux", "ovr", "brs" };
     private static String[] nonValidprefixes = { "led", "trl", "nul", "lea", "dat", "img", "dfas", "dfdn", "lut" };
 
     private static final int maxIteration = Integer.parseInt(testPreferences.getPropertyString("nest.test.maxProductsPerRootFolder"));
@@ -229,9 +229,9 @@ public class TestUtils {
                         TestUtils.executeOperator(op);
 
                         ++iterations;
-                    } //else {
-                      //  System.out.println(file.getName() + " is non valid");
-                    //}
+                    } else {
+                        System.out.println(file.getName() + " is non valid");
+                    }
                 } catch(Exception e) {
                     boolean ok = false;
                     if(exceptionExemptions != null) {

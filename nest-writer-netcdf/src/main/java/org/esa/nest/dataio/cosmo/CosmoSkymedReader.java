@@ -258,6 +258,11 @@ public class CosmoSkymedReader extends AbstractProductReader {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.azimuth_looks,
                 globalElem.getAttributeDouble("Azimuth Processing Number of Looks", defInt));
 
+        if(productType.contains("GEC")) {
+            AbstractMetadata.setAttribute(absRoot, AbstractMetadata.map_projection,
+                globalElem.getAttributeString("Projection ID", defStr));
+        }
+
         final MetadataElement s01Elem = globalElem.getElement("S01");
         if(s01Elem != null) {
             AbstractMetadata.setAttribute(absRoot, AbstractMetadata.pulse_repetition_frequency,
