@@ -40,7 +40,7 @@ public class TestOrthorectifyGraph extends TestCase {
         final File outputFile = new File(ResourceUtils.getApplicationUserTempDataDir(), "tmpOut.dim");
         if(!inputFile.exists()) return;
 
-        final GraphExecuter graphEx = new GraphExecuter();
+    /*     final GraphExecuter graphEx = new GraphExecuter();
         graphEx.loadGraph(new File(ResourceUtils.getGraphFolder("User Graphs"), graphFile1), false);
 
         GraphExecuter.setGraphIO(graphEx,
@@ -49,9 +49,9 @@ public class TestOrthorectifyGraph extends TestCase {
                 DimapProductConstants.DIMAP_FORMAT_NAME);
 
         graphEx.InitGraph();
-        graphEx.executeGraph(ProgressMonitor.NULL);
+        graphEx.executeGraph(ProgressMonitor.NULL);  */
     }
-
+     /*
     public void testRemoveAntPat_OrthorectifyGraph() throws GraphException {
         final File inputFile = new File(TestUtils.rootPathExpectedProducts, ERS_PRI);
         final File outputFile = new File(ResourceUtils.getApplicationUserTempDataDir(), "tmpOut.dim");
@@ -84,7 +84,7 @@ public class TestOrthorectifyGraph extends TestCase {
 
         graphEx.InitGraph();
         graphEx.executeGraph(ProgressMonitor.NULL);
-    }
+    }           */
 
   /*  public void testMultilookCalibrateOrthorectifyGraph() throws GraphException {
         final File inputFile = new File(TestUtils.rootPathExpectedProducts, ASAR_IMM);
