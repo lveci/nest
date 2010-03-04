@@ -1164,9 +1164,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
         double delLatMax = Math.abs(lat - sensorGeoPos.lat);
         double delLonMax;
         if (lon < 0 && sensorGeoPos.lon > 0) {
-            delLonMax = Math.abs(360 + lon - sensorGeoPos.lon);
+            delLonMax = Math.min(Math.abs(360 + lon - sensorGeoPos.lon), sensorGeoPos.lon - lon);
         } else if (lon > 0 && sensorGeoPos.lon < 0) {
-            delLonMax = Math.abs(360 + sensorGeoPos.lon - lon);
+            delLonMax = Math.min(Math.abs(360 + sensorGeoPos.lon - lon), lon - sensorGeoPos.lon);
         } else {
             delLonMax = Math.abs(lon - sensorGeoPos.lon);
         }
@@ -1175,9 +1175,9 @@ public class SARSimTerrainCorrectionOp extends Operator {
         double srcLon = longitude.getPixelFloat((float)rangeIndex, (float)azimuthIndex);
         double delLon;
         if (lon < 0 && srcLon > 0) {
-            delLon = Math.abs(360 + lon - srcLon);
+            delLon = Math.min(Math.abs(360 + lon - srcLon), srcLon - lon);
         } else if (lon > 0 && srcLon < 0) {
-            delLon = Math.abs(360 + srcLon - lon);
+            delLon = Math.min(Math.abs(360 + srcLon - lon), lon - srcLon);
         } else {
             delLon = Math.abs(lon - srcLon);
         }
