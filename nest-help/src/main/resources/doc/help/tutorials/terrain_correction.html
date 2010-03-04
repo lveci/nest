@@ -73,11 +73,7 @@ is referred
 to <a href="../operators/RemoveAntennaPatternOp.html">Remove Antenna Pattern Operator</a>.</p><p>Note also that among&nbsp;<span style="font-style: italic;">&#963;</span><sup style="font-style: italic;"><sub>0</sub></sup>, <span style="font-style: italic;">&#947;</span><sup style="font-style: italic;"><sub>0</sub></sup> and <span style="font-style: italic;">&#946;</span><sup style="font-style: italic;"><sub>0</sub></sup> bands output in the target product, only <span style="font-style: italic;">&#963;</span><sup style="font-style: italic;"><sub>0</sub></sup>&nbsp;is real band while <span style="font-style: italic;">&#947;</span><sup style="font-style: italic;"><sub>0</sub></sup> and <span style="font-style: italic;">&#946;</span><sup style="font-style: italic;"><sub>0</sub></sup>&nbsp;are virtual bands expressed in terms of <span style="font-style: italic;">&#963;</span><sup style="font-style: italic;"><sub>0</sub></sup>&nbsp;and incidence angle. Therefore, <span style="font-style: italic;">&#963;</span><sup style="font-style: italic;"><sub>0</sub></sup> and incidence angle are&nbsp;automatically saved and output if  <span style="font-style: italic;">&#947;</span><sup style="font-style: italic;"><sub>0</sub></sup> or&nbsp;<span style="font-style: italic;">&#946;</span><sup style="font-style: italic;"><sub>0</sub></sup> is selected.&nbsp;</p><p>For&nbsp;<span style="font-style: italic;">&#963;</span><sup style="font-style: italic;"><sub>0</sub></sup> and <span style="font-style: italic;">&#947;</span><sup style="font-style: italic;"><sub>0</sub></sup>&nbsp;calculation,
 user can select using projected local incidence angle (local incidence angle projected onto range plane) or incidence
 angle from ellipsoid (incidence angle from tie points of
-the source product).</p><p>For all ASAR&nbsp;products, <span style="font-style: italic;">&#946;</span><sup style="font-style: italic;"><sub>0</sub></sup> is given as the follows:<br></p>&nbsp;<br><div style="margin-left: 40px;"><img style="width: 255px; height: 63px;" alt="" src="../operators/images/range_doppler_eq4.jpg"><br></div><h4>Radiometric Normalization (Third Party Products)</h4><ul><li>For
-radiometric normalization of ALOS product, the operator applies only
-calibration constant correction.</li><li>For RadarSAT2 product, the operator
-applies only antenna pattern gain correction.</li><li> Other third paty products
-are currently not supported.</li></ul><h4>Radiometric Normalization with Multilook</h4><ul><li style="font-weight: bold;"> <span style="font-weight: normal;">Right now i</span><span style="font-weight: normal;"></span><span style="font-weight: normal;">f
+the source product).</p><p>For all ASAR&nbsp;products, <span style="font-style: italic;">&#946;</span><sup style="font-style: italic;"><sub>0</sub></sup> is given as the follows:<br></p>&nbsp;<br><div style="margin-left: 40px;"><img style="width: 255px; height: 63px;" alt="" src="../operators/images/range_doppler_eq4.jpg"><br></div><h4>Radiometric Normalization with Multilook</h4><ul><li style="font-weight: bold;"> <span style="font-weight: normal;">Right now i</span><span style="font-weight: normal;"></span><span style="font-weight: normal;">f
 a detected product (such as ASAR IMP, APP, APM, WSM or ERS PRI) has
 already been multilooked, then the&nbsp;radiometric
 normalization does not correct the antenna pattern and range spreading
@@ -88,7 +84,11 @@ multilooking.</span></li><li style="font-weight: bold;"><span style="font-weight
 user needs to apply a rigorous radiometric normalization, multilook and terrain
 correction to a product, then user graphs
 'RemoveAntPat_Multilook_Orthorectify' or
-'RemoveAntPat_Multilook_SARSim_GCPSelection' should be used.</span></li></ul><h4>Steps to Produce Orthorectified Image</h4>
+'RemoveAntPat_Multilook_SARSim_GCPSelection' should be used.</span></li></ul><h4>Radiometric Normalization (Third Party Products)</h4><ul><li>For
+radiometric normalization of ALOS product, the operator applies only
+calibration constant correction.</li><li>For RadarSAT2 product, the operator
+applies only antenna pattern gain correction.</li><li> Other third paty products
+are currently not supported.</li></ul><h4>Steps to Produce Orthorectified Image</h4>
 &nbsp;&nbsp;&nbsp;The following steps should be followed to produce an orthorectified image:<br><ol><li>From the Geometry menu select Terrain Correction. This will call up the dialog for the <a href="../operators/RangeDopplerGeocodingOp.html">Terrain Correction</a>
 Operator (Figure 1).</li><li>Select your source bands.</li><li>Select
 the Digital Elevation Model (DEM) to use. You can select 30
