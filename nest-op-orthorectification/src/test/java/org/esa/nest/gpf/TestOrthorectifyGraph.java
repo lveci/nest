@@ -21,7 +21,9 @@ public class TestOrthorectifyGraph extends TestCase {
     private static String graphFile2 = "RemoveAntPat_Orthorectify.xml";
     private static String graphFile3 = "RemoveAntPat_SARSim_GCPSelection.xml";
     private static String graphFile4 = "Multilook-Calibrate-Orthorectify.xml";
-    private static String ASAR_IMM = "input\\subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim";
+    private static String ASAR_IMM = "input\\ASA_IMM_1P_0739.N1";
+    private static String ASAR_IMM_SUB = "input\\subset_0_of_ENVISAT-ASA_IMM_1P_0739.dim";
+    private static String ERS_PRI = "input\\subset_0_of_ERS-1_SAR_PRI-ORBIT_32506_DATE__02-OCT-1997_14_53_43.dim";
 
     @Override
     protected void setUp() throws Exception {
@@ -51,7 +53,7 @@ public class TestOrthorectifyGraph extends TestCase {
     }
 
     public void testRemoveAntPat_OrthorectifyGraph() throws GraphException {
-        final File inputFile = new File(TestUtils.rootPathExpectedProducts, ASAR_IMM);
+        final File inputFile = new File(TestUtils.rootPathExpectedProducts, ERS_PRI);
         final File outputFile = new File(ResourceUtils.getApplicationUserTempDataDir(), "tmpOut.dim");
         if(!inputFile.exists()) return;
 
@@ -68,7 +70,7 @@ public class TestOrthorectifyGraph extends TestCase {
     }
 
     public void testRemoveAntPat_SARSim_GCPSelectionGraph() throws GraphException {
-        final File inputFile = new File(TestUtils.rootPathExpectedProducts, ASAR_IMM);
+        final File inputFile = new File(TestUtils.rootPathExpectedProducts, ERS_PRI);
         final File outputFile = new File(ResourceUtils.getApplicationUserTempDataDir(), "tmpOut.dim");
         if(!inputFile.exists()) return;
 
