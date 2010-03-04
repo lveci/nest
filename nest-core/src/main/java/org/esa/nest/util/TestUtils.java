@@ -37,9 +37,14 @@ public class TestUtils {
     public final static String rootPathCosmoSkymed = testPreferences.getPropertyString("nest.test.rootPathCosmoSkymed");
     public final static String rootPathMixProducts = testPreferences.getPropertyString("nest.test.rootPathMixProducts");
 
+    private final static int subsetX = Integer.parseInt(testPreferences.getPropertyString("nest.test.subsetX"));
+    private final static int subsetY = Integer.parseInt(testPreferences.getPropertyString("nest.test.subsetY"));
+    private final static int subsetWidth = Integer.parseInt(testPreferences.getPropertyString("nest.test.subsetWidth"));
+    private final static int subsetHeight = Integer.parseInt(testPreferences.getPropertyString("nest.test.subsetHeight"));
+
     private static String[] nonValidExtensions = { "xsd", "xsl", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord", "tgz",
-                                                   "tif", "tiff", "tfw", "gif", "jpg", "jgw", "hdr", "self", "report",
-                                                   "log", "html", "htm", "png", "bmp", "ps", "aux", "ovr", "brs" };
+                                                   "tif", "tiff", "tfw", "gif", "jpg", "jgw", "hdr", "self", "report", "raw",
+                                                   "log", "html", "htm", "png", "bmp", "ps", "aux", "ovr", "brs", "kml", "kmz" };
     private static String[] nonValidprefixes = { "led", "trl", "nul", "lea", "dat", "img", "dfas", "dfdn", "lut" };
 
     private static final int maxIteration = Integer.parseInt(testPreferences.getPropertyString("nest.test.maxProductsPerRootFolder"));
@@ -188,9 +193,20 @@ public class TestUtils {
         if(targetBand == null)
             throwErr("targetBand at 0 is null");
 
+        final int bandWidth = targetBand.getSceneRasterWidth();
+        final int bandHeight = targetBand.getSceneRasterHeight();
+
         // readPixels: execute computeTiles()
         final float[] floatValues = new float[10000];
-        targetBand.readPixels(100, 100, 100, 100, floatValues, ProgressMonitor.NULL);
+        targetBand.readPixels(within(subsetX, bandWidth),
+                              within(subsetY, bandHeight),
+                              within(subsetWidth, bandWidth),
+                              within(subsetHeight, bandHeight), 
+                              floatValues, ProgressMonitor.NULL);
+    }
+
+    private static int within(final int val, final int max) {
+        return Math.max(0, Math.min(val, max));
     }
 
     private static boolean isAlos(Product prod) {
