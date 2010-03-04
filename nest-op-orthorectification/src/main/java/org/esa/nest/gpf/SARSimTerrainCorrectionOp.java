@@ -206,6 +206,8 @@ public class SARSimTerrainCorrectionOp extends Operator {
     private boolean orthoDataProduced = false;  // check if any ortho data is actually produced
     private boolean processingStarted = false;
 
+    private boolean flipIndex = false; // temp fix for descending Radarsat2
+
     /**
      * Initializes this operator and sets the one and only target product.
      * <p>The target product can be either defined by a field of type {@link org.esa.beam.framework.datamodel.Product} annotated with the
@@ -373,6 +375,14 @@ public class SARSimTerrainCorrectionOp extends Operator {
                 throw new OperatorException("For radiometric normalization of ERS product, please use one of the following\n" +
                         " user graphs: 'RemoveAntPat_SARSim_GCPSelection' or 'RemoveAntPat_Multilook_SARSim_GCPSelection',\n" +
                         " then apply 'SARSim Terrain Correction' operator to the output in the Graph Builder.");
+            }
+        }
+
+        // temp fix for descending Radarsat2
+        if (mission.contains("RS2")) {
+            final String pass = absRoot.getAttributeString(AbstractMetadata.PASS);
+            if (pass.contains("DESCENDING")) {
+                flipIndex = true;
             }
         }
     }
@@ -991,9 +1001,14 @@ public class SARSimTerrainCorrectionOp extends Operator {
                     slantRange = RangeDopplerGeocodingOp.computeSlantRange(
                             zeroDopplerTimeWithoutBias, timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    final double rangeIndex = RangeDopplerGeocodingOp.computeRangeIndex(
+                    /*final*/ double rangeIndex = RangeDopplerGeocodingOp.computeRangeIndex(
                             srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC, rangeSpacing,
                             zeroDopplerTimeWithoutBias, slantRange, nearEdgeSlantRange, srgrConvParams);
+
+                    // temp fix for descending Radarsat2
+                    if (flipIndex) {
+                        rangeIndex = srcMaxRange - rangeIndex;
+                    }
 
                     if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, srcMaxRange, srcMaxAzimuth, sensorPos)) {
                         saveNoDataValueToTarget(index, trgTiles);

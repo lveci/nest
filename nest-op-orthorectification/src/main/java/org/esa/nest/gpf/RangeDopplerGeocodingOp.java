@@ -206,6 +206,8 @@ public class RangeDopplerGeocodingOp extends Operator {
     private boolean orthoDataProduced = false;  // check if any ortho data is actually produced
     private boolean processingStarted = false;
 
+    private boolean flipIndex = false; // temp fix for descending Radarsat2
+
     public static final String USE_INCIDENCE_ANGLE_FROM_DEM = "Use projected local incidence angle from DEM";
     public static final String USE_INCIDENCE_ANGLE_FROM_ELLIPSOID = "Use incidence angle from Ellipsoid";
     public static final double NonValidIncidenceAngle = -99999.0;
@@ -394,6 +396,14 @@ public class RangeDopplerGeocodingOp extends Operator {
                         "  'Remove Antenna Pattern' operator to remove calibration factors applied and apply ADC,\n" +
                         "  then apply 'Range-Doppler Terrain Correction' operator; or use one of the following\n" +
                         "  user graphs: 'RemoveAntPat_Orthorectify' or 'RemoveAntPat_Multilook_Orthorectify'.");
+            }
+        }
+
+        // temp fix for descending Radarsat2
+        if (mission.contains("RS2")) {
+            final String pass = absRoot.getAttributeString(AbstractMetadata.PASS);
+            if (pass.contains("DESCENDING")) {
+                flipIndex = true;
             }
         }
     }
@@ -1122,8 +1132,13 @@ public class RangeDopplerGeocodingOp extends Operator {
                     slantRange = computeSlantRange(
                             zeroDopplerTimeWithoutBias,  timeArray, xPosArray, yPosArray, zPosArray, earthPoint, sensorPos);
 
-                    final double rangeIndex = computeRangeIndex(srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC,
+                    /*final*/ double rangeIndex = computeRangeIndex(srgrFlag, sourceImageWidth, firstLineUTC, lastLineUTC,
                             rangeSpacing, zeroDopplerTimeWithoutBias, slantRange, nearEdgeSlantRange, srgrConvParams);
+
+                    // temp fix for descending Radarsat2
+                    if (flipIndex) {
+                        rangeIndex = srcMaxRange - rangeIndex;
+                    }
 
                     if (!isValidCell(rangeIndex, azimuthIndex, lat, lon, srcMaxRange, srcMaxAzimuth, sensorPos)) {
                         saveNoDataValueToTarget(index, trgTiles);
