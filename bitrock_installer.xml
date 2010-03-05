@@ -222,7 +222,7 @@
                             <origin>target/nest-3C-bin-win.dir/post-uninstall.bat</origin>
                         </distributionFile>
                         <distributionDirectory>
-                            <origin>../dist/jdk7/windows/jre</origin>
+                            <origin>../dist/jdk6/windows/jre</origin>
                         </distributionDirectory>
                     </distributionFileList>
                 </folder>

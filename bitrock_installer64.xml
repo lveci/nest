@@ -177,7 +177,7 @@
                             <origin>target/nest-3C-bin-win64.dir/jhdf.dll</origin>
                         </distributionFile>
                         <distributionDirectory>
-                            <origin>../dist/jdk7/windows64/jre</origin>
+                            <origin>../dist/jdk6/windows64/jre</origin>
                         </distributionDirectory>
                     </distributionFileList>
                 </folder>
