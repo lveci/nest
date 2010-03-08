@@ -31,6 +31,7 @@ public final class ftpUtils {
     }
 
     private ftpUtils(final String server, final String user, final String password) throws IOException {
+        ftpClient.setRemoteVerificationEnabled(false);
         ftpClient.connect(server);
         int reply = ftpClient.getReplyCode();
         if (FTPReply.isPositiveCompletion(reply))
@@ -41,7 +42,7 @@ public final class ftpUtils {
         } else {
             ftpClient.enterLocalPassiveMode();
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-            ftpClient.setDataTimeout(30000);
+            ftpClient.setDataTimeout(60000);
         }
     }
 
