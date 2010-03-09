@@ -94,7 +94,6 @@ public class SARSimTerrainCorrectionDialog extends MultiGraphDialog {
         final GraphNode tcNode = graphExecuterList.get(1).findGraphNode("2-SARSim-Terrain-Correction");
         if (tcNode != null) {
             final BaseOperatorUI ui = (BaseOperatorUI)tcNode.GetOperatorUI();
-            //ui.overrideParameterMap("pixelSpacing", 4.0);
             ui.setSourceProducts(new Product[] { ioPanel.getSelectedSourceProduct() });
         }
     }

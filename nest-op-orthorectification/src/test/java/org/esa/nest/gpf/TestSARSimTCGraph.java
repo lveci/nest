@@ -21,7 +21,7 @@ public class TestSARSimTCGraph extends TestCase {
 
     private final static String inputPathWSM =     TestUtils.rootPathExpectedProducts+"\\input\\subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim";
     private final static String test1 = "P:\\nest\\nest\\ESA Data\\RADAR\\ASAR\\Alternating Polarization Medium Resolution\\ASA_APM_1PNIPA20080510_203246_000000422068_00272_32390_0810.N1";
-    private final static String test2 = "P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat2\\Fine Quad Pol\\PK6626_DK340_FQ3_20080331_181047_HH_VV_HV_VH_SLC_(StOfGibraltar_Promo)\\product.xml";
+    private final static String test2 = "";//"P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat2\\Fine Quad Pol\\PK6626_DK340_FQ3_20080331_181047_HH_VV_HV_VH_SLC_(StOfGibraltar_Promo)\\product.xml";
 
     private String[] productTypeExemptions = { "_BP", "XCA", "WVW", "WVI", "WVS", "WSS", "DOR_VOR_AX" };
     private String[] exceptionExemptions = { "not supported", "already map projected" };
