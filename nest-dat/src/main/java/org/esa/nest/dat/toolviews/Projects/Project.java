@@ -473,7 +473,7 @@ public class Project extends Observable {
                 final String pathStr = file.getAbsolutePath();
                 final File dataDir = new File(pathStr.substring(0, pathStr.length()-4) + ".data");
                 if(dataDir.exists()) {
-                    ResourceUtils.deleteDir(dataDir);
+                    ResourceUtils.deleteFile(dataDir);
                     file.delete();
                 }
             } else {

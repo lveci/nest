@@ -236,6 +236,33 @@ public abstract class MultiGraphDialog extends ModelessDialog {
         ioPanel.setTargetProductNameSuffix(suffix);
     }
 
+    /**
+     * For running graphs in unit tests
+     * @throws Exception when failing validation
+     */
+    public void testRunGraph() throws Exception {
+        ioPanel.initProducts();
+        initGraphs();
+
+        if(ValidateAllNodes()) {
+
+            for(GraphExecuter graphEx : graphExecuterList) {
+                final String desc = graphEx.getGraphDescription();
+                if(desc != null && !desc.isEmpty())
+                    System.out.println("Processing "+ graphEx.getGraphDescription());
+
+                graphEx.InitGraph();
+
+                graphEx.executeGraph(ProgressMonitor.NULL);
+                graphEx.disposeGraphContext();
+            }
+
+            cleanUpTempFiles();
+        } else {
+            throw new OperatorException(statusLabel.getText());
+        }
+    }
+
     /////
 
     private class ProcessThread extends SwingWorker<Boolean, Object> {

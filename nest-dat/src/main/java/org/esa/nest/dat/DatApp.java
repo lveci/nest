@@ -170,7 +170,7 @@ public final class DatApp extends VisatApp {
         fileList = tempFolder.listFiles();
         for(File file : fileList) {
             if(file.getName().startsWith("tmp_")) {
-                ResourceUtils.deleteDir(file);
+                ResourceUtils.deleteFile(file);
             }
         }
     }

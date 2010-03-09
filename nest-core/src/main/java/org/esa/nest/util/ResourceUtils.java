@@ -32,20 +32,20 @@ public final class ResourceUtils {
         return new ImageIcon(imageURL);
     }
 
-    public static void deleteDir(final File dir) {
-        if (dir.isDirectory()) {
-            for (String aChild : dir.list()) {
-                deleteDir(new File(dir, aChild));
+    public static void deleteFile(final File file) {
+        if (file.isDirectory()) {
+            for (String aChild : file.list()) {
+                deleteFile(new File(file, aChild));
             }
         }
-        final Product prod = ProductCache.instance().getProduct(dir);
+        final Product prod = ProductCache.instance().getProduct(file);
         if(prod != null) {
-            ProductCache.instance().removeProduct(dir);
+            ProductCache.instance().removeProduct(file);
             prod.dispose();
         }
-        if(!dir.delete())
-            System.out.println("Could not delete "+dir.getName());
-	}
+        if(!file.delete())
+            System.out.println("Could not delete "+file.getName());
+    }
 
     public static File GetFilePath(final String title, final String formatName, final String extension,
                                    final String fileName, final String description, final boolean isSave) {

@@ -417,7 +417,8 @@ public final class AbstractMetadata {
         final MetadataAttribute[] attribs = completeMetadata.getAttributes();
         for(MetadataAttribute at : attribs) {
             if(abstractedMetadata.getAttribute(at.getName()) == null) {
-                abstractedMetadata.addAttribute(at);   
+                abstractedMetadata.addAttribute(at);
+                abstractedMetadata.getProduct().setModified(false);
             }
         }
     }

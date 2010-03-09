@@ -101,7 +101,7 @@ public class SARSimTerrainCorrectionDialog extends MultiGraphDialog {
 
     @Override
     protected void cleanUpTempFiles() {
-        tmpFile1.delete();
-        ResourceUtils.deleteDir(tmpDataFile1);
+        ResourceUtils.deleteFile(tmpFile1);
+        ResourceUtils.deleteFile(tmpDataFile1);
     }
 }

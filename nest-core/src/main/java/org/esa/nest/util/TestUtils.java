@@ -1,26 +1,19 @@
 package org.esa.nest.util;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.dataio.DecodeQualification;
-import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.dataio.ProductReaderPlugIn;
+import org.esa.beam.framework.dataio.*;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.product.ProductSceneView;
-import org.esa.beam.framework.ui.application.ApplicationPage;
 import org.esa.beam.util.PropertyMap;
+import org.esa.beam.util.ProductUtils;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.awt.*;
 
 /**
  * Utilities for Operator unit tests
@@ -42,10 +35,10 @@ public class TestUtils {
     public final static String rootPathCosmoSkymed = testPreferences.getPropertyString("nest.test.rootPathCosmoSkymed");
     public final static String rootPathMixProducts = testPreferences.getPropertyString("nest.test.rootPathMixProducts");
 
-    private final static int subsetX = Integer.parseInt(testPreferences.getPropertyString("nest.test.subsetX"));
-    private final static int subsetY = Integer.parseInt(testPreferences.getPropertyString("nest.test.subsetY"));
-    private final static int subsetWidth = Integer.parseInt(testPreferences.getPropertyString("nest.test.subsetWidth"));
-    private final static int subsetHeight = Integer.parseInt(testPreferences.getPropertyString("nest.test.subsetHeight"));
+    public final static int subsetX = Integer.parseInt(testPreferences.getPropertyString("nest.test.subsetX"));
+    public final static int subsetY = Integer.parseInt(testPreferences.getPropertyString("nest.test.subsetY"));
+    public final static int subsetWidth = Integer.parseInt(testPreferences.getPropertyString("nest.test.subsetWidth"));
+    public final static int subsetHeight = Integer.parseInt(testPreferences.getPropertyString("nest.test.subsetHeight"));
 
     private static String[] nonValidExtensions = { "xsd", "xsl", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord", "tgz",
                                                    "tif", "tiff", "tfw", "gif", "jpg", "jgw", "hdr", "self", "report", "raw",
@@ -62,6 +55,10 @@ public class TestUtils {
             System.out.println("Unable to load test preferences "+e.getMessage());
         }
         return prefs;
+    }
+
+    public static int getMaxIterations() {
+        return maxIteration;
     }
 
     public static boolean canTestReadersOnAllProducts() {
@@ -210,6 +207,27 @@ public class TestUtils {
                               floatValues, ProgressMonitor.NULL);
     }
 
+    public static Product createSubsetProduct(final Product sourceProduct) throws IOException {
+        final int bandWidth = sourceProduct.getSceneRasterWidth();
+        final int bandHeight = sourceProduct.getSceneRasterHeight();
+
+        final ProductSubsetBuilder subsetReader = new ProductSubsetBuilder();
+        final ProductSubsetDef subsetDef = new ProductSubsetDef();
+
+        subsetDef.addNodeNames(sourceProduct.getTiePointGridNames());
+
+        final String bandName = ProductUtils.findSuitableQuicklookBandName(sourceProduct);
+        subsetDef.addNodeNames(new String[] { bandName } );
+        subsetDef.setRegion(within(subsetX, bandWidth),
+                            within(subsetY, bandHeight),
+                            within(subsetWidth, bandWidth),
+                            within(subsetHeight, bandHeight));
+        subsetDef.setIgnoreMetadata(false);
+        subsetDef.setTreatVirtualBandsAsRealBands(true);
+
+        return subsetReader.readProductNodes(sourceProduct, subsetDef);
+    }
+
     private static int within(final int val, final int max) {
         return Math.max(0, Math.min(val, max));
     }
@@ -265,7 +283,7 @@ public class TestUtils {
                         }
                     }
                     if(!ok) {
-                        System.out.println("Failed to process "+ file.toString());
+                        //System.out.println("Failed to process "+ file.toString());
                         throw e;
                     }
                 }
@@ -274,7 +292,7 @@ public class TestUtils {
         return iterations;
     }
 
-    private static boolean isNotProduct(final File file) {
+    public static boolean isNotProduct(final File file) {
         final String name = file.getName().toLowerCase();
         for(String ext : nonValidExtensions) {
             if(name.endsWith(ext))
@@ -287,7 +305,7 @@ public class TestUtils {
         return false;
     }
 
-    private static boolean contains(final String value, final String[] exemptions) {
+    public static boolean contains(final String value, final String[] exemptions) {
         if(exemptions != null) {
             for(String type : exemptions) {
                 if(value.contains(type))
@@ -315,6 +333,27 @@ public class TestUtils {
         if(canTestProcessingOnAllProducts()) {
             int iterations = 0;
             recurseProcessFolder(spi, folder, iterations, productTypeExemptions, exceptionExemptions);
+        }
+    }
+
+    /**
+     * Processes all products in a folder
+     * @param processor the RecursiveProcessor to create the graph
+     * @param folderPath the path to recurse through
+     * @param productTypeExemptions product types to ignore
+     * @param exceptionExemptions exceptions that are ok and can be ignored for the test
+     * @throws Exception general exception
+     */
+    public static void testProcessAllInPath(final RecursiveProcessor processor, final String folderPath,
+                                            final String[] productTypeExemptions,
+                                            final String[] exceptionExemptions) throws Exception
+    {
+        final File folder = new File(folderPath);
+        if(!folder.exists()) return;
+
+        if(canTestProcessingOnAllProducts()) {
+            int iterations = 0;
+            processor.recurseProcessFolder(folder, iterations, productTypeExemptions, exceptionExemptions);
         }
     }
 
@@ -359,50 +398,5 @@ public class TestUtils {
 
     private static void throwErr(final String description) throws Exception {
         throw new Exception(description);
-    }
-
-
-    /**
-     * Mock AppContext for tests
-     */
-    public class MockAppContext implements AppContext {
-        private PropertyMap preferences = new PropertyMap();
-        private ProductManager prodMan = new ProductManager();
-
-        public Window getApplicationWindow() {
-            return null;
-        }
-
-        public String getApplicationName() {
-            return "Killer App";
-        }
-
-        public ApplicationPage getApplicationPage() {
-            return null;
-        }
-
-        public Product getSelectedProduct() {
-            return null;
-        }
-
-        public void handleError(Throwable e) {
-            JOptionPane.showMessageDialog(getApplicationWindow(), e.getMessage());
-        }
-
-        public void handleError(String message, Throwable e) {
-            JOptionPane.showMessageDialog(getApplicationWindow(), message);
-        }
-
-        public PropertyMap getPreferences() {
-            return preferences;
-        }
-
-        public ProductManager getProductManager() {
-            return prodMan;
-        }
-
-        public ProductSceneView getSelectedProductSceneView() {
-            return null;
-        }
     }
 }

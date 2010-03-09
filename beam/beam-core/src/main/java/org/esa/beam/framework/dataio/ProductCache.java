@@ -27,7 +27,7 @@ public final class ProductCache {
 
     public synchronized void addProduct(final File file, final Product p) {
         productMap.put(file, p);
-        //timeStampMap.put(file, file.lastModified());
+        timeStampMap.put(file, file.lastModified());
 
         fileList.remove(file);
         fileList.add(0, file);
@@ -41,7 +41,7 @@ public final class ProductCache {
 
     public Product getProduct(final File file) {
         final Product prod = productMap.get(file);
-        if(prod != null && prod.getFileLocation() != null && file.lastModified() == prod.getFileLocation().lastModified())
+        if(prod != null && prod.getFileLocation() != null && file.lastModified() == timeStampMap.get(file))
             return prod;
         return null;
     }
@@ -50,6 +50,7 @@ public final class ProductCache {
         if(file == null) return;
         productMap.remove(file);
         fileList.remove(file);
+        timeStampMap.remove(file);
     }
 
     public synchronized void clearCache() {
@@ -62,6 +63,7 @@ public final class ProductCache {
         toDelete.clear();
         productMap.clear();
         fileList.clear();
+        timeStampMap.clear();
     }
 
 }
