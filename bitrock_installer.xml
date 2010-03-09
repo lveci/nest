@@ -2,6 +2,7 @@
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>3C</version>
+    <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>beam/res/NEST_Splash.png</splashImage>
     <postInstallationActionList>
@@ -37,7 +38,7 @@
             </ruleList>
         </createSymLink>
         <substitute>
-            <files>${installdir}\dat.command</files>
+            <files>${installdir}/dat.command</files>
             <type>regexp</type>
             <ruleList>
                 <platformTest>
@@ -46,13 +47,13 @@
             </ruleList>
             <substitutionList>
                 <substitution>
-                    <pattern>%%INSTALL_DIR%%</pattern>
+                    <pattern>@@INSTALL_DIR@@</pattern>
                     <value>${installdir}</value>
                 </substitution>
             </substitutionList>
         </substitute>
         <substitute>
-            <files>${installdir}\gpt.command</files>
+            <files>${installdir}/gpt.command</files>
             <type>regexp</type>
             <ruleList>
                 <platformTest>
@@ -61,7 +62,7 @@
             </ruleList>
             <substitutionList>
                 <substitution>
-                    <pattern>%%INSTALL_DIR%%</pattern>
+                    <pattern>@@INSTALL_DIR@@</pattern>
                     <value>${installdir}</value>
                 </substitution>
             </substitutionList>
