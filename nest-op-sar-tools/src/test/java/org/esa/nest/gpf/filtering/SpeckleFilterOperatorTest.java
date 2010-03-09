@@ -317,6 +317,6 @@ public class SpeckleFilterOperatorTest extends TestCase {
 
     public void testProcessAllNestBox() throws Exception
     {
-        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathMixProducts, null, null);
+        TestUtils.testProcessAllInPath(spi, TestUtils.rootPathMixProducts, productTypeExemptions, null);
     }
 }

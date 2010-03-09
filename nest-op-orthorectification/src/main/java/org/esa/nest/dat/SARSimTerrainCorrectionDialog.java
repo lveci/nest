@@ -16,7 +16,7 @@ import java.io.File;
 /**
  *  Provides the User Interface for Automated Terrain Correction
  */
-class SARSimTerrainCorrectionDialog extends MultiGraphDialog {
+public class SARSimTerrainCorrectionDialog extends MultiGraphDialog {
 
     private final static String homeUrl = System.getProperty("nest.home", ".");
     private final static File graphPath = new File(homeUrl, File.separator + "graphs" + File.separator + "internal");

@@ -9,13 +9,18 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.framework.ui.product.ProductSceneView;
+import org.esa.beam.framework.ui.application.ApplicationPage;
 import org.esa.beam.util.PropertyMap;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.awt.*;
 
 /**
  * Utilities for Operator unit tests
@@ -354,5 +359,50 @@ public class TestUtils {
 
     private static void throwErr(final String description) throws Exception {
         throw new Exception(description);
+    }
+
+
+    /**
+     * Mock AppContext for tests
+     */
+    public class MockAppContext implements AppContext {
+        private PropertyMap preferences = new PropertyMap();
+        private ProductManager prodMan = new ProductManager();
+
+        public Window getApplicationWindow() {
+            return null;
+        }
+
+        public String getApplicationName() {
+            return "Killer App";
+        }
+
+        public ApplicationPage getApplicationPage() {
+            return null;
+        }
+
+        public Product getSelectedProduct() {
+            return null;
+        }
+
+        public void handleError(Throwable e) {
+            JOptionPane.showMessageDialog(getApplicationWindow(), e.getMessage());
+        }
+
+        public void handleError(String message, Throwable e) {
+            JOptionPane.showMessageDialog(getApplicationWindow(), message);
+        }
+
+        public PropertyMap getPreferences() {
+            return preferences;
+        }
+
+        public ProductManager getProductManager() {
+            return prodMan;
+        }
+
+        public ProductSceneView getSelectedProductSceneView() {
+            return null;
+        }
     }
 }

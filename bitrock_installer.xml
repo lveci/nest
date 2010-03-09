@@ -2,7 +2,6 @@
     <shortName>NEST</shortName>
     <fullName>Next ESA SAR Toolbox</fullName>
     <version>3C</version>
-    <installerFilename></installerFilename>
     <licenseFile>LICENSE.txt</licenseFile>
     <splashImage>beam/res/NEST_Splash.png</splashImage>
     <postInstallationActionList>
@@ -20,7 +19,7 @@
             <value>${installdir}</value>
         </addEnvironmentVariable>
         <changePermissions>
-            <files>*/*.sh;*/*.bin;*/*.command;${InstallDir}/*.command;${InstallDir}/dat.sh;${InstallDir}/gpt.sh;${InstallDir}/jre/bin/*;${InstallDir}/*.so;${InstallDir}/*.jnilib</files>
+            <files>*/*.sh;*/*.bin;*/*.command;${installdir}/*.command;${installdir}/dat.sh;${installdir}/gpt.sh;${installdir}/jre/bin/*;${installdir}/*.so;${installdir}/*.jnilib</files>
             <permissions>755</permissions>
         </changePermissions>
         <addDirectoryToPath>
@@ -30,13 +29,43 @@
         </addDirectoryToPath>
         <createSymLink>
             <linkName>~/Desktop/NEST_DAT</linkName>
-            <target>${installdir}/dat.command ${installdir}</target>
+            <target>${installdir}/dat.command</target>
             <ruleList>
                 <platformTest>
                     <type>osx</type>
                 </platformTest>
             </ruleList>
         </createSymLink>
+        <substitute>
+            <files>${installdir}\dat.command</files>
+            <type>regexp</type>
+            <ruleList>
+                <platformTest>
+                    <type>osx</type>
+                </platformTest>
+            </ruleList>
+            <substitutionList>
+                <substitution>
+                    <pattern>%%INSTALL_DIR%%</pattern>
+                    <value>${installdir}</value>
+                </substitution>
+            </substitutionList>
+        </substitute>
+        <substitute>
+            <files>${installdir}\gpt.command</files>
+            <type>regexp</type>
+            <ruleList>
+                <platformTest>
+                    <type>osx</type>
+                </platformTest>
+            </ruleList>
+            <substitutionList>
+                <substitution>
+                    <pattern>%%INSTALL_DIR%%</pattern>
+                    <value>${installdir}</value>
+                </substitution>
+            </substitutionList>
+        </substitute>
     </postInstallationActionList>
     <compressionAlgorithm>lzma</compressionAlgorithm>
     <enableRollback>1</enableRollback>
