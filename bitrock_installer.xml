@@ -30,7 +30,7 @@
         </addDirectoryToPath>
         <createSymLink>
             <linkName>~/Desktop/NEST_DAT</linkName>
-            <target>${installdir}/dat.command</target>
+            <target>${installdir}/dat.command ${installdir}</target>
             <ruleList>
                 <platformTest>
                     <type>osx</type>
