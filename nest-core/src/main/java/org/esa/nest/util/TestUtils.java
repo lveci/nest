@@ -6,8 +6,10 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.operators.common.WriteOp;
 import org.esa.beam.util.PropertyMap;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.nest.dataio.ReaderUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 
@@ -225,7 +227,11 @@ public class TestUtils {
         subsetDef.setIgnoreMetadata(false);
         subsetDef.setTreatVirtualBandsAsRealBands(true);
 
-        return subsetReader.readProductNodes(sourceProduct, subsetDef);
+        final Product subsetProduct = subsetReader.readProductNodes(sourceProduct, subsetDef);
+        final File tmpFile = new File(ResourceUtils.getApplicationUserTempDataDir(), "tmp_subset.dim");
+        WriteOp.writeProduct(subsetProduct, tmpFile, DimapProductConstants.DIMAP_FORMAT_NAME, ProgressMonitor.NULL);           
+
+        return ProductIO.readProduct(tmpFile);
     }
 
     private static int within(final int val, final int max) {

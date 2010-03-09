@@ -5,12 +5,8 @@ import org.esa.nest.dat.SARSimTerrainCorrectionDialog;
 import org.esa.nest.util.TestUtils;
 import org.esa.nest.util.MockAppContext;
 import org.esa.nest.util.RecursiveProcessor;
-import org.esa.nest.util.ResourceUtils;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.gpf.operators.common.WriteOp;
-import org.esa.beam.dataio.dimap.DimapProductConstants;
-import com.bc.ceres.core.ProgressMonitor;
 
 import java.io.File;
 
@@ -21,7 +17,7 @@ public class TestSARSimTCGraph extends TestCase {
 
     private final static String inputPathWSM =     TestUtils.rootPathExpectedProducts+"\\input\\subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim";
     private final static String test1 = "P:\\nest\\nest\\ESA Data\\RADAR\\ASAR\\Alternating Polarization Medium Resolution\\ASA_APM_1PNIPA20080510_203246_000000422068_00272_32390_0810.N1";
-    private final static String test2 = "";//"P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat2\\Fine Quad Pol\\PK6626_DK340_FQ3_20080331_181047_HH_VV_HV_VH_SLC_(StOfGibraltar_Promo)\\product.xml";
+    private final static String test2 = "P:\\nest\\nest\\ESA Data\\RADAR\\Radarsat2\\Fine Quad Pol\\PK6626_DK340_FQ3_20080331_181047_HH_VV_HV_VH_SLC_(StOfGibraltar_Promo)\\product.xml";
 
     private String[] productTypeExemptions = { "_BP", "XCA", "WVW", "WVI", "WVS", "WSS", "DOR_VOR_AX" };
     private String[] exceptionExemptions = { "not supported", "already map projected" };
@@ -37,8 +33,11 @@ public class TestSARSimTCGraph extends TestCase {
     }
 
     public void test1() throws Exception {
+        final File inputFile = new File(test1);
+        if(!inputFile.exists()) return;
+
         final MockAppContext appContext = new MockAppContext();
-        appContext.setSelectedProduct(ProductIO.readProduct(test1));
+        appContext.setSelectedProduct(ProductIO.readProduct(inputFile));
 
         final SARSimTerrainCorrectionDialog dialog = new SARSimTerrainCorrectionDialog(appContext,
                 "SAR Sim Terrain Correction", "SARSimGeocodingOp");
@@ -47,8 +46,13 @@ public class TestSARSimTCGraph extends TestCase {
     }
 
     public void test2() throws Exception {
+        final File inputFile = new File(test2);
+        if(!inputFile.exists()) return;
+
+        final Product subsetProduct = TestUtils.createSubsetProduct(ProductIO.readProduct(inputFile));
+
         final MockAppContext appContext = new MockAppContext();
-        appContext.setSelectedProduct(ProductIO.readProduct(test2));
+        appContext.setSelectedProduct(subsetProduct);
 
         final SARSimTerrainCorrectionDialog dialog = new SARSimTerrainCorrectionDialog(appContext,
                 "SAR Sim Terrain Correction", "SARSimGeocodingOp");
@@ -114,17 +118,13 @@ public class TestSARSimTCGraph extends TestCase {
             System.out.println("Processing "+ sourceProduct.getFileLocation().getAbsolutePath());
             
             final Product subsetProduct = TestUtils.createSubsetProduct(sourceProduct);
-            final File tmpFile = new File(ResourceUtils.getApplicationUserTempDataDir(), "tmp_subset.dim");
-            WriteOp.writeProduct(subsetProduct, tmpFile, DimapProductConstants.DIMAP_FORMAT_NAME, ProgressMonitor.NULL);           
-
-            final Product newProduct = ProductIO.readProduct(tmpFile);
             final MockAppContext appContext = new MockAppContext();
-            appContext.setSelectedProduct(newProduct);
+            appContext.setSelectedProduct(subsetProduct);
 
             final SARSimTerrainCorrectionDialog dialog = new SARSimTerrainCorrectionDialog(appContext,
                     "SAR Sim Terrain Correction", "SARSimGeocodingOp");
 
             dialog.testRunGraph();
         }
-    }
+    }      
 }
