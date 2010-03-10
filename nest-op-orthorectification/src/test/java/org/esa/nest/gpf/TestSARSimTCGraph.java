@@ -46,7 +46,7 @@ public class TestSARSimTCGraph extends TestCase {
     }
 
     public void test2() throws Exception {
-        final File inputFile = new File(test2);
+     /*   final File inputFile = new File(test2);
         if(!inputFile.exists()) return;
 
         final Product subsetProduct = TestUtils.createSubsetProduct(ProductIO.readProduct(inputFile));
@@ -57,7 +57,7 @@ public class TestSARSimTCGraph extends TestCase {
         final SARSimTerrainCorrectionDialog dialog = new SARSimTerrainCorrectionDialog(appContext,
                 "SAR Sim Terrain Correction", "SARSimGeocodingOp");
 
-        dialog.testRunGraph();
+        dialog.testRunGraph();     */
     }
 
     public void testDialog() throws Exception {

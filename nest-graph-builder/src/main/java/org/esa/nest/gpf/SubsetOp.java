@@ -103,15 +103,21 @@ public class SubsetOp extends Operator {
         final ProductData destBuffer = targetTile.getRawSamples();
         final Rectangle rectangle = targetTile.getRectangle();
         try {
-            subsetReader.readBandRasterData(bandMap.get(band),
+            // for virtual bands
+            Band tgtBand = bandMap.get(band);
+            if(tgtBand == null)
+                tgtBand = band;
+            subsetReader.readBandRasterData(tgtBand,
                                             rectangle.x,
                                             rectangle.y,
                                             rectangle.width,
                                             rectangle.height,
                                             destBuffer, pm);
             targetTile.setRawSamples(destBuffer);
-        } catch (IOException e) {
-            throw new OperatorException(e);
+        } catch (Exception e) {
+            OperatorUtils.catchOperatorException(getId(), e);
+        } finally {
+            pm.done();
         }
     }
 
