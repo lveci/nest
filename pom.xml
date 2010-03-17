@@ -489,7 +489,7 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
-                        <skip>false</skip>
+                        <skip>true</skip>
                         <printSummary>true</printSummary>
 						<workingDirectory>../beam</workingDirectory>
                         <excludes>
@@ -554,6 +554,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <descriptors>
+						<descriptor>src/main/assembly/repository.xml</descriptor>
 						<descriptor>src/main/assembly/bin-windows.xml</descriptor>
 						<descriptor>src/main/assembly/bin-windows64.xml</descriptor>
 						<descriptor>src/main/assembly/bin-linux.xml</descriptor>
