@@ -382,29 +382,87 @@ public class Radarsat2ProductDirectory extends XMLProductDirectory {
 
     @Override
     protected void addTiePointGrids(final Product product) {
+
+        final int sourceImageWidth = product.getSceneRasterWidth();
+        final int sourceImageHeight = product.getSceneRasterHeight();
+        final int gridWidth = 11;
+        final int gridHeight = 11;
+        final int subSamplingX = (int)((float)sourceImageWidth / (float)(gridWidth - 1));
+        final int subSamplingY = (int)((float)sourceImageHeight / (float)(gridHeight - 1));
+
+        // Method 1
+        double a = 6378137; // WGS 84: equatorial Earth radius in m (for PGS CEOS)
+        double b = 6356752.314245 ; // WGS 84: polar Earth radius in m (for PGS CEOS)
+        // double a = 6378144; // in m (GEM6)
+        // double b = 6356759; // in m (GEM6)
+
+        // get slant range to first pixel and pixel spacing
+        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+        final double slantRangeToFirstPixel = absRoot.getAttributeDouble(AbstractMetadata.slant_range_to_first_pixel, 0); // in m
+        final double rangeSpacing = absRoot.getAttributeDouble(AbstractMetadata.range_spacing, 0); // in m
+        final boolean srgrFlag = absRoot.getAttributeInt(AbstractMetadata.srgr_flag) != 0;
+
+        // get scene center latitude
+        final GeoPos sceneCenterPos =
+                product.getGeoCoding().getGeoPos(new PixelPos(sourceImageWidth/2.0f, sourceImageHeight/2.0f), null);
+        double sceneCenterLatitude = sceneCenterPos.lat; // in deg
+
+        // get near range incidence angle
         final MetadataElement root = product.getMetadataRoot();
         final MetadataElement productElem = root.getElement("product");
         final MetadataElement imageGenerationParameters = productElem.getElement("imageGenerationParameters");
         final MetadataElement sarProcessingInformation = imageGenerationParameters.getElement("sarProcessingInformation");
+        final MetadataElement incidenceAngleNearRangeElem = sarProcessingInformation.getElement("incidenceAngleNearRange");
+        final double nearRangeIncidenceAngle = (float)incidenceAngleNearRangeElem.getAttributeDouble("incidenceAngleNearRange", 0);
 
-        final MetadataElement incidenceAngleNearRange = sarProcessingInformation.getElement("incidenceAngleNearRange");
-        final float nearRange = (float)incidenceAngleNearRange.getAttributeDouble("incidenceAngleNearRange", 0);
-        final MetadataElement incidenceAngleFarRange = sarProcessingInformation.getElement("incidenceAngleFarRange");
-        final float farRange = (float)incidenceAngleFarRange.getAttributeDouble("incidenceAngleFarRange", 0);
+        final double alpha1 = nearRangeIncidenceAngle * org.esa.beam.util.math.MathUtils.DTOR;
+        final double lambda = sceneCenterLatitude * org.esa.beam.util.math.MathUtils.DTOR;
+        final double cos2 = Math.cos(lambda) * Math.cos(lambda);
+        final double sin2 = Math.sin(lambda) * Math.sin(lambda);
+        final double e2 = (b*b)/(a*a);
+        final double rt = a*Math.sqrt((cos2 + e2*e2*sin2)/(cos2 + e2*sin2));
+        final double rt2 = rt*rt;
 
-        float[] incidenceCorners = new float[] { nearRange, farRange, nearRange, farRange };
+        double groundRangeSpacing;
+        if (srgrFlag) { // detected
+            groundRangeSpacing = rangeSpacing;
+        } else {
+            groundRangeSpacing = rangeSpacing / Math.sin(alpha1);
+        }
 
-        final int gridWidth = 4;
-        final int gridHeight = 4;
-        final float subSamplingX = (float)product.getSceneRasterWidth() / (float)(gridWidth - 1);
-        final float subSamplingY = (float)product.getSceneRasterHeight() / (float)(gridHeight - 1);
+        double deltaPsi = groundRangeSpacing / rt; // in radian
+        final double r1 = slantRangeToFirstPixel;
+        final double rtPlusH = Math.sqrt(rt2 + r1*r1 + 2.0*rt*r1*Math.cos(alpha1));
+        final double rtPlusH2 = rtPlusH*rtPlusH;
+        final double theta1 = Math.acos((r1 + rt*Math.cos(alpha1))/rtPlusH);
+        final double psi1 = alpha1 - theta1;
+        double psi = psi1;
+        float[] incidenceAngles = new float[gridWidth];
+        int k = 0;
+        for (int i = 0; i < sourceImageWidth; i++) {
+            final double ri = Math.sqrt(rt2 + rtPlusH2 - 2.0*rt*rtPlusH*Math.cos(psi));
+            final double alpha = Math.acos((rtPlusH2 - ri*ri - rt2)/(2.0*ri*rt));
+            if (i % subSamplingX == 0) {
+                incidenceAngles[k] = (float)(alpha * org.esa.beam.util.math.MathUtils.RTOD);
+                k++;
+            }
 
-        final float[] fineAngles = new float[gridWidth*gridHeight];
+            if (!srgrFlag) { // complex
+                groundRangeSpacing = rangeSpacing / Math.sin(alpha);
+                deltaPsi = groundRangeSpacing/rt;
+            }
+            psi = psi + deltaPsi;
+        }
 
-        ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, incidenceCorners, fineAngles);
+        float[] incidenceAngleList = new float[gridWidth*gridHeight];
+        for (int j = 0; j < gridHeight; j++) {
+            System.arraycopy(incidenceAngles, 0, incidenceAngleList, j*gridWidth, gridWidth);
+        }
 
-        final TiePointGrid incidentAngleGrid = new TiePointGrid(OperatorUtils.TPG_INCIDENT_ANGLE, gridWidth, gridHeight, 0, 0,
-                subSamplingX, subSamplingY, fineAngles);
+        final TiePointGrid incidentAngleGrid = new TiePointGrid(
+                OperatorUtils.TPG_INCIDENT_ANGLE, gridWidth, gridHeight, 0, 0,
+                (float)subSamplingX, (float)subSamplingY, incidenceAngleList);
+
         incidentAngleGrid.setUnit(Unit.DEGREES);
 
         product.addTiePointGrid(incidentAngleGrid);
