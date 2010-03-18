@@ -314,8 +314,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                             " constant and incidence angle corrections will be performed for radiometric normalization");
                 }
 
-                if (!mission.contains("ALOS") && !mission.contains("RS2") &&
-                    !mission.contains("ENVISAT") && !mission.contains("ERS") && applyRadiometricNormalization) {
+                if (!mission.contains("ALOS") && !mission.contains("RS2") && !mission.contains("ENVISAT") &&
+                    !mission.contains("ERS") && !mission.equals(" ") && applyRadiometricNormalization) {
                     applyRadiometricNormalization = false;
                     return new UIValidation(UIValidation.State.WARNING, "Radiometric normalization currently is" +
                             " not available for third party products except for ALOS and RadarSAT-2");
