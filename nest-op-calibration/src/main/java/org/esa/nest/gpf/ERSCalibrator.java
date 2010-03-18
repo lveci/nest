@@ -91,6 +91,7 @@ public final class ERSCalibrator implements Calibrator {
     private boolean antennaPatternCorrectionFlag = false;
     private boolean rangeSpreadingLossCompFlag = false;
     private boolean useExtXCAFile = false;
+    private boolean multilookFlag = false;
 
     private double rangeSpacing; // m
     private double azimuthSpacing; // m
@@ -202,6 +203,7 @@ public final class ERSCalibrator implements Calibrator {
         getSampleType();  // abs
         getProductType(); // abs
         getCalibrationFlags(); // abs
+        getMultilookFlag(); // abs
         getPixelSpacings(); // abs
         getProcessingTime(); // abs
         getProcessingSystemID();   // abs
@@ -639,6 +641,14 @@ public final class ERSCalibrator implements Calibrator {
         rangeSpreadingLossCompFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.range_spread_comp_flag);
         //System.out.println("Antenna pattern correction flag is " + antennaPatternCorrectionFlag);
         //System.out.println("Range spreding loss compensation flag is " + rangeSpreadingLossCompFlag);
+    }
+
+    /**
+     * Get multilook flag from the abstracted metadata.
+     * @throws Exception The exceptions.
+     */
+    private void getMultilookFlag() throws Exception {
+        multilookFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.multilook_flag);
     }
 
     /**
@@ -2453,6 +2463,11 @@ public final class ERSCalibrator implements Calibrator {
             sigma = Math.pow(10, v/10.0); // convert dB to linear scale
         } else {
             throw new OperatorException("Unknown band unit");
+        }
+
+        if (multilookFlag && antennaPatternCorrectionFlag) { // calibration constant and incidence angle corrections only
+            return Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR) /
+                   Math.sin(referenceIncidenceAngle) / calibrationConstant;
         }
 
         sigma *= Math.sin(Math.abs(localIncidenceAngle)*org.esa.beam.util.math.MathUtils.DTOR) /
