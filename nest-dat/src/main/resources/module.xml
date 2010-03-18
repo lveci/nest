@@ -43,7 +43,6 @@
                 <excludedActions>
                     <id>orthorectification</id>
                     <id>showDataSources</id>
-                    <id>showUpdateDialog</id>
                     <id>new</id>
                     <id>open</id>
                     <id>createAsarNrcsBands</id>

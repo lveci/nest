@@ -1,5 +1,5 @@
 /*
- * $Id: ShowModuleManagerAction.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: ShowModuleManagerAction.java,v 1.2 2010-03-18 20:39:31 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -34,19 +34,19 @@ import java.net.URL;
  * This action shows the update module manager
  *
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-18 20:39:31 $
  */
 public class ShowModuleManagerAction extends ExecCommand {
 
     // System keys
-    private static final String SYS_KEY_BEAM_REPOSITORY_URL = "beam.repository.url";
+    private static final String SYS_KEY_BEAM_REPOSITORY_URL = "nest.repository.url";
     // Preferences keys
-    private static final String KEY_BEAM_REPOSITORY_PROXY_USED = "beam.repository.proxyUsed";
-    private static final String KEY_BEAM_REPOSITORY_PROXY_HOST = "beam.repository.proxy.host";
-    private static final String KEY_BEAM_REPOSITORY_PROXY_PORT = "beam.repository.proxy.port";
-    private static final String KEY_BEAM_REPOSITORY_PROXY_AUTH_USED = "beam.repository.proxy.authUsed";
-    private static final String KEY_BEAM_REPOSITORY_PROXY_USERNAME = "beam.repository.proxy.username";
-    private static final String KEY_BEAM_REPOSITORY_PROXY_PASSWORD = "beam.repository.proxy.password";
+    private static final String KEY_BEAM_REPOSITORY_PROXY_USED = "nest.repository.proxyUsed";
+    private static final String KEY_BEAM_REPOSITORY_PROXY_HOST = "nest.repository.proxy.host";
+    private static final String KEY_BEAM_REPOSITORY_PROXY_PORT = "nest.repository.proxy.port";
+    private static final String KEY_BEAM_REPOSITORY_PROXY_AUTH_USED = "nest.repository.proxy.authUsed";
+    private static final String KEY_BEAM_REPOSITORY_PROXY_USERNAME = "nest.repository.proxy.username";
+    private static final String KEY_BEAM_REPOSITORY_PROXY_PASSWORD = "nest.repository.proxy.password";
     private static final String RTSM = "Please check the module repository settings in the preferences dialog.";
 
     @Override
