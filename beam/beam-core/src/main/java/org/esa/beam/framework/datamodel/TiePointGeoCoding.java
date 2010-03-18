@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGeoCoding.java,v 1.10 2010-02-10 16:43:43 lveci Exp $
+ * $Id: TiePointGeoCoding.java,v 1.11 2010-03-18 21:42:27 junlu Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -56,6 +56,10 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
     private final float _offsetY;
     private final float _subSamplingX;
     private final float _subSamplingY;
+    private float[] _latTiePoints = null;
+    private float[] _lonTiePoints = null;
+    private int _gridWidth;
+    private int _numTiePoints;
 
     private float _overlapStart;
     private float _overlapEnd;
@@ -99,6 +103,10 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         _offsetY = _latGrid.getOffsetY();
         _subSamplingX = _latGrid.getSubSamplingX();
         _subSamplingY = _latGrid.getSubSamplingY();
+        _latTiePoints = _latGrid.getTiePoints();
+        _lonTiePoints = _lonGrid.getTiePoints();
+        _gridWidth = _latGrid.getRasterWidth();
+        _numTiePoints = _latTiePoints.length;
 
         initNormalizedLonGrid();
         initLatLonMinMax();
@@ -275,15 +283,44 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
 
         final double lat = (double)geoPos.lat;
         final double lon = (double)geoPos.lon;
-        final double lat11 = _latGrid.getPixelFloat(x1, y1);
-        final double lat12 = _latGrid.getPixelFloat(x2, y1);
-        final double lat21 = _latGrid.getPixelFloat(x1, y2);
-        final double lat22 = _latGrid.getPixelFloat(x2, y2);
 
-        final double lon11 = _lonGrid.getPixelFloat(x1, y1);
-        final double lon12 = _lonGrid.getPixelFloat(x2, y1);
-        final double lon21 = _lonGrid.getPixelFloat(x1, y2);
-        final double lon22 = _lonGrid.getPixelFloat(x2, y2);
+        final int idx11 = j1*_gridWidth + i1;
+        final int idx12 = j1*_gridWidth + i1 + 1;
+        final int idx21 = (j1+1)*_gridWidth + i1;
+        final int idx22 = (j1+1)*_gridWidth + i1 + 1;
+
+        double lat11, lat12, lat21, lat22, lon11, lon12, lon21, lon22;
+        if (idx11 < _numTiePoints) {
+            lat11 = _latTiePoints[idx11];
+            lon11 = _lonTiePoints[idx11];
+        } else {
+            lat11 = _latGrid.getPixelFloat(x1, y1);
+            lon11 = _lonGrid.getPixelFloat(x1, y1);
+        }
+
+        if (idx12 < _numTiePoints) {
+            lat12 = _latTiePoints[idx12];
+            lon12 = _lonTiePoints[idx12];
+        } else {
+            lat12 = _latGrid.getPixelFloat(x2, y1);
+            lon12 = _lonGrid.getPixelFloat(x2, y1);
+        }
+
+        if (idx21 < _numTiePoints) {
+            lat21 = _latTiePoints[idx21];
+            lon21 = _lonTiePoints[idx21];
+        } else {
+            lat21 = _latGrid.getPixelFloat(x1, y2);
+            lon21 = _lonGrid.getPixelFloat(x1, y2);
+        }
+
+        if (idx22 < _numTiePoints) {
+            lat22 = _latTiePoints[idx22];
+            lon22 = _lonTiePoints[idx22];
+        } else {
+            lat22 = _latGrid.getPixelFloat(x2, y2);
+            lon22 = _lonGrid.getPixelFloat(x2, y2);
+        }
 
         final double x2y2 = x2*y2;
         final double x2y1 = x2*y1;
