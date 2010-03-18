@@ -391,7 +391,8 @@ public class RangeDopplerGeocodingOp extends Operator {
                 throw new OperatorException("Apply radiometric normalization must be selected.");
             }
         } else {
-            if (applyRadiometricNormalization && mission.contains("ERS")) {
+            final boolean multilookFlag = AbstractMetadata.getAttributeBoolean(absRoot, AbstractMetadata.multilook_flag);
+            if (applyRadiometricNormalization && mission.contains("ERS") && !multilookFlag) {
                 throw new OperatorException("For radiometric normalization of ERS product, please first use\n" +
                         "  'Remove Antenna Pattern' operator to remove calibration factors applied and apply ADC,\n" +
                         "  then apply 'Range-Doppler Terrain Correction' operator; or use one of the following\n" +
