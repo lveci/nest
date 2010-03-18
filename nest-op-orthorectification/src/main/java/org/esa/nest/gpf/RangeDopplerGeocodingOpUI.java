@@ -141,25 +141,61 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
         applyRadiometricNormalizationCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
+
                     applyRadiometricNormalization = (e.getStateChange() == ItemEvent.SELECTED);
                     if (applyRadiometricNormalization) {
-                        saveSigmaNoughtCheckBox.setEnabled(true);
-                        saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
-                        saveSigmaNoughtCheckBox.setSelected(true);
-                        incidenceAngleForSigma0.setEnabled(true);
-                        saveGammaNoughtCheckBox.setEnabled(true);
-                        saveGammaNoughtCheckBox.getModel().setPressed(saveGammaNought);
-                        incidenceAngleForGamma0.setEnabled(true);
-                        saveBetaNoughtCheckBox.setEnabled(true);
-                        saveBetaNoughtCheckBox.getModel().setPressed(saveBetaNought);
-                        saveSelectedSourceBandCheckBox.setSelected(false);
+
+                        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProducts[0]);
+                        if (absRoot != null) {
+                            final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
+
+                            if (mission.contains("ALOS") || mission.contains("RS2")) {
+
+                                saveSigmaNoughtCheckBox.setEnabled(true);
+                                saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
+                                saveSigmaNoughtCheckBox.setSelected(true);
+                                saveGammaNoughtCheckBox.setEnabled(true);
+                                saveGammaNoughtCheckBox.getModel().setPressed(saveGammaNought);
+                                saveBetaNoughtCheckBox.setEnabled(true);
+                                saveBetaNoughtCheckBox.getModel().setPressed(saveBetaNought);
+                                saveSelectedSourceBandCheckBox.setSelected(false);
+                                incidenceAngleForGamma0.setEnabled(false);
+                                incidenceAngleForSigma0.setEnabled(false);
+
+                            } else if (mission.contains("ENVISAT") || mission.contains("ERS")) {
+
+                                saveSigmaNoughtCheckBox.setEnabled(true);
+                                saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
+                                saveSigmaNoughtCheckBox.setSelected(true);
+                                incidenceAngleForSigma0.setEnabled(true);
+                                saveGammaNoughtCheckBox.setEnabled(true);
+                                saveGammaNoughtCheckBox.getModel().setPressed(saveGammaNought);
+                                incidenceAngleForGamma0.setEnabled(true);
+                                saveBetaNoughtCheckBox.setEnabled(true);
+                                saveBetaNoughtCheckBox.getModel().setPressed(saveBetaNought);
+                                saveSelectedSourceBandCheckBox.setSelected(false);
+
+                            } else {
+
+                                saveSigmaNoughtCheckBox.setSelected(false);
+                                saveSigmaNoughtCheckBox.setEnabled(false);
+                                saveGammaNoughtCheckBox.setEnabled(false);
+                                saveBetaNoughtCheckBox.setEnabled(false);
+                                incidenceAngleForSigma0.setEnabled(false);
+                                incidenceAngleForGamma0.setEnabled(false);
+                                saveSelectedSourceBandCheckBox.setSelected(true);
+                            }
+                        }
+
                     } else {
+
                         saveSigmaNoughtCheckBox.setSelected(false);
                         saveSigmaNoughtCheckBox.setEnabled(false);
                         saveGammaNoughtCheckBox.setEnabled(false);
                         saveBetaNoughtCheckBox.setEnabled(false);
                         incidenceAngleForSigma0.setEnabled(false);
                         incidenceAngleForGamma0.setEnabled(false);
+                        saveSelectedSourceBandCheckBox.setSelected(true);
                     }
                 }
         });
@@ -199,7 +235,6 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
 
     @Override
     public void initParameters() {
-
         OperatorUIUtils.initBandList(bandList, getBandNames());
 
         demName.setSelectedItem(paramMap.get("demName"));
@@ -271,10 +306,19 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
             if(absRoot != null) {
                 final boolean antElevCorrFlag = absRoot.getAttributeInt(AbstractMetadata.ant_elev_corr_flag) != 0;
                 final boolean multilookFlag = absRoot.getAttributeInt(AbstractMetadata.multilook_flag) != 0;
+                final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
 
-                if (applyRadiometricNormalization && antElevCorrFlag && multilookFlag) {
+                if ((mission.contains("ENVISAT") || mission.contains("ERS")) &&
+                     applyRadiometricNormalization && antElevCorrFlag && multilookFlag) {
                     return new UIValidation(UIValidation.State.WARNING, "For multilooked products only" +
                             " constant and incidence angle corrections will be performed for radiometric normalization");
+                }
+
+                if (!mission.contains("ALOS") && !mission.contains("RS2") &&
+                    !mission.contains("ENVISAT") && !mission.contains("ERS") && applyRadiometricNormalization) {
+                    applyRadiometricNormalization = false;
+                    return new UIValidation(UIValidation.State.WARNING, "Radiometric normalization currently is" +
+                            " not available for third party products except for ALOS and RadarSAT-2");
                 }
             }
         }
