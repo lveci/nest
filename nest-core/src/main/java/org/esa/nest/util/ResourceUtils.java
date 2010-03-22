@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.Enumeration;
+import java.util.Properties;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -65,25 +66,22 @@ public final class ResourceUtils {
         return FileUtils.ensureExtension(file, extension);
     }
 
-     public static InputStream getResourceAsStream(final String filename) throws IOException {
-        // Try to load resource from jar
-        final InputStream stream = ClassLoader.getSystemResourceAsStream(filename);
-        if (stream != null) return stream;
-
-        // If not found in jar, then load from disk
-        final java.net.URL resURL = ResourceUtils.class.getClassLoader().getResource(filename);
-        if (resURL != null) {
-            try {
-                return new FileInputStream(resURL.toURI().getPath());
-            } catch(URISyntaxException e) {
-                //
-            }
+    public static Properties loadProperties(final String filename) throws IOException {
+        final InputStream dbPropInputStream = getResourceAsStream(filename);
+        final Properties dbProperties = new Properties();
+        try {
+            dbProperties.load(dbPropInputStream);
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
-
-        return new FileInputStream(filename);
+        return dbProperties;
     }
 
-    public static InputStream getResourceAsStream(final String filename, Class theClass) throws IOException {
+    public static InputStream getResourceAsStream(final String filename) throws IOException {
+        return getResourceAsStream(filename, ResourceUtils.class);
+    }
+
+    public static InputStream getResourceAsStream(final String filename, final Class theClass) throws IOException {
         // Try to load resource from jar
         final InputStream stream = ClassLoader.getSystemResourceAsStream(filename);
         if (stream != null) return stream;
@@ -101,7 +99,7 @@ public final class ResourceUtils {
         return new FileInputStream(filename);
     }
 
-    public static File getResourceAsFile(final String filename, Class theClass) throws IOException {
+    public static File getResourceAsFile(final String filename, final Class theClass) throws IOException {
 
         try {
             // load from disk
@@ -114,7 +112,6 @@ public final class ResourceUtils {
         }
         throw new IOException("resURL==null Unable to open "+ filename);
     }
-
 
     /**
      * Optionally creates and returns the current user's application data directory.
