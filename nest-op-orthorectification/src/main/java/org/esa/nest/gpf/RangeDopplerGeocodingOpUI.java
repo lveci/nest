@@ -149,20 +149,8 @@ public class RangeDopplerGeocodingOpUI extends BaseOperatorUI {
                         if (absRoot != null) {
                             final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
 
-                            if (mission.contains("ALOS") || mission.contains("RS2")) {
-
-                                saveSigmaNoughtCheckBox.setEnabled(true);
-                                saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
-                                saveSigmaNoughtCheckBox.setSelected(true);
-                                saveGammaNoughtCheckBox.setEnabled(true);
-                                saveGammaNoughtCheckBox.getModel().setPressed(saveGammaNought);
-                                saveBetaNoughtCheckBox.setEnabled(true);
-                                saveBetaNoughtCheckBox.getModel().setPressed(saveBetaNought);
-                                saveSelectedSourceBandCheckBox.setSelected(false);
-                                incidenceAngleForGamma0.setEnabled(false);
-                                incidenceAngleForSigma0.setEnabled(false);
-
-                            } else if (mission.contains("ENVISAT") || mission.contains("ERS")) {
+                            if (mission.contains("ENVISAT") || mission.contains("ERS") ||
+                                mission.contains("ALOS") || mission.contains("RS2")) {
 
                                 saveSigmaNoughtCheckBox.setEnabled(true);
                                 saveSigmaNoughtCheckBox.getModel().setPressed(saveSigmaNought);
