@@ -19,6 +19,7 @@ import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.internal.OperatorContext;
+import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
@@ -37,10 +38,10 @@ public class Radarsat2Calibrator implements Calibrator {
     private Product targetProduct;
 
     private boolean outputImageScaleInDb = false;
-
     private boolean isComplex = false;
-    private static final double underFlowFloat = 1.0e-30;
+    private TiePointGrid incidenceAngle = null;
 
+    private static final double underFlowFloat = 1.0e-30;
     private static final String lutsigma = "lutsigma";
     private static final String lutgamma = "lutgamma";
     private static final String lutbeta = "lutbeta";
@@ -101,6 +102,8 @@ public class Radarsat2Calibrator implements Calibrator {
 
             getLUT();
 
+            getTiePointGridData(sourceProduct);
+
             if (mustUpdateMetadata) {
                 updateTargetProductMetadata();
             }
@@ -122,6 +125,14 @@ public class Radarsat2Calibrator implements Calibrator {
                 gains = (double[])gainsAttrib.getData().getElems();
             }
         }
+    }
+
+    /**
+     * Get incidence angle and slant range time tie point grids.
+     * @param sourceProduct the source
+     */
+    private void getTiePointGridData(Product sourceProduct) {
+        incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
     }
 
     /**
@@ -268,11 +279,11 @@ public class Radarsat2Calibrator implements Calibrator {
             }
         }
 
-        return sigma;
+        return sigma*Math.sin(localIncidenceAngle * MathUtils.DTOR);
     }
 
     public double applyRetroCalibration(int x, int y, double v, String bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
-        return v;
+        return v / Math.sin(incidenceAngle.getPixelDouble(x, y) * MathUtils.DTOR);
     }
 
     public void removeFactorsForCurrentTile(Band targetBand, Tile targetTile, String srcBandName, ProgressMonitor pm) throws OperatorException {

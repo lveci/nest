@@ -15,13 +15,11 @@
 package org.esa.nest.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.MetadataElement;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.internal.OperatorContext;
+import org.esa.beam.util.math.MathUtils;
 import org.esa.nest.datamodel.AbstractMetadata;
 import org.esa.nest.datamodel.Calibrator;
 import org.esa.nest.datamodel.Unit;
@@ -40,10 +38,10 @@ public class ALOSCalibrator implements Calibrator {
     private Product targetProduct;
 
     private boolean outputImageScaleInDb = false;
-
     private MetadataElement abstractedMetadata = null;
     private String sampleType = null;
     private double calibrationFactor = 0;
+    private TiePointGrid incidenceAngle = null;
 
     private static final double underFlowFloat = 1.0e-30;
 
@@ -94,6 +92,8 @@ public class ALOSCalibrator implements Calibrator {
 
             getCalibrationFactor();
 
+            getTiePointGridData(sourceProduct);
+
             if (mustUpdateMetadata) {
                 updateTargetProductMetadata();
             }
@@ -117,6 +117,14 @@ public class ALOSCalibrator implements Calibrator {
 
         calibrationFactor = Math.pow(10.0, calibrationFactor/10.0); // dB to linear scale
         //System.out.println("Calibration factor is " + calibrationFactor);
+    }
+
+    /**
+     * Get incidence angle and slant range time tie point grids.
+     * @param sourceProduct the source
+     */
+    private void getTiePointGridData(Product sourceProduct) {
+        incidenceAngle = OperatorUtils.getIncidenceAngle(sourceProduct);
     }
 
     /**
@@ -237,11 +245,11 @@ public class ALOSCalibrator implements Calibrator {
             throw new OperatorException("Unknown band unit");
         }
 
-        return sigma*calibrationFactor;
+        return sigma*calibrationFactor*Math.sin(localIncidenceAngle * MathUtils.DTOR);
     }
 
     public double applyRetroCalibration(int x, int y, double v, String bandPolar, final Unit.UnitType bandUnit, int[] subSwathIndex) {
-        return v;
+        return v / Math.sin(incidenceAngle.getPixelDouble(x, y) * MathUtils.DTOR);
     }
 
     public void removeFactorsForCurrentTile(Band targetBand, Tile targetTile, String srcBandName, ProgressMonitor pm) throws OperatorException {
