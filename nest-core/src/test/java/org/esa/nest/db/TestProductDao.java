@@ -39,10 +39,10 @@ public class TestProductDao extends TestCase {
     }
 
     public void testAddAll() throws IOException, SQLException {
-        final File folder = new File(TestUtils.rootPathASAR);
-        if(!folder.exists()) return;
+        final File folder1 = new File(TestUtils.rootPathASAR);
+        if(!folder1.exists()) return;
 
-        recurseProcessFolder(folder, db);
+        recurseProcessFolder(folder1, db);
     }
 
     public static void recurseProcessFolder(final File folder, final ProductDao db) throws SQLException {
@@ -53,6 +53,10 @@ public class TestProductDao extends TestCase {
             } else {
                 if(TestUtils.isNotProduct(file))
                     continue;
+
+                if(db.pathExistsInDB(file))
+                    continue;
+
                 final ProductReader reader = ProductIO.getProductReaderForFile(file);
                 if(reader != null) {
                     Product sourceProduct = null;
@@ -62,13 +66,20 @@ public class TestProductDao extends TestCase {
                         System.out.println("Unable to read "+file.getAbsolutePath());
                     }
                     if(sourceProduct != null) {
-                        System.out.println("Adding "+file.getAbsolutePath());
+                        //System.out.println("Adding "+file.getAbsolutePath());
 
-                        final ProductEntry newEntry = new ProductEntry(sourceProduct);
-                        db.saveRecord(newEntry);
+                        db.saveProduct(sourceProduct);
                     }
                 }
             }
+        }
+    }
+
+    public void testListAll() throws IOException, SQLException {
+
+        final ProductEntry[] list = db.getProductEntryList();
+        for(ProductEntry entry : list) {
+            System.out.println(entry.getId() + " " + entry.getPath());
         }
     }
 

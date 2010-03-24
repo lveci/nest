@@ -18,9 +18,16 @@ public class ProductEntry {
 
     // corner locations
 
-    public ProductEntry(final String path, final int id) {
-        this.path = path;
+    public ProductEntry(final int id, final String path) {
         this.id = id;
+        this.path = path;
+    }
+
+    public ProductEntry(final int id, final String path, final String mission, final String productType) {
+        this.id = id;
+        this.path = path;
+        this.mission = mission;
+        this.productType = productType;
     }
 
     public ProductEntry(final Product product) {

@@ -1,11 +1,15 @@
 package org.esa.nest.db;
 
+import org.esa.beam.framework.datamodel.Product;
+
 import java.io.IOException;
+import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 /**
  *
@@ -15,6 +19,7 @@ public class ProductDao extends DAO {
     private PreparedStatement stmtSaveNewRecord;
     private PreparedStatement stmtUpdateExistingRecord;
     private PreparedStatement stmtGetAddress;
+    private PreparedStatement stmtGetProductWithPath;
     private PreparedStatement stmtDeleteAddress;
 
     private static final String strCreateProductTable =
@@ -35,8 +40,12 @@ public class ProductDao extends DAO {
             "VALUES (?, ?, ?)";
 
     private static final String strGetListEntries =
-            "SELECT ID, LASTNAME, FIRSTNAME, MIDDLENAME FROM APP.ADDRESS "  +
-            "ORDER BY LASTNAME ASC";
+            "SELECT ID, PATH, MISSION, PRODUCTTYPE FROM APP.PRODUCTS "  +
+            "ORDER BY MISSION ASC";
+
+    private static final String strGetProductWithPath =
+            "SELECT ID FROM APP.PRODUCTS " +
+            "WHERE PATH = ?";
 
     private static final String strUpdateProduct =
             "UPDATE APP.PRODUCTS " +
@@ -71,35 +80,59 @@ public class ProductDao extends DAO {
     }
 
     protected void prepareStatements() throws SQLException {
-        stmtSaveNewRecord = getDBConnection().prepareStatement(strSaveProduct, Statement.RETURN_GENERATED_KEYS);
-        stmtUpdateExistingRecord = getDBConnection().prepareStatement(strUpdateProduct);
-        stmtGetAddress = getDBConnection().prepareStatement(strGetProduct);
-        stmtDeleteAddress = getDBConnection().prepareStatement(strDeleteProduct);
+        try {
+            stmtSaveNewRecord = getDBConnection().prepareStatement(strSaveProduct, Statement.RETURN_GENERATED_KEYS);
+            stmtUpdateExistingRecord = getDBConnection().prepareStatement(strUpdateProduct);
+            stmtGetAddress = getDBConnection().prepareStatement(strGetProduct);
+            stmtGetProductWithPath = getDBConnection().prepareStatement(strGetProductWithPath);
+            stmtDeleteAddress = getDBConnection().prepareStatement(strDeleteProduct);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            throw ex;
+        }
     }
-    
-    public int saveRecord(final ProductEntry record) throws SQLException {
-        int id = -1;
-        stmtSaveNewRecord.clearParameters();
 
+    public boolean pathExistsInDB(final File file) throws SQLException {
+        stmtGetProductWithPath.clearParameters();
+        stmtGetProductWithPath.setString(1, file.getAbsolutePath());
+        final ResultSet results = stmtGetProductWithPath.executeQuery();
+        return results.next();
+    }
+
+    public void saveProduct(final Product product) throws SQLException {
+        final ProductEntry newEntry = new ProductEntry(product);
+
+        stmtGetProductWithPath.clearParameters();
+        stmtGetProductWithPath.setString(1, newEntry.getPath());
+        final ResultSet results = stmtGetProductWithPath.executeQuery();
+        if(results.next()) {
+            // update
+        } else {
+            addRecord(newEntry);
+        }
+    }
+
+    private void addRecord(final ProductEntry record) throws SQLException {
+
+        stmtSaveNewRecord.clearParameters();
         stmtSaveNewRecord.setString(1, record.getPath());
         stmtSaveNewRecord.setString(2, record.getMission());
         stmtSaveNewRecord.setString(3, record.getProductType());
         final int rowCount = stmtSaveNewRecord.executeUpdate();
         final ResultSet results = stmtSaveNewRecord.getGeneratedKeys();
         if (results.next()) {
-            id = results.getInt(1);
+            final int id = results.getInt(1);
             record.setId(id);
         }
-        return id;
     }
     
-    public void editRecord(final ProductEntry record) throws SQLException {
+   /* public void editRecord(final ProductEntry record) throws SQLException {
         stmtUpdateExistingRecord.clearParameters();
 
         stmtUpdateExistingRecord.setString(1, record.getPath());
         stmtUpdateExistingRecord.setInt(12, record.getId());
         stmtUpdateExistingRecord.executeUpdate();
-    }
+    } */  
     
     public void deleteRecord(final int id) throws SQLException {
         stmtDeleteAddress.clearParameters();
@@ -111,31 +144,28 @@ public class ProductDao extends DAO {
         deleteRecord(record.getId());
     }
     
-   /* public List<ListEntry> getListEntries() {
-        List<ListEntry> listEntries = new ArrayList<ListEntry>();
-        Statement queryStatement = null;
-        ResultSet results = null;
-        
+    public ProductEntry[] getProductEntryList() {
+        final ArrayList<ProductEntry> listEntries = new ArrayList<ProductEntry>();
+
         try {
-            queryStatement = dbConnection.createStatement();
-            results = queryStatement.executeQuery(strGetListEntries);
+            final Statement queryStatement = getDBConnection().createStatement();
+            final ResultSet results = queryStatement.executeQuery(strGetListEntries);
             while(results.next()) {
-                int id = results.getInt(1);
-                String lName = results.getString(2);
-                String fName = results.getString(3);
-                String mName = results.getString(4);
+                final int id = results.getInt(1);
+                final String path = results.getString(2);
+                final String mission = results.getString(3);
+                final String productType = results.getString(4);
                 
-                ListEntry entry = new ListEntry(lName, fName, mName, id);
+                final ProductEntry entry = new ProductEntry(id, path, mission, productType);
                 listEntries.add(entry);
             }
             
-        } catch (SQLException sqle) {
-            sqle.printStackTrace();
-            
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            lastSQLException = ex;
         }
-        
-        return listEntries;
-    }    */
+        return listEntries.toArray(new ProductEntry[listEntries.size()]);
+    }
     
     public ProductEntry getProductEntry(final int index) {
         ProductEntry entry = null;
@@ -144,9 +174,7 @@ public class ProductDao extends DAO {
             stmtGetAddress.setInt(1, index);
             final ResultSet result = stmtGetAddress.executeQuery();
             if (result.next()) {
-                final String path = result.getString("PATH");
-                final int id = result.getInt("ID");
-                entry = new ProductEntry(path, id);
+                entry = new ProductEntry(result.getInt("ID"), result.getString("PATH"));
             }
         } catch(SQLException sqle) {
             sqle.printStackTrace();
