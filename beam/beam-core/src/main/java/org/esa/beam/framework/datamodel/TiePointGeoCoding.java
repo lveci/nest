@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGeoCoding.java,v 1.12 2010-03-22 20:06:05 junlu Exp $
+ * $Id: TiePointGeoCoding.java,v 1.13 2010-03-25 18:08:11 junlu Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -275,6 +275,11 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
 
         final PixelPos approximatedPixelPos = new PixelPos();
         getPixelPos(geoPos, approximatedPixelPos);
+        if (approximatedPixelPos.x < 0.0 || approximatedPixelPos.y < 0.0) {
+            pixelPos.x = -1.0f;
+            pixelPos.y = -1.0f;
+            return pixelPos;
+        }
 
         final int i1 = (int)(approximatedPixelPos.x / _subSamplingX);
         final int i2 = i1 + 1;
