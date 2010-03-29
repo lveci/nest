@@ -205,9 +205,15 @@ public class ImageIOFile {
         sampleModel.getSamples(0, 0, destWidth, destHeight, imageID, dArray, dataBuffer);
         pm.worked(1);
 
-        for (int i = 0; i < dArray.length; i++) {
-            destBuffer.setElemDoubleAt(i, dArray[i]);
+        final int length = dArray.length;
+        if(destBuffer.getElems() instanceof double[]) {
+            System.arraycopy(destBuffer.getElems(), 0, dArray, 0, length);
+        } else {
+            for (int i = 0; i < length; ++i) {
+                destBuffer.setElemDoubleAt(i, dArray[i]);
+            }
         }
+
         pm.worked(1);
     }
 

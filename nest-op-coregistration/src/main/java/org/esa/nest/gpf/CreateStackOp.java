@@ -485,25 +485,25 @@ public class CreateStackOp extends Operator {
         try {
             final RasterDataNode targetBand = targetTile.getRasterDataNode();
             final Rectangle targetRectangle = targetTile.getRectangle();
-
-            final Product srcProduct = sourceBand.getProduct();
-            final int sourceRasterHeight = srcProduct.getSceneRasterHeight();
-            final int sourceRasterWidth = srcProduct.getSceneRasterWidth();
             final ProductData trgBuffer = targetTile.getDataBuffer();
 
-            final Resampling resampling;
-            if (isFlagBand(sourceBand) || isValidPixelExpressionUsed(sourceBand)) {
-                resampling = Resampling.NEAREST_NEIGHBOUR;
-            } else {
-                resampling = selectedResampling;
-            }
-            final Resampling.Index resamplingIndex = resampling.createIndex();
             final float noDataValue = (float) targetBand.getGeophysicalNoDataValue();
-
             final int maxX = targetRectangle.x + targetRectangle.width;
             final int maxY = targetRectangle.y + targetRectangle.height;
 
             if (sourceRectangle != null) {
+                final Product srcProduct = sourceBand.getProduct();
+                final int sourceRasterHeight = srcProduct.getSceneRasterHeight();
+                final int sourceRasterWidth = srcProduct.getSceneRasterWidth();
+
+                final Resampling resampling;
+                if (isFlagBand(sourceBand) || isValidPixelExpressionUsed(sourceBand)) {
+                    resampling = Resampling.NEAREST_NEIGHBOUR;
+                } else {
+                    resampling = selectedResampling;
+                }
+                final Resampling.Index resamplingIndex = resampling.createIndex();
+
                 final Tile sourceTile = getSourceTile(sourceBand, sourceRectangle, pm);
                 final ResamplingRaster resamplingRaster = new ResamplingRaster(sourceTile);
 
@@ -531,6 +531,7 @@ public class CreateStackOp extends Operator {
                     }
                     pm.worked(1);
                 }
+                sourceTile.getDataBuffer().dispose();
             } else {
                 for (int y = targetRectangle.y, index = 0; y < maxY; ++y) {
                     checkForCancelation(pm);
