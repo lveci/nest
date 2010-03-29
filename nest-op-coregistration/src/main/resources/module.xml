@@ -55,6 +55,15 @@
         </action>
 
         <action>
+            <id>CoregistrationGraph</id>
+            <class>org.esa.nest.dat.CoregistrationGraphAction</class>
+            <text>Full Coregistration (single graph)</text>
+            <shortDescr>Perform Coregistration</shortDescr>
+            <parent>Coregistration</parent>
+            <helpId>Coregistration</helpId>
+        </action>
+
+        <action>
             <id>GCPSelectionAction</id>
             <class>org.esa.nest.dat.GCPSelectionAction</class>
             <parent>Coregistration</parent>

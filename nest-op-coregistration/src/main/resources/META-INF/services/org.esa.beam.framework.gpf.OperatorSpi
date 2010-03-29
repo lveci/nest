@@ -1,6 +1,8 @@
 org.esa.nest.gpf.CreateStackOp$Spi
 org.esa.nest.gpf.GCPSelectionOp$Spi
+org.esa.nest.gpf.GCPSelection2Op$Spi
 org.esa.nest.gpf.WarpOp$Spi
+org.esa.nest.gpf.Warp2Op$Spi
 org.esa.nest.gpf.PCAStatisticsOp$Spi
 org.esa.nest.gpf.PCAMinOp$Spi
 org.esa.nest.gpf.PCAImageOp$Spi
