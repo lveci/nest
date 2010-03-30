@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGeoCoding.java,v 1.13 2010-03-25 18:08:11 junlu Exp $
+ * $Id: TiePointGeoCoding.java,v 1.14 2010-03-30 19:56:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -115,6 +115,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
 
         initNormalizedLonGrid();
         initLatLonMinMax();
+        initApproximations();
         // detection disabled, mz,mp 18.03.2008
         // test show big improvements for AVHRR and small ones for MERIS
 //        _swathResampling = detectSwathResampling();
@@ -237,8 +238,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
-        final Approximation[] approximations = getApproximations();
-        if (approximations != null) {
+        if (_approximations != null) {
             float lat = normalizeLat(geoPos.lat);
             float lon = normalizeLon(geoPos.lon);
             if (pixelPos == null) {
@@ -247,14 +247,14 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
             // ensure that pixel is out of image (= no source position)
             pixelPos.x = -1;
             pixelPos.y = -1;
-            if (!Float.isNaN(lat) && !Float.isNaN(lon)) {
-                Approximation approximation = getBestApproximation(approximations, lat, lon);
+            if (lat != Float.NaN && lon != Float.NaN) { //(!Float.isNaN(lat) && !Float.isNaN(lon)) {
+                Approximation approximation = getBestApproximation(_approximations, lat, lon);
                 if (approximation == null) {
                     // retry with pixel in overlap range, re-normalise
                     // solves the problem with overlapping normalized and unnormalized orbit areas (AATSR)
                     if (lon >= _overlapStart && lon <= _overlapEnd) {
                         lon += 360;
-                        approximation = getBestApproximation(approximations, lat, lon);
+                        approximation = getBestApproximation(_approximations, lat, lon);
                     }
                 }
                 if (approximation != null) {
@@ -787,8 +787,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         Approximation approximation = null;
         if (approximations.length == 1) {
             final Approximation a = approximations[0];
-            final float squareDistance = a.getSquareDistance(lat, lon);
-            if (squareDistance < a.getMinSquareDistance()) {
+            if (a.getSquareDistance(lat, lon) < a.getMinSquareDistance()) {
                 approximation = a;
             }
         } else {

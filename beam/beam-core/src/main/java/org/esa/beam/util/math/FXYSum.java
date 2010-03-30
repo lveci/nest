@@ -1,5 +1,5 @@
 /*
- * $Id: FXYSum.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: FXYSum.java,v 1.2 2010-03-30 19:56:32 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -28,7 +28,7 @@ package org.esa.beam.util.math;
  * {@link FXYSum#computeZ(double, double)} method.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-30 19:56:32 $
  */
 public class FXYSum {
 
@@ -175,7 +175,7 @@ public class FXYSum {
     };
 
     private final FXY[] _f;
-    private final double[] _c;
+    protected final double[] _c;
     private final int _order;
     private double[] _errorStatistics;
 
@@ -398,7 +398,7 @@ public class FXYSum {
 
         @Override
         public double computeZ(final double x, final double y) {
-            final double[] c = getCoefficients();
+            final double[] c = _c;//getCoefficients();
             return c[0] +
                    c[1] * x + c[2] * y;
         }
@@ -421,7 +421,7 @@ public class FXYSum {
 
         @Override
         public double computeZ(final double x, final double y) {
-            final double[] c = getCoefficients();
+            final double[] c = _c;//getCoefficients();
             return c[0] +
                    (c[1] +
                     c[3] * y) * x +
@@ -446,7 +446,7 @@ public class FXYSum {
 
         @Override
         public double computeZ(final double x, final double y) {
-            final double[] c = getCoefficients();
+            final double[] c = _c;//getCoefficients();
             return c[0] +
                    (c[1] +
                     c[3] * x +
@@ -473,7 +473,7 @@ public class FXYSum {
 
         @Override
         public double computeZ(final double x, final double y) {
-            final double[] c = getCoefficients();
+            final double[] c = _c;//getCoefficients();
             return c[0] +
                    (c[1] +
                     (c[3] +
@@ -500,7 +500,7 @@ public class FXYSum {
 
         @Override
         public double computeZ(final double x, final double y) {
-            final double[] c = getCoefficients();
+            final double[] c = _c;//getCoefficients();
             return c[0] +
                    (c[1] +
                     (c[3] +
@@ -529,7 +529,7 @@ public class FXYSum {
 
         @Override
         public double computeZ(final double x, final double y) {
-            final double[] c = getCoefficients();
+            final double[] c = _c;//getCoefficients();
             return c[0] +
                    (c[1] +
                     (c[3] +
