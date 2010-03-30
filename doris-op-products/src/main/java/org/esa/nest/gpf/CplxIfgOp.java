@@ -47,10 +47,10 @@ public class CplxIfgOp extends Operator {
     private Band masterBand0 = null;
     private Band masterBand1 = null;
 
-    private final static Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
-    private final static Map<Band, Band> complexSrcMapI = new HashMap<Band, Band>(10);
-    private final static Map<Band, Band> complexSrcMapQ = new HashMap<Band, Band>(10);
-    //private final static Map<Band, Band> complexIfgMap = new HashMap<Band, Band>(10);
+    private final Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
+    private final Map<Band, Band> complexSrcMapI = new HashMap<Band, Band>(10);
+    private final Map<Band, Band> complexSrcMapQ = new HashMap<Band, Band>(10);
+    //private final Map<Band, Band> complexIfgMap = new HashMap<Band, Band>(10);
 
     /**
      * Default constructor. The graph processing framework
@@ -119,8 +119,8 @@ public class CplxIfgOp extends Operator {
                     iBandName = srcBandI.getName();
                 } else {
                     iBandName = "i_ifg" + cnt + "_" +
-                            masterBand0.getDisplayName() + "_" +
-                            srcBandI.getDisplayName();
+                            masterBand0.getName() + "_" +
+                            srcBandI.getName();
                 }
                 Band targetBandI;
                 if(srcBandI == masterBand0) {
@@ -136,8 +136,8 @@ public class CplxIfgOp extends Operator {
                     qBandName = srcBandQ.getName();
                 } else {
                     qBandName = "q_ifg" + cnt + "_" +
-                            masterBand1.getDisplayName() + "_" +
-                            srcBandQ.getDisplayName();
+                            masterBand1.getName() + "_" +
+                            srcBandQ.getName();
                 }
 
                 Band targetBandQ;

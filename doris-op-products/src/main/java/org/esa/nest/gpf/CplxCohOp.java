@@ -51,10 +51,10 @@ public class CplxCohOp extends Operator {
     private String[] masterBandNames;
     private String[] slaveBandNames;
 
-    private final static Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
-    private final static Map<Band, Band> complexSrcMapI = new HashMap<Band, Band>(10);
-    private final static Map<Band, Band> complexSrcMapQ = new HashMap<Band, Band>(10);
-    //private final static Map<Band, Band> complexIfgMap = new HashMap<Band, Band>(10);
+    private final Map<Band, Band> sourceRasterMap = new HashMap<Band, Band>(10);
+    private final Map<Band, Band> complexSrcMapI = new HashMap<Band, Band>(10);
+    private final Map<Band, Band> complexSrcMapQ = new HashMap<Band, Band>(10);
+    //private final Map<Band, Band> complexIfgMap = new HashMap<Band, Band>(10);
 
     /**
      * Default constructor. The graph processing framework
