@@ -1,5 +1,5 @@
 /*
- * $Id: VirtualBandTest.java,v 1.4 2009-12-11 20:46:13 lveci Exp $
+ * $Id: VirtualBandTest.java,v 1.5 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

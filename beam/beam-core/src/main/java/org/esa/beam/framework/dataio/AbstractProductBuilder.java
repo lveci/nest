@@ -126,8 +126,7 @@ public abstract class AbstractProductBuilder extends AbstractProductReader {
     }
 
     protected static void addAttribString(String name, String value, MetadataElement subsetElem) {
-        final ProductData data = ProductData.createInstance(value);
-        subsetElem.addAttribute(new MetadataAttribute(name, data, true));
+        subsetElem.addAttribute(new MetadataAttribute(name, ProductData.createInstance(value), true));
     }
 
     /**

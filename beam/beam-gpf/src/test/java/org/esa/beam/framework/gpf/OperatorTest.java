@@ -6,7 +6,7 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.gpf.operators.common.PassThroughOp;
+import org.esa.beam.gpf.operators.standard.PassThroughOp;
 
 import java.io.IOException;
 
@@ -27,6 +27,23 @@ public class OperatorTest extends TestCase {
         product.getBand("bar").readRasterDataFully(ProgressMonitor.NULL);
         assertTrue(op.initializeCalled);
         assertTrue(op.computeTileCalled);
+    }
+
+    public void testThatGetTargetProductMustNotBeCalledFromInitialize() {
+        Operator op = new Operator() {
+            @Override
+            public void initialize() throws OperatorException {
+                getTargetProduct();
+            }
+        };
+        try {
+            op.getTargetProduct();
+            fail("RuntimeException expected: Operator shall not allow calling getTargetProduct() from within initialize().");
+        } catch (OperatorException e) {
+            fail("RuntimeException expected: Operator shall not allow calling getTargetProduct() from within initialize().");
+        } catch (RuntimeException e) {
+            // ok, passed
+        }
     }
 
     public void testPassThroughDetection() throws OperatorException, IOException {

@@ -20,7 +20,7 @@ import junit.framework.TestCase;
  * Tests for class {@link Array}.
  *
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:34 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-31 13:59:56 $
  */
 public class ArrayTest extends TestCase {
 

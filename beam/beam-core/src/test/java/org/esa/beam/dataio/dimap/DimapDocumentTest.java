@@ -1,5 +1,5 @@
 /*
- * $Id: DimapDocumentTest.java,v 1.6 2009-12-14 21:03:50 lveci Exp $
+ * $Id: DimapDocumentTest.java,v 1.7 2010-03-31 13:59:55 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -817,21 +817,21 @@ public class DimapDocumentTest extends TestCase {
         pw.println("        </Mask_Usage>");
         pw.println("    </Image_Display>");
         pw.println("    <Masks>");
-        pw.println("        <Mask type=\"Math\">");
+        pw.println("        <Mask type=\"Maths\">");
         pw.println("            <NAME value=\"name1\" />");
         pw.println("            <DESCRIPTION value=\"bitmask.description1\" />");
         pw.println("            <COLOR red=\"0\" green=\"0\" blue=\"0\" alpha=\"255\" />");
         pw.println("            <TRANSPARENCY value=\"1.0\" />");
         pw.println("            <EXPRESSION value=\"bitmask.expression1\" />");
         pw.println("        </Mask>");
-        pw.println("        <Mask type=\"Math\">");
+        pw.println("        <Mask type=\"Maths\">");
         pw.println("            <NAME value=\"name2\" />");
         pw.println("            <DESCRIPTION value=\"bitmask.description2\" />");
         pw.println("            <COLOR red=\"0\" green=\"0\" blue=\"255\" alpha=\"255\" />");
         pw.println("            <TRANSPARENCY value=\"0.75\" />");
         pw.println("            <EXPRESSION value=\"bitmask.expression2\" />");
         pw.println("        </Mask>");
-        pw.println("        <Mask type=\"Math\">");
+        pw.println("        <Mask type=\"Maths\">");
         pw.println("            <NAME value=\"name3\" />");
         pw.println("            <DESCRIPTION value=\"bitmask.description3\" />");
         pw.println("            <COLOR red=\"0\" green=\"255\" blue=\"0\" alpha=\"255\" />");

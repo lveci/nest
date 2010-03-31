@@ -1,5 +1,5 @@
 /*
- * $Id: PropertyEditor.java,v 1.1 2010-02-10 19:57:11 lveci Exp $
+ * $Id: PropertyEditor.java,v 1.2 2010-03-31 13:59:58 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -26,7 +26,7 @@ import javax.swing.JLabel;
  * described by a {@link com.bc.ceres.binding.PropertyDescriptor}.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.1 $ $Date: 2010-02-10 19:57:11 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-31 13:59:58 $
  * @since BEAM 4.6
  */
 public abstract class PropertyEditor {

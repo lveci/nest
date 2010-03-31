@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /*
- * $Id: Avnir2LeaderFDRTest.java,v 1.1 2009-04-28 14:37:13 lveci Exp $
+ * $Id: Avnir2LeaderFDRTest.java,v 1.2 2010-03-31 13:59:55 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -30,7 +30,7 @@ import java.util.Arrays;
  * Created by marco.
  *
  * @author marco
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:13 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-31 13:59:55 $
  */
 public class Avnir2LeaderFDRTest extends BaseLeaderFileDescriptorRecordTest {
 

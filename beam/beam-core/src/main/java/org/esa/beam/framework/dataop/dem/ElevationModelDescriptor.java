@@ -1,5 +1,5 @@
 /*
- * $Id: ElevationModelDescriptor.java,v 1.2 2009-04-29 15:00:08 lveci Exp $
+ * $Id: ElevationModelDescriptor.java,v 1.3 2010-03-31 13:56:29 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -17,7 +17,7 @@ import java.net.URL;
  * specified geographical datum for a given geographical position.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public interface ElevationModelDescriptor {
 

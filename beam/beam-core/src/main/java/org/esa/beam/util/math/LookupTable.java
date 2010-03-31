@@ -1,5 +1,5 @@
 /*
-    $Id: LookupTable.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+    $Id: LookupTable.java,v 1.2 2010-03-31 13:56:29 lveci Exp $
 
     Copyright (c) 2006 Brockmann Consult. All rights reserved. Use is
     subject to license terms.
@@ -32,7 +32,7 @@ import java.text.MessageFormat;
  * todo - method for degrading a table (see C++ code below)
  *
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-31 13:56:29 $
  */
 public class LookupTable {
 

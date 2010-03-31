@@ -1,5 +1,5 @@
 /*
- * $Id: ProductMetadataTable.java,v 1.2 2010-02-12 20:18:31 lveci Exp $
+ * $Id: ProductMetadataTable.java,v 1.3 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

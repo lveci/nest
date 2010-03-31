@@ -38,7 +38,7 @@ import java.util.Map;
  * WARNING: This class belongs to a preliminary API and may change in future releases.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.10 $ $Date: 2010-02-10 19:57:11 $
+ * @version $Revision: 1.11 $ $Date: 2010-03-31 13:59:22 $
  */
 public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog {
 
@@ -318,8 +318,10 @@ public class DefaultSingleTargetProductDialog extends SingleTargetProductDialog 
         }
 
         private void updateValueSets(Product product) {
-            for (PropertyDescriptor propertyDescriptor : rasterDataNodeTypeProperties) {
-                updateValueSet(propertyDescriptor, product);
+            if (rasterDataNodeTypeProperties != null) {
+                for (PropertyDescriptor propertyDescriptor : rasterDataNodeTypeProperties) {
+                    updateValueSet(propertyDescriptor, product);
+                }
             }
         }
     }

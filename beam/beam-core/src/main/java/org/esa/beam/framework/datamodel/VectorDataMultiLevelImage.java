@@ -8,7 +8,11 @@ import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.jai.VectorDataMaskOpImage;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.RenderedImage;
 import java.lang.ref.WeakReference;
 
@@ -17,7 +21,7 @@ import java.lang.ref.WeakReference;
  * resets itsself whenever the referred vector data have changed.
  *
  * @author Ralf Quast
- * @version $Revision: 1.2 $ $Date: 2010-02-08 21:57:50 $
+ * @version $Revision: 1.3 $ $Date: 2010-03-31 13:56:29 $
  * @since BEAM 4.7
  */
 class VectorDataMultiLevelImage extends DefaultMultiLevelImage implements ProductNodeListener {
@@ -59,6 +63,21 @@ class VectorDataMultiLevelImage extends DefaultMultiLevelImage implements Produc
 
         this.vectorDataReference = new WeakReference<VectorDataNode>(vectorDataNode);
         vectorDataNode.getProduct().addProductNodeListener(this);
+    }
+
+    @Override
+    public Shape getImageShape(int level) {
+        VectorDataNode vectorDataNode = vectorDataReference.get();
+        if (vectorDataNode != null) {
+            ReferencedEnvelope envelope = vectorDataNode.getEnvelope();
+            if (!envelope.isEmpty()) {
+                Rectangle2D modelBounds = new Rectangle2D.Double(envelope.getMinX(), envelope.getMinY(),
+                                                                 envelope.getWidth(), envelope.getHeight());
+                AffineTransform m2i = getModel().getModelToImageTransform(level);
+                return m2i.createTransformedShape(modelBounds);
+            }
+        }
+        return null;
     }
 
     @Override

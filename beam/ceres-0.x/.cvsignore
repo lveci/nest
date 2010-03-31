@@ -5,5 +5,7 @@
 .project
 .classpath
 .settings
+.git
+.gitignore
 target
 

@@ -1,5 +1,5 @@
 /*
- * $Id: OrthorectifierTest.java,v 1.3 2009-11-04 17:04:32 lveci Exp $
+ * $Id: OrthorectifierTest.java,v 1.4 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -14,6 +14,7 @@ import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Pointing;
 import org.esa.beam.framework.dataop.maptransf.Datum;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 
@@ -160,7 +161,7 @@ public class OrthorectifierTest extends TestCase {
 
         @Override
         public CoordinateReferenceSystem getGeoCRS() {
-            return null;
+            return DefaultGeographicCRS.WGS84;
         }
 
         @Override

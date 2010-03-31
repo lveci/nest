@@ -1,5 +1,5 @@
 /*
- * $Id: BandArithmetikDialog.java,v 1.16 2010-02-10 19:57:11 lveci Exp $
+ * $Id: BandMathsDialog.java,v 1.1 2010-03-31 14:00:01 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -69,7 +69,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class BandArithmetikDialog extends ModalDialog {
+public class BandMathsDialog extends ModalDialog {
 
     private static final String PROPERTY_NAME_PRODUCT = "productName";
     private static final String PROPERTY_NAME_EXPRESSION = "expression";
@@ -96,9 +96,9 @@ public class BandArithmetikDialog extends ModalDialog {
 
     private static int numNewBands = 0;
 
-    public BandArithmetikDialog(final VisatApp visatApp, Product currentProduct, ProductNodeList<Product> productsList,
+    public BandMathsDialog(final VisatApp visatApp, Product currentProduct, ProductNodeList<Product> productsList,
                                 String helpId) {
-        super(visatApp.getMainFrame(), "Band Math", ID_OK_CANCEL_HELP, helpId); /* I18N */
+        super(visatApp.getMainFrame(), "Band Maths", ID_OK_CANCEL_HELP, helpId); /* I18N */
         Guardian.assertNotNull("currentProduct", currentProduct);
         Guardian.assertNotNull("productsList", productsList);
         Guardian.assertGreaterThan("productsList must be not empty", productsList.size(), 0);
@@ -117,7 +117,7 @@ public class BandArithmetikDialog extends ModalDialog {
             int defaultProductIndex = Arrays.asList(products).indexOf(targetProduct);
             validMaskExpression = BandArithmetic.getValidMaskExpression(getExpression(), products, defaultProductIndex, null);
         } catch (ParseException e) {
-            String errorMessage = "The band could not be created.\nAn expression parse error occurred:\n" + e.getMessage(); /*I18N*/
+            String errorMessage = "The band could not be created.\nAn parse error occurred:\n" + e.getMessage(); /*I18N*/
             visatApp.showErrorDialog(errorMessage);
             hide();
             return;
@@ -129,18 +129,10 @@ public class BandArithmetikDialog extends ModalDialog {
         Band band;
         if (saveExpressionOnly) {
             band = new VirtualBand(getBandName(), ProductData.TYPE_FLOAT32, width, height, getExpression());
-            band.setDescription(bandDescription);
-            band.setUnit(bandUnit);
-            band.setGeophysicalNoDataValue(noDataValue);
-            band.setNoDataValueUsed(noDataValueUsed);
-            band.setValidPixelExpression(validMaskExpression);
+            setBandProperties(band, validMaskExpression);
         } else {
             band = new Band(getBandName(), ProductData.TYPE_FLOAT32, width, height);
-            band.setDescription(bandDescription);
-            band.setUnit(bandUnit);
-            band.setGeophysicalNoDataValue(noDataValue);
-            band.setNoDataValueUsed(noDataValueUsed);
-            band.setValidPixelExpression("");
+            setBandProperties(band, "");
         }
 
         targetProduct.addBand(band);
@@ -162,10 +154,19 @@ public class BandArithmetikDialog extends ModalDialog {
         }
     }
 
+    private void setBandProperties(Band band, String validMaskExpression) {
+        band.setDescription(bandDescription);
+        band.setUnit(bandUnit);
+        //band.setSpectralWavelength(bandWavelength);
+        band.setGeophysicalNoDataValue(noDataValue);
+        band.setNoDataValueUsed(noDataValueUsed);
+        band.setValidPixelExpression(validMaskExpression);
+    }
+
     @Override
     protected boolean verifyUserInput() {
         if (!isValidExpression()) {
-            showErrorDialog("Please check the expression you have entered.\nIt is not valid."); /*I18N*/
+            showErrorDialog("Please check the band maths expression you have entered.\nIt is not valid."); /*I18N*/
             return false;
         }
 
@@ -290,7 +291,7 @@ public class BandArithmetikDialog extends ModalDialog {
 
         descriptor = container.getDescriptor(PROPERTY_NAME_EXPRESSION);
         descriptor.setDisplayName("Expression");
-        descriptor.setDescription("Math expression");
+        descriptor.setDescription("Band maths expression");
         descriptor.setNotEmpty(true);
 
         descriptor = container.getDescriptor(PROPERTY_NAME_SAVE_EXPRESSION_ONLY);
@@ -338,8 +339,8 @@ public class BandArithmetikDialog extends ModalDialog {
         List<Product> compatibleProducts = new ArrayList<Product>(productsList.size());
         compatibleProducts.add(targetProduct);
         final float geolocationEps = getGeolocationEps();
-        Debug.trace("BandArithmetikDialog.geolocationEps = " + geolocationEps);
-        Debug.trace("BandArithmetikDialog.getCompatibleProducts:");
+        Debug.trace("BandMathsDialog.geolocationEps = " + geolocationEps);
+        Debug.trace("BandMathsDialog.getCompatibleProducts:");
         Debug.trace("  comparing: " + targetProduct.getName());
         for (int i = 0; i < productsList.size(); i++) {
             final Product product = productsList.getAt(i);
@@ -370,7 +371,7 @@ public class BandArithmetikDialog extends ModalDialog {
                                                                                               targetProduct,
                                                                                               visatApp.getPreferences());
                 pep.setCode(getExpression());
-                int status = pep.showModalDialog(getJDialog(), "Math Expression Editor");
+                int status = pep.showModalDialog(getJDialog(), "Band Maths Expression Editor");
                 if (status == ModalDialog.ID_OK) {
                     bindingContext.getBinding(PROPERTY_NAME_EXPRESSION).setPropertyValue(pep.getCode());
                 }
@@ -397,7 +398,7 @@ public class BandArithmetikDialog extends ModalDialog {
                     }
                 }
                 if (!externalProducts.isEmpty()) {
-                    visatApp.showWarningDialog("The entered expression references multiple products.\n"
+                    visatApp.showWarningDialog("The entered maths expression references multiple products.\n"
                                                + "It will cause problems unless the session is restored as is.\n\n"
                                                + "Note: You can save the session from the file menu.");
                 }

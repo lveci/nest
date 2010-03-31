@@ -1,5 +1,5 @@
 /*
- * $Id: AdjustableViewScrollPane.java,v 1.4 2009-12-04 19:06:45 lveci Exp $
+ * $Id: AdjustableViewScrollPane.java,v 1.5 2010-03-31 13:59:58 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -44,7 +44,7 @@ import java.awt.geom.Rectangle2D;
  * the view component must implement the {@link AdjustableView} interface.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2009-12-04 19:06:45 $
+ * @version $Revision: 1.5 $ $Date: 2010-03-31 13:59:58 $
  */
 public class AdjustableViewScrollPane extends JPanel {
     private static final long serialVersionUID = -2634482999458990218L;

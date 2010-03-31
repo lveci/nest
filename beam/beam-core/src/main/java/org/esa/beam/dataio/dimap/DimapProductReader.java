@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductReader.java,v 1.12 2010-02-08 21:57:50 lveci Exp $
+ * $Id: DimapProductReader.java,v 1.13 2010-03-31 13:56:29 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -60,7 +60,7 @@ import java.util.Map;
  *
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.12 $ $Date: 2010-02-08 21:57:50 $
+ * @version $Revision: 1.13 $ $Date: 2010-03-31 13:56:29 $
  * @see org.esa.beam.dataio.dimap.DimapProductReaderPlugIn
  */
 public class DimapProductReader extends AbstractProductReader {
@@ -318,10 +318,9 @@ public class DimapProductReader extends AbstractProductReader {
                             destPos++;
                         }
                     }
-
+                }
                 pm.worked(1);
             }
-          }
         } finally {
             pm.done();
         }

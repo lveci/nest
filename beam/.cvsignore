@@ -5,6 +5,7 @@
 .classpath
 .settings
 .svn*
+.git
 beam*
 ceres*
 lib-*

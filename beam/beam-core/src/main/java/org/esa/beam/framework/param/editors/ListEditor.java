@@ -1,5 +1,5 @@
 /*
- * $Id: ListEditor.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ListEditor.java,v 1.2 2010-03-31 13:56:29 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: VersionCheckerTest.java,v 1.2 2010-01-13 16:39:23 lveci Exp $
+ * $Id: VersionCheckerTest.java,v 1.3 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -21,7 +21,7 @@ public class VersionCheckerTest extends TestCase {
         if (vc.getLocalVersionFile().exists()) {
             final String localVersion = vc.getLocalVersion();
             assertNotNull(localVersion);
-            assertTrue(localVersion.startsWith("VERSION 4.7"));
+            assertTrue(localVersion.startsWith("VERSION 4.8"));
             // Failed? --> Adapt current version number here.
         }
     }

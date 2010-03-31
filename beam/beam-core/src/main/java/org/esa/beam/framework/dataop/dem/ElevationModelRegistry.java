@@ -1,5 +1,5 @@
 /*
- * $Id: ElevationModelRegistry.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
+ * $Id: ElevationModelRegistry.java,v 1.3 2010-03-31 13:56:29 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -19,7 +19,7 @@ import java.util.Set;
  * elevation models as described by their {@link ElevationModelDescriptor}s.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ElevationModelRegistry {
 

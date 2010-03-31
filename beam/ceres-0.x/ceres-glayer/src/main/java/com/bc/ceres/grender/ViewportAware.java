@@ -1,5 +1,5 @@
 /*
- * $Id: ViewportAware.java,v 1.1 2009-12-09 16:41:39 lveci Exp $
+ * $Id: ViewportAware.java,v 1.2 2010-03-31 13:59:58 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *

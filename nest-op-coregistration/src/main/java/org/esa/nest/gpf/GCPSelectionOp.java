@@ -229,8 +229,7 @@ public class GCPSelectionOp extends Operator {
 
             for(float x=spacingX/2f; x < width; x+= spacingX) {
 
-                final String[] uniquePinNameAndLabel =
-                        PlacemarkNameFactory.createUniqueNameAndLabel(GcpDescriptor.INSTANCE, group);
+                final String[] uniquePinNameAndLabel = createUniqueNameAndLabel(GcpDescriptor.INSTANCE, group);
                 final Placemark newPin = new Placemark(uniquePinNameAndLabel[0],
                              uniquePinNameAndLabel[1], "",
                              new PixelPos((int)x, (int)y), null,
@@ -238,6 +237,17 @@ public class GCPSelectionOp extends Operator {
                 group.add(newPin);
             }
         }
+    }
+
+    private static String[] createUniqueNameAndLabel(PlacemarkDescriptor placemarkDescriptor,
+                                                     ProductNodeGroup<Placemark> placemarkGroup) {
+        int pinNumber = placemarkGroup.getNodeCount() + 1;
+        String name = PlacemarkNameFactory.createName(placemarkDescriptor, pinNumber);
+        while (placemarkGroup.get(name) != null) {
+            name = PlacemarkNameFactory.createName(placemarkDescriptor, ++pinNumber);
+        }
+        final String label = PlacemarkNameFactory.createLabel(placemarkDescriptor, pinNumber, true);
+        return new String[]{name, label};
     }
 
     /**

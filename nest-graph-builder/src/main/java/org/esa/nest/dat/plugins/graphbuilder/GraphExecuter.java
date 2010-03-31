@@ -10,8 +10,8 @@ import org.esa.beam.framework.gpf.OperatorSpiRegistry;
 import org.esa.beam.framework.gpf.OperatorUI;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.graph.*;
-import org.esa.beam.framework.gpf.operators.common.ReadOp;
-import org.esa.beam.framework.gpf.operators.common.WriteOp;
+import org.esa.beam.gpf.operators.standard.ReadOp;
+import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.nest.gpf.ProductSetReaderOp;
 import org.esa.nest.util.ResourceUtils;
 

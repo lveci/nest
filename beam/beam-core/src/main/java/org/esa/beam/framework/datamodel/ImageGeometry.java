@@ -1,5 +1,5 @@
 /*
- * $Id: ImageGeometry.java,v 1.2 2010-02-12 14:42:16 lveci Exp $
+ * $Id: ImageGeometry.java,v 1.3 2010-03-31 13:56:29 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -186,11 +186,16 @@ public class ImageGeometry {
             Rectangle2D rect = XRectangle2D.createFromExtremums(0.5, 0.5, sourceW - 0.5, sourceH - 0.5);
             int pointsPerSide = Math.min(sourceH, sourceW) / 10;
             pointsPerSide = Math.max(9, pointsPerSide);
-
             final ReferencedEnvelope sourceEnvelope = new ReferencedEnvelope(rect, sourceCrs);
             final ReferencedEnvelope targetEnvelope = sourceEnvelope.transform(targetCrs, true, pointsPerSide);
-            return new Rectangle2D.Double(targetEnvelope.getMinX(), targetEnvelope.getMinY(),
-                                          targetEnvelope.getWidth(), targetEnvelope.getHeight());
+            double minX = targetEnvelope.getMinX();
+            double width = targetEnvelope.getWidth();
+            if(product.getGeoCoding().isCrossingMeridianAt180()) {
+                minX = -180.0;
+                width = 360;
+            }
+            return new Rectangle2D.Double(minX, targetEnvelope.getMinY(),
+                                          width, targetEnvelope.getHeight());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

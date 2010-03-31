@@ -1,5 +1,5 @@
 /*
- * $Id: ImageInfoEditor2.java,v 1.1 2009-04-27 13:08:25 lveci Exp $
+ * $Id: ImageInfoEditor2.java,v 1.2 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

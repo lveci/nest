@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractVisatAction.java,v 1.2 2009-12-02 16:52:12 lveci Exp $
+ * $Id: AbstractVisatAction.java,v 1.3 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -77,14 +77,15 @@ public abstract class AbstractVisatAction extends AppCommand {
         }
 
         @Override
-        public void handleError(Throwable e) {
-            e.printStackTrace();
-            app.showErrorDialog(toolTitle, e.getMessage());
+        public void handleError(Throwable t) {
+            handleError(t.getMessage(), t);
         }
 
         @Override
-        public void handleError(String message, Throwable e) {
-            e.printStackTrace();
+        public void handleError(String message, Throwable t) {
+            if (t != null) {
+                t.printStackTrace();
+            }
             app.showErrorDialog(toolTitle, message);
         }
 

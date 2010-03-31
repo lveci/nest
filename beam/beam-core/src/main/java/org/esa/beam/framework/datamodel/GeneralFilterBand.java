@@ -1,5 +1,5 @@
 /*
- * $Id: GeneralFilterBand.java,v 1.4 2009-07-15 20:04:37 lveci Exp $
+ * $Id: GeneralFilterBand.java,v 1.5 2010-03-31 13:56:29 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -43,7 +43,7 @@ import java.util.Arrays;
  * <p><i>Note that this class is not yet public API and may change in future releases.</i></p>
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2009-07-15 20:04:37 $
+ * @version $Revision: 1.5 $ $Date: 2010-03-31 13:56:29 $
  */
 public class GeneralFilterBand extends FilterBand {
 

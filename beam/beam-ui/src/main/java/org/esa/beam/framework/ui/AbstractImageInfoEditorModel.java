@@ -14,7 +14,7 @@ import javax.swing.event.EventListenerList;
  * Unstable interface. Do not use.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:17:18 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-31 13:59:56 $
  * @since BEAM 4.5.1
  */
 public abstract class AbstractImageInfoEditorModel implements ImageInfoEditorModel {

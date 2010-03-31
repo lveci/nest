@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataNode_Stx_Test.java,v 1.2 2010-02-12 14:42:16 lveci Exp $
+ * $Id: RasterDataNode_Stx_Test.java,v 1.3 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

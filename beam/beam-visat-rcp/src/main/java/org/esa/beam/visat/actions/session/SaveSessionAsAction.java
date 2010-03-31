@@ -1,5 +1,5 @@
 /*
- * $Id: SaveSessionAsAction.java,v 1.2 2009-05-01 13:37:58 lveci Exp $
+ * $Id: SaveSessionAsAction.java,v 1.3 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -33,7 +33,7 @@ import java.util.ArrayList;
  * Saves a VISAT session with a new filename.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-05-01 13:37:58 $
+ * @version $Revision: 1.3 $ $Date: 2010-03-31 13:59:56 $
  * @since BEAM 4.6
  */
 public class SaveSessionAsAction extends ExecCommand {

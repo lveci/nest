@@ -1,7 +1,7 @@
 package org.esa.beam.dataio.ceos.avnir2.records;
 
 /*
- * $Id: Avnir2TrailerRecordTest.java,v 1.1 2009-04-28 14:37:13 lveci Exp $
+ * $Id: Avnir2TrailerRecordTest.java,v 1.2 2010-03-31 13:59:55 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -29,7 +29,7 @@ import java.io.IOException;
  * Created by marco.
  *
  * @author marco
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:13 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-31 13:59:55 $
  */
 public class Avnir2TrailerRecordTest extends BaseTrailerRecordTest {
 

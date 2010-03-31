@@ -1,5 +1,5 @@
 /*
- * $Id: BitmaskOverlayToolView.java,v 1.2 2009-11-04 17:04:32 lveci Exp $
+ * $Id: BitmaskOverlayToolView.java,v 1.3 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -1139,7 +1139,7 @@ public class BitmaskOverlayToolView extends AbstractToolView {
 
         @Override
         public String getName() {
-            return (String) _nameParam.getValue();
+            return _nameParam != null ? (String) _nameParam.getValue() : "";
         }
 
         public String getDescription() {

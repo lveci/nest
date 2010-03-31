@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataNodeDeleter.java,v 1.3 2010-02-12 14:42:16 lveci Exp $
+ * $Id: RasterDataNodeDeleter.java,v 1.4 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2010 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -46,7 +46,7 @@ import javax.swing.JOptionPane;
  * Confirms Raster Data Node deletion by the user and performs them.
  *
  * @author Marco Zuehlke
- * @version $Revision: 1.3 $ $Date: 2010-02-12 14:42:16 $
+ * @version $Revision: 1.4 $ $Date: 2010-03-31 13:59:56 $
  * @since BEAM 4.7
  */
 public class RasterDataNodeDeleter {
@@ -271,8 +271,8 @@ public class RasterDataNodeDeleter {
             final Mask[] masks = maskGroup.toArray(new Mask[maskGroup.getNodeCount()]);
             for (final Mask mask : masks) {
                 final String expression;
-                if (mask.getImageType() == Mask.BandMathType.INSTANCE) {
-                    expression = Mask.BandMathType.getExpression(mask);
+                if (mask.getImageType() == Mask.BandMathsType.INSTANCE) {
+                    expression = Mask.BandMathsType.getExpression(mask);
                 } else if (mask.getImageType() == Mask.RangeType.INSTANCE) {
                     expression = Mask.RangeType.getRasterName(mask);
                 } else {

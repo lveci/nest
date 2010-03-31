@@ -1,5 +1,5 @@
 /*
- * $Id: CloseSessionAction.java,v 1.5 2009-05-27 13:12:23 lveci Exp $
+ * $Id: CloseSessionAction.java,v 1.6 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -25,7 +25,7 @@ import org.esa.beam.visat.VisatApp;
  * Closes a VISAT session.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.5 $ $Date: 2009-05-27 13:12:23 $
+ * @version $Revision: 1.6 $ $Date: 2010-03-31 13:59:56 $
  * @since BEAM 4.6
  */
 public class CloseSessionAction extends ExecCommand {

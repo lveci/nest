@@ -1,5 +1,5 @@
 /*
- * $Id: ProductNodeList.java,v 1.4 2009-12-02 16:52:11 lveci Exp $
+ * $Id: ProductNodeList.java,v 1.5 2010-03-31 13:56:29 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -27,7 +27,7 @@ import java.util.List;
  * A type-safe list for elements of the type <code>ProductNode</code>.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2009-12-02 16:52:11 $
+ * @version $Revision: 1.5 $ $Date: 2010-03-31 13:56:29 $
  */
 public final class ProductNodeList<T extends ProductNode> {
 
@@ -321,7 +321,7 @@ public final class ProductNodeList<T extends ProductNode> {
         Guardian.assertNotNull("name", name);
         int n = size();
         for (int i = 0; i < n; i++) {
-            if (nodes.get(i).getName().equalsIgnoreCase(name)) {
+            if (getAt(i).getName().equalsIgnoreCase(name)) {
                 return i;
             }
         }

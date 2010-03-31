@@ -1,5 +1,5 @@
 /*
- * $Id: EnvisatProductReaderPlugIn.java,v 1.1 2009-04-28 14:37:13 lveci Exp $
+ * $Id: EnvisatProductReaderPlugIn.java,v 1.2 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -42,7 +42,7 @@ import java.util.zip.ZipFile;
  * the actual reader objects.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:13 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-31 13:59:56 $
  * @see org.esa.beam.dataio.envisat.EnvisatProductReader
  */
 public class EnvisatProductReaderPlugIn implements ProductReaderPlugIn {
@@ -147,7 +147,7 @@ public class EnvisatProductReaderPlugIn implements ProductReaderPlugIn {
      * @see org.esa.beam.framework.dataio.AbstractProductReader#readProductNodes
      */
     public Class[] getInputTypes() {
-        return new Class[]{String.class, File.class, ImageInputStream.class};
+        return new Class[]{String.class, File.class, ImageInputStream.class, ProductFile.class};
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * $Id: OperatorContext.java,v 1.12 2010-02-11 21:17:51 lveci Exp $
+ * $Id: OperatorContext.java,v 1.13 2010-03-31 13:59:22 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -96,6 +96,7 @@ public class OperatorContext {
     private PropertyContainer propertyContainer;
     private RenderingHints renderingHints;
     private PerformanceMetric performanceMetric;
+    private boolean initialising;
 
 
     public OperatorContext(Operator operator) {
@@ -369,23 +370,30 @@ public class OperatorContext {
     }
 
     private void initializeOperator() throws OperatorException {
+        Assert.state(targetProduct == null, "targetProduct == null");
         Assert.state(operator != null, "operator != null");
+        Assert.state(!initialising, "!initialising, attempt to call getTargetProduct() from within initialise()?");
 
-        if (!(operator instanceof GraphOp)) {
-            initSourceProductFields();
-            injectParameterValues();
-            injectConfiguration();
-        }
-        operator.initialize();
-        initTargetProduct();
-        initTargetProperties();
-        if (!(operator instanceof GraphOp)) {
-            initPassThrough();
-        }
-        initTargetImages();
-        initGraphMetadata();
+        try {
+            initialising = true;
+            if (!(operator instanceof GraphOp)) {
+                initSourceProductFields();
+                injectParameterValues();
+                injectConfiguration();
+            }
+            operator.initialize();
+            initTargetProduct();
+            initTargetProperties();
+            if (!(operator instanceof GraphOp)) {
+                initPassThrough();
+            }
+            initTargetImages();
+            initGraphMetadata();
 
-        targetProduct.setModified(false);
+            targetProduct.setModified(false);
+        } finally {
+            initialising = false;
+        }
     }
 
     private PropertyContainer getOperatorValueContainer() {

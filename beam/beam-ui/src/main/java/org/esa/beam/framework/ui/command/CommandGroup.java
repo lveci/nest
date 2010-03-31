@@ -1,5 +1,5 @@
 /*
- * $Id: CommandGroup.java,v 1.1 2009-04-28 14:17:18 lveci Exp $
+ * $Id: CommandGroup.java,v 1.2 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -29,7 +29,7 @@ import javax.swing.JMenuItem;
  * The <code>CommandGroup</code> is a ...
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $  $Date: 2009-04-28 14:17:18 $
+ * @version $Revision: 1.2 $  $Date: 2010-03-31 13:59:56 $
  */
 public class CommandGroup extends Command {
 

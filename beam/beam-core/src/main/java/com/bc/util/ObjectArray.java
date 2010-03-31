@@ -1,5 +1,5 @@
 /*
- * $Id: ObjectArray.java,v 1.2 2009-05-14 16:31:17 lveci Exp $
+ * $Id: ObjectArray.java,v 1.3 2010-03-31 13:59:55 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -41,6 +41,10 @@ public final class ObjectArray {
 
     public void clear() {
         Arrays.fill(_objects, 0, _objects.length, null);
+    }
+
+    private int getArrayIndex(int i) {
+        return i - _minIndex;
     }
 
     public void set(ObjectArray array) {

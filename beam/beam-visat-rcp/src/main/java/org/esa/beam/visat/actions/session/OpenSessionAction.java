@@ -1,5 +1,5 @@
 /*
- * $Id: OpenSessionAction.java,v 1.7 2010-02-10 16:20:37 lveci Exp $
+ * $Id: OpenSessionAction.java,v 1.8 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -50,7 +50,7 @@ import java.util.concurrent.ExecutionException;
  * Opens a VISAT session.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.7 $ $Date: 2010-02-10 16:20:37 $
+ * @version $Revision: 1.8 $ $Date: 2010-03-31 13:59:56 $
  * @since BEAM 4.6
  */
 public class OpenSessionAction extends ExecCommand {

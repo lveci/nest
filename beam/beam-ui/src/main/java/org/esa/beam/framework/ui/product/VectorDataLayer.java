@@ -1,5 +1,5 @@
 /*
- * $Id: VectorDataLayer.java,v 1.8 2010-01-15 16:23:03 lveci Exp $
+ * $Id: VectorDataLayer.java,v 1.9 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *

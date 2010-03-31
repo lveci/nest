@@ -1,5 +1,5 @@
 /*
- * $Id: SliderAdapter.java,v 1.1 2010-02-10 19:57:11 lveci Exp $
+ * $Id: SliderAdapter.java,v 1.2 2010-03-31 13:59:58 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *

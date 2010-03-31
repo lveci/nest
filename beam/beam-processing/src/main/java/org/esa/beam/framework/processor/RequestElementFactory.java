@@ -1,5 +1,5 @@
 /*
- * $Id: RequestElementFactory.java,v 1.1 2009-04-28 14:19:06 lveci Exp $
+ * $Id: RequestElementFactory.java,v 1.2 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -26,7 +26,7 @@ import java.io.File;
  * processor implementation to influence the process of generating request elements with a <code>RequestLoader</code>.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:19:06 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-31 13:59:56 $
  * @see RequestLoader
  * @see Request
  */

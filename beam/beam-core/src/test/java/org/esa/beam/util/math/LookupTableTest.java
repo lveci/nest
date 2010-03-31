@@ -1,5 +1,5 @@
 /*
-    $Id: LookupTableTest.java,v 1.1 2009-04-28 14:39:34 lveci Exp $
+    $Id: LookupTableTest.java,v 1.2 2010-03-31 13:59:56 lveci Exp $
 
     Copyright (c) 2006 Brockmann Consult. All rights reserved. Use is
     subject to license terms.
@@ -28,7 +28,7 @@ import java.util.Random;
  * Test methods for class {@link LookupTable}.
  *
  * @author Ralf Quast
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:34 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-31 13:59:56 $
  */
 public class LookupTableTest extends TestCase {
 

@@ -1,5 +1,5 @@
 /*
- * $Id: DimapProductWriter.java,v 1.10 2010-02-12 19:05:40 lveci Exp $
+ * $Id: DimapProductWriter.java,v 1.11 2010-03-31 13:56:29 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -38,6 +38,7 @@ import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 
+import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -50,13 +51,13 @@ import java.util.Map;
  * The product writer for BEAM DIMAP products.
  *
  * @author Sabine Embacher
- * @version $Revision: 1.10 $ $Date: 2010-02-12 19:05:40 $
+ * @version $Revision: 1.11 $ $Date: 2010-03-31 13:56:29 $
  */
 public class DimapProductWriter extends AbstractProductWriter {
 
     private File _outputDir;
     private File _outputFile;
-    private Map _bandOutputStreams;
+    private Map<Band, ImageOutputStream> _bandOutputStreams;
     private File _dataOutputDir;
     private boolean _incremental = true;
 
@@ -79,7 +80,7 @@ public class DimapProductWriter extends AbstractProductWriter {
     /**
      * Returns all band output streams opened so far.
      */
-    public Map getBandOutputStreams() {
+    public Map<Band, ImageOutputStream> getBandOutputStreams() {
         return _bandOutputStreams;
     }
 
@@ -118,6 +119,7 @@ public class DimapProductWriter extends AbstractProductWriter {
      * product file without an previous call to the saveProductNodes to this product writer.
      *
      * @param outputFile the dimap header file location.
+     *
      * @throws java.io.IOException if an I/O error occurs
      */
     public void initDirs(final File outputFile) throws IOException {
@@ -150,6 +152,7 @@ public class DimapProductWriter extends AbstractProductWriter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void writeBandRasterData(Band sourceBand,
                                     int sourceOffsetX, int sourceOffsetY,
                                     int sourceWidth, int sourceHeight,
@@ -164,19 +167,16 @@ public class DimapProductWriter extends AbstractProductWriter {
                                           sourceOffsetY);
         final ImageOutputStream outputStream = getOrCreateImageOutputStream(sourceBand);
         long outputPos = sourceOffsetY * sourceBandWidth + sourceOffsetX;
-        pm.beginTask("Writing band '" + sourceBand.getName() + "'...", 1);//sourceHeight);
+        pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
         try {
-            final long max = sourceHeight * sourceWidth;
-            final int size = sourceBuffer.getElemSize();
-            for (int sourcePos = 0; sourcePos < max; sourcePos += sourceWidth) {
-                sourceBuffer.writeTo(sourcePos, sourceWidth, size, outputStream, outputPos);
+            for (int sourcePos = 0; sourcePos < sourceHeight * sourceWidth; sourcePos += sourceWidth) {
+                sourceBuffer.writeTo(sourcePos, sourceWidth, outputStream, outputPos);
                 outputPos += sourceBandWidth;
-                //pm.worked(1);
-                //if (pm.isCanceled()) {
-                //    break;
-                //}
+                pm.worked(1);
+                if (pm.isCanceled()) {
+                    break;
+                }
             }
-            pm.worked(1);
         } finally {
             pm.done();
         }
@@ -185,6 +185,7 @@ public class DimapProductWriter extends AbstractProductWriter {
     /**
      * Deletes the physically representation of the product from the hard disk.
      */
+    @Override
     public void deleteOutput() throws IOException {
         flush();
         close();
@@ -217,13 +218,13 @@ public class DimapProductWriter extends AbstractProductWriter {
      *
      * @throws java.io.IOException on failure
      */
-    public void flush() throws IOException {
+    @Override
+    public synchronized void flush() throws IOException {
         if (_bandOutputStreams == null) {
             return;
         }
-        final Iterator streamsIterator = _bandOutputStreams.values().iterator();
-        while (streamsIterator.hasNext()) {
-            ((ImageOutputStream) streamsIterator.next()).flush();
+        for (ImageOutputStream imageOutputStream : _bandOutputStreams.values()) {
+            imageOutputStream.flush();
         }
     }
 
@@ -232,13 +233,13 @@ public class DimapProductWriter extends AbstractProductWriter {
      *
      * @throws java.io.IOException on failure
      */
-    public void close() throws IOException {
+    @Override
+    public synchronized void close() throws IOException {
         if (_bandOutputStreams == null) {
             return;
         }
-        final Iterator streamsIterator = _bandOutputStreams.values().iterator();
-        while (streamsIterator.hasNext()) {
-            ((ImageOutputStream) streamsIterator.next()).close();
+        for (ImageOutputStream imageOutputStream : _bandOutputStreams.values()) {
+            (imageOutputStream).close();
         }
         _bandOutputStreams.clear();
         _bandOutputStreams = null;
@@ -274,30 +275,30 @@ public class DimapProductWriter extends AbstractProductWriter {
         tiePointGridDir.mkdirs();
     }
 
-    /**
+    /*
      * Returns the data output stream associated with the given <code>Band</code>. If no stream exists, one is created
      * and fed into the hash map
      */
-    private ImageOutputStream getOrCreateImageOutputStream(Band band) throws IOException {
+    private synchronized ImageOutputStream getOrCreateImageOutputStream(Band band) throws IOException {
         ImageOutputStream outputStream = getImageOutputStream(band);
         if (outputStream == null) {
             outputStream = createImageOutputStream(band);
             if (_bandOutputStreams == null) {
-                _bandOutputStreams = new HashMap();
+                _bandOutputStreams = new HashMap<Band, ImageOutputStream>();
             }
             _bandOutputStreams.put(band, outputStream);
         }
         return outputStream;
     }
 
-    private ImageOutputStream getImageOutputStream(Band band) {
+    private synchronized ImageOutputStream getImageOutputStream(Band band) {
         if (_bandOutputStreams != null) {
-            return (ImageOutputStream) _bandOutputStreams.get(band);
+            return _bandOutputStreams.get(band);
         }
         return null;
     }
 
-    /**
+    /*
      * Returns a file associated with the given <code>Band</code>. The method ensures that the file exists and have the
      * right size. Also ensures a recreate if the file not exists or the file have a different file size. A new envi
      * header file was written every call.
@@ -354,8 +355,8 @@ public class DimapProductWriter extends AbstractProductWriter {
 
     private static long getImageFileSize(RasterDataNode band) {
         return (long) ProductData.getElemSize(band.getDataType()) *
-                (long) band.getRasterWidth() *
-                (long) band.getRasterHeight();
+               (long) band.getRasterWidth() *
+               (long) band.getRasterHeight();
     }
 
     private File getEnviHeaderFile(Band band) {
@@ -390,8 +391,11 @@ public class DimapProductWriter extends AbstractProductWriter {
             parentDir.mkdirs();
         }
         final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
-        randomAccessFile.setLength(fileSize);
-        randomAccessFile.close();
+        try {
+            randomAccessFile.setLength(fileSize);
+        } finally {
+            randomAccessFile.close();
+        }
     }
 
     @Override
@@ -436,17 +440,6 @@ public class DimapProductWriter extends AbstractProductWriter {
         return _incremental;
     }
 
-    /**
-     * Entfernt alle zu l�schenden dateifragmente aus dem Product bevor der header und die b�nder geschrieben werden.
-     * Das ist nur notwendig, f�r den fall da� der Benutzer ein DIMAP-Product ge�ffnet hat, darin eine oderer mehrere
-     * product nodes gel�scht und anschlie�end nodes mit den gleichen namen erzeugt hat. Sind die gel�schten und
-     * wiedererstellten nodes zum Beispiel B�nder, so w�rde der writer diese neu erzeugten Banddaten nicht schreiben,
-     * wenn diese zuvor nicht von der Festplatte gel�scht worden sind. Bevor banddaten von der Festplatte gel�scht
-     * werden k�nnen ist es notwendig den reader zu schlie�en (reader.close()) damit dieser die Dateien zum l�schen frei
-     * gibt.
-     *
-     * @throws IOException if an IOException occurs.
-     */
     private void deleteRemovedNodes() throws IOException {
         final Product product = getSourceProduct();
         final ProductReader productReader = product.getProductReader();
@@ -454,8 +447,8 @@ public class DimapProductWriter extends AbstractProductWriter {
             final ProductNode[] removedNodes = product.getRemovedChildNodes();
             if (removedNodes.length > 0) {
                 productReader.close();
-                for (int i = 0; i < removedNodes.length; i++) {
-                    removedNodes[i].removeFromFile(this);
+                for (ProductNode removedNode : removedNodes) {
+                    removedNode.removeFromFile(this);
                 }
             }
         }
@@ -473,11 +466,10 @@ public class DimapProductWriter extends AbstractProductWriter {
             if (files == null) {
                 return;
             }
-            String name;
-            for (int i = 0; i < files.length; i++) {
-                name = files[i].getName();
-                if (files[i].isFile() && (name.equals(headerFilename) || name.equals(imageFilename))) {
-                    files[i].delete();
+            for (File file : files) {
+                String name = file.getName();
+                if (file.isFile() && (name.equals(headerFilename) || name.equals(imageFilename))) {
+                    file.delete();
                 }
             }
         }
@@ -500,7 +492,7 @@ public class DimapProductWriter extends AbstractProductWriter {
             for (File file : files) {
                 file.delete();
             }
-        } 
+        }
         if (hasVectorData) {
             vectorDataDir.mkdirs();
             for (int i = 0; i < vectorDataGroup.getNodeCount(); i++) {
@@ -515,7 +507,8 @@ public class DimapProductWriter extends AbstractProductWriter {
     private void writeVectorData(File vectorDataDir, VectorDataNode vectorDataNode) {
         try {
             VectorDataNodeWriter vectorDataNodeWriter = new VectorDataNodeWriter();
-            vectorDataNodeWriter.write(vectorDataNode, new File(vectorDataDir, vectorDataNode.getName() + VectorDataNodeIO.FILENAME_EXTENSION));
+            vectorDataNodeWriter.write(vectorDataNode, new File(vectorDataDir,
+                                                                vectorDataNode.getName() + VectorDataNodeIO.FILENAME_EXTENSION));
         } catch (IOException e) {
             BeamLogManager.getSystemLogger().throwing("DimapProductWriter", "writeVectorData", e);
         }

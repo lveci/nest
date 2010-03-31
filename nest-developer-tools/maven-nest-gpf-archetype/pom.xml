@@ -25,25 +25,25 @@
         <dependency>
             <groupId>com.bc.ceres</groupId>
             <artifactId>ceres-core</artifactId>
-            <version>0.10-SNAPSHOT</version>
+            <version>0.11-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-core</artifactId>
-            <version>4.7-SNAPSHOT</version>
+            <version>4.8-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-gpf</artifactId>
-            <version>4.7-SNAPSHOT</version>
+            <version>4.8-SNAPSHOT</version>
         </dependency>
 
 		<dependency>
 		  <groupId>org.esa.beam</groupId>
 		  <artifactId>beam-visat-rcp</artifactId>
-		  <version>4.7-SNAPSHOT</version>
+		  <version>4.8-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>

@@ -1,5 +1,5 @@
 /*
- * $Id: MaskCollectionLayer.java,v 1.3 2009-12-11 20:46:13 lveci Exp $
+ * $Id: MaskCollectionLayer.java,v 1.4 2010-03-31 13:56:29 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *

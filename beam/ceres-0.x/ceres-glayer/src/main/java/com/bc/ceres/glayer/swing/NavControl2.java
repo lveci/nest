@@ -1,5 +1,5 @@
 /*
- * $Id: NavControl2.java,v 1.2 2009-12-02 16:48:34 lveci Exp $
+ * $Id: NavControl2.java,v 1.3 2010-03-31 13:59:58 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -32,7 +32,7 @@ import java.util.EventListener;
  * It can fire rotation, translation and scale events.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2009-12-02 16:48:34 $
+ * @version $Revision: 1.3 $ $Date: 2010-03-31 13:59:58 $
  */
 public class NavControl2 extends JComponent {
     private static final int W = 100;

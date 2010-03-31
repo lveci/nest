@@ -1,5 +1,5 @@
 /*
- * $Id: TiePointGeoCoding.java,v 1.14 2010-03-30 19:56:32 lveci Exp $
+ * $Id: TiePointGeoCoding.java,v 1.15 2010-03-31 13:56:29 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -119,6 +119,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         // detection disabled, mz,mp 18.03.2008
         // test show big improvements for AVHRR and small ones for MERIS
 //        _swathResampling = detectSwathResampling();
+        initApproximations();
     }
 
     /**

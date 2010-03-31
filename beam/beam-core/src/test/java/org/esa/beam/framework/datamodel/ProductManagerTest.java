@@ -1,5 +1,5 @@
 /*
- * $Id: ProductManagerTest.java,v 1.2 2009-05-14 16:31:18 lveci Exp $
+ * $Id: ProductManagerTest.java,v 1.3 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

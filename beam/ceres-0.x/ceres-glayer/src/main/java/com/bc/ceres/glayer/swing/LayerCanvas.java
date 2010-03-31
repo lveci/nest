@@ -1,5 +1,5 @@
 /*
- * $Id: LayerCanvas.java,v 1.4 2010-01-13 16:39:23 lveci Exp $
+ * $Id: LayerCanvas.java,v 1.5 2010-03-31 13:59:58 lveci Exp $
  *
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  *

@@ -10,7 +10,7 @@ import org.esa.beam.framework.datamodel.ProductNodeGroup;
  * Created by Marco Peters.
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2010-02-10 16:20:37 $
+ * @version $Revision: 1.3 $ $Date: 2010-03-31 13:59:58 $
  */
 public class PlacemarkNameFactory {
 
@@ -19,16 +19,12 @@ public class PlacemarkNameFactory {
 
     public static String[] createUniqueNameAndLabel(PlacemarkDescriptor placemarkDescriptor, Product product) {
         ProductNodeGroup<Placemark> placemarkGroup = placemarkDescriptor.getPlacemarkGroup(product);
-        return createUniqueNameAndLabel(placemarkDescriptor, placemarkGroup);
-    }
-
-    public static String[] createUniqueNameAndLabel(PlacemarkDescriptor placemarkDescriptor, ProductNodeGroup<Placemark> group) {
-        int pinNumber = group.getNodeCount() + 1;
-        String name = PlacemarkNameFactory.createName(placemarkDescriptor, pinNumber);
-        while (group.get(name) != null) {
-            name = PlacemarkNameFactory.createName(placemarkDescriptor, ++pinNumber);
+        int pinNumber = placemarkGroup.getNodeCount() + 1;
+        String name = createName(placemarkDescriptor, pinNumber);
+        while (placemarkGroup.get(name) != null) {
+            name = createName(placemarkDescriptor, ++pinNumber);
         }
-        final String label = PlacemarkNameFactory.createLabel(placemarkDescriptor, pinNumber, true);
+        final String label = createLabel(placemarkDescriptor, pinNumber, true);
         return new String[]{name, label};
     }
 

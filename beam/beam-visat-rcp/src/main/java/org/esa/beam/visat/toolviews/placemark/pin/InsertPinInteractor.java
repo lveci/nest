@@ -1,5 +1,5 @@
 /*
- * $Id: InsertPinInteractor.java,v 1.2 2009-12-16 16:15:19 lveci Exp $
+ * $Id: InsertPinInteractor.java,v 1.3 2010-03-31 13:59:58 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

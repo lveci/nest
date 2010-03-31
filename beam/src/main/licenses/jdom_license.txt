@@ -1,6 +1,6 @@
 /*-- 
 
- $Id: jdom_license.txt,v 1.1 2009-04-09 16:19:18 lveci Exp $
+ $Id: jdom_license.txt,v 1.2 2010-03-31 13:59:59 lveci Exp $
 
  Copyright (C) 2000-2002 Brett McLaughlin & Jason Hunter.
  All rights reserved.

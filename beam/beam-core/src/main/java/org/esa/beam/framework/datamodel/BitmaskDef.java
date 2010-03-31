@@ -1,5 +1,5 @@
 /*
- * $Id: BitmaskDef.java,v 1.4 2010-02-12 14:42:16 lveci Exp $
+ * $Id: BitmaskDef.java,v 1.5 2010-03-31 13:56:29 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -16,7 +16,6 @@ import com.bc.jexp.Term;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.dataio.dimap.DimapProductHelpers;
 import org.esa.beam.framework.dataio.ProductSubsetDef;
-import org.esa.beam.framework.datamodel.Mask.BandMathType;
 import org.esa.beam.util.*;
 import org.jdom.Element;
 
@@ -27,7 +26,7 @@ import java.awt.Color;
  * transparancy.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.4 $ $Date: 2010-02-12 14:42:16 $
+ * @version $Revision: 1.5 $ $Date: 2010-03-31 13:56:29 $
  * @deprecated since BEAM 4.7, use {@code Mask} with {@code Mask.BandMathType} instead.
  */
 @Deprecated
@@ -280,7 +279,7 @@ public class BitmaskDef extends ProductNode {
     }
     
     public Mask createMask(int width, int height) {
-        return Mask.BandMathType.create(getName(), getDescription(), width, height, 
+        return Mask.BandMathsType.create(getName(), getDescription(), width, height,
                                              getExpr(), getColor(), getTransparency());
     }
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: ModisUint32BandReader.java,v 1.1 2009-12-02 16:52:11 lveci Exp $
+ * $Id: ModisUint32BandReader.java,v 1.2 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

@@ -15,7 +15,7 @@ import java.awt.geom.Rectangle2D;
 
 /**
  * @author Marco Peters
- * @version $Revision: 1.1 $ $Date: 2009-07-10 18:36:55 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-31 13:59:56 $
  * @since BEAM 4.6
  */
 class ZoomToLayerAction extends AbstractAction {

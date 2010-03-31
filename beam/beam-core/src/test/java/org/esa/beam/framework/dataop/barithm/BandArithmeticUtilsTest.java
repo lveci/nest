@@ -1,5 +1,5 @@
 /*
- * $Id: BandArithmeticUtilsTest.java,v 1.3 2009-11-04 17:04:32 lveci Exp $
+ * $Id: BandArithmeticUtilsTest.java,v 1.4 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

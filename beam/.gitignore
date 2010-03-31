@@ -1,0 +1,9 @@
+*.iml
+*.ipr
+*.iws
+.idea/
+config/
+modules/
+target/
+CVS/
+.cvsignore

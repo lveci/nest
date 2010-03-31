@@ -1,5 +1,5 @@
 /*
- * $Id: MaskToolView.java,v 1.8 2010-02-08 21:57:50 lveci Exp $
+ * $Id: MaskToolView.java,v 1.9 2010-03-31 13:59:58 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *

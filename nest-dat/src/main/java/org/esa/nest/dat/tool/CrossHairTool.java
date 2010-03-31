@@ -1,7 +1,7 @@
 
 package org.esa.nest.dat.tool;
 
-import org.esa.beam.framework.ui.tool.impl.SelectTool;
+//import org.esa.beam.framework.ui.tool.impl.SelectTool;
 import org.esa.nest.util.ResourceUtils;
 
 import javax.swing.*;
@@ -10,8 +10,8 @@ import java.awt.*;
 /**
  * A tool used to select items in a {@link org.esa.beam.framework.ui.product.ProductSceneView}.
  */
-public class CrossHairTool extends SelectTool {
-    public static final String SELECT_TOOL_PROPERTY_NAME = "crossHairTool";
+public class CrossHairTool { //extends SelectTool {
+/*    public static final String SELECT_TOOL_PROPERTY_NAME = "crossHairTool";
 
     @Override
     public Cursor getCursor() {
@@ -25,5 +25,5 @@ public class CrossHairTool extends SelectTool {
         final Point hotSpot = new Point(icon.getIconWidth() /2, icon.getIconHeight() /2);
 
         return defaultToolkit.createCustomCursor(icon.getImage(), hotSpot, cursorName);
-    }
+    }  */
 }

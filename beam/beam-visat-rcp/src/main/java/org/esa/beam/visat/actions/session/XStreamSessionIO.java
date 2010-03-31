@@ -16,7 +16,7 @@ import java.io.Writer;
  * for their session.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-27 13:08:25 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-31 13:59:56 $
  * @since BEAM 4.6
  */
 public class XStreamSessionIO extends SessionIO {

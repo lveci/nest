@@ -15,7 +15,7 @@ import java.io.IOException;
  * Tests for class {@link ProductSubsetBuilder}.
  *
  * @author Ralf Quast
- * @version $Revision: 1.3 $ $Date: 2010-02-10 16:20:36 $
+ * @version $Revision: 1.4 $ $Date: 2010-03-31 13:59:56 $
  */
 public class ProductSubsetBuilderTest extends TestCase {
 

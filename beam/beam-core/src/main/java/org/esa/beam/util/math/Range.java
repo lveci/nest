@@ -1,5 +1,5 @@
 /*
- * $Id: Range.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: Range.java,v 1.2 2010-03-31 13:56:29 lveci Exp $
  * Copyright (c) by Brockmann Consult 2003
  */
 
@@ -410,7 +410,7 @@ public class Range {
         double min = +Double.MAX_VALUE;
         double max = -Double.MAX_VALUE;
         double value;
-        //pm.beginTask("Computing range ...", n);
+        pm.beginTask("Computing range ...", n);
         try {
             for (int i = 0; i < n; i++) {
                 if (validator.validateIndex(i)) {
@@ -424,10 +424,10 @@ public class Range {
                         }
                     }
                 }
-                //pm.worked(1);
+                pm.worked(1);
             }
         } finally {
-            //pm.done();
+            pm.done();
         }
         if (range == null) {
             range = new Range(min, max);

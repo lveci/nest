@@ -10,7 +10,7 @@ import java.awt.event.ActionEvent;
 
 /**
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2009-05-11 16:17:37 $
+ * @version $Revision: 1.3 $ $Date: 2010-03-31 13:59:56 $
  * @since BEAM 4.6
  */
 class MoveLayerDownAction extends AbstractAction {

@@ -1,5 +1,5 @@
 /*
- * $Id: ModisTiePointDescriptionTest.java,v 1.1 2009-09-25 19:03:49 lveci Exp $
+ * $Id: ModisTiePointDescriptionTest.java,v 1.2 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *//*
- * $Id: ModisTiePointDescriptionTest.java,v 1.1 2009-09-25 19:03:49 lveci Exp $
+ * $Id: ModisTiePointDescriptionTest.java,v 1.2 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

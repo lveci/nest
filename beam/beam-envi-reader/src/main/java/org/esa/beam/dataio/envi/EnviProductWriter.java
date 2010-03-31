@@ -15,7 +15,6 @@ import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
-import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.FileUtils;
 
 import javax.imageio.stream.ImageOutputStream;
@@ -23,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**

@@ -1,5 +1,5 @@
 /*
- * $Id: RasterDataNode.java,v 1.15 2010-02-08 22:13:38 lveci Exp $
+ * $Id: RasterDataNode.java,v 1.16 2010-03-31 13:56:29 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -41,6 +41,7 @@ import javax.media.jai.ROI;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
@@ -77,7 +78,8 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
     public static final String PROPERTY_NAME_VALID_PIXEL_EXPRESSION = "validPixelExpression";
     public static final String PROPERTY_NAME_GEOCODING = Product.PROPERTY_NAME_GEOCODING;
     public static final String PROPERTY_NAME_STX = "stx";
-
+    public static final String PROPERTY_NAME_AREA_OF_DATA = "areaOfData";
+    
     /**
      * Text returned by the <code>{@link #getPixelString}</code> method if no data is available at the given pixel
      * position.
@@ -150,7 +152,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
     private Mask validMask;
 
     private ROI validMaskROI;
-
+    
     /**
      * Constructs an object of type <code>RasterDataNode</code>.
      *
@@ -886,7 +888,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
             validMaskImage.dispose();
             validMaskImage = null;
         }
-        if (geophysicalImage != null) {
+        if (geophysicalImage != null && geophysicalImage != sourceImage) {
             geophysicalImage.dispose();
             geophysicalImage = null;
         }
@@ -2171,6 +2173,18 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
         return Stx.create(this, level, pm);
     }
 
+    /**
+     * Gets the area where this raster has data, If <code>null</code> the whole
+     * image has data.
+     *
+     * @return area the area where this raster has data
+     *
+     * @since BEAM 4.7
+     */
+    public Shape getValidShape() {
+        return validMaskImage != null ? validMaskImage.getImageShape(0) : null;
+    }
+
     private static MultiLevelImage toMultiLevelImage(RenderedImage sourceImage) {
         if (sourceImage instanceof MultiLevelImage) {
             return (MultiLevelImage) sourceImage;
@@ -2488,7 +2502,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
      *
      * @throws java.io.IOException if an I/O error occurs
      * @see #isScalingApplied()
-     * @deprecated since BEAM 4.5, use {@link org.esa.beam.framework.datamodel.Stx#create(RasterDataNode, java.awt.image.RenderedImage, int, com.bc.ceres.core.ProgressMonitor)}
+     * @deprecated since BEAM 4.5, use {@link Stx#create(RasterDataNode, Mask, int, com.bc.ceres.core.ProgressMonitor)}
      */
     @Deprecated
     public Histogram computeRasterDataHistogram(final ROI roi,
@@ -2519,7 +2533,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
      * @throws java.io.IOException if an I/O error occurs
      * @see #isScalingApplied()
      * @see #isLog10Scaled()
-     * @deprecated since BEAM 4.5, use {@link org.esa.beam.framework.datamodel.Stx#create(RasterDataNode, java.awt.image.RenderedImage, com.bc.ceres.core.ProgressMonitor)}
+     * @deprecated since BEAM 4.5, use {@link Stx#create(RasterDataNode, Mask, com.bc.ceres.core.ProgressMonitor)}
      */
     @Deprecated
     public Range computeRasterDataRange(final ROI roi, ProgressMonitor pm) throws IOException {
@@ -2540,7 +2554,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
      * @return the statistics
      *
      * @throws java.io.IOException if an I/O error occurs
-     * @deprecated since BEAM 4.5, use {@link org.esa.beam.framework.datamodel.Stx#create(RasterDataNode, java.awt.image.RenderedImage, com.bc.ceres.core.ProgressMonitor)}
+     * @deprecated since BEAM 4.5, use {@link Stx#create(RasterDataNode, Mask, com.bc.ceres.core.ProgressMonitor)}
      */
     @Deprecated
     public Statistics computeStatistics(final ROI roi, ProgressMonitor pm) throws IOException {

@@ -1,5 +1,5 @@
 /*
- * $Id: FXYSum.java,v 1.2 2010-03-30 19:56:32 lveci Exp $
+ * $Id: FXYSum.java,v 1.3 2010-03-31 13:56:29 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -28,7 +28,7 @@ package org.esa.beam.util.math;
  * {@link FXYSum#computeZ(double, double)} method.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $ $Date: 2010-03-30 19:56:32 $
+ * @version $Revision: 1.3 $ $Date: 2010-03-31 13:56:29 $
  */
 public class FXYSum {
 

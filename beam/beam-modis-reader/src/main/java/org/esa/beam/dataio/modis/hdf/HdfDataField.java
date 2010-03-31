@@ -1,5 +1,5 @@
 /*
- * $Id: HdfDataField.java,v 1.1 2009-09-25 19:03:49 lveci Exp $
+ * $Id: HdfDataField.java,v 1.2 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

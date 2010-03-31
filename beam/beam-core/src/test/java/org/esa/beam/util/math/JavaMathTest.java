@@ -1,5 +1,5 @@
 /*
- * $Id: JavaMathTest.java,v 1.2 2009-10-15 20:30:19 lveci Exp $
+ * $Id: JavaMathTest.java,v 1.3 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

@@ -20,6 +20,8 @@ import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.framework.ui.product.ProductTree;
 import org.esa.beam.framework.ui.product.ProductTreeListenerAdapter;
 import org.esa.beam.framework.ui.product.VectorDataLayer;
+import org.esa.beam.framework.ui.product.tree.ProductTreeModel;
+import org.esa.beam.framework.ui.product.tree.ProductTreeNode;
 import org.esa.beam.util.Debug;
 import org.esa.beam.visat.actions.ShowMetadataViewAction;
 import org.esa.beam.visat.internal.RasterDataNodeDeleter;
@@ -75,6 +77,7 @@ public class ProductsToolView extends AbstractToolView {
 
     private void initProductTree() {
         productTree = new ProductTree();
+        productTree.setModel(new ProductTreeModel(visatApp.getProductManager()));
         productTree.addProductTreeListener(new VisatPTL());
         productTree.setCommandManager(visatApp.getCommandManager());
         productTree.setCommandUIFactory(visatApp.getCommandUIFactory());
@@ -190,7 +193,7 @@ public class ProductsToolView extends AbstractToolView {
             if (frame != null) {
                 try {
                     frame.setSelected(true);
-                } catch (PropertyVetoException e) {
+                } catch (PropertyVetoException ignored) {
                     // ok
                 }
                 return;
@@ -215,7 +218,7 @@ public class ProductsToolView extends AbstractToolView {
             if (frame != null) {
                 try {
                     frame.setSelected(true);
-                } catch (PropertyVetoException e) {
+                } catch (PropertyVetoException ignored) {
                     // ok
                 }
             } else if (clickCount == 2) {
@@ -232,19 +235,9 @@ public class ProductsToolView extends AbstractToolView {
 
 
         private void setSelectedProductNode(ProductNode product) {
-            //deselectInternalFrame();
             visatApp.setSelectedProductNode(product);
         }
 
-        private void deselectInternalFrame() {
-            try {
-                final JInternalFrame frame = visatApp.getSelectedInternalFrame();
-                if (frame != null) {
-                    frame.setSelected(false);
-                }
-            } catch (PropertyVetoException ignore) {
-            }
-        }
     }
 
     static class ProductTreeSelectionContext extends TreeSelectionContext {
@@ -260,15 +253,11 @@ public class ProductsToolView extends AbstractToolView {
         }
 
         private boolean isDeletableVectorData(Object selectedObject) {
-            if (selectedObject instanceof VectorDataNode) {
-                return !((VectorDataNode) selectedObject).isInternalNode();
-            }
-            return false;
+            return selectedObject instanceof VectorDataNode && !((VectorDataNode) selectedObject).isInternalNode();
         }
 
         private boolean isDeletableRasterData(Object selectedObject) {
-            return selectedObject instanceof Band
-                    || selectedObject instanceof TiePointGrid;
+            return selectedObject instanceof Band || selectedObject instanceof TiePointGrid;
         }
 
         @Override
@@ -283,21 +272,19 @@ public class ProductsToolView extends AbstractToolView {
         
         private Object getSelectedObject() {
             TreePath treePath = (TreePath) getSelection().getSelectedValue();
-            return ((DefaultMutableTreeNode) treePath.getLastPathComponent()).getUserObject();
+            return ((ProductTreeNode) treePath.getLastPathComponent()).getContent();
         }
     }
 
     private class ProductManagerL implements ProductManager.Listener {
         @Override
         public void productAdded(final ProductManager.Event event) {
-            productTree.addProduct(event.getProduct());
             visatApp.getApplicationPage().showToolView(ID);
         }
 
         @Override
         public void productRemoved(final ProductManager.Event event) {
             final Product product = event.getProduct();
-            productTree.removeProduct(product);
             if (visatApp.getSelectedProduct() == product) {
                 visatApp.setSelectedProductNode((ProductNode) null);
             }

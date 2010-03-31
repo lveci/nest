@@ -6,7 +6,7 @@
 
     <groupId>com.bc.ceres</groupId>
     <artifactId>ceres</artifactId>
-    <version>0.10-SNAPSHOT</version>
+    <version>0.11-SNAPSHOT</version>
     <name>Ceres</name>
     <url>http://www.brockmann-consult.de/</url>
 
@@ -104,27 +104,27 @@
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-launcher</artifactId>
-                <version>0.10-SNAPSHOT</version>
+                <version>0.11-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-binding</artifactId>
-                <version>0.10-SNAPSHOT</version>
+                <version>0.11-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-core</artifactId>
-                <version>0.10-SNAPSHOT</version>
+                <version>0.11-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-ui</artifactId>
-                <version>0.10-SNAPSHOT</version>
+                <version>0.11-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.bc.ceres</groupId>
                 <artifactId>ceres-glayer</artifactId>
-                <version>0.10-SNAPSHOT</version>
+                <version>0.11-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -154,7 +154,6 @@
                     <target>1.6</target>
                     <debug>true</debug>
                     <encoding>UTF-8</encoding>
-					<optimize>true</optimize>
                 </configuration>
             </plugin>
 			<plugin>

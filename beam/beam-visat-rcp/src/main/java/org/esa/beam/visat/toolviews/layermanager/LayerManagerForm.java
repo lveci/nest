@@ -426,7 +426,7 @@ class LayerManagerForm extends AbstractLayerForm {
             if (selectedLayer != null) {
                 removeTransparencyChangeListener(selectedLayer);
             }
-            selectedLayer = getLayer(event.getPath());
+            selectedLayer = getLayer(event.getNewLeadSelectionPath());
             if (selectedLayer != null) {
                 installTransparencyChangeListener(selectedLayer);
             }
@@ -439,8 +439,8 @@ class LayerManagerForm extends AbstractLayerForm {
         @Override
         public void valueChanged(TreeSelectionEvent event) {
             if (!adjusting) {
-                Layer layer = getLayer(event.getPath());
-                layer.setVisible(((TreeSelectionModel) event.getSource()).isPathSelected(event.getPath()));
+                Layer layer = getLayer(event.getNewLeadSelectionPath());
+                layer.setVisible(((TreeSelectionModel) event.getSource()).isPathSelected(event.getNewLeadSelectionPath()));
             }
         }
     }

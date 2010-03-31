@@ -1,5 +1,5 @@
 /*
- * $Id: Command.java,v 1.3 2010-02-11 17:02:24 lveci Exp $
+ * $Id: Command.java,v 1.4 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -42,7 +42,7 @@ import java.util.ResourceBundle;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.3 $  $Date: 2010-02-11 17:02:24 $
+ * @version $Revision: 1.4 $  $Date: 2010-03-31 13:59:56 $
  */
 public abstract class Command implements ConfigurableExtension {
 

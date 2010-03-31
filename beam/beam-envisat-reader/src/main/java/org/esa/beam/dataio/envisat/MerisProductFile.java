@@ -1,5 +1,5 @@
 /*
- * $Id: MerisProductFile.java,v 1.1 2009-04-28 14:37:13 lveci Exp $
+ * $Id: MerisProductFile.java,v 1.2 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -36,7 +36,7 @@ import java.util.Map;
  * MERIS data products.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:13 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-31 13:59:56 $
  * @see org.esa.beam.dataio.envisat.AatsrProductFile
  */
 public class MerisProductFile extends ProductFile {
@@ -184,10 +184,11 @@ public class MerisProductFile extends ProductFile {
      *
      * @param file            the abstract file path representation.
      * @param dataInputStream the seekable data input stream which will be used to read data from the product file.
+     * @param lineInterleaved if true the Envisat file is expected to be in line interleaved storage format
      * @throws java.io.IOException if an I/O error occurs
      */
-    protected MerisProductFile(File file, ImageInputStream dataInputStream) throws IOException {
-        super(file, dataInputStream);
+    protected MerisProductFile(File file, ImageInputStream dataInputStream, boolean lineInterleaved) throws IOException {
+        super(file, dataInputStream, lineInterleaved);
     }
 
     /**

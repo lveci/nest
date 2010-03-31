@@ -1,5 +1,5 @@
 /*
- * $Id: ProductUtilsTest.java,v 1.5 2009-12-02 16:52:11 lveci Exp $
+ * $Id: ProductUtilsTest.java,v 1.6 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

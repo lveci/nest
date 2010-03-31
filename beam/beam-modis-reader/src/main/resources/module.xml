@@ -47,7 +47,7 @@
             <shortDescr>Import a MODIS data product data product or product subset.</shortDescr>
             <description>Import a MODIS (MOD, MXD, MYD) data product data product or product subset.</description>
             <helpId>importModisProduct</helpId>
-			<parent>importOptical</parent>
+		<parent>importOptical</parent>
         </action>
     </extension>
 

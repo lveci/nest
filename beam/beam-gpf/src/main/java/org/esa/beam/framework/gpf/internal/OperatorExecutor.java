@@ -1,4 +1,5 @@
 /*
+ * $Id: OperatorExecutor.java,v 1.10 2010-03-31 13:59:22 lveci Exp $
  *
  * Copyright (C) 2009 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -28,8 +29,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.Raster;
 import java.lang.reflect.Field;
-import java.util.concurrent.Semaphore;
 import java.util.ArrayList;
+import java.util.concurrent.Semaphore;
 
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;

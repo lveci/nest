@@ -17,17 +17,16 @@ import org.esa.beam.framework.gpf.graph.Graph;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.gpf.graph.Node;
 import org.esa.beam.framework.gpf.graph.NodeSource;
-import org.esa.beam.framework.gpf.operators.common.ReadOp;
-import org.esa.beam.framework.gpf.operators.common.WriteOp;
+import org.esa.beam.gpf.operators.standard.ReadOp;
+import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.util.SystemUtils;
 
 import javax.media.jai.JAI;
 import javax.media.jai.TileCache;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.Map.Entry;
 import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * The common command-line tool for the GPF.
@@ -91,7 +90,7 @@ class CommandLineTool {
         TileCache tileCache = JAI.getDefaultInstance().getTileCache();
         tileCache.setMemoryCapacity(lineArgs.getTileCacheCapacity());
         SystemUtils.initThirdPartyLibraries();
-        
+
         if (lineArgs.getOperatorName() != null) {
             Map<String, Object> parameters = getParameterMap(lineArgs);
             Map<String, Product> sourceProducts = getSourceProductMap(lineArgs);
@@ -111,12 +110,12 @@ class CommandLineTool {
             Node lastNode = graph.getNode(graph.getNodeCount() - 1);
             SortedMap<String, String> sourceFilepathsMap = lineArgs.getSourceFilepathMap();
             String readOperatorAlias = OperatorSpi.getOperatorAlias(ReadOp.class);
-            for (Entry<String, String> entry : sourceFilepathsMap.entrySet()) {
+            for (Map.Entry<String, String> entry : sourceFilepathsMap.entrySet()) {
                 String sourceId = entry.getKey();
                 String sourceFilepath = entry.getValue();
                 String sourceNodeId = sourceNodeIdMap.get(sourceId);
                 if (graph.getNode(sourceNodeId) == null) {
-                    
+
                     DomElement parameters = new DefaultDomElement("parameters");
                     parameters.createChild("file").setValue(sourceFilepath);
 

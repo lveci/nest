@@ -21,11 +21,9 @@ final class BilinearInterpolationResampling implements Resampling {
         index.width = width;
         index.height = height;
 
-        //final int i0 = (int) Math.floor(x);
-        //final int j0 = (int) Math.floor(y);
-        final int i0 = Index.crop((int)x, width - 1);
-        final int j0 = Index.crop((int)y, height - 1);
-/*
+        final int i0 = (int) Math.floor(x);
+        final int j0 = (int) Math.floor(y);
+
         final float di = x - (i0 + .5f);
         final float dj = y - (j0 + .5f);
 
@@ -53,50 +51,27 @@ final class BilinearInterpolationResampling implements Resampling {
             index.j[1] = Index.crop(j0 + 0, jMax);
             index.kj[0] = dj + 1;
         }
-*/
-        index.i0 = i0;
-        index.j0 = j0;
-        
-        index.i[0] = i0;
-        index.i[1] = Index.crop(i0 + 1, width - 1);
-        index.ki[0] = x - i0;
-
-        index.j[0] = j0;
-        index.j[1] = Index.crop(j0 + 1, height - 1);
-        index.kj[0] = y - j0;        
-    }
-
-    private static int crop(final int i, final int max) {
-        return (i < 0) ? 0 : (i > max) ? max : i;
     }
 
     public final float resample(final Raster raster,
                                 final Index index) throws Exception {
 
         final int i1 = index.i[0];
-        final int j1 = index.j[0];
-
-        final float z11 = raster.getSample(i1, j1);
-        if (Float.isNaN(z11)) {
-            return raster.getSample(index.i0, index.j0);
-        }
         final int i2 = index.i[1];
-        final float z12 = raster.getSample(i2, j1);
-        if (Float.isNaN(z12)) {
-            return raster.getSample(index.i0, index.j0);
-        }
+        final int j1 = index.j[0];
         final int j2 = index.j[1];
-        final float z21 = raster.getSample(i1, j2);
-        if (Float.isNaN(z21)) {
-            return raster.getSample(index.i0, index.j0);
-        }
-        final float z22 = raster.getSample(i2, j2);
-        if (Float.isNaN(z22)) {
-            return raster.getSample(index.i0, index.j0);
-        }
 
         final float ki = index.ki[0];
         final float kj = index.kj[0];
+
+        final float z11 = raster.getSample(i1, j1);
+        final float z12 = raster.getSample(i2, j1);
+        final float z21 = raster.getSample(i1, j2);
+        final float z22 = raster.getSample(i2, j2);
+
+        if (Float.isNaN(z11) || Float.isNaN(z12) || Float.isNaN(z21) || Float.isNaN(z22)) {
+            return raster.getSample(index.i0, index.j0);
+        }
 
         return z11 * (1f - ki) * (1f - kj) +
                 z12 * ki * (1f - kj) +

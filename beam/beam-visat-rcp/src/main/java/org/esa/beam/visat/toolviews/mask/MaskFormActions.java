@@ -11,7 +11,6 @@ import org.esa.beam.dataio.dimap.spi.DimapPersistence;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.BitmaskDef;
 import org.esa.beam.framework.datamodel.Mask;
-import org.esa.beam.framework.datamodel.Mask.BandMathType;
 import org.esa.beam.framework.datamodel.Mask.ImageType;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNodeGroup;
@@ -30,15 +29,12 @@ import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.visat.VisatApp;
 import org.esa.beam.visat.actions.CreateVectorDataNodeAction;
 import org.esa.beam.visat.internal.RasterDataNodeDeleter;
-import org.geotools.feature.FeatureCollection;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
 
 import javax.swing.Action;
 import javax.swing.JComponent;
@@ -80,7 +76,7 @@ class MaskFormActions {
 
     MaskFormActions(AbstractToolView maskToolView, MaskForm maskForm) {
         maskActions = new MaskAction[]{
-                new NewBandMathAction(maskForm), new NewRangeAction(maskForm),
+                new NewBandMathsAction(maskForm), new NewRangeAction(maskForm),
                 new NewVectorDataNodeAction(maskForm), new NullAction(maskForm),
                 new NewUnionAction(maskForm), new NewIntersectionAction(maskForm),
                 new NewDifferenceAction(maskForm), new NewInvDifferenceAction(maskForm),
@@ -106,7 +102,7 @@ class MaskFormActions {
     }
 
     public MaskAction getNewBandMathAction() {
-        return getMaskAction(NewBandMathAction.class);
+        return getMaskAction(NewBandMathsAction.class);
     }
 
     public MaskAction getNewRangeAction() {
@@ -153,10 +149,10 @@ class MaskFormActions {
         return getMaskAction(NullAction.class);
     }
 
-    private static class NewBandMathAction extends BandMathAction {
+    private static class NewBandMathsAction extends BandMathsAction {
 
-        private NewBandMathAction(MaskForm maskForm) {
-            super(maskForm, "BandMath24.png", "bandMathButton", "Creates a new mask based on a logical expression");
+        private NewBandMathsAction(MaskForm maskForm) {
+            super(maskForm, "BandMath24.png", "bandMathButton", "Creates a new mask based on a logical band maths expression");
         }
 
         @Override
@@ -166,7 +162,7 @@ class MaskFormActions {
                     new Product[]{product}, product, null);
             expressionPane.setEmptyExpressionAllowed(false);
             expressionPane.setCode("");
-            if (expressionPane.showModalDialog(null, "New Logical Expression") == AbstractDialog.ID_OK) {
+            if (expressionPane.showModalDialog(null, "New Logical Band Maths Expression") == AbstractDialog.ID_OK) {
                 final String code = expressionPane.getCode();
                 if (!code.isEmpty()) {
                     return code;
@@ -206,7 +202,7 @@ class MaskFormActions {
         }
     }
 
-    private static class NewIntersectionAction extends BandMathAction {
+    private static class NewIntersectionAction extends BandMathsAction {
 
         private NewIntersectionAction(MaskForm maskForm) {
             super(maskForm, "Intersection24.png", "intersectionButton",
@@ -224,7 +220,7 @@ class MaskFormActions {
         }
     }
 
-    private static class NewComplementAction extends BandMathAction {
+    private static class NewComplementAction extends BandMathsAction {
 
         private NewComplementAction(MaskForm maskForm) {
             super(maskForm, "Complement24.png", "complementButton",
@@ -296,7 +292,7 @@ class MaskFormActions {
 
     }
 
-    private static class NewDifferenceAction extends BandMathAction {
+    private static class NewDifferenceAction extends BandMathsAction {
 
         private NewDifferenceAction(MaskForm maskForm) {
             super(maskForm, "Difference24.png", "differenceButton",
@@ -323,7 +319,7 @@ class MaskFormActions {
 
     }
 
-    private static class NewInvDifferenceAction extends BandMathAction {
+    private static class NewInvDifferenceAction extends BandMathsAction {
 
         private NewInvDifferenceAction(MaskForm maskForm) {
             super(maskForm, "InvDifference24.png", "invDifferenceButton",
@@ -353,7 +349,7 @@ class MaskFormActions {
 
     }
 
-    private static class NewUnionAction extends BandMathAction {
+    private static class NewUnionAction extends BandMathsAction {
 
         private NewUnionAction(MaskForm maskForm) {
             super(maskForm, "Union24.png", "unionButton",
@@ -623,13 +619,13 @@ class MaskFormActions {
             Mask selectedMask = getMaskForm().getSelectedMask();
             PropertyContainer selectedMaskConfig = selectedMask.getImageConfig();
             Mask.ImageType type = selectedMask.getImageType();
-            if (type == Mask.BandMathType.INSTANCE) {
+            if (type == Mask.BandMathsType.INSTANCE) {
                 Product product = getMaskForm().getProduct();
                 ProductExpressionPane expressionPane = ProductExpressionPane.createBooleanExpressionPane(
                         new Product[]{product}, product, null);
                 expressionPane.setEmptyExpressionAllowed(false);
                 expressionPane.setCode((String) selectedMaskConfig.getValue("expression"));
-                if (expressionPane.showModalDialog(window, "Edit Band-Math Mask") == AbstractDialog.ID_OK) {
+                if (expressionPane.showModalDialog(window, "Edit Band Maths Mask") == AbstractDialog.ID_OK) {
                     String code = expressionPane.getCode();
                     selectedMaskConfig.setValue("expression", code);
                     selectedMask.setDescription(code);
@@ -698,9 +694,9 @@ class MaskFormActions {
         }
     }
 
-    private abstract static class BandMathAction extends MaskAction {
+    private abstract static class BandMathsAction extends MaskAction {
 
-        BandMathAction(MaskForm maskForm, String iconPath, String buttonName, String description) {
+        BandMathsAction(MaskForm maskForm, String iconPath, String buttonName, String description) {
             super(maskForm, iconPath, buttonName, description);
         }
 
@@ -738,9 +734,9 @@ class MaskFormActions {
 
 
         void addBandMathMask(String code) {
-            final Mask mask = createNewMask(Mask.BandMathType.INSTANCE);
+            final Mask mask = createNewMask(Mask.BandMathsType.INSTANCE);
             final PropertyContainer imageConfig = mask.getImageConfig();
-            final String propertyNameExpression = BandMathType.PROPERTY_NAME_EXPRESSION;
+            final String propertyNameExpression = Mask.BandMathsType.PROPERTY_NAME_EXPRESSION;
             imageConfig.setValue(propertyNameExpression, code);
             imageConfig.addPropertyChangeListener(propertyNameExpression, new PropertyChangeListener() {
                 @Override
@@ -839,7 +835,7 @@ class MaskFormActions {
             int width = targetProduct.getSceneRasterWidth();
             int height = targetProduct.getSceneRasterHeight();
             String description = mask.getDescription() + " (from " + mask.getProduct().getDisplayName() + ")";
-            Mask targetMask = Mask.BandMathType.create(maskName, description, width, height, 
+            Mask targetMask = Mask.BandMathsType.create(maskName, description, width, height,
                                                        bandName, mask.getImageColor(), mask.getImageTransparency());
             targetProduct.getMaskGroup().add(targetMask);
             return band;
@@ -914,14 +910,12 @@ class MaskFormActions {
 
         private static Rectangle2D handleVectorMask(Mask mask) {
             VectorDataNode vectorData = Mask.VectorDataType.getVectorData(mask);
-            FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = vectorData.getFeatureCollection();
-            if (featureCollection.isEmpty()) {
-                return null;
+            ReferencedEnvelope envelope = vectorData.getEnvelope();
+            if (!envelope.isEmpty()) {
+                return new Rectangle2D.Double(envelope.getMinX(), envelope.getMinY(),
+                        envelope.getWidth(), envelope.getHeight());
             }
-            ReferencedEnvelope envelope = featureCollection.getBounds();
-            Rectangle2D modelBounds = new Rectangle2D.Double(envelope.getMinX(), envelope.getMinY(),
-                                                 envelope.getWidth(), envelope.getHeight());
-            return modelBounds;
+            return null;
         }
         
         private Rectangle2D handleImageMask(Mask mask, AffineTransform i2m) {

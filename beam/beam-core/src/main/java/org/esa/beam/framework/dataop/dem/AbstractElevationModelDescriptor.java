@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractElevationModelDescriptor.java,v 1.2 2009-11-16 17:26:48 lveci Exp $
+ * $Id: AbstractElevationModelDescriptor.java,v 1.3 2010-03-31 13:56:29 lveci Exp $
  *
  * Copyright (c) 2003 Brockmann Consult GmbH. All right reserved.
  * http://www.brockmann-consult.de
@@ -27,7 +27,7 @@ import java.util.Properties;
  * in order to download and install the DEM.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class AbstractElevationModelDescriptor implements ElevationModelDescriptor {
 

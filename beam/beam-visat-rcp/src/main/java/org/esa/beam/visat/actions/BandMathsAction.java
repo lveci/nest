@@ -5,16 +5,16 @@ import org.esa.beam.framework.datamodel.ProductNodeList;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.framework.ui.command.ExecCommand;
 import org.esa.beam.visat.VisatApp;
-import org.esa.beam.visat.dialogs.BandArithmetikDialog;
+import org.esa.beam.visat.dialogs.BandMathsDialog;
 
 
 /**
  * VISAT's band arithmetic feature.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2010-01-13 16:39:23 $
+ * @version $Revision: 1.1 $ $Date: 2010-03-31 13:59:56 $
  */
-public class BandMathAction extends ExecCommand {
+public class BandMathsAction extends ExecCommand {
 
     @Override
     public void actionPerformed(final CommandEvent event) {
@@ -35,10 +35,10 @@ public class BandMathAction extends ExecCommand {
         for (Product prod : prods) {
             products.add(prod);
         }
-        BandArithmetikDialog bandArithmetikDialog = new BandArithmetikDialog(visatApp,
+        BandMathsDialog bandMathsDialog = new BandMathsDialog(visatApp,
                                                          visatApp.getSelectedProduct(),
                                                          products,
                                                          helpId);
-        bandArithmetikDialog.show();
+        bandMathsDialog.show();
     }
 }

@@ -19,7 +19,7 @@ import org.geotools.geometry.text.WKTParser;
  * A converter for {@link java.awt.Shape}s.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-05-12 12:56:42 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-31 13:59:56 $
  * @since BEAM 4.6
  */
 public class PointConverter implements Converter {

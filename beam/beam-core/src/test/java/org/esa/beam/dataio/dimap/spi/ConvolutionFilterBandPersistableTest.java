@@ -1,6 +1,6 @@
 package org.esa.beam.dataio.dimap.spi;
 /*
- * $Id: ConvolutionFilterBandPersistableTest.java,v 1.2 2009-05-11 16:17:36 lveci Exp $
+ * $Id: ConvolutionFilterBandPersistableTest.java,v 1.3 2010-03-31 13:59:55 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -34,7 +34,7 @@ import java.util.List;
  * Created by Marco Peters.
  *
  * @author Marco Peters
- * @version $Revision: 1.2 $ $Date: 2009-05-11 16:17:36 $
+ * @version $Revision: 1.3 $ $Date: 2010-03-31 13:59:55 $
  */
 public class ConvolutionFilterBandPersistableTest extends TestCase {
 

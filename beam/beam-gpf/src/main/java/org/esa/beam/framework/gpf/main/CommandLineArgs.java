@@ -107,7 +107,7 @@ class CommandLineArgs {
                 argCount++;
             }
         }
-
+   
         if (operatorName == null && graphFilepath == null && !helpRequested) {
             throw error("Either operator name or graph XML file must be given");
         }

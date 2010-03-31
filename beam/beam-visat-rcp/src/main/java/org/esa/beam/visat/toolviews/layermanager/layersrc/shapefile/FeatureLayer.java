@@ -40,7 +40,7 @@ import java.util.Map;
  *
  * @author Marco Peters
  * @author Marco Zühlke
- * @version $Revision: 1.11 $ $Date: 2010-01-15 14:18:33 $
+ * @version $Revision: 1.12 $ $Date: 2010-03-31 13:59:56 $
  * @since BEAM 4.6
  */
 public class FeatureLayer extends Layer {

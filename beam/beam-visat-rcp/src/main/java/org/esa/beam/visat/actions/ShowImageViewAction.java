@@ -1,5 +1,5 @@
 /*
- * $Id: ShowImageViewAction.java,v 1.9 2010-02-08 21:57:50 lveci Exp $
+ * $Id: ShowImageViewAction.java,v 1.10 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -48,7 +48,7 @@ import java.util.ArrayList;
  * This action opens an image view of the currently selected raster.
  *
  * @author Marco Peters
- * @version $Revision: 1.9 $ $Date: 2010-02-08 21:57:50 $
+ * @version $Revision: 1.10 $ $Date: 2010-03-31 13:59:56 $
  */
 public class ShowImageViewAction extends ExecCommand {
 
@@ -121,7 +121,7 @@ public class ShowImageViewAction extends ExecCommand {
     public JInternalFrame openInternalFrame(final ProductSceneView view) {
         return openInternalFrame(view, true);
     }
-    
+
     public JInternalFrame openInternalFrame(final ProductSceneView view, boolean configureByPreferences) {
         final VisatApp visatApp = VisatApp.getApp();
         final RasterDataNode selectedProductNode = view.getRaster();
@@ -154,29 +154,6 @@ public class ShowImageViewAction extends ExecCommand {
                 product.removeProductNodeListener(pnl);
             }
         });
-
-
-        // todo - uncomment in order to implement synchronised cursor positions (nf 20090512)
-        /*
-        view.getLayerCanvas().addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                LayerCanvas layerCanvas = (LayerCanvas) e.getSource();
-                Point2D mp = layerCanvas.getViewport().getViewToModelTransform().transform(e.getPoint(), null);
-
-                for (JInternalFrame frame : visatApp.getAllInternalFrames()) {
-                    Container contentPane = frame.getContentPane();
-                    if (contentPane instanceof ProductSceneView) {
-                        ProductSceneView otherView = (ProductSceneView) contentPane;
-                        if (otherView != view) {
-
-                            //  layerCanvas.getViewport()
-                        }
-                    }
-                }
-            }
-        });
-        */
 
         visatApp.updateState();
 

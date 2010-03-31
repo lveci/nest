@@ -1,5 +1,5 @@
 /*
- * $Id: SingleTargetProductDialog.java,v 1.6 2010-02-18 15:59:30 lveci Exp $
+ * $Id: SingleTargetProductDialog.java,v 1.7 2010-03-31 13:59:22 lveci Exp $
  *
  * Copyright (C) 2007 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -22,11 +22,11 @@ import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.OperatorException;
-import org.esa.beam.framework.gpf.operators.common.WriteOp;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.BasicApp;
 import org.esa.beam.framework.ui.ModelessDialog;
 import org.esa.beam.framework.ui.SuppressibleOptionPane;
+import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.FileUtils;
 
@@ -46,7 +46,7 @@ import java.awt.*;
  *
  * @author Norman Fomferra
  * @author Marco Peters
- * @version $Revision: 1.6 $ $Date: 2010-02-18 15:59:30 $
+ * @version $Revision: 1.7 $ $Date: 2010-03-31 13:59:22 $
  */
 public abstract class SingleTargetProductDialog extends ModelessDialog {
 

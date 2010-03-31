@@ -8,7 +8,7 @@ import org.esa.beam.framework.datamodel.ProductData;
  * @author Marco Peters
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:37:14 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-31 13:59:56 $
  */
 class TiffAscii extends TiffValue {
 

@@ -1,5 +1,5 @@
 /*
- * $Id: FigureChangeListener.java,v 1.2 2010-02-08 21:57:50 lveci Exp $
+ * $Id: FigureChangeListener.java,v 1.3 2010-03-31 13:56:29 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -22,7 +22,7 @@ import java.util.EventListener;
  * A listener interested in figure changes.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.2 $  $Date: 2010-02-08 21:57:50 $
+ * @version $Revision: 1.3 $  $Date: 2010-03-31 13:56:29 $
  * @deprecated since BEAM 4.7, no replacement
  */
 @Deprecated

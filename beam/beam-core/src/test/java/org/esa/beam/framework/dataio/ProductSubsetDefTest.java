@@ -1,5 +1,5 @@
 /*
- * $Id: ProductSubsetDefTest.java,v 1.1 2010-01-27 21:19:48 lveci Exp $
+ * $Id: ProductSubsetDefTest.java,v 1.2 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *

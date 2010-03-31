@@ -1,5 +1,5 @@
 /*
- * $Id: FileUtils.java,v 1.2 2009-05-27 13:12:23 lveci Exp $
+ * $Id: FileUtils.java,v 1.3 2010-03-31 13:56:29 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -39,7 +39,7 @@ import com.bc.ceres.core.Assert;
  * @author Tom Block
  * @author Sabine Embacher
  * @author Norman Fomferra
- * @version $Revision: 1.2 $  $Date: 2009-05-27 13:12:23 $
+ * @version $Revision: 1.3 $  $Date: 2010-03-31 13:56:29 $
  */
 public class FileUtils {
 

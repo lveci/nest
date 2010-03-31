@@ -1,5 +1,5 @@
 /*
- * $Id: ScatterPlot.java,v 1.1 2009-04-28 14:39:33 lveci Exp $
+ * $Id: ScatterPlot.java,v 1.2 2010-03-31 13:56:29 lveci Exp $
  * 
  * Copyright (C) 2008 by Brockmann Consult (info@brockmann-consult.de)
  * 
@@ -22,9 +22,11 @@ import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.math.MathUtils;
 
 import javax.media.jai.PixelAccessor;
+import javax.media.jai.PlanarImage;
 import javax.media.jai.UnpackedImageData;
 import javax.media.jai.operator.MinDescriptor;
-import java.awt.Rectangle;
+import java.awt.*;
+import java.awt.geom.Area;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
@@ -35,7 +37,7 @@ import java.util.concurrent.CancellationException;
  * Creates an Scatterplot from two given bands.
  * 
  * @author Marco Zuehlke
- * @version $Revision: 1.1 $ $Date: 2009-04-28 14:39:33 $
+ * @version $Revision: 1.2 $ $Date: 2010-03-31 13:56:29 $
  * @since BEAM 4.5
  */
 public class ScatterPlot {
@@ -55,18 +57,20 @@ public class ScatterPlot {
      *            the minimum sample value to be considered in the second raster
      * @param sampleMax2
      *            the maximum sample value to be considered in the second raster
-     * @param roiImage   
-     *            an optional image to be used as a ROI for the computation
+     * @param roiMask
+     *            an optional mask to be used as a ROI for the computation
      * @param width
      *            the width of the output image
      * @param height
      *            the height of the output image
      * @param pixelValues
      *            an which will hold the data
+     * @param pm
+     *            a progress monitor
      */
     public static void accumulate(final RasterDataNode raster1, final double sampleMin1, final double sampleMax1,
                                   final RasterDataNode raster2, final double sampleMin2, final double sampleMax2,
-                                  final RenderedImage roiImage, final int width, final int height,
+                                  final Mask roiMask, final int width, final int height,
                                   final byte[] pixelValues, final ProgressMonitor pm) {
         Assert.notNull(raster1, "raster1");
         Assert.notNull(raster2, "raster2");
@@ -77,7 +81,58 @@ public class ScatterPlot {
                                                         raster2.scaleInverse(sampleMin2),
                                                         raster2.scaleInverse(sampleMax2),
                                                         width, height);
-        scatterPlotOp.accumulate(raster1, raster2, roiImage, pixelValues, pm);
+        Shape maskShape = null;
+        RenderedImage maskImage = null;
+        if (roiMask != null) {
+            maskShape = roiMask.getValidShape();
+            maskImage = roiMask.getSourceImage();
+        }
+        scatterPlotOp.accumulate(raster1, raster2, maskImage, maskShape, pixelValues, pm);
+    }
+
+    /**
+     * Creates a scatter plot image from two raster data nodes.
+     *
+     * @param raster1
+     *            the first raster data node
+     * @param sampleMin1
+     *            the minimum sample value to be considered in the first raster
+     * @param sampleMax1
+     *            the maximum sample value to be considered in the first raster
+     * @param raster2
+     *            the second raster data node
+     * @param sampleMin2
+     *            the minimum sample value to be considered in the second raster
+     * @param sampleMax2
+     *            the maximum sample value to be considered in the second raster
+     * @param roiImage
+     *            an optional image to be used as a ROI for the computation
+     * @param width
+     *            the width of the output image
+     * @param height
+     *            the height of the output image
+     * @param pixelValues
+     *            an which will hold the data
+     * @param pm
+     *            a progress monitor
+     *
+     * @deprecated since BEAM 4.7, use {@link #accumulate(RasterDataNode, double, double, RasterDataNode, double, double, Mask, int, int, byte[], ProgressMonitor)} instead.
+     */
+    @Deprecated
+    public static void accumulate(final RasterDataNode raster1, final double sampleMin1, final double sampleMax1,
+                                  final RasterDataNode raster2, final double sampleMin2, final double sampleMax2,
+                                  final RenderedImage roiImage, final int width, final int height,
+                                  final byte[] pixelValues, final ProgressMonitor pm) {
+        Assert.notNull(raster1, "raster1");
+        Assert.notNull(raster2, "raster2");
+        Assert.notNull(pm, "pm");
+
+        ScatterPlotOp scatterPlotOp = new ScatterPlotOp(raster1.scaleInverse(sampleMin1),
+                                                        raster1.scaleInverse(sampleMax1),
+                                                        raster2.scaleInverse(sampleMin2),
+                                                        raster2.scaleInverse(sampleMax2),
+                                                        width, height);
+        scatterPlotOp.accumulate(raster1, raster2, roiImage, null, pixelValues, pm);
     }
 
     private static class ScatterPlotOp {
@@ -114,8 +169,9 @@ public class ScatterPlot {
             }
         }
 
-        public void accumulate(RasterDataNode raster1, RasterDataNode raster2, RenderedImage roiImage, byte[] pixelValues, ProgressMonitor pm) {
+        public void accumulate(RasterDataNode raster1, RasterDataNode raster2, RenderedImage roiImage, Shape roiShape, byte[] pixelValues, ProgressMonitor pm) {
 
+            PlanarImage dataImage = raster1.getSourceImage();
             RenderedImage dataImage1 = raster1.getSourceImage();
             RenderedImage dataImage2 = raster2.getSourceImage();
             final SampleModel dataSampleModel1 = dataImage1.getSampleModel();
@@ -157,7 +213,24 @@ public class ScatterPlot {
                     maskImage = roiImage;
                 }
             }
-            
+            Shape validShape1 = raster1.getValidShape();
+            Shape validShape2 = raster2.getValidShape();
+            Shape effectiveShape = validShape1;
+            if (validShape1 != null && validShape2 != null) {
+                Area area = new Area(validShape1);
+                area.intersect(new Area(validShape2));
+                effectiveShape = area;
+            } else if (validShape2 != null) {
+                effectiveShape = validShape2;
+            }
+            if (effectiveShape != null && roiShape != null) {
+                Area area = new Area(effectiveShape);
+                area.intersect(new Area(roiShape));
+                effectiveShape = area;
+            } else if (roiShape != null) {
+                effectiveShape = roiShape;
+            }
+
             PixelAccessor maskAccessor;
             if (maskImage != null) {
                 SampleModel maskSampleModel = maskImage.getSampleModel();
@@ -189,45 +262,54 @@ public class ScatterPlot {
                         if (pm.isCanceled()) {
                             throw new CancellationException("Process terminated by user."); /* I18N */
                         }
-                        final Raster dataTile1 = dataImage1.getTile(tileX, tileY);
-                        final Raster dataTile2 = dataImage2.getTile(tileX, tileY);
-                        final Raster maskTile = maskImage != null ? maskImage.getTile(tileX, tileY) : null;
-                        final Rectangle r = imageRect.intersection(dataTile1.getBounds());
-                        
-                        switch (dataAccessor1.sampleType) {
-                            case PixelAccessor.TYPE_BIT:
-                            case DataBuffer.TYPE_BYTE:
-                                accumulateDataUByte(dataTile1, dataAccessor1,
-                                                    dataTile2, dataAccessor2,
-                                                    maskTile, maskAccessor, r, pixelValues);
-                                break;
-                            case DataBuffer.TYPE_USHORT:
-                                accumulateDataUShort(dataTile1, dataAccessor1,
-                                                     dataTile2, dataAccessor2,
-                                                     maskTile, maskAccessor, r, pixelValues);
-                                break;
-                            case DataBuffer.TYPE_SHORT:
-                                accumulateDataShort(dataTile1, dataAccessor1,
-                                                    dataTile2, dataAccessor2,
-                                                    maskTile, maskAccessor, r, pixelValues);
-                                break;
-                            case DataBuffer.TYPE_INT:
-                                accumulateDataInt(dataTile1, dataAccessor1,
-                                                  dataTile2, dataAccessor2,
-                                                  maskTile, maskAccessor, r, pixelValues);
-                                break;
-                            case DataBuffer.TYPE_FLOAT:
-                                accumulateDataFloat(dataTile1, dataAccessor1,
-                                                    dataTile2, dataAccessor2,
-                                                    maskTile, maskAccessor, r, pixelValues);
-                                break;
-                            case DataBuffer.TYPE_DOUBLE:
-                                accumulateDataDouble(dataTile1, dataAccessor1,
-                                                     dataTile2, dataAccessor2,
-                                                     maskTile, maskAccessor, r, pixelValues);
-                                break;
+                        boolean tileContainsData = true;
+                        if (effectiveShape != null) {
+                            Rectangle dataRect = dataImage.getTileRect(tileX, tileY);
+                            if (!effectiveShape.intersects(dataRect)) {
+                                tileContainsData = false;
+                            }
                         }
-                        pm.worked(1);
+                        if (tileContainsData) {
+                            final Raster dataTile1 = dataImage1.getTile(tileX, tileY);
+                            final Raster dataTile2 = dataImage2.getTile(tileX, tileY);
+                            final Raster maskTile = maskImage != null ? maskImage.getTile(tileX, tileY) : null;
+                            final Rectangle r = imageRect.intersection(dataTile1.getBounds());
+
+                            switch (dataAccessor1.sampleType) {
+                                case PixelAccessor.TYPE_BIT:
+                                case DataBuffer.TYPE_BYTE:
+                                    accumulateDataUByte(dataTile1, dataAccessor1,
+                                            dataTile2, dataAccessor2,
+                                            maskTile, maskAccessor, r, pixelValues);
+                                    break;
+                                case DataBuffer.TYPE_USHORT:
+                                    accumulateDataUShort(dataTile1, dataAccessor1,
+                                            dataTile2, dataAccessor2,
+                                            maskTile, maskAccessor, r, pixelValues);
+                                    break;
+                                case DataBuffer.TYPE_SHORT:
+                                    accumulateDataShort(dataTile1, dataAccessor1,
+                                            dataTile2, dataAccessor2,
+                                            maskTile, maskAccessor, r, pixelValues);
+                                    break;
+                                case DataBuffer.TYPE_INT:
+                                    accumulateDataInt(dataTile1, dataAccessor1,
+                                            dataTile2, dataAccessor2,
+                                            maskTile, maskAccessor, r, pixelValues);
+                                    break;
+                                case DataBuffer.TYPE_FLOAT:
+                                    accumulateDataFloat(dataTile1, dataAccessor1,
+                                            dataTile2, dataAccessor2,
+                                            maskTile, maskAccessor, r, pixelValues);
+                                    break;
+                                case DataBuffer.TYPE_DOUBLE:
+                                    accumulateDataDouble(dataTile1, dataAccessor1,
+                                            dataTile2, dataAccessor2,
+                                            maskTile, maskAccessor, r, pixelValues);
+                                    break;
+                            }
+                            pm.worked(1);
+                        }
                     }
                 }
             } finally {

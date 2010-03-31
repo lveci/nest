@@ -19,7 +19,7 @@ import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.jai.VirtualBandOpImage;
 import org.esa.beam.util.StringUtils;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
 import java.beans.PropertyChangeEvent;
@@ -33,7 +33,7 @@ import java.util.Map;
  * This is a preliminary API under construction for BEAM 4.7. Not intended for public use.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.11 $ $Date: 2010-02-12 14:42:16 $
+ * @version $Revision: 1.12 $ $Date: 2010-03-31 13:56:29 $
  * @since BEAM 4.7
  */
 public class Mask extends Band {
@@ -145,6 +145,11 @@ public class Mask extends Band {
         getImageType().handleRename(this, oldExternalName, newExternalName);
         super.updateExpression(oldExternalName, newExternalName);
     }
+    
+    @Override
+    public Shape getValidShape() {
+        return getSourceImage().getImageShape(0);
+    }
 
     /**
      * Specifies a factory for the {@link RasterDataNode#getSourceImage() source image} used by a {@link Mask}.
@@ -212,14 +217,14 @@ public class Mask extends Band {
     /**
      * A mask image type which is based on band math.
      */
-    public static class BandMathType extends ImageType {
+    public static class BandMathsType extends ImageType {
 
-        public static final String TYPE_NAME = "Math";
+        public static final String TYPE_NAME = "Maths";
         public static final String PROPERTY_NAME_EXPRESSION = "expression";
         
-        public static final BandMathType INSTANCE =  new BandMathType();
+        public static final BandMathsType INSTANCE =  new BandMathsType();
 
-        private BandMathType() {
+        private BandMathsType() {
             super(TYPE_NAME);
         }
 
@@ -366,13 +371,13 @@ public class Mask extends Band {
         
         public static Mask create(String name, String description, int width, int height,
                                   String expression, Color color, double transparency) {
-            final Mask mask = new Mask(name, width, height, Mask.BandMathType.INSTANCE);
+            final Mask mask = new Mask(name, width, height, BandMathsType.INSTANCE);
             if (description != null) {
                 mask.setDescription(description);
             }
             mask.setImageColor(color);
             mask.setImageTransparency(transparency);
-            BandMathType.setExpression(mask, expression);
+            BandMathsType.setExpression(mask, expression);
             return mask;
         }
     }

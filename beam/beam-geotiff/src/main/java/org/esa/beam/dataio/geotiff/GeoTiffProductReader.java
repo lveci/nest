@@ -1,5 +1,5 @@
 /*
- * $Id: GeoTiffProductReader.java,v 1.9 2010-02-10 16:20:37 lveci Exp $
+ * $Id: GeoTiffProductReader.java,v 1.10 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -129,14 +129,14 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
             final Raster data = subsampledImage.getData(new Rectangle(destOffsetX, destOffsetY,
                                                                       destWidth, destHeight));
+            final double[] dArray = new double[destSize];
             Integer bandIdx = bandMap.get(destBand);
             if (bandIdx == null) {
                 bandIdx = 0;
             }
             final DataBuffer dataBuffer = data.getDataBuffer();
             final SampleModel sampleModel = data.getSampleModel();
-
-            final double[] dArray = new double[destSize];
+ 
             sampleModel.getSamples(0, 0, destWidth, destHeight, bandIdx, dArray, dataBuffer);
             pm.worked(1);
 

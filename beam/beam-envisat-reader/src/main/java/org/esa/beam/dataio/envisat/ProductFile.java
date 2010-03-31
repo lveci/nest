@@ -1,5 +1,5 @@
 /*
- * $Id: ProductFile.java,v 1.6 2010-01-26 20:50:49 lveci Exp $
+ * $Id: ProductFile.java,v 1.7 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -40,7 +40,7 @@ import java.util.logging.Logger;
  * product files which have been opened for <i>read-only</i> access.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.6 $ $Date: 2010-01-26 20:50:49 $
+ * @version $Revision: 1.7 $ $Date: 2010-03-31 13:59:56 $
  */
 public abstract class ProductFile {
 
@@ -57,17 +57,17 @@ public abstract class ProductFile {
     /**
      * The abstract file path representation.
      */
-    private File file;
+    private final File file;
 
     /**
      * The image seekable data input stream used to read data from ENVISAT products
      */
-    private ImageInputStream dataInputStream;
+    private final ImageInputStream dataInputStream;
 
     /**
      * The logger
      */
-    private Logger logger;
+    private final Logger logger;
 
     /**
      * The ENVISAT product's main product header (MPH)
@@ -156,6 +156,7 @@ public abstract class ProductFile {
     private Map<Band, BandLineReader> _bandLineReaderMap;
     private String _productDescription;
 
+    private final boolean lineInterleaved;
 
     /**
      * Constructs a <code>ProductFile</code> for the given seekable data input stream.
@@ -164,11 +165,27 @@ public abstract class ProductFile {
      * @param dataInputStream the seekable data input stream which will be used to read data from the product file.
      * @throws java.io.IOException if an I/O error occurs
      */
-    protected ProductFile(File file, ImageInputStream dataInputStream)
-            throws IOException {
-        init(file, dataInputStream);
+    protected ProductFile(File file, ImageInputStream dataInputStream) throws IOException {
+        this(file, dataInputStream, false);
     }
 
+    /**
+     * Constructs a <code>ProductFile</code> for the given seekable data input stream.
+     *
+     * @param file            the abstract file path representation.
+     * @param dataInputStream the seekable data input stream which will be used to read data from the product file.
+     * @param lineInterleaved if true the Envisat file is expected to be in line interleaved storage format
+     * @throws java.io.IOException if an I/O error occurs
+     */
+    protected ProductFile(File file, ImageInputStream dataInputStream, boolean lineInterleaved) throws IOException {
+        Debug.assertTrue(dataInputStream != null);
+
+        this.file = file;
+        this.dataInputStream = dataInputStream;
+        this.lineInterleaved = lineInterleaved;
+        this.logger = BeamLogManager.getSystemLogger();
+        init();
+    }
     /*
      * Opens an ENVISAT product file with the given file path and returns an
      * object representing the opened product file.
@@ -287,6 +304,7 @@ public abstract class ProductFile {
         } catch (IOException e) {
             // ignore
         }
+
         return productType;
     }
 
@@ -661,7 +679,11 @@ public abstract class ProductFile {
         }
 
         // Create a new record reader...
-        recordReader = new RecordReader(this, dsd, recordInfo);
+        if (lineInterleaved && dsd.getDatasetType() == 'M') {
+            recordReader = new LineInterleavedRecordReader(this, dsd, recordInfo);
+        } else {
+            recordReader = new RecordReader(this, dsd, recordInfo);
+        }
         // ...and put it into the cache
         recordReaderCache.put(datasetNameUC, recordReader);
 
@@ -912,10 +934,28 @@ public abstract class ProductFile {
      * @param dataInputStream the seekable data input stream which will be used to read data from the product file.
      * @return an object representing the opened ENVISAT product file, never <code>null</code>
      * @throws java.io.IOException if an I/O error occurs
-     * @throws java.lang.IllegalArgumentException
-     *                             if an I/O error occurs
+     * @throws java.lang.IllegalArgumentException if an I/O error occurs
      */
     public static ProductFile open(File file, ImageInputStream dataInputStream) throws IOException {
+        return open(file, dataInputStream, false);
+    }
+
+    /**
+     * Opens an ENVISAT product file for the given seekable data input stream and returns an object representing the
+     * opened product file.
+     * <p/>
+     * <p> This factory method automatically detects the ENVISAT product type and returns - if applicable - an
+     * appropriate <code>ProductFile</code> subclass instance for it, otherwise a default <code>ProductFile</code>
+     * instance is created.
+     *
+     * @param file the Envisat product file
+     * @param dataInputStream the seekable data input stream which will be used to read data from the product file.
+     * @param lineInterleaved if true the Envisat file is expected to be in line interleaved storage format
+     * @return an object representing the opened ENVISAT product file, never <code>null</code>
+     * @throws java.io.IOException if an I/O error occurs
+     * @throws java.lang.IllegalArgumentException if an I/O error occurs
+     */
+    public static ProductFile open(File file, ImageInputStream dataInputStream, boolean lineInterleaved) throws IOException {
         Guardian.assertNotNull("dataInputStream", dataInputStream);
 
         String productType = readProductType(dataInputStream);
@@ -928,7 +968,7 @@ public abstract class ProductFile {
         ProductFile productFile = null;
 
         if (productTypeUC.startsWith("ME")) {
-            productFile = new MerisProductFile(file, dataInputStream);
+            productFile = new MerisProductFile(file, dataInputStream, lineInterleaved);
         } else if (productTypeUC.startsWith("AT")) {
             productFile = new AatsrProductFile(file, dataInputStream);
         } else if (productTypeUC.startsWith("AS") || productTypeUC.startsWith("SA")) {
@@ -949,24 +989,14 @@ public abstract class ProductFile {
 
 
     /**
-     * Initializes a product file object with for the given seekable data input stream.
+     * Initializes a product file object from the seekable data input stream.
      * <p/>
      * <p> The method then calls the private <code>readMPH</code> and <code>readSPH</code> in sequence.
      *
-     * @param file            the abstract file path representation.
-     * @param dataInputStream the seekable data input stream which will be used to read data from the product file.
      * @throws java.io.IOException if an I/O error occurs
      */
-    private void init(final File file, final ImageInputStream dataInputStream) throws IOException {
+    private void init() throws IOException {
 
-        logger = BeamLogManager.getSystemLogger();
-
-        Debug.assertTrue(dataInputStream != null);
-        Debug.assertTrue(this.dataInputStream == null);
-
-        this.file = file;
-
-        this.dataInputStream = dataInputStream;
         synchronized (dataInputStream) {
             readMPH();
             postProcessMPH(parameters);

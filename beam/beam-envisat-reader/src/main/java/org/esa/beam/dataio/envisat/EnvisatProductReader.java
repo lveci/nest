@@ -1,5 +1,5 @@
 /*
- * $Id: EnvisatProductReader.java,v 1.11 2010-01-18 20:00:59 lveci Exp $
+ * $Id: EnvisatProductReader.java,v 1.12 2010-03-31 13:59:56 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -44,7 +44,7 @@ import java.util.Vector;
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
- * @version $Revision: 1.11 $ $Date: 2010-01-18 20:00:59 $
+ * @version $Revision: 1.12 $ $Date: 2010-03-31 13:59:56 $
  * @see org.esa.beam.dataio.envisat.EnvisatProductReaderPlugIn
  */
 public class EnvisatProductReader extends AbstractProductReader {
@@ -121,6 +121,8 @@ public class EnvisatProductReader extends AbstractProductReader {
             }
         } else if (input instanceof ImageInputStream) {
             _productFile = ProductFile.open((ImageInputStream) input);
+        } else if (input instanceof ProductFile) {
+            _productFile = (ProductFile) input;
         }
 
         Debug.assertNotNull(_productFile);
