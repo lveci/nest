@@ -1,5 +1,5 @@
 /*
- * $Id: VisatApp.java,v 1.26 2010-03-31 13:59:56 lveci Exp $
+ * $Id: VisatApp.java,v 1.27 2010-03-31 16:41:51 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -147,7 +147,7 @@ import java.util.logging.Level;
  * @author Norman Fomferra
  * @author Marco Peters
  * @author Sabine Embacher
- * @version $Revision: 1.26 $ $Date: 2010-03-31 13:59:56 $
+ * @version $Revision: 1.27 $ $Date: 2010-03-31 16:41:51 $
  */
 public class VisatApp extends BasicApp implements AppContext {
 
@@ -1774,7 +1774,7 @@ public class VisatApp extends BasicApp implements AppContext {
     }
 
     private void configureJaiTileCache() {
-        final int tileCacheCapacity = getPreferences().getPropertyInt(PROPERTY_KEY_JAI_TILE_CACHE_CAPACITY, 512);
+        final int tileCacheCapacity = Integer.parseInt(System.getProperty(PROPERTY_KEY_JAI_TILE_CACHE_CAPACITY, "256"));
         JAIUtils.setDefaultTileCacheCapacity(tileCacheCapacity);
     }
 
