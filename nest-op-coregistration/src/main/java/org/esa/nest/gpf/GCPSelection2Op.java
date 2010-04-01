@@ -361,7 +361,6 @@ public class GCPSelection2Op extends Operator {
 
         final ProductNodeGroup<Placemark> targetGCPGroup = targetProduct.getGcpGroup(targetBand);
         final GeoCoding tgtGeoCoding = targetProduct.getGeoCoding();
-        final GeoCoding slaveGeoCoding = slaveBand.getGeoCoding();
 
         final ArrayList<Thread> threadList = new ArrayList<Thread>();
         final int numCPU = Runtime.getRuntime().availableProcessors();
@@ -376,8 +375,7 @@ public class GCPSelection2Op extends Operator {
             if (checkMasterGCPValidity(mGCPPixelPos)) {
 
                 final GeoPos mGCPGeoPos = mPin.getGeoPos();
-                final PixelPos sGCPPixelPos = slaveGeoCoding.getPixelPos(mGCPGeoPos, null);
-
+                final PixelPos sGCPPixelPos = mPin.getPixelPos();
                 if (!checkSlaveGCPValidity(sGCPPixelPos)) {
                     //System.out.println("GCP(" + i + ") is outside slave image.");
                     continue;
