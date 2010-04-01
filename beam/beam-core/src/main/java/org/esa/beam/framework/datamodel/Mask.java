@@ -33,7 +33,7 @@ import java.util.Map;
  * This is a preliminary API under construction for BEAM 4.7. Not intended for public use.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.12 $ $Date: 2010-03-31 13:56:29 $
+ * @version $Revision: 1.13 $ $Date: 2010-04-01 19:39:12 $
  * @since BEAM 4.7
  */
 public class Mask extends Band {
@@ -246,7 +246,7 @@ public class Mask extends Band {
                                                          ResolutionLevel.create(getModel(), level));
                 }
             };
-            return new MathMultiLevelImage(multiLevelSource, getExpression(mask), mask.getProduct()) {
+            return new BandMathsMultiLevelImage(multiLevelSource, getExpression(mask), mask.getProduct()) {
                 @Override
                 public void reset() {
                     super.reset();
@@ -460,7 +460,7 @@ public class Mask extends Band {
                                                          ResolutionLevel.create(getModel(), level));
                 }
             };
-            return new MathMultiLevelImage(multiLevelSource, getExpression(mask), mask.getProduct()) {
+            return new BandMathsMultiLevelImage(multiLevelSource, getExpression(mask), mask.getProduct()) {
                 @Override
                 public void reset() {
                     super.reset();

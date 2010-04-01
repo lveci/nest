@@ -11,7 +11,6 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.internal.JaiHelper;
 
-import javax.media.jai.Interpolation;
 import java.awt.RenderingHints;
 import java.text.MessageFormat;
 import java.util.HashMap;

@@ -1,5 +1,5 @@
 /*
- * $Id: NavigationToolView.java,v 1.4 2010-01-14 20:35:27 lveci Exp $
+ * $Id: NavigationToolView.java,v 1.5 2010-04-01 19:39:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -161,7 +161,7 @@ public class NavigationToolView extends AbstractToolView {
         });
 
         syncViewsButton = ToolButtonFactory.createButton(UIUtils.loadImageIcon("icons/SyncViews24.png"), true);
-        syncViewsButton.setToolTipText("Synchronize compatible product views."); /*I18N*/
+        syncViewsButton.setToolTipText("Synchronise compatible product views."); /*I18N*/
         syncViewsButton.setName("syncViewsButton");
         syncViewsButton.addActionListener(new ActionListener() {
             @Override
@@ -171,7 +171,7 @@ public class NavigationToolView extends AbstractToolView {
         });
 
         syncCursorButton = ToolButtonFactory.createButton(UIUtils.loadImageIcon("icons/SyncCursor24.png"), true);
-        syncCursorButton.setToolTipText("Synchronize cursor position."); /*I18N*/
+        syncCursorButton.setToolTipText("Synchronise cursor position."); /*I18N*/
         syncCursorButton.setName("syncCursorButton");
         syncCursorButton.addActionListener(new ActionListener() {
             @Override

@@ -1,5 +1,5 @@
 /*
- * $Id: VirtualBand.java,v 1.7 2009-12-07 21:39:44 lveci Exp $
+ * $Id: VirtualBand.java,v 1.8 2010-04-01 19:39:12 lveci Exp $
  *
  * Copyright (C) 2002 by Brockmann Consult (info@brockmann-consult.de)
  *
@@ -44,7 +44,7 @@ import java.io.IOException;
  * and <code>writePixel</code> perform the inverse operations in this case.
  *
  * @author Norman Fomferra
- * @version $Revision: 1.7 $ $Date: 2009-12-07 21:39:44 $
+ * @version $Revision: 1.8 $ $Date: 2010-04-01 19:39:12 $
  * @see ProductData
  * @see #getPixels
  * @see #setPixels
@@ -265,7 +265,7 @@ public class VirtualBand extends Band {
      * @return A multi-level image.
      */
     public static MultiLevelImage createVirtualSourceImage(final RasterDataNode raster, final String expression) {
-        return MathMultiLevelImage.create(expression, raster);
+        return BandMathsMultiLevelImage.create(expression, raster);
     }
 }
 
