@@ -14,7 +14,7 @@
 		<beam.version>4.8-SNAPSHOT</beam.version>
         <ceres.version>0.11-SNAPSHOT</ceres.version>
         <geotools.version>2.6.1</geotools.version>
-		<nest.version>3C</nest.version>
+		<nest.version>4A</nest.version>
     </properties>
 	
     <name>NEST Project</name>

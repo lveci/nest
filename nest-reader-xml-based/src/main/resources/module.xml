@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-reader-xml-based</symbolicName>
-    <version>3C</version>
+    <version>4A</version>
     <name>NEST TerraSarX and Radarsat-2 Product Reader</name>
 
     <description>

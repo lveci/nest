@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>nest-op-calibration</symbolicName>
-    <version>3C</version>
+    <version>4A</version>
     <name>NEST Calibration Operator</name>
     <description>NEST Calibration Operator</description>
 	
